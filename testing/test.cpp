@@ -74,7 +74,7 @@ void test_1()
 	
 	double freq[length];
 	for(int i=0;i<length;i++)
-		freq[i]=10.+i*1e-0;
+		freq[i]=10.+i*1e-1;
 
 	clock_t  start, end;
 	start = clock(); 
@@ -92,28 +92,28 @@ void test_1()
 	end3=clock();
 
 	ofstream ampfile;
-	ampfile.open("python/amplitude_output.csv");
+	ampfile.open("testing/data/amplitude_output.csv");
 	ampfile.precision(15);
 	for(int i = 0;i<length;i++)
 		ampfile<<freq[i]<<','<<amp[i]<<endl;
 	ampfile.close();
 	
 	ofstream phasefile;
-	phasefile.open("python/phase_output.csv");
+	phasefile.open("testing/data/phase_output.csv");
 	phasefile.precision(15);
 	for(int i = 0;i<length;i++)
 		phasefile<<freq[i]<<','<<phaseout[i]<<endl;
 	phasefile.close();
 
 	ofstream wavefilereal;
-	wavefilereal.open("python/real_waveform_output.csv");
+	wavefilereal.open("testing/data/real_waveform_output.csv");
 	wavefilereal.precision(15);
 	for(int i = 0;i<length;i++)
 		wavefilereal<<freq[i]<<','<<real(waveformout[i])<<endl;
 	wavefilereal.close();
 
 	ofstream wavefileimag;
-	wavefileimag.open("python/imag_waveform_output.csv");
+	wavefileimag.open("testing/data/imag_waveform_output.csv");
 	wavefileimag.precision(15);
 	for(int i = 0;i<length;i++)
 		wavefileimag<<freq[i]<<','<<imag(waveformout[i])<<endl;
@@ -188,28 +188,28 @@ void test_1()
 	cout<<"TIMING phase ppE: "<<(double)(endppe-startppe)/CLOCKS_PER_SEC<<endl;
 
 	//ofstream ampfile;
-	ampfile.open("python/ppeamplitude_output.csv");
+	ampfile.open("testing/data/ppeamplitude_output.csv");
 	ampfile.precision(15);
 	for(int i = 0;i<length;i++)
 		ampfile<<freq[i]<<','<<amp[i]<<endl;
 	ampfile.close();
 	
 	//ofstream phasefile;
-	phasefile.open("python/ppephase_output.csv");
+	phasefile.open("testing/data/ppephase_output.csv");
 	phasefile.precision(15);
 	for(int i = 0;i<length;i++)
 		phasefile<<freq[i]<<','<<phaseout[i]<<endl;
 	phasefile.close();
 
 	//ofstream wavefilereal;
-	wavefilereal.open("python/ppereal_waveform_output.csv");
+	wavefilereal.open("testing/data/ppereal_waveform_output.csv");
 	wavefilereal.precision(15);
 	for(int i = 0;i<length;i++)
 		wavefilereal<<freq[i]<<','<<real(waveformout[i])<<endl;
 	wavefilereal.close();
 
 	//ofstream wavefileimag;
-	wavefileimag.open("python/ppeimag_waveform_output.csv");
+	wavefileimag.open("testing/data/ppeimag_waveform_output.csv");
 	wavefileimag.precision(15);
 	for(int i = 0;i<length;i++)
 		wavefileimag<<freq[i]<<','<<imag(waveformout[i])<<endl;
@@ -272,13 +272,13 @@ void test_1()
 	
 	cout<<"TIMING: 2 grad: "<<(double)(end5-start5)/CLOCKS_PER_SEC<<endl;
 	ofstream derivA;
-	derivA.open("python/deriv_amp.csv");
+	derivA.open("testing/data/deriv_amp.csv");
 	derivA.precision(15);
 	for(int i = 0;i<length;i++)
 		derivA<<freq[i]<<','<<A0*amp_derivative[0][i]<<','<<amp_derivative[1][i]<<','<<amp_derivative[2][i]<<','<<chirpmass*amp_derivative[3][i]<<','<<symm*amp_derivative[4][i]<<','<<amp_derivative[5][i]<<','<<amp_derivative[6][i]<<endl;
 	derivA.close();
 	ofstream derivp;
-	derivp.open("python/deriv_phase.csv");
+	derivp.open("testing/data/deriv_phase.csv");
 	derivp.precision(15);
 	for(int i = 0;i<length;i++)
 		derivp<<freq[i]<<','<<A0*phase_derivative[0][i]<<','<<phase_derivative[1][i]<<','<<phase_derivative[2][i]<<','<<chirpmass*phase_derivative[3][i]<<','<<symm*phase_derivative[4][i]<<','<<phase_derivative[5][i]<<','<<phase_derivative[6][i]<<endl;
@@ -339,13 +339,13 @@ void test_1()
 	
 	cout<<"TIMING: 2 grad ppE: "<<(double)(end5-start5)/CLOCKS_PER_SEC<<endl;
 	ofstream ppederivA;
-	ppederivA.open("python/ppederiv_amp.csv");
+	ppederivA.open("testing/data/ppederiv_amp.csv");
 	ppederivA.precision(15);
 	for(int i = 0;i<length;i++)
 		ppederivA<<freq[i]<<','<<A0*ppeamp_derivative[0][i]<<','<<ppeamp_derivative[1][i]<<','<<ppeamp_derivative[2][i]<<','<<chirpmass*ppeamp_derivative[3][i]<<','<<symm*ppeamp_derivative[4][i]<<','<<ppeamp_derivative[5][i]<<','<<ppeamp_derivative[6][i]<<','<<ppeamp_derivative[7][i]<<endl;
 	ppederivA.close();
 	ofstream ppederivp;
-	ppederivp.open("python/ppederiv_phase.csv");
+	ppederivp.open("testing/data/ppederiv_phase.csv");
 	ppederivp.precision(15);
 	for(int i = 0;i<length;i++)
 		ppederivp<<freq[i]<<','<<A0*ppephase_derivative[0][i]<<','<<ppephase_derivative[1][i]<<','<<ppephase_derivative[2][i]<<','<<chirpmass*ppephase_derivative[3][i]<<','<<symm*ppephase_derivative[4][i]<<','<<ppephase_derivative[5][i]<<','<<ppephase_derivative[6][i]<<','<<ppephase_derivative[7][i]<<endl;

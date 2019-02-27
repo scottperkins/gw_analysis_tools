@@ -7,7 +7,7 @@ ODIR=build
 IDIR=include
 LDIR_LOCAL=lib
 
-PYDIR=gw_analysis_py
+PYDIR=gw_analysis_tools_py
 PYSRC=mcmc_routines_ext.pyx waveform_generator_ext.pyx
 #PROJ_PYSRC=$(PYDIR)/$(PYSRC)
 PROJ_PYSRC=$(addprefix $(PYDIR)/src/,$(PYSRC))
@@ -19,7 +19,11 @@ LIBS=-ladolc -lgsl -lgslcblas -lfftw3
 LOCAL_LIB=libgwanalysistools.a
 PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
 
+TESTSRC=testing/test.cpp
+TESTOBJ=testing/test.o
 TEST=bin/exe.a
+
+
 
 CFLAGS=-I$(IDIR) -I$(SYSIDIR) -Wall -fPIC -g -O3
 LFLAGS=-L$(LDIR) 
@@ -39,14 +43,16 @@ all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB)
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) 
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+$(TESTOBJ): $(TESTSRC)
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(PROJ_LIB) : $(OBJECTS)
 	ar rcs $(LDIR_LOCAL)/$(LOCAL_LIB) $(OBJECTS)
 
 $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_PYSRC)
-	make -C gw_analysis_py 
+	make -C $(PYDIR) 
 	
-$(TEST) : $(OBJECTS)
+$(TEST) : $(OBJECTS) $(TESTOBJ)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
 Doxyfile: $(OBJECTS)
@@ -61,7 +67,7 @@ clean:
 .PHONY: remove
 remove:
 	rm build/*.o $(TEST) lib/*.a
-	make -C gw_analysis_py remove
+	make -C $(PYDIR) remove
 #.PHONY: docs
 #docs:
 #	doxygen Doxyfile
