@@ -1,3 +1,4 @@
+"""@package mcmc_routines wrapper"""
 from numpy cimport ndarray
 from libcpp cimport bool
 from libcpp cimport complex

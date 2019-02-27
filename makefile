@@ -21,7 +21,8 @@ PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
 
 TESTSRC=testing/test.cpp
 TESTOBJ=testing/test.o
-TEST=bin/exe.a
+TESTDIR=bin
+TEST=$(addprefix $(TESTDIR)/,exe.a)
 
 
 
@@ -43,17 +44,28 @@ all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB)
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) 
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+$(OBJECTS): | $(ODIR)
+
+$(ODIR):
+	mkdir -p $(ODIR)
+
 $(TESTOBJ): $(TESTSRC)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(PROJ_LIB) : $(OBJECTS)
+$(PROJ_LIB) : $(OBJECTS) | $(LDIR_LOCAL)
 	ar rcs $(LDIR_LOCAL)/$(LOCAL_LIB) $(OBJECTS)
+
+$(LDIR_LOCAL):
+	mkdir -p $(LDIR_LOCAL)
 
 $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_PYSRC)
 	make -C $(PYDIR) 
 	
-$(TEST) : $(OBJECTS) $(TESTOBJ)
+$(TEST) : $(OBJECTS) $(TESTOBJ) | $(TESTDIR)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
+
+$(TESTDIR):
+	mkdir -p $(TESTDIR)
 
 Doxyfile: $(OBJECTS)
 	doxygen Doxyfile
