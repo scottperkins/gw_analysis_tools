@@ -246,7 +246,8 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	free(integrand);
 	free(g);
 
-	return -0.5*(DD+HH- 2*max);
+	//return -0.5*(DD+HH- 2*max);
+	return -0.5*(HH- 2*max);
 }
 double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 				size_t length,
