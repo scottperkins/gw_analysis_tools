@@ -5,5 +5,37 @@ hello
 
 /*! \mainpage Gravitational Waves Analysis Tools
 
+A suite of analysis tools useful for gravitational wave science. All code is written in C++, with some of the interface classes wrapped in Cython to allow for python-access.
+
+\section Required Software
+
+Required non-standard C libraries:
+FFTW3
+ADOL-C
+GSL
+
+Required non-standard Python packages:
+Cython 
+
+Required non-standard packages for documentation:
+Doxygen
+
+\section Installation
+For proper compilation, update or create the enviornment variables CDIR and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries. 
+
+\section Supported Functionality 
+
+\subsection Waveform Generation
+IMRPhenomD, IMRPhenomPv2
+
+\subsection Modified Gravity
+ppE_IMRPhenomD_Inspiral ppE_IMRPhenomD_IMR ppE_IMRPhenomP_Inspiral ppE_IMRPhenomP_IMR 
+
+\subsection Fisher Analysis
+utilizes the above waveform templates
+
+\subsection MCMC Routines
+Includes log likelihood caclulation
+
 \author Scott Perkins
 */
