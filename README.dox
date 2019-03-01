@@ -23,6 +23,10 @@ Doxygen
 \section installation Installation
 For proper compilation, update or create the enviornment variables CDIR and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries. 
 
+In the root directory of the project, run 'make' to compile source files, create the library file and create the cython modules, and create the documentation.
+
+Run 'make test' to build a test program that will create an executable.
+
 \section functionality Supported Functionality 
 
 \subsection wave_gen Waveform Generation
