@@ -1,4 +1,5 @@
-"""@package mcmc_routines wrapper"""
+## @package mcmc_routines_ext
+#Documentation
 from numpy cimport ndarray
 from libcpp cimport bool
 from libcpp cimport complex
@@ -48,7 +49,8 @@ cdef class fftw_outline_py:
         initiate_likelihood_function(&self.plan,N)
     def __reduce__(self):
         return (self.__class__,(self.N,))
-
+## Documentation
+# hello
 def maximized_coal_log_likelihood_IMRPhenomD_py(double[::1] frequencies ,
 				double[::1] real_data ,
 				double[::1] imag_data ,

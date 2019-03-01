@@ -7,7 +7,7 @@ hello
 
 A suite of analysis tools useful for gravitational wave science. All code is written in C++, with some of the interface classes wrapped in Cython to allow for python-access.
 
-\section Required Software
+\section external_libs Required Software
 
 Required non-standard C libraries:
 FFTW3
@@ -20,31 +20,50 @@ Cython
 Required non-standard packages for documentation:
 Doxygen
 
-\section Installation
+\section installation Installation
 For proper compilation, update or create the enviornment variables CDIR and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries. 
 
-\section Supported Functionality 
+\section functionality Supported Functionality 
 
-\subsection Waveform Generation
+\subsection wave_gen Waveform Generation
 IMRPhenomD, IMRPhenomPv2
 
-\subsection Modified Gravity
+\subsection mod_grav Modified Gravity
 ppE_IMRPhenomD_Inspiral ppE_IMRPhenomD_IMR ppE_IMRPhenomP_Inspiral ppE_IMRPhenomP_IMR 
 
-\subsection Fisher Analysis
+\subsection fisher Fisher Analysis
 utilizes the above waveform templates
 
-\subsection MCMC Routines
+\subsection mcmc MCMC Routines
 Includes log likelihood caclulation
 
-\section Usage
-\subsection Enviornment variables
+\section usage Usage
+
+\subsection var Environment variables
 The python path PYTHONPATH should include the directory \$(PROJECT_DIR)/gw_analysis_tools_py/
 
-\subsection Include
+\subsection include Include
 To include header files, use -I\$(PROJECT_DIRECTORY)/include
 
-\subsection Link
+\subsection link Link
 To link object files, use -L\$(PROJECT_DIRECTORY)/lib -lgwanalysistools
+
+\subsection py Python Importable Code
+
+Two modules currently available:
+
+\subsubsection mcmcpy gw_analysis_tools_py.mcmc_routines_ext
+	
+Wraps the log_likelihood functions in mcmc_routines.cpp
+
+\subsubsection wavegenpy gw_analysis_tools_py.waveform_generator_ext
+
+Wraps the fourier_waveform function in waveform_generator.cpp
+
+
+
+
 \author Scott Perkins
+
+Contact: scottperkins2@montana.edu
 */
