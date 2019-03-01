@@ -1,0 +1,189 @@
+\hypertarget{classppE__IMRPhenomD__Inspiral}{}\section{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral$<$ T $>$ Class Template Reference}
+\label{classppE__IMRPhenomD__Inspiral}\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral$<$ T $>$@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral$<$ T $>$}}
+
+
+{\ttfamily \#include $<$pp\+E\+\_\+\+I\+M\+R\+Phenom\+D.\+h$>$}
+
+
+
+Inheritance diagram for pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral$<$ T $>$\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=242pt]{classppE__IMRPhenomD__Inspiral__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral$<$ T $>$\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=242pt]{classppE__IMRPhenomD__Inspiral__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_a3187c9dba10e42f0bf20fb1e3bac9a52}\label{classppE__IMRPhenomD__Inspiral_a3187c9dba10e42f0bf20fb1e3bac9a52}} 
+virtual T \hyperlink{classppE__IMRPhenomD__Inspiral_a3187c9dba10e42f0bf20fb1e3bac9a52}{phase\+\_\+ins} (T f, \hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ T $>$ $\ast$param, T $\ast$pn\+\_\+coeff, \hyperlink{structlambda__parameters}{lambda\+\_\+parameters}$<$ T $>$ $\ast$lambda, \hyperlink{structuseful__powers}{useful\+\_\+powers}$<$ T $>$ $\ast$pow)
+\begin{DoxyCompactList}\small\item\em Overloaded method for the inspiral portion of the phase. \end{DoxyCompactList}\item 
+virtual T \hyperlink{classppE__IMRPhenomD__Inspiral_ae297c077497d34a2632c55a7dafb9e83}{Dphase\+\_\+ins} (T f, \hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ T $>$ $\ast$param, T $\ast$pn\+\_\+coeff, \hyperlink{structlambda__parameters}{lambda\+\_\+parameters}$<$ T $>$ $\ast$lambda)
+\begin{DoxyCompactList}\small\item\em Calculates the derivative of the inspiral phase for frequency f. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_a0bad711ec764c9aaa09b501ea47df252}\label{classppE__IMRPhenomD__Inspiral_a0bad711ec764c9aaa09b501ea47df252}} 
+virtual void {\bfseries fisher\+\_\+calculation} (double $\ast$frequency, int length, \hyperlink{structgen__params}{gen\+\_\+params} $\ast$parameters, double $\ast$$\ast$amplitude\+\_\+deriv, double $\ast$$\ast$phase\+\_\+deriv, double $\ast$amplitude, int $\ast$amp\+\_\+tapes, int $\ast$phase\+\_\+tapes)
+\item 
+virtual void \hyperlink{classppE__IMRPhenomD__Inspiral_a87474cac9d6086d5625f79e28970b5ed}{amplitude\+\_\+tape} (\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$tape)
+\begin{DoxyCompactList}\small\item\em Creates the tapes for derivatives of the amplitude. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classppE__IMRPhenomD__Inspiral_a2fb1a8fb66e4204dbe397b792933afbe}{phase\+\_\+tape} (\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$tape)
+\begin{DoxyCompactList}\small\item\em Creates the tapes for derivatives of phase. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classppE__IMRPhenomD__Inspiral_a97d35197595f31d6cfbf6a8cf7c9a9ad}{construct\+\_\+amplitude\+\_\+derivative} (double $\ast$frequencies, int length, int dimension, double $\ast$$\ast$amplitude\+\_\+derivative, \hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$tapes=N\+U\+LL)
+\begin{DoxyCompactList}\small\item\em Construct the derivative of the amplitude for a given source evaluated by the given frequency. \end{DoxyCompactList}\item 
+virtual void \hyperlink{classppE__IMRPhenomD__Inspiral_a28d189808db2bd204e0d0051a1ed6427}{construct\+\_\+phase\+\_\+derivative} (double $\ast$frequencies, int length, int dimension, double $\ast$$\ast$phase\+\_\+derivative, \hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$tapes=N\+U\+LL)
+\begin{DoxyCompactList}\small\item\em Construct the derivative of the phase for a given source evaluated by the given frequency. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$class T$>$\newline
+class pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral$<$ T $>$}
+
+Class that extends the \hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD} waveform to include non-\/\+GR terms in the inspiral portion of the phase. This is an appropriate waveform choice for generation effects, but not necessarily for propagation effects 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_a87474cac9d6086d5625f79e28970b5ed}\label{classppE__IMRPhenomD__Inspiral_a87474cac9d6086d5625f79e28970b5ed}} 
+\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}!amplitude\+\_\+tape@{amplitude\+\_\+tape}}
+\index{amplitude\+\_\+tape@{amplitude\+\_\+tape}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}}
+\subsubsection{\texorpdfstring{amplitude\+\_\+tape()}{amplitude\_tape()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void \hyperlink{classppE__IMRPhenomD__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}$<$ T $>$\+::amplitude\+\_\+tape (\begin{DoxyParamCaption}\item[{\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{int $\ast$}]{tape }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Creates the tapes for derivatives of the amplitude. 
+
+For efficiency in long runs of large sets of fishers, the tapes can be precomputed and reused 
+\begin{DoxyParams}{Parameters}
+{\em input\+\_\+params} & source parameters structure of the desired source \\
+\hline
+{\em tape} & tape ids \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \hyperlink{classIMRPhenomD_a6fbe3c51ee3eb66d332dc87a9fdf5bd4}{I\+M\+R\+Phenom\+D$<$ T $>$}.
+
+
+
+Reimplemented in \hyperlink{classppE__IMRPhenomD__IMR_a3119a07c11ed53ae94823b11c5234c4f}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+I\+M\+R$<$ T $>$}.
+
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_a97d35197595f31d6cfbf6a8cf7c9a9ad}\label{classppE__IMRPhenomD__Inspiral_a97d35197595f31d6cfbf6a8cf7c9a9ad}} 
+\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}!construct\+\_\+amplitude\+\_\+derivative@{construct\+\_\+amplitude\+\_\+derivative}}
+\index{construct\+\_\+amplitude\+\_\+derivative@{construct\+\_\+amplitude\+\_\+derivative}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}}
+\subsubsection{\texorpdfstring{construct\+\_\+amplitude\+\_\+derivative()}{construct\_amplitude\_derivative()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void \hyperlink{classppE__IMRPhenomD__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}$<$ T $>$\+::construct\+\_\+amplitude\+\_\+derivative (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{double $\ast$$\ast$}]{amplitude\+\_\+derivative,  }\item[{\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{int $\ast$}]{tapes = {\ttfamily NULL} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Construct the derivative of the amplitude for a given source evaluated by the given frequency. 
+
+Order of output\+: dh/d  \+:   \{A0,tc, phic, chirp mass, eta, symmetric spin, antisymmetric spin\} 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & input array of frequency \\
+\hline
+{\em length} & length of the frequency array \\
+\hline
+{\em amplitude\+\_\+derivative} & $<$ dimension of the fisher output array for all the derivatives double\mbox{[}dimension\mbox{]}\mbox{[}length\mbox{]} \\
+\hline
+{\em input\+\_\+params} & Source parameters structure for the source \\
+\hline
+{\em tapes} & int array of tape ids, if N\+U\+LL, these will be calculated \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \hyperlink{classIMRPhenomD_a4142331cc7a6471d13274b1ac8727378}{I\+M\+R\+Phenom\+D$<$ T $>$}.
+
+
+
+Reimplemented in \hyperlink{classppE__IMRPhenomD__IMR_a5b80e5ae4dd83da49beb15e6e5f17715}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+I\+M\+R$<$ T $>$}.
+
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_a28d189808db2bd204e0d0051a1ed6427}\label{classppE__IMRPhenomD__Inspiral_a28d189808db2bd204e0d0051a1ed6427}} 
+\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}!construct\+\_\+phase\+\_\+derivative@{construct\+\_\+phase\+\_\+derivative}}
+\index{construct\+\_\+phase\+\_\+derivative@{construct\+\_\+phase\+\_\+derivative}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}}
+\subsubsection{\texorpdfstring{construct\+\_\+phase\+\_\+derivative()}{construct\_phase\_derivative()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void \hyperlink{classppE__IMRPhenomD__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}$<$ T $>$\+::construct\+\_\+phase\+\_\+derivative (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{double $\ast$$\ast$}]{phase\+\_\+derivative,  }\item[{\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{int $\ast$}]{tapes = {\ttfamily NULL} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Construct the derivative of the phase for a given source evaluated by the given frequency. 
+
+Order of output\+: dh/d  \+:   \{A0,tc, phic, chirp mass, eta, symmetric spin, antisymmetric spin\} 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & input array of frequency \\
+\hline
+{\em length} & length of the frequency array \\
+\hline
+{\em phase\+\_\+derivative} & $<$ dimension of the fisher output array for all the derivatives double\mbox{[}dimension\mbox{]}\mbox{[}length\mbox{]} \\
+\hline
+{\em input\+\_\+params} & Source parameters structure for the source \\
+\hline
+{\em tapes} & int array of tape ids, if N\+U\+LL, these will be calculated \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \hyperlink{classIMRPhenomD_a26da276caf4c148016f558541d6914f6}{I\+M\+R\+Phenom\+D$<$ T $>$}.
+
+
+
+Reimplemented in \hyperlink{classppE__IMRPhenomD__IMR_a78151d1f34693b69cf6ccbc28df4caa6}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+I\+M\+R$<$ T $>$}.
+
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_ae297c077497d34a2632c55a7dafb9e83}\label{classppE__IMRPhenomD__Inspiral_ae297c077497d34a2632c55a7dafb9e83}} 
+\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}!Dphase\+\_\+ins@{Dphase\+\_\+ins}}
+\index{Dphase\+\_\+ins@{Dphase\+\_\+ins}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}}
+\subsubsection{\texorpdfstring{Dphase\+\_\+ins()}{Dphase\_ins()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+T \hyperlink{classppE__IMRPhenomD__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}$<$ T $>$\+::Dphase\+\_\+ins (\begin{DoxyParamCaption}\item[{T}]{f,  }\item[{\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ T $>$ $\ast$}]{param,  }\item[{T $\ast$}]{pn\+\_\+coeff,  }\item[{\hyperlink{structlambda__parameters}{lambda\+\_\+parameters}$<$ T $>$ $\ast$}]{lambda }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Calculates the derivative of the inspiral phase for frequency f. 
+
+For phase continuity and smoothness return a T 
+
+Reimplemented from \hyperlink{classIMRPhenomD_ab840b052576cde8a9e802c5784d24092}{I\+M\+R\+Phenom\+D$<$ T $>$}.
+
+\mbox{\Hypertarget{classppE__IMRPhenomD__Inspiral_a2fb1a8fb66e4204dbe397b792933afbe}\label{classppE__IMRPhenomD__Inspiral_a2fb1a8fb66e4204dbe397b792933afbe}} 
+\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}!phase\+\_\+tape@{phase\+\_\+tape}}
+\index{phase\+\_\+tape@{phase\+\_\+tape}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}}
+\subsubsection{\texorpdfstring{phase\+\_\+tape()}{phase\_tape()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void \hyperlink{classppE__IMRPhenomD__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}$<$ T $>$\+::phase\+\_\+tape (\begin{DoxyParamCaption}\item[{\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{int $\ast$}]{tape }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Creates the tapes for derivatives of phase. 
+
+For efficiency in long runs of large sets of fishers, the tapes can be precomputed and reused 
+\begin{DoxyParams}{Parameters}
+{\em input\+\_\+params} & source parameters structure of the desired source \\
+\hline
+{\em tape} & tape ids \\
+\hline
+\end{DoxyParams}
+
+
+Reimplemented from \hyperlink{classIMRPhenomD_ae456c25f87c34487e6e05f9cf5d2d08c}{I\+M\+R\+Phenom\+D$<$ T $>$}.
+
+
+
+Reimplemented in \hyperlink{classppE__IMRPhenomD__IMR_acf2ed8617b3e24ecc273a409ff579ce4}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+I\+M\+R$<$ T $>$}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/\hyperlink{ppE__IMRPhenomD_8h}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D.\+h}\item 
+src/\hyperlink{ppE__IMRPhenomD_8cpp}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D.\+cpp}\end{DoxyCompactItemize}

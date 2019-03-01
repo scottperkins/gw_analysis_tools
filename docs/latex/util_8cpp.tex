@@ -1,0 +1,80 @@
+\hypertarget{util_8cpp}{}\section{src/util.cpp File Reference}
+\label{util_8cpp}\index{src/util.\+cpp@{src/util.\+cpp}}
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}noise\+\_\+util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
+Include dependency graph for util.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{util_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}{calculate\+\_\+chirpmass} (double mass1, double mass2)
+\begin{DoxyCompactList}\small\item\em Calculates the chirp mass from the two component masses. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8cpp_a0a7a0da86013d639bf8689c9a01d8583}\label{util_8cpp_a0a7a0da86013d639bf8689c9a01d8583}} 
+adouble {\bfseries calculate\+\_\+chirpmass} (adouble mass1, adouble mass2)
+\item 
+\mbox{\Hypertarget{util_8cpp_a06ffbad5fe4daa3872db626f90556202}\label{util_8cpp_a06ffbad5fe4daa3872db626f90556202}} 
+double \hyperlink{util_8cpp_a06ffbad5fe4daa3872db626f90556202}{calculate\+\_\+eta} (double mass1, double mass2)
+\begin{DoxyCompactList}\small\item\em Calculates the symmetric mass ration from the two component masses. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8cpp_adc4391c722f94cb17f0e0275a0930fa9}\label{util_8cpp_adc4391c722f94cb17f0e0275a0930fa9}} 
+adouble {\bfseries calculate\+\_\+eta} (adouble mass1, adouble mass2)
+\item 
+double \hyperlink{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}{calculate\+\_\+mass1} (double chirpmass, double eta)
+\begin{DoxyCompactList}\small\item\em Calculates the larger mass given a chirp mass and symmetric mass ratio. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8cpp_a663f11702648d9a84c9b573e9ab76f09}\label{util_8cpp_a663f11702648d9a84c9b573e9ab76f09}} 
+adouble {\bfseries calculate\+\_\+mass1} (adouble chirpmass, adouble eta)
+\item 
+double \hyperlink{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}{calculate\+\_\+mass2} (double chirpmass, double eta)
+\begin{DoxyCompactList}\small\item\em Calculates the smaller mass given a chirp mass and symmetric mass ratio. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8cpp_adb85ce9fbb2e3a438dd41a35c38a3237}\label{util_8cpp_adb85ce9fbb2e3a438dd41a35c38a3237}} 
+adouble {\bfseries calculate\+\_\+mass2} (adouble chirpmass, adouble eta)
+\item 
+\mbox{\Hypertarget{util_8cpp_ae40cc3f267c33745a8a2485638d5db55}\label{util_8cpp_ae40cc3f267c33745a8a2485638d5db55}} 
+long {\bfseries factorial} (long num)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+General utilities that are method independent 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}\label{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}} 
+\index{util.\+cpp@{util.\+cpp}!calculate\+\_\+chirpmass@{calculate\+\_\+chirpmass}}
+\index{calculate\+\_\+chirpmass@{calculate\+\_\+chirpmass}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{calculate\+\_\+chirpmass()}{calculate\_chirpmass()}}
+{\footnotesize\ttfamily double calculate\+\_\+chirpmass (\begin{DoxyParamCaption}\item[{double}]{mass1,  }\item[{double}]{mass2 }\end{DoxyParamCaption})}
+
+
+
+Calculates the chirp mass from the two component masses. 
+
+The output units are whatever units the input masses are \mbox{\Hypertarget{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}\label{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}} 
+\index{util.\+cpp@{util.\+cpp}!calculate\+\_\+mass1@{calculate\+\_\+mass1}}
+\index{calculate\+\_\+mass1@{calculate\+\_\+mass1}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{calculate\+\_\+mass1()}{calculate\_mass1()}}
+{\footnotesize\ttfamily double calculate\+\_\+mass1 (\begin{DoxyParamCaption}\item[{double}]{chirpmass,  }\item[{double}]{eta }\end{DoxyParamCaption})}
+
+
+
+Calculates the larger mass given a chirp mass and symmetric mass ratio. 
+
+Units of the output match the units of the input chirp mass \mbox{\Hypertarget{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}\label{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}} 
+\index{util.\+cpp@{util.\+cpp}!calculate\+\_\+mass2@{calculate\+\_\+mass2}}
+\index{calculate\+\_\+mass2@{calculate\+\_\+mass2}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{calculate\+\_\+mass2()}{calculate\_mass2()}}
+{\footnotesize\ttfamily double calculate\+\_\+mass2 (\begin{DoxyParamCaption}\item[{double}]{chirpmass,  }\item[{double}]{eta }\end{DoxyParamCaption})}
+
+
+
+Calculates the smaller mass given a chirp mass and symmetric mass ratio. 
+
+Units of the output match the units of the input chirp mass 

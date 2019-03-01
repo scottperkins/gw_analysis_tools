@@ -1,0 +1,179 @@
+\hypertarget{util_8h}{}\section{include/util.h File Reference}
+\label{util_8h}\index{include/util.\+h@{include/util.\+h}}
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
+Include dependency graph for util.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=295pt]{util_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{util_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structgen__params}{gen\+\_\+params}
+\item 
+struct \hyperlink{structuseful__powers}{useful\+\_\+powers$<$ T $>$}
+\begin{DoxyCompactList}\small\item\em To speed up calculations within the for loops, we pre-\/calculate reoccuring powers of M$\ast$F and Pi, since the pow() function is prohibatively slow. \end{DoxyCompactList}\item 
+struct \hyperlink{structsource__parameters}{source\+\_\+parameters$<$ T $>$}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{util_8h_a06ffbad5fe4daa3872db626f90556202}\label{util_8h_a06ffbad5fe4daa3872db626f90556202}} 
+double \hyperlink{util_8h_a06ffbad5fe4daa3872db626f90556202}{calculate\+\_\+eta} (double mass1, double mass2)
+\begin{DoxyCompactList}\small\item\em Calculates the symmetric mass ration from the two component masses. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_adc4391c722f94cb17f0e0275a0930fa9}\label{util_8h_adc4391c722f94cb17f0e0275a0930fa9}} 
+adouble {\bfseries calculate\+\_\+eta} (adouble mass1, adouble mass2)
+\item 
+double \hyperlink{util_8h_af7aeeebcf190ab70c667a478a51ce435}{calculate\+\_\+chirpmass} (double mass1, double mass2)
+\begin{DoxyCompactList}\small\item\em Calculates the chirp mass from the two component masses. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_a0a7a0da86013d639bf8689c9a01d8583}\label{util_8h_a0a7a0da86013d639bf8689c9a01d8583}} 
+adouble {\bfseries calculate\+\_\+chirpmass} (adouble mass1, adouble mass2)
+\item 
+double \hyperlink{util_8h_a85a0fc50a6f06dd519a18a6d273a0b4a}{calculate\+\_\+mass1} (double chirpmass, double eta)
+\begin{DoxyCompactList}\small\item\em Calculates the larger mass given a chirp mass and symmetric mass ratio. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_a663f11702648d9a84c9b573e9ab76f09}\label{util_8h_a663f11702648d9a84c9b573e9ab76f09}} 
+adouble {\bfseries calculate\+\_\+mass1} (adouble chirpmass, adouble eta)
+\item 
+double \hyperlink{util_8h_a5f62f4a7c1011180080d72e0032cef1b}{calculate\+\_\+mass2} (double chirpmass, double eta)
+\begin{DoxyCompactList}\small\item\em Calculates the smaller mass given a chirp mass and symmetric mass ratio. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_adb85ce9fbb2e3a438dd41a35c38a3237}\label{util_8h_adb85ce9fbb2e3a438dd41a35c38a3237}} 
+adouble {\bfseries calculate\+\_\+mass2} (adouble chirpmass, adouble eta)
+\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8h_a185f5ce6420f94f03d77915d94b06f4f}{trapezoidal\+\_\+sum\+\_\+uniform} (double delta\+\_\+x, int length, T $\ast$integrand)
+\begin{DoxyCompactList}\small\item\em Trapezoidal sum rule to approximate discrete integral -\/ Uniform spacing. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8h_ab7d3ff0c020ec0ffbe56f4271f425d68}{trapezoidal\+\_\+sum} (double $\ast$delta\+\_\+x, int length, T $\ast$integrand)
+\begin{DoxyCompactList}\small\item\em Trapezoidal sum rule to approximate discrete integral -\/ Non-\/\+Uniform spacing. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8h_ad77170ec9220ef33a32f2540e9184e31}{simpsons\+\_\+sum} (double delta\+\_\+x, int length, T $\ast$integrand)
+\begin{DoxyCompactList}\small\item\em Simpsons sum rule to approximate discrete integral -\/ Uniform spacing. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_ae40cc3f267c33745a8a2485638d5db55}\label{util_8h_ae40cc3f267c33745a8a2485638d5db55}} 
+long {\bfseries factorial} (long num)
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const double \hyperlink{util_8h_ae35ccfea47f0da0a31cf1d13c80f3c58}{gamma\+\_\+E} = 0.\+5772156649015328606065120900824024310421
+\item 
+const double \hyperlink{util_8h_a8fc6defe4e499b1b9b9c275689e44352}{c} = 299792458.
+\item 
+const double \hyperlink{util_8h_ab97e4616d23ed4c2961295010c1afc3c}{G} =6.\+674e-\/11$\ast$(1.\+98855e30)
+\item 
+const double \hyperlink{util_8h_a498f9210d23417e309c01ad5cb9a635b}{M\+S\+O\+L\+\_\+\+S\+EC} =492549095.e-\/14
+\item 
+const double \hyperlink{util_8h_a47be806b6c8a58bd030f167ca91ed201}{M\+P\+C\+\_\+\+S\+EC} = 3085677581.e13/\hyperlink{util_8h_a8fc6defe4e499b1b9b9c275689e44352}{c}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+General utilities (functions and structures) independent of modelling method 
+
+\subsection{Function Documentation}
+\mbox{\Hypertarget{util_8h_af7aeeebcf190ab70c667a478a51ce435}\label{util_8h_af7aeeebcf190ab70c667a478a51ce435}} 
+\index{util.\+h@{util.\+h}!calculate\+\_\+chirpmass@{calculate\+\_\+chirpmass}}
+\index{calculate\+\_\+chirpmass@{calculate\+\_\+chirpmass}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{calculate\+\_\+chirpmass()}{calculate\_chirpmass()}}
+{\footnotesize\ttfamily double calculate\+\_\+chirpmass (\begin{DoxyParamCaption}\item[{double}]{mass1,  }\item[{double}]{mass2 }\end{DoxyParamCaption})}
+
+
+
+Calculates the chirp mass from the two component masses. 
+
+The output units are whatever units the input masses are \mbox{\Hypertarget{util_8h_a85a0fc50a6f06dd519a18a6d273a0b4a}\label{util_8h_a85a0fc50a6f06dd519a18a6d273a0b4a}} 
+\index{util.\+h@{util.\+h}!calculate\+\_\+mass1@{calculate\+\_\+mass1}}
+\index{calculate\+\_\+mass1@{calculate\+\_\+mass1}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{calculate\+\_\+mass1()}{calculate\_mass1()}}
+{\footnotesize\ttfamily double calculate\+\_\+mass1 (\begin{DoxyParamCaption}\item[{double}]{chirpmass,  }\item[{double}]{eta }\end{DoxyParamCaption})}
+
+
+
+Calculates the larger mass given a chirp mass and symmetric mass ratio. 
+
+Units of the output match the units of the input chirp mass \mbox{\Hypertarget{util_8h_a5f62f4a7c1011180080d72e0032cef1b}\label{util_8h_a5f62f4a7c1011180080d72e0032cef1b}} 
+\index{util.\+h@{util.\+h}!calculate\+\_\+mass2@{calculate\+\_\+mass2}}
+\index{calculate\+\_\+mass2@{calculate\+\_\+mass2}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{calculate\+\_\+mass2()}{calculate\_mass2()}}
+{\footnotesize\ttfamily double calculate\+\_\+mass2 (\begin{DoxyParamCaption}\item[{double}]{chirpmass,  }\item[{double}]{eta }\end{DoxyParamCaption})}
+
+
+
+Calculates the smaller mass given a chirp mass and symmetric mass ratio. 
+
+Units of the output match the units of the input chirp mass \mbox{\Hypertarget{util_8h_ad77170ec9220ef33a32f2540e9184e31}\label{util_8h_ad77170ec9220ef33a32f2540e9184e31}} 
+\index{util.\+h@{util.\+h}!simpsons\+\_\+sum@{simpsons\+\_\+sum}}
+\index{simpsons\+\_\+sum@{simpsons\+\_\+sum}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{simpsons\+\_\+sum()}{simpsons\_sum()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+T simpsons\+\_\+sum (\begin{DoxyParamCaption}\item[{double}]{delta\+\_\+x,  }\item[{int}]{length,  }\item[{T $\ast$}]{integrand }\end{DoxyParamCaption})}
+
+
+
+Simpsons sum rule to approximate discrete integral -\/ Uniform spacing. 
+
+More accurate than the trapezoidal rule, but must be uniform \mbox{\Hypertarget{util_8h_ab7d3ff0c020ec0ffbe56f4271f425d68}\label{util_8h_ab7d3ff0c020ec0ffbe56f4271f425d68}} 
+\index{util.\+h@{util.\+h}!trapezoidal\+\_\+sum@{trapezoidal\+\_\+sum}}
+\index{trapezoidal\+\_\+sum@{trapezoidal\+\_\+sum}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{trapezoidal\+\_\+sum()}{trapezoidal\_sum()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+T trapezoidal\+\_\+sum (\begin{DoxyParamCaption}\item[{double $\ast$}]{delta\+\_\+x,  }\item[{int}]{length,  }\item[{T $\ast$}]{integrand }\end{DoxyParamCaption})}
+
+
+
+Trapezoidal sum rule to approximate discrete integral -\/ Non-\/\+Uniform spacing. 
+
+This version is slower than the uniform version, but will handle non-\/uniform spacing \mbox{\Hypertarget{util_8h_a185f5ce6420f94f03d77915d94b06f4f}\label{util_8h_a185f5ce6420f94f03d77915d94b06f4f}} 
+\index{util.\+h@{util.\+h}!trapezoidal\+\_\+sum\+\_\+uniform@{trapezoidal\+\_\+sum\+\_\+uniform}}
+\index{trapezoidal\+\_\+sum\+\_\+uniform@{trapezoidal\+\_\+sum\+\_\+uniform}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{trapezoidal\+\_\+sum\+\_\+uniform()}{trapezoidal\_sum\_uniform()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+T trapezoidal\+\_\+sum\+\_\+uniform (\begin{DoxyParamCaption}\item[{double}]{delta\+\_\+x,  }\item[{int}]{length,  }\item[{T $\ast$}]{integrand }\end{DoxyParamCaption})}
+
+
+
+Trapezoidal sum rule to approximate discrete integral -\/ Uniform spacing. 
+
+This version is faster than the general version, as it has half the function calls
+
+Something may be wrong with this function -\/ had an overall offset for real data that was fixed by using the simpsons rule -\/ not sure if this was because of a boost in accuracy or because something is off with the trapezoidal sum 
+
+\subsection{Variable Documentation}
+\mbox{\Hypertarget{util_8h_a8fc6defe4e499b1b9b9c275689e44352}\label{util_8h_a8fc6defe4e499b1b9b9c275689e44352}} 
+\index{util.\+h@{util.\+h}!c@{c}}
+\index{c@{c}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{c}{c}}
+{\footnotesize\ttfamily const double c = 299792458.}
+
+Speed of light m/s \mbox{\Hypertarget{util_8h_ab97e4616d23ed4c2961295010c1afc3c}\label{util_8h_ab97e4616d23ed4c2961295010c1afc3c}} 
+\index{util.\+h@{util.\+h}!G@{G}}
+\index{G@{G}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{G}{G}}
+{\footnotesize\ttfamily const double G =6.\+674e-\/11$\ast$(1.\+98855e30)}
+
+Gravitational constant in m$\ast$$\ast$3/(s$\ast$$\ast$2 Sol\+Mass) \mbox{\Hypertarget{util_8h_ae35ccfea47f0da0a31cf1d13c80f3c58}\label{util_8h_ae35ccfea47f0da0a31cf1d13c80f3c58}} 
+\index{util.\+h@{util.\+h}!gamma\+\_\+E@{gamma\+\_\+E}}
+\index{gamma\+\_\+E@{gamma\+\_\+E}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{gamma\+\_\+E}{gamma\_E}}
+{\footnotesize\ttfamily const double gamma\+\_\+E = 0.\+5772156649015328606065120900824024310421}
+
+Euler number \mbox{\Hypertarget{util_8h_a47be806b6c8a58bd030f167ca91ed201}\label{util_8h_a47be806b6c8a58bd030f167ca91ed201}} 
+\index{util.\+h@{util.\+h}!M\+P\+C\+\_\+\+S\+EC@{M\+P\+C\+\_\+\+S\+EC}}
+\index{M\+P\+C\+\_\+\+S\+EC@{M\+P\+C\+\_\+\+S\+EC}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{M\+P\+C\+\_\+\+S\+EC}{MPC\_SEC}}
+{\footnotesize\ttfamily const double M\+P\+C\+\_\+\+S\+EC = 3085677581.e13/\hyperlink{util_8h_a8fc6defe4e499b1b9b9c275689e44352}{c}}
+
+consts.\+kpc.\+to(\textquotesingle{}m\textquotesingle{})$\ast$1000/c Mpc in sec \mbox{\Hypertarget{util_8h_a498f9210d23417e309c01ad5cb9a635b}\label{util_8h_a498f9210d23417e309c01ad5cb9a635b}} 
+\index{util.\+h@{util.\+h}!M\+S\+O\+L\+\_\+\+S\+EC@{M\+S\+O\+L\+\_\+\+S\+EC}}
+\index{M\+S\+O\+L\+\_\+\+S\+EC@{M\+S\+O\+L\+\_\+\+S\+EC}!util.\+h@{util.\+h}}
+\subsubsection{\texorpdfstring{M\+S\+O\+L\+\_\+\+S\+EC}{MSOL\_SEC}}
+{\footnotesize\ttfamily const double M\+S\+O\+L\+\_\+\+S\+EC =492549095.e-\/14}
+
+G/c$\ast$$\ast$3 seconds per solar mass 
