@@ -37,5 +37,14 @@ utilizes the above waveform templates
 \subsection MCMC Routines
 Includes log likelihood caclulation
 
+\section Usage
+\subsection Enviornment variables
+The python path PYTHONPATH should include the directory \$(PROJECT_DIR)/gw_analysis_tools_py/
+
+\subsection Include
+To include header files, use -I\$(PROJECT_DIRECTORY)/include
+
+\subsection Link
+To link object files, use -L\$(PROJECT_DIRECTORY)/lib -lgwanalysistools
 \author Scott Perkins
 */
