@@ -20,6 +20,11 @@ virtual int construct_waveform(T *frequencies, /**< T array of frequencies the w
 				std::complex<T> *waveform,/**< complex T array for the waveform to be output*/ 
 				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 				);
+
+virtual void PhenomPv2_Param_Transform(source_parameters<T> *params);
+
+virtual T L2PN( T eta, useful_powers<T> *pow);
+
 };
 
 #endif

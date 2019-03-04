@@ -151,6 +151,15 @@ struct source_parameters
 	T tc;
 	/*overall amplitude factor*/	
 	T A0;
+	
+	//############################################
+	//PhenomP
+	T s ;
+
+	T chi_l;
+	
+	T chi_p;
+	
 
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/

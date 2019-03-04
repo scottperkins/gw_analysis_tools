@@ -161,5 +161,28 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	return 1;
 }
 
+template<class T>
+void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params)
+{
+	T L;
+	T S_perp = params->spin1z * pow_int(params->mass1,2) +
+		params->spin2z * pow_int(params->mass2,2);
+	T S_x = params->spin1x*pow_int(params->mass1,2) + params->spin2x*pow_int(params->mass2,2) ;
+	T S_y = params->spin1y*pow_int(params->mass1,2) + params->spin2y*pow_int(params->mass2,2) ;
+	T denom = L + sqrt(pow_int(S_x,2)+pow_int(S_y,2));
+	params->s = S_perp/denom;
+
+		
+
+	
+}
+
+template<class T>
+T IMRPhenomPv2<T>::L2PN( T eta, useful_powers<T> *pow)
+{
+	T x = pow->MF2third * pow->PI2third;
+	return eta/(sqrt(x))*(1 + (3./2 + eta/6)*x + (3.373 - 19.*eta/8 - eta*eta/24 )*x*x);
+}
+
 template class IMRPhenomPv2<double>;
 template class IMRPhenomPv2<adouble>;
