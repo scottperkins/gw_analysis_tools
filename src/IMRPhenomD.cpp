@@ -1123,7 +1123,7 @@ T IMRPhenomD<T>::phase_mr(T f, source_parameters<T> *param, lambda_parameters<T>
         T Mf = M*f;
 	T Mfcube = Mf*Mf*Mf;
 	T Mf3fourths = sqrt(sqrt(Mfcube));
-        return (1/eta)*(alpha0 +alpha1*(M*f) -alpha2*(1./(M*f)) + (4./3)*alpha3*Mf3fourths + 
+        return (1/eta)*(alpha0 +alpha1*(Mf) -alpha2*(1./(Mf)) + (4./3)*alpha3*Mf3fourths + 
         alpha4*atan((f-alpha5*fRD)/fdamp));
 
 }

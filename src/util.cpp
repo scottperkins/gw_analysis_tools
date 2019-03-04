@@ -123,5 +123,28 @@ long factorial(long num)
 	return prod;
 }
 
+double pow_int(double base, int power)
+{
+	double prod = 1;
+	int pow = std::abs(power);
+	for (int i = 0; i< pow;i++)
+		prod = prod * base;
+	if (pow>0)
+		return prod;
+	else
+		return 1./prod;
+}
+adouble pow_int(adouble base, int power)
+{
+	adouble prod = 1;
+	int pow = std::abs(power);
+	for (int i = 0; i< pow;i++)
+		prod = prod * base;
+	if (pow>0)
+		return prod;
+	else
+		return 1./prod;
+}
+
 template class source_parameters<double>;
 template class source_parameters<adouble>;

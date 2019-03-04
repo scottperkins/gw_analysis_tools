@@ -1,6 +1,7 @@
 #include <iostream>
 #include "waveform_generator.h"
 #include "IMRPhenomD.h"
+#include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
 #include "util.h"
 #include <complex>
@@ -27,6 +28,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			gen_params *parameters/**<structure containing all the source parameters*/
 			)
 {
+	
 	int status=1;
 	bool NSflag = parameters->NSflag;
 
@@ -65,6 +67,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+	}
+	else if(generation_method == "IMRPhenomPv2")
+	{
+		IMRPhenomPv2<double> modeld;
+		//Initialize Pv2 specific params	
+		status = modeld.construct_waveform(frequencies, length, waveform, &params);	
 	}
 
 	return status ;

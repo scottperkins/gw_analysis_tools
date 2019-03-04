@@ -235,4 +235,6 @@ T simpsons_sum(double delta_x, int length, T *integrand)
 	return sum*delta_x/3;
 }
 long factorial(long num);
+double pow_int(double base, int power);
+adouble pow_int(adouble base, int power);
 #endif

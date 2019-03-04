@@ -46,7 +46,7 @@ void test_1()
 	gen_params params;
 	IMRPhenomD<double> modeld;
 	IMRPhenomD<adouble> modela;
-	int length = 16e3;
+	int length = 900;
 	params.mass1 = 200;
 	params.mass2 = 50;
 	string method= "IMRPhenomD";
