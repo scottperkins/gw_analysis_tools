@@ -5,7 +5,7 @@
 #include <string>
 #include <complex>
 #include <iostream>
-#include <adolc/adouble.h>
+#include "adolc/adouble.h"
 
 /*! \file
  *

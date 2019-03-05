@@ -3,7 +3,7 @@
 //#include "general_parameter_structures.h"
 #include <string>
 #include <complex>
-#include <adolc/adouble.h>
+#include "adolc/adouble.h"
 //#define adouble double
 /*! \file 
  *General utilities (functions and structures) independent of modelling method
