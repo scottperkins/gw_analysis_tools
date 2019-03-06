@@ -191,7 +191,7 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	params.spin2[1]= 0;
 	params.spin2[2]= spin2;
 	params.phic=0;
-	params.tc=0;
+	params.tc=1126259462.42;
 	params.NSflag=NSflag;
 
 	fourier_waveform(frequencies, length, template_strain, "IMRPhenomD", &params);
@@ -218,6 +218,19 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	//integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
 	integral2 = 4*simpsons_sum(delta_f, length, integrand);
 	double DD = integral2;
+
+	//###################################################################
+	//testing
+	//sum = 0;
+	//double integral3;
+	//for (int i =0;i< length;i++)
+	//	integrand[i] = real(template_strain[i]*std::conj(data[i]))/noise[i];
+	////integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
+	//integral3 = 4*simpsons_sum(delta_f, length, integrand);
+	//double HD = integral3;
+	//###################################################################
+
+
 
 	//double normalizing_factor = SNR/sqrt(integral);
 	
@@ -246,7 +259,7 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	free(integrand);
 	free(g);
 
-	//return -0.5*(DD+HH- 2*max);
+	//return -0.5*(HH- 2*HD);//TESTING
 	return -0.5*(HH- 2*max);
 }
 double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,

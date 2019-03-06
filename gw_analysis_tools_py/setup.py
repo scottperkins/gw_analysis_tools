@@ -6,8 +6,8 @@ from Cython.Distutils import build_ext
 import numpy
 import multiprocessing
 
-os.environ["CC"]="gcc-8"
-os.environ["CXX"]="g++-8"
+#os.environ["CC"]="gcc-8"
+#os.environ["CXX"]="g++-8"
 compile_args = ['-fPIC','-Wall','-O2']
 
 
