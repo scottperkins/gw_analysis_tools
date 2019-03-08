@@ -4,7 +4,10 @@
 #include <adolc/adouble.h>
 #include <math.h>
 #include <algorithm>
-
+/*! \file 
+ *
+ * Source code for IMRPhenomP
+ */
 
 //Shamelessly stolen from lalsuite
 /* Macro functions to rotate the components of a vector about an axis */
