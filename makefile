@@ -1,6 +1,3 @@
-SYSIDIR=${CDIR}
-LDIR=${LD_LIBRARY_PATH}
-
 
 SRCDIR=src
 ODIR=build
@@ -9,7 +6,6 @@ LDIR_LOCAL=lib
 
 PYDIR=gw_analysis_tools_py
 PYSRC=mcmc_routines_ext.pyx waveform_generator_ext.pyx
-#PROJ_PYSRC=$(PYDIR)/$(PYSRC)
 PROJ_PYSRC=$(addprefix $(PYDIR)/src/,$(PYSRC))
 
 PYLIB=mcmc_routines_ext.cpp waveform_generator_ext.cpp
@@ -26,9 +22,7 @@ TEST=$(addprefix $(TESTDIR)/,exe.a)
 
 
 
-CFLAGS=-I$(IDIR) -I$(SYSIDIR) -Wall -fPIC -g -O3
-LFLAGS=-L$(LDIR) 
-
+CFLAGS=-I$(IDIR) -Wall -fPIC -g -O3 -std=c++11 
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
@@ -36,7 +30,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 
-CC=g++
+CC=g++-7
 
 .PHONY: all
 all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB)
@@ -62,6 +56,7 @@ $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_PYSRC)
 	make -C $(PYDIR) 
 	
 $(TEST) : $(OBJECTS) $(TESTOBJ) | $(TESTDIR)
+	@echo ${LD_LIBRARY_PATH}
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
 $(TESTDIR):
@@ -70,6 +65,9 @@ $(TESTDIR):
 Doxyfile: $(OBJECTS)
 	doxygen Doxyfile
  
+.PHONY: c
+c: $(PROJ_LIB)
+
 .PHONY: test
 test: $(TEST) $(PROJ_LIB) $(PROJ_PYLIB) 
 
@@ -80,6 +78,3 @@ clean:
 remove:
 	rm build/*.o $(TEST) lib/*.a
 	make -C $(PYDIR) remove
-#.PHONY: docs
-#docs:
-#	doxygen Doxyfile

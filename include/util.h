@@ -156,11 +156,23 @@ struct source_parameters
 	//PhenomP
 	T s ;
 
-	T chi_l;
+	T chil;
 	
-	T chi_p;
-	
+	T chip;
 
+	T f_ref;
+	
+	T phi_aligned;
+
+	T incl_angle;
+	
+	T phiRef;
+
+	T alpha0;
+
+	T thetaJN;
+
+	T zeta_polariz;
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
 	T betappe;

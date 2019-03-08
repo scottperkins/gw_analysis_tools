@@ -1,12 +1,16 @@
 /*! \file
 
-hello
 */
 
 /*! \mainpage Gravitational Waves Analysis Tools
 
 A suite of analysis tools useful for gravitational wave science. All code is written in C++, with some of the interface classes wrapped in Cython to allow for python-access.
 
+\section compat Compatibility
+
+Known to work with gcc/g++-7
+
+DOES NOT WORK FOR gcc/g++-8
 \section external_libs Required Software
 
 Required non-standard C libraries:

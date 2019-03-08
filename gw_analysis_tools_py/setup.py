@@ -6,16 +6,15 @@ from Cython.Distutils import build_ext
 import numpy
 import multiprocessing
 
-#os.environ["CC"]="gcc-8"
-#os.environ["CXX"]="g++-8"
+os.environ["CC"]="gcc-7"
+os.environ["CXX"]="g++-7"
 compile_args = ['-fPIC','-Wall','-O2']
 
 
 exts = [Extension("gw_analysis_tools_py.*",['src/*.pyx'],
                 extra_compile_args=compile_args,
-                include_dirs=[numpy.get_include(),"../include","/usr/include/",'/usr/local/include/'],
+                include_dirs=[numpy.get_include(),"../include"],
                 extra_objects = ["../lib/libgwanalysistools.a"],
-                libraries_dir=['/usr/local/lib/','/usr/lib64','/Users/sperkins/opt/adolc_base/lib64'],
                 libraries = ['adolc','fftw3'],
                 language='c++'
                 )]
@@ -23,6 +22,6 @@ exts = [Extension("gw_analysis_tools_py.*",['src/*.pyx'],
 setup(
     name='gw_analysis_tools_py',
     packages=['gw_analysis_tools_py'],
-    ext_modules=cythonize(exts,force=True),
+    ext_modules=cythonize(exts,force=True,language_level=3),
     cmdclass={'build_ext':build_ext}
     )

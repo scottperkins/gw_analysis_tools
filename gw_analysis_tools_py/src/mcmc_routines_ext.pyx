@@ -1,8 +1,9 @@
-## @package mcmc_routines_ext
-#Documentation
 from numpy cimport ndarray
+import numpy as np
 from libcpp cimport bool
 from libcpp cimport complex
+from libcpp.vector cimport vector
+from libcpp.complex cimport complex
 cimport numpy as np
 cimport cython
 

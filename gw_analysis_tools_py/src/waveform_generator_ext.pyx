@@ -1,3 +1,4 @@
+
 from numpy cimport ndarray
 from libcpp cimport bool
 import numpy as np
@@ -6,7 +7,6 @@ cimport cython
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.complex cimport complex
-
 
 cdef extern from "waveform_generator.h" :
     struct gen_params:
@@ -61,9 +61,10 @@ cdef class gen_params_py:
 #cdef np.ndarray[np.complex128_t,ndim=1] fourier_waveform_py(double[::1] frequencies ,
 def fourier_waveform_py(double[::1] frequencies ,
                                 string generation_method,
-                                gen_params_py parameters):
-    cdef double[::1] waveform_real = np.zeros((frequencies.size),dtype=np.float64)
-    cdef double[::1] waveform_imag= np.zeros((frequencies.size),dtype=np.float64)
+                                gen_params_py parameters
+                                ):
+    cdef double[::1] waveform_real = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    cdef double[::1] waveform_imag= np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
     fourier_waveform(&frequencies[0],
 				frequencies.size,
                                 &waveform_real[0],
