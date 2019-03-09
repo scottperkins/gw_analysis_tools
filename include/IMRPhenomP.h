@@ -15,11 +15,14 @@ virtual T epsilon(T omega, T q, T chi2l, T chi2);
 
 virtual T d(int l, int mp, int m,T s);
 
-virtual int construct_waveform(T *frequencies, /**< T array of frequencies the waveform is to be evaluated at*/
-				int length, /**< integer length of the array of frequencies and the waveform*/	
-				std::complex<T> *waveform,/**< complex T array for the waveform to be output*/ 
-				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
+virtual int construct_waveform(T *frequencies, 
+				int length, 
+				std::complex<T> *waveform_plus,
+				std::complex<T> *waveform_cross,
+				source_parameters<T> *params 
 				);
+
+virtual T calc_s(T f, source_parameters<T> *params);
 
 virtual void PhenomPv2_Param_Transform(source_parameters<T> *params);
 

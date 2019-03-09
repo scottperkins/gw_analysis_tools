@@ -24,6 +24,8 @@ void test_2();
 int main(){
 
 	test_1();	
+	std::cout<<"spin-weighted Spherical Harmonic"<<
+			XLALSpinWeightedSphericalHarmonic(0.,1.,-2,2,2)<<std::endl;
 	return 0;
 }
 void test_2()

@@ -11,6 +11,24 @@
 
 int fourier_waveform(double *frequencies, 
 			int length,
+			std::complex<double> *waveform_plus, 
+			std::complex<double> *waveform_cross, 
+			std::string generation_method,
+			gen_params *parameters
+			);
+
+int fourier_waveform(double *frequencies, 
+			int length,
+			double *waveform_plus_real, 
+			double *waveform_plus_imag, 
+			double *waveform_cross_real, 
+			double *waveform_cross_imag,
+			std::string generation_method,
+			gen_params *parameters
+
+			);
+int fourier_waveform(double *frequencies, 
+			int length,
 			std::complex<double> *waveform,
 			std::string generation_method,
 			gen_params *parameters);

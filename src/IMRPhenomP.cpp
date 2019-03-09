@@ -114,10 +114,19 @@ T IMRPhenomPv2<T>::d(int l, int m_prime, int m,T s)
 template <class T>
 int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequencies the waveform is to be evaluated at*/
 				int length, /**< integer length of the array of frequencies and the waveform*/	
-				std::complex<T> *waveform,/**< complex T array for the waveform to be output*/ 
+				std::complex<T> *waveform_plus,/**< complex T array for the plus polariaztion waveform to be output*/ 
+				std::complex<T> *waveform_cross,/**< complex T array for the cross polarization waveform to be output*/ 
 				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 				)
 {
+	//Initialize Spherical harmonics for polarization construction
+	sph_harm<T> harmonics;
+	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,2);
+	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,1);
+	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,0);
+	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,-1);
+	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,-2);
+	
 	T M = params-> M;
 	T chirpmass = params->chirpmass;
 	T DL = params->DL;
@@ -149,11 +158,13 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0;
-	T s = .1;
+	T s;
 	T chi2l = .1;
 	T chi2 = .1;
 	int m = 2;
 	T q = params->mass2/params->mass1;
+	T d2[5];
+	T dm2[5];
 
 	T f;
 	std::complex<T> amp, phase;
@@ -169,17 +180,26 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+		calc_s(f, params);
+		
+		//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
+		d2[0] =1 ;
 		amp = amp * this->d(2,2,2,s);
 		//Probably mulitply frequency by M here..
 		phase = phase + (std::complex<T>)(2 * this->epsilon(M_PI*f, q, chi2l,chi2) 
 				+ m * (this->alpha(M_PI*f,q,chi2l,chi2)  +params->alpha0));
-		waveform[j] = amp * std::exp(-i * phase);
+		waveform_plus[j] = amp * std::exp(-i * phase);
 
 	}
 	//}
 	return 1;
 }
 
+template<class T>
+T IMRPhenomPv2<T>::calc_s(T f, source_parameters<T> *params)
+{
+	return f;
+}
 
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
  *

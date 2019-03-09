@@ -27,6 +27,21 @@ const double MPC_SEC = 3085677581.e13/c;
 //const double MSOL_SEC = GSL_CONST_MKSA_SOLAR_MASS*(GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT/(c*c*c));
 //const double MPC_SEC = GSL_CONST_MKSA_PARSEC*1e6/c; 
 
+
+/*!\struct
+ *
+ * Container for set of spin weighted spherical harmonics (all spins are -2)
+ */
+template <class T>
+struct sph_harm
+{
+	std::complex<T> Y22;
+	std::complex<T> Y21;
+	std::complex<T> Y20;
+	std::complex<T> Y2m1;
+	std::complex<T> Y2m2;
+};
+
 /*!\struct
  * \brief Structure for interfacing with the libraries 
  * 
@@ -173,11 +188,17 @@ struct source_parameters
 	T thetaJN;
 
 	T zeta_polariz;
+
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
 	T betappe;
 	/*b power for ppE formalism*/
 	int bppe;
+	
+	//Spherical polar angles for the sky location relative to the detector in question
+	T phi;
+
+	T theta;
 
 static source_parameters<T> populate_source_parameters(
 			T mass1, 
@@ -258,4 +279,16 @@ T simpsons_sum(double delta_x, int length, T *integrand)
 long factorial(long num);
 double pow_int(double base, int power);
 adouble pow_int(adouble base, int power);
+
+template <class T>
+std::complex<T> cpolar(T mag, T phase);
+
+template <class T>
+std::complex<T> XLALSpinWeightedSphericalHarmonic(
+                                   T theta,  /**< polar angle (rad) */
+                                   T phi,    /**< azimuthal angle (rad) */
+                                   int s,        /**< spin weight */
+                                   int l,        /**< mode number l */
+                                   int m         /**< mode number m */
+    );
 #endif
