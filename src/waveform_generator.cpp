@@ -49,7 +49,8 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	double t_c = parameters->tc;
 	source_parameters<double> params;
 	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
-
+	params.phi = parameters->phi;
+	params.theta = parameters->theta;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -82,9 +83,6 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		modeld.PhenomPv2_Param_Transform(&params);
 		//Calculate Waveform
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-		//This will obviously need to change..
-		for (int i =0 ; i < length; i++)
-			waveform_cross[i] = std::complex<double>(0,1) * waveform_plus[i];
 	}
 
 	return status ;
@@ -147,6 +145,8 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	source_parameters<double> params;
 	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
 
+	params.phi = parameters->phi;
+	params.theta = parameters->theta;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;

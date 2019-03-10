@@ -43,10 +43,10 @@ void test_3()
 	double phaseout[length];
 	complex<double> waveformout_plus[length];
 	complex<double> waveformout_cross[length];
-	params.spin1[0] = .1;
-	params.spin1[1] = .2;
+	params.spin1[0] = .0;
+	params.spin1[1] = .0;
 	params.spin1[2] = -.2;
-	params.spin2[0] = .4;
+	params.spin2[0] = .0;
 	params.spin2[1] = 0.0;
 	params.spin2[2] = .9;
 	double *spin1  = params.spin1;
@@ -57,8 +57,8 @@ void test_3()
 	params.betappe = 10.;
 	params.bppe  = -1.;
 	params.NSflag = false;
-	params.phi = 0;
-	params.theta = 0;
+	params.phi = M_PI/3.;
+	params.theta = M_PI/3;
 	params.incl_angle = 0;
 	
 	double freq[length];

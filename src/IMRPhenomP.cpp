@@ -126,11 +126,20 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 {
 	//Initialize Spherical harmonics for polarization construction
 	sph_harm<T> harmonics;
+	harmonics.Y22 = std::complex<T>(0.0,0.0);
+	harmonics.Y21 = std::complex<T>(0.0,0.0);
+	harmonics.Y20 = std::complex<T>(0.0,0.0);
+	harmonics.Y2m1 =std::complex<T>(0.0,0.0);
+	harmonics.Y2m2 =std::complex<T>(0.0,0.0);
 	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,2);
 	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,1);
 	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,0);
 	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,-1);
 	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,-2);
+	
+	//if(std::is_same<T,double>::value){
+	//	std::cout<<"sph harm: "<<harmonics.Y22<<" "<<harmonics.Y21<<" "<<harmonics.Y20<<" "<<harmonics.Y2m2<<" "<<harmonics.Y2m1<<" "<<std::endl;
+	//}
 	
 	T M = params-> M;
 	T chirpmass = params->chirpmass;

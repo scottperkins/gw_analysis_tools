@@ -167,8 +167,8 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
                                    int m         /**< mode number m */
     )
 {
-  T fac;
-  std::complex<T> ans;
+  T fac = 0.0;
+  std::complex<T> ans = std::complex<T>(0.0,0.0);
 
   /* sanity checks ... */
   //if ( l < abs(s) ) 
@@ -181,7 +181,6 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
   //  XLALPrintError("XLAL Error - %s: Invalid mode s=%d, l=%d, m=%d - require |m| <= l\n", __func__, s, l, m );
   //  XLAL_ERROR_VAL(0, XLAL_EINVAL);
   //}
-
   if ( s == -2 ) 
   {
     if ( l == 2 ) 
