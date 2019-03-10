@@ -33,11 +33,11 @@ void test_3()
 	gen_params params;
 	IMRPhenomPv2<double> modeld;
 	IMRPhenomPv2<adouble> modela;
-	int length = 9000;
+	int length = 900;
 	params.mass1 = 200;
 	params.mass2 = 50;
-	//string method= "IMRPhenomPv2";
-	string method= "IMRPhenomD";
+	string method= "IMRPhenomPv2";
+	//string method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
 	double amp[length];
 	double phaseout[length];

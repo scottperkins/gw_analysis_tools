@@ -1,9 +1,14 @@
 #include "IMRPhenomP.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <complex>
 #include "IMRPhenomD.h"
 #include "util.h"
 #include <adolc/adouble.h>
 #include <math.h>
 #include <algorithm>
+#include <type_traits>
 /*! \file 
  *
  * Source code for IMRPhenomP
@@ -158,10 +163,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0;
-	T s;
-	T chi2l = .1;
-	T chi2 = .1;
-	T q = params->mass2/params->mass1;
+	T q = params->mass1/params->mass2;
 	T d2[5] ;
 	T dm2[5];
 	std::complex<T> hp_factor = std::complex<T>(0.0,0.0);
@@ -190,9 +192,15 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		this->WignerD(d2,dm2, &pows, params);
 		//Calculate Euler angles alpha and epsilon
 		//epsilon = this->epsilon(M_PI*f, q, params->chil,params->chip);
-		this->calculate_euler_angles(&alpha, &epsilon, M_PI*f, q, params->chil, params->chip);
+		this->calculate_euler_angles(&alpha, &epsilon, params->M *M_PI*f, q, params->chil, params->chip);
+		
+
 		//Twist it up
 		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
+
+		//if(std::is_same<T,double>::value){
+		//	std::cout<<"D: "<<d2[0]<<" hc: "<<hc_factor<<std::endl;
+		//}
 		//Probably mulitply frequency by M here..
 		phase = phase + (std::complex<T>)(2. * epsilon);
 		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
@@ -271,6 +279,13 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	//Calculate spin parameters chil and chip
 	T chi1_l = params->spin1z;
 	T chi2_l = params->spin2z;
+
+	T q = params->mass1/params->mass2;
+	T chi_eff = (params->mass1*chi1_l + params->mass2*chi2_l) / params->M; /* Effective aligned spin */
+  	T chil = (1.0+q)/q * chi_eff; /* dimensionless aligned spin of the largest BH */
+	params->chil = chil;
+
+
 	
 	T m1_2 = params->mass1 * params->mass1;
 	T m2_2 = params->mass2 * params->mass2;
@@ -287,7 +302,11 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	T num = (ASp2>ASp1) ? ASp2 : ASp1;
 	T denom = (params->mass2 > params->mass1)? A2*m2_2 : A1*m1_2;
 	params->chip = num/denom;
-
+	
+	//if(std::is_same<T,double>::value){
+	//	std::cout<<params->chil<<std::endl;
+	//}
+	
 	//Compute the rotation operations for L, J0 at fref	
 	//T v_ref = pow(M_PI * params->f_ref * (params->M),1./3);
 	T L0 = 0.0;

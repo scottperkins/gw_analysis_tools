@@ -1,4 +1,3 @@
-
 from numpy cimport ndarray
 from libcpp cimport bool
 import numpy as np
@@ -28,6 +27,14 @@ cdef extern from "waveform_generator.h" :
 				int length,
                                 double *waveform_real,
                                 double *waveform_imag,
+                                string generation_method,
+                                gen_params *parameters)
+    int fourier_waveform(double *frequencies,
+				int length,
+                                double *waveform_plus_real,
+                                double *waveform_plus_imag,
+                                double *waveform_cross_real,
+                                double *waveform_cross_imag,
                                 string generation_method,
                                 gen_params *parameters)
 cdef extern from "waveform_util.h" :
@@ -78,6 +85,30 @@ def fourier_waveform_py(double[::1] frequencies ,
         i = i +1
     return waveform
 
+def fourier_waveform_polarizations_py(double[::1] frequencies ,
+                                string generation_method,
+                                gen_params_py parameters
+                                ):
+    cdef double[::1] waveform_plus_real = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    cdef double[::1] waveform_plus_imag= np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    cdef double[::1] waveform_cross_real = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    cdef double[::1] waveform_cross_imag= np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    fourier_waveform(&frequencies[0],
+				frequencies.size,
+                                &waveform_plus_real[0],
+                                &waveform_plus_imag[0],
+                                &waveform_cross_real[0],
+                                &waveform_cross_imag[0],
+                                generation_method,
+                                &parameters.params)
+    cdef np.ndarray[np.complex128_t,ndim=1] waveform_plus = np.zeros((frequencies.size),dtype=np.complex128)
+    cdef np.ndarray[np.complex128_t,ndim=1] waveform_cross = np.zeros((frequencies.size),dtype=np.complex128)
+    cdef int i = 0
+    while i<frequencies.size:
+        waveform_plus[i] = waveform_plus_real[i] + 1j*waveform_plus_imag[i]
+        waveform_cross[i] = waveform_cross_real[i] + 1j*waveform_cross_imag[i]
+        i = i +1
+    return waveform_plus, waveform_cross
 def data_snr_maximized_extrinsic_py(double[::1] frequencies,
                                 double[::1] data_real,
                                 double[::1] data_imag,
