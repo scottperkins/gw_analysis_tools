@@ -18,15 +18,59 @@ using namespace std;
 
 void test_1();
 void test_2();
+void test_3();
 
 
 
 int main(){
 
-	test_1();	
-	std::cout<<"spin-weighted Spherical Harmonic"<<
-			XLALSpinWeightedSphericalHarmonic(0.,1.,-2,2,2)<<std::endl;
+	test_3();	
 	return 0;
+}
+
+void test_3()
+{
+	gen_params params;
+	IMRPhenomPv2<double> modeld;
+	IMRPhenomPv2<adouble> modela;
+	int length = 9000;
+	params.mass1 = 200;
+	params.mass2 = 50;
+	//string method= "IMRPhenomPv2";
+	string method= "IMRPhenomD";
+	//string method= "ppE_IMRPhenomD_Inspiral";
+	double amp[length];
+	double phaseout[length];
+	complex<double> waveformout_plus[length];
+	complex<double> waveformout_cross[length];
+	params.spin1[0] = .1;
+	params.spin1[1] = .2;
+	params.spin1[2] = -.2;
+	params.spin2[0] = .4;
+	params.spin2[1] = 0.0;
+	params.spin2[2] = .9;
+	double *spin1  = params.spin1;
+	double *spin2= params.spin2;
+	params.phic = 2.0;
+	params.tc = 8.0;
+	params.Luminosity_Distance = 800.;
+	params.betappe = 10.;
+	params.bppe  = -1.;
+	params.NSflag = false;
+	params.phi = 0;
+	params.theta = 0;
+	params.incl_angle = 0;
+	
+	double freq[length];
+	for(int i=0;i<length;i++)
+		freq[i]=10.+i*1e-1;
+
+	clock_t  start, end;
+	start = clock(); 
+	fourier_waveform(freq, length, waveformout_plus,waveformout_cross,method,&params);
+	end=clock();
+	cout<<"TIMING waveform: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+	
 }
 void test_2()
 {

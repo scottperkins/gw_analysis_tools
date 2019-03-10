@@ -23,7 +23,7 @@ tmp2 = - vx*sin(angle) + vz*cos(angle);\
 vx = tmp1;\
 vz = tmp2
 
-
+double sqrt_6 = sqrt(6.);
 
 template<class T>
 T IMRPhenomPv2<T>::alpha(T omega, T q,T chi2l, T chi2){
@@ -161,10 +161,13 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	T s;
 	T chi2l = .1;
 	T chi2 = .1;
-	int m = 2;
 	T q = params->mass2/params->mass1;
-	T d2[5];
+	T d2[5] ;
 	T dm2[5];
+	std::complex<T> hp_factor = std::complex<T>(0.0,0.0);
+	std::complex<T> hc_factor = std::complex<T>(0.0,0.0);
+	T epsilon;
+	T alpha;
 
 	T f;
 	std::complex<T> amp, phase;
@@ -178,17 +181,22 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		{
 			this->precalc_powers_ins(f, M, &pows);
 		}
+		else{
+			pows.MF2third = pow(M * f, 2./3.);//PhenomP requires this for WignerD matrices
+		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		calc_s(f, params);
-		
 		//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
-		d2[0] =1 ;
-		amp = amp * this->d(2,2,2,s);
+		this->WignerD(d2,dm2, &pows, params);
+		//Calculate Euler angles alpha and epsilon
+		//epsilon = this->epsilon(M_PI*f, q, params->chil,params->chip);
+		this->calculate_euler_angles(&alpha, &epsilon, M_PI*f, q, params->chil, params->chip);
+		//Twist it up
+		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
 		//Probably mulitply frequency by M here..
-		phase = phase + (std::complex<T>)(2 * this->epsilon(M_PI*f, q, chi2l,chi2) 
-				+ m * (this->alpha(M_PI*f,q,chi2l,chi2)  +params->alpha0));
-		waveform_plus[j] = amp * std::exp(-i * phase);
+		phase = phase + (std::complex<T>)(2. * epsilon);
+		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 
 	}
 	//}
@@ -196,11 +204,62 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 }
 
 template<class T>
-T IMRPhenomPv2<T>::calc_s(T f, source_parameters<T> *params)
+void IMRPhenomPv2<T>::WignerD(T d2[5],T dm2[5], useful_powers<T> *pows, source_parameters<T> *params)
 {
-	return f;
+	T L = this->L2PN(params->eta, pows);
+	T s = params->SP / ( L + params-> SL);
+	T s_2 = s*s;
+	T cos_beta = 1./sqrt(1.0 + s_2);
+	T cos_beta_half = sqrt( (1.0 + cos_beta) / 2.0);
+	T sin_beta_half = sqrt( (1.0 - cos_beta) / 2.0);
+	T c2 = cos_beta_half * cos_beta_half;
+	T s2 = sin_beta_half * sin_beta_half;
+	T c3 = c2 * cos_beta_half;
+	T s3 = s2 * sin_beta_half;
+	T c4 = c3 * cos_beta_half;
+	T s4 = s3 * sin_beta_half;
+	
+	d2[0] = s4;
+	d2[1] = 2*cos_beta_half * s3;
+	d2[2] = sqrt_6 * s2*c2 ;
+	d2[3] = 2 * c3* sin_beta_half;
+	d2[4] = c4;
+	//Exploit Symmetry
+	dm2[0] = d2[4];
+	dm2[1] = -d2[3];
+	dm2[2] = d2[2];
+	dm2[3] = -d2[1];
+	dm2[4] = d2[0];
+	
 }
 
+template<class T>
+void IMRPhenomPv2<T>::calculate_twistup( T alpha, std::complex<T> *hp_factor, std::complex<T> *hc_factor, T d2[5], T dm2[5], sph_harm<T> *sph_harm)
+{
+	std::complex<T> T2m;
+	std::complex<T> Tm2m;
+	std::complex<T> exp_a = std::exp(std::complex<T>(0,1) *alpha);
+	std::complex<T> exp_ma = std::complex<T>(1.,0.0)/exp_a;
+	std::complex<T> exp_2a = exp_a*exp_a;
+	std::complex<T> exp_m2a = exp_ma*exp_ma;
+	std::complex<T> exp_a_vec[5] = {exp_m2a, exp_ma,std::complex<T>(1.0,0.0) , exp_a, exp_2a};
+	std::complex<T> harmonics[5] = 
+			{sph_harm->Y2m2, sph_harm->Y2m1, sph_harm->Y20, sph_harm->Y21, sph_harm->Y22};
+	for (int m = -2; m<=2; m++)
+	{
+		T2m = exp_a_vec[-m+2] * dm2[m+2] * harmonics[m+2];
+		Tm2m = exp_a_vec[m+2] * d2[m+2] * conj(harmonics[m+2]); 
+		*hp_factor += T2m + Tm2m;
+		*hc_factor += std::complex<T>(0,1.) * (T2m - Tm2m);
+	}
+	
+}
+template<class T>
+void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, T omega, T q, T chil, T chip)
+{
+	*alpha = this->alpha(omega,q, chil, chip);	
+	*epsilon = this->epsilon(omega,q,chil,chip);
+}
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
  *
  * Pretty much stolen verbatim from lalsuite
@@ -322,7 +381,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
   	T QArunz_Jf = -Nx_Jf;
   	T XdotPArun = tmp_x*PArunx_Jf+tmp_y*PAruny_Jf+tmp_z*PArunz_Jf;
   	T XdotQArun = tmp_x*QArunx_Jf+tmp_y*QAruny_Jf+tmp_z*QArunz_Jf;
-  	params->zeta_polariz = atan2(XdotQArun , XdotPArun);
+  	params->zeta_polariz = atan(XdotQArun / XdotPArun);
 	
 }
 

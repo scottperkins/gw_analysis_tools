@@ -22,7 +22,11 @@ virtual int construct_waveform(T *frequencies,
 				source_parameters<T> *params 
 				);
 
-virtual T calc_s(T f, source_parameters<T> *params);
+virtual void WignerD(T d2[5], T dm2[5], useful_powers<T> *pows,source_parameters<T> *params);
+
+virtual void calculate_twistup( T alpha, std::complex<T> *hp_factor, std::complex<T> *hc_factor, T d2[5], T dm2[5], sph_harm<T> *sph_harm);
+
+virtual void calculate_euler_angles(T *alpha, T *epsilon, T omega, T q, T chil, T chip);
 
 virtual void PhenomPv2_Param_Transform(source_parameters<T> *params);
 

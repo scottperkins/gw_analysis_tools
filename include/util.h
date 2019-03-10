@@ -199,6 +199,10 @@ struct source_parameters
 	T phi;
 
 	T theta;
+	
+	T SP;
+
+	T SL;
 
 static source_parameters<T> populate_source_parameters(
 			T mass1, 
