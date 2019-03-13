@@ -37,6 +37,7 @@ int fourier_detector_response(double *frequencies,
 			std::string detector);
 
 int fourier_detector_response(double *frequencies, 
+			int length,
 			std::complex<double> *response, 
 			std::string detector,
 			std::string generation_method,

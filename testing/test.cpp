@@ -24,7 +24,7 @@ void test_3();
 
 int main(){
 
-	test_3();	
+	test_1();	
 	return 0;
 }
 
@@ -191,9 +191,25 @@ void test_1()
 	double logl2 = maximized_coal_log_likelihood_IMRPhenomD(freq, length, waveformout, 
 				noise, snr, 1.2*calculate_chirpmass(params.mass1,params.mass2), 
 				calculate_eta(params.mass1,params.mass2), spin1[2], spin2[2], false,&plan);
-	cout<<"logl TIMING: "<<(double)(end4-start4)/CLOCKS_PER_SEC<<endl;
+	params.mass1=300;
+	params.mass2=75;
+	start = clock();
+	double logl3 = maximized_coal_Log_Likelihood(waveformout, noise,freq,length, 
+				&params,"Hanford","IMRPhenomD",&plan);
+	end = clock();
+	cout<<"logl new TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+	start = clock();
+	double logl4 = maximized_coal_log_likelihood_IMRPhenomD_Full_Param(freq, length, waveformout, 
+				noise,  calculate_chirpmass(params.mass1,params.mass2), 
+				calculate_eta(params.mass1,params.mass2), params.spin1[2], params.spin2[2],params.Luminosity_Distance,params.theta,params.phi,params.incl_angle, false,&plan);
+	end = clock();
+	cout.precision(15);
+	cout<<"logl old old TIMING: "<<(double)(end4-start4)/CLOCKS_PER_SEC<<endl;
+	cout<<"logl old  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 	cout<<logl<<endl;
 	cout<<logl2<<endl;
+	cout<<"LOGLnew: "<<logl3<<endl;
+	cout<<"LOGLold: "<<logl4<<endl;
 	deactivate_likelihood_function(&plan);	
 
 

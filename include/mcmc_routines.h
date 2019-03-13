@@ -2,6 +2,7 @@
 #define MCMC_ROUTINES_H
 #include <complex>
 #include <fftw3.h>
+#include "util.h"
 /*! \file 
  */
 struct fftw_outline
@@ -92,4 +93,32 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 				fftw_outline *plan);
 void initiate_likelihood_function(fftw_outline *plan,int length);
 void deactivate_likelihood_function(fftw_outline *plan);
+
+
+double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
+				double *psd,
+				double *frequencies,
+				std::complex<double> *detector_response,
+				int length,
+				fftw_outline *plan
+				);
+double maximized_coal_Log_Likelihood(std::complex<double> *data, 
+				double *psd,
+				double *frequencies,
+				int length,
+				gen_params *params,
+				std::string detector,
+				std::string generation_method,
+				fftw_outline *plan
+				);
+double maximized_coal_Log_Likelihood(double *data_real, 
+				double *data_imag,
+				double *psd,
+				double *frequencies,
+				int length,
+				gen_params *params,
+				std::string detector,
+				std::string generation_method,
+				fftw_outline *plan
+				);
 #endif
