@@ -22,7 +22,7 @@ TEST=$(addprefix $(TESTDIR)/,exe.a)
 
 
 
-CFLAGS=-I$(IDIR) -Wall -fPIC -g -O3 -std=c++17
+CFLAGS=-I$(IDIR) -Wall -fPIC -g -O3 -std=c++11
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))

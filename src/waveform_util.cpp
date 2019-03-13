@@ -6,21 +6,14 @@
 #include <algorithm>
 #include <complex>
 #include <vector>
+#include <string>
+/*!\file 
+ * Utilities for waveforms - SNR calculation and detector response
+ * 	
+ * includes snr and detector response
+ */
 
 
-
-std::complex<double> Q(double theta, double phi, double iota)
-{
-	double ct = cos(theta);
-	double cp2 = cos(2.*phi);
-	double sp2 = sin(2.*phi);
-	double ci = cos(iota);
-
-	double Fplus = (1./2)*(1+ ct*ct)*cp2;
-	double Fcross = ct * sp2;
-	std::complex<double> Q = (1+ci*ci)/2. *Fplus + std::complex<double>(0,Fcross*ci);
-	return Q;
-}
 
 double data_snr_maximized_extrinsic(double *frequencies,
 				int length,
@@ -133,4 +126,87 @@ double calculate_snr(std::string detector, /**< detector name - must match the s
 	free(integrand);
 	free(noise);
         return sqrt(integral);
+}
+
+/* \brief calculates the detector response for a given waveform and detector
+ */
+int fourier_detector_response(double *frequencies, /**<array of frequencies corresponding to waveform*/
+			int length,/**< length of frequency/waveform arrays*/
+			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<double> *detector_response, /**< [out] detector response*/
+			double theta, /**< polar angle theta in detector frame*/
+			double phi, /**< azimuthal angle phi in detector frame*/ 
+			double iota,/**< inclination angle of the binary*/ 
+			std::string detector/**< detector - list of supported detectors in noise_util*/
+			)
+{
+	int status=1;
+	double ci = cos(iota);
+	double fplus;
+	double fcross;
+	if(	detector == "LIGO" || 
+		detector == "Livingston" || 
+		detector == "Hanford" || 
+		detector == "VIRGO")
+	{
+		fplus = right_interferometer_plus(theta,phi);
+		fcross = right_interferometer_cross(theta,phi);	
+	}
+	for (int i =0; i <length; i++)
+	{
+		detector_response[i] = fplus * (1. + ci*ci)/2. * hplus[i] 
+					+ (fcross * ci);
+	}	
+	return status;
+	
+}
+
+/*!\brief Function to produce the detector response caused by impinging gravitational waves from a quasi-circular binary
+ *
+ * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * method of waveform generation - not all methods use the same parameters
+ *
+ * This puts the responsibility on the user to pass the necessary parameters
+ *
+ * Detector options include classic interferometers like LIGO/VIRGO (coming soon: ET and LISA)
+ * 	
+ * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually - detector responses will be in the noise_util files
+ */
+int fourier_detector_response(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
+			std::complex<double> *response, /**< [out] complex array for the output plus polarization waveform*/
+			std::string detector,
+			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+			gen_params *parameters/**<structure containing all the source parameters*/
+			)
+{
+	int status = 1;
+	//generate waveform
+	std::complex<double> *waveform_plus =
+		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
+	std::complex<double> *waveform_cross=
+		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
+	status = fourier_waveform(frequencies, 
+			length,
+			waveform_plus, 
+			waveform_cross, 
+			generation_method,
+			parameters
+			);
+	status = fourier_detector_response(frequencies, 
+			length, 
+			waveform_plus, 
+			waveform_cross,
+			response, 
+			parameters->theta, 
+			parameters->phi, 
+			parameters->incl_angle, 
+			detector 
+			) ;
+		
+	//Deallocate memory
+	free(waveform_plus);
+	free(waveform_cross);
+
+	return status;
 }

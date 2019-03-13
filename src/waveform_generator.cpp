@@ -15,10 +15,12 @@ using namespace std;
  * Builds a waveform for given DETECTOR FRAME parameters
  */
 
-/*!\brief Function to produce the (3,2) mode of an quasi-circular binary
+/*!\brief Function to produce the plus/cross polarizations of an quasi-circular binary
  *
  * By using the structure parameter, the function is allowed to be more flexible in using different 
  * method of waveform generation - not all methods use the same parameters
+ *
+ * This puts the responsibility on the user to pass the necessary parameters
  *
  */
 int fourier_waveform(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
@@ -111,6 +113,11 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	free(waveform_plus);
 	free(waveform_cross);
 }
+
+
+
+
+
 /*!\brief Function to produce the (2,2) mode of an quasi-circular binary
  *
  * By using the structure parameter, the function is allowed to be more flexible in using different 

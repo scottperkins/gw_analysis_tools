@@ -51,7 +51,8 @@ source_parameters<T> source_parameters<T>::populate_source_parameters(
 	params.delta_mass = sqrt(1.-4*params.eta);
 	params.phic = phi_c;
 	params.tc = t_c;
-	params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	//params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
 	return params;
 }
 

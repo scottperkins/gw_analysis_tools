@@ -25,8 +25,9 @@ int fourier_waveform(double *frequencies,
 			double *waveform_cross_imag,
 			std::string generation_method,
 			gen_params *parameters
-
 			);
+
+
 int fourier_waveform(double *frequencies, 
 			int length,
 			std::complex<double> *waveform,

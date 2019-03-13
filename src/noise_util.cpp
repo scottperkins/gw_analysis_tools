@@ -83,3 +83,34 @@ double Hanford_O1_fitted(double f)
 	return sqrt(S0) * exp( avec[0] + avec[1]*x + avec[2]*x*x +
             avec[3] * x*x*x + avec[4]*x*x*x*x + avec[5]*x*x*x*x*x + avec[6]*x*x*x*x*x*x);
 }
+
+std::complex<double> Q(double theta, double phi, double iota)
+{
+	double ct = cos(theta);
+	double cp2 = cos(2.*phi);
+	double sp2 = sin(2.*phi);
+	double ci = cos(iota);
+
+	double Fplus = (1./2)*(1+ ct*ct)*cp2;
+	double Fcross = ct * sp2;
+	std::complex<double> Q = (1+ci*ci)/2. *Fplus + std::complex<double>(0,Fcross*ci);
+	return Q;
+}
+
+
+double right_interferometer_plus(double theta, double phi)
+{
+	double ct = cos(theta);
+	double cp2 = cos(2.*phi);
+
+	double Fplus = (1./2)*(1+ ct*ct)*cp2;
+	return Fplus;
+}
+
+double right_interferometer_cross(double theta, double phi)
+{
+	double ct = cos(theta);
+	double sp2 = sin(2.*phi);
+	double Fcross = ct * sp2;
+	return Fcross;
+}

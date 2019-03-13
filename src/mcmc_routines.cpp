@@ -1,6 +1,7 @@
 #include "mcmc_routines.h"
 #include "waveform_generator.h"
 #include "util.h"
+#include "noise_util.h"
 #include "waveform_util.h"
 #include <iostream>
 #include <vector>

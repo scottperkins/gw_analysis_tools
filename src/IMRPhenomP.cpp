@@ -208,12 +208,17 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
 
 		//if(std::is_same<T,double>::value){
-		//	std::cout<<"D: "<<d2[0]<<" hc: "<<hc_factor<<std::endl;
+		//	std::cout<<"hp: "<<hp_factor<<" hc: "<<hc_factor<<std::endl;
 		//}
 		//Probably mulitply frequency by M here..
+		hp_factor=1;
+		hc_factor=1;
 		phase = phase + (std::complex<T>)(2. * epsilon);
+		
 		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+		hp_factor = 0.;
+		hc_factor = 0.;
 
 	}
 	//}
@@ -223,9 +228,12 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 template<class T>
 void IMRPhenomPv2<T>::WignerD(T d2[5],T dm2[5], useful_powers<T> *pows, source_parameters<T> *params)
 {
-	T L = this->L2PN(params->eta, pows);
+	T L = this->L2PN(params->eta, pows) * params->M * params->M;
 	T s = params->SP / ( L + params-> SL);
 	T s_2 = s*s;
+	if(std::is_same<T,double>::value){
+		std::cout<<"L: "<<L<<" s: "<<s<<" SP: "<<params->SP<<std::endl;
+	}
 	T cos_beta = 1./sqrt(1.0 + s_2);
 	T cos_beta_half = sqrt( (1.0 + cos_beta) / 2.0);
 	T sin_beta_half = sqrt( (1.0 - cos_beta) / 2.0);
@@ -311,7 +319,8 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	T num = (ASp2>ASp1) ? ASp2 : ASp1;
 	T denom = (params->mass2 > params->mass1)? A2*m2_2 : A1*m1_2;
 	params->chip = num/denom;
-	
+	params->SP = params->chip * params->mass1 * params->mass1;
+	params->SL = chi1_l * params->mass1 * params->mass1 + chi2_l *params->mass2 * params->mass2;
 	//if(std::is_same<T,double>::value){
 	//	std::cout<<params->chil<<std::endl;
 	//}
@@ -417,7 +426,10 @@ template<class T>
 T IMRPhenomPv2<T>::L2PN( T eta, useful_powers<T> *pow)
 {
 	T x = pow->MF2third * pow->PI2third;
-	return eta/(sqrt(x))*(1 + (3./2 + eta/6)*x + (3.373 - 19.*eta/8 - eta*eta/24 )*x*x);
+	T x2 = x*x;
+	T eta2 = eta*eta;
+	//return eta/(sqrt(x))*(1 + (3./2 + eta/6)*x + (3.373 - 19.*eta/8 - eta*eta/24 )*x*x);
+	return (eta*(1.0 + (1.5 + eta/6.0)*x + (3.375 - (19.0*eta)/8. - eta2/24.0)*x2)) / sqrt(x);
 }
 
 template class IMRPhenomPv2<double>;
