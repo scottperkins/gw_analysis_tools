@@ -192,7 +192,9 @@ void test_1()
 				noise, snr, 1.2*calculate_chirpmass(params.mass1,params.mass2), 
 				calculate_eta(params.mass1,params.mass2), spin1[2], spin2[2], false,&plan);
 	params.mass1=300;
-	params.mass2=75;
+	params.mass2=20;
+	params.spin1[2] = .9;
+	params.spin2[2] = -.2;
 	start = clock();
 	double logl3 = maximized_coal_Log_Likelihood(waveformout, noise,freq,length, 
 				&params,"Hanford","IMRPhenomD",&plan);

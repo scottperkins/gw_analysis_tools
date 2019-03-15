@@ -6,50 +6,15 @@ cimport cython
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.complex cimport complex
+import os
+scriptpath = os.path.dirname(os.path.realpath(__file__)) 
+import sys
+sys.path.append(scriptpath)
+#cimport gwanalysistools_def 
+cimport waveform_generator_ext
 
-cdef extern from "waveform_generator.h" :
-    struct gen_params:
-        double mass1
-        double mass2
-        double Luminosity_Distance
-        double spin1[3]
-        double spin2[3]
-        double phic
-        double tc
-        int bppe
-        double betappe
-        double incl_angle
-        double theta
-        double phi
-        bool NSflag
-
-    int fourier_waveform(double *frequencies,
-				int length,
-                                double *waveform_real,
-                                double *waveform_imag,
-                                string generation_method,
-                                gen_params *parameters)
-    int fourier_waveform(double *frequencies,
-				int length,
-                                double *waveform_plus_real,
-                                double *waveform_plus_imag,
-                                double *waveform_cross_real,
-                                double *waveform_cross_imag,
-                                string generation_method,
-                                gen_params *parameters)
-cdef extern from "waveform_util.h" :
-    double data_snr_maximized_extrinsic(double *frequencies,
-                                int length,
-                                double *data_real,
-                                double *data_imag,
-                                string detector,
-                                string generation_method,
-                                gen_params param
-                                )
 
 cdef class gen_params_py:
-    cdef gen_params params
-
     def __init__(self, mass1,mass2, DL, spin1, spin2, phic, tc, bppe, betappe, theta,phi,incl_angle, NSflag):
         self.params.mass1 = mass1
         self.params.mass2 = mass2
@@ -72,7 +37,7 @@ def fourier_waveform_py(double[::1] frequencies ,
                                 ):
     cdef double[::1] waveform_real = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
     cdef double[::1] waveform_imag= np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
-    fourier_waveform(&frequencies[0],
+    waveform_generator_ext.fourier_waveform(&frequencies[0],
 				frequencies.size,
                                 &waveform_real[0],
                                 &waveform_imag[0],
@@ -93,7 +58,7 @@ def fourier_waveform_polarizations_py(double[::1] frequencies ,
     cdef double[::1] waveform_plus_imag= np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
     cdef double[::1] waveform_cross_real = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
     cdef double[::1] waveform_cross_imag= np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
-    fourier_waveform(&frequencies[0],
+    waveform_generator_ext.fourier_waveform(&frequencies[0],
 				frequencies.size,
                                 &waveform_plus_real[0],
                                 &waveform_plus_imag[0],
@@ -115,7 +80,7 @@ def data_snr_maximized_extrinsic_py(double[::1] frequencies,
                                 string detector,
                                 string generation_method,
                                 gen_params_py parameters):
-    cdef double snr = data_snr_maximized_extrinsic(&frequencies[0],
+    cdef double snr = waveform_generator_ext.data_snr_maximized_extrinsic(&frequencies[0],
                                         frequencies.size,
                                         &data_real[0],
                                         &data_imag[0],

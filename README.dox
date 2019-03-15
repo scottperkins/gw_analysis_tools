@@ -27,6 +27,8 @@ Doxygen
 \section installation Installation
 For proper compilation, update or create the enviornment variables CPATH, LIBRARY_PATH,and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries. 
 
+Also, the PYTHONPATH environment variables must point to $(PROJECT_DIR)/gw_analysis_tools_py/src because I can't figure how to get this shit to work.
+
 In the root directory of the project, run 'make' to compile source files, create the library file and create the cython modules, and create the documentation.
 
 Run 'make test' to build a test program that will create an executable.
