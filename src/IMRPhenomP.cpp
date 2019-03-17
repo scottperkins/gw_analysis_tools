@@ -170,7 +170,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
 
-	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0;
 	T q = params->mass1/params->mass2;
 	T d2[5] ;
@@ -203,19 +202,25 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		//epsilon = this->epsilon(M_PI*f, q, params->chil,params->chip);
 		this->calculate_euler_angles(&alpha, &epsilon, params->M *M_PI*f, q, params->chil, params->chip);
 		
+		if(std::is_same<T,double>::value){
+			std::cout<<d2[0]<<" "<<d2[1]<<" "<<d2[2]<<" "<<d2[3]<<" "<<d2[4]<<std::endl;
+		}
 
 		//Twist it up
 		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
+		if(std::is_same<T,double>::value){
+			std::cout<<hp_factor<<hc_factor<<std::endl;
+		}
 
 		//if(std::is_same<T,double>::value){
 		//	std::cout<<"hp: "<<hp_factor<<" hc: "<<hc_factor<<std::endl;
 		//}
 		//Probably mulitply frequency by M here..
-		hp_factor=1;
-		hc_factor=1;
+		//hp_factor=1;
+		//hc_factor=1;
 		phase = phase + (std::complex<T>)(2. * epsilon);
 		
-		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase);///std::complex<T>(2.,0.0);
 		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		hp_factor = 0.;
 		hc_factor = 0.;
@@ -231,9 +236,9 @@ void IMRPhenomPv2<T>::WignerD(T d2[5],T dm2[5], useful_powers<T> *pows, source_p
 	T L = this->L2PN(params->eta, pows) * params->M * params->M;
 	T s = params->SP / ( L + params-> SL);
 	T s_2 = s*s;
-	if(std::is_same<T,double>::value){
-		std::cout<<"L: "<<L<<" s: "<<s<<" SP: "<<params->SP<<std::endl;
-	}
+	//if(std::is_same<T,double>::value){
+	//	std::cout<<"L: "<<L<<" s: "<<s<<" SP: "<<params->SP<<std::endl;
+	//}
 	T cos_beta = 1./sqrt(1.0 + s_2);
 	T cos_beta_half = sqrt( (1.0 + cos_beta) / 2.0);
 	T sin_beta_half = sqrt( (1.0 - cos_beta) / 2.0);

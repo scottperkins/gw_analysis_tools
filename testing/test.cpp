@@ -13,6 +13,7 @@
 #include "fisher.h"
 #include "ppE_IMRPhenomD.h"
 #include "IMRPhenomP.h"
+#include <lal/LALSimIMR.h>
 
 using namespace std;
 
@@ -20,13 +21,18 @@ void test_1();
 void test_2();
 void test_3();
 void test_4();
+void test_5();
 
 
 
 int main(){
 
-	test_4();	
+	test_5();	
 	return 0;
+}
+void test_5()
+{
+
 }
 void test_4()
 {
@@ -34,7 +40,7 @@ void test_4()
 	cout.precision(15);
 
 	gen_params params;
-	int length = 1e4;
+	int length = 1e3;
 	double chirpmass = 20;
 	double eta = .2;
 	params.mass1 = calculate_mass1(chirpmass,eta);
