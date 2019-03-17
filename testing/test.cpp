@@ -19,15 +19,139 @@ using namespace std;
 void test_1();
 void test_2();
 void test_3();
+void test_4();
 
 
 
 int main(){
 
-	test_1();	
+	test_4();	
 	return 0;
 }
+void test_4()
+{
 
+	cout.precision(15);
+
+	gen_params params;
+	int length = 1e4;
+	double chirpmass = 20;
+	double eta = .2;
+	params.mass1 = calculate_mass1(chirpmass,eta);
+	params.mass2 = calculate_mass2(chirpmass,eta);
+	string method= "IMRPhenomD";
+	//string method= "ppE_IMRPhenomD_Inspiral";
+	complex<double> *waveformout = (complex<double> *)malloc(sizeof(complex<double>) * length);
+	params.spin1[0] = 0;
+	params.spin1[1] = 0;
+	params.spin1[2] = .1;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin2[2] = .3;
+	double *spin1  = params.spin1;
+	double *spin2= params.spin2;
+	params.phic = .0;
+	params.tc = .0;
+	params.Luminosity_Distance = 100.2;
+	params.betappe = 10.;
+	params.bppe  = -1;
+	params.NSflag = false;
+	params.phi = 1.2;
+	params.theta =3.4;
+	params.incl_angle = 1.3;
+	
+	double fhigh =1000;
+	double flow =10;
+	double df = (fhigh-flow)/length;
+	double *freq = (double *)malloc(sizeof(double) * length);
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+	
+	clock_t  start, end;
+	start = clock(); 
+	fourier_waveform(freq, length, waveformout,method,&params);
+	end=clock();
+	cout<<"TIMING waveform: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+
+	double *noise = (double *)malloc(sizeof(double)*length);
+	populate_noise(freq,"Hanford_O1_fitted", noise,length);
+	for (int i =0; i<length;i++)
+		noise[i] = noise[i]*noise[i];
+	
+	//params.mass1 = 100;
+	//params.mass2 = 5;
+	fftw_outline plan;
+	initiate_likelihood_function(&plan,length);
+	
+	int masslen = 50;
+	//double chirp = calculate_chirpmass(params.mass1,params.mass2);
+	//double eta = calculate_eta(params.mass1,params.mass2);
+	double masses[masslen];
+	for (int i =0; i <masslen;i++)
+		masses[i] = (i+1.)*.1*chirpmass;
+	double mass2 = params.mass2;
+	cout<<"Mass2: "<<mass2<<std::endl;
+	
+
+
+	double *real = (double *)malloc(sizeof(double)*length);
+	double *imag = (double *)malloc(sizeof(double)*length);
+	for ( int i =0; i<length;i++)
+	{
+		real[i]=(waveformout[i]).real();
+		imag[i]=(waveformout[i]).imag();
+	}
+	double llnew, llold;
+	for (int i =0;i<masslen;i++)
+	{
+		//if(masses[i]<mass2)
+		//{
+		//	params.mass2 = masses[i];
+		//	params.mass1 = mass2;
+		//}
+		//else
+		//{
+		//	params.mass1 = masses[i];
+		//	params.mass2 = mass2;
+		//}
+		params.mass1 = calculate_mass1(masses[i],eta);
+		params.mass2 = calculate_mass2(masses[i],eta);
+		start = clock();
+		//llnew = maximized_coal_Log_Likelihood(waveformout, noise,freq,length, 
+		//			&params,"Hanford","IMRPhenomD",&plan);
+		llnew = maximized_coal_Log_Likelihood(real,imag, noise,freq,length, 
+					&params,"Hanford","IMRPhenomD",&plan);
+		end = clock();
+		//cout<<"logl new TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+
+		//params.mass1=10;	
+		
+		start = clock();
+		llold = maximized_coal_log_likelihood_IMRPhenomD_Full_Param(freq, length, waveformout, 
+					noise,  calculate_chirpmass(params.mass1,params.mass2), 
+					calculate_eta(params.mass1,params.mass2), params.spin1[2], params.spin2[2],params.Luminosity_Distance,params.theta,params.phi,params.incl_angle, false,&plan);
+		//llold = maximized_coal_log_likelihood_IMRPhenomD_Full_Param(freq, length, real,imag, 
+		//			noise,  calculate_chirpmass(params.mass1,params.mass2), 
+		//			calculate_eta(params.mass1,params.mass2), params.spin1[2], params.spin2[2],params.Luminosity_Distance,params.theta,params.phi,params.incl_angle, false,&plan);
+		end = clock();
+		
+		//cout<<"logl old  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+		
+		//cout<<"LOGLnew: "<<llnew<<endl;
+		//cout<<"LOGLold: "<<llold<<endl;
+		cout<<"chirpmass: "<<masses[i]<<" new: "<<llnew<<" old: "<<llold<<" diff: "<<(llold-llnew)/llold<<endl;
+	}
+
+
+
+	free(real);
+	free(imag);
+	free(waveformout);
+	free(freq);
+	free(noise);
+
+	deactivate_likelihood_function(&plan);	
+}
 void test_3()
 {
 	gen_params params;
@@ -92,7 +216,7 @@ void test_1()
 	gen_params params;
 	IMRPhenomD<double> modeld;
 	IMRPhenomD<adouble> modela;
-	int length = 900;
+	int length = 1000;
 	params.mass1 = 200;
 	params.mass2 = 50;
 	string method= "IMRPhenomD";
@@ -111,7 +235,7 @@ void test_1()
 	params.phic = 2.0;
 	params.tc = 8.0;
 	params.Luminosity_Distance = 800.;
-	params.betappe = 10.;
+	params.betappe = 1000.;
 	params.bppe  = -1.;
 	params.NSflag = false;
 	params.phi = 0;
@@ -192,7 +316,7 @@ void test_1()
 				noise, snr, 1.2*calculate_chirpmass(params.mass1,params.mass2), 
 				calculate_eta(params.mass1,params.mass2), spin1[2], spin2[2], false,&plan);
 	params.mass1=300;
-	params.mass2=20;
+	params.mass2=100;
 	params.spin1[2] = .9;
 	params.spin2[2] = -.2;
 	start = clock();
@@ -437,3 +561,4 @@ void test_1()
 	free(output);
 	free(outputppe);
 }
+

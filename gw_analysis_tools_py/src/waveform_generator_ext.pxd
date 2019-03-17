@@ -11,7 +11,7 @@ scriptpath = os.path.dirname(os.path.realpath(__file__))
 import sys
 sys.path.append(scriptpath)
 
-cdef extern from "waveform_generator.h" :
+cdef extern from "util.h" :
     struct gen_params:
         double mass1
         double mass2
@@ -27,6 +27,7 @@ cdef extern from "waveform_generator.h" :
         double phi
         bool NSflag
 
+cdef extern from "waveform_generator.h" :
     int fourier_waveform(double *frequencies,
 				int length,
                                 double *waveform_real,

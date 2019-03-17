@@ -156,7 +156,8 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 	for (int i =0; i <length; i++)
 	{
 		detector_response[i] = fplus * (1. + ci*ci)/2. * hplus[i] 
-					+ (fcross * ci);
+					+ (fcross * ci)*hcross[i];
+		//std::cout<<hcross[i]<<std::endl;
 	}	
 	return status;
 	
@@ -203,6 +204,7 @@ int fourier_detector_response(double *frequencies, /**< double array of frequenc
 			parameters->incl_angle, 
 			detector 
 			) ;
+	
 		
 	//Deallocate memory
 	free(waveform_plus);

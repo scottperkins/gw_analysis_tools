@@ -148,6 +148,7 @@ double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 	std::complex<double> *data = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	for (int i =0; i<length; i++)
 		data[i] = std::complex<double>(real_data[i],imag_data[i]);
+
 	double out =  maximized_coal_log_likelihood_IMRPhenomD(frequencies,
 				length,
 				data,
@@ -202,68 +203,76 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 		template_strain[i] = template_strain[i]*q;
 	
 
-	//Calculate template snr and scale it to match the data snr
-	//later, upgrade to non uniform spacing, cause why not
-	double delta_f = frequencies[1]-frequencies[0];
-	double sum = 0;
-	double *integrand = (double *)malloc(sizeof(double)*length);
-	for (int i =0;i< length;i++)
-		integrand[i] = real(template_strain[i]*std::conj(template_strain[i]))/noise[i];
-	//double integral = 4.*trapezoidal_sum_uniform(delta_f, length, integrand);
-	double integral = 4.*simpsons_sum(delta_f, length, integrand);
-	double HH = integral;
+	////Calculate template snr and scale it to match the data snr
+	////later, upgrade to non uniform spacing, cause why not
+	//double delta_f = frequencies[1]-frequencies[0];
+	//double sum = 0;
+	//double *integrand = (double *)malloc(sizeof(double)*length);
+	//for (int i =0;i< length;i++)
+	//	integrand[i] = real(template_strain[i]*std::conj(template_strain[i]))/noise[i];
+	////double integral = 4.*trapezoidal_sum_uniform(delta_f, length, integrand);
+	//double integral = 4.*simpsons_sum(delta_f, length, integrand);
+	//double HH = integral;
 
-	sum = 0;
-	double integral2;
-	for (int i =0;i< length;i++)
-		integrand[i] = real(data[i]*std::conj(data[i]))/noise[i];
-	//integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
-	integral2 = 4*simpsons_sum(delta_f, length, integrand);
-	double DD = integral2;
+	//sum = 0;
+	//double integral2;
+	//for (int i =0;i< length;i++)
+	//	integrand[i] = real(data[i]*std::conj(data[i]))/noise[i];
+	////integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
+	//integral2 = 4*simpsons_sum(delta_f, length, integrand);
+	//double DD = integral2;
 
-	//###################################################################
-	//testing
-	//###################################################################
-	sum = 0;
-	double integral3;
-	for (int i =0;i< length;i++)
-		integrand[i] = real(template_strain[i]*std::conj(data[i]))/noise[i];
-	//integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
-	integral3 = 4*simpsons_sum(delta_f, length, integrand);
-	double HD = integral3;
-	//###################################################################
+	////###################################################################
+	////testing
+	////###################################################################
+	//sum = 0;
+	//double integral3;
+	//for (int i =0;i< length;i++)
+	//	integrand[i] = real(template_strain[i]*std::conj(data[i]))/noise[i];
+	////integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
+	//integral3 = 4*simpsons_sum(delta_f, length, integrand);
+	//double HD = integral3;
+	////###################################################################
 
 
 
-	//double normalizing_factor = SNR/sqrt(integral);
-	
-	//calculate the fourier transform that corresponds to maximizing over phic and tc
-	//Use malloc at some point, not sure how long these arrays will be 
-	std::complex<double> g_tilde;
-	for (int i=0;i<length; i++)
-	{
-		g_tilde = 4.*conj(data[i]) * template_strain[i] / noise[i]; 
-		plan->in[i][0] = real(g_tilde);
-		plan->in[i][1] = imag(g_tilde);
-	}
+	////double normalizing_factor = SNR/sqrt(integral);
+	//
+	////calculate the fourier transform that corresponds to maximizing over phic and tc
+	////Use malloc at some point, not sure how long these arrays will be 
+	//std::complex<double> g_tilde;
+	//for (int i=0;i<length; i++)
+	//{
+	//	g_tilde = 4.*conj(data[i]) * template_strain[i] / noise[i]; 
+	//	plan->in[i][0] = real(g_tilde);
+	//	plan->in[i][1] = imag(g_tilde);
+	//}
 
-	double *g = (double *)malloc(sizeof(double)*length);
-	
-	fftw_execute(plan->p);
-	
-	for (int i=0;i<length; i++)
-	{
-		g[i] = std::abs(std::complex<double>(plan->out[i][0],plan->out[i][1])) ;
-	}
+	//double *g = (double *)malloc(sizeof(double)*length);
+	//
+	//fftw_execute(plan->p);
+	//
+	//for (int i=0;i<length; i++)
+	//{
+	//	g[i] = std::abs(std::complex<double>(plan->out[i][0],plan->out[i][1])) ;
+	//}
 
-	double max = *std::max_element(g, g+length)*delta_f; 
+	//double max = *std::max_element(g, g+length)*delta_f; 
 
+	//free(integrand);
+	//free(g);
+
+	double out =  maximized_coal_Log_Likelihood_internal(data,
+				noise,
+				frequencies,
+				template_strain,
+				length,
+				plan
+				);
 	free(template_strain);
-	free(integrand);
-	free(g);
-
+	return out;
 	//return -0.5*(HH- 2*HD);//TESTING
-	return -0.5*(HH- 2*max);
+	//return -0.5*(HH- 2*max);
 	//return -0.5*(DD+HH- 2*max);
 }
 double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
@@ -370,18 +379,11 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				fftw_outline *plan
 				)
 {
-	//std::complex<double hplus =
-	//		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	//std::complex<double hcross =
-	//		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	//fourier_waveform(frequencies, length, hplus, hcross, generation_method, params);
 	std::complex<double> *response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
 	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,response, length, plan);
 	
-	//free(hplus);
-	//free(hcross);
 	free(response);
 	return ll;
 }
@@ -397,10 +399,34 @@ double maximized_coal_Log_Likelihood(double *data_real,
 				fftw_outline *plan
 				)
 {
+	cout.precision(15);
+	//std::cout<<"Inside C++ file"<<std::endl;
+	//std::cout<<params->mass1<<std::endl;
+	//std::cout<<params->mass2<<std::endl;
+	//std::cout<<params->Luminosity_Distance<<std::endl;
+	//std::cout<<params->phic<<std::endl;
+	//std::cout<<params->tc<<std::endl;
+	//std::cout<<params->bppe<<std::endl;
+	//std::cout<<params->betappe<<std::endl;
+	//std::cout<<params->incl_angle<<std::endl;
+	//std::cout<<params->theta<<std::endl;
+	//std::cout<<params->phi<<std::endl;
+	//std::cout<<length<<std::endl;
+	//std::cout<<frequencies[0]<<std::endl;
+	//std::cout<<frequencies[length-1]<<std::endl;
+	//std::cout<<data_real[0]<<std::endl;
+	//std::cout<<data_real[length-1]<<std::endl;
+	//std::cout<<data_imag[0]<<std::endl;
+	//std::cout<<data_imag[length-1]<<std::endl;
+	//std::cout<<psd[0]<<std::endl;
+	//std::cout<<psd[length-1]<<std::endl;
+	
 	std::complex<double> *data = 
 			(std::complex<double> *) malloc(sizeof(std::complex<double>)*length);
-	for(int i =0; i<length; i ++)
+	for(int i =0; i<length; i ++){
 		data[i] = std::complex<double>(data_real[i],data_imag[i]);
+		//std::cout<<"Data: "<<data[i]<<std::endl;
+	}
 	
 	double ll = maximized_coal_Log_Likelihood(data, 
 				psd,
@@ -415,7 +441,7 @@ double maximized_coal_Log_Likelihood(double *data_real,
 }
 /*! \brief Maximized match over coalescence variables - returns log likelihood NOT NORMALIZED
  *
- * Note: this function is not properly normalized for an absolute comparison. This is made for MCMC sampling, so to maximize time, constant terms like (Data|Data), which would cancel in the Metropolis-Hasting ratio, are left out for efficiency
+ * Note: this function is not properly normalized for an absolute comparison. This is made for MCMC sampling, so to minimize time, constant terms like (Data|Data), which would cancel in the Metropolis-Hasting ratio, are left out for efficiency
  */
 double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 				double *psd,

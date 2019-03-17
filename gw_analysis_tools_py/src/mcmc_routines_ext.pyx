@@ -14,7 +14,7 @@ sys.path.append(scriptpath)
 sys.path.append(scriptpath+"/src")
 cimport mcmc_routines_ext
 cimport waveform_generator_ext
-from waveform_generator_ext import gen_params_py
+#from waveform_generator_ext import gen_params_py
 
 
 @cython.auto_pickle(True)
@@ -88,6 +88,37 @@ def maximized_coal_Log_Likelihood_py(double[::1] data_real,
 				string detector,
 				string generation_method,
 				fftw_outline_py plan):
+    #print("Inside pyx file")
+    #print(params.params.mass1)
+    #print(params.params.mass2)
+    #print(params.params.Luminosity_Distance)
+    #print(params.params.phic)
+    #print(params.params.tc)
+    #print(params.params.bppe)
+    #print(params.params.betappe)
+    #print(params.params.incl_angle)
+    #print(params.params.theta)
+    #print(params.params.phi)
+    #cdef double m1 = params.params.mass1
+    #cdef double m2 = params.params.mass2
+    #cdef double symmetric_mass_ratio =(m1*m2)/ (m1+m2)**2.
+    #cdef double chirpmass = (m1 + m2) * symmetric_mass_ratio**(3./5)
+    #print(m1,m2)
+    #return mcmc_routines_ext.maximized_coal_log_likelihood_IMRPhenomD_Full_Param(&frequencies[0],
+    #    			frequencies.size,
+    #    			&data_real[0],
+    #    			&data_imag[0],
+    #    			&psd[0],
+    #    			chirpmass,	
+    #    			symmetric_mass_ratio, 
+    #    			params.params.spin1[2],
+    #    			params.params.spin2[2],
+    #                            params.params.Luminosity_Distance,
+    #                            params.params.theta,
+    #                            params.params.phi,
+    #                            params.params.incl_angle,
+    #    			params.params.NSflag,
+    #                            &plan.plan)
     return mcmc_routines_ext.maximized_coal_Log_Likelihood(&data_real[0],
                                 &data_imag[0],
                                 &psd[0],

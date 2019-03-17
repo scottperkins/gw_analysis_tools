@@ -56,7 +56,6 @@ $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_PYSRC)
 	make -C $(PYDIR) 
 	
 $(TEST) : $(OBJECTS) $(TESTOBJ) | $(TESTDIR)
-	@echo ${LD_LIBRARY_PATH}
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
 $(TESTDIR):

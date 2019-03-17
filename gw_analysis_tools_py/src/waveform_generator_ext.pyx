@@ -15,7 +15,7 @@ cimport waveform_generator_ext
 
 
 cdef class gen_params_py:
-    def __init__(self, mass1,mass2, DL, spin1, spin2, phic, tc, bppe, betappe, theta,phi,incl_angle, NSflag):
+    def __init__(self, double mass1, double mass2, double DL, spin1, spin2,double phic,double tc,int bppe,double betappe,double theta,double phi,double incl_angle,bool NSflag):
         self.params.mass1 = mass1
         self.params.mass2 = mass2
         self.params.Luminosity_Distance = DL
