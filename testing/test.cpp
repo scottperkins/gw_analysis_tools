@@ -13,7 +13,8 @@
 #include "fisher.h"
 #include "ppE_IMRPhenomD.h"
 #include "IMRPhenomP.h"
-#include <lal/LALSimIMR.h>
+#include <lal/LALDetectors.h>
+#include <LALSimIMRPhenomP.h>
 
 using namespace std;
 

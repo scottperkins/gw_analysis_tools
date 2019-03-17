@@ -11,7 +11,7 @@ PROJ_PYSRC=$(addprefix $(PYDIR)/src/,$(PYSRC))
 PYLIB=mcmc_routines_ext.cpp waveform_generator_ext.cpp
 PROJ_PYLIB=$(addprefix $(PYDIR)/,$(PYLIB))
 
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal
 LOCAL_LIB=libgwanalysistools.a
 PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
 
@@ -22,7 +22,8 @@ TEST=$(addprefix $(TESTDIR)/,exe.a)
 
 
 
-CFLAGS=-I$(IDIR) -Wall -fPIC -g -O3 -std=c++11
+CFLAGS=-I$(IDIR) -I/opt/lalsuite/lalsimulation/src -I/opt/lalsuite/include -Wall -fPIC -g -O3 -std=c++11
+#CFLAGS=-I$(IDIR) -Wall -fPIC -g -O3 -std=c++11
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
