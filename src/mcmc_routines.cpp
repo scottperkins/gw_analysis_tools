@@ -437,6 +437,7 @@ double maximized_coal_Log_Likelihood(double *data_real,
 				generation_method,
 				plan);
 	free(data);
+	std::cout<<ll<<std::endl;
 	return ll;
 }
 /*! \brief Maximized match over coalescence variables - returns log likelihood NOT NORMALIZED
