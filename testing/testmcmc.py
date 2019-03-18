@@ -7,7 +7,11 @@ from phenompy.gr import IMRPhenomD_detector_frame as imr
 from phenompy.analysis_utilities import log_likelihood_maximized_coal_Full_Param as ll 
 
 chirpmass = 20
-length =2.4e4
+length =1100
+flow = 17
+fhigh = 1013
+freqs = np.ascontiguousarray(np.linspace(flow,fhigh,length),dtype = np.float64)
+
 eta = .20
 mass1 = calculate_mass1(chirpmass, eta)
 mass2 = calculate_mass2(chirpmass, eta)
@@ -22,7 +26,7 @@ betappe = 0.
 theta = .1 
 phi = 3 
 incl_angle =2.0
-freqs = np.ascontiguousarray(np.linspace(10,1000,length),dtype = np.float64)
+print(freqs)
 noiseroot, noisefunc, temp = imr.populate_noise("Hanford_O1", int_scheme="quad")
 psd  = np.ascontiguousarray(noisefunc(freqs)**2, dtype=np.float64)
 params = wg.gen_params_py(mass1,mass2,DL,spin1,spin2,phic,tc,bppe,betappe,theta,phi,incl_angle,False)
@@ -42,10 +46,10 @@ waveform, hcross = wg.fourier_waveform_polarizations_py(freqs, b"IMRPhenomD",par
 plan = mcmc.fftw_outline_py(len(freqs))
 mcmc.initiate_likelihood_function_py(plan, len(freqs))
 
-frac_diff = [[],[]]
+frac_diff = [[],[],[],[]]
 llvec = [[],[],[]]
 
-chirpmasses = np.linspace(5,50,10,dtype=np.float64)
+chirpmasses = np.linspace(5,50,100,dtype=np.float64)
 #for i in [.1,.2,.5,.6,.7,1.,2,3,5,100]:
 counter =0
 data_real = np.ascontiguousarray(waveform.real,dtype=np.float64)
@@ -78,6 +82,8 @@ for i in chirpmasses:
     llvec[2].append(oldoldll)
     #frac_diff[0].append((newll-oldll)/oldll)
     frac_diff[0].append((newll-oldll)/(newll))
+    frac_diff[2].append((oldoldll-oldll)/(oldoldll))
+    frac_diff[3].append((oldoldll-newll)/(oldoldll))
     #print(mass1,mass2,i,frac_diff[0][-1])
     
     #print("outside pyx file")
@@ -92,8 +98,10 @@ for i in chirpmasses:
     #print(theta)
     #print(phi)
     frac_diff[1].append((newllppe-oldll)/oldll)
-print(frac_diff[0])
-plt.plot(chirpmasses,frac_diff[0])
+plt.plot(chirpmasses,frac_diff[0], label = 'c to c new')
+#plt.plot(chirpmasses,frac_diff[2], label = 'py to c')
+#plt.plot(chirpmasses,frac_diff[3], label = 'py to c new')
+plt.legend()
 plt.show()
 plt.close()
 plt.plot(chirpmasses,llvec[0],label='old')

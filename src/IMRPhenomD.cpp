@@ -3,7 +3,7 @@
 #include "util.h"
 #include <math.h>
 #include <iostream>
-#include <complex.h>
+#include <complex>
 #include <cmath>
 #include <adolc/adouble.h>
 #include <adolc/taping.h>

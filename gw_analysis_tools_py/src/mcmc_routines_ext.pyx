@@ -64,6 +64,9 @@ def maximized_coal_log_likelihood_IMRPhenomD_Full_Param_py(double[::1] frequenci
                                 double iota,
 				bool NSflag,
                                 fftw_outline_py plan):
+    print("Inside pyx file")
+    print("OLD Full param: ")
+    print(np.asarray(frequencies))
     return mcmc_routines_ext.maximized_coal_log_likelihood_IMRPhenomD_Full_Param(&frequencies[0],
 				frequencies.size,
 				&real_data[0],
@@ -87,7 +90,9 @@ def maximized_coal_Log_Likelihood_py(double[::1] data_real,
 				string detector,
 				string generation_method,
 				fftw_outline_py plan):
-    #print("Inside pyx file")
+    print("Inside pyx file")
+    print("NEW Full param: ")
+    print(np.asarray(frequencies))
     #print(params.params.mass1)
     #print(params.params.mass2)
     #print(params.params.Luminosity_Distance)

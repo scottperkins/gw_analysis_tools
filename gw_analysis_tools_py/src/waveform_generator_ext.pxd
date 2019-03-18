@@ -42,6 +42,20 @@ cdef extern from "waveform_generator.h" :
                                 double *waveform_cross_imag,
                                 string generation_method,
                                 gen_params *parameters)
+
+    int fourier_amplitude(double *frequencies, 
+    			int length,
+    			double *amplitude, 
+    			string generation_method,
+    			gen_params *parameters
+    			)
+    
+    int fourier_phase(double *frequencies, 
+    			int length,
+    			double *phase, 
+    			string generation_method,
+    			gen_params *parameters
+    			)
 cdef extern from "waveform_util.h" :
     double data_snr_maximized_extrinsic(double *frequencies,
                                 int length,

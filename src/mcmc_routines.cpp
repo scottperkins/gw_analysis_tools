@@ -192,9 +192,8 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	params.spin2[0]= 0;
 	params.spin2[1]= 0;
 	params.spin2[2]= spin2;
-	params.phic=0;
-	//params.tc=1126259462.42;
-	params.tc=1.;
+	params.phic=0.;
+	params.tc=0.0;
 	params.NSflag=NSflag;
 
 	fourier_waveform(frequencies, length, template_strain, "IMRPhenomD", &params);
@@ -399,33 +398,11 @@ double maximized_coal_Log_Likelihood(double *data_real,
 				fftw_outline *plan
 				)
 {
-	cout.precision(15);
-	//std::cout<<"Inside C++ file"<<std::endl;
-	//std::cout<<params->mass1<<std::endl;
-	//std::cout<<params->mass2<<std::endl;
-	//std::cout<<params->Luminosity_Distance<<std::endl;
-	//std::cout<<params->phic<<std::endl;
-	//std::cout<<params->tc<<std::endl;
-	//std::cout<<params->bppe<<std::endl;
-	//std::cout<<params->betappe<<std::endl;
-	//std::cout<<params->incl_angle<<std::endl;
-	//std::cout<<params->theta<<std::endl;
-	//std::cout<<params->phi<<std::endl;
-	//std::cout<<length<<std::endl;
-	//std::cout<<frequencies[0]<<std::endl;
-	//std::cout<<frequencies[length-1]<<std::endl;
-	//std::cout<<data_real[0]<<std::endl;
-	//std::cout<<data_real[length-1]<<std::endl;
-	//std::cout<<data_imag[0]<<std::endl;
-	//std::cout<<data_imag[length-1]<<std::endl;
-	//std::cout<<psd[0]<<std::endl;
-	//std::cout<<psd[length-1]<<std::endl;
 	
 	std::complex<double> *data = 
 			(std::complex<double> *) malloc(sizeof(std::complex<double>)*length);
 	for(int i =0; i<length; i ++){
 		data[i] = std::complex<double>(data_real[i],data_imag[i]);
-		//std::cout<<"Data: "<<data[i]<<std::endl;
 	}
 	
 	double ll = maximized_coal_Log_Likelihood(data, 
@@ -437,7 +414,6 @@ double maximized_coal_Log_Likelihood(double *data_real,
 				generation_method,
 				plan);
 	free(data);
-	std::cout<<ll<<std::endl;
 	return ll;
 }
 /*! \brief Maximized match over coalescence variables - returns log likelihood NOT NORMALIZED
@@ -455,7 +431,7 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	//Calculate template snr and scale it to match the data snr
 	//later, upgrade to non uniform spacing, cause why not
 	double delta_f = frequencies[1]-frequencies[0];
-	double sum = 0;
+	double sum = 0.;
 	double *integrand = (double *)malloc(sizeof(double)*length);
 	for (int i =0;i< length;i++)
 		integrand[i] = real(detector_response[i]*std::conj(detector_response[i]))/psd[i];
@@ -463,29 +439,6 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	double integral = 4.*simpsons_sum(delta_f, length, integrand);
 	double HH = integral;
 
-	//sum = 0;
-	//double integral2;
-	//for (int i =0;i< length;i++)
-	//	integrand[i] = real(data[i]*std::conj(data[i]))/psd[i];
-	////integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
-	//integral2 = 4*simpsons_sum(delta_f, length, integrand);
-	//double DD = integral2;
-
-	//###################################################################
-	//testing
-	//###################################################################
-	//sum = 0;
-	//double integral3;
-	//for (int i =0;i< length;i++)
-	//	integrand[i] = real(template_strain[i]*std::conj(data[i]))/noise[i];
-	////integral2 = 4*trapezoidal_sum_uniform(delta_f, length, integrand2);
-	//integral3 = 4*simpsons_sum(delta_f, length, integrand);
-	//double HD = integral3;
-	//###################################################################
-
-
-
-	//double normalizing_factor = SNR/sqrt(integral);
 	
 	//calculate the fourier transform that corresponds to maximizing over phic and tc
 	//Use malloc at some point, not sure how long these arrays will be 
@@ -511,7 +464,5 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	free(integrand);
 	free(g);
 
-	//return -0.5*(HH- 2*HD);//TESTING
 	return -0.5*(HH- 2*max);
-	//return -0.5*(DD+HH- 2*max);
 }

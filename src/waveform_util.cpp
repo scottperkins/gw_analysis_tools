@@ -157,7 +157,6 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 	{
 		detector_response[i] = fplus * (1. + ci*ci)/2. * hplus[i] 
 					+ (fcross * ci)*hcross[i];
-		//std::cout<<hcross[i]<<std::endl;
 	}	
 	return status;
 	

@@ -50,6 +50,28 @@ def fourier_waveform_py(double[::1] frequencies ,
         i = i +1
     return waveform
 
+def fourier_amplitude_py(double[::1] frequencies ,
+                                string generation_method,
+                                gen_params_py parameters
+                                ):
+    cdef double[::1] amplitude = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    waveform_generator_ext.fourier_amplitude(&frequencies[0],
+				frequencies.size,
+                                &amplitude[0],
+                                generation_method,
+                                &parameters.params)
+    return amplitude
+def fourier_phase_py(double[::1] frequencies ,
+                                string generation_method,
+                                gen_params_py parameters
+                                ):
+    cdef double[::1] phase = np.ascontiguousarray(np.zeros((frequencies.size),dtype=np.float64))
+    waveform_generator_ext.fourier_phase(&frequencies[0],
+				frequencies.size,
+                                &phase[0],
+                                generation_method,
+                                &parameters.params)
+    return phase
 def fourier_waveform_polarizations_py(double[::1] frequencies ,
                                 string generation_method,
                                 gen_params_py parameters
