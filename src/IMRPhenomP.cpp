@@ -28,7 +28,7 @@ tmp2 = - vx*sin(angle) + vz*cos(angle);\
 vx = tmp1;\
 vz = tmp2
 
-double sqrt_6 = sqrt(6.);
+const double sqrt_6 = 2.44948974278317788;
 
 template<class T>
 T IMRPhenomPv2<T>::alpha(T omega, T q,T chi2l, T chi2){
@@ -126,21 +126,25 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 {
 	//Initialize Spherical harmonics for polarization construction
 	sph_harm<T> harmonics;
+	T phiHarm = 0.;
 	harmonics.Y22 = std::complex<T>(0.0,0.0);
 	harmonics.Y21 = std::complex<T>(0.0,0.0);
 	harmonics.Y20 = std::complex<T>(0.0,0.0);
 	harmonics.Y2m1 =std::complex<T>(0.0,0.0);
 	harmonics.Y2m2 =std::complex<T>(0.0,0.0);
-	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,2);
-	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,1);
-	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,0);
-	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,-1);
-	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->theta,params->phi, -2,2,-2);
+	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,2);
+	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,1);
+	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,0);
+	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,-1);
+	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,-2);
 	
 	//if(std::is_same<T,double>::value){
 	//	std::cout<<"sph harm: "<<harmonics.Y22<<" "<<harmonics.Y21<<" "<<harmonics.Y20<<" "<<harmonics.Y2m2<<" "<<harmonics.Y2m1<<" "<<std::endl;
 	//}
 	
+	//if(std::is_same<T,double>::value){
+	//	std::cout<<params->alpha0<<std::endl;
+	//}
 	T M = params-> M;
 	T chirpmass = params->chirpmass;
 	T DL = params->DL;
@@ -170,7 +174,8 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
 
-	T A0 = params->A0;
+	//Rescale amplitude because lalsuite does
+	T A0 = params->A0 / (2. * sqrt(5. / (64.*M_PI)) );
 	T q = params->mass1/params->mass2;
 	T d2[5] ;
 	T dm2[5];
@@ -184,6 +189,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	//T amp, phase;
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
+
 	for (int j =0; j< length; j++)
 	{
 		f = frequencies[j];
@@ -201,16 +207,17 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		//Calculate Euler angles alpha and epsilon
 		//epsilon = this->epsilon(M_PI*f, q, params->chil,params->chip);
 		this->calculate_euler_angles(&alpha, &epsilon, params->M *M_PI*f, q, params->chil, params->chip);
-		
-		if(std::is_same<T,double>::value){
-			std::cout<<d2[0]<<" "<<d2[1]<<" "<<d2[2]<<" "<<d2[3]<<" "<<d2[4]<<std::endl;
-		}
+		//Add offset to alpha
+		alpha = alpha - params->alpha0;
+		//if(std::is_same<T,double>::value){
+		//	std::cout<<d2[0]<<" "<<d2[1]<<" "<<d2[2]<<" "<<d2[3]<<" "<<d2[4]<<std::endl;
+		//}
 
 		//Twist it up
 		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
-		if(std::is_same<T,double>::value){
-			std::cout<<hp_factor<<hc_factor<<std::endl;
-		}
+		//if(std::is_same<T,double>::value){
+		//	std::cout<<hp_factor<<hc_factor<<std::endl;
+		//}
 
 		//if(std::is_same<T,double>::value){
 		//	std::cout<<"hp: "<<hp_factor<<" hc: "<<hc_factor<<std::endl;
@@ -220,7 +227,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		//hc_factor=1;
 		phase = phase + (std::complex<T>)(2. * epsilon);
 		
-		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase);///std::complex<T>(2.,0.0);
+		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		hp_factor = 0.;
 		hc_factor = 0.;
@@ -287,7 +294,7 @@ void IMRPhenomPv2<T>::calculate_twistup( T alpha, std::complex<T> *hp_factor, st
 template<class T>
 void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, T omega, T q, T chil, T chip)
 {
-	*alpha = this->alpha(omega,q, chil, chip);	
+	*alpha = this->alpha(omega,q, chil, chip) ;	
 	*epsilon = this->epsilon(omega,q,chil,chip);
 }
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
@@ -298,6 +305,11 @@ template<class T>
 void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*< Source Parameters*/
 						)
 {
+	//TESTING
+	params->phiRef=0.0;
+	params->f_ref=10.;
+
+
 	//Calculate spin parameters chil and chip
 	T chi1_l = params->spin1z;
 	T chi2_l = params->spin2z;
@@ -379,6 +391,10 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	ROTATEZ(-phiJ_sf, tmp_x,tmp_y, tmp_z);
 	ROTATEY(-thetaJ_sf, tmp_x,tmp_y, tmp_z);
 	ROTATEZ(kappa, tmp_x,tmp_y, tmp_z);
+	
+	//if(std::is_same<T,double>::value){
+	//	std::cout<<tmp_y<<tmp_x<<std::endl;
+	//}
 	params->alpha0 = atan(tmp_y/tmp_x);
 
 	tmp_x = Nx_sf;

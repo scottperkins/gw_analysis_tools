@@ -53,12 +53,16 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
+	params.incl_angle = parameters->incl_angle;
+	double ci = cos(params.incl_angle);
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
-		for (int i =0 ; i < length; i++)
-			waveform_cross[i] = std::complex<double>(0,1) * waveform_plus[i];
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i] * .5 *(1+ci*ci);
+		}
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
@@ -66,17 +70,21 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-		for (int i =0 ; i < length; i++)
-			waveform_cross[i] = std::complex<double>(0,1) * waveform_plus[i];
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i]* .5 *(1+ci*ci);
+		}
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
-		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);	
-		for (int i =0 ; i < length; i++)
-			waveform_cross[i] = std::complex<double>(0,1) * waveform_plus[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i] * .5 *(1+ci*ci);
+		}
 	}
 	else if(generation_method == "IMRPhenomPv2")
 	{
@@ -85,6 +93,16 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		modeld.PhenomPv2_Param_Transform(&params);
 		//Calculate Waveform
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+		std::complex<double> tempPlus,tempCross;
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
+					+sin(2.*params.zeta_polariz)*tempCross;
+			waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
+					-sin(2.*params.zeta_polariz)*tempPlus;
+		}
 	}
 
 	return status ;

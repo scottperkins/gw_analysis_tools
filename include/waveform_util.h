@@ -33,7 +33,6 @@ int fourier_detector_response(double *frequencies,
 			std::complex<double> *detector_response, 
 			double theta, 
 			double phi, 
-			double iota, 
 			std::string detector);
 
 int fourier_detector_response(double *frequencies, 

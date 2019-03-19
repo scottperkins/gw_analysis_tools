@@ -137,12 +137,10 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 			std::complex<double> *detector_response, /**< [out] detector response*/
 			double theta, /**< polar angle theta in detector frame*/
 			double phi, /**< azimuthal angle phi in detector frame*/ 
-			double iota,/**< inclination angle of the binary*/ 
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
 	int status=1;
-	double ci = cos(iota);
 	double fplus;
 	double fcross;
 	if(	detector == "LIGO" || 
@@ -155,8 +153,8 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 	}
 	for (int i =0; i <length; i++)
 	{
-		detector_response[i] = fplus * (1. + ci*ci)/2. * hplus[i] 
-					+ (fcross * ci)*hcross[i];
+		detector_response[i] = fplus * hplus[i] 
+					+ (fcross )*hcross[i];
 	}	
 	return status;
 	
@@ -200,7 +198,6 @@ int fourier_detector_response(double *frequencies, /**< double array of frequenc
 			response, 
 			parameters->theta, 
 			parameters->phi, 
-			parameters->incl_angle, 
 			detector 
 			) ;
 	
