@@ -75,6 +75,11 @@ struct gen_params
 	double phi;
 	/*! BOOL flag for early termination of NS binaries*/
 	bool NSflag;
+
+	/*! Reference frequency for PhenomPv2*/
+	double f_ref;
+	
+	double phiRef;
 };
 
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow
@@ -120,6 +125,8 @@ struct source_parameters
 	T mass2;
 	/*! Total mass*/
 	T M;
+	/*Mass ratio*/	
+	T q;
 	/*! z-Spin component of the larger body*/
 	T spin1z;
 	/*! z-Spin component of the smaller body*/

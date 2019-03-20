@@ -15,7 +15,7 @@ cimport waveform_generator_ext
 
 
 cdef class gen_params_py:
-    def __init__(self, double mass1, double mass2, double DL, spin1, spin2,double phic,double tc,int bppe,double betappe,double theta,double phi,double incl_angle,bool NSflag):
+    def __init__(self, double mass1, double mass2, double DL, spin1, spin2,double phic,double tc,int bppe,double betappe,double theta,double phi,double incl_angle,double f_ref,double phiRef,bool NSflag):
         self.params.mass1 = mass1
         self.params.mass2 = mass2
         self.params.Luminosity_Distance = DL
@@ -28,6 +28,8 @@ cdef class gen_params_py:
         self.params.incl_angle = incl_angle
         self.params.theta = theta
         self.params.phi = phi
+        self.params.f_ref = f_ref
+        self.params.phiRef = phiRef
         self.params.NSflag = NSflag
          
 #cdef np.ndarray[np.complex128_t,ndim=1] fourier_waveform_py(double[::1] frequencies ,

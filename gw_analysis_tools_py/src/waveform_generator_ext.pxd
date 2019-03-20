@@ -26,6 +26,8 @@ cdef extern from "util.h" :
         double theta
         double phi
         bool NSflag
+        double f_ref
+        double phiRef
 
 cdef extern from "waveform_generator.h" :
     int fourier_waveform(double *frequencies,

@@ -90,6 +90,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	{
 		IMRPhenomPv2<double> modeld;
 		//Initialize Pv2 specific params	
+
+		//TESTING
+		params.f_ref = parameters->f_ref;
+		params.phiRef = parameters->phiRef;
+
+		//Compute transform
 		modeld.PhenomPv2_Param_Transform(&params);
 		//Calculate Waveform
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);

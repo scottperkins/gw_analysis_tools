@@ -67,6 +67,91 @@ T IMRPhenomPv2<T>::epsilon(T omega, T q, T chi2l, T chi2)
 	return epsilon;
 }
 
+/*! \brief Pre calculate euler angle coefficients
+ *
+ * Straight up stolen from LALsuite
+ */
+template<class T>
+void IMRPhenomPv2<T>::calculate_euler_coeffs(alpha_coeffs<T> *acoeffs, epsilon_coeffs<T> *ecoeffs, source_parameters<T> *params)
+{
+	T m2 = params->q/(1. + params->q);
+	T m1 = 1./(1. +params-> q);
+	T dm = m1 - m2;
+	T mtot = 1.;
+	T eta = m1*m2; /* mtot = 1 */
+	T eta2 = eta*eta;
+	T eta3 = eta2*eta;
+	T eta4 = eta3*eta;
+	T mtot2 = mtot*mtot;
+	T mtot4 = mtot2*mtot2;
+	T mtot6 = mtot4*mtot2;
+	T mtot8 = mtot6*mtot2;
+	T chil2 = params->chil*params->chil;
+	T chip2 = params->chip*params->chip;
+	T chip4 = chip2*chip2;
+	T dm2 = dm*dm;
+	T dm3 = dm2*dm;
+	T m2_2 = m2*m2;
+	T m2_3 = m2_2*m2;
+	T m2_4 = m2_3*m2;
+	T m2_5 = m2_4*m2;
+	T m2_6 = m2_5*m2;
+	T m2_7 = m2_6*m2;
+	T m2_8 = m2_7*m2;
+	T chil = params->chil;
+	
+	acoeffs->coeff1 = (-0.18229166666666666 - (5*dm)/(64.*m2));
+
+	acoeffs->coeff2 = ((-15*dm*m2*chil)/(128.*mtot2*eta) - (35*m2_2*chil)/(128.*mtot2*eta));
+	
+	acoeffs->coeff3 = (-1.7952473958333333 - (4555*dm)/(7168.*m2) -
+	      (15*chip2*dm*m2_3)/(128.*mtot4*eta2) -
+	      (35*chip2*m2_4)/(128.*mtot4*eta2) - (515*eta)/384. - (15*dm2*eta)/(256.*m2_2) -
+	      (175*dm*eta)/(256.*m2));
+	
+	acoeffs->coeff4 = - (35*M_PI)/48. - (5*dm*M_PI)/(16.*m2) +
+	   (5*dm2*chil)/(16.*mtot2) + (5*dm*m2*chil)/(3.*mtot2) +
+	   (2545*m2_2*chil)/(1152.*mtot2) -
+	   (5*chip2*dm*m2_5*chil)/(128.*mtot6*eta3) -
+	   (35*chip2*m2_6*chil)/(384.*mtot6*eta3) + (2035*dm*m2*chil)/(21504.*mtot2*eta) +
+	   (2995*m2_2*chil)/(9216.*mtot2*eta);
+	
+	acoeffs->coeff5 = (4.318908476114694 + (27895885*dm)/(2.1676032e7*m2) -
+	      (15*chip4*dm*m2_7)/(512.*mtot8*eta4) -
+	      (35*chip4*m2_8)/(512.*mtot8*eta4) -
+	      (485*chip2*dm*m2_3)/(14336.*mtot4*eta2) +
+	      (475*chip2*m2_4)/(6144.*mtot4*eta2) +
+	      (15*chip2*dm2*m2_2)/(256.*mtot4*eta) + (145*chip2*dm*m2_3)/(512.*mtot4*eta) +
+	      (575*chip2*m2_4)/(1536.*mtot4*eta) + (39695*eta)/86016. + (1615*dm2*eta)/(28672.*m2_2) -
+	      (265*dm*eta)/(14336.*m2) + (955*eta2)/576. + (15*dm3*eta2)/(1024.*m2_3) +
+	      (35*dm2*eta2)/(256.*m2_2) + (2725*dm*eta2)/(3072.*m2) - (15*dm*m2*M_PI*chil)/(16.*mtot2*eta) -
+	      (35*m2_2*M_PI*chil)/(16.*mtot2*eta) + (15*chip2*dm*m2_7*chil2)/(128.*mtot8*eta4) +
+	      (35*chip2*m2_8*chil2)/(128.*mtot8*eta4) +
+	      (375*dm2*m2_2*chil2)/(256.*mtot4*eta) + (1815*dm*m2_3*chil2)/(256.*mtot4*eta) +
+	      (1645*m2_4*chil2)/(192.*mtot4*eta));
+
+	ecoeffs->coeff1 = (-0.18229166666666666 - (5*dm)/(64.*m2));
+	
+	ecoeffs->coeff2 = ((-15*dm*m2*chil)/(128.*mtot2*eta) - (35*m2_2*chil)/(128.*mtot2*eta));
+	
+	ecoeffs->coeff3 = (-1.7952473958333333 - (4555*dm)/(7168.*m2) - (515*eta)/384. -
+	      (15*dm2*eta)/(256.*m2_2) - (175*dm*eta)/(256.*m2));
+	
+	ecoeffs->coeff4 = - (35*M_PI)/48. - (5*dm*M_PI)/(16.*m2) +
+	   (5*dm2*chil)/(16.*mtot2) + (5*dm*m2*chil)/(3.*mtot2) +
+	   (2545*m2_2*chil)/(1152.*mtot2) + (2035*dm*m2*chil)/(21504.*mtot2*eta) +
+	   (2995*m2_2*chil)/(9216.*mtot2*eta);
+	
+	ecoeffs->coeff5 = (4.318908476114694 + (27895885*dm)/(2.1676032e7*m2) + (39695*eta)/86016. +
+	      (1615*dm2*eta)/(28672.*m2_2) - (265*dm*eta)/(14336.*m2) + (955*eta2)/576. +
+	      (15*dm3*eta2)/(1024.*m2_3) + (35*dm2*eta2)/(256.*m2_2) +
+	      (2725*dm*eta2)/(3072.*m2) - (15*dm*m2*M_PI*chil)/(16.*mtot2*eta) - (35*m2_2*M_PI*chil)/(16.*mtot2*eta) +
+	      (375*dm2*m2_2*chil2)/(256.*mtot4*eta) + (1815*dm*m2_3*chil2)/(256.*mtot4*eta) +
+	      (1645*m2_4*chil2)/(192.*mtot4*eta));
+
+
+
+}
 template<class T>
 T IMRPhenomPv2<T>::d(int l, int m_prime, int m,T s)
 {
@@ -124,6 +209,10 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 				)
 {
+	//Phic comes from initial conditions
+	params->phic = 2*params->phi_aligned;
+
+
 	//Initialize Spherical harmonics for polarization construction
 	sph_harm<T> harmonics;
 	T phiHarm = 0.;
@@ -132,22 +221,16 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	harmonics.Y20 = std::complex<T>(0.0,0.0);
 	harmonics.Y2m1 =std::complex<T>(0.0,0.0);
 	harmonics.Y2m2 =std::complex<T>(0.0,0.0);
-	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,2);
-	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,1);
-	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,0);
-	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,-1);
-	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->incl_angle,phiHarm, -2,2,-2);
+	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,2);
+	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,1);
+	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,0);
+	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,-1);
+	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,-2);
 	
-	//if(std::is_same<T,double>::value){
-	//	std::cout<<"sph harm: "<<harmonics.Y22<<" "<<harmonics.Y21<<" "<<harmonics.Y20<<" "<<harmonics.Y2m2<<" "<<harmonics.Y2m1<<" "<<std::endl;
-	//}
-	
-	//if(std::is_same<T,double>::value){
-	//	std::cout<<params->alpha0<<std::endl;
-	//}
 	T M = params-> M;
 	T chirpmass = params->chirpmass;
 	T DL = params->DL;
+	T eta = params->eta;
 	lambda_parameters<T> lambda, *lambda_ptr;
 	this->assign_lambda_param(params, &lambda);
 
@@ -166,6 +249,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	T deltas[6];
 	T pn_amp_coeffs[7];
 	T pn_phase_coeffs[8];
+	
 
 	this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
 	this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
@@ -174,15 +258,20 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
 
-	//Rescale amplitude because lalsuite does
+	//Rescale amplitude because we aren't just using (2,2) mode anymore
 	T A0 = params->A0 / (2. * sqrt(5. / (64.*M_PI)) );
 	T q = params->mass1/params->mass2;
+	params->q = q;
 	T d2[5] ;
 	T dm2[5];
 	std::complex<T> hp_factor = std::complex<T>(0.0,0.0);
 	std::complex<T> hc_factor = std::complex<T>(0.0,0.0);
-	T epsilon;
-	T alpha;
+	T epsilon, epsilon_offset;
+	T alpha, alpha_offset;
+
+	alpha_coeffs<T> acoeffs;
+	epsilon_coeffs<T> ecoeffs;
+	this->calculate_euler_coeffs(&acoeffs, &ecoeffs, params);
 
 	T f;
 	std::complex<T> amp, phase;
@@ -190,6 +279,11 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
 
+
+	//Calculate offsets at fRef
+	pows.MFthird = pow(params->M* params->f_ref, 1./3.);
+	pows.MF2third =pows.MFthird* pows.MFthird;
+	this->calculate_euler_angles(&alpha_offset, &epsilon_offset, &pows, &acoeffs, &ecoeffs);
 	for (int j =0; j< length; j++)
 	{
 		f = frequencies[j];
@@ -198,34 +292,24 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			this->precalc_powers_ins(f, M, &pows);
 		}
 		else{
-			pows.MF2third = pow(M * f, 2./3.);//PhenomP requires this for WignerD matrices
+			pows.MFthird = pow(M* f, 1./3.);
+			pows.MF2third =pows.MFthird* pows.MFthird;
+			//pows.MF2third = pow(M * f, 2./3.);//PhenomP requires this for WignerD matrices
 		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 		//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
 		this->WignerD(d2,dm2, &pows, params);
 		//Calculate Euler angles alpha and epsilon
-		//epsilon = this->epsilon(M_PI*f, q, params->chil,params->chip);
-		this->calculate_euler_angles(&alpha, &epsilon, params->M *M_PI*f, q, params->chil, params->chip);
+		this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
 		//Add offset to alpha
-		alpha = alpha - params->alpha0;
-		//if(std::is_same<T,double>::value){
-		//	std::cout<<d2[0]<<" "<<d2[1]<<" "<<d2[2]<<" "<<d2[3]<<" "<<d2[4]<<std::endl;
-		//}
+		alpha = alpha - params->alpha0 + alpha_offset;
+		epsilon = epsilon - epsilon_offset;
 
 		//Twist it up
 		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
-		//if(std::is_same<T,double>::value){
-		//	std::cout<<hp_factor<<hc_factor<<std::endl;
-		//}
 
-		//if(std::is_same<T,double>::value){
-		//	std::cout<<"hp: "<<hp_factor<<" hc: "<<hc_factor<<std::endl;
-		//}
-		//Probably mulitply frequency by M here..
-		//hp_factor=1;
-		//hc_factor=1;
-		phase = phase + (std::complex<T>)(2. * epsilon);
+		phase = phase + (std::complex<T>)(2. * epsilon) ;
 		
 		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
@@ -240,12 +324,10 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 template<class T>
 void IMRPhenomPv2<T>::WignerD(T d2[5],T dm2[5], useful_powers<T> *pows, source_parameters<T> *params)
 {
-	T L = this->L2PN(params->eta, pows) * params->M * params->M;
+	T L = this->L2PN(params->eta, pows) ;//* params->M * params->M;
 	T s = params->SP / ( L + params-> SL);
 	T s_2 = s*s;
-	//if(std::is_same<T,double>::value){
-	//	std::cout<<"L: "<<L<<" s: "<<s<<" SP: "<<params->SP<<std::endl;
-	//}
+
 	T cos_beta = 1./sqrt(1.0 + s_2);
 	T cos_beta_half = sqrt( (1.0 + cos_beta) / 2.0);
 	T sin_beta_half = sqrt( (1.0 - cos_beta) / 2.0);
@@ -292,10 +374,24 @@ void IMRPhenomPv2<T>::calculate_twistup( T alpha, std::complex<T> *hp_factor, st
 	
 }
 template<class T>
-void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, T omega, T q, T chil, T chip)
+void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, useful_powers<T> *pows, alpha_coeffs<T> *acoeffs, epsilon_coeffs<T> *ecoeffs)
 {
-	*alpha = this->alpha(omega,q, chil, chip) ;	
-	*epsilon = this->epsilon(omega,q,chil,chip);
+	T omega_cbrt = pows->MFthird * pows->PIthird ;
+	T omega_cbrt2 = omega_cbrt*omega_cbrt;
+	T logomega = log(omega_cbrt2*omega_cbrt);
+	T omega = omega_cbrt2*omega_cbrt;
+	*alpha = (acoeffs->coeff1/omega
+              + acoeffs->coeff2/omega_cbrt2
+              + acoeffs->coeff3/omega_cbrt
+              + acoeffs->coeff4*logomega
+              + acoeffs->coeff5*omega_cbrt);
+
+	*epsilon = (ecoeffs->coeff1/omega
+                + ecoeffs->coeff2/omega_cbrt2
+                + ecoeffs->coeff3/omega_cbrt
+                + ecoeffs->coeff4*logomega
+                + ecoeffs->coeff5*omega_cbrt);
+
 }
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
  *
@@ -305,9 +401,6 @@ template<class T>
 void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*< Source Parameters*/
 						)
 {
-	//TESTING
-	params->phiRef=0.0;
-	params->f_ref=10.;
 
 
 	//Calculate spin parameters chil and chip
@@ -336,14 +429,12 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	T num = (ASp2>ASp1) ? ASp2 : ASp1;
 	T denom = (params->mass2 > params->mass1)? A2*m2_2 : A1*m1_2;
 	params->chip = num/denom;
-	params->SP = params->chip * params->mass1 * params->mass1;
-	params->SL = chi1_l * params->mass1 * params->mass1 + chi2_l *params->mass2 * params->mass2;
-	//if(std::is_same<T,double>::value){
-	//	std::cout<<params->chil<<std::endl;
-	//}
+	T m1 = q/(1+q);
+	T m2 = 1./(1+q);
+	params->SP = params->chip * m1*m1;
+	params->SL = chi1_l * m1 * m1 + chi2_l *m2 * m2;
 	
 	//Compute the rotation operations for L, J0 at fref	
-	//T v_ref = pow(M_PI * params->f_ref * (params->M),1./3);
 	T L0 = 0.0;
 	useful_powers<T> pows;
 	IMRPhenomD<T> temp;
@@ -392,9 +483,6 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	ROTATEY(-thetaJ_sf, tmp_x,tmp_y, tmp_z);
 	ROTATEZ(kappa, tmp_x,tmp_y, tmp_z);
 	
-	//if(std::is_same<T,double>::value){
-	//	std::cout<<tmp_y<<tmp_x<<std::endl;
-	//}
 	params->alpha0 = atan(tmp_y/tmp_x);
 
 	tmp_x = Nx_sf;
@@ -449,7 +537,6 @@ T IMRPhenomPv2<T>::L2PN( T eta, useful_powers<T> *pow)
 	T x = pow->MF2third * pow->PI2third;
 	T x2 = x*x;
 	T eta2 = eta*eta;
-	//return eta/(sqrt(x))*(1 + (3./2 + eta/6)*x + (3.373 - 19.*eta/8 - eta*eta/24 )*x*x);
 	return (eta*(1.0 + (1.5 + eta/6.0)*x + (3.375 - (19.0*eta)/8. - eta2/24.0)*x2)) / sqrt(x);
 }
 
