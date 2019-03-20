@@ -7,9 +7,9 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.complex cimport complex
 import os
-scriptpath = os.path.dirname(os.path.realpath(__file__)) 
+#scriptpath = os.path.dirname(os.path.realpath(__file__)) 
 import sys
-sys.path.append(scriptpath)
+#sys.path.append(scriptpath)
 
 cdef extern from "util.h" :
     struct gen_params:

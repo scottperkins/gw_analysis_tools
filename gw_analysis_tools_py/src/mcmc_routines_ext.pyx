@@ -8,10 +8,10 @@ from libcpp.complex cimport complex
 cimport numpy as np
 cimport cython
 import os
-scriptpath = os.path.dirname(os.path.realpath(__file__)) 
+#scriptpath = os.path.dirname(os.path.realpath(__file__)) 
 import sys
-sys.path.append(scriptpath)
-sys.path.append(scriptpath+"/src")
+#sys.path.append(scriptpath)
+#sys.path.append(scriptpath+"/src")
 cimport mcmc_routines_ext
 cimport waveform_generator_ext
 #from waveform_generator_ext import gen_params_py

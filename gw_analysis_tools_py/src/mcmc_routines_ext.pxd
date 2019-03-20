@@ -7,10 +7,10 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.complex cimport complex
 import os
-scriptpath = os.path.dirname(os.path.realpath(__file__)) 
+#scriptpath = os.path.dirname(os.path.realpath(__file__)) 
 import sys
-sys.path.append(scriptpath)
-sys.path.append(scriptpath+"/src")
+#sys.path.append(scriptpath)
+#sys.path.append(scriptpath+"/src")
 cimport waveform_generator_ext
 #from waveform_generator_ext import gen_params
 
