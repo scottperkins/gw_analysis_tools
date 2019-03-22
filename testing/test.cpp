@@ -26,7 +26,7 @@ void test_5();
 
 int main(){
 
-	test_4();	
+	test_1();	
 	return 0;
 }
 void test_5()
@@ -40,7 +40,7 @@ void test_4()
 
 	gen_params params;
 
-	int length = 10001;
+	int length = 16000;
 	double fhigh =1013;
 	double flow =17;
 	double df = (fhigh-flow)/(length-1);
@@ -62,13 +62,15 @@ void test_4()
 	double eta = .2;
 	params.mass1 = calculate_mass1(chirpmass,eta);
 	params.mass2 = calculate_mass2(chirpmass,eta);
-	string method= "IMRPhenomD";
+	//string method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
+	string method= "IMRPhenomPv2";
 	complex<double> *waveformout = (complex<double> *)malloc(sizeof(complex<double>) * length);
-	params.spin1[0] = 0;
+	complex<double> *waveformoutcross = (complex<double> *)malloc(sizeof(complex<double>) * length);
+	params.spin1[0] = 0.01;
 	params.spin1[1] = 0;
 	params.spin1[2] = .1;
-	params.spin2[0] = 0;
+	params.spin2[0] = 0.01;
 	params.spin2[1] = 0;
 	params.spin2[2] = .3;
 	double *spin1  = params.spin1;
@@ -82,11 +84,13 @@ void test_4()
 	params.phi = 1.2;
 	params.theta =3.4;
 	params.incl_angle = 1.3;
+	params.f_ref=10;
+	params.phiRef=0.;
 	
 	
 	clock_t  start, end;
 	start = clock(); 
-	fourier_waveform(freq, length, waveformout,method,&params);
+	fourier_waveform(freq, length, waveformout,waveformoutcross,method,&params);
 	end=clock();
 	cout<<"TIMING waveform: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 
@@ -100,7 +104,7 @@ void test_4()
 	fftw_outline plan;
 	initiate_likelihood_function(&plan,length);
 	
-	int masslen = 100;
+	int masslen = 10;
 	//double chirp = calculate_chirpmass(params.mass1,params.mass2);
 	//double eta = calculate_eta(params.mass1,params.mass2);
 	double masses[masslen];
@@ -127,62 +131,27 @@ void test_4()
 	complex<double> q;
 	for (int i =0;i<masslen;i++)
 	{
-		//if(masses[i]<mass2)
-		//{
-		//	params.mass2 = masses[i];
-		//	params.mass1 = mass2;
-		//}
-		//else
-		//{
-		//	params.mass1 = masses[i];
-		//	params.mass2 = mass2;
-		//}
 		params.mass1 = calculate_mass1(masses[i],eta);
 		params.mass2 = calculate_mass2(masses[i],eta);
 
-		//############################
-		//freq testing 
-		//length = 12;
-		//fhigh =1013;
-		//flow =17;
-		//df = (fhigh-flow)/(length-1);
-		//cout<<"Freq spacing new "<<df<<endl;
-		//for(int i=0;i<length;i++)
-		//	freq[i]=flow+i*df;
-		//############################
 		
 		start = clock();
 		llnew = maximized_coal_Log_Likelihood(waveformout, noise,freqnew,length, 
-					&params,"Hanford","IMRPhenomD",&plan);
+					&params,"Hanford","IMRPhenomPv2",&plan);
 		//llnew = maximized_coal_Log_Likelihood(real,imag, noise,freqnew,length, 
 					//&params,"Hanford","IMRPhenomD",&plan);
 		end = clock();
+		cout<<"logl new  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 		start = clock();
 		fourier_detector_response(freqnew,length, detector_response,"Hanford",
-					"IMRPhenomD",&params);
+					"IMRPhenomPv2",&params);
 		end = clock();
-		//cout<<"logl new TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
-
-		//params.mass1=10;	
-		
-		//############################
-		//freq testing
-		//length = 13;
-		//fhigh =1013;
-		//flow =17;
-		//df = (fhigh-flow)/(length-1);
-		//cout<<"Freq spacing old"<<df<<endl;
-		//for(int i=0;i<length;i++)
-		//	freq[i]=flow+i*df;
-		//############################
+		cout<<"waveform Pv2  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 		
 		start = clock();
 		llold = maximized_coal_log_likelihood_IMRPhenomD_Full_Param(freq, length, real,imag, 
 					noise,  calculate_chirpmass(params.mass1,params.mass2), 
 					calculate_eta(params.mass1,params.mass2), params.spin1[2], params.spin2[2],params.Luminosity_Distance,params.theta,params.phi,params.incl_angle, false,&plan);
-		//llold = maximized_coal_log_likelihood_IMRPhenomD_Full_Param(freq, length, real,imag, 
-		//			noise,  calculate_chirpmass(params.mass1,params.mass2), 
-		//			calculate_eta(params.mass1,params.mass2), params.spin1[2], params.spin2[2],params.Luminosity_Distance,params.theta,params.phi,params.incl_angle, false,&plan);
 		end = clock();
 		
 		start = clock();
@@ -192,7 +161,8 @@ void test_4()
 		for (int i = 0; i<length;i++)
 			hplus_old[i] = q * hplus_old[i];
 		end = clock();
-		//cout<<"logl old  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+		cout<<"waveform old  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+		cout<<"logl old  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 		
 		//cout<<"LOGLnew: "<<llnew<<endl;
 		//cout<<"LOGLold: "<<llold<<endl;
@@ -210,6 +180,7 @@ void test_4()
 	free(real);
 	free(imag);
 	free(waveformout);
+	free(waveformoutcross);
 	free(freq);
 	free(freqnew);
 	free(detector_response);

@@ -259,7 +259,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 
 	//Rescale amplitude because we aren't just using (2,2) mode anymore
-	T A0 = params->A0 / (2. * sqrt(5. / (64.*M_PI)) );
+	T A0 = params->A0* pow(M,7./6.) / (2. * sqrt(5. / (64.*M_PI)) );
 	T q = params->mass1/params->mass2;
 	params->q = q;
 	T d2[5] ;
@@ -284,17 +284,33 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	pows.MFthird = pow(params->M* params->f_ref, 1./3.);
 	pows.MF2third =pows.MFthird* pows.MFthird;
 	this->calculate_euler_angles(&alpha_offset, &epsilon_offset, &pows, &acoeffs, &ecoeffs);
+	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
 	for (int j =0; j< length; j++)
 	{
 		f = frequencies[j];
+		if(f>fcut){
+			amp = 0.0;
+			waveform_plus[j] = 0.0;
+			waveform_cross[j] = 0.0;
+		}
+		else{	
 		if (f<params->f1_phase)
 		{
 			this->precalc_powers_ins(f, M, &pows);
 		}
 		else{
-			pows.MFthird = pow(M* f, 1./3.);
+			//if(std::is_same< double, T>::value){
+			//	
+			//	pows.MFthird = cbrt(M*f );
+			//}
+			//else{
+			//	pows.MFthird = pow(M* f, 1./3.);
+			//}
+			//pows.MFthird = cbrt(M*f ); //cbrt is probably faster, but won't work with adouble - may need to look into this later
+			pows.MFsixth = pow(M*f,1./6 );
+			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+			pows.MFthird = pows.MFsixth * pows.MFsixth;
 			pows.MF2third =pows.MFthird* pows.MFthird;
-			//pows.MF2third = pow(M * f, 2./3.);//PhenomP requires this for WignerD matrices
 		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
@@ -315,6 +331,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		hp_factor = 0.;
 		hc_factor = 0.;
+		}
 
 	}
 	//}

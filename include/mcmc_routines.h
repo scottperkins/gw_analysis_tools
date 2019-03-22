@@ -95,10 +95,18 @@ void initiate_likelihood_function(fftw_outline *plan,int length);
 void deactivate_likelihood_function(fftw_outline *plan);
 
 
-double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
+double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				std::complex<double> *detector_response,
+				size_t length,
+				fftw_outline *plan
+				);
+double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
+				double *psd,
+				double *frequencies,
+				std::complex<double> *hplus,
+				std::complex<double> *hcross,
 				size_t length,
 				fftw_outline *plan
 				);

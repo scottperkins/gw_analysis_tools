@@ -261,7 +261,7 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	//free(integrand);
 	//free(g);
 
-	double out =  maximized_coal_Log_Likelihood_internal(data,
+	double out =  maximized_coal_Log_Likelihood_aligned_spin_internal(data,
 				noise,
 				frequencies,
 				template_strain,
@@ -378,12 +378,32 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				fftw_outline *plan
 				)
 {
-	std::complex<double> *response =
-			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
-	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,response, length, plan);
-	
-	free(response);
+	double ll = 0;
+	if(	generation_method  == "IMRPhenomD" ||
+		generation_method  == "ppE_IMRPhenomD_Inspiral" ||
+		generation_method  == "ppE_IMRPhenomD_IMR" ){
+		
+		std::complex<double> *response =
+				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
+		fourier_detector_response(frequencies, length, response, detector, generation_method, params);
+		ll = maximized_coal_Log_Likelihood_aligned_spin_internal(data, psd, frequencies,response, length, plan);
+		
+		free(response);
+		}
+	else if ( 	generation_method == "IMRPhenomPv2" ||
+			generation_method == "ppE_IMRPhenomPv2_Inspiral" ||
+			generation_method == "ppE_IMRPhenomPv2_IMR" ){
+				
+		std::complex<double> *hp =
+				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
+		std::complex<double> *hc =
+				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
+		fourier_waveform(frequencies,length,hp,hc,generation_method,params);
+		ll = maximized_coal_Log_Likelihood_unaligned_spin_internal(data,psd,frequencies,hp,hc, length, plan);
+
+		free(hp);
+		free(hc);
+	}
 	return ll;
 }
 					
@@ -416,11 +436,11 @@ double maximized_coal_Log_Likelihood(double *data_real,
 	free(data);
 	return ll;
 }
-/*! \brief Maximized match over coalescence variables - returns log likelihood NOT NORMALIZED
+/*! \brief Maximized match over coalescence variables - returns log likelihood NOT NORMALIZED for aligned spins
  *
  * Note: this function is not properly normalized for an absolute comparison. This is made for MCMC sampling, so to minimize time, constant terms like (Data|Data), which would cancel in the Metropolis-Hasting ratio, are left out for efficiency
  */
-double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
+double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				std::complex<double> *detector_response,
@@ -465,4 +485,136 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	free(g);
 
 	return -0.5*(HH- 2*max);
+}
+
+/*! \brief log likelihood function that maximizes over extrinsic parameters tc, phic, D, and phiRef, the reference frequency - for unaligned spins 
+ *
+ * Ref: arXiv 1603.02444v2
+ */
+double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
+				double *psd,
+				double *frequencies,
+				std::complex<double> *hplus,
+				std::complex<double> *hcross,
+				size_t length,
+				fftw_outline *plan
+				)
+{
+	double delta_f = frequencies[1]-frequencies[0];
+	double *integrand = (double *)malloc(sizeof(double)*length);
+	double integral;
+	//NOTE: I'm setting detector to HANFORD TEMPORARILY for testing
+	//
+	//THIS NEEDS TO CHANGE
+	//
+	//
+	//
+	//calculate overall template snr squared HH = <H|H> NOT NECESSARY I think
+	std::complex<double> *detector_response = 
+		(std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	//fourier_detector_response(frequencies, length, hplus,hcross, detector_response, 0.0,0.0,"Hanford");
+
+	//for (int i =0;i< length;i++)
+	//	integrand[i] = real(detector_response[i]*std::conj(detector_response[i]))/psd[i];
+	//integral = 4.*simpsons_sum(delta_f, length, integrand);
+	//double HH = integral;
+
+	//Calculate template snr for plus polarization sqrt(<H+|H+>)
+	for (int i =0;i< length;i++)
+		integrand[i] = real(hplus[i]*std::conj(hplus[i]))/psd[i];
+	integral = 4.*simpsons_sum(delta_f, length, integrand);
+	double HpHproot = sqrt(integral);
+
+	//Calculate template snr for cross polarization sqrt(<Hx|Hx>)
+	for (int i =0;i< length;i++)
+		integrand[i] = real(hcross[i]*std::conj(hcross[i]))/psd[i];
+	integral = 4.*simpsons_sum(delta_f, length, integrand);
+	double HcHcroot = sqrt(integral);
+	
+	//Rescale waveforms from hplus/cross to \hat{hplus/cross} 
+	std::complex<double> *hpnorm = 
+		(std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	std::complex<double> *hcnorm = 
+		(std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	for (int i =0 ;i<length;i++)
+	{
+		hpnorm[i] = hplus[i]/HpHproot;
+		hcnorm[i] = hcross[i]/HcHcroot;
+	}
+
+	//calculate \hat{rhoplus/cross} (just denoted rhoplus/cross) <d|hpnorm> 
+	//To maximize of coalescence phase, this is an FFT (so its a vector of 
+	//<d|h> at discrete tc
+	double *rhoplus2 = 
+		(double *)malloc(sizeof(double)*length);
+	double *rhocross2 = 
+		(double *)malloc(sizeof(double)*length);
+	std::complex<double> *rhoplus = 
+		(std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	std::complex<double> *rhocross = 
+		(std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	double *gammahat = 
+		(double *)malloc(sizeof(double)*length);
+	std::complex<double> g_tilde;
+
+	for (int i=0;i<length; i++)
+	{
+		g_tilde = 4.*conj(data[i]) * hpnorm[i] / psd[i]; 
+		plan->in[i][0] = real(g_tilde);
+		plan->in[i][1] = imag(g_tilde);
+	}
+	fftw_execute(plan->p);
+	for (int i=0;i<length; i++)
+	{
+		rhoplus[i] = std::complex<double>(plan->out[i][0],plan->out[i][1]);
+		//Norm of the output, squared (Re{g}^2 + Im{g}^2)
+		rhoplus2[i] = plan->out[i][0]* plan->out[i][0]
+				+ plan->out[i][1]* plan->out[i][1];
+		
+	}
+	for (int i=0;i<length; i++)
+	{
+		g_tilde = 4.*conj(data[i]) * hcnorm[i] / psd[i]; 
+		plan->in[i][0] = real(g_tilde);
+		plan->in[i][1] = imag(g_tilde);
+	}
+	fftw_execute(plan->p);
+	for (int i=0;i<length; i++)
+	{
+		rhocross[i] = std::complex<double>(plan->out[i][0],plan->out[i][1]);
+		//Norm of the output, squared (Re{g}^2 + Im{g}^2)
+		rhocross2[i] = plan->out[i][0]* plan->out[i][0]
+				+ plan->out[i][1]* plan->out[i][1];
+	}
+	
+	for (int i = 0; i <length;i++)
+		gammahat[i] = real(rhoplus[i] * conj(rhocross[i]));
+	
+	
+	for (int i =0;i< length;i++)
+		integrand[i] = real(hpnorm[i]*std::conj(hcnorm[i]))/psd[i];
+	integral = 4.*simpsons_sum(delta_f, length, integrand);
+	double Ipc = integral;
+
+	double *lambda = (double *)malloc(sizeof(double) * length);
+	for(int i = 0; i < length; i++){
+		lambda[i] =  (rhoplus2[i] + rhocross2[i] - 2*gammahat[i] * Ipc +
+			sqrt( (rhoplus2[i] -rhocross2[i])*(rhoplus2[i] -rhocross2[i]) +
+			4. * (Ipc*rhoplus2[i] - gammahat[i] ) * (Ipc*rhocross2[i] - gammahat[i])))
+			/(1. - Ipc*Ipc);
+	}
+	double max = .25 * (*std::max_element(lambda, lambda+length));//*delta_f; 
+
+	free(integrand);
+	free(hpnorm);
+	free(hcnorm);
+	free(rhoplus2);
+	free(rhoplus);
+	free(rhocross);
+	free(rhocross2);
+	free(gammahat);
+	free(lambda);
+
+	//return -0.5*(HH- 2*max);
+	return max;
 }

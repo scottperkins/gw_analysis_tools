@@ -10,7 +10,12 @@
 #include <adolc/drivers/drivers.h>
 #include <typeinfo>
 using namespace std;
+#ifndef _OPENMP
+#define omp ignore
+#endif
 
+
+double log_64 = 1.80617997398;
 /*! \file 
  * File that includes all the low level functions that go into constructing the waveform
  */
@@ -391,22 +396,34 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
-	T A0 = params->A0;
+	T A0 = params->A0* pow(M,7./6.);
 
 	T f;
 	std::complex<T> amp, phase;
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
+	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
 	for (int j =0; j< length; j++)
 	{
 		f = frequencies[j];
+		if(f>fcut){
+			amp = 0.0;
+			waveform[j] = 0.0;
+		}
+		else{	
 		if (f<params->f1_phase)
 		{
 			precalc_powers_ins(f, M, &pows);
 		}
+		else
+		{
+			pows.MFsixth= pow(M*f,1./6.);	
+			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 		waveform[j] = amp * std::exp(-i * phase);
+		}
 
 	}
 	//}
@@ -450,18 +467,29 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
-	T A0 = params->A0;
+	T A0 = params->A0* pow(M,7./6.);
 
 	std::complex<T> amp, phase;
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
+	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
+	if(frequency>fcut){
+		return std::complex<T>(0.0,0.0);
+	}
+	else{	
 	if (frequency<params->f1_phase)
 	{
 		this->precalc_powers_ins(frequency, M, &pows);
 	}
+	else
+	{
+		pows.MFsixth = pow(M*frequency,1./6.);	
+		pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+	}
 	amp = (A0 * this->build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(frequency,&lambda,params,&pows,pn_phase_coeffs));
 	return amp * std::exp(-i * phase);
+	}
 
 }
 /*! \brief Constructs the Amplitude as outlined by IMRPhenomD
@@ -499,18 +527,29 @@ int IMRPhenomD<T>::construct_amplitude(T *frequencies, /**< T array of frequenci
 	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
-	T A0 = params->A0;
+	T A0 = params->A0 * pow(M,7./6.);
 
 	T f;
+	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
 	for (int j =0; j< length; j++)
 	{
 		f = frequencies[j];
+		if(f>fcut){
+			amplitude[j] = 0.0;
+		}
+		else{	
 		if (f<params->f1)
 		{
 			this->precalc_powers_ins_amp(f, M, &pows);
 		}
+		else
+		{
+			pows.MFsixth = pow(M*f,1./6.);	
+			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+		}
 		amplitude[j] = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 
+		}
 	}
 	return 1;
 }
@@ -616,14 +655,18 @@ T IMRPhenomD<T>::build_amp(T f,
 {
 	if(f<params->f1)	
 	{
-		return  pow(f,-7./6)* this->amp_ins(f, params, amp_coeff, lambda, pows);
+		//return  pow(f,-7./6)* this->amp_ins(f, params, amp_coeff, lambda, pows);
+		return  1./(pows->MF7sixth) * this->amp_ins(f, params, amp_coeff, lambda, pows);
 	}
-	else if(f<params->f3)	
+	else if(f>params->f3)	
 	{
-		return pow(f,-7./6)* this->amp_int(f, params,  lambda, deltas);
+		//return pow(f,-7./6)* this->amp_int(f, params,  lambda, deltas);
+		return 1./pows->MF7sixth* this->amp_mr(f, params, lambda);
 	}
-	else 	
-		return pow(f,-7./6)* this->amp_mr(f, params, lambda);
+	else 	{
+		//return pow(f,-7./6)* this->amp_mr(f, params, lambda);
+		return 1./pows->MF7sixth* this->amp_int(f, params,  lambda, deltas);
+	}
 }
 
 /*! \brief constructs the IMRPhenomD phase for frequency f
@@ -642,12 +685,12 @@ T IMRPhenomD<T>::build_phase(T f,
 	{
 		return this->phase_ins(f, params, phase_coeff,lambda, pows);
 	}
-	else if(f < params->f2_phase)
+	else if(f > params->f2_phase)
 	{
-		return this->phase_int(f,params,lambda);
+		return this->phase_mr(f, params, lambda);
 	}
 	else 
-		return this->phase_mr(f, params, lambda);
+		return this->phase_int(f,params,lambda);
 }
 
 
@@ -704,7 +747,9 @@ void IMRPhenomD<T>::precalc_powers_ins(T f, T M, useful_powers<T> *Mf_pows)
 	T Mf = M*f;
 	Mf_pows->MFsquare = Mf*Mf;
 	Mf_pows->MFcube = Mf*Mf*Mf;
-	Mf_pows->MFthird = pow(M*f,1./3.);
+	Mf_pows->MFsixth = pow(M*f,1./6.);
+	Mf_pows->MF7sixth= Mf_pows->MFsixth * M*f;
+	Mf_pows->MFthird = Mf_pows->MFsixth*Mf_pows->MFsixth;
 	Mf_pows->MF2third = Mf_pows->MFthird * Mf_pows->MFthird;
 	Mf_pows->MF4third = Mf_pows->MFthird * Mf;
 	Mf_pows->MF5third = Mf_pows->MF2third * Mf;
@@ -723,7 +768,9 @@ void IMRPhenomD<T>::precalc_powers_ins_amp(T f, T M, useful_powers<T> *Mf_pows)
 	T Mf = M*f;
 	Mf_pows->MFsquare = Mf*Mf;
 	Mf_pows->MFcube = Mf*Mf*Mf;
-	Mf_pows->MFthird = pow(M*f,1./3.);
+	Mf_pows->MFsixth = pow(M*f,1./6.);
+	Mf_pows->MF7sixth= Mf_pows->MFsixth * M*f;
+	Mf_pows->MFthird = Mf_pows->MFsixth*Mf_pows->MFsixth;
 	Mf_pows->MF2third = Mf_pows->MFthird * Mf_pows->MFthird;
 	Mf_pows->MF4third = Mf_pows->MFthird * Mf;
 	Mf_pows->MF5third = Mf_pows->MF2third * Mf;
@@ -742,7 +789,9 @@ void IMRPhenomD<T>::precalc_powers_ins_phase(T f, T M, useful_powers<T> *Mf_pows
 	T Mf = M*f;
 	Mf_pows->MFsquare = Mf*Mf;
 	Mf_pows->MFcube = Mf*Mf*Mf;
-	Mf_pows->MFthird = pow(M*f,1./3.);
+	Mf_pows->MFsixth = pow(M*f,1./6.);
+	Mf_pows->MF7sixth= Mf_pows->MFsixth * M*f;
+	Mf_pows->MFthird = Mf_pows->MFsixth*Mf_pows->MFsixth;
 	Mf_pows->MF2third = Mf_pows->MFthird * Mf_pows->MFthird;
 	Mf_pows->MF4third = Mf_pows->MFthird * Mf;
 	Mf_pows->MF5third = Mf_pows->MF2third * Mf;
@@ -860,8 +909,9 @@ void IMRPhenomD<T>::assign_nonstatic_pn_phase_coeff(source_parameters<T> *source
 	T chi_a2 = chi_a*chi_a;
 	double pi2 = M_PI*M_PI;
 	T M = source_param->mass1 + source_param->mass2;
+	T logF = log(M_PI*M*f);
 
-	coeff[5] = (1. + log(M_PI*M*f))* (38645.*M_PI/756 - 65.*M_PI*eta/9 + 
+	coeff[5] = (1. + logF)* (38645.*M_PI/756 - 65.*M_PI*eta/9 + 
     		delta*(-732985./2268 - 140.*eta/9)*chi_a + 
     		(-732985./2268 + 24260.*eta/81 + 340.*eta2/9)*chi_s);
 
@@ -869,7 +919,7 @@ void IMRPhenomD<T>::assign_nonstatic_pn_phase_coeff(source_parameters<T> *source
      		640.*pi2/3 + (-15737765635./3048192 + 2255.*pi2/12)*eta + 
      		76055.*eta2/1728 - 127825.*eta3/1296 
      		+ 2270.*delta*chi_a*M_PI/3 + 
-     		(2270.*M_PI/3 - 520.*M_PI*eta)*chi_s - 6848.*log(64*M_PI*M*f)/63;
+     		(2270.*M_PI/3 - 520.*M_PI*eta)*chi_s - 6848.*(logF + log_64)/63;
 
 }
 
@@ -978,7 +1028,6 @@ T IMRPhenomD<T>::amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
 		 pn_coeff[6] * pow->PIsquare * pow->MFsquare ;
 	
 	T nr_amp;
-	for(int i=0;i<3;i++)
 	nr_amp= (lambda->rho[0]) * pow->MF7third +
 		(lambda->rho[1]) * pow->MF8third +
 		(lambda->rho[2]) * pow->MFcube ;

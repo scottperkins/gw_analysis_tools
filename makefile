@@ -23,7 +23,7 @@ TEST=$(addprefix $(TESTDIR)/,exe.a)
 
 
 #CFLAGS=-I$(IDIR) -I/opt/lalsuite/lalsimulation/src -I/opt/lalsuite/include -Wall -fPIC -g -O3 -std=c++11
-CFLAGS=-I$(IDIR) -Wall -fPIC -g -O3 -std=c++11
+CFLAGS=-I$(IDIR) -Wall -fPIC -g -O2 -std=c++11
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
