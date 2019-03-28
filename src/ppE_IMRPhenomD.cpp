@@ -256,6 +256,14 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_amplitude_derivative(double *frequenc
 	for (int i=0;i<length; i++)
 	{
 		evaluate_params[0] = frequencies[i];
+		if(evaluate_params[0]>.2/input_params->M){
+			for(int j=0;j<dimension;j++)
+			{
+				amplitude_derivative[j][i] = 0;
+			} 
+
+		}
+		else{	
 		if(evaluate_params[0]<input_params->f1)
 		{
 			gradient(tapes[0],dimension+1, evaluate_params, grad);
@@ -279,6 +287,7 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_amplitude_derivative(double *frequenc
 			{
 				amplitude_derivative[j][i] = grad[j+1];
 			} 
+		}
 		}
 	}
 	
@@ -320,6 +329,14 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_phase_derivative(double *frequencies,
 	for (int i=0;i<length; i++)
 	{
 		evaluate_params[0] = frequencies[i];
+		if(evaluate_params[0]>.2/input_params->M){
+			for(int j=0;j<dimension;j++)
+			{
+				phase_derivative[j][i] = 0;
+			} 
+
+		}
+		else{	
 		if(evaluate_params[0]<input_params->f1_phase)
 		{
 			gradient(tapes[0],dimension+1, evaluate_params, grad);
@@ -343,6 +360,7 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_phase_derivative(double *frequencies,
 			{
 				phase_derivative[j][i] = grad[j+1];
 			} 
+		}
 		}
 	}
 	
@@ -604,6 +622,14 @@ void ppE_IMRPhenomD_IMR<T>::construct_amplitude_derivative(double *frequencies, 
 	for (int i=0;i<length; i++)
 	{
 		evaluate_params[0] = frequencies[i];
+		if(evaluate_params[0]>.2/input_params->M){
+			for(int j=0;j<dimension;j++)
+			{
+				amplitude_derivative[j][i] = 0;
+			} 
+
+		}
+		else{	
 		if(evaluate_params[0]<input_params->f1)
 		{
 			gradient(tapes[0],dimension+1, evaluate_params, grad);
@@ -627,6 +653,7 @@ void ppE_IMRPhenomD_IMR<T>::construct_amplitude_derivative(double *frequencies, 
 			{
 				amplitude_derivative[j][i] = grad[j+1];
 			} 
+		}
 		}
 	}
 	
@@ -668,6 +695,14 @@ void ppE_IMRPhenomD_IMR<T>::construct_phase_derivative(double *frequencies, /**<
 	for (int i=0;i<length; i++)
 	{
 		evaluate_params[0] = frequencies[i];
+		if(evaluate_params[0]>.2/input_params->M){
+			for(int j=0;j<dimension;j++)
+			{
+				phase_derivative[j][i] = 0;
+			} 
+
+		}
+		else{	
 		if(evaluate_params[0]<input_params->f1_phase)
 		{
 			gradient(tapes[0],dimension+1, evaluate_params, grad);
@@ -691,6 +726,7 @@ void ppE_IMRPhenomD_IMR<T>::construct_phase_derivative(double *frequencies, /**<
 			{
 				phase_derivative[j][i] = grad[j+1];
 			} 
+		}
 		}
 	}
 	

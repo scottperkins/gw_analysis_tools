@@ -147,9 +147,15 @@ adouble pow_int(adouble base, int power)
 		return 1./prod;
 }
 
+double cbrt_internal(double base)
+{
+	return cbrt(base);
+}
+adouble cbrt_internal(adouble base)
+{
+	return pow(base,1./3.);
+}
 
-template class source_parameters<double>;
-template class source_parameters<adouble>;
 
 
 template <class T>
@@ -546,3 +552,5 @@ template std::complex<double> XLALSpinWeightedSphericalHarmonic<double>(double,d
 template std::complex<adouble> XLALSpinWeightedSphericalHarmonic<adouble>(adouble,adouble,int,int,int);
 template std::complex<double> cpolar<double>(double, double);
 template std::complex<adouble> cpolar<adouble>(adouble,adouble);
+template class source_parameters<double>;
+template class source_parameters<adouble>;

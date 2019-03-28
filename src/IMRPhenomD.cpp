@@ -9,7 +9,9 @@
 #include <adolc/taping.h>
 #include <adolc/drivers/drivers.h>
 #include <typeinfo>
+#include <omp.h>
 using namespace std;
+
 #ifndef _OPENMP
 #define omp ignore
 #endif
@@ -122,6 +124,14 @@ void IMRPhenomD<T>::construct_amplitude_derivative(double *frequencies, /**< inp
 	for (int i=0;i<length; i++)
 	{
 		evaluate_params[0] = frequencies[i];
+		if(evaluate_params[0]>.2/input_params->M){
+			for(int j=0;j<dimension;j++)
+			{
+				amplitude_derivative[j][i] = 0;
+			} 
+
+		}
+		else{	
 		if(evaluate_params[0]<input_params->f1)
 		{
 			gradient(tapes[0],dimension+1, evaluate_params, grad);
@@ -145,6 +155,7 @@ void IMRPhenomD<T>::construct_amplitude_derivative(double *frequencies, /**< inp
 			{
 				amplitude_derivative[j][i] = grad[j+1];
 			} 
+		}
 		}
 	}
 	
@@ -185,6 +196,14 @@ void IMRPhenomD<T>::construct_phase_derivative(double *frequencies, /**< input a
 	for (int i=0;i<length; i++)
 	{
 		evaluate_params[0] = frequencies[i];
+		if(evaluate_params[0]>.2/input_params->M){
+			for(int j=0;j<dimension;j++)
+			{
+				phase_derivative[j][i] = 0;
+			} 
+
+		}
+		else{	
 		if(evaluate_params[0]<input_params->f1_phase)
 		{
 			gradient(tapes[0],dimension+1, evaluate_params, grad);
@@ -208,6 +227,7 @@ void IMRPhenomD<T>::construct_phase_derivative(double *frequencies, /**< input a
 			{
 				phase_derivative[j][i] = grad[j+1];
 			} 
+		}
 		}
 	}
 	
@@ -386,7 +406,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 
 	T deltas[6];
 	T pn_amp_coeffs[7];
-	T pn_phase_coeffs[8];
+	T pn_phase_coeffs[10];
 
 	this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
 	this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
@@ -403,7 +423,8 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
 	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
-	for (int j =0; j< length; j++)
+	
+	for (size_t j =0; j< length; j++)
 	{
 		f = frequencies[j];
 		if(f>fcut){
@@ -457,7 +478,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 
 	T deltas[6];
 	T pn_amp_coeffs[7];
-	T pn_phase_coeffs[8];
+	T pn_phase_coeffs[10];
 
 	this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
 	this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
@@ -553,48 +574,6 @@ int IMRPhenomD<T>::construct_amplitude(T *frequencies, /**< T array of frequenci
 	}
 	return 1;
 }
-/*! \brief Overloaded version for a single frequency instead of a whole array 
- *
- * This will be a SLOWER evaluation, only being defined for internal evaluations of derivatives
- */
-//template <class T>
-//T IMRPhenomD<T>::construct_amplitude(T frequency, /**< T array of frequencies the waveform is to be evaulated at*/
-//				source_parameters<T> *params/**< Structure of source parameters to be initilized before computation*/
-//				)
-//{
-//	T M = params-> M;
-//	T chirpmass = params->chirpmass;
-//	T DL = params->DL;
-//	lambda_parameters<T> lambda;
-//	assign_lambda_param(params, &lambda);
-//
-//	/*Initialize the post merger quantities*/
-//	post_merger_variables(params);
-//
-//	params->f1 = 0.014/(params->M);
-//	params->f3 = fpeak(params, &lambda);
-//
-//	useful_powers<T> pows;
-//	precalc_powers_PI(&pows);
-//
-//	T deltas[6];
-//	T pn_amp_coeffs[7];
-//
-//	assign_pn_amplitude_coeff(params, pn_amp_coeffs);
-//
-//	amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
-//
-//	T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
-//
-//	if (frequency<params->f1)
-//	{
-//		precalc_powers_ins_amp(frequency, M, &pows);
-//	}
-//	return (A0 * build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
-//
-//	
-//	return 1;
-//}
 /*! \brief Constructs the Phase as outlined by IMRPhenomD
  *
  * arguments:
@@ -620,7 +599,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	useful_powers<T> pows;
 	this->precalc_powers_PI(&pows);
 
-	T pn_phase_coeffs[8];
+	T pn_phase_coeffs[10];
 
 	this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
 
@@ -887,6 +866,14 @@ void IMRPhenomD<T>::assign_static_pn_phase_coeff(source_parameters<T> *source_pa
     			26804935.*eta/6048 - 1985.*eta2/48)*chi_a + 
     			(-25150083775./3048192 + 10566655595.*eta/762048 - 
     			1042165.*eta2/3024 + 5345.*eta3/36)*chi_s;
+	coeff[8] = (38645.*M_PI/756 - 65.*M_PI*eta/9 + 
+    		delta*(-732985./2268 - 140.*eta/9)*chi_a + 
+    		(-732985./2268 + 24260.*eta/81 + 340.*eta2/9)*chi_s);
+	coeff[9] = 11583231236531./4694215680 - 6848.*gamma_E/21 -\
+     		640.*pi2/3 + (-15737765635./3048192 + 2255.*pi2/12)*eta + 
+     		76055.*eta2/1728 - 127825.*eta3/1296 
+     		+ 2270.*delta*chi_a*M_PI/3 + 
+     		(2270.*M_PI/3 - 520.*M_PI*eta)*chi_s- 6848.*( log_64)/63;
 }
 
 /*! 
@@ -911,16 +898,17 @@ void IMRPhenomD<T>::assign_nonstatic_pn_phase_coeff(source_parameters<T> *source
 	T M = source_param->mass1 + source_param->mass2;
 	T logF = log(M_PI*M*f);
 
-	coeff[5] = (1. + logF)* (38645.*M_PI/756 - 65.*M_PI*eta/9 + 
-    		delta*(-732985./2268 - 140.*eta/9)*chi_a + 
-    		(-732985./2268 + 24260.*eta/81 + 340.*eta2/9)*chi_s);
+	//coeff[5] = (1. + logF)* (38645.*M_PI/756 - 65.*M_PI*eta/9 + 
+    	//	delta*(-732985./2268 - 140.*eta/9)*chi_a + 
+    	//	(-732985./2268 + 24260.*eta/81 + 340.*eta2/9)*chi_s);
 
-    	coeff[6] = 11583231236531./4694215680 - 6848.*gamma_E/21 -\
-     		640.*pi2/3 + (-15737765635./3048192 + 2255.*pi2/12)*eta + 
-     		76055.*eta2/1728 - 127825.*eta3/1296 
-     		+ 2270.*delta*chi_a*M_PI/3 + 
-     		(2270.*M_PI/3 - 520.*M_PI*eta)*chi_s - 6848.*(logF + log_64)/63;
-
+    	//coeff[6] = 11583231236531./4694215680 - 6848.*gamma_E/21 -\
+     	//	640.*pi2/3 + (-15737765635./3048192 + 2255.*pi2/12)*eta + 
+     	//	76055.*eta2/1728 - 127825.*eta3/1296 
+     	//	+ 2270.*delta*chi_a*M_PI/3 + 
+     	//	(2270.*M_PI/3 - 520.*M_PI*eta)*chi_s - 6848.*(logF + log_64)/63;
+	coeff[5] = coeff[8] *(1.+logF);
+	coeff[6] = coeff[9]-6848.*(logF)/63.;
 }
 
 /*! 

@@ -109,7 +109,7 @@ void fisher(double *frequency,
 					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*phase_deriv[k][i])
 					/internal_noise[i]);
 			}
-			output[j][k] = 4*trapezoidal_sum_uniform(
+			output[j][k] = 4*simpsons_sum(
 						frequency[1]-frequency[0], length, integrand);	
 			output[k][j] = output[j][k];
 		}
@@ -124,7 +124,7 @@ void fisher(double *frequency,
 				real( (amplitude_deriv[j][i]*amplitude_deriv[j][i]
 					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*phase_deriv[j][i])
 					/internal_noise[i]);
-		output[j][j] = 4*trapezoidal_sum_uniform(
+		output[j][j] = 4*simpsons_sum(
 					frequency[1]-frequency[0], length, integrand);	
 	}
 		

@@ -13,6 +13,7 @@
 #include "fisher.h"
 #include "ppE_IMRPhenomD.h"
 #include "IMRPhenomP.h"
+#include "waveform_generator_C.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ void test_4()
 	gen_params params;
 
 	int length = 16000;
-	double fhigh =1013;
+	double fhigh =20;
 	double flow =17;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
@@ -278,9 +279,15 @@ void test_1()
 	params.theta = 0;
 	params.incl_angle = 0;
 	
-	double freq[length];
+	double fhigh =100;
+	double flow =17;
+	double df = (fhigh-flow)/(length-1);
+	double *freq = (double *)malloc(sizeof(double) * length);
+
+	cout<<"Freq spacing "<<df<<endl;
+
 	for(int i=0;i<length;i++)
-		freq[i]=10.+i*1e-1;
+		freq[i]=flow+i*df;
 
 	clock_t  start, end;
 	start = clock(); 
@@ -591,6 +598,7 @@ void test_1()
 		free( ppephase_derivative[i]);
 	}
 	free(amp_derivative);
+	free(freq);
 	free(phase_derivative);
 	free(ppeamp_derivative);
 	free(ppephase_derivative);

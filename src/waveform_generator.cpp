@@ -22,6 +22,23 @@ using namespace std;
  *
  * This puts the responsibility on the user to pass the necessary parameters
  *
+ * NEW PHASE OPTIONS for 
+ *
+ * PHENOMD ONLY:
+ *
+ * If phic is assigned, the reference frequency and reference phase are IGNORED.
+ *
+ * If Phic is unassigned, a reference phase AND a reference frequency are looked for.If no options are found, both are set to 0.
+ *
+ * If tc is assigned, it is used. 
+ *
+ * If tc is unassigned, the waveform is shifted so the merger happens at 0. 
+ *
+ * PhenomPv2:
+ *
+ * PhiRef and f_ref are required, phic is not an option. 
+ *
+ * tc, if specified, is used with the use of interpolation. If not, tc is set such that coalescence happens at t=0
  */
 int fourier_waveform(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
 			int length,/**<integer length of all the arrays*/
@@ -56,6 +73,15 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.incl_angle = parameters->incl_angle;
 	double ci = cos(params.incl_angle);
 	if(generation_method == "IMRPhenomD")
+	{
+		IMRPhenomD<double> modeld;
+		status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i] * .5 *(1+ci*ci);
+		}
+	}
+	else if(generation_method == "IMRPhenomD_LAL")
 	{
 		IMRPhenomD<double> modeld;
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);

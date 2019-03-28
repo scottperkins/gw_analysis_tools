@@ -26,7 +26,6 @@ template<class T>
 class IMRPhenomPv2: public IMRPhenomD<T>
 {
 public:
-
 virtual T alpha(T omega, T q,T chi2l, T chi2);
 
 virtual T epsilon(T omega, T q, T chi2l, T chi2);

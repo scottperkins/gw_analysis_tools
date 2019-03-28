@@ -61,9 +61,9 @@ struct gen_params
 	/*!Spin vector of the smaller mass [Sx,Sy,Sz]*/
 	double spin2[3];
 	/*!coalescence phase of the binary*/
-	double phic;
+	double phic=NULL;
 	/*!coalescence time of the binary*/
-	double tc;
+	double tc=NULL;
 	/*!ppE b parameter (power of the frequency)*/
 	int bppe;
 	/*!ppE coefficient for the phase modification*/
@@ -77,9 +77,9 @@ struct gen_params
 	bool NSflag;
 
 	/*! Reference frequency for PhenomPv2*/
-	double f_ref;
+	double f_ref=NULL;
 	
-	double phiRef;
+	double phiRef=NULL;
 };
 
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow
@@ -92,6 +92,8 @@ template <class T>
 struct useful_powers
 {
 	T MFthird;
+	T MFsixth;
+	T MF7sixth;
 	T MF2third;
 	T MF4third;
 	T MF5third;
@@ -302,4 +304,6 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
                                    int l,        /**< mode number l */
                                    int m         /**< mode number m */
     );
+double cbrt_internal(double base);
+adouble cbrt_internal(adouble base);
 #endif
