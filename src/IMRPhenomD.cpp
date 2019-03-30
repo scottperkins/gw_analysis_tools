@@ -386,6 +386,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 				)
 {
+
 	T M = params-> M;
 	T chirpmass = params->chirpmass;
 	T DL = params->DL;
@@ -414,6 +415,52 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
+	//################################################################
+	//Calculate phase and coalescence time variables
+	T phic, f_ref, tc, phi_shift, tc_shift;
+	//If phic is unspecified - use f_ref and phiRef
+	//params->f_ref = 0;
+	if(params->f_ref != NULL ){
+		//if(std::is_same< double, T>::value){
+		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
+		//}
+		f_ref = params->f_ref;
+		precalc_powers_ins(f_ref, M, &pows);
+		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
+		phic = 2*params->phiRef + phi_shift;
+	}
+	//If phic is specified, ignore f_ref phiRef and use phic
+	else{
+		f_ref = 0;
+		phic = params->phic;
+	}
+	
+	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
+	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
+	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
+	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	tc = 2*M_PI*params->tc + tc_shift;
+	//###################################################################
+	//###################################################################
+	//###################################################################
+	//TESTING
+	//tc = 2.9210463370e+02*M;
+	//phic = 7.9606509905e+02;
+	//###################################################################
+	//###################################################################
+	//###################################################################
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"TC : "<<tc/M<<std::endl;
+	//	std::cout<<"total phase shift: "<<phic<<std::endl;
+	//	std::cout<<"fpeak : "<<params->f3*M<<std::endl;
+	//	std::cout<<"rd : "<<params->fRD*M<<std::endl;
+	//	std::cout<<"damp : "<<params->fdamp*M<<std::endl;
+	//	std::cout<<"gamma3 : "<<lambda.gamma[2]<<std::endl;
+	//	std::cout<<"gamma2 : "<<lambda.gamma[1]<<std::endl;
+	//	std::cout<<"M : "<<M<<std::endl;
+	//	
+	//}
+	//################################################################
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);
@@ -443,6 +490,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+		phase -=   (T)(tc*(f-f_ref) + phic);
 		waveform[j] = amp * std::exp(-i * phase);
 		}
 
@@ -486,6 +534,32 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
+	//################################################################
+	//Calculate phase and coalescence time variables
+	T phic, f_ref, tc, phi_shift, tc_shift;
+	//If phic is unspecified - use f_ref and phiRef
+			
+	//params->f_ref = 0;
+	if(params->f_ref != NULL && params->phiRef != NULL){
+		//if(std::is_same< double, T>::value){
+		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
+		//}
+		f_ref = params->f_ref;
+		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
+		phic = params->phiRef + phi_shift;
+	}
+	//If phic is specified, ignore f_ref phiRef and use phic
+	else{
+		f_ref = 0;
+		phic = params->phic;
+	}
+	
+	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
+	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
+	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
+	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	tc = 2.*M_PI*params->tc/M + tc_shift;
+	//################################################################
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);
@@ -509,6 +583,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	}
 	amp = (A0 * this->build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(frequency,&lambda,params,&pows,pn_phase_coeffs));
+	phase -=   (T)(tc*M*(frequency-f_ref) + phic);
 	return amp * std::exp(-i * phase);
 	}
 
@@ -595,6 +670,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 
 	params->f1_phase = 0.018/(params->M);
 	params->f2_phase = params->fRD/2.;
+	params->f3 = this->fpeak(params, &lambda);
 
 	useful_powers<T> pows;
 	this->precalc_powers_PI(&pows);
@@ -605,6 +681,56 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
+	//################################################################
+	//Calculate phase and coalescence time variables
+	T phic, f_ref, tc, phi_shift, tc_shift;
+	//If phic is unspecified - use f_ref and phiRef
+	//params->f_ref = 0;
+	if(params->f_ref != NULL ){
+		//if(std::is_same< double, T>::value){
+		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
+		//}
+		f_ref = params->f_ref;
+		precalc_powers_ins(f_ref, M, &pows);
+		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
+		phic = 2*params->phiRef + phi_shift;
+	}
+	//If phic is specified, ignore f_ref phiRef and use phic
+	else{
+		f_ref = 0;
+		phic = params->phic;
+	}
+	
+	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
+	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
+	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
+	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	//tc_shift = tc_shift - .00561069;
+	//tc_shift = 3.1734968285e2*M;
+	tc = 2*M_PI*params->tc + tc_shift;
+	
+	cout.precision(15);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"dimensionless TC : "<<tc/M<<std::endl;
+	//	std::cout<<"total phase shift: "<<phic<<std::endl;
+	//	std::cout<<"fpeak : "<<params->f3*M<<std::endl;
+	//	std::cout<<"rd : "<<params->fRD*M<<std::endl;
+	//	std::cout<<"damp : "<<params->fdamp*M<<std::endl;
+	//	std::cout<<"gamma3 : "<<lambda.gamma[2]<<std::endl;
+	//	std::cout<<"gamma2 : "<<lambda.gamma[1]<<std::endl;
+	//	std::cout<<"M : "<<M<<std::endl;
+	//	std::cout<<"eta : "<<params->eta<<std::endl;
+	//	std::cout<<"alpha0 : "<<lambda.alpha[0]<<std::endl;
+	//	std::cout<<"alpha1 : "<<lambda.alpha[1]<<std::endl;
+	//	std::cout<<"alpha2 : "<<lambda.alpha[2]<<std::endl;
+	//	std::cout<<"alpha3 : "<<lambda.alpha[3]<<std::endl;
+	//	std::cout<<"alpha4 : "<<lambda.alpha[4]<<std::endl;
+	//	std::cout<<"beta0 : "<<lambda.beta[0]<<std::endl;
+	//	std::cout<<"beta1 : "<<lambda.beta[1]<<std::endl;
+	//	std::cout<<"beta2 : "<<lambda.beta[2]<<std::endl;
+	//	std::cout<<"beta3 : "<<lambda.beta[3]<<std::endl;
+	//}
+	
 	T f;
 	
 	for (int j =0; j< length; j++)
@@ -615,6 +741,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 			this->precalc_powers_ins_phase(f, M, &pows);
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+		phase[j] -=   (T)(params->tc*2*M_PI*f + tc_shift*(f-f_ref) + phic);
 
 	}
 	return 1;
@@ -990,8 +1117,14 @@ T IMRPhenomD<T>::fpeak(source_parameters<T> *params, lambda_parameters<T> *lambd
 	T fdamp = params->fdamp;
 	T gamma3 = lambda->gamma[2];
 	T gamma2 = lambda->gamma[1];
+	T out;
 	//return abs(fRD + fdamp*gamma3*(sqrt(1-gamma2*gamma2)-1)/gamma2);
-	return sqrt( (fRD + fdamp*gamma3*(sqrt(1-gamma2*gamma2)-1)/gamma2)*(fRD + fdamp*gamma3*(sqrt(1-gamma2*gamma2)-1)/gamma2));
+	if(gamma2>1){
+		out = fRD + (fdamp*(-1.)*gamma3)/gamma2;
+		return sqrt(out*out);
+	}
+	else
+		return sqrt( (fRD + fdamp*gamma3*(sqrt(1-gamma2*gamma2)-1)/gamma2)*(fRD + fdamp*gamma3*(sqrt(1-gamma2*gamma2)-1)/gamma2));
 }
 
 
@@ -1046,7 +1179,7 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 		 pn_coeff[6] * pow->PIsquare * pow->MFsquare +
 		 pn_coeff[7] * pow->PI7third * pow->MF7third ;
 
-	T phase_TF2 = 2.*M_PI*(param->tc)*f - (param->phic) - M_PI/4. 
+	T phase_TF2 =  M_PI/4. 
 			+ 3./(128.*eta) * pow->PIminus_5third * pow->MFminus_5third * pn_phase;
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
@@ -1101,8 +1234,7 @@ T IMRPhenomD<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambd
 	T pn_phase=0;
 	for (int i =0; i< 8; i++)
 		pn_phase += pn_coeff[i]*pow(M_PI * M * f,i/3.);
-	T phase_TF2 = 2*M_PI*(param->tc) 
-			+ 3./(128*eta) *pow(M_PI * M,-5./3.)*(-5./3.)*pow(f,-5./3-1.)*pn_phase;
+	T phase_TF2 = 	+ 3./(128*eta) *pow(M_PI * M,-5./3.)*(-5./3.)*pow(f,-5./3-1.)*pn_phase;
 
 	T pn_phase_deriv=0;
 	for (int i =0;i<8;i++)

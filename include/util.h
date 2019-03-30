@@ -16,9 +16,12 @@ const double c = 299792458.;
 /*!Gravitational constant in m**3/(s**2 SolMass)*/
 const double G =6.674e-11*(1.98855e30);
 /*! G/c**3 seconds per solar mass*/
-const double MSOL_SEC =492549095.e-14; 
+//const double MSOL_SEC =492549095.e-14; 
+//const double MSOL_SEC =492549095.e-14; 
+const double MSOL_SEC =4.925491025543575903411922162094833998e-6 ;
 /*!consts.kpc.to('m')*1000/c Mpc in sec*/
-const double MPC_SEC = 3085677581.e13/c; 
+//const double MPC_SEC = 3085677581.e13/c; 
+const double MPC_SEC = 3.085677581491367278913937957796471611e22/c; 
 
 //GSL versions of the constants, but G seems off..
 //const double gamma_E = M_EULER;
@@ -61,9 +64,9 @@ struct gen_params
 	/*!Spin vector of the smaller mass [Sx,Sy,Sz]*/
 	double spin2[3];
 	/*!coalescence phase of the binary*/
-	double phic=NULL;
+	double phic=0;
 	/*!coalescence time of the binary*/
-	double tc=NULL;
+	double tc=0;
 	/*!ppE b parameter (power of the frequency)*/
 	int bppe;
 	/*!ppE coefficient for the phase modification*/
@@ -77,9 +80,9 @@ struct gen_params
 	bool NSflag;
 
 	/*! Reference frequency for PhenomPv2*/
-	double f_ref=NULL;
+	double f_ref=0;
 	
-	double phiRef=NULL;
+	double phiRef=0;
 };
 
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow

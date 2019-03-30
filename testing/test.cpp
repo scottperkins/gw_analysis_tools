@@ -76,7 +76,7 @@ void test_4()
 	params.spin2[2] = .3;
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
-	params.phic = .0;
+	params.phic = 1.0;
 	params.tc = .0;
 	params.Luminosity_Distance = 100.2;
 	params.betappe = 10.;
@@ -85,8 +85,8 @@ void test_4()
 	params.phi = 1.2;
 	params.theta =3.4;
 	params.incl_angle = 1.3;
-	params.f_ref=10;
-	params.phiRef=0.;
+	//params.f_ref=10;
+	//params.phiRef=0.;
 	
 	
 	clock_t  start, end;
@@ -278,6 +278,8 @@ void test_1()
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;
+	params.f_ref = 100;
+	params.phiRef = 1.0;
 	
 	double fhigh =100;
 	double flow =17;

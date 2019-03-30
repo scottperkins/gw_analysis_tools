@@ -48,7 +48,6 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			gen_params *parameters/**<structure containing all the source parameters*/
 			)
 {
-	
 	int status=1;
 	bool NSflag = parameters->NSflag;
 
@@ -71,6 +70,8 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
 	params.incl_angle = parameters->incl_angle;
+	params.f_ref = parameters->f_ref;
+	params.phiRef = parameters->phiRef;
 	double ci = cos(params.incl_angle);
 	if(generation_method == "IMRPhenomD")
 	{
@@ -117,9 +118,6 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		IMRPhenomPv2<double> modeld;
 		//Initialize Pv2 specific params	
 
-		//TESTING
-		params.f_ref = parameters->f_ref;
-		params.phiRef = parameters->phiRef;
 
 		//Compute transform
 		modeld.PhenomPv2_Param_Transform(&params);
@@ -202,6 +200,8 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	source_parameters<double> params;
 	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
 
+	params.f_ref = parameters->f_ref;
+	params.phiRef = parameters->phiRef;
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
 	if(generation_method == "IMRPhenomD")
@@ -282,6 +282,8 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	double t_c = parameters->tc;
 	source_parameters<double> params;
 	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params.f_ref = parameters->f_ref;
+	params.phiRef = parameters->phiRef;
 
 	if(generation_method == "IMRPhenomD")
 	{
@@ -336,6 +338,8 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	double t_c = parameters->tc;
 	source_parameters<double> params;
 	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params.f_ref = parameters->f_ref;
+	params.phiRef = parameters->phiRef;
 
 	if(generation_method == "IMRPhenomD")
 	{
