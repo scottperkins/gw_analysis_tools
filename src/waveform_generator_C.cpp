@@ -24,8 +24,9 @@ int fourier_waveformC(double *frequencies,
 		double tc,
 		double f_ref,
 		double phiRef,
-		double ppE_beta,
-		int ppE_b,
+		double *ppE_beta,
+		int *ppE_b,
+		int Nmod,
 		double incl_angle,
 		double theta,
 		double phi
@@ -45,6 +46,7 @@ int fourier_waveformC(double *frequencies,
 	params.tc = tc;
 	params.phic = phic;
 	params.bppe = ppE_b;
+	params.Nmod = Nmod;
 	params.betappe = ppE_beta;
 	params.incl_angle = incl_angle;
 	params.theta = theta;
@@ -128,8 +130,9 @@ int fourier_phaseC(double *frequencies,
 		double tc,
 		double f_ref,
 		double phiRef,
-		double ppE_beta,
-		int ppE_b,
+		double *ppE_beta,
+		int *ppE_b,
+		int Nmod,
 		double incl_angle,
 		double theta,
 		double phi
@@ -149,6 +152,7 @@ int fourier_phaseC(double *frequencies,
 	params.phic = phic;
 	params.bppe = ppE_b;
 	params.betappe = ppE_beta;
+	params.Nmod = Nmod;
 	params.incl_angle = incl_angle;
 	params.theta = theta;
 	params.phi = phi;

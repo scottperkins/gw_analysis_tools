@@ -32,7 +32,7 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 
-CC=g++-7
+CC=g++
 
 .PHONY: all
 all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB)

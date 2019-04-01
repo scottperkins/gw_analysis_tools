@@ -603,7 +603,7 @@ double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double
 			4. * (Ipc*rhoplus2[i] - gammahat[i] ) * (Ipc*rhocross2[i] - gammahat[i])))
 			/(1. - Ipc*Ipc);
 	}
-	double max = .25 * (*std::max_element(lambda, lambda+length));//*delta_f; 
+	double max = .25 * (*std::max_element(lambda, lambda+length))*delta_f; 
 
 	free(integrand);
 	free(hpnorm);

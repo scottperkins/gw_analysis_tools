@@ -31,6 +31,8 @@ Also, the PYTHONPATH environment variables must point to $(PROJECT_DIR)/gw_analy
 
 In the root directory of the project, run 'make' to compile source files, create the library file and create the cython modules, and create the documentation.
 
+To just create C++/C files, run 'make c'.
+
 Run 'make test' to build a test program that will create an executable.
 
 \section functionality Supported Functionality 

@@ -79,8 +79,11 @@ void test_4()
 	params.phic = 1.0;
 	params.tc = .0;
 	params.Luminosity_Distance = 100.2;
-	params.betappe = 10.;
-	params.bppe  = -1;
+	params.betappe = new double[1] ;
+	params.betappe[0]=1.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -1;
+	params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 1.2;
 	params.theta =3.4;
@@ -186,6 +189,8 @@ void test_4()
 	free(freqnew);
 	free(detector_response);
 	free(noise);
+	delete [] params.betappe;
+	delete [] params.bppe;
 
 	deactivate_likelihood_function(&plan);	
 }
@@ -215,8 +220,11 @@ void test_3()
 	params.phic = 2.0;
 	params.tc = 8.0;
 	params.Luminosity_Distance = 800.;
-	params.betappe = 10.;
-	params.bppe  = -1.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=1.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -1;
+	params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = M_PI/3.;
 	params.theta = M_PI/3;
@@ -231,6 +239,8 @@ void test_3()
 	fourier_waveform(freq, length, waveformout_plus,waveformout_cross,method,&params);
 	end=clock();
 	cout<<"TIMING waveform: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+	delete [] params.betappe;
+	delete [] params.bppe;
 	
 }
 void test_2()
@@ -272,8 +282,12 @@ void test_1()
 	params.phic = 2.0;
 	params.tc = 8.0;
 	params.Luminosity_Distance = 800.;
-	params.betappe = 1000.;
-	params.bppe  = -1.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=10.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -1;
+	params.Nmod = 1;
+	params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 0;
 	params.theta = 0;
@@ -360,10 +374,10 @@ void test_1()
 	double logl2 = maximized_coal_log_likelihood_IMRPhenomD(freq, length, waveformout, 
 				noise, snr, 1.2*calculate_chirpmass(params.mass1,params.mass2), 
 				calculate_eta(params.mass1,params.mass2), spin1[2], spin2[2], false,&plan);
-	params.mass1=300;
-	params.mass2=100;
-	params.spin1[2] = .9;
-	params.spin2[2] = -.2;
+	//params.mass1=300;
+	//params.mass2=100;
+	//params.spin1[2] = .9;
+	//params.spin2[2] = -.2;
 	start = clock();
 	double logl3 = maximized_coal_Log_Likelihood(waveformout, noise,freq,length, 
 				&params,"Hanford","IMRPhenomD",&plan);
@@ -403,7 +417,7 @@ void test_1()
 
 //###################################################################################################
 	
-	method = "ppE_IMRPhenomD_IMR";
+	method = "ppE_IMRPhenomD_Inspiral";
 	clock_t  startppe, endppe;
 	startppe = clock(); 
 	fourier_waveform(freq, length, waveformout,method,&params);
@@ -475,8 +489,11 @@ void test_1()
 	source_params.f3 = modeld.fpeak(&source_params, &lambda);
 	source_params.f1_phase = 0.018/(source_params.M);
 	source_params.f2_phase = source_params.fRD/2.;
-	source_params.bppe = -1;
-	source_params.betappe = 10;
+	source_params.bppe = new int[1];
+	source_params.bppe[0] =-1;
+	source_params.betappe = new double[1];
+	source_params.betappe[0] = 10;
+	source_params.Nmod=1;
 
 	double A0 = source_params.A0; 
 	double tc = source_params.tc;
@@ -562,7 +579,7 @@ void test_1()
 		ppephase_derivative[i] = (double *)malloc(length * sizeof(double)); 
 
 
-	ppE_IMRPhenomD_IMR<double> modelppe;
+	ppE_IMRPhenomD_Inspiral<double> modelppe;
 	start5=clock();
 	//for (int i = 0; i<100;i++)
 	modelppe.construct_amplitude_derivative(freq,length,dimensionppe,ppeamp_derivative, &source_params); 
@@ -606,5 +623,9 @@ void test_1()
 	free(ppephase_derivative);
 	free(output);
 	free(outputppe);
+	delete [] params.betappe;
+	delete [] params.bppe;
+	delete [] source_params.betappe;
+	delete [] source_params.bppe;
 }
 

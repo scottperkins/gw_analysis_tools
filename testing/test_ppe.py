@@ -21,24 +21,24 @@ derivp = []
 for i in np.arange(8):
     derivA.append([])
     derivp.append([])
-with open("ppeamplitude_output.csv",'r') as f:
+with open("data/ppeamplitude_output.csv",'r') as f:
     reader = csv.reader(f, delimiter=',')
     for line in reader:
         freqs.append(float(line[0]))
         amp.append(float(line[1]))
-with open("ppephase_output.csv",'r') as f:
+with open("data/ppephase_output.csv",'r') as f:
     reader = csv.reader(f, delimiter=',')
     for line in reader:
         phasec.append(float(line[1]))
-with open("ppereal_waveform_output.csv",'r') as f:
+with open("data/ppereal_waveform_output.csv",'r') as f:
     reader = csv.reader(f, delimiter=',')
     for line in reader:
         waveform_real.append(float(line[1]))
-with open("ppeimag_waveform_output.csv",'r') as f:
+with open("data/ppeimag_waveform_output.csv",'r') as f:
     reader = csv.reader(f, delimiter=',')
     for line in reader:
         waveform_imag.append(float(line[1]))
-with open("ppederiv_amp.csv",'r') as f:
+with open("data/ppederiv_amp.csv",'r') as f:
     reader = csv.reader(f, delimiter=',')
     for line in reader:
         derivA[0].append(float(line[1]))
@@ -49,7 +49,7 @@ with open("ppederiv_amp.csv",'r') as f:
         derivA[5].append(float(line[6]))
         derivA[6].append(float(line[7]))
         derivA[7].append(float(line[8]))
-with open("ppederiv_phase.csv",'r') as f:
+with open("data/ppederiv_phase.csv",'r') as f:
     reader = csv.reader(f, delimiter=',')
     for line in reader:
         derivp[0].append(float(line[1]))

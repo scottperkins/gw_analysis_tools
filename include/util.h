@@ -67,10 +67,12 @@ struct gen_params
 	double phic=0;
 	/*!coalescence time of the binary*/
 	double tc=0;
-	/*!ppE b parameter (power of the frequency)*/
-	int bppe;
-	/*!ppE coefficient for the phase modification*/
-	double betappe;
+	/*!ppE b parameter (power of the frequency) - vector for multiple modifications*/
+	int *bppe;
+	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
+	double *betappe;
+	/*!Number of phase modificatinos*/
+	int Nmod;
 	/*!*angle between angular momentum and the total momentum */
 	double incl_angle;
 	/*! spherical angles for the source location relative to the detector*/
@@ -203,9 +205,12 @@ struct source_parameters
 
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
-	T betappe;
+	T *betappe;
 	/*b power for ppE formalism*/
-	int bppe;
+	int *bppe;
+
+	/*! Number of modifications to phase*/	
+	int Nmod;
 	
 	//Spherical polar angles for the sky location relative to the detector in question
 	T phi;

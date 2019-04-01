@@ -10,8 +10,8 @@ sys.path.append(os.path.abspath("."))
 sys.path.append(os.path.abspath("./src"))
 #sys.path.append(scriptdir+"/src")
 
-os.environ["CC"]="gcc-7"
-os.environ["CXX"]="g++-7"
+#os.environ["CC"]="gcc-7"
+#os.environ["CXX"]="g++-7"
 compile_args = ['-fPIC','-Wall','-O2']
 
 

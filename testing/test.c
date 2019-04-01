@@ -6,9 +6,10 @@ void test1(void)
 {
 	
 	int length = 50;
-	double mass1 = 200;
-	double mass2 = 50;
-	char *method= "IMRPhenomD";
+	double mass1 = 20;
+	double mass2 = 10;
+	char *method= "ppE_IMRPhenomD_Inspiral";
+	//char *method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
 	//double wpr[length];
 	//double wpi[length];
@@ -24,8 +25,15 @@ void test1(void)
 	double incl_angle = 0;
 	double f_ref = 100;
 	double phiRef = 1.0;
+	int mods = 2;
+	double *betappe = (double *)malloc(sizeof(double)*mods);
+	betappe[0] = 10;
+	betappe[1] = 10;
+	int *bppe = (int *)malloc(sizeof(int)*mods);
+	bppe[0] = -1;
+	bppe[1] = -2;
 	
-	double fhigh =100;
+	double fhigh =550;
 	double flow =17;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
@@ -64,19 +72,23 @@ fourier_waveformC(freq, //Freqs
                  tc, //tc                                                                                                                     
                  f_ref, //f_ref                                                                                                             
                  phiRef, //phiRef                                                                                                               
-                 0, //ppE_beta                                                                                                                
-                 0, //ppE_b                                                                                                                   
+                 betappe, //ppE_beta                                                                                                                
+                 bppe, //ppE_b                                                                                                                   
+		 mods, //Nmod
                  0, //incl_angle                                                                                                              
                  0, //theta                                                                                                                   
                  0 //phi                                                                                                                      
                  ); 
 	for (int i = 0; i < length; i ++)
-		printf("%f, %f\n",log(abs(wpr[i])),wpi[i]);
+		//printf("%.10e, %.10e\n",log(abs(wpr[i])),log(abs(wpi[i])));
+		printf("%.10e, %.10e\n",wpr[i],wpi[i]);
 	free(freq);
 	free(wcr);
 	free(wci);
 	free(wpr);
 	free(wpi);
+	free(betappe);
+	free(bppe);
 }
 int main(void)
 {

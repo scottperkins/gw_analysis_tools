@@ -82,20 +82,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			waveform_plus[i] = waveform_plus[i] * .5 *(1+ci*ci);
 		}
 	}
-	else if(generation_method == "IMRPhenomD_LAL")
-	{
-		IMRPhenomD<double> modeld;
-		status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
-		for (int i =0 ; i < length; i++){
-			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
-			waveform_plus[i] = waveform_plus[i] * .5 *(1+ci*ci);
-		}
-	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
 		for (int i =0 ; i < length; i++){
 			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
@@ -107,6 +99,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
 		for (int i =0 ; i < length; i++){
 			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
@@ -214,6 +207,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
@@ -221,6 +215,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
 	}
 	//else if(generation_method == "IMRPhenomPv2")
@@ -294,6 +289,7 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	{
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
@@ -301,6 +297,7 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	{
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
@@ -350,6 +347,7 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	{
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 	}
@@ -357,6 +355,7 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	{
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 	}

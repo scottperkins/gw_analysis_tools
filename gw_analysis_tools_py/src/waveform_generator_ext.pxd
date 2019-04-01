@@ -20,8 +20,9 @@ cdef extern from "util.h" :
         double spin2[3]
         double phic
         double tc
-        int bppe
-        double betappe
+        int *bppe
+        double *betappe
+        int Nmod
         double incl_angle
         double theta
         double phi
