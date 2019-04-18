@@ -439,7 +439,8 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
 	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
-	tc = 2*M_PI*params->tc + tc_shift;
+	//tc = 2*M_PI*params->tc + tc_shift;
+	tc = 2*M_PI*params->tc ;
 	//###################################################################
 	//###################################################################
 	//###################################################################
@@ -538,15 +539,15 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-			
 	//params->f_ref = 0;
-	if(params->f_ref != NULL && params->phiRef != NULL){
+	if(params->f_ref != NULL ){
 		//if(std::is_same< double, T>::value){
 		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
 		//}
 		f_ref = params->f_ref;
+		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
-		phic = params->phiRef + phi_shift;
+		phic = 2*params->phiRef + phi_shift;
 	}
 	//If phic is specified, ignore f_ref phiRef and use phic
 	else{
@@ -558,7 +559,10 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
 	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
-	tc = 2.*M_PI*params->tc/M + tc_shift;
+	//tc_shift = tc_shift - .00561069;
+	//tc_shift = 3.1734968285e2*M;
+	//tc = 2*M_PI*params->tc + tc_shift;
+	tc = 2*M_PI*params->tc ;
 	//################################################################
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
@@ -583,7 +587,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	}
 	amp = (A0 * this->build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(frequency,&lambda,params,&pows,pn_phase_coeffs));
-	phase -=   (T)(tc*M*(frequency-f_ref) + phic);
+	phase -=   (T)(tc*(frequency-f_ref) + phic);
 	return amp * std::exp(-i * phase);
 	}
 
@@ -680,6 +684,12 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
 
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
+	
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"Connection coefficients alpha0"<<lambda.alpha[0]<<std::endl;
+	//	std::cout<<"Connection coefficients alpha1"<<lambda.alpha[1]<<std::endl;
+	//}
+		
 
 	//################################################################
 	//Calculate phase and coalescence time variables
@@ -707,29 +717,10 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
 	//tc_shift = tc_shift - .00561069;
 	//tc_shift = 3.1734968285e2*M;
-	tc = 2*M_PI*params->tc + tc_shift;
+	//tc = 2*M_PI*params->tc + tc_shift;
+	tc = 2*M_PI*params->tc ;
 	
 	cout.precision(15);
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<"dimensionless TC : "<<tc/M<<std::endl;
-	//	std::cout<<"total phase shift: "<<phic<<std::endl;
-	//	std::cout<<"fpeak : "<<params->f3*M<<std::endl;
-	//	std::cout<<"rd : "<<params->fRD*M<<std::endl;
-	//	std::cout<<"damp : "<<params->fdamp*M<<std::endl;
-	//	std::cout<<"gamma3 : "<<lambda.gamma[2]<<std::endl;
-	//	std::cout<<"gamma2 : "<<lambda.gamma[1]<<std::endl;
-	//	std::cout<<"M : "<<M<<std::endl;
-	//	std::cout<<"eta : "<<params->eta<<std::endl;
-	//	std::cout<<"alpha0 : "<<lambda.alpha[0]<<std::endl;
-	//	std::cout<<"alpha1 : "<<lambda.alpha[1]<<std::endl;
-	//	std::cout<<"alpha2 : "<<lambda.alpha[2]<<std::endl;
-	//	std::cout<<"alpha3 : "<<lambda.alpha[3]<<std::endl;
-	//	std::cout<<"alpha4 : "<<lambda.alpha[4]<<std::endl;
-	//	std::cout<<"beta0 : "<<lambda.beta[0]<<std::endl;
-	//	std::cout<<"beta1 : "<<lambda.beta[1]<<std::endl;
-	//	std::cout<<"beta2 : "<<lambda.beta[2]<<std::endl;
-	//	std::cout<<"beta3 : "<<lambda.beta[3]<<std::endl;
-	//}
 	
 	T f;
 	
@@ -739,9 +730,20 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 		if (f<params->f1_phase)
 		{
 			this->precalc_powers_ins_phase(f, M, &pows);
+			
+			if(std::is_same< double, T>::value){
+				//std::cout<<"Dphi_Ins"<<this->Dphase_ins(f, params,pn_phase_coeffs,&lambda)<<" "<<f<<std::endl;
+			}
+		}
+		else
+		{
+
+			if(std::is_same< double, T>::value){
+				//std::cout<<"Dphi_Int"<<this->Dphase_int(f, params,&lambda)<<" "<<f<<std::endl;
+			}
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		phase[j] -=   (T)(params->tc*2*M_PI*f + tc_shift*(f-f_ref) + phic);
+		phase[j] -=   (T)(tc*(f-f_ref) + phic);
 
 	}
 	return 1;
@@ -1407,6 +1409,19 @@ void IMRPhenomD<T>::phase_connection_coefficients(source_parameters<T> *param,
 				lambda_parameters<T> *lambda, 
 				T *pn_coeffs)
 {
+	//T f1 = param->f1_phase;
+	//T M = param->M;
+	//T eta = param->eta;
+	//useful_powers<T> powers;
+	//this->precalc_powers_ins(f1, M, &powers);	
+	//this->precalc_powers_PI(&powers);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"Internal connection 1"<<std::endl;
+	//	std::cout<<f1<<std::endl;
+	//	std::cout<<this->Dphase_ins(f1, param, pn_coeffs, lambda)<<std::endl;
+	//	std::cout<<this->Dphase_int(f1, param, lambda)<<std::endl;
+	//	
+	//}
 	lambda->beta[0] = 0;
 	lambda->beta[1] = 0;
 	lambda->alpha[0] = 0;
@@ -1416,6 +1431,15 @@ void IMRPhenomD<T>::phase_connection_coefficients(source_parameters<T> *param,
 	lambda->beta[0] =this->calculate_beta0(param,lambda,pn_coeffs);
 	lambda->alpha[1] =this->calculate_alpha1(param,lambda);
 	lambda->alpha[0] = this->calculate_alpha0(param,lambda);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"Internal connection"<<std::endl;
+	//	std::cout<<f1<<std::endl;
+	//	std::cout<<this->Dphase_ins(f1, param, pn_coeffs, lambda)<<std::endl;
+	//	std::cout<<this->Dphase_int(f1, param, lambda)<<std::endl;
+	//	std::cout<<lambda->beta[0]<<std::endl;
+	//	std::cout<<lambda->beta[1]<<std::endl;
+	//	
+	//}
 }
 
 template <class T>

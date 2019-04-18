@@ -275,6 +275,11 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	T f;
 	std::complex<T> amp, phase;
+	std::complex<T> *amp_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	std::complex<T> *phase_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	std::complex<T> *hpfac_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	std::complex<T> *hcfac_vec= (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	
 	//T amp, phase;
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
@@ -326,15 +331,28 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
 
 		phase = phase + (std::complex<T>)(2. * epsilon) ;
-		
-		waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
-		waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+		amp_vec[j] = amp/std::complex<T>(2.,0.0);
+		phase_vec[j] = phase;
+		hpfac_vec[j] = hp_factor;
+		hcfac_vec[j] = hc_factor;
+		//waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+		//waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 		hp_factor = 0.;
 		hc_factor = 0.;
 		}
 
 	}
+	//Interpolate phase to set coalescence time to 0
+	
+	for (int j = 0; j<length;j++){
+		waveform_plus[j] = amp_vec[j] * hpfac_vec[j]*std::exp(-i * phase_vec[j]);
+		waveform_cross[j] = amp_vec[j] * hcfac_vec[j]*std::exp(-i * phase_vec[j]);
+	}
 	//}
+	free(amp_vec);
+	free(phase_vec);
+	free(hpfac_vec);
+	free(hcfac_vec);
 	return 1;
 }
 

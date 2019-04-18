@@ -33,6 +33,67 @@ int main(){
 void test_5()
 {
 
+	gen_params params;
+	IMRPhenomD<double> modeld;
+	IMRPhenomD<adouble> modela;
+	int length = 1000;
+	params.mass1 = 200;
+	params.mass2 = 50;
+	params.spin1[0] = 0;
+	params.spin1[1] = 0;
+	params.spin1[2] = -.2;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin2[2] = .9;
+	double *spin1  = params.spin1;
+	double *spin2= params.spin2;
+	params.phic = 2.0;
+	params.tc = 8.0;
+	params.Luminosity_Distance = 800.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=10.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -1;
+	params.Nmod = 1;
+	params.NSflag = false;
+	params.phi = 0;
+	params.theta = 0;
+	params.incl_angle = 0;
+	params.f_ref = 100;
+	params.phiRef = 1.0;
+	
+	double fhigh =100;
+	double flow =17;
+	double df = (fhigh-flow)/(length-1);
+	double *freq = (double *)malloc(sizeof(double) * length);
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+
+	double noise[length];
+	populate_noise(freq,"Hanford_O1_fitted", noise,length);
+	for (int i =0; i<length;i++)
+		noise[i] = noise[i]*noise[i];
+
+	int dimension =8;
+	clock_t start7,end7;
+	double **output = (double **)malloc(dimension * sizeof(**output));	
+	for (int i = 0;i<dimension;i++)
+		output[i] = (double *)malloc(dimension*sizeof(double));
+	
+	start7 = clock();
+	fisher(freq, length, "ppE_IMRPhenomD_Inspiral","Hanford_O1_fitted", output, dimension, 
+				&params );
+
+	end7 = clock();
+	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+	for (int i = 0;i <dimension;i++)
+	{
+		for (int j=0;j <dimension; j++)
+			cout<<output[i][j]<<"   ";
+		cout<<endl;
+	}
+	free(output);
+	free(freq);
 }
 void test_4()
 {
@@ -264,8 +325,10 @@ void test_1()
 	IMRPhenomD<double> modeld;
 	IMRPhenomD<adouble> modela;
 	int length = 1000;
-	params.mass1 = 200;
-	params.mass2 = 50;
+	double chirpm = 49.78;
+	double eta =.21;
+	params.mass1 = calculate_mass1(chirpm,eta);
+	params.mass2 = calculate_mass2(chirpm,eta);
 	string method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
 	double amp[length];
@@ -273,30 +336,29 @@ void test_1()
 	complex<double> waveformout[length];
 	params.spin1[0] = 0;
 	params.spin1[1] = 0;
-	params.spin1[2] = -.2;
+	params.spin1[2] = -.0;
 	params.spin2[0] = 0;
 	params.spin2[1] = 0;
-	params.spin2[2] = .9;
+	params.spin2[2] = .0;
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
 	params.phic = 2.0;
-	params.tc = 8.0;
-	params.Luminosity_Distance = 800.;
+	params.tc = -8.0;
+	params.Luminosity_Distance = 410.;
 	params.betappe = new double[1] ;
-	params.betappe[0]=10.;
+	params.betappe[0]=-100.;
 	params.bppe  =new int[1];
-	params.bppe[0] = -1;
-	params.Nmod = 1;
+	params.bppe[0] = -3;
 	params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;
-	params.f_ref = 100;
-	params.phiRef = 1.0;
+	//params.f_ref = 100;
+	//params.phiRef = 1.0;
 	
-	double fhigh =100;
-	double flow =17;
+	double fhigh =30;
+	double flow =25;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
 

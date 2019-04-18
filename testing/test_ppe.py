@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import csv 
 import numpy as np
-from phenompy.modified_gr import Modified_IMRPhenomD_Full_Freq_detector_frame as imrmod
+from phenompy.modified_gr import Modified_IMRPhenomD_Inspiral_Freq_detector_frame as imrmod
 from phenompy.gr import IMRPhenomD_detector_frame as imr
-from phenompy.utilities import s_solm, mpc
+from phenompy.utilities import s_solm, mpc, calculate_mass1,calculate_mass2
 from phenompy.analysis_utilities import log_likelihood_maximized_coal as ll
 from time import time
 
@@ -62,7 +62,9 @@ with open("data/ppederiv_phase.csv",'r') as f:
         derivp[7].append(float(line[8]))
 
 start = time()
-model = imrmod(mass1 = 200*s_solm, mass2 = 50*s_solm, spin1=-.2, spin2=.9, collision_phase=2, collision_time = 8, Luminosity_Distance=800*mpc, phase_mod=10, bppe= -1)
+eta = .21
+chirpm = 49.78
+model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.0, spin2=.0, collision_phase=2, collision_time = 8, Luminosity_Distance=410*mpc, phase_mod=-100, bppe= -3)
 #model = imr(mass1 = 200*s_solm, mass2 = 50*s_solm, spin1=-.2, spin2=.9, collision_phase=2, collision_time = 8, Luminosity_Distance=800*mpc)
 print("py model time: ",time()-start)
 start = time()

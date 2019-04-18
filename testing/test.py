@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import csv 
 import numpy as np
 from phenompy.gr import IMRPhenomD_detector_frame as imr
-from phenompy.utilities import s_solm, mpc
+from phenompy.utilities import s_solm, mpc, calculate_mass1,calculate_mass2
 from phenompy.analysis_utilities import log_likelihood_maximized_coal as ll
 from time import time
 
@@ -64,7 +64,9 @@ with open("data/deriv_phase.csv",'r') as f:
         derivp[6].append(float(line[7]))
 
 start = time()
-model = imr(mass1 = 200*s_solm, mass2 = 50*s_solm, spin1=-.2, spin2=.9, collision_phase=2, collision_time = 8, Luminosity_Distance=800*mpc)
+eta = .21
+chirpm = 49.78
+model = imr(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.0, spin2=.0, collision_phase=2, collision_time = 8, Luminosity_Distance=410*mpc)
 print("py model time: ",time()-start)
 start = time()
 for i in np.arange(100):

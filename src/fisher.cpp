@@ -8,8 +8,14 @@
 #include "noise_util.h"
 #include "IMRPhenomD.h"
 #include "ppE_IMRPhenomD.h"
+#include "waveform_generator.h"
+
 
 using namespace std;
+
+
+
+
 
 /*!\file 
  *
@@ -19,6 +25,145 @@ using namespace std;
 /*!\brief Calculates the fisher matrix for the given arguments
  */
 void fisher(double *frequency, 
+	int length,/**< if 0, standard frequency range for the detector is used*/ 
+	string generation_method, 
+	string detector, 
+	double **output,/**< double [dimension][dimension]*/
+	int dimension, 
+	gen_params *parameters,
+	//double *parameters,
+	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	double *noise
+	)
+{
+	//populate noise and frequency
+	double internal_noise[length];
+	if (noise==NULL)
+	{
+		//double noise[length];
+		populate_noise(frequency,detector, internal_noise,length);
+		for (int i =0; i<length;i++)
+		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
+	}
+	else
+		for(int i = 0 ; i < length;i++)
+		{
+			internal_noise[i] = noise[i];
+		}
+		
+	//populate derivatives - Derivatives of DETECTOR RESPONSE
+	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
+	for (int i = 0; i<dimension; i++)
+		amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
+	double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
+	for (int i = 0; i<dimension; i++)
+		phase_deriv[i] = (double *)malloc(length*sizeof(double));
+	double *amplitude = (double*)malloc(length*sizeof(double));
+	double *integrand = (double*)malloc(length*sizeof(double));
+	
+
+	calculate_derivatives(amplitude_deriv, 
+			phase_deriv, 
+			amplitude,
+			frequency,
+			length, 
+			detector, 
+			generation_method,
+			parameters);
+
+	//PROBLEM 
+	//calulate fisher elements
+	for (int j=0;j<dimension; j++)
+	{
+		for (int k = 0; k<j; k++)
+		{
+			for (int i =0;i<length;i++)
+			{
+				integrand[i] = 
+					real( (amplitude_deriv[j][i]*amplitude_deriv[k][i]
+					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*phase_deriv[k][i])
+					/internal_noise[i]);
+			}
+			output[j][k] = 4*simpsons_sum(
+						frequency[1]-frequency[0], length, integrand);	
+			output[k][j] = output[j][k];
+		}
+
+	}
+
+	for (int j = 0; j<dimension; j ++)
+	{
+
+		for (int i =0;i<length;i++)
+			integrand[i] = 
+				real( (amplitude_deriv[j][i]*amplitude_deriv[j][i]
+					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*phase_deriv[j][i])
+					/internal_noise[i]);
+		output[j][j] = 4*simpsons_sum(
+					frequency[1]-frequency[0], length, integrand);	
+	}
+		
+
+
+	for (int i =0;i<dimension;i++)
+	{
+		free( amplitude_deriv[i]);
+		free( phase_deriv[i]);
+	}
+	free(amplitude_deriv);
+	free(phase_deriv);
+	free(amplitude);
+	free(integrand);
+}
+
+
+/* \brief Abstraction layer for handling the case separation for the different waveforms
+ *
+ */
+void calculate_derivatives(double  **amplitdue_deriv, 
+       	double **phase_deriv,
+       	double *amplitude,
+       	double *frequencies,
+       	int length, 
+       	string detector, 
+       	string  gen_method,
+       	gen_params *parameters)
+{
+	//Finite difference spacing
+	double epsilon = 1e-5;
+	double *waveform_plus_plus = (double *) malloc(sizeof(double)*length);
+	double *waveform_plus_minus = (double *) malloc(sizeof(double)*length);
+	double *waveform_cross_plus = (double *) malloc(sizeof(double)*length);
+	double *waveform_cross_minus = (double *) malloc(sizeof(double)*length);
+
+	fourier_waveform(frequencies, 
+		length,
+		waveform_plus_plus,
+		waveform_cross_plus,
+		gen_method,
+		parameters);	
+	fourier_waveform(frequencies, 
+		length,
+		waveform_plus_minus,
+		waveform_cross_minus,
+		gen_method,
+		parameters);	
+
+	free(waveform_plus_plus);
+	free(waveform_plus_minus);
+	free(waveform_cross_plus);
+	free(waveform_cross_minus);
+}
+
+/*!\file 
+ *
+ * Uses ADOL-C AutoDiff - outdated in favor of numerical derivatives -All subroutines associated with waveform differentiation and Fisher analysis
+ */
+
+/*!\brief Calculates the fisher matrix for the given arguments
+ */
+void fisher_old(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	string generation_method, 
 	string detector, 
@@ -140,13 +285,6 @@ void fisher(double *frequency,
 	free(amplitude);
 	free(integrand);
 }
-
-
-
-
-
-
-
 
 
 
