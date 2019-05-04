@@ -86,10 +86,6 @@ def animate(i):
     y2= wg.fourier_waveform_py(frequencies, method,param).real
     y= np.asarray(wg.fourier_phase_py(frequencies, method,param))
     x2 = frequencies 
-    for t in np.arange(len(x2)):
-        if x2[t]>28.7 and x2[t]<28.9:
-            print(y[t],x2[t])
-    print()
     line2.set_data(x2,y2)
     line1.set_data(x2,y)
     ax1.set_ylim([y[0]*1.1,y[-1]])

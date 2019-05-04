@@ -85,6 +85,8 @@ struct gen_params
 	double f_ref=0;
 	
 	double phiRef=0;
+
+	bool sky_average;
 };
 
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow
@@ -221,15 +223,23 @@ struct source_parameters
 
 	T SL;
 
-static source_parameters<T> populate_source_parameters(
+	bool sky_average;
+
+static source_parameters<T> populate_source_parameters(gen_params *param_in);
+static source_parameters<T> populate_source_parameters_old(
 			T mass1, 
 			T mass2, 
 			T Luminosity_Distance, 
 			T *spin1,
 			T *spin2, 
 			T phi_c,
-			T t_c) ;
+			T t_c, 
+			bool sky_average) ;
 };
+void initiate_LumD_Z_interp();
+void free_LumD_Z_interp();
+adouble Z_from_DL(adouble DL);
+double Z_from_DL(double DL);
 double calculate_eta(double mass1, double mass2);
 adouble calculate_eta(adouble mass1, adouble mass2);
 

@@ -62,17 +62,42 @@ with open("data/deriv_phase.csv",'r') as f:
         derivp[4].append(float(line[5]))
         derivp[5].append(float(line[6]))
         derivp[6].append(float(line[7]))
-
 start = time()
 eta = .21
 chirpm = 49.78
-model = imr(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.0, spin2=.0, collision_phase=2, collision_time = 8, Luminosity_Distance=410*mpc)
+model = imr(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0, Luminosity_Distance=410*mpc)
 print("py model time: ",time()-start)
 start = time()
 for i in np.arange(100):
     amppy,phase,h = model.calculate_waveform_vector(freqs)
     strain = amppy*np.exp(-1j*phase)
+
 print("py waveform time: ",(time()-start)/100)
+
+
+i1 = int(len(freqs)/3)
+i2 = int(2*len(freqs)/3)
+freq1 = freqs[i1 ]
+freq2 = freqs[i2]
+#negative because phenomd is defined as -phi(f)i
+pycbc1 = phasec[i1]
+pycbc2 = phasec[i2]
+scott1 = phase[i1]
+scott2 = phase[i2]
+tc = (pycbc1 -scott1 - pycbc2 + scott2)/(2*np.pi*(freq1-freq2) )
+phic = -pycbc1 + scott1 + 2*np.pi * freq1*tc
+
+model = imr(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=phic, collision_time = tc, Luminosity_Distance=410*mpc)
+print("py model time: ",time()-start)
+start = time()
+for i in np.arange(100):
+    amppy,phase,h = model.calculate_waveform_vector(freqs)
+    strain = amppy*np.exp(-1j*phase)
+
+
+
+
+
 
 py_deriv = []
 py_derivp = []
@@ -92,8 +117,8 @@ py_derivp[4] = py_derivp[4]*model.symmratio;
 
 start = time()
 #for i in np.arange(100):
-#fish,ifish = model.calculate_fisher_matrix_vector("Hanford_O2",lower_freq=freqs[0], upper_freq=freqs[-1], stepsize=freqs[1]-freqs[0])
-fish,ifish = model.calculate_fisher_matrix_vector("Hanford_O2")
+fish,ifish = model.calculate_fisher_matrix_vector("Hanford_O1",lower_freq=freqs[0], upper_freq=freqs[-1], stepsize=freqs[1]-freqs[0])
+#fish,ifish = model.calculate_fisher_matrix_vector("Hanford_O1")
 print("Fish time: ",time()-start)
 print(fish)
 for i in np.arange(0,7):

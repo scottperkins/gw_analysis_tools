@@ -4,11 +4,12 @@
 
 void test1(void)
 {
-	
-	int length = 50;
+	initiate_LumD_Z_interp_C();	
+	int length = 500;
 	double mass1 = 20;
 	double mass2 = 10;
-	char *method= "ppE_IMRPhenomD_Inspiral";
+	//char *method= "ppE_IMRPhenomD_Inspiral";
+	char *method= "EdGB_IMRPhenomD_log";
 	//char *method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
 	//double wpr[length];
@@ -19,21 +20,21 @@ void test1(void)
 	double chi2 = .1;
 	double phic = 2.0;
 	double tc = 8.0;
-	double Luminosity_Distance = 800.;
+	double Luminosity_Distance = 200.;
 	double phi = 0;
 	double theta = 0;
 	double incl_angle = 0;
 	double f_ref = 100;
 	double phiRef = 1.0;
-	int mods = 3;
+	int mods = 1;
 	double *betappe = (double *)malloc(sizeof(double)*mods);
-	betappe[0] = 10;
-	betappe[1] = 10;
-	betappe[1] = 10;
+	betappe[0] = 67.;
+	//betappe[1] = 10;
+	//betappe[1] = 10;
 	int *bppe = (int *)malloc(sizeof(int)*mods);
 	bppe[0] = -1;
-	bppe[1] = -2;
-	bppe[1] = -3;
+	//bppe[1] = -2;
+	//bppe[1] = -3;
 	
 	double fhigh =550;
 	double flow =17;
@@ -75,6 +76,7 @@ fourier_waveformC(freq, //Freqs
                  0, //theta                                                                                                                   
                  0 //phi                                                                                                                      
                  ); 
+	//betappe[0] = 20;
 fourier_amplitudeC(freq, //Freqs                                                                                                 
                  length, //length of array                                                                                                       
                  amplitude, //waveform plus real                                                                                                    
@@ -92,12 +94,14 @@ fourier_amplitudeC(freq, //Freqs
                  0, //theta                                                                                                                   
                  0 //phi                                                                                                                      
                  ); 
+	//betappe[0] = 20;
 fourier_phaseC(freq, //Freqs                                                                                                 
                  length, //length of array                                                                                                       
                  phase, //waveform plus real                                                                                                    
                  method, //method of waveform generation                                                                                  
                  mass1, //Mass 1 in solar masses                                                                                                 
                  mass2, //Mass2 in solar masses                                                                                                  
+		Luminosity_Distance,
                  0, //spin1x                                                                                                                  
                  0, //spin1y                                                                                                                  
                  chi1, //spin1z                                                                                                               
@@ -115,16 +119,16 @@ fourier_phaseC(freq, //Freqs
                  0, //theta                                                                                                                   
                  0 //phi                                                                                                                      
                  ); 
-	for (int i = 0; i < length; i ++){
-		//printf("%.10e, %.10e\n",log(abs(wpr[i])),log(abs(wpi[i])));
-		printf("%.10e, %.10e\n",wpr[i],wpi[i]);
-	}
+	//for (int i = 0; i < length; i ++){
+	//	//printf("%.10e, %.10e\n",log(abs(wpr[i])),log(abs(wpi[i])));
+	//	printf("%.10e, %.10e\n",wpr[i],wpi[i]);
+	//}
 	for (int i = 0; i < length; i ++){
 		printf("%.10e\n",phase[i]);
 	}
-	for (int i = 0; i < length; i ++){
-		printf("%.10e\n",amplitude[i]);
-	}
+	//for (int i = 0; i < length; i ++){
+	//	printf("%.10e\n",amplitude[i]);
+	//}
 	free(freq);
 	free(wcr);
 	free(wci);
@@ -134,6 +138,7 @@ fourier_phaseC(freq, //Freqs
 	free(amplitude);
 	free(betappe);
 	free(bppe);
+	free_LumD_Z_interp_C();
 }
 int main(void)
 {

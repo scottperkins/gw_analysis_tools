@@ -121,7 +121,7 @@ void fisher(double *frequency,
 /* \brief Abstraction layer for handling the case separation for the different waveforms
  *
  */
-void calculate_derivatives(double  **amplitdue_deriv, 
+void calculate_derivatives(double  **amplitude_deriv, 
        	double **phase_deriv,
        	double *amplitude,
        	double *frequencies,
@@ -131,39 +131,170 @@ void calculate_derivatives(double  **amplitdue_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-5;
-	double *waveform_plus_plus = (double *) malloc(sizeof(double)*length);
-	double *waveform_plus_minus = (double *) malloc(sizeof(double)*length);
-	double *waveform_cross_plus = (double *) malloc(sizeof(double)*length);
-	double *waveform_cross_minus = (double *) malloc(sizeof(double)*length);
+	double epsilon = 1e-7;
+	double epsilonnaught = 1e-7;
+	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
+	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
+	double *amplitude_cross_plus = (double *) malloc(sizeof(double)*length);
+	double *amplitude_cross_minus = (double *) malloc(sizeof(double)*length);
+	double *phase_plus_plus = (double *) malloc(sizeof(double)*length);
+	double *phase_plus_minus = (double *) malloc(sizeof(double)*length);
+	double *phase_cross_plus = (double *) malloc(sizeof(double)*length);
+	double *phase_cross_minus = (double *) malloc(sizeof(double)*length);
+	
+	if (gen_method == "IMRPhenomD"){
+		IMRPhenomD<double> model;
+		int dimension = 7;
+		source_parameters<double> parameters_in;
+		gen_params waveform_params;
+		//parameters_in = parameters_in.populate_source_parameters(parameters->mass1, 
+		//		parameters->mass2,
+		//		parameters->Luminosity_Distance,
+		//		parameters->spin1,
+		//		parameters->spin2,
+		//		parameters->phic,
+		//		parameters->tc);
+		
+		//#################################
+		//TESTING 
+		//parameters->sky_average=true;
+		//#################################
+		parameters_in = parameters_in.populate_source_parameters(parameters); 
+		double param_p[dimension] ;
+		double param_m[dimension] ;
+		double param_in[dimension] ;
+		double param_out[dimension] ;
+		param_in[0] = parameters_in.A0;//seconds
+		param_in[1] = parameters_in.tc;
+		param_in[2] = parameters_in.phic;
+		param_in[3] = parameters_in.chirpmass;//seconds
+		param_in[4] = parameters_in.eta;
+		param_in[5] = parameters_in.chi_s;
+		param_in[6] = parameters_in.chi_a;
 
-	fourier_waveform(frequencies, 
+		waveform_params.sky_average=parameters->sky_average;
+
+		for (int i =0; i<dimension; i++){
+			for( int j =0;j<dimension;j++){
+				param_p[j] = param_in[j] ;
+				param_m[j] = param_in[j] ;
+			}
+			//if(i==0) epsilon = 1e-25;
+			//else epsilon = epsilonnaught;
+			param_p[i] = param_in[i] + epsilon;
+			param_m[i] = param_in[i] - epsilon;
+			//param_p[i] = param_in[i]*(1. + epsilon);
+			//param_m[i] = param_in[i] *(1- epsilon);
+
+			model.change_parameter_basis(param_p, param_out, parameters_in.sky_average);
+			waveform_params.mass1 = param_out[0]/MSOL_SEC;
+			waveform_params.mass2 = param_out[1]/MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_out[2]/MPC_SEC;
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_out[3];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_out[4];
+			waveform_params.phic = param_out[5];
+			waveform_params.tc= param_out[6];
+			waveform_params.incl_angle = parameters->incl_angle;
+			waveform_params.theta = parameters->theta;
+			waveform_params.phi = parameters->phi;
+			waveform_params.NSflag = parameters->NSflag;
+
+
+			fourier_amplitude(frequencies, 
+				length,
+				amplitude_plus_plus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			fourier_phase(frequencies, 
+				length,
+				phase_plus_plus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+
+			model.change_parameter_basis(param_m, param_out,parameters_in.sky_average);
+			waveform_params.mass1 = param_out[0]/MSOL_SEC;
+			waveform_params.mass2 = param_out[1]/MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_out[2]/MPC_SEC;
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_out[3];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_out[4];
+			waveform_params.phic = param_out[5];
+			waveform_params.tc= param_out[6];
+			waveform_params.incl_angle = parameters->incl_angle;
+			waveform_params.theta = parameters->theta;
+			waveform_params.phi = parameters->phi;
+			waveform_params.NSflag = parameters->NSflag;
+			fourier_amplitude(frequencies, 
+				length,
+				amplitude_plus_minus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			fourier_phase(frequencies, 
+				length,
+				phase_plus_minus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			for (int l =0;l<length;l++)
+			{
+				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
+				phase_deriv[i][l] = (phase_plus_plus[l] -phase_plus_minus[l])/(2*epsilon);
+			}
+			//ofstream ampfile
+			//for (int l = 0;l<length;l++)
+			//{
+			//	
+			//}
+			
+		
+				
+		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[0][l] = amplitude_deriv[0][l]*param_in[0] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			phase_deriv[0][l] = phase_deriv[0][l]*param_in[0] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+		}
+			
+	}	
+	fourier_amplitude(frequencies, 
 		length,
-		waveform_plus_plus,
-		waveform_cross_plus,
+		amplitude,
+		//amplitude_cross_plus,
 		gen_method,
 		parameters);	
-	fourier_waveform(frequencies, 
-		length,
-		waveform_plus_minus,
-		waveform_cross_minus,
-		gen_method,
-		parameters);	
 
-	free(waveform_plus_plus);
-	free(waveform_plus_minus);
-	free(waveform_cross_plus);
-	free(waveform_cross_minus);
+	free(amplitude_plus_plus);
+	free(amplitude_plus_minus);
+	free(amplitude_cross_plus);
+	free(amplitude_cross_minus);
+	free(phase_plus_plus);
+	free(phase_plus_minus);
+	free(phase_cross_plus);
+	free(phase_cross_minus);
 }
 
-/*!\file 
- *
- * Uses ADOL-C AutoDiff - outdated in favor of numerical derivatives -All subroutines associated with waveform differentiation and Fisher analysis
+/*!\file *
+ * Uses ADOL-C AutoDiff -All subroutines associated with waveform differentiation and Fisher analysis
  */
 
-/*!\brief Calculates the fisher matrix for the given arguments
+/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  */
-void fisher_old(double *frequency, 
+void fisher_autodiff(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	string generation_method, 
 	string detector, 

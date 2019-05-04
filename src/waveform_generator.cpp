@@ -66,7 +66,8 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	double phi_c = parameters->phic;
 	double t_c = parameters->tc;
 	source_parameters<double> params;
-	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params = params.populate_source_parameters(parameters);
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
 	params.incl_angle = parameters->incl_angle;
@@ -93,6 +94,47 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
 			waveform_plus[i] = waveform_plus[i]* .5 *(1+ci*ci);
 		}
+	}
+	else if(generation_method == "dCS_IMRPhenomD_log")
+	{
+		dCS_IMRPhenomD_log<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod =parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		
+		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i]* .5 *(1+ci*ci);
+		}
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "EdGB_IMRPhenomD_log")
+	{
+		EdGB_IMRPhenomD_log<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i]* .5 *(1+ci*ci);
+		}
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
@@ -191,7 +233,8 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	double phi_c = parameters->phic;
 	double t_c = parameters->tc;
 	source_parameters<double> params;
-	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params = params.populate_source_parameters(parameters);
 
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
@@ -209,6 +252,38 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+	}
+	else if(generation_method == "dCS_IMRPhenomD_log")
+	{
+		dCS_IMRPhenomD_log<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "EdGB_IMRPhenomD_log")
+	{
+		EdGB_IMRPhenomD_log<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
@@ -276,9 +351,10 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	double phi_c = parameters->phic;
 	double t_c = parameters->tc;
 	source_parameters<double> params;
-	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
-	params.f_ref = parameters->f_ref;
-	params.phiRef = parameters->phiRef;
+	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params = params.populate_source_parameters(parameters);
+	//params.f_ref = parameters->f_ref;
+	//params.phiRef = parameters->phiRef;
 
 	if(generation_method == "IMRPhenomD")
 	{
@@ -287,17 +363,33 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
-		params.betappe = parameters->betappe;
-		params.bppe = parameters->bppe;
-		params.Nmod = parameters->Nmod;
+		//params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
+		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	}
+	else if(generation_method == "dCS_IMRPhenomD_log")
+	{
+		//params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		dCS_IMRPhenomD_log<double> ppemodeld;
+		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	}
+	else if(generation_method == "EdGB_IMRPhenomD_log")
+	{
+		//params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		EdGB_IMRPhenomD_log<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
-		params.betappe = parameters->betappe;
-		params.bppe = parameters->bppe;
-		params.Nmod = parameters->Nmod;
+		//params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
@@ -334,7 +426,8 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	double phi_c = parameters->phic;
 	double t_c = parameters->tc;
 	source_parameters<double> params;
-	params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params = params.populate_source_parameters(parameters);
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
 
@@ -350,6 +443,39 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+	}
+	else if(generation_method == "dCS_IMRPhenomD_log")
+	{
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		dCS_IMRPhenomD_log<double> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "EdGB_IMRPhenomD_log")
+	{
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		EdGB_IMRPhenomD_log<double> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{

@@ -55,6 +55,7 @@ int fourier_phaseC(double *frequencies,
 		char *generation_method,
 		double mass1,
 		double mass2,
+		double DL,
 		double spin1x,
 		double spin1y,
 		double spin1z,
@@ -72,6 +73,8 @@ int fourier_phaseC(double *frequencies,
 		double theta,
 		double phi
 		);
+void initiate_LumD_Z_interp_C();
+void free_LumD_Z_interp_C();
 #ifdef __cplusplus
 }
 #endif

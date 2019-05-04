@@ -42,7 +42,8 @@ virtual void fisher_calculation(double *frequency,
 			int *phase_tapes
 			);
 virtual void change_parameter_basis(T *old_param,
-					T *new_param
+					T *new_param,
+					bool sky_average
 					);
 virtual void construct_amplitude_derivative(double *frequencies, 
 				int length,

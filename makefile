@@ -33,6 +33,7 @@ IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 
 CC=g++-7
+#CC=nvcc
 
 .PHONY: all
 all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB)

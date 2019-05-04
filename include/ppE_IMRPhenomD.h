@@ -102,4 +102,38 @@ virtual void construct_phase_derivative(double *frequencies,
 				int *tapes = NULL
 				);
 };
+
+template<class T> 
+class dCS_IMRPhenomD_log: public ppE_IMRPhenomD_Inspiral<T>
+{
+public:
+virtual int construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params);
+virtual T dCS_phase_mod( source_parameters<T> *param);
+virtual T dCS_phase_factor(source_parameters<T> *param);
+
+virtual int construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params);
+
+//virtual T construct_amplitude(T frequency,  source_parameters<T> *params);
+
+virtual int construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params);
+};
+
+template<class T> 
+class EdGB_IMRPhenomD_log: public ppE_IMRPhenomD_Inspiral<T>
+{
+public:
+virtual int construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params);
+
+virtual T EdGB_phase_mod( source_parameters<T> *param);
+virtual T EdGB_phase_factor(source_parameters<T> *param);
+
+//virtual std::complex<T> construct_waveform(T frequency,source_parameters<T> *params );
+
+virtual int construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params);
+
+//virtual T construct_amplitude(T frequency,  source_parameters<T> *params);
+
+virtual int construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params);
+};
+
 #endif

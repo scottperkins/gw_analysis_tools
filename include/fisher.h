@@ -20,7 +20,7 @@ void fisher(double *frequency,
 	double *noise = NULL
 	);
 
-void calculate_derivatives(double  **amplitdue_deriv, 
+void calculate_derivatives(double  **amplitude_deriv, 
        	double **phase_deriv,
        	double *amplitude,
        	double *frequencies,
@@ -28,7 +28,7 @@ void calculate_derivatives(double  **amplitdue_deriv,
        	string detector, 
        	string  gen_method,
        	gen_params *parameters);
-void fisher_old(double *frequency, 
+void fisher_autodiff(double *frequency, 
 	int length,
 	string generation_method, 
 	string detector, 

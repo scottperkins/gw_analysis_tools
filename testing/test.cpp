@@ -17,20 +17,116 @@
 
 using namespace std;
 
-void test_1();
-void test_2();
-void test_3();
-void test_4();
-void test_5();
+void test1();
+void test2();
+void test3();
+void test4();
+void test5();
+void test6();
 
 
 
 int main(){
 
-	test_1();	
+	test1();	
 	return 0;
 }
-void test_5()
+void test6()
+{
+
+	gen_params params;
+	IMRPhenomD<double> modeld;
+	IMRPhenomD<adouble> modela;
+	int length = 8000;
+	double chirpm = 49.78;
+	double eta =.21;
+	params.mass1 = calculate_mass1(chirpm,eta);
+	params.mass2 = calculate_mass2(chirpm,eta);
+	string method= "IMRPhenomD";
+	//string method= "ppE_IMRPhenomD_Inspiral";
+	double amp[length];
+	double phaseout[length];
+	complex<double> waveformout[length];
+	params.spin1[0] = 0;
+	params.spin1[1] = 0;
+	params.spin1[2] = -.2;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin2[2] = .4;
+	double *spin1  = params.spin1;
+	double *spin2= params.spin2;
+	params.phic = .0;
+	params.tc = -.0;
+	params.Luminosity_Distance = 410.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=-100.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -3;
+	params.Nmod = 1;
+	params.NSflag = false;
+	params.phi = 0;
+	params.theta = 0;
+	params.incl_angle = 0;
+	params.sky_average=true;
+	//params.f_ref = 100;
+	//params.phiRef = 1.0;
+	
+	double fhigh =300;
+	double flow =25;
+	double df = (fhigh-flow)/(length-1);
+	double *freq = (double *)malloc(sizeof(double) * length);
+
+	cout<<"Freq spacing "<<df<<endl;
+
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+
+	int dimension = 7;
+	clock_t start7,end7;
+	double **output = (double **)malloc(dimension * sizeof(**output));	
+	double **output2 = (double **)malloc(dimension * sizeof(**output2));	
+
+	for (int i = 0;i<dimension;i++){
+		output[i] = (double *)malloc(dimension*sizeof(double));
+		output2[i] = (double *)malloc(dimension*sizeof(double));
+	}
+	
+	start7 = clock();
+	fisher(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
+				&params );
+
+	end7 = clock();
+	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+	cout.precision(10);
+	for (int i = 0;i <dimension;i++)
+	{
+		for (int j=0;j <dimension; j++)
+			cout<<output[i][j]<<"   ";
+		cout<<endl;
+	}
+	start7 = clock();
+	fisher_autodiff(freq, length, "IMRPhenomD","Hanford_O1_fitted", output2, dimension, 
+				&params );
+
+	end7 = clock();
+	cout<<"TIMING: FISHER autodiff: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+	for (int i = 0;i <dimension;i++)
+	{
+		for (int j=0;j <dimension; j++)
+			cout<<output2[i][j]<<"   ";
+		cout<<endl;
+	}
+	std::cout<<"fractional DIFF: "<<std::endl;
+	for (int i = 0;i <dimension;i++)
+	{
+		for (int j=0;j <dimension; j++)
+			cout<<(output2[i][j]-output[i][j])/output2[i][j]<<"   ";
+		cout<<endl;
+	}
+	free(output);
+	free(output2);
+}
+void test5()
 {
 
 	gen_params params;
@@ -61,6 +157,7 @@ void test_5()
 	params.incl_angle = 0;
 	params.f_ref = 100;
 	params.phiRef = 1.0;
+	params.sky_average=true;
 	
 	double fhigh =100;
 	double flow =17;
@@ -95,7 +192,7 @@ void test_5()
 	free(output);
 	free(freq);
 }
-void test_4()
+void test4()
 {
 
 	cout.precision(15);
@@ -255,7 +352,7 @@ void test_4()
 
 	deactivate_likelihood_function(&plan);	
 }
-void test_3()
+void test3()
 {
 	gen_params params;
 	IMRPhenomPv2<double> modeld;
@@ -287,8 +384,10 @@ void test_3()
 	params.bppe[0] = -1;
 	params.Nmod = 1;
 	params.NSflag = false;
-	params.phi = M_PI/3.;
-	params.theta = M_PI/3;
+	//params.phi = M_PI/3.;
+	//params.theta = M_PI/3;
+	params.phi = 0;
+	params.theta = 0;
 	params.incl_angle = 0;
 	
 	double freq[length];
@@ -304,7 +403,7 @@ void test_3()
 	delete [] params.bppe;
 	
 }
-void test_2()
+void test2()
 {
 	double alpha, epsilon;
 	IMRPhenomPv2<double> modelP;
@@ -318,13 +417,14 @@ void test_2()
 	double d = modelP.d(2,1,0,.4);
 	cout<<d<<endl;
 }
-void test_1()
+void test1()
 {
 
+	initiate_LumD_Z_interp();
 	gen_params params;
 	IMRPhenomD<double> modeld;
 	IMRPhenomD<adouble> modela;
-	int length = 1000;
+	int length = 5000;
 	double chirpm = 49.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
@@ -336,29 +436,30 @@ void test_1()
 	complex<double> waveformout[length];
 	params.spin1[0] = 0;
 	params.spin1[1] = 0;
-	params.spin1[2] = -.0;
+	params.spin1[2] = -.2;
 	params.spin2[0] = 0;
 	params.spin2[1] = 0;
-	params.spin2[2] = .0;
+	params.spin2[2] = .4;
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
-	params.phic = 2.0;
-	params.tc = -8.0;
+	params.phic = .0;
+	params.tc = -.0;
 	params.Luminosity_Distance = 410.;
 	params.betappe = new double[1] ;
-	params.betappe[0]=-100.;
+	params.betappe[0]=-50;
 	params.bppe  =new int[1];
-	params.bppe[0] = -3;
+	params.bppe[0] = -1;
 	params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;
-	//params.f_ref = 100;
-	//params.phiRef = 1.0;
+	params.sky_average=true;
+	//params.f_ref = 30.5011;
+	//params.phiRef =58.944425/2.;
 	
-	double fhigh =30;
-	double flow =25;
+	double fhigh =200;
+	double flow =10;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
 
@@ -479,7 +580,9 @@ void test_1()
 
 //###################################################################################################
 	
-	method = "ppE_IMRPhenomD_Inspiral";
+	//method = "ppE_IMRPhenomD_Inspiral";
+	//method = "dCS_IMRPhenomD_log";
+	method = "EdGB_IMRPhenomD_log";
 	clock_t  startppe, endppe;
 	startppe = clock(); 
 	fourier_waveform(freq, length, waveformout,method,&params);
@@ -495,6 +598,7 @@ void test_1()
 	fourier_phase(freq, length, phaseout,method,&params);
 	endppe=clock();
 	cout<<"TIMING phase ppE: "<<(double)(endppe-startppe)/CLOCKS_PER_SEC<<endl;
+	params.betappe[0]=2.;
 
 	//ofstream ampfile;
 	ampfile.open("testing/data/ppeamplitude_output.csv");
@@ -506,8 +610,10 @@ void test_1()
 	//ofstream phasefile;
 	phasefile.open("testing/data/ppephase_output.csv");
 	phasefile.precision(15);
-	for(int i = 0;i<length;i++)
+	for(int i = 0;i<length;i++){
 		phasefile<<freq[i]<<','<<phaseout[i]<<endl;
+		//std::cout<<phaseout[i]<<std::endl;
+	}
 	phasefile.close();
 
 	//ofstream wavefilereal;
@@ -540,9 +646,9 @@ void test_1()
 	double spin1vec[3] = {0,0,parameters[3]};
 	double spin2vec[3] = {0,0,parameters[4]};
 	source_parameters<double> source_params;
-	source_params = source_params.populate_source_parameters(parameters[0],
+	source_params = source_params.populate_source_parameters_old(parameters[0],
 			parameters[1],parameters[2],spin1vec,spin2vec,parameters[5],
-			parameters[6]);
+			parameters[6],false);
 
 	lambda_parameters<double> lambda;
 	modeld.assign_lambda_param(&source_params, &lambda);
@@ -608,6 +714,7 @@ void test_1()
 
 	end7 = clock();
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+	cout.precision(4);
 	for (int i = 0;i <dimension;i++)
 	{
 		for (int j=0;j <dimension; j++)
@@ -689,5 +796,6 @@ void test_1()
 	delete [] params.bppe;
 	delete [] source_params.betappe;
 	delete [] source_params.bppe;
+	free_LumD_Z_interp();
 }
 

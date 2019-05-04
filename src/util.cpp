@@ -5,26 +5,192 @@
 #include <string>
 #include <complex>
 #include <iostream>
+#include <fstream>
 #include "adolc/adouble.h"
+#include <gsl/gsl_interp.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_errno.h>
+
+const std::string PROJECT_DIRECTORY="/Users/sperkins/opt/gw_analysis_tools";
 
 /*! \file
  *
  * General utilities that are method independent
  */
+//#######################################################################################
+//Interpolate Z to DL once per import
+const int npts =100000;
+double DLvec[npts];
+double Zvec[npts];
+gsl_interp_accel *Z_DL_accel_ptr = gsl_interp_accel_alloc();
+gsl_spline *Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
+void initiate_LumD_Z_interp()
+{
+	std::fstream data_table;
+	data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
+	std::vector<std::string> row;
+	std::string line, word, temp;
+	int i =0,j=0;
+	if(data_table){
+		while(std::getline(data_table,line)){
+			std::stringstream lineStream(line);	
+			std::string item;
+			while(std::getline(lineStream, item, ','))
+			{
+				if(i<npts){
+				if(j==0){DLvec[i]=std::stod(item);}
+				else if(j==1){Zvec[i]=std::stod(item);}
+				j++;
+				}
+			}
+			j = 0;
+			i ++;
+		}
+	}
+	gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
+	data_table.close();
+}
+void free_LumD_Z_interp()
+{
+	gsl_interp_accel_free(Z_DL_accel_ptr);
+	gsl_spline_free(Z_DL_spline_ptr);
+}
+//#######################################################################################
 
-/*! \brief Builds the structure that shuttles source parameters between functions
+
+
+
+adouble Z_from_DL(adouble DL)
+{
+	//std::fstream data_table;
+	//data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
+	//int npts =100000;
+	//double DLvec[npts];
+	//double Zvec[npts];
+	//std::vector<std::string> row;
+	//std::string line, word, temp;
+	//int i =0,j=0;
+	//if(data_table){
+	//	while(std::getline(data_table,line)){
+	//		std::stringstream lineStream(line);	
+	//		std::string item;
+	//		while(std::getline(lineStream, item, ','))
+	//		{
+	//			if(j==0){DLvec[i]=std::stod(item);}
+	//			else if(j==1){Zvec[i]=std::stod(item);}
+	//			j++;
+	//		}
+	//		j = 0;
+	//		i ++;
+	//	}
+	//}
+	//gsl_interp_accel *Z_DL_accel_ptr = gsl_interp_accel_alloc();
+	//gsl_spline *Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
+	//gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
+	adouble Z = 0;
+	Z = (adouble)gsl_spline_eval(Z_DL_spline_ptr, DL.value(), Z_DL_accel_ptr);
+	return Z;
+}
+
+double Z_from_DL(double DL)
+{
+	//std::fstream data_table;
+	//data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
+	//int npts =100000;
+	//double DLvec[npts];
+	//double Zvec[npts];
+	//std::vector<std::string> row;
+	//std::string line, word, temp;
+	//int i =0,j=0;
+	//if(data_table){
+	//	while(std::getline(data_table,line)){
+	//		std::stringstream lineStream(line);	
+	//		std::string item;
+	//		while(std::getline(lineStream, item, ','))
+	//		{
+	//			if(i<npts){
+	//			if(j==0){DLvec[i]=std::stod(item);}
+	//			else if(j==1){Zvec[i]=std::stod(item);}
+	//			j++;
+	//			}
+	//		}
+	//		j = 0;
+	//		i ++;
+	//	}
+	//}
+	//gsl_interp_accel *Z_DL_accel_ptr = gsl_interp_accel_alloc();
+	//gsl_spline *Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
+	//gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
+	double Z = 0;
+	double DLtemp = DL;
+	if(DL>DLvec[npts-1]){
+		std::cout<<"WARNING: DL exceeded limit: setting to highest value in table"<<std::endl;
+		DLtemp=DLvec[npts-1];
+		std::cout<<DL<<std::endl;
+		std::cout<<DLtemp<<std::endl;
+	}
+	
+	Z = gsl_spline_eval(Z_DL_spline_ptr, DLtemp, Z_DL_accel_ptr);
+	return Z;
+}
+
+/*! \brief Builds the structure that shuttles source parameters between functions -updated version to incorporate structure argument
  *
  * Populates the structure that is passed to all generation methods - contains all relavent source parameters 
  */
 template <class T>
 source_parameters<T> source_parameters<T>::populate_source_parameters(
+			gen_params *param_in
+			) 
+{
+
+	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
+	source_parameters params;
+	params.mass1 = param_in->mass1*MSOL_SEC;
+	params.mass2 = param_in->mass2*MSOL_SEC;
+	params.spin1x = param_in->spin1[0];
+	params.spin2x = param_in->spin2[0];
+	params.spin1y = param_in->spin1[1];
+	params.spin2y = param_in->spin2[1];
+	params.spin1z = param_in->spin1[2];
+	params.spin2z = param_in->spin2[2];
+	params.chi_s = (1./2)*(params.spin1z+params.spin2z);
+	params.chi_a = (1./2)*(params.spin1z-params.spin2z);
+	//params.chirpmass = (adouble)calculate_chirpmass((double)params.mass1.value(),(double)params.mass2.value());
+	params.chirpmass = calculate_chirpmass(params.mass1,params.mass2);
+	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());	
+	params.eta = calculate_eta(params.mass1,params.mass2);	
+	params.M = params.mass1 + params.mass2;
+	params.chi_eff = (params.mass1*(params.spin1z)+ params.mass2*(params.spin2z))/(params.M);
+	params.chi_pn = params.chi_eff - (38*params.eta/113)*(2*params.chi_s);
+	params.DL = param_in->Luminosity_Distance*MPC_SEC;
+	params.delta_mass = sqrt(1.-4*params.eta);
+	params.phic = param_in->phic;
+	params.tc = param_in->tc;
+	if (param_in->sky_average){
+		params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+		params.sky_average=true;
+	}
+	else{
+		params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+		params.sky_average=false;
+	}
+	return params;
+}
+/*! \brief Builds the structure that shuttles source parameters between functions- outdated in favor of structure argument 
+ *
+ * Populates the structure that is passed to all generation methods - contains all relavent source parameters 
+ */
+template <class T>
+source_parameters<T> source_parameters<T>::populate_source_parameters_old(
 			T mass1, /**< mass of the larger body - in Solar Masses*/ 
 			T mass2, /**< mass of the smaller body - in Solar Masses*/
 			T Luminosity_Distance,/**< Luminosity Distance in Mpc*/ 
 			T *spin1,/** spin vector of the larger body  {sx,sy,sz}*/
 			T *spin2, /** spin vector of the smaller body  {sx,sy,sz}*/
 			T phi_c,/** coalescence phase*/
-			T t_c /** coalescence time*/
+			T t_c ,/** coalescence time*/
+			bool sky_average
 			) 
 {
 
@@ -52,7 +218,12 @@ source_parameters<T> source_parameters<T>::populate_source_parameters(
 	params.phic = phi_c;
 	params.tc = t_c;
 	//params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
-	params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	if(sky_average){
+		params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	}
+	else{
+		params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	}
 	return params;
 }
 
@@ -126,11 +297,13 @@ long factorial(long num)
 
 double pow_int(double base, int power)
 {
+	if (power == 0) return 1.;
 	double prod = 1;
 	int pow = std::abs(power);
-	for (int i = 0; i< pow;i++)
+	for (int i = 0; i< pow;i++){
 		prod = prod * base;
-	if (pow>0)
+	}
+	if (power>0)
 		return prod;
 	else
 		return 1./prod;

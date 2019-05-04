@@ -44,9 +44,10 @@ void IMRPhenomD<T>::fisher_calculation(double *frequency,
 		//DOUBLE CHECK ORDER OF PARAMETERS
 		//input_params = source_parameters<double>::populate_source_parameters(parameters[0],
 		//	parameters[1],parameters[2],spin1vec,spin2vec,parameters[5],parameters[6]);
-		input_params = source_parameters<double>::populate_source_parameters(parameters->mass1,
-			parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
-			parameters->spin2,parameters->phic,parameters->tc);
+		//input_params = source_parameters<double>::populate_source_parameters(parameters->mass1,
+		//	parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
+		//	parameters->spin2,parameters->phic,parameters->tc);
+		input_params = source_parameters<double>::populate_source_parameters(parameters);
 		//Need the splitting frequency	
 		lambda_parameters<double> lambda, *lambda_ptr;
 		modeld.assign_lambda_param(&input_params, &lambda);
@@ -271,14 +272,14 @@ void IMRPhenomD<T>::amplitude_tape(source_parameters<double> *input_params, /**<
 		parameters[5] <<= input_params-> chi_s;
 		parameters[6] <<= input_params-> chi_a;
 		//parameters[3] = parameters[3]/MSOL_SEC;
-		model.change_parameter_basis(parameters, new_params);
+		model.change_parameter_basis(parameters, new_params,input_params->sky_average);
 
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
 		source_parameters<adouble> intermediate_params;
-		intermediate_params = intermediate_params.populate_source_parameters(new_params[0]/MSOL_SEC,
+		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
-				new_params[6]);
+				new_params[6],input_params->sky_average);
 
 		adouble freqs[1] = {freq};
 		adouble amp_temp[1];
@@ -328,13 +329,14 @@ void IMRPhenomD<T>::phase_tape(source_parameters<double> *input_params, /**< sou
 		parameters[6] <<= input_params-> chi_a;
 		//parameters[3] = parameters[3]/MSOL_SEC;
 		adouble new_params[7];
-		model.change_parameter_basis(parameters, new_params);
+		model.change_parameter_basis(parameters, new_params,input_params->sky_average);
 		source_parameters<adouble> intermediate_params;
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
-		intermediate_params = intermediate_params.populate_source_parameters(new_params[0]/MSOL_SEC,
+		
+		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
-				new_params[6]);
+				new_params[6], input_params->sky_average);
 		adouble freqs[1] = {freq};
 		adouble phase_temp[1];
 		model.construct_phase(freqs, 1,  phase_temp, &intermediate_params);
@@ -349,7 +351,8 @@ void IMRPhenomD<T>::phase_tape(source_parameters<double> *input_params, /**< sou
  */
 template <class T>
 void IMRPhenomD<T>::change_parameter_basis(T *old_param, /**< array of old params, order {A0, tc, phic, chirpmass, eta, spin1, spin2}*/
-					T *new_param /**< output new array: order {m1,m2,DL, spin1,spin2,phic,tc}*/
+					T *new_param, /**< output new array: order {m1,m2,DL, spin1,spin2,phic,tc}*/
+					bool sky_average
 					)
 {
 	T m1, m2, DL, spin1,spin2;
@@ -358,8 +361,18 @@ void IMRPhenomD<T>::change_parameter_basis(T *old_param, /**< array of old param
 	//T chirpmass_sec = old_param[3]*MSOL_SEC;
 	//DL =1/(old_param[0] * sqrt(30/M_PI) /(chirpmass_sec*chirpmass_sec)/
 	//		pow(M_PI*chirpmass_sec,-7./6))/MPC_SEC  ;
-	DL =1/(old_param[0] * sqrt(30/M_PI) /(old_param[3]*old_param[3])/
+	//#############################################
+	//Sky averaged
+	if(sky_average){
+		DL =1/(old_param[0] * sqrt(30/M_PI) /(old_param[3]*old_param[3])/
 			pow(M_PI*old_param[3],-7./6))  ;
+	}
+	//#############################################
+	//Not sky averaged
+	else{
+		DL =1/(old_param[0] * sqrt(192./(40*M_PI)) /(old_param[3]*old_param[3])/
+				pow(M_PI*old_param[3],-7./6))  ;
+	}
 	spin1 = old_param[5]+old_param[6];
 	spin2 = old_param[5]-old_param[6];
 	T spinvec1[3] ={0.,0.,spin1};
@@ -441,6 +454,10 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
 	//tc = 2*M_PI*params->tc + tc_shift;
 	tc = 2*M_PI*params->tc ;
+	if(std::is_same< double, T>::value){
+		//std::cout<<params->mass1/MSOL_SEC<<" "<<params->mass2/MSOL_SEC<<std::endl;
+		//std::cout<<params->chi_s<<" "<<params->chi_a<<std::endl;
+	}
 	//###################################################################
 	//###################################################################
 	//###################################################################
@@ -720,7 +737,6 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//tc = 2*M_PI*params->tc + tc_shift;
 	tc = 2*M_PI*params->tc ;
 	
-	cout.precision(15);
 	
 	T f;
 	
@@ -731,16 +747,9 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 		{
 			this->precalc_powers_ins_phase(f, M, &pows);
 			
-			if(std::is_same< double, T>::value){
+			//if(std::is_same< double, T>::value){
 				//std::cout<<"Dphi_Ins"<<this->Dphase_ins(f, params,pn_phase_coeffs,&lambda)<<" "<<f<<std::endl;
-			}
-		}
-		else
-		{
-
-			if(std::is_same< double, T>::value){
-				//std::cout<<"Dphi_Int"<<this->Dphase_int(f, params,&lambda)<<" "<<f<<std::endl;
-			}
+			//}
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 		phase[j] -=   (T)(tc*(f-f_ref) + phic);
@@ -1186,8 +1195,8 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        //T sigma1 =0;
-        T sigma1 = lambda->sigma[1];
+        T sigma1 =0;
+        //T sigma1 = lambda->sigma[1];
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
@@ -1246,8 +1255,8 @@ T IMRPhenomD<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambd
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        T sigma1 =lambda->sigma[1];
-        //T sigma1 =0 ;
+        //T sigma1 =lambda->sigma[1];
+        T sigma1 =0 ;
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
