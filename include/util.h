@@ -23,6 +23,10 @@ const double MSOL_SEC =4.925491025543575903411922162094833998e-6 ;
 //const double MPC_SEC = 3085677581.e13/c; 
 const double MPC_SEC = 3.085677581491367278913937957796471611e22/c; 
 
+
+
+#define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
+#define PBWIDTH 60
 //GSL versions of the constants, but G seems off..
 //const double gamma_E = M_EULER;
 //const double c = GSL_CONST_MKSA_SPEED_OF_LIGHT;
@@ -240,6 +244,14 @@ void initiate_LumD_Z_interp();
 void free_LumD_Z_interp();
 adouble Z_from_DL(adouble DL);
 double Z_from_DL(double DL);
+
+
+void printProgress (double percentage);
+
+void allocate_3D_array(double ***array, int dim1, int dim2, int dim3);
+
+void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3);
+
 double calculate_eta(double mass1, double mass2);
 adouble calculate_eta(adouble mass1, adouble mass2);
 

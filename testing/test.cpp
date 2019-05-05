@@ -14,6 +14,7 @@
 #include "ppE_IMRPhenomD.h"
 #include "IMRPhenomP.h"
 #include "waveform_generator_C.h"
+#include "mcmc_sampler.h"
 
 using namespace std;
 
@@ -23,13 +24,35 @@ void test3();
 void test4();
 void test5();
 void test6();
+void test7();
+double test_ll(double *pos, int dim);
+double test_lp(double *pos, int dim);
 
 
 
 int main(){
 
-	test1();	
+	test7();	
 	return 0;
+}
+double test_ll(double *pos, int dim)
+{
+	return std::exp(-pos[0]*pos[0]/(4.));
+}
+double test_lp(double *pos, int dim)
+{
+	return 1;
+}	
+void test7()
+{
+	int dimension = 1;
+	int N_steps = 100;
+	int chain_N= 3;
+	double ***output ;
+	allocate_3D_array(output, chain_N, dimension, N_steps);
+	
+
+	deallocate_3D_array(output, chain_N, dimension, N_steps);
 }
 void test6()
 {

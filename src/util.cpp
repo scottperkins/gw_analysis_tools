@@ -132,6 +132,16 @@ double Z_from_DL(double DL)
 	
 	Z = gsl_spline_eval(Z_DL_spline_ptr, DLtemp, Z_DL_accel_ptr);
 	return Z;
+
+}
+
+void printProgress (double percentage)
+{
+    	int val = (int) (percentage * 100);
+    	int lpad = (int) (percentage * PBWIDTH);
+    	int rpad = PBWIDTH - lpad;
+    	printf ("\r%3d%% [%.*s%*s]", val, lpad, PBSTR, rpad, "");
+    	fflush (stdout);
 }
 
 /*! \brief Builds the structure that shuttles source parameters between functions -updated version to incorporate structure argument
@@ -330,6 +340,25 @@ adouble cbrt_internal(adouble base)
 }
 
 
+void allocate_3D_array(double ***array, int dim1, int dim2, int dim3)
+{
+	array = (double ***) malloc(sizeof(double**)*dim1);
+	for (int i = 0; i<dim1; i ++)
+	{
+		array[i] = (double**)malloc(sizeof(double *) * dim2);
+		for (int j = 0 ; j< dim2; j++)
+			array[i][j] = (double *)malloc(sizeof(double) * dim3);
+	}
+}
+void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
+{
+	for(int i =0; i < dim1; i++)
+	{
+		for(int j =0 ; j<dim2; j++)
+			free(array[i][j]);
+		free(array[i]);
+	}
+}
 
 template <class T>
 std::complex<T> cpolar(T mag, T phase)
