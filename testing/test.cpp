@@ -15,6 +15,13 @@
 #include "IMRPhenomP.h"
 #include "waveform_generator_C.h"
 #include "mcmc_sampler.h"
+#include "gsl/gsl_sf_gamma.h"
+#include "gsl/gsl_rng.h"
+#include "adolc/adouble.h"
+#include "adolc/drivers/drivers.h"
+#include "adolc/taping.h"
+#include "limits"
+
 
 using namespace std;
 
@@ -25,35 +32,196 @@ void test4();
 void test5();
 void test6();
 void test7();
+void test8();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
+double test_lp_GW(double *pos, int dim);
+void test_fisher(double *pos, int dim, double **fisher);
+double log_student_t (double *x,int dim);
+double log_neil_proj3 (double *x,int dim);
+void fisher_neil_proj3 (double *x,int dim, double **fish);
+adouble dist(adouble *pos, int dimension);
 
+const gsl_rng_type* Y;
+gsl_rng * g;
 
 
 int main(){
 
-	test7();	
+	//gsl_rng_env_setup();
+	//Y = gsl_rng_default;
+	//g = gsl_rng_alloc(Y);
+	test8();	
 	return 0;
 }
-double test_ll(double *pos, int dim)
+void test8()
 {
-	return std::exp(-pos[0]*pos[0]/(4.));
+	//#########################################################
+	//Make trial data
+	gen_params params;
+	IMRPhenomD<double> modeld;
+	int length = 1600;
+	double chirpm = 49.78;
+	double eta =.21;
+	params.mass1 = calculate_mass1(chirpm,eta);
+	params.mass2 = calculate_mass2(chirpm,eta);
+	string method= "IMRPhenomD";
+	//string method= "ppE_IMRPhenomD_Inspiral";
+	complex<double> waveformout[length];
+	params.spin1[0] = 0;
+	params.spin1[1] = 0;
+	params.spin1[2] = -.8;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin2[2] = .7;
+	double *spin1  = params.spin1;
+	double *spin2= params.spin2;
+	params.phic = .0;
+	params.tc = -.0;
+	params.Luminosity_Distance = 410.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=-50;
+	params.bppe  =new int[1];
+	params.bppe[0] = -1;
+	params.Nmod = 1;
+	params.NSflag = false;
+	params.phi = 0;
+	params.theta = 0;
+	params.incl_angle = 0;
+	params.sky_average=false;
+	//params.f_ref = 30.5011;
+	//params.phiRef =58.944425/2.;
+	
+	double fhigh =300;
+	double flow =10;
+	double df = (fhigh-flow)/(length-1);
+	double *freq = (double *)malloc(sizeof(double) * length);
+
+	cout<<"Freq spacing "<<df<<endl;
+
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+
+	clock_t  start, end;
+	start = clock(); 
+	fourier_waveform(freq, length, waveformout,method,&params);
+	end=clock();
+
+	double noise[length];
+	populate_noise(freq,"Hanford_O1_fitted", noise,length);
+	for (int i =0; i<length;i++)
+		noise[i] = noise[i]*noise[i];
+	//#########################################################
+	//#########################################################
+	//MCMC options
+	int dimension = 5;
+	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
+	int N_steps = 15000;
+	int chain_N= 8;
+	double ***output;
+	output = allocate_3D_array( chain_N, N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 10;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	double temp_step = 100./(chain_N);
+	for(int i =0; i < chain_N;  i ++)
+		//chain_temps[i]=1.;
+		chain_temps[i] = 1+ temp_step * i;
+	//double chain_temps[chain_N] ={1};
+	
+	//#########################################################
+	//GW options
+	int num_detectors =1;
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =length;
+	std::complex<double> **data= (std::complex<double>**)malloc(
+			sizeof(std::complex<double>*)*num_detectors);
+	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
+	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
+	std::string *detectors = (std::string*)malloc(sizeof(std::string)*10*num_detectors);
+	detectors[0] = "Hanford";
+	std::string generation_method = "IMRPhenomD";
+	
+	for (int i =0; i<num_detectors; i++){
+		data[i] = (std::complex<double> *)malloc(
+			sizeof(std::complex<double>)*data_length[0]);
+		
+		psd[i] = (double *)malloc(sizeof(double)*data_length[0]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[0]);
+		for(int j = 0; j<data_length[0]; j++){
+			frequencies[i][j] = freq[j];	
+			psd[i][j] = noise[j];	
+			data[i][j] = waveformout[j];	
+		}
+	}
+	
+	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp_GW, num_detectors, data, psd, frequencies, data_length, detectors, generation_method,"","","");	
+	std::cout<<"ENDED"<<std::endl;
+
+	ofstream mcmc_out;
+	mcmc_out.open("testing/data/mcmc_output.csv");
+	mcmc_out.precision(15);
+	//for(int i = 0;i<chain_N;i++){
+	for(int j = 0; j<N_steps;j++){
+		//for(int k = 0; k<dimension; k++){
+			mcmc_out<<std::exp(output[0][j][0])/MPC_SEC<<" , "<<std::exp(output[0][j][1])/MSOL_SEC<<" , "<<output[0][j][2]<<" , "<<output[0][j][3]<<" , "<<output[0][j][4]<<endl;
+		//}
+	}
+	//}
+	mcmc_out.close();
+
+	deallocate_3D_array(output, chain_N, dimension, N_steps);
+	for(int i =0; i< num_detectors; i++){
+		free(data[i]);
+		free(psd[i]);
+		free(frequencies[i]);
+	}
+	free(data);
+	free(psd);
+	free(frequencies );
+	free(detectors);
+	free(data_length);
 }
-double test_lp(double *pos, int dim)
-{
-	return 1;
-}	
 void test7()
 {
-	int dimension = 1;
-	int N_steps = 100;
-	int chain_N= 3;
-	double ***output ;
-	allocate_3D_array(output, chain_N, dimension, N_steps);
+	int dimension = 2;
+	double initial_pos[2]={6,5.};
+
 	
+	int N_steps = 50000;
+	int chain_N= 40;
+	double ***output;
+	output = allocate_3D_array( chain_N, N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 300;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	double temp_step = 20./(chain_N);
+	for(int i =0; i < chain_N;  i ++)
+		//chain_temps[i]=1.;
+		chain_temps[i] = 1+ temp_step * i;
+	//double chain_temps[chain_N] ={1};
+	
+	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3 );	
+	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,"","","" );	
+	std::cout<<"ENDED"<<std::endl;
+
+	ofstream mcmc_out;
+	mcmc_out.open("testing/data/mcmc_output.csv");
+	mcmc_out.precision(15);
+	//for(int i = 0;i<chain_N;i++){
+	for(int j = 0; j<N_steps;j++){
+		//for(int k = 0; k<dimension; k++){
+			mcmc_out<<output[0][j][0]<<" , "<<output[0][j][1]<<endl;
+		//}
+	}
+	//}
+	mcmc_out.close();
 
 	deallocate_3D_array(output, chain_N, dimension, N_steps);
 }
+
 void test6()
 {
 
@@ -822,3 +990,79 @@ void test1()
 	free_LumD_Z_interp();
 }
 
+void fisher_neil_proj3 (double *pos,int dimension, double **fisher)
+{
+	//int alpha = (int)(gsl_rng_uniform(g)*1e7);
+ 	adouble* x = new adouble[dimension];
+ 	adouble y = 1;  
+ 	double out =1;
+ 	trace_on(1);
+ 	for (int i =0; i< dimension; i++){
+ 	        x[i]<<= pos[i];
+ 	}
+ 	y =-1* log(dist(x, dimension));
+ 	y>>=out;
+ 	delete[] x;
+ 	trace_off();
+ 	hessian(1,dimension,pos,fisher);
+	for (int i = 0 ; i<dimension; i++){
+        	for (int j=0;j<i;j++){
+        	        if (i!=j) fisher[j][i] =fisher[i][j];
+        	}
+	}
+
+}
+adouble dist(adouble *pos, int dimension){
+        adouble x = pos[0];
+        adouble y = pos[1];
+        adouble exponent_1 = - pow(x,2) - pow(9 + 4*pow(x,2) + 8*y , 2);
+        adouble exponent_2 = - 8*pow(x,2) - 8*pow(y - 2, 2);
+        adouble out =( 16/(3 * M_PI) ) * ( exp(exponent_1) + 0.5 * exp(exponent_2) ); 
+ 
+        return out;
+}
+double log_neil_proj3 (double *c,int dim)
+{
+	double x = c[0];
+	double y = c[1];
+	double prefactor = 16./(M_PI*3.);
+	double pow1 = -x*x - pow((9+4*x*x +8*y),2);
+	double pow2 = -8*x*x -8*pow(y-2,2);
+	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
+	//return 2.;
+}
+double log_student_t (double *x,int dim){
+
+	double  mu=1, nu=3,  sigma=1;
+        double g1 = gsl_sf_gamma( (nu + 1) / 2 ) ;
+        double g2 = gsl_sf_gamma( (nu/2) );
+        double parenth = 1 + (1/nu) *pow( (x[0] - mu) / sigma, 2 );
+        return log(g1 / (g2 * sqrt(nu * M_PI ) * sigma ) * pow(parenth,-(nu+1)/2    ));
+}
+void test_fisher(double *pos, int dim, double **fisher)
+{
+	fisher[0][0] = .5;
+}
+double test_ll(double *pos, int dim)
+{
+	//std::cout<<"LL"<<std::endl;
+	//std::cout<<"Pos in LL: "<<pos[0]<<std::endl;
+	return -pos[0]*pos[0]/(4.);
+	//return  0;
+}
+double test_lp(double *pos, int dim)
+{
+	//return 0;
+	return -pos[0]*pos[0]/(10.)- pos[1]*pos[1]/20.;
+}	
+double test_lp_GW(double *pos, int dim)
+{
+	double a = std::numeric_limits<double>::infinity();
+	//Flat priors across physical regions
+	if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
+	if (std::exp(pos[1])/MSOL_SEC<2 || std::exp(pos[1])/MSOL_SEC>100){return a;}
+	if ((pos[2])<.1 || (pos[2])>.245){return a;}
+	if ((pos[3])<-.9 || (pos[3])>.9){return a;}
+	if ((pos[4])<-.9 || (pos[4])>.9){return a;}
+	else {return 0.;}
+}

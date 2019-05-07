@@ -43,8 +43,8 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_mod( source_parameters<T> *param)
 {
  	T M = param->M;	
 	T DL = param->DL;
-	//T Z= Z_from_DL(DL/MPC_SEC);
-	T Z= 0;
+	T Z= Z_from_DL(DL/MPC_SEC);
+	//T Z= 0;
 	//T Z=0.34972425;
 	T redshiftedM = M/(1.+Z);
 	T phase_mod = exp(param->betappe[0]);

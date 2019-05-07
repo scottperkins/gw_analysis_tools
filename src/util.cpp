@@ -340,24 +340,29 @@ adouble cbrt_internal(adouble base)
 }
 
 
-void allocate_3D_array(double ***array, int dim1, int dim2, int dim3)
+double*** allocate_3D_array( int dim1, int dim2, int dim3)
 {
-	array = (double ***) malloc(sizeof(double**)*dim1);
+	double ***array = (double ***) malloc(sizeof(double**)*dim1);
 	for (int i = 0; i<dim1; i ++)
 	{
 		array[i] = (double**)malloc(sizeof(double *) * dim2);
 		for (int j = 0 ; j< dim2; j++)
+		{
 			array[i][j] = (double *)malloc(sizeof(double) * dim3);
+		}
 	}
+	return array;
 }
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
 {
 	for(int i =0; i < dim1; i++)
 	{
-		for(int j =0 ; j<dim2; j++)
+		for(int j =0 ; j<dim2; j++){
 			free(array[i][j]);
+		}
 		free(array[i]);
 	}
+	free(array);
 }
 
 template <class T>

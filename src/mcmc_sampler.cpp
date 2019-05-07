@@ -4,6 +4,11 @@
 #include <gsl/gsl_randist.h>
 #include "util.h"
 #include "mcmc_sampler_internals.h"
+#include <omp.h>
+
+#ifndef _OPENMP
+#define omp ignore
+#endif
 
 #include <unistd.h>
 
@@ -46,9 +51,13 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		int swp_freq,	/**< the frequency with which chains are swapped*/
 		double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
 		double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
-		void (*fisher)(double *param, int dimension, double **fisher)	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
 		)
 {
+	omp_set_num_threads(15);
 	//random number generator initialization
 	gsl_rng_env_setup();
 	T=gsl_rng_default;
@@ -57,38 +66,15 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//Array holding the probability of each 
 	//type of step - Gaussian, differential evolution, MMALA, Fisher
 	sampler sampler;
-	bool fisher_bool;
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
-	if(fisher ==NULL)
-		fisher_bool = false;
+	if(fisher ==NULL){
+		sampler.fisher_exist = false;
+	}
 	else 
-		fisher_bool = true;
+		sampler.fisher_exist = true;
 	
-	if(!fisher_bool)//Obviously must add up to 1
-	{
-		//sampler.step_prob[0]=.7;
-		//sampler.step_prob[1]=.3;
-		//Testing
-		sampler.step_prob[0]=1.;
-		sampler.step_prob[1]=0.;
-		sampler.step_prob[2]=0;
-		sampler.step_prob[3]=0;
-	}
-	else
-	{
-		sampler.step_prob[0]=.3;
-		sampler.step_prob[1]=.2;
-		sampler.step_prob[2]=.3;
-		sampler.step_prob[3]=.2;
-
-	}
-	//Split probabilities into boundaries for if-else loop
-	sampler.prob_boundaries[0] = sampler.step_prob[0];
-	sampler.prob_boundaries[1] = sampler.step_prob[1]+sampler.prob_boundaries[0];
-	sampler.prob_boundaries[2] = sampler.step_prob[2]+sampler.prob_boundaries[1];
-	sampler.prob_boundaries[3] = sampler.step_prob[3]+sampler.prob_boundaries[2];
 	
 	//Construct sampler structure
 	sampler.lp = log_prior;
@@ -99,21 +85,110 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.chain_N = chain_N;
 	sampler.dimension = dimension;
 	sampler.r = r;
+	sampler.history_length = 100;
+	
+	allocate_sampler_mem(&sampler);
+	for (int chain_index; chain_index<sampler.chain_N; chain_index++)
+		assign_probabilities(&sampler, chain_index);
+	
 
-	int i,j, k=0;
-	int swp_accepted, swp_rejected;
-
-	while (k<N_steps){
-		for (j=0; j<chain_N; j++)
+	//int i,j, k=0;
+	//int j, k=0;
+	int  k=0;
+	int swp_accepted=0, swp_rejected=0;
+	int step_accepted=0, step_rejected=0;
+	
+	//Assign initial position to start chains
+	//Currently, just set all chains to same initial position
+	for (int j=0;j<sampler.chain_N;j++){
+		for (int i = 0; i<sampler.dimension; i++)
 		{
-			for (i = 0 ; i< sampler.swp_freq;i++)
+			sampler.de_primed[j]=false;
+			output[j][0][i] = initial_pos[i];
+		}
+	}
+	
+	//Sampler Loop
+	//#pragma omp parallel //num_threads(4)
+	{
+	while (k<N_steps-1){
+		int cutoff ;
+		if( N_steps-k <= sampler.swp_freq) cutoff = N_steps-k-1;	
+		else cutoff = sampler.swp_freq;	
+		#pragma omp parallel for reduction(+:step_accepted) reduction(+:step_rejected)
+		for (int j=0; j<chain_N; j++)
+		{
+			for (int i = 0 ; i< cutoff;i++)
 			{
-				mcmc_step(&sampler, output[j][i], output[j][i+k]);	
+				int success;
+				success = mcmc_step(&sampler, output[j][k+i], output[j][k+i+1],j);	
+				if(success==1){step_accepted+=1;}
+				else{step_rejected+=1;}
+				update_history(&sampler,output[j][k+i+1], j);
+			}
+			if(!sampler.de_primed[j]) 
+			{
+				if ((k+cutoff)>sampler.history_length)
+				{
+					sampler.de_primed[j]=true;
+					assign_probabilities(&sampler,j);	
+				}
 			}
 		}
-		k+= sampler.swp_freq;
+		k+= cutoff;
 		chain_swap(&sampler, output, k, &swp_accepted, &swp_rejected);
 		printProgress((double)k/N_steps);	
 	}
+	}
+	std::cout<<std::endl;
+	double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
+	double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
+	std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
+	std::cout<<"Rejected percentage of chain swaps (all chains): "<<rejected_percent<<std::endl;
+	accepted_percent = (double)(step_accepted)/(step_accepted+step_rejected);
+	rejected_percent = (double)(step_rejected)/(step_accepted+step_rejected);
+	std::cout<<"Accepted percentage of steps (all chains): "<<accepted_percent<<std::endl;
+	std::cout<<"Rejected percentage of steps (all chains): "<<rejected_percent<<std::endl;
+	std::cout<<"NANS (all chains): "<<sampler.nan_counter<<std::endl;
+	
+	//###########################################################
+	//Auto-correlation
+	double **temp = (double **) malloc(sizeof(double*)*N_steps);
+	for (int i = 0 ; i< sampler.dimension; i++){
+		temp[i] = (double *)malloc(sizeof(double)*N_steps);
+		for(int j =0; j< N_steps; j++){
+			temp[i][j] = output[0][j][i];
+		}
+	}
+	int segments = 10;
+	double stepsize = (double)N_steps/segments;
+	double lengths[segments];
+	double ac[sampler.dimension][segments];
+	for (int i =0; i<segments;i++)
+		lengths[i]=stepsize*(1. + i);
+	
+	#pragma omp parallel for 
+	for (int i = 0 ; i< sampler.dimension; i++)
+	{
+		for(int l =0; l<segments; l++){
+			for(int j =0; j< lengths[l]; j++){
+				temp[i][j] = output[0][j][i];
+			}
+			ac[i][l]=auto_correlation(temp[i],lengths[l], 0.01);
+			//std::cout<<"autocorrelation: "<<ac[i][l]<<std::endl;
+		}
+	}	
+	
+	for (int i = 0 ; i< sampler.dimension; i++)
+	{
+		for(int l =0; l<segments; l++){
+			std::cout<<"AUTO-CORR ("<<i<<","<<l<<"): "<<ac[i][l]<<std::endl;
+		}
+	}
+	for (int i = 0 ; i< sampler.dimension; i++)
+		free(temp[i]);
+	free(temp);
+	deallocate_sampler_mem(&sampler);
 }
-		
+
+
