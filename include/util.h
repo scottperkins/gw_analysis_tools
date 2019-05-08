@@ -248,9 +248,17 @@ double Z_from_DL(double DL);
 
 void printProgress (double percentage);
 
+double** allocate_2D_array( int dim1, int dim2);
+void deallocate_2D_array(double ***array, int dim1, int dim2);
 double*** allocate_3D_array( int dim1, int dim2, int dim3);
 
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3);
+
+void read_file(std::string filename,double **output, int rows, int cols );
+void read_file(std::string filename, double *output );
+
+void write_file(std::string filename, double **input, int rows, int cols);
+void write_file(std::string filename, double *input, int length);
 
 double calculate_eta(double mass1, double mass2);
 adouble calculate_eta(adouble mass1, adouble mass2);

@@ -116,15 +116,15 @@ void test8()
 	//MCMC options
 	int dimension = 5;
 	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
-	int N_steps = 15000;
-	int chain_N= 8;
+	int N_steps = 20000;
+	int chain_N= 4;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 100./(chain_N);
+	double temp_step = 50./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
@@ -159,17 +159,29 @@ void test8()
 	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp_GW, num_detectors, data, psd, frequencies, data_length, detectors, generation_method,"","","");	
 	std::cout<<"ENDED"<<std::endl;
 
-	ofstream mcmc_out;
-	mcmc_out.open("testing/data/mcmc_output.csv");
-	mcmc_out.precision(15);
-	//for(int i = 0;i<chain_N;i++){
+	double **output_transform=(double **)malloc(sizeof(double*)*N_steps);
+	for (int j =0; j<N_steps; j++)
+		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
+
 	for(int j = 0; j<N_steps;j++){
-		//for(int k = 0; k<dimension; k++){
-			mcmc_out<<std::exp(output[0][j][0])/MPC_SEC<<" , "<<std::exp(output[0][j][1])/MSOL_SEC<<" , "<<output[0][j][2]<<" , "<<output[0][j][3]<<" , "<<output[0][j][4]<<endl;
-		//}
+			output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][1]=std::exp(output[0][j][1])/MSOL_SEC;
+			output_transform[j][2]=output[0][j][2];
+			output_transform[j][3]=output[0][j][3];
+			output_transform[j][4]=output[0][j][4];
 	}
+	write_file("testing/data/mcmc_output.csv", output_transform, N_steps, dimension);
+	//ofstream mcmc_out;
+	//mcmc_out.open("testing/data/mcmc_output.csv");
+	//mcmc_out.precision(15);
+	////for(int i = 0;i<chain_N;i++){
+	//for(int j = 0; j<N_steps;j++){
+	//	//for(int k = 0; k<dimension; k++){
+	//		mcmc_out<<std::exp(output[0][j][0])/MPC_SEC<<" , "<<std::exp(output[0][j][1])/MSOL_SEC<<" , "<<output[0][j][2]<<" , "<<output[0][j][3]<<" , "<<output[0][j][4]<<endl;
+	//	//}
 	//}
-	mcmc_out.close();
+	////}
+	//mcmc_out.close();
 
 	deallocate_3D_array(output, chain_N, dimension, N_steps);
 	for(int i =0; i< num_detectors; i++){
@@ -177,6 +189,10 @@ void test8()
 		free(psd[i]);
 		free(frequencies[i]);
 	}
+	for(int i =0; i< N_steps; i++){
+		free(output_transform[i]);
+	}
+	free(output_transform);
 	free(data);
 	free(psd);
 	free(frequencies );
@@ -190,14 +206,14 @@ void test7()
 
 	
 	int N_steps = 50000;
-	int chain_N= 40;
+	int chain_N= 800;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 300;
+	int swp_freq = 30;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 20./(chain_N);
+	double temp_step = 500./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
@@ -207,17 +223,18 @@ void test7()
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,"","","" );	
 	std::cout<<"ENDED"<<std::endl;
 
-	ofstream mcmc_out;
-	mcmc_out.open("testing/data/mcmc_output.csv");
-	mcmc_out.precision(15);
-	//for(int i = 0;i<chain_N;i++){
-	for(int j = 0; j<N_steps;j++){
-		//for(int k = 0; k<dimension; k++){
-			mcmc_out<<output[0][j][0]<<" , "<<output[0][j][1]<<endl;
-		//}
-	}
+	write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
+	//ofstream mcmc_out;
+	//mcmc_out.open("testing/data/mcmc_output.csv");
+	//mcmc_out.precision(15);
+	////for(int i = 0;i<chain_N;i++){
+	//for(int j = 0; j<N_steps;j++){
+	//	//for(int k = 0; k<dimension; k++){
+	//		mcmc_out<<output[0][j][0]<<" , "<<output[0][j][1]<<endl;
+	//	//}
 	//}
-	mcmc_out.close();
+	////}
+	//mcmc_out.close();
 
 	deallocate_3D_array(output, chain_N, dimension, N_steps);
 }

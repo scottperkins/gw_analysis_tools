@@ -339,7 +339,33 @@ adouble cbrt_internal(adouble base)
 	return pow(base,1./3.);
 }
 
+/* \brief Utility to malloc 2D array
+ * 
+ */
+double** allocate_2D_array( int dim1, int dim2)
+{
+	double **array = (double **) malloc(sizeof(double*)*dim1);
+	for (int i = 0; i<dim1; i ++)
+	{
+		array[i] = (double*)malloc(sizeof(double ) * dim2);
+	}
+	return array;
+}
 
+/* \brief Utility to free malloc'd 2D array
+ * 
+ */
+void deallocate_2D_array(double ***array, int dim1, int dim2)
+{
+	for(int i =0; i < dim1; i++)
+	{
+		free(array[i]);
+	}
+	free(array);
+}
+/* \brief Utility to malloc 3D array
+ * 
+ */
 double*** allocate_3D_array( int dim1, int dim2, int dim3)
 {
 	double ***array = (double ***) malloc(sizeof(double**)*dim1);
@@ -353,6 +379,9 @@ double*** allocate_3D_array( int dim1, int dim2, int dim3)
 	}
 	return array;
 }
+/* \brief Utility to free malloc'd 2D array
+ * 
+ */
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
 {
 	for(int i =0; i < dim1; i++)
@@ -364,6 +393,116 @@ void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
 	}
 	free(array);
 }
+
+/*\brief Utility to read in data
+ *
+ * Takes filename, and assigns to output[rows][cols]
+ *
+ * File must be comma separated doubles
+ */
+void read_file(std::string filename, /**< input filename, relative to execution directory*/
+		double **output, /**<[out] array to store output, dimensions rowsXcols*/
+		int rows, /**< first dimension*/
+		int cols /**<second dimension*/
+		)
+{
+	std::fstream file_in;
+	file_in.open(filename, std::ios::in);
+	std::string line, word;
+	int i=0, j=0;
+	double *temp = (double *)malloc(sizeof(double)*rows*cols);
+	
+	if(file_in){
+		while(std::getline(file_in, line)){
+			std::stringstream lineStream(line);
+			std::string item;
+			while(std::getline(lineStream,item, ',')){
+				temp[i]=std::stod(item);	
+				i+=1;	
+			}	
+		}	
+	}
+	for(i =0; i<rows;i++){
+		for(j=0; j<cols;j++)
+			output[i][j] = temp[cols*i + j];
+	}
+	free(temp);
+}
+
+
+/*\brief Utility to read in data (single dimension vector) 
+ *
+ * Takes filename, and assigns to output[i*rows + cols]
+ *
+ * Output vector must be long enough, no check is done for the length
+ *
+ * File must be comma separated doubles
+ */
+void read_file(std::string filename, /**< input filename, relative to execution directory*/
+	double *output /**<[out] output array, assumed to have the proper length of total items*/
+	)
+{
+	std::fstream file_in;
+	file_in.open(filename, std::ios::in);
+	std::string line, word, temp;
+	int i =0;
+	if(file_in){
+		while(std::getline(file_in, line)){
+			std::stringstream lineStream(line);
+			std::string item;
+			while(std::getline(lineStream,item, ',')){
+				output[i]=std::stod(item);	
+				i+=1;
+			}	
+		}	
+	}
+}
+
+/* \brief Utility to write 2D array to file
+ *
+ * Grid of data, comma separated
+ *
+ * Grid has rows rows and cols columns
+ */
+void write_file(std::string filename, /**<Filename of output file, relative to execution directory*/
+		double **input, /**< Input 2D array pointer array[rows][cols]*/
+		int rows, /**< First dimension of array*/
+		int cols /**< second dimension of array*/
+		)
+{
+	
+	std::ofstream out_file;
+	out_file.open(filename);
+	out_file.precision(15);
+	for(int i =0; i<rows; i++){
+		for(int j=0; j<cols;j++){
+			if(j==cols-1)
+				out_file<<input[i][j]<<std::endl;
+			else
+				out_file<<input[i][j]<<" , ";
+		}
+	}
+	out_file.close();
+}
+/* \brief Utility to write 1D array to file
+ *
+ * Single column of data
+ */
+void write_file(std::string filename, /**<Filename of output file, relative to execution directory*/
+		double *input, /**< input 1D array pointer array[length]*/
+		int length /**< length of array*/
+		)
+{
+	std::ofstream out_file;
+	out_file.open(filename);
+	out_file.precision(15);
+	for(int j =0; j<length; j++)
+		out_file<<input[j]<<std::endl;
+	out_file.close();
+
+}
+
+
 
 template <class T>
 std::complex<T> cpolar(T mag, T phase)

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from chainconsumer import ChainConsumer
 
 data = np.loadtxt("data/mcmc_output.csv",delimiter=',',unpack=True)
-#burnin =1000
+burnin =1000
 #data = data[burnin:]
 print(data)
 burnin =0
