@@ -51,7 +51,7 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test8();	
+	test6();	
 	return 0;
 }
 void test8()
@@ -115,16 +115,17 @@ void test8()
 	//#########################################################
 	//MCMC options
 	int dimension = 5;
-	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
+	//double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
+	double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
 	int N_steps = 20000;
-	int chain_N= 4;
+	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 50./(chain_N);
+	double temp_step = 500./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
@@ -156,7 +157,14 @@ void test8()
 		}
 	}
 	
-	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp_GW, num_detectors, data, psd, frequencies, data_length, detectors, generation_method,"","","");	
+	std::string autocorrfile = "testing/data/auto_corr_mcmc.csv";
+	std::string chainfile = "testing/data/mcmc_output.csv";
+	std::string statfilename = "testing/data/mcmc_statistics.txt";
+
+	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
+			swp_freq, test_lp_GW, num_detectors, data, psd, 
+			frequencies, data_length, detectors, generation_method,
+			statfilename,"",autocorrfile);	
 	std::cout<<"ENDED"<<std::endl;
 
 	double **output_transform=(double **)malloc(sizeof(double*)*N_steps);
@@ -170,7 +178,7 @@ void test8()
 			output_transform[j][3]=output[0][j][3];
 			output_transform[j][4]=output[0][j][4];
 	}
-	write_file("testing/data/mcmc_output.csv", output_transform, N_steps, dimension);
+	write_file(chainfile, output_transform, N_steps, dimension);
 	//ofstream mcmc_out;
 	//mcmc_out.open("testing/data/mcmc_output.csv");
 	//mcmc_out.precision(15);
@@ -280,7 +288,7 @@ void test6()
 	//params.phiRef = 1.0;
 	
 	double fhigh =300;
-	double flow =25;
+	double flow =15;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
 
@@ -305,7 +313,7 @@ void test6()
 
 	end7 = clock();
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
-	cout.precision(10);
+	cout.precision(5);
 	for (int i = 0;i <dimension;i++)
 	{
 		for (int j=0;j <dimension; j++)

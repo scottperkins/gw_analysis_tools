@@ -339,7 +339,7 @@ adouble cbrt_internal(adouble base)
 	return pow(base,1./3.);
 }
 
-/* \brief Utility to malloc 2D array
+/*! \brief Utility to malloc 2D array
  * 
  */
 double** allocate_2D_array( int dim1, int dim2)
@@ -352,10 +352,10 @@ double** allocate_2D_array( int dim1, int dim2)
 	return array;
 }
 
-/* \brief Utility to free malloc'd 2D array
+/*! \brief Utility to free malloc'd 2D array
  * 
  */
-void deallocate_2D_array(double ***array, int dim1, int dim2)
+void deallocate_2D_array(double **array, int dim1, int dim2)
 {
 	for(int i =0; i < dim1; i++)
 	{
@@ -363,7 +363,7 @@ void deallocate_2D_array(double ***array, int dim1, int dim2)
 	}
 	free(array);
 }
-/* \brief Utility to malloc 3D array
+/*! \brief Utility to malloc 3D array
  * 
  */
 double*** allocate_3D_array( int dim1, int dim2, int dim3)
@@ -379,7 +379,7 @@ double*** allocate_3D_array( int dim1, int dim2, int dim3)
 	}
 	return array;
 }
-/* \brief Utility to free malloc'd 2D array
+/*! \brief Utility to free malloc'd 2D array
  * 
  */
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
@@ -394,7 +394,7 @@ void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
 	free(array);
 }
 
-/*\brief Utility to read in data
+/*!\brief Utility to read in data
  *
  * Takes filename, and assigns to output[rows][cols]
  *
@@ -430,7 +430,7 @@ void read_file(std::string filename, /**< input filename, relative to execution 
 }
 
 
-/*\brief Utility to read in data (single dimension vector) 
+/*!\brief Utility to read in data (single dimension vector) 
  *
  * Takes filename, and assigns to output[i*rows + cols]
  *
@@ -458,7 +458,7 @@ void read_file(std::string filename, /**< input filename, relative to execution 
 	}
 }
 
-/* \brief Utility to write 2D array to file
+/*! \brief Utility to write 2D array to file
  *
  * Grid of data, comma separated
  *
@@ -484,7 +484,7 @@ void write_file(std::string filename, /**<Filename of output file, relative to e
 	}
 	out_file.close();
 }
-/* \brief Utility to write 1D array to file
+/*! \brief Utility to write 1D array to file
  *
  * Single column of data
  */
@@ -510,7 +510,9 @@ std::complex<T> cpolar(T mag, T phase)
 	return mag * std::exp(std::complex<T>(0,1) * phase);
 }
 
-//Shamelessly stolen from LALsuite
+/*! Shamelessly stolen from LALsuite
+ *
+ */
 template <class T>
 std::complex<T> XLALSpinWeightedSphericalHarmonic(
                                    T theta,  /**< polar angle (rad) */

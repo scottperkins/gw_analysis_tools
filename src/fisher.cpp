@@ -131,7 +131,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-5;
+	double epsilon = 1e-8;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);

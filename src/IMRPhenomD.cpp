@@ -1195,8 +1195,8 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        T sigma1 =0;
-        //T sigma1 = lambda->sigma[1];
+        //T sigma1 =0;
+        T sigma1 = lambda->sigma[1];
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
@@ -1255,8 +1255,8 @@ T IMRPhenomD<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambd
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        //T sigma1 =lambda->sigma[1];
-        T sigma1 =0 ;
+        T sigma1 =lambda->sigma[1];
+        //T sigma1 =0 ;
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];

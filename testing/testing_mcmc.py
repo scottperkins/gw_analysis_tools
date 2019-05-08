@@ -3,9 +3,16 @@ import matplotlib.pyplot as plt
 from chainconsumer import ChainConsumer
 
 data = np.loadtxt("data/mcmc_output.csv",delimiter=',')
+autocorr = np.loadtxt("data/auto_corr_mcmc.csv",delimiter=',')
+lengths = autocorr[0]
+autocorr = autocorr[1:]
 #for i in np.arange(len(data)):
 #    data[i][0] = np.log(data[i][0])
 #    data[i][1] = np.log(data[i][1])
+for i in autocorr:
+    plt.plot(lengths,i)
+plt.show()
+plt.close()
 burnin =0
 data = data[burnin:]
 #burnin =0;

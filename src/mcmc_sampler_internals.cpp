@@ -1,11 +1,13 @@
 #include "mcmc_sampler_internals.h"
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <eigen3/Eigen/Eigen>
 #include "util.h"
 #include <limits>
+#include <iomanip>
 
 double limit_inf = std::numeric_limits<double>::infinity();
 /*! \file
@@ -25,14 +27,17 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	if (alpha<sampler->prob_boundaries[chain_number][0])
 	{
 		gaussian_step(sampler, current_param, proposed_param);
+		sampler->num_gauss+=1;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][1])
 	{
 		diff_ev_step(sampler, current_param, proposed_param, chain_number);
+		sampler->num_de+=1;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][2])
 	{
 		mmala_step(sampler, current_param, proposed_param);
+		sampler->num_mmala+=1;
 	}
 	else 
 	{
@@ -157,10 +162,20 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		nansum+= std::isnan(eigen_vecs.col(beta)(i));	
 	nansum+= std::isnan(eigen_vals(beta));
 	if(nansum){
+		for(int i =0; i<sampler->dimension*sampler->dimension;i++)
+			std::cout<<oneDfisher[i]<<std::endl;
+		sampler->num_gauss+=1;
+		//for(int i =0; i<sampler->dimension;i++)
+		std::cout<<std::exp(current_param[0])/MPC_SEC<<std::endl;
+		std::cout<<std::exp(current_param[1])/MSOL_SEC<<std::endl;
+		std::cout<<current_param[2]<<std::endl;
+		std::cout<<current_param[3]<<std::endl;
+		std::cout<<current_param[4]<<std::endl;
 		gaussian_step(sampler,current_param, proposed_param);	
 		sampler->nan_counter+=1;
 	}
 	else{
+		sampler->num_fish+=1;
 		double alpha = gsl_ran_gaussian(sampler->r, 1);
 
 		double scaling = 0.0;
@@ -501,3 +516,217 @@ double auto_correlation_serial(double *arr, int length  ){
 	return h;
 }
 
+/*! \brief Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence
+ * 
+ */
+void auto_corr_intervals(double *data, /**<Input data */
+			int length, /**< length of input data*/
+			double *output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
+			int num_segments, /**< number of segements to compute the auto-corr length*/
+			double accuracy /**< longer chains are computed numerically, this specifies the tolerance*/
+			)
+{
+	double stepsize = (double)length/num_segments;
+	int lengths[num_segments];
+	for (int i =0; i<num_segments;i++)
+		lengths[i]=(int)(stepsize*(1. + i));
+	double *temp = (double *)malloc(sizeof(double)*length);		
+	for(int l =0; l<num_segments; l++){
+		for(int j =0; j< lengths[l]; j++){
+			temp[j] = data[j];
+		}
+		output[l]=auto_correlation(data,lengths[l], accuracy);
+	}
+	free(temp);
+	
+}
+
+
+void write_stat_file(sampler *sampler, 
+		std::string filename, 
+		int *accepted_steps,
+		int *rejected_steps,
+		int accepted_swps, 
+		int rejected_swps
+		)
+{
+	double total_swps= accepted_swps + rejected_swps;
+	double accepted_swp_fraction = (double)accepted_swps/(total_swps);		
+	double rejected_swp_fraction = (double)rejected_swps/(total_swps);		
+	
+	std::ofstream out_file;
+	out_file.open(filename);	
+	//File variables
+	int width= 80;
+	int third = (int)((double)width/3.);
+	int half = (int)((double)width/2.);
+	int fourth = (int)((double)width/4.);
+	int fifth = (int)((double)width/5.);
+	
+	//Sampler parameters
+	out_file<<std::setw(width)<<std::left<<
+		"Parameters of sampler: "<<std::endl;	
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		"Dimension: "<<
+		std::setw(fourth)<<std::left<<
+		sampler->dimension<<
+		std::setw(fourth)<<std::left<<
+		"Length of History: "<<
+		std::setw(fourth)<<std::left<<
+		sampler->history_length<<
+		std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		"Steps per chain: "<<
+		std::setw(fourth)<<std::left<<
+		sampler->N_steps<<
+		std::setw(fourth)<<std::left<<
+		"Chain steps/chain swap: "<<
+		std::setw(fourth)<<std::left<<
+		sampler->swp_freq<<
+		std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		"CPU time - sampler (min): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_cpu/60.<<
+		std::setw(fourth)<<std::left<<
+		"CPU time - sampler(sec): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_cpu<<
+		std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		"Wall time - sampler (min): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_wall/60.<<
+		std::setw(fourth)<<std::left<<
+		"Wall time - sampler(sec): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_wall<<
+		std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		"CPU time - auto-corr (min): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_cpu_ac/60.<<
+		std::setw(fourth)<<std::left<<
+		"CPU time - auto-corr(sec): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_cpu_ac<<
+		std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		"Wall time - auto-corr (min): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_wall_ac/60.<<
+		std::setw(fourth)<<std::left<<
+		"Wall time - auto-corr(sec): "<<
+		std::setw(fourth)<<std::left<<
+		sampler->time_elapsed_wall_ac<<
+		std::endl;
+	out_file<<
+		std::setw(width)<<std::left<<
+		"Probabilities of steps (Gaussian, DE, MMALA, FISHER): "<<std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		sampler->step_prob[0][0]<<
+		std::setw(fourth)<<std::left<<
+		sampler->step_prob[0][1]<<
+		std::setw(fourth)<<std::left<<
+		sampler->step_prob[0][2]<<
+		std::setw(fourth)<<std::left<<
+		sampler->step_prob[0][3]<<
+		std::endl;
+	out_file<<std::endl;
+
+	out_file<<
+		std::setw(width)<<std::left<<
+		"Number of steps per type (Gaussian, DE, MMALA, FISHER): "<<std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		sampler->num_gauss<<
+		std::setw(fourth)<<std::left<<
+		sampler->num_de<<
+		std::setw(fourth)<<std::left<<
+		sampler->num_mmala<<
+		std::setw(fourth)<<std::left<<
+		sampler->num_fish<<
+		std::endl;
+	double total_step_type = sampler->num_gauss+sampler->num_mmala+sampler->num_de+sampler->num_fish;
+	out_file<<
+		std::setw(width)<<std::left<<
+		"Fraction of steps per type (Gaussian, DE, MMALA, FISHER): "<<std::endl;
+	out_file<<
+		std::setw(fourth)<<std::left<<
+		(double)sampler->num_gauss/total_step_type<<
+		std::setw(fourth)<<std::left<<
+		(double)sampler->num_de/total_step_type<<
+		std::setw(fourth)<<std::left<<
+		(double)sampler->num_mmala/total_step_type<<
+		std::setw(fourth)<<std::left<<
+		(double)sampler->num_fish/total_step_type<<
+		std::endl;
+
+	out_file<<std::endl;	
+
+	//Accepted rejected steps
+	out_file.width(width);
+	out_file<<std::left<<"Number of accepted and rejected steps for each chain temp: "<<std::endl;
+	out_file.width(width);
+	
+	out_file<<std::left<<std::setw(third)<<"Chain Temp"<<std::setw(third)<<"accepted"<<std::left<<std::setw(third)<<"rejected"<<std::endl;
+	double acc_total=0;
+	double rej_total=0;
+	for (int i =0; i<sampler->chain_N;i++){
+		acc_total += accepted_steps[i];
+		rej_total += rejected_steps[i];
+		out_file<<std::left<<std::setw(third)<<sampler->chain_temps[i]<<
+			std::setw(third)<<accepted_steps[i]<<
+			std::left<<std::setw(third)<<rejected_steps[i]<<std::endl;
+	}
+	out_file<<
+		std::left<<std::setw(third)<<"TOTAL: "<<
+		std::setw(third)<<acc_total<<
+		std::left<<std::setw(third)<<rej_total<<
+		std::endl;
+
+
+	out_file<<std::endl;	
+
+	out_file<<std::left<<"Fraction of accepted and rejected steps for each chain temp: "<<std::endl;
+	out_file.width(width);
+	
+	out_file<<std::left<<std::setw(third)<<"Chain Temp"<<std::setw(third)<<"accepted"<<std::left<<std::setw(third)<<"rejected"<<std::endl;
+	double total ;
+	double acc_frac = 0;
+	double rej_frac = 0;
+	for (int i =0; i<sampler->chain_N;i++){
+		total = accepted_steps[i]+rejected_steps[i];
+		acc_frac = (double)accepted_steps[i]/total;
+		rej_frac = (double)rejected_steps[i]/total;
+		out_file<<std::left<<std::setw(third)<<sampler->chain_temps[i]<<
+			std::setw(third)<<acc_frac<<
+			std::left<<std::setw(third)<<rej_frac<<std::endl;
+	}
+	out_file<<
+		std::left<<std::setw(third)<<"TOTAL: "<<
+		std::setw(third)<<(double)acc_total/(acc_total+rej_total)<<
+		std::left<<std::setw(third)<<(double)rej_total/(acc_total+rej_total)<<
+		std::endl;
+
+	out_file<<std::endl;	
+	
+	//Accepted rejected swaps
+	out_file<<std::left<<"Number of accepted and rejected swaps for all chain temps: "
+			<<std::endl;
+	out_file<<std::left<<std::setw(fourth)<<"Accepted: "<<std::setw(fourth)<<accepted_swps
+			<<std::setw(fourth)<<"Rejected: "<<std::setw(fourth)<< 
+			rejected_swps<<std::endl;
+	out_file<<std::left<<std::setw(fourth)<<"Accepted fraction: "<<std::setw(fourth)<<
+			accepted_swp_fraction
+			<<std::setw(fourth)<<"Rejected fraction: "<<std::setw(fourth)<< 
+			rejected_swp_fraction<<std::endl;
+	out_file.close();
+}

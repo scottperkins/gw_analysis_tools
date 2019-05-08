@@ -622,7 +622,7 @@ double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double
 }
 
 
-/* \brief Wrapper for the MCMC_MH function, specifically for GW analysis
+/*! \brief Wrapper for the MCMC_MH function, specifically for GW analysis
  *
  * Handles the details of setting up the MCMC sampler and wraps the fisher and log likelihood to conform to the format of the sampler
  */

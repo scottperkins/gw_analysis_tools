@@ -1,7 +1,9 @@
 #ifndef MCMC_SAMPLER_H
 #define MCMC_SAMPLER_H
 #include <iostream>
-void testmcmc();
+/* \file 
+ * Header file for mcmc_sampler
+ */
 
 void MCMC_MH(	double ***output, 
 		int dimension, 	
