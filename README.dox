@@ -47,7 +47,9 @@ ppE_IMRPhenomD_Inspiral ppE_IMRPhenomD_IMR ppE_IMRPhenomPv2_Inspiral ppE_IMRPhen
 utilizes the above waveform templates
 
 \subsection mcmc MCMC Routines
-Includes log likelihood caclulation
+Has a generic MCMC sampler, MCMC_MH, that utilizes gaussian steps, differential evolution steps, and Fisher informed steps. Includes wrapping MCMC_MH_GW for GW specific sampling, currently only for one detector. 
+
+Includes log likelihood caclulation for implementation in other samplers.
 
 \section usage Usage
 
