@@ -20,6 +20,9 @@ TESTOBJ=testing/test.o
 TESTDIR=bin
 TEST=$(addprefix $(TESTDIR)/,exe.a)
 
+TESTFISHERSRC=testing/fisher_comparison.cpp
+TESTFISHEROBJ=testing/fisher_comparison.o
+TESTFISHER=$(addprefix $(TESTDIR)/,exefisher.a)
 
 
 #CFLAGS=-I$(IDIR) -I/opt/lalsuite/lalsimulation/src -I/opt/lalsuite/include -Wall -fPIC -g -O3 -std=c++11
@@ -32,8 +35,8 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 
-CC=g++-7
-#CC=g++
+#CC=g++-7
+CC=g++
 #CC=nvcc
 
 .PHONY: all
@@ -50,6 +53,9 @@ $(ODIR):
 $(TESTOBJ): $(TESTSRC)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+$(TESTFISHEROBJ): $(TESTFISHERSRC)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 $(PROJ_LIB) : $(OBJECTS) | $(LDIR_LOCAL)
 	ar rcs $(LDIR_LOCAL)/$(LOCAL_LIB) $(OBJECTS)
 
@@ -59,6 +65,9 @@ $(LDIR_LOCAL):
 $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_PYSRC)
 	make -C $(PYDIR) 
 	
+$(TESTFISHER) : $(OBJECTS) $(TESTFISHEROBJ) | $(TESTDIR)
+	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
+
 $(TEST) : $(OBJECTS) $(TESTOBJ) | $(TESTDIR)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
@@ -73,6 +82,9 @@ c: $(PROJ_LIB)
 
 .PHONY: test
 test: $(TEST) $(PROJ_LIB) $(PROJ_PYLIB) 
+
+.PHONY: testfisher
+testfisher: $(TESTFISHER) $(PROJ_LIB) 
 
 .PHONY: testc
 testc: $(TEST) $(PROJ_LIB)  

@@ -146,7 +146,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
  	Eigen::VectorXd eigen_vals = eigensolver.eigenvalues();
 	
 	//beta determines direction to step in eigen directions
-	int beta = (int)(sampler->dimension)*(gsl_rng_uniform(sampler->r));
+	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->r)));
 	//std::cout<<"Val: "<<eigen_vals(beta)<<std::endl;
 	//std::cout<<"Direction: "<<beta<<std::endl;
 	
@@ -162,15 +162,14 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		nansum+= std::isnan(eigen_vecs.col(beta)(i));	
 	nansum+= std::isnan(eigen_vals(beta));
 	if(nansum){
-		for(int i =0; i<sampler->dimension*sampler->dimension;i++)
-			std::cout<<oneDfisher[i]<<std::endl;
+		//for(int i =0; i<sampler->dimension*sampler->dimension;i++)
+		//	std::cout<<oneDfisher[i]<<std::endl;
+		//std::cout<<std::exp(current_param[0])/MPC_SEC<<std::endl;
+		//std::cout<<std::exp(current_param[1])/MSOL_SEC<<std::endl;
+		//std::cout<<current_param[2]<<std::endl;
+		//std::cout<<current_param[3]<<std::endl;
+		//std::cout<<current_param[4]<<std::endl;
 		sampler->num_gauss+=1;
-		//for(int i =0; i<sampler->dimension;i++)
-		std::cout<<std::exp(current_param[0])/MPC_SEC<<std::endl;
-		std::cout<<std::exp(current_param[1])/MSOL_SEC<<std::endl;
-		std::cout<<current_param[2]<<std::endl;
-		std::cout<<current_param[3]<<std::endl;
-		std::cout<<current_param[4]<<std::endl;
 		gaussian_step(sampler,current_param, proposed_param);	
 		sampler->nan_counter+=1;
 	}
@@ -215,10 +214,10 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
-	int i = (int)(sampler->history_length)*(gsl_rng_uniform(sampler->r));
+	int i = (int)((sampler->history_length)*(gsl_rng_uniform(sampler->r)));
 	int j;
 	do{
-		j=(int)(sampler->history_length)*(gsl_rng_uniform(sampler->r));	
+		j=(int)((sampler->history_length)*(gsl_rng_uniform(sampler->r)));	
 	}while(j==i);
 		
 	double alpha = 1.;

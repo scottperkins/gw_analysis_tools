@@ -674,7 +674,8 @@ void MCMC_MH_GW(double ***output,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,statistics_filename,
 		chain_filename,auto_corr_filename);
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos, chain_temps, swp_freq,
-	//	 log_prior,MCMC_likelihood_wrapper, NULL);
+	//	 log_prior,MCMC_likelihood_wrapper, NULL,statistics_filename,
+	//	chain_filename,auto_corr_filename);
 	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)

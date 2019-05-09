@@ -51,7 +51,7 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test6();	
+	test8();	
 	return 0;
 }
 void test8()
@@ -111,21 +111,26 @@ void test8()
 	populate_noise(freq,"Hanford_O1_fitted", noise,length);
 	for (int i =0; i<length;i++)
 		noise[i] = noise[i]*noise[i];
+	double snr = calculate_snr("Hanford_O1_fitted",waveformout, freq, length);
+	std::cout<<"SNR of injection: "<<snr<<std::endl;
 	//#########################################################
+	
+
+
 	//#########################################################
 	//MCMC options
 	int dimension = 5;
-	//double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
-	double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 20000;
-	int chain_N= 15;
+	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
+	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
+	int N_steps = 50000;
+	int chain_N= 12;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 500./(chain_N);
+	double temp_step = 200./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
@@ -164,7 +169,7 @@ void test8()
 	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
 			swp_freq, test_lp_GW, num_detectors, data, psd, 
 			frequencies, data_length, detectors, generation_method,
-			statfilename,"",autocorrfile);	
+			statfilename, "" ,autocorrfile);	
 	std::cout<<"ENDED"<<std::endl;
 
 	double **output_transform=(double **)malloc(sizeof(double*)*N_steps);
@@ -226,12 +231,15 @@ void test7()
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
 	//double chain_temps[chain_N] ={1};
+	std::string autocorrfile = "testing/data/auto_corr_mcmc.csv";
+	std::string chainfile = "testing/data/mcmc_output.csv";
+	std::string statfilename = "testing/data/mcmc_statistics.txt";
 	
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3 );	
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,"","","" );	
+	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,statfilename,chainfile,autocorrfile );	
 	std::cout<<"ENDED"<<std::endl;
 
-	write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
+	//write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
 	//ofstream mcmc_out;
 	//mcmc_out.open("testing/data/mcmc_output.csv");
 	//mcmc_out.precision(15);
