@@ -41,6 +41,14 @@ struct sampler
 	double time_elapsed_wall;
 	double time_elapsed_cpu_ac;
 	double time_elapsed_wall_ac;
+	int *fish_accept_ct;
+	int *fish_reject_ct;
+	int *de_accept_ct;
+	int *de_reject_ct;
+	int *gauss_accept_ct;
+	int *gauss_reject_ct;
+	int *mmala_accept_ct;
+	int *mmala_reject_ct;
 };
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);
@@ -70,4 +78,7 @@ double auto_correlation(double *arr, int length, double tolerance);
 double auto_correlation_serial(double *arr, int length);
 void auto_corr_intervals(double *data, int length,double *output, int num_segments,  double accuracy);
 void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
+
+void assign_ct_p(sampler *sampler, int step, int chain_index);
+void assign_ct_m(sampler *sampler, int step, int chain_index);
 #endif

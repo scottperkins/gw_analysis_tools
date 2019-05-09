@@ -109,7 +109,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.N_steps = N_steps;
 	sampler.dimension = dimension;
 	sampler.r = r;
-	sampler.history_length = 500;
+	sampler.history_length = 1000;
 	
 	allocate_sampler_mem(&sampler);
 	for (int chain_index; chain_index<sampler.chain_N; chain_index++)

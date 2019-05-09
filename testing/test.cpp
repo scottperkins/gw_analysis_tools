@@ -33,6 +33,7 @@ void test5();
 void test6();
 void test7();
 void test8();
+void test9();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_GW(double *pos, int dim);
@@ -51,8 +52,126 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test8();	
+	test9();	
 	return 0;
+}
+void test9()
+{
+	int raw_length = 28673;
+	int cutoff = 600;
+	int length = raw_length-cutoff;
+	int num_detectors =1;
+
+	double **temp_data = allocate_2D_array(raw_length,2);
+	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
+	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
+	std::string filebase = "testing/data/gw_150914_";
+	read_file(filebase+"data.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd.csv",temp_psd);
+	read_file(filebase+"freq.csv",temp_freq);
+
+	std::complex<double> **data= (std::complex<double>**)malloc(
+			sizeof(std::complex<double>*)*num_detectors);
+	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
+	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =length;
+
+	for (int i =0; i<num_detectors; i++){
+		data[i] = (std::complex<double> *)malloc(
+			sizeof(std::complex<double>)*data_length[0]);
+		
+		psd[i] = (double *)malloc(sizeof(double)*data_length[0]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[0]);
+		for(int j = 0; j<data_length[0]; j++){
+			frequencies[i][j] = temp_freq[j+cutoff];	
+			psd[i][j] = (temp_psd[j+cutoff]);	
+			data[i][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+			//std::cout<<psd[i][j]<<std::endl;
+			//std::cout<<frequencies[i][j]<<std::endl;
+			//std::cout<<temp_data[j][0]<<std::endl;
+			//if(temp_freq[j]<20)std::cout<<j<<std::endl;
+		}
+	}
+
+	deallocate_2D_array(temp_data,length,2);
+	free(temp_psd);
+	free(temp_freq);
+
+	//#########################################################
+	//MCMC options
+	int dimension = 5;
+	double initial_pos[dimension]={log(400*MPC_SEC),log(30*MSOL_SEC), .24, 0,0};
+	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
+	int N_steps = 50000;
+	int chain_N= 20;
+	double ***output;
+	output = allocate_3D_array( chain_N, N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 10;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	double temp_step = 500./(chain_N); for(int i =0; i < chain_N;  i ++)
+		//chain_temps[i]=1.;
+		chain_temps[i] = 1+ temp_step * i;
+	//double chain_temps[chain_N] ={1};
+	
+	//#########################################################
+	//GW options
+	std::string *detectors = (std::string*)malloc(sizeof(std::string)*10*num_detectors);
+	detectors[0] = "Hanford";
+	std::string generation_method = "IMRPhenomD";
+	
+	
+	std::string autocorrfile = "testing/data/auto_corr_mcmc.csv";
+	std::string chainfile = "testing/data/mcmc_output.csv";
+	std::string statfilename = "testing/data/mcmc_statistics.txt";
+
+	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
+			swp_freq, test_lp_GW, num_detectors, data, psd, 
+			frequencies, data_length, detectors, generation_method,
+			statfilename,"",autocorrfile);	
+	std::cout<<"ENDED"<<std::endl;
+
+	double **output_transform=(double **)malloc(sizeof(double*)*N_steps);
+	for (int j =0; j<N_steps; j++)
+		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
+
+	for(int j = 0; j<N_steps;j++){
+			output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][1]=std::exp(output[0][j][1])/MSOL_SEC;
+			output_transform[j][2]=output[0][j][2];
+			output_transform[j][3]=output[0][j][3];
+			output_transform[j][4]=output[0][j][4];
+	}
+	write_file(chainfile, output_transform, N_steps, dimension);
+	//ofstream mcmc_out;
+	//mcmc_out.open("testing/data/mcmc_output.csv");
+	//mcmc_out.precision(15);
+	////for(int i = 0;i<chain_N;i++){
+	//for(int j = 0; j<N_steps;j++){
+	//	//for(int k = 0; k<dimension; k++){
+	//		mcmc_out<<std::exp(output[0][j][0])/MPC_SEC<<" , "<<std::exp(output[0][j][1])/MSOL_SEC<<" , "<<output[0][j][2]<<" , "<<output[0][j][3]<<" , "<<output[0][j][4]<<endl;
+	//	//}
+	//}
+	////}
+	//mcmc_out.close();
+
+	deallocate_3D_array(output, chain_N, dimension, N_steps);
+	for(int i =0; i< num_detectors; i++){
+		free(data[i]);
+		free(psd[i]);
+		free(frequencies[i]);
+	}
+	for(int i =0; i< N_steps; i++){
+		free(output_transform[i]);
+	}
+	free(output_transform);
+	free(data);
+	free(psd);
+	free(frequencies );
+	free(detectors);
+	free(data_length);
 }
 void test8()
 {
@@ -61,7 +180,7 @@ void test8()
 	gen_params params;
 	IMRPhenomD<double> modeld;
 	int length = 1600;
-	double chirpm = 49.78;
+	double chirpm = 30.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
 	params.mass2 = calculate_mass2(chirpm,eta);
@@ -70,10 +189,10 @@ void test8()
 	complex<double> waveformout[length];
 	params.spin1[0] = 0;
 	params.spin1[1] = 0;
-	params.spin1[2] = -.8;
+	params.spin1[2] = -.0;
 	params.spin2[0] = 0;
 	params.spin2[1] = 0;
-	params.spin2[2] = .7;
+	params.spin2[2] = .0;
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
 	params.phic = .0;
@@ -109,8 +228,10 @@ void test8()
 
 	double noise[length];
 	populate_noise(freq,"Hanford_O1_fitted", noise,length);
-	for (int i =0; i<length;i++)
+	for (int i =0; i<length;i++){
 		noise[i] = noise[i]*noise[i];
+		//std::cout<<noise[i]<<std::endl;
+	}
 	double snr = calculate_snr("Hanford_O1_fitted",waveformout, freq, length);
 	std::cout<<"SNR of injection: "<<snr<<std::endl;
 	//#########################################################
@@ -122,7 +243,7 @@ void test8()
 	int dimension = 5;
 	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 50000;
+	int N_steps = 15000;
 	int chain_N= 12;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -219,7 +340,7 @@ void test7()
 
 	
 	int N_steps = 50000;
-	int chain_N= 800;
+	int chain_N= 100;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
