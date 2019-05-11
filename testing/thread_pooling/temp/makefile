@@ -9,7 +9,7 @@ LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -lpthread
 
 OUT=bin/exe.a
 
-CFLAGS=-I$(IDIR) -I$(SYSIDIR) -Wall -fPIC -g -fopenmp
+CFLAGS=-I$(IDIR) -I$(SYSIDIR) -Wall -fPIC -g 
 LFLAGS=-L$(LDIR) 
 
 SRCEXT := cpp
@@ -19,13 +19,16 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 
-CC=g++
+#CC=g++
+CC=g++-7
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) 
 	$(CC) $(CFLAGS) -c -o $@ $<
 
+#$(OUT) : $(OBJECTS)
+#	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 $(OUT) : $(OBJECTS)
-	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
+	$(CC)  -o $@ $^ $(LIBS)
 
 .PHONY: clean
 clean:

@@ -22,29 +22,59 @@
 #include "adolc/taping.h"
 #include "limits"
 
-void test();
+void write_data();
 
 int main()
 {
 	std::cout<<"TEST"<<std::endl;
+	write_data();
 	return 1;
 }
 
 
-void test(){
+void write_data(){
+
+	//output files:
+	std::string numerical_file = "fisher_data/numerical.csv";
+	std::string autodiff_file = "fisher_data/autodiff.csv";
+	std::string param_file = "fisher_data/parameters.csv";
+
+	int length = 5000;
+	double fhigh =300;
+	double flow =15;
+	double df = (fhigh-flow)/(length-1);
+	double *freq = (double *)malloc(sizeof(double) * length);
+	cout<<"Freq spacing "<<df<<endl;
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+	int dimension = 7;
+
+	double **output = (double **)malloc(dimension * sizeof(**output));	
+	double **output2 = (double **)malloc(dimension * sizeof(**output2));	
+
+	for (int i = 0;i<dimension;i++){
+		output[i] = (double *)malloc(dimension*sizeof(double));
+		output2[i] = (double *)malloc(dimension*sizeof(double));
+	}
+
+	int num_samples = 1000;	
+	double mass1s[num_samples];
+	double mass2s[num_samples];
+	double spin1s[num_samples];
+	double spin2s[num_samples];
+	double DLs[num_samples];
+
+
 	gen_params params;
-	IMRPhenomD<double> modeld;
-	IMRPhenomD<adouble> modela;
-	int length = 8000;
 	double chirpm = 49.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
 	params.mass2 = calculate_mass2(chirpm,eta);
 	string method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
-	double amp[length];
-	double phaseout[length];
-	complex<double> waveformout[length];
+	//double amp[length];
+	//double phaseout[length];
+	//complex<double> waveformout[length];
 	params.spin1[0] = 0;
 	params.spin1[1] = 0;
 	params.spin1[2] = -.2;
@@ -56,38 +86,19 @@ void test(){
 	params.phic = .0;
 	params.tc = -.0;
 	params.Luminosity_Distance = 410.;
-	params.betappe = new double[1] ;
-	params.betappe[0]=-100.;
-	params.bppe  =new int[1];
-	params.bppe[0] = -3;
-	params.Nmod = 1;
+	//params.betappe = new double[1] ;
+	//params.betappe[0]=-100.;
+	//params.bppe  =new int[1];
+	//params.bppe[0] = -3;
+	//params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;
 	params.sky_average=true;
-	//params.f_ref = 100;
-	//params.phiRef = 1.0;
 	
-	double fhigh =300;
-	double flow =15;
-	double df = (fhigh-flow)/(length-1);
-	double *freq = (double *)malloc(sizeof(double) * length);
 
-	cout<<"Freq spacing "<<df<<endl;
-
-	for(int i=0;i<length;i++)
-		freq[i]=flow+i*df;
-
-	int dimension = 7;
 	clock_t start7,end7;
-	double **output = (double **)malloc(dimension * sizeof(**output));	
-	double **output2 = (double **)malloc(dimension * sizeof(**output2));	
-
-	for (int i = 0;i<dimension;i++){
-		output[i] = (double *)malloc(dimension*sizeof(double));
-		output2[i] = (double *)malloc(dimension*sizeof(double));
-	}
 	
 	start7 = clock();
 	fisher(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
@@ -124,3 +135,4 @@ void test(){
 	free(output);
 	free(output2);
 }
+

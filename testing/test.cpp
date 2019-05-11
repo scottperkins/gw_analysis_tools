@@ -155,7 +155,7 @@ void test9()
 	double initial_pos[dimension]={log(400*MPC_SEC),log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
 	int N_steps = 5000;
-	int chain_N= 20;
+	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
