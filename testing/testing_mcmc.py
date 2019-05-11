@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 data = np.loadtxt("data/mcmc_output.csv",delimiter=',')
+#data = data[:-100]
+chirpmasses = [x[1] for x in data]
+plt.plot(chirpmasses)
+plt.show()
+plt.close()
+
 ndim, nsamples = 5, len(data) 
 labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 

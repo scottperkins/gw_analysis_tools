@@ -5,6 +5,9 @@
  * Header file for mcmc_sampler
  */
 
+void mcmc_step_threaded(int j);
+void mcmc_swap_threaded(int i, int j);
+
 void MCMC_MH(	double ***output, 
 		int dimension, 	
 		int N_steps,	

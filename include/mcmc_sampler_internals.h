@@ -19,12 +19,17 @@ struct sampler
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
+	bool *waiting;
+	int *chain_pos;
 	double swp_freq;
 	int chain_N;
 	int N_steps;
 	int dimension;
 	bool fisher_exist;
 	bool *de_primed;
+	double ***output;
+	bool pool;
+	int progress=0;
 
 	int history_length;
 	int *current_hist_pos;
@@ -60,6 +65,11 @@ struct sampler
 	int *gauss_reject_ct;
 	int *mmala_accept_ct;
 	int *mmala_reject_ct;
+
+	int *swap_accept_ct;
+	int *swap_reject_ct;
+	int *step_accept_ct;
+	int *step_reject_ct;
 };
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);

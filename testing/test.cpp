@@ -108,9 +108,9 @@ void test9()
 {
 	int raw_length = 28673;
 	int cutoff = 600;
-	//int high_cut = 11000;
-	//int length = high_cut-cutoff;
-	int length = raw_length-cutoff;
+	int high_cut = 11000;
+	int length = high_cut-cutoff;
+	//int length = raw_length-cutoff;
 	int num_detectors =1;
 
 	double **temp_data = allocate_2D_array(raw_length,2);
@@ -154,12 +154,12 @@ void test9()
 	int dimension = 5;
 	double initial_pos[dimension]={log(400*MPC_SEC),log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 5000;
-	int chain_N= 5;
+	int N_steps = 50;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 100;
+	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	double temp_step = 400./(chain_N); 

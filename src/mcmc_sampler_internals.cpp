@@ -467,7 +467,9 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->step_prob = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->prob_boundaries = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->de_primed = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
+	sampler->waiting = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
 	sampler->current_hist_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
+	sampler->chain_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
 
 	sampler->fish_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -478,6 +480,10 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->mmala_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->mmala_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fisher_update_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->swap_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->swap_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->step_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->step_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
@@ -493,6 +499,12 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->mmala_accept_ct[i]=0;
 		sampler->mmala_reject_ct[i]=0;
 		sampler->fisher_update_ct[i] = sampler->fisher_update_number;
+		sampler->chain_pos[i]=0;
+		sampler->waiting[i]=true;
+		sampler->swap_accept_ct[i]=0;
+		sampler->swap_reject_ct[i]=0;
+		sampler->step_accept_ct[i]=0;
+		sampler->step_reject_ct[i]=0;
 
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
@@ -523,6 +535,11 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->gauss_reject_ct);
 	free(sampler->mmala_accept_ct);
 	free(sampler->mmala_reject_ct);
+	free(sampler->chain_pos);
+	free(sampler->swap_accept_ct);
+	free(sampler->swap_reject_ct);
+	free(sampler->step_accept_ct);
+	free(sampler->step_reject_ct);
 	deallocate_3D_array(sampler->history,sampler->chain_N, 
 				sampler->history_length, sampler->dimension);
 	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->dimension, sampler->dimension);

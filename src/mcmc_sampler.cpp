@@ -6,6 +6,11 @@
 #include "mcmc_sampler_internals.h"
 #include <omp.h>
 #include <time.h>
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <vector>
+#include <queue>
 
 #ifndef _OPENMP
 #define omp ignore
@@ -23,7 +28,146 @@
 //Random number variables
 const gsl_rng_type *T;
 gsl_rng * r;
+sampler *samplerptr;
 
+class ThreadPool
+
+{
+public:
+	//using Task = std::function<void()>;
+	
+	
+	explicit ThreadPool(std::size_t numThreads)
+	{
+		start(numThreads);
+	}
+
+	~ThreadPool()
+	{
+		stop();
+	}
+
+
+	//void enqueue(Task task)
+	//{
+	//	{
+	//		std::unique_lock<std::mutex> lock{mEventMutex};
+	//		mTasks.emplace(std::move(task));
+	//	}
+	//	mEventVar.notify_one();
+	//}
+	void enqueue(int i)
+	{
+		{
+			std::unique_lock<std::mutex> lock{mEventMutex};
+			mTasks.emplace(std::move(i));
+		}
+		mEventVar.notify_one();
+	}
+
+	void enqueue_swap(int i)
+	{
+		{
+			std::unique_lock<std::mutex> lock{mEventMutexSWP};
+			mSwaps.emplace(std::move(i));
+		}
+		mEventVarSWP.notify_one();
+	}
+	
+	void public_stop()
+	{
+		stop();
+	}
+private:
+	std::vector<std::thread> mThreads;
+	
+	std::condition_variable mEventVar;
+
+	std::mutex mEventMutex;
+
+	bool mStopping = false;
+	
+	int numSwpThreads= 1;
+		
+	std::condition_variable mEventVarSWP;
+
+	std::mutex mEventMutexSWP;
+
+	//std::queue<Task> mTasks;
+	std::queue<int> mTasks;
+	std::queue<int> mSwaps;
+
+	void start(std::size_t numThreads)
+	{
+		for(auto i =0u; i<numThreads-numSwpThreads; i++)
+		{
+			mThreads.emplace_back([=]{
+				while(true)
+				{
+					int j;
+					{
+						std::unique_lock<std::mutex> lock{mEventMutex};
+
+						//mEventVar.wait(lock,[=]{return mStopping || !mTasks.empty(); });
+						mEventVar.wait(lock,[=]{return mStopping || !mTasks.empty(); });
+						
+						if (mStopping && mTasks.empty())
+							break;	
+						j = std::move(mTasks.front());
+						mTasks.pop();
+						//std::cout<<mTasks.empty();
+					}
+					mcmc_step_threaded(j);
+					
+				}
+			});
+		}
+
+		//Swapping thread
+		for(auto i =0u; i<numSwpThreads; i++)
+		{
+			mThreads.emplace_back([=]{
+				while(true)
+				{
+					int j, k;
+					{
+						std::unique_lock<std::mutex> lock{mEventMutexSWP};
+
+						//mEventVarSWP.wait(lock,[=]{return mStopping || !mSwaps.empty(); });
+						mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwaps.size()<2); });
+						
+						//if (mStopping && mSwaps.empty())
+						if (mStopping && mSwaps.size()<2)
+							break;	
+						j = std::move(mSwaps.front());
+						mSwaps.pop();
+						k = std::move(mSwaps.front());
+						mSwaps.pop();
+						//std::cout<<mTasks.empty();
+					}
+					mcmc_swap_threaded(j,k);
+					
+				}
+			});
+		}
+	}
+	void stop() noexcept
+	{
+		std::cout<<"STOPPING"<<std::endl;
+		{
+			std::unique_lock<std::mutex> lock{mEventMutex};
+			//std::unique_lock<std::mutex> lock{mEventMutexSWP};
+			mStopping = true;
+		}
+		
+		mEventVar.notify_all();
+		mEventVarSWP.notify_all();
+		
+		for(auto &thread: mThreads)
+			thread.join();
+	}
+};
+ThreadPool *poolptr;
 
 /*!\brief Generic sampler, where the likelihood, prior are parameters supplied by the user
  *
@@ -79,8 +223,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	double wstart, wend, wacend;
 	start = clock();
 	wstart = omp_get_wtime();
-
-	omp_set_num_threads(15);
+	int numThread = 15;
+	omp_set_num_threads(numThread);
 
 	//random number generator initialization
 	gsl_rng_env_setup();
@@ -112,6 +256,14 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.r = r;
 	sampler.history_length = 1000;
 	sampler.fisher_update_number = 1000;
+	sampler.output = output;
+	//########################################################
+	//########################################################
+	//POOLING -- TESTING
+	sampler.pool = true;
+	//########################################################
+	//########################################################
+
 	allocate_sampler_mem(&sampler);
 	for (int chain_index; chain_index<sampler.chain_N; chain_index++)
 		assign_probabilities(&sampler, chain_index);
@@ -125,13 +277,15 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	int *step_accepted = (int *)malloc(sizeof(int)*sampler.chain_N);
 	int *step_rejected = (int *)malloc(sizeof(int)*sampler.chain_N);
 	
+	samplerptr = &sampler;
 	//Assign initial position to start chains
 	//Currently, just set all chains to same initial position
 	for (int j=0;j<sampler.chain_N;j++){
 		for (int i = 0; i<sampler.dimension; i++)
 		{
 			sampler.de_primed[j]=false;
-			output[j][0][i] = initial_pos[i];
+			for(int l =0; l<N_steps; l++)
+				output[j][l][i] = initial_pos[i];
 		}
 		step_accepted[j]=0;
 		step_rejected[j]=0;
@@ -139,47 +293,76 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	
 	int cutoff ;
 	//Sampler Loop
-	#pragma omp parallel //num_threads(4)
+	if (!samplerptr->pool)
 	{
-	while (k<N_steps-1){
-		#pragma omp single
+		#pragma omp parallel //num_threads(4)
 		{
-		if( N_steps-k <= sampler.swp_freq) cutoff = N_steps-k-1;	
-		else cutoff = sampler.swp_freq;	
-		}
-		//#pragma omp parallel for reduction(+:step_accepted) reduction(+:step_rejected)
-		//#pragma omp parallel for 
-		#pragma omp for
-		for (int j=0; j<chain_N; j++)
-		{
-			for (int i = 0 ; i< cutoff;i++)
+		while (k<N_steps-1){
+			#pragma omp single
 			{
-				int success;
-				success = mcmc_step(&sampler, output[j][k+i], output[j][k+i+1],j);	
-				if(success==1){step_accepted[j]+=1;}
-				else{step_rejected[j]+=1;}
-				update_history(&sampler,output[j][k+i+1], j);
+			if( N_steps-k <= sampler.swp_freq) cutoff = N_steps-k-1;	
+			else cutoff = sampler.swp_freq;	
 			}
-			if(!sampler.de_primed[j]) 
+			//#pragma omp parallel for reduction(+:step_accepted) reduction(+:step_rejected)
+			//#pragma omp parallel for 
+			#pragma omp for
+			for (int j=0; j<chain_N; j++)
 			{
-				if ((k+cutoff)>sampler.history_length)
+				for (int i = 0 ; i< cutoff;i++)
 				{
-					sampler.de_primed[j]=true;
-					assign_probabilities(&sampler,j);	
+					int success;
+					success = mcmc_step(&sampler, output[j][k+i], output[j][k+i+1],j);	
+					if(success==1){step_accepted[j]+=1;}
+					else{step_rejected[j]+=1;}
+					update_history(&sampler,output[j][k+i+1], j);
+				}
+				if(!sampler.de_primed[j]) 
+				{
+					if ((k+cutoff)>sampler.history_length)
+					{
+						sampler.de_primed[j]=true;
+						assign_probabilities(&sampler,j);	
+					}
 				}
 			}
+			#pragma omp single
+			{
+			k+= cutoff;
+			chain_swap(&sampler, output, k, &swp_accepted, &swp_rejected);
+			printProgress((double)k/N_steps);	
+			}
 		}
-		#pragma omp single
-		{
-		k+= cutoff;
-		chain_swap(&sampler, output, k, &swp_accepted, &swp_rejected);
-		printProgress((double)k/N_steps);	
 		}
 	}
+
+
+	else
+	{
+		ThreadPool pool(numThread);
+		poolptr = &pool;
+		while(samplerptr->progress<N_steps-samplerptr->swp_freq-2)
+		{
+			for(int i =0; i<samplerptr->chain_N; i++)
+			{
+				if(samplerptr->waiting[i] && samplerptr->chain_pos[i]<(N_steps-samplerptr->swp_freq -1))
+				{
+					samplerptr->waiting[i]=false;
+					if(i==0) samplerptr->progress+=samplerptr->swp_freq;
+					poolptr->enqueue(i);
+				}
+			}
+			printProgress((double)samplerptr->progress/N_steps);
+		}
+		for (int i =0;i<samplerptr->chain_N; i++)
+		{
+			swp_accepted+=samplerptr->swap_accept_ct[i];
+			swp_rejected+=samplerptr->swap_reject_ct[i];
+			step_accepted[i]=samplerptr->step_accept_ct[i];
+			step_rejected[i]=samplerptr->step_reject_ct[i];
+		}
 	}
 	end =clock();
 	wend =omp_get_wtime();
-
 	//###########################################################
 	//Auto-correlation
 	if(auto_corr_filename != ""){
@@ -245,3 +428,47 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 }
 
 
+void mcmc_step_threaded(int j)
+{
+	int k = samplerptr->chain_pos[j];
+	int cutoff = samplerptr->swp_freq;
+	for (int i = 0 ; i< cutoff;i++)
+	{
+		int success;
+		success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
+		if(success==1){samplerptr->step_accept_ct[j]+=1;}
+		else{samplerptr->step_reject_ct[j]+=1;}
+		update_history(samplerptr,samplerptr->output[j][k+i+1], j);
+	}
+	if(!samplerptr->de_primed[j]) 
+	{
+		if ((k+cutoff)>samplerptr->history_length)
+		{
+			samplerptr->de_primed[j]=true;
+			assign_probabilities(samplerptr,j);	
+		}
+	}
+	samplerptr->chain_pos[j]+=cutoff;
+	poolptr->enqueue_swap(j);
+}
+void mcmc_swap_threaded(int i, int j)
+{
+	int k = samplerptr->chain_pos[i];
+	int l = samplerptr->chain_pos[j];
+	double T1 = samplerptr->chain_temps[i];
+	double T2 = samplerptr->chain_temps[j];
+	int success;
+	success = single_chain_swap(samplerptr, samplerptr->output[i][k], samplerptr->output[j][l],T1,T2);
+	if(success ==1){
+		samplerptr->swap_accept_ct[i]+=1;	
+		samplerptr->swap_accept_ct[j]+=1;	
+	}
+	else{
+		samplerptr->swap_reject_ct[i]+=1;	
+		samplerptr->swap_reject_ct[j]+=1;	
+	}
+	//NEED -- add finished bool here
+	//std::cout<<"SWAPPING CHAINS: "<<i<<" "<<j<<std::endl;
+	samplerptr->waiting[i]=true;
+	samplerptr->waiting[j]=true;
+}
