@@ -34,6 +34,7 @@ void test6();
 void test7();
 void test8();
 void test9();
+void test10();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_GW(double *pos, int dim);
@@ -55,10 +56,60 @@ int main(){
 	test9();	
 	return 0;
 }
+void test10()
+{
+	//char *ptr = (char *)malloc(sizeof(char) * 10);
+	//ptr = "PhenomD";
+	//std::cout<<ptr<<std::endl;
+	//
+	//char *ptr2;
+	//ptr2 = ptr;
+	//
+	//std::cout<<ptr2<<std::endl;
+	//free(ptr2);
+	//free (ptr);
+	
+	std::string detectors[2];
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+	std::string *ptr1 = new std::string[2];
+	ptr1[0] = detectors[0];
+	ptr1[1] = detectors[1];
+	std::cout<<ptr1[0]<<std::endl;
+	std::cout<<ptr1[1]<<std::endl;
+	std::string *new_detect = ptr1;
+	//new_detect = detectors;
+	std::cout<<new_detect[0]<<std::endl;
+	std::cout<<new_detect[1]<<std::endl;
+	delete [] ptr1;
+
+	//int num =2;
+	//int namelen = 50;
+	//char **ptr = (char **)malloc(sizeof(char*) * num);
+	//for (int i = 0; i<num; i++)
+	//	ptr[i] = (char *)malloc(sizeof(char) * namelen);
+	//ptr[0] = "PhenomD";
+	//ptr[1] = "PhenomD";
+	//
+	//std::cout<<ptr[0]<<std::endl;
+	//std::cout<<ptr[1]<<std::endl;
+	//char **ptr2;
+	//ptr2 = ptr;
+	//
+	//std::cout<<ptr2[0]<<std::endl;
+	//std::cout<<ptr2[1]<<std::endl;
+	//free(ptr2);
+	//for (int i = 0; i<num; i++)
+	//	free(ptr[i]);
+	//free (ptr);
+	
+}
 void test9()
 {
 	int raw_length = 28673;
 	int cutoff = 600;
+	//int high_cut = 11000;
+	//int length = high_cut-cutoff;
 	int length = raw_length-cutoff;
 	int num_detectors =1;
 
@@ -77,6 +128,7 @@ void test9()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =length;
 
+	//bool check = true;
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
 			sizeof(std::complex<double>)*data_length[0]);
@@ -87,38 +139,37 @@ void test9()
 			frequencies[i][j] = temp_freq[j+cutoff];	
 			psd[i][j] = (temp_psd[j+cutoff]);	
 			data[i][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
-			//std::cout<<psd[i][j]<<std::endl;
 			//std::cout<<frequencies[i][j]<<std::endl;
-			//std::cout<<temp_data[j][0]<<std::endl;
-			//if(temp_freq[j]<20)std::cout<<j<<std::endl;
+			//std::cout<<psd[i][j]<<std::endl;
+			//std::cout<<data[i][j]<<std::endl;
+			//if(temp_freq[j]>400 && check){std::cout<<j<<std::endl;check=false;}
 		}
 	}
 
-	deallocate_2D_array(temp_data,length,2);
+	deallocate_2D_array(temp_data,raw_length,2);
 	free(temp_psd);
 	free(temp_freq);
-
 	//#########################################################
 	//MCMC options
 	int dimension = 5;
 	double initial_pos[dimension]={log(400*MPC_SEC),log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 50000;
+	int N_steps = 5000;
 	int chain_N= 20;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 10;
+	int swp_freq = 100;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 500./(chain_N); for(int i =0; i < chain_N;  i ++)
-		//chain_temps[i]=1.;
+	double temp_step = 400./(chain_N); 
+	for(int i =0; i < chain_N;  i ++)
 		chain_temps[i] = 1+ temp_step * i;
 	//double chain_temps[chain_N] ={1};
 	
 	//#########################################################
 	//GW options
-	std::string *detectors = (std::string*)malloc(sizeof(std::string)*10*num_detectors);
+	std::string *detectors = new std::string[1];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	std::string generation_method = "IMRPhenomD";
 	
@@ -157,7 +208,7 @@ void test9()
 	////}
 	//mcmc_out.close();
 
-	deallocate_3D_array(output, chain_N, dimension, N_steps);
+	deallocate_3D_array(output, chain_N, N_steps, dimension);
 	for(int i =0; i< num_detectors; i++){
 		free(data[i]);
 		free(psd[i]);
@@ -170,7 +221,8 @@ void test9()
 	free(data);
 	free(psd);
 	free(frequencies );
-	free(detectors);
+	delete [] detectors;
+	//free(detectors);
 	free(data_length);
 }
 void test8()
@@ -179,7 +231,7 @@ void test8()
 	//Make trial data
 	gen_params params;
 	IMRPhenomD<double> modeld;
-	int length = 1600;
+	int length = 200;
 	double chirpm = 30.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
@@ -198,11 +250,11 @@ void test8()
 	params.phic = .0;
 	params.tc = -.0;
 	params.Luminosity_Distance = 410.;
-	params.betappe = new double[1] ;
-	params.betappe[0]=-50;
-	params.bppe  =new int[1];
-	params.bppe[0] = -1;
-	params.Nmod = 1;
+	//params.betappe = new double[1] ;
+	//params.betappe[0]=-50;
+	//params.bppe  =new int[1];
+	//params.bppe[0] = -1;
+	//params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 0;
 	params.theta = 0;
@@ -243,15 +295,15 @@ void test8()
 	int dimension = 5;
 	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 15000;
-	int chain_N= 12;
+	int N_steps = 100;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 200./(chain_N);
+	double temp_step = 400./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
@@ -266,17 +318,17 @@ void test8()
 			sizeof(std::complex<double>*)*num_detectors);
 	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
 	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
-	std::string *detectors = (std::string*)malloc(sizeof(std::string)*10*num_detectors);
+	std::string *detectors = new std::string[1];//(std::string*)malloc(sizeof(std::string)*10*num_detectors);
 	detectors[0] = "Hanford";
 	std::string generation_method = "IMRPhenomD";
 	
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
-			sizeof(std::complex<double>)*data_length[0]);
+			sizeof(std::complex<double>)*data_length[i]);
 		
-		psd[i] = (double *)malloc(sizeof(double)*data_length[0]);
-		frequencies[i] = (double *)malloc(sizeof(double)*data_length[0]);
-		for(int j = 0; j<data_length[0]; j++){
+		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
+		for(int j = 0; j<data_length[i]; j++){
 			frequencies[i][j] = freq[j];	
 			psd[i][j] = noise[j];	
 			data[i][j] = waveformout[j];	
@@ -287,6 +339,13 @@ void test8()
 	std::string chainfile = "testing/data/mcmc_output.csv";
 	std::string statfilename = "testing/data/mcmc_statistics.txt";
 
+	
+	std::cout<<"TEST"<<std::endl;
+	//fftw_outline plan;
+	//initiate_likelihood_function(&plan, data_length[0]);
+	//maximized_coal_Log_Likelihood(data[0], psd[0], frequencies[0], data_length[0],
+	//		&params, "Hanford", "IMRPhenomD", &plan);
+	//deactivate_likelihood_function(&plan);
 	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
 			swp_freq, test_lp_GW, num_detectors, data, psd, 
 			frequencies, data_length, detectors, generation_method,
@@ -305,6 +364,7 @@ void test8()
 			output_transform[j][4]=output[0][j][4];
 	}
 	write_file(chainfile, output_transform, N_steps, dimension);
+	
 	//ofstream mcmc_out;
 	//mcmc_out.open("testing/data/mcmc_output.csv");
 	//mcmc_out.precision(15);
@@ -317,7 +377,7 @@ void test8()
 	////}
 	//mcmc_out.close();
 
-	deallocate_3D_array(output, chain_N, dimension, N_steps);
+	deallocate_3D_array(output, chain_N, N_steps, dimension);
 	for(int i =0; i< num_detectors; i++){
 		free(data[i]);
 		free(psd[i]);
@@ -329,8 +389,10 @@ void test8()
 	free(output_transform);
 	free(data);
 	free(psd);
+	free(freq);
 	free(frequencies );
-	free(detectors);
+	//free(detectors);
+	delete [] detectors;
 	free(data_length);
 }
 void test7()
@@ -339,8 +401,8 @@ void test7()
 	double initial_pos[2]={6,5.};
 
 	
-	int N_steps = 50000;
-	int chain_N= 100;
+	int N_steps = 50;
+	int chain_N= 1;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -373,7 +435,7 @@ void test7()
 	////}
 	//mcmc_out.close();
 
-	deallocate_3D_array(output, chain_N, dimension, N_steps);
+	deallocate_3D_array(output, chain_N, N_steps, dimension);
 }
 
 void test6()
@@ -382,7 +444,7 @@ void test6()
 	gen_params params;
 	IMRPhenomD<double> modeld;
 	IMRPhenomD<adouble> modela;
-	int length = 8000;
+	int length = 8;
 	double chirpm = 49.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
@@ -403,11 +465,11 @@ void test6()
 	params.phic = .0;
 	params.tc = -.0;
 	params.Luminosity_Distance = 410.;
-	params.betappe = new double[1] ;
-	params.betappe[0]=-100.;
-	params.bppe  =new int[1];
-	params.bppe[0] = -3;
-	params.Nmod = 1;
+	//params.betappe = new double[1] ;
+	//params.betappe[0]=-100.;
+	//params.bppe  =new int[1];
+	//params.bppe[0] = -3;
+	//params.Nmod = 1;
 	params.NSflag = false;
 	params.phi = 0;
 	params.theta = 0;
@@ -427,13 +489,36 @@ void test6()
 		freq[i]=flow+i*df;
 
 	int dimension = 7;
+	int dimensionmcmc = 5;
+
 	clock_t start7,end7;
+
 	double **output = (double **)malloc(dimension * sizeof(**output));	
 	double **output2 = (double **)malloc(dimension * sizeof(**output2));	
+	double **output3 = (double **)malloc(dimensionmcmc * sizeof(**output3));	
 
 	for (int i = 0;i<dimension;i++){
 		output[i] = (double *)malloc(dimension*sizeof(double));
 		output2[i] = (double *)malloc(dimension*sizeof(double));
+	}
+	for (int i = 0;i<dimensionmcmc;i++){
+	
+		output3[i] = (double*)malloc(dimensionmcmc*sizeof(double));
+	}
+	start7 = clock();
+	fisher(freq, length, "MCMC_IMRPhenomD_single_detect","Hanford_O1_fitted", 
+			output3, dimensionmcmc, &params );
+
+	end7 = clock();
+
+	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+
+	cout.precision(5);
+	for (int i = 0;i <dimensionmcmc;i++)
+	{
+		for (int j=0;j <dimensionmcmc; j++)
+			cout<<output3[i][j]<<"   ";
+		cout<<endl;
 	}
 	
 	start7 = clock();
@@ -468,8 +553,19 @@ void test6()
 			cout<<(output2[i][j]-output[i][j])/output2[i][j]<<"   ";
 		cout<<endl;
 	}
+	for(int i =0; i<dimension; i++)
+	{
+		free(output[i]);
+		free(output2[i]);
+	}
+	for(int i =0; i<dimensionmcmc; i++)
+	{
+		free(output3[i]);
+	}
 	free(output);
 	free(output2);
+	free(output3);
+	free(freq);
 }
 void test5()
 {

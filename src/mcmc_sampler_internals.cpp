@@ -128,6 +128,118 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		int chain_index
 		)
 {
+	sampler->num_fish+=1;
+	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
+		update_fisher(sampler, current_param, chain_index);	
+
+	sampler->fisher_update_ct[chain_index] += 1;
+	
+	//beta determines direction to step in eigen directions
+	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->r)));
+	
+	double alpha = gsl_ran_gaussian(sampler->r, .1);
+
+	double scaling = 0.0;
+	for(int i =0; i< sampler->dimension;i++)
+	{
+		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+		else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+
+		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+				sampler->chain_temps[chain_index];}
+
+		proposed_param[i] = current_param[i] +
+			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+	}
+
+}
+/*!\brief Fisher informed gaussian step
+ */
+//void fisher_step(sampler *sampler, /**< Sampler struct*/
+//		double *current_param, /**< current position in parameter space*/
+//		double *proposed_param, /**< [out] Proposed position in parameter space*/
+//		int chain_index
+//		)
+//{
+//	////Fisher calculation
+//	//double **fisher=(double **)malloc(sizeof(double*)*sampler->dimension);	
+//	//for (int i =0; i<sampler->dimension;i++){
+//	//	fisher[i] = (double*)malloc(sizeof(double)*sampler->dimension);
+//	//}
+//	//sampler->fish(current_param, sampler->dimension, fisher);
+//
+//	////Convert to 1D array for Eigen
+//	//double *oneDfisher=(double *)malloc(sizeof(double)*sampler->dimension*sampler->dimension);
+//	//for (int i =0; i<sampler->dimension;i++){
+//	//	for (int j = 0; j<sampler->dimension; j++){
+//	//		oneDfisher[sampler->dimension*i+j] = fisher[i][j];///
+//	//				//sampler->chain_temps[chain_index];
+//	//		//std::cout<<oneDfisher[sampler->dimension*i+j]<<std::endl;
+//	//	}
+//	//	
+//	//}
+//	//
+//	////Find eigen vectors and eigen values
+//	//Eigen::Map<Eigen::MatrixXd> m(oneDfisher,sampler->dimension,sampler->dimension);
+// 	//Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(m);
+// 	//Eigen::MatrixXd eigen_vecs = eigensolver.eigenvectors();
+// 	//Eigen::VectorXd eigen_vals = eigensolver.eigenvalues();
+//	
+//	//beta determines direction to step in eigen directions
+//	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->r)));
+//	//std::cout<<"Val: "<<eigen_vals(beta)<<std::endl;
+//	//std::cout<<"Direction: "<<beta<<std::endl;
+//	
+//	//##############################################################
+//	//Numerical matrix inversion can be tricky - catch nans here and replace
+//	//with gaussian step just to not have the program crash because of 
+//	//one position in parameter space
+//	//
+//	//To see impact of nans, variable is stored in sampler->nan_counter
+//	//##############################################################
+//	int nansum = 0;
+//	for(int i =0; i<sampler->dimension; i++)
+//		nansum+= std::isnan(eigen_vecs.col(beta)(i));	
+//	nansum+= std::isnan(eigen_vals(beta));
+//	if(nansum){
+//		//for(int i =0; i<sampler->dimension*sampler->dimension;i++)
+//		//	std::cout<<oneDfisher[i]<<std::endl;
+//		//std::cout<<std::exp(current_param[0])/MPC_SEC<<std::endl;
+//		//std::cout<<std::exp(current_param[1])/MSOL_SEC<<std::endl;
+//		//std::cout<<current_param[2]<<std::endl;
+//		//std::cout<<current_param[3]<<std::endl;
+//		//std::cout<<current_param[4]<<std::endl;
+//		std::cout<<"FISHER failed"<<std::endl;
+//		sampler->num_gauss+=1;
+//		gaussian_step(sampler,current_param, proposed_param);	
+//		sampler->nan_counter+=1;
+//	}
+//	else{
+//		sampler->num_fish+=1;
+//		double alpha = gsl_ran_gaussian(sampler->r, .05);
+//
+//		double scaling = 0.0;
+//		for(int i =0; i< sampler->dimension;i++)
+//		{
+//			if(abs(eigen_vals(beta))<10){scaling = 10.;}
+//			else if(abs(eigen_vals(beta))>1000){scaling = 1000.;}
+//			else{scaling = abs(eigen_vals(beta))/sampler->chain_temps[chain_index];}
+//			proposed_param[i] = current_param[i] +
+//				alpha/sqrt(scaling) *eigen_vecs.col(beta)(i);
+//		}
+//
+//
+//	}
+//	for (int i =0; i<sampler->dimension;i++){
+//		free(fisher[i]);
+//	}
+//	free(fisher);
+//	free(oneDfisher);
+//}
+
+
+void update_fisher(sampler *sampler, double *current_param, int chain_index)
+{
 	//Fisher calculation
 	double **fisher=(double **)malloc(sizeof(double*)*sampler->dimension);	
 	for (int i =0; i<sampler->dimension;i++){
@@ -152,11 +264,6 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
  	Eigen::MatrixXd eigen_vecs = eigensolver.eigenvectors();
  	Eigen::VectorXd eigen_vals = eigensolver.eigenvalues();
 	
-	//beta determines direction to step in eigen directions
-	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->r)));
-	//std::cout<<"Val: "<<eigen_vals(beta)<<std::endl;
-	//std::cout<<"Direction: "<<beta<<std::endl;
-	
 	//##############################################################
 	//Numerical matrix inversion can be tricky - catch nans here and replace
 	//with gaussian step just to not have the program crash because of 
@@ -165,38 +272,24 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	//To see impact of nans, variable is stored in sampler->nan_counter
 	//##############################################################
 	int nansum = 0;
-	for(int i =0; i<sampler->dimension; i++)
-		nansum+= std::isnan(eigen_vecs.col(beta)(i));	
-	nansum+= std::isnan(eigen_vals(beta));
-	if(nansum){
-		//for(int i =0; i<sampler->dimension*sampler->dimension;i++)
-		//	std::cout<<oneDfisher[i]<<std::endl;
-		//std::cout<<std::exp(current_param[0])/MPC_SEC<<std::endl;
-		//std::cout<<std::exp(current_param[1])/MSOL_SEC<<std::endl;
-		//std::cout<<current_param[2]<<std::endl;
-		//std::cout<<current_param[3]<<std::endl;
-		//std::cout<<current_param[4]<<std::endl;
-		std::cout<<"FISHER failed"<<std::endl;
-		sampler->num_gauss+=1;
-		gaussian_step(sampler,current_param, proposed_param);	
-		sampler->nan_counter+=1;
+	for(int j = 0 ; j<sampler->dimension; j++){
+		for(int i =0; i<sampler->dimension; i++)
+			nansum+= std::isnan(eigen_vecs.col(j)(i));	
+		nansum+= std::isnan(eigen_vals(j));
 	}
-	else{
-		sampler->num_fish+=1;
-		double alpha = gsl_ran_gaussian(sampler->r, .1);
-
-		double scaling = 0.0;
-		for(int i =0; i< sampler->dimension;i++)
+	if(!nansum){
+		for (int i =0; i < sampler-> dimension; i++)
 		{
-			if(abs(eigen_vals(beta))<10){scaling = 10.;}
-			else if(abs(eigen_vals(beta))>1000){scaling = 1000.;}
-			else{scaling = abs(eigen_vals(beta))/sampler->chain_temps[chain_index];}
-			proposed_param[i] = current_param[i] +
-				alpha/sqrt(scaling) *eigen_vecs.col(beta)(i);
+			for(int j = 0; j<sampler->dimension; j++)
+			{
+				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
+			}
+			sampler->fisher_vals[chain_index][i]=eigen_vals[i];
 		}
-
-
+		sampler->fisher_update_ct[chain_index]=0;
 	}
+	else{ sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;}
+
 	for (int i =0; i<sampler->dimension;i++){
 		free(fisher[i]);
 	}
@@ -231,7 +324,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = .1;
 	double beta = gsl_rng_uniform(sampler->r);
 	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->r,.1);
+		alpha=gsl_ran_gaussian(sampler->r,.05);
 	for (int k = 0; k<sampler->dimension; k++)
 	{
 		proposed_param[k] = current_param[k] + alpha*
@@ -375,6 +468,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->prob_boundaries = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->de_primed = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
 	sampler->current_hist_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
+
 	sampler->fish_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -383,6 +477,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->gauss_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->mmala_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->mmala_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->fisher_update_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
@@ -397,11 +492,16 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->gauss_reject_ct[i]=0;
 		sampler->mmala_accept_ct[i]=0;
 		sampler->mmala_reject_ct[i]=0;
+		sampler->fisher_update_ct[i] = sampler->fisher_update_number;
 
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->dimension);
+	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 
+				sampler->dimension, sampler->dimension);
+	sampler->fisher_vals = allocate_2D_array(sampler->chain_N, sampler->dimension);
 }
+
 void deallocate_sampler_mem(sampler *sampler)
 {
 	int i;
@@ -425,7 +525,11 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->mmala_reject_ct);
 	deallocate_3D_array(sampler->history,sampler->chain_N, 
 				sampler->history_length, sampler->dimension);
+	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->dimension, sampler->dimension);
+	deallocate_2D_array(sampler->fisher_vals, sampler->chain_N, sampler->dimension);
  
+	free(sampler->fisher_update_ct);
+	gsl_rng_free(sampler->r);
 	
 }
 
@@ -769,11 +873,11 @@ void write_stat_file(sampler *sampler,
 	double detotal ;
 	double mmtotal ;
 	double ftotal ;
-	double gtotal_total ;
-	double detotal_total ;
-	double mmtotal_total ;
-	double ftotal_total ;
-	double total_total ;
+	double gtotal_total =0;
+	double detotal_total =0;
+	double mmtotal_total =0;
+	double ftotal_total =0;
+	double total_total =0;
 	double gacc_frac = 0;
 	double deacc_frac = 0;
 	double mmacc_frac = 0;

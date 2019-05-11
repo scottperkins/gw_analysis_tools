@@ -381,6 +381,7 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				)
 {
 	double ll = 0;
+	params->tc = 4;
 	if(	generation_method  == "IMRPhenomD" ||
 		generation_method  == "ppE_IMRPhenomD_Inspiral" ||
 		generation_method  == "ppE_IMRPhenomD_IMR" ){

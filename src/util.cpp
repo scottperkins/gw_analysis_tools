@@ -22,10 +22,12 @@ const std::string PROJECT_DIRECTORY="/Users/sperkins/opt/gw_analysis_tools";
 const int npts =100000;
 double DLvec[npts];
 double Zvec[npts];
-gsl_interp_accel *Z_DL_accel_ptr = gsl_interp_accel_alloc();
-gsl_spline *Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
+gsl_interp_accel *Z_DL_accel_ptr ;
+gsl_spline *Z_DL_spline_ptr ;
 void initiate_LumD_Z_interp()
 {
+	Z_DL_accel_ptr = gsl_interp_accel_alloc();
+	Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
 	std::fstream data_table;
 	data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
 	std::vector<std::string> row;

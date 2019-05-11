@@ -13,7 +13,9 @@ plt.close()
 autocorr = np.loadtxt("data/auto_corr_mcmc.csv",delimiter=',')
 lengths = autocorr[0]
 autocorr = autocorr[1:]
-for i in autocorr:
-    plt.plot(lengths,i)
+names = ["DL","CHIRP","ETA","CHI1","CHI2"]
+for i in np.arange(len(autocorr)):
+    plt.plot(lengths,autocorr[i], label=names[i])
+plt.legend()
 plt.savefig("autocorr_testing.pdf")
 plt.close()

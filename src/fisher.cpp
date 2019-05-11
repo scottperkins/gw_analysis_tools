@@ -82,8 +82,8 @@ void fisher(double *frequency,
 			{
 				integrand[i] = 
 					real( (amplitude_deriv[j][i]*amplitude_deriv[k][i]
-					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*phase_deriv[k][i])
-					/internal_noise[i]);
+					+amplitude[i]*amplitude[i]*
+					phase_deriv[j][i]*phase_deriv[k][i])/internal_noise[i]);
 			}
 			output[j][k] = 4*simpsons_sum(
 						frequency[1]-frequency[0], length, integrand);	
@@ -98,8 +98,8 @@ void fisher(double *frequency,
 		for (int i =0;i<length;i++)
 			integrand[i] = 
 				real( (amplitude_deriv[j][i]*amplitude_deriv[j][i]
-					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*phase_deriv[j][i])
-					/internal_noise[i]);
+					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*
+					phase_deriv[j][i])/internal_noise[i]);
 		output[j][j] = 4*simpsons_sum(
 					frequency[1]-frequency[0], length, integrand);	
 	}
@@ -131,7 +131,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-8;
+	double epsilon = 1e-5;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -288,13 +288,13 @@ void calculate_derivatives(double  **amplitude_deriv,
 		//TESTING 
 		//parameters->sky_average=true;
 		//#################################
-		parameters->sky_average=false;
+		//parameters->sky_average=false;
 		parameters_in = parameters_in.populate_source_parameters(parameters); 
 		double param_p[dimension] ;
 		double param_m[dimension] ;
 		double param_in[dimension] ;
 		double param_out[dimension] ;
-		param_in[0] = parameters_in.DL;//seconds
+		param_in[0] = parameters_in.DL/MPC_SEC;//MPC -- too big a number for numdiff?
 		param_in[1] = parameters_in.chirpmass;//seconds
 		param_in[2] = parameters_in.eta;
 		param_in[3] = parameters_in.chi_s+parameters_in.chi_a;
@@ -320,15 +320,17 @@ void calculate_derivatives(double  **amplitude_deriv,
 			param_out[2] = calculate_mass2(param_p[1],param_p[2]);
 			param_out[3] = param_p[3];
 			param_out[4] = param_p[4];
+
 			waveform_params.mass1 = param_out[1]/MSOL_SEC;
 			waveform_params.mass2 = param_out[2]/MSOL_SEC;
-			waveform_params.Luminosity_Distance=param_out[0]/MPC_SEC;
+			waveform_params.Luminosity_Distance=param_out[0];
 			waveform_params.spin1[0]=0;
 			waveform_params.spin1[1]=0;
 			waveform_params.spin1[2]=param_out[3];
 			waveform_params.spin2[0]=0;
 			waveform_params.spin2[1]=0;
 			waveform_params.spin2[2]=param_out[4];
+
 			waveform_params.phic = parameters->phic;
 			waveform_params.tc= parameters->tc;
 			waveform_params.incl_angle = parameters->incl_angle;
@@ -356,17 +358,18 @@ void calculate_derivatives(double  **amplitude_deriv,
 			param_out[2] = calculate_mass2(param_m[1],param_m[2]);
 			param_out[3] = param_m[3];
 			param_out[4] = param_m[4];
+
 			waveform_params.mass1 = param_out[1]/MSOL_SEC;
 			waveform_params.mass2 = param_out[2]/MSOL_SEC;
-			waveform_params.Luminosity_Distance=param_out[0]/MPC_SEC;
+			waveform_params.Luminosity_Distance=param_out[0];
 			waveform_params.spin1[0]=0;
 			waveform_params.spin1[1]=0;
 			waveform_params.spin1[2]=param_out[3];
 			waveform_params.spin2[0]=0;
 			waveform_params.spin2[1]=0;
 			waveform_params.spin2[2]=param_out[4];
-			waveform_params.phic = 0;
-			waveform_params.tc= 0;
+			waveform_params.phic = parameters->phic;
+			waveform_params.tc= parameters->tc;
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
@@ -402,11 +405,15 @@ void calculate_derivatives(double  **amplitude_deriv,
 		{
 			amplitude_deriv[0][l] = amplitude_deriv[0][l]*param_in[0] ;
 			amplitude_deriv[1][l] = amplitude_deriv[1][l]*param_in[1] ;
-			//amplitude_deriv[2][l] = amplitude_deriv[2][l]*param_in[2] ;
 			phase_deriv[0][l] = phase_deriv[0][l]*param_in[0] ;
 			phase_deriv[1][l] = phase_deriv[1][l]*param_in[1] ;
-			//phase_deriv[2][l] = phase_deriv[2][l]*param_in[2] ;
 		}
+		fourier_amplitude(frequencies, 
+			length,
+			amplitude,
+			//amplitude_cross_plus,
+			"IMRPhenomD",
+			parameters);	
 			
 	}	
 	fourier_amplitude(frequencies, 

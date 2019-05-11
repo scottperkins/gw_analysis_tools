@@ -81,6 +81,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	wstart = omp_get_wtime();
 
 	omp_set_num_threads(15);
+
 	//random number generator initialization
 	gsl_rng_env_setup();
 	T=gsl_rng_default;
@@ -110,7 +111,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.dimension = dimension;
 	sampler.r = r;
 	sampler.history_length = 1000;
-	
+	sampler.fisher_update_number = 1000;
 	allocate_sampler_mem(&sampler);
 	for (int chain_index; chain_index<sampler.chain_N; chain_index++)
 		assign_probabilities(&sampler, chain_index);
@@ -136,15 +137,19 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		step_rejected[j]=0;
 	}
 	
+	int cutoff ;
 	//Sampler Loop
-	//#pragma omp parallel //num_threads(4)
+	#pragma omp parallel //num_threads(4)
 	{
 	while (k<N_steps-1){
-		int cutoff ;
+		#pragma omp single
+		{
 		if( N_steps-k <= sampler.swp_freq) cutoff = N_steps-k-1;	
 		else cutoff = sampler.swp_freq;	
+		}
 		//#pragma omp parallel for reduction(+:step_accepted) reduction(+:step_rejected)
-		#pragma omp parallel for 
+		//#pragma omp parallel for 
+		#pragma omp for
 		for (int j=0; j<chain_N; j++)
 		{
 			for (int i = 0 ; i< cutoff;i++)
@@ -164,9 +169,12 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 				}
 			}
 		}
+		#pragma omp single
+		{
 		k+= cutoff;
 		chain_swap(&sampler, output, k, &swp_accepted, &swp_rejected);
 		printProgress((double)k/N_steps);	
+		}
 	}
 	}
 	end =clock();
@@ -174,9 +182,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 
 	//###########################################################
 	//Auto-correlation
-	//
-	//Transpose the data for auto-correlation
 	if(auto_corr_filename != ""){
+		//Transpose the data for auto-correlation
 		double **temp = (double **) malloc(sizeof(double*)*N_steps);
 		for (int i = 0 ; i< sampler.dimension; i++){
 			temp[i] = (double *)malloc(sizeof(double)*N_steps);
