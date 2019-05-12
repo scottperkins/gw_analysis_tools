@@ -223,7 +223,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	double wstart, wend, wacend;
 	start = clock();
 	wstart = omp_get_wtime();
-	int numThread = 15;
+	int numThread = 20;
 	omp_set_num_threads(numThread);
 
 	//random number generator initialization
@@ -455,10 +455,8 @@ void mcmc_swap_threaded(int i, int j)
 {
 	int k = samplerptr->chain_pos[i];
 	int l = samplerptr->chain_pos[j];
-	double T1 = samplerptr->chain_temps[i];
-	double T2 = samplerptr->chain_temps[j];
 	int success;
-	success = single_chain_swap(samplerptr, samplerptr->output[i][k], samplerptr->output[j][l],T1,T2);
+	success = single_chain_swap(samplerptr, samplerptr->output[i][k], samplerptr->output[j][l],i,j);
 	if(success ==1){
 		samplerptr->swap_accept_ct[i]+=1;	
 		samplerptr->swap_accept_ct[j]+=1;	
@@ -467,8 +465,6 @@ void mcmc_swap_threaded(int i, int j)
 		samplerptr->swap_reject_ct[i]+=1;	
 		samplerptr->swap_reject_ct[j]+=1;	
 	}
-	//NEED -- add finished bool here
-	//std::cout<<"SWAPPING CHAINS: "<<i<<" "<<j<<std::endl;
 	samplerptr->waiting[i]=true;
 	samplerptr->waiting[j]=true;
 }

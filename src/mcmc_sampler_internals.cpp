@@ -51,13 +51,14 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	double current_lp = sampler->lp(current_param, sampler->dimension);
 	double proposed_lp = sampler->lp(proposed_param, sampler->dimension);
 	double MH_ratio;
+	double power;
 
 	if(current_lp == limit_inf || proposed_lp == limit_inf){MH_ratio = 0.;}
 	else{
 		//Calculate log_likelihood and log prior
 		double current_ll = sampler->ll(current_param, sampler->dimension);
 		current_ll = (current_ll )/sampler->chain_temps[chain_number];
-		double current_lp = sampler->lp(current_param, sampler->dimension);
+		//double current_lp = sampler->lp(current_param, sampler->dimension);
 		double proposed_ll = sampler->ll(proposed_param, sampler->dimension);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 		//std::cout<<"mcmc update current pos: "<<current_param[0]<<" mcmc update proposed pos: "<<proposed_param[0]<<std::endl;
@@ -66,7 +67,10 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 		//std::cout<<"Chain number: "<<chain_number<<std::endl;
 
 		//Calculate MH ratio
-		MH_ratio = std::exp(-current_ll+proposed_ll-current_lp + proposed_lp);
+		power = -current_ll+proposed_ll-current_lp + proposed_lp;
+		if(power>1.){MH_ratio=1.1;}
+		else{MH_ratio = std::exp(power);}
+		//std::cout<<power<<" "<<MH_ratio<<std::endl;
 	}
 
 	int i;
@@ -324,7 +328,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = .1;
 	double beta = gsl_rng_uniform(sampler->r);
 	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->r,.05);
+		alpha=gsl_ran_gaussian(sampler->r,.5);
 	for (int k = 0; k<sampler->dimension; k++)
 	{
 		proposed_param[k] = current_param[k] + alpha*
@@ -367,9 +371,23 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	double T2 = sampler->chain_temps[T2_index];
 	//std::cout<<"ll for chain 1 (swapping): "<<ll1<<std::endl;
 	//std::cout<<"ll for chain 2 (swapping): "<<ll2<<std::endl;
+	//std::cout<<"T for chain 1 (swapping): "<<T1<<std::endl;
+	//std::cout<<"T for chain 2 (swapping): "<<T2<<std::endl;
 	//std::cout<<"Position chain 1 (swapping): "<<chain1[0]<<std::endl;
 	//std::cout<<"Position chain 2 (swapping): "<<chain2[0]<<std::endl;
-	double MH_ratio = std::exp(ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2);
+	//std::cout<<"Position chain 1 (swapping): "<<chain1[1]<<std::endl;
+	//std::cout<<"Position chain 2 (swapping): "<<chain2[1]<<std::endl;
+	//std::cout<<"Position chain 1 (swapping): "<<chain1[2]<<std::endl;
+	//std::cout<<"Position chain 2 (swapping): "<<chain2[2]<<std::endl;
+	//std::cout<<"Position chain 1 (swapping): "<<chain1[3]<<std::endl;
+	//std::cout<<"Position chain 2 (swapping): "<<chain2[3]<<std::endl;
+	//std::cout<<"Position chain 1 (swapping): "<<chain1[4]<<std::endl;
+	//std::cout<<"Position chain 2 (swapping): "<<chain2[4]<<std::endl;
+	//std::cout<<MH_ratio<<std::endl;
+	double pow = ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2;
+	double MH_ratio;
+	if(pow>1){MH_ratio = 1.1;}
+	else{MH_ratio = std::exp(ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2);}
 	if(MH_ratio>1.)
 	{
 		double temp[sampler->dimension];
@@ -536,6 +554,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->mmala_accept_ct);
 	free(sampler->mmala_reject_ct);
 	free(sampler->chain_pos);
+	free(sampler->waiting);
 	free(sampler->swap_accept_ct);
 	free(sampler->swap_reject_ct);
 	free(sampler->step_accept_ct);

@@ -53,7 +53,7 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test9();	
+	test8();	
 	return 0;
 }
 void test10()
@@ -154,18 +154,20 @@ void test9()
 	int dimension = 5;
 	double initial_pos[dimension]={log(400*MPC_SEC),log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 50;
-	int chain_N= 10;
+	int N_steps = 15000;
+	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 400./(chain_N); 
-	for(int i =0; i < chain_N;  i ++)
-		chain_temps[i] = 1+ temp_step * i;
-	//double chain_temps[chain_N] ={1};
+	//double temp_step = 20./(chain_N);
+	chain_temps[0]=1.;
+	double c = 1.2;
+	for(int i =1; i < chain_N;  i ++)
+		chain_temps[i] = c*chain_temps[i-1];
+		//chain_temps[i] = (1.+i*temp_step);
 	
 	//#########################################################
 	//GW options
@@ -231,8 +233,8 @@ void test8()
 	//Make trial data
 	gen_params params;
 	IMRPhenomD<double> modeld;
-	int length = 200;
-	double chirpm = 30.78;
+	int length = 2000;
+	double chirpm = 70.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
 	params.mass2 = calculate_mass2(chirpm,eta);
@@ -241,10 +243,10 @@ void test8()
 	complex<double> waveformout[length];
 	params.spin1[0] = 0;
 	params.spin1[1] = 0;
-	params.spin1[2] = -.0;
+	params.spin1[2] = -.4;
 	params.spin2[0] = 0;
 	params.spin2[1] = 0;
-	params.spin2[2] = .0;
+	params.spin2[2] = .3;
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
 	params.phic = .0;
@@ -295,19 +297,20 @@ void test8()
 	int dimension = 5;
 	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 100;
-	int chain_N= 10;
+	int N_steps = 1500;
+	int chain_N= 50;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 400./(chain_N);
-	for(int i =0; i < chain_N;  i ++)
-		//chain_temps[i]=1.;
-		chain_temps[i] = 1+ temp_step * i;
-	//double chain_temps[chain_N] ={1};
+	//double temp_step = 20./(chain_N);
+	chain_temps[0]=1.;
+	double c = 1.2;
+	for(int i =1; i < chain_N;  i ++)
+		chain_temps[i] = c*chain_temps[i-1];
+		//chain_temps[i] = (1.+i*temp_step);
 	
 	//#########################################################
 	//GW options
@@ -401,24 +404,24 @@ void test7()
 	double initial_pos[2]={6,5.};
 
 	
-	int N_steps = 50;
-	int chain_N= 1;
+	int N_steps = 50000;
+	int chain_N= 100;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 30;
+	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 500./(chain_N);
+	double temp_step = 50./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
 	//double chain_temps[chain_N] ={1};
-	std::string autocorrfile = "testing/data/auto_corr_mcmc.csv";
-	std::string chainfile = "testing/data/mcmc_output.csv";
-	std::string statfilename = "testing/data/mcmc_statistics.txt";
+	std::string autocorrfile = "testing/data/neil_auto_corr_mcmc.csv";
+	std::string chainfile = "testing/data/neil_mcmc_output.csv";
+	std::string statfilename = "testing/data/neil_mcmc_statistics.txt";
 	
-	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3 );	
+	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3,statfilename,chainfile,autocorrfile );	
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,statfilename,chainfile,autocorrfile );	
 	std::cout<<"ENDED"<<std::endl;
 
@@ -1314,5 +1317,6 @@ double test_lp_GW(double *pos, int dim)
 	if ((pos[2])<.1 || (pos[2])>.245){return a;}
 	if ((pos[3])<-.9 || (pos[3])>.9){return a;}
 	if ((pos[4])<-.9 || (pos[4])>.9){return a;}
-	else {return 0.;}
+	//else {return 0.;}
+	else {return log(std::exp(pos[1])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
 }
