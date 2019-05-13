@@ -135,6 +135,14 @@ double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> 
 				size_t length,
 				fftw_outline *plan
 				);
+double Log_Likelihood(std::complex<double> *data,
+				double *psd,
+				double *frequencies,
+				std::complex<double> *detector_response,
+				size_t length,
+				fftw_outline *plan
+				);
+
 double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
@@ -162,6 +170,13 @@ double maximized_coal_Log_Likelihood(double *data_real,
 				std::string generation_method,
 				fftw_outline *plan
 				);
+double Log_Likelihood_internal(std::complex<double> *data,
+			double *psd,
+			double *frequencies,
+			std::complex<double> *detector_response,
+			int length,
+			fftw_outline *plan
+			);
 void MCMC_MH_GW(double ***output,
 			int dimension,
 			int N_steps,

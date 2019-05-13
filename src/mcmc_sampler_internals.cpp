@@ -53,7 +53,17 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	double MH_ratio;
 	double power;
 
-	if(current_lp == limit_inf || proposed_lp == limit_inf){MH_ratio = 0.;}
+	if(current_lp == limit_inf || proposed_lp == limit_inf){
+		MH_ratio =-1e20;
+		//std::cout<<std::exp(proposed_param[0])/MPC_SEC<<std::endl;		
+		//std::cout<<proposed_param[1]<<std::endl;		
+		//std::cout<<proposed_param[2]<<std::endl;		
+		//std::cout<<std::exp(proposed_param[3])/MSOL_SEC<<std::endl;		
+		//std::cout<<proposed_param[4]<<std::endl;		
+		//std::cout<<proposed_param[5]<<std::endl;		
+		//std::cout<<proposed_param[6]<<std::endl;		
+		//std::cout<<"YIKES"<<std::endl;
+	}
 	else{
 		//Calculate log_likelihood and log prior
 		double current_ll = sampler->ll(current_param, sampler->dimension);
@@ -67,45 +77,67 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 		//std::cout<<"Chain number: "<<chain_number<<std::endl;
 
 		//Calculate MH ratio
-		power = -current_ll+proposed_ll-current_lp + proposed_lp;
-		if(power>1.){MH_ratio=1.1;}
-		else{MH_ratio = std::exp(power);}
+		//power = -current_ll+proposed_ll-current_lp + proposed_lp;
+		MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
+		//if(power>0.){MH_ratio=1.1;}
+		//else{MH_ratio = std::exp(power);}
 		//std::cout<<power<<" "<<MH_ratio<<std::endl;
 	}
 
 	int i;
-	if (MH_ratio>1.)
+	//Random number to determine step acceptance
+	double beta = log(gsl_rng_uniform(sampler->r));
+	//std::cout<<beta<<" "<<MH_ratio<<std::endl;
+	if(MH_ratio< beta){
+		for ( i=0;i<sampler->dimension; i ++)
+		{
+			next_param[i] = current_param[i];
+		}
+		assign_ct_m(sampler, step,chain_number);
+		return -1;
+	}	
+	else
 	{
 		for ( i=0;i<sampler->dimension; i ++)
 		{
 			next_param[i] = proposed_param[i];
 		}
-		assign_ct_p(sampler, step,chain_number);
+		assign_ct_p(sampler, step, chain_number);
 		return 1;
-	}	
-	else 
-	{
-		//Random number to determine step acceptance
-		double beta = gsl_rng_uniform(sampler->r);
-		if(MH_ratio< beta){
-			for ( i=0;i<sampler->dimension; i ++)
-			{
-				next_param[i] = current_param[i];
-			}
-			assign_ct_m(sampler, step,chain_number);
-			return -1;
-		}	
-		else
-		{
-			for ( i=0;i<sampler->dimension; i ++)
-			{
-				next_param[i] = proposed_param[i];
-			}
-			assign_ct_p(sampler, step, chain_number);
-			return 1;
-		}		
+	}		
 	
-	}
+	//if (MH_ratio>1.)
+	//{
+	//	for ( i=0;i<sampler->dimension; i ++)
+	//	{
+	//		next_param[i] = proposed_param[i];
+	//	}
+	//	assign_ct_p(sampler, step,chain_number);
+	//	return 1;
+	//}	
+	//else 
+	//{
+	//	//Random number to determine step acceptance
+	//	double beta = gsl_rng_uniform(sampler->r);
+	//	if(MH_ratio< beta){
+	//		for ( i=0;i<sampler->dimension; i ++)
+	//		{
+	//			next_param[i] = current_param[i];
+	//		}
+	//		assign_ct_m(sampler, step,chain_number);
+	//		return -1;
+	//	}	
+	//	else
+	//	{
+	//		for ( i=0;i<sampler->dimension; i ++)
+	//		{
+	//			next_param[i] = proposed_param[i];
+	//		}
+	//		assign_ct_p(sampler, step, chain_number);
+	//		return 1;
+	//	}		
+	//
+	//}
 }
 	
 
@@ -120,7 +152,7 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = gsl_rng_uniform(sampler->r);
 	//double alpha = .0005;
 	for (i=0;i<sampler->dimension;i++){
-		proposed_param[i] = gsl_ran_gaussian(sampler->r, alpha)+current_param[i];
+		proposed_param[i] = gsl_ran_gaussian(sampler->r, 0.05*alpha)+current_param[i];
 	}
 }
 
@@ -144,102 +176,21 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = gsl_ran_gaussian(sampler->r, .1);
 
 	double scaling = 0.0;
+	if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+	else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+
+	else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+				sampler->chain_temps[chain_index];}
 	for(int i =0; i< sampler->dimension;i++)
 	{
-		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-		else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
-
-		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
-				sampler->chain_temps[chain_index];}
-
+		//std::cout<<sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
 		proposed_param[i] = current_param[i] +
 			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 	}
+	//std::cout<<alpha/sqrt(scaling)<<std::endl;
+	//std::cout<<std::endl;
 
 }
-/*!\brief Fisher informed gaussian step
- */
-//void fisher_step(sampler *sampler, /**< Sampler struct*/
-//		double *current_param, /**< current position in parameter space*/
-//		double *proposed_param, /**< [out] Proposed position in parameter space*/
-//		int chain_index
-//		)
-//{
-//	////Fisher calculation
-//	//double **fisher=(double **)malloc(sizeof(double*)*sampler->dimension);	
-//	//for (int i =0; i<sampler->dimension;i++){
-//	//	fisher[i] = (double*)malloc(sizeof(double)*sampler->dimension);
-//	//}
-//	//sampler->fish(current_param, sampler->dimension, fisher);
-//
-//	////Convert to 1D array for Eigen
-//	//double *oneDfisher=(double *)malloc(sizeof(double)*sampler->dimension*sampler->dimension);
-//	//for (int i =0; i<sampler->dimension;i++){
-//	//	for (int j = 0; j<sampler->dimension; j++){
-//	//		oneDfisher[sampler->dimension*i+j] = fisher[i][j];///
-//	//				//sampler->chain_temps[chain_index];
-//	//		//std::cout<<oneDfisher[sampler->dimension*i+j]<<std::endl;
-//	//	}
-//	//	
-//	//}
-//	//
-//	////Find eigen vectors and eigen values
-//	//Eigen::Map<Eigen::MatrixXd> m(oneDfisher,sampler->dimension,sampler->dimension);
-// 	//Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(m);
-// 	//Eigen::MatrixXd eigen_vecs = eigensolver.eigenvectors();
-// 	//Eigen::VectorXd eigen_vals = eigensolver.eigenvalues();
-//	
-//	//beta determines direction to step in eigen directions
-//	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->r)));
-//	//std::cout<<"Val: "<<eigen_vals(beta)<<std::endl;
-//	//std::cout<<"Direction: "<<beta<<std::endl;
-//	
-//	//##############################################################
-//	//Numerical matrix inversion can be tricky - catch nans here and replace
-//	//with gaussian step just to not have the program crash because of 
-//	//one position in parameter space
-//	//
-//	//To see impact of nans, variable is stored in sampler->nan_counter
-//	//##############################################################
-//	int nansum = 0;
-//	for(int i =0; i<sampler->dimension; i++)
-//		nansum+= std::isnan(eigen_vecs.col(beta)(i));	
-//	nansum+= std::isnan(eigen_vals(beta));
-//	if(nansum){
-//		//for(int i =0; i<sampler->dimension*sampler->dimension;i++)
-//		//	std::cout<<oneDfisher[i]<<std::endl;
-//		//std::cout<<std::exp(current_param[0])/MPC_SEC<<std::endl;
-//		//std::cout<<std::exp(current_param[1])/MSOL_SEC<<std::endl;
-//		//std::cout<<current_param[2]<<std::endl;
-//		//std::cout<<current_param[3]<<std::endl;
-//		//std::cout<<current_param[4]<<std::endl;
-//		std::cout<<"FISHER failed"<<std::endl;
-//		sampler->num_gauss+=1;
-//		gaussian_step(sampler,current_param, proposed_param);	
-//		sampler->nan_counter+=1;
-//	}
-//	else{
-//		sampler->num_fish+=1;
-//		double alpha = gsl_ran_gaussian(sampler->r, .05);
-//
-//		double scaling = 0.0;
-//		for(int i =0; i< sampler->dimension;i++)
-//		{
-//			if(abs(eigen_vals(beta))<10){scaling = 10.;}
-//			else if(abs(eigen_vals(beta))>1000){scaling = 1000.;}
-//			else{scaling = abs(eigen_vals(beta))/sampler->chain_temps[chain_index];}
-//			proposed_param[i] = current_param[i] +
-//				alpha/sqrt(scaling) *eigen_vecs.col(beta)(i);
-//		}
-//
-//
-//	}
-//	for (int i =0; i<sampler->dimension;i++){
-//		free(fisher[i]);
-//	}
-//	free(fisher);
-//	free(oneDfisher);
-//}
 
 
 void update_fisher(sampler *sampler, double *current_param, int chain_index)
@@ -289,6 +240,7 @@ void update_fisher(sampler *sampler, double *current_param, int chain_index)
 				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
 			}
 			sampler->fisher_vals[chain_index][i]=eigen_vals[i];
+			//std::cout<<sampler->fisher_vals[chain_index][i]<<std::endl;
 		}
 		sampler->fisher_update_ct[chain_index]=0;
 	}
@@ -319,10 +271,10 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
-	int i = (int)((sampler->history_length)*(gsl_rng_uniform(sampler->r)));
+	int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->r)));
 	int j;
 	do{
-		j=(int)((sampler->history_length)*(gsl_rng_uniform(sampler->r)));	
+		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->r)));	
 	}while(j==i);
 		
 	double alpha = .1;
@@ -369,21 +321,6 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	double ll2 =  sampler->ll(chain2, sampler->dimension);
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
-	//std::cout<<"ll for chain 1 (swapping): "<<ll1<<std::endl;
-	//std::cout<<"ll for chain 2 (swapping): "<<ll2<<std::endl;
-	//std::cout<<"T for chain 1 (swapping): "<<T1<<std::endl;
-	//std::cout<<"T for chain 2 (swapping): "<<T2<<std::endl;
-	//std::cout<<"Position chain 1 (swapping): "<<chain1[0]<<std::endl;
-	//std::cout<<"Position chain 2 (swapping): "<<chain2[0]<<std::endl;
-	//std::cout<<"Position chain 1 (swapping): "<<chain1[1]<<std::endl;
-	//std::cout<<"Position chain 2 (swapping): "<<chain2[1]<<std::endl;
-	//std::cout<<"Position chain 1 (swapping): "<<chain1[2]<<std::endl;
-	//std::cout<<"Position chain 2 (swapping): "<<chain2[2]<<std::endl;
-	//std::cout<<"Position chain 1 (swapping): "<<chain1[3]<<std::endl;
-	//std::cout<<"Position chain 2 (swapping): "<<chain2[3]<<std::endl;
-	//std::cout<<"Position chain 1 (swapping): "<<chain1[4]<<std::endl;
-	//std::cout<<"Position chain 2 (swapping): "<<chain2[4]<<std::endl;
-	//std::cout<<MH_ratio<<std::endl;
 	double pow = ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2;
 	double MH_ratio;
 	if(pow>1){MH_ratio = 1.1;}
@@ -706,7 +643,8 @@ void auto_corr_intervals(double *data, /**<Input data */
 		for(int j =0; j< lengths[l]; j++){
 			temp[j] = data[j];
 		}
-		output[l]=auto_correlation(data,lengths[l], accuracy);
+		//output[l]=auto_correlation(data,lengths[l], accuracy);
+		output[l]=auto_correlation_serial(data,lengths[l]);
 	}
 	free(temp);
 	

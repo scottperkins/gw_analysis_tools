@@ -381,7 +381,6 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				)
 {
 	double ll = 0;
-	params->tc = 4;
 	if(	generation_method  == "IMRPhenomD" ||
 		generation_method  == "ppE_IMRPhenomD_Inspiral" ||
 		generation_method  == "ppE_IMRPhenomD_IMR" ){
@@ -439,6 +438,30 @@ double maximized_coal_Log_Likelihood(double *data_real,
 	free(data);
 	return ll;
 }
+
+/*! \brief Unmarginalized log of the likelihood
+ *
+ */
+double Log_Likelihood(std::complex<double> *data, 
+				double *psd,
+				double *frequencies,
+				size_t length,
+				gen_params *params,
+				std::string detector,
+				std::string generation_method,
+				fftw_outline *plan
+				)
+{
+	double ll = 0;
+
+	std::complex<double> *detect_response =
+			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
+	fourier_detector_response(frequencies,length,detect_response,detector, generation_method,params);
+	ll = Log_Likelihood_internal(data,psd,frequencies,detect_response, length, plan);
+
+	free(detect_response);
+	return ll;
+}
 /*! \brief Maximized match over coalescence variables - returns log likelihood NOT NORMALIZED for aligned spins
  *
  * Note: this function is not properly normalized for an absolute comparison. This is made for MCMC sampling, so to minimize time, constant terms like (Data|Data), which would cancel in the Metropolis-Hasting ratio, are left out for efficiency
@@ -486,8 +509,11 @@ double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> 
 
 	free(integrand);
 	free(g);
+	//std::cout<<"inner products: "<<max<<" "<<HH<<std::endl;
 
-	return -0.5*(HH- 2*max);
+	//return -0.5*(HH- 2*max);
+	//std::cout<<.5*(max*max)/HH<<std::endl;
+	return .5*(max*max)/HH;
 }
 
 /*! \brief log likelihood function that maximizes over extrinsic parameters tc, phic, D, and phiRef, the reference frequency - for unaligned spins 
@@ -622,6 +648,39 @@ double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double
 	return max;
 }
 
+/*! \brief Internal function for the unmarginalized log of the likelihood 
+ *
+ * .5 * ( ( h | h ) - 2 ( D | h ) )
+ */
+double Log_Likelihood_internal(std::complex<double> *data,
+			double *psd,
+			double *frequencies,
+			std::complex<double> *detector_response,
+			int length,
+			fftw_outline *plan
+			)
+{
+	
+	//Calculate template snr and scale it to match the data snr
+	//later, upgrade to non uniform spacing, cause why not
+	double delta_f = frequencies[1]-frequencies[0];
+	double sum = 0.;
+	double *integrand = (double *)malloc(sizeof(double)*length);
+	for (int i =0;i< length;i++)
+		integrand[i] = real(detector_response[i]*std::conj(detector_response[i]))/psd[i];
+	double integral = 4.*simpsons_sum(delta_f, length, integrand);
+	double HH = integral;
+
+	for (int i =0;i< length;i++)
+		integrand[i] = real(data[i]*std::conj(detector_response[i]))/psd[i];
+	integral = 4.*simpsons_sum(delta_f, length, integrand);
+	double DH = integral;
+	//std::cout<<"inner products: "<<DH<<" "<<HH<<std::endl;
+
+	free(integrand);
+
+	return -0.5*(HH- 2*DH);
+}
 
 /*! \brief Wrapper for the MCMC_MH function, specifically for GW analysis
  *
@@ -686,13 +745,47 @@ void MCMC_MH_GW(double ***output,
 
 void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 {
-	if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
+	//if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
+	if(dimension ==4 && mcmc_generation_method =="IMRPhenomD"){	
+		//unpack parameter vector
+		//double dl_prime = std::exp(param[0])/MPC_SEC;
+		double dl_prime = 100;
+		double chirpmass = std::exp(param[0])/MSOL_SEC;
+		double eta = param[1];
+		double chi1 = param[2];
+		double chi2 = param[3];
+	
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = 0;
+		parameters.spin1[1] = 0;
+		parameters.spin1[2] = chi1;
+		parameters.spin2[0] = 0;
+		parameters.spin2[1] = 0;
+		parameters.spin2[2] = chi2;
+		parameters.Luminosity_Distance = 100;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		parameters.phic = 0;
+		parameters.incl_angle = 0;
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		
+		fisher(mcmc_frequencies[0], mcmc_data_length[0],"MCMC_"+mcmc_generation_method+"_single_detect", mcmc_detectors[0], output, 4, &parameters, NULL, NULL, mcmc_noise[0]);
+	}
+	else if(dimension ==7 && mcmc_generation_method =="IMRPhenomD"){	
 		//unpack parameter vector
 		double dl_prime = std::exp(param[0])/MPC_SEC;
-		double chirpmass = std::exp(param[1])/MSOL_SEC;
-		double eta = param[2];
-		double chi1 = param[3];
-		double chi2 = param[4];
+		double tc = std::exp(param[1]);
+		double phic = std::exp(param[2]);
+		double chirpmass = std::exp(param[3])/MSOL_SEC;
+		double eta = param[4];
+		double chi1 = param[5];
+		double chi2 = param[6];
 	
 		//create gen_param struct
 		gen_params parameters; 
@@ -706,29 +799,34 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 		parameters.spin2[2] = chi2;
 		parameters.Luminosity_Distance = dl_prime;
 		//The rest is maximized over for this option
-		parameters.tc = 0;
-		parameters.phic = 0;
+		parameters.tc = tc;
+		parameters.phic = phic;
 		parameters.incl_angle = 0;
 		parameters.phi=0;
 		parameters.theta=0;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
+	
+		//*NOTE* Current fisher is log \eta -- sampler is in \eta -- 
+		//Leaving for now, but that should change too
+		fisher(mcmc_frequencies[0], mcmc_data_length[0],"MCMC_"+mcmc_generation_method+"_ind_spins", mcmc_detectors[0], output, 7, &parameters, NULL, NULL, mcmc_noise[0]);
 		
-		fisher(mcmc_frequencies[0], mcmc_data_length[0],"MCMC_"+mcmc_generation_method+"_single_detect", mcmc_detectors[0], output, 5, &parameters, NULL, NULL, mcmc_noise[0]);
 	}
 }
 
 double MCMC_likelihood_wrapper(double *param, int dimension)
 {
 	double ll = 0;
-	if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
+	//if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
+	if(dimension ==4 && mcmc_generation_method =="IMRPhenomD"){	
 	//if(false){	
 		//unpack parameter vector
-		double dl_prime = std::exp(param[0])/MPC_SEC;
-		double chirpmass = std::exp(param[1])/MSOL_SEC;
-		double eta = param[2];
-		double chi1 = param[3];
-		double chi2 = param[4];
+		//double dl_prime = std::exp(param[0])/MPC_SEC;
+		double dl_prime = 100;
+		double chirpmass = std::exp(param[0])/MSOL_SEC;
+		double eta = param[1];
+		double chi1 = param[2];
+		double chi2 = param[3];
 	
 		//create gen_param struct
 		gen_params parameters; 
@@ -760,6 +858,49 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 					mcmc_generation_method,
 					&mcmc_fftw_plans[0]
 					);
+	}
+	if(dimension ==7 && mcmc_generation_method =="IMRPhenomD"){	
+	//if(false){	
+		//unpack parameter vector
+		double dl_prime = std::exp(param[0])/MPC_SEC;
+		double tc = std::exp(param[1]);
+		double phic = std::exp(param[2]);
+		double chirpmass = std::exp(param[3])/MSOL_SEC;
+		double eta = param[4];
+		double chi1 = param[5];
+		double chi2 = param[6];
+	
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = 0;
+		parameters.spin1[1] = 0;
+		parameters.spin1[2] = chi1;
+		parameters.spin2[0] = 0;
+		parameters.spin2[1] = 0;
+		parameters.spin2[2] = chi2;
+		parameters.Luminosity_Distance = dl_prime;
+		//The rest is maximized over for this option
+		parameters.tc = tc;
+		parameters.phic = phic;
+		parameters.incl_angle = 1.5;
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		
+		//calculate log likelihood
+		ll = Log_Likelihood(mcmc_data[0], 
+					mcmc_noise[0],
+					mcmc_frequencies[0],
+					(size_t) mcmc_data_length[0],
+					&parameters,
+					mcmc_detectors[0],
+					mcmc_generation_method,
+					&mcmc_fftw_plans[0]
+					);
+		//std::cout<<ll<<std::endl;
 	}
 	return ll;
 	//testing detailed balance

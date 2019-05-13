@@ -38,6 +38,7 @@ void test10();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_GW(double *pos, int dim);
+double test_lp_GW_7dim(double *pos, int dim);
 void test_fisher(double *pos, int dim, double **fisher);
 double log_student_t (double *x,int dim);
 double log_neil_proj3 (double *x,int dim);
@@ -53,70 +54,25 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test8();	
+	test9();	
 	return 0;
 }
 void test10()
 {
-	//char *ptr = (char *)malloc(sizeof(char) * 10);
-	//ptr = "PhenomD";
-	//std::cout<<ptr<<std::endl;
-	//
-	//char *ptr2;
-	//ptr2 = ptr;
-	//
-	//std::cout<<ptr2<<std::endl;
-	//free(ptr2);
-	//free (ptr);
-	
-	std::string detectors[2];
-	detectors[0] = "Hanford";
-	detectors[1] = "Livingston";
-	std::string *ptr1 = new std::string[2];
-	ptr1[0] = detectors[0];
-	ptr1[1] = detectors[1];
-	std::cout<<ptr1[0]<<std::endl;
-	std::cout<<ptr1[1]<<std::endl;
-	std::string *new_detect = ptr1;
-	//new_detect = detectors;
-	std::cout<<new_detect[0]<<std::endl;
-	std::cout<<new_detect[1]<<std::endl;
-	delete [] ptr1;
-
-	//int num =2;
-	//int namelen = 50;
-	//char **ptr = (char **)malloc(sizeof(char*) * num);
-	//for (int i = 0; i<num; i++)
-	//	ptr[i] = (char *)malloc(sizeof(char) * namelen);
-	//ptr[0] = "PhenomD";
-	//ptr[1] = "PhenomD";
-	//
-	//std::cout<<ptr[0]<<std::endl;
-	//std::cout<<ptr[1]<<std::endl;
-	//char **ptr2;
-	//ptr2 = ptr;
-	//
-	//std::cout<<ptr2[0]<<std::endl;
-	//std::cout<<ptr2[1]<<std::endl;
-	//free(ptr2);
-	//for (int i = 0; i<num; i++)
-	//	free(ptr[i]);
-	//free (ptr);
-	
-}
-void test9()
-{
-	int raw_length = 28673;
-	int cutoff = 600;
-	int high_cut = 11000;
-	int length = high_cut-cutoff;
+	//int raw_length = 28673;
+	//int cutoff = 600;
+	//int high_cut = 11000;
+	//int length = high_cut-cutoff;
+	int length = 4096;
+	int cutoff = 0;
+	int raw_length=  length;
 	//int length = raw_length-cutoff;
 	int num_detectors =1;
 
 	double **temp_data = allocate_2D_array(raw_length,2);
 	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
 	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
-	std::string filebase = "testing/data/gw_150914_";
+	std::string filebase = "testing/data/gw150914_";
 	read_file(filebase+"data.csv",temp_data, raw_length,2);
 	read_file(filebase+"psd.csv",temp_psd);
 	read_file(filebase+"freq.csv",temp_freq);
@@ -151,10 +107,139 @@ void test9()
 	free(temp_freq);
 	//#########################################################
 	//MCMC options
-	int dimension = 5;
-	double initial_pos[dimension]={log(400*MPC_SEC),log(30*MSOL_SEC), .24, 0,0};
+	int dimension = 7;
+	double initial_pos[dimension]={log(400*MPC_SEC),2,2,log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 15000;
+	int N_steps = 20;
+	int chain_N= 1;
+	double ***output;
+	output = allocate_3D_array( chain_N, N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 5;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	//double temp_step = 20./(chain_N);
+	chain_temps[0]=1.;
+	double c = 1.2;
+	for(int i =1; i < chain_N;  i ++)
+		chain_temps[i] = c*chain_temps[i-1];
+		//chain_temps[i] = (1.+i*temp_step);
+	
+	//#########################################################
+	//GW options
+	std::string *detectors = new std::string[1];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	std::string generation_method = "IMRPhenomD";
+	
+	
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_7dim.csv";
+	std::string chainfile = "testing/data/mcmc_output_7dim.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_7dim.txt";
+
+	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
+			swp_freq, test_lp_GW_7dim, num_detectors, data, psd, 
+			frequencies, data_length, detectors, generation_method,
+			statfilename,"",autocorrfile);	
+	std::cout<<"ENDED"<<std::endl;
+
+	double **output_transform=(double **)malloc(sizeof(double*)*N_steps);
+	for (int j =0; j<N_steps; j++)
+		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
+
+	for(int j = 0; j<N_steps;j++){
+			output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][1]=output[0][j][1];
+			output_transform[j][2]=output[0][j][2];
+			output_transform[j][3]=std::exp(output[0][j][3])/MSOL_SEC;
+			output_transform[j][4]=output[0][j][4];
+			output_transform[j][5]=output[0][j][5];
+			output_transform[j][6]=output[0][j][6];
+	}
+	write_file(chainfile, output_transform, N_steps, dimension);
+	//ofstream mcmc_out;
+	//mcmc_out.open("testing/data/mcmc_output.csv");
+	//mcmc_out.precision(15);
+	////for(int i = 0;i<chain_N;i++){
+	//for(int j = 0; j<N_steps;j++){
+	//	//for(int k = 0; k<dimension; k++){
+	//		mcmc_out<<std::exp(output[0][j][0])/MPC_SEC<<" , "<<std::exp(output[0][j][1])/MSOL_SEC<<" , "<<output[0][j][2]<<" , "<<output[0][j][3]<<" , "<<output[0][j][4]<<endl;
+	//	//}
+	//}
+	////}
+	//mcmc_out.close();
+
+	deallocate_3D_array(output, chain_N, N_steps, dimension);
+	for(int i =0; i< num_detectors; i++){
+		free(data[i]);
+		free(psd[i]);
+		free(frequencies[i]);
+	}
+	for(int i =0; i< N_steps; i++){
+		free(output_transform[i]);
+	}
+	free(output_transform);
+	free(data);
+	free(psd);
+	free(frequencies );
+	delete [] detectors;
+	//free(detectors);
+	free(data_length);
+	
+}
+void test9()
+{
+	//int raw_length = 28673;
+	//int cutoff = 600;
+	//int high_cut = 11000;
+	//int length = high_cut-cutoff;
+	int raw_length=  4096;
+	int cutoff = 100;
+	int length = raw_length-cutoff;
+	//int length = raw_length-cutoff;
+	int num_detectors =1;
+
+	double **temp_data = allocate_2D_array(raw_length,2);
+	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
+	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
+	std::string filebase = "testing/data/gw150914_";
+	read_file(filebase+"data.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd.csv",temp_psd);
+	read_file(filebase+"freq.csv",temp_freq);
+
+	std::complex<double> **data= (std::complex<double>**)malloc(
+			sizeof(std::complex<double>*)*num_detectors);
+	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
+	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =length;
+
+	//bool check = true;
+	for (int i =0; i<num_detectors; i++){
+		data[i] = (std::complex<double> *)malloc(
+			sizeof(std::complex<double>)*data_length[0]);
+		
+		psd[i] = (double *)malloc(sizeof(double)*data_length[0]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[0]);
+		for(int j = 0; j<data_length[0]; j++){
+			frequencies[i][j] = temp_freq[j+cutoff];	
+			psd[i][j] = (temp_psd[j+cutoff]);	
+			data[i][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+			//std::cout<<data[i][j]*psd[i][j]*frequencies[i][j]<<std::endl;
+			//std::cout<<psd[i][j]<<std::endl;
+			//std::cout<<data[i][j]<<std::endl;
+			//if(temp_freq[j]>400 && check){std::cout<<j<<std::endl;check=false;}
+		}
+	}
+
+	deallocate_2D_array(temp_data,raw_length,2);
+	free(temp_psd);
+	free(temp_freq);
+	//#########################################################
+	//MCMC options
+	int dimension = 4;
+	double initial_pos[dimension]={log(60*MSOL_SEC), .12,- .8,-.9};
+	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
+	int N_steps = 100000;
 	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -177,6 +262,7 @@ void test9()
 	
 	
 	std::string autocorrfile = "testing/data/auto_corr_mcmc.csv";
+	//std::string autocorrfile = "";
 	std::string chainfile = "testing/data/mcmc_output.csv";
 	std::string statfilename = "testing/data/mcmc_statistics.txt";
 
@@ -191,11 +277,11 @@ void test9()
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
 
 	for(int j = 0; j<N_steps;j++){
-			output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
-			output_transform[j][1]=std::exp(output[0][j][1])/MSOL_SEC;
+			//output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][0]=std::exp(output[0][j][0])/MSOL_SEC;
+			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
-			output_transform[j][4]=output[0][j][4];
 	}
 	write_file(chainfile, output_transform, N_steps, dimension);
 	//ofstream mcmc_out;
@@ -233,8 +319,8 @@ void test8()
 	//Make trial data
 	gen_params params;
 	IMRPhenomD<double> modeld;
-	int length = 2000;
-	double chirpm = 70.78;
+	int length = 1000;
+	double chirpm = 20.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
 	params.mass2 = calculate_mass2(chirpm,eta);
@@ -251,7 +337,7 @@ void test8()
 	double *spin2= params.spin2;
 	params.phic = .0;
 	params.tc = -.0;
-	params.Luminosity_Distance = 410.;
+	params.Luminosity_Distance = 810.;
 	//params.betappe = new double[1] ;
 	//params.betappe[0]=-50;
 	//params.bppe  =new int[1];
@@ -294,20 +380,21 @@ void test8()
 
 	//#########################################################
 	//MCMC options
-	int dimension = 5;
-	double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
+	int dimension = 4;
+	//double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
+	double initial_pos[dimension]={log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 1500;
-	int chain_N= 50;
+	int N_steps = 20000;
+	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 10;
+	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//double temp_step = 20./(chain_N);
 	chain_temps[0]=1.;
-	double c = 1.2;
+	double c = 1.5;
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
@@ -360,11 +447,11 @@ void test8()
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
 
 	for(int j = 0; j<N_steps;j++){
-			output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
-			output_transform[j][1]=std::exp(output[0][j][1])/MSOL_SEC;
+			//output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][0]=std::exp(output[0][j][0])/MSOL_SEC;
+			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
-			output_transform[j][4]=output[0][j][4];
 	}
 	write_file(chainfile, output_transform, N_steps, dimension);
 	
@@ -401,11 +488,11 @@ void test8()
 void test7()
 {
 	int dimension = 2;
-	double initial_pos[2]={6,5.};
+	double initial_pos[2]={0,0.};
 
 	
-	int N_steps = 50000;
-	int chain_N= 100;
+	int N_steps = 10000;
+	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -1281,8 +1368,8 @@ double log_neil_proj3 (double *c,int dim)
 	double prefactor = 16./(M_PI*3.);
 	double pow1 = -x*x - pow((9+4*x*x +8*y),2);
 	double pow2 = -8*x*x -8*pow(y-2,2);
-	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
-	//return 2.;
+	//return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
+	return 2.;
 }
 double log_student_t (double *x,int dim){
 
@@ -1312,11 +1399,26 @@ double test_lp_GW(double *pos, int dim)
 {
 	double a = std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
-	if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
-	if (std::exp(pos[1])/MSOL_SEC<2 || std::exp(pos[1])/MSOL_SEC>100){return a;}
-	if ((pos[2])<.1 || (pos[2])>.245){return a;}
+	//if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
+	if (std::exp(pos[0])/MSOL_SEC<2 || std::exp(pos[0])/MSOL_SEC>100){return a;}
+	if ((pos[1])<.1 || (pos[1])>.245){return a;}
+	if ((pos[2])<-.9 || (pos[2])>.9){return a;}
 	if ((pos[3])<-.9 || (pos[3])>.9){return a;}
-	if ((pos[4])<-.9 || (pos[4])>.9){return a;}
 	//else {return 0.;}
-	else {return log(std::exp(pos[1])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
+	//else {return log(std::exp(pos[1])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
+	else {return log(std::exp(pos[0]));}
+}
+double test_lp_GW_7dim(double *pos, int dim)
+{
+	double a = std::numeric_limits<double>::infinity();
+	//Flat priors across physical regions
+	if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
+	if ((pos[1])<0 || (pos[1])>4){return a;}
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}
+	if (std::exp(pos[3])/MSOL_SEC<2 || std::exp(pos[3])/MSOL_SEC>100){return a;}
+	if ((pos[4])<.1 || (pos[4])>.245){return a;}
+	if ((pos[5])<-.9 || (pos[5])>.9){return a;}
+	if ((pos[6])<-.9 || (pos[6])>.9){return a;}
+	//else {return 0.;}
+	else {return log(std::exp(pos[3])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
 }
