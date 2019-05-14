@@ -42,6 +42,7 @@ double test_lp_GW_7dim(double *pos, int dim);
 void test_fisher(double *pos, int dim, double **fisher);
 double log_student_t (double *x,int dim);
 double log_neil_proj3 (double *x,int dim);
+double log_neil_proj32 (double *c,int dim);
 void fisher_neil_proj3 (double *x,int dim, double **fish);
 adouble dist(adouble *pos, int dimension);
 
@@ -54,7 +55,7 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test9();	
+	test10();	
 	return 0;
 }
 void test10()
@@ -110,8 +111,8 @@ void test10()
 	int dimension = 7;
 	double initial_pos[dimension]={log(400*MPC_SEC),2,2,log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 20;
-	int chain_N= 1;
+	int N_steps = 20000;
+	int chain_N= 2;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -237,10 +238,10 @@ void test9()
 	//#########################################################
 	//MCMC options
 	int dimension = 4;
-	double initial_pos[dimension]={log(60*MSOL_SEC), .12,- .8,-.9};
+	double initial_pos[dimension]={log(30*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 100000;
-	int chain_N= 5;
+	int N_steps = 20000;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -282,6 +283,16 @@ void test9()
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
+	}
+	write_file(chainfile, output_transform, N_steps, dimension);
+	//Output hottest chain too
+	chainfile = "testing/data/mcmc_output_hot.csv";
+	for(int j = 0; j<N_steps;j++){
+			//output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][0]=std::exp(output[chain_N-1][j][0])/MSOL_SEC;
+			output_transform[j][1]=output[chain_N-1][j][1];
+			output_transform[j][2]=output[chain_N-1][j][2];
+			output_transform[j][3]=output[chain_N-1][j][3];
 	}
 	write_file(chainfile, output_transform, N_steps, dimension);
 	//ofstream mcmc_out;
@@ -491,7 +502,7 @@ void test7()
 	double initial_pos[2]={0,0.};
 
 	
-	int N_steps = 10000;
+	int N_steps = 100000;
 	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -512,6 +523,11 @@ void test7()
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,statfilename,chainfile,autocorrfile );	
 	std::cout<<"ENDED"<<std::endl;
 
+	autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
+	chainfile = "testing/data/neil_mcmc_output2.csv";
+	statfilename = "testing/data/neil_mcmc_statistics2.txt";
+	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj32,NULL,statfilename,chainfile,autocorrfile );	
+	std::cout<<"ENDED"<<std::endl;
 	//write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
 	//ofstream mcmc_out;
 	//mcmc_out.open("testing/data/mcmc_output.csv");
@@ -1368,8 +1384,18 @@ double log_neil_proj3 (double *c,int dim)
 	double prefactor = 16./(M_PI*3.);
 	double pow1 = -x*x - pow((9+4*x*x +8*y),2);
 	double pow2 = -8*x*x -8*pow(y-2,2);
-	//return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
-	return 2.;
+	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
+	//return 2.;
+}
+double log_neil_proj32 (double *c,int dim)
+{
+	double x = c[0]*c[1];
+	double y = c[0]/c[1];
+	double prefactor = 16./(M_PI*3.);
+	double pow1 = -x*x - pow((9+4*x*x +8*y),2);
+	double pow2 = -8*x*x -8*pow(y-2,2);
+	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
+	//return 2.;
 }
 double log_student_t (double *x,int dim){
 
@@ -1405,8 +1431,9 @@ double test_lp_GW(double *pos, int dim)
 	if ((pos[2])<-.9 || (pos[2])>.9){return a;}
 	if ((pos[3])<-.9 || (pos[3])>.9){return a;}
 	//else {return 0.;}
-	//else {return log(std::exp(pos[1])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
-	else {return log(std::exp(pos[0]));}
+	else {return pos[1];}
+	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10);}
+	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10)-(pos[1]-.24)*(pos[1]-.24)/(2*.010);}
 }
 double test_lp_GW_7dim(double *pos, int dim)
 {
@@ -1420,5 +1447,6 @@ double test_lp_GW_7dim(double *pos, int dim)
 	if ((pos[5])<-.9 || (pos[5])>.9){return a;}
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}
 	//else {return 0.;}
-	else {return log(std::exp(pos[3])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
+	//else {return log(std::exp(pos[3])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
+	else {return pos[3]+3*pos[0];}
 }

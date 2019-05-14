@@ -87,7 +87,7 @@ private:
 
 	bool mStopping = false;
 	
-	int numSwpThreads= 1;
+	int numSwpThreads= 2;
 		
 	std::condition_variable mEventVarSWP;
 
@@ -260,7 +260,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//########################################################
 	//########################################################
 	//POOLING -- TESTING
-	sampler.pool = true;
+	sampler.pool = false;
 	//########################################################
 	//########################################################
 
@@ -290,6 +290,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		step_accepted[j]=0;
 		step_rejected[j]=0;
 	}
+
+		
 	
 	int cutoff ;
 	//Sampler Loop
@@ -353,6 +355,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			}
 			printProgress((double)samplerptr->progress/N_steps);
 		}
+		//##############################################################
 		for (int i =0;i<samplerptr->chain_N; i++)
 		{
 			swp_accepted+=samplerptr->swap_accept_ct[i];
@@ -363,6 +366,18 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	}
 	end =clock();
 	wend =omp_get_wtime();
+
+	//for (int j=0;j<sampler.chain_N;j++){
+	//	std::cout<<std::endl;
+	//	//for (int i = 0; i<sampler.dimension; i++)
+	//	{
+	//		std::cout<<exp(samplerptr->output[j][N_steps-100][0])/MSOL_SEC<<std::endl;
+	//		std::cout<<samplerptr->output[j][N_steps-100][1]<<std::endl;
+	//		std::cout<<samplerptr->output[j][N_steps-100][2]<<std::endl;
+	//		std::cout<<samplerptr->output[j][N_steps-100][3]<<std::endl;
+	//	}
+	//}
+
 	//###########################################################
 	//Auto-correlation
 	if(auto_corr_filename != ""){
@@ -457,6 +472,7 @@ void mcmc_swap_threaded(int i, int j)
 	int l = samplerptr->chain_pos[j];
 	int success;
 	success = single_chain_swap(samplerptr, samplerptr->output[i][k], samplerptr->output[j][l],i,j);
+	//success = -1;
 	if(success ==1){
 		samplerptr->swap_accept_ct[i]+=1;	
 		samplerptr->swap_accept_ct[j]+=1;	

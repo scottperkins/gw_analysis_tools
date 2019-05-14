@@ -131,7 +131,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-7;
+	double epsilon = 1e-8;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -258,6 +258,16 @@ void calculate_derivatives(double  **amplitude_deriv,
 			
 		
 				
+		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[0][l] = amplitude_deriv[0][l]*param_in[0] ;
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
+			phase_deriv[0][l] = phase_deriv[0][l]*param_in[0] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
 	}
 	else if (gen_method == "MCMC_IMRPhenomD_ind_spins"){
