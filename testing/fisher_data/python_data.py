@@ -25,6 +25,7 @@ for i in np.arange(num_samples):
     fishers.append(fish)
     end = time()
     times.append(end-start)
+    print(i)
 fishers_trans = np.zeros((num_samples, dimension*dimension)) 
 for i in np.arange(num_samples):
     for j in np.arange(dimension):

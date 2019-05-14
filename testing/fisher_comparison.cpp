@@ -156,6 +156,9 @@ void write_data(){
 
 		end7 = clock();
 		times_auto[i]=(double)(end7-start7)/CLOCKS_PER_SEC;
+
+		printProgress((double)i/num_samples);
+
 		//cout<<"TIMING: FISHER autodiff: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
 
 		//cout.precision(5);

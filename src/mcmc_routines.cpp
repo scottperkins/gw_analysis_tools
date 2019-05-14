@@ -749,7 +749,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 	if(dimension ==4 && mcmc_generation_method =="IMRPhenomD"){	
 		//unpack parameter vector
 		//double dl_prime = std::exp(param[0])/MPC_SEC;
-		double dl_prime = 100;
+		double dl_prime = 1000;
 		double chirpmass = std::exp(param[0])/MSOL_SEC;
 		double eta = param[1];
 		double chi1 = param[2];
@@ -765,7 +765,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 		parameters.spin2[0] = 0;
 		parameters.spin2[1] = 0;
 		parameters.spin2[2] = chi2;
-		parameters.Luminosity_Distance = 100;
+		parameters.Luminosity_Distance = dl_prime;
 		//The rest is maximized over for this option
 		parameters.tc = 0;
 		parameters.phic = 0;
@@ -822,7 +822,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 	//if(false){	
 		//unpack parameter vector
 		//double dl_prime = std::exp(param[0])/MPC_SEC;
-		double dl_prime = 100;
+		double dl_prime = 1000;
 		double chirpmass = std::exp(param[0])/MSOL_SEC;
 		double eta = param[1];
 		double chi1 = param[2];
@@ -884,7 +884,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		//The rest is maximized over for this option
 		parameters.tc = tc;
 		parameters.phic = phic;
-		parameters.incl_angle = 1.5;
+		parameters.incl_angle = 0;
 		parameters.phi=0;
 		parameters.theta=0;
 		parameters.NSflag = false;

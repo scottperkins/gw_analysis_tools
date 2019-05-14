@@ -17,7 +17,8 @@ using namespace std;
 #endif
 
 
-double log_64 = 1.80617997398;
+//double log_64 = 1.80617997398;//log base 10...
+double log_64 = 4.15888308336;
 /*! \file 
  * File that includes all the low level functions that go into constructing the waveform
  */
@@ -458,27 +459,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		//std::cout<<params->mass1/MSOL_SEC<<" "<<params->mass2/MSOL_SEC<<std::endl;
 		//std::cout<<params->chi_s<<" "<<params->chi_a<<std::endl;
 	}
-	//###################################################################
-	//###################################################################
-	//###################################################################
-	//TESTING
-	//tc = 2.9210463370e+02*M;
-	//phic = 7.9606509905e+02;
-	//###################################################################
-	//###################################################################
-	//###################################################################
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<"TC : "<<tc/M<<std::endl;
-	//	std::cout<<"total phase shift: "<<phic<<std::endl;
-	//	std::cout<<"fpeak : "<<params->f3*M<<std::endl;
-	//	std::cout<<"rd : "<<params->fRD*M<<std::endl;
-	//	std::cout<<"damp : "<<params->fdamp*M<<std::endl;
-	//	std::cout<<"gamma3 : "<<lambda.gamma[2]<<std::endl;
-	//	std::cout<<"gamma2 : "<<lambda.gamma[1]<<std::endl;
-	//	std::cout<<"M : "<<M<<std::endl;
-	//	
-	//}
-	//################################################################
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);
@@ -508,7 +488,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		}
 		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		phase -=   (T)(tc*(f-f_ref) + phic);
+		phase +=   (T)(tc*(f-f_ref) - phic);
 		waveform[j] = amp * std::exp(-i * phase);
 		}
 
@@ -604,7 +584,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	}
 	amp = (A0 * this->build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(frequency,&lambda,params,&pows,pn_phase_coeffs));
-	phase -=   (T)(tc*(frequency-f_ref) + phic);
+	phase +=   (T)(tc*(frequency-f_ref) - phic);
 	return amp * std::exp(-i * phase);
 	}
 
@@ -737,6 +717,11 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//tc = 2*M_PI*params->tc + tc_shift;
 	tc = 2*M_PI*params->tc ;
 	
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<tc<<std::endl;	
+	//	std::cout<<phic<<std::endl;	
+	//	std::cout<<f_ref<<std::endl;	
+	//}
 	
 	T f;
 	
@@ -752,7 +737,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 			//}
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		phase[j] -=   (T)(tc*(f-f_ref) + phic);
+		phase[j] +=   (T)(tc*(f-f_ref) - phic);
 
 	}
 	return 1;
@@ -1190,13 +1175,13 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 		 pn_coeff[6] * pow->PIsquare * pow->MFsquare +
 		 pn_coeff[7] * pow->PI7third * pow->MF7third ;
 
-	T phase_TF2 =  M_PI/4. 
-			+ 3./(128.*eta) * pow->PIminus_5third * pow->MFminus_5third * pn_phase;
+	T phase_TF2 =  -M_PI/4. 
+		+ 3./(128.*eta) * pow->PIminus_5third * pow->MFminus_5third * pn_phase;
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        //T sigma1 =0;
-        T sigma1 = lambda->sigma[1];
+        T sigma1 =0;
+        //T sigma1 = lambda->sigma[1];
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
@@ -1255,8 +1240,8 @@ T IMRPhenomD<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambd
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        T sigma1 =lambda->sigma[1];
-        //T sigma1 =0 ;
+        //T sigma1 =lambda->sigma[1];
+        T sigma1 =0 ;
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];

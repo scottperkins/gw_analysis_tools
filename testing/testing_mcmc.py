@@ -50,7 +50,6 @@ datatransform= []
 for x in data:
     datatransform.append([calculate_mass1(x[0],x[1]),calculate_mass2(x[0],x[1] ), chieff(calculate_mass1(x[0],x[1]),calculate_mass1(x[0],x[1]),x[2],x[3])])
 datatransform = np.asarray(datatransform);
-print(datatransform)
 
 ndim, nsamples = 3, len(datatransform) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]

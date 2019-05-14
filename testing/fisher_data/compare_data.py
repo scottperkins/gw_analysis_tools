@@ -37,18 +37,18 @@ for i in np.arange(num_samples):
 c_diff_t = c_diff.transpose()
 py_auto_t = py_auto.transpose()
 py_num_t = py_num.transpose()
-i = 3
-print(py_auto_t[i*dimension +i][:])
-i = 4
-print(py_auto_t[i*dimension +i][:])
-i = 2
-print(py_auto_t[i*dimension +i][:])
+#i = 3
+#print(py_auto_t[i*dimension +i][:])
+#i = 4
+#print(py_auto_t[i*dimension +i][:])
+#i = 2
+#print(py_auto_t[i*dimension +i][:])
 for i in np.arange(dimension):
     #for j in np.arange(dimension):
     plt.title(i)
-    #plt.hist(c_diff_t[i*dimension +i][:],bins=20,density=True, label = "auto num")
+    plt.hist(c_diff_t[i*dimension +i][:],bins=20,density=True, label = "auto num")
     plt.hist(py_auto_t[i*dimension +i][:],bins=20,density=True, label = "py auto")
-    #plt.hist(py_num_t[i*dimension +i][:],bins=20,density=True, label = "py num")
+    plt.hist(py_num_t[i*dimension +i][:],bins=20,density=True, label = "py num")
     plt.legend()
     plt.show()
     plt.close() 

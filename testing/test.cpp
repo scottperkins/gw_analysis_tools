@@ -55,7 +55,7 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test10();	
+	test9();	
 	return 0;
 }
 void test10()
@@ -112,7 +112,7 @@ void test10()
 	double initial_pos[dimension]={log(400*MPC_SEC),2,2,log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
 	int N_steps = 20000;
-	int chain_N= 2;
+	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -193,10 +193,11 @@ void test9()
 	//int cutoff = 600;
 	//int high_cut = 11000;
 	//int length = high_cut-cutoff;
+	
 	int raw_length=  4096;
 	int cutoff = 100;
 	int length = raw_length-cutoff;
-	//int length = raw_length-cutoff;
+
 	int num_detectors =1;
 
 	double **temp_data = allocate_2D_array(raw_length,2);
@@ -241,7 +242,7 @@ void test9()
 	double initial_pos[dimension]={log(30*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
 	int N_steps = 20000;
-	int chain_N= 10;
+	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -1274,17 +1275,17 @@ void test1()
 	for (int i = 0;i<dimensionppe;i++)
 		outputppe[i] = (double *)malloc(dimensionppe*sizeof(double));
 	start7 = clock();
-	fisher(freq, length, "ppE_IMRPhenomD_IMR","Hanford_O1_fitted", outputppe, dimensionppe, 
-				&params );
+	//fisher(freq, length, "ppE_IMRPhenomD_IMR","Hanford_O1_fitted", outputppe, dimensionppe, 
+	//			&params );
 
-	end7 = clock();
-	cout<<"TIMING: FISHER ppE: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
-	for (int i = 0;i <dimensionppe;i++)
-	{
-		for (int j=0;j <dimensionppe; j++)
-			cout<<outputppe[i][j]<<"   ";
-		cout<<endl;
-	}
+	//end7 = clock();
+	//cout<<"TIMING: FISHER ppE: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+	//for (int i = 0;i <dimensionppe;i++)
+	//{
+	//	for (int j=0;j <dimensionppe; j++)
+	//		cout<<outputppe[i][j]<<"   ";
+	//	cout<<endl;
+	//}
 
 
 	double **ppeamp_derivative = (double**) malloc(dimensionppe * sizeof(**ppeamp_derivative));
