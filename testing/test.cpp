@@ -195,18 +195,15 @@ void test9()
 	//int length = high_cut-cutoff;
 	
 	int raw_length=  4096;
-	int cutoff = 100;
+	int cutoff = 50;
 	int length = raw_length-cutoff;
 
-	int num_detectors =1;
+	int num_detectors =2;
 
 	double **temp_data = allocate_2D_array(raw_length,2);
 	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
 	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
 	std::string filebase = "testing/data/gw150914_";
-	read_file(filebase+"data.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd.csv",temp_psd);
-	read_file(filebase+"freq.csv",temp_freq);
 
 	std::complex<double> **data= (std::complex<double>**)malloc(
 			sizeof(std::complex<double>*)*num_detectors);
@@ -214,23 +211,31 @@ void test9()
 	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =length;
+	data_length[1] =length;
 
 	//bool check = true;
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
-			sizeof(std::complex<double>)*data_length[0]);
+			sizeof(std::complex<double>)*data_length[i]);
 		
-		psd[i] = (double *)malloc(sizeof(double)*data_length[0]);
-		frequencies[i] = (double *)malloc(sizeof(double)*data_length[0]);
-		for(int j = 0; j<data_length[0]; j++){
-			frequencies[i][j] = temp_freq[j+cutoff];	
-			psd[i][j] = (temp_psd[j+cutoff]);	
-			data[i][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
-			//std::cout<<data[i][j]*psd[i][j]*frequencies[i][j]<<std::endl;
-			//std::cout<<psd[i][j]<<std::endl;
-			//std::cout<<data[i][j]<<std::endl;
-			//if(temp_freq[j]>400 && check){std::cout<<j<<std::endl;check=false;}
-		}
+		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
+	}
+	read_file(filebase+"data_H.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_H.csv",temp_psd);
+	read_file(filebase+"freq_H.csv",temp_freq);
+	for(int j = 0; j<data_length[0]; j++){
+		frequencies[0][j] = temp_freq[j+cutoff];	
+		psd[0][j] = (temp_psd[j+cutoff]);	
+		data[0][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+	}
+	read_file(filebase+"data_L.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_L.csv",temp_psd);
+	read_file(filebase+"freq_L.csv",temp_freq);
+	for(int j = 0; j<data_length[1]; j++){
+		frequencies[1][j] = temp_freq[j+cutoff];	
+		psd[1][j] = (temp_psd[j+cutoff]);	
+		data[1][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
 	}
 
 	deallocate_2D_array(temp_data,raw_length,2);
@@ -241,8 +246,8 @@ void test9()
 	int dimension = 4;
 	double initial_pos[dimension]={log(30*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 20000;
-	int chain_N= 15;
+	int N_steps = 50000;
+	int chain_N= 1;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -258,8 +263,9 @@ void test9()
 	
 	//#########################################################
 	//GW options
-	std::string *detectors = new std::string[1];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
 	std::string generation_method = "IMRPhenomD";
 	
 	
@@ -331,7 +337,7 @@ void test8()
 	//Make trial data
 	gen_params params;
 	IMRPhenomD<double> modeld;
-	int length = 1000;
+	int length = 4000;
 	double chirpm = 20.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
@@ -348,8 +354,8 @@ void test8()
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
 	params.phic = .0;
-	params.tc = -.0;
-	params.Luminosity_Distance = 810.;
+	params.tc = 5;
+	params.Luminosity_Distance = 210.;
 	//params.betappe = new double[1] ;
 	//params.betappe[0]=-50;
 	//params.bppe  =new int[1];
@@ -363,7 +369,7 @@ void test8()
 	//params.f_ref = 30.5011;
 	//params.phiRef =58.944425/2.;
 	
-	double fhigh =300;
+	double fhigh =500;
 	double flow =10;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
@@ -386,6 +392,9 @@ void test8()
 	}
 	double snr = calculate_snr("Hanford_O1_fitted",waveformout, freq, length);
 	std::cout<<"SNR of injection: "<<snr<<std::endl;
+	params.tc = 20;
+	snr = data_snr_maximized_extrinsic(freq,length, waveformout,"Hanford_O1_fitted","IMRPhenomD",params );
+	std::cout<<"SNR of injection calculated as data: "<<snr<<std::endl;
 	//#########################################################
 	
 
@@ -397,7 +406,7 @@ void test8()
 	double initial_pos[dimension]={log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
 	int N_steps = 20000;
-	int chain_N= 8;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;

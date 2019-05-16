@@ -304,14 +304,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			this->precalc_powers_ins(f, M, &pows);
 		}
 		else{
-			//if(std::is_same< double, T>::value){
-			//	
-			//	pows.MFthird = cbrt(M*f );
-			//}
-			//else{
-			//	pows.MFthird = pow(M* f, 1./3.);
-			//}
-			//pows.MFthird = cbrt(M*f ); //cbrt is probably faster, but won't work with adouble - may need to look into this later
 			pows.MFsixth = pow(M*f,1./6 );
 			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
 			pows.MFthird = pows.MFsixth * pows.MFsixth;

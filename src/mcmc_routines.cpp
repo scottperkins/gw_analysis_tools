@@ -492,6 +492,7 @@ double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> 
 	for (int i=0;i<length; i++)
 	{
 		g_tilde = 4.*conj(data[i]) * detector_response[i] / psd[i]; 
+		//g_tilde = conj(data[i]) * detector_response[i] / psd[i]; 
 		plan->in[i][0] = real(g_tilde);
 		plan->in[i][1] = imag(g_tilde);
 	}
@@ -502,18 +503,21 @@ double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> 
 	
 	for (int i=0;i<length; i++)
 	{
-		g[i] = std::abs(std::complex<double>(plan->out[i][0],plan->out[i][1])) ;
+		//g[i] = std::abs(std::complex<double>(plan->out[i][0],plan->out[i][1])) ;
+		g[i] = plan->out[i][0]*plan->out[i][0]+plan->out[i][1]*plan->out[i][1] ;
 	}
 
-	double max = *std::max_element(g, g+length)*delta_f; 
+	double max = *std::max_element(g, g+length)*delta_f*delta_f; 
 
 	free(integrand);
 	free(g);
 	//std::cout<<"inner products: "<<max<<" "<<HH<<std::endl;
 
 	//return -0.5*(HH- 2*max);
-	//std::cout<<.5*(max*max)/HH<<std::endl;
-	return .5*(max*max)/HH;
+	//std::cout<<"ll: "<<.5*(max)/HH<<std::endl;
+	//std::cout<<"SNR**2 template "<<HH<<std::endl;
+	//return .5*(max*max)/HH;
+	return .5*(max)/HH;
 }
 
 /*! \brief log likelihood function that maximizes over extrinsic parameters tc, phic, D, and phiRef, the reference frequency - for unaligned spins 
@@ -720,16 +724,16 @@ void MCMC_MH_GW(double ***output,
 	mcmc_generation_method = generation_method;
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
-	if(num_detectors==1 && generation_method =="IMRPhenomD"){
-		//Dimension - [DL', chirpmass, eta, chis, chia]
-		//dimension = 5;
-		//Future -- option to maximize of DL
-	}
-	else{
-		std::cout<<
-			"Only supported options are currently 1 detector and PhenomD"<<std::endl;
-		exit(1);
-	}
+	//if(num_detectors==1 && generation_method =="IMRPhenomD"){
+	//	//Dimension - [DL', chirpmass, eta, chis, chia]
+	//	//dimension = 5;
+	//	//Future -- option to maximize of DL
+	//}
+	//else{
+	//	std::cout<<
+	//		"Only supported options are currently 1 detector and PhenomD"<<std::endl;
+	//	exit(1);
+	//}
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,statistics_filename,
 		chain_filename,auto_corr_filename);
@@ -775,7 +779,28 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		
-		fisher(mcmc_frequencies[0], mcmc_data_length[0],"MCMC_"+mcmc_generation_method+"_single_detect", mcmc_detectors[0], output, 4, &parameters, NULL, NULL, mcmc_noise[0]);
+		for(int j =0; j<dimension; j++){
+			for(int k =0; k<dimension; k++)
+			{
+				output[j][k] =0;
+			}
+		} 
+		double **temp_out = allocate_2D_array(dimension,dimension);
+		for (int i =0; i<mcmc_num_detectors; i++){
+			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+				"MCMC_"+mcmc_generation_method+"_single_detect", 
+				mcmc_detectors[i], temp_out, 4, &parameters, 
+				NULL, NULL, mcmc_noise[i]);
+			for(int j =0; j<dimension; j++){
+				for(int k =0; k<dimension; k++)
+				{
+					output[j][k] +=temp_out[j][k];
+				}
+			} 
+		}
+
+
+		deallocate_2D_array(temp_out, dimension,dimension);
 	}
 	else if(dimension ==7 && mcmc_generation_method =="IMRPhenomD"){	
 		//unpack parameter vector
@@ -809,8 +834,30 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 	
 		//*NOTE* Current fisher is log \eta -- sampler is in \eta -- 
 		//Leaving for now, but that should change too
-		fisher(mcmc_frequencies[0], mcmc_data_length[0],"MCMC_"+mcmc_generation_method+"_ind_spins", mcmc_detectors[0], output, 7, &parameters, NULL, NULL, mcmc_noise[0]);
+		//fisher(mcmc_frequencies[0], mcmc_data_length[0],"MCMC_"+mcmc_generation_method+"_ind_spins", mcmc_detectors[0], output, 7, &parameters, NULL, NULL, mcmc_noise[0]);
 		
+		for(int j =0; j<dimension; j++){
+			for(int k =0; k<dimension; k++)
+			{
+				output[j][k] =0;
+			}
+		} 
+		double **temp_out = allocate_2D_array(dimension,dimension);
+		for (int i =0; i<mcmc_num_detectors; i++){
+			fisher(mcmc_frequencies[i], 
+				mcmc_data_length[i],"MCMC_"+mcmc_generation_method+"_ind_spins",
+				mcmc_detectors[i], output, 7, &parameters, NULL, NULL, 
+				mcmc_noise[i]);
+			for(int j =0; j<dimension; j++){
+				for(int k =0; k<dimension; k++)
+				{
+					output[j][k] +=temp_out[j][k];
+				}
+			} 
+		}
+
+
+		deallocate_2D_array(temp_out, dimension,dimension);
 	}
 }
 
@@ -849,15 +896,17 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		parameters.sky_average = false;
 		
 		//calculate log likelihood
-		ll = maximized_coal_Log_Likelihood(mcmc_data[0], 
-					mcmc_noise[0],
-					mcmc_frequencies[0],
-					(size_t) mcmc_data_length[0],
+		for(int i=0; i < mcmc_num_detectors; i++){
+			ll += maximized_coal_Log_Likelihood(mcmc_data[i], 
+					mcmc_noise[i],
+					mcmc_frequencies[i],
+					(size_t) mcmc_data_length[i],
 					&parameters,
-					mcmc_detectors[0],
+					mcmc_detectors[i],
 					mcmc_generation_method,
-					&mcmc_fftw_plans[0]
+					&mcmc_fftw_plans[i]
 					);
+		}
 	}
 	if(dimension ==7 && mcmc_generation_method =="IMRPhenomD"){	
 	//if(false){	
@@ -891,17 +940,19 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		parameters.sky_average = false;
 		
 		//calculate log likelihood
-		ll = Log_Likelihood(mcmc_data[0], 
-					mcmc_noise[0],
-					mcmc_frequencies[0],
-					(size_t) mcmc_data_length[0],
+		for(int i=0; i < mcmc_num_detectors; i++){
+			ll += Log_Likelihood(mcmc_data[i], 
+					mcmc_noise[i],
+					mcmc_frequencies[i],
+					(size_t) mcmc_data_length[i],
 					&parameters,
-					mcmc_detectors[0],
+					mcmc_detectors[i],
 					mcmc_generation_method,
-					&mcmc_fftw_plans[0]
+					&mcmc_fftw_plans[i]
 					);
-		//std::cout<<ll<<std::endl;
+		}
 	}
+	//std::cout<<ll<<std::endl;
 	return ll;
 	//testing detailed balance
 	//return 2;
