@@ -48,8 +48,12 @@ def chieff(m1, m2, spin1, spin2,):
     return (m1*spin1 + m2*spin2)/(m1+m2)
 datatransform= []
 for x in data:
-    datatransform.append([calculate_mass1(x[0],x[1]),calculate_mass2(x[0],x[1] ), chieff(calculate_mass1(x[0],x[1]),calculate_mass1(x[0],x[1]),x[2],x[3])])
-datatransform = np.asarray(datatransform);
+    chirpm = x[0]
+    symmratio = x[1]
+    m1 = calculate_mass1(chirpm, symmratio)
+    m2 = calculate_mass2(chirpm, symmratio)
+    datatransform.append([m1,m2, chieff(m1,m2,x[2],x[3])])
+datatransform = np.asarray(datatransform)
 
 ndim, nsamples = 3, len(datatransform) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
