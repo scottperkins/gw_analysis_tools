@@ -44,13 +44,13 @@ struct sampler
 	log_likelihood ll;
 	fisher fish;
 
-	gsl_rng * r;
+	gsl_rng ** rvec;
 
-	int nan_counter=0;
-	int num_gauss =0;
-	int num_fish = 0;
-	int num_de = 0;
-	int num_mmala = 0;
+	int *nan_counter;
+	int *num_gauss ;
+	int *num_fish ;
+	int *num_de ;
+	int *num_mmala ;
 
 	double time_elapsed_cpu;
 	double time_elapsed_wall;
@@ -74,7 +74,7 @@ struct sampler
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);
 
-void gaussian_step(sampler *sampler, double *current_param,double *proposed_param);
+void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int chain_id);
 
 void fisher_step(sampler *sampler,double *current_param, double *proposed_param, int chain_index);
 

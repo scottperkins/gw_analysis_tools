@@ -424,6 +424,7 @@ void read_file(std::string filename, /**< input filename, relative to execution 
 			}	
 		}	
 	}
+	else{std::cout<<"ERROR -- File "<<filename<<" not found"<<std::endl;exit(1);}
 	for(i =0; i<rows;i++){
 		for(j=0; j<cols;j++)
 			output[i][j] = temp[cols*i + j];
@@ -458,6 +459,7 @@ void read_file(std::string filename, /**< input filename, relative to execution 
 			}	
 		}	
 	}
+	else{std::cout<<"ERROR -- File "<<filename<<" not found"<<std::endl;exit(1);}
 }
 
 /*! \brief Utility to write 2D array to file

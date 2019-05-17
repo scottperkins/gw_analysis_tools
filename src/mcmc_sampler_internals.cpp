@@ -9,7 +9,7 @@
 #include <limits>
 #include <iomanip>
 
-double limit_inf = std::numeric_limits<double>::infinity();
+const double limit_inf = std::numeric_limits<double>::infinity();
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
  */
@@ -19,32 +19,34 @@ double limit_inf = std::numeric_limits<double>::infinity();
 int mcmc_step(sampler *sampler, double *current_param, double *next_param, int chain_number)
 {
 	//Random number to determine type of step
-	double alpha = gsl_rng_uniform(sampler->r);
+	double alpha = gsl_rng_uniform(sampler->rvec[chain_number]);
+	
 
 	double proposed_param[sampler->dimension];
 
 	int step;	
 	if (alpha<sampler->prob_boundaries[chain_number][0])
 	{
-		gaussian_step(sampler, current_param, proposed_param);
-		sampler->num_gauss+=1;
+		gaussian_step(sampler, current_param, proposed_param, chain_number);
+		sampler->num_gauss[chain_number]+=1;
 		step = 0;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][1])
 	{
 		diff_ev_step(sampler, current_param, proposed_param, chain_number);
-		sampler->num_de+=1;
+		sampler->num_de[chain_number]+=1;
 		step = 1;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][2])
 	{
 		mmala_step(sampler, current_param, proposed_param);
-		sampler->num_mmala+=1;
+		sampler->num_mmala[chain_number]+=1;
 		step= 2;
 	}
 	else 
 	{
 		fisher_step(sampler, current_param, proposed_param, chain_number);
+		sampler->num_fish[chain_number]+=1;
 		step = 3;
 	}
 	
@@ -55,25 +57,18 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 
 	if(current_lp == limit_inf || proposed_lp == limit_inf){
 		MH_ratio =-1e20;
-		//std::cout<<std::exp(proposed_param[0])/MPC_SEC<<std::endl;		
-		//std::cout<<proposed_param[1]<<std::endl;		
-		//std::cout<<proposed_param[2]<<std::endl;		
-		//std::cout<<std::exp(proposed_param[3])/MSOL_SEC<<std::endl;		
-		//std::cout<<proposed_param[4]<<std::endl;		
-		//std::cout<<proposed_param[5]<<std::endl;		
-		//std::cout<<proposed_param[6]<<std::endl;		
-		//std::cout<<"YIKES"<<std::endl;
 	}
 	else{
 		//Calculate log_likelihood and log prior
 		double current_ll = sampler->ll(current_param, sampler->dimension);
+		//std::cout<<"mcmc update current pos: "<<exp(current_param[0])/MSOL_SEC<<" "<<current_param[1]<<" "<<current_param[2]<<" "<<current_param[3]<<" "<<current_ll<<std::endl;
+		//std::cout<<current_ll<<std::endl;
 		current_ll = (current_ll )/sampler->chain_temps[chain_number];
 		//double current_lp = sampler->lp(current_param, sampler->dimension);
 		double proposed_ll = sampler->ll(proposed_param, sampler->dimension);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
-		//std::cout<<"mcmc update current pos: "<<current_param[0]<<" mcmc update proposed pos: "<<proposed_param[0]<<std::endl;
 		//std::cout<<"mcmc update current pos: "<<current_param[1]<<" mcmc update proposed pos: "<<proposed_param[1]<<std::endl;
-		//std::cout<<"mcmc update current ll: "<<current_ll<<" mcmc update proposed ll: "<<proposed_ll<<std::endl;
+		//std::cout<<"current ll: "<<current_ll<<" proposed ll: "<<proposed_ll<<" Temp: "<<sampler->chain_temps[chain_number]<<" lp: "<<current_lp<<" "<<proposed_lp<<std::endl;
 		//std::cout<<"Chain number: "<<chain_number<<std::endl;
 
 		//Calculate MH ratio
@@ -86,7 +81,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 
 	int i;
 	//Random number to determine step acceptance
-	double beta = log(gsl_rng_uniform(sampler->r));
+	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
 	//std::cout<<beta<<" "<<MH_ratio<<std::endl;
 	if(MH_ratio< beta){
 		for ( i=0;i<sampler->dimension; i ++)
@@ -106,38 +101,6 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 		return 1;
 	}		
 	
-	//if (MH_ratio>1.)
-	//{
-	//	for ( i=0;i<sampler->dimension; i ++)
-	//	{
-	//		next_param[i] = proposed_param[i];
-	//	}
-	//	assign_ct_p(sampler, step,chain_number);
-	//	return 1;
-	//}	
-	//else 
-	//{
-	//	//Random number to determine step acceptance
-	//	double beta = gsl_rng_uniform(sampler->r);
-	//	if(MH_ratio< beta){
-	//		for ( i=0;i<sampler->dimension; i ++)
-	//		{
-	//			next_param[i] = current_param[i];
-	//		}
-	//		assign_ct_m(sampler, step,chain_number);
-	//		return -1;
-	//	}	
-	//	else
-	//	{
-	//		for ( i=0;i<sampler->dimension; i ++)
-	//		{
-	//			next_param[i] = proposed_param[i];
-	//		}
-	//		assign_ct_p(sampler, step, chain_number);
-	//		return 1;
-	//	}		
-	//
-	//}
 }
 	
 
@@ -145,14 +108,15 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
  */
 void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
-		double *proposed_param /**< [out] Proposed position in parameter space*/
+		double *proposed_param, /**< [out] Proposed position in parameter space*/
+		int chain_id
 		)
 {
 	int i ;
-	double alpha = gsl_rng_uniform(sampler->r);
+	double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
 	//double alpha = .0005;
 	for (i=0;i<sampler->dimension;i++){
-		proposed_param[i] = gsl_ran_gaussian(sampler->r, 0.05*alpha)+current_param[i];
+		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], 0.05*alpha)+current_param[i];
 	}
 }
 
@@ -164,16 +128,16 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		int chain_index
 		)
 {
-	sampler->num_fish+=1;
+	//sampler->num_fish+=1;
 	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
 		update_fisher(sampler, current_param, chain_index);	
 
 	sampler->fisher_update_ct[chain_index] += 1;
 	
 	//beta determines direction to step in eigen directions
-	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->r)));
+	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 	
-	double alpha = gsl_ran_gaussian(sampler->r, .1);
+	double alpha = gsl_ran_gaussian(sampler->rvec[chain_index], .1);
 
 	double scaling = 0.0;
 	if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
@@ -207,8 +171,6 @@ void update_fisher(sampler *sampler, double *current_param, int chain_index)
 	for (int i =0; i<sampler->dimension;i++){
 		for (int j = 0; j<sampler->dimension; j++){
 			oneDfisher[sampler->dimension*i+j] = fisher[i][j];///
-					//sampler->chain_temps[chain_index];
-			//std::cout<<oneDfisher[sampler->dimension*i+j]<<std::endl;
 		}
 		
 	}
@@ -244,7 +206,10 @@ void update_fisher(sampler *sampler, double *current_param, int chain_index)
 		}
 		sampler->fisher_update_ct[chain_index]=0;
 	}
-	else{ sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;}
+	else{ 
+		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
+		sampler->nan_counter[chain_index]+=1;
+	}
 
 	for (int i =0; i<sampler->dimension;i++){
 		free(fisher[i]);
@@ -271,16 +236,16 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
-	int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->r)));
+	int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
 	int j;
 	do{
-		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->r)));	
+		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
 	}while(j==i);
 		
 	double alpha = .1;
-	double beta = gsl_rng_uniform(sampler->r);
+	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->r,.5);
+		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.5);
 	for (int k = 0; k<sampler->dimension; k++)
 	{
 		proposed_param[k] = current_param[k] + alpha*
@@ -321,12 +286,23 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	double ll2 =  sampler->ll(chain2, sampler->dimension);
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
-	double pow = ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2;
+	//double pow = ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2;
+	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1;
 	double MH_ratio;
-	if(pow>1){MH_ratio = 1.1;}
-	else{MH_ratio = std::exp(ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2);}
-	if(MH_ratio>1.)
+	MH_ratio = pow;
+	double alpha = log(gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]));
+	
+	if (MH_ratio<alpha)
 	{
+		//std::cout<<"reject LL: "<<ll1<<" "<<ll2<<std::endl;
+		return -1;
+	}	
+	else
+	{
+		//std::cout<<"Alpha: "<<alpha<<std::endl;
+		//std::cout<<"MH: "<<MH_ratio<<std::endl;
+		//std::cout<<"Temps: "<<T1<<" "<<T2<<std::endl;
+		//std::cout<<"Accept LL: "<<ll1<<" "<<ll2<<std::endl;
 		double temp[sampler->dimension];
 		for(int i =0; i < sampler->dimension;i++)
 		{
@@ -336,25 +312,40 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 		}
 		return 1;
 	}
-	else
-	{
-		double alpha = gsl_rng_uniform(sampler->r);
-		if(MH_ratio<alpha){
-			return -1;
-		}
-		else
-		{
-			double temp[sampler->dimension];
-			for(int i =0; i < sampler->dimension;i++)
-			{
-				temp[i] = chain1[i];
-				chain1[i] = chain2[i];
-				chain2[i]=temp[i];
-			}
-			return 1;
-		}
-			
-	}
+
+	//if(pow>1){MH_ratio = 1.1;}
+	//else{MH_ratio = std::exp(pow);}
+	//if(MH_ratio>1.)
+	//{
+	//	
+	//	double temp[sampler->dimension];
+	//	for(int i =0; i < sampler->dimension;i++)
+	//	{
+	//		temp[i] = chain1[i];
+	//		chain1[i] = chain2[i];
+	//		chain2[i]=temp[i];
+	//	}
+	//	return 1;
+	//}
+	//else
+	//{
+	//	double alpha = gsl_rng_uniform(sampler->r);
+	//	if(MH_ratio<alpha){
+	//		return -1;
+	//	}
+	//	else
+	//	{
+	//		double temp[sampler->dimension];
+	//		for(int i =0; i < sampler->dimension;i++)
+	//		{
+	//			temp[i] = chain1[i];
+	//			chain1[i] = chain2[i];
+	//			chain2[i]=temp[i];
+	//		}
+	//		return 1;
+	//	}
+	//		
+	//}
 }
 
 void assign_probabilities(sampler *sampler, int chain_index)
@@ -418,6 +409,9 @@ void assign_probabilities(sampler *sampler, int chain_index)
 
 void allocate_sampler_mem(sampler *sampler)
 {
+	gsl_rng_env_setup();
+	const gsl_rng_type *T= gsl_rng_default;
+
 	int i;
 	sampler->step_prob = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->prob_boundaries = (double **)malloc(sizeof(double *) * sampler->chain_N);
@@ -439,6 +433,13 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->swap_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->step_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->step_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->rvec = (gsl_rng **)malloc(sizeof(gsl_rng *) * sampler->chain_N);
+
+	sampler->nan_counter = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->num_gauss = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->num_fish = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->num_de = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->num_mmala = (int *)malloc(sizeof(int) * sampler->chain_N);
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
@@ -461,6 +462,16 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->step_accept_ct[i]=0;
 		sampler->step_reject_ct[i]=0;
 
+		sampler->nan_counter[i]=0;
+		sampler->num_gauss[i]=0;
+		sampler->num_fish[i]=0;
+		sampler->num_de[i]=0;
+		sampler->num_mmala[i]=0;
+
+		sampler->rvec[i] = gsl_rng_alloc(T);
+		//Seed differently
+		gsl_rng_set(sampler->rvec[i] , i+1);
+
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->dimension);
@@ -476,6 +487,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	{
 		free(sampler->step_prob[i]);
 		free(sampler->prob_boundaries[i]); 
+		gsl_rng_free(sampler->rvec[i]);
 
 	}		
 	free(sampler->step_prob); 
@@ -496,13 +508,21 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->swap_reject_ct);
 	free(sampler->step_accept_ct);
 	free(sampler->step_reject_ct);
+
+	free(sampler->nan_counter);
+	free(sampler->num_gauss);
+	free(sampler->num_fish);
+	free(sampler->num_de);
+	free(sampler->num_mmala);
+
 	deallocate_3D_array(sampler->history,sampler->chain_N, 
 				sampler->history_length, sampler->dimension);
 	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->dimension, sampler->dimension);
 	deallocate_2D_array(sampler->fisher_vals, sampler->chain_N, sampler->dimension);
  
 	free(sampler->fisher_update_ct);
-	gsl_rng_free(sampler->r);
+	free(sampler->rvec);
+	//gsl_rng_free(sampler->r);
 	
 }
 
@@ -751,34 +771,41 @@ void write_stat_file(sampler *sampler,
 		std::endl;
 	out_file<<std::endl;
 
+	double total_step_type;
 	out_file<<
 		std::setw(width)<<std::left<<
 		"Number of steps per type (Gaussian, DE, MMALA, FISHER): "<<std::endl;
-	out_file<<
-		std::setw(fourth)<<std::left<<
-		sampler->num_gauss<<
-		std::setw(fourth)<<std::left<<
-		sampler->num_de<<
-		std::setw(fourth)<<std::left<<
-		sampler->num_mmala<<
-		std::setw(fourth)<<std::left<<
-		sampler->num_fish<<
-		std::endl;
-	double total_step_type = sampler->num_gauss+sampler->num_mmala+sampler->num_de+sampler->num_fish;
-	out_file<<
-		std::setw(width)<<std::left<<
-		"Fraction of steps per type (Gaussian, DE, MMALA, FISHER): "<<std::endl;
-	out_file<<
-		std::setw(fourth)<<std::left<<
-		(double)sampler->num_gauss/total_step_type<<
-		std::setw(fourth)<<std::left<<
-		(double)sampler->num_de/total_step_type<<
-		std::setw(fourth)<<std::left<<
-		(double)sampler->num_mmala/total_step_type<<
-		std::setw(fourth)<<std::left<<
-		(double)sampler->num_fish/total_step_type<<
-		std::endl;
-
+	for (int i =0; i < sampler->chain_N; i++){	
+	 	total_step_type= sampler->num_gauss[i]+sampler->num_mmala[i]+
+				sampler->num_de[i]+sampler->num_fish[i];
+		out_file<<
+			std::setw(fifth)<<std::left<<
+			i<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->num_gauss[i]/total_step_type<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->num_de[i]/total_step_type<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->num_mmala[i]/total_step_type<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->num_fish[i]/total_step_type<<
+			std::endl;
+		
+	}
+//	out_file<<
+//		std::setw(width)<<std::left<<
+//		"Fraction of steps per type (Gaussian, DE, MMALA, FISHER): "<<std::endl;
+//	out_file<<
+//		std::setw(fourth)<<std::left<<
+//		(double)sampler->num_gauss/total_step_type<<
+//		std::setw(fourth)<<std::left<<
+//		(double)sampler->num_de/total_step_type<<
+//		std::setw(fourth)<<std::left<<
+//		(double)sampler->num_mmala/total_step_type<<
+//		std::setw(fourth)<<std::left<<
+//		(double)sampler->num_fish/total_step_type<<
+//		std::endl;
+//
 	out_file<<std::endl;	
 
 	double acc_total=0;

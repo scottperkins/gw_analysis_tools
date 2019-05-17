@@ -35,6 +35,7 @@ void test7();
 void test8();
 void test9();
 void test10();
+void test11();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_GW(double *pos, int dim);
@@ -48,15 +49,140 @@ adouble dist(adouble *pos, int dimension);
 
 const gsl_rng_type* Y;
 gsl_rng * g;
-
+static std::complex<double> *waveformout11=NULL;
+static double *freq=NULL;
+static double *psd=NULL;
 
 int main(){
 
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test9();	
+	test10();	
 	return 0;
+}
+void test11()
+{
+	int length = 4000;
+	int loops = 10000;
+	
+	//std::complex<double> **out = (std::complex<double> **)malloc(sizeof(std::complex<double>)*loops);
+
+	//for (int i =0 ; i< loops; i++)
+	//{
+	//	out[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*length);
+	//}
+	double fhigh =500;
+	double flow =10;
+	double df = (fhigh-flow)/(length-1);
+	freq = (double *)malloc(sizeof(double) * length);
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+
+	//Synthetic data
+	gen_params params_data;
+	double chirpm = 20.78;
+	double eta =.21;
+	params_data.mass1 = calculate_mass1(chirpm,eta);
+	params_data.mass2 = calculate_mass2(chirpm,eta);
+	string method= "IMRPhenomD";
+	//complex<double> waveformout[length];
+	params_data.spin1[0] = 0;
+	params_data.spin1[1] = 0;
+	params_data.spin1[2] = -.4;
+	params_data.spin2[0] = 0;
+	params_data.spin2[1] = 0;
+	params_data.spin2[2] = .3;
+	params_data.phic = .0;
+	params_data.tc = 5;
+	params_data.Luminosity_Distance = 210.;
+	params_data.NSflag = false;
+	params_data.phi = 0;
+	params_data.theta = 0;
+	params_data.incl_angle = 0;
+	params_data.sky_average=false;
+	waveformout11 = (std::complex<double>*) malloc(sizeof(std::complex<double>)*length);
+	
+	fourier_waveform(freq, length, waveformout11,method,&params_data);
+
+	//double psd[length];
+	psd = (double *) malloc(sizeof(double)*length);
+	populate_noise(freq,"Hanford_O1_fitted", psd,length);
+	for (int i =0; i<length;i++){
+		psd[i] = psd[i]*psd[i];
+	}
+	//fftw_outline *plans = (fftw_outline *)malloc(sizeof(fftw_outline)*loops);	
+	//for(int i =0 ; i<loops; i ++)
+	//{
+	//	initiate_likelihood_function(&plans[i] , length);
+	//}
+	fftw_outline plan;
+	initiate_likelihood_function(&plan, length);
+	double ll_true =maximized_coal_Log_Likelihood(waveformout11, psd, freq,
+			length, &params_data, "Hanford", "IMRPhenomD", &plan);
+	
+	omp_set_num_threads(10);
+
+	#pragma omp parallel 
+	{
+		#pragma omp for
+		for (int i =0; i<loops; i ++)
+		{
+			gen_params params;
+			double chirpm = 20.78;
+			double eta =.21;
+			params.mass1 = calculate_mass1(chirpm,eta);
+			params.mass2 = calculate_mass2(chirpm,eta);
+			string method= "IMRPhenomD";
+			params.spin1[0] = 0;
+			params.spin1[1] = 0;
+			params.spin1[2] = -.4;
+			params.spin2[0] = 0;
+			params.spin2[1] = 0;
+			params.spin2[2] = .3;
+			params.phic = .0;
+			params.tc = 5;
+			params.Luminosity_Distance = 210.;
+			params.NSflag = false;
+			params.phi = 0;
+			params.theta = 0;
+			params.incl_angle = 0;
+			params.sky_average=false;
+
+			//fourier_waveform(freq, length, out[i],method,&params);
+
+			double ll =maximized_coal_Log_Likelihood(waveformout11, psd, freq,
+					length, &params, "Hanford", "IMRPhenomD", &plan);
+			//if(ll != ll_true)
+			{
+				std::cout<<ll<<std::endl;
+			}
+		}
+	}
+
+	//for(int i =1;i < loops; i++)
+	//{
+	//	for(int j =0; j <length; j++){
+	//		if(out[i-1][j]!=out[i][j]){
+	//			std::cout<<"YIKES"<<std::endl;
+	//		}
+	//	}
+	//}
+
+	//for(int i =0;i < loops; i++)
+	//{
+	//	free(out[i]);
+	//}
+	//free(out);
+	//for(int i =0 ; i<loops; i ++)
+	//{
+	//	deactivate_likelihood_function(&plans[i]);
+	//}
+	//free(plans);
+	deactivate_likelihood_function(&plan);
+	free(freq);
+	free(psd);
+	free(waveformout11);
 }
 void test10()
 {
@@ -116,12 +242,12 @@ void test10()
 	int dimension = 7;
 	double initial_pos[dimension]={log(400*MPC_SEC),2,2,log(30*MSOL_SEC), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 40000;
-	int chain_N= 10;
+	int N_steps = 50000;
+	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 50;
+	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//double temp_step = 20./(chain_N);
@@ -206,10 +332,15 @@ void test9()
 
 	int num_detectors =2;
 	//int num_detectors =1;
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
 
 	double **temp_data = allocate_2D_array(raw_length,2);
 	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
 	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
+	//std::string filebase = "testing/data/gw170608_";
+	//std::string filebase = "testing/data/gw151226_";
 	std::string filebase = "testing/data/gw150914_";
 	//std::string filebase = "testing/data/gw_150914_";
 
@@ -221,7 +352,6 @@ void test9()
 	data_length[0] =length;
 	data_length[1] =length;
 
-	//bool check = true;
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
 			sizeof(std::complex<double>)*data_length[i]);
@@ -252,31 +382,58 @@ void test9()
 	deallocate_2D_array(temp_data,raw_length,2);
 	free(temp_psd);
 	free(temp_freq);
+	
+	//gen_params params;
+	//IMRPhenomD<double> modeld;
+	//params.mass1 = 63.187;
+	//params.mass2 = 17.331;
+	//string method= "IMRPhenomD";
+	//params.spin1[0] = 0;
+	//params.spin1[1] = 0;
+	//params.spin1[2] = -.16;
+	//params.spin2[0] = 0;
+	//params.spin2[1] = 0;
+	//params.spin2[2] = .01388;
+	//params.phic = .0;
+	//params.tc = 0;
+	//params.Luminosity_Distance = 100.;
+	//params.NSflag = false;
+	//params.phi = 0;
+	//params.theta = 0;
+	//params.incl_angle = 0;
+	//params.sky_average=false;
+	//fftw_outline plan;
+	//initiate_likelihood_function(&plan, length);
+	//double ll =maximized_coal_Log_Likelihood(data[0], psd[0], frequencies[0],
+	//		length, &params, "Hanford", "IMRPhenomD", &plan);
+	//double snr = data_snr_maximized_extrinsic(frequencies[0],length, data[0],"Hanford_O1_fitted","IMRPhenomD",params );
+	//std::cout<<"LL "<<ll<<std::endl;
+	//std::cout<<"SNR "<<snr<<std::endl;
+	//deactivate_likelihood_function(&plan);
+	//exit(1);
 	//#########################################################
 	//MCMC options
 	int dimension = 4;
 	double initial_pos[dimension]={log(30*MSOL_SEC), .24,- .0,-.0};
+	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 40000;
-	int chain_N= 1;
+	int N_steps = 10000;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 100;
+	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//double temp_step = 20./(chain_N);
 	chain_temps[0]=1.;
-	double c = 1.2;
+	double c = 1.1;
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
 	
 	//#########################################################
 	//GW options
-	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
-	detectors[0] = "Hanford";
-	detectors[1] = "Livingston";
 	std::string generation_method = "IMRPhenomD";
 	
 	
@@ -313,17 +470,6 @@ void test9()
 			output_transform[j][3]=output[chain_N-1][j][3];
 	}
 	write_file(chainfile, output_transform, N_steps, dimension);
-	//ofstream mcmc_out;
-	//mcmc_out.open("testing/data/mcmc_output.csv");
-	//mcmc_out.precision(15);
-	////for(int i = 0;i<chain_N;i++){
-	//for(int j = 0; j<N_steps;j++){
-	//	//for(int k = 0; k<dimension; k++){
-	//		mcmc_out<<std::exp(output[0][j][0])/MPC_SEC<<" , "<<std::exp(output[0][j][1])/MSOL_SEC<<" , "<<output[0][j][2]<<" , "<<output[0][j][3]<<" , "<<output[0][j][4]<<endl;
-	//	//}
-	//}
-	////}
-	//mcmc_out.close();
 
 	deallocate_3D_array(output, chain_N, N_steps, dimension);
 	for(int i =0; i< num_detectors; i++){
@@ -339,7 +485,6 @@ void test9()
 	free(psd);
 	free(frequencies );
 	delete [] detectors;
-	//free(detectors);
 	free(data_length);
 }
 void test8()
@@ -416,8 +561,8 @@ void test8()
 	//double initial_pos[dimension]={log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	double initial_pos[dimension]={log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 20000;
-	int chain_N= 10;
+	int N_steps = 200;
+	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -524,14 +669,14 @@ void test7()
 
 	
 	int N_steps = 100000;
-	int chain_N= 5;
+	int chain_N= 20;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 10;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
-	double temp_step = 50./(chain_N);
+	double temp_step = 500./(chain_N);
 	for(int i =0; i < chain_N;  i ++)
 		//chain_temps[i]=1.;
 		chain_temps[i] = 1+ temp_step * i;
@@ -544,11 +689,14 @@ void test7()
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,statfilename,chainfile,autocorrfile );	
 	std::cout<<"ENDED"<<std::endl;
 
-	autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
-	chainfile = "testing/data/neil_mcmc_output2.csv";
-	statfilename = "testing/data/neil_mcmc_statistics2.txt";
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj32,NULL,statfilename,chainfile,autocorrfile );	
-	std::cout<<"ENDED"<<std::endl;
+	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
+	//chainfile = "testing/data/neil_mcmc_output2.csv";
+	//statfilename = "testing/data/neil_mcmc_statistics2.txt";
+	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj32,NULL,statfilename,chainfile,autocorrfile );	
+	//std::cout<<"ENDED"<<std::endl;
+	
+
+
 	//write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
 	//ofstream mcmc_out;
 	//mcmc_out.open("testing/data/mcmc_output.csv");
@@ -1448,11 +1596,11 @@ double test_lp_GW(double *pos, int dim)
 	//Flat priors across physical regions
 	//if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
 	if (std::exp(pos[0])/MSOL_SEC<2 || std::exp(pos[0])/MSOL_SEC>100){return a;}
-	if ((pos[1])<.1 || (pos[1])>.249999){return a;}
-	if ((pos[2])<-.9 || (pos[2])>.9){return a;}
-	if ((pos[3])<-.9 || (pos[3])>.9){return a;}
+	else if ((pos[1])<.1 || (pos[1])>.249999){return a;}
+	else if ((pos[2])<-.9 || (pos[2])>.9){return a;}
+	else if ((pos[3])<-.9 || (pos[3])>.9){return a;}
 	//else {return 0.;}
-	else {return pos[1];}
+	else {return pos[0] ;}
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10);}
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10)-(pos[1]-.24)*(pos[1]-.24)/(2*.010);}
 }
@@ -1469,5 +1617,5 @@ double test_lp_GW_7dim(double *pos, int dim)
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}
 	//else {return 0.;}
 	//else {return log(std::exp(pos[3])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
-	else {return pos[3]+2*pos[0];}
+	else {return pos[3]+4*pos[0];}
 }

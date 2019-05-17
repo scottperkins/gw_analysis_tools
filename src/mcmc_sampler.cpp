@@ -87,7 +87,7 @@ private:
 
 	bool mStopping = false;
 	
-	int numSwpThreads= 2;
+	int numSwpThreads= 1;
 		
 	std::condition_variable mEventVarSWP;
 
@@ -136,14 +136,12 @@ private:
 						//mEventVarSWP.wait(lock,[=]{return mStopping || !mSwaps.empty(); });
 						mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwaps.size()<2); });
 						
-						//if (mStopping && mSwaps.empty())
 						if (mStopping && mSwaps.size()<2)
 							break;	
 						j = std::move(mSwaps.front());
 						mSwaps.pop();
 						k = std::move(mSwaps.front());
 						mSwaps.pop();
-						//std::cout<<mTasks.empty();
 					}
 					mcmc_swap_threaded(j,k);
 					
@@ -153,7 +151,8 @@ private:
 	}
 	void stop() noexcept
 	{
-		std::cout<<"STOPPING"<<std::endl;
+		std::cout<<std::endl;
+		std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
 		{
 			std::unique_lock<std::mutex> lock{mEventMutex};
 			//std::unique_lock<std::mutex> lock{mEventMutexSWP};
@@ -227,9 +226,9 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	omp_set_num_threads(numThread);
 
 	//random number generator initialization
-	gsl_rng_env_setup();
-	T=gsl_rng_default;
-	r = gsl_rng_alloc(T);
+	//gsl_rng_env_setup();
+	//T=gsl_rng_default;
+	//r = gsl_rng_alloc(T);
 
 	//Array holding the probability of each 
 	//type of step - Gaussian, differential evolution, MMALA, Fisher
@@ -253,14 +252,14 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.chain_N = chain_N;
 	sampler.N_steps = N_steps;
 	sampler.dimension = dimension;
-	sampler.r = r;
+	//sampler.r = r;
 	sampler.history_length = 1000;
 	sampler.fisher_update_number = 1000;
 	sampler.output = output;
 	//########################################################
 	//########################################################
 	//POOLING -- TESTING
-	sampler.pool = false;
+	sampler.pool = true;
 	//########################################################
 	//########################################################
 
@@ -294,7 +293,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		
 	
 	int cutoff ;
-	//Sampler Loop
+	//Sampler Loop - ``Deterministic'' swapping between chains
 	if (!samplerptr->pool)
 	{
 		#pragma omp parallel //num_threads(4)
@@ -337,7 +336,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		}
 	}
 
-
+	//POOLING  -- ``Stochastic'' swapping between chains
 	else
 	{
 		ThreadPool pool(numThread);
@@ -428,7 +427,10 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	rejected_percent = (double)(step_rejected[0])/(step_accepted[0]+step_rejected[0]);
 	std::cout<<"Accepted percentage of steps (cold chain): "<<accepted_percent<<std::endl;
 	std::cout<<"Rejected percentage of steps (cold chain): "<<rejected_percent<<std::endl;
-	std::cout<<"NANS (all chains): "<<sampler.nan_counter<<std::endl;
+	double nansum=0;
+	for (int i =0; i< chain_N; i++)
+		nansum+= samplerptr->nan_counter[i];
+	std::cout<<"NANS (all chains): "<<nansum<<std::endl;
 	
 	if(statistics_filename != "")
 		write_stat_file(&sampler, statistics_filename, step_accepted, step_rejected,

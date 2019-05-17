@@ -384,9 +384,9 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 	if(	generation_method  == "IMRPhenomD" ||
 		generation_method  == "ppE_IMRPhenomD_Inspiral" ||
 		generation_method  == "ppE_IMRPhenomD_IMR" ){
-		
+		//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->spin1[2]<<" "<<params->spin2[2]<<std::endl;	
 		std::complex<double> *response =
-				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
+			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 		fourier_detector_response(frequencies, length, response, detector, generation_method, params);
 		ll = maximized_coal_Log_Likelihood_aligned_spin_internal(data, psd, frequencies,response, length, plan);
 		
@@ -489,32 +489,44 @@ double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> 
 	//calculate the fourier transform that corresponds to maximizing over phic and tc
 	//Use malloc at some point, not sure how long these arrays will be 
 	std::complex<double> g_tilde;
+
+	fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 	for (int i=0;i<length; i++)
 	{
 		g_tilde = 4.*conj(data[i]) * detector_response[i] / psd[i]; 
 		//g_tilde = conj(data[i]) * detector_response[i] / psd[i]; 
-		plan->in[i][0] = real(g_tilde);
-		plan->in[i][1] = imag(g_tilde);
+		//plan->in[i][0] = real(g_tilde);
+		//plan->in[i][1] = imag(g_tilde);
+		in[i][0] = real(g_tilde);
+		in[i][1] = imag(g_tilde);
 	}
 
 	double *g = (double *)malloc(sizeof(double)*length);
 	
-	fftw_execute(plan->p);
+	//fftw_execute(plan->p);
+	fftw_execute_dft(plan->p, in, out);
 	
 	for (int i=0;i<length; i++)
 	{
 		//g[i] = std::abs(std::complex<double>(plan->out[i][0],plan->out[i][1])) ;
-		g[i] = plan->out[i][0]*plan->out[i][0]+plan->out[i][1]*plan->out[i][1] ;
+		//g[i] = plan->out[i][0]*plan->out[i][0]+plan->out[i][1]*plan->out[i][1] ;
+		g[i] = out[i][0]*out[i][0]+out[i][1]*out[i][1] ;
 	}
 
 	double max = *std::max_element(g, g+length)*delta_f*delta_f; 
 
 	free(integrand);
 	free(g);
+	fftw_free(in);
+	fftw_free(out);
 	//std::cout<<"inner products: "<<max<<" "<<HH<<std::endl;
 
 	//return -0.5*(HH- 2*max);
 	//std::cout<<"ll: "<<.5*(max)/HH<<std::endl;
+	//std::cout<<"psd: "<<psd[1000]<<std::endl;
+	//std::cout<<"freq: "<<frequencies[1000]<<std::endl;
+	//std::cout<<"data: "<<data[1000]<<std::endl;
 	//std::cout<<"SNR**2 template "<<HH<<std::endl;
 	//return .5*(max*max)/HH;
 	return .5*(max)/HH;
@@ -589,35 +601,37 @@ double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double
 	double *gammahat = 
 		(double *)malloc(sizeof(double)*length);
 	std::complex<double> g_tilde;
+	fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 
 	for (int i=0;i<length; i++)
 	{
 		g_tilde = 4.*conj(data[i]) * hpnorm[i] / psd[i]; 
-		plan->in[i][0] = real(g_tilde);
-		plan->in[i][1] = imag(g_tilde);
+		in[i][0] = real(g_tilde);
+		in[i][1] = imag(g_tilde);
 	}
-	fftw_execute(plan->p);
+	//fftw_execute(plan->p);
+	fftw_execute_dft(plan->p, in, out);
 	for (int i=0;i<length; i++)
 	{
 		rhoplus[i] = std::complex<double>(plan->out[i][0],plan->out[i][1]);
 		//Norm of the output, squared (Re{g}^2 + Im{g}^2)
-		rhoplus2[i] = plan->out[i][0]* plan->out[i][0]
-				+ plan->out[i][1]* plan->out[i][1];
+		rhoplus2[i] = out[i][0]* out[i][0]+ out[i][1]* out[i][1];
 		
 	}
 	for (int i=0;i<length; i++)
 	{
 		g_tilde = 4.*conj(data[i]) * hcnorm[i] / psd[i]; 
-		plan->in[i][0] = real(g_tilde);
-		plan->in[i][1] = imag(g_tilde);
+		in[i][0] = real(g_tilde);
+		in[i][1] = imag(g_tilde);
 	}
-	fftw_execute(plan->p);
+	//fftw_execute(plan->p);
+	fftw_execute_dft(plan->p, in, out);
 	for (int i=0;i<length; i++)
 	{
 		rhocross[i] = std::complex<double>(plan->out[i][0],plan->out[i][1]);
 		//Norm of the output, squared (Re{g}^2 + Im{g}^2)
-		rhocross2[i] = plan->out[i][0]* plan->out[i][0]
-				+ plan->out[i][1]* plan->out[i][1];
+		rhocross2[i] = out[i][0]* out[i][0]+ out[i][1]* out[i][1];
 	}
 	
 	for (int i = 0; i <length;i++)
@@ -647,6 +661,8 @@ double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double
 	free(rhocross2);
 	free(gammahat);
 	free(lambda);
+	fftw_free(in);
+	fftw_free(out);
 
 	//return -0.5*(HH- 2*max);
 	return max;
@@ -724,16 +740,17 @@ void MCMC_MH_GW(double ***output,
 	mcmc_generation_method = generation_method;
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
-	//if(num_detectors==1 && generation_method =="IMRPhenomD"){
-	//	//Dimension - [DL', chirpmass, eta, chis, chia]
-	//	//dimension = 5;
-	//	//Future -- option to maximize of DL
-	//}
-	//else{
-	//	std::cout<<
-	//		"Only supported options are currently 1 detector and PhenomD"<<std::endl;
-	//	exit(1);
-	//}
+	if(dimension==4 && generation_method =="IMRPhenomD"){
+		std::cout<<"Sampling in parameters: chirpmass, eta, chi1, chi2"<<std::endl;
+	}
+	else if(dimension==7 && generation_method =="IMRPhenomD"){
+		std::cout<<"Sampling in parameters: DL, tc, phic, chirpmass, eta, chi1, chi2"<<std::endl;
+	}
+	else{
+		std::cout<<
+			"Only supported options are currently 1 detector and PhenomD"<<std::endl;
+		exit(1);
+	}
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,statistics_filename,
 		chain_filename,auto_corr_filename);
@@ -874,7 +891,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		double eta = param[1];
 		double chi1 = param[2];
 		double chi2 = param[3];
-	
+		//std::cout<<"LL: "<<chirpmass<<" "<<eta<<" "<<chi1<<" "<<chi2<<std::endl;	
 		//create gen_param struct
 		gen_params parameters; 
 		parameters.mass1 = calculate_mass1(chirpmass, eta);
@@ -894,7 +911,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		parameters.theta=0;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
-		
+
 		//calculate log likelihood
 		for(int i=0; i < mcmc_num_detectors; i++){
 			ll += maximized_coal_Log_Likelihood(mcmc_data[i], 
@@ -938,6 +955,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		parameters.theta=0;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
+
 		
 		//calculate log likelihood
 		for(int i=0; i < mcmc_num_detectors; i++){
@@ -952,8 +970,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 					);
 		}
 	}
-	//std::cout<<ll<<std::endl;
 	return ll;
+
 	//testing detailed balance
 	//return 2;
 }

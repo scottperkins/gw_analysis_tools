@@ -2,24 +2,7 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 
-#strain = np.loadtxt("data/gw150914_data.csv",delimiter=',',unpack=True)
-#psd = np.loadtxt("data/gw150914_psd.csv",delimiter=',',unpack=True)
-#freq = np.loadtxt("data/gw150914_freq.csv",delimiter=',',unpack=True)
-#
-#plt.loglog(freq,psd)
-#plt.loglog(freq,strain[0]*strain[0]+strain[1]*strain[1])
-##plt.show()
-##plt.close()
-#
-#strain = np.loadtxt("data/gw_150914_data.csv",delimiter=',',unpack=True)
-#psd = np.loadtxt("data/gw_150914_psd.csv",delimiter=',',unpack=True)
-#freq = np.loadtxt("data/gw_150914_freq.csv",delimiter=',',unpack=True)
-#
-##plt.loglog(freq,psd)
-##plt.loglog(freq,strain[0]*strain[0]+strain[1]*strain[1])
-##plt.show()
-##plt.close()
-#
+
 data = np.loadtxt("data/mcmc_output_7dim.csv",delimiter=',')
 ##data = data[:-100]
 #dls = [x[0] for x in data]

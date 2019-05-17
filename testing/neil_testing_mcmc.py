@@ -16,9 +16,9 @@ data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',')
 ndim, nsamples = 2, len(data) 
 labels = [r"x",r"y"]
 
-for x in data:
-    x[0] = abs(x[0])
-    x[1] = abs(x[1])
+#for x in data:
+#    x[0] = abs(x[0])
+#    x[1] = abs(x[1])
 figure = corner.corner(data, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 plt.savefig("neil_mcmc_testing.pdf")
 plt.close()
