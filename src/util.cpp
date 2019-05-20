@@ -506,8 +506,70 @@ void write_file(std::string filename, /**<Filename of output file, relative to e
 
 }
 
+/*! \brief Utility to transform from celestial coord RA and DEC to local horizon coord for detector response functions
+ *
+ * Outputs are the spherical polar angles defined by North as 0 degrees azimuth and the normal to the earth as 0 degree polar
+ */
+void celestial_horizon_transform(double RA, /**< Right acsension (rad)*/
+				double DEC, /**< Declination (rad)*/
+				double gps_time, /**<GPS time */
+				double LONG, /**< Longitude (rad)*/
+				double LAT,/**< Latitude (rad)*/
+				double *phi, /**<[out] horizon azimuthal angle (rad)*/
+				double *theta/**< [out] horizon polar angle (rad)*/
+				)
+{
+	//#################################
+	//NEED TRANSFORM FROM GPS TO SIDEREAL
+	double GMST = gps_to_GMST(gps_time);
+	//###############################
+	
+	//std::cout<<"GMST: "<<GMST<<std::endl;
+	double LMST = GMST + (LONG*180./M_PI)/15.; //Local mean sidereal in hours
+	double H = (LMST - (RA*180./M_PI)/15.)*15.*M_PI/180.;//Local hour angle in rad
+	
+	double alt = asin( sin(DEC) * sin(LAT) + cos(DEC) * cos(LAT) *cos(H) );//alt in rad
+	double a =  acos( (sin(DEC) - sin(alt)*sin(LAT) )/ (cos(alt)*cos(LAT))) ; //azimuth in rad
+	double azimuth ;
+	if (sin(H)<0) azimuth = a ;
+	else azimuth = 2*M_PI - a;
+	*phi = azimuth ;//output in rad
+	*theta = M_PI/2. - alt;//output in rad
+}
 
+//https://aa.usno.navy.mil/faq/docs/GAST.php
+double gps_to_GMST(double gps_time)
+{
+	double J2000 = 2451545;
+	double JD = gps_to_JD(gps_time);
+	double JD0;
+	double H;
+	if((JD - floor(JD)) >.5){ 
+		JD0 = floor(JD)+.5;//Julian date of the previous midnight
+		H = (JD - JD0)*24;//Hours past midnight (in hours)
+	}
+	else{
+		JD0 = floor(JD) -1. ;
+		H = (JD - JD0)*24;
+	}
+	double D0 = JD0 -J2000;
+	double D = JD -J2000;
+	double T = D/ 36525.; //Centuries since J2000
+	//approximation of GMST from JD (from GPST)
+	double GMST_unscaled = 6.697374558 + 0.06570982441908*D0 + 1.00273790935*H + 0.000026*T*T;
+	int hours = (int)floor(GMST_unscaled)%24;
+	double fraction = GMST_unscaled - floor(GMST_unscaled);
+	//return (6.697374558 + 0.06570982441908*D0 + 1.00273790935*H + 0.000026*T*T);
+	return hours + fraction;
+}
 
+double gps_to_JD(double gps_time)
+{
+	double J2000 = 2451545;
+	double J2000_GPST = 630763213.;
+	return J2000 + (gps_time-J2000_GPST)/(86400.);
+}
+//################################################################
 template <class T>
 std::complex<T> cpolar(T mag, T phase)
 {

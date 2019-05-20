@@ -61,22 +61,13 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	else{
 		//Calculate log_likelihood and log prior
 		double current_ll = sampler->ll(current_param, sampler->dimension);
-		//std::cout<<"mcmc update current pos: "<<exp(current_param[0])/MSOL_SEC<<" "<<current_param[1]<<" "<<current_param[2]<<" "<<current_param[3]<<" "<<current_ll<<std::endl;
-		//std::cout<<current_ll<<std::endl;
 		current_ll = (current_ll )/sampler->chain_temps[chain_number];
 		//double current_lp = sampler->lp(current_param, sampler->dimension);
 		double proposed_ll = sampler->ll(proposed_param, sampler->dimension);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
-		//std::cout<<"mcmc update current pos: "<<current_param[1]<<" mcmc update proposed pos: "<<proposed_param[1]<<std::endl;
-		//std::cout<<"current ll: "<<current_ll<<" proposed ll: "<<proposed_ll<<" Temp: "<<sampler->chain_temps[chain_number]<<" lp: "<<current_lp<<" "<<proposed_lp<<std::endl;
-		//std::cout<<"Chain number: "<<chain_number<<std::endl;
 
 		//Calculate MH ratio
-		//power = -current_ll+proposed_ll-current_lp + proposed_lp;
 		MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
-		//if(power>0.){MH_ratio=1.1;}
-		//else{MH_ratio = std::exp(power);}
-		//std::cout<<power<<" "<<MH_ratio<<std::endl;
 	}
 
 	int i;
@@ -147,12 +138,9 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				sampler->chain_temps[chain_index];}
 	for(int i =0; i< sampler->dimension;i++)
 	{
-		//std::cout<<sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
 		proposed_param[i] = current_param[i] +
 			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 	}
-	//std::cout<<alpha/sqrt(scaling)<<std::endl;
-	//std::cout<<std::endl;
 
 }
 
@@ -299,10 +287,6 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	}	
 	else
 	{
-		//std::cout<<"Alpha: "<<alpha<<std::endl;
-		//std::cout<<"MH: "<<MH_ratio<<std::endl;
-		//std::cout<<"Temps: "<<T1<<" "<<T2<<std::endl;
-		//std::cout<<"Accept LL: "<<ll1<<" "<<ll2<<std::endl;
 		double temp[sampler->dimension];
 		for(int i =0; i < sampler->dimension;i++)
 		{
@@ -313,41 +297,18 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 		return 1;
 	}
 
-	//if(pow>1){MH_ratio = 1.1;}
-	//else{MH_ratio = std::exp(pow);}
-	//if(MH_ratio>1.)
-	//{
-	//	
-	//	double temp[sampler->dimension];
-	//	for(int i =0; i < sampler->dimension;i++)
-	//	{
-	//		temp[i] = chain1[i];
-	//		chain1[i] = chain2[i];
-	//		chain2[i]=temp[i];
-	//	}
-	//	return 1;
-	//}
-	//else
-	//{
-	//	double alpha = gsl_rng_uniform(sampler->r);
-	//	if(MH_ratio<alpha){
-	//		return -1;
-	//	}
-	//	else
-	//	{
-	//		double temp[sampler->dimension];
-	//		for(int i =0; i < sampler->dimension;i++)
-	//		{
-	//			temp[i] = chain1[i];
-	//			chain1[i] = chain2[i];
-	//			chain2[i]=temp[i];
-	//		}
-	//		return 1;
-	//	}
-	//		
-	//}
 }
 
+/*! \brief update and initiate probabilities for each variety of step
+ *
+ * Type 0: Gaussian step
+ *
+ * Type 1: Differential Evolution step
+ *
+ * Type 2: MMALA step (currently not supported)
+ *
+ * Type 3: Fisher step
+ */
 void assign_probabilities(sampler *sampler, int chain_index)
 {
 
@@ -394,10 +355,10 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//sampler->step_prob[chain_index][2]=.2;
 		//sampler->step_prob[chain_index][3]=.3;
 		//Testing
-		sampler->step_prob[chain_index][0]=.1;
-		sampler->step_prob[chain_index][1]=.4;
+		sampler->step_prob[chain_index][0]=.05;
+		sampler->step_prob[chain_index][1]=.3;
 		sampler->step_prob[chain_index][2]=.0;
-		sampler->step_prob[chain_index][3]=.5;
+		sampler->step_prob[chain_index][3]=.65;
 
 	}
 	//Split probabilities into boundaries for if-else loop

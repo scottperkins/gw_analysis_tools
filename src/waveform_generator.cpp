@@ -22,6 +22,10 @@ using namespace std;
  *
  * This puts the responsibility on the user to pass the necessary parameters
  *
+ *
+ * *NEED TO OUTLINE OPTIONS FOR EACH METHOD IN DEPTH*
+ *
+ *
  * NEW PHASE OPTIONS for 
  *
  * PHENOMD ONLY:
@@ -153,9 +157,17 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		IMRPhenomPv2<double> modeld;
 		//Initialize Pv2 specific params	
 
-
-		//Compute transform
-		modeld.PhenomPv2_Param_Transform(&params);
+		params.thetaJN = parameters->thetaJN;
+		params.alpha0 = parameters->alpha0;
+		params.zeta_polariz = parameters->zeta_polariz;
+		params.phi_aligned = parameters->phi_aligned;
+		params.chil = parameters->chil;
+		params.chip = parameters->chip;
+		//Check to see if thetaJN was used
+		//If not, its calculated
+		if(params.thetaJN==0 )
+			//Compute transform
+			modeld.PhenomPv2_Param_Transform(&params);
 		//Calculate Waveform
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;

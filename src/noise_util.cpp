@@ -1,4 +1,5 @@
 #include "noise_util.h"
+#include "util.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -113,4 +114,88 @@ double right_interferometer_cross(double theta, double phi)
 	double sp2 = sin(2.*phi);
 	double Fcross = ct * sp2;
 	return Fcross;
+}
+
+void celestial_horizon_transform(double RA, /**< in RAD*/
+		double DEC, /**< in RAD*/
+		double gps_time, 
+		std::string detector, 
+		double *phi, /**< in RAD*/
+		double *theta /**< in RAD*/
+		)
+{
+	double LAT, LONG, azimuth_offset;
+	if (detector =="Hanford" || detector == "hanford")
+	{
+		LAT =  H_LAT;		
+		LONG =  H_LONG;		
+		azimuth_offset = H_azimuth_offset;
+		
+	}
+	else if (detector =="Livingston" || detector == "livingston")
+	{
+		LAT =  L_LAT;		
+		LONG =  L_LONG;		
+		azimuth_offset = L_azimuth_offset;
+
+	}
+	else if (detector =="Virgo" || detector == "virgo")
+	{
+		LAT =  V_LAT;		
+		LONG =  V_LONG;		
+		azimuth_offset = V_azimuth_offset;
+
+	}
+	celestial_horizon_transform(RA,DEC, gps_time, LONG, LAT, phi, theta);
+	*phi += azimuth_offset;
+	if(*phi>2*M_PI) *phi -=2*M_PI;
+}
+
+/*! \brief calculate Difference in time of arrival (DTOA) for a given source location and 2 different detectors
+ */
+double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
+	double theta2, /**<spherical polar angle for detector 2 in RAD*/ 
+	std::string detector1, /**< name of detector one*/
+	std::string detector2 /**<name of detector two*/
+	)
+{
+	double R1, R2;
+	//detector one
+	if(detector1 == "Hanford" || detector1 == "hanford")
+	{
+		R1 = H_radius;	
+	}
+	else if(detector1 == "Livingston" || detector1 == "livingston")
+	{
+		R1 = L_radius;	
+	}
+	else if(detector1 == "Virgo" || detector1 == "virgo")
+	{
+		R1 = V_radius;	
+	}
+	//detector 2
+	if(detector2 == "Hanford" || detector2 == "hanford")
+	{
+		R2 = H_radius;	
+	}
+	else if(detector2 == "Livingston" || detector2 == "livingston")
+	{
+		R2 = L_radius;	
+	}
+	else if(detector2 == "Virgo" || detector2 == "virgo")
+	{
+		R2 = V_radius;	
+	}
+	return (cos(theta1)*R1 - cos(theta2)*R2)/c;
+}
+
+double radius_at_lat(double latitude, /**< latitude in degrees*/
+			double elevation /**<elevation in meters*/
+			)
+{
+	double numerator = pow(RE_equatorial*RE_equatorial * cos(latitude*M_PI/180.) ,2 ) 
+			+ pow(RE_polar*RE_polar * sin(latitude*M_PI/180. ), 2);
+	double denominator = pow(RE_equatorial * cos(latitude*M_PI/180.) ,2 ) 
+			+ pow(RE_polar * sin(latitude*M_PI/180. ), 2);
+	return sqrt(numerator/denominator) + elevation;
 }

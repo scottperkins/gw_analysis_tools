@@ -135,8 +135,8 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
 			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
 			std::complex<double> *detector_response, /**< [out] detector response*/
-			double theta, /**< polar angle theta in detector frame*/
-			double phi, /**< azimuthal angle phi in detector frame*/ 
+			double theta, /**< polar angle (rad) theta in detector frame*/
+			double phi, /**< azimuthal angle (rad) phi in detector frame*/ 
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {

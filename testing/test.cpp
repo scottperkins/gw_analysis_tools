@@ -36,10 +36,15 @@ void test8();
 void test9();
 void test10();
 void test11();
+void test12();
+void test13();
+void test14();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_GW(double *pos, int dim);
+double test_lp_GW_Pv2(double *pos, int dim);
 double test_lp_GW_7dim(double *pos, int dim);
+double test_lp_GW_DFull(double *pos, int dim);
 void test_fisher(double *pos, int dim, double **fisher);
 double log_student_t (double *x,int dim);
 double log_neil_proj3 (double *x,int dim);
@@ -58,8 +63,318 @@ int main(){
 	//gsl_rng_env_setup();
 	//Y = gsl_rng_default;
 	//g = gsl_rng_alloc(Y);
-	test10();	
+	test14();	
 	return 0;
+}
+
+void test14()
+{
+	//int raw_length = 28673;
+	//int cutoff = 600;
+	//int high_cut = 11000;
+	//int length = high_cut-cutoff;
+	
+	int raw_length=  4096;
+	int cutoff = 50;
+	int length = raw_length-cutoff;
+
+	int num_detectors =2;
+	//int num_detectors =1;
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+
+	double **temp_data = allocate_2D_array(raw_length,2);
+	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
+	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
+	std::string filebase = "testing/data/gw170608_";
+	//std::string filebase = "testing/data/gw151226_";
+	//std::string filebase = "testing/data/gw150914_";
+	//std::string filebase = "testing/data/gw_150914_";
+	//double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1135136350.6;//TESTING -- gw151226
+	double gps_time = 1180922494.5; //TESTING -- gw170608
+
+	std::complex<double> **data= (std::complex<double>**)malloc(
+			sizeof(std::complex<double>*)*num_detectors);
+	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
+	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =length;
+	data_length[1] =length;
+
+	for (int i =0; i<num_detectors; i++){
+		data[i] = (std::complex<double> *)malloc(
+			sizeof(std::complex<double>)*data_length[i]);
+		
+		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
+	}
+	read_file(filebase+"data_H.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_H.csv",temp_psd);
+	read_file(filebase+"freq_H.csv",temp_freq);
+	//read_file(filebase+"data.csv",temp_data, raw_length,2);
+	//read_file(filebase+"psd.csv",temp_psd);
+	//read_file(filebase+"freq.csv",temp_freq);
+	for(int j = 0; j<data_length[0]; j++){
+		frequencies[0][j] = temp_freq[j+cutoff];	
+		psd[0][j] = (temp_psd[j+cutoff]);	
+		data[0][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+	}
+	read_file(filebase+"data_L.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_L.csv",temp_psd);
+	read_file(filebase+"freq_L.csv",temp_freq);
+	for(int j = 0; j<data_length[1]; j++){
+		frequencies[1][j] = temp_freq[j+cutoff];	
+		psd[1][j] = (temp_psd[j+cutoff]);	
+		data[1][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+	}
+
+	deallocate_2D_array(temp_data,raw_length,2);
+	free(temp_psd);
+	free(temp_freq);
+	
+	//#########################################################
+	//mcmc options
+	int dimension = 8;
+	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(30*MSOL_SEC), .24,- .0,-.0};
+	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
+	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
+	int n_steps = 80000;
+	int chain_N= 10;
+	double ***output;
+	output = allocate_3D_array( chain_N, n_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 5;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	//double temp_step = 20./(chain_N);
+	chain_temps[0]=1.;
+	double c = 1.2;
+	for(int i =1; i < chain_N;  i ++)
+		chain_temps[i] = c*chain_temps[i-1];
+		//chain_temps[i] = (1.+i*temp_step);
+	
+	int numThreads = 20;
+	bool pool = false;
+	//#########################################################
+	//gw options
+	std::string generation_method = "IMRPhenomD";
+	
+	
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_DFull.csv";
+	//std::string autocorrfile = "";
+	std::string chainfile = "testing/data/mcmc_output_DFull.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_DFull.txt";
+
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+			swp_freq, test_lp_GW_DFull,numThreads, pool, num_detectors, data, psd, 
+			frequencies, data_length, gps_time,detectors, generation_method,
+			statfilename,"",autocorrfile);	
+	std::cout<<"ended"<<std::endl;
+
+	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
+	for (int j =0; j<n_steps; j++)
+		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
+
+	for(int j = 0; j<n_steps;j++){
+			output_transform[j][0]=output[0][j][0];
+			output_transform[j][1]=output[0][j][1];
+			output_transform[j][2]=output[0][j][2];
+			output_transform[j][3]=std::exp(output[0][j][3])/MPC_SEC;
+			output_transform[j][4]=std::exp(output[0][j][4])/MSOL_SEC;
+			output_transform[j][5]=output[0][j][5];
+			output_transform[j][6]=output[0][j][6];
+			output_transform[j][7]=output[0][j][7];
+	}
+	write_file(chainfile, output_transform, n_steps, dimension);
+	//output hottest chain too
+	chainfile = "testing/data/mcmc_output_DFull_hot.csv";
+	for(int j = 0; j<n_steps;j++){
+			output_transform[j][0]=output[chain_N-1][j][0];
+			output_transform[j][1]=output[chain_N-1][j][1];
+			output_transform[j][2]=output[chain_N-1][j][2];
+			output_transform[j][3]=std::exp(output[chain_N-1][j][3])/MPC_SEC;
+			output_transform[j][4]=std::exp(output[chain_N-1][j][4])/MSOL_SEC;
+			output_transform[j][5]=output[chain_N-1][j][5];
+			output_transform[j][6]=output[chain_N-1][j][6];
+			output_transform[j][7]=output[chain_N-1][j][7];
+	}
+	write_file(chainfile, output_transform, n_steps, dimension);
+
+	deallocate_3D_array(output, chain_N, n_steps, dimension);
+	for(int i =0; i< num_detectors; i++){
+		free(data[i]);
+		free(psd[i]);
+		free(frequencies[i]);
+	}
+	for(int i =0; i< n_steps; i++){
+		free(output_transform[i]);
+	}
+	free(output_transform);
+	free(data);
+	free(psd);
+	free(frequencies );
+	delete [] detectors;
+	free(data_length);
+}
+void test13()
+{
+	double RV, RH, RL;
+	RV = radius_at_lat(V_LAT, V_elevation);
+	RH = radius_at_lat(H_LAT, H_elevation);
+	RL = radius_at_lat(L_LAT, L_elevation);
+	double dtoa = DTOA(80,80,"Hanford","Virgo");
+	
+	cout.precision(15);
+	std::cout<<"Distance to center of the earth for Virgo: "<<RV<<std::endl;
+	std::cout<<"Distance to center of the earth for Livingston: "<<RL<<std::endl;
+	std::cout<<"Distance to center of the earth for Hanford: "<<RH<<std::endl;
+	std::cout<<"DTOA: "<<dtoa<<std::endl;
+}
+void test12()
+{
+	//int raw_length = 28673;
+	//int cutoff = 600;
+	//int high_cut = 11000;
+	//int length = high_cut-cutoff;
+	
+	int raw_length=  4096;
+	int cutoff = 50;
+	int length = raw_length-cutoff;
+
+	int num_detectors =2;
+	//int num_detectors =1;
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+
+	double **temp_data = allocate_2D_array(raw_length,2);
+	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
+	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
+	//std::string filebase = "testing/data/gw170608_";
+	//std::string filebase = "testing/data/gw151226_";
+	std::string filebase = "testing/data/gw150914_";
+	//std::string filebase = "testing/data/gw_150914_";
+	double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1135136350.6;//TESTING -- gw151226
+	//double gps_time = 1180922494.5; //TESTING -- gw170608
+
+	std::complex<double> **data= (std::complex<double>**)malloc(
+			sizeof(std::complex<double>*)*num_detectors);
+	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
+	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =length;
+	data_length[1] =length;
+
+	for (int i =0; i<num_detectors; i++){
+		data[i] = (std::complex<double> *)malloc(
+			sizeof(std::complex<double>)*data_length[i]);
+		
+		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
+	}
+	read_file(filebase+"data_h.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_h.csv",temp_psd);
+	read_file(filebase+"freq_h.csv",temp_freq);
+	//read_file(filebase+"data.csv",temp_data, raw_length,2);
+	//read_file(filebase+"psd.csv",temp_psd);
+	//read_file(filebase+"freq.csv",temp_freq);
+	for(int j = 0; j<data_length[0]; j++){
+		frequencies[0][j] = temp_freq[j+cutoff];	
+		psd[0][j] = (temp_psd[j+cutoff]);	
+		data[0][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+	}
+	read_file(filebase+"data_l.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_l.csv",temp_psd);
+	read_file(filebase+"freq_l.csv",temp_freq);
+	for(int j = 0; j<data_length[1]; j++){
+		frequencies[1][j] = temp_freq[j+cutoff];	
+		psd[1][j] = (temp_psd[j+cutoff]);	
+		data[1][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+	}
+
+	deallocate_2D_array(temp_data,raw_length,2);
+	free(temp_psd);
+	free(temp_freq);
+	
+	//#########################################################
+	//mcmc options
+	int dimension = 7;
+	double initial_pos[dimension]={0,log(30*MSOL_SEC), .24, .0,.0,0,0};
+	int n_steps = 100;
+	int chain_N= 10;
+	double ***output;
+	output = allocate_3D_array( chain_N, n_steps, dimension );
+	int swp_freq = 5;
+	double chain_temps[chain_N];
+	chain_temps[0]=1.;
+	double c = 1.1;
+	for(int i =1; i < chain_N;  i ++)
+		chain_temps[i] = c*chain_temps[i-1];
+	
+	int numThreads = 20;
+	bool pool = false;
+	//#########################################################
+	//gw options
+	std::string generation_method = "IMRPhenomPv2";
+	
+	
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_Pv2.csv";
+	//std::string autocorrfile = "";
+	std::string chainfile = "testing/data/mcmc_output_Pv2.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_Pv2.txt";
+
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+			swp_freq, test_lp_GW_Pv2,numThreads, pool, num_detectors, data, psd, 
+			frequencies, data_length, gps_time,detectors, generation_method,
+			statfilename,"",autocorrfile);	
+	std::cout<<"ended"<<std::endl;
+
+	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
+	for (int j =0; j<n_steps; j++)
+		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
+
+	for(int j = 0; j<n_steps;j++){
+			//output_transform[j][0]=std::exp(output[0][j][0])/mpc_sec;
+			output_transform[j][0] = output[0][j][0];
+			output_transform[j][1]=std::exp(output[0][j][1])/MSOL_SEC;
+			output_transform[j][2]=output[0][j][2];
+			output_transform[j][3]=output[0][j][3];
+			output_transform[j][4]=output[0][j][4];
+			output_transform[j][5]=output[0][j][5];
+			output_transform[j][6]=output[0][j][6];
+	}
+	write_file(chainfile, output_transform, n_steps, dimension);
+	//output hottest chain too
+	chainfile = "testing/data/mcmc_output_Pv2_hot.csv";
+	for(int j = 0; j<n_steps;j++){
+			output_transform[j][0] = output[chain_N-1][j][0];
+			output_transform[j][1]=std::exp(output[chain_N-1][j][1])/MSOL_SEC;
+			output_transform[j][2]=output[chain_N-1][j][2];
+			output_transform[j][3]=output[chain_N-1][j][3];
+			output_transform[j][4]=output[chain_N-1][j][4];
+			output_transform[j][5]=output[chain_N-1][j][5];
+			output_transform[j][6]=output[chain_N-1][j][6];
+	}
+	write_file(chainfile, output_transform, n_steps, dimension);
+
+	deallocate_3D_array(output, chain_N, n_steps, dimension);
+	for(int i =0; i< num_detectors; i++){
+		free(data[i]);
+		free(psd[i]);
+		free(frequencies[i]);
+	}
+	for(int i =0; i< n_steps; i++){
+		free(output_transform[i]);
+	}
+	free(output_transform);
+	free(data);
+	free(psd);
+	free(frequencies );
+	delete [] detectors;
+	free(data_length);
 }
 void test11()
 {
@@ -118,7 +433,7 @@ void test11()
 	//}
 	fftw_outline plan;
 	initiate_likelihood_function(&plan, length);
-	double ll_true =maximized_coal_Log_Likelihood(waveformout11, psd, freq,
+	double ll_true =maximized_Log_Likelihood(waveformout11, psd, freq,
 			length, &params_data, "Hanford", "IMRPhenomD", &plan);
 	
 	omp_set_num_threads(10);
@@ -151,7 +466,7 @@ void test11()
 
 			//fourier_waveform(freq, length, out[i],method,&params);
 
-			double ll =maximized_coal_Log_Likelihood(waveformout11, psd, freq,
+			double ll =maximized_Log_Likelihood(waveformout11, psd, freq,
 					length, &params, "Hanford", "IMRPhenomD", &plan);
 			//if(ll != ll_true)
 			{
@@ -200,6 +515,9 @@ void test10()
 	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
 	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
 	std::string filebase = "testing/data/gw150914_";
+	double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1135136350.6;//TESTING -- gw151226
+	//double gps_time = 1180922494.5; //TESTING -- gw170608
 
 	std::complex<double> **data= (std::complex<double>**)malloc(
 			sizeof(std::complex<double>*)*num_detectors);
@@ -257,6 +575,8 @@ void test10()
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
 	
+	int numThreads = 20;
+	bool pool = false;
 	//#########################################################
 	//GW options
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
@@ -270,8 +590,8 @@ void test10()
 	std::string statfilename = "testing/data/mcmc_statistics_7dim.txt";
 
 	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
-			swp_freq, test_lp_GW_7dim, num_detectors, data, psd, 
-			frequencies, data_length, detectors, generation_method,
+			swp_freq, test_lp_GW_7dim,numThreads, pool, num_detectors, data, psd, 
+			frequencies, data_length,gps_time, detectors, generation_method,
 			statfilename,"",autocorrfile);	
 	std::cout<<"ENDED"<<std::endl;
 
@@ -343,6 +663,9 @@ void test9()
 	//std::string filebase = "testing/data/gw151226_";
 	std::string filebase = "testing/data/gw150914_";
 	//std::string filebase = "testing/data/gw_150914_";
+	double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1135136350.6;//TESTING -- gw151226
+	//double gps_time = 1180922494.5; //TESTING -- gw170608
 
 	std::complex<double> **data= (std::complex<double>**)malloc(
 			sizeof(std::complex<double>*)*num_detectors);
@@ -359,9 +682,9 @@ void test9()
 		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
 		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
 	}
-	read_file(filebase+"data_H.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_H.csv",temp_psd);
-	read_file(filebase+"freq_H.csv",temp_freq);
+	read_file(filebase+"data_h.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_h.csv",temp_psd);
+	read_file(filebase+"freq_h.csv",temp_freq);
 	//read_file(filebase+"data.csv",temp_data, raw_length,2);
 	//read_file(filebase+"psd.csv",temp_psd);
 	//read_file(filebase+"freq.csv",temp_freq);
@@ -370,9 +693,9 @@ void test9()
 		psd[0][j] = (temp_psd[j+cutoff]);	
 		data[0][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
 	}
-	read_file(filebase+"data_L.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_L.csv",temp_psd);
-	read_file(filebase+"freq_L.csv",temp_freq);
+	read_file(filebase+"data_l.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_l.csv",temp_psd);
+	read_file(filebase+"freq_l.csv",temp_freq);
 	for(int j = 0; j<data_length[1]; j++){
 		frequencies[1][j] = temp_freq[j+cutoff];	
 		psd[1][j] = (temp_psd[j+cutoff]);	
@@ -384,10 +707,10 @@ void test9()
 	free(temp_freq);
 	
 	//gen_params params;
-	//IMRPhenomD<double> modeld;
+	//imrphenomd<double> modeld;
 	//params.mass1 = 63.187;
 	//params.mass2 = 17.331;
-	//string method= "IMRPhenomD";
+	//string method= "imrphenomd";
 	//params.spin1[0] = 0;
 	//params.spin1[1] = 0;
 	//params.spin1[2] = -.16;
@@ -396,31 +719,31 @@ void test9()
 	//params.spin2[2] = .01388;
 	//params.phic = .0;
 	//params.tc = 0;
-	//params.Luminosity_Distance = 100.;
-	//params.NSflag = false;
+	//params.luminosity_distance = 100.;
+	//params.nsflag = false;
 	//params.phi = 0;
 	//params.theta = 0;
 	//params.incl_angle = 0;
 	//params.sky_average=false;
 	//fftw_outline plan;
 	//initiate_likelihood_function(&plan, length);
-	//double ll =maximized_coal_Log_Likelihood(data[0], psd[0], frequencies[0],
-	//		length, &params, "Hanford", "IMRPhenomD", &plan);
-	//double snr = data_snr_maximized_extrinsic(frequencies[0],length, data[0],"Hanford_O1_fitted","IMRPhenomD",params );
-	//std::cout<<"LL "<<ll<<std::endl;
-	//std::cout<<"SNR "<<snr<<std::endl;
+	//double ll =maximized_log_likelihood(data[0], psd[0], frequencies[0],
+	//		length, &params, "hanford", "imrphenomd", &plan);
+	//double snr = data_snr_maximized_extrinsic(frequencies[0],length, data[0],"hanford_o1_fitted","imrphenomd",params );
+	//std::cout<<"ll "<<ll<<std::endl;
+	//std::cout<<"snr "<<snr<<std::endl;
 	//deactivate_likelihood_function(&plan);
 	//exit(1);
 	//#########################################################
-	//MCMC options
+	//mcmc options
 	int dimension = 4;
 	double initial_pos[dimension]={log(30*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
-	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
-	int N_steps = 10000;
+	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
+	int n_steps = 10000;
 	int chain_N= 10;
 	double ***output;
-	output = allocate_3D_array( chain_N, N_steps, dimension );
+	output = allocate_3D_array( chain_N, n_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -432,8 +755,10 @@ void test9()
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
 	
+	int numThreads = 20;
+	bool pool = false;
 	//#########################################################
-	//GW options
+	//gw options
 	std::string generation_method = "IMRPhenomD";
 	
 	
@@ -442,42 +767,42 @@ void test9()
 	std::string chainfile = "testing/data/mcmc_output.csv";
 	std::string statfilename = "testing/data/mcmc_statistics.txt";
 
-	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
-			swp_freq, test_lp_GW, num_detectors, data, psd, 
-			frequencies, data_length, detectors, generation_method,
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+			swp_freq, test_lp_GW,numThreads, pool, num_detectors, data, psd, 
+			frequencies, data_length,gps_time, detectors, generation_method,
 			statfilename,"",autocorrfile);	
-	std::cout<<"ENDED"<<std::endl;
+	std::cout<<"ended"<<std::endl;
 
-	double **output_transform=(double **)malloc(sizeof(double*)*N_steps);
-	for (int j =0; j<N_steps; j++)
+	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
+	for (int j =0; j<n_steps; j++)
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
 
-	for(int j = 0; j<N_steps;j++){
-			//output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+	for(int j = 0; j<n_steps;j++){
+			//output_transform[j][0]=std::exp(output[0][j][0])/mpc_sec;
 			output_transform[j][0]=std::exp(output[0][j][0])/MSOL_SEC;
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
 	}
-	write_file(chainfile, output_transform, N_steps, dimension);
-	//Output hottest chain too
+	write_file(chainfile, output_transform, n_steps, dimension);
+	//output hottest chain too
 	chainfile = "testing/data/mcmc_output_hot.csv";
-	for(int j = 0; j<N_steps;j++){
-			//output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+	for(int j = 0; j<n_steps;j++){
+			//output_transform[j][0]=std::exp(output[0][j][0])/mpc_sec;
 			output_transform[j][0]=std::exp(output[chain_N-1][j][0])/MSOL_SEC;
 			output_transform[j][1]=output[chain_N-1][j][1];
 			output_transform[j][2]=output[chain_N-1][j][2];
 			output_transform[j][3]=output[chain_N-1][j][3];
 	}
-	write_file(chainfile, output_transform, N_steps, dimension);
+	write_file(chainfile, output_transform, n_steps, dimension);
 
-	deallocate_3D_array(output, chain_N, N_steps, dimension);
+	deallocate_3D_array(output, chain_N, n_steps, dimension);
 	for(int i =0; i< num_detectors; i++){
 		free(data[i]);
 		free(psd[i]);
 		free(frequencies[i]);
 	}
-	for(int i =0; i< N_steps; i++){
+	for(int i =0; i< n_steps; i++){
 		free(output_transform[i]);
 	}
 	free(output_transform);
@@ -607,15 +932,18 @@ void test8()
 	std::string statfilename = "testing/data/mcmc_statistics.txt";
 
 	
+	int numThreads = 20;
+	bool pool = false;
+	double gps_time = 0;
 	std::cout<<"TEST"<<std::endl;
 	//fftw_outline plan;
 	//initiate_likelihood_function(&plan, data_length[0]);
-	//maximized_coal_Log_Likelihood(data[0], psd[0], frequencies[0], data_length[0],
+	//maximized_Log_Likelihood(data[0], psd[0], frequencies[0], data_length[0],
 	//		&params, "Hanford", "IMRPhenomD", &plan);
 	//deactivate_likelihood_function(&plan);
 	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
-			swp_freq, test_lp_GW, num_detectors, data, psd, 
-			frequencies, data_length, detectors, generation_method,
+			swp_freq, test_lp_GW,numThreads, pool, num_detectors, data, psd, 
+			frequencies, data_length, gps_time,detectors, generation_method,
 			statfilename, "" ,autocorrfile);	
 	std::cout<<"ENDED"<<std::endl;
 
@@ -684,9 +1012,11 @@ void test7()
 	std::string autocorrfile = "testing/data/neil_auto_corr_mcmc.csv";
 	std::string chainfile = "testing/data/neil_mcmc_output.csv";
 	std::string statfilename = "testing/data/neil_mcmc_statistics.txt";
+	int numThreads = 20;
+	bool pool = false;
 	
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3,statfilename,chainfile,autocorrfile );	
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,statfilename,chainfile,autocorrfile );	
+	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,statfilename,chainfile,autocorrfile );	
 	std::cout<<"ENDED"<<std::endl;
 
 	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
@@ -1014,9 +1344,9 @@ void test4()
 
 		
 		start = clock();
-		llnew = maximized_coal_Log_Likelihood(waveformout, noise,freqnew,length, 
+		llnew = maximized_Log_Likelihood(waveformout, noise,freqnew,length, 
 					&params,"Hanford","IMRPhenomPv2",&plan);
-		//llnew = maximized_coal_Log_Likelihood(real,imag, noise,freqnew,length, 
+		//llnew = maximized_Log_Likelihood(real,imag, noise,freqnew,length, 
 					//&params,"Hanford","IMRPhenomD",&plan);
 		end = clock();
 		cout<<"logl new  TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
@@ -1258,7 +1588,7 @@ void test1()
 	//params.spin1[2] = .9;
 	//params.spin2[2] = -.2;
 	start = clock();
-	double logl3 = maximized_coal_Log_Likelihood(waveformout, noise,freq,length, 
+	double logl3 = maximized_Log_Likelihood(waveformout, noise,freq,length, 
 				&params,"Hanford","IMRPhenomD",&plan);
 	end = clock();
 	cout<<"logl new TIMING: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
@@ -1604,6 +1934,22 @@ double test_lp_GW(double *pos, int dim)
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10);}
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10)-(pos[1]-.24)*(pos[1]-.24)/(2*.010);}
 }
+double test_lp_GW_Pv2(double *pos, int dim)
+{
+	double a = std::numeric_limits<double>::infinity();
+	//Flat priors across physical regions
+	if (std::exp(pos[1])/MSOL_SEC<2 || std::exp(pos[1])/MSOL_SEC>100){return a;}
+	else if ((pos[0])<-1 || (pos[0])>1){return a;}
+	else if ((pos[2])<.1 || (pos[2])>.249999){return a;}
+	else if ((pos[3])<0 || (pos[3])>.9){return a;}
+	else if ((pos[4])<0 || (pos[4])>.9){return a;}
+	else if ((pos[5])<-1 || (pos[5])>1){return a;}
+	else if ((pos[6])<-1 || (pos[6])>1){return a;}
+	//else {return 0.;}
+	else {return pos[0] ;}
+	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10);}
+	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10)-(pos[1]-.24)*(pos[1]-.24)/(2*.010);}
+}
 double test_lp_GW_7dim(double *pos, int dim)
 {
 	double a = std::numeric_limits<double>::infinity();
@@ -1618,4 +1964,18 @@ double test_lp_GW_7dim(double *pos, int dim)
 	//else {return 0.;}
 	//else {return log(std::exp(pos[3])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
 	else {return pos[3]+4*pos[0];}
+}
+double test_lp_GW_DFull(double *pos, int dim)
+{
+	double a = std::numeric_limits<double>::infinity();
+	//Flat priors across physical regions
+	if ((pos[0])<0 || (pos[0])>M_PI){return a;}
+	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}
+	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}
+	if (std::exp(pos[3])/MPC_SEC<50 || std::exp(pos[3])/MPC_SEC>800){return a;}
+	if (std::exp(pos[4])/MSOL_SEC<2 || std::exp(pos[4])/MSOL_SEC>100){return a;}
+	if ((pos[5])<.1 || (pos[5])>.249999){return a;}
+	if ((pos[6])<-.9 || (pos[6])>.9){return a;}
+	if ((pos[7])<-.9 || (pos[7])>.9){return a;}
+	else {return pos[4]+2*pos[3];}
 }

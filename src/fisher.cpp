@@ -131,7 +131,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-8;
+	double epsilon = 1e-5;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -266,6 +266,146 @@ void calculate_derivatives(double  **amplitude_deriv,
 			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
 			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
 			phase_deriv[0][l] = phase_deriv[0][l]*param_in[0] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+		}
+	}
+	if (gen_method == "MCMC_IMRPhenomD_Full"){
+		fourier_amplitude(frequencies, 
+			length,
+			amplitude,
+			//amplitude_cross_plus,
+			"IMRPhenomD",
+			parameters);	
+
+		IMRPhenomD<double> model;
+		int dimension = 8;
+		source_parameters<double> parameters_in;
+		gen_params waveform_params;
+		//parameters_in = parameters_in.populate_source_parameters(parameters->mass1, 
+		//		parameters->mass2,
+		//		parameters->Luminosity_Distance,
+		//		parameters->spin1,
+		//		parameters->spin2,
+		//		parameters->phic,
+		//		parameters->tc);
+		
+		//#################################
+		//TESTING 
+		//parameters->sky_average=true;
+		//#################################
+		double param_p[dimension] ;
+		double param_m[dimension] ;
+		double param_in[dimension] ;
+		double param_out[dimension] ;
+		double chirpmass = calculate_chirpmass(parameters->mass1, parameters->mass2);
+		double eta = calculate_eta(parameters->mass1, parameters->mass2);
+		param_in[0] = parameters->incl_angle;
+		param_in[1] = parameters->theta;
+		param_in[2] = parameters->phi;
+		param_in[3] = parameters->Luminosity_Distance;//MPC
+		param_in[4] = chirpmass; //Sol mass
+		param_in[5] = eta;
+		param_in[6] = parameters->spin1[2];
+		param_in[7] = parameters->spin2[2];
+		waveform_params.sky_average=parameters->sky_average;
+		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
+		std::complex<double> Qp, Qm;
+
+		for (int i =0; i<dimension; i++){
+			for( int j =0;j<dimension;j++){
+				param_p[j] = param_in[j] ;
+				param_m[j] = param_in[j] ;
+			}
+			//if(i==0) epsilon = 1e-25;
+			//else epsilon = epsilonnaught;
+			param_p[i] = param_in[i] + epsilon;
+			param_m[i] = param_in[i] - epsilon;
+			//param_p[i] = param_in[i]*(1. + epsilon);
+			//param_m[i] = param_in[i] *(1- epsilon);
+
+			
+			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);///MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);///MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_p[3];///MPC_SEC;
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_p[6];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_p[7];
+			waveform_params.phic = 0;
+			waveform_params.tc= 0;
+			waveform_params.incl_angle = param_p[0];
+			waveform_params.theta = param_p[1];
+			waveform_params.phi = param_p[2];
+			waveform_params.NSflag = parameters->NSflag;
+
+
+			Qp = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
+			a_corr_p = std::abs(Qp);
+			p_corr_p = std::arg(Qp);
+
+			fourier_amplitude(frequencies, 
+				length,
+				amplitude_plus_plus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			fourier_phase(frequencies, 
+				length,
+				phase_plus_plus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+
+
+			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);///MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5]);///MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_m[3];///MPC_SEC;
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_m[6];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_m[7];
+			waveform_params.phic = 0;
+			waveform_params.tc= 0;
+			waveform_params.incl_angle = param_m[0];
+			waveform_params.theta = param_m[1];
+			waveform_params.phi = param_m[2];
+			waveform_params.NSflag = parameters->NSflag;
+
+			Qm = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
+			a_corr_m = std::abs(Qm);
+			p_corr_m = std::arg(Qm);
+
+			fourier_amplitude(frequencies, 
+				length,
+				amplitude_plus_minus,
+				//amplitude_cross_plus,
+				"IMRPhenomD",
+				&waveform_params);	
+			fourier_phase(frequencies, 
+				length,
+				phase_plus_minus,
+				//amplitude_cross_plus,
+				"IMRPhenomD",
+				&waveform_params);	
+			for (int l =0;l<length;l++)
+			{
+				amplitude_deriv[i][l] = (a_corr_p*amplitude_plus_plus[l] -a_corr_m*amplitude_plus_minus[l])/(2*epsilon);
+				phase_deriv[i][l] = (p_corr_p+phase_plus_plus[l] -p_corr_m -phase_plus_minus[l])/(2*epsilon);
+			}
+			
+		
+				
+		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
 			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}

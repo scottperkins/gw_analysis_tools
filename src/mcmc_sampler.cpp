@@ -48,14 +48,6 @@ public:
 	}
 
 
-	//void enqueue(Task task)
-	//{
-	//	{
-	//		std::unique_lock<std::mutex> lock{mEventMutex};
-	//		mTasks.emplace(std::move(task));
-	//	}
-	//	mEventVar.notify_one();
-	//}
 	void enqueue(int i)
 	{
 		{
@@ -176,6 +168,14 @@ ThreadPool *poolptr;
  * Uses the Metropolis-Hastings method, with the option for Fisher/MALA steps if the Fisher
  * routine is supplied.
  *
+ * 3 modes to use - 
+ *
+ * single threaded (numThreads = 1) runs single threaded
+ *
+ * multi-threaded ``deterministic'' (numThreads>1 ; pool = false) progresses each chain in parallel for swp_freq steps, then waits for all threads to complete before swapping temperatures in sequenctial order (j, j+1) then (j+1, j+2) etc (sequenctially)
+ *
+ * multi-threaded ``stochastic'' (numThreads>2 ; pool = true) progresses each chain in parallel by queueing each temperature and evaluating them in the order they were submitted. Once finished, the threads are queued to swap, where they swapped in the order they are submitted. This means the chains are swapped randomly, and the chains do NOT finish at the same time. The sampler runs until the the 0th chain reaches the step number
+ *
  * Format for the auto_corr file (compatable with csv, dat, txt extensions): each row is a dimension of the cold chain, with the first row being the lengths used for the auto-corr calculation:
  *
  * lengths: length1 , length2 ...
@@ -213,6 +213,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
 		double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
 		void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
@@ -222,16 +224,9 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	double wstart, wend, wacend;
 	start = clock();
 	wstart = omp_get_wtime();
-	int numThread = 20;
-	omp_set_num_threads(numThread);
+	//int numThread = 20;
+	omp_set_num_threads(numThreads);
 
-	//random number generator initialization
-	//gsl_rng_env_setup();
-	//T=gsl_rng_default;
-	//r = gsl_rng_alloc(T);
-
-	//Array holding the probability of each 
-	//type of step - Gaussian, differential evolution, MMALA, Fisher
 	sampler sampler;
 
 	//if Fisher is not provided, Fisher and MALA steps
@@ -252,14 +247,14 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.chain_N = chain_N;
 	sampler.N_steps = N_steps;
 	sampler.dimension = dimension;
-	//sampler.r = r;
 	sampler.history_length = 1000;
 	sampler.fisher_update_number = 1000;
 	sampler.output = output;
+	sampler.pool = pool;
 	//########################################################
 	//########################################################
 	//POOLING -- TESTING
-	sampler.pool = true;
+	//sampler.pool = false;
 	//########################################################
 	//########################################################
 
@@ -268,11 +263,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		assign_probabilities(&sampler, chain_index);
 	
 
-	//int i,j, k=0;
-	//int j, k=0;
 	int  k=0;
 	int swp_accepted=0, swp_rejected=0;
-	//int step_accepted=0, step_rejected=0;
 	int *step_accepted = (int *)malloc(sizeof(int)*sampler.chain_N);
 	int *step_rejected = (int *)malloc(sizeof(int)*sampler.chain_N);
 	
@@ -296,7 +288,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//Sampler Loop - ``Deterministic'' swapping between chains
 	if (!samplerptr->pool)
 	{
-		#pragma omp parallel //num_threads(4)
+		#pragma omp parallel 
 		{
 		while (k<N_steps-1){
 			#pragma omp single
@@ -304,8 +296,6 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			if( N_steps-k <= sampler.swp_freq) cutoff = N_steps-k-1;	
 			else cutoff = sampler.swp_freq;	
 			}
-			//#pragma omp parallel for reduction(+:step_accepted) reduction(+:step_rejected)
-			//#pragma omp parallel for 
 			#pragma omp for
 			for (int j=0; j<chain_N; j++)
 			{
@@ -339,16 +329,33 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//POOLING  -- ``Stochastic'' swapping between chains
 	else
 	{
-		ThreadPool pool(numThread);
+		ThreadPool pool(numThreads);
 		poolptr = &pool;
 		while(samplerptr->progress<N_steps-samplerptr->swp_freq-2)
 		{
 			for(int i =0; i<samplerptr->chain_N; i++)
 			{
-				if(samplerptr->waiting[i] && samplerptr->chain_pos[i]<(N_steps-samplerptr->swp_freq -1))
+				if(samplerptr->waiting[i] && 
+				samplerptr->chain_pos[i]<(N_steps-samplerptr->swp_freq -1))
 				{
 					samplerptr->waiting[i]=false;
 					if(i==0) samplerptr->progress+=samplerptr->swp_freq;
+					poolptr->enqueue(i);
+				}
+				//If a chain finishes before chain 0, it's wrapped around 
+				//and allowed to keep stepping -- not sure if this is the best
+				//method for keeping the 0th chain from finishing last or not
+				else if(i!=0 &&
+					samplerptr->chain_pos[i]>(N_steps-samplerptr->swp_freq-1))
+				{
+					samplerptr->waiting[i]=false;
+					int pos = samplerptr->chain_pos[i];
+					for (int k =0; k<samplerptr->dimension; k++){
+						samplerptr->output[i][0][k] = 
+							samplerptr->output[i][pos][k] ;
+					}
+					samplerptr->chain_pos[i] = 0;
+
 					poolptr->enqueue(i);
 				}
 			}

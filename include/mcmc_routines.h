@@ -35,6 +35,7 @@ static std::string mcmc_generation_method="";
 static int *mcmc_data_length=NULL ;
 static fftw_outline *mcmc_fftw_plans=NULL ;
 static int mcmc_num_detectors=2;
+static double mcmc_gps_time=0;
 //extern const double **mcmc_noise=NULL;
 //extern const std::complex<double> **mcmc_data=NULL;
 //extern const double **mcmc_frequencies=NULL;
@@ -128,7 +129,7 @@ void initiate_likelihood_function(fftw_outline *plan,int length);
 void deactivate_likelihood_function(fftw_outline *plan);
 
 
-double maximized_coal_Log_Likelihood_aligned_spin_internal(std::complex<double> *data,
+double maximized_Log_Likelihood_aligned_spin_internal(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				std::complex<double> *detector_response,
@@ -143,12 +144,31 @@ double Log_Likelihood(std::complex<double> *data,
 				fftw_outline *plan
 				);
 
-double maximized_coal_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
+double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				std::complex<double> *hplus,
 				std::complex<double> *hcross,
 				size_t length,
+				fftw_outline *plan
+				);
+double maximized_Log_Likelihood(std::complex<double> *data, 
+				double *psd,
+				double *frequencies,
+				size_t length,
+				gen_params *params,
+				std::string detector,
+				std::string generation_method,
+				fftw_outline *plan
+				);
+double maximized_Log_Likelihood(double *data_real, 
+				double *data_imag,
+				double *psd,
+				double *frequencies,
+				size_t length,
+				gen_params *params,
+				std::string detector,
+				std::string generation_method,
 				fftw_outline *plan
 				);
 double maximized_coal_Log_Likelihood(std::complex<double> *data, 
@@ -158,17 +178,18 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				gen_params *params,
 				std::string detector,
 				std::string generation_method,
-				fftw_outline *plan
+				fftw_outline *plan,
+				double *tc,
+				double *phic
 				);
-double maximized_coal_Log_Likelihood(double *data_real, 
-				double *data_imag,
+double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
+				std::complex<double> *detector_response,
 				size_t length,
-				gen_params *params,
-				std::string detector,
-				std::string generation_method,
-				fftw_outline *plan
+				fftw_outline *plan,
+				double *tc,
+				double *phic
 				);
 double Log_Likelihood_internal(std::complex<double> *data,
 			double *psd,
@@ -185,11 +206,14 @@ void MCMC_MH_GW(double ***output,
 			double *chain_temps,
 			int swp_freq,
 			double(*log_prior)(double *param, int dimension),
+			int numThreads,
+			bool pool,
 			int num_detectors,
 			std::complex<double> **data,
 			double **noise_psd,
 			double **frequencies,
 			int *data_length,
+			double gps_time,
 			std::string *detector,
 			std::string generation_method,
 			std::string statistics_filename,

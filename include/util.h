@@ -90,6 +90,18 @@ struct gen_params
 	
 	double phiRef=0;
 
+	double thetaJN = 0;
+
+	double alpha0 = 0;
+
+	double zeta_polariz = 0;
+
+	double phi_aligned = 0;
+
+	double chil = 0;
+
+	double chip = 0;
+
 	bool sky_average;
 };
 
@@ -272,6 +284,11 @@ adouble calculate_mass1(adouble chirpmass, adouble eta);
 double calculate_mass2(double chirpmass, double eta);
 adouble calculate_mass2(adouble chirpmass, adouble eta);
 
+void celestial_horizon_transform(double RA, double DEC, double gps_time, double LONG, double LAT,
+				double *phi, double *theta);
+
+double gps_to_GMST(double gps_time);
+double gps_to_JD(double gps_time);
 /*!\brief Trapezoidal sum rule to approximate discrete integral - Uniform spacing
  *
  * This version is faster than the general version, as it has half the function calls
