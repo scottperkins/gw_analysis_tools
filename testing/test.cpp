@@ -137,11 +137,11 @@ void test14()
 	//#########################################################
 	//mcmc options
 	int dimension = 8;
-	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(30*MSOL_SEC), .24,- .0,-.0};
+	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(7*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
-	int n_steps = 80000;
-	int chain_N= 10;
+	int n_steps = 50000;
+	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -156,7 +156,7 @@ void test14()
 		//chain_temps[i] = (1.+i*temp_step);
 	
 	int numThreads = 20;
-	bool pool = false;
+	bool pool = true;
 	//#########################################################
 	//gw options
 	std::string generation_method = "IMRPhenomD";
@@ -1972,7 +1972,7 @@ double test_lp_GW_DFull(double *pos, int dim)
 	if ((pos[0])<0 || (pos[0])>M_PI){return a;}
 	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}
 	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}
-	if (std::exp(pos[3])/MPC_SEC<50 || std::exp(pos[3])/MPC_SEC>800){return a;}
+	if (std::exp(pos[3])/MPC_SEC<200 || std::exp(pos[3])/MPC_SEC>600){return a;}
 	if (std::exp(pos[4])/MSOL_SEC<2 || std::exp(pos[4])/MSOL_SEC>100){return a;}
 	if ((pos[5])<.1 || (pos[5])>.249999){return a;}
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}

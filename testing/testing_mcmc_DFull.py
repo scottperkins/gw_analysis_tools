@@ -1,3 +1,5 @@
+import matplotlib as mpl
+mpl.use("pdf")
 import corner
 import matplotlib.pyplot as plt
 import numpy as np

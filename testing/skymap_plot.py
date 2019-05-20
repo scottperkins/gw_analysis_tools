@@ -1,3 +1,5 @@
+import matplotlib as mpl
+mpl.use('pdf')
 import astropy.coordinates as coord
 import numpy as np
 import matplotlib.pyplot as plt
