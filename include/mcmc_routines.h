@@ -139,8 +139,10 @@ double maximized_Log_Likelihood_aligned_spin_internal(std::complex<double> *data
 double Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
-				std::complex<double> *detector_response,
 				size_t length,
+				gen_params *params,
+				std::string detector,
+				std::string generation_method,
 				fftw_outline *plan
 				);
 

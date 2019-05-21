@@ -233,7 +233,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = .1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.5);
+		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.05);
 	for (int k = 0; k<sampler->dimension; k++)
 	{
 		proposed_param[k] = current_param[k] + alpha*
@@ -356,9 +356,9 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//sampler->step_prob[chain_index][3]=.3;
 		//Testing
 		sampler->step_prob[chain_index][0]=.05;
-		sampler->step_prob[chain_index][1]=.3;
+		sampler->step_prob[chain_index][1]=.2;
 		sampler->step_prob[chain_index][2]=.0;
-		sampler->step_prob[chain_index][3]=.65;
+		sampler->step_prob[chain_index][3]=.75;
 
 	}
 	//Split probabilities into boundaries for if-else loop

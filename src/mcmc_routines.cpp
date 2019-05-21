@@ -800,7 +800,6 @@ double Log_Likelihood_internal(std::complex<double> *data,
 		integrand[i] = real(data[i]*std::conj(detector_response[i]))/psd[i];
 	integral = 4.*simpsons_sum(delta_f, length, integrand);
 	double DH = integral;
-	//std::cout<<"inner products: "<<DH<<" "<<HH<<std::endl;
 
 	free(integrand);
 
@@ -1232,6 +1231,11 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 					&mcmc_fftw_plans[i]
 					);
 		}
+		//std::cout<<"POLAR ANGLES"<<std::endl;
+		//for(int i =0; i<mcmc_num_detectors;i++){
+		//	std::cout<<phi[i]<<std::endl;
+		//	std::cout<<theta[i]<<std::endl;
+		//}
 		delete [] phi;
 		delete [] theta;
 	}

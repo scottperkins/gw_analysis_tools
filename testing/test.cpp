@@ -140,8 +140,8 @@ void test14()
 	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(30*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
-	int n_steps = 80000;
-	int chain_N= 15;
+	int n_steps = 100000;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -410,7 +410,7 @@ void test11()
 	params_data.spin2[2] = .3;
 	params_data.phic = .0;
 	params_data.tc = 5;
-	params_data.Luminosity_Distance = 210.;
+	params_data.Luminosity_Distance = 400.;
 	params_data.NSflag = false;
 	params_data.phi = 0;
 	params_data.theta = 0;
@@ -418,7 +418,8 @@ void test11()
 	params_data.sky_average=false;
 	waveformout11 = (std::complex<double>*) malloc(sizeof(std::complex<double>)*length);
 	
-	fourier_waveform(freq, length, waveformout11,method,&params_data);
+	//fourier_detector_response(freq, length, waveformout11,method,&params_data);
+	fourier_detector_response(freq, length, waveformout11,"Hanford",method,&params_data);
 
 	//double psd[length];
 	psd = (double *) malloc(sizeof(double)*length);
@@ -438,9 +439,20 @@ void test11()
 	
 	omp_set_num_threads(10);
 
-	#pragma omp parallel 
+	double *DLs = (double *)malloc(sizeof(double)*loops);
+	double *lls1 = (double *)malloc(sizeof(double)*loops);
+	double *lls2 = (double *)malloc(sizeof(double)*loops);
+	double *lls3 = (double *)malloc(sizeof(double)*loops);
+	double DLmin = 50;
+	double DLmax = 850;
+	double DLstep = (DLmax - DLmin)/loops;
+	for (int i =0; i<loops; i++)
 	{
-		#pragma omp for
+		DLs[i] = DLstep * i + DLmin;
+	}
+	//#pragma omp parallel 
+	{
+		//#pragma omp for
 		for (int i =0; i<loops; i ++)
 		{
 			gen_params params;
@@ -457,7 +469,7 @@ void test11()
 			params.spin2[2] = .3;
 			params.phic = .0;
 			params.tc = 5;
-			params.Luminosity_Distance = 210.;
+			params.Luminosity_Distance = DLs[i];
 			params.NSflag = false;
 			params.phi = 0;
 			params.theta = 0;
@@ -466,15 +478,29 @@ void test11()
 
 			//fourier_waveform(freq, length, out[i],method,&params);
 
-			double ll =maximized_Log_Likelihood(waveformout11, psd, freq,
+			lls1[i] =Log_Likelihood(waveformout11, psd, freq,
+					length, &params, "Hanford", "IMRPhenomD", &plan);
+			params.incl_angle = M_PI/3.;
+			lls2[i] =Log_Likelihood(waveformout11, psd, freq,
+					length, &params, "Hanford", "IMRPhenomD", &plan);
+			params.incl_angle = -M_PI/4.;
+			lls3[i] =Log_Likelihood(waveformout11, psd, freq,
 					length, &params, "Hanford", "IMRPhenomD", &plan);
 			//if(ll != ll_true)
-			{
-				std::cout<<ll<<std::endl;
-			}
+			//{
+			//	std::cout<<ll<<std::endl;
+			//}
 		}
 	}
-
+	double **output = allocate_2D_array(loops, 4);
+	for (int i=0;i<loops; i++){
+		output[i][0] = DLs[i];
+		output[i][1] = lls1[i];
+		output[i][2] = lls2[i];
+		output[i][3] = lls3[i];
+	}
+	std::string filename = "testing/data/dl_ll.csv";
+	write_file(filename, output, loops, 4);
 	//for(int i =1;i < loops; i++)
 	//{
 	//	for(int j =0; j <length; j++){
@@ -495,7 +521,12 @@ void test11()
 	//}
 	//free(plans);
 	deactivate_likelihood_function(&plan);
+	deallocate_2D_array(output, loops,2);
 	free(freq);
+	free(DLs);
+	free(lls1);
+	free(lls2);
+	free(lls3);
 	free(psd);
 	free(waveformout11);
 }
