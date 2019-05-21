@@ -87,13 +87,13 @@ void test14()
 	double **temp_data = allocate_2D_array(raw_length,2);
 	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
 	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
-	std::string filebase = "testing/data/gw170608_";
+	//std::string filebase = "testing/data/gw170608_";
 	//std::string filebase = "testing/data/gw151226_";
-	//std::string filebase = "testing/data/gw150914_";
+	std::string filebase = "testing/data/gw150914_";
 	//std::string filebase = "testing/data/gw_150914_";
-	//double gps_time = 1126259462;//TESTING -- gw150914
+	double gps_time = 1126259462;//TESTING -- gw150914
 	//double gps_time = 1135136350.6;//TESTING -- gw151226
-	double gps_time = 1180922494.5; //TESTING -- gw170608
+	//double gps_time = 1180922494.5; //TESTING -- gw170608
 
 	std::complex<double> **data= (std::complex<double>**)malloc(
 			sizeof(std::complex<double>*)*num_detectors);
@@ -140,7 +140,7 @@ void test14()
 	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(7*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
-	int n_steps = 50000;
+	int n_steps = 100000;
 	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -1972,10 +1972,10 @@ double test_lp_GW_DFull(double *pos, int dim)
 	if ((pos[0])<0 || (pos[0])>M_PI){return a;}
 	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}
 	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}
-	if (std::exp(pos[3])/MPC_SEC<200 || std::exp(pos[3])/MPC_SEC>600){return a;}
+	if (std::exp(pos[3])/MPC_SEC<100 || std::exp(pos[3])/MPC_SEC>800){return a;}
 	if (std::exp(pos[4])/MSOL_SEC<2 || std::exp(pos[4])/MSOL_SEC>100){return a;}
 	if ((pos[5])<.1 || (pos[5])>.249999){return a;}
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}
 	if ((pos[7])<-.9 || (pos[7])>.9){return a;}
-	else {return pos[4]+2*pos[3];}
+	else {return pos[4]+pos[3];}
 }
