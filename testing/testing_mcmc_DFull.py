@@ -6,7 +6,7 @@ import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
 data = np.loadtxt("data/mcmc_output_DFull.csv",delimiter=',')
-data = data[10000:]
+#data = data[10000:]
 #chirpmasses = [x[5] for x in data]
 #plt.plot(chirpmasses)
 #plt.show()

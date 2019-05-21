@@ -137,10 +137,10 @@ void test14()
 	//#########################################################
 	//mcmc options
 	int dimension = 8;
-	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(7*MSOL_SEC), .24,- .0,-.0};
+	double initial_pos[dimension]={0, 0,0,log(400*MPC_SEC),log(30*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
-	int n_steps = 100000;
+	int n_steps = 80000;
 	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -156,7 +156,7 @@ void test14()
 		//chain_temps[i] = (1.+i*temp_step);
 	
 	int numThreads = 20;
-	bool pool = true;
+	bool pool = false;
 	//#########################################################
 	//gw options
 	std::string generation_method = "IMRPhenomD";
