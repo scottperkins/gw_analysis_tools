@@ -20,6 +20,7 @@ void MCMC_MH(	double ***output,
 		void (*fisher)(double *param, int dimension, double **fisher),
 		int numThreads,
 		bool pool,
+		bool show_prog,
 		std::string statistics_filename,
 		std::string chain_filename,
 		std::string auto_corr_filename

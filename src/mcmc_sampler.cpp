@@ -30,6 +30,18 @@ const gsl_rng_type *T;
 gsl_rng * r;
 sampler *samplerptr;
 
+/*! \brief Class to facilitate the comparing of chains for priority
+ *
+ * 3 levels of priority: 0 (high) 1 (default) 2 (low)
+ */
+class Comparator
+{
+public:
+	bool operator()(int i, int j)
+	{
+		return samplerptr->priority[i]>samplerptr->priority[j];	
+	}
+};
 class ThreadPool
 
 {
@@ -86,8 +98,10 @@ private:
 	std::mutex mEventMutexSWP;
 
 	//std::queue<Task> mTasks;
-	std::queue<int> mTasks;
-	std::queue<int> mSwaps;
+	//std::queue<int> mTasks;
+	//std::queue<int> mSwaps;
+	std::priority_queue<int,std::vector<int>,Comparator> mTasks;
+	std::priority_queue<int,std::vector<int>,Comparator> mSwaps;
 
 	void start(std::size_t numThreads)
 	{
@@ -105,7 +119,8 @@ private:
 						
 						if (mStopping && mTasks.empty())
 							break;	
-						j = std::move(mTasks.front());
+						//j = std::move(mTasks.front());
+						j = std::move(mTasks.top());
 						mTasks.pop();
 						//std::cout<<mTasks.empty();
 					}
@@ -130,9 +145,11 @@ private:
 						
 						if (mStopping && mSwaps.size()<2)
 							break;	
-						j = std::move(mSwaps.front());
+						//j = std::move(mSwaps.front());
+						j = std::move(mSwaps.top());
 						mSwaps.pop();
-						k = std::move(mSwaps.front());
+						//k = std::move(mSwaps.front());
+						k = std::move(mSwaps.top());
 						mSwaps.pop();
 					}
 					mcmc_swap_threaded(j,k);
@@ -176,6 +193,8 @@ ThreadPool *poolptr;
  *
  * multi-threaded ``stochastic'' (numThreads>2 ; pool = true) progresses each chain in parallel by queueing each temperature and evaluating them in the order they were submitted. Once finished, the threads are queued to swap, where they swapped in the order they are submitted. This means the chains are swapped randomly, and the chains do NOT finish at the same time. The sampler runs until the the 0th chain reaches the step number
  *
+ * Note on limits: In the prior function, if a set of parameters should be disallowed, return -std::numeric_limits<double>::infinity()  -- (this is in the <limits> file in std)
+ *
  * Format for the auto_corr file (compatable with csv, dat, txt extensions): each row is a dimension of the cold chain, with the first row being the lengths used for the auto-corr calculation:
  *
  * lengths: length1 , length2 ...
@@ -215,6 +234,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
 		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
@@ -247,10 +267,13 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.chain_N = chain_N;
 	sampler.N_steps = N_steps;
 	sampler.dimension = dimension;
-	sampler.history_length = 1000;
-	sampler.fisher_update_number = 1000;
+
+	sampler.history_length = 500;
+	sampler.fisher_update_number = 500;
+
 	sampler.output = output;
 	sampler.pool = pool;
+	sampler.numThreads = numThreads;
 	//########################################################
 	//########################################################
 	//POOLING -- TESTING
@@ -259,6 +282,14 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//########################################################
 
 	allocate_sampler_mem(&sampler);
+
+	//########################################################
+	//########################################################
+	//Set chain 0 to highest priority
+	//sampler.priority[0] = 0;
+	//########################################################
+	//########################################################
+
 	for (int chain_index; chain_index<sampler.chain_N; chain_index++)
 		assign_probabilities(&sampler, chain_index);
 	
@@ -272,12 +303,17 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//Assign initial position to start chains
 	//Currently, just set all chains to same initial position
 	for (int j=0;j<sampler.chain_N;j++){
+		sampler.de_primed[j]=false;
 		for (int i = 0; i<sampler.dimension; i++)
 		{
-			sampler.de_primed[j]=false;
+			//Only doing this last loop because there is sometimes ~5 elements 
+			//not initialized on the end of the output, which through off plotting
 			for(int l =0; l<N_steps; l++)
 				output[j][l][i] = initial_pos[i];
+			
 		}
+		sampler.current_likelihoods[j] =
+			 sampler.ll(output[j][0],sampler.dimension)/sampler.chain_temps[j];
 		step_accepted[j]=0;
 		step_rejected[j]=0;
 	}
@@ -320,7 +356,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			{
 			k+= cutoff;
 			chain_swap(&sampler, output, k, &swp_accepted, &swp_rejected);
-			printProgress((double)k/N_steps);	
+			if(show_prog)
+				printProgress((double)k/N_steps);	
 			}
 		}
 		}
@@ -329,6 +366,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//POOLING  -- ``Stochastic'' swapping between chains
 	else
 	{
+		
 		ThreadPool pool(numThreads);
 		poolptr = &pool;
 		while(samplerptr->progress<N_steps-samplerptr->swp_freq-2)
@@ -343,12 +381,13 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 					poolptr->enqueue(i);
 				}
 				//If a chain finishes before chain 0, it's wrapped around 
-				//and allowed to keep stepping -- not sure if this is the best
+				//and allowed to keep stepping at low priority-- not sure if this is the best
 				//method for keeping the 0th chain from finishing last or not
 				else if(i!=0 &&
 					samplerptr->chain_pos[i]>(N_steps-samplerptr->swp_freq-1))
 				{
 					samplerptr->waiting[i]=false;
+					samplerptr->priority[i] = 2;
 					int pos = samplerptr->chain_pos[i];
 					for (int k =0; k<samplerptr->dimension; k++){
 						samplerptr->output[i][0][k] = 
@@ -359,30 +398,21 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 					poolptr->enqueue(i);
 				}
 			}
-			printProgress((double)samplerptr->progress/N_steps);
+			if(show_prog)
+				printProgress((double)samplerptr->progress/N_steps);
 		}
-		//##############################################################
-		for (int i =0;i<samplerptr->chain_N; i++)
-		{
-			swp_accepted+=samplerptr->swap_accept_ct[i];
-			swp_rejected+=samplerptr->swap_reject_ct[i];
-			step_accepted[i]=samplerptr->step_accept_ct[i];
-			step_rejected[i]=samplerptr->step_reject_ct[i];
-		}
+	}
+	//##############################################################
+	for (int i =0;i<samplerptr->chain_N; i++)
+	{
+		swp_accepted+=samplerptr->swap_accept_ct[i];
+		swp_rejected+=samplerptr->swap_reject_ct[i];
+		step_accepted[i]+=samplerptr->step_accept_ct[i];
+		step_rejected[i]+=samplerptr->step_reject_ct[i];
 	}
 	end =clock();
 	wend =omp_get_wtime();
 
-	//for (int j=0;j<sampler.chain_N;j++){
-	//	std::cout<<std::endl;
-	//	//for (int i = 0; i<sampler.dimension; i++)
-	//	{
-	//		std::cout<<exp(samplerptr->output[j][N_steps-100][0])/MSOL_SEC<<std::endl;
-	//		std::cout<<samplerptr->output[j][N_steps-100][1]<<std::endl;
-	//		std::cout<<samplerptr->output[j][N_steps-100][2]<<std::endl;
-	//		std::cout<<samplerptr->output[j][N_steps-100][3]<<std::endl;
-	//	}
-	//}
 
 	//###########################################################
 	//Auto-correlation

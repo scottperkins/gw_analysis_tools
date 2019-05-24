@@ -145,8 +145,14 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 	double fcross;
 	if(	detector == "LIGO" || 
 		detector == "Livingston" || 
+		detector == "LIVINGSTON" || 
+		detector == "livingston" || 
 		detector == "Hanford" || 
-		detector == "VIRGO")
+		detector == "HANFORD" || 
+		detector == "hanford" || 
+		detector == "VIRGO" ||
+		detector == "Virgo" ||
+		detector == "virgo")
 	{
 		fplus = right_interferometer_plus(theta,phi);
 		fcross = right_interferometer_cross(theta,phi);	

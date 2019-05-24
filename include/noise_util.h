@@ -35,6 +35,7 @@ const double H_azimuth_offset = 2.199;//in rad
 const double H_radius = 6367299.93401105;
 //const double H_elevation = 123.139;//in meters
 const double H_elevation = 142.554;//in meters
+
 const double L_LAT =0.53342313506 ;//in rad
 const double L_LONG =-1.58430937078 ;//in rad
 //const double L_azimuth_offset = 4.40317772346;//in rad
@@ -43,6 +44,7 @@ const double L_azimuth_offset = 3.4557;//in rad
 const double L_radius = 6372795.50144497;
 //const double L_elevation = 13.1064;//in meters
 const double L_elevation = -6.574;//in meters
+
 const double V_LAT =0.76151183984 ;//in rad
 const double V_LONG =0.18333805213 ;//in rad
 //const double V_azimuth_offset = 0.33916285222;//in rad

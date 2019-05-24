@@ -131,7 +131,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-5;
+	double epsilon = 1e-7;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -277,6 +277,11 @@ void calculate_derivatives(double  **amplitude_deriv,
 			//amplitude_cross_plus,
 			"IMRPhenomD",
 			parameters);	
+		std::complex<double> Qtemp = 
+			Q(parameters->theta, parameters->phi, parameters->incl_angle);
+		double a_corr = std::abs(Qtemp);
+		for (int k =0; k<length; k++)
+			amplitude[k] = a_corr * amplitude[k];
 
 		IMRPhenomD<double> model;
 		int dimension = 8;
@@ -300,7 +305,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 		double param_out[dimension] ;
 		double chirpmass = calculate_chirpmass(parameters->mass1, parameters->mass2);
 		double eta = calculate_eta(parameters->mass1, parameters->mass2);
-		param_in[0] = parameters->incl_angle;
+		param_in[0] = cos(parameters->incl_angle);
 		param_in[1] = parameters->theta;
 		param_in[2] = parameters->phi;
 		param_in[3] = parameters->Luminosity_Distance;//MPC
@@ -317,12 +322,14 @@ void calculate_derivatives(double  **amplitude_deriv,
 				param_p[j] = param_in[j] ;
 				param_m[j] = param_in[j] ;
 			}
-			//if(i==0) epsilon = 1e-25;
-			//else epsilon = epsilonnaught;
 			param_p[i] = param_in[i] + epsilon;
 			param_m[i] = param_in[i] - epsilon;
-			//param_p[i] = param_in[i]*(1. + epsilon);
-			//param_m[i] = param_in[i] *(1- epsilon);
+
+			//cos \iota must lie within certain range
+			if(param_p[0]>1.)param_p[0]=1.;
+			else if( param_p[1]<-1.) param_p[0]=-1.;
+			if(param_m[0]>1.)param_m[0]=1.;
+			else if( param_m[1]<-1.) param_m[0]=-1.;
 
 			
 			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);///MSOL_SEC;
@@ -336,7 +343,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.spin2[2]=param_p[7];
 			waveform_params.phic = 0;
 			waveform_params.tc= 0;
-			waveform_params.incl_angle = param_p[0];
+			waveform_params.incl_angle = acos(param_p[0]);
 			waveform_params.theta = param_p[1];
 			waveform_params.phi = param_p[2];
 			waveform_params.NSflag = parameters->NSflag;
@@ -345,18 +352,19 @@ void calculate_derivatives(double  **amplitude_deriv,
 			Qp = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
 			a_corr_p = std::abs(Qp);
 			p_corr_p = std::arg(Qp);
+			
 
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_plus,
 				//amplitude_cross_plus,
-				gen_method,
+				"IMRPhenomD",
 				&waveform_params);	
 			fourier_phase(frequencies, 
 				length,
 				phase_plus_plus,
 				//amplitude_cross_plus,
-				gen_method,
+				"IMRPhenomD",
 				&waveform_params);	
 
 
@@ -371,7 +379,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.spin2[2]=param_m[7];
 			waveform_params.phic = 0;
 			waveform_params.tc= 0;
-			waveform_params.incl_angle = param_m[0];
+			waveform_params.incl_angle = acos(param_m[0]);
 			waveform_params.theta = param_m[1];
 			waveform_params.phi = param_m[2];
 			waveform_params.NSflag = parameters->NSflag;
@@ -380,6 +388,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 			a_corr_m = std::abs(Qm);
 			p_corr_m = std::arg(Qm);
 
+			//std::cout<<"Angles: "<<waveform_params.theta<<" "<< waveform_params.phi<<" "<<waveform_params.incl_angle<<std::endl;
+			//std::cout<<"Amp: "<<a_corr_p-a_corr_m<<std::endl;
+			//std::cout<<"Phase: "<<p_corr_p-p_corr_m<<std::endl;
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_minus,

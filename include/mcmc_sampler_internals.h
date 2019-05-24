@@ -23,10 +23,12 @@ struct sampler
 	int *chain_pos;
 	double swp_freq;
 	int chain_N;
+	int numThreads;
 	int N_steps;
 	int dimension;
 	bool fisher_exist;
 	bool *de_primed;
+	int *priority;
 	double ***output;
 	bool pool;
 	int progress=0;
@@ -34,6 +36,7 @@ struct sampler
 	int history_length;
 	int *current_hist_pos;
 	double ***history;
+	double *current_likelihoods;
 
 	double ***fisher_vecs;
 	double **fisher_vals;
