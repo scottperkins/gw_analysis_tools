@@ -18,30 +18,34 @@
 double data_snr_maximized_extrinsic(double *frequencies,
 				int length,
 				std::complex<double> *data,
+				double *psd,
 				std::string detector,
 				std::string generation_method,
-				gen_params param
+				gen_params *param
 				)
 {
 	
 	/*produce noise curve*/
 	double *noise = (double *)malloc(sizeof(double)*length);	
-	populate_noise(frequencies,detector, noise, length);
+	//populate_noise(frequencies,detector, noise, length);
 	for(int i = 0; i<length; i++)
-		noise[i] = noise[i]*noise[i];
+		//noise[i] = noise[i]*noise[i];
+		noise[i ] =psd[i];
 
-	std::complex<double> q = Q(param.theta,param.phi,param.incl_angle);
+	//std::complex<double> q = Q(param.theta,param.phi,param.incl_angle);
 	std::complex<double> *detector_response
 			 = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	double *integrand
 			 = (double *)malloc(sizeof(double)*length);
 	/*produce the waveform*/
-	fourier_waveform(frequencies, length, detector_response, generation_method, &param);
+	//fourier_waveform(frequencies, length, detector_response, generation_method, &param);
+	fourier_detector_response(frequencies, length, detector_response, detector,generation_method, param);
 
 	/*Calculate the template snr integrand 4*Re(h* h /S(f)) - factor of q for the plus, cross modes 
  * 	effect on the detector*/
 	for (int i = 0; i<length;i++)
-		integrand[i] = 4.*real(conj(q*detector_response[i])*q*detector_response[i])/noise[i]; 
+		//integrand[i] = 4.*real(conj(q*detector_response[i])*q*detector_response[i])/noise[i]; 
+		integrand[i] = 4.*real(conj(detector_response[i])*detector_response[i])/noise[i]; 
 	double delta_f = frequencies[1]-frequencies[0];
 	double snr_template;
 	//snr_template = sqrt(trapezoidal_sum_uniform(delta_f,length, integrand));
@@ -55,7 +59,8 @@ double data_snr_maximized_extrinsic(double *frequencies,
 	std::complex<double> g_tilde;
         for (int i=0;i<length; i++)
         {
-                g_tilde = 4.*q*conj(data[i]) * detector_response[i] / noise[i];
+                //g_tilde = 4.*q*conj(data[i]) * detector_response[i] / noise[i];
+                g_tilde = 4.*conj(data[i]) * detector_response[i] / noise[i];
                 in[i][0] = real(g_tilde);
                 in[i][1] = imag(g_tilde);
         }
@@ -82,15 +87,16 @@ double data_snr_maximized_extrinsic(double *frequencies,
 	free(noise);
 	free(detector_response);
 	free(integrand);
-	return max/snr_template;
+	return max/(snr_template);
 }
 double data_snr_maximized_extrinsic(double *frequencies,
 				int length,
 				double *data_real,
 				double *data_imag,
+				double *psd,
 				std::string detector,
 				std::string generation_method,
-				gen_params param
+				gen_params *param
 				)
 {
 	std::complex<double> *data = (std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
@@ -100,6 +106,7 @@ double data_snr_maximized_extrinsic(double *frequencies,
 	snr = data_snr_maximized_extrinsic(frequencies,
 				length,
 				data,
+				psd,
 				detector,
 				generation_method,
 				param);

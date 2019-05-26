@@ -1,5 +1,5 @@
 import matplotlib as mpl
-mpl.use("pdf")
+#mpl.use("pdf")
 import corner
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,10 +7,11 @@ from phenompy.utilities import calculate_mass1, calculate_mass2
 
 data = np.loadtxt("data/mcmc_output_DFull.csv",delimiter=',')
 #data = data[10000:]
-#parameter = [x[3] for x in data]
-#plt.plot(parameter)
-#plt.show()
-#plt.close()
+for i in np.arange(8):
+    parameter = [x[i] for x in data]
+    plt.plot(parameter)
+    plt.show()
+    plt.close()
 ndim, nsamples = 8, len(data) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]

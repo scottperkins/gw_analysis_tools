@@ -150,7 +150,29 @@ void celestial_horizon_transform(double RA, /**< in RAD*/
 	*phi += azimuth_offset;
 	if(*phi>2*M_PI) *phi -=2*M_PI;
 }
+void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
+		double DEC, /**< in RAD*/
+		double gps_time, 
+		std::string detector, 
+		double *dphi_dRA, 
+		double *dtheta_dRA, 
+		double *dphi_dDEC, 
+		double *dtheta_dDEC 
+		)
+{
+	double phip, phim, thetap, thetam;
+	double epsilon = 1e-5;
 
+	celestial_horizon_transform(RA+epsilon, DEC,gps_time,detector,&phip,&thetap);
+	celestial_horizon_transform(RA-epsilon, DEC,gps_time,detector,&phim,&thetam);
+	*dtheta_dRA = (thetap-thetam)/(2*epsilon);
+	*dphi_dRA = (phip-phim)/(2*epsilon);
+
+	celestial_horizon_transform(RA, DEC+epsilon,gps_time,detector,&phip,&thetap);
+	celestial_horizon_transform(RA, DEC-epsilon,gps_time,detector,&phim,&thetam);
+	*dtheta_dDEC = (thetap-thetam)/(2*epsilon);
+	*dphi_dDEC = (phip-phim)/(2*epsilon);
+}
 /*! \brief calculate Difference in time of arrival (DTOA) for a given source location and 2 different detectors
  */
 double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/

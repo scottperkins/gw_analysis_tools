@@ -52,22 +52,22 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	
 	double current_lp = sampler->lp(current_param, sampler->dimension);
 	double proposed_lp = sampler->lp(proposed_param, sampler->dimension);
-	double current_ll, proposed_ll;
+	double current_ll=0, proposed_ll=0;
 	double MH_ratio;
 	double power;
 
 	if(current_lp == limit_inf || proposed_lp == limit_inf){
 		//MH_ratio =-1e20;
 		MH_ratio = limit_inf;
+		//std::cout<<"OUT OF RANGE"<<std::endl;
 	}
 	else{
 		//Calculate log_likelihood and log prior
 		
-		//double current_ll = sampler->ll(current_param, sampler->dimension);
+		//current_ll = sampler->ll(current_param, sampler->dimension);
 		//current_ll = (current_ll )/sampler->chain_temps[chain_number];
 		current_ll = sampler->current_likelihoods[chain_number];
 		
-		//double current_lp = sampler->lp(current_param, sampler->dimension);
 		proposed_ll = sampler->ll(proposed_param, sampler->dimension);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 
@@ -117,7 +117,7 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
 	//double alpha = .0005;
 	for (i=0;i<sampler->dimension;i++){
-		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], 0.05*alpha)+current_param[i];
+		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
 	}
 }
 
@@ -147,11 +147,13 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 				sampler->chain_temps[chain_index];}
 	//std::cout<<"FISHER scaling: "<<alpha/sqrt(scaling)<<std::endl;
+	//scaling = 1e10;
 	for(int i =0; i< sampler->dimension;i++)
 	{
 		proposed_param[i] = current_param[i] +
 			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
-		//std::cout<<"FISHER pos: "<<sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
+		//std::cout<<"FISHER pos diff: "<<i<<" "<<sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
+		//std::cout<<"FISHER pos diff: "<<i<<" "<<current_param[i]-proposed_param[i]<<std::endl;
 	}
 
 }
@@ -243,7 +245,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
 	}while(j==i);
 		
-	double alpha = .1;
+	double alpha = 1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
 		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.5);
@@ -285,19 +287,19 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			int T2_index	/**<number of chain swapper in chain_temps*/
 			)
 {
-	double ll1 =  sampler->ll(chain1, sampler->dimension);
-	double ll2 =  sampler->ll(chain2, sampler->dimension);
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
+	double ll1 =  T1*sampler->current_likelihoods[T1_index];
+	double ll2 =  T2*sampler->current_likelihoods[T2_index];
 	//double pow = ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2;
 	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1;
 	double MH_ratio;
 	MH_ratio = pow;
-	double alpha = log(gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]));
+	//Averaging the two random numbers from each chains seed
+	double alpha = log( (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.);
 	
 	if (MH_ratio<alpha)
 	{
-		//std::cout<<"reject LL: "<<ll1<<" "<<ll2<<std::endl;
 		return -1;
 	}	
 	else
@@ -309,6 +311,10 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			chain1[i] = chain2[i];
 			chain2[i]=temp[i];
 		}
+		double templl = sampler->current_likelihoods[T1_index];
+		sampler->current_likelihoods[T1_index] = 
+				T2/T1 * sampler->current_likelihoods[T2_index];
+		sampler->current_likelihoods[T2_index] = T1/T2*templl;
 		return 1;
 	}
 

@@ -5,8 +5,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
-data = np.loadtxt("data/mcmc_output_injection.csv",delimiter=',')
-#data = data[10000:]
+dataload = np.loadtxt("data/mcmc_output_injection.csv",delimiter=',')
+data = dataload
+#data = []
+#for i in np.arange(len(dataload)):
+#    if (i%10==0):
+#        data.append(dataload[i]) 
+#data = data[1000:]
 for i in np.arange(8):
     parameter = [x[i] for x in data]
     plt.plot(parameter)

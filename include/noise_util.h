@@ -75,6 +75,16 @@ double Hanford_O1_fitted(double f);
 
 void celestial_horizon_transform(double RA, double DEC, double gps_time, std::string detector, double *phi, double *theta);
 
+void derivative_celestial_horizon_transform(double RA, 
+		double DEC, 
+		double gps_time, 
+		std::string detector, 
+		double *dphi_dRA, 
+		double *dtheta_dRA, 
+		double *dphi_dDEC, 
+		double *dtheta_dDEC 
+		);
+
 double DTOA(double theta1, double theta2, std::string detector1, std::string detector2);
 
 double radius_at_lat(double latitude, double elevation);

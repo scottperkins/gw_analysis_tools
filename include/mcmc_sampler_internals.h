@@ -34,6 +34,7 @@ struct sampler
 	int progress=0;
 
 	int history_length;
+	int history_update;
 	int *current_hist_pos;
 	double ***history;
 	double *current_likelihoods;

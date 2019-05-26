@@ -268,8 +268,19 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	sampler.N_steps = N_steps;
 	sampler.dimension = dimension;
 
+	//NOTE: currently, update the history every step until length is 
+	//reached, then the history is updated every 20th step, always only
+	//keeping history of length history_length (overwrites the list as 
+	//it walks forward when it reaches the end)
 	sampler.history_length = 500;
-	sampler.fisher_update_number = 500;
+	sampler.history_update = 1;
+	//Number of steps to take with the fisher before updating the fisher 
+	//to a new value 
+	//NOTE: if this is too low, detailed balance isn't maintained without 
+	//accounting for the changing fisher (doesn't cancel in MH ratio)
+	//but if the number is high enough, detailed balance is approximately 
+	//kept without calculating second fisher
+	sampler.fisher_update_number = 200;
 
 	sampler.output = output;
 	sampler.pool = pool;
@@ -286,7 +297,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//########################################################
 	//########################################################
 	//Set chain 0 to highest priority
-	//sampler.priority[0] = 0;
+	sampler.priority[0] = 1;
 	//########################################################
 	//########################################################
 
@@ -339,9 +350,13 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 				{
 					int success;
 					success = mcmc_step(&sampler, output[j][k+i], output[j][k+i+1],j);	
+					sampler.chain_pos[j]+=1;
 					if(success==1){step_accepted[j]+=1;}
 					else{step_rejected[j]+=1;}
-					update_history(&sampler,output[j][k+i+1], j);
+					if(!sampler.de_primed[j])
+						update_history(&sampler,output[j][k+i+1], j);
+					else if(sampler.chain_pos[j]%sampler.history_update==0)
+						update_history(&sampler,output[j][k+i+1], j);
 				}
 				if(!sampler.de_primed[j]) 
 				{
@@ -373,30 +388,47 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		{
 			for(int i =0; i<samplerptr->chain_N; i++)
 			{
-				if(samplerptr->waiting[i] && 
-				samplerptr->chain_pos[i]<(N_steps-samplerptr->swp_freq -1))
-				{
-					samplerptr->waiting[i]=false;
-					if(i==0) samplerptr->progress+=samplerptr->swp_freq;
-					poolptr->enqueue(i);
-				}
-				//If a chain finishes before chain 0, it's wrapped around 
-				//and allowed to keep stepping at low priority-- not sure if this is the best
-				//method for keeping the 0th chain from finishing last or not
-				else if(i!=0 &&
-					samplerptr->chain_pos[i]>(N_steps-samplerptr->swp_freq-1))
-				{
-					samplerptr->waiting[i]=false;
-					samplerptr->priority[i] = 2;
-					int pos = samplerptr->chain_pos[i];
-					for (int k =0; k<samplerptr->dimension; k++){
-						samplerptr->output[i][0][k] = 
-							samplerptr->output[i][pos][k] ;
+				if(samplerptr->waiting[i]){
+					if(samplerptr->chain_pos[i]<(N_steps-samplerptr->swp_freq -1))
+					{
+						samplerptr->waiting[i]=false;
+						if(i==0) samplerptr->progress+=samplerptr->swp_freq;
+						poolptr->enqueue(i);
 					}
-					samplerptr->chain_pos[i] = 0;
+					//If a chain finishes before chain 0, it's wrapped around 
+					//and allowed to keep stepping at low priority-- 
+					//not sure if this is the best
+					//method for keeping the 0th chain from finishing last or not
+					else if(i !=0){
 
-					poolptr->enqueue(i);
+						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+						samplerptr->waiting[i]=false;
+						samplerptr->priority[i] = 2;
+						int pos = samplerptr->chain_pos[i];
+						for (int k =0; k<samplerptr->dimension; k++){
+							samplerptr->output[i][0][k] = 
+								samplerptr->output[i][pos][k] ;
+						}
+						samplerptr->chain_pos[i] = 0;
+
+						poolptr->enqueue(i);
+					}
 				}
+				//else if(i!=0 && samplerptr->waiting[i] &&
+				//	samplerptr->chain_pos[i]>(N_steps-samplerptr->swp_freq-1))
+				//{
+				//	std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+				//	samplerptr->waiting[i]=false;
+				//	samplerptr->priority[i] = 2;
+				//	int pos = samplerptr->chain_pos[i];
+				//	for (int k =0; k<samplerptr->dimension; k++){
+				//		samplerptr->output[i][0][k] = 
+				//			samplerptr->output[i][pos][k] ;
+				//	}
+				//	samplerptr->chain_pos[i] = 0;
+
+				//	poolptr->enqueue(i);
+				//}
 			}
 			if(show_prog)
 				printProgress((double)samplerptr->progress/N_steps);
@@ -492,7 +524,11 @@ void mcmc_step_threaded(int j)
 		success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
 		if(success==1){samplerptr->step_accept_ct[j]+=1;}
 		else{samplerptr->step_reject_ct[j]+=1;}
-		update_history(samplerptr,samplerptr->output[j][k+i+1], j);
+		//update_history(samplerptr,samplerptr->output[j][k+i+1], j);
+		if(!samplerptr->de_primed[j])
+			update_history(samplerptr,samplerptr->output[j][k+i+1], j);
+		else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
+			update_history(samplerptr,samplerptr->output[j][k+i+1], j);
 	}
 	if(!samplerptr->de_primed[j]) 
 	{

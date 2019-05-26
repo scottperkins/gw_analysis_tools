@@ -483,7 +483,7 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 
 	//Calculate template snr and scale it to match the data snr
 	//later, upgrade to non uniform spacing, cause why not
-	double delta_f = frequencies[1]-frequencies[0];
+	double delta_f = frequencies[length/2]-frequencies[length/2-1];
 	double sum = 0.;
 	double *integrand = (double *)malloc(sizeof(double)*length);
 	for (int i =0;i< length;i++)
@@ -526,6 +526,7 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	double *max;
 	max = std::max_element(g, g+length); 
 	double max_val = *max*delta_f;
+	//double max_val = *max;
 	int max_index = std::distance(g,max);
 	double Tau = 1./delta_f;
 	*tc = (double)(max_index)/length * ( Tau );
@@ -539,6 +540,7 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	fftw_free(in);
 	fftw_free(out);
 	//std::cout<<"inner products: "<<max_val<<" "<<HH<<std::endl;
+	//std::cout<<"inner products max: "<<max_val<<" "<<HH<<std::endl;
 
 	return -0.5*(HH- 2*max_val);
 	//return .5*(max*max)/HH;
@@ -566,7 +568,10 @@ double Log_Likelihood(std::complex<double> *data,
 	//std::cout<<detect_response[length/2]<<std::endl;
 	ll = Log_Likelihood_internal(data,psd,frequencies,detect_response, length, plan);
 
+	//if(ll>0){
 	//std::cout<<detector<<std::endl;
+	//std::cout<<ll<<std::endl;
+	//}
 	free(detect_response);
 	return ll;
 }
@@ -789,7 +794,7 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			)
 {
 	
-	double delta_f = frequencies[1]-frequencies[0];
+	double delta_f = frequencies[length/2]-frequencies[length/2-1];
 	double sum = 0.;
 	double *integrand = (double *)malloc(sizeof(double)*length);
 	for (int i =0;i< length;i++)
@@ -802,9 +807,14 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	integral = 4.*simpsons_sum(delta_f, length, integrand);
 	double DH = integral;
 
+	//for (int i =0;i< length;i++)
+	//	integrand[i] = real(data[i]*std::conj(data[i]))/psd[i];
+	//integral = 4.*simpsons_sum(delta_f, length, integrand);
+	//double DD = integral;
+
 	free(integrand);
 	
-	//std::cout<<"inner products: "<<DH<<" "<<HH<<std::endl;
+	//std::cout<<"inner products not max: "<<DH<<" "<<HH<<std::endl;
 	return -0.5*(HH- 2*DH);
 }
 
@@ -1000,6 +1010,10 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 				"MCMC_"+mcmc_generation_method+"_Full", 
 				mcmc_detectors[i], temp_out, 8, &parameters, 
 				NULL, NULL, mcmc_noise[i]);
+			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
+			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
+			//	mcmc_detectors[i], &dphi_dra, &dtheta_dra, 
+			//	&dphi_ddec,&dtheta_ddec);
 			for(int j =0; j<dimension; j++){
 				for(int k =0; k<dimension; k++)
 				{
@@ -1214,6 +1228,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 				&tc_ref,
 				&phic_ref
 				);
+		//std::cout<<"Hanford"<<std::endl;
+		//std::cout<<ll<<std::endl;
+		//std::cout<<tc_ref<<std::endl;
 		//std::cout<<mcmc_detectors[2]<<std::endl;	
 		//calculate log likelihood
 		for(int i=1; i < mcmc_num_detectors; i++){
@@ -1311,6 +1328,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		}
 		std::cout<<ll<<std::endl;
 	}
+	//std::cout<<ll<<std::endl;
 	return ll;
 
 	//testing detailed balance
