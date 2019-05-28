@@ -355,19 +355,6 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	return out;
 }
 
-void initiate_likelihood_function(fftw_outline *plan, int length)
-{
-	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
-	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
-	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_FORWARD, FFTW_MEASURE);
-}
-void deactivate_likelihood_function(fftw_outline *plan)
-{
-	fftw_destroy_plan(plan->p);
-	fftw_free(plan->in);
-	fftw_free(plan->out);
-	fftw_cleanup();
-}
 
 
 /*! \brief routine to maximize over all extrinsic quantities and return the log likelihood

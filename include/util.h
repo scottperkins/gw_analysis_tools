@@ -4,6 +4,7 @@
 #include <string>
 #include <complex>
 #include "adolc/adouble.h"
+#include <fftw3.h>
 //#define adouble double
 /*! \file 
  *General utilities (functions and structures) independent of modelling method
@@ -34,6 +35,11 @@ const double MPC_SEC = 3.085677581491367278913937957796471611e22/c;
 //const double MSOL_SEC = GSL_CONST_MKSA_SOLAR_MASS*(GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT/(c*c*c));
 //const double MPC_SEC = GSL_CONST_MKSA_PARSEC*1e6/c; 
 
+struct fftw_outline
+{
+	fftw_complex *in, *out;
+	fftw_plan p;
+};
 
 /*!\struct
  *
@@ -260,6 +266,9 @@ double Z_from_DL(double DL);
 
 void printProgress (double percentage);
 
+void initiate_likelihood_function(fftw_outline *plan,int length);
+void deactivate_likelihood_function(fftw_outline *plan);
+
 double** allocate_2D_array( int dim1, int dim2);
 void deallocate_2D_array(double **array, int dim1, int dim2);
 double*** allocate_3D_array( int dim1, int dim2, int dim3);
@@ -268,6 +277,39 @@ void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3);
 
 void read_file(std::string filename,double **output, int rows, int cols );
 void read_file(std::string filename, double *output );
+
+void read_LOSC_data_file(std::string filename, 
+			double *output,
+			double *data_start_time,
+			double *duration,
+			double *fs);
+
+void read_LOSC_PSD_file(std::string filename, 
+			double **output,
+			int rows,
+			int cols);
+
+void allocate_LOSC_data(std::string *data_files, 
+			std::string psd_file, 
+			int num_detectors,
+			int psd_length,
+			int data_file_length,
+			double trigger_time,
+			std::complex<double> **data,
+			double **psds,
+			double **freqs
+			);
+
+void free_LOSC_data(std::complex<double> **data,
+		double **psds,
+		double **freqs,
+		int num_detectors,
+		int length
+		);
+
+void tukey_window(double *window,
+		int length,
+		double alpha);
 
 void write_file(std::string filename, double **input, int rows, int cols);
 void write_file(std::string filename, double *input, int length);

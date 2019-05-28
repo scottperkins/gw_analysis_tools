@@ -7,11 +7,6 @@
 /*! \file 
  */
 
-struct fftw_outline
-{
-	fftw_complex *in, *out;
-	fftw_plan p;
-};
 //########################################
 //MCMC global variables - facilitate wrapping 
 //of likelihood function 
@@ -125,8 +120,6 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 				double iota,
 				bool NSflag,
 				fftw_outline *plan);
-void initiate_likelihood_function(fftw_outline *plan,int length);
-void deactivate_likelihood_function(fftw_outline *plan);
 
 
 double maximized_Log_Likelihood_aligned_spin_internal(std::complex<double> *data,

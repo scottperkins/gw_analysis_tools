@@ -146,6 +146,20 @@ void printProgress (double percentage)
     	fflush (stdout);
 }
 
+void initiate_likelihood_function(fftw_outline *plan, int length)
+{
+	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_FORWARD, FFTW_MEASURE);
+}
+void deactivate_likelihood_function(fftw_outline *plan)
+{
+	fftw_destroy_plan(plan->p);
+	fftw_free(plan->in);
+	fftw_free(plan->out);
+	fftw_cleanup();
+}
+
 /*! \brief Builds the structure that shuttles source parameters between functions -updated version to incorporate structure argument
  *
  * Populates the structure that is passed to all generation methods - contains all relavent source parameters 
@@ -461,7 +475,276 @@ void read_file(std::string filename, /**< input filename, relative to execution 
 	}
 	else{std::cout<<"ERROR -- File "<<filename<<" not found"<<std::endl;exit(1);}
 }
+/*! \brief Read data file from LIGO Open Science Center 
+ *
+ * Convenience function for cutting off the first few lines of text
+ */
+void read_LOSC_data_file(std::string filename, /**< input filename*/
+			double *output,/**<[out] Output data*/
+			double *data_start_time,/**<[out] GPS start time of the data in file*/
+			double *duration,/**<[out] Duration of the signal*/
+			double *fs/**<[out] Sampling frequency of the data*/
+			)
+{
 
+	std::fstream file_in;
+	file_in.open(filename, std::ios::in);
+	std::string line, word, temp;
+	int i =0;
+	int j =0;
+	if(file_in){
+		while(std::getline(file_in, line)){
+			std::stringstream lineStream(line);
+			std::string item;
+
+			//skip first three rows
+			if (j>2){
+				while(std::getline(lineStream,item, ',')){
+					output[i]=std::stod(item);	
+					i+=1;
+				}	
+			}
+			//Extract data information from first 3 rows
+			else{
+				//Sampling frequency first
+				if(j==1){
+					std::istringstream iss(line);
+					for(std::string s; iss>>s;){
+						if(isdigit(s[0]))
+							*fs = std::stod(s);
+					}
+				}
+				else if (j==2){
+					int k = 0;
+					std::istringstream iss(line);
+					for(std::string s; iss>>s;){
+						if(isdigit(s[0])){
+							//Time stamp
+							if(k == 0){
+								*data_start_time = std::stod(s);
+								k++;
+							}
+							//Duration
+							else{
+								*duration = std::stod(s);
+							}
+						}
+					}
+				} 
+				j+=1;
+			}
+		}	
+	}
+	else{std::cout<<"ERROR -- File "<<filename<<" not found"<<std::endl;exit(1);}
+}
+
+/*! \brief Read PSD file from LIGO Open Science Center 
+ *
+ * Convenience function for cutting off the first few lines of text
+ */
+void read_LOSC_PSD_file(std::string filename, 
+			double **output,
+			int rows,
+			int cols
+			)
+{
+	//std::string s = "split on    whitespace   ";
+	//for(std::string s; iss >> s; )
+	//    result.push_back(s);
+
+	std::fstream file_in;
+	file_in.open(filename, std::ios::in);
+	std::string line;
+	int i=0, j=0, k =0;
+	std::vector<std::string> line_str;
+	double *temp = (double *)malloc(sizeof(double)*rows*cols);
+	
+	if(file_in){
+		while(std::getline(file_in, line)){
+			std::istringstream iss(line);
+			//skip the first row 
+			if (k >0){	
+				for(std::string s; iss>>s;){
+					temp[i]=std::stod(s);	
+					i+=1;	
+				}
+			}
+			else{ k+=1;}
+		}	
+	}
+	else{std::cout<<"ERROR -- File "<<filename<<" not found"<<std::endl;exit(1);}
+	for(i =0; i<rows;i++){
+		for(j=0; j<cols;j++)
+			output[i][j] = temp[cols*i + j];
+	}
+	free(temp);
+
+}
+/*!\brief Prepare data for MCMC directly from LIGO Open Science Center
+ *
+ * Trims data for Tobs (determined by PSD file) 3/4*Tobs in front of trigger, and 1/4*Tobs behind
+ *
+ * Currently, default to sampling frequency and observation time set by PSD -- cannot be customized
+ *
+ * Output is in order of PSD columns -- string vector of detectos MUST match order of PSD cols
+ *
+ * Output shapes-- 
+ * 		psds = [num_detectors][psd_length]
+ * 		data = [num_detectors][psd_length]	
+ * 		freqs = [num_detectors][psd_length]	
+ *
+ * Total observation time = 1/( freq[i] - freq[i-1]) (from PSD file)
+ *
+ * Sampling frequency fs = max frequency from PSD file
+ *
+ * ALLOCATES MEMORY -- must be freed to prevent memory leak
+ */
+void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each detector file from LOSC*/
+			std::string psd_file, /**< String of psd file from LOSC*/
+			int num_detectors,/**< Number of detectors to use*/
+			int psd_length,/**< Length of the PSD file (number of rows of DATA)*/
+			int data_file_length,/**< Length of the data file (number of rows of DATA)*/
+			double trigger_time, /**< Time for the signal trigger (GPS)*/
+			std::complex<double> **data,/**<[out] Output array of data for each detector*/
+			double **psds,/**<[out] Output array of psds for each detector */
+			double **freqs/**<[out] Output array of freqs for each detector*/
+			)
+{
+	//Read in data from files
+	double **temp_data = allocate_2D_array(num_detectors, data_file_length);
+	//data = (std::complex<double> **)malloc(sizeof(std::complex<double> *)*num_detectors);
+	//for(int i =0; i<num_detectors; i++)
+	//	data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
+	double fs, duration, file_start;
+	for(int i =0; i< num_detectors ; i++){
+		read_LOSC_data_file(data_files[i],temp_data[i], &file_start, &duration, &fs);
+	}	
+
+	//Read in frequencies and PSDs from files
+	//psds = allocate_2D_array(num_detectors, psd_length);
+	//freqs = allocate_2D_array(num_detectors, psd_length);
+	double **temp_psds = allocate_2D_array( psd_length,num_detectors+1);
+	read_LOSC_PSD_file(psd_file,temp_psds,  psd_length,num_detectors+1);
+	for (int j = 0; j< psd_length; j++){
+		for(int i =0; i< num_detectors ; i++){
+			psds[i][j] = temp_psds[j][i+1];
+			freqs[i][j] = temp_psds[j][0];
+		}	
+	}
+	std::cout<<"TEST"<<std::endl;
+		
+	double Tobs = 1./(freqs[0][psd_length/2] - freqs[0][psd_length/2 - 1]);
+	int N = fs*duration;
+	int N_trimmed = Tobs*fs;
+	double *times_untrimmed = (double *)malloc(sizeof(double)*N);
+	double dt = 1./fs;
+	for (int i =0; i < N; i++){
+		times_untrimmed[i] = file_start + i*dt;
+	}
+
+	double time_start = trigger_time - Tobs*3./4.;
+	double time_end = trigger_time + Tobs/4.;
+	double **data_trimmed = allocate_2D_array(num_detectors, N_trimmed);
+	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
+	double *window = (double *)malloc(sizeof(double)*N_trimmed);
+	double alpha = .4; //Standard alpha choice
+	tukey_window(window,N_trimmed, alpha);
+	//Trim data to Tobs, and apply tukey windowing for fft
+	int l=0 ;
+	for (int i =0; i<N; i ++){
+		if(times_untrimmed[i]>time_start && times_untrimmed[i]<time_end){
+			times_trimmed[l] = times_untrimmed[i];
+			for (int j =0; j<num_detectors; j++){
+				data_trimmed[j][l] = temp_data[j][i]*window[l];
+			}	
+			l++;
+		}
+	}
+	
+	fftw_outline plan;
+	initiate_likelihood_function(&plan, N_trimmed);
+	std::complex<double> **fft_data = (std::complex<double> **)
+					malloc(sizeof(std::complex<double>) * num_detectors);
+	for (int i =0; i < num_detectors; i++){
+		fft_data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*N_trimmed);
+		for (int j =0; j<N_trimmed; j++){
+			plan.in[j][0]=data_trimmed[i][j];
+			plan.in[j][1]=0;//No imaginary part
+		}
+		fftw_execute(plan.p);
+		for (int j =0; j<N_trimmed; j++){
+			fft_data[i][j] = std::complex<double>(plan.out[j][0],plan.out[j][1]);
+		}
+		
+	}	
+	deactivate_likelihood_function(&plan);
+	double *freq_untrimmed = (double *)malloc(sizeof(double)*psd_length);
+	double df = 1./Tobs;
+	for(int i =0; i<N_trimmed; i++){
+		freq_untrimmed[i]=i*df;
+	}
+	double fmin = freqs[0][0];
+	double fmax = freqs[0][psd_length-1];
+	l = 0;
+	for (int i =0 ; i<N_trimmed; i++){
+		if(freq_untrimmed[i]>fmin && freq_untrimmed[i]<fmax){
+			for(int j =0; j<num_detectors;j++){
+				data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
+			}
+			l++;
+		}
+	}
+	//Deallocate temporary arrays
+	free(times_trimmed);
+	free(times_untrimmed);
+	free(window);
+	deallocate_2D_array(temp_data,num_detectors, data_file_length);
+	deallocate_2D_array(data_trimmed,num_detectors, N_trimmed);
+	deallocate_2D_array(temp_psds, psd_length,num_detectors+1);
+	for (int i =0; i<num_detectors; i++){
+		free(fft_data[i]);
+	}
+	free(fft_data);
+	
+}
+
+/*! /brief Free data allocated by prep_LOSC_data function
+ */
+void free_LOSC_data(std::complex<double> **data,
+		double **psds,
+		double **freqs,
+		int num_detectors,
+		int length
+		)
+{
+	deallocate_2D_array(psds,num_detectors, length);
+	deallocate_2D_array(freqs,num_detectors, length);
+	for(int i =0; i<num_detectors; i++)
+		free(data[i]);
+	free(data);
+}
+
+/*! \brief Tukey window function for FFTs
+ *
+ * As defined by https://en.wikipedia.org/wiki/Window_function
+ */
+void tukey_window(double *window,
+		int length,
+		double alpha)
+{
+	for (int i =0; i<length; i++){
+		if(i<(double)(alpha * length)/2.){
+			window[i] = 0.5*(1 + cos(M_PI * ( (2. * i)/(alpha * length) -1) ) );
+		}
+		else if(i<length*(1.-alpha/2)){
+			window[i] = 1;
+		}
+		else{
+			window[i] = 0.5*(1 + cos(M_PI * ( (2. * i)/(alpha * length) - 2./alpha + 1) ) );
+		}
+	}	
+
+}
 /*! \brief Utility to write 2D array to file
  *
  * Grid of data, comma separated
