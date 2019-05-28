@@ -631,7 +631,6 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			freqs[i][j] = temp_psds[j][0];
 		}	
 	}
-	std::cout<<"TEST"<<std::endl;
 		
 	double Tobs = 1./(freqs[0][psd_length/2] - freqs[0][psd_length/2 - 1]);
 	int N = fs*duration;
@@ -664,7 +663,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	fftw_outline plan;
 	initiate_likelihood_function(&plan, N_trimmed);
 	std::complex<double> **fft_data = (std::complex<double> **)
-					malloc(sizeof(std::complex<double>) * num_detectors);
+					malloc(sizeof(std::complex<double>*) * num_detectors);
 	for (int i =0; i < num_detectors; i++){
 		fft_data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*N_trimmed);
 		for (int j =0; j<N_trimmed; j++){
@@ -678,7 +677,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 		
 	}	
 	deactivate_likelihood_function(&plan);
-	double *freq_untrimmed = (double *)malloc(sizeof(double)*psd_length);
+	double *freq_untrimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double df = 1./Tobs;
 	for(int i =0; i<N_trimmed; i++){
 		freq_untrimmed[i]=i*df;
@@ -687,16 +686,18 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double fmax = freqs[0][psd_length-1];
 	l = 0;
 	for (int i =0 ; i<N_trimmed; i++){
-		if(freq_untrimmed[i]>fmin && freq_untrimmed[i]<fmax){
+		if(freq_untrimmed[i]>=fmin && freq_untrimmed[i]<=fmax){
 			for(int j =0; j<num_detectors;j++){
 				data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
 			}
 			l++;
 		}
 	}
+
 	//Deallocate temporary arrays
 	free(times_trimmed);
 	free(times_untrimmed);
+	free(freq_untrimmed);
 	free(window);
 	deallocate_2D_array(temp_data,num_detectors, data_file_length);
 	deallocate_2D_array(data_trimmed,num_detectors, N_trimmed);

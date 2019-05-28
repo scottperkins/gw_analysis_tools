@@ -895,7 +895,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 		//unpack parameter vector
 		//double dl_prime = std::exp(param[0])/MPC_SEC;
 		double dl_prime = 1000;
-		double chirpmass = std::exp(param[0])/MSOL_SEC;
+		double chirpmass = std::exp(param[0]);
 		double eta = param[1];
 		double chi1 = param[2];
 		double chi2 = param[3];
@@ -948,8 +948,8 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 		double incl = acos(param[0]);
 		double RA = param[1];
 		double DEC = param[2];
-		double DL = std::exp(param[3])/MPC_SEC;
-		double chirpmass = std::exp(param[4])/MSOL_SEC;
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
 		double eta = param[5];
 		double chi1 = param[6];
 		double chi2 = param[7];
@@ -1015,10 +1015,10 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output)
 	}
 	else if(dimension ==7 && mcmc_generation_method =="IMRPhenomD"){	
 		//unpack parameter vector
-		double dl_prime = std::exp(param[0])/MPC_SEC;
+		double dl_prime = std::exp(param[0]);
 		double tc = std::exp(param[1]);
 		double phic = std::exp(param[2]);
-		double chirpmass = std::exp(param[3])/MSOL_SEC;
+		double chirpmass = std::exp(param[3]);
 		double eta = param[4];
 		double chi1 = param[5];
 		double chi2 = param[6];
@@ -1081,7 +1081,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		//unpack parameter vector
 		//double dl_prime = std::exp(param[0])/MPC_SEC;
 		double dl_prime = 1000;
-		double chirpmass = std::exp(param[0])/MSOL_SEC;
+		double chirpmass = std::exp(param[0]);
 		double eta = param[1];
 		double chi1 = param[2];
 		double chi2 = param[3];
@@ -1122,10 +1122,10 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 	else if(dimension ==7 && mcmc_generation_method =="IMRPhenomD"){	
 	//if(false){	
 		//unpack parameter vector
-		double dl_prime = std::exp(param[0])/MPC_SEC;
+		double dl_prime = std::exp(param[0]);
 		double tc = std::exp(param[1]);
 		double phic = std::exp(param[2]);
-		double chirpmass = std::exp(param[3])/MSOL_SEC;
+		double chirpmass = std::exp(param[3]);
 		double eta = param[4];
 		double chi1 = param[5];
 		double chi2 = param[6];
@@ -1170,8 +1170,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 		double incl = acos(param[0]);
 		double RA = param[1];
 		double DEC = param[2];
-		double DL = std::exp(param[3])/MPC_SEC;
-		double chirpmass = std::exp(param[4])/MSOL_SEC;
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
 		double eta = param[5];
 		double chi1 = param[6];
 		double chi2 = param[7];
@@ -1215,11 +1215,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 				&tc_ref,
 				&phic_ref
 				);
-		//std::cout<<"Hanford"<<std::endl;
-		//std::cout<<ll<<std::endl;
-		//std::cout<<tc_ref<<std::endl;
-		//std::cout<<mcmc_detectors[2]<<std::endl;	
-		//calculate log likelihood
 		for(int i=1; i < mcmc_num_detectors; i++){
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
 					mcmc_detectors[i], &phi[i], &theta[i]);
@@ -1227,11 +1222,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 			parameters.theta=theta[i];
 			delta_t = DTOA(theta[0], theta[i], mcmc_detectors[0], mcmc_detectors[i]);
 			parameters.tc = tc_ref + delta_t;
-			//std::cout<<"Time at "<<mcmc_detectors[i]<<" : "<<parameters.tc<<std::endl;
-			//std::cout<<std::endl;
-			//std::cout<<"theta at "<<mcmc_detectors[i]<<" : "<<theta[i]<<std::endl;
-			//std::cout<<"phi at "<<mcmc_detectors[i]<<" : "<<phi[i]<<std::endl;
-			//std::cout<<std::endl;
 			parameters.phic = phic_ref;	
 			ll += Log_Likelihood(mcmc_data[i], 
 					mcmc_noise[i],
@@ -1243,12 +1233,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 					&mcmc_fftw_plans[i]
 					);
 		}
-		//std::cout<<ll<<std::endl;
-		//std::cout<<"POLAR ANGLES"<<std::endl;
-		//for(int i =0; i<mcmc_num_detectors;i++){
-		//	std::cout<<phi[i]<<std::endl;
-		//	std::cout<<theta[i]<<std::endl;
-		//}
 		delete [] phi;
 		delete [] theta;
 	}
@@ -1256,7 +1240,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension)
 	//if(false){	
 		//unpack parameter vector
 		double cos_JN = param[0];
-		double chirpmass = std::exp(param[1])/MSOL_SEC;
+		double chirpmass = std::exp(param[1]);
 		double eta = param[2];
 		double chi1mag = param[3];
 		double chi2mag = param[4];

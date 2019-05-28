@@ -101,6 +101,8 @@ void test16()
 		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
 
 	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
+
+
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
@@ -109,12 +111,12 @@ void test16()
 	//#########################################################
 	//mcmc options
 	int dimension = 8;
-	//double initial_pos[dimension]={.3, 2., -0.2,log(400*MPC_SEC),log(40*MSOL_SEC), .24,- .0,-.0};
-	double initial_pos[dimension]={.0, 1, 0.,log(300*MPC_SEC),log(10*MSOL_SEC), .2,- .0,-.0};
-	//double initial_pos[dimension]={-.9, 2, -1.2,log(410*MPC_SEC),log(30*MSOL_SEC), .24,-.4,.3};
-	//double initial_pos[dimension]={-.0, 0, -0,log(500*MPC_SEC),log(50*MSOL_SEC), .2,-.0,.0};
-	//double initial_pos[dimension]={-.99, 2, -1.2,log(410*MPC_SEC),log(30.78*MSOL_SEC), .24,-.4,.3};
-	int n_steps = 50000;
+	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
+	double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0};
+	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
+	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
+	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
+	int n_steps = 20000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -152,8 +154,8 @@ void test16()
 			output_transform[j][0]=output[0][j][0];
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
-			output_transform[j][3]=std::exp(output[0][j][3])/MPC_SEC;
-			output_transform[j][4]=std::exp(output[0][j][4])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[0][j][3]);
+			output_transform[j][4]=std::exp(output[0][j][4]);
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
@@ -165,8 +167,8 @@ void test16()
 			output_transform[j][0]=output[chain_N-1][j][0];
 			output_transform[j][1]=output[chain_N-1][j][1];
 			output_transform[j][2]=output[chain_N-1][j][2];
-			output_transform[j][3]=std::exp(output[chain_N-1][j][3])/MPC_SEC;
-			output_transform[j][4]=std::exp(output[chain_N-1][j][4])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[chain_N-1][j][3]);
+			output_transform[j][4]=std::exp(output[chain_N-1][j][4]);
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
@@ -326,12 +328,12 @@ void test15()
 	//#########################################################
 	//mcmc options
 	int dimension = 8;
-	//double initial_pos[dimension]={.3, 2., -0.2,log(400*MPC_SEC),log(40*MSOL_SEC), .24,- .0,-.0};
-	double initial_pos[dimension]={.0, 1, 0.,log(300*MPC_SEC),log(10*MSOL_SEC), .2,- .0,-.0};
-	//double initial_pos[dimension]={-.9, 2, -1.2,log(410*MPC_SEC),log(30*MSOL_SEC), .24,-.4,.3};
-	//double initial_pos[dimension]={-.0, 0, -0,log(500*MPC_SEC),log(50*MSOL_SEC), .2,-.0,.0};
-	//double initial_pos[dimension]={-.99, 2, -1.2,log(410*MPC_SEC),log(30.78*MSOL_SEC), .24,-.4,.3};
-	int n_steps = 30000;
+	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
+	double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0};
+	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
+	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
+	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
+	int n_steps = 20000;
 	int chain_N= 5;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -369,8 +371,8 @@ void test15()
 			output_transform[j][0]=output[0][j][0];
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
-			output_transform[j][3]=std::exp(output[0][j][3])/MPC_SEC;
-			output_transform[j][4]=std::exp(output[0][j][4])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[0][j][3]);
+			output_transform[j][4]=std::exp(output[0][j][4]);
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
@@ -382,8 +384,8 @@ void test15()
 			output_transform[j][0]=output[chain_N-1][j][0];
 			output_transform[j][1]=output[chain_N-1][j][1];
 			output_transform[j][2]=output[chain_N-1][j][2];
-			output_transform[j][3]=std::exp(output[chain_N-1][j][3])/MPC_SEC;
-			output_transform[j][4]=std::exp(output[chain_N-1][j][4])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[chain_N-1][j][3]);
+			output_transform[j][4]=std::exp(output[chain_N-1][j][4]);
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
@@ -570,12 +572,12 @@ void test14()
 	//#########################################################
 	//mcmc options
 	int dimension = 8;
-	//double initial_pos[dimension]={-.9, 1.,-1.,log(400*MPC_SEC),log(30*MSOL_SEC), .24,- .0,-.0};
+	//double initial_pos[dimension]={-.9, 1.,-1.,log(400),log(30), .24,- .0,-.0};
 	double initial_pos[dimension]={cos(params.incl_angle)*.9, RA,DEC,
-		log(params.Luminosity_Distance*MPC_SEC),log(chirpm*MSOL_SEC), .24,- .0,-.0};
-	//double initial_pos[dimension]={-.0, 0.,-0.,log(400*MPC_SEC),log(10*MSOL_SEC), .24,- .0,-.0};
-	//double initial_pos[dimension]={log(8*MSOL_SEC), .24,- .0,-.0};
-	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
+		log(params.Luminosity_Distance),log(chirpm), .24,- .0,-.0};
+	//double initial_pos[dimension]={-.0, 0.,-0.,log(400),log(10), .24,- .0,-.0};
+	//double initial_pos[dimension]={log(8), .24,- .0,-.0};
+	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
 	int n_steps = 40000;
 	int chain_N= 8;
 	double ***output;
@@ -618,8 +620,8 @@ void test14()
 			output_transform[j][0]=output[0][j][0];
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
-			output_transform[j][3]=std::exp(output[0][j][3])/MPC_SEC;
-			output_transform[j][4]=std::exp(output[0][j][4])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[0][j][3]);
+			output_transform[j][4]=std::exp(output[0][j][4]);
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
@@ -631,8 +633,8 @@ void test14()
 			output_transform[j][0]=output[chain_N-1][j][0];
 			output_transform[j][1]=output[chain_N-1][j][1];
 			output_transform[j][2]=output[chain_N-1][j][2];
-			output_transform[j][3]=std::exp(output[chain_N-1][j][3])/MPC_SEC;
-			output_transform[j][4]=std::exp(output[chain_N-1][j][4])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[chain_N-1][j][3]);
+			output_transform[j][4]=std::exp(output[chain_N-1][j][4]);
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
@@ -739,7 +741,7 @@ void test12()
 	//#########################################################
 	//mcmc options
 	int dimension = 7;
-	double initial_pos[dimension]={0,log(30*MSOL_SEC), .24, .0,.0,0,0};
+	double initial_pos[dimension]={0,log(30), .24, .0,.0,0,0};
 	int n_steps = 100;
 	int chain_N= 10;
 	double ***output;
@@ -776,7 +778,7 @@ void test12()
 	for(int j = 0; j<n_steps;j++){
 			//output_transform[j][0]=std::exp(output[0][j][0])/mpc_sec;
 			output_transform[j][0] = output[0][j][0];
-			output_transform[j][1]=std::exp(output[0][j][1])/MSOL_SEC;
+			output_transform[j][1]=std::exp(output[0][j][1]);
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
 			output_transform[j][4]=output[0][j][4];
@@ -788,7 +790,7 @@ void test12()
 	chainfile = "testing/data/mcmc_output_Pv2_hot.csv";
 	for(int j = 0; j<n_steps;j++){
 			output_transform[j][0] = output[chain_N-1][j][0];
-			output_transform[j][1]=std::exp(output[chain_N-1][j][1])/MSOL_SEC;
+			output_transform[j][1]=std::exp(output[chain_N-1][j][1]);
 			output_transform[j][2]=output[chain_N-1][j][2];
 			output_transform[j][3]=output[chain_N-1][j][3];
 			output_transform[j][4]=output[chain_N-1][j][4];
@@ -1085,7 +1087,7 @@ void test10()
 	//#########################################################
 	//MCMC options
 	int dimension = 7;
-	double initial_pos[dimension]={log(400*MPC_SEC),2,2,log(30*MSOL_SEC), .24, 0,0};
+	double initial_pos[dimension]={log(400),2,2,log(30), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
 	int N_steps = 50000;
 	int chain_N= 8;
@@ -1127,10 +1129,10 @@ void test10()
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
 
 	for(int j = 0; j<N_steps;j++){
-			output_transform[j][0]=std::exp(output[0][j][0])/MPC_SEC;
+			output_transform[j][0]=std::exp(output[0][j][0]);
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
-			output_transform[j][3]=std::exp(output[0][j][3])/MSOL_SEC;
+			output_transform[j][3]=std::exp(output[0][j][3]);
 			output_transform[j][4]=output[0][j][4];
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
@@ -1271,9 +1273,9 @@ void test9()
 	//#########################################################
 	//mcmc options
 	int dimension = 4;
-	//double initial_pos[dimension]={log(30*MSOL_SEC), .24,- .0,-.0};
-	double initial_pos[dimension]={log(8*MSOL_SEC), .12,- .0,-.0};
-	//double initial_pos[dimension]={log(200*mpc_sec),log(20*MSOL_SEC), .15, 0,0};
+	//double initial_pos[dimension]={log(30), .24,- .0,-.0};
+	double initial_pos[dimension]={log(8), .12,- .0,-.0};
+	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
 	int n_steps = 40000;
 	int chain_N= 8;
 	double ***output;
@@ -1313,7 +1315,7 @@ void test9()
 
 	for(int j = 0; j<n_steps;j++){
 			//output_transform[j][0]=std::exp(output[0][j][0])/mpc_sec;
-			output_transform[j][0]=std::exp(output[0][j][0])/MSOL_SEC;
+			output_transform[j][0]=std::exp(output[0][j][0]);
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
@@ -1323,7 +1325,7 @@ void test9()
 	chainfile = "testing/data/mcmc_output_hot.csv";
 	for(int j = 0; j<n_steps;j++){
 			//output_transform[j][0]=std::exp(output[0][j][0])/mpc_sec;
-			output_transform[j][0]=std::exp(output[chain_N-1][j][0])/MSOL_SEC;
+			output_transform[j][0]=std::exp(output[chain_N-1][j][0]);
 			output_transform[j][1]=output[chain_N-1][j][1];
 			output_transform[j][2]=output[chain_N-1][j][2];
 			output_transform[j][3]=output[chain_N-1][j][3];
@@ -1457,8 +1459,8 @@ void test8()
 	//MCMC options
 	int dimension = 4;
 	//double initial_pos[dimension]={log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
-	double initial_pos[dimension]={log(10*MSOL_SEC), .2, 0,0};
-	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
+	double initial_pos[dimension]={log(10), .2, 0,0};
+	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
 	int N_steps = 15000;
 	int chain_N= 8;
 	double ***output;
@@ -1496,7 +1498,7 @@ void test8()
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
 
 	for(int j = 0; j<N_steps;j++){
-			output_transform[j][0]=std::exp(output[0][j][0])/MSOL_SEC;
+			output_transform[j][0]=std::exp(output[0][j][0]);
 			output_transform[j][1]=output[0][j][1];
 			output_transform[j][2]=output[0][j][2];
 			output_transform[j][3]=output[0][j][3];
@@ -2457,7 +2459,7 @@ double test_lp_GW(double *pos, int dim)
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
 	//if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
-	if (std::exp(pos[0])/MSOL_SEC<2 || std::exp(pos[0])/MSOL_SEC>100){return a;}
+	if (std::exp(pos[0])<2 || std::exp(pos[0])>100){return a;}
 	else if ((pos[1])<.1 || (pos[1])>.249999){return a;}
 	else if ((pos[2])<-.9 || (pos[2])>.9){return a;}
 	else if ((pos[3])<-.9 || (pos[3])>.9){return a;}
@@ -2470,7 +2472,7 @@ double test_lp_GW_Pv2(double *pos, int dim)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
-	if (std::exp(pos[1])/MSOL_SEC<2 || std::exp(pos[1])/MSOL_SEC>100){return a;}
+	if (std::exp(pos[1])<2 || std::exp(pos[1])>100){return a;}
 	else if ((pos[0])<-1 || (pos[0])>1){return a;}
 	else if ((pos[2])<.1 || (pos[2])>.249999){return a;}
 	else if ((pos[3])<0 || (pos[3])>.9){return a;}
@@ -2486,10 +2488,10 @@ double test_lp_GW_7dim(double *pos, int dim)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
-	if (std::exp(pos[0])/MPC_SEC<50 || std::exp(pos[0])/MPC_SEC>1000){return a;}
+	if (std::exp(pos[0])<50 || std::exp(pos[0])>1000){return a;}
 	if ((pos[1])<0 || (pos[1])>4){return a;}
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}
-	if (std::exp(pos[3])/MSOL_SEC<2 || std::exp(pos[3])/MSOL_SEC>100){return a;}
+	if (std::exp(pos[3])<2 || std::exp(pos[3])>100){return a;}
 	if ((pos[4])<.1 || (pos[4])>.245){return a;}
 	if ((pos[5])<-.9 || (pos[5])>.9){return a;}
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}
@@ -2505,8 +2507,8 @@ double test_lp_GW_DFull(double *pos, int dim)
 	if ((pos[0])<-1 || (pos[0])>1){return a;}//cos \iota
 	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}//RA
 	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}//DEC
-	if (std::exp(pos[3])/MPC_SEC<100 || std::exp(pos[3])/MPC_SEC>10000){return a;}//DL
-	if (std::exp(pos[4])/MSOL_SEC<2 || std::exp(pos[4])/MSOL_SEC>100){return a;}//chirpmass
+	if (std::exp(pos[3])<100 || std::exp(pos[3])>10000){return a;}//DL
+	if (std::exp(pos[4])<2 || std::exp(pos[4])>100){return a;}//chirpmass
 	if ((pos[5])<.1 || (pos[5])>.249999){return a;}//eta
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}//chi1 
 	if ((pos[7])<-.9 || (pos[7])>.9){return a;}//chi2
