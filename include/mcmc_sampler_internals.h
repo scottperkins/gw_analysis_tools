@@ -3,15 +3,22 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <string>
+#include <functional>
 
 /*! \file
  * Internal functions of the generic MCMC sampler (nothing specific to GW)
  */
 
-typedef double (*log_prior)(double *param, int dimension);
-typedef double (*log_likelihood)(double *param, int dimension);
-typedef void (*fisher)(double *param, int dimension,double **fisher);
+//typedef double (*log_prior_thread_safe)(double *param, int dimension);
+//typedef double (*log_likelihood_thread_safe)(double *param, int dimension);
+//typedef void (*fisher_thread_safe)(double *param, int dimension,double **fisher);
 
+//typedef double (*log_prior)(double *param, int dimension, int thread_id);
+//typedef double (*log_likelihood)(double *param, int dimension, int thread_id);
+//typedef void (*fisher)(double *param, int dimension,double **fisher, int thread_id);
+//std::function<double(double*,int, int)> log_prior;
+//std::function<double(double*,int, int)> log_likelihood;
+//std::function<void(double*,int,double**,int)> fisher;
 /*! Structure storing everything that defines an instance of the sampler
  */
 struct sampler
@@ -44,10 +51,13 @@ struct sampler
 	int *fisher_update_ct;
 	int fisher_update_number;
 
-	log_prior lp;
-	log_likelihood ll;
-	fisher fish;
-
+	//log_prior lp;
+	//log_likelihood ll;
+	//fisher fish;
+	std::function<double(double*,int, int)> lp;
+	std::function<double(double*,int, int)> ll;
+	std::function<void(double*,int,double**,int)> fish;
+ 
 	gsl_rng ** rvec;
 
 	int *nan_counter;

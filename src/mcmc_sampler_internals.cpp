@@ -50,8 +50,8 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 		step = 3;
 	}
 	
-	double current_lp = sampler->lp(current_param, sampler->dimension);
-	double proposed_lp = sampler->lp(proposed_param, sampler->dimension);
+	double current_lp = sampler->lp(current_param, sampler->dimension, chain_number);
+	double proposed_lp = sampler->lp(proposed_param, sampler->dimension, chain_number);
 	double current_ll=0, proposed_ll=0;
 	double MH_ratio;
 	double power;
@@ -64,11 +64,9 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	else{
 		//Calculate log_likelihood and log prior
 		
-		//current_ll = sampler->ll(current_param, sampler->dimension);
-		//current_ll = (current_ll )/sampler->chain_temps[chain_number];
 		current_ll = sampler->current_likelihoods[chain_number];
 		
-		proposed_ll = sampler->ll(proposed_param, sampler->dimension);
+		proposed_ll = sampler->ll(proposed_param, sampler->dimension,chain_number);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 
 		//Calculate MH ratio
@@ -167,7 +165,7 @@ void update_fisher(sampler *sampler, double *current_param, int chain_index)
 	for (int i =0; i<sampler->dimension;i++){
 		fisher[i] = (double*)malloc(sizeof(double)*sampler->dimension);
 	}
-	sampler->fish(current_param, sampler->dimension, fisher);
+	sampler->fish(current_param, sampler->dimension, fisher,chain_index);
 
 	//Convert to 1D array for Eigen
 	double *oneDfisher=(double *)malloc(sizeof(double)*sampler->dimension*sampler->dimension);

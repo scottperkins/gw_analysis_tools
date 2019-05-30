@@ -1,17 +1,21 @@
 #include "util.h"
+#include "GWATConfig.h"
 //#include "general_parameter_structures.h"
 #include "noise_util.h"
 #include <math.h>
 #include <string>
+#include <string.h>
 #include <complex>
 #include <iostream>
+#include <stdio.h>
 #include <fstream>
 #include "adolc/adouble.h"
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 
-const std::string PROJECT_DIRECTORY="/Users/sperkins/opt/gw_analysis_tools";
+//const std::string PROJECT_DIRECTORY="/Users/sperkins/opt/gw_analysis_tools";
+//#define PROJECT_DIRECTORY __FILE__.substr(0,10)
 
 /*! \file
  *
@@ -19,17 +23,22 @@ const std::string PROJECT_DIRECTORY="/Users/sperkins/opt/gw_analysis_tools";
  */
 //#######################################################################################
 //Interpolate Z to DL once per import
-const int npts =100000;
-double DLvec[npts];
-double Zvec[npts];
-gsl_interp_accel *Z_DL_accel_ptr ;
-gsl_spline *Z_DL_spline_ptr ;
-void initiate_LumD_Z_interp()
+//const int npts =100000;
+//double DLvec[npts];
+//double Zvec[npts];
+//gsl_interp_accel *Z_DL_accel_ptr ;
+//gsl_spline *Z_DL_spline_ptr ;
+void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr)
 {
-	Z_DL_accel_ptr = gsl_interp_accel_alloc();
-	Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
+	//int npts =100000;
+	//int npts =10000;
+	int npts =100;
+	double DLvec[npts];
+	double Zvec[npts];
+	*Z_DL_accel_ptr = gsl_interp_accel_alloc();
+	*Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
 	std::fstream data_table;
-	data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
+	data_table.open(std::string(GWAT_ROOT_DIRECTORY)+"/data/tabulated_LumD_Z.csv",std::ios::in);
 	std::vector<std::string> row;
 	std::string line, word, temp;
 	int i =0,j=0;
@@ -49,20 +58,20 @@ void initiate_LumD_Z_interp()
 			i ++;
 		}
 	}
-	gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
+	gsl_spline_init(*Z_DL_spline_ptr, DLvec, Zvec, npts);
 	data_table.close();
 }
-void free_LumD_Z_interp()
+void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr)
 {
-	gsl_interp_accel_free(Z_DL_accel_ptr);
-	gsl_spline_free(Z_DL_spline_ptr);
+	gsl_interp_accel_free(*Z_DL_accel_ptr);
+	gsl_spline_free(*Z_DL_spline_ptr);
 }
 //#######################################################################################
 
 
 
 
-adouble Z_from_DL(adouble DL)
+adouble Z_from_DL(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
 {
 	//std::fstream data_table;
 	//data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
@@ -94,7 +103,7 @@ adouble Z_from_DL(adouble DL)
 	return Z;
 }
 
-double Z_from_DL(double DL)
+double Z_from_DL(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
 {
 	//std::fstream data_table;
 	//data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
@@ -125,12 +134,12 @@ double Z_from_DL(double DL)
 	//gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
 	double Z = 0;
 	double DLtemp = DL;
-	if(DL>DLvec[npts-1]){
-		std::cout<<"WARNING: DL exceeded limit: setting to highest value in table"<<std::endl;
-		DLtemp=DLvec[npts-1];
-		std::cout<<DL<<std::endl;
-		std::cout<<DLtemp<<std::endl;
-	}
+	//if(DL>DLvec[npts-1]){
+	//	std::cout<<"WARNING: DL exceeded limit: setting to highest value in table"<<std::endl;
+	//	DLtemp=DLvec[npts-1];
+	//	std::cout<<DL<<std::endl;
+	//	std::cout<<DLtemp<<std::endl;
+	//}
 	
 	Z = gsl_spline_eval(Z_DL_spline_ptr, DLtemp, Z_DL_accel_ptr);
 	return Z;

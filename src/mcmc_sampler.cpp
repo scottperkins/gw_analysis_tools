@@ -11,6 +11,7 @@
 #include <thread>
 #include <vector>
 #include <queue>
+#include <functional>
 
 #ifndef _OPENMP
 #define omp ignore
@@ -222,16 +223,19 @@ ThreadPool *poolptr;
  *
  * Statistics_filename : should be txt extension
  */
-void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 		int dimension, 	/**< dimension of the parameter space being explored*/
 		int N_steps,	/**< Number of total steps to be taken, per chain*/
 		int chain_N,	/**< Number of chains*/
 		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 		double *chain_temps,	/**<Double array of temperatures for the chains*/
 		int swp_freq,	/**< the frequency with which chains are swapped*/
-		double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
-		double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
-		void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		//double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+		//double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+		//void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		std::function<double(double*,int,int)> log_prior,
+		std::function<double(double*,int,int)> log_likelihood,
+		std::function<void(double*,int,double**,int)>fisher,
 		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
@@ -273,7 +277,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
 	sampler.history_length = 500;
-	sampler.history_update = 1;
+	sampler.history_update = 5;
 	//Number of steps to take with the fisher before updating the fisher 
 	//to a new value 
 	//NOTE: if this is too low, detailed balance isn't maintained without 
@@ -297,7 +301,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	//########################################################
 	//########################################################
 	//Set chain 0 to highest priority
-	sampler.priority[0] = 1;
+	sampler.priority[0] = 0;
 	//########################################################
 	//########################################################
 
@@ -324,7 +328,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			
 		}
 		sampler.current_likelihoods[j] =
-			 sampler.ll(output[j][0],sampler.dimension)/sampler.chain_temps[j];
+			 sampler.ll(output[j][0],sampler.dimension, j)/sampler.chain_temps[j];
 		step_accepted[j]=0;
 		step_rejected[j]=0;
 	}
@@ -558,4 +562,62 @@ void mcmc_swap_threaded(int i, int j)
 	}
 	samplerptr->waiting[i]=true;
 	samplerptr->waiting[j]=true;
+}
+void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+		int dimension, 	/**< dimension of the parameter space being explored*/
+		int N_steps,	/**< Number of total steps to be taken, per chain*/
+		int chain_N,	/**< Number of chains*/
+		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+		double *chain_temps,	/**<Double array of temperatures for the chains*/
+		int swp_freq,	/**< the frequency with which chains are swapped*/
+		double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
+		double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
+		void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		)
+{
+	auto ll = [&log_likelihood](double *param, int dim, int chain_id){
+		return log_likelihood(param, dim);};
+
+	auto lp = [&log_prior](double *param, int dim, int chain_id){
+		return log_prior(param, dim);};
+	std::function<void(double*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm);};
+	}
+	
+	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, 
+			lp, ll, f, numThreads, pool, show_prog, 
+			statistics_filename, chain_filename, auto_corr_filename);
+}
+void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+		int dimension, 	/**< dimension of the parameter space being explored*/
+		int N_steps,	/**< Number of total steps to be taken, per chain*/
+		int chain_N,	/**< Number of chains*/
+		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+		double *chain_temps,	/**<Double array of temperatures for the chains*/
+		int swp_freq,	/**< the frequency with which chains are swapped*/
+		double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+		double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+		void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		)
+{
+	std::function<double(double*,int,int)> lp = log_prior;
+	std::function<double(double*,int,int)> ll = log_likelihood;
+	std::function<void(double*,int,double**,int)>f = fisher;
+	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, 
+			lp, ll, f, numThreads, pool, show_prog, 
+			statistics_filename, chain_filename, auto_corr_filename);
 }

@@ -5,6 +5,9 @@
 #include <complex>
 #include "adolc/adouble.h"
 #include <fftw3.h>
+#include <gsl/gsl_interp.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_errno.h>
 //#define adouble double
 /*! \file 
  *General utilities (functions and structures) independent of modelling method
@@ -109,6 +112,10 @@ struct gen_params
 	double chip = 0;
 
 	bool sky_average;
+	
+	gsl_spline *Z_DL_spline_ptr=NULL;
+
+	gsl_interp_accel *Z_DL_accel_ptr=NULL;
 };
 
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow
@@ -247,6 +254,10 @@ struct source_parameters
 
 	bool sky_average;
 
+	gsl_spline *Z_DL_spline_ptr=NULL;
+
+	gsl_interp_accel *Z_DL_accel_ptr=NULL;
+
 static source_parameters<T> populate_source_parameters(gen_params *param_in);
 static source_parameters<T> populate_source_parameters_old(
 			T mass1, 
@@ -258,10 +269,11 @@ static source_parameters<T> populate_source_parameters_old(
 			T t_c, 
 			bool sky_average) ;
 };
-void initiate_LumD_Z_interp();
-void free_LumD_Z_interp();
-adouble Z_from_DL(adouble DL);
-double Z_from_DL(double DL);
+void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr);
+void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr);
+adouble Z_from_DL(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);
+	
+double Z_from_DL(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);
 
 
 void printProgress (double percentage);

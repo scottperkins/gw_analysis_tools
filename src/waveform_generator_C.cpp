@@ -170,11 +170,11 @@ int fourier_phaseC(double *frequencies,
 	return 1;
 }
 
-void initiate_LumD_Z_interp_C()
-{
-	initiate_LumD_Z_interp();
-}
-void free_LumD_Z_interp_C()
-{
-	free_LumD_Z_interp();
-}
+//void initiate_LumD_Z_interp_C()
+//{
+//	initiate_LumD_Z_interp();
+//}
+//void free_LumD_Z_interp_C()
+//{
+//	free_LumD_Z_interp();
+//}

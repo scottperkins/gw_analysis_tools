@@ -4,6 +4,9 @@
 #include <fftw3.h>
 #include "util.h"
 #include <iostream>
+#include <gsl/gsl_interp.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_errno.h>
 /*! \file 
  */
 
@@ -31,6 +34,8 @@ static int *mcmc_data_length=NULL ;
 static fftw_outline *mcmc_fftw_plans=NULL ;
 static int mcmc_num_detectors=2;
 static double mcmc_gps_time=0;
+static gsl_interp_accel **mcmc_accels = NULL;
+static gsl_spline **mcmc_splines = NULL;
 //extern const double **mcmc_noise=NULL;
 //extern const std::complex<double> **mcmc_data=NULL;
 //extern const double **mcmc_frequencies=NULL;
@@ -200,7 +205,7 @@ void MCMC_MH_GW(double ***output,
 			double *initial_pos,
 			double *chain_temps,
 			int swp_freq,
-			double(*log_prior)(double *param, int dimension),
+			double(*log_prior)(double *param, int dimension, int chain_id),
 			int numThreads,
 			bool pool,
 			bool show_prog,
@@ -216,6 +221,6 @@ void MCMC_MH_GW(double ***output,
 			std::string chain_filename,
 			std::string auto_corr_filename
 			);
-void MCMC_fisher_wrapper(double *param, int dimension, double **output) ;
-double MCMC_likelihood_wrapper(double *param, int dimension) ;
+void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
+double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
 #endif

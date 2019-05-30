@@ -43,7 +43,7 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_mod( source_parameters<T> *param)
 {
  	T M = param->M;	
 	T DL = param->DL;
-	T Z= Z_from_DL(DL/MPC_SEC);
+	T Z= Z_from_DL(DL/MPC_SEC, param->Z_DL_accel_ptr,param->Z_DL_spline_ptr);
 	//T Z= 0;
 	//T Z=0.34972425;
 	T redshiftedM = M/(1.+Z);
@@ -107,7 +107,7 @@ T EdGB_IMRPhenomD_log<T>::EdGB_phase_mod( source_parameters<T> *param)
 {
  	T M = param->M;	
 	T DL = param->DL;
-	T Z= Z_from_DL(DL/MPC_SEC);
+	T Z= Z_from_DL(DL/MPC_SEC,param->Z_DL_accel_ptr, param->Z_DL_spline_ptr);
 	T redshiftedM = M/(1.+Z);
 	T phase_mod = exp(param->betappe[0]);
 	return 16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) * this->EdGB_phase_factor(param);
