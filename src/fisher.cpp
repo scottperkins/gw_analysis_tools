@@ -131,7 +131,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-7;
+	double epsilon = 1e-5;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -409,12 +409,17 @@ void calculate_derivatives(double  **amplitude_deriv,
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
 	}
-	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full"){
+	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" || gen_method == "MCMC_dCS_IMRPhenomD_Full"){
+		std::string local_gen;
+		if(gen_method == "MCMC_dCS_IMRPhenomD_log_Full")
+			local_gen = "dCS_IMRPhenomD_log";
+		else if(gen_method == "MCMC_dCS_IMRPhenomD_Full")
+			local_gen = "dCS_IMRPhenomD";
 		fourier_amplitude(frequencies, 
 			length,
 			amplitude,
 			//amplitude_cross_plus,
-			"dCS_IMRPhenomD_log",
+			local_gen,
 			parameters);	
 		std::complex<double> Qtemp = 
 			Q(parameters->theta, parameters->phi, parameters->incl_angle);
@@ -476,7 +481,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.phi = param_p[2];
 			waveform_params.NSflag = parameters->NSflag;
 			waveform_params.betappe = new double[1];
-			//waveform.bppe = new double[1];
 			waveform_params.betappe[0] = param_p[8];
 
 
@@ -489,13 +493,13 @@ void calculate_derivatives(double  **amplitude_deriv,
 				length,
 				amplitude_plus_plus,
 				//amplitude_cross_plus,
-				"IMRPhenomD",
+				local_gen,
 				&waveform_params);	
 			fourier_phase(frequencies, 
 				length,
 				phase_plus_plus,
 				//amplitude_cross_plus,
-				"IMRPhenomD",
+				local_gen,
 				&waveform_params);	
 
 
@@ -528,13 +532,13 @@ void calculate_derivatives(double  **amplitude_deriv,
 				length,
 				amplitude_plus_minus,
 				//amplitude_cross_plus,
-				"dCS_IMRPhenomD_log",
+				local_gen,
 				&waveform_params);	
 			fourier_phase(frequencies, 
 				length,
 				phase_plus_minus,
 				//amplitude_cross_plus,
-				"dCS_IMRPhenomD_log",
+				local_gen,
 				&waveform_params);	
 			delete [] waveform_params.betappe;
 			for (int l =0;l<length;l++)

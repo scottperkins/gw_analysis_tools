@@ -1,7 +1,6 @@
 #include "util.h"
 #include "GWATConfig.h"
-//#include "general_parameter_structures.h"
-#include "noise_util.h"
+#include "D_Z_Config.h"
 #include <math.h>
 #include <string>
 #include <string.h>
@@ -9,7 +8,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
-#include "adolc/adouble.h"
+#include <adolc/adouble.h>
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
@@ -31,8 +30,7 @@
 void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr)
 {
 	//int npts =100000;
-	//int npts =10000;
-	int npts =100;
+	int npts =10000;
 	double DLvec[npts];
 	double Zvec[npts];
 	*Z_DL_accel_ptr = gsl_interp_accel_alloc();
@@ -71,67 +69,15 @@ void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spl
 
 
 
-adouble Z_from_DL(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
+adouble Z_from_DL_interp(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
 {
-	//std::fstream data_table;
-	//data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
-	//int npts =100000;
-	//double DLvec[npts];
-	//double Zvec[npts];
-	//std::vector<std::string> row;
-	//std::string line, word, temp;
-	//int i =0,j=0;
-	//if(data_table){
-	//	while(std::getline(data_table,line)){
-	//		std::stringstream lineStream(line);	
-	//		std::string item;
-	//		while(std::getline(lineStream, item, ','))
-	//		{
-	//			if(j==0){DLvec[i]=std::stod(item);}
-	//			else if(j==1){Zvec[i]=std::stod(item);}
-	//			j++;
-	//		}
-	//		j = 0;
-	//		i ++;
-	//	}
-	//}
-	//gsl_interp_accel *Z_DL_accel_ptr = gsl_interp_accel_alloc();
-	//gsl_spline *Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
-	//gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
 	adouble Z = 0;
 	Z = (adouble)gsl_spline_eval(Z_DL_spline_ptr, DL.value(), Z_DL_accel_ptr);
 	return Z;
 }
 
-double Z_from_DL(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
+double Z_from_DL_interp(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
 {
-	//std::fstream data_table;
-	//data_table.open(PROJECT_DIRECTORY+"/data/tabulated_LumD_Z.csv",std::ios::in);
-	//int npts =100000;
-	//double DLvec[npts];
-	//double Zvec[npts];
-	//std::vector<std::string> row;
-	//std::string line, word, temp;
-	//int i =0,j=0;
-	//if(data_table){
-	//	while(std::getline(data_table,line)){
-	//		std::stringstream lineStream(line);	
-	//		std::string item;
-	//		while(std::getline(lineStream, item, ','))
-	//		{
-	//			if(i<npts){
-	//			if(j==0){DLvec[i]=std::stod(item);}
-	//			else if(j==1){Zvec[i]=std::stod(item);}
-	//			j++;
-	//			}
-	//		}
-	//		j = 0;
-	//		i ++;
-	//	}
-	//}
-	//gsl_interp_accel *Z_DL_accel_ptr = gsl_interp_accel_alloc();
-	//gsl_spline *Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
-	//gsl_spline_init(Z_DL_spline_ptr, DLvec, Zvec, npts);
 	double Z = 0;
 	double DLtemp = DL;
 	//if(DL>DLvec[npts-1]){
@@ -144,6 +90,169 @@ double Z_from_DL(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_sp
 	Z = gsl_spline_eval(Z_DL_spline_ptr, DLtemp, Z_DL_accel_ptr);
 	return Z;
 
+}
+//#######################################################################################
+
+
+/*! \brief Calculates the redshift given the luminosity distance
+ *
+ * Based on Astropy.cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.cosmology's definitions (http://docs.astropy.org/en/stable/cosmology/) and used scipy.optimize to fit to a power series, stepping in half powers of DL. These coefficients are then output to a header file (D_Z_config.h) which are used here to calculate redshift. Custom cosmologies etc can easily be acheived by editing the python script D_Z_config.py, the c++ functions do not need modification. They use whatever data is available in the header file.
+ *
+ * 5 cosmological models are available (this argument must be spelled exactly, although case insensitive):
+ * 
+ * PLANCK15, PLANCK13, WMAP9, WMAP7, WMAP5
+ */
+double Z_from_DL(double DL, std::string cosmology)
+{
+	std::string formatted_cosmo = "";
+	std::locale loc;
+  	for (std::string::size_type i=0; i<cosmology.length(); ++i)
+    		formatted_cosmo+=std::toupper(cosmology[i], loc);
+	int cosmo_index = cosmology_lookup(formatted_cosmo);
+	if (cosmo_index == -1){ std::cout<<"Invalid Cosmology"<<std::endl;return -1;}
+	const double *boundaries = boundaries_D[cosmo_index];
+	int interp_deg = interp_degree[cosmo_index];
+	//const double (**coeffs) = &COEFF_VEC_DZ[cosmo_index][0];
+	int num_seg = num_segments[cosmo_index];
+	double z;
+	for (int i =0; i<num_seg; i++){
+		if ( DL<boundaries[i+1]){
+			double *coeffs = new double [interp_deg];
+			for (int j =0; j<interp_deg;j++)
+				coeffs[j]=COEFF_VEC_DZ[cosmo_index][i][j];
+			z =  cosmology_interpolation_function(DL,coeffs, interp_deg);
+			delete[] coeffs;
+			return z;
+			
+		}	
+	}
+	return -1;
+	
+}
+adouble Z_from_DL(adouble DL, std::string cosmology)
+{
+	std::string formatted_cosmo = "";
+	std::locale loc;
+  	for (std::string::size_type i=0; i<cosmology.length(); ++i)
+    		formatted_cosmo+=std::toupper(cosmology[i], loc);
+	int cosmo_index = cosmology_lookup(formatted_cosmo);
+	if (cosmo_index == -1){ std::cout<<"Invalid Cosmology"<<std::endl;return -1;}
+	const double *boundaries = boundaries_D[cosmo_index];
+	int interp_deg = interp_degree[cosmo_index];
+	//const double (**coeffs) = &COEFF_VEC_DZ[cosmo_index][0];
+	int num_seg = num_segments[cosmo_index];
+	adouble z;
+	for (int i =0; i<num_seg; i++){
+		if ( DL<boundaries[i+1]){
+			double *coeffs = new double [interp_deg];
+			for (int j =0; j<interp_deg;j++)
+				coeffs[j]=COEFF_VEC_DZ[cosmo_index][i][j];
+			z =  cosmology_interpolation_function(DL,coeffs, interp_deg);
+			delete[] coeffs;
+			return z;
+			
+		}	
+	}
+	return -1;
+	
+}
+
+/*! \brief Calculates the luminosity distance given the redshift
+ *
+ * Based on Astropy.cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.cosmology's definitions (http://docs.astropy.org/en/stable/cosmology/) and used scipy.optimize to fit to a power series, stepping in half powers of Z. These coefficients are then output to a header file (D_Z_config.h) which are used here to calculate distance. Custom cosmologies etc can easily be acheived by editing the python script D_Z_config.py, the c++ functions do not need modification. They use whatever data is available in the header file. If the functional form of the fitting function changes, these functions DO need to change.
+ *
+ * 5 cosmological models are available (this argument must be spelled exactly):
+ * 
+ * PLANCK15, PLANCK13, WMAP9, WMAP7, WMAP5
+ */
+double DL_from_Z(double Z, std::string cosmology)
+{
+	std::string formatted_cosmo = "";
+	std::locale loc;
+  	for (std::string::size_type i=0; i<cosmology.length(); ++i)
+    		formatted_cosmo+=std::toupper(cosmology[i], loc);
+	int cosmo_index = cosmology_lookup(formatted_cosmo);
+	if (cosmo_index == -1){ std::cout<<"Invalid Cosmology"<<std::endl;return -1;}
+	const double *boundaries = boundaries_Z[cosmo_index];
+	int interp_deg = interp_degree[cosmo_index];
+	//const double (**coeffs) = &COEFF_VEC_DZ[cosmo_index][0];
+	int num_seg = num_segments[cosmo_index];
+	double dl;
+	for (int i =0; i<num_seg; i++){
+		if ( Z<boundaries[i+1]){
+			double *coeffs = new double [interp_deg];
+			for (int j =0; j<interp_deg;j++)
+				coeffs[j]=COEFF_VEC_ZD[cosmo_index][i][j];
+			dl =  cosmology_interpolation_function(Z,coeffs, interp_deg);
+			delete[] coeffs;
+			return dl;
+			
+		}	
+	}
+	return -1;
+}
+adouble DL_from_Z(adouble Z, std::string cosmology)
+{
+	std::string formatted_cosmo = "";
+	std::locale loc;
+  	for (std::string::size_type i=0; i<cosmology.length(); ++i)
+    		formatted_cosmo+=std::toupper(cosmology[i], loc);
+	int cosmo_index = cosmology_lookup(formatted_cosmo);
+	if (cosmo_index == -1){ std::cout<<"Invalid Cosmology"<<std::endl;return -1;}
+	const double *boundaries = boundaries_Z[cosmo_index];
+	int interp_deg = interp_degree[cosmo_index];
+	//const double (**coeffs) = &COEFF_VEC_DZ[cosmo_index][0];
+	int num_seg = num_segments[cosmo_index];
+	adouble dl;
+	for (int i =0; i<num_seg; i++){
+		if ( Z<boundaries[i+1]){
+			double *coeffs = new double [interp_deg];
+			for (int j =0; j<interp_deg;j++)
+				coeffs[j]=COEFF_VEC_ZD[cosmo_index][i][j];
+			dl =  cosmology_interpolation_function(Z,coeffs, interp_deg);
+			delete[] coeffs;
+			return dl;
+			
+		}	
+	}
+	return -1;
+}
+/*! \brief Custom interpolation function used in the cosmology calculations
+ *
+ * Power series in half power increments of x, up to 11/2. powers of x
+ *
+ */
+double cosmology_interpolation_function(double x,double *coeffs, int interp_degree)
+{
+	double sum=coeffs[0];
+	double rootx = std::sqrt(x);
+		
+	for(int i =1; i<interp_degree;i++){
+		sum+= coeffs[i]*pow_int(rootx,i);
+	}
+	return sum;
+
+}
+adouble cosmology_interpolation_function(adouble x,double *coeffs, int interp_degree)
+{
+	adouble sum=coeffs[0];
+	adouble rootx = sqrt(x);
+		
+	for(int i =1; i<interp_degree;i++){
+		sum+= coeffs[i]*pow_int(rootx,i);
+	}
+	return sum;
+
+}
+
+double cosmology_lookup(std::string cosmology)
+{
+	for (int i =0; i<num_cosmologies; i++){
+		if (cosmology == std::string(cosmos[i])){
+			return i;
+		}
+	}
+	return -1;
 }
 
 void printProgress (double percentage)
@@ -642,10 +751,21 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	}
 		
 	double Tobs = 1./(freqs[0][psd_length/2] - freqs[0][psd_length/2 - 1]);
+	double df = 1./Tobs;
 	int N = fs*duration;
 	int N_trimmed = Tobs*fs;
 	double *times_untrimmed = (double *)malloc(sizeof(double)*N);
 	double dt = 1./fs;
+	//MODIFIED HERE
+	//#################################################
+	//for (int j = 0; j< psd_length; j++){
+	//	for(int i =0; i< num_detectors ; i++){
+	//		psds[i][j] = psds[i][j]*N_trimmed;
+	//	}
+	//}
+	//#################################################
+
+
 	for (int i =0; i < N; i++){
 		times_untrimmed[i] = file_start + i*dt;
 	}
@@ -687,17 +807,21 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	}	
 	deactivate_likelihood_function(&plan);
 	double *freq_untrimmed = (double *)malloc(sizeof(double)*N_trimmed);
-	double df = 1./Tobs;
 	for(int i =0; i<N_trimmed; i++){
 		freq_untrimmed[i]=i*df;
 	}
 	double fmin = freqs[0][0];
 	double fmax = freqs[0][psd_length-1];
 	l = 0;
+	//MODIFIED HERE
 	for (int i =0 ; i<N_trimmed; i++){
 		if(freq_untrimmed[i]>=fmin && freq_untrimmed[i]<=fmax){
 			for(int j =0; j<num_detectors;j++){
 				data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
+	//#################################################
+				//data[j][l] = fft_data[j][i]/((double)N_trimmed);
+				//data[j][l] = fft_data[j][i];
+	//#################################################
 			}
 			l++;
 		}

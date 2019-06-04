@@ -28,7 +28,6 @@ const double MSOL_SEC =4.925491025543575903411922162094833998e-6 ;
 const double MPC_SEC = 3.085677581491367278913937957796471611e22/c; 
 
 
-
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
 //GSL versions of the constants, but G seems off..
@@ -116,6 +115,8 @@ struct gen_params
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
+		
+	std::string cosmology="PLANCK15";
 };
 
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow
@@ -257,6 +258,8 @@ struct source_parameters
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
+	
+	std::string cosmology;
 
 static source_parameters<T> populate_source_parameters(gen_params *param_in);
 static source_parameters<T> populate_source_parameters_old(
@@ -271,10 +274,16 @@ static source_parameters<T> populate_source_parameters_old(
 };
 void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr);
 void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr);
-adouble Z_from_DL(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);
-	
-double Z_from_DL(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);
+adouble Z_from_DL_interp(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);
+double Z_from_DL_interp(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);
 
+double Z_from_DL(double DL, std::string cosmology);
+double DL_from_Z(double Z, std::string cosmology);
+double cosmology_interpolation_function(double x, double *coeffs, int interp_degree);
+double cosmology_lookup(std::string cosmology);
+adouble Z_from_DL(adouble DL, std::string cosmology);
+adouble DL_from_Z(adouble Z, std::string cosmology);
+adouble cosmology_interpolation_function(adouble x, double *coeffs, int interp_degree);
 
 void printProgress (double percentage);
 

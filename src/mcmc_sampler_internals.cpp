@@ -112,8 +112,9 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		)
 {
 	int i ;
-	double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
+	//double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
 	//double alpha = .0005;
+	double alpha = sampler->randgauss_width[chain_id][0];
 	for (i=0;i<sampler->dimension;i++){
 		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
 	}
@@ -136,7 +137,9 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	//beta determines direction to step in eigen directions
 	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 	
-	double alpha = gsl_ran_gaussian(sampler->rvec[chain_index], 1);
+	//double alpha = gsl_ran_gaussian(sampler->rvec[chain_index], .5);
+	double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+				 sampler->randgauss_width[chain_index][3]);
 
 	double scaling = 0.0;
 	if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
@@ -146,6 +149,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				sampler->chain_temps[chain_index];}
 	//std::cout<<"FISHER scaling: "<<alpha/sqrt(scaling)<<std::endl;
 	//scaling = 1e10;
+	//std::cout<<sampler->fisher_vecs[chain_index][beta][8]<<std::endl;
 	for(int i =0; i< sampler->dimension;i++)
 	{
 		proposed_param[i] = current_param[i] +
@@ -243,10 +247,11 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
 	}while(j==i);
 		
-	double alpha = 1;
+	double alpha = .1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.5);
+		//alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.5);
+		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
 	for (int k = 0; k<sampler->dimension; k++)
 	{
 		proposed_param[k] = current_param[k] + alpha*
@@ -425,6 +430,17 @@ void allocate_sampler_mem(sampler *sampler)
 
 	sampler->current_likelihoods = (double *)malloc(sizeof(double) * sampler->chain_N);
 
+	sampler->check_stepsize_freq = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->max_target_accept_ratio = (double *)malloc(sizeof(double) * sampler->chain_N);
+	sampler->min_target_accept_ratio = (double *)malloc(sizeof(double) * sampler->chain_N);
+	sampler->gauss_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->gauss_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->fish_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->fish_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
+
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
@@ -459,6 +475,25 @@ void allocate_sampler_mem(sampler *sampler)
 
 		//Seed differently
 		gsl_rng_set(sampler->rvec[i] , i+1);
+	
+		sampler->check_stepsize_freq[i] = 500;
+		//max probability is a function of the temperature -- higher temp 
+		//are allowed to step more
+		sampler->max_target_accept_ratio[i] = .90-.15/sampler->chain_temps[i];
+		sampler->min_target_accept_ratio[i] = .60;
+		sampler->gauss_last_accept_ct[i] = 0.;
+		sampler->gauss_last_reject_ct[i] = 0.;
+		sampler->fish_last_accept_ct[i] = 0.;
+		sampler->fish_last_reject_ct[i] = 0.;
+		sampler->de_last_accept_ct[i] = 0.;
+		sampler->de_last_reject_ct[i] = 0.;
+
+		//Initial width size for all chains, all steps is 1.
+		//for(int j=0; j<sampler->types_of_steps;j++)
+		sampler->randgauss_width[i][0]=.01;
+		sampler->randgauss_width[i][1]=.05;
+		sampler->randgauss_width[i][2]=.05;
+		sampler->randgauss_width[i][3]=.5;
 
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
@@ -513,6 +548,17 @@ void deallocate_sampler_mem(sampler *sampler)
  
 	free(sampler->fisher_update_ct);
 	free(sampler->rvec);
+
+	free(sampler->check_stepsize_freq);
+	free(sampler->gauss_last_accept_ct);
+	free(sampler->gauss_last_reject_ct);
+	free(sampler->de_last_accept_ct);
+	free(sampler->de_last_reject_ct);
+	free(sampler->fish_last_accept_ct);
+	free(sampler->fish_last_reject_ct);
+	free(sampler->max_target_accept_ratio);
+	free(sampler->min_target_accept_ratio);
+	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
 	//gsl_rng_free(sampler->r);
 	
 }
@@ -831,6 +877,41 @@ void write_stat_file(sampler *sampler,
 		
 	}
 	out_file<<std::endl;	
+	//########################################################
+	
+	out_file<<
+		std::setw(width)<<std::left<<
+		"Final width of Gaussian random number per step type: "<<std::endl;
+	out_file<<
+		std::setw(fifth)<<std::left<<
+		"Chain Number"<<
+		std::setw(fifth)<<std::left<<
+		"Gaussian"<<
+		std::setw(fifth)<<std::left<<
+		"Diff. Ev."<<
+		std::setw(fifth)<<std::left<<
+		"MMALA"<<
+		std::setw(fifth)<<std::left<<
+		"Fisher"<<
+		std::endl;
+	for (int i =0; i < sampler->chain_N; i++){	
+		out_file<<
+			std::setw(fifth)<<std::left<<
+			i<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->randgauss_width[i][0]<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->randgauss_width[i][1]<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->randgauss_width[i][2]<<
+			std::setw(fifth)<<std::left<<
+			(double)sampler->randgauss_width[i][3]<<
+			std::endl;
+		
+	}
+	out_file<<std::endl;	
+
+	//#######################################################
 
 	double acc_total=0;
 	double rej_total=0;

@@ -23,6 +23,7 @@
  */
 struct sampler
 {
+	int types_of_steps = 4;
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
@@ -45,6 +46,18 @@ struct sampler
 	int *current_hist_pos;
 	double ***history;
 	double *current_likelihoods;
+
+
+	int *check_stepsize_freq;
+	double *max_target_accept_ratio;
+	double *min_target_accept_ratio;
+	int *gauss_last_accept_ct;
+	int *gauss_last_reject_ct;
+	int *de_last_accept_ct;
+	int *de_last_reject_ct;
+	int *fish_last_accept_ct;
+	int *fish_last_reject_ct;
+	double **randgauss_width;
 
 	double ***fisher_vecs;
 	double **fisher_vals;

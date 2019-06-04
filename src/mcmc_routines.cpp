@@ -453,6 +453,7 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 	std::complex<double> *response =
 		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
+	//std::cout<<params->betappe[0]<<std::endl;
 	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,
 				response, length, plan, tc, phic);
 	//std::cout<<detector<<std::endl;
@@ -863,8 +864,6 @@ void MCMC_MH_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	//gsl_interp_accel **accels = NULL;
-	//gsl_spline **splines = NULL;
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
 	}
@@ -875,15 +874,10 @@ void MCMC_MH_GW(double ***output,
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
 	}
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD_log"){
-		mcmc_accels= 
-			(gsl_interp_accel **)malloc(sizeof(gsl_interp_accel*)*chain_N);
-		mcmc_splines= 
-			(gsl_spline **)malloc(sizeof(gsl_spline*)*chain_N);
-		for (int i =0;i<chain_N;i++)
-		{	
-			initiate_LumD_Z_interp(&mcmc_accels[i] , &mcmc_splines[i]);
-		}
-		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, ln \alpha^2 "<<std::endl;
+		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, ln alpha^2 "<<std::endl;
+	}
+	else if(dimension==9 && generation_method =="dCS_IMRPhenomD"){
+		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 	}
 	else if(dimension==7 && generation_method =="IMRPhenomPv2"){
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, cos theta_1, cos theta_2"<<std::endl;
@@ -896,20 +890,11 @@ void MCMC_MH_GW(double ***output,
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename);
-	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos, chain_temps, swp_freq,
-	//	 log_prior,MCMC_likelihood_wrapper, NULL,statistics_filename,
-	//	chain_filename,auto_corr_filename);
 	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
 		deactivate_likelihood_function(&plans[i]);
 	free(plans);
-	if(dimension==9 && generation_method =="dCS_IMRPhenomD_log"){
-		for (int i =0;i<chain_N;i++)
-		{	
-			free_LumD_Z_interp(&mcmc_accels[i] , &mcmc_splines[i]);
-		}
-	}
 }
 
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id)
@@ -1037,9 +1022,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 
 		deallocate_2D_array(temp_out, dimension,dimension);
 	}
-	else if(dimension ==9 && mcmc_generation_method =="dCS_IMRPhenomD_log"){	
+	else if(dimension ==9 && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
+			|| mcmc_generation_method == "dCS_IMRPhenomD")){	
 		//unpack parameter vector
-		std::cout<<"FISHER "<<chain_id<<std::endl;
 		double incl = acos(param[0]);
 		double RA = param[1];
 		double DEC = param[2];
@@ -1048,6 +1033,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		double eta = param[5];
 		double chi1 = param[6];
 		double chi2 = param[7];
+		//ln alpha^2 or alpha^2, depending on method
 		double lnalpha2 = param[8];
 		double delta_t = 0;
 		double tc_ref =0;
@@ -1069,6 +1055,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		parameters.spin2[1] = 0;
 		parameters.spin2[2] = chi2;
 		parameters.Luminosity_Distance = DL;
+		parameters.Nmod = 1;
 		parameters.betappe = new double[1];
 		parameters.betappe[0] = lnalpha2;
 		//The rest is maximized over for this option
@@ -1079,8 +1066,8 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		parameters.theta=0;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
-		parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
-		parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
+		//parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
+		//parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
 		
 		for(int j =0; j<dimension; j++){
 			for(int k =0; k<dimension; k++)
@@ -1093,14 +1080,17 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
+			//std::cout<<"IN: "<<parameters.betappe[0]<<std::endl;
 			fisher(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 8, &parameters, 
+				mcmc_detectors[i], temp_out, 9, &parameters, 
 				NULL, NULL, mcmc_noise[i]);
+			//std::cout<<"out: "<<parameters.betappe[0]<<std::endl;
 			for(int j =0; j<dimension; j++){
 				for(int k =0; k<dimension; k++)
 				{
 					output[j][k] +=temp_out[j][k];
+					//std::cout<<j<<" "<<k<<" "<<output[j][k]<<std::endl;
 				}
 			} 
 		}
@@ -1331,10 +1321,11 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		delete [] phi;
 		delete [] theta;
 	}
-	else if(dimension ==9 && mcmc_generation_method =="dCS_IMRPhenomD_log"){	
+	//dCS or dCS_log doesn't matter, the two are the same until inside the waveform
+	else if(dimension ==9 && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
+				|| mcmc_generation_method == "dCS_IMRPhenomD")){	
 	//else if(false){	
 		//unpack parameter vector
-		std::cout<<"LL "<<chain_id<<std::endl;
 		double incl = acos(param[0]);
 		double RA = param[1];
 		double DEC = param[2];
@@ -1344,6 +1335,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double chi1 = param[6];
 		double chi2 = param[7];
 		double lnalpha2 = param[8];
+		//std::cout.precision(15);
+		//std::cout<<"lnalpha2 "<<lnalpha2<<std::endl;
 		double delta_t = 0;
 		double tc_ref =0;
 		double phic_ref =0;
@@ -1371,10 +1364,11 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.theta=theta[0];
 		parameters.NSflag = false;
 		parameters.sky_average = false;
+		parameters.Nmod = 1;
 		parameters.betappe = new double[1];
 		parameters.betappe[0] = lnalpha2;
-		parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
-		parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
+		//parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
+		//parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
 		
 		//Referecne detector first
 		ll += maximized_coal_Log_Likelihood(mcmc_data[0], 
@@ -1388,6 +1382,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 				&tc_ref,
 				&phic_ref
 				);
+		//double savell = ll;
+		//std::cout<<"HANFORD "<<ll<<std::endl;
 		for(int i=1; i < mcmc_num_detectors; i++){
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
 					mcmc_detectors[i], &phi[i], &theta[i]);
@@ -1405,11 +1401,12 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 					mcmc_generation_method,
 					&mcmc_fftw_plans[i]
 					);
+			//std::cout<<"L/V "<<ll-savell<<std::endl;
+			//savell = ll;
 		}
 		delete [] phi;
 		delete [] theta;
 		delete [] parameters.betappe;
-		std::cout<<"LL = "<<ll<<std::endl;
 	}
 	else if(dimension ==7 && mcmc_generation_method =="IMRPhenomPv2"){	
 	//if(false){	
@@ -1472,7 +1469,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 					&mcmc_fftw_plans[i]
 					);
 		}
-		std::cout<<ll<<std::endl;
 	}
 	//std::cout<<ll<<std::endl;
 	return ll;

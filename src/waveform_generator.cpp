@@ -77,6 +77,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.incl_angle = parameters->incl_angle;
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
+	params.cosmology = parameters->cosmology;
 	double ci = cos(params.incl_angle);
 	if(generation_method == "IMRPhenomD")
 	{
@@ -106,14 +107,14 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.betappe = parameters->betappe;
 		//params.bppe = parameters->bppe;
 		//params.Nmod =parameters->Nmod;
-		if(!parameters->Z_DL_accel_ptr){
-			params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
-			params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
-		}	
-		else{
-			initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
-			local_spline = true;
-		}
+		//if(!parameters->Z_DL_accel_ptr){
+		//	params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
+		//	params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
+		//}	
+		//else{
+		//	initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//	local_spline = true;
+		//}
 		params.Nmod = 1;
 		int tempbppe[params.Nmod] = {-1};
 		params.bppe = tempbppe;
@@ -129,9 +130,43 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		}
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
-		if(local_spline){
-			free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//if(local_spline){
+		//	free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//}
+	}
+	else if(generation_method == "dCS_IMRPhenomD")
+	{
+		bool local_spline = false;
+		dCS_IMRPhenomD<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod =parameters->Nmod;
+		//if(!parameters->Z_DL_accel_ptr){
+		//	params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
+		//	params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
+		//}	
+		//else{
+		//	initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//	local_spline = true;
+		//}
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+
+		
+		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i]* .5 *(1+ci*ci);
 		}
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+		//if(local_spline){
+		//	free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//}
 	}
 	else if(generation_method == "EdGB_IMRPhenomD_log")
 	{
@@ -265,6 +300,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.phiRef = parameters->phiRef;
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
+	params.cosmology = parameters->cosmology;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -283,14 +319,14 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		bool local_spline = false;
 		dCS_IMRPhenomD_log<double> ppemodeld;
 		params.betappe = parameters->betappe;
-		if(!parameters->Z_DL_accel_ptr){
-			params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
-			params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
-		}	
-		else{
-			initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
-			local_spline = true;
-		}
+		//if(!parameters->Z_DL_accel_ptr){
+		//	params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
+		//	params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
+		//}	
+		//else{
+		//	initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//	local_spline = true;
+		//}
 		//params.bppe = parameters->bppe;
 		//params.Nmod = parameters->Nmod;
 		params.Nmod = 1;
@@ -302,9 +338,37 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
-		if(local_spline){
-			free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
-		}
+		//if(local_spline){
+		//	free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//}
+	}
+	else if(generation_method == "dCS_IMRPhenomD")
+	{
+		bool local_spline = false;
+		dCS_IMRPhenomD<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//if(!parameters->Z_DL_accel_ptr){
+		//	params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
+		//	params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
+		//}	
+		//else{
+		//	initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//	local_spline = true;
+		//}
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+		//if(local_spline){
+		//	free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//}
 	}
 	else if(generation_method == "EdGB_IMRPhenomD_log")
 	{
@@ -392,6 +456,7 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	params = params.populate_source_parameters(parameters);
 	//params.f_ref = parameters->f_ref;
 	//params.phiRef = parameters->phiRef;
+	params.cosmology = parameters->cosmology;
 
 	if(generation_method == "IMRPhenomD")
 	{
@@ -412,6 +477,14 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 		//params.bppe = parameters->bppe;
 		//params.Nmod = parameters->Nmod;
 		dCS_IMRPhenomD_log<double> ppemodeld;
+		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	}
+	else if(generation_method == "dCS_IMRPhenomD")
+	{
+		//params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		dCS_IMRPhenomD<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "EdGB_IMRPhenomD_log")
@@ -467,6 +540,7 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	params = params.populate_source_parameters(parameters);
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
+	params.cosmology = parameters->cosmology;
 
 	if(generation_method == "IMRPhenomD")
 	{
@@ -485,14 +559,14 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	{
 		bool local_spline = false;
 		params.betappe = parameters->betappe;
-		if(!parameters->Z_DL_accel_ptr){
-			params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
-			params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
-		}	
-		else{
-			initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
-			local_spline = true;
-		}
+		//if(!parameters->Z_DL_accel_ptr){
+		//	params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
+		//	params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
+		//}	
+		//else{
+		//	initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//	local_spline = true;
+		//}
 		//params.bppe = parameters->bppe;
 		//params.Nmod = parameters->Nmod;
 		params.Nmod = 1;
@@ -506,9 +580,38 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
-		if(local_spline){
-			free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
-		}
+		//if(local_spline){
+		//	free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//}
+	}
+	else if(generation_method == "dCS_IMRPhenomD")
+	{
+		bool local_spline = false;
+		params.betappe = parameters->betappe;
+		//if(!parameters->Z_DL_accel_ptr){
+		//	params.Z_DL_accel_ptr = parameters->Z_DL_accel_ptr;	
+		//	params.Z_DL_spline_ptr = parameters->Z_DL_spline_ptr;	
+		//}	
+		//else{
+		//	initiate_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//	local_spline = true;
+		//}
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		dCS_IMRPhenomD<double> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+		//if(local_spline){
+		//	free_LumD_Z_interp(&params.Z_DL_accel_ptr, &params.Z_DL_spline_ptr);
+		//}
 	}
 	else if(generation_method == "EdGB_IMRPhenomD_log")
 	{

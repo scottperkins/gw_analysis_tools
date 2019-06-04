@@ -12,12 +12,12 @@
 #include <vector>
 #include <queue>
 #include <functional>
+#include <unistd.h>
 
 #ifndef _OPENMP
 #define omp ignore
 #endif
 
-#include <unistd.h>
 
 /*!\file 
  * Source file for the sampler foundation
@@ -418,6 +418,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 						poolptr->enqueue(i);
 					}
 				}
+				
 				//else if(i!=0 && samplerptr->waiting[i] &&
 				//	samplerptr->chain_pos[i]>(N_steps-samplerptr->swp_freq-1))
 				//{
@@ -436,6 +437,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 			}
 			if(show_prog)
 				printProgress((double)samplerptr->progress/N_steps);
+			usleep(300);
 		}
 	}
 	//##############################################################
@@ -543,6 +545,61 @@ void mcmc_step_threaded(int j)
 		}
 	}
 	samplerptr->chain_pos[j]+=cutoff;
+
+	//update stepsize to maximize step efficiency
+	//increases in stepsizes of 10%
+	double frac, acc, rej;
+	if(samplerptr->chain_pos[j]%samplerptr->check_stepsize_freq[j] == 0){
+		//Gaussian
+		if(samplerptr->step_prob[j][0]!= 0){
+			acc = samplerptr->gauss_accept_ct[j] - samplerptr->gauss_last_accept_ct[j];	
+			rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][0] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][0] *=1.1;	
+			}
+			samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
+			samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
+		}	
+		//de
+		if(samplerptr->step_prob[j][1]!= 0){
+			acc = samplerptr->de_accept_ct[j] - samplerptr->de_last_accept_ct[j];	
+			rej = samplerptr->de_reject_ct[j] - samplerptr->de_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][1] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][1] *=1.1;	
+			}
+			samplerptr->de_last_accept_ct[j]=samplerptr->de_accept_ct[j];
+			samplerptr->de_last_reject_ct[j]=samplerptr->de_reject_ct[j];
+		}	
+		//fisher
+		if(samplerptr->step_prob[j][3]!= 0){
+			acc = samplerptr->fish_accept_ct[j] - samplerptr->fish_last_accept_ct[j];	
+			rej = samplerptr->fish_reject_ct[j] - samplerptr->fish_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][3] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][3] *=1.1;	
+			}
+			samplerptr->fish_last_accept_ct[j]=samplerptr->fish_accept_ct[j];
+			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
+		}	
+		
+		//Make this more general later
+		//for (int k =0; k<samplerptr->types_of_steps; k++){
+		//	if(step_prob[j][k]!= 0){
+		//		
+		//	}
+		//}
+	}
 	poolptr->enqueue_swap(j);
 }
 void mcmc_swap_threaded(int i, int j)

@@ -48,6 +48,7 @@ void test15();
 void test16();
 void test17();
 void test18();
+void test19();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -56,6 +57,7 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id);
 double test_lp_GW_7dim(double *pos, int dim, int chain_id);
 double test_lp_GW_DFull(double *pos, int dim, int chain_id);
 double test_lp_GW_dCS(double *pos, int dim, int chain_id);
+double test_lp_GW_dCS_log(double *pos, int dim, int chain_id);
 void test_fisher(double *pos, int dim, double **fisher);
 double log_student_t (double *x,int dim);
 double log_neil_proj3 (double *x,int dim);
@@ -72,34 +74,119 @@ static double *psd=NULL;
 
 int main(){
 
-	test17();	
+	test14();	
 	return 0;
+}
+void test19()
+{
+	gen_params params;
+	double RA=1, DEC=.2;
+	double gps_time = 1185389807.3;//TESTING -- gw170729
+	params.mass1 = 80;
+	params.mass2 = 40;
+	params.spin1[0] = 0;
+	params.spin1[1] = 0;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin1[2] = .1;
+	params.spin2[2] = .1;
+	params.Nmod = 1;
+	params.betappe= new double[params.Nmod];
+	params.betappe[0] = -1;
+	params.sky_average = false;
+	params.NSflag = false;
+	params.incl_angle = M_PI/3.;
+	params.theta = 0;
+	params.phi = 0;
+	params.Luminosity_Distance = 400;
+	params.phic = 0;
+	params.tc = 0;
+	std::string gen_method = "MCMC_dCS_IMRPhenomD_log_Full";
+	std::string detector = "Hanford";
+	
+	int length = 4000;
+	double freqs[length];
+	double fhigh = 1024;
+	double flow = 10;
+	double fstep = (fhigh-flow)/length;
+	for(int i =0; i<length; i++){
+		freqs[i] = flow + i*fstep;
+	}
+	double noise[length];
+	populate_noise(freqs,"Hanford_O1_fitted", noise,length);
+	for (int i =0; i<length;i++){
+		noise[i] = noise[i]*noise[i];
+	}
+	int dim = 9;
+	double **fishout = allocate_2D_array(dim, dim);
+	std::complex<double> response[length];
+	std::complex<double> responsedcs[length];
+	double tc=2;
+	params.tc = tc;
+	double phic;
+	double phicmax, tcmax;
+	fftw_outline plan;
+	initiate_likelihood_function(&plan, length);
+
+	//fisher(freqs, length, gen_method, detector,fishout,dim, &params,NULL, NULL, noise);
+	fourier_detector_response(freqs, length, response, detector, "IMRPhenomD",&params);
+	fourier_detector_response(freqs, length, responsedcs, detector, "dCS_IMRPhenomD_log",&params);
+
+
+	celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
+	double llmax = maximized_coal_Log_Likelihood(response, noise, freqs, length, &params,
+			"Hanford", "dCS_IMRPhenomD_log",&plan, &tcmax,&phicmax);
+	std::cout<<tcmax<<" "<<phicmax<<std::endl;
+	double temptheta = params.theta;
+	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
+	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
+	double ll = Log_Likelihood(response, noise, freqs, length, &params,
+			"Livingston", "dCS_IMRPhenomD_log", &plan);
+	std::cout.precision(15);
+	std::cout<<llmax<<std::endl;
+	std::cout<<ll<<std::endl;
+	std::cout<<ll+llmax<<std::endl;
+	for(int i =0; i<length/4;i++){
+	//for(int i =0; i<dim;i++){
+		for(int j =0; j<dim; j++){
+			//std::cout<<i<<" "<<j<<" "<<fishout[i][j]<<std::endl;
+			//std::cout<<i<<" "<<j<<" "<<fishout[i][j]<<std::endl;
+		}
+		//std::cout<<responsedcs[i]-response[i]<<std::endl;
+	}
+	deallocate_2D_array(fishout, dim , dim);
+	delete [] params.betappe;
+	deactivate_likelihood_function(&plan);
 }
 void test18()
 {
 	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
 	int datalength = 131075;
 	//double **psd = allocate_2D_array(rows, cols);
 	//read_LOSC_PSD_file(psd_file, psd, rows, cols);
 	//double data_start_time, duration, fs;
-	//int num_detectors = 2, psd_length = 8032, length;
-	int num_detectors = 3, psd_length = 4016, length;
-	//double gps_time = 1135136350.6;//TESTING -- gw151226
-	double gps_time = 1185389807.3;//TESTING -- gw170729
+	int num_detectors = 2, psd_length = 8032, length;
+	//int num_detectors = 3, psd_length = 4016, length;
+	double gps_time = 1135136350.6;//TESTING -- gw151226
+	//double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1185389807.3;//TESTING -- gw170729
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
-	detectors[2] = "Virgo";
+	//detectors[2] = "Virgo";
 	std::string *detector_files = new std::string[num_detectors];
-	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
  	//double trigger_time= 1135136350.6;
  	double trigger_time = gps_time;
 	double **psd = allocate_2D_array(num_detectors,psd_length);
@@ -114,18 +201,20 @@ void test18()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
-	data_length[2] =psd_length;
+	//data_length[2] =psd_length;
 
 	//#########################################################
 	//mcmc options
 	int dimension = 9;
-	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
-	double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -.1};
-	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
-	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
-	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
-	int n_steps = 20000;
-	int chain_N= 5;
+	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(50000,4))};
+	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(5,4))};
+	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -5};
+	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
+	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-70};
+	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
+	std::cout<<initial_pos[8]<<std::endl;
+	int n_steps = 300000;
+	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 3;
@@ -135,11 +224,12 @@ void test18()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int numThreads = 1;
+	int numThreads = 4;
 	bool pool = false;
 	//#########################################################
 	//gw options
 	std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD";
 	
 	
 	std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
@@ -148,7 +238,7 @@ void test18()
 	std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
-			swp_freq, test_lp_GW_dCS,numThreads, pool,show_progress,
+			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,
 			generation_method,statfilename,"",autocorrfile);	
@@ -158,29 +248,31 @@ void test18()
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
 
 	for(int j = 0; j<n_steps;j++){
-			output_transform[j][0]=output[0][j][0];
-			output_transform[j][1]=output[0][j][1];
-			output_transform[j][2]=output[0][j][2];
-			output_transform[j][3]=std::exp(output[0][j][3]);
-			output_transform[j][4]=std::exp(output[0][j][4]);
-			output_transform[j][5]=output[0][j][5];
-			output_transform[j][6]=output[0][j][6];
-			output_transform[j][7]=output[0][j][7];
-			output_transform[j][8]=std::exp(output[0][j][8]);
+		output_transform[j][0]=output[0][j][0];
+		output_transform[j][1]=output[0][j][1];
+		output_transform[j][2]=output[0][j][2];
+		output_transform[j][3]=std::exp(output[0][j][3]);
+		output_transform[j][4]=std::exp(output[0][j][4]);
+		output_transform[j][5]=output[0][j][5];
+		output_transform[j][6]=output[0][j][6];
+		output_transform[j][7]=output[0][j][7];
+		output_transform[j][8]=std::exp(output[0][j][8]);
+		//output_transform[j][8]=output[0][j][8];
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
 	chainfile = "testing/data/mcmc_output_dCS_hot.csv";
 	for(int j = 0; j<n_steps;j++){
-			output_transform[j][0]=output[chain_N-1][j][0];
-			output_transform[j][1]=output[chain_N-1][j][1];
-			output_transform[j][2]=output[chain_N-1][j][2];
-			output_transform[j][3]=std::exp(output[chain_N-1][j][3]);
-			output_transform[j][4]=std::exp(output[chain_N-1][j][4]);
-			output_transform[j][5]=output[chain_N-1][j][5];
-			output_transform[j][6]=output[chain_N-1][j][6];
-			output_transform[j][7]=output[chain_N-1][j][7];
-			output_transform[j][8]=std::exp(output[chain_N-1][j][8]);
+		output_transform[j][0]=output[chain_N-1][j][0];
+		output_transform[j][1]=output[chain_N-1][j][1];
+		output_transform[j][2]=output[chain_N-1][j][2];
+		output_transform[j][3]=std::exp(output[chain_N-1][j][3]);
+		output_transform[j][4]=std::exp(output[chain_N-1][j][4]);
+		output_transform[j][5]=output[chain_N-1][j][5];
+		output_transform[j][6]=output[chain_N-1][j][6];
+		output_transform[j][7]=output[chain_N-1][j][7];
+		output_transform[j][8]=std::exp(output[chain_N-1][j][8]);
+		//output_transform[j][8]=output[chain_N-1][j][8];
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -217,38 +309,46 @@ void test18()
 }
 void test17()
 {
-	clock_t start7,end7;
-	int threads =10;
-	start7 = clock();
+	std::cout<<Z_from_DL(1000.,"PLANCK13")<<std::endl;
+	std::cout<<Z_from_DL(10000.,"PLANCK13")<<std::endl;
+	std::cout<<Z_from_DL(100.,"PLANCK13")<<std::endl;
+	std::cout<<DL_from_Z(10.,"PLANCK13")<<std::endl;
+	std::cout<<DL_from_Z(1.,"PLANCK13")<<std::endl;
+	std::cout<<DL_from_Z(.1,"PLANCK13")<<std::endl;
+	//clock_t start7,end7;
+	//int threads =10;
+	//start7 = clock();
 	//gsl_spline **z_d_spline = (gsl_spline **)malloc(sizeof(gsl_spline*)*threads);	
 	//gsl_interp_accel **z_d_accel= (gsl_interp_accel **)malloc(sizeof(gsl_interp_accel *)*threads);	
 	//for(int i =0; i<threads; i++){
 	//	initiate_LumD_Z_interp(&z_d_accel[i], &z_d_spline[i]);
 	//}
-	int iterations = 100;
-	omp_set_num_threads(threads);
-	#pragma omp parallel for 
-	for (int j =0; j<iterations; j++){
-		gsl_spline *z_d_spline;
-		gsl_interp_accel *z_d_accel;
-		initiate_LumD_Z_interp(&z_d_accel, &z_d_spline);
-		std::cout<<j<<std::endl;
-		std::cout<<Z_from_DL(j+10, z_d_accel, z_d_spline)<<std::endl;;
-		free_LumD_Z_interp(&z_d_accel, &z_d_spline);
-	}
+	//int iterations = 100;
+	//omp_set_num_threads(threads);
+	//#pragma omp parallel for 
+	//for (int j =0; j<iterations; j++){
+	//	gsl_spline *z_d_spline;
+	//	gsl_interp_accel *z_d_accel;
+	//	initiate_LumD_Z_interp(&z_d_accel, &z_d_spline);
+	//	std::cout<<j<<std::endl;
+	//	std::cout<<Z_from_DL_interp(j+10, z_d_accel, z_d_spline)<<std::endl;;
+	//	free_LumD_Z_interp(&z_d_accel, &z_d_spline);
+	//}
 
-	//for (int i =0; i<threads;i++)
-	//	free_LumD_Z_interp(&z_d_accel[i], &z_d_spline[i]);
-	end7 = clock();
+	////for (int i =0; i<threads;i++)
+	////	free_LumD_Z_interp(&z_d_accel[i], &z_d_spline[i]);
+	//end7 = clock();
 
-	cout<<"TIMING interp: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
+	//cout<<"TIMING interp: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
 }
 
 void test16()
 {
 	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170608/GWTC1_GW170608_PSDs.dat.txt";
+	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
 	int datalength = 131075;
@@ -256,19 +356,24 @@ void test16()
 	//read_LOSC_PSD_file(psd_file, psd, rows, cols);
 	//double data_start_time, duration, fs;
 	//int num_detectors = 2, psd_length = 8032, length;
-	int num_detectors = 3, psd_length = 4016, length;
+	int num_detectors = 2, psd_length = 16064, length;
+	//int num_detectors = 3, psd_length = 4016, length;
+	//double gps_time = 1126259462;//TESTING -- gw150914
 	//double gps_time = 1135136350.6;//TESTING -- gw151226
-	double gps_time = 1185389807.3;//TESTING -- gw170729
+	//double gps_time = 1185389807.3;//TESTING -- gw170729
+	double gps_time = 1180922494.5;//TESTING -- gw170608
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
-	detectors[2] = "Virgo";
+	//detectors[2] = "Virgo";
 	std::string *detector_files = new std::string[num_detectors];
 	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170608/H-H1_GWOSC_4KHZ_R1-1180922479-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170608/L-L1_GWOSC_4KHZ_R1-1180922479-32.txt";
+	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
  	//double trigger_time= 1135136350.6;
  	double trigger_time = gps_time;
 	double **psd = allocate_2D_array(num_detectors,psd_length);
@@ -283,17 +388,17 @@ void test16()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
-	data_length[2] =psd_length;
+	//data_length[2] =psd_length;
 
 	//#########################################################
 	//mcmc options
 	int dimension = 8;
-	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
+	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(30), .24,- .0,-.0};
 	double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0};
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
-	int n_steps = 20000;
+	int n_steps = 40000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -304,7 +409,7 @@ void test16()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int numThreads = 4;
+	int numThreads = 10;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -592,8 +697,8 @@ void test14()
 	//int high_cut = 11000;
 	//int length = high_cut-cutoff;
 	
-	//int raw_length=  4096;
-	int raw_length=  8032;
+	int raw_length=  4096;
+	//int raw_length=  8032;
 	int cutoff = 50;
 	int length = raw_length-cutoff;
 
@@ -629,12 +734,12 @@ void test14()
 		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
 		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
 	}
-	//read_file(filebase+"data_H.csv",temp_data, raw_length,2);
-	//read_file(filebase+"psd_H.csv",temp_psd);
-	//read_file(filebase+"freq_H.csv",temp_freq);
-	read_file(filebase+"data_H_new.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_H_new.csv",temp_psd);
-	read_file(filebase+"freq_H_new.csv",temp_freq);
+	read_file(filebase+"data_H.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_H.csv",temp_psd);
+	read_file(filebase+"freq_H.csv",temp_freq);
+	//read_file(filebase+"data_H_new.csv",temp_data, raw_length,2);
+	//read_file(filebase+"psd_H_new.csv",temp_psd);
+	//read_file(filebase+"freq_H_new.csv",temp_freq);
 	//read_file(filebase+"data_L.csv",temp_data, raw_length,2);
 	//read_file(filebase+"psd_L.csv",temp_psd);
 	//read_file(filebase+"freq_L.csv",temp_freq);
@@ -650,12 +755,12 @@ void test14()
 		psd[0][j] = 1./delta_f * (temp_psd[j+cutoff]);	
 		data[0][j] = 1./delta_f * std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
 	}
-	//read_file(filebase+"data_L.csv",temp_data, raw_length,2);
-	//read_file(filebase+"psd_L.csv",temp_psd);
-	//read_file(filebase+"freq_L.csv",temp_freq);
-	read_file(filebase+"data_L_new.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_L_new.csv",temp_psd);
-	read_file(filebase+"freq_L_new.csv",temp_freq);
+	read_file(filebase+"data_L.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_L.csv",temp_psd);
+	read_file(filebase+"freq_L.csv",temp_freq);
+	//read_file(filebase+"data_L_new.csv",temp_data, raw_length,2);
+	//read_file(filebase+"psd_L_new.csv",temp_psd);
+	//read_file(filebase+"freq_L_new.csv",temp_freq);
 	//read_file(filebase+"data_H.csv",temp_data, raw_length,2);
 	//read_file(filebase+"psd_H.csv",temp_psd);
 	//read_file(filebase+"freq_H.csv",temp_freq);
@@ -755,8 +860,8 @@ void test14()
 	//double initial_pos[dimension]={-.0, 0.,-0.,log(400),log(10), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
-	int n_steps = 10000;
-	int chain_N= 4;
+	int n_steps = 30000;
+	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -770,17 +875,17 @@ void test14()
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
 	
-	int numThreads = 4;
+	int numThreads = 8;
 	bool pool = true;
 	//#########################################################
 	//gw options
 	std::string generation_method = "IMRPhenomD";
 	
 	
-	std::string autocorrfile = "testing/data/auto_corr_mcmc_DFull.csv";
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_DFull_Neil.csv";
 	//std::string autocorrfile = "";
-	std::string chainfile = "testing/data/mcmc_output_DFull.csv";
-	std::string statfilename = "testing/data/mcmc_statistics_DFull.txt";
+	std::string chainfile = "testing/data/mcmc_output_DFull_Neil.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_DFull_Neil.txt";
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool, show_progress, 
 			num_detectors, 
@@ -805,7 +910,7 @@ void test14()
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
-	chainfile = "testing/data/mcmc_output_DFull_hot.csv";
+	chainfile = "testing/data/mcmc_output_DFull_hot_Neil.csv";
 	for(int j = 0; j<n_steps;j++){
 			output_transform[j][0]=output[chain_N-1][j][0];
 			output_transform[j][1]=output[chain_N-1][j][1];
@@ -2708,10 +2813,28 @@ double test_lp_GW_DFull(double *pos, int dim, int chain_id)
 double test_lp_GW_dCS(double *pos, int dim , int chain_id)
 {
 	double a = -std::numeric_limits<double>::infinity();
-	double alphamin = 0;
-	double alphamax = 1e6;
-	if((std::exp(pos[8])<alphamin) || std::exp(pos[8])>alphamax){return a;}
+	double alphasqmin = 0;
+	double alphasqmax = 1e4;//>10^6 km in \sqrt{\alpha}
+	//if((std::exp(pos[8])<alphamin) || std::exp(pos[8])>alphamax){return a;}
+	//if((std::exp(pos[8])<alphamin) ){return a;}
+	//if(((pos[8])<lnalphamin) ){return a;}
+	if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){return a;}
 	
 	//Uniform prior on \alpha^2, not \alpha
-	else { return test_lp_GW_DFull(pos,dim,chain_id)+pos[8];}
+	else { return test_lp_GW_DFull(pos,dim,chain_id)-.75*std::log(pos[8]);}
+	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
+}
+double test_lp_GW_dCS_log(double *pos, int dim , int chain_id)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double lnalphamin = -500;
+	double lnalphamax = 0;
+	//if((std::exp(pos[8])<alphamin) || std::exp(pos[8])>alphamax){return a;}
+	//if((std::exp(pos[8])<alphamin) ){return a;}
+	//if(((pos[8])<lnalphamin) ){return a;}
+	if(((pos[8])<lnalphamin)|| (pos[8]>lnalphamax) ){return a;}
+	
+	//Uniform prior on \alpha^2, not \alpha
+	else { return test_lp_GW_DFull(pos,dim,chain_id)+.25*pos[8];}
+	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }

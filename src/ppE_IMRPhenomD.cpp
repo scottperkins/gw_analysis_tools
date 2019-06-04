@@ -39,18 +39,93 @@
 //} 
 
 template<class T>
+T dCS_IMRPhenomD<T>::dCS_phase_mod( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	//T Z= Z_from_DL_interp(DL/MPC_SEC, param->Z_DL_accel_ptr,param->Z_DL_spline_ptr);
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	//T Z= 0;
+	//T Z=0.34972425;
+	T redshiftedM = M/(1.+Z);
+	T phase_mod = param->betappe[0];
+	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *this->dCS_phase_factor(param);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"dCS"<<std::endl;	
+	//	std::cout<<Z<<std::endl;
+	//	std::cout<<out<<std::endl;
+	//	std::cout<<param->betappe[0]<<std::endl;
+	//}
+	return out;
+} 
+
+template<class T>
+T dCS_IMRPhenomD<T>::dCS_phase_factor(source_parameters<T> *param)
+{
+	T g=0;
+ 	T M = param->M;	
+ 	T chirpmass = param->chirpmass;	
+ 	T eta = param->eta;	
+	T coeff1 = -5./8192.;
+	T coeff2 = 15075./114688.;
+	T m1 = calculate_mass1(chirpmass,eta);
+	T m2 = calculate_mass2(chirpmass,eta);
+	T m = m1+m2;
+	T chi1 = param->chi_s+param->chi_a;
+	T chi2 = param->chi_s-param->chi_a;
+	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * sqrt((3. - 2.*(1.-chi1*chi1)));
+	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * sqrt((3. - 2.*(1.-chi2*chi2)));
+	chi1 +=1e-10;
+	chi2 +=1e-10;
+	T s1  = s1temp/(2.*chi1*chi1*chi1);
+	T s2  = s2temp/(2.*chi2*chi2*chi2);
+	
+	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
+	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 305./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
+	return g;
+}
+
+template<class T>
+int dCS_IMRPhenomD<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
+{
+	params->betappe[0] = this->dCS_phase_mod(params);
+	ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
+}
+
+template<class T>
+int dCS_IMRPhenomD<T>::construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params)
+{
+	ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
+}
+
+template<class T>
+int dCS_IMRPhenomD<T>::construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params)
+{
+	params->betappe[0] = this->dCS_phase_mod(params);
+	ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
+}
+
+
+
+//###########################################################################
+
+template<class T>
 T dCS_IMRPhenomD_log<T>::dCS_phase_mod( source_parameters<T> *param)
 {
  	T M = param->M;	
 	T DL = param->DL;
-	T Z= Z_from_DL(DL/MPC_SEC, param->Z_DL_accel_ptr,param->Z_DL_spline_ptr);
+	//T Z= Z_from_DL_interp(DL/MPC_SEC, param->Z_DL_accel_ptr,param->Z_DL_spline_ptr);
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	//T Z= 0;
 	//T Z=0.34972425;
 	T redshiftedM = M/(1.+Z);
 	T phase_mod = exp(param->betappe[0]);
 	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *this->dCS_phase_factor(param);
 	//if(std::is_same< double, T>::value){
-	    //std::cout<<Z<<std::endl;
+	//	std::cout<<"dCS"<<std::endl;	
+	//	std::cout<<Z<<std::endl;
+	//	std::cout<<out<<std::endl;
+	//	std::cout<<param->betappe[0]<<std::endl;
 	//}
 	return out;
 } 
@@ -85,6 +160,10 @@ template<class T>
 int dCS_IMRPhenomD_log<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
 	params->betappe[0] = this->dCS_phase_mod(params);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"post dCS"<<std::endl;	
+	//	std::cout<<params->betappe[0]<<std::endl;
+	//}
 	ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
 }
 
@@ -107,7 +186,8 @@ T EdGB_IMRPhenomD_log<T>::EdGB_phase_mod( source_parameters<T> *param)
 {
  	T M = param->M;	
 	T DL = param->DL;
-	T Z= Z_from_DL(DL/MPC_SEC,param->Z_DL_accel_ptr, param->Z_DL_spline_ptr);
+	//T Z= Z_from_DL_interp(DL/MPC_SEC,param->Z_DL_accel_ptr, param->Z_DL_spline_ptr);
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T redshiftedM = M/(1.+Z);
 	T phase_mod = exp(param->betappe[0]);
 	return 16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) * this->EdGB_phase_factor(param);
@@ -169,10 +249,16 @@ T ppE_IMRPhenomD_Inspiral<T>::phase_ins(T f, source_parameters<T> *param, T *pn_
 	T PIMFcube = pow(M_PI * param->chirpmass * f, 1./3.);
 	T gr_ins = model.phase_ins(f, param, pn_coeff, lambda,powers);
 	T phaseout= gr_ins;
+	
 	for(int i = 0; i<param->Nmod; i++)
 		//phaseout += pow((param->chirpmass *M_PI * f),param->bppe[i]/3.) * param->betappe[i];
 		phaseout =phaseout +  pow_int((PIMFcube),(int)param->bppe[i]) * param->betappe[i];
 	//return (gr_ins + pow((param->chirpmass *M_PI * f),param->bppe/3.) * param->betappe);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<"loop dCS"<<std::endl;	
+	//	std::cout<<phaseout<<std::endl;
+	//	std::cout<<param->betappe[0]<<std::endl;
+	//}
 	return phaseout;
 
 }
@@ -991,5 +1077,7 @@ template class ppE_IMRPhenomD_IMR<double>;
 template class ppE_IMRPhenomD_IMR<adouble>;
 template class dCS_IMRPhenomD_log<double>;
 template class dCS_IMRPhenomD_log<adouble>;
+template class dCS_IMRPhenomD<double>;
+template class dCS_IMRPhenomD<adouble>;
 template class EdGB_IMRPhenomD_log<double>;
 template class EdGB_IMRPhenomD_log<adouble>;
