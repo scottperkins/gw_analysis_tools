@@ -760,7 +760,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	//#################################################
 	//for (int j = 0; j< psd_length; j++){
 	//	for(int i =0; i< num_detectors ; i++){
-	//		psds[i][j] = psds[i][j]*N_trimmed;
+	//		psds[i][j] = psds[i][j]*df;
 	//	}
 	//}
 	//#################################################

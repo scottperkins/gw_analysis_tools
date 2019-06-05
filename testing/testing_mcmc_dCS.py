@@ -9,10 +9,9 @@ data = np.loadtxt("data/mcmc_output_dCS.csv",delimiter=',')
 #data = data[10000:]
 for i in np.arange(9):
     parameter = [x[i] for x in data]
+    plt.plot(parameter)
     if i == 8:
-        plt.loglog(parameter)
-    else:
-        plt.plot(parameter)
+        plt.yscale("log")
     plt.show()
     plt.close()
 ndim, nsamples = 9, len(data) 

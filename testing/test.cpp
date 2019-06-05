@@ -74,7 +74,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test14();	
+	test16();	
 	return 0;
 }
 void test19()
@@ -210,10 +210,10 @@ void test18()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(5,4))};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -5};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
-	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-70};
+	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-50};
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 300000;
+	int n_steps = 70000;
 	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -225,7 +225,7 @@ void test18()
 		chain_temps[i] = c*chain_temps[i-1];
 	
 	int numThreads = 4;
-	bool pool = false;
+	bool pool = true;
 	//#########################################################
 	//gw options
 	std::string generation_method = "dCS_IMRPhenomD_log";
@@ -398,18 +398,18 @@ void test16()
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
-	int n_steps = 40000;
+	int n_steps = 30000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
-	int swp_freq = 3;
+	int swp_freq = 10;
 	double chain_temps[chain_N];
 	chain_temps[0]=1.;
 	double c = 1.2;
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int numThreads = 10;
+	int numThreads = 5;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -747,8 +747,8 @@ void test14()
 	//read_file(filebase+"psd.csv",temp_psd);
 	//read_file(filebase+"freq.csv",temp_freq);
 	
-	//double delta_f = temp_freq[length/2]-temp_freq[length/2-1];
-	double delta_f = 1;
+	double delta_f = temp_freq[length/2]-temp_freq[length/2-1];
+	//double delta_f = 1;
 	//double delta_f = 1./(temp_freq[length/2]-temp_freq[length/2-1]);
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[0][j] = temp_freq[j+cutoff];	
@@ -860,7 +860,7 @@ void test14()
 	//double initial_pos[dimension]={-.0, 0.,-0.,log(400),log(10), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
-	int n_steps = 30000;
+	int n_steps = 50000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -2834,7 +2834,9 @@ double test_lp_GW_dCS_log(double *pos, int dim , int chain_id)
 	//if(((pos[8])<lnalphamin) ){return a;}
 	if(((pos[8])<lnalphamin)|| (pos[8]>lnalphamax) ){return a;}
 	
-	//Uniform prior on \alpha^2, not \alpha
-	else { return test_lp_GW_DFull(pos,dim,chain_id)+.25*pos[8];}
+	//Uniform prior on \alpha^.5, not \alpha
+	//else { return test_lp_GW_DFull(pos,dim,chain_id)+.25*pos[8];}
+	//Uniform in ln \alpha^2
+	else { return test_lp_GW_DFull(pos,dim,chain_id);}
 	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }
