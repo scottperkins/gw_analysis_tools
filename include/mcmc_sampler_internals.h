@@ -4,6 +4,8 @@
 #include <gsl/gsl_rng.h>
 #include <string>
 #include <functional>
+#include <limits>
+#include <iomanip>
 
 /*! \file
  * Internal functions of the generic MCMC sampler (nothing specific to GW)
@@ -21,6 +23,7 @@
 //std::function<void(double*,int,double**,int)> fisher;
 /*! Structure storing everything that defines an instance of the sampler
  */
+const double limit_inf = -std::numeric_limits<double>::infinity();
 struct sampler
 {
 	int types_of_steps = 4;

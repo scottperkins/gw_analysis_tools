@@ -228,6 +228,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 		int N_steps,	/**< Number of total steps to be taken, per chain*/
 		int chain_N,	/**< Number of chains*/
 		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
 		double *chain_temps,	/**<Double array of temperatures for the chains*/
 		int swp_freq,	/**< the frequency with which chains are swapped*/
 		//double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
@@ -244,6 +245,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
 		)
 {
+	//seeding_var = NULL;	
 	clock_t start, end, acend;
 	double wstart, wend, wacend;
 	start = clock();
@@ -317,20 +319,68 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	samplerptr = &sampler;
 	//Assign initial position to start chains
 	//Currently, just set all chains to same initial position
-	for (int j=0;j<sampler.chain_N;j++){
-		sampler.de_primed[j]=false;
-		for (int i = 0; i<sampler.dimension; i++)
-		{
-			//Only doing this last loop because there is sometimes ~5 elements 
-			//not initialized on the end of the output, which through off plotting
-			for(int l =0; l<N_steps; l++)
-				output[j][l][i] = initial_pos[i];
-			
+	if(!seeding_var){ for (int j=0;j<sampler.chain_N;j++){
+			sampler.de_primed[j]=false;
+			for (int i = 0; i<sampler.dimension; i++)
+			{
+				//Only doing this last loop because there is sometimes ~5 elements 
+				//not initialized on the end of the output, which screw up plotting
+				for(int l =0; l<N_steps; l++)
+					output[j][l][i] = initial_pos[i];
+				
+			}
+			sampler.current_likelihoods[j] =
+				 sampler.ll(output[j][0],sampler.dimension, j)/sampler.chain_temps[j];
+			step_accepted[j]=0;
+			step_rejected[j]=0;
 		}
-		sampler.current_likelihoods[j] =
-			 sampler.ll(output[j][0],sampler.dimension, j)/sampler.chain_temps[j];
-		step_accepted[j]=0;
-		step_rejected[j]=0;
+	}
+	//Seed non-zero chains normally with variance as specified
+	else{
+		int attempts = 0;
+		int max_attempts = 10;
+		double temp_pos[dimension];
+		for (int j=0;j<sampler.chain_N;j++){
+			sampler.de_primed[j]=false;
+			if(j == 0){
+				for (int i = 0; i<sampler.dimension; i++)
+				{
+				//Only doing this last loop because there is sometimes ~5 elements 
+				//not initialized on the end of the output, which screw up plotting
+					for(int l =0; l<N_steps; l++)
+						output[j][l][i] = initial_pos[i];
+				}
+			}
+			else{
+				do{
+					for(int i =0; i<sampler.dimension; i++){
+						temp_pos[i] = gsl_ran_gaussian(sampler.rvec[j],seeding_var[i]) + initial_pos[i];
+					}
+					attempts+=1;
+				}while(sampler.lp(temp_pos, dimension,j) == limit_inf && attempts<max_attempts);
+				attempts =0;
+				if(sampler.lp(temp_pos, dimension,j) != limit_inf ){
+					for(int i =0; i<sampler.dimension;i++){
+						for(int l =0; l<N_steps; l++)
+							output[j][l][i] = temp_pos[i];
+						//std::cout<<output[j][0][i]<<std::endl;
+					}
+				}
+				else{
+					for(int i =0; i<sampler.dimension;i++){
+						for(int l =0; l<N_steps; l++)
+							output[j][l][i] = initial_pos[i];
+						//std::cout<<output[j][0][i]<<std::endl;
+					}
+			
+				}
+			}
+			
+			sampler.current_likelihoods[j] =
+				 sampler.ll(output[j][0],sampler.dimension, j)/sampler.chain_temps[j];
+			step_accepted[j]=0;
+			step_rejected[j]=0;
+		}
 	}
 
 		
@@ -625,6 +675,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		int N_steps,	/**< Number of total steps to be taken, per chain*/
 		int chain_N,	/**< Number of chains*/
 		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
 		double *chain_temps,	/**<Double array of temperatures for the chains*/
 		int swp_freq,	/**< the frequency with which chains are swapped*/
 		double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
@@ -649,7 +700,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			fisher(param, dim, fisherm);};
 	}
 	
-	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, 
+	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename, auto_corr_filename);
 }
@@ -658,6 +709,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		int N_steps,	/**< Number of total steps to be taken, per chain*/
 		int chain_N,	/**< Number of chains*/
 		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
 		double *chain_temps,	/**<Double array of temperatures for the chains*/
 		int swp_freq,	/**< the frequency with which chains are swapped*/
 		double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
@@ -674,7 +726,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	std::function<double(double*,int,int)> lp = log_prior;
 	std::function<double(double*,int,int)> ll = log_likelihood;
 	std::function<void(double*,int,double**,int)>f = fisher;
-	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, 
+	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename, auto_corr_filename);
 }

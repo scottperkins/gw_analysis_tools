@@ -9,7 +9,6 @@
 #include <limits>
 #include <iomanip>
 
-const double limit_inf = -std::numeric_limits<double>::infinity();
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
  */

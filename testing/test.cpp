@@ -74,7 +74,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test16();	
+	test9();	
 	return 0;
 }
 void test19()
@@ -212,9 +212,10 @@ void test18()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
 	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-50};
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
+	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 70000;
-	int chain_N=8 ;
+	int n_steps = 150000;
+	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 3;
@@ -224,20 +225,24 @@ void test18()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int numThreads = 4;
+	int numThreads = 6;
 	bool pool = true;
 	//#########################################################
 	//gw options
 	std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD";
 	
 	
-	std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
 	//std::string autocorrfile = "";
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
 	std::string chainfile = "testing/data/mcmc_output_dCS.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
+	//std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
+	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,
@@ -261,6 +266,7 @@ void test18()
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
+	//chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
 	chainfile = "testing/data/mcmc_output_dCS_hot.csv";
 	for(int j = 0; j<n_steps;j++){
 		output_transform[j][0]=output[chain_N-1][j][0];
@@ -398,7 +404,8 @@ void test16()
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
-	int n_steps = 30000;
+	double *seeding_var = NULL;
+	int n_steps = 3000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -421,7 +428,7 @@ void test16()
 	std::string chainfile = "testing/data/mcmc_output_DFull.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_DFull.txt";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,
@@ -615,6 +622,7 @@ void test15()
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
+	double *seeding_var = NULL;
 	int n_steps = 20000;
 	int chain_N= 5;
 	double ***output;
@@ -638,7 +646,7 @@ void test15()
 	std::string chainfile = "testing/data/mcmc_output_injection.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_injection.txt";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,
@@ -860,6 +868,7 @@ void test14()
 	//double initial_pos[dimension]={-.0, 0.,-0.,log(400),log(10), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(8), .24,- .0,-.0};
 	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
+	double *seeding_var = NULL;
 	int n_steps = 50000;
 	int chain_N= 8;
 	double ***output;
@@ -886,7 +895,7 @@ void test14()
 	//std::string autocorrfile = "";
 	std::string chainfile = "testing/data/mcmc_output_DFull_Neil.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_DFull_Neil.txt";
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool, show_progress, 
 			num_detectors, 
 			data, psd, 
@@ -1024,6 +1033,7 @@ void test12()
 	//mcmc options
 	int dimension = 7;
 	double initial_pos[dimension]={0,log(30), .24, .0,.0,0,0};
+	double *seeding_var = NULL;
 	int n_steps = 100;
 	int chain_N= 10;
 	double ***output;
@@ -1047,7 +1057,7 @@ void test12()
 	std::string chainfile = "testing/data/mcmc_output_Pv2.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_Pv2.txt";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_Pv2,numThreads, pool,show_progress, num_detectors, data, psd, 
 			frequencies, data_length, gps_time,detectors, generation_method,
 			statfilename,"",autocorrfile);	
@@ -1371,6 +1381,7 @@ void test10()
 	int dimension = 7;
 	double initial_pos[dimension]={log(400),2,2,log(30), .24, 0,0};
 	//double initial_pos[dimension]={log(200*MPC_SEC),log(20*MSOL_SEC), .15, 0,0};
+	double *seeding_var = NULL;
 	int N_steps = 50000;
 	int chain_N= 8;
 	double ***output;
@@ -1400,7 +1411,7 @@ void test10()
 	std::string chainfile = "testing/data/mcmc_output_7dim.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_7dim.txt";
 
-	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_7dim,numThreads, pool,show_progress, num_detectors, data, psd, 
 			frequencies, data_length,gps_time, detectors, generation_method,
 			statfilename,"",autocorrfile);	
@@ -1457,8 +1468,8 @@ void test9()
 	//int high_cut = 11000;
 	//int length = high_cut-cutoff;
 	
-	//int raw_length=  4096;
-	int raw_length=  8032;
+	int raw_length=  4096;
+	//int raw_length=  8032;
 	int cutoff = 50;
 	int length = raw_length-cutoff;
 
@@ -1494,30 +1505,32 @@ void test9()
 		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
 		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
 	}
-	//read_file(filebase+"data_H.csv",temp_data, raw_length,2);
-	//read_file(filebase+"psd_H.csv",temp_psd);
-	//read_file(filebase+"freq_H.csv",temp_freq);
-	read_file(filebase+"data_H_new.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_H_new.csv",temp_psd);
-	read_file(filebase+"freq_H_new.csv",temp_freq);
+	read_file(filebase+"data_H.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_H.csv",temp_psd);
+	read_file(filebase+"freq_H.csv",temp_freq);
+	//read_file(filebase+"data_H_new.csv",temp_data, raw_length,2);
+	//read_file(filebase+"psd_H_new.csv",temp_psd);
+	//read_file(filebase+"freq_H_new.csv",temp_freq);
 	//read_file(filebase+"data.csv",temp_data, raw_length,2);
 	//read_file(filebase+"psd.csv",temp_psd);
 	//read_file(filebase+"freq.csv",temp_freq);
+	//double delta_f = temp_freq[length/2]-temp_freq[length/2-1];
+	double delta_f = 1;
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[0][j] = temp_freq[j+cutoff];	
-		psd[0][j] = (temp_psd[j+cutoff]);	
-		data[0][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+		psd[0][j] =  (temp_psd[j+cutoff]);	
+		data[0][j] = 1./delta_f * std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
 	}
-	//read_file(filebase+"data_L.csv",temp_data, raw_length,2);
-	//read_file(filebase+"psd_L.csv",temp_psd);
-	//read_file(filebase+"freq_L.csv",temp_freq);
-	read_file(filebase+"data_L_new.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_L_new.csv",temp_psd);
-	read_file(filebase+"freq_L_new.csv",temp_freq);
+	read_file(filebase+"data_L.csv",temp_data, raw_length,2);
+	read_file(filebase+"psd_L.csv",temp_psd);
+	read_file(filebase+"freq_L.csv",temp_freq);
+	//read_file(filebase+"data_L_new.csv",temp_data, raw_length,2);
+	//read_file(filebase+"psd_L_new.csv",temp_psd);
+	//read_file(filebase+"freq_L_new.csv",temp_freq);
 	for(int j = 0; j<data_length[1]; j++){
 		frequencies[1][j] = temp_freq[j+cutoff];	
-		psd[1][j] = (temp_psd[j+cutoff]);	
-		data[1][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
+		psd[1][j] =  (temp_psd[j+cutoff]);	
+		data[1][j] = 1./delta_f * std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
 	}
 
 	deallocate_2D_array(temp_data,raw_length,2);
@@ -1558,6 +1571,7 @@ void test9()
 	//double initial_pos[dimension]={log(30), .24,- .0,-.0};
 	double initial_pos[dimension]={log(8), .12,- .0,-.0};
 	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
+	double *seeding_var = NULL;
 	int n_steps = 40000;
 	int chain_N= 8;
 	double ***output;
@@ -1585,7 +1599,7 @@ void test9()
 	std::string chainfile = "testing/data/mcmc_output.csv";
 	std::string statfilename = "testing/data/mcmc_statistics.txt";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW,numThreads, pool,show_progress, num_detectors, data, psd, 
 			frequencies, data_length,gps_time, detectors, generation_method,
 			statfilename,"",autocorrfile);	
@@ -1743,6 +1757,7 @@ void test8()
 	//double initial_pos[dimension]={log(chirpm*MSOL_SEC), eta, params.spin1[2],params.spin2[2]};
 	double initial_pos[dimension]={log(10), .2, 0,0};
 	//double initial_pos[dimension]={log(200),log(20), .15, 0,0};
+	double *seeding_var = NULL;
 	int N_steps = 15000;
 	int chain_N= 8;
 	double ***output;
@@ -1767,7 +1782,7 @@ void test8()
 	int numThreads = 20;
 	bool pool = true;
 
-	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,chain_temps, 
+	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW,numThreads, pool,show_progress, 
 			num_detectors, 
 			data, psd, 
@@ -1810,6 +1825,7 @@ void test7()
 {
 	int dimension = 2;
 	double initial_pos[2]={0,0.};
+	double *seeding_var = NULL;
 
 	
 	int N_steps = 10000;
@@ -1834,7 +1850,7 @@ void test7()
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3,statfilename,chainfile,autocorrfile );	
 	//auto lambda = [](double *x, int dim){return log_neil_proj3(x,dim);};
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile );	
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile );	
+	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile );	
 	std::cout<<"ENDED"<<std::endl;
 
 	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";

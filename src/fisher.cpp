@@ -409,12 +409,17 @@ void calculate_derivatives(double  **amplitude_deriv,
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
 	}
-	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" || gen_method == "MCMC_dCS_IMRPhenomD_Full"){
+	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" 
+		|| gen_method == "MCMC_dCS_IMRPhenomD_Full"
+		|| gen_method == "MCMC_EdGB_IMRPhenomD_log_Full"
+		){
 		std::string local_gen;
 		if(gen_method == "MCMC_dCS_IMRPhenomD_log_Full")
 			local_gen = "dCS_IMRPhenomD_log";
 		else if(gen_method == "MCMC_dCS_IMRPhenomD_Full")
 			local_gen = "dCS_IMRPhenomD";
+		else if(gen_method == "MCMC_EdGB_IMRPhenomD_log_Full")
+			local_gen = "EdGB_IMRPhenomD_log";
 		fourier_amplitude(frequencies, 
 			length,
 			amplitude,
