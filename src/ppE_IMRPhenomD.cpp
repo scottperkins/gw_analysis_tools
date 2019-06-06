@@ -73,8 +73,8 @@ T dCS_IMRPhenomD<T>::dCS_phase_factor(source_parameters<T> *param)
 	T m = m1+m2;
 	T chi1 = param->chi_s+param->chi_a;
 	T chi2 = param->chi_s-param->chi_a;
-	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * sqrt((3. - 2.*(1.-chi1*chi1)));
-	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * sqrt((3. - 2.*(1.-chi2*chi2)));
+	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * ((3. - 2.*sqrt(1.-chi1*chi1)));
+	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * ((3. - 2.*sqrt(1.-chi2*chi2)));
 	chi1 +=1e-10;
 	chi2 +=1e-10;
 	T s1  = s1temp/(2.*chi1*chi1*chi1);
@@ -122,10 +122,17 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_mod( source_parameters<T> *param)
 	T phase_mod = exp(param->betappe[0]);
 	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *this->dCS_phase_factor(param);
 	//if(std::is_same< double, T>::value){
-	//	std::cout<<"dCS"<<std::endl;	
-	//	std::cout<<Z<<std::endl;
-	//	std::cout<<out<<std::endl;
-	//	std::cout<<param->betappe[0]<<std::endl;
+		//std::cout<<"dCS"<<std::endl;	
+		//std::cout<<"REDSHIFT: "<<Z<<std::endl;
+		//std::cout<<"DL: "<<DL/MPC_SEC<<std::endl;
+		//std::cout<<"out: "<<out<<std::endl;
+		//std::cout<<"factor: "<<this->dCS_phase_factor(param)<<std::endl;
+		//std::cout<<"ln betappe: "<<param->betappe[0]<<std::endl;
+		//std::cout<<"alpha**1/2: "<<pow(exp(param->betappe[0]),1./4.)*3e5<<std::endl;
+		//std::cout<<"chirp: "<<param->chirpmass/MSOL_SEC<<std::endl;
+		//std::cout<<"eta: "<<param->eta<<std::endl;
+		//std::cout<<"chi1: "<<param->chi_s<<std::endl;
+		//std::cout<<"chi2: "<<param->chi_a<<std::endl;
 	//}
 	return out;
 } 
@@ -144,8 +151,8 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_factor(source_parameters<T> *param)
 	T m = m1+m2;
 	T chi1 = param->chi_s+param->chi_a;
 	T chi2 = param->chi_s-param->chi_a;
-	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * sqrt((3. - 2.*(1.-chi1*chi1)));
-	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * sqrt((3. - 2.*(1.-chi2*chi2)));
+	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * ((3. - 2.*sqrt(1.-chi1*chi1)));
+	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * ((3. - 2.*sqrt(1.-chi2*chi2)));
 	chi1 +=1e-10;
 	chi2 +=1e-10;
 	T s1  = s1temp/(2.*chi1*chi1*chi1);

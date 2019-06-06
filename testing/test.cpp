@@ -74,7 +74,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test9();	
+	test18();	
 	return 0;
 }
 void test19()
@@ -214,7 +214,7 @@ void test18()
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 150000;
+	int n_steps = 100000;
 	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
