@@ -129,7 +129,9 @@ void update_history(sampler *sampler, double *new_params, int chain_index);
 double auto_correlation(double *arr, int length, double tolerance);
 
 double auto_correlation_serial(double *arr, int length);
+
 void auto_corr_intervals(double *data, int length,double *output, int num_segments,  double accuracy);
+
 void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
 
 void assign_ct_p(sampler *sampler, int step, int chain_index);

@@ -478,8 +478,10 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->check_stepsize_freq[i] = 500;
 		//max probability is a function of the temperature -- higher temp 
 		//are allowed to step more
-		sampler->max_target_accept_ratio[i] = .90-.15/sampler->chain_temps[i];
-		sampler->min_target_accept_ratio[i] = .60;
+		//sampler->max_target_accept_ratio[i] = .90-.15/sampler->chain_temps[i];
+		//sampler->min_target_accept_ratio[i] = .60;
+		sampler->max_target_accept_ratio[i] = .60-.2/sampler->chain_temps[i];
+		sampler->min_target_accept_ratio[i] = .2;
 		sampler->gauss_last_accept_ct[i] = 0.;
 		sampler->gauss_last_reject_ct[i] = 0.;
 		sampler->fish_last_accept_ct[i] = 0.;

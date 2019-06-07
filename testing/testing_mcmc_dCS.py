@@ -4,9 +4,10 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
-
+burn = True
 data = np.loadtxt("data/mcmc_output_dCS.csv",delimiter=',')
-#data = data[10000:]
+if burn:
+    data = data[10000:]
 for i in np.arange(9):
     parameter = [x[i] for x in data]
     plt.plot(parameter)
@@ -35,6 +36,8 @@ plt.savefig("alpha_hist_dCS.pdf")
 plt.close()
 ##############################################################
 data = np.loadtxt("data/mcmc_output_dCS_hot.csv",delimiter=',')
+if burn:
+    data = data[10000:]
 #for i in np.arange(9):
 #    parameter = [x[i] for x in data]
 #    plt.plot(parameter)
@@ -73,6 +76,8 @@ plt.close()
 
 ##############################################################
 data = np.loadtxt("data/mcmc_output_dCS.csv",delimiter=',')
+if burn:
+    data = data[10000:]
 def chieff(m1, m2, spin1, spin2,):
     return (m1*spin1 + m2*spin2)/(m1+m2)
 datatransform= []
