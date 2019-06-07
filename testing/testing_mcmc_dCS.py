@@ -35,13 +35,14 @@ plt.savefig("alpha_hist_dCS.pdf")
 plt.close()
 ##############################################################
 data = np.loadtxt("data/mcmc_output_dCS_hot.csv",delimiter=',')
-for i in np.arange(9):
-    parameter = [x[i] for x in data]
-    plt.plot(parameter)
-    if i == 8:
-        plt.yscale("log")
-    plt.show()
-    plt.close()
+#for i in np.arange(9):
+#    parameter = [x[i] for x in data]
+#    plt.plot(parameter)
+#    if i == 8:
+#        plt.yscale("log")
+#    plt.show()
+#    plt.close()
+
 #data = data[:30000]
 #data = data[:-100]
 #chirpmasses = [x[1] for x in data]

@@ -210,11 +210,11 @@ void test18()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(5,4))};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -5};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
-	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-50};
+	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-40};
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 100000;
+	int n_steps = 300000;
 	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -225,7 +225,7 @@ void test18()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int numThreads = 6;
+	int numThreads = 3;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -2327,7 +2327,7 @@ void test1()
 	params.tc = -.0;
 	params.Luminosity_Distance = 410.;
 	params.betappe = new double[1] ;
-	params.betappe[0]=-50;
+	params.betappe[0]=4*log(  1000/3.e5);
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
@@ -2464,8 +2464,8 @@ void test1()
 //###################################################################################################
 	
 	//method = "ppE_IMRPhenomD_Inspiral";
-	//method = "dCS_IMRPhenomD_log";
-	method = "EdGB_IMRPhenomD_log";
+	method = "dCS_IMRPhenomD_log";
+	//method = "EdGB_IMRPhenomD_log";
 	clock_t  startppe, endppe;
 	startppe = clock(); 
 	fourier_waveform(freq, length, waveformout,method,&params);

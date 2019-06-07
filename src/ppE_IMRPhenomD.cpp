@@ -122,17 +122,17 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_mod( source_parameters<T> *param)
 	T phase_mod = exp(param->betappe[0]);
 	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *this->dCS_phase_factor(param);
 	//if(std::is_same< double, T>::value){
-		//std::cout<<"dCS"<<std::endl;	
-		//std::cout<<"REDSHIFT: "<<Z<<std::endl;
-		//std::cout<<"DL: "<<DL/MPC_SEC<<std::endl;
-		//std::cout<<"out: "<<out<<std::endl;
-		//std::cout<<"factor: "<<this->dCS_phase_factor(param)<<std::endl;
-		//std::cout<<"ln betappe: "<<param->betappe[0]<<std::endl;
-		//std::cout<<"alpha**1/2: "<<pow(exp(param->betappe[0]),1./4.)*3e5<<std::endl;
-		//std::cout<<"chirp: "<<param->chirpmass/MSOL_SEC<<std::endl;
-		//std::cout<<"eta: "<<param->eta<<std::endl;
-		//std::cout<<"chi1: "<<param->chi_s<<std::endl;
-		//std::cout<<"chi2: "<<param->chi_a<<std::endl;
+	//	std::cout<<"dCS"<<std::endl;	
+	//	std::cout<<"REDSHIFT: "<<Z<<std::endl;
+	//	std::cout<<"DL: "<<DL/MPC_SEC<<std::endl;
+	//	std::cout<<"out: "<<out<<std::endl;
+	//	std::cout<<"factor: "<<this->dCS_phase_factor(param)<<std::endl;
+	//	std::cout<<"ln betappe: "<<param->betappe[0]<<std::endl;
+	//	std::cout<<"alpha**1/2: "<<pow(exp(param->betappe[0]),1./4.)*3e5<<std::endl;
+	//	std::cout<<"chirp: "<<param->chirpmass/MSOL_SEC<<std::endl;
+	//	std::cout<<"eta: "<<param->eta<<std::endl;
+	//	std::cout<<"chi1: "<<param->chi_s<<std::endl;
+	//	std::cout<<"chi2: "<<param->chi_a<<std::endl;
 	//}
 	return out;
 } 

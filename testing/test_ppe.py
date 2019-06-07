@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import csv 
 import numpy as np
 #from phenompy.modified_gr import Modified_IMRPhenomD_Inspiral_Freq_detector_frame as imrmod
-#from phenompy.modified_gr import dCS_IMRPhenomD_detector_frame as imrmod
-from phenompy.modified_gr import EdGB_IMRPhenomD_detector_frame as imrmod
+from phenompy.modified_gr import dCS_IMRPhenomD_detector_frame as imrmod
+#from phenompy.modified_gr import EdGB_IMRPhenomD_detector_frame as imrmod
 from phenompy.gr import IMRPhenomD_detector_frame as imr
 from phenompy.utilities import s_solm, mpc, calculate_mass1,calculate_mass2
 from phenompy.analysis_utilities import log_likelihood_maximized_coal as ll
@@ -67,7 +67,7 @@ start = time()
 eta = .21
 chirpm = 49.78
 #model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0, Luminosity_Distance=410*mpc, phase_mod=np.exp(2), bppe= -1)
-model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0, Luminosity_Distance=410*mpc, phase_mod=np.exp(-50))
+model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0., Luminosity_Distance=410*mpc, phase_mod=(1000/3.e5)**4.)
 amppy,phase,h = model.calculate_waveform_vector(freqs)
 
 
