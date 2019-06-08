@@ -76,6 +76,19 @@ Wraps the fourier_waveform function in waveform_generator.cpp
 
 Also contains the SNR calculation function
 
+\subsubsection adding_waveforms Custom Waveforms
+
+If adding waveforms and to have full accesibility:
+
+Create class, using other waveforms as template -- need interface to create full waveform (plus,cross polarization), and amplitude/phase
+
+Add the option as a waveform to waveform_generation.cpp, including the header file at the top of the waveform_generation.cpp file
+
+For autodiff Fishers -- write the class as a template with double and adouble types for all variables. Then write the necessary fisher subroutines (see fisher file to determine whats necessary)
+
+For numerical Fishers -- write finite difference method, following the template of the previous waveforms
+
+For MCMC sampling -- write mcmc_fisher_wrapper and mcmc_likelihood_wrapper options and write any necessary initialization in MCMC_MH_GW 
 
 
 

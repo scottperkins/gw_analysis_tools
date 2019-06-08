@@ -214,18 +214,18 @@ void test18()
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 100000;
-	int chain_N=10 ;
+	int n_steps = 750000;
+	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
-	int swp_freq = 7;
+	int swp_freq = 5;
 	double chain_temps[chain_N];
 	chain_temps[0]=1.;
 	double c = 1.2;
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int numThreads = 4;
+	int numThreads = 6;
 	bool pool = true;
 	//#########################################################
 	//gw options

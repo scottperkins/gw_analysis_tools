@@ -865,6 +865,7 @@ void MCMC_MH_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
+	mcmc_Nmod = 1;
 	bool local_seeding = false;
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
@@ -967,6 +968,74 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[5]=.1;
 			seeding_var[6]=.1;
 		}
+	}
+	else if(generation_method == "ppE_IMRPhenomD_Inspiral_log" 
+		|| generation_method == "ppE_IMRPhenomD_IMR_log"
+		|| generation_method == "ppE_IMRPhenomD_Inspiral"
+		|| generation_method == "ppE_IMRPhenomD_IMR"
+		){
+		if(dimension-mcmc_Nmod == 7){
+			
+			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
+			if(generation_method == "ppE_IMRPhenomD_IMR_log" 
+			||generation_method == "ppE_IMRPhenomD_IMR_log"){
+				for(int i =0; i<mcmc_Nmod; i++){
+					std::cout<<", ln beta"<<i;
+				}
+			}
+			else{
+				for(int i =0; i<mcmc_Nmod; i++){
+					std::cout<<", beta"<<i;
+				}
+			}
+			std::cout<<endl;
+			if(!seeding_var){
+				local_seeding=true;
+				seeding_var = new double[dimension];
+				seeding_var[0]=.1;
+				seeding_var[1]=.1;
+				seeding_var[2]=.1;
+				seeding_var[3]=1;
+				seeding_var[4]=.5;
+				seeding_var[5]=.1;
+				seeding_var[6]=.1;
+				seeding_var[7]=.1;
+				for(int i =0; i< mcmc_Nmod;i++){
+					seeding_var[8 + i]=2;
+				}
+			}
+		}
+		if(dimension-mcmc_Nmod == 4){
+			std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
+			if(generation_method == "ppE_IMRPhenomD_IMR_log" 
+			||generation_method == "ppE_IMRPhenomD_IMR_log"){
+				for(int i =0; i<mcmc_Nmod; i++){
+					std::cout<<", ln beta"<<i;
+				}
+			}
+			else{
+				for(int i =0; i<mcmc_Nmod; i++){
+					std::cout<<", beta"<<i;
+				}
+			}
+			std::cout<<endl;
+			if(!seeding_var){
+				local_seeding=true;
+				seeding_var = new double[dimension];
+				seeding_var[0]=.1;
+				seeding_var[1]=.1;
+				seeding_var[2]=.1;
+				seeding_var[3]=1;
+				seeding_var[4]=.5;
+				seeding_var[5]=.1;
+				seeding_var[6]=.1;
+				seeding_var[7]=.1;
+				for(int i =0; i< mcmc_Nmod;i++){
+					seeding_var[8 + i]=2;
+				}
+			}
+		}
+
 	}
 	else{
 		std::cout<<
