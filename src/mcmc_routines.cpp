@@ -870,6 +870,7 @@ void MCMC_MH_GW(double ***output,
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
 	bool local_seeding = false;
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
@@ -881,6 +882,7 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[2]=.1;
 			seeding_var[3]=.1;
 		}
+		mcmc_intrinsic=true;
 	}
 	else if(dimension==7 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln DL, tc, phic, ln chirpmass, eta, chi1, chi2"<<std::endl;
@@ -927,7 +929,7 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[7]=.1;
 			seeding_var[8]=2;
 		}
-		//mcmc_log_beta = true;
+		mcmc_log_beta = true;
 	}
 	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD_log"){
 		mcmc_Nmod = 1;
@@ -945,7 +947,7 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[7]=.1;
 			seeding_var[8]=2;
 		}
-		//mcmc_log_beta = true;
+		mcmc_log_beta = true;
 	}
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD"){
 		mcmc_Nmod = 1;
@@ -965,6 +967,7 @@ void MCMC_MH_GW(double ***output,
 		}
 	}
 	else if(dimension==7 && generation_method =="IMRPhenomPv2"){
+		mcmc_intrinsic=true;
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, cos theta_1, cos theta_2"<<std::endl;
 		if(!seeding_var){
 			local_seeding=true;
@@ -1016,6 +1019,7 @@ void MCMC_MH_GW(double ***output,
 			}
 		}
 		if(dimension-mcmc_Nmod == 4){
+			mcmc_intrinsic=true;
 			std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
 			if(generation_method == "ppE_IMRPhenomD_IMR_log" 
 			||generation_method == "ppE_IMRPhenomD_IMR_log"){
@@ -1067,7 +1071,7 @@ void MCMC_MH_GW(double ***output,
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id)
 {
 	//if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
-	if(dimension ==4 && mcmc_generation_method =="IMRPhenomD"){	
+	if(mcmc_intrinsic && mcmc_generation_method =="IMRPhenomD"){	
 		//unpack parameter vector
 		//double dl_prime = std::exp(param[0])/MPC_SEC;
 		double dl_prime = 1000;
@@ -1119,7 +1123,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 
 		deallocate_2D_array(temp_out, dimension,dimension);
 	}
-	else if(dimension ==8 && mcmc_generation_method =="IMRPhenomD"){	
+	else if(!mcmc_intrinsic && mcmc_generation_method =="IMRPhenomD"){	
 		//unpack parameter vector
 		double incl = acos(param[0]);
 		double RA = param[1];
@@ -1189,7 +1193,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 
 		deallocate_2D_array(temp_out, dimension,dimension);
 	}
-	else if(dimension ==9 && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
+	else if(!mcmc_intrinsic && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
 			|| mcmc_generation_method == "dCS_IMRPhenomD" 
 			|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
@@ -1350,7 +1354,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 {
 	double ll = 0;
 	//if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
-	if(dimension ==4 && mcmc_generation_method =="IMRPhenomD"){	
+	if(mcmc_intrinsic && mcmc_generation_method =="IMRPhenomD"){	
 	//if(false){	
 		//unpack parameter vector
 		//double dl_prime = std::exp(param[0])/MPC_SEC;
@@ -1438,7 +1442,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 					);
 		}
 	}
-	else if(dimension ==8 && mcmc_generation_method =="IMRPhenomD"){	
+	else if(!mcmc_intrinsic && mcmc_generation_method =="IMRPhenomD"){	
 	//else if(false){	
 		//unpack parameter vector
 		double incl = acos(param[0]);
@@ -1511,10 +1515,32 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		delete [] theta;
 	}
 	//dCS or dCS_log doesn't matter, the two are the same until inside the waveform
-	else if(dimension ==9 && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
+	else if(!mcmc_intrinsic && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
 				|| mcmc_generation_method == "dCS_IMRPhenomD" 
 				|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
+				|| mcmc_generation_method == "EdGB_IMRPhenomD"
+				|| mcmc_generation_method == "ppE_IMRPhenomD_IMR_log"
+				|| mcmc_generation_method == "ppE_IMRPhenomD_IMR"
+				|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
+				|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"
 				)){	
+		std::string local_method ;
+		if(mcmc_generation_method == "dCS_IMRPhenomD_log" || 
+			mcmc_generation_method=="dCS_IMRPhenomD"){
+			local_method = "dCS_IMRPhenomD";
+		}
+		if(mcmc_generation_method == "EdGB_IMRPhenomD_log" || 
+			mcmc_generation_method=="EdGB_IMRPhenomD"){
+			local_method = "EdGB_IMRPhenomD";
+		}
+		if(mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log" || 
+			mcmc_generation_method=="ppE_IMRPhenomD_Inspiral"){
+			local_method = "ppE_IMRPhenomD_Inspiral";
+		}
+		if(mcmc_generation_method == "ppE_IMRPhenomD_IMR_log" || 
+			mcmc_generation_method=="ppE_IMRPhenomD_IMR"){
+			local_method = "ppE_IMRPhenomD_IMR";
+		}
 	//else if(false){	
 		//unpack parameter vector
 		double incl = acos(param[0]);
@@ -1584,7 +1610,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 				(size_t) mcmc_data_length[0],
 				&parameters,
 				mcmc_detectors[0],
-				mcmc_generation_method,
+				//mcmc_generation_method,
+				local_method,
 				&mcmc_fftw_plans[0],
 				&tc_ref,
 				&phic_ref
@@ -1605,7 +1632,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 					(size_t) mcmc_data_length[i],
 					&parameters,
 					mcmc_detectors[i],
-					mcmc_generation_method,
+					//mcmc_generation_method,
+					local_method,
 					&mcmc_fftw_plans[i]
 					);
 			//std::cout<<"L/V "<<ll-savell<<std::endl;
@@ -1615,7 +1643,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		delete [] theta;
 		delete [] parameters.betappe;
 	}
-	else if(dimension ==7 && mcmc_generation_method =="IMRPhenomPv2"){	
+	else if(mcmc_intrinsic && mcmc_generation_method =="IMRPhenomPv2"){	
 	//if(false){	
 		//unpack parameter vector
 		double cos_JN = param[0];
@@ -1677,7 +1705,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 					);
 		}
 	}
-	//std::cout<<ll<<std::endl;
+	//if(isnan(ll)){
+		//std::cout<<ll<<std::endl;
+	//}
 	return ll;
 
 	//testing detailed balance

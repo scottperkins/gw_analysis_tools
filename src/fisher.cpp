@@ -419,12 +419,17 @@ void calculate_derivatives(double  **amplitude_deriv,
 		){
 		std::string local_gen;
 		bool log_scaling = false;
-		if(gen_method == "MCMC_dCS_IMRPhenomD_log_Full")
-			local_gen = "dCS_IMRPhenomD_log";
-		else if(gen_method == "MCMC_dCS_IMRPhenomD_Full")
+		if(gen_method == "MCMC_dCS_IMRPhenomD_log_Full"){
 			local_gen = "dCS_IMRPhenomD";
-		else if(gen_method == "MCMC_EdGB_IMRPhenomD_log_Full")
-			local_gen = "EdGB_IMRPhenomD_log";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_dCS_IMRPhenomD_Full"){
+			local_gen = "dCS_IMRPhenomD";
+		}
+		else if(gen_method == "MCMC_EdGB_IMRPhenomD_log_Full"){
+			local_gen = "EdGB_IMRPhenomD";
+			log_scaling = true;
+		}
 		else if(gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"){
 			local_gen = "ppE_IMRPhenomD_IMR";
 			log_scaling = true;

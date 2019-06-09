@@ -48,7 +48,7 @@ T dCS_IMRPhenomD<T>::dCS_phase_mod( source_parameters<T> *param)
 	//T Z= 0;
 	//T Z=0.34972425;
 	T redshiftedM = M/(1.+Z);
-	T phase_mod = param->betappe[0];
+	T phase_mod = (param->betappe[0]);
 	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *this->dCS_phase_factor(param);
 	//if(std::is_same< double, T>::value){
 	//	std::cout<<"dCS"<<std::endl;	

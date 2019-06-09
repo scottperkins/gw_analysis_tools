@@ -39,6 +39,7 @@ static int *mcmc_bppe;
 static gsl_interp_accel **mcmc_accels = NULL;
 static gsl_spline **mcmc_splines = NULL;
 static bool mcmc_log_beta;
+static bool mcmc_intrinsic;
 //extern const double **mcmc_noise=NULL;
 //extern const std::complex<double> **mcmc_data=NULL;
 //extern const double **mcmc_frequencies=NULL;
