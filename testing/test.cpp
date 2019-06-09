@@ -214,7 +214,7 @@ void test18()
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 50000;
+	int n_steps = 100;
 	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -227,22 +227,22 @@ void test18()
 	
 	int Nmod = 0;
 	int *bppe = NULL;
-	int numThreads = 6;
+	int numThreads = 10;
 	bool pool = true;
 	//#########################################################
 	//gw options
-	std::string generation_method = "dCS_IMRPhenomD_log";
-	//std::string generation_method = "EdGB_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD";
 	
 	
 	//std::string autocorrfile = "";
-	std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
-	std::string chainfile = "testing/data/mcmc_output_dCS.csv";
-	std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
-	//std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
-	//std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
-	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
+	//std::string chainfile = "testing/data/mcmc_output_dCS.csv";
+	//std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
+	std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
@@ -268,8 +268,8 @@ void test18()
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
-	//chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
-	chainfile = "testing/data/mcmc_output_dCS_hot.csv";
+	chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
+	//chainfile = "testing/data/mcmc_output_dCS_hot.csv";
 	for(int j = 0; j<n_steps;j++){
 		output_transform[j][0]=output[chain_N-1][j][0];
 		output_transform[j][1]=output[chain_N-1][j][1];

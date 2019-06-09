@@ -1282,6 +1282,8 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			} 
 		}
 
+		delete [] phi;
+		delete [] theta;
 		delete [] parameters.betappe;
 		deallocate_2D_array(temp_out, dimension,dimension);
 	}
