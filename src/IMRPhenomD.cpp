@@ -400,7 +400,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 				)
 {
-
 	T M = params-> M;
 	T chirpmass = params->chirpmass;
 	T DL = params->DL;
@@ -493,6 +492,10 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		}
 
 	}
+	//}
+	//std::cout<<"TEST d"<<std::endl;
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<waveform[length-1]<<std::endl;
 	//}
 	return 1;
 }

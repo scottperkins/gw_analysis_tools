@@ -412,14 +412,33 @@ void calculate_derivatives(double  **amplitude_deriv,
 	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" 
 		|| gen_method == "MCMC_dCS_IMRPhenomD_Full"
 		|| gen_method == "MCMC_EdGB_IMRPhenomD_log_Full"
+		|| gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_log_Full"
+		|| gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"
+		|| gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"
+		|| gen_method == "MCMC_ppE_IMRPhenomD_IMR_Full"
 		){
 		std::string local_gen;
+		bool log_scaling = false;
 		if(gen_method == "MCMC_dCS_IMRPhenomD_log_Full")
 			local_gen = "dCS_IMRPhenomD_log";
 		else if(gen_method == "MCMC_dCS_IMRPhenomD_Full")
 			local_gen = "dCS_IMRPhenomD";
 		else if(gen_method == "MCMC_EdGB_IMRPhenomD_log_Full")
 			local_gen = "EdGB_IMRPhenomD_log";
+		else if(gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"){
+			local_gen = "ppE_IMRPhenomD_IMR";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_log_Full"){
+			local_gen = "ppE_IMRPhenomD_Inspiral";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomD_IMR_Full"){
+			local_gen = "ppE_IMRPhenomD_IMR";
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"){
+			local_gen = "ppE_IMRPhenomD_Inspiral";
+		}
 		fourier_amplitude(frequencies, 
 			length,
 			amplitude,
@@ -433,7 +452,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			amplitude[k] = a_corr * amplitude[k];
 
 		IMRPhenomD<double> model;
-		int dimension = 9;
+		int dimension = 8+parameters->Nmod;
 		source_parameters<double> parameters_in;
 		gen_params waveform_params;
 		double param_p[dimension] ;
@@ -450,7 +469,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 		param_in[5] = eta;
 		param_in[6] = parameters->spin1[2];
 		param_in[7] = parameters->spin2[2];
-		param_in[8] = parameters->betappe[0];
+		for(int i = 0; i<parameters->Nmod; i++){
+			param_in[8+i] = parameters->betappe[i];
+		}
 		waveform_params.sky_average=parameters->sky_average;
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
 		std::complex<double> Qp, Qm;
@@ -485,8 +506,10 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.theta = param_p[1];
 			waveform_params.phi = param_p[2];
 			waveform_params.NSflag = parameters->NSflag;
-			waveform_params.betappe = new double[1];
-			waveform_params.betappe[0] = param_p[8];
+			waveform_params.betappe = new double[parameters->Nmod];
+			for (int j =0; j<parameters->Nmod; j++){
+				waveform_params.betappe[j] = param_p[8+j];
+			}
 
 
 			Qp = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
@@ -524,7 +547,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.phi = param_m[2];
 			waveform_params.NSflag = parameters->NSflag;
 			//waveform.bppe = new double[1];
-			waveform_params.betappe[0] = param_m[8];
+			for (int j =0; j<parameters->Nmod; j++){
+				waveform_params.betappe[j] = param_m[8+j];
+			}
 
 			Qm = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
 			a_corr_m = std::abs(Qm);
@@ -562,6 +587,12 @@ void calculate_derivatives(double  **amplitude_deriv,
 			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
 			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+			if(log_scaling){
+				for (int j =0 ; j<parameters->Nmod; j++){
+					amplitude_deriv[8+j][l] = 
+						amplitude_deriv[8+j][l]*param_in[8+j];	
+				}
+			}
 		}
 	}
 	else if (gen_method == "MCMC_IMRPhenomD_ind_spins"){

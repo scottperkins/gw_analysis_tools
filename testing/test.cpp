@@ -214,7 +214,7 @@ void test18()
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 750000;
+	int n_steps = 50000;
 	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -225,6 +225,8 @@ void test18()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
+	int Nmod = 0;
+	int *bppe = NULL;
 	int numThreads = 6;
 	bool pool = true;
 	//#########################################################
@@ -245,7 +247,7 @@ void test18()
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
-			data, psd,freqs, data_length,gps_time, detectors,
+			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,"",autocorrfile);	
 
 	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
@@ -416,6 +418,8 @@ void test16()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
+	int Nmod = 0;
+	int *bppe = NULL;
 	int numThreads = 5;
 	bool pool = true;
 	//#########################################################
@@ -431,7 +435,7 @@ void test16()
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
-			data, psd,freqs, data_length,gps_time, detectors,
+			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,"",autocorrfile);	
 	std::cout<<"ended"<<std::endl;
 
@@ -634,6 +638,8 @@ void test15()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
+	int Nmod = 0;
+	int *bppe = NULL;
 	int numThreads = 3;
 	bool pool = true;
 	//#########################################################
@@ -649,7 +655,7 @@ void test15()
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
-			data, psd,frequencies, data_length,gps_time, detectors,
+			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,"",autocorrfile);	
 	std::cout<<"ended"<<std::endl;
 
@@ -883,6 +889,8 @@ void test14()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
+	int Nmod = 0;
+	int *bppe = NULL;
 	
 	int numThreads = 8;
 	bool pool = true;
@@ -899,7 +907,7 @@ void test14()
 			swp_freq, test_lp_GW_DFull,numThreads, pool, show_progress, 
 			num_detectors, 
 			data, psd, 
-			frequencies, data_length, gps_time,detectors, generation_method,
+			frequencies, data_length, gps_time,detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile);	
 	std::cout<<"ended"<<std::endl;
 
@@ -1045,6 +1053,8 @@ void test12()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
+	int Nmod = 0;
+	int *bppe = NULL;
 	int numThreads = 20;
 	bool pool = false;
 	//#########################################################
@@ -1059,7 +1069,7 @@ void test12()
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_Pv2,numThreads, pool,show_progress, num_detectors, data, psd, 
-			frequencies, data_length, gps_time,detectors, generation_method,
+			frequencies, data_length, gps_time,detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile);	
 	std::cout<<"ended"<<std::endl;
 
@@ -1396,6 +1406,8 @@ void test10()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
+	int Nmod = 0;
+	int *bppe = NULL;
 	
 	int numThreads = 20;
 	bool pool = false;
@@ -1413,7 +1425,7 @@ void test10()
 
 	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_7dim,numThreads, pool,show_progress, num_detectors, data, psd, 
-			frequencies, data_length,gps_time, detectors, generation_method,
+			frequencies, data_length,gps_time, detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile);	
 	std::cout<<"ENDED"<<std::endl;
 
@@ -1586,6 +1598,8 @@ void test9()
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
+	int Nmod = 0;
+	int *bppe = NULL;
 	
 	int numThreads = 20;
 	bool pool = true;
@@ -1601,7 +1615,7 @@ void test9()
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW,numThreads, pool,show_progress, num_detectors, data, psd, 
-			frequencies, data_length,gps_time, detectors, generation_method,
+			frequencies, data_length,gps_time, detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile);	
 	std::cout<<"ended"<<std::endl;
 
@@ -1773,6 +1787,8 @@ void test8()
 		chain_temps[i] = c*chain_temps[i-1];
 		//chain_temps[i] = (1.+i*temp_step);
 	
+	int Nmod = 0;
+	int *bppe = NULL;
 	
 	std::string autocorrfile = "testing/data/auto_corr_mcmc.csv";
 	std::string chainfile = "testing/data/mcmc_output.csv";
@@ -1786,7 +1802,7 @@ void test8()
 			swp_freq, test_lp_GW,numThreads, pool,show_progress, 
 			num_detectors, 
 			data, psd, 
-			frequencies, data_length, gps_time,detectors, generation_method,
+			frequencies, data_length, gps_time,detectors,Nmod, bppe, generation_method,
 			statfilename, "" ,autocorrfile);	
 	std::cout<<"ENDED"<<std::endl;
 

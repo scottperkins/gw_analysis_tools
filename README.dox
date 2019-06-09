@@ -10,7 +10,8 @@ A suite of analysis tools useful for gravitational wave science. All code is wri
 
 Known to work with gcc/g++-7
 
-DOES NOT WORK FOR gcc/g++-8
+Known to work with gcc/g++-9
+
 \section external_libs Required Software
 
 Required non-standard C libraries:

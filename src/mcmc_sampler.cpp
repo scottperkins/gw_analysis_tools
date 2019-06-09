@@ -435,7 +435,6 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	//POOLING  -- ``Stochastic'' swapping between chains
 	else
 	{
-		
 		ThreadPool pool(numThreads);
 		poolptr = &pool;
 		while(samplerptr->progress<N_steps-samplerptr->swp_freq-2)

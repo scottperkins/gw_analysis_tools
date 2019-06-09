@@ -844,6 +844,8 @@ void MCMC_MH_GW(double ***output,
 		int *data_length,
 		double gps_time,
 		std::string *detectors,
+		int Nmod,
+		int *bppe,
 		std::string generation_method,
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
@@ -865,7 +867,9 @@ void MCMC_MH_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_Nmod = 1;
+	mcmc_Nmod = Nmod;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
 	bool local_seeding = false;
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
@@ -908,6 +912,7 @@ void MCMC_MH_GW(double ***output,
 		}
 	}
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD_log"){
+		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, ln alpha^2 "<<std::endl;
 		if(!seeding_var){
 			local_seeding=true;
@@ -922,8 +927,10 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[7]=.1;
 			seeding_var[8]=2;
 		}
+		//mcmc_log_beta = true;
 	}
 	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD_log"){
+		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, ln alpha^2 "<<std::endl;
 		if(!seeding_var){
 			local_seeding=true;
@@ -938,8 +945,10 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[7]=.1;
 			seeding_var[8]=2;
 		}
+		//mcmc_log_beta = true;
 	}
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD"){
+		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(!seeding_var){
 			local_seeding=true;
@@ -982,6 +991,7 @@ void MCMC_MH_GW(double ***output,
 				for(int i =0; i<mcmc_Nmod; i++){
 					std::cout<<", ln beta"<<i;
 				}
+				mcmc_log_beta = true;
 			}
 			else{
 				for(int i =0; i<mcmc_Nmod; i++){
@@ -1012,6 +1022,7 @@ void MCMC_MH_GW(double ***output,
 				for(int i =0; i<mcmc_Nmod; i++){
 					std::cout<<", ln beta"<<i;
 				}
+				mcmc_log_beta = true;
 			}
 			else{
 				for(int i =0; i<mcmc_Nmod; i++){
@@ -1181,6 +1192,10 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	else if(dimension ==9 && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
 			|| mcmc_generation_method == "dCS_IMRPhenomD" 
 			|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
+			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
+			|| mcmc_generation_method == "ppE_IMRPhenomD_IMR_log"
+			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"
+			|| mcmc_generation_method == "ppE_IMRPhenomD_IMR"
 			)){	
 		//unpack parameter vector
 		double incl = acos(param[0]);
@@ -1192,7 +1207,18 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		double chi1 = param[6];
 		double chi2 = param[7];
 		//ln alpha^2 or alpha^2, depending on method
-		double lnalpha2 = param[8];
+		//double lnalpha2 = param[8];
+		double beta[mcmc_Nmod] ;
+		if(mcmc_log_beta){
+			for (int j = 0; j<mcmc_Nmod;j++){
+				beta[j ] = std::exp(param[8+j]);	
+			}
+		}
+		else{
+			for (int j = 0; j<mcmc_Nmod;j++){
+				beta[j ] = param[8+j];	
+			}
+		}
 		double delta_t = 0;
 		double tc_ref =0;
 		double phic_ref =0;
@@ -1213,9 +1239,12 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		parameters.spin2[1] = 0;
 		parameters.spin2[2] = chi2;
 		parameters.Luminosity_Distance = DL;
-		parameters.Nmod = 1;
-		parameters.betappe = new double[1];
-		parameters.betappe[0] = lnalpha2;
+		parameters.Nmod = mcmc_Nmod;
+		parameters.betappe = new double[mcmc_Nmod];
+		//parameters.betappe[0] = lnalpha2;
+		for (int j = 0 ; j<mcmc_Nmod; j++){
+			parameters.betappe[j] = beta[j];
+		}
 		//The rest is maximized over for this option
 		parameters.tc = 0;
 		parameters.phic = 0;
@@ -1494,7 +1523,19 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double eta = param[5];
 		double chi1 = param[6];
 		double chi2 = param[7];
-		double lnalpha2 = param[8];
+		//double lnalpha2 = param[8];
+
+		double beta[mcmc_Nmod] ;
+		if(mcmc_log_beta){
+			for (int j = 0; j<mcmc_Nmod;j++){
+				beta[j ] = std::exp(param[8+j]);	
+			}
+		}
+		else{
+			for (int j = 0; j<mcmc_Nmod;j++){
+				beta[j ] = param[8+j];	
+			}
+		}
 		//std::cout.precision(15);
 		//std::cout<<"lnalpha2 "<<lnalpha2<<std::endl;
 		double delta_t = 0;
@@ -1524,9 +1565,13 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.theta=theta[0];
 		parameters.NSflag = false;
 		parameters.sky_average = false;
-		parameters.Nmod = 1;
-		parameters.betappe = new double[1];
-		parameters.betappe[0] = lnalpha2;
+		parameters.Nmod = mcmc_Nmod;
+		parameters.betappe = new double[mcmc_Nmod];
+		parameters.bppe = mcmc_bppe;
+		//parameters.betappe[0] = lnalpha2;
+		for (int j = 0 ; j<mcmc_Nmod; j++){
+			parameters.betappe[j] = beta[j];
+		}
 		//parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
 		//parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
 		

@@ -35,8 +35,10 @@ static fftw_outline *mcmc_fftw_plans=NULL ;
 static int mcmc_num_detectors=2;
 static double mcmc_gps_time=0;
 static int mcmc_Nmod;
+static int *mcmc_bppe;
 static gsl_interp_accel **mcmc_accels = NULL;
 static gsl_spline **mcmc_splines = NULL;
+static bool mcmc_log_beta;
 //extern const double **mcmc_noise=NULL;
 //extern const std::complex<double> **mcmc_data=NULL;
 //extern const double **mcmc_frequencies=NULL;
@@ -218,6 +220,8 @@ void MCMC_MH_GW(double ***output,
 			int *data_length,
 			double gps_time,
 			std::string *detector,
+			int Nmod,
+			int *bppe,
 			std::string generation_method,
 			std::string statistics_filename,
 			std::string chain_filename,
