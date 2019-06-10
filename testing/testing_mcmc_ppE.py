@@ -4,7 +4,7 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
-burn = False
+burn = True
 data = np.loadtxt("data/mcmc_output_ppE.csv",delimiter=',')
 if burn:
     data = data[10000:]

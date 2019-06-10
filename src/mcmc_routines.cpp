@@ -986,7 +986,7 @@ void MCMC_MH_GW(double ***output,
 		|| generation_method == "ppE_IMRPhenomD_Inspiral"
 		|| generation_method == "ppE_IMRPhenomD_IMR"
 		){
-		if(dimension-mcmc_Nmod == 7){
+		if(dimension-mcmc_Nmod == 8){
 			
 			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
 			if(generation_method == "ppE_IMRPhenomD_IMR_log" 

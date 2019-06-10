@@ -131,25 +131,25 @@ void test20()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(5,4))};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -5};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
-	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-0};
-	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
+	//double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-0};
+	double initial_pos[dimension]={.9, 2, -1.,log(300),log(30), .24,- .0,-.0,-0};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 40000;
-	int chain_N=6 ;
+	int n_steps = 1000000;
+	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
 	double chain_temps[chain_N];
 	chain_temps[0]=1.;
-	double c = 1.2;
+	double c = 1.3;
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 4;
+	int numThreads = 8;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -158,8 +158,8 @@ void test20()
 	//std::string generation_method = "dCS_IMRPhenomD";
 	
 	
-	//std::string autocorrfile = "";
-	std::string autocorrfile = "testing/data/auto_corr_mcmc_ppE.csv";
+	std::string autocorrfile = "";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_ppE.csv";
 	std::string chainfile = "testing/data/mcmc_output_ppE.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_ppE.txt";
 	//std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
