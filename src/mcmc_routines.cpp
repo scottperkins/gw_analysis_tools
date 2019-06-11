@@ -966,6 +966,23 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[8]=1e-20;
 		}
 	}
+	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD"){
+		mcmc_Nmod = 1;
+		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
+		if(!seeding_var){
+			local_seeding=true;
+			seeding_var = new double[dimension];
+			seeding_var[0]=.1;
+			seeding_var[1]=.1;
+			seeding_var[2]=.1;
+			seeding_var[3]=1;
+			seeding_var[4]=.5;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=1e-20;
+		}
+	}
 	else if(dimension==7 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=true;
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, cos theta_1, cos theta_2"<<std::endl;
@@ -1196,6 +1213,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
 			|| mcmc_generation_method == "dCS_IMRPhenomD" 
 			|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
+			|| mcmc_generation_method == "EdGB_IMRPhenomD"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_IMR_log"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"

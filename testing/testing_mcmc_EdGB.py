@@ -4,9 +4,11 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
-
+burnin = True
+burninlength = 50000
 data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
-#data = data[10000:]
+if burnin:
+    data = data[burninlength:]
 for i in np.arange(9):
     parameter = [x[i] for x in data]
     plt.plot(parameter)
@@ -26,15 +28,21 @@ figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titl
 plt.savefig("mcmc_testing_EdGB.pdf")
 plt.close()
 alphahist = []
+i = 0
 for x in dataplot:
+    if x[-1]>10:
+        i+=1
     alphahist.append(x[-1])
 alphahist = np.asarray(alphahist)
 print("Minimum root alpha: ",alphahist.min())
+print(i)
 plt.hist(alphahist,bins=100,density=True)
 plt.savefig("alpha_hist_EdGB.pdf")
 plt.close()
 ##############################################################
 data = np.loadtxt("data/mcmc_output_EdGB_hot.csv",delimiter=',')
+if burnin:
+    data = data[burninlength:]
 #data = data[:30000]
 #data = data[:-100]
 #chirpmasses = [x[1] for x in data]
@@ -65,6 +73,8 @@ plt.close()
 
 ##############################################################
 data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
+if burnin:
+    data = data[burninlength:]
 def chieff(m1, m2, spin1, spin2,):
     return (m1*spin1 + m2*spin2)/(m1+m2)
 datatransform= []
@@ -82,4 +92,4 @@ labels = [r"$M_1$",r"$M_2$",r"$\chi_{eff}$"]
 
 figure = corner.corner(datatransform, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 plt.savefig("mcmc_testing_transform_EdGB.pdf")
-plt.close()
+PLT.Close()

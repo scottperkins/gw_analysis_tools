@@ -412,6 +412,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" 
 		|| gen_method == "MCMC_dCS_IMRPhenomD_Full"
 		|| gen_method == "MCMC_EdGB_IMRPhenomD_log_Full"
+		|| gen_method == "MCMC_EdGB_IMRPhenomD_Full"
 		|| gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_log_Full"
 		|| gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"
 		|| gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"
@@ -429,6 +430,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 		else if(gen_method == "MCMC_EdGB_IMRPhenomD_log_Full"){
 			local_gen = "EdGB_IMRPhenomD";
 			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_EdGB_IMRPhenomD_Full"){
+			local_gen = "EdGB_IMRPhenomD";
 		}
 		else if(gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"){
 			local_gen = "ppE_IMRPhenomD_IMR";

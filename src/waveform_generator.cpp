@@ -188,6 +188,26 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
 	}
+	else if(generation_method == "EdGB_IMRPhenomD")
+	{
+		EdGB_IMRPhenomD<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<double>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i]* .5 *(1+ci*ci);
+		}
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
@@ -386,6 +406,22 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
 	}
+	else if(generation_method == "EdGB_IMRPhenomD")
+	{
+		EdGB_IMRPhenomD<double> ppemodeld;
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
@@ -493,6 +529,14 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 		//params.bppe = parameters->bppe;
 		//params.Nmod = parameters->Nmod;
 		EdGB_IMRPhenomD_log<double> ppemodeld;
+		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	}
+	else if(generation_method == "EdGB_IMRPhenomD")
+	{
+		//params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		EdGB_IMRPhenomD<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
@@ -625,6 +669,22 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		for( int i = 0; i < params.Nmod; i++)
 			temp[i] = params.betappe[i];
 		EdGB_IMRPhenomD_log<double> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "EdGB_IMRPhenomD")
+	{
+		params.betappe = parameters->betappe;
+		//params.bppe = parameters->bppe;
+		//params.Nmod = parameters->Nmod;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		double temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		EdGB_IMRPhenomD<double> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
