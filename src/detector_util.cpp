@@ -1,4 +1,4 @@
-#include "noise_util.h"
+#include "detector_util.h"
 #include "util.h"
 #include <fstream>
 #include <iostream>
@@ -6,7 +6,8 @@
 #include <math.h>
 
 /*! \file
- * Routines to construct noise curves for various detectors*/
+ * Routines to construct noise curves for various detectors and for detector specific utilities for response functions and coordinate transformations
+ */
 
 /*! \brief Function to populate the squareroot of the noise curve for various detectors
  *
@@ -66,7 +67,10 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		
 }
 
-
+/*! \brief Analytic function approximating the PSD for aLIGO 
+ *
+ * CITE (Will?)
+ */
 double aLIGO_analytic(double f)
 {
 	double S= 3e-48;
@@ -76,6 +80,10 @@ double aLIGO_analytic(double f)
 	return sqrt( S * (x4 + 2 + 2*x*x)/5 );
 }
 
+/*! \brief Numerically fit PSD to the Hanford Detector's O1
+ *
+ * CITE (Yunes?)
+ */
 double Hanford_O1_fitted(double f)
 {
 	double avec[7]={47.8466,-92.1896,35.9273,-7.61447,0.916742,-0.0588089,0.00156345};
@@ -85,6 +93,10 @@ double Hanford_O1_fitted(double f)
             avec[3] * x*x*x + avec[4]*x*x*x*x + avec[5]*x*x*x*x*x + avec[6]*x*x*x*x*x*x);
 }
 
+/*! \brief Utility for the overall amplitude and phase shift for spin-aligned systems
+ *
+ * For spin aligned, all the extrinsic parameters have the effect of an overall amplitude modulation and phase shift
+ */
 std::complex<double> Q(double theta, double phi, double iota)
 {
 	double ct = cos(theta);
@@ -99,6 +111,10 @@ std::complex<double> Q(double theta, double phi, double iota)
 }
 
 
+/*! \brief Response function of a 90 deg interferometer for plus polarization
+ *
+ * Theta and phi are local, horizontal coordinates relative to the detector
+ */
 double right_interferometer_plus(double theta, double phi)
 {
 	double ct = cos(theta);
@@ -108,6 +124,10 @@ double right_interferometer_plus(double theta, double phi)
 	return Fplus;
 }
 
+/*! \brief Response function of a 90 deg interferometer for cross polarization
+ *
+ * Theta and phi are local, horizontal coordinates relative to the detector
+ */
 double right_interferometer_cross(double theta, double phi)
 {
 	double ct = cos(theta);
@@ -116,6 +136,14 @@ double right_interferometer_cross(double theta, double phi)
 	return Fcross;
 }
 
+/*! \brief Transform from celestial coordinates to local horizontal coords
+ *
+ * (RA,DEC) -> (altitude, azimuth)
+ *
+ * Need gps_time of transformation, as the horizontal coords change in time
+ *
+ * detector is used to specify the lat and long of the local frame
+ */
 void celestial_horizon_transform(double RA, /**< in RAD*/
 		double DEC, /**< in RAD*/
 		double gps_time, 
@@ -150,6 +178,11 @@ void celestial_horizon_transform(double RA, /**< in RAD*/
 	*phi += azimuth_offset;
 	if(*phi>2*M_PI) *phi -=2*M_PI;
 }
+
+/*! \brief Numerical derivative of the transformation
+ *
+ * Planned for use in Fisher calculations, but not currently implemented anywhere
+ */
 void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 		double DEC, /**< in RAD*/
 		double gps_time, 
@@ -173,7 +206,8 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 	*dtheta_dDEC = (thetap-thetam)/(2*epsilon);
 	*dphi_dDEC = (phip-phim)/(2*epsilon);
 }
-/*! \brief calculate Difference in time of arrival (DTOA) for a given source location and 2 different detectors
+
+/*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  */
 double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	double theta2, /**<spherical polar angle for detector 2 in RAD*/ 
@@ -211,6 +245,10 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	return (cos(theta1)*R1 - cos(theta2)*R2)/c;
 }
 
+/*! /brief Analytic approximation of the radius from the center of earth to a given location
+ *
+ * Just the raidus as a function of angles, modelling an oblate spheroid
+ */
 double radius_at_lat(double latitude, /**< latitude in degrees*/
 			double elevation /**<elevation in meters*/
 			)

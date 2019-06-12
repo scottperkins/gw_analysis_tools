@@ -1,7 +1,7 @@
 #include "waveform_util.h"
 #include "util.h"
 #include "waveform_generator.h"
-#include "noise_util.h"
+#include "detector_util.h"
 #include <fftw3.h>
 #include <algorithm>
 #include <complex>
@@ -14,14 +14,17 @@
  */
 
 
-
-double data_snr_maximized_extrinsic(double *frequencies,
-				int length,
-				std::complex<double> *data,
-				double *psd,
-				std::string detector,
-				std::string generation_method,
-				gen_params *param
+/*! \brief Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc
+ *
+ * The gen_params structure holds the parameters for the template to be used (the maximimum likelihood parameters)
+ */
+double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used by data*/
+				int length,/**< length of the data*/
+				std::complex<double> *data,/**< input data in the fourier domain*/
+				double *psd,/**< PSD for the detector that created the data*/
+				std::string detector,/**< Name of the detector --See noise_util for options */
+				std::string generation_method,/**< Generation method for the template -- See waveform_generation.cpp for options*/
+				gen_params *param/**< gen_params structure for the template*/
 				)
 {
 	
@@ -32,23 +35,19 @@ double data_snr_maximized_extrinsic(double *frequencies,
 		//noise[i] = noise[i]*noise[i];
 		noise[i ] =psd[i];
 
-	//std::complex<double> q = Q(param.theta,param.phi,param.incl_angle);
 	std::complex<double> *detector_response
 			 = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	double *integrand
 			 = (double *)malloc(sizeof(double)*length);
 	/*produce the waveform*/
-	//fourier_waveform(frequencies, length, detector_response, generation_method, &param);
 	fourier_detector_response(frequencies, length, detector_response, detector,generation_method, param);
 
 	/*Calculate the template snr integrand 4*Re(h* h /S(f)) - factor of q for the plus, cross modes 
  * 	effect on the detector*/
 	for (int i = 0; i<length;i++)
-		//integrand[i] = 4.*real(conj(q*detector_response[i])*q*detector_response[i])/noise[i]; 
 		integrand[i] = 4.*real(conj(detector_response[i])*detector_response[i])/noise[i]; 
 	double delta_f = frequencies[1]-frequencies[0];
 	double snr_template;
-	//snr_template = sqrt(trapezoidal_sum_uniform(delta_f,length, integrand));
 	snr_template = sqrt(simpsons_sum(delta_f,length, integrand));
 
 	fftw_complex *in, *out; 
@@ -59,7 +58,6 @@ double data_snr_maximized_extrinsic(double *frequencies,
 	std::complex<double> g_tilde;
         for (int i=0;i<length; i++)
         {
-                //g_tilde = 4.*q*conj(data[i]) * detector_response[i] / noise[i];
                 g_tilde = 4.*conj(data[i]) * detector_response[i] / noise[i];
                 in[i][0] = real(g_tilde);
                 in[i][1] = imag(g_tilde);
@@ -89,14 +87,18 @@ double data_snr_maximized_extrinsic(double *frequencies,
 	free(integrand);
 	return max/(snr_template);
 }
-double data_snr_maximized_extrinsic(double *frequencies,
-				int length,
-				double *data_real,
-				double *data_imag,
-				double *psd,
-				std::string detector,
-				std::string generation_method,
-				gen_params *param
+/*! \brief Light wrapper for the data_snr_maximized_extrinsic method
+ *
+ * Splits the data into real and imaginary, so all the arguments are C-safe
+ */
+double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used by data*/
+				int length,/**< length of the data*/
+				double *data_real,/**< input data in the fourier domain -- real part*/
+				double *data_imag,/**< input data in the fourier domain -- imaginary part*/
+				double *psd,/**< PSD for the detector that created the data*/
+				std::string detector,/**< Name of the detector --See noise_util for options */
+				std::string generation_method,/**< Generation method for the template -- See waveform_generation.cpp for options*/
+				gen_params *param/**< gen_params structure for the template*/
 				)
 {
 	std::complex<double> *data = (std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
@@ -115,6 +117,7 @@ double data_snr_maximized_extrinsic(double *frequencies,
 }
 /*! \brief Caclulates the snr given a detector and waveform (complex) and frequencies
  *      
+ * This function computes the un-normalized snr: \sqrt( ( H | H ) )
  */     
 double calculate_snr(std::string detector, /**< detector name - must match the string of populate_noise precisely*/
                         std::complex<double> *waveform,/**< complex waveform */
@@ -182,7 +185,7 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
  *
  * Detector options include classic interferometers like LIGO/VIRGO (coming soon: ET and LISA)
  * 	
- * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually - detector responses will be in the noise_util files
+ * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
  */
 int fourier_detector_response(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
 			std::complex<double> *response, /**< [out] complex array for the output plus polarization waveform*/

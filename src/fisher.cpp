@@ -5,7 +5,7 @@
 #include <math.h>
 #include <string>
 #include "util.h"
-#include "noise_util.h"
+#include "detector_util.h"
 #include "IMRPhenomD.h"
 #include "ppE_IMRPhenomD.h"
 #include "waveform_generator.h"

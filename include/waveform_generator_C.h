@@ -1,6 +1,10 @@
 #ifndef WAVEFORM_GENERATOR_C_H
 #define WAVEFORM_GENERATOR_C_H
 
+/*! \file 
+ * Header file for the C wrapping of the waveform_generation.cpp 
+ *
+ */
 #ifdef __cplusplus
 extern "C"
 {

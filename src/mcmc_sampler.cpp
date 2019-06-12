@@ -231,12 +231,9 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
 		double *chain_temps,	/**<Double array of temperatures for the chains*/
 		int swp_freq,	/**< the frequency with which chains are swapped*/
-		//double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
-		//double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
-		//void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
-		std::function<double(double*,int,int)> log_prior,
-		std::function<double(double*,int,int)> log_likelihood,
-		std::function<void(double*,int,double**,int)>fisher,
+		std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+		std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+		std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
 		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
@@ -291,19 +288,13 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	sampler.output = output;
 	sampler.pool = pool;
 	sampler.numThreads = numThreads;
-	//########################################################
-	//########################################################
-	//POOLING -- TESTING
-	//sampler.pool = false;
-	//########################################################
-	//########################################################
 
 	allocate_sampler_mem(&sampler);
 
 	//########################################################
 	//########################################################
 	//Set chain 0 to highest priority
-	sampler.priority[0] = 0;
+	//sampler.priority[0] = 0;
 	//########################################################
 	//########################################################
 
@@ -319,7 +310,8 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	samplerptr = &sampler;
 	//Assign initial position to start chains
 	//Currently, just set all chains to same initial position
-	if(!seeding_var){ for (int j=0;j<sampler.chain_N;j++){
+	if(!seeding_var){ 
+		for (int j=0;j<sampler.chain_N;j++){
 			sampler.de_primed[j]=false;
 			for (int i = 0; i<sampler.dimension; i++)
 			{
@@ -468,21 +460,6 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 					}
 				}
 				
-				//else if(i!=0 && samplerptr->waiting[i] &&
-				//	samplerptr->chain_pos[i]>(N_steps-samplerptr->swp_freq-1))
-				//{
-				//	std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
-				//	samplerptr->waiting[i]=false;
-				//	samplerptr->priority[i] = 2;
-				//	int pos = samplerptr->chain_pos[i];
-				//	for (int k =0; k<samplerptr->dimension; k++){
-				//		samplerptr->output[i][0][k] = 
-				//			samplerptr->output[i][pos][k] ;
-				//	}
-				//	samplerptr->chain_pos[i] = 0;
-
-				//	poolptr->enqueue(i);
-				//}
 			}
 			if(show_prog)
 				printProgress((double)samplerptr->progress/N_steps);
@@ -554,7 +531,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	double nansum=0;
 	for (int i =0; i< chain_N; i++)
 		nansum+= samplerptr->nan_counter[i];
-	std::cout<<"NANS (all chains): "<<nansum<<std::endl;
+	std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
 	
 	if(statistics_filename != "")
 		write_stat_file(&sampler, statistics_filename, step_accepted, step_rejected,
@@ -579,7 +556,6 @@ void mcmc_step_threaded(int j)
 		success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
 		if(success==1){samplerptr->step_accept_ct[j]+=1;}
 		else{samplerptr->step_reject_ct[j]+=1;}
-		//update_history(samplerptr,samplerptr->output[j][k+i+1], j);
 		if(!samplerptr->de_primed[j])
 			update_history(samplerptr,samplerptr->output[j][k+i+1], j);
 		else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
@@ -642,12 +618,6 @@ void mcmc_step_threaded(int j)
 			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
 		}	
 		
-		//Make this more general later
-		//for (int k =0; k<samplerptr->types_of_steps; k++){
-		//	if(step_prob[j][k]!= 0){
-		//		
-		//	}
-		//}
 	}
 	poolptr->enqueue_swap(j);
 }

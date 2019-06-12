@@ -1,5 +1,5 @@
-#ifndef MCMC_ROUTINES_H
-#define MCMC_ROUTINES_H
+#ifndef MCMC_GW_H
+#define MCMC_GW_H
 #include <complex>
 #include <fftw3.h>
 #include "util.h"
@@ -8,23 +8,13 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 /*! \file 
+ *
+ * Header file for the Graviational Wave specific MCMC routines
  */
 
 //########################################
 //MCMC global variables - facilitate wrapping 
 //of likelihood function 
-//extern double **mcmc_noise=null;
-//extern std::complex<double> **mcmc_data=null;
-//extern double **mcmc_frequencies=null;
-//extern std::string *mcmc_detectors=null;
-//extern std::string *generation_method=null;
-//extern int *mcmc_data_length = null;
-//extern double **mcmc_noise;
-//extern std::complex<double> **mcmc_data;
-//extern double **mcmc_frequencies;
-//extern std::string *mcmc_detectors;
-//extern std::string *generation_method;
-//extern int *mcmc_data_length ;
 static double **mcmc_noise=NULL;
 static std::complex<double> **mcmc_data=NULL;
 static double **mcmc_frequencies=NULL;
@@ -40,12 +30,6 @@ static gsl_interp_accel **mcmc_accels = NULL;
 static gsl_spline **mcmc_splines = NULL;
 static bool mcmc_log_beta;
 static bool mcmc_intrinsic;
-//extern const double **mcmc_noise=NULL;
-//extern const std::complex<double> **mcmc_data=NULL;
-//extern const double **mcmc_frequencies=NULL;
-//extern const std::string *mcmc_detectors=NULL;
-//extern const std::string *generation_method=NULL;
-//extern const int *mcmc_data_length=NULL ;
 //########################################
 
 

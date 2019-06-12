@@ -4,7 +4,9 @@
 #include "util.h"
 #include <string>
 
-
+/*! \file 
+ * Header file for waveform specific utilites
+ */
 
 double data_snr_maximized_extrinsic(double *frequencies,
 				int length,

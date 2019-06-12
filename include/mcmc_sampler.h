@@ -2,7 +2,7 @@
 #define MCMC_SAMPLER_H
 #include <iostream>
 #include <functional>
-/* \file 
+/*! \file 
  * Header file for mcmc_sampler
  */
 

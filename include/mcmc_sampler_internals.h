@@ -15,12 +15,6 @@
 //typedef double (*log_likelihood_thread_safe)(double *param, int dimension);
 //typedef void (*fisher_thread_safe)(double *param, int dimension,double **fisher);
 
-//typedef double (*log_prior)(double *param, int dimension, int thread_id);
-//typedef double (*log_likelihood)(double *param, int dimension, int thread_id);
-//typedef void (*fisher)(double *param, int dimension,double **fisher, int thread_id);
-//std::function<double(double*,int, int)> log_prior;
-//std::function<double(double*,int, int)> log_likelihood;
-//std::function<void(double*,int,double**,int)> fisher;
 /*! Structure storing everything that defines an instance of the sampler
  */
 const double limit_inf = -std::numeric_limits<double>::infinity();

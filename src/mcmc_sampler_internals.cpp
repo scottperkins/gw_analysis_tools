@@ -24,6 +24,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	double proposed_param[sampler->dimension];
 
 	int step;	
+	//Determine which step to take and calculate proposed coord.
 	if (alpha<sampler->prob_boundaries[chain_number][0])
 	{
 		gaussian_step(sampler, current_param, proposed_param, chain_number);
@@ -55,19 +56,16 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	double MH_ratio;
 	double power;
 
+	//Check if proposed step is out of range by calculating prior
+	//if out of range, reject step
 	if(current_lp == limit_inf || proposed_lp == limit_inf){
-		//MH_ratio =-1e20;
 		MH_ratio = limit_inf;
-		//std::cout<<"OUT OF RANGE"<<std::endl;
 	}
 	else{
 		//Calculate log_likelihood and log prior
-		
 		current_ll = sampler->current_likelihoods[chain_number];
-		
 		proposed_ll = sampler->ll(proposed_param, sampler->dimension,chain_number);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
-
 		//Calculate MH ratio
 		MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
 	}
@@ -75,11 +73,6 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	int i;
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
-	//std::cout<<std::endl;
-	//std::cout<<"Chain: "<<chain_number<<" "<<beta<<" "<<MH_ratio<<std::endl;
-	//std::cout<<current_ll<<" "<<proposed_ll<<std::endl;
-	////std::cout<<"Step: "<<step<<std::endl;
-	//std::cout<<"Proposed: "<<proposed_param[0]<<" "<<proposed_param[1]<<" "<<proposed_param[2]<<" "<<exp(proposed_param[3])/MPC_SEC<<" "<<exp(proposed_param[4])/MSOL_SEC<<" "<<proposed_param[5]<<" "<<proposed_param[6]<<" "<<proposed_param[7]<<std::endl;
 	if(MH_ratio< beta){
 		for ( i=0;i<sampler->dimension; i ++)
 		{
@@ -127,34 +120,31 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		int chain_index
 		)
 {
-	//sampler->num_fish+=1;
+	//Check whether or not we need to update the fisher
 	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
 		update_fisher(sampler, current_param, chain_index);	
 
+	//update the count of steps since last fisher update
 	sampler->fisher_update_ct[chain_index] += 1;
 	
 	//beta determines direction to step in eigen directions
 	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 	
-	//double alpha = gsl_ran_gaussian(sampler->rvec[chain_index], .5);
 	double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
 				 sampler->randgauss_width[chain_index][3]);
 
 	double scaling = 0.0;
+	//ensure the steps aren't ridiculous
 	if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
 	else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
 
 	else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 				sampler->chain_temps[chain_index];}
-	//std::cout<<"FISHER scaling: "<<alpha/sqrt(scaling)<<std::endl;
-	//scaling = 1e10;
-	//std::cout<<sampler->fisher_vecs[chain_index][beta][8]<<std::endl;
+	//Take step
 	for(int i =0; i< sampler->dimension;i++)
 	{
 		proposed_param[i] = current_param[i] +
 			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
-		//std::cout<<"FISHER pos diff: "<<i<<" "<<sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
-		//std::cout<<"FISHER pos diff: "<<i<<" "<<current_param[i]-proposed_param[i]<<std::endl;
 	}
 
 }
@@ -162,7 +152,6 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 
 void update_fisher(sampler *sampler, double *current_param, int chain_index)
 {
-	//std::cout<<"FISHER UPDATED"<<std::endl;
 	//Fisher calculation
 	double **fisher=(double **)malloc(sizeof(double*)*sampler->dimension);	
 	for (int i =0; i<sampler->dimension;i++){
@@ -206,7 +195,6 @@ void update_fisher(sampler *sampler, double *current_param, int chain_index)
 				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
 			}
 			sampler->fisher_vals[chain_index][i]=eigen_vals[i];
-			//std::cout<<sampler->fisher_vals[chain_index][i]<<std::endl;
 		}
 		sampler->fisher_update_ct[chain_index]=0;
 	}
@@ -233,6 +221,11 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 }
 
 /*!\brief differential evolution informed step
+ *
+ * Differential evolution uses the past history of the chain to inform the proposed step:
+ *
+ * Take the difference of two random, accepted previous steps and step along that with some step size,
+ * determined by a gaussian
  */
 void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
@@ -240,7 +233,9 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
+	//First position ID
 	int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
+	//Second position ID
 	int j;
 	do{
 		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
@@ -249,7 +244,6 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = .1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
-		//alpha=gsl_ran_gaussian(sampler->rvec[chain_id],.5);
 		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
 	for (int k = 0; k<sampler->dimension; k++)
 	{
@@ -259,6 +253,11 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
+ *
+ * The total output file is passed, and the chains are swapped sequentially
+ *
+ * This is the routine for ``Deterministic'' sampling (parallel or sequential, 
+ * but not pooled)
  */
 void chain_swap(sampler *sampler, /**<sampler struct*/
 		double ***output, /**<output vector containing chains*/
@@ -281,6 +280,8 @@ void chain_swap(sampler *sampler, /**<sampler struct*/
 }
 
 /*! \brief subroutine to actually swap two chains
+ *
+ * This is the more general subroutine, which just swaps the two chains passed to the function
  */
 int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			double *chain1, /**< parameter position of chain that could be changed*/
@@ -289,11 +290,11 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			int T2_index	/**<number of chain swapper in chain_temps*/
 			)
 {
+	//Unpack parameters
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
 	double ll1 =  T1*sampler->current_likelihoods[T1_index];
 	double ll2 =  T2*sampler->current_likelihoods[T2_index];
-	//double pow = ll1/T2 + ll2/T1 - ll1/T1 - ll2/T2;
 	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1;
 	double MH_ratio;
 	MH_ratio = pow;
@@ -360,9 +361,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 	//No fisher, but de ready
 	else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 	{
-		//testing
-		//sampler->step_prob[chain_index][0]=0;
-		//sampler->step_prob[chain_index][1]=1;
 		
 		sampler->step_prob[chain_index][0]=.2;
 		sampler->step_prob[chain_index][1]=.8;
@@ -373,11 +371,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 	//all methods available
 	else
 	{
-		//sampler->step_prob[chain_index][0]=.2;
-		//sampler->step_prob[chain_index][1]=.3;
-		//sampler->step_prob[chain_index][2]=.2;
-		//sampler->step_prob[chain_index][3]=.3;
-		//Testing
 		sampler->step_prob[chain_index][0]=.05;
 		sampler->step_prob[chain_index][1]=.2;
 		sampler->step_prob[chain_index][2]=.0;

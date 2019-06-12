@@ -4,7 +4,7 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
-burnin = True
+burnin = False
 burninlength = 50000
 data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
 if burnin:
@@ -92,4 +92,4 @@ labels = [r"$M_1$",r"$M_2$",r"$\chi_{eff}$"]
 
 figure = corner.corner(datatransform, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 plt.savefig("mcmc_testing_transform_EdGB.pdf")
-PLT.Close()
+plt.close()

@@ -1,8 +1,9 @@
-#ifndef NOISE_UTIL_H
-#define NOISE_UTIL_H
+#ifndef DETECTOR_UTIL_H
+#define DETECTOR_UTIL_H
 #include <string>
 #include <complex>
 /*! \file
+ * Header file for all detector-specific utilities
  */
 
 /*Detector Orientation  variables*/

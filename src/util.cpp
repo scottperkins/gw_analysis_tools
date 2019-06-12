@@ -12,21 +12,17 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
-
-//const std::string PROJECT_DIRECTORY="/Users/sperkins/opt/gw_analysis_tools";
-//#define PROJECT_DIRECTORY __FILE__.substr(0,10)
-
 /*! \file
  *
- * General utilities that are method independent
+ * General utilities that are not necessarily specific to any part of the project at large
  */
+
 //#######################################################################################
 //Interpolate Z to DL once per import
-//const int npts =100000;
-//double DLvec[npts];
-//double Zvec[npts];
-//gsl_interp_accel *Z_DL_accel_ptr ;
-//gsl_spline *Z_DL_spline_ptr ;
+/*! \brief Function that uses the GSL libraries to interpolate pre-calculated Z-D_L data
+ *
+ * Initiates the requried functions -- GSL interpolation requires allocating memory before hand
+ */
 void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr)
 {
 	//int npts =100000;
@@ -59,6 +55,9 @@ void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL
 	gsl_spline_init(*Z_DL_spline_ptr, DLvec, Zvec, npts);
 	data_table.close();
 }
+
+/*! \brief Frees the allocated interpolation function
+ */
 void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr)
 {
 	gsl_interp_accel_free(*Z_DL_accel_ptr);
@@ -66,9 +65,10 @@ void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spl
 }
 //#######################################################################################
 
-
-
-
+/*! Function that returns Z from a given luminosity Distance -- only Planck15
+ *
+ * adouble version for ADOL-C calculations
+ */
 adouble Z_from_DL_interp(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
 {
 	adouble Z = 0;
@@ -76,6 +76,8 @@ adouble Z_from_DL_interp(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline
 	return Z;
 }
 
+/*! Function that returns Z from a given luminosity Distance -- only Planck15
+ */
 double Z_from_DL_interp(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr)
 {
 	double Z = 0;
@@ -129,6 +131,9 @@ double Z_from_DL(double DL, std::string cosmology)
 	return -1;
 	
 }
+/*! \brief Calculates the redshift given the luminosity distance
+ * adouble version for ADOL-C implementation
+ */
 adouble Z_from_DL(adouble DL, std::string cosmology)
 {
 	std::string formatted_cosmo = "";
@@ -191,6 +196,9 @@ double DL_from_Z(double Z, std::string cosmology)
 	}
 	return -1;
 }
+/*! \brief Calculates the luminosity distance given the redshift
+ * adouble version for ADOL-C implementation
+ */
 adouble DL_from_Z(adouble Z, std::string cosmology)
 {
 	std::string formatted_cosmo = "";
@@ -233,6 +241,9 @@ double cosmology_interpolation_function(double x,double *coeffs, int interp_degr
 	return sum;
 
 }
+/*! \brief Custom interpolation function used in the cosmology calculations
+ * adouble version for ADOL-C
+ */
 adouble cosmology_interpolation_function(adouble x,double *coeffs, int interp_degree)
 {
 	adouble sum=coeffs[0];
@@ -245,6 +256,8 @@ adouble cosmology_interpolation_function(adouble x,double *coeffs, int interp_de
 
 }
 
+/*! \brief Helper function for mapping cosmology name to an internal index
+ */
 double cosmology_lookup(std::string cosmology)
 {
 	for (int i =0; i<num_cosmologies; i++){
@@ -255,6 +268,10 @@ double cosmology_lookup(std::string cosmology)
 	return -1;
 }
 
+/*! \brief routine to print the progress of a process to the terminal as a progress bar
+ *
+ * Call everytime you want the progress printed
+ */
 void printProgress (double percentage)
 {
     	int val = (int) (percentage * 100);
@@ -264,12 +281,17 @@ void printProgress (double percentage)
     	fflush (stdout);
 }
 
+/*! \brief Allocate memory for FFTW3 methods used in a lot of inner products
+ * input is a locally defined structure that houses all the pertinent data
+ */
 void initiate_likelihood_function(fftw_outline *plan, int length)
 {
 	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_FORWARD, FFTW_MEASURE);
 }
+/*!\brief deallocates the memory used for FFTW routines
+ */
 void deactivate_likelihood_function(fftw_outline *plan)
 {
 	fftw_destroy_plan(plan->p);
@@ -426,7 +448,8 @@ adouble calculate_mass2(adouble chirpmass, adouble eta)
     	return 1./2*(chirpmass / etapow - sqrt(1.-4*eta)*chirpmass / etapow);
 }
 
-
+/*! \brief Local function to calculate a factorial
+ */
 long factorial(long num)
 {
 	int prod = 1;
@@ -439,6 +462,10 @@ long factorial(long num)
 	return prod;
 }
 
+/*! \brief Local power function, specifically for integer powers
+ *
+ * Much faster than the std version, because this is only for integer powers
+ */
 double pow_int(double base, int power)
 {
 	if (power == 0) return 1.;
@@ -464,10 +491,16 @@ adouble pow_int(adouble base, int power)
 		return 1./prod;
 }
 
+/*! \brief Fucntion that just returns the cuberoot 
+ */
 double cbrt_internal(double base)
 {
 	return cbrt(base);
 }
+/*! \brief Fucntion that just returns the cuberoot 
+ * ADOL-C doesn't have the cbrt function (which is faster),
+ * so have to use the power function
+ */
 adouble cbrt_internal(adouble base)
 {
 	return pow(base,1./3.);
@@ -666,9 +699,6 @@ void read_LOSC_PSD_file(std::string filename,
 			int cols
 			)
 {
-	//std::string s = "split on    whitespace   ";
-	//for(std::string s; iss >> s; )
-	//    result.push_back(s);
 
 	std::fstream file_in;
 	file_in.open(filename, std::ios::in);
@@ -730,17 +760,12 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 {
 	//Read in data from files
 	double **temp_data = allocate_2D_array(num_detectors, data_file_length);
-	//data = (std::complex<double> **)malloc(sizeof(std::complex<double> *)*num_detectors);
-	//for(int i =0; i<num_detectors; i++)
-	//	data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
 	double fs, duration, file_start;
 	for(int i =0; i< num_detectors ; i++){
 		read_LOSC_data_file(data_files[i],temp_data[i], &file_start, &duration, &fs);
 	}	
 
 	//Read in frequencies and PSDs from files
-	//psds = allocate_2D_array(num_detectors, psd_length);
-	//freqs = allocate_2D_array(num_detectors, psd_length);
 	double **temp_psds = allocate_2D_array( psd_length,num_detectors+1);
 	read_LOSC_PSD_file(psd_file,temp_psds,  psd_length,num_detectors+1);
 	for (int j = 0; j< psd_length; j++){
@@ -954,7 +979,9 @@ void celestial_horizon_transform(double RA, /**< Right acsension (rad)*/
 	*theta = M_PI/2. - alt;//output in rad
 }
 
-//https://aa.usno.navy.mil/faq/docs/GAST.php
+/*! \brief Utility to transform from gps time to GMST
+ * https://aa.usno.navy.mil/faq/docs/GAST.php
+ */
 double gps_to_GMST(double gps_time)
 {
 	double J2000 = 2451545;
@@ -980,6 +1007,8 @@ double gps_to_GMST(double gps_time)
 	return hours + fraction;
 }
 
+/*! \brief Utility to transform from gps to JD
+ */
 double gps_to_JD(double gps_time)
 {
 	double J2000 = 2451545;

@@ -3,6 +3,14 @@
 #include "IMRPhenomD.h"
 #include "util.h"
 
+/*! \file 
+ * Header file for IMRPhenomP functions
+ *
+ * Currently, only Pv2 is supported.
+ *
+ * Wrapped around IMRPhenomD
+ */
+
 template<class T>
 struct alpha_coeffs
 {

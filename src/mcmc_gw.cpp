@@ -1,7 +1,7 @@
-#include "mcmc_routines.h"
+#include "mcmc_gw.h"
 #include "waveform_generator.h"
 #include "util.h"
-#include "noise_util.h"
+#include "detector_util.h"
 #include "waveform_util.h"
 #include "fisher.h"
 #include "mcmc_sampler.h"
@@ -1726,6 +1726,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	//if(isnan(ll)){
 		//std::cout<<ll<<std::endl;
 	//}
+	if(isnan(ll))
+		std::cout<<"NAN "<<chain_id<<std::endl;
 	return ll;
 
 	//testing detailed balance

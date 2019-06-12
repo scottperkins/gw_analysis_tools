@@ -5,8 +5,8 @@
 #include <string>
 #include "waveform_generator.h"
 #include "IMRPhenomD.h"
-#include "mcmc_routines.h"
-#include "noise_util.h"
+#include "mcmc_gw.h"
+#include "detector_util.h"
 #include "util.h"
 #include "waveform_util.h"
 #include <adolc/adouble.h>
@@ -76,7 +76,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test18();	
+	test16();	
 	return 0;
 }
 void test20()
@@ -378,7 +378,7 @@ void test18()
 	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
 	double *seeding_var = NULL;
 	std::cout<<initial_pos[8]<<std::endl;
-	int n_steps = 750000;
+	int n_steps = 20000;
 	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -391,7 +391,7 @@ void test18()
 	
 	int Nmod = 1;
 	int *bppe = NULL;
-	int numThreads = 10;
+	int numThreads = 5;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -571,7 +571,7 @@ void test16()
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 3000;
+	int n_steps = 20000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
