@@ -645,7 +645,7 @@ double auto_correlation(double *arr, int length , double tolerance){
 		} 
 		counter++;
 	}	
-	printf("Loops Required %i, rho: %f \n",counter,rho);
+	//printf("Loops Required %i, rho: %f \n",counter,rho);
 	return h;
 }	
 
@@ -701,8 +701,8 @@ void auto_corr_intervals(double *data, /**<Input data */
 		for(int j =0; j< lengths[l]; j++){
 			temp[j] = data[j];
 		}
-		//output[l]=auto_correlation(data,lengths[l], accuracy);
-		output[l]=auto_correlation_serial(data,lengths[l]);
+		output[l]=auto_correlation(data,lengths[l], accuracy);
+		//output[l]=auto_correlation_serial(data,lengths[l]);
 	}
 	free(temp);
 	
