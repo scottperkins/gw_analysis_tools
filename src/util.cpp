@@ -1015,6 +1015,39 @@ double gps_to_JD(double gps_time)
 	double J2000_GPST = 630763213.;
 	return J2000 + (gps_time-J2000_GPST)/(86400.);
 }
+
+/*! \brief utility to transform a vector from cartesian to spherical (radian)
+ * 	
+ * order:
+ *
+ * cart: x, y, z
+ *
+ * spherical: r, polar, azimuthal
+ */
+void transform_cart_sph(double *cartvec, double *sphvec)
+{
+	sphvec[0]  = cartvec[0]*cartvec[0] +
+			cartvec[2]*cartvec[2] +
+			cartvec[1] * cartvec[1] ;
+	sphvec[1] = std::acos(cartvec[2]/ sphvec[0]);
+	sphvec[2] = std::atan(cartvec[1]/ cartvec[0]);
+
+}
+/*! \brief utility to transform a vector from spherical (radian) to cartesian
+ *
+ * order:
+ *
+ * cart: x, y, z
+ *
+ * spherical: r, polar, azimuthal
+ */
+void transform_sph_cart(double *sphvec, double *cartvec)
+{
+	cartvec[0] = sphvec[0] * std::sin(sphvec[1]) * std::cos(sphvec[2]);
+	cartvec[1] = sphvec[0] * std::sin(sphvec[1]) * std::sin(sphvec[2]);
+	cartvec[2] = sphvec[0] * std::cos(sphvec[1]) ;
+}
+
 //################################################################
 template <class T>
 std::complex<T> cpolar(T mag, T phase)

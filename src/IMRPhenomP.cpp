@@ -420,6 +420,26 @@ void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, useful_powers
                 + ecoeffs->coeff5*omega_cbrt);
 
 }
+/*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters -- assumed inclination of total angular momentum J is given, not orbital angular momentum (in source frame (Lhat == zhat)
+ *
+ * Pretty much stolen verbatim from lalsuite
+ */
+template<class T>
+void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_J(source_parameters<T> *params /*< Source Parameters*/
+						)
+{
+	double incl = 0;
+	useful_powers<T> pows;
+	IMRPhenomD<T> temp;
+	temp.precalc_powers_PI(&pows);
+	temp.precalc_powers_ins(params->f_ref, params->M, &pows);
+	double L0 = params->M * params-> M * this->L2PN(params->eta, &pows);
+	
+	
+		
+		
+
+}
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
  *
  * Pretty much stolen verbatim from lalsuite

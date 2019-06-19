@@ -9,13 +9,13 @@ burninlength = 50000
 data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
 if burnin:
     data = data[burninlength:]
-for i in np.arange(9):
-    parameter = [x[i] for x in data]
-    plt.plot(parameter)
-    if i == 8:
-        plt.yscale("log")
-    plt.show()
-    plt.close()
+#for i in np.arange(9):
+#    parameter = [x[i] for x in data]
+#    plt.plot(parameter)
+#    if i == 8:
+#        plt.yscale("log")
+#    plt.show()
+#    plt.close()
 ndim, nsamples = 9, len(data) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\sqrt{\alpha}$"]

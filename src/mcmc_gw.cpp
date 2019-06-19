@@ -823,7 +823,7 @@ double Log_Likelihood_internal(std::complex<double> *data,
  * 
  * dCS_IMRPhenomD_log - 8 dimensions -- cos inclination, RA, DEC, ln D_L, ln chirpmass, eta, chi1, chi2, ln \alpha^2 (the coupling parameter)
  *
- * IMRPhenomPv2 - 7 dimensions -- cos J_N, ln chirpmass, eta, |chi1|, |chi1|, cos theta_1, cos theta_2
+ * IMRPhenomPv2 - 9 dimensions -- cos J_N, ln chirpmass, eta, |chi1|, |chi1|, theta_1, theta_2, phi_1, phi_2
  */
 void MCMC_MH_GW(double ***output,
 		int dimension,
@@ -983,9 +983,9 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[8]=1e-20;
 		}
 	}
-	else if(dimension==7 && generation_method =="IMRPhenomPv2"){
+	else if(dimension==9 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=true;
-		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, cos theta_1, cos theta_2"<<std::endl;
+		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
 		if(!seeding_var){
 			local_seeding=true;
 			seeding_var = new double[dimension];
@@ -996,6 +996,8 @@ void MCMC_MH_GW(double ***output,
 			seeding_var[4]=.1;
 			seeding_var[5]=.1;
 			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=.1;
 		}
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral_log" 
@@ -1126,7 +1128,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		double **temp_out = allocate_2D_array(dimension,dimension);
 		for (int i =0; i<mcmc_num_detectors; i++){
 			fisher(mcmc_frequencies[i], mcmc_data_length[i],
-				"MCMC_"+mcmc_generation_method+"_single_detect", 
+				"MCMC_"+mcmc_generation_method, 
 				mcmc_detectors[i], temp_out, 4, &parameters, 
 				NULL, NULL, mcmc_noise[i]);
 			for(int j =0; j<dimension; j++){
@@ -1353,6 +1355,87 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		for (int i =0; i<mcmc_num_detectors; i++){
 			fisher(mcmc_frequencies[i], 
 				mcmc_data_length[i],"MCMC_"+mcmc_generation_method+"_ind_spins",
+				mcmc_detectors[i], output, 7, &parameters, NULL, NULL, 
+				mcmc_noise[i]);
+			for(int j =0; j<dimension; j++){
+				for(int k =0; k<dimension; k++)
+				{
+					output[j][k] +=temp_out[j][k];
+				}
+			} 
+		}
+
+
+		deallocate_2D_array(temp_out, dimension,dimension);
+	}
+	else if(mcmc_intrinsic && mcmc_generation_method =="IMRPhenomPv2"){	
+	//if(false){	
+		//unpack parameter vector
+		double cos_JN = param[0];
+		double chirpmass = std::exp(param[1]);
+		double eta = param[2];
+		double chi1mag = param[3];
+		double chi2mag = param[4];
+		double theta1 = param[5];
+		double theta2 = param[6];
+		double phi1 = param[7];
+		double phi2 = param[8];
+		
+		double spin1[3];
+		double spin2[3];
+		spin1[0] = chi1mag;
+		spin1[1] = theta1;
+		spin1[2] = phi1;
+		spin2[0] = chi2mag;
+		spin2[1] = theta2;
+		spin2[2] = phi2;
+		//spin1[0] = chi1mag * std::sin(theta1)*std::cos(phi1);
+		//spin2[0] = chi2mag * std::sin(theta2)*std::cos(phi2);
+		//spin1[1] = chi1mag * std::sin(theta1)*std::sin(phi1);
+		//spin2[1] = chi2mag * std::sin(theta2)*std::sin(phi2);
+		//spin1[2] = chi1mag * std::cos(theta1) ;
+		//spin2[2] = chi2mag * std::cos(theta2) ;
+	
+		double dl_prime = 1000;
+
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		//parameters.spin1 = &spin1[0];
+		//parameters.spin2 = &spin2[0];
+		
+		transform_sph_cart(spin1, parameters.spin1);
+		transform_sph_cart(spin2, parameters.spin1);
+
+		//parameters.chil = chi2parall + chi1parall;
+		//parameters.chip = chi2perp + chi1perp;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		parameters.phic = 0;
+
+		parameters.thetaJN = acos(cos_JN);
+		parameters.alpha0 = 0;
+		parameters.zeta_polariz = 0;
+		parameters.phi_aligned = 0;
+
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.Luminosity_Distance = dl_prime;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+
+		
+		for(int j =0; j<dimension; j++){
+			for(int k =0; k<dimension; k++)
+			{
+				output[j][k] =0;
+			}
+		} 
+		double **temp_out = allocate_2D_array(dimension,dimension);
+		for (int i =0; i<mcmc_num_detectors; i++){
+			fisher(mcmc_frequencies[i], 
+				mcmc_data_length[i],"MCMC_"+mcmc_generation_method,
 				mcmc_detectors[i], output, 7, &parameters, NULL, NULL, 
 				mcmc_noise[i]);
 			for(int j =0; j<dimension; j++){
@@ -1669,31 +1752,40 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double eta = param[2];
 		double chi1mag = param[3];
 		double chi2mag = param[4];
-		double costheta1 = param[5];
-		double costheta2 = param[6];
+		double theta1 = param[5];
+		double theta2 = param[6];
+		double phi1 = param[7];
+		double phi2 = param[8];
 		
-		double chi1parall = chi1mag * sqrt(1. - costheta1*costheta1);
-		double chi2parall = chi2mag * sqrt(1. - costheta2*costheta2);
-
-		double chi1perp = chi1mag * costheta1;
-		double chi2perp = chi2mag * costheta2;
+		double spin1[3];
+		double spin2[3];
+		spin1[0] = chi1mag;
+		spin1[1] = theta1;
+		spin1[2] = phi1;
+		spin2[0] = chi2mag;
+		spin2[1] = theta2;
+		spin2[2] = phi2;
+		//spin1[0] = chi1mag * std::sin(theta1)*std::cos(phi1);
+		//spin2[0] = chi2mag * std::sin(theta2)*std::cos(phi2);
+		//spin1[1] = chi1mag * std::sin(theta1)*std::sin(phi1);
+		//spin2[1] = chi2mag * std::sin(theta2)*std::sin(phi2);
+		//spin1[2] = chi1mag * std::cos(theta1) ;
+		//spin2[2] = chi2mag * std::cos(theta2) ;
 	
-
 		double dl_prime = 1000;
 
 		//create gen_param struct
 		gen_params parameters; 
 		parameters.mass1 = calculate_mass1(chirpmass, eta);
 		parameters.mass2 = calculate_mass2(chirpmass, eta);
-		parameters.spin1[0] = chi1parall;
-		parameters.spin1[1] = 0;
-		parameters.spin1[2] = chi1perp;
-		parameters.spin2[0] = chi2parall;
-		parameters.spin2[1] = 0;
-		parameters.spin2[2] = chi2perp;
+		//parameters.spin1 = &spin1[0];
+		//parameters.spin2 = &spin2[0];
+		
+		transform_sph_cart(spin1, parameters.spin1);
+		transform_sph_cart(spin2, parameters.spin1);
 
-		parameters.chil = chi2parall + chi1parall;
-		parameters.chip = chi2perp + chi1perp;
+		//parameters.chil = chi2parall + chi1parall;
+		//parameters.chip = chi2perp + chi1perp;
 		//The rest is maximized over for this option
 		parameters.tc = 0;
 		parameters.phic = 0;

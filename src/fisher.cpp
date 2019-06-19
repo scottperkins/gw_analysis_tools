@@ -7,8 +7,10 @@
 #include "util.h"
 #include "detector_util.h"
 #include "IMRPhenomD.h"
+#include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
 #include "waveform_generator.h"
+#include "waveform_util.h"
 
 
 using namespace std;
@@ -147,18 +149,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 		int dimension = 7;
 		source_parameters<double> parameters_in;
 		gen_params waveform_params;
-		//parameters_in = parameters_in.populate_source_parameters(parameters->mass1, 
-		//		parameters->mass2,
-		//		parameters->Luminosity_Distance,
-		//		parameters->spin1,
-		//		parameters->spin2,
-		//		parameters->phic,
-		//		parameters->tc);
-		
-		//#################################
-		//TESTING 
-		//parameters->sky_average=true;
-		//#################################
 		parameters_in = parameters_in.populate_source_parameters(parameters); 
 		double param_p[dimension] ;
 		double param_m[dimension] ;
@@ -179,12 +169,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 				param_p[j] = param_in[j] ;
 				param_m[j] = param_in[j] ;
 			}
-			//if(i==0) epsilon = 1e-25;
-			//else epsilon = epsilonnaught;
 			param_p[i] = param_in[i] + epsilon;
 			param_m[i] = param_in[i] - epsilon;
-			//param_p[i] = param_in[i]*(1. + epsilon);
-			//param_m[i] = param_in[i] *(1- epsilon);
 
 			model.change_parameter_basis(param_p, param_out, parameters_in.sky_average);
 			waveform_params.mass1 = param_out[0]/MSOL_SEC;
@@ -269,6 +255,144 @@ void calculate_derivatives(double  **amplitude_deriv,
 			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
+	}
+	//*NOTE* this is not a good, rigorous fisher matrix, as some extrinsic parameters
+	//are chosen randomly. This is only to inform MCMC steps, and is just an estimate
+	if (gen_method == "MCMC_IMRPhenomPv2"){
+		std::string local_method = "IMRPhenomPv2";
+		double *temp = (double*)malloc(sizeof(double)*length);
+		fourier_detector_amplitude_phase(frequencies, 
+			length,
+			amplitude,
+			temp,
+			//amplitude_cross_plus,
+			detector,
+			local_method,
+			parameters);	
+		IMRPhenomPv2<double> model;
+		int dimension = 9;
+		source_parameters<double> parameters_in;
+		gen_params waveform_params;
+		parameters_in = parameters_in.populate_source_parameters(parameters); 
+		double param_p[dimension] ;
+		double param_m[dimension] ;
+		double param_in[dimension] ;
+		double param_out[dimension] ;
+		double spin1sph[3];
+		double spin2sph[3];
+		transform_cart_sph(parameters->spin1, spin1sph);
+		transform_cart_sph(parameters->spin2, spin2sph);
+		double chirpmass = calculate_chirpmass(parameters->mass1, parameters->mass2);
+		double eta = calculate_eta(parameters->mass1, parameters->mass2);
+		param_in[0] = cos(parameters->incl_angle);
+		param_in[1] = chirpmass; //Sol mass
+		param_in[2] = eta;
+		param_in[3] = spin1sph[0];
+		param_in[4] = spin2sph[0];
+		param_in[5] = spin1sph[1];
+		param_in[6] = spin2sph[1];
+		param_in[7] = spin1sph[2];
+		param_in[8] = spin2sph[2];
+
+		waveform_params.sky_average=parameters->sky_average;
+
+		for (int i =0; i<dimension; i++){
+			for( int j =0;j<dimension;j++){
+				param_p[j] = param_in[j] ;
+				param_m[j] = param_in[j] ;
+			}
+			param_p[i] = param_in[i] + epsilon;
+			param_m[i] = param_in[i] - epsilon;
+
+				
+			waveform_params.mass1 =calculate_mass1(param_p[1],param_p[2]);
+			waveform_params.mass2 =calculate_mass2(param_p[1],param_p[2]);
+			waveform_params.Luminosity_Distance=parameters->Luminosity_Distance;
+			double param_in_spin1[3] = {param_p[3],param_p[5],param_p[7]};
+			transform_sph_cart(param_in_spin1, waveform_params.spin1);
+			double param_in_spin2[3] = {param_p[4],param_p[6],param_p[8]};
+			transform_sph_cart(param_in_spin2, waveform_params.spin2);
+			waveform_params.phic = parameters->phic;
+			waveform_params.tc=parameters->tc;
+			waveform_params.incl_angle = std::acos(param_p[0]);
+			waveform_params.theta = parameters->theta;
+			waveform_params.phi = parameters->phi;
+			waveform_params.NSflag = parameters->NSflag;
+
+
+			fourier_detector_amplitude_phase(frequencies, 
+				length,
+				amplitude_plus_plus,
+				phase_plus_plus,
+				//amplitude_cross_plus,
+				detector,
+				gen_method,
+				&waveform_params);	
+			//fourier_phase(frequencies, 
+			//	length,
+			//	phase_plus_plus,
+			//	//amplitude_cross_plus,
+			//	gen_method,
+			//	&waveform_params);	
+
+			waveform_params.mass1 =calculate_mass1(param_m[1],param_m[2]);
+			waveform_params.mass2 =calculate_mass2(param_m[1],param_m[2]);
+			waveform_params.Luminosity_Distance=parameters->Luminosity_Distance;
+
+			param_in_spin1[0] = param_m[3];
+			param_in_spin1[1] = param_m[5];
+			param_in_spin1[2]=param_m[7];
+			transform_sph_cart(param_in_spin1, waveform_params.spin1);
+			param_in_spin1[0] = param_m[4];
+			param_in_spin1[1] = param_m[6];
+			param_in_spin1[2]=param_m[8];
+			transform_sph_cart(param_in_spin2, waveform_params.spin2);
+
+			waveform_params.phic = parameters->phic;
+			waveform_params.tc=parameters->tc;
+			waveform_params.incl_angle = std::acos(param_m[0]);
+			waveform_params.theta = parameters->theta;
+			waveform_params.phi = parameters->phi;
+			waveform_params.NSflag = parameters->NSflag;
+			fourier_detector_amplitude_phase(frequencies, 
+				length,
+				amplitude_plus_minus,
+				phase_plus_minus,
+				//amplitude_cross_plus,
+				detector,
+				gen_method,
+				&waveform_params);	
+			//fourier_detector_phase(frequencies, 
+			//	length,
+			//	phase_plus_minus,
+			//	//amplitude_cross_plus,
+			//	gen_method,
+			//	&waveform_params);	
+			for (int l =0;l<length;l++)
+			{
+				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
+				phase_deriv[i][l] = (phase_plus_plus[l] -phase_plus_minus[l])/(2*epsilon);
+			}
+			//ofstream ampfile
+			//for (int l = 0;l<length;l++)
+			//{
+			//	
+			//}
+			
+		
+				
+		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[0][l] = amplitude_deriv[0][l]*param_in[0] ;
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
+			phase_deriv[0][l] = phase_deriv[0][l]*param_in[0] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+		}
+		free(temp);
 	}
 	if (gen_method == "MCMC_IMRPhenomD_Full"){
 		fourier_amplitude(frequencies, 
@@ -604,7 +728,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			}
 		}
 	}
-	else if (gen_method == "MCMC_IMRPhenomD_ind_spins"){
+	else if (gen_method == "MCMC_IMRPhenomD"){
 		IMRPhenomD<double> model;
 		int dimension = 7;
 		source_parameters<double> parameters_in;

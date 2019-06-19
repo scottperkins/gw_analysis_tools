@@ -57,6 +57,8 @@ virtual void calculate_euler_angles(T *alpha, T *epsilon, useful_powers<T> *pows
 
 virtual void PhenomPv2_Param_Transform(source_parameters<T> *params);
 
+virtual void PhenomPv2_Param_Transform_J(source_parameters<T> *params);
+
 virtual T L2PN( T eta, useful_powers<T> *pow);
 
 };

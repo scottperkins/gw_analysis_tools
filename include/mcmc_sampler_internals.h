@@ -124,7 +124,15 @@ double auto_correlation(double *arr, int length, double tolerance);
 
 double auto_correlation_serial(double *arr, int length);
 
+double auto_correlation_grid_search(double *arr, int length, int box_num=10, int final_length= 50, double target_length=.01);
+
+double auto_correlation_internal(double *arr, int length, int lag, double ave);
+
 void auto_corr_intervals(double *data, int length,double *output, int num_segments,  double accuracy);
+
+void write_auto_corr_file_from_data(std::string autocorr_filename, double **output,int intervals, int dimension, int N_steps);
+
+void write_auto_corr_file_from_data_file(std::string autocorr_filename, std::string output_file,int intervals, int dimension, int N_steps);
 
 void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
 

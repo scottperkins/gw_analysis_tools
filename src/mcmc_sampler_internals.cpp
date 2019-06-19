@@ -664,15 +664,133 @@ double auto_correlation_serial(double *arr, int length  ){
 	int h = 1;
 	while(rho>.01){	
 		h++;
-		gamma_sum=0;
-		for(k=0;k<(length-h);k++){
-			gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
-		}
+		//gamma_sum=0;
+		//for(k=0;k<(length-h);k++){
+		//	gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
+		//}
 
-		gamma = gamma_sum/(length-h);
-		rho = gamma/gamma_0;
+		//gamma = gamma_sum/(length-h);
+		//rho = gamma/gamma_0;
+		rho = auto_correlation_internal(arr, length, h, ave)/gamma_0;
 	}	
 	return h;
+}
+
+/*! \brief Grid search method of computing the autocorrelation 
+ *
+ * Hopefully more reliable than the box-search method, which can sometimes get caught in a recursive loop when the stepsize isn't tuned, but also faster than the basic linear, serial search
+ */
+double auto_correlation_grid_search(double *arr, /**< Input array to use for autocorrelation*/
+			int length  , /**< Length of input array*/
+			int box_num, /**< number of boxes to use for each iteration, default is 10*/
+			int final_length, /**< number of elements per box at which the grid search ends and the serial calculation begins*/
+			double target_length /**< target correlation that corresponds to the returned lag*/
+			)
+{
+	//if array isn't long enough, just calculate serial
+	if(length < final_length*2) 
+		return auto_correlation_serial(arr, length);
+	//#######################################################	
+	//Zero lag variance
+	double sum =0;
+	int k;	
+	for(k =0 ; k< length; k++){
+		sum+= arr[k];
+	}
+
+	double ave = sum/length;
+	double gamma_0_sum = 0;
+	for (k=0;k<length;k++){
+		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
+	}
+	double gamma_0 = gamma_0_sum/length;
+	
+
+	//#######################################################	
+	int lag_previous = 0;
+	int lag = length-1;	
+	int count = 0;
+	double rho;
+	bool more_bins = true;
+	double rho_final = 1;
+	int start_final = 0;
+	int stop_final = 0;
+	int success_iteration = 0;
+	while(lag != lag_previous && success_iteration < 5){
+		count ++;
+		lag_previous = lag;
+		int start=1, stop=lag, loop_length, index;
+		while(stop-start > final_length){
+			int boundary_num = box_num +1;
+			double auto_corrs[boundary_num];
+			int lags[boundary_num];
+			loop_length = stop-start;
+			double lag_step = ( (double)(loop_length) ) / (boundary_num-1);
+			for (int i =0 ; i<boundary_num; i++){
+				lags[i] = start + (int)(lag_step * i );
+				
+			}
+			for(int j =0 ; j<boundary_num ; j++){
+				auto_corrs[j] = auto_correlation_internal(
+							arr, length,lags[j], ave)/gamma_0;	
+			}
+			for (int j =0 ; j<box_num; j++){
+				if(auto_corrs[j+1]<target_length){
+					start = lags[j];
+					//index = j;
+					rho_final = auto_corrs[j];
+					start_final = start;
+					stop = lags[j+1];
+					stop_final = stop;
+					more_bins=false;
+					break;
+				}
+			}
+			if (more_bins) {
+				std::cout<<"SAFETY "<<count<<" "<<box_num<<" "<<lag<< " "<<auto_corrs[boundary_num-1]<<std::endl;
+				for(int j =0 ; j<boundary_num ; j++){
+					std::cout<<auto_corrs[j]<<std::endl;	
+				}
+				//break;
+				box_num +=5;
+				if(final_length < 3*box_num){final_length*=2;}
+					
+			}
+			more_bins = true;
+			
+		}
+		//loop_length = stop-start;
+		//rho = auto_corrs[index];
+		rho = rho_final;
+		lag = start_final;
+		while (rho>target_length && lag<stop_final){
+			lag ++;
+			rho = auto_correlation_internal(arr, length, lag,ave)/gamma_0;
+		}
+		if(lag == lag_previous){
+			success_iteration ++;
+			box_num +=5;
+			if(final_length < 3*box_num){final_length*=2;}
+		}
+		else{
+			success_iteration = 0;
+		}
+	}	
+	//std::cout<<rho<<std::endl;
+	return lag;
+}
+
+/*! \brief Internal function to compute the auto correlation for a given lag
+ *
+ */
+double auto_correlation_internal(double *arr, int length, int lag, double ave)
+{
+		double gamma_sum=0;
+		for(int k=0;k<(length-lag);k++){
+			gamma_sum += (arr[k+lag] - ave)*(arr[k]-ave);
+		}
+		return gamma_sum / (length-lag);
+
 }
 
 /*! \brief Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence
@@ -694,13 +812,62 @@ void auto_corr_intervals(double *data, /**<Input data */
 		for(int j =0; j< lengths[l]; j++){
 			temp[j] = data[j];
 		}
-		output[l]=auto_correlation(data,lengths[l], accuracy);
+		//output[l]=auto_correlation(data,lengths[l], accuracy);
 		//output[l]=auto_correlation_serial(data,lengths[l]);
+		output[l]=auto_correlation_grid_search(data,lengths[l], 10, 100, .01);
 	}
 	free(temp);
 	
 }
 
+void write_auto_corr_file_from_data(std::string auto_corr_filename, 
+				double **output,
+				int intervals, 
+				int dimension, 
+				int N_steps)
+{
+	double **ac = allocate_2D_array(dimension+1, intervals);
+	//First row is the step size for the given auto-corr length
+	double stepsize = (double)N_steps/intervals;
+	for (int i =0 ; i<intervals; i++)
+		ac[0][i] = (int)(stepsize*(1.+i));
+	
+	#pragma omp parallel for 
+	for (int i = 0 ; i< dimension; i++)
+	{
+		auto_corr_intervals(output[i],N_steps, ac[i+1], intervals, 0.01);
+	}	
+
+	write_file(auto_corr_filename, ac, dimension+1, intervals);
+
+	deallocate_2D_array(ac,dimension+1, intervals);
+}
+
+void write_auto_corr_file_from_data_file(std::string auto_corr_filename, 
+				std::string output_file,
+				int intervals, 
+				int dimension, 
+				int N_steps)
+{
+	double **output = allocate_2D_array(N_steps,dimension);
+	read_file(output_file,output, N_steps, dimension);
+	double **temp = (double **) malloc(sizeof(double*)*N_steps);
+	for (int i = 0 ; i< dimension; i++){
+		temp[i] = (double *)malloc(sizeof(double)*N_steps);
+		for(int j =0; j< N_steps; j++){
+			temp[i][j] = output[j][i];
+		}
+	}
+	int segments = 50;
+	write_auto_corr_file_from_data(auto_corr_filename, temp, segments, dimension, N_steps);
+	
+
+	deallocate_2D_array(output,N_steps,dimension);
+	for (int i = 0 ; i< dimension; i++){
+		free(temp[i]);
+	}
+	free(temp);
+}
 
 void write_stat_file(sampler *sampler, 
 		std::string filename, 

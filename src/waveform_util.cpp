@@ -224,3 +224,29 @@ int fourier_detector_response(double *frequencies, /**< double array of frequenc
 
 	return status;
 }
+/*! \brief Calculates the amplitude (magnitude) and phase (argument) of the response of a given detector
+ *
+ * This is for general waveforms, and will work for precessing waveforms
+ *
+ * Not as fast as non-precessing, but that can't be helped. MUST include plus/cross polarizations
+ */
+int fourier_detector_amplitude_phase(double *frequencies, 
+			int length,
+			double *amplitude, 
+			double *phase, 
+			std::string detector,
+			std::string generation_method,
+			gen_params *parameters
+			)
+{
+	std::complex<double> *response = (std::complex<double>*)malloc(
+			sizeof(std::complex<double> ) * length);	
+	fourier_detector_response(frequencies, length,
+				response, detector, generation_method, parameters);
+	for(int i =0 ; i< length; i++){
+		amplitude[i] = std::abs(response[i]);
+		phase[i] = std::arg(response[i]);
+	}
+
+	free(response);
+}

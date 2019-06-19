@@ -294,7 +294,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	//########################################################
 	//########################################################
 	//Set chain 0 to highest priority
-	//sampler.priority[0] = 0;
+	sampler.priority[0] = 0;
 	//########################################################
 	//########################################################
 
@@ -463,7 +463,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 			}
 			if(show_prog)
 				printProgress((double)samplerptr->progress/N_steps);
-			usleep(300);
+			//usleep(300);
 		}
 	}
 	//##############################################################
@@ -477,7 +477,10 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	end =clock();
 	wend =omp_get_wtime();
 
+	sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	sampler.time_elapsed_wall = (double)(wend-wstart);
 
+	
 	//###########################################################
 	//Auto-correlation
 	if(auto_corr_filename != ""){
@@ -490,32 +493,30 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 			}
 		}
 		int segments = 50;
-		double **ac = allocate_2D_array(sampler.dimension+1, segments);
-		//First row is the step size for the given auto-corr length
-		double stepsize = (double)N_steps/segments;
-		for (int i =0 ; i<segments; i++)
-			ac[0][i] = (int)(stepsize*(1.+i));
-		
-		#pragma omp parallel for 
-		for (int i = 0 ; i< sampler.dimension; i++)
-		{
-			auto_corr_intervals(temp[i],N_steps, ac[i+1], segments, 0.01);
-		}	
+		//double **ac = allocate_2D_array(sampler.dimension+1, segments);
+		////First row is the step size for the given auto-corr length
+		//double stepsize = (double)N_steps/segments;
+		//for (int i =0 ; i<segments; i++)
+		//	ac[0][i] = (int)(stepsize*(1.+i));
+		//
+		//#pragma omp parallel for 
+		//for (int i = 0 ; i< sampler.dimension; i++)
+		//{
+		//	auto_corr_intervals(temp[i],N_steps, ac[i+1], segments, 0.01);
+		//}	
 
-		write_file(auto_corr_filename, ac, sampler.dimension+1, segments);
+		//write_file(auto_corr_filename, ac, sampler.dimension+1, segments);
 
+		//deallocate_2D_array(ac,sampler.dimension+1, segments);
+		write_auto_corr_file_from_data(auto_corr_filename, temp, segments, sampler.dimension, N_steps);
 		for (int i = 0 ; i< sampler.dimension; i++){
 			free(temp[i]);
 		}
 		free(temp);
-		deallocate_2D_array(ac,sampler.dimension+1, segments);
 	}
 	//###########################################################
-	
 	acend =clock();
 	wacend =omp_get_wtime();
-	sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
-	sampler.time_elapsed_wall = (double)(wend-wstart);
 	sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
 	sampler.time_elapsed_wall_ac = (double)(wacend - wend);
 
@@ -539,6 +540,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	
 	if(chain_filename != "")
 		write_file(chain_filename, output[0], N_steps,sampler.dimension);
+
 
 	free(step_accepted);
 	free(step_rejected);

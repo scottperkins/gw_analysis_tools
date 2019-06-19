@@ -46,6 +46,14 @@ int fourier_detector_response(double *frequencies,
 			std::string generation_method,
 			gen_params *parameters
 			);
+int fourier_detector_amplitude_phase(double *frequencies, 
+			int length,
+			double *amplitude, 
+			double *phase, 
+			std::string detector,
+			std::string generation_method,
+			gen_params *parameters
+			);
 
 #endif
 

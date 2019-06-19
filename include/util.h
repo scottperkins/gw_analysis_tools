@@ -98,7 +98,7 @@ struct gen_params
 	
 	double phiRef=0;
 
-	double thetaJN = 0;
+	double thetaJN = -1;
 
 	double alpha0 = 0;
 
@@ -352,6 +352,12 @@ void celestial_horizon_transform(double RA, double DEC, double gps_time, double 
 
 double gps_to_GMST(double gps_time);
 double gps_to_JD(double gps_time);
+
+
+void transform_cart_sph(double *cartvec, double *sphvec);
+
+void transform_sph_cart(double *sphvec, double *cartvec);
+
 /*!\brief Trapezoidal sum rule to approximate discrete integral - Uniform spacing
  *
  * This version is faster than the general version, as it has half the function calls
