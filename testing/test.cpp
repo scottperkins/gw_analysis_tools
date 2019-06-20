@@ -22,7 +22,9 @@
 #include "adolc/drivers/drivers.h"
 #include "adolc/taping.h"
 #include "limits"
-#include "GWATConfig.h"
+
+#include "cuda_utilities.h"
+
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
@@ -85,11 +87,18 @@ int main(){
 
 void test22()
 {
-	std::string outputfile = "testing/data/mcmc_output_cluster.csv";
+	std::string outputfile = "testing/data/mcmc_output_dCS.csv";
 	std::string acfile = "testing/data/auto_corr_mcmc_cluster.csv";
-	int dimension = 8;
-	int N_steps = 200000;
-	write_auto_corr_file_from_data_file(acfile, outputfile, 50, dimension, N_steps);	
+	int dimension = 9;
+	int N_steps = 750000;
+	double **output = allocate_2D_array(N_steps,dimension);
+	read_file(outputfile,output, N_steps, dimension);
+	double **autocorr;
+	//write_auto_corr_file_from_data_file(acfile, outputfile, 50, dimension, N_steps);	
+	//std::cout<<"CHECKPOINT"<<std::endl;
+	auto_corr_from_data_accel(output,dimension,N_steps,autocorr);
+	deallocate_2D_array(output, N_steps, dimension);
+	
 }
 void test21()
 {

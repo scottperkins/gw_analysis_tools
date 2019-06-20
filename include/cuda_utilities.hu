@@ -1,0 +1,9 @@
+#ifndef CUDA_UTILITIES
+#define CUDA_UTILITIES
+
+//__device__ __host__
+void auto_corr_internal(double *arr, int length, int lag, double average, double *corr);
+
+//__global__
+void auto_corr_internal_kernal(double *arr, int length, int lag, double average, double *corr);
+#endif
