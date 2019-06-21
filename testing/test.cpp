@@ -93,11 +93,14 @@ void test22()
 	int N_steps = 750000;
 	double **output = allocate_2D_array(N_steps,dimension);
 	read_file(outputfile,output, N_steps, dimension);
-	double **autocorr;
+	int segs = 50;
+	double target_corr = .01;
+	double **autocorr = allocate_2D_array(segs, dimension);
 	//write_auto_corr_file_from_data_file(acfile, outputfile, 50, dimension, N_steps);	
 	//std::cout<<"CHECKPOINT"<<std::endl;
-	auto_corr_from_data_accel(output,dimension,N_steps,autocorr);
+	auto_corr_from_data_accel(output,dimension,N_steps,segs,target_corr, autocorr);
 	deallocate_2D_array(output, N_steps, dimension);
+	deallocate_2D_array(autocorr, segs, dimension);
 	
 }
 void test21()

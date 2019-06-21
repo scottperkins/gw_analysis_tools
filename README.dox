@@ -12,12 +12,15 @@ Known to work with gcc/g++-7
 
 Known to work with gcc/g++-9
 
+Need nvcc -- known to work with v9.1 of CUDA
+
 \section external_libs Required Software
 
 Required non-standard C libraries:
 FFTW3
 ADOL-C
 GSL
+CUDA
 
 Required non-standard Python packages:
 Cython 
@@ -62,6 +65,10 @@ To include header files, use -I\$(PROJECT_DIRECTORY)/include
 
 \subsection link Link
 To link object files, use -L\$(PROJECT_DIRECTORY)/lib -lgwanalysistools
+
+For Cuda code: use -lcuda -lcudart 
+
+For Cuda, may need to link to /usr/local/cuda/lib64/ (or wherever this library is on your machine)
 
 \subsection py Python Importable Code
 

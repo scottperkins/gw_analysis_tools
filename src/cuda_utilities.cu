@@ -1,8 +1,9 @@
 #include "cuda_utilities.h"
 #include "cuda_utilities.hu"
+#include "util.h"
 #include <iostream>
 
-__device__
+__device__ __host__
 void auto_corr_internal(double *arr, int length, int lag, double average, double *corr)
 {
 	double sum = 0;
@@ -12,66 +13,73 @@ void auto_corr_internal(double *arr, int length, int lag, double average, double
 	*corr = sum / (length - lag);
 }
 __global__
-void auto_corr_internal_kernal(double *arr, int length, int *lag, double average, double *corr)
+void auto_corr_internal_kernal(double *arr, int length,  double average, int *rho_index, double target_corr, double var)
 {
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
-	//auto_corr_internal(arr, length, lag[id], average, &corr[id]);
-	double sum = 0;
-	for(int i =0; i< (length - lag[id]); i++){
-		sum+= (arr[i+lag[id]] - average ) * ( arr[i] - average );
-	}		
-	double temp  = sum/ (length - lag[id]);
-	//corr[id] = sum / (length - lag[id]);
+	if(id < *rho_index){
+		double corr;
+		auto_corr_internal(arr, length, id, average, &corr);
+		if(corr/var<target_corr) atomicMin(rho_index, id);
+	}
 
 }
 
-void auto_corr_from_data_accel(double **output, int dimension, int N_steps, double **autocorr)
+void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int num_segments, double target_corr, double **autocorr)
 {
-	double *arr, *corr;
-	int *lags;
-	double average = 0;
 
-	double *temp = (double*) malloc(sizeof(double)* N_steps);
-	int *temp2 = (int*) malloc(sizeof(int)* N_steps);
-	double *ac = (double*) malloc(sizeof(double)* N_steps);
+	int *rho_index;
 
-	cudaMalloc( (void**)&arr, N_steps*sizeof(double) );
-	cudaMalloc( (void**)&corr, N_steps*sizeof(double) );
-	cudaMalloc( (void**)&lags, N_steps*sizeof(int) );
+	cudaMalloc( (void**)&rho_index, sizeof(int) );
 
-	int dim = 0;
-	for(int	j = 0 ; j< N_steps; j++){
-		//std::cout<<output[j][dim]<<std::endl;
-		temp[j] = output[j][dim];	
-		temp2[j] = j;
-	}
-	cudaMemcpy(arr, temp, sizeof(double)*N_steps, cudaMemcpyHostToDevice);
-	cudaMemcpy(lags, temp2, sizeof(int)*N_steps, cudaMemcpyHostToDevice);
-	
-	int N = 750000;
+	//double target_corr = .01;
+
+	int dim ;
+	int length_step = N_steps / num_segments;
 	int threads_per_block = 512;
-	
-	auto_corr_internal_kernal<<<(int)((double)N/threads_per_block),threads_per_block>>>(arr, N_steps, lags, average, corr);
-	//auto_corr_internal_kernal<<<N_steps,1>>>(arr, N_steps, lags, average, corr);
+	int iterations = dimension * num_segments;
 
-	//cudaMemcpy(ac, corr, sizeof(double)*N_steps, cudaMemcpyDeviceToHost);
+	for(dim=0; dim<dimension; dim ++){
+		for(int k =0 ; k<num_segments; k++){
+			int length_seg = (k+1) * length_step;
+			int laginit = length_seg;
 
-	for(int i =0; i<100; i++)
-		std::cout<<ac[i]<<std::endl;
-	cudaFree(arr);
-	cudaFree(corr);
+			double *temp = (double*) malloc(sizeof(double)* length_seg);
+			double *arr;
+			cudaMalloc( (void**)&arr, length_seg*sizeof(double) );
 
-	//int length = N_steps;
-	//for(int j =0 ; j<N; j++){
-	//	int id = j;
-	//	double sum = 0;
-	//	for(int i =0; i< (length - temp2[id]); i++){
-	//		sum+= (temp[i+temp2[id]] - average ) * ( temp[i] - average );
-	//	}		
-	//	ac[id] = sum / (length - temp2[id]);
-	//}
-	free(temp);
-	free(temp2);
-	free(ac);
+			for(int	j = 0 ; j< length_seg; j++){
+				temp[j] = output[j][dim];	
+			}
+
+			double sum = 0;
+			for (int i =0 ; i< length_seg; i++){
+				sum+=temp[i];
+			}
+			double average = sum/length_seg;
+
+			double var=0;
+			auto_corr_internal( temp, length_seg, 0, average, &var);
+
+			cudaMemcpy(arr, temp, sizeof(double)*length_seg, cudaMemcpyHostToDevice);
+			cudaMemcpy(rho_index, &laginit, sizeof(int), cudaMemcpyHostToDevice);
+			
+			int N = length_seg;
+			
+			auto_corr_internal_kernal
+				<<<N/threads_per_block,threads_per_block>>>
+				(arr, length_seg, average, rho_index, target_corr, var);
+
+			int lag ;
+			cudaMemcpy(&lag, rho_index, sizeof(int), cudaMemcpyDeviceToHost);
+			autocorr[k][dim] = lag;
+			free(temp);
+			cudaFree(arr);
+			printProgress((double)(dim*num_segments + k)/iterations);
+			
+		}
+	}
+	std::cout<<std::endl;
+	cudaFree(rho_index);
+
 	
 }
