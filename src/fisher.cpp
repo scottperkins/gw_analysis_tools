@@ -120,7 +120,7 @@ void fisher(double *frequency,
 }
 
 
-/* \brief Abstraction layer for handling the case separation for the different waveforms
+/*! \brief Abstraction layer for handling the case separation for the different waveforms
  *
  */
 void calculate_derivatives(double  **amplitude_deriv, 
@@ -444,9 +444,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 			else if( param_m[1]<-1.) param_m[0]=-1.;
 
 			
-			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);///MSOL_SEC;
-			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);///MSOL_SEC;
-			waveform_params.Luminosity_Distance=param_p[3];///MPC_SEC;
+			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);//MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_p[3];//MPC_SEC;
 			waveform_params.spin1[0]=0;
 			waveform_params.spin1[1]=0;
 			waveform_params.spin1[2]=param_p[6];
@@ -480,9 +480,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 				&waveform_params);	
 
 
-			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);///MSOL_SEC;
-			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5]);///MSOL_SEC;
-			waveform_params.Luminosity_Distance=param_m[3];///MPC_SEC;
+			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);//MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5]);//MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_m[3];//MPC_SEC;
 			waveform_params.spin1[0]=0;
 			waveform_params.spin1[1]=0;
 			waveform_params.spin1[2]=param_m[6];
@@ -624,9 +624,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 			else if( param_m[1]<-1.) param_m[0]=-1.;
 
 			
-			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);///MSOL_SEC;
-			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);///MSOL_SEC;
-			waveform_params.Luminosity_Distance=param_p[3];///MPC_SEC;
+			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);//MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_p[3];//MPC_SEC;
 			waveform_params.spin1[0]=0;
 			waveform_params.spin1[1]=0;
 			waveform_params.spin1[2]=param_p[6];
@@ -664,9 +664,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 				&waveform_params);	
 
 
-			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);///MSOL_SEC;
-			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5]);///MSOL_SEC;
-			waveform_params.Luminosity_Distance=param_m[3];///MPC_SEC;
+			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);//MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5]);//MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_m[3];//MPC_SEC;
 			waveform_params.spin1[0]=0;
 			waveform_params.spin1[1]=0;
 			waveform_params.spin1[2]=param_m[6];
