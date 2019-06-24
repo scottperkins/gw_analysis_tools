@@ -37,10 +37,13 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 SRCEXTCUDA := cu
 SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal -lcuda -lcudart 
-OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
-#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal 
-#OBJECTSCUDA := 
+############################################################################
+#CUDA OPTIONS
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal -lcuda -lcudart 
+#OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal 
+OBJECTSCUDA := 
+########################################################################
 
 IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
@@ -49,8 +52,8 @@ DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 IEXTCUDA := hu
 DEPSCUDA:= $(shell find $(IDIR) -type f -name *.$(IEXTCUDA))
 
-#CC=g++-7
-CC=g++
+CC=g++-7
+#CC=g++
 CCCUDA=nvcc
 #CC=nvcc
 
