@@ -1,9 +1,26 @@
-#ifndef CUDA_UTILITIES
-#define CUDA_UTILITIES
+#ifndef CUDA_UTILITIES_HU
+#define CUDA_UTILITIES_HU
 
+typedef struct 
+{
+	int device_id;
+	double *device_data;
+	double *host_data ;
+	int *host_lag;
+	int *device_lag;
+	int *device_lags;
+	int *initial_lag;
+	cudaStream_t stream;
+}GPUplan;
 __device__ __host__
-void auto_corr_internal(double *arr, int length, int lag, double average, double *corr);
+void auto_corr_internal(double *arr, int length, int lag, double average, double *corr, int start_id);
 
 __global__
-void auto_corr_internal_kernal(double *arr, int length, double average, int *rho_index, double target_corr, double var);
+void auto_corr_internal_kernal(double *arr, int length, double average, int *rho_index, double target_corr, double var, int start_id);
+
+void allocate_gpu_plan(GPUplan *plan, int data_length, int dimension, int num_segments);
+
+void deallocate_gpu_plan(GPUplan *plan, int data_length, int dimension, int num_segments);
+
+void copy_data_to_device(GPUplan *plan, double **input_data,int data_length, int dimension, int num_segments);
 #endif

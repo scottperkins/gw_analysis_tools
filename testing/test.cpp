@@ -88,17 +88,31 @@ int main(){
 void test22()
 {
 	std::string outputfile = "testing/data/mcmc_output_dCS.csv";
-	std::string acfile = "testing/data/auto_corr_mcmc_cluster.csv";
+	//std::string outputfile = "testing/data/mcmc_output_DFull.csv";
+	std::string acfile = "testing/data/auto_corr_mcmc_dCS.csv";
+	//std::string acfile = "testing/data/auto_corr_mcmc_DFull.csv";
 	int dimension = 9;
+	//int dimension = 8;
 	int N_steps = 750000;
+	//int N_steps = 20000;
 	double **output = allocate_2D_array(N_steps,dimension);
 	read_file(outputfile,output, N_steps, dimension);
 	int segs = 50;
 	double target_corr = .01;
 	double **autocorr = allocate_2D_array(segs, dimension);
-	//write_auto_corr_file_from_data_file(acfile, outputfile, 50, dimension, N_steps);	
-	//std::cout<<"CHECKPOINT"<<std::endl;
+	clock_t start, end;
+	double wstart, wend;
+	//omp_set_num_threads(12);
+	//wstart = omp_get_wtime();
+	//
+	//write_auto_corr_file_from_data_file(acfile, outputfile, segs, dimension, N_steps);	
+	//wend = omp_get_wtime();
+	//cout<<"TIMING cpu: "<<(double)(wend-wstart)<<endl;
+	
+	start = clock();
 	auto_corr_from_data_accel(output,dimension,N_steps,segs,target_corr, autocorr);
+	end = clock();
+	cout<<"TIMING gpu: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 	deallocate_2D_array(output, N_steps, dimension);
 	deallocate_2D_array(autocorr, segs, dimension);
 	
@@ -690,7 +704,8 @@ void test16()
 	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
-	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170608/GWTC1_GW170608_PSDs.dat.txt";
+	std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
+	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170608/GWTC1_GW170608_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
@@ -698,22 +713,22 @@ void test16()
 	//double **psd = allocate_2D_array(rows, cols);
 	//read_LOSC_PSD_file(psd_file, psd, rows, cols);
 	//double data_start_time, duration, fs;
-	//int num_detectors = 2, psd_length = 8032, length;
-	int num_detectors = 2, psd_length = 16064, length;
+	int num_detectors = 2, psd_length = 8032, length;
+	//int num_detectors = 2, psd_length = 16064, length;
 	//int num_detectors = 3, psd_length = 4016, length;
 	//double gps_time = 1126259462;//TESTING -- gw150914
-	//double gps_time = 1135136350.6;//TESTING -- gw151226
+	double gps_time = 1135136350.6;//TESTING -- gw151226
 	//double gps_time = 1185389807.3;//TESTING -- gw170729
-	double gps_time = 1180922494.5;//TESTING -- gw170608
+	//double gps_time = 1180922494.5;//TESTING -- gw170608
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
 	//detectors[2] = "Virgo";
 	std::string *detector_files = new std::string[num_detectors];
-	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170608/H-H1_GWOSC_4KHZ_R1-1180922479-32.txt";
-	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170608/L-L1_GWOSC_4KHZ_R1-1180922479-32.txt";
+	detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170608/H-H1_GWOSC_4KHZ_R1-1180922479-32.txt";
+	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170608/L-L1_GWOSC_4KHZ_R1-1180922479-32.txt";
 	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
@@ -742,8 +757,8 @@ void test16()
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 20000;
-	int chain_N= 8;
+	int n_steps = 40000;
+	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 10;
@@ -755,7 +770,7 @@ void test16()
 	
 	int Nmod = 0;
 	int *bppe = NULL;
-	int numThreads = 5;
+	int numThreads = 15;
 	bool pool = true;
 	//#########################################################
 	//gw options

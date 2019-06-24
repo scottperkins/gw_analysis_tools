@@ -813,8 +813,8 @@ void auto_corr_intervals(double *data, /**<Input data */
 			temp[j] = data[j];
 		}
 		//output[l]=auto_correlation(data,lengths[l], accuracy);
-		//output[l]=auto_correlation_serial(data,lengths[l]);
-		output[l]=auto_correlation_grid_search(data,lengths[l], 10, 100, .01);
+		output[l]=auto_correlation_serial(data,lengths[l]);
+		//output[l]=auto_correlation_grid_search(data,lengths[l], 10, 100, .01);
 	}
 	free(temp);
 	
@@ -858,8 +858,7 @@ void write_auto_corr_file_from_data_file(std::string auto_corr_filename,
 			temp[i][j] = output[j][i];
 		}
 	}
-	int segments = 50;
-	write_auto_corr_file_from_data(auto_corr_filename, temp, segments, dimension, N_steps);
+	write_auto_corr_file_from_data(auto_corr_filename, temp, intervals, dimension, N_steps);
 	
 
 	deallocate_2D_array(output,N_steps,dimension);

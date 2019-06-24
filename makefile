@@ -94,7 +94,7 @@ $(TEST) : $(OBJECTS) $(OBJECTSCUDA) $(TESTOBJ) | $(TESTDIR)
 $(TESTDIR):
 	mkdir -p $(TESTDIR)
 
-Doxyfile: $(OBJECTS)
+Doxyfile: $(OBJECTS) $(OBJECTSCUDA)
 	doxygen Doxyfile
  
 .PHONY: c
