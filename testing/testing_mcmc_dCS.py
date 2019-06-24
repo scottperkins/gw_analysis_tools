@@ -74,6 +74,16 @@ plt.legend()
 plt.savefig("autocorr_testing_dCS.pdf")
 plt.close()
 
+#autocorr = np.loadtxt("data/auto_corr_mcmc_dCS_GPU.csv",delimiter=',')
+#lengths = autocorr[0]
+#autocorr = autocorr[1:]
+#
+#for i in np.arange(len(autocorr)):
+#    plt.plot(lengths,autocorr[i], label=labels[i])
+#plt.legend()
+#plt.savefig("autocorr_testing_dCS_GPU.pdf")
+#plt.close()
+
 ##############################################################
 data = np.loadtxt("data/mcmc_output_dCS.csv",delimiter=',')
 if burn:

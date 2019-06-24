@@ -11,7 +11,12 @@
 
 /*! \file
  */
+
 GPUplan *plans_global;
+/*! \brief Class to build thread pool for scheduling work for GPUs
+ * 
+ * Probably will be combined with the MCMC thread pull, to create a more general thread pool class
+ */
 class ThreadPoolKernelLaunch
 {
 public:
@@ -106,8 +111,17 @@ private:
 	
 };
 
+/*! \brief Internal function to calculate the autocorrelation for a given lag
+ * Customized for the thread pool architecture, with extra arguments because of the way the memory is allocated
+ */
 __device__ __host__
-void auto_corr_internal(double *arr, int length, int lag, double average, double *corr, int start_id)
+void auto_corr_internal(double *arr, /**< Input array of data*/
+			int length, /**< Length of input array*/
+			int lag,  /**< Lag to be used to calculate the correlation*/
+			double average,  /**< Average of the array arr*/
+			double *corr,  /**< [out] output correlation*/
+			int start_id /**< ID of location to start calculation -- input arrary arr is assumed to be contiguous for multiple dimensions*/
+			)
 {
 	double sum = 0;
 	for(int i =0; i< (length - lag); i++){
@@ -115,14 +129,24 @@ void auto_corr_internal(double *arr, int length, int lag, double average, double
 	}		
 	*corr = sum / (length - lag);
 }
-__global__ 
-void auto_corr_internal_prep(int *lag, int length)
-{
-	*lag = length;
-}
 
+/*! \brief Internal function to launch the CUDA kernel for a range of autocorrelations
+ * 
+ * Correlation function used:
+ *
+ * rho(lag) = 1 / (length - lag) \sum (arr[i+lag]-average) ( arr[i]- average)
+ *
+ * target_corr = rho(rho_index)/rho(0) = rho(rho_index)/var
+ */
 __global__
-void auto_corr_internal_kernal(double *arr, int length,  double average, int *rho_index, double target_corr, double var, int start_id)
+void auto_corr_internal_kernal(double *arr, /**< Input array of data*/
+				int length,  /**< Length of data array*/
+				double average, /**< Average of input data*/
+				int *rho_index, /**< [out] Index of the lag that results ina correlation ratio target_corr*/
+				double target_corr, /**< Target correlation ratio rho(lag)/rho(0) = target_corr*/
+				double var, /**< Variance rho(0)*/
+				int start_id/**< Starting index to use for the data array arr*/
+				)
 {
 	int id = threadIdx.x + blockIdx.x * blockDim.x;
 	if(id < *rho_index){
@@ -133,22 +157,63 @@ void auto_corr_internal_kernal(double *arr, int length,  double average, int *rh
 
 }
 
-void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int num_segments, double target_corr, double **autocorr)
+/*! \brief Write data file for autocorrelation lengths of the data given a data file name, as written by the mcmc_sampler
+ */
+void write_file_auto_corr_from_data_file_accel(std::string acfile, /**< Filename of the autocorrelation data*/
+					std::string chains_file, /**<Filename of the data file for the chains*/
+					int dimension, /**< Dimension of the data*/
+					int N_steps, /**< Number of steps in the chain*/
+					int num_segments,  /**< Number of segments to check the autocorrelation length for each dimension*/
+					double target_corr/**< Target correlation ratio to use for the correlation length calculation*/
+					)
+{
+	double **chains = allocate_2D_array(N_steps, dimension);
+	read_file(chains_file, chains, N_steps, dimension);
+	write_file_auto_corr_from_data_accel(acfile, chains, dimension, 
+			N_steps, num_segments, target_corr);	
+	deallocate_2D_array(chains,N_steps, dimension);
+}
+
+/*! \brief Write data file given output chains, as formatted by the mcmc_sampler
+ */
+void write_file_auto_corr_from_data_accel(std::string acfile, /**< Output autocorrelation filename */
+					double **chains, /**< Chain data from MCMC_sampler*/
+					int dimension, /**< Dimension of the data*/
+					int N_steps, /**< Number of steps in the chain*/
+					int num_segments,  /**< Number of segments to check the autocorrelation length for each dimension*/
+					double target_corr/**< Target correlation ratio to use for the correlation length calculation*/
+					)
+{
+	double **autocorr = allocate_2D_array(dimension, num_segments);
+	double **autocorrout = allocate_2D_array(dimension+1, num_segments);
+	auto_corr_from_data_accel(chains, dimension, N_steps, num_segments, target_corr, autocorr);
+	int seg_step = N_steps/ num_segments;
+	for(int i =0 ; i < num_segments; i ++)
+	{
+		autocorrout[0][i] = (i+1) * seg_step;
+		for(int j =0; j<dimension; j++){
+			autocorrout[j+1][i] = autocorr[j][i];
+		}
+	}
+	write_file(acfile, autocorrout, dimension+1, num_segments);
+}
+
+/*! \brief Find autocorrelation of data at different points in the chain length and output to autocorr
+ */
+void auto_corr_from_data_accel(double **output, /**< Chain data input*/
+				int dimension, /**< Dimension of the data*/
+				int N_steps, /**< Number of steps in the data*/
+				int num_segments, /**< number of segments to calculate the autocorrelation length*/
+				double target_corr, /**< Target correlation ratio*/
+				double **autocorr /**<[out] Autocorrelation lengths for the different segments*/
+				)
 {
 	int device_num;
-	//int current_dev;
-	//int succ;
 	cudaGetDeviceCount(&device_num);
-	//std::cout<<"NUMBER OF DEVICES "<<device_num<<std::endl;
-	//cudaGetDevice(&current_dev);
-	//std::cout<<"CURRENT DEV: "<<current_dev<<std::endl;
-	//succ = cudaSetDevice(0);
-	//std::cout<<"SUCCESS: "<<succ<<std::endl;
-	//cudaGetDevice(&current_dev);
-	//std::cout<<"CURRENT DEV: "<<current_dev<<std::endl;
-
-	if(device_num==1){
+	//First option -- outdated -- only single gpu systems
+	//if(device_num==1){
 	//if(true){
+	if(false){
 		int *rho_index;
 		//HERE
 		cudaMallocManaged( (void**)&rho_index, sizeof(int) );
@@ -157,9 +222,6 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 		int iterations = dimension * num_segments;
 		for(dim=0; dim<dimension; dim ++){
 			for(int k =0 ; k<num_segments; k++){
-				//std::cout<<"DIM: "<<dim<<std::endl;
-				//std::cout<<"k: "<<k<<std::endl;
-				//std::cout<<"LOOP: "<<dim*num_segments + k<<std::endl;
 				int length_seg = (k+1) * length_step;
 				int laginit = length_seg;
 
@@ -212,8 +274,6 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 		dimension_internal = dimension;
 		autocorr_internal = autocorr;
 
-		//GPUplan plans_local[gpu_count];
-		//plans = plans_local;
 		GPUplan plans[device_num];
 		
 		for(int i = 0 ; i< device_num; i++)
@@ -224,7 +284,6 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 		}
 		plans_global = plans;
 
-		//ThreadPoolKernelLaunch kernelpool(output, dimension, N_steps, autocorr, target_corr, num_segments);
 		ThreadPoolKernelLaunch kernelpool;
 		for(int i =0; i< dimension_internal*num_segments_internal; i++){
 			kernelpool.enqueue(i);
@@ -238,6 +297,7 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 			cudaSetDevice(i);
 			cudaStreamSynchronize(plans_global[i].stream);
 		}
+		//Copy over data from Device to Host
 		double **lags = allocate_2D_array(device_num, num_segments_internal*dimension_internal);
 		int *lags_transfer;
 		cudaMallocHost((void **)&lags_transfer, sizeof(int)* num_segments_internal*dimension_internal);
@@ -248,22 +308,16 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 				cudaMemcpyDeviceToHost,plans_global[i].stream );
 			cudaStreamSynchronize(plans_global[i].stream);
 			for(int j =0; j<num_segments_internal*dimension_internal; j++)
-				//std::cout<<lags_transfer[j]<<std::endl;
 				lags[i][j] = lags_transfer[j];
 		}
 		cudaFreeHost(lags_transfer);
-		//Wait for final jobs to finish before deallocating gpu memory
-		for(int i = 0 ; i< device_num; i++){
-			cudaSetDevice(i);
-			cudaStreamSynchronize(plans_global[i].stream);
-		}
 		for(int i =0 ; i<num_segments_internal*dimension_internal; i++)
 		{
 			for(int j = 0; j<device_num; j++){
 				if(lags[j][i] != 2*chain_length_internal){
 					int dim = i/num_segments_internal;
 					int k = i - dim*num_segments_internal;
-					autocorr[k][dim] = lags[j][i];
+					autocorr[dim][k] = lags[j][i];
 				}
 			}
 		}
@@ -276,11 +330,6 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 			deallocate_gpu_plan(&plans_global[i], chain_length_internal, dimension_internal, num_segments);	
 		}
 	}
-	for(int i = 0; i<dimension; i++){
-		for(int j =0; j<num_segments; j++){
-			std::cout<<i<<" "<<j<<" "<<autocorr[j][i]<<std::endl;
-		}
-	}
 	for(int i =0 ; i< device_num; i++){
 		cudaSetDevice(i);
 		cudaDeviceReset();
@@ -289,17 +338,20 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 
 	
 }
-void ac_gpu_wrapper(int thread, int job_id)
+/*! \brief Wrapper function for the thread pool
+ */
+void ac_gpu_wrapper(int thread, /**< Host thread*/
+			int job_id/**< Job ID*/
+			)
 {
-	int dim = job_id/num_segments_internal;
-	int k = job_id-dim*num_segments_internal;
-	autocorr_internal[k][dim] = 
-		launch_ac_gpu(thread, job_id, chains_internal, 
+	launch_ac_gpu(thread, job_id, chains_internal, 
 		chain_length_internal, dimension_internal, 
 		target_corr_internal, num_segments_internal);
 }
 
-int launch_ac_gpu(int device, int element, double **data, int length, int dimension, double target_corr, int num_segments)
+/*! \brief Launch the GPU kernel, formatted for the thread pool
+ */
+void launch_ac_gpu(int device, int element, double **data, int length, int dimension, double target_corr, int num_segments)
 {
 	cudaSetDevice(device);
 	int dim = element/num_segments;
@@ -308,7 +360,7 @@ int launch_ac_gpu(int device, int element, double **data, int length, int dimens
 	int length_seg = (k+1) * length_step;
 	int *host_seg;
 	int start_id = dim * length;
-	plans_global[device].initial_lag = &length_seg;
+	//plans_global[device].initial_lag = &length_seg;
 
 	double sum = 0;
 	for (int i =start_id ; i< start_id + length_seg; i++){
@@ -325,12 +377,10 @@ int launch_ac_gpu(int device, int element, double **data, int length, int dimens
 	//		sizeof(double)*length_seg, 
 	//		cudaMemcpyHostToDevice, 
 	//		plans_global[device].stream);
-	//cudaMemcpyAsync(plans_global[device].device_lag, 
+	//cudaMemcpyAsync(&plans_global[device].device_lags[element], 
 	//		plans_global[device].initial_lag,
 	//		sizeof(int), cudaMemcpyHostToDevice, 
 	//		plans_global[device].stream);
-	//printf("%d\n", *plans_global[device].device_lag);
-	//std::cout<<*plans_global[device].initial_lag<<std::endl;
 	
 	int N = length_seg;
 	auto_corr_internal_kernal
@@ -339,17 +389,22 @@ int launch_ac_gpu(int device, int element, double **data, int length, int dimens
 		(plans_global[device].device_data, length_seg, average, 
 		&plans_global[device].device_lags[element], target_corr, var, start_id);
 
-	//printf("%d\n", plans_global[device].device_lag);
 	//cudaMemcpy(plans_global[device].host_lag, 
 	//		&plans_global[device].device_lags[element], sizeof(int), 
 	//		cudaMemcpyDeviceToHost);
 	//cudaStreamSynchronize(plans_global[device].stream);
 	//return *plans_global[device].host_lag - start_id;
 	//std::cout<<element<<std::endl;
-	return 1;//*plans_global[device].host_lag ;
+	//return 1;//*plans_global[device].host_lag ;
 }
 
-void allocate_gpu_plan(GPUplan *plan, int data_length, int dimension, int num_segments)
+/*! \brief Allocates memory for autocorrelation--GPU structure
+ */
+void allocate_gpu_plan(GPUplan *plan, /**< Structure for GPU plan*/
+		int data_length, /**< Length of data*/
+		int dimension, /**< Dimension of the data*/
+		int num_segments /**< Number of segments to calculate the autocorrelation length*/
+		)
 {
 	cudaSetDevice(plan->device_id);
 	
@@ -361,7 +416,13 @@ void allocate_gpu_plan(GPUplan *plan, int data_length, int dimension, int num_se
 	cudaMallocHost((void **)&plan->initial_lag, sizeof(int));
 	cudaStreamCreate(&plan->stream);
 }
-void deallocate_gpu_plan(GPUplan *plan, int data_length, int dimension, int num_segments)
+/*! \brief Deallocates memory for the autocorrelation--GPU structure 
+ */
+void deallocate_gpu_plan(GPUplan *plan, /**< Structure for the GPU plan*/
+		int data_length, /**< Length of data*/
+		int dimension, /**< Dimension of the data*/
+		int num_segments /**< Number of segments to calculate the autocorrelation length*/
+		)
 {	
 	cudaSetDevice(plan->device_id);
 	cudaFree(plan->device_data);
@@ -372,7 +433,14 @@ void deallocate_gpu_plan(GPUplan *plan, int data_length, int dimension, int num_
 	cudaFreeHost(plan->host_data);
 	cudaStreamDestroy(plan->stream);
 }
-void copy_data_to_device(GPUplan *plan, double **input_data,int data_length, int dimension, int num_segments)
+/*! \brief Copy data to device before starting kernels
+ */
+void copy_data_to_device(GPUplan *plan, /**< GPU plan*/
+		double **input_data, /**<Input chain data*/
+		int data_length, /**< Length of data*/
+		int dimension, /**< Dimension of the data*/
+		int num_segments /**< Number of segments to calculate the autocorrelation length*/
+		)
 {
 	cudaSetDevice(plan->device_id);
 	for(int i =0; i< dimension; i++){

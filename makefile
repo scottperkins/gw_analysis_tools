@@ -12,7 +12,6 @@ PROJ_PYSRC=$(addprefix $(PYDIR)/src/,$(PYSRC))
 PYLIB=mcmc_routines_ext.cpp waveform_generator_ext.cpp
 PROJ_PYLIB=$(addprefix $(PYDIR)/,$(PYLIB))
 
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal -lcuda -lcudart 
 LOCAL_LIB=libgwanalysistools.a
 PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
 
@@ -37,7 +36,11 @@ OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
 
 SRCEXTCUDA := cu
 SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
+
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal -lcuda -lcudart 
 OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal 
+#OBJECTSCUDA := 
 
 IEXT := h
 DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))

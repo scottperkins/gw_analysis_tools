@@ -355,14 +355,12 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 					for(int i =0; i<sampler.dimension;i++){
 						for(int l =0; l<N_steps; l++)
 							output[j][l][i] = temp_pos[i];
-						//std::cout<<output[j][0][i]<<std::endl;
 					}
 				}
 				else{
 					for(int i =0; i<sampler.dimension;i++){
 						for(int l =0; l<N_steps; l++)
 							output[j][l][i] = initial_pos[i];
-						//std::cout<<output[j][0][i]<<std::endl;
 					}
 			
 				}
@@ -493,21 +491,6 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 			}
 		}
 		int segments = 50;
-		//double **ac = allocate_2D_array(sampler.dimension+1, segments);
-		////First row is the step size for the given auto-corr length
-		//double stepsize = (double)N_steps/segments;
-		//for (int i =0 ; i<segments; i++)
-		//	ac[0][i] = (int)(stepsize*(1.+i));
-		//
-		//#pragma omp parallel for 
-		//for (int i = 0 ; i< sampler.dimension; i++)
-		//{
-		//	auto_corr_intervals(temp[i],N_steps, ac[i+1], segments, 0.01);
-		//}	
-
-		//write_file(auto_corr_filename, ac, sampler.dimension+1, segments);
-
-		//deallocate_2D_array(ac,sampler.dimension+1, segments);
 		write_auto_corr_file_from_data(auto_corr_filename, temp, segments, sampler.dimension, N_steps);
 		for (int i = 0 ; i< sampler.dimension; i++){
 			free(temp[i]);

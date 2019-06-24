@@ -1,6 +1,9 @@
 #ifndef CUDA_UTILITIES_HU
 #define CUDA_UTILITIES_HU
 
+/*! \file
+ *
+ */
 typedef struct 
 {
 	int device_id;

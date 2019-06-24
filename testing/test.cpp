@@ -89,7 +89,8 @@ void test22()
 {
 	std::string outputfile = "testing/data/mcmc_output_dCS.csv";
 	//std::string outputfile = "testing/data/mcmc_output_DFull.csv";
-	std::string acfile = "testing/data/auto_corr_mcmc_dCS.csv";
+	std::string acfile = "testing/data/auto_corr_mcmc_dCS_GPU.csv";
+	std::string acfilecpu = "testing/data/auto_corr_mcmc_dCS.csv";
 	//std::string acfile = "testing/data/auto_corr_mcmc_DFull.csv";
 	int dimension = 9;
 	//int dimension = 8;
@@ -97,24 +98,25 @@ void test22()
 	//int N_steps = 20000;
 	double **output = allocate_2D_array(N_steps,dimension);
 	read_file(outputfile,output, N_steps, dimension);
-	int segs = 50;
+	int segs =10;
 	double target_corr = .01;
-	double **autocorr = allocate_2D_array(segs, dimension);
+	//double **autocorr = allocate_2D_array(dimension,segs);
 	clock_t start, end;
 	double wstart, wend;
-	//omp_set_num_threads(12);
+	omp_set_num_threads(12);
 	//wstart = omp_get_wtime();
 	//
-	//write_auto_corr_file_from_data_file(acfile, outputfile, segs, dimension, N_steps);	
+	//write_auto_corr_file_from_data_file(acfilecpu, outputfile, segs, dimension, N_steps);	
 	//wend = omp_get_wtime();
 	//cout<<"TIMING cpu: "<<(double)(wend-wstart)<<endl;
 	
 	start = clock();
-	auto_corr_from_data_accel(output,dimension,N_steps,segs,target_corr, autocorr);
+	//write_file_auto_corr_from_data_accel(acfile, output,dimension,N_steps,segs,target_corr);
+	write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
 	end = clock();
 	cout<<"TIMING gpu: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 	deallocate_2D_array(output, N_steps, dimension);
-	deallocate_2D_array(autocorr, segs, dimension);
+	//deallocate_2D_array(autocorr, dimension, segs);
 	
 }
 void test21()
