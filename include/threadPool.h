@@ -77,6 +77,12 @@ public:
 	{
 		return numThreads_internal;
 	}
+/*! \brief Get the current length of the job queue
+ */
+	int get_queue_length()
+	{
+		return Tasks.size();
+	}
 	
 	
 private:

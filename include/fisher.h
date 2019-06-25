@@ -28,6 +28,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	string detector, 
        	string  gen_method,
        	gen_params *parameters);
+
 void fisher_autodiff(double *frequency, 
 	int length,
 	string generation_method, 

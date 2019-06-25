@@ -8,108 +8,12 @@
 #include <functional>
 #include <mutex>
 #include <unistd.h>
+#include <threadPool.h>
 
 /*! \file
  */
 
 GPUplan *plans_global;
-/*! \brief Class to build thread pool for scheduling work for GPUs
- * 
- * Probably will be combined with the MCMC thread pull, to create a more general thread pool class
- */
-class ThreadPoolKernelLaunch
-{
-public:
-	explicit ThreadPoolKernelLaunch()
-	{
-		int device_num;
-		cudaGetDeviceCount(&device_num);
-		start(device_num);
-		//start(1);
-	}
-
-	~ThreadPoolKernelLaunch()
-	{
-		stop();
-	}
-
-
-	void enqueue(int i)
-	{
-		{
-			std::unique_lock<std::mutex> lock{mEventMutex};
-			mTasks.emplace(std::move(i));
-		}
-		mEventVar.notify_one();
-	}
-
-	void public_stop()
-	{
-		stop();
-	}
-	int get_queue_length()
-	{
-		return mTasks.size();
-	}
-	void end_pool()
-	{
-		while(true)
-		{
-			if(mTasks.empty()){
-				stop();
-			}
-			usleep(100);	
-		}
-	}
-private:
-	
-	std::vector<std::thread> mThreads;
-	std::condition_variable mEventVar;
-	std::mutex mEventMutex;
-	bool mStopping = false;
-	std::queue<int> mTasks;
-
-	void start(std::size_t numThreads)
-	{
-		for(auto i =0u; i<numThreads; i++)
-		{
-			mThreads.emplace_back([=]{
-				while(true)
-				{
-					int j;
-					{
-						std::unique_lock<std::mutex> lock{mEventMutex};
-						mEventVar.wait(lock,[=]{return mStopping || !mTasks.empty(); });
-						
-						if (mStopping && mTasks.empty())
-							break;	
-						j = std::move(mTasks.front());
-						mTasks.pop();
-					}
-					//std::cout<<"DEVICE: "<<i<<std::endl;
-					ac_gpu_wrapper(i, j);
-					
-				}
-			});
-		}
-
-	}
-	void stop() noexcept
-	{
-		std::cout<<std::endl;
-		std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
-		{
-			std::unique_lock<std::mutex> lock{mEventMutex};
-			mStopping = true;
-		}
-		
-		mEventVar.notify_all();
-		
-		for(auto &thread: mThreads)
-			thread.join();
-	}
-	
-};
 
 /*! \brief Internal function to calculate the autocorrelation for a given lag
  * Customized for the thread pool architecture, with extra arguments because of the way the memory is allocated
@@ -210,126 +114,69 @@ void auto_corr_from_data_accel(double **output, /**< Chain data input*/
 {
 	int device_num;
 	cudaGetDeviceCount(&device_num);
-	//First option -- outdated -- only single gpu systems
-	//if(device_num==1){
-	//if(true){
-	if(false){
-		int *rho_index;
-		//HERE
-		cudaMallocManaged( (void**)&rho_index, sizeof(int) );
-		int dim ;
-		int length_step = N_steps / num_segments;
-		int iterations = dimension * num_segments;
-		for(dim=0; dim<dimension; dim ++){
-			for(int k =0 ; k<num_segments; k++){
-				int length_seg = (k+1) * length_step;
-				int laginit = length_seg;
+	chains_internal = output;
+	target_corr_internal = target_corr;
+	chain_length_internal = N_steps;
+	num_segments_internal = num_segments;
+	dimension_internal = dimension;
+	autocorr_internal = autocorr;
 
-				double *temp = (double*) malloc(sizeof(double)* length_seg);
-				double *arr;
-				//HERE
-				cudaMallocManaged( (void**)&arr, length_seg*sizeof(double) );
-
-				for(int	j = 0 ; j< length_seg; j++){
-					temp[j] = output[j][dim];	
-				}
-
-				double sum = 0;
-				for (int i =0 ; i< length_seg; i++){
-					sum+=temp[i];
-				}
-				double average = sum/length_seg;
-
-				double var=0;
-				auto_corr_internal( temp, length_seg, 0, average, &var, 0);
-
-				cudaMemcpy(arr, temp, sizeof(double)*length_seg, cudaMemcpyHostToDevice);
-				cudaMemcpy(rho_index, &laginit, sizeof(int), cudaMemcpyHostToDevice);
-				
-				int N = length_seg;
-				
-				//std::cout<<"LAUNCHING KERNAL"<<std::endl;
-				auto_corr_internal_kernal
-					<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>
-					(arr, length_seg, average, rho_index, target_corr, var, 0);
-
-				int lag ;
-				cudaMemcpy(&lag, rho_index, sizeof(int), cudaMemcpyDeviceToHost);
-				//cudaDeviceSynchronize();
-				//std::cout<<"COPYING RESULTS"<<std::endl;
-				autocorr[k][dim] = lag;
-				free(temp);
-				cudaFree(arr);
-				printProgress((double)(dim*num_segments + k)/iterations);
-				
-			}
-		}
-		cudaFree(rho_index);
+	GPUplan plans[device_num];
+	
+	for(int i = 0 ; i< device_num; i++)
+	{
+		plans[i].device_id = i;
+		allocate_gpu_plan(&plans[i],chain_length_internal, dimension_internal, num_segments_internal);
+		copy_data_to_device(&plans[i], chains_internal, chain_length_internal, dimension_internal, num_segments_internal);
 	}
-	else{
-		chains_internal = output;
-		target_corr_internal = target_corr;
-		chain_length_internal = N_steps;
-		num_segments_internal = num_segments;
-		dimension_internal = dimension;
-		autocorr_internal = autocorr;
+	plans_global = plans;
 
-		GPUplan plans[device_num];
-		
-		for(int i = 0 ; i< device_num; i++)
-		{
-			plans[i].device_id = i;
-			allocate_gpu_plan(&plans[i],chain_length_internal, dimension_internal, num_segments_internal);
-			copy_data_to_device(&plans[i], chains_internal, chain_length_internal, dimension_internal, num_segments_internal);
-		}
-		plans_global = plans;
-
-		ThreadPoolKernelLaunch kernelpool;
+	//ThreadPoolKernelLaunch kernelpool;
+	{
+		threadPool<> kernelpool(device_num, ac_gpu_wrapper);
 		for(int i =0; i< dimension_internal*num_segments_internal; i++){
 			kernelpool.enqueue(i);
 		}
-		//Wait for queue to empty before deallocating gpu memory
-		while(kernelpool.get_queue_length() != 0){
-			usleep(50000);
-		}	
-		//Wait for final jobs to finish before deallocating gpu memory
-		for(int i = 0 ; i< device_num; i++){
-			cudaSetDevice(i);
-			cudaStreamSynchronize(plans_global[i].stream);
-		}
-		//Copy over data from Device to Host
-		double **lags = allocate_2D_array(device_num, num_segments_internal*dimension_internal);
-		int *lags_transfer;
-		cudaMallocHost((void **)&lags_transfer, sizeof(int)* num_segments_internal*dimension_internal);
-		for(int i =0; i<device_num; i++){
-			cudaSetDevice(i);
-			cudaMemcpyAsync(lags_transfer, plans_global[i].device_lags, 
-				sizeof(int)*dimension_internal*num_segments_internal, 
-				cudaMemcpyDeviceToHost,plans_global[i].stream );
-			cudaStreamSynchronize(plans_global[i].stream);
-			for(int j =0; j<num_segments_internal*dimension_internal; j++)
-				lags[i][j] = lags_transfer[j];
-		}
-		cudaFreeHost(lags_transfer);
-		for(int i =0 ; i<num_segments_internal*dimension_internal; i++)
-		{
-			for(int j = 0; j<device_num; j++){
-				if(lags[j][i] != 2*chain_length_internal){
-					int dim = i/num_segments_internal;
-					int k = i - dim*num_segments_internal;
-					autocorr[dim][k] = lags[j][i];
-				}
+	}
+	//Wait for final jobs to finish before deallocating gpu memory
+	for(int i = 0 ; i< device_num; i++){
+		cudaSetDevice(i);
+		cudaStreamSynchronize(plans_global[i].stream);
+	}
+
+	//Copy over data from Device to Host
+	double **lags = allocate_2D_array(device_num, num_segments_internal*dimension_internal);
+	int *lags_transfer;
+	cudaMallocHost((void **)&lags_transfer, sizeof(int)* num_segments_internal*dimension_internal);
+	for(int i =0; i<device_num; i++){
+		cudaSetDevice(i);
+		cudaMemcpyAsync(lags_transfer, plans_global[i].device_lags, 
+			sizeof(int)*dimension_internal*num_segments_internal, 
+			cudaMemcpyDeviceToHost,plans_global[i].stream );
+		cudaStreamSynchronize(plans_global[i].stream);
+		for(int j =0; j<num_segments_internal*dimension_internal; j++)
+			lags[i][j] = lags_transfer[j];
+	}
+	cudaFreeHost(lags_transfer);
+	for(int i =0 ; i<num_segments_internal*dimension_internal; i++)
+	{
+		for(int j = 0; j<device_num; j++){
+			if(lags[j][i] != 2*chain_length_internal){
+				int dim = i/num_segments_internal;
+				int k = i - dim*num_segments_internal;
+				autocorr[dim][k] = lags[j][i];
 			}
 		}
-		deallocate_2D_array(lags, device_num, num_segments_internal);
-			
-		std::cout<<"STREAMS SYNCED"<<std::endl;
-		std::cout<<"DEALLOCATING"<<std::endl;
-		for(int i = 0 ; i< device_num; i++)
-		{
-			deallocate_gpu_plan(&plans_global[i], chain_length_internal, dimension_internal, num_segments);	
-		}
 	}
+	deallocate_2D_array(lags, device_num, num_segments_internal);
+		
+	std::cout<<"STREAMS SYNCED"<<std::endl;
+	std::cout<<"DEALLOCATING"<<std::endl;
+	for(int i = 0 ; i< device_num; i++)
+	{
+		deallocate_gpu_plan(&plans_global[i], chain_length_internal, dimension_internal, num_segments);	
+	}
+	
 	for(int i =0 ; i< device_num; i++){
 		cudaSetDevice(i);
 		cudaDeviceReset();
