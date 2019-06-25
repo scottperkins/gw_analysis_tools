@@ -1,9 +1,10 @@
 #include "mcmc_sampler.h"
+#include "util.h"
+#include "mcmc_sampler_internals.h"
+#include "threadPool.h"
 #include <iostream>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include "util.h"
-#include "mcmc_sampler_internals.h"
 #include <omp.h>
 #include <time.h>
 #include <condition_variable>
