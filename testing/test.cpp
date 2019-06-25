@@ -23,7 +23,7 @@
 #include "adolc/taping.h"
 #include "limits"
 
-#include "cuda_utilities.h"
+//#include "cuda_utilities.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -81,7 +81,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test22();	
+	test1();	
 	return 0;
 }
 
@@ -112,7 +112,7 @@ void test22()
 	
 	start = clock();
 	//write_file_auto_corr_from_data_accel(acfile, output,dimension,N_steps,segs,target_corr);
-	write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
+	//write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
 	end = clock();
 	cout<<"TIMING gpu: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 	deallocate_2D_array(output, N_steps, dimension);
@@ -2697,7 +2697,7 @@ void test1()
 	params.tc = -.0;
 	params.Luminosity_Distance = 410.;
 	params.betappe = new double[1] ;
-	params.betappe[0]=4*log(  1000/3.e5);
+	params.betappe[0]=pow((  3e5/3.e5),4);
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
@@ -2834,7 +2834,7 @@ void test1()
 //###################################################################################################
 	
 	//method = "ppE_IMRPhenomD_Inspiral";
-	method = "dCS_IMRPhenomD_log";
+	method = "dCS_IMRPhenomD";
 	//method = "EdGB_IMRPhenomD_log";
 	clock_t  startppe, endppe;
 	startppe = clock(); 

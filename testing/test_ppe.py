@@ -67,7 +67,7 @@ start = time()
 eta = .21
 chirpm = 49.78
 #model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0, Luminosity_Distance=410*mpc, phase_mod=np.exp(2), bppe= -1)
-model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0., Luminosity_Distance=410*mpc, phase_mod=(1000/3.e5)**4.)
+model = imrmod(mass1 = calculate_mass1(chirpm,eta)*s_solm, mass2 =calculate_mass2(chirpm,eta)*s_solm, spin1=-.2, spin2=.4, collision_phase=0, collision_time = 0., Luminosity_Distance=410*mpc, phase_mod=(3e5/3.e5)**4.)
 amppy,phase,h = model.calculate_waveform_vector(freqs)
 
 
