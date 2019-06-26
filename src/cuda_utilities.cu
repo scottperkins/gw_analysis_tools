@@ -100,6 +100,8 @@ void write_file_auto_corr_from_data_accel(std::string acfile, /**< Output autoco
 		}
 	}
 	write_file(acfile, autocorrout, dimension+1, num_segments);
+	deallocate_2D_array(autocorr,dimension, num_segments);
+	deallocate_2D_array(autocorrout,dimension+1, num_segments);
 }
 
 /*! \brief Find autocorrelation of data at different points in the chain length and output to autocorr
@@ -200,6 +202,7 @@ void ac_gpu_wrapper(int thread, /**< Host thread*/
  */
 void launch_ac_gpu(int device, int element, double **data, int length, int dimension, double target_corr, int num_segments)
 {
+	//std::cout<<"Thread (device): "<<device<<std::endl;
 	cudaSetDevice(device);
 	int dim = element/num_segments;
 	int k = element-dim*num_segments;
@@ -219,11 +222,18 @@ void launch_ac_gpu(int device, int element, double **data, int length, int dimen
 	auto_corr_internal( plans_global[device].host_data, 
 				length_seg, 0, average, &var, start_id);
 
+	//cudaMemcpy(plans_global[device].device_data, 
+	//		chains_internal, 
+	//		sizeof(double)*length, 
+	//		cudaMemcpyHostToDevice);
+	//cudaMemcpy(&plans_global[device].device_lags[element], 
+	//		&length_seg,
+	//		sizeof(int), cudaMemcpyHostToDevice
+	//		);
 	//cudaMemcpyAsync(plans_global[device].device_data, 
 	//		plans_global[device].host_data, 
 	//		sizeof(double)*length_seg, 
-	//		cudaMemcpyHostToDevice, 
-	//		plans_global[device].stream);
+	//		cudaMemcpyHostToDevice, plans_global[device].stream);
 	//cudaMemcpyAsync(&plans_global[device].device_lags[element], 
 	//		plans_global[device].initial_lag,
 	//		sizeof(int), cudaMemcpyHostToDevice, 
@@ -236,10 +246,15 @@ void launch_ac_gpu(int device, int element, double **data, int length, int dimen
 		(plans_global[device].device_data, length_seg, average, 
 		&plans_global[device].device_lags[element], target_corr, var, start_id);
 
+	//auto_corr_internal_kernal
+	//	<<<N/THREADS_PER_BLOCK,THREADS_PER_BLOCK>>>
+	//	(plans_global[device].device_data, length_seg, average, 
+	//	&plans_global[device].device_lags[element], target_corr, var, start_id);
 	//cudaMemcpy(plans_global[device].host_lag, 
 	//		&plans_global[device].device_lags[element], sizeof(int), 
 	//		cudaMemcpyDeviceToHost);
-	//cudaStreamSynchronize(plans_global[device].stream);
+	cudaStreamSynchronize(plans_global[device].stream);
+	//cudaDeviceSynchronize();
 	//return *plans_global[device].host_lag - start_id;
 	//std::cout<<element<<std::endl;
 	//return 1;//*plans_global[device].host_lag ;

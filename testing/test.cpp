@@ -23,7 +23,7 @@
 #include "adolc/taping.h"
 #include "limits"
 
-//#include "cuda_utilities.h"
+#include "cuda_utilities.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
@@ -81,40 +81,45 @@ static double *psd=NULL;
 
 int main(){
 
-	test1();	
+	test22();	
 	return 0;
 }
 
 void test22()
 {
-	std::string outputfile = "testing/data/mcmc_output_dCS.csv";
+	//std::string outputfile = "testing/data/mcmc_output_dCS.csv";
+	std::string outputfile = "testing/data/mcmc_output_injection.csv";
 	//std::string outputfile = "testing/data/mcmc_output_DFull.csv";
-	std::string acfile = "testing/data/auto_corr_mcmc_dCS_GPU.csv";
+	//std::string acfile = "testing/data/auto_corr_mcmc_dCS_GPU.csv";
+	std::string acfile = "testing/data/auto_corr_mcmc_injection_GPU.csv";
 	std::string acfilecpu = "testing/data/auto_corr_mcmc_dCS.csv";
 	//std::string acfile = "testing/data/auto_corr_mcmc_DFull.csv";
 	int dimension = 9;
 	//int dimension = 8;
-	int N_steps = 750000;
+	//int N_steps = 750000;
+	int N_steps = 3000000;
 	//int N_steps = 20000;
 	double **output = allocate_2D_array(N_steps,dimension);
 	read_file(outputfile,output, N_steps, dimension);
-	int segs =10;
-	double target_corr = .01;
+	int segs =5;
+	double target_corr = .1;
 	//double **autocorr = allocate_2D_array(dimension,segs);
 	clock_t start, end;
 	double wstart, wend;
-	omp_set_num_threads(12);
-	//wstart = omp_get_wtime();
+	//omp_set_num_threads(12);
+	wstart = omp_get_wtime();
 	//
 	//write_auto_corr_file_from_data_file(acfilecpu, outputfile, segs, dimension, N_steps);	
 	//wend = omp_get_wtime();
 	//cout<<"TIMING cpu: "<<(double)(wend-wstart)<<endl;
 	
-	start = clock();
+	//start = clock();
 	//write_file_auto_corr_from_data_accel(acfile, output,dimension,N_steps,segs,target_corr);
-	//write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
-	end = clock();
-	cout<<"TIMING gpu: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+	write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
+	wend = omp_get_wtime();
+	//end = clock();
+	//cout<<"TIMING gpu: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+	cout<<"TIMING GPU: "<<(double)(wend-wstart)<<endl;
 	deallocate_2D_array(output, N_steps, dimension);
 	//deallocate_2D_array(autocorr, dimension, segs);
 	
@@ -759,11 +764,11 @@ void test16()
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 40000;
-	int chain_N= 15;
+	int n_steps = 20000;
+	int chain_N= 4;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
-	int swp_freq = 10;
+	int swp_freq = 5;
 	double chain_temps[chain_N];
 	chain_temps[0]=1.;
 	double c = 1.2;
@@ -774,6 +779,7 @@ void test16()
 	int *bppe = NULL;
 	int numThreads = 15;
 	bool pool = true;
+	//bool pool = false;
 	//#########################################################
 	//gw options
 	std::string generation_method = "IMRPhenomD";
@@ -885,7 +891,7 @@ void test15()
 	//double DEC = 1.;
 	double RA = 1.5;
 	double DEC = .2;
-	double chirpm = 20.78;
+	double chirpm = 40.78;
 	double eta =.21;
 	params.mass1 = calculate_mass1(chirpm,eta);
 	params.mass2 = calculate_mass2(chirpm,eta);
@@ -900,8 +906,14 @@ void test15()
 	double tc = 2;
 	params.Luminosity_Distance = 410.;
 	params.NSflag = false;
-	params.incl_angle = M_PI/3.;
+	params.incl_angle = 0.9;//M_PI/3.;
 	params.sky_average=false;
+	params.bppe = new int[1];
+	params.betappe = new double[1];
+	params.bppe[0] = -1;
+	params.betappe[0] = pow(10./(3e5),4);
+	params.Nmod = 1;
+	std::string method = "dCS_IMRPhenomD";
 	//params.f_ref = 30.5011;
 	//params.phiRef =58.944425/2.;
 	
@@ -930,7 +942,7 @@ void test15()
 	params.tc = tc; 
 	celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
 	
-	fourier_detector_response(freq,length, waveformout,"Hanford","IMRPhenomD", &params);
+	fourier_detector_response(freq,length, waveformout,"Hanford",method, &params);
 	double temptheta = params.theta;
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[0][j] = freq[j];	
@@ -938,12 +950,12 @@ void test15()
 		data[0][j] = waveformout[j];	
 	}
 	//double snr2 = pow(calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
-	double snr2 = pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Hanford", "IMRPhenomD",&params),2);
+	double snr2 = pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Hanford", method,&params),2);
 
 	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
 	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
 	std::cout<<"Time at Livingston of injection: "<<params.tc<<std::endl;
-	fourier_detector_response(freq,length, waveformout,"Livingston","IMRPhenomD", &params);
+	fourier_detector_response(freq,length, waveformout,"Livingston",method, &params);
 
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[1][j] = freq[j];	
@@ -951,11 +963,11 @@ void test15()
 		data[1][j] = waveformout[j];	
 	}
 	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
-	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Livingston", "IMRPhenomD",&params),2);
+	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Livingston", method,&params),2);
 	celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
 	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
 	std::cout<<"Time at Virgo of injection: "<<params.tc<<std::endl;
-	fourier_detector_response(freq,length, waveformout,"Virgo","IMRPhenomD", &params);
+	fourier_detector_response(freq,length, waveformout,"Virgo",method, &params);
 
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[2][j] = freq[j];	
@@ -964,39 +976,42 @@ void test15()
 	}
 	//#########################################################
 	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
-	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", "IMRPhenomD",&params),2);
+	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", method,&params),2);
 	std::cout<<"SNR of injection: "<<sqrt(snr2)<<std::endl;
-	//snr = data_snr_maximized_extrinsic(freq,length, waveformout,"Hanford_O1_fitted","IMRPhenomD",params );
+	//snr = data_snr_maximized_extrinsic(freq,length, waveformout,"Hanford_O1_fitted",method,params );
 	//std::cout<<"SNR of injection calculated as data: "<<snr<<std::endl;
 
+	delete [] params.bppe;
+	delete [] params.betappe;
 	
 	//#########################################################
 	//mcmc options
-	int dimension = 8;
+	int dimension = 9;
 	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
-	double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0};
+	double initial_pos[dimension]={.9, 1, 0.,log(400),log(40), .2,- .0,-.0, -40};
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 20000;
-	int chain_N= 5;
+	int n_steps = 3000000;
+	int chain_N= 15;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 3;
 	double chain_temps[chain_N];
 	chain_temps[0]=1.;
-	double c = 1.2;
+	double c = 1.5;
 	for(int i =1; i < chain_N;  i ++)
 		chain_temps[i] = c*chain_temps[i-1];
 	
-	int Nmod = 0;
-	int *bppe = NULL;
-	int numThreads = 3;
+	int Nmod = 1;
+	int *bppe = new int[1];
+	bppe[0] = -1;
+	int numThreads = 10;
 	bool pool = true;
 	//#########################################################
 	//gw options
-	std::string generation_method = "IMRPhenomD";
+	std::string generation_method = "dCS_IMRPhenomD_log";
 	
 	
 	std::string autocorrfile = "testing/data/auto_corr_mcmc_injection.csv";
@@ -1005,12 +1020,12 @@ void test15()
 	std::string statfilename = "testing/data/mcmc_statistics_injection.txt";
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
-			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
+			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"",autocorrfile);	
+			generation_method,statfilename,"","");	
+	
 	std::cout<<"ended"<<std::endl;
-
 	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
 	for (int j =0; j<n_steps; j++)
 		output_transform[j] = (double *)malloc(sizeof(double)*dimension);
@@ -1024,8 +1039,14 @@ void test15()
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
+			output_transform[j][8]=exp(output[0][j][8]);
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
+
+	int segs = 30;
+	double target_corr = .01;
+	write_file_auto_corr_from_data_file_accel(autocorrfile, chainfile,dimension,n_steps,segs,target_corr);
+
 	//output hottest chain too
 	chainfile = "testing/data/mcmc_output_injection_hot.csv";
 	for(int j = 0; j<n_steps;j++){
@@ -1037,6 +1058,7 @@ void test15()
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
+			output_transform[j][8]=exp(output[chain_N-1][j][8]);
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -1051,6 +1073,7 @@ void test15()
 	}
 	free(output_transform);
 	free(data);
+	delete [] bppe;
 	free(psd);
 	free(frequencies );
 	delete [] detectors;
