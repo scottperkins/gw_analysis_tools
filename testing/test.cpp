@@ -95,14 +95,14 @@ void test24()
 	std::string data_file = "testing/data/mcmc_output_dCS.csv";
 	int length =750000;
 	int dim =9;
-	int segs = 10;
+	int segs = 50;
 	double **data=allocate_2D_array(length, dim);
 	read_file(data_file, data, length, dim);
 	int **ac=(int **)malloc(sizeof(int *)*dim);
 	for(int i =0 ; i<dim; i++){
 		ac[i]=(int *)malloc(sizeof(int)*length);
 	}
-	double accuracy = .1;
+	double accuracy = .01;
 	int num_threads = 10;
 	double wstart, wend;
 	wstart = omp_get_wtime();

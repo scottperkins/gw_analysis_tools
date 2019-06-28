@@ -4,7 +4,7 @@
 #include <iostream>
 
 /*! Max length of array to use serial calculation*/
-#define MAX_SERIAL 100000
+#define MAX_SERIAL 200000
 
 /*! \file 
  *
@@ -61,19 +61,76 @@ void auto_corr_from_data(double **data, /**<Input data */
 	//	end[j] = (j+1)*step;
 	//}
 	//}
-	for(int i =0 ; i<num_segments; i++){
-		lengths[i] = (i+1)*step;
-		if(lengths[i]>MAX_SERIAL){
-			fftw_lengths[i] = pow(2, std::ceil(std::log2(lengths[i])));	
-			initiate_likelihood_function(&plans_forward[i],fftw_lengths[i]);
-			allocate_FFTW3_mem_inverse(&plans_reverse[i],fftw_lengths[i]);
-		}
-	}	
+	//for(int i =0 ; i<num_segments; i++){
+	//	lengths[i] = (i+1)*step;
+	//	if(lengths[i]>MAX_SERIAL){
+	//		fftw_lengths[i] = pow(2, std::ceil(std::log2(lengths[i])));	
+	//		initiate_likelihood_function(&plans_forward[i],fftw_lengths[i]);
+	//		allocate_FFTW3_mem_inverse(&plans_reverse[i],fftw_lengths[i]);
+	//	}
+	//}	
 	threaded_ac_jobs_serial jobs_s[num_segments*dimension];
 	threaded_ac_jobs_fft jobs_f[num_segments*dimension];
+	for(int i =0 ; i<num_segments; i++){
+		lengths[i] = (i+1)*step;
+	}
 	{	
-		threadPool<threaded_ac_jobs_fft,comparator_ac_fft> fftw_jobs(fft_threads,threaded_ac_spectral);
-		threadPool<threaded_ac_jobs_serial,comparator_ac_serial> serial_jobs(serial_threads,threaded_ac_serial);
+		//threadPool<threaded_ac_jobs_fft,comparator_ac_fft> fftw_jobs(fft_threads,threaded_ac_spectral);
+		//threadPool<threaded_ac_jobs_serial,comparator_ac_serial> serial_jobs(serial_threads,threaded_ac_serial);
+		//for(int j =0 ; j<dimension; j++){
+		//	for(int i =0 ; i< num_segments; i++)
+		//	{
+		//		if(lengths[i]>MAX_SERIAL){
+		//			jobs_f[j*num_segments + i].data = data_transpose;
+		//			jobs_f[j*num_segments + i].length = &lengths[i];
+		//			jobs_f[j*num_segments + i].target = &accuracy;		
+		//			jobs_f[j*num_segments + i].dimension = j;		
+		//			jobs_f[j*num_segments + i].lag = &output[j][i];
+		//			//job.start= &start[j];
+		//			//job.end = &end[i+j*num_segments];
+		//			jobs_f[j*num_segments + i].planforward = &plans_forward[i];
+		//			jobs_f[j*num_segments + i].planreverse = &plans_reverse[i];
+		//			fftw_jobs.enqueue(jobs_f[j*num_segments + i]);
+		//		}
+		//		else{
+		//			//threaded_ac_jobs_serial job;
+		//			jobs_s[j*num_segments+i].data = data_transpose;
+		//			jobs_s[j*num_segments+i].length = &lengths[i];
+		//			jobs_s[j*num_segments+i].target = &accuracy;		
+		//			jobs_s[j*num_segments+i].dimension = j;		
+		//			jobs_s[j*num_segments + i].lag = &output[j][i];
+		//			//job.start= &start[j];
+		//			//job.end = &end[i+j*num_segments];
+		//			serial_jobs.enqueue(jobs_s[j*num_segments+i]);
+		//		}
+
+		//	}		
+		//}	
+		{
+			threadPool<threaded_ac_jobs_serial,comparator_ac_serial> serial_jobs(num_threads,threaded_ac_serial);
+			for(int j =0 ; j<dimension; j++){
+				for(int i =0 ; i< num_segments; i++)
+				{
+					if(lengths[i]<=MAX_SERIAL){
+						jobs_s[j*num_segments + i].data = data_transpose;
+						jobs_s[j*num_segments + i].length = &lengths[i];
+						jobs_s[j*num_segments + i].target = &accuracy;		
+						jobs_s[j*num_segments + i].dimension = j;		
+						jobs_s[j*num_segments + i].lag = &output[j][i];
+						serial_jobs.enqueue(jobs_s[j*num_segments + i]);
+					}
+				}
+			}
+			for(int i =0 ; i<num_segments; i++){
+				if(lengths[i]>MAX_SERIAL){
+					fftw_lengths[i] = pow(2, std::ceil(std::log2(lengths[i])));	
+					initiate_likelihood_function(&plans_forward[i],fftw_lengths[i]);
+					allocate_FFTW3_mem_inverse(&plans_reverse[i],fftw_lengths[i]);
+				}
+			}	
+		}
+
+		threadPool<threaded_ac_jobs_fft,comparator_ac_fft> fftw_jobs(num_threads,threaded_ac_spectral);
 		for(int j =0 ; j<dimension; j++){
 			for(int i =0 ; i< num_segments; i++)
 			{
@@ -83,37 +140,13 @@ void auto_corr_from_data(double **data, /**<Input data */
 					jobs_f[j*num_segments + i].target = &accuracy;		
 					jobs_f[j*num_segments + i].dimension = j;		
 					jobs_f[j*num_segments + i].lag = &output[j][i];
-					//job.start= &start[j];
-					//job.end = &end[i+j*num_segments];
 					jobs_f[j*num_segments + i].planforward = &plans_forward[i];
 					jobs_f[j*num_segments + i].planreverse = &plans_reverse[i];
 					fftw_jobs.enqueue(jobs_f[j*num_segments + i]);
 				}
-				else{
-					//threaded_ac_jobs_serial job;
-					jobs_s[j*num_segments+i].data = data_transpose;
-					jobs_s[j*num_segments+i].length = &lengths[i];
-					jobs_s[j*num_segments+i].target = &accuracy;		
-					jobs_s[j*num_segments+i].dimension = j;		
-					jobs_s[j*num_segments + i].lag = &output[j][i];
-					//job.start= &start[j];
-					//job.end = &end[i+j*num_segments];
-					serial_jobs.enqueue(jobs_s[j*num_segments+i]);
-				}
-
-			}		
-		}	
+			}
+		}
 	}
-	//for(int i =0 ; i< dimension; i++){
-	//	for(int j =0 ; j<num_segments; j++){
-	//		if(lengths[j]>MAX_SERIAL){
-	//			output[i][j] = jobs_f[i*num_segments + i].lag;
-	//		}
-	//		else{
-	//			output[i][j] = jobs_s[i*num_segments + i].lag;
-	//		}
-	//	}
-	//}
 	for(int i =0 ; i<num_segments; i++){
 		if(lengths[i]>MAX_SERIAL){
 			deactivate_likelihood_function(&plans_forward[i]);
