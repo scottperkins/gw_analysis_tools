@@ -8,6 +8,8 @@
 #include "util.h"
 #include <limits>
 #include <iomanip>
+#include <fftw3.h>
+#include "autocorrelation.h"
 
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
@@ -576,297 +578,416 @@ void update_history(sampler *sampler, double *new_params, int chain_index)
 
 }
 
-
-//Calculate the autocorrelation of a chain - if the chain is >100,000,
-//the program will use a box-search method to help with computation time
-double auto_correlation(double *arr, int length , double tolerance){
-	
-	//if the chain is short enough, its easier to just calculate it in serial
-	if(length<=100000){return auto_correlation_serial(arr,length);}
-	
-	double sum =0;
-	int k;	
-	for(k =0 ; k< length; k++){
-		sum+= arr[k];
-	}
-	double ave = sum/length;
-	double gamma_0_sum = 0;
-
-	for (k=0;k<length;k++){
-		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
-	}
-	double gamma_0 = gamma_0_sum/length;
-	
-
-	double step_multiplier = 1. + .01*tolerance;
-	double error_tol = .01*tolerance;	/*error tolerance to find stopping point*/
-	
-	double rho = 1;
-	int h= (int)(0.1*length);
-	int direction = 1;	/*Variable to track which direction h should change each iteration*/
-	double gamma_sum, gamma;
-	int counter = 0;
-
-	while(rho>.01+error_tol || rho < .01-error_tol || rho <0.){
-		if(counter%1000==0)std::cout<<"Rho: "<<rho<<std::endl;
-		
-		if(counter%10000 == 0)h = 1.12*h;
-		
-		/* Pick new h based on direction */
-		if (direction > 0&& h< (int)(length/step_multiplier)){
-			h = (int)(step_multiplier*h);
-		}
-		else{
-			h = (int)(h/step_multiplier);
-		}
-	
-		/*calculate new Gamma and rho*/
-		gamma_sum=0;
-	
-		for(k=0;k<(length-h);k++){
-			gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
-		}
-
-		gamma = gamma_sum/(length-h);
-		rho = gamma/gamma_0;
-		/*Update direction for next iteration*/
-		if(rho - (.01+error_tol)>0){
-			direction = 1;
-		}
-		else if ((0.01 - error_tol) - rho>0){
-			direction = -1;
-		} 
-		counter++;
-	}	
-	//printf("Loops Required %i, rho: %f \n",counter,rho);
-	return h;
-}	
-
-//Serial version for short chains
-double auto_correlation_serial(double *arr, int length  ){
-
-	double sum =0;
-	int k;	
-	for(k =0 ; k< length; k++){
-		sum+= arr[k];
-	}
-	double ave = sum/length;
-	double gamma_0_sum = 0;
-	for (k=0;k<length;k++){
-		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
-	}
-	double gamma_0 = gamma_0_sum/length;
-	
-
-	double rho = 1;
-	double gamma_sum, gamma;
-	int counter = 0;
-	int h = 1;
-	while(rho>.01){	
-		h++;
-		//gamma_sum=0;
-		//for(k=0;k<(length-h);k++){
-		//	gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
-		//}
-
-		//gamma = gamma_sum/(length-h);
-		//rho = gamma/gamma_0;
-		rho = auto_correlation_internal(arr, length, h, ave)/gamma_0;
-	}	
-	return h;
-}
-
-/*! \brief Grid search method of computing the autocorrelation 
- *
- * Hopefully more reliable than the box-search method, which can sometimes get caught in a recursive loop when the stepsize isn't tuned, but also faster than the basic linear, serial search
- */
-double auto_correlation_grid_search(double *arr, /**< Input array to use for autocorrelation*/
-			int length  , /**< Length of input array*/
-			int box_num, /**< number of boxes to use for each iteration, default is 10*/
-			int final_length, /**< number of elements per box at which the grid search ends and the serial calculation begins*/
-			double target_length /**< target correlation that corresponds to the returned lag*/
-			)
-{
-	//if array isn't long enough, just calculate serial
-	if(length < final_length*2) 
-		return auto_correlation_serial(arr, length);
-	//#######################################################	
-	//Zero lag variance
-	double sum =0;
-	int k;	
-	for(k =0 ; k< length; k++){
-		sum+= arr[k];
-	}
-
-	double ave = sum/length;
-	double gamma_0_sum = 0;
-	for (k=0;k<length;k++){
-		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
-	}
-	double gamma_0 = gamma_0_sum/length;
-	
-
-	//#######################################################	
-	int lag_previous = 0;
-	int lag = length-1;	
-	int count = 0;
-	double rho;
-	bool more_bins = true;
-	double rho_final = 1;
-	int start_final = 0;
-	int stop_final = 0;
-	int success_iteration = 0;
-	while(lag != lag_previous && success_iteration < 5){
-		count ++;
-		lag_previous = lag;
-		int start=1, stop=lag, loop_length, index;
-		while(stop-start > final_length){
-			int boundary_num = box_num +1;
-			double auto_corrs[boundary_num];
-			int lags[boundary_num];
-			loop_length = stop-start;
-			double lag_step = ( (double)(loop_length) ) / (boundary_num-1);
-			for (int i =0 ; i<boundary_num; i++){
-				lags[i] = start + (int)(lag_step * i );
-				
-			}
-			for(int j =0 ; j<boundary_num ; j++){
-				auto_corrs[j] = auto_correlation_internal(
-							arr, length,lags[j], ave)/gamma_0;	
-			}
-			for (int j =0 ; j<box_num; j++){
-				if(auto_corrs[j+1]<target_length){
-					start = lags[j];
-					//index = j;
-					rho_final = auto_corrs[j];
-					start_final = start;
-					stop = lags[j+1];
-					stop_final = stop;
-					more_bins=false;
-					break;
-				}
-			}
-			if (more_bins) {
-				std::cout<<"SAFETY "<<count<<" "<<box_num<<" "<<lag<< " "<<auto_corrs[boundary_num-1]<<std::endl;
-				for(int j =0 ; j<boundary_num ; j++){
-					std::cout<<auto_corrs[j]<<std::endl;	
-				}
-				//break;
-				box_num +=5;
-				if(final_length < 3*box_num){final_length*=2;}
-					
-			}
-			more_bins = true;
-			
-		}
-		//loop_length = stop-start;
-		//rho = auto_corrs[index];
-		rho = rho_final;
-		lag = start_final;
-		while (rho>target_length && lag<stop_final){
-			lag ++;
-			rho = auto_correlation_internal(arr, length, lag,ave)/gamma_0;
-		}
-		if(lag == lag_previous){
-			success_iteration ++;
-			box_num +=5;
-			if(final_length < 3*box_num){final_length*=2;}
-		}
-		else{
-			success_iteration = 0;
-		}
-	}	
-	//std::cout<<rho<<std::endl;
-	return lag;
-}
-
-/*! \brief Internal function to compute the auto correlation for a given lag
- *
- */
-double auto_correlation_internal(double *arr, int length, int lag, double ave)
-{
-		double gamma_sum=0;
-		for(int k=0;k<(length-lag);k++){
-			gamma_sum += (arr[k+lag] - ave)*(arr[k]-ave);
-		}
-		return gamma_sum / (length-lag);
-
-}
-
-/*! \brief Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence
- * 
- */
-void auto_corr_intervals(double *data, /**<Input data */
-			int length, /**< length of input data*/
-			double *output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
-			int num_segments, /**< number of segements to compute the auto-corr length*/
-			double accuracy /**< longer chains are computed numerically, this specifies the tolerance*/
-			)
-{
-	double stepsize = (double)length/num_segments;
-	int lengths[num_segments];
-	for (int i =0; i<num_segments;i++)
-		lengths[i]=(int)(stepsize*(1. + i));
-	double *temp = (double *)malloc(sizeof(double)*length);		
-	for(int l =0; l<num_segments; l++){
-		for(int j =0; j< lengths[l]; j++){
-			temp[j] = data[j];
-		}
-		//output[l]=auto_correlation(data,lengths[l], accuracy);
-		output[l]=auto_correlation_serial(data,lengths[l]);
-		//output[l]=auto_correlation_grid_search(data,lengths[l], 10, 100, .01);
-	}
-	free(temp);
-	
-}
-
-void write_auto_corr_file_from_data(std::string auto_corr_filename, 
-				double **output,
-				int intervals, 
-				int dimension, 
-				int N_steps)
-{
-	double **ac = allocate_2D_array(dimension+1, intervals);
-	//First row is the step size for the given auto-corr length
-	double stepsize = (double)N_steps/intervals;
-	for (int i =0 ; i<intervals; i++)
-		ac[0][i] = (int)(stepsize*(1.+i));
-	
-	#pragma omp parallel for 
-	for (int i = 0 ; i< dimension; i++)
-	{
-		auto_corr_intervals(output[i],N_steps, ac[i+1], intervals, 0.01);
-	}	
-
-	write_file(auto_corr_filename, ac, dimension+1, intervals);
-
-	deallocate_2D_array(ac,dimension+1, intervals);
-}
-
-void write_auto_corr_file_from_data_file(std::string auto_corr_filename, 
-				std::string output_file,
-				int intervals, 
-				int dimension, 
-				int N_steps)
-{
-	double **output = allocate_2D_array(N_steps,dimension);
-	read_file(output_file,output, N_steps, dimension);
-	double **temp = (double **) malloc(sizeof(double*)*N_steps);
-	for (int i = 0 ; i< dimension; i++){
-		temp[i] = (double *)malloc(sizeof(double)*N_steps);
-		for(int j =0; j< N_steps; j++){
-			temp[i][j] = output[j][i];
-		}
-	}
-	write_auto_corr_file_from_data(auto_corr_filename, temp, intervals, dimension, N_steps);
-	
-
-	deallocate_2D_array(output,N_steps,dimension);
-	for (int i = 0 ; i< dimension; i++){
-		free(temp[i]);
-	}
-	free(temp);
-}
+///*! \brief Faster approximation of the autocorrelation of a chain. Implements FFT/IFFT 
+// *
+// * Based on the Wiener-Khinchin Theorem.
+// *
+// * Algorithm used from https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/
+// *
+// */
+//void auto_correlation_spectral(double *chain, int length, double *autocorr)
+//{
+//	//Normalize
+//	double *x_cent = (double *)malloc(sizeof(double)*length);
+//	//Calculate Average
+//	double ave = 0;
+//	for(int i =0; i<length; i++)
+//		ave+= chain[i];
+//	ave /= length;
+//	
+//	//Create normalized vector
+//	for(int i = 0 ; i<length; i++){
+//		x_cent[i] = chain[i]-ave;
+//	}
+//
+//	//Padded length
+//	int L = pow(2, std::ceil( std::log2(length) ) );	
+//
+//	//Padded Vector
+//	double *x_pad = (double *)malloc(sizeof(double)*L);
+//
+//	//Copy centered vector
+//	for(int i = 0 ; i < length; i++){
+//		x_pad[i] = x_cent[i];
+//	}
+//
+//	//Add padding
+//	for(int i = length ; i < L; i++){
+//		x_pad[i] = 0;
+//	}
+//
+//	//Allocate FFTW3 memory
+//	double *norm = (double *)malloc(sizeof(double)*L);
+//	fftw_outline plan;
+//	initiate_likelihood_function(&plan, L);
+//	
+//	fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+//	fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+//	for(int i =0 ; i<L; i++){
+//		in[i][0] = x_pad[i];
+//		in[i][1] = 0;
+//	}
+//
+//	//Execute Forward Transform
+//	fftw_execute_dft(plan.p, in, out);
+//
+//	//Take norm^2 of the output
+//	for(int i =0 ; i<L; i++){
+//		norm[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
+//	}
+//	//Execute Reverse Transform
+//	fftw_outline plan_inv;
+//	allocate_FFTW3_mem_inverse(&plan_inv, L);
+//	for(int i =0 ; i<L; i++){
+//		in[i][0] = norm[i];
+//		in[i][1] = 0;
+//	}
+//	fftw_execute_dft(plan_inv.p, in, out);
+//	
+//	//acov is the result
+//	double *acov = (double *)malloc(sizeof(double)*length);
+//	for(int i =0 ; i< length; i++){
+//		acov[i] = out[i][0];	
+//	}
+//
+//	//adjust the cov
+//	double *mask = (double *)malloc(sizeof(double)*L);
+//	//first length elements are 1
+//	for(int i = 0 ; i < length; i++){
+//		mask[i]=1;
+//	}
+//	// last L-length elements are 0
+//	for(int i = length ; i < L; i++){
+//		mask[i]=0;
+//	}
+//	for(int i =0 ; i<L; i++){
+//		in[i][0] = mask[i];
+//		in[i][1] = 0;
+//	}
+//
+//	//execute fft
+//	fftw_execute_dft(plan.p, in ,out);
+//	
+//	//output vector -- will be trimmed to length
+//	double *normadj = (double *)malloc(sizeof(double)*length);
+//	//trimmed output
+//	for(int i =0 ; i< length; i++){
+//		normadj[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
+//	}
+//	
+//	//adjust the cov vector
+//	//for(int i =0 ; i<length ; i++){
+//	//	acov[i]/=normadj[i];
+//	//}
+//	
+//	double var = acov[0];
+//
+//	for(int i = 0 ; i< length; i++)
+//		autocorr[i] = acov[i]/var;
+//
+//	//Free memory
+//	deactivate_likelihood_function(&plan);
+//	deactivate_likelihood_function(&plan_inv);
+//	free(norm);
+//	free(mask);
+//	free(normadj);
+//	fftw_free(in);
+//	fftw_free(out);
+//	free(x_cent);
+//	free(x_pad);
+//}
+//
+//
+////Calculate the autocorrelation of a chain - if the chain is >100,000,
+////the program will use a box-search method to help with computation time
+//double auto_correlation(double *arr, int length , double tolerance){
+//	
+//	//if the chain is short enough, its easier to just calculate it in serial
+//	if(length<=100000){return auto_correlation_serial(arr,length);}
+//	
+//	double sum =0;
+//	int k;	
+//	for(k =0 ; k< length; k++){
+//		sum+= arr[k];
+//	}
+//	double ave = sum/length;
+//	double gamma_0_sum = 0;
+//
+//	for (k=0;k<length;k++){
+//		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
+//	}
+//	double gamma_0 = gamma_0_sum/length;
+//	
+//
+//	double step_multiplier = 1. + .01*tolerance;
+//	double error_tol = .01*tolerance;	/*error tolerance to find stopping point*/
+//	
+//	double rho = 1;
+//	int h= (int)(0.1*length);
+//	int direction = 1;	/*Variable to track which direction h should change each iteration*/
+//	double gamma_sum, gamma;
+//	int counter = 0;
+//
+//	while(rho>.01+error_tol || rho < .01-error_tol || rho <0.){
+//		if(counter%1000==0)std::cout<<"Rho: "<<rho<<std::endl;
+//		
+//		if(counter%10000 == 0)h = 1.12*h;
+//		
+//		/* Pick new h based on direction */
+//		if (direction > 0&& h< (int)(length/step_multiplier)){
+//			h = (int)(step_multiplier*h);
+//		}
+//		else{
+//			h = (int)(h/step_multiplier);
+//		}
+//	
+//		/*calculate new Gamma and rho*/
+//		gamma_sum=0;
+//	
+//		for(k=0;k<(length-h);k++){
+//			gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
+//		}
+//
+//		gamma = gamma_sum/(length-h);
+//		rho = gamma/gamma_0;
+//		/*Update direction for next iteration*/
+//		if(rho - (.01+error_tol)>0){
+//			direction = 1;
+//		}
+//		else if ((0.01 - error_tol) - rho>0){
+//			direction = -1;
+//		} 
+//		counter++;
+//	}	
+//	//printf("Loops Required %i, rho: %f \n",counter,rho);
+//	return h;
+//}	
+//
+////Serial version for short chains
+//double auto_correlation_serial(double *arr, int length  ){
+//
+//	double sum =0;
+//	int k;	
+//	for(k =0 ; k< length; k++){
+//		sum+= arr[k];
+//	}
+//	double ave = sum/length;
+//	double gamma_0_sum = 0;
+//	for (k=0;k<length;k++){
+//		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
+//	}
+//	double gamma_0 = gamma_0_sum/length;
+//	
+//
+//	double rho = 1;
+//	double gamma_sum, gamma;
+//	int counter = 0;
+//	int h = 1;
+//	while(rho>.01){	
+//		h++;
+//		//gamma_sum=0;
+//		//for(k=0;k<(length-h);k++){
+//		//	gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
+//		//}
+//
+//		//gamma = gamma_sum/(length-h);
+//		//rho = gamma/gamma_0;
+//		rho = auto_correlation_internal(arr, length, h, ave)/gamma_0;
+//	}	
+//	return h;
+//}
+//
+///*! \brief Grid search method of computing the autocorrelation 
+// *
+// * Hopefully more reliable than the box-search method, which can sometimes get caught in a recursive loop when the stepsize isn't tuned, but also faster than the basic linear, serial search
+// */
+//double auto_correlation_grid_search(double *arr, /**< Input array to use for autocorrelation*/
+//			int length  , /**< Length of input array*/
+//			int box_num, /**< number of boxes to use for each iteration, default is 10*/
+//			int final_length, /**< number of elements per box at which the grid search ends and the serial calculation begins*/
+//			double target_length /**< target correlation that corresponds to the returned lag*/
+//			)
+//{
+//	//if array isn't long enough, just calculate serial
+//	if(length < final_length*2) 
+//		return auto_correlation_serial(arr, length);
+//	//#######################################################	
+//	//Zero lag variance
+//	double sum =0;
+//	int k;	
+//	for(k =0 ; k< length; k++){
+//		sum+= arr[k];
+//	}
+//
+//	double ave = sum/length;
+//	double gamma_0_sum = 0;
+//	for (k=0;k<length;k++){
+//		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
+//	}
+//	double gamma_0 = gamma_0_sum/length;
+//	
+//
+//	//#######################################################	
+//	int lag_previous = 0;
+//	int lag = length-1;	
+//	int count = 0;
+//	double rho;
+//	bool more_bins = true;
+//	double rho_final = 1;
+//	int start_final = 0;
+//	int stop_final = 0;
+//	int success_iteration = 0;
+//	while(lag != lag_previous && success_iteration < 5){
+//		count ++;
+//		lag_previous = lag;
+//		int start=1, stop=lag, loop_length, index;
+//		while(stop-start > final_length){
+//			int boundary_num = box_num +1;
+//			double auto_corrs[boundary_num];
+//			int lags[boundary_num];
+//			loop_length = stop-start;
+//			double lag_step = ( (double)(loop_length) ) / (boundary_num-1);
+//			for (int i =0 ; i<boundary_num; i++){
+//				lags[i] = start + (int)(lag_step * i );
+//				
+//			}
+//			for(int j =0 ; j<boundary_num ; j++){
+//				auto_corrs[j] = auto_correlation_internal(
+//							arr, length,lags[j], ave)/gamma_0;	
+//			}
+//			for (int j =0 ; j<box_num; j++){
+//				if(auto_corrs[j+1]<target_length){
+//					start = lags[j];
+//					//index = j;
+//					rho_final = auto_corrs[j];
+//					start_final = start;
+//					stop = lags[j+1];
+//					stop_final = stop;
+//					more_bins=false;
+//					break;
+//				}
+//			}
+//			if (more_bins) {
+//				std::cout<<"SAFETY "<<count<<" "<<box_num<<" "<<lag<< " "<<auto_corrs[boundary_num-1]<<std::endl;
+//				for(int j =0 ; j<boundary_num ; j++){
+//					std::cout<<auto_corrs[j]<<std::endl;	
+//				}
+//				//break;
+//				box_num +=5;
+//				if(final_length < 3*box_num){final_length*=2;}
+//					
+//			}
+//			more_bins = true;
+//			
+//		}
+//		//loop_length = stop-start;
+//		//rho = auto_corrs[index];
+//		rho = rho_final;
+//		lag = start_final;
+//		while (rho>target_length && lag<stop_final){
+//			lag ++;
+//			rho = auto_correlation_internal(arr, length, lag,ave)/gamma_0;
+//		}
+//		if(lag == lag_previous){
+//			success_iteration ++;
+//			box_num +=5;
+//			if(final_length < 3*box_num){final_length*=2;}
+//		}
+//		else{
+//			success_iteration = 0;
+//		}
+//	}	
+//	//std::cout<<rho<<std::endl;
+//	return lag;
+//}
+//
+///*! \brief Internal function to compute the auto correlation for a given lag
+// *
+// */
+//double auto_correlation_internal(double *arr, int length, int lag, double ave)
+//{
+//		double gamma_sum=0;
+//		for(int k=0;k<(length-lag);k++){
+//			gamma_sum += (arr[k+lag] - ave)*(arr[k]-ave);
+//		}
+//		return gamma_sum / (length-lag);
+//
+//}
+//
+///*! \brief Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence
+// * 
+// */
+//void auto_corr_intervals(double *data, /**<Input data */
+//			int length, /**< length of input data*/
+//			double *output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
+//			int num_segments, /**< number of segements to compute the auto-corr length*/
+//			double accuracy /**< longer chains are computed numerically, this specifies the tolerance*/
+//			)
+//{
+//	double stepsize = (double)length/num_segments;
+//	int lengths[num_segments];
+//	for (int i =0; i<num_segments;i++)
+//		lengths[i]=(int)(stepsize*(1. + i));
+//	double *temp = (double *)malloc(sizeof(double)*length);		
+//	for(int l =0; l<num_segments; l++){
+//		for(int j =0; j< lengths[l]; j++){
+//			temp[j] = data[j];
+//		}
+//		//output[l]=auto_correlation(data,lengths[l], accuracy);
+//		output[l]=auto_correlation_serial(data,lengths[l]);
+//		//output[l]=auto_correlation_grid_search(data,lengths[l], 10, 100, .01);
+//	}
+//	free(temp);
+//	
+//}
+//
+//void write_auto_corr_file_from_data(std::string auto_corr_filename, 
+//				double **output,
+//				int intervals, 
+//				int dimension, 
+//				int N_steps)
+//{
+//	double **ac = allocate_2D_array(dimension+1, intervals);
+//	//First row is the step size for the given auto-corr length
+//	double stepsize = (double)N_steps/intervals;
+//	for (int i =0 ; i<intervals; i++)
+//		ac[0][i] = (int)(stepsize*(1.+i));
+//	
+//	#pragma omp parallel for 
+//	for (int i = 0 ; i< dimension; i++)
+//	{
+//		auto_corr_intervals(output[i],N_steps, ac[i+1], intervals, 0.01);
+//	}	
+//
+//	write_file(auto_corr_filename, ac, dimension+1, intervals);
+//
+//	deallocate_2D_array(ac,dimension+1, intervals);
+//}
+//
+//void write_auto_corr_file_from_data_file(std::string auto_corr_filename, 
+//				std::string output_file,
+//				int intervals, 
+//				int dimension, 
+//				int N_steps)
+//{
+//	double **output = allocate_2D_array(N_steps,dimension);
+//	read_file(output_file,output, N_steps, dimension);
+//	double **temp = (double **) malloc(sizeof(double*)*N_steps);
+//	for (int i = 0 ; i< dimension; i++){
+//		temp[i] = (double *)malloc(sizeof(double)*N_steps);
+//		for(int j =0; j< N_steps; j++){
+//			temp[i][j] = output[j][i];
+//		}
+//	}
+//	write_auto_corr_file_from_data(auto_corr_filename, temp, intervals, dimension, N_steps);
+//	
+//
+//	deallocate_2D_array(output,N_steps,dimension);
+//	for (int i = 0 ; i< dimension; i++){
+//		free(temp[i]);
+//	}
+//	free(temp);
+//}
 
 void write_stat_file(sampler *sampler, 
 		std::string filename, 

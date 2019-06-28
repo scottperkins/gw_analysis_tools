@@ -1,5 +1,5 @@
-#include "cuda_utilities.h"
-#include "cuda_utilities.hu"
+#include "autocorrelation_cuda.h"
+#include "autocorrelation_cuda.hu"
 #include "util.h"
 #include <iostream>
 #include <condition_variable>
@@ -9,6 +9,8 @@
 #include <mutex>
 #include <unistd.h>
 #include <threadPool.h>
+#include <cufft.h>
+
 
 /*! \file
  */
@@ -323,3 +325,142 @@ void copy_data_to_device(GPUplan *plan, /**< GPU plan*/
 	cudaFreeHost(data_lengths);
 	
 }
+
+
+
+/*! \brief Faster approximation of the autocorrelation of a chain. Implements FFT/IFFT -- GPU accelerated
+ *
+ * Based on the Wiener-Khinchin Theorem.
+ *
+ * Algorithm used from https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/
+ *
+ */
+//void auto_correlation_spectral_accel(double *chain, int length, double *autocorr)
+//{
+//
+//	//Normalize
+//	double *x_cent = (double *)malloc(sizeof(double)*length);
+//	//Calculate Average
+//	double ave = 0;
+//	for(int i =0; i<length; i++)
+//		ave+= chain[i];
+//	ave /= length;
+//	
+//	//Create normalized vector
+//	for(int i = 0 ; i<length; i++){
+//		x_cent[i] = chain[i]-ave;
+//	}
+//
+//	//Padded length
+//	int L = pow(2, std::ceil( std::log2(length) ) );	
+//
+//	//Padded Vector
+//	double *x_pad = (double *)malloc(sizeof(double)*L);
+//
+//	//Copy centered vector
+//	for(int i = 0 ; i < length; i++){
+//		x_pad[i] = x_cent[i];
+//	}
+//
+//	//Add padding
+//	for(int i = length ; i < L; i++){
+//		x_pad[i] = 0;
+//	}
+//
+//	//Allocate FFTW3 memory
+//	double *norm = (double *)malloc(sizeof(double)*L);
+//	std::complex<double> *out_host = (std::complex<double> *)malloc(sizeof(std::complex<double>)*L);
+//	//fftw_outline plan;
+//	//cufftHandle plan; 
+//	cufftReal *in;
+//	cufftComplex *out;
+//	int batch = 1;
+//	
+//	cudaMalloc((void **) &in, sizeof(cfftReal)*L*batch);
+//	cudaMalloc((void **) &out, sizeof(cfftComplex)*L*batch);
+//	cufftPlan1d(&plan, L, CUFFT D2Z, batch); 
+//	cufftExecD2Z(plan, in, data, CUFFT FORWARD);
+//	cudaMemcpy(out_host,out, sizeof(std::complex<double>)*L, cudaMemcpyDeviceToHost);
+//	cufftDestroy(plan); 
+//	cudaFree(in);
+//	cudaFree(out);
+//	//initiate_likelihood_function(&plan, L);
+//	//
+//	//fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+//	//fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+//	//for(int i =0 ; i<L; i++){
+//	//	in[i][0] = x_pad[i];
+//	//	in[i][1] = 0;
+//	//}
+//
+//	////Execute Forward Transform
+//	//fftw_execute_dft(plan.p, in, out);
+//
+//	//Take norm^2 of the output
+//	for(int i =0 ; i<L; i++){
+//		double re = std::real(out_host[i]);
+//		double im = std::imag(out_host[i]);
+//		norm[i] = re*re + im*im;
+//	}
+//	//Execute Reverse Transform
+//	fftw_outline plan_inv;
+//	allocate_FFTW3_mem_inverse(&plan_inv, L);
+//	for(int i =0 ; i<L; i++){
+//		in[i][0] = norm[i];
+//		in[i][1] = 0;
+//	}
+//	fftw_execute_dft(plan_inv.p, in, out);
+//	
+//	//acov is the result
+//	double *acov = (double *)malloc(sizeof(double)*length);
+//	for(int i =0 ; i< length; i++){
+//		acov[i] = out[i][0];	
+//	}
+//
+//	//adjust the cov
+//	double *mask = (double *)malloc(sizeof(double)*L);
+//	//first length elements are 1
+//	for(int i = 0 ; i < length; i++){
+//		mask[i]=1;
+//	}
+//	// last L-length elements are 0
+//	for(int i = length ; i < L; i++){
+//		mask[i]=0;
+//	}
+//	for(int i =0 ; i<L; i++){
+//		in[i][0] = mask[i];
+//		in[i][1] = 0;
+//	}
+//
+//	//execute fft
+//	fftw_execute_dft(plan.p, in ,out);
+//	
+//	//output vector -- will be trimmed to length
+//	double *normadj = (double *)malloc(sizeof(double)*length);
+//	//trimmed output
+//	for(int i =0 ; i< length; i++){
+//		normadj[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
+//	}
+//	
+//	//adjust the cov vector
+//	//for(int i =0 ; i<length ; i++){
+//	//	acov[i]/=normadj[i];
+//	//}
+//	
+//	double var = acov[0];
+//
+//	for(int i = 0 ; i< length; i++)
+//		autocorr[i] = acov[i]/var;
+//
+//	//Free memory
+//	deactivate_likelihood_function(&plan);
+//	deactivate_likelihood_function(&plan_inv);
+//	free(norm);
+//	free(out_host);
+//	free(mask);
+//	free(normadj);
+//	fftw_free(in);
+//	fftw_free(out);
+//	free(x_cent);
+//	free(x_pad);
+//}

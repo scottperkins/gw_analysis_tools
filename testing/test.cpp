@@ -4,6 +4,7 @@
 #include <complex>
 #include <string>
 #include "waveform_generator.h"
+#include "autocorrelation.h"
 #include "IMRPhenomD.h"
 #include "mcmc_gw.h"
 #include "mcmc_sampler_internals.h"
@@ -23,12 +24,11 @@
 #include "adolc/taping.h"
 #include "limits"
 
-#include "cuda_utilities.h"
+#include "autocorrelation_cuda.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
-
 
 using namespace std;
 
@@ -55,6 +55,8 @@ void test19();
 void test20();
 void test21();
 void test22();
+void test23();
+void test24();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -81,12 +83,94 @@ static double *psd=NULL;
 
 int main(){
 
-	test22();	
+	test24();	
 	return 0;
 }
 
+void test24()
+{
+	//std::string data_file = "testing/data/mcmc_output_DFull.csv";
+	//int length =50000;
+	//int dim =8;
+	std::string data_file = "testing/data/mcmc_output_dCS.csv";
+	int length =750000;
+	int dim =9;
+	int segs = 10;
+	double **data=allocate_2D_array(length, dim);
+	read_file(data_file, data, length, dim);
+	int **ac=(int **)malloc(sizeof(int *)*dim);
+	for(int i =0 ; i<dim; i++){
+		ac[i]=(int *)malloc(sizeof(int)*length);
+	}
+	double accuracy = .1;
+	int num_threads = 10;
+	double wstart, wend;
+	wstart = omp_get_wtime();
+	auto_corr_from_data(data, length, dim, ac, segs, accuracy, num_threads);
+	wend = omp_get_wtime();
+	std::cout<<"DONE: TIME: "<<wend-wstart<<std::endl;
+	for(int i =0 ; i<dim; i++){
+		for(int j = 0; j<segs; j++){
+			std::cout<<ac[i][j]<<std::endl;
+		}
+	}
+	deallocate_2D_array(data, length, dim);
+	for(int i =0; i<dim; i++)
+		free(ac[i]);
+	free(ac);
+}
+void test23()
+{
+
+	int length = 750000;
+	//int length = 40000;
+	int dimension = 9;
+	//int dimension = 7;
+	std::string filename = "testing/data/mcmc_output_dCS.csv";
+	//std::string filename = "testing/data/mcmc_output_7dim.csv";
+	double *chain = (double *)malloc(sizeof(double)*length);
+	double *ac = (double *)malloc(sizeof(double)*length);
+	double **output = allocate_2D_array(length, dimension);
+	read_file(filename, output, length, dimension);
+	clock_t start, stop;
+	for(int i =0; i< length; i++){
+		chain[i] = output[i][0];
+	}
+	fftw_outline plan_forw;
+	fftw_outline plan_rev;
+	initiate_likelihood_function(&plan_forw, pow(2, std::ceil( std::log2(length))));
+	allocate_FFTW3_mem_inverse(&plan_rev, pow(2, std::ceil( std::log2(length))));
+	start = clock();
+	auto_correlation_spectral(chain, length, ac, &plan_forw, &plan_rev);
+	stop = clock();
+	std::cout<<"Spectral method timing: "<<(double)(stop-start)/CLOCKS_PER_SEC<<std::endl;
+	deactivate_likelihood_function(&plan_forw);
+	deactivate_likelihood_function(&plan_rev);
+	for(int i =1; i<length; i++)
+	{
+		if(ac[i]<.01){
+			std::cout<<i<<std::endl;
+			std::cout<<ac[i]<<std::endl;
+			break;
+		}
+	}
+	start = clock();
+	int lag_serial = auto_correlation_serial_old(chain, length);
+	stop = clock();
+	std::cout<<"old method timing: "<<(double)(stop-start)/CLOCKS_PER_SEC<<std::endl;
+	std::cout<<lag_serial<<std::endl;
+
+	deallocate_2D_array(output,length, dimension);
+	free(chain);
+	free(ac);
+
+
+}
 void test22()
 {
+	#ifdef CUDA_ENABLED
+		std::cout<<"CUDA_ENABLED"<<std::endl;
+	#endif
 	//std::string outputfile = "testing/data/mcmc_output_dCS.csv";
 	std::string outputfile = "testing/data/mcmc_output_injection.csv";
 	//std::string outputfile = "testing/data/mcmc_output_DFull.csv";
@@ -115,7 +199,7 @@ void test22()
 	
 	//start = clock();
 	//write_file_auto_corr_from_data_accel(acfile, output,dimension,N_steps,segs,target_corr);
-	write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
+	//write_file_auto_corr_from_data_file_accel(acfile, outputfile,dimension,N_steps,segs,target_corr);
 	wend = omp_get_wtime();
 	//end = clock();
 	//cout<<"TIMING gpu: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;

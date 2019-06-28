@@ -1,5 +1,5 @@
-#ifndef CUDA_UTILITIES_HU
-#define CUDA_UTILITIES_HU
+#ifndef AUTOCORRELATION_CUDA_HU
+#define AUTOCORRELATION_CUDA_HU
 
 /*! \file
  *

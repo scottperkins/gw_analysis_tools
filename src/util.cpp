@@ -290,6 +290,15 @@ void initiate_likelihood_function(fftw_outline *plan, int length)
 	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_FORWARD, FFTW_MEASURE);
 }
+/*! \brief Allocate memory for FFTW3 methods used in a lot of inner products --INVERSE
+ * input is a locally defined structure that houses all the pertinent data
+ */
+void allocate_FFTW3_mem_inverse(fftw_outline *plan, int length)
+{
+	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_BACKWARD, FFTW_MEASURE);
+}
 /*!\brief deallocates the memory used for FFTW routines
  */
 void deactivate_likelihood_function(fftw_outline *plan)

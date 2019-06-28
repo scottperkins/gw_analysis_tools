@@ -1,5 +1,5 @@
-#ifndef CUDA_UTILITIES_H
-#define CUDA_UTILITIES_H
+#ifndef AUTOCORRELATION_CUDA_H
+#define AUTOCORRELATION_CUDA_H
 #include <string>
 
 /*!\file
@@ -27,5 +27,7 @@ void auto_corr_from_data_accel(double **output, int dimension, int N_steps, int 
 void launch_ac_gpu(int device, int element, double **data, int length, int dimension, double target_corr, int num_segments);
 
 void ac_gpu_wrapper(int thread, int job_id);
+
+void auto_correlation_spectral_accel(double *chains, int length, double *autocorr);
 #endif
 

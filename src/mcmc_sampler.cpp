@@ -1,4 +1,5 @@
 #include "mcmc_sampler.h"
+#include "autocorrelation.h"
 #include "util.h"
 #include "mcmc_sampler_internals.h"
 #include "threadPool.h"
