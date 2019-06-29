@@ -69,7 +69,12 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 		proposed_ll = sampler->ll(proposed_param, sampler->dimension,chain_number);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 		//Calculate MH ratio
-		MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
+		if(std::isnan(proposed_ll)){
+			MH_ratio = limit_inf;
+		}
+		else{
+			MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
+		}
 	}
 
 	int i;

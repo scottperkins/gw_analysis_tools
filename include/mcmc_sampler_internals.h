@@ -18,6 +18,7 @@
 /*! Structure storing everything that defines an instance of the sampler
  */
 const double limit_inf = -std::numeric_limits<double>::infinity();
+
 struct sampler
 {
 	int types_of_steps = 4;
