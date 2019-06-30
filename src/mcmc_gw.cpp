@@ -849,7 +849,8 @@ void MCMC_MH_GW(double ***output,
 		std::string generation_method,
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 					)
 {
 	//Create fftw plan for each detector (length of data stream may be different)
@@ -1078,7 +1079,7 @@ void MCMC_MH_GW(double ***output,
 	}
 	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
-		chain_filename,auto_corr_filename);
+		chain_filename,auto_corr_filename, checkpoint_file);
 	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)

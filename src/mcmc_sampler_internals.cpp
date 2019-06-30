@@ -1299,6 +1299,39 @@ void write_stat_file(sampler *sampler,
 			rejected_swp_fraction<<std::endl;
 	out_file.close();
 }
+/*! \brief Routine that writes metadata and final positions of a sampler to a checkpoint file
+ *
+ */
+void write_checkpoint_file(sampler *sampler, std::string filename)
+{
+	std::ofstream checkfile;
+	checkfile.open(filename);
+	checkfile.precision(15);
+	checkfile<<sampler->dimension<<" , "<<sampler->chain_N<<std::endl;//Dim, chain_N
+	//Chain temps
+	checkfile<<sampler->chain_temps[0];
+	for(int i =1 ; i<sampler->chain_N; i++){
+		checkfile<<" , "<<sampler->chain_temps[i];
+	}
+	checkfile<<std::endl;
+	//step widths
+	for(int i =0 ; i<sampler->chain_N; i++){
+		checkfile<<sampler->randgauss_width[i][0];
+		for(int j =1 ;j<sampler->types_of_steps; j++){
+			checkfile<<" , "<<sampler->randgauss_width[i][j];
+		}
+		checkfile<<std::endl;
+	}
+	//final position
+	for(int i =0 ; i< sampler->chain_N; i++){
+		int pos = sampler->chain_pos[i];
+		checkfile<<sampler->output[i][pos][0];
+		for(int j =1; j<sampler->dimension;j++){
+			checkfile<<" , "<<sampler->output[i][pos][j];
+		}
+		checkfile<<std::endl;
+	}
+}
 
 void assign_ct_p(sampler *sampler, int step, int chain_index)
 {

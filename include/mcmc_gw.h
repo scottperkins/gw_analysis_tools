@@ -210,7 +210,8 @@ void MCMC_MH_GW(double ***output,
 			std::string generation_method,
 			std::string statistics_filename,
 			std::string chain_filename,
-			std::string auto_corr_filename
+			std::string auto_corr_filename,
+			std::string checkpoint_filename
 			);
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;

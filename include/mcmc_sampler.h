@@ -5,9 +5,11 @@
 /*! \file 
  * Header file for mcmc_sampler
  */
-
+#include "mcmc_sampler_internals.h"
 void mcmc_step_threaded(int j);
 void mcmc_swap_threaded(int i, int j);
+
+void MCMC_MH_loop(sampler *sampler);
 
 void MCMC_MH(	double ***output, 
 		int dimension, 	
@@ -25,7 +27,8 @@ void MCMC_MH(	double ***output,
 		bool show_prog,
 		std::string statistics_filename,
 		std::string chain_filename,
-		std::string auto_corr_filename
+		std::string auto_corr_filename,
+		std::string checkpoint_filename
 		);
 void MCMC_MH(	double ***output, 
 		int dimension, 	
@@ -43,7 +46,8 @@ void MCMC_MH(	double ***output,
 		bool show_prog,
 		std::string statistics_filename,
 		std::string chain_filename,
-		std::string auto_corr_filename
+		std::string auto_corr_filename,
+		std::string checkpoint_filename
 		);
 void MCMC_MH_internal(	double ***output, 
 		int dimension, 	
@@ -64,6 +68,7 @@ void MCMC_MH_internal(	double ***output,
 		bool show_prog,
 		std::string statistics_filename,
 		std::string chain_filename,
-		std::string auto_corr_filename
+		std::string auto_corr_filename,
+		std::string checkpoint_filename
 		);
 #endif

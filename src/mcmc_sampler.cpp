@@ -224,6 +224,16 @@ ThreadPool *poolptr;
  * .
  *
  * Statistics_filename : should be txt extension
+ *
+ * checkpoint_file : This file saves the final position of all the chains, as well as other metadata, and can be loaded by the function <FUNCTION> to continue the chain from the point it left off. Not meant to be read by humans, the data order is custom to this software library. An empty string ("") means no checkpoint will be saved. For developers, the contents are:
+ *
+ * dimension, # of chains
+ *
+ * temps of chains
+ *
+ * Stepping widths of all chains
+ *
+ * Final position of all chains
  */
 void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 		int dimension, 	/**< dimension of the parameter space being explored*/
@@ -241,7 +251,8 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 		)
 {
 	//seeding_var = NULL;	
@@ -250,81 +261,85 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	start = clock();
 	wstart = omp_get_wtime();
 	//int numThread = 20;
-	omp_set_num_threads(numThreads);
+	//omp_set_num_threads(numThreads);
 
 	sampler sampler;
+	samplerptr = &sampler;
+	//samplerptr = (sampler *)malloc(sizeof(sampler));
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		sampler.fisher_exist = false;
+		samplerptr->fisher_exist = false;
 	}
 	else 
-		sampler.fisher_exist = true;
+		samplerptr->fisher_exist = true;
 	
 	
 	//Construct sampler structure
-	sampler.lp = log_prior;
-	sampler.ll = log_likelihood;
-	sampler.fish = fisher;
-	sampler.swp_freq = swp_freq;
-	sampler.chain_temps = chain_temps;
-	sampler.chain_N = chain_N;
-	sampler.N_steps = N_steps;
-	sampler.dimension = dimension;
+	samplerptr->lp = log_prior;
+	samplerptr->ll = log_likelihood;
+	samplerptr->fish = fisher;
+	samplerptr->swp_freq = swp_freq;
+	samplerptr->chain_temps = chain_temps;
+	samplerptr->chain_N = chain_N;
+	samplerptr->N_steps = N_steps;
+	samplerptr->dimension = dimension;
+	samplerptr->show_progress = show_prog;
+	samplerptr->num_threads = numThreads;
 
 	//NOTE: currently, update the history every step until length is 
 	//reached, then the history is updated every 20th step, always only
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
-	sampler.history_length = 500;
-	sampler.history_update = 5;
+	samplerptr->history_length = 500;
+	samplerptr->history_update = 5;
 	//Number of steps to take with the fisher before updating the fisher 
 	//to a new value 
 	//NOTE: if this is too low, detailed balance isn't maintained without 
 	//accounting for the changing fisher (doesn't cancel in MH ratio)
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
-	sampler.fisher_update_number = 200;
+	samplerptr->fisher_update_number = 200;
 
-	sampler.output = output;
-	sampler.pool = pool;
-	sampler.numThreads = numThreads;
+	samplerptr->output = output;
+	samplerptr->pool = pool;
+	samplerptr->numThreads = numThreads;
 
-	allocate_sampler_mem(&sampler);
+	allocate_sampler_mem(samplerptr);
 
 	//########################################################
 	//########################################################
 	//Set chain 0 to highest priority
-	sampler.priority[0] = 0;
+	samplerptr->priority[0] = 0;
 	//########################################################
 	//########################################################
 
-	for (int chain_index; chain_index<sampler.chain_N; chain_index++)
-		assign_probabilities(&sampler, chain_index);
+	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
+		assign_probabilities(samplerptr, chain_index);
 	
 
 	int  k=0;
-	int swp_accepted=0, swp_rejected=0;
-	int *step_accepted = (int *)malloc(sizeof(int)*sampler.chain_N);
-	int *step_rejected = (int *)malloc(sizeof(int)*sampler.chain_N);
+	//int swp_accepted=0, swp_rejected=0;
+	int *step_accepted = (int *)malloc(sizeof(int)*samplerptr->chain_N);
+	int *step_rejected = (int *)malloc(sizeof(int)*samplerptr->chain_N);
 	
-	samplerptr = &sampler;
+	//samplerptr = &sampler;
 	//Assign initial position to start chains
 	//Currently, just set all chains to same initial position
 	if(!seeding_var){ 
-		for (int j=0;j<sampler.chain_N;j++){
-			sampler.de_primed[j]=false;
-			for (int i = 0; i<sampler.dimension; i++)
+		for (int j=0;j<samplerptr->chain_N;j++){
+			samplerptr->de_primed[j]=false;
+			for (int i = 0; i<samplerptr->dimension; i++)
 			{
 				//Only doing this last loop because there is sometimes ~5 elements 
 				//not initialized on the end of the output, which screw up plotting
-				for(int l =0; l<N_steps; l++)
-					output[j][l][i] = initial_pos[i];
+				for(int l =0; l<samplerptr->N_steps; l++)
+					samplerptr->output[j][l][i] = initial_pos[i];
 				
 			}
-			sampler.current_likelihoods[j] =
-				 sampler.ll(output[j][0],sampler.dimension, j)/sampler.chain_temps[j];
+			samplerptr->current_likelihoods[j] =
+				 samplerptr->ll(output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
 			step_accepted[j]=0;
 			step_rejected[j]=0;
 		}
@@ -333,140 +348,147 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	else{
 		int attempts = 0;
 		int max_attempts = 10;
-		double temp_pos[dimension];
-		for (int j=0;j<sampler.chain_N;j++){
-			sampler.de_primed[j]=false;
+		double temp_pos[samplerptr->dimension];
+		for (int j=0;j<samplerptr->chain_N;j++){
+			samplerptr->de_primed[j]=false;
 			if(j == 0){
-				for (int i = 0; i<sampler.dimension; i++)
+				for (int i = 0; i<samplerptr->dimension; i++)
 				{
 				//Only doing this last loop because there is sometimes ~5 elements 
 				//not initialized on the end of the output, which screw up plotting
-					for(int l =0; l<N_steps; l++)
-						output[j][l][i] = initial_pos[i];
+					for(int l =0; l<samplerptr->N_steps; l++)
+						samplerptr->output[j][l][i] = initial_pos[i];
 				}
 			}
 			else{
 				do{
-					for(int i =0; i<sampler.dimension; i++){
-						temp_pos[i] = gsl_ran_gaussian(sampler.rvec[j],seeding_var[i]) + initial_pos[i];
+					for(int i =0; i<samplerptr->dimension; i++){
+						temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
 					}
 					attempts+=1;
-				}while(sampler.lp(temp_pos, dimension,j) == limit_inf && attempts<max_attempts);
+				}while(samplerptr->lp(temp_pos, samplerptr->dimension,j) == limit_inf && attempts<max_attempts);
 				attempts =0;
-				if(sampler.lp(temp_pos, dimension,j) != limit_inf ){
-					for(int i =0; i<sampler.dimension;i++){
-						for(int l =0; l<N_steps; l++)
-							output[j][l][i] = temp_pos[i];
+				if(samplerptr->lp(temp_pos, samplerptr->dimension,j) != limit_inf ){
+					for(int i =0; i<samplerptr->dimension;i++){
+						for(int l =0; l<samplerptr->N_steps; l++)
+							samplerptr->output[j][l][i] = temp_pos[i];
 					}
 				}
 				else{
-					for(int i =0; i<sampler.dimension;i++){
-						for(int l =0; l<N_steps; l++)
-							output[j][l][i] = initial_pos[i];
+					for(int i =0; i<samplerptr->dimension;i++){
+						for(int l =0; l<samplerptr->N_steps; l++)
+							samplerptr->output[j][l][i] = initial_pos[i];
 					}
 			
 				}
 			}
 			
-			sampler.current_likelihoods[j] =
-				 sampler.ll(output[j][0],sampler.dimension, j)/sampler.chain_temps[j];
+			samplerptr->current_likelihoods[j] =
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
 			step_accepted[j]=0;
 			step_rejected[j]=0;
 		}
 	}
 
 		
-	
-	int cutoff ;
-	//Sampler Loop - ``Deterministic'' swapping between chains
-	if (!samplerptr->pool)
-	{
-		#pragma omp parallel 
-		{
-		while (k<N_steps-1){
-			#pragma omp single
-			{
-			if( N_steps-k <= sampler.swp_freq) cutoff = N_steps-k-1;	
-			else cutoff = sampler.swp_freq;	
-			}
-			#pragma omp for
-			for (int j=0; j<chain_N; j++)
-			{
-				for (int i = 0 ; i< cutoff;i++)
-				{
-					int success;
-					success = mcmc_step(&sampler, output[j][k+i], output[j][k+i+1],j);	
-					sampler.chain_pos[j]+=1;
-					if(success==1){step_accepted[j]+=1;}
-					else{step_rejected[j]+=1;}
-					if(!sampler.de_primed[j])
-						update_history(&sampler,output[j][k+i+1], j);
-					else if(sampler.chain_pos[j]%sampler.history_update==0)
-						update_history(&sampler,output[j][k+i+1], j);
-				}
-				if(!sampler.de_primed[j]) 
-				{
-					if ((k+cutoff)>sampler.history_length)
-					{
-						sampler.de_primed[j]=true;
-						assign_probabilities(&sampler,j);	
-					}
-				}
-			}
-			#pragma omp single
-			{
-			k+= cutoff;
-			chain_swap(&sampler, output, k, &swp_accepted, &swp_rejected);
-			if(show_prog)
-				printProgress((double)k/N_steps);	
-			}
-		}
-		}
-	}
+	MCMC_MH_loop(samplerptr);	
+	//int cutoff ;
+	////Sampler Loop - ``Deterministic'' swapping between chains
+	//if (!samplerptr->pool)
+	//{
+	//	#pragma omp parallel 
+	//	{
+	//	while (k<samplerptr->N_steps-1){
+	//		#pragma omp single
+	//		{
+	//			if( samplerptr->N_steps-k <= samplerptr->swp_freq) 
+	//				cutoff = samplerptr->N_steps-k-1;	
+	//			else cutoff = samplerptr->swp_freq;	
+	//		}
+	//		#pragma omp for
+	//		for (int j=0; j<samplerptr->chain_N; j++)
+	//		{
+	//			for (int i = 0 ; i< cutoff;i++)
+	//			{
+	//				int success;
+	//				success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
+	//				samplerptr->chain_pos[j]+=1;
+	//				//if(success==1){step_accepted[j]+=1;}
+	//				//else{step_rejected[j]+=1;}
+	//				if(success==1){samplerptr->step_accept_ct[j]+=1;}
+	//				else{samplerptr->step_reject_ct[j]+=1;}
+	//				if(!samplerptr->de_primed[j])
+	//					update_history(samplerptr,output[j][k+i+1], j);
+	//				else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
+	//					update_history(samplerptr,output[j][k+i+1], j);
+	//			}
+	//			if(!samplerptr->de_primed[j]) 
+	//			{
+	//				if ((k+cutoff)>samplerptr->history_length)
+	//				{
+	//					samplerptr->de_primed[j]=true;
+	//					assign_probabilities(samplerptr,j);	
+	//				}
+	//			}
+	//		}
+	//		#pragma omp single
+	//		{
+	//			k+= cutoff;
+	//			int swp_accepted=0, swp_rejected=0;
+	//			chain_swap(samplerptr, output, k, &swp_accepted, &swp_rejected);
+	//			samplerptr->swap_accept_ct+=swp_accepted;
+	//			samplerptr->swap_reject_ct+=swp_rejected;
+	//			if(show_prog)
+	//				printProgress((double)k/samplerptr->N_steps);	
+	//		}
+	//	}
+	//	}
+	//}
 
-	//POOLING  -- ``Stochastic'' swapping between chains
-	else
-	{
-		ThreadPool pool(numThreads);
-		poolptr = &pool;
-		while(samplerptr->progress<N_steps-samplerptr->swp_freq-2)
-		{
-			for(int i =0; i<samplerptr->chain_N; i++)
-			{
-				if(samplerptr->waiting[i]){
-					if(samplerptr->chain_pos[i]<(N_steps-samplerptr->swp_freq -1))
-					{
-						samplerptr->waiting[i]=false;
-						if(i==0) samplerptr->progress+=samplerptr->swp_freq;
-						poolptr->enqueue(i);
-					}
-					//If a chain finishes before chain 0, it's wrapped around 
-					//and allowed to keep stepping at low priority-- 
-					//not sure if this is the best
-					//method for keeping the 0th chain from finishing last or not
-					else if(i !=0){
+	////POOLING  -- ``Stochastic'' swapping between chains
+	//else
+	//{
+	//	ThreadPool pool(numThreads);
+	//	poolptr = &pool;
+	//	while(samplerptr->progress<N_steps-1)
+	//	{
+	//		for(int i =0; i<samplerptr->chain_N; i++)
+	//		{
+	//			if(samplerptr->waiting[i]){
+	//				if(samplerptr->chain_pos[i]<(samplerptr->N_steps-1))
+	//				{
+	//					samplerptr->waiting[i]=false;
+	//					//if(i==0) samplerptr->progress+=samplerptr->swp_freq;
+	//					poolptr->enqueue(i);
+	//				}
+	//				//If a chain finishes before chain 0, it's wrapped around 
+	//				//and allowed to keep stepping at low priority-- 
+	//				//not sure if this is the best
+	//				//method for keeping the 0th chain from finishing last or not
+	//				else if(i !=0){
 
-						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
-						samplerptr->waiting[i]=false;
-						samplerptr->priority[i] = 2;
-						int pos = samplerptr->chain_pos[i];
-						for (int k =0; k<samplerptr->dimension; k++){
-							samplerptr->output[i][0][k] = 
-								samplerptr->output[i][pos][k] ;
-						}
-						samplerptr->chain_pos[i] = 0;
+	//					samplerptr->waiting[i]=false;
+	//					std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+	//					samplerptr->priority[i] = 2;
+	//					int pos = samplerptr->chain_pos[i];
+	//					for (int k =0; k<samplerptr->dimension; k++){
+	//						samplerptr->output[i][0][k] = 
+	//							samplerptr->output[i][pos][k] ;
+	//					}
+	//					samplerptr->chain_pos[i] = 0;
 
-						poolptr->enqueue(i);
-					}
-				}
-				
-			}
-			if(show_prog)
-				printProgress((double)samplerptr->progress/N_steps);
-			//usleep(300);
-		}
-	}
+	//					poolptr->enqueue(i);
+	//				}
+	//			}
+	//			
+	//		}
+	//		if(show_prog)
+	//			printProgress((double)samplerptr->progress/samplerptr->N_steps);
+	//		//usleep(300);
+	//	}
+	//}
 	//##############################################################
+	int swp_accepted=0, swp_rejected=0;
 	for (int i =0;i<samplerptr->chain_N; i++)
 	{
 		swp_accepted+=samplerptr->swap_accept_ct[i];
@@ -477,24 +499,25 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	end =clock();
 	wend =omp_get_wtime();
 
-	sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
-	sampler.time_elapsed_wall = (double)(wend-wstart);
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
 
 	
 	//###########################################################
 	//Auto-correlation
+	std::cout<<"Calculating Autocorrelation: "<<std::endl;
 	if(auto_corr_filename != ""){
 		//Transpose the data for auto-correlation
-		double **temp = (double **) malloc(sizeof(double*)*N_steps);
-		for (int i = 0 ; i< sampler.dimension; i++){
-			temp[i] = (double *)malloc(sizeof(double)*N_steps);
-			for(int j =0; j< N_steps; j++){
+		double **temp = (double **) malloc(sizeof(double*)*samplerptr->N_steps);
+		for (int i = 0 ; i< samplerptr->dimension; i++){
+			temp[i] = (double *)malloc(sizeof(double)*samplerptr->N_steps);
+			for(int j =0; j< samplerptr->N_steps; j++){
 				temp[i][j] = output[0][j][i];
 			}
 		}
 		int segments = 50;
-		write_auto_corr_file_from_data(auto_corr_filename, temp, segments, sampler.dimension, N_steps);
-		for (int i = 0 ; i< sampler.dimension; i++){
+		write_auto_corr_file_from_data(auto_corr_filename, temp, segments, samplerptr->dimension, samplerptr->N_steps);
+		for (int i = 0 ; i< samplerptr->dimension; i++){
 			free(temp[i]);
 		}
 		free(temp);
@@ -502,8 +525,8 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	//###########################################################
 	acend =clock();
 	wacend =omp_get_wtime();
-	sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
-	sampler.time_elapsed_wall_ac = (double)(wacend - wend);
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
 
 	std::cout<<std::endl;
 	double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
@@ -520,23 +543,129 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
 	
 	if(statistics_filename != "")
-		write_stat_file(&sampler, statistics_filename, step_accepted, step_rejected,
+		write_stat_file(samplerptr, statistics_filename, step_accepted, step_rejected,
 				swp_accepted, swp_rejected);	
 	
 	if(chain_filename != "")
-		write_file(chain_filename, output[0], N_steps,sampler.dimension);
+		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
 
+	if(checkpoint_file !=""){
+		write_checkpoint_file(samplerptr, checkpoint_file);
+	}
 
 	free(step_accepted);
 	free(step_rejected);
-	deallocate_sampler_mem(&sampler);
+	deallocate_sampler_mem(samplerptr);
+}
+
+void MCMC_MH_loop(sampler *sampler)
+{
+	int k =0;
+	int cutoff ;
+	//Sampler Loop - ``Deterministic'' swapping between chains
+	if (!sampler->pool)
+	{
+		omp_set_num_threads(samplerptr->num_threads);
+		#pragma omp parallel 
+		{
+		while (k<sampler->N_steps-1){
+			#pragma omp single
+			{
+				if( sampler->N_steps-k <= sampler->swp_freq) 
+					cutoff = sampler->N_steps-k-1;	
+				else cutoff = sampler->swp_freq;	
+			}
+			#pragma omp for
+			for (int j=0; j<sampler->chain_N; j++)
+			{
+				for (int i = 0 ; i< cutoff;i++)
+				{
+					int success;
+					success = mcmc_step(sampler, sampler->output[j][k+i], sampler->output[j][k+i+1],j);	
+					sampler->chain_pos[j]+=1;
+					//if(success==1){step_accepted[j]+=1;}
+					//else{step_rejected[j]+=1;}
+					if(success==1){sampler->step_accept_ct[j]+=1;}
+					else{sampler->step_reject_ct[j]+=1;}
+					if(!sampler->de_primed[j])
+						update_history(sampler,sampler->output[j][k+i+1], j);
+					else if(sampler->chain_pos[j]%sampler->history_update==0)
+						update_history(sampler,sampler->output[j][k+i+1], j);
+				}
+				if(!sampler->de_primed[j]) 
+				{
+					if ((k+cutoff)>sampler->history_length)
+					{
+						sampler->de_primed[j]=true;
+						assign_probabilities(sampler,j);	
+					}
+				}
+			}
+			#pragma omp single
+			{
+				k+= cutoff;
+				int swp_accepted=0, swp_rejected=0;
+				chain_swap(sampler, sampler->output, k, &swp_accepted, &swp_rejected);
+				sampler->swap_accept_ct+=swp_accepted;
+				sampler->swap_reject_ct+=swp_rejected;
+				if(sampler->show_progress)
+					printProgress((double)k/sampler->N_steps);	
+			}
+		}
+		}
+	}
+
+	//POOLING  -- ``Stochastic'' swapping between chains
+	else
+	{
+		ThreadPool pool(sampler->num_threads);
+		poolptr = &pool;
+		while(sampler->progress<sampler->N_steps-1)
+		{
+			for(int i =0; i<sampler->chain_N; i++)
+			{
+				if(sampler->waiting[i]){
+					if(sampler->chain_pos[i]<(sampler->N_steps-1))
+					{
+						sampler->waiting[i]=false;
+						//if(i==0) samplerptr->progress+=samplerptr->swp_freq;
+						poolptr->enqueue(i);
+					}
+					//If a chain finishes before chain 0, it's wrapped around 
+					//and allowed to keep stepping at low priority-- 
+					//not sure if this is the best
+					//method for keeping the 0th chain from finishing last or not
+					else if(i !=0){
+
+						sampler->waiting[i]=false;
+						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+						sampler->priority[i] = 2;
+						int pos = sampler->chain_pos[i];
+						for (int k =0; k<sampler->dimension; k++){
+							sampler->output[i][0][k] = 
+								sampler->output[i][pos][k] ;
+						}
+						sampler->chain_pos[i] = 0;
+
+						poolptr->enqueue(i);
+					}
+				}
+				
+			}
+			if(sampler->show_progress)
+				printProgress((double)sampler->progress/sampler->N_steps);
+			//usleep(300);
+		}
+	}
 }
 
 
 void mcmc_step_threaded(int j)
 {
 	int k = samplerptr->chain_pos[j];
-	int cutoff = samplerptr->swp_freq;
+	int cutoff;
+	if( samplerptr->N_steps-k <= samplerptr->swp_freq) cutoff = samplerptr->N_steps-k-1;	
+	else cutoff = samplerptr->swp_freq;	
 	for (int i = 0 ; i< cutoff;i++)
 	{
 		int success;
@@ -557,6 +686,7 @@ void mcmc_step_threaded(int j)
 		}
 	}
 	samplerptr->chain_pos[j]+=cutoff;
+	if(j==0) samplerptr->progress+=cutoff;
 
 	//update stepsize to maximize step efficiency
 	//increases in stepsizes of 10%
@@ -642,7 +772,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 		)
 {
 	auto ll = [&log_likelihood](double *param, int dim, int chain_id){
@@ -658,7 +789,7 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	
 	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
-			statistics_filename, chain_filename, auto_corr_filename);
+			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
 }
 void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 		int dimension, 	/**< dimension of the parameter space being explored*/
@@ -676,7 +807,8 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 		)
 {
 	std::function<double(double*,int,int)> lp = log_prior;
@@ -684,5 +816,5 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	std::function<void(double*,int,double**,int)>f = fisher;
 	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
-			statistics_filename, chain_filename, auto_corr_filename);
+			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
 }

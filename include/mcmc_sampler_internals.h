@@ -38,6 +38,8 @@ struct sampler
 	double ***output;
 	bool pool;
 	int progress=0;
+	bool show_progress;
+	int num_threads;
 
 	int history_length;
 	int history_update;
@@ -121,6 +123,7 @@ void deallocate_sampler_mem(sampler *sampler);
 
 void update_history(sampler *sampler, double *new_params, int chain_index);
 
+
 //void auto_correlation_spectral(double *chain, int length, double *autocorr);
 //
 //double auto_correlation(double *arr, int length, double tolerance);
@@ -138,6 +141,8 @@ void update_history(sampler *sampler, double *new_params, int chain_index);
 //void write_auto_corr_file_from_data_file(std::string autocorr_filename, std::string output_file,int intervals, int dimension, int N_steps);
 
 void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
+
+void write_checkpoint_file(sampler *sampler, std::string filename);
 
 void assign_ct_p(sampler *sampler, int step, int chain_index);
 void assign_ct_m(sampler *sampler, int step, int chain_index);
