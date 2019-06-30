@@ -236,36 +236,32 @@ ThreadPool *poolptr;
  * Final position of all chains
  */
 void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
-		int dimension, 	/**< dimension of the parameter space being explored*/
-		int N_steps,	/**< Number of total steps to be taken, per chain*/
-		int chain_N,	/**< Number of chains*/
-		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
-		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
-		double *chain_temps,	/**<Double array of temperatures for the chains*/
-		int swp_freq,	/**< the frequency with which chains are swapped*/
-		std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
-		std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
-		std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
-		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
-		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
-		)
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain*/
+	int chain_N,	/**< Number of chains*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps,	/**<Double array of temperatures for the chains*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
 {
-	//seeding_var = NULL;	
 	clock_t start, end, acend;
 	double wstart, wend, wacend;
 	start = clock();
 	wstart = omp_get_wtime();
-	//int numThread = 20;
-	//omp_set_num_threads(numThreads);
 
 	sampler sampler;
 	samplerptr = &sampler;
-	//samplerptr = (sampler *)malloc(sizeof(sampler));
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
@@ -392,101 +388,6 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 
 		
 	MCMC_MH_loop(samplerptr);	
-	//int cutoff ;
-	////Sampler Loop - ``Deterministic'' swapping between chains
-	//if (!samplerptr->pool)
-	//{
-	//	#pragma omp parallel 
-	//	{
-	//	while (k<samplerptr->N_steps-1){
-	//		#pragma omp single
-	//		{
-	//			if( samplerptr->N_steps-k <= samplerptr->swp_freq) 
-	//				cutoff = samplerptr->N_steps-k-1;	
-	//			else cutoff = samplerptr->swp_freq;	
-	//		}
-	//		#pragma omp for
-	//		for (int j=0; j<samplerptr->chain_N; j++)
-	//		{
-	//			for (int i = 0 ; i< cutoff;i++)
-	//			{
-	//				int success;
-	//				success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
-	//				samplerptr->chain_pos[j]+=1;
-	//				//if(success==1){step_accepted[j]+=1;}
-	//				//else{step_rejected[j]+=1;}
-	//				if(success==1){samplerptr->step_accept_ct[j]+=1;}
-	//				else{samplerptr->step_reject_ct[j]+=1;}
-	//				if(!samplerptr->de_primed[j])
-	//					update_history(samplerptr,output[j][k+i+1], j);
-	//				else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
-	//					update_history(samplerptr,output[j][k+i+1], j);
-	//			}
-	//			if(!samplerptr->de_primed[j]) 
-	//			{
-	//				if ((k+cutoff)>samplerptr->history_length)
-	//				{
-	//					samplerptr->de_primed[j]=true;
-	//					assign_probabilities(samplerptr,j);	
-	//				}
-	//			}
-	//		}
-	//		#pragma omp single
-	//		{
-	//			k+= cutoff;
-	//			int swp_accepted=0, swp_rejected=0;
-	//			chain_swap(samplerptr, output, k, &swp_accepted, &swp_rejected);
-	//			samplerptr->swap_accept_ct+=swp_accepted;
-	//			samplerptr->swap_reject_ct+=swp_rejected;
-	//			if(show_prog)
-	//				printProgress((double)k/samplerptr->N_steps);	
-	//		}
-	//	}
-	//	}
-	//}
-
-	////POOLING  -- ``Stochastic'' swapping between chains
-	//else
-	//{
-	//	ThreadPool pool(numThreads);
-	//	poolptr = &pool;
-	//	while(samplerptr->progress<N_steps-1)
-	//	{
-	//		for(int i =0; i<samplerptr->chain_N; i++)
-	//		{
-	//			if(samplerptr->waiting[i]){
-	//				if(samplerptr->chain_pos[i]<(samplerptr->N_steps-1))
-	//				{
-	//					samplerptr->waiting[i]=false;
-	//					//if(i==0) samplerptr->progress+=samplerptr->swp_freq;
-	//					poolptr->enqueue(i);
-	//				}
-	//				//If a chain finishes before chain 0, it's wrapped around 
-	//				//and allowed to keep stepping at low priority-- 
-	//				//not sure if this is the best
-	//				//method for keeping the 0th chain from finishing last or not
-	//				else if(i !=0){
-
-	//					samplerptr->waiting[i]=false;
-	//					std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
-	//					samplerptr->priority[i] = 2;
-	//					int pos = samplerptr->chain_pos[i];
-	//					for (int k =0; k<samplerptr->dimension; k++){
-	//						samplerptr->output[i][0][k] = 
-	//							samplerptr->output[i][pos][k] ;
-	//					}
-	//					samplerptr->chain_pos[i] = 0;
-
-	//					poolptr->enqueue(i);
-	//				}
-	//			}
-	//			
-	//		}
-	//		if(show_prog)
-	//			printProgress((double)samplerptr->progress/samplerptr->N_steps);
-	//		//usleep(300);
-	//	}
-	//}
 	//##############################################################
 	int swp_accepted=0, swp_rejected=0;
 	for (int i =0;i<samplerptr->chain_N; i++)
@@ -502,25 +403,15 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
 	samplerptr->time_elapsed_wall = (double)(wend-wstart);
 
+	std::cout<<std::endl;
 	
 	//###########################################################
 	//Auto-correlation
-	std::cout<<"Calculating Autocorrelation: "<<std::endl;
 	if(auto_corr_filename != ""){
-		//Transpose the data for auto-correlation
-		double **temp = (double **) malloc(sizeof(double*)*samplerptr->N_steps);
-		for (int i = 0 ; i< samplerptr->dimension; i++){
-			temp[i] = (double *)malloc(sizeof(double)*samplerptr->N_steps);
-			for(int j =0; j< samplerptr->N_steps; j++){
-				temp[i][j] = output[0][j][i];
-			}
-		}
+		std::cout<<"Calculating Autocorrelation: "<<std::endl;
 		int segments = 50;
-		write_auto_corr_file_from_data(auto_corr_filename, temp, segments, samplerptr->dimension, samplerptr->N_steps);
-		for (int i = 0 ; i< samplerptr->dimension; i++){
-			free(temp[i]);
-		}
-		free(temp);
+		double target_corr = .01;
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads);
 	}
 	//###########################################################
 	acend =clock();
@@ -543,8 +434,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
 	
 	if(statistics_filename != "")
-		write_stat_file(samplerptr, statistics_filename, step_accepted, step_rejected,
-				swp_accepted, swp_rejected);	
+		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != "")
 		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
@@ -558,6 +448,159 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	deallocate_sampler_mem(samplerptr);
 }
 
+/*! \brief Routine to take a checkpoint file and begin a new chain at said checkpoint
+ *
+ * See MCMC_MH_internal for more details of parameters (pretty much all the same)
+ */
+void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+
+	sampler sampler;
+	samplerptr = &sampler;
+
+	//if Fisher is not provided, Fisher and MALA steps
+	//aren't used
+	if(fisher ==NULL){
+		samplerptr->fisher_exist = false;
+	}
+	else 
+		samplerptr->fisher_exist = true;
+	
+	
+	//Construct sampler structure
+	samplerptr->lp = log_prior;
+	samplerptr->ll = log_likelihood;
+	samplerptr->fish = fisher;
+	samplerptr->swp_freq = swp_freq;
+	samplerptr->N_steps = N_steps;
+	samplerptr->show_progress = show_prog;
+	samplerptr->num_threads = numThreads;
+
+	//NOTE: currently, update the history every step until length is 
+	//reached, then the history is updated every 20th step, always only
+	//keeping history of length history_length (overwrites the list as 
+	//it walks forward when it reaches the end)
+	samplerptr->history_length = 500;
+	samplerptr->history_update = 5;
+	//Number of steps to take with the fisher before updating the fisher 
+	//to a new value 
+	//NOTE: if this is too low, detailed balance isn't maintained without 
+	//accounting for the changing fisher (doesn't cancel in MH ratio)
+	//but if the number is high enough, detailed balance is approximately 
+	//kept without calculating second fisher
+	samplerptr->fisher_update_number = 200;
+
+	samplerptr->output = output;
+	samplerptr->pool = pool;
+
+	//Unpack checkpoint file -- allocates memory internally -- separate call unneccessary
+	load_checkpoint_file(start_checkpoint_file, samplerptr);
+
+
+	//allocate other parameters
+	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
+		assign_probabilities(samplerptr, chain_index);
+	for (int j=0;j<samplerptr->chain_N;j++){
+		samplerptr->de_primed[j]=false;
+		samplerptr->current_likelihoods[j] =
+			 samplerptr->ll(output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+		//step_accepted[j]=0;
+		//step_rejected[j]=0;
+	}
+	
+	//########################################################
+	//########################################################
+	//Set chain 0 to highest priority
+	samplerptr->priority[0] = 0;
+	//########################################################
+	
+	//########################################################
+	MCMC_MH_loop(samplerptr);	
+	//##############################################################
+	
+	//int swp_accepted=0, swp_rejected=0;
+	//for (int i =0;i<samplerptr->chain_N; i++)
+	//{
+	//	swp_accepted+=samplerptr->swap_accept_ct[i];
+	//	swp_rejected+=samplerptr->swap_reject_ct[i];
+	//	step_accepted[i]+=samplerptr->step_accept_ct[i];
+	//	step_rejected[i]+=samplerptr->step_reject_ct[i];
+	//}
+	end =clock();
+	wend =omp_get_wtime();
+
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
+
+	std::cout<<std::endl;
+	
+	//###########################################################
+	//Auto-correlation
+	if(auto_corr_filename != ""){
+		std::cout<<"Calculating Autocorrelation: "<<std::endl;
+		int segments = 50;
+		double target_corr = .01;
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads);
+	}
+	//###########################################################
+	acend =clock();
+	wacend =omp_get_wtime();
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
+
+	//std::cout<<std::endl;
+	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
+	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
+	//std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of chain swaps (all chains): "<<rejected_percent<<std::endl;
+	//accepted_percent = (double)(step_accepted[0])/(step_accepted[0]+step_rejected[0]);
+	//rejected_percent = (double)(step_rejected[0])/(step_accepted[0]+step_rejected[0]);
+	//std::cout<<"Accepted percentage of steps (cold chain): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of steps (cold chain): "<<rejected_percent<<std::endl;
+	//double nansum=0;
+	//for (int i =0; i< chain_N; i++)
+	//	nansum+= samplerptr->nan_counter[i];
+	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
+	
+	if(statistics_filename != "")
+		write_stat_file(samplerptr, statistics_filename);
+	
+	if(chain_filename != "")
+		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
+
+	if(end_checkpoint_file !=""){
+		write_checkpoint_file(samplerptr, end_checkpoint_file);
+	}
+
+	//free(step_accepted);
+	//free(step_rejected);
+	//temps usually allocated by user, but for continued chains, this is done internally
+	free(samplerptr->chain_temps);
+	deallocate_sampler_mem(samplerptr);
+}
+					
+
+/*!\brief Internal function that runs the actual loop for the sampler
+ *
+ */
 void MCMC_MH_loop(sampler *sampler)
 {
 	int k =0;
@@ -565,7 +608,7 @@ void MCMC_MH_loop(sampler *sampler)
 	//Sampler Loop - ``Deterministic'' swapping between chains
 	if (!sampler->pool)
 	{
-		omp_set_num_threads(samplerptr->num_threads);
+		omp_set_num_threads(sampler->num_threads);
 		#pragma omp parallel 
 		{
 		while (k<sampler->N_steps-1){
@@ -757,24 +800,24 @@ void mcmc_swap_threaded(int i, int j)
 	samplerptr->waiting[j]=true;
 }
 void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
-		int dimension, 	/**< dimension of the parameter space being explored*/
-		int N_steps,	/**< Number of total steps to be taken, per chain*/
-		int chain_N,	/**< Number of chains*/
-		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
-		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
-		double *chain_temps,	/**<Double array of temperatures for the chains*/
-		int swp_freq,	/**< the frequency with which chains are swapped*/
-		double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
-		double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
-		void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
-		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
-		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
-		)
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain*/
+	int chain_N,	/**< Number of chains*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps,	/**<Double array of temperatures for the chains*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
 {
 	auto ll = [&log_likelihood](double *param, int dim, int chain_id){
 		return log_likelihood(param, dim);};
@@ -792,24 +835,24 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
 }
 void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
-		int dimension, 	/**< dimension of the parameter space being explored*/
-		int N_steps,	/**< Number of total steps to be taken, per chain*/
-		int chain_N,	/**< Number of chains*/
-		double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
-		double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
-		double *chain_temps,	/**<Double array of temperatures for the chains*/
-		int swp_freq,	/**< the frequency with which chains are swapped*/
-		double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
-		double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
-		void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
-		int numThreads, /**< Number of threads to use (=1 is single threaded)*/
-		bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-		bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
-		)
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain*/
+	int chain_N,	/**< Number of chains*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps,	/**<Double array of temperatures for the chains*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
 {
 	std::function<double(double*,int,int)> lp = log_prior;
 	std::function<double(double*,int,int)> ll = log_likelihood;
@@ -817,4 +860,81 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
+}
+void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+
+	std::function<double(double*,int,int)> lp = log_prior;
+	std::function<double(double*,int,int)> ll = log_likelihood;
+	std::function<void(double*,int,double**,int)>f = fisher;
+	continue_MCMC_MH_internal(start_checkpoint_file,
+			output,
+			N_steps,
+			swp_freq,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			auto_corr_filename,
+			end_checkpoint_file);
+}
+void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+
+	auto ll = [&log_likelihood](double *param, int dim, int chain_id){
+		return log_likelihood(param, dim);};
+
+	auto lp = [&log_prior](double *param, int dim, int chain_id){
+		return log_prior(param, dim);};
+	std::function<void(double*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm);};
+	}
+	continue_MCMC_MH_internal(start_checkpoint_file,
+			output,
+			N_steps,
+			swp_freq,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			auto_corr_filename,
+			end_checkpoint_file);
 }

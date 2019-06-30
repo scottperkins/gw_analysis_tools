@@ -12,7 +12,15 @@ import corner
 #plt.close()
 #plt.hist(data,bins=100,density=True)
 #x = np.linspace(-3,3)
-data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',')
+data_sets = []
+numsets =2
+for i in np.arange(numsets):
+    data_sets.append(  np.loadtxt("data/neil_mcmc_output{}.csv".format(i+1),delimiter=','))
+combined_data = []
+for x in data_sets:
+    for y in x:
+        combined_data.append(y)
+data = np.asarray(combined_data)
 ndim, nsamples = 2, len(data) 
 labels = [r"x",r"y"]
 
@@ -24,13 +32,13 @@ plt.savefig("neil_mcmc_testing.pdf")
 plt.close()
 
 
-autocorr = np.loadtxt("data/neil_auto_corr_mcmc.csv",delimiter=',')
-lengths = autocorr[0]
-autocorr = autocorr[1:]
-for i in autocorr:
-    plt.plot(lengths,i)
-plt.savefig("neil_autocorr_testing.pdf")
-plt.close()
+#autocorr = np.loadtxt("data/neil_auto_corr_mcmc.csv",delimiter=',')
+#lengths = autocorr[0]
+#autocorr = autocorr[1:]
+#for i in autocorr:
+#    plt.plot(lengths,i)
+#plt.savefig("neil_autocorr_testing.pdf")
+#plt.close()
 
 
 

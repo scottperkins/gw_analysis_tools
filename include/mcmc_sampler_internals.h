@@ -140,9 +140,12 @@ void update_history(sampler *sampler, double *new_params, int chain_index);
 //
 //void write_auto_corr_file_from_data_file(std::string autocorr_filename, std::string output_file,int intervals, int dimension, int N_steps);
 
-void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
+//void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
+void write_stat_file(sampler *sampler, std::string filename);
 
 void write_checkpoint_file(sampler *sampler, std::string filename);
+
+void load_checkpoint_file(std::string check_file, sampler *sampler);
 
 void assign_ct_p(sampler *sampler, int step, int chain_index);
 void assign_ct_m(sampler *sampler, int step, int chain_index);

@@ -57,6 +57,7 @@ void test21();
 void test22();
 void test23();
 void test24();
+void test25();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -83,41 +84,65 @@ static double *psd=NULL;
 
 int main(){
 
-	test7();	
+	test25();	
 	return 0;
 }
 
+void test25()
+{
+	std::string start_checkfile = "testing/data/neil_mcmc_checkpoint.csv";
+	int N_steps = 50010;
+	int dimension =2;
+	int chain_N = 10;
+	double ***output;
+	output = allocate_3D_array( chain_N, N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 3;
+	std::string autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
+	//std::string autocorrfile = "";
+	std::string chainfile = "testing/data/neil_mcmc_output2.csv";
+	std::string statfilename = "testing/data/neil_mcmc_statistics2.txt";
+	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint2.csv";
+	
+	int numThreads = 10;
+	bool pool = true;
+	
+	continue_MCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
+	std::cout<<"ENDED"<<std::endl;
+}
 void test24()
 {
 	//std::string data_file = "testing/data/mcmc_output_DFull.csv";
 	//int length =50000;
 	//int dim =8;
-	std::string data_file = "testing/data/mcmc_output_dCS.csv";
-	int length =750000;
-	int dim =9;
+	std::string data_file = "testing/data/mcmc_output_7dim.csv";
+	std::string acfile = "testing/data/auto_corr_mcmc_7dim_fft.csv";
+	int length =40000;
+	int dim =7;
 	int segs = 50;
 	double **data=allocate_2D_array(length, dim);
 	read_file(data_file, data, length, dim);
-	int **ac=(int **)malloc(sizeof(int *)*dim);
-	for(int i =0 ; i<dim; i++){
-		ac[i]=(int *)malloc(sizeof(int)*length);
-	}
+	//int **ac=(int **)malloc(sizeof(int *)*dim);
+	//for(int i =0 ; i<dim; i++){
+	//	ac[i]=(int *)malloc(sizeof(int)*length);
+	//}
 	double accuracy = .01;
 	int num_threads = 10;
 	double wstart, wend;
 	wstart = omp_get_wtime();
-	auto_corr_from_data(data, length, dim, ac, segs, accuracy, num_threads);
+	//auto_corr_from_data(data, length, dim, ac, segs, accuracy, num_threads);
+	write_auto_corr_file_from_data(acfile, data, length, dim, segs, accuracy, num_threads);
 	wend = omp_get_wtime();
 	std::cout<<"DONE: TIME: "<<wend-wstart<<std::endl;
-	for(int i =0 ; i<dim; i++){
-		for(int j = 0; j<segs; j++){
-			std::cout<<ac[i][j]<<std::endl;
-		}
-	}
+	//for(int i =0 ; i<dim; i++){
+	//	for(int j = 0; j<segs; j++){
+	//		std::cout<<ac[i][j]<<std::endl;
+	//	}
+	//}
 	deallocate_2D_array(data, length, dim);
-	for(int i =0; i<dim; i++)
-		free(ac[i]);
-	free(ac);
+	//for(int i =0; i<dim; i++)
+	//	free(ac[i]);
+	//free(ac);
 }
 void test23()
 {
@@ -858,8 +883,8 @@ void test16()
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 20000;
-	int chain_N= 4;
+	int n_steps = 100;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -2321,7 +2346,7 @@ void test7()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 100001;
+	int N_steps = 50100;
 	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -2336,9 +2361,9 @@ void test7()
 		//chain_temps[i]=1.;
 		chain_temps[i] =  chain_temps[i-1] * c;
 	//double chain_temps[chain_N] ={1};
-	//std::string autocorrfile = "testing/data/neil_auto_corr_mcmc.csv";
-	std::string autocorrfile = "";
-	std::string chainfile = "testing/data/neil_mcmc_output.csv";
+	std::string autocorrfile = "testing/data/neil_auto_corr_mcmc.csv";
+	//std::string autocorrfile = "";
+	std::string chainfile = "testing/data/neil_mcmc_output1.csv";
 	std::string statfilename = "testing/data/neil_mcmc_statistics.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint.csv";
 	

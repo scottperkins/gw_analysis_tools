@@ -3,6 +3,12 @@
 #include <string>
 #include "util.h"
 
+/*! \file 
+ *
+ * Autocorrelation header file
+ *
+ */
+
 /*! \brief Class to contain spectral method jobs
  */
 class threaded_ac_jobs_fft
@@ -63,7 +69,8 @@ public:
 		else{ return true;}
 	}	
 };
-void auto_corr_from_data(double **data, int length, int dimension, int **output, int num_segments,  double accuracy, int num_threads);
+void write_auto_corr_file_from_data(std::string autocorr_filename,double **data,int length, int dimension, int num_segments,double target_corr, int num_threads);
+void auto_corr_from_data(double **data, int length, int dimension, int **output, int num_segments,  double target_corr, int num_threads);
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job);
 void threaded_ac_serial(int thread, threaded_ac_jobs_serial job);
 double auto_correlation_serial(double *arr, int length, int start, double target);

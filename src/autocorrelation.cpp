@@ -11,14 +11,56 @@
  * Turns out calculating the autocorrelation is more complicated if you want to do it fast, so it gets its own file now
  */
 
+void write_auto_corr_file_from_data(std::string autocorr_filename,
+				double **data,
+				int length, /**< length of input data*/
+				int dimension, /**< dimension of data*/
+				int num_segments, /**< number of segements to compute the auto-corr length*/
+				double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
+				int num_threads /**< Total number of threads to use*/
+				)
+{
+	double **autocorrout= allocate_2D_array(dimension+1, num_segments);//double just because thats what my internal functions are written for (write_file)
+	int **autocorr= (int **)malloc(sizeof(int *)*dimension);
+	for(int i =0 ; i<dimension; i++)
+		autocorr[i] = (int *)malloc(sizeof(int)*num_segments);
 
+	auto_corr_from_data(data, length, dimension, autocorr, 	
+			num_segments, target_corr, num_threads);
 
+	int step = length/(num_segments);
+	for(int i; i<num_segments; i++){
+		autocorrout[0][i] = (i+1)*step;	
+	}
+
+	for(int i =0 ; i<dimension; i++){
+		for(int j =0 ; j<num_segments; j++){
+			autocorrout[i+1][j] = autocorr[i][j];
+		}
+	}
+	
+	write_file(autocorr_filename, autocorrout, dimension+1, num_segments);
+
+	for(int i =0 ; i<dimension; i++){
+		free(autocorr[i]);
+	}
+	free(autocorr);
+	deallocate_2D_array(autocorrout, dimension+1, num_segments);
+}
+				
+
+/*! \brief Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes FFTW3 for longer chuncks of the chains
+ *
+ * Takes in the data from a sampler, shape data[N_steps][dimension]
+ *
+ * Outputs lags that correspond to the target_corr -- shape output[dimension][num_segments]
+ */
 void auto_corr_from_data(double **data, /**<Input data */
 			int length, /**< length of input data*/
 			int dimension, /**< dimension of data*/
 			int **output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
 			int num_segments, /**< number of segements to compute the auto-corr length*/
-			double accuracy, /**< longer chains are computed numerically, this specifies the tolerance*/
+			double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
 			int num_threads /**< Total number of threads to use*/
 			)
 {
@@ -114,7 +156,7 @@ void auto_corr_from_data(double **data, /**<Input data */
 					if(lengths[i]<=MAX_SERIAL){
 						jobs_s[j*num_segments + i].data = data_transpose;
 						jobs_s[j*num_segments + i].length = &lengths[i];
-						jobs_s[j*num_segments + i].target = &accuracy;		
+						jobs_s[j*num_segments + i].target = &target_corr;		
 						jobs_s[j*num_segments + i].dimension = j;		
 						jobs_s[j*num_segments + i].lag = &output[j][i];
 						serial_jobs.enqueue(jobs_s[j*num_segments + i]);
@@ -137,7 +179,7 @@ void auto_corr_from_data(double **data, /**<Input data */
 				if(lengths[i]>MAX_SERIAL){
 					jobs_f[j*num_segments + i].data = data_transpose;
 					jobs_f[j*num_segments + i].length = &lengths[i];
-					jobs_f[j*num_segments + i].target = &accuracy;		
+					jobs_f[j*num_segments + i].target = &target_corr;		
 					jobs_f[j*num_segments + i].dimension = j;		
 					jobs_f[j*num_segments + i].lag = &output[j][i];
 					jobs_f[j*num_segments + i].planforward = &plans_forward[i];

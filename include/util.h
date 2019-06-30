@@ -292,7 +292,9 @@ void allocate_FFTW3_mem_inverse(fftw_outline *plan,int length);
 void deactivate_likelihood_function(fftw_outline *plan);
 
 double** allocate_2D_array( int dim1, int dim2);
+//int** allocate_2D_array( int dim1, int dim2);
 void deallocate_2D_array(double **array, int dim1, int dim2);
+//void deallocate_2D_array(int **array, int dim1, int dim2);
 double*** allocate_3D_array( int dim1, int dim2, int dim3);
 
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3);

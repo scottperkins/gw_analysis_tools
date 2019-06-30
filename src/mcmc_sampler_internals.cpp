@@ -1,15 +1,17 @@
 #include "mcmc_sampler_internals.h"
+#include "autocorrelation.h"
+#include "util.h"
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <math.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <eigen3/Eigen/Eigen>
-#include "util.h"
 #include <limits>
 #include <iomanip>
 #include <fftw3.h>
-#include "autocorrelation.h"
+#include <stdio.h>
 
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
@@ -995,13 +997,23 @@ void update_history(sampler *sampler, double *new_params, int chain_index)
 //}
 
 void write_stat_file(sampler *sampler, 
-		std::string filename, 
-		int *accepted_steps,
-		int *rejected_steps,
-		int accepted_swps, 
-		int rejected_swps
+		std::string filename
+		//int *accepted_steps,
+		//int *rejected_steps,
+		//int accepted_swps, 
+		//int rejected_swps
 		)
 {
+	int rejected_swps=0, accepted_swps=0;
+	int *accepted_steps=(int *)malloc(sizeof(int)*sampler->chain_N);
+	int *rejected_steps=(int *)malloc(sizeof(int)*sampler->chain_N);
+	for (int i =0;i<sampler->chain_N; i++)
+	{
+		accepted_swps+=sampler->swap_accept_ct[i];
+		rejected_swps+=sampler->swap_reject_ct[i];
+		accepted_steps[i]+=sampler->step_accept_ct[i];
+		rejected_steps[i]+=sampler->step_reject_ct[i];
+	}
 	double total_swps= accepted_swps + rejected_swps;
 	double accepted_swp_fraction = (double)accepted_swps/(total_swps);		
 	double rejected_swp_fraction = (double)rejected_swps/(total_swps);		
@@ -1038,7 +1050,7 @@ void write_stat_file(sampler *sampler,
 		std::setw(fourth)<<std::left<<
 		"Threads/Stochastic: "<<
 		std::setw(fourth)<<std::left<<
-		sampler->numThreads<<" / "<<sampler->pool<<
+		sampler->num_threads<<" / "<<sampler->pool<<
 		std::endl;
 	out_file<<
 		std::setw(fourth)<<std::left<<
@@ -1298,6 +1310,7 @@ void write_stat_file(sampler *sampler,
 			<<std::setw(fourth)<<"Rejected fraction: "<<std::setw(fourth)<< 
 			rejected_swp_fraction<<std::endl;
 	out_file.close();
+	free(accepted_steps);free(rejected_steps);
 }
 /*! \brief Routine that writes metadata and final positions of a sampler to a checkpoint file
  *
@@ -1331,6 +1344,75 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 		}
 		checkfile<<std::endl;
 	}
+}
+
+/*! \brief load checkpoint file into sampler struct
+ *
+ * *NOTE* -- allocate_sampler called in function -- MUST deallocate manually
+ *
+ * *NOTE* -- sampler->chain_temps allocated internally -- MUST free manually
+ */
+void load_checkpoint_file(std::string check_file,sampler *sampler)
+{
+	std::fstream file_in;
+	file_in.open(check_file, std::ios::in);
+	std::string line;
+	std::string item;
+	int i;
+	if(file_in){
+		//First row -- dim, chain_N
+		std::getline(file_in,line);
+		std::stringstream lineStream(line);
+		std::getline(lineStream, item, ',');
+		sampler->dimension = std::stod(item);
+		std::getline(lineStream, item, ',');
+		sampler->chain_N = std::stod(item);
+		//std::cout<<sampler->dimension<<" "<<sampler->chain_N<<std::endl;
+
+		//Second Row -- temps
+		std::getline(file_in,line);
+		std::stringstream lineStreamtemps(line);
+		sampler->chain_temps = (double *)malloc(sizeof(double)*sampler->chain_N);
+		i=0;
+		while(std::getline(lineStreamtemps, item, ',')){
+			sampler->chain_temps[i] = std::stod(item);
+			//std::cout<<sampler->chain_temps[i]<<std::endl;
+			i++;
+		}
+		
+		//###################################
+		//Allocate memory, now we have initial parameters
+		allocate_sampler_mem(sampler);
+		//###################################
+
+		//third row+chain_N -- step widths
+		for(int j =0 ;j<sampler->chain_N; j++){
+			i=0;
+			std::getline(file_in,line);
+			std::stringstream lineStreamwidths(line);
+			while(std::getline(lineStreamwidths, item, ',')){
+				sampler->randgauss_width[j][i] = std::stod(item);
+				//std::cout<<sampler->randgauss_width[j][i]<<std::endl;
+				i++;
+			}
+		}
+
+		//row 3 +chain_N  to 3+2 chain_N-- initial positions
+		for(int j =0 ;j<sampler->chain_N; j++){
+			i=0;
+			std::getline(file_in,line);
+			std::stringstream lineStreampos(line);
+			while(std::getline(lineStreampos, item, ',')){
+				sampler->output[j][0][i] = std::stod(item);
+				//std::cout<<sampler->output[j][0][i]<<std::endl;
+				i++;
+			}
+		}
+	
+		//exit(1);
+		
+	}
+	else{std::cout<<"ERROR -- File "<<check_file<<" not found"<<std::endl; exit(1);}
 }
 
 void assign_ct_p(sampler *sampler, int step, int chain_index)

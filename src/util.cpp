@@ -527,6 +527,15 @@ double** allocate_2D_array( int dim1, int dim2)
 	}
 	return array;
 }
+//int** allocate_2D_array( int dim1, int dim2)
+//{
+//	int **array = (int **) malloc(sizeof(int*)*dim1);
+//	for (int i = 0; i<dim1; i ++)
+//	{
+//		array[i] = (int*)malloc(sizeof(int ) * dim2);
+//	}
+//	return array;
+//}
 
 /*! \brief Utility to free malloc'd 2D array
  * 
@@ -539,6 +548,14 @@ void deallocate_2D_array(double **array, int dim1, int dim2)
 	}
 	free(array);
 }
+//void deallocate_2D_array(int **array, int dim1, int dim2)
+//{
+//	for(int i =0; i < dim1; i++)
+//	{
+//		free(array[i]);
+//	}
+//	free(array);
+//}
 /*! \brief Utility to malloc 3D array
  * 
  */
