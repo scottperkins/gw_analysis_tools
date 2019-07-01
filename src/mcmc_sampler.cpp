@@ -335,7 +335,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 				
 			}
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
 			step_accepted[j]=0;
 			step_rejected[j]=0;
 		}
@@ -519,9 +519,9 @@ void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for s
 	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
 		assign_probabilities(samplerptr, chain_index);
 	for (int j=0;j<samplerptr->chain_N;j++){
-		samplerptr->de_primed[j]=false;
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+		//std::cout<<samplerptr->current_likelihoods[j]<<std::endl;
 		//step_accepted[j]=0;
 		//step_rejected[j]=0;
 	}

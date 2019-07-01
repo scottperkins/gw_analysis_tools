@@ -28,6 +28,13 @@ Cython
 Required non-standard packages for documentation:
 Doxygen
 
+\section dev Current Development
+NOTE: currently using static parameters to share data between threads for mcmc_gw.cpp. This could cause issues when running multiple samplers at the same time. Investigating further.
+
+To do: 
+
+Change MCMC_MH to use the more general threadPool class instead of a custom threadpool, incorporate job class and comparator
+
 \section installation Installation
 For proper compilation, update or create the enviornment variables CPATH, LIBRARY_PATH,and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries. 
 

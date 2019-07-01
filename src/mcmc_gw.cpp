@@ -813,6 +813,8 @@ double Log_Likelihood_internal(std::complex<double> *data,
  *
  * Handles the details of setting up the MCMC sampler and wraps the fisher and log likelihood to conform to the format of the sampler
  *
+ * *NOTE*  -- This sampler is NOT thread safe. There is global memory declared for each call to MCMC_MH_GW, so separate samplers should not be run in the same process space
+ *
  * Supported parameter combinations:
  *
  * IMRPhenomD - 4 dimensions -- ln chirpmass, eta, chi1, chi2
@@ -872,11 +874,87 @@ void MCMC_MH_GW(double ***output,
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
-	bool local_seeding = false;
+	bool local_seeding ;
+	if(!seeding_var)
+		local_seeding = true;
+	else
+		local_seeding = false;
+	MCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+
+	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
+		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
+		chain_filename,auto_corr_filename, checkpoint_file);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deactivate_likelihood_function(&plans[i]);
+	free(plans);
+	if(local_seeding){ delete [] seeding_var;}
+}
+void continue_MCMC_MH_GW(std::string start_checkpoint_file,
+			double ***output,
+			int dimension,
+			int N_steps,
+			int swp_freq,
+			double(*log_prior)(double *param, int dimension, int chain_id),
+			int numThreads,
+			bool pool,
+			bool show_prog,
+			int num_detectors,
+			std::complex<double> **data,
+			double **noise_psd,
+			double **frequencies,
+			int *data_length,
+			double gps_time,
+			std::string *detectors,
+			int Nmod,
+			int *bppe,
+			std::string generation_method,
+			std::string statistics_filename,
+			std::string chain_filename,
+			std::string auto_corr_filename,
+			std::string final_checkpoint_filename
+			)
+{
+
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		initiate_likelihood_function(&plans[i] , data_length[i]);
+	}
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_generation_method = generation_method;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_Nmod = Nmod;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
+	bool local_seeding=false ;
+	MCMC_method_specific_prep(generation_method, dimension, NULL, local_seeding);
+
+	continue_MCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
+			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
+			show_prog,statistics_filename,chain_filename,
+			auto_corr_filename, final_checkpoint_filename);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deactivate_likelihood_function(&plans[i]);
+	free(plans);
+}
+
+void MCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding)
+{
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.5;
 			seeding_var[1]=.1;
@@ -887,8 +965,7 @@ void MCMC_MH_GW(double ***output,
 	}
 	else if(dimension==7 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln DL, tc, phic, ln chirpmass, eta, chi1, chi2"<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1;
 			seeding_var[1]=.1;
@@ -901,8 +978,7 @@ void MCMC_MH_GW(double ***output,
 	}
 	else if(dimension==8 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
 			seeding_var[1]=.1;
@@ -917,8 +993,7 @@ void MCMC_MH_GW(double ***output,
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD_log"){
 		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, ln alpha^2 "<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
 			seeding_var[1]=.1;
@@ -935,8 +1010,7 @@ void MCMC_MH_GW(double ***output,
 	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD_log"){
 		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, ln alpha^2 "<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
 			seeding_var[1]=.1;
@@ -953,8 +1027,7 @@ void MCMC_MH_GW(double ***output,
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD"){
 		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
 			seeding_var[1]=.1;
@@ -970,8 +1043,7 @@ void MCMC_MH_GW(double ***output,
 	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD"){
 		mcmc_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
 			seeding_var[1]=.1;
@@ -987,8 +1059,7 @@ void MCMC_MH_GW(double ***output,
 	else if(dimension==9 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=true;
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
-		if(!seeding_var){
-			local_seeding=true;
+		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
 			seeding_var[1]=.5;
@@ -1022,8 +1093,7 @@ void MCMC_MH_GW(double ***output,
 				}
 			}
 			std::cout<<endl;
-			if(!seeding_var){
-				local_seeding=true;
+			if(local_seeding){
 				seeding_var = new double[dimension];
 				seeding_var[0]=.1;
 				seeding_var[1]=.1;
@@ -1054,8 +1124,7 @@ void MCMC_MH_GW(double ***output,
 				}
 			}
 			std::cout<<endl;
-			if(!seeding_var){
-				local_seeding=true;
+			if(local_seeding){
 				seeding_var = new double[dimension];
 				seeding_var[0]=.1;
 				seeding_var[1]=.1;
@@ -1077,15 +1146,6 @@ void MCMC_MH_GW(double ***output,
 			"Input parameters not valid, please check that input is compatible with the supported methods - dimension combinations"<<std::endl;
 		exit(1);
 	}
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
-		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
-		chain_filename,auto_corr_filename, checkpoint_file);
-	
-	//Deallocate fftw plans
-	for (int i =0;i<num_detectors;i++)
-		deactivate_likelihood_function(&plans[i]);
-	free(plans);
-	if(local_seeding){ delete [] seeding_var;}
 }
 
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id)

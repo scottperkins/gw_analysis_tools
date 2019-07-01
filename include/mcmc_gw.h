@@ -213,6 +213,31 @@ void MCMC_MH_GW(double ***output,
 			std::string auto_corr_filename,
 			std::string checkpoint_filename
 			);
+void continue_MCMC_MH_GW(std::string start_checkpoint_file,
+			double ***output,
+			int dimension,
+			int N_steps,
+			int swp_freq,
+			double(*log_prior)(double *param, int dimension, int chain_id),
+			int numThreads,
+			bool pool,
+			bool show_prog,
+			int num_detectors,
+			std::complex<double> **data,
+			double **noise_psd,
+			double **frequencies,
+			int *data_length,
+			double gps_time,
+			std::string *detector,
+			int Nmod,
+			int *bppe,
+			std::string generation_method,
+			std::string statistics_filename,
+			std::string chain_filename,
+			std::string auto_corr_filename,
+			std::string final_checkpoint_filename
+			);
+void MCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
 #endif
