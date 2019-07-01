@@ -13,7 +13,7 @@ import corner
 #plt.hist(data,bins=100,density=True)
 #x = np.linspace(-3,3)
 data_sets = []
-numsets =2
+numsets =3
 for i in np.arange(numsets):
     data_sets.append(  np.loadtxt("data/neil_mcmc_output{}.csv".format(i+1),delimiter=','))
 combined_data = []
@@ -23,6 +23,12 @@ for x in data_sets:
 data = np.asarray(combined_data)
 ndim, nsamples = 2, len(data) 
 labels = [r"x",r"y"]
+
+for i in np.arange(2):
+    parameter = [x[i] for x in data]
+    plt.plot(parameter)
+    plt.show()
+    plt.close()
 
 #for x in data:
 #    x[0] = abs(x[0])

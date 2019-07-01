@@ -7,7 +7,7 @@ from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
 burnin = False
 burninlength = 50000
 datasets = []
-numsets = 4
+numsets = 7
 for i in np.arange(numsets):
     datasets.append( np.loadtxt("data/mcmc_output_EdGB{}.csv".format(i+1),delimiter=','))
 data = []

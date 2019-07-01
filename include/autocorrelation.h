@@ -69,6 +69,7 @@ public:
 		else{ return true;}
 	}	
 };
+void write_auto_corr_file_from_data_file(std::string autocorr_filename,std::string datafile,int length, int dimension, int num_segments,double target_corr, int num_threads);
 void write_auto_corr_file_from_data(std::string autocorr_filename,double **data,int length, int dimension, int num_segments,double target_corr, int num_threads);
 void auto_corr_from_data(double **data, int length, int dimension, int **output, int num_segments,  double target_corr, int num_threads);
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job);

@@ -4,8 +4,8 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
-burnin = False
-burninlength = 50000
+burnin = True
+burninlength = 10000
 data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
 if burnin:
     data = data[burninlength:]
@@ -25,7 +25,7 @@ for x in data:
     dataplot[-1][-1]=(dataplot[-1][-1])**(1./4.)*(3e5)
 dataplot = np.asarray(dataplot)
 figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-plt.savefig("mcmc_testing_EdGB.pdf")
+plt.savefig("mcmc_testing_EdGB_singlerun.pdf")
 plt.close()
 alphahist = []
 i = 0
@@ -35,9 +35,9 @@ for x in dataplot:
     alphahist.append(x[-1])
 alphahist = np.asarray(alphahist)
 print("Minimum root alpha: ",alphahist.min())
-print(i)
+#print(i)
 plt.hist(alphahist,bins=100,density=True)
-plt.savefig("alpha_hist_EdGB.pdf")
+plt.savefig("alpha_hist_EdGBsinglerun.pdf")
 plt.close()
 ##############################################################
 data = np.loadtxt("data/mcmc_output_EdGB_hot.csv",delimiter=',')
@@ -72,24 +72,24 @@ plt.savefig("autocorr_testing_EdGB.pdf")
 plt.close()
 
 ##############################################################
-data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
-if burnin:
-    data = data[burninlength:]
-def chieff(m1, m2, spin1, spin2,):
-    return (m1*spin1 + m2*spin2)/(m1+m2)
-datatransform= []
-for x in data:
-    chirpm = x[4]
-    symmratio = x[5]
-    m1 = calculate_mass1(chirpm, symmratio)
-    m2 = calculate_mass2(chirpm, symmratio)
-    datatransform.append([m1,m2, chieff(m1,m2,x[6],x[7])])
-datatransform = np.asarray(datatransform)
-
-ndim, nsamples = 3, len(datatransform) 
-#labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
-labels = [r"$M_1$",r"$M_2$",r"$\chi_{eff}$"]
-
-figure = corner.corner(datatransform, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-plt.savefig("mcmc_testing_transform_EdGB.pdf")
-plt.close()
+#data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')
+#if burnin:
+#    data = data[burninlength:]
+#def chieff(m1, m2, spin1, spin2,):
+#    return (m1*spin1 + m2*spin2)/(m1+m2)
+#datatransform= []
+#for x in data:
+#    chirpm = x[4]
+#    symmratio = x[5]
+#    m1 = calculate_mass1(chirpm, symmratio)
+#    m2 = calculate_mass2(chirpm, symmratio)
+#    datatransform.append([m1,m2, chieff(m1,m2,x[6],x[7])])
+#datatransform = np.asarray(datatransform)
+#
+#ndim, nsamples = 3, len(datatransform) 
+##labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
+#labels = [r"$M_1$",r"$M_2$",r"$\chi_{eff}$"]
+#
+#figure = corner.corner(datatransform, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
+#plt.savefig("mcmc_testing_transform_EdGB.pdf")
+#plt.close()

@@ -916,7 +916,6 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 			std::string final_checkpoint_filename
 			)
 {
-
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
 	for (int i =0;i<num_detectors;i++)
@@ -937,13 +936,13 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
 	bool local_seeding=false ;
+
 	MCMC_method_specific_prep(generation_method, dimension, NULL, local_seeding);
 
 	continue_MCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
 			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
 			show_prog,statistics_filename,chain_filename,
 			auto_corr_filename, final_checkpoint_filename);
-	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
 		deactivate_likelihood_function(&plans[i]);
@@ -1714,7 +1713,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double chi1 = param[6];
 		double chi2 = param[7];
 		//double lnalpha2 = param[8];
-
 		double beta[mcmc_Nmod] ;
 		if(mcmc_log_beta){
 			for (int j = 0; j<mcmc_Nmod;j++){

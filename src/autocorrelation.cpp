@@ -10,6 +10,21 @@
  *
  * Turns out calculating the autocorrelation is more complicated if you want to do it fast, so it gets its own file now
  */
+void write_auto_corr_file_from_data_file(std::string autocorr_filename,
+				std::string datafile,
+				int length, /**< length of input data*/
+				int dimension, /**< dimension of data*/
+				int num_segments, /**< number of segements to compute the auto-corr length*/
+				double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
+				int num_threads /**< Total number of threads to use*/
+				)
+{
+	double **chains = allocate_2D_array(length, dimension);
+	read_file(datafile, chains, length, dimension);
+	write_auto_corr_file_from_data(autocorr_filename, chains, length, 
+			dimension, num_segments, target_corr, num_threads);	
+	deallocate_2D_array(chains,length, dimension);
+}
 
 void write_auto_corr_file_from_data(std::string autocorr_filename,
 				double **data,
