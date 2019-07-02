@@ -509,6 +509,10 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 
 				sampler->dimension, sampler->dimension);
 	sampler->fisher_vals = allocate_2D_array(sampler->chain_N, sampler->dimension);
+	
+
+	//Trouble Shooting:
+	//sampler->ll_lp_output = allocate_3D_array(sampler->chain_N, sampler->N_steps, 2);
 }
 
 void deallocate_sampler_mem(sampler *sampler)
@@ -568,6 +572,10 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
 	//gsl_rng_free(sampler->r);
+	
+
+	//Trouble shooting
+	//deallocate_3D_array(sampler->ll_lp_output,sampler->chain_N, sampler->N_steps, 2);
 	
 }
 

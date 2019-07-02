@@ -97,6 +97,11 @@ struct sampler
 	int *swap_reject_ct;
 	int *step_accept_ct;
 	int *step_reject_ct;
+
+	//Pointer for testing -- stores log likelihood and log prior for output
+	//Quite a bit of memory, so probably not good to run every single time. Just for trouble
+	//shooting.
+	double ***ll_lp_output;
 };
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);

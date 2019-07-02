@@ -4,9 +4,16 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
-burnin = 100000
-dataload = np.loadtxt("data/mcmc_output_injection.csv",delimiter=',')
-data = dataload[burnin:]
+burnin = 0
+datasets = []
+numsets = 5
+for i in np.arange(numsets):
+    datasets.append( np.loadtxt("data/mcmc_output_injection{}.csv".format(i+1),delimiter=','))
+data = []
+for x in datasets:
+    for y in x:
+        data.append(y)
+data = data[burnin:]
 dataplot = []
 for x in data:
     dataplot.append(x)
@@ -30,34 +37,36 @@ figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titl
 plt.savefig("mcmc_testing_injection.pdf")
 plt.close()
 ##############################################################
-dataload = np.loadtxt("data/mcmc_output_injection_hot.csv",delimiter=',')
-data = dataload[burnin:]
-dataplot = []
-for x in data:
-    dataplot.append(x)
-    dataplot[-1][-1] = (dataplot[-1][-1])**(1./4.)*(3e5) 
-#data = data[:-100]
-#chirpmasses = [x[1] for x in data]
-#plt.plot(chirpmasses)
-#plt.show()
+#dataload = np.loadtxt("data/mcmc_output_injection_hot.csv",delimiter=',')
+#data = dataload[burnin:]
+#dataplot = []
+#for x in data:
+#    dataplot.append(x)
+#    dataplot[-1][-1] = (dataplot[-1][-1])**(1./4.)*(3e5) 
+##data = data[:-100]
+##chirpmasses = [x[1] for x in data]
+##plt.plot(chirpmasses)
+##plt.show()
+##plt.close()
+#ndim, nsamples = 8, len(data) 
+#
+#figure = corner.corner(data, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
+#plt.savefig("mcmc_testing_injection_hot.pdf")
 #plt.close()
-ndim, nsamples = 8, len(data) 
-
-figure = corner.corner(data, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-plt.savefig("mcmc_testing_injection_hot.pdf")
-plt.close()
-
-###############################################################
-autocorr = np.loadtxt("data/auto_corr_mcmc_injection.csv",delimiter=',')
-lengths = autocorr[0]
-autocorr = autocorr[1:]
-
-labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$", r'\sqrt{\alpha}']
-for i in np.arange(len(autocorr)):
-    plt.plot(lengths,autocorr[i], label=labels[i])
-plt.legend()
-plt.savefig("autocorr_testing_injection.pdf")
-plt.close()
+#
+################################################################
+for i in np.arange(numsets):
+    autocorr = np.loadtxt("data/auto_corr_mcmc_injection{}.csv".format(i+1),delimiter=',')
+    lengths = autocorr[0]
+    autocorr = autocorr[1:]
+    
+    labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$", r'\sqrt{\alpha}']
+    for i in np.arange(len(autocorr)):
+        plt.plot(lengths,autocorr[i], label=labels[i])
+    plt.legend()
+    #plt.savefig("autocorr_testing_injection.pdf")
+    #plt.show()
+    plt.close()
 #
 ###############################################################
 #data = np.loadtxt("data/mcmc_output_injection.csv",delimiter=',')
