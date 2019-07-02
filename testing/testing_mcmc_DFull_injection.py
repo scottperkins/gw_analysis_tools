@@ -4,7 +4,7 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
-burnin = 500000
+burnin = 100000
 dataload = np.loadtxt("data/mcmc_output_injection.csv",delimiter=',')
 data = dataload[burnin:]
 dataplot = []
@@ -16,11 +16,11 @@ for x in data:
 #    if (i%10==0):
 #        data.append(dataload[i]) 
 #data = data[1000:]
-#for i in np.arange(9):
-#    parameter = [x[i] for x in data]
-#    plt.plot(parameter)
-#    plt.show()
-#    plt.close()
+for i in np.arange(9):
+    parameter = [x[i] for x in data]
+    plt.plot(parameter)
+    plt.show()
+    plt.close()
 ndim, nsamples = 9, len(data) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 #labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]

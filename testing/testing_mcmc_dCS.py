@@ -4,10 +4,11 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2, mpc
-burn = False
+burn = True
 data = np.loadtxt("data/mcmc_output_dCS.csv",delimiter=',')
+burnlength = 100000
 if burn:
-    data = data[10000:]
+    data = data[burnlength:]
 for i in np.arange(9):
     parameter = [x[i] for x in data]
     plt.plot(parameter)
@@ -37,7 +38,7 @@ plt.close()
 ##############################################################
 data = np.loadtxt("data/mcmc_output_dCS_hot.csv",delimiter=',')
 if burn:
-    data = data[10000:]
+    data = data[burnlength:]
 #for i in np.arange(9):
 #    parameter = [x[i] for x in data]
 #    plt.plot(parameter)

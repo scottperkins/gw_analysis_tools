@@ -292,15 +292,15 @@ void test26()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(5,4))};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -5};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
-	int n_steps = 10000;
-	int chain_N = 8;
+	int n_steps = 200000;
+	int chain_N = 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 4;
+	int numThreads = 12;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -309,8 +309,8 @@ void test26()
 	//std::string generation_method = "dCS_IMRPhenomD_log";
 	
 	
-	std::string iteration = "8";
-	std::string previteration = "7";
+	std::string iteration = "4";
+	std::string previteration = "3";
 	//std::string autocorrfile = "";
 	//std::string autocorrfile = "testing/data/auto_corr_mcmc_ppE.csv";
 	//std::string chainfile = "testing/data/mcmc_output_ppE.csv";
@@ -324,6 +324,11 @@ void test26()
 	std::string statfilename = "testing/data/mcmc_statistics_EdGB"+iteration+".txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_EdGB"+iteration+".csv";
 	std::string startcheckfile = "testing/data/mcmc_checkpoint_EdGB"+previteration+".csv";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_logflat_EdGB"+iteration+".csv";
+	//std::string chainfile = "testing/data/mcmc_output_logflat_EdGB"+iteration+".csv";
+	//std::string statfilename = "testing/data/mcmc_statistics_logflat_EdGB"+iteration+".txt";
+	//std::string checkfile = "testing/data/mcmc_checkpoint_logflat_EdGB"+iteration+".csv";
+	//std::string startcheckfile = "testing/data/mcmc_checkpoint_logflat_EdGB"+previteration+".csv";
 
 	continue_MCMC_MH_GW(startcheckfile,output, dimension, n_steps, 
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
@@ -349,7 +354,7 @@ void test26()
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
-	chainfile = "testing/data/mcmc_output_EdGB_hot"+iteration+".csv";
+	chainfile = "testing/data/mcmc_output_logflat_EdGB_hot"+iteration+".csv";
 	//chainfile = "testing/data/mcmc_output_ppE_hot.csv";
 	//chainfile = "testing/data/mcmc_output_dCS_hot.csv";
 	for(int j = 0; j<n_steps;j++){
@@ -758,9 +763,9 @@ void test20()
 	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-40};
 	//double initial_pos[dimension]={.9, 2, -1.,log(300),log(10), .24,- .0,-.0,-0};
 	double *seeding_var = NULL;
-	int n_steps = 50000;
+	int n_steps = 300000;
 	//int n_steps = 122000;
-	int chain_N=8 ;
+	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -773,7 +778,7 @@ void test20()
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 8;
+	int numThreads = 12;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -794,6 +799,10 @@ void test20()
 	std::string chainfile = "testing/data/mcmc_output_EdGB1.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_EdGB1.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_EdGB1.csv";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_logflat_EdGB1.csv";
+	//std::string chainfile = "testing/data/mcmc_output_logflat_EdGB1.csv";
+	//std::string statfilename = "testing/data/mcmc_statistics_logflat_EdGB1.txt";
+	//std::string checkfile = "testing/data/mcmc_checkpoint_logflat_EdGB1.csv";
 	//std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
 	//std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
 	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
@@ -824,6 +833,7 @@ void test20()
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
 	chainfile = "testing/data/mcmc_output_EdGB_hot1.csv";
+	//chainfile = "testing/data/mcmc_output_logflat_EdGB_hot1.csv";
 	//chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
 	//chainfile = "testing/data/mcmc_output_ppE_hot.csv";
 	//chainfile = "testing/data/mcmc_output_dCS_hot.csv";
