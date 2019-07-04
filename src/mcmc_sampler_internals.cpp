@@ -512,7 +512,7 @@ void allocate_sampler_mem(sampler *sampler)
 	
 
 	//Trouble Shooting:
-	//sampler->ll_lp_output = allocate_3D_array(sampler->chain_N, sampler->N_steps, 2);
+	sampler->ll_lp_output = allocate_3D_array(sampler->chain_N, sampler->N_steps, 2);
 }
 
 void deallocate_sampler_mem(sampler *sampler)
@@ -575,7 +575,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	
 
 	//Trouble shooting
-	//deallocate_3D_array(sampler->ll_lp_output,sampler->chain_N, sampler->N_steps, 2);
+	deallocate_3D_array(sampler->ll_lp_output,sampler->chain_N, sampler->N_steps, 2);
 	
 }
 

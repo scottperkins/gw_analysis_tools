@@ -4,11 +4,12 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
-burnin = 0
+burnin = 80000
 datasets = []
-numsets = 5
+numsets = 9
 for i in np.arange(numsets):
-    datasets.append( np.loadtxt("data/mcmc_output_injection{}.csv".format(i+1),delimiter=','))
+    #datasets.append( np.loadtxt("data/mcmc_output_injection{}.csv".format(i+1),delimiter=','))
+    datasets.append( np.loadtxt("data/mcmc_output_injection{}_1226.csv".format(i+1),delimiter=','))
 data = []
 for x in datasets:
     for y in x:
@@ -34,7 +35,8 @@ ndim, nsamples = 9, len(data)
 labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$", r'\sqrt{\alpha}']
 
 figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-plt.savefig("mcmc_testing_injection.pdf")
+#plt.savefig("mcmc_testing_injection.pdf")
+plt.savefig("mcmc_testing_injection_1226.pdf")
 plt.close()
 ##############################################################
 #dataload = np.loadtxt("data/mcmc_output_injection_hot.csv",delimiter=',')
@@ -56,7 +58,7 @@ plt.close()
 #
 ################################################################
 for i in np.arange(numsets):
-    autocorr = np.loadtxt("data/auto_corr_mcmc_injection{}.csv".format(i+1),delimiter=',')
+    autocorr = np.loadtxt("data/auto_corr_mcmc_injection{}_1226.csv".format(i+1),delimiter=',')
     lengths = autocorr[0]
     autocorr = autocorr[1:]
     
@@ -65,7 +67,7 @@ for i in np.arange(numsets):
         plt.plot(lengths,autocorr[i], label=labels[i])
     plt.legend()
     #plt.savefig("autocorr_testing_injection.pdf")
-    #plt.show()
+    plt.show()
     plt.close()
 #
 ###############################################################
