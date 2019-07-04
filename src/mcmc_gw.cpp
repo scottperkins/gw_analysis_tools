@@ -825,6 +825,10 @@ double Log_Likelihood_internal(std::complex<double> *data,
  * 
  * dCS_IMRPhenomD_log - 8 dimensions -- cos inclination, RA, DEC, ln D_L, ln chirpmass, eta, chi1, chi2, ln \alpha^2 (the coupling parameter)
  *
+ * dCS_IMRPhenomD- 8 dimensions -- cos inclination, RA, DEC, ln D_L, ln chirpmass, eta, chi1, chi2, \alpha^2 (the coupling parameter)
+ *
+ * dCS_IMRPhenomD_root_alpha- 8 dimensions -- cos inclination, RA, DEC, ln D_L, ln chirpmass, eta, chi1, chi2, \sqrt \alpha (in km) (the coupling parameter)
+ *
  * IMRPhenomPv2 - 9 dimensions -- cos J_N, ln chirpmass, eta, |chi1|, |chi1|, theta_1, theta_2, phi_1, phi_2
  */
 void MCMC_MH_GW(double ***output,
@@ -1037,6 +1041,23 @@ void MCMC_method_specific_prep(std::string generation_method, int dimension,doub
 			seeding_var[6]=.1;
 			seeding_var[7]=.1;
 			seeding_var[8]=1e-20;
+		}
+	}
+	//Sampling parameter is root alpha in km
+	else if(dimension==9 && generation_method =="dCS_IMRPhenomD_root_alpha"){
+		mcmc_Nmod = 1;
+		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, root alpha in km"<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
+			seeding_var[0]=.1;
+			seeding_var[1]=.1;
+			seeding_var[2]=.1;
+			seeding_var[3]=1;
+			seeding_var[4]=.5;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=10;
 		}
 	}
 	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD"){
@@ -1274,6 +1295,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	}
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
 			|| mcmc_generation_method == "dCS_IMRPhenomD" 
+			|| mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" 
 			|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
 			|| mcmc_generation_method == "EdGB_IMRPhenomD"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
@@ -1303,6 +1325,10 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				beta[j ] = param[8+j];	
 			}
 		}
+		//transform to alpha^2 in sec^4 
+		//if(mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" ){
+		//	beta[0] = pow(beta[0]/(3.e5),4);
+		//}
 		double delta_t = 0;
 		double tc_ref =0;
 		double phic_ref =0;
@@ -1676,8 +1702,10 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		delete [] theta;
 	}
 	//dCS or dCS_log doesn't matter, the two are the same until inside the waveform
+	//else if(false){
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
 				|| mcmc_generation_method == "dCS_IMRPhenomD" 
+				|| mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" 
 				|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
 				|| mcmc_generation_method == "EdGB_IMRPhenomD"
 				|| mcmc_generation_method == "ppE_IMRPhenomD_IMR_log"
@@ -1687,7 +1715,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 				)){	
 		std::string local_method ;
 		if(mcmc_generation_method == "dCS_IMRPhenomD_log" || 
-			mcmc_generation_method=="dCS_IMRPhenomD"){
+			mcmc_generation_method=="dCS_IMRPhenomD"
+			|| mcmc_generation_method =="dCS_IMRPhenomD_root_alpha"){
 			local_method = "dCS_IMRPhenomD";
 		}
 		if(mcmc_generation_method == "EdGB_IMRPhenomD_log" || 
@@ -1723,6 +1752,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 			for (int j = 0; j<mcmc_Nmod;j++){
 				beta[j ] = param[8+j];	
 			}
+		}
+		if(mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" ){
+			beta[0] = pow(beta[0]/(3.e5),4);
 		}
 		//std::cout.precision(15);
 		//std::cout<<"lnalpha2 "<<lnalpha2<<std::endl;
@@ -1877,8 +1909,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	//if(isnan(ll)){
 		//std::cout<<ll<<std::endl;
 	//}
-	if(isnan(ll))
-		std::cout<<"NAN "<<chain_id<<std::endl;
+	//if(isnan(ll))
+	//	std::cout<<"NAN "<<chain_id<<std::endl;
 	return ll;
 
 	//testing detailed balance

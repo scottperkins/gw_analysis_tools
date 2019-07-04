@@ -70,6 +70,7 @@ double test_lp_GW_7dim(double *pos, int dim, int chain_id);
 double test_lp_GW_DFull(double *pos, int dim, int chain_id);
 double test_lp_GW_dCS(double *pos, int dim, int chain_id);
 double test_lp_GW_dCS_log(double *pos, int dim, int chain_id);
+double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id);
 double test_lp_GW_ppE(double *pos, int dim, int chain_id);
 void test_fisher(double *pos, int dim, double **fisher);
 double log_student_t (double *x,int dim);
@@ -87,7 +88,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test15();	
+	test18();	
 	return 0;
 }
 
@@ -1250,10 +1251,10 @@ void test18()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, log(pow(MPC_SEC,4)*pow(5,4))};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0, -5};
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
-	double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-40};
-	//double initial_pos[dimension]={.9, 2, 1.,log(3000),log(50), .24,- .0,-.0,5e-18};
+	//double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-40};
+	//double initial_pos[dimension]={.9, 2, 1.,std::log(300),std::log(10), .24,- .0,-.0,7.7e-18};
+	double initial_pos[dimension]={.9, 2, 1.,std::log(300),std::log(10), .24,- .0,-.0,10};
 	double *seeding_var = NULL;
-	std::cout<<initial_pos[8]<<std::endl;
 	int n_steps = 20000;
 	int chain_N=8 ;
 	double ***output;
@@ -1267,26 +1268,27 @@ void test18()
 	
 	int Nmod = 1;
 	int *bppe = NULL;
-	int numThreads = 5;
+	int numThreads = 8;
 	bool pool = true;
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";
-	std::string generation_method = "EdGB_IMRPhenomD_log";
-	//std::string generation_method = "dCS_IMRPhenomD";
+	//std::string generation_method = "EdGB_IMRPhenomD_log";
+	std::string generation_method = "dCS_IMRPhenomD_root_alpha";
 	
 	
 	//std::string autocorrfile = "";
-	//std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
-	//std::string chainfile = "testing/data/mcmc_output_dCS.csv";
-	//std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
-	std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
-	std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
-	std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
-	std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
+	std::string chainfile = "testing/data/mcmc_output_dCS.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_dCS.csv";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
+	//std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
+	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
+	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
-			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
+			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,"",autocorrfile, checkfile);	
@@ -1304,13 +1306,13 @@ void test18()
 		output_transform[j][5]=output[0][j][5];
 		output_transform[j][6]=output[0][j][6];
 		output_transform[j][7]=output[0][j][7];
-		output_transform[j][8]=std::exp(output[0][j][8]);
-		//output_transform[j][8]=output[0][j][8];
+		//output_transform[j][8]=std::exp(output[0][j][8]);
+		output_transform[j][8]=output[0][j][8];
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 	//output hottest chain too
-	chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
-	//chainfile = "testing/data/mcmc_output_dCS_hot.csv";
+	//chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
+	chainfile = "testing/data/mcmc_output_dCS_hot.csv";
 	for(int j = 0; j<n_steps;j++){
 		output_transform[j][0]=output[chain_N-1][j][0];
 		output_transform[j][1]=output[chain_N-1][j][1];
@@ -1320,8 +1322,8 @@ void test18()
 		output_transform[j][5]=output[chain_N-1][j][5];
 		output_transform[j][6]=output[chain_N-1][j][6];
 		output_transform[j][7]=output[chain_N-1][j][7];
-		output_transform[j][8]=std::exp(output[chain_N-1][j][8]);
-		//output_transform[j][8]=output[chain_N-1][j][8];
+		//output_transform[j][8]=std::exp(output[chain_N-1][j][8]);
+		output_transform[j][8]=output[chain_N-1][j][8];
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -3932,14 +3934,32 @@ double test_lp_GW_dCS(double *pos, int dim , int chain_id)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	double alphasqmin = 0;
-	double alphasqmax = 1e4;//>10^6 km in \sqrt{\alpha}
+	double alphasqmax = pow(1.e2/(3e5),4);//>10^6 km in \sqrt{\alpha}
+	
 	//if((std::exp(pos[8])<alphamin) || std::exp(pos[8])>alphamax){return a;}
 	//if((std::exp(pos[8])<alphamin) ){return a;}
 	//if(((pos[8])<lnalphamin) ){return a;}
+	//if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){std::cout<<"BOUDNARY"<<std::endl;return a;}
 	if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){return a;}
 	
 	//Uniform prior on \alpha^2, not \alpha
 	else { return test_lp_GW_DFull(pos,dim,chain_id)-.75*std::log(pos[8]);}
+	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
+}
+double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double alphasqmin = 0;
+	double alphasqmax = 100;//>10^6 km in \sqrt{\alpha}
+	
+	//if((std::exp(pos[8])<alphamin) || std::exp(pos[8])>alphamax){return a;}
+	//if((std::exp(pos[8])<alphamin) ){return a;}
+	//if(((pos[8])<lnalphamin) ){return a;}
+	//if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){std::cout<<"BOUDNARY"<<std::endl;return a;}
+	if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){return a;}
+	
+	//Uniform prior on \alpha^2, not \alpha
+	else { return test_lp_GW_DFull(pos,dim,chain_id);}
 	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }
 double test_lp_GW_dCS_log(double *pos, int dim , int chain_id)
