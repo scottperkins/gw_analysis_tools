@@ -895,6 +895,14 @@ void MCMC_MH_GW(double ***output,
 	free(plans);
 	if(local_seeding){ delete [] seeding_var;}
 }
+/*! \brief Takes in an MCMC checkpoint file and continues the chain
+ *
+ * Obviously, the user must be sure to correctly match the dimension, number of chains, the generation_method, 
+ * the prior function, the data, psds, freqs, and the detectors (number and name), and the gps_time to the 
+ * previous run, otherwise the behavior of the sampler is undefined.
+ *
+ * numThreads and pool do not necessarily have to be the same
+ */
 void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 			double ***output,
 			int dimension,
@@ -953,6 +961,10 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 	free(plans);
 }
 
+/*! \brief Unpacks MCMC parameters for method specific initiation 
+ *
+ * Populates seeding vector if non supplied, populates mcmc_Nmod, populates mcmc_log_beta, populates mcmc_intrinsic
+ */
 void MCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding)
 {
 	if(dimension==4 && generation_method =="IMRPhenomD"){
@@ -1168,6 +1180,13 @@ void MCMC_method_specific_prep(std::string generation_method, int dimension,doub
 	}
 }
 
+
+/*! \brief Fisher function for MCMC for GW
+ *
+ * Wraps the fisher calculation in src/fisher.cpp and unpacks parameters correctly for common GW analysis
+ *
+ * Supports all the method/parameter combinations found in MCMC_MH_GW
+ */
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id)
 {
 	//if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
@@ -1537,6 +1556,12 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	}
 }
 
+/*! \brief log likelihood function for MCMC for GW
+ *
+ * Wraps the above likelihood functions and unpacks parameters correctly for common GW analysis
+ *
+ * Supports all the method/parameter combinations found in MCMC_MH_GW
+ */
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 {
 	double ll = 0;

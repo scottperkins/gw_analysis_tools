@@ -55,6 +55,13 @@ if __name__=="__main__":
             boundariesZ_base .append(np.logspace(np.log10(1e-6),np.log10(20), num_segments[i]+1))#points in each segment
         #boundariesZ_base = np.logspace(np.log10(1e-6),np.log10(20), num_segments+1) #Written based on chunks of Z, then boundaries of DL will be dependent on cosmology
 
+        config_header.write("/*! \\file \n \* Header file for the cosmological interpolation \n \**")
+        config_header.write("// This header file contains the coefficients for the interpolation \n")
+        config_header.write("// function for the conversion from redshift to Luminosity Distance and vice versa.  \n")
+        config_header.write("// Adding cosmologies and adding more segments for accuracy should be solely done in the   \n")
+        config_header.write("// python file D_Z_config.py file. Add the name to be used in the entire package,\n")
+        config_header.write("// change the segments, and points per segement as needed, and rerun the python script to interpolate.\n")
+        config_header.write("// The output is written to the header file, and the option is now available anywhere in the C++ code.\n")
         config_header.write("#ifndef D_Z_CONFIG_H\n")
         config_header.write("#define D_Z_CONFIG_H\n")
         config_header.write("\n")
