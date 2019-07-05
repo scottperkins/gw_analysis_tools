@@ -102,6 +102,11 @@ $(TESTDIR):
 
 Doxyfile: $(OBJECTS) $(OBJECTSCUDA)
 	doxygen Doxyfile
+	make -C docs/latex
+	cp docs/latex/refman.pdf ./
+	make -C docs/latex clean
+	 
+	
  
 .PHONY: c
 c: $(PROJ_LIB)
