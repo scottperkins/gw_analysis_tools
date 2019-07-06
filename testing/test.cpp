@@ -88,7 +88,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test18();	
+	test15();	
 	return 0;
 }
 
@@ -1553,13 +1553,13 @@ void test16()
 }
 void test15()
 {
-	int length = 5000;
-	//int num_detectors =3;
-	int num_detectors =2;
+	int length = 4000;
+	int num_detectors =3;
+	//int num_detectors =2;
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
-	//detectors[2] = "Virgo";
+	detectors[2] = "Virgo";
 
 	double gps_time = 1135136350.6;//TESTING -- gw151226
 
@@ -1570,7 +1570,7 @@ void test15()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =length;
 	data_length[1] =length;
-	//data_length[2] =length;
+	data_length[2] =length;
 
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
@@ -1582,10 +1582,10 @@ void test15()
 	//#########################################################
 	//Make trial data
 	gen_params params;
-	//double RA = 5.;
-	//double DEC = 1.;
-	double RA = 2;
-	double DEC = .7;
+	double RA = 5.;
+	double DEC = 1.;
+	//double RA = 2;
+	//double DEC = .7;
 	double chirpm = 9.71;
 	double eta =.2;
 	params.mass1 = calculate_mass1(chirpm,eta);
@@ -1599,7 +1599,7 @@ void test15()
 	params.spin2[2] = .0;
 	params.phic = .0;
 	double tc = 2;
-	params.Luminosity_Distance = 525.;
+	params.Luminosity_Distance = 125.;
 	params.NSflag = false;
 	params.incl_angle = 0.;//M_PI/3.;
 	params.sky_average=false;
@@ -1609,12 +1609,13 @@ void test15()
 	params.betappe[0] = (pow(0./(3e5),4));
 	//params.betappe[0] = log(pow(100./(3e5),4));
 	params.Nmod = 1;
-	std::string injection_method = "dCS_IMRPhenomD";
+	//std::string injection_method = "dCS_IMRPhenomD";
+	std::string injection_method = "IMRPhenomD";
 	//params.f_ref = 30.5011;
 	//params.phiRef =58.944425/2.;
 	
 	//############################################################
-	double fhigh =1000;
+	double fhigh =500;
 	double flow =10;
 	double df = (fhigh-flow)/(length-1);
 	//double *freq = (double *)malloc(sizeof(double) * length);
@@ -1646,6 +1647,7 @@ void test15()
 		data[0][j] = waveformout[j];	
 	}
 	//double snr2 = pow(calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	
 	double snr2 = pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Hanford", injection_method,&params),2);
 
 	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
@@ -1659,20 +1661,20 @@ void test15()
 		data[1][j] = waveformout[j];	
 	}
 	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
-	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Livingston", injection_method,&params),2);
-	//celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
-	//params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
-	//std::cout<<"Time at Virgo of injection: "<<params.tc<<std::endl;
-	//fourier_detector_response(freq,length, waveformout,"Virgo",injection_method, &params);
+	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", injection_method,&params),2);
+	celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
+	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
+	std::cout<<"Time at Virgo of injection: "<<params.tc<<std::endl;
+	fourier_detector_response(freq,length, waveformout,"Virgo",injection_method, &params);
 
-	//for(int j = 0; j<data_length[0]; j++){
-	//	frequencies[2][j] = freq[j];	
-	//	psd[2][j] = (noise[j]);	
-	//	data[2][j] = waveformout[j];	
-	//}
+	for(int j = 0; j<data_length[0]; j++){
+		frequencies[2][j] = freq[j];	
+		psd[2][j] = (noise[j]);	
+		data[2][j] = waveformout[j];	
+	}
 	//#########################################################
 	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
-	//snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", injection_method,&params),2);
+	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", injection_method,&params),2);
 	std::cout<<"SNR of injection: "<<sqrt(snr2)<<std::endl;
 	//snr = data_snr_maximized_extrinsic(freq,length, waveformout,"Hanford_O1_fitted",method,params );
 	//std::cout<<"SNR of injection calculated as data: "<<snr<<std::endl;
@@ -1682,14 +1684,16 @@ void test15()
 	
 	//#########################################################
 	//mcmc options
-	int dimension = 9;
+	//int dimension = 9;
+	int dimension = 8;
 	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
-	double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0, log( pow((50./(3e5)),4))};
+	//double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0, log( pow((50./(3e5)),4))};
+	double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0};
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 30000;
+	int n_steps = 100000;
 	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -1707,7 +1711,8 @@ void test15()
 	bool pool = true;
 	//#########################################################
 	//gw options
-	std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	std::string generation_method = "IMRPhenomD";
 	
 	
 	//std::string autocorrfile = "testing/data/auto_corr_mcmc_injection1_1226.csv";
@@ -1715,13 +1720,17 @@ void test15()
 	//std::string chainfile = "testing/data/mcmc_output_injection1_1226.csv";
 	//std::string statfilename = "testing/data/mcmc_statistics_injection1_1226.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_injection1_1226.csv";
-	std::string autocorrfile = "testing/data/junk.csv";
+	//std::string autocorrfile = "testing/data/junk.csv";
+	//std::string chainfile = "testing/data/mcmc_output_injection1_1226.csv";
+	//std::string statfilename = "testing/data/mcmc_statistics_injection1_1226.txt";
+	//std::string checkfile = "testing/data/mcmc_checkpoint_injection1_1226.csv";
+	std::string autocorrfile = "testing/data/auto_corr_mcmc_injection1_1226.csv";
 	std::string chainfile = "testing/data/mcmc_output_injection1_1226.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_injection1_1226.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_injection1_1226.csv";
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
-			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
+			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
 			//generation_method,statfilename,"","", checkfile);	
@@ -1741,7 +1750,7 @@ void test15()
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
-			output_transform[j][8]=exp(output[0][j][8]);
+			//output_transform[j][8]=exp(output[0][j][8]);
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -1761,7 +1770,7 @@ void test15()
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
-			output_transform[j][8]=exp(output[chain_N-1][j][8]);
+			//output_transform[j][8]=exp(output[chain_N-1][j][8]);
 	}
 	//write_file(chainfile, output_transform, n_steps, dimension);
 

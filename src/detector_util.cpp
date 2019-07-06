@@ -174,6 +174,10 @@ void celestial_horizon_transform(double RA, /**< in RAD*/
 		azimuth_offset = V_azimuth_offset;
 
 	}
+	else {
+		std::cout<<"Invalid detector"<<std::endl;
+		exit(1);
+	}
 	celestial_horizon_transform(RA,DEC, gps_time, LONG, LAT, phi, theta);
 	*phi += azimuth_offset;
 	if(*phi>2*M_PI) *phi -=2*M_PI;
