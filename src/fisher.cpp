@@ -538,6 +538,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 		|| gen_method == "MCMC_dCS_IMRPhenomD_root_alpha_Full"
 		|| gen_method == "MCMC_EdGB_IMRPhenomD_log_Full"
 		|| gen_method == "MCMC_EdGB_IMRPhenomD_Full"
+		|| gen_method == "MCMC_EdGB_IMRPhenomD_root_alpha_Full"
 		|| gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_log_Full"
 		|| gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"
 		|| gen_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"
@@ -560,6 +561,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 			log_scaling = true;
 		}
 		else if(gen_method == "MCMC_EdGB_IMRPhenomD_Full"){
+			local_gen = "EdGB_IMRPhenomD";
+		}
+		else if(gen_method == "MCMC_EdGB_IMRPhenomD_root_alpha_Full"){
 			local_gen = "EdGB_IMRPhenomD";
 		}
 		else if(gen_method == "MCMC_ppE_IMRPhenomD_IMR_log_Full"){
@@ -647,7 +651,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			for (int j =0; j<parameters->Nmod; j++){
 				waveform_params.betappe[j] = param_p[8+j];
 			}
-			if(gen_method == "MCMC_dCS_IMRPhenomD_root_alpha_Full"){
+			if(gen_method == "MCMC_dCS_IMRPhenomD_root_alpha_Full"||gen_method == "MCMC_EdGB_IMRPhenomD_root_alpha_Full"){
 				waveform_params.betappe[0]=pow(param_p[8]/(3.e5), 4.);
 			}
 
@@ -690,7 +694,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			for (int j =0; j<parameters->Nmod; j++){
 				waveform_params.betappe[j] = param_m[8+j];
 			}
-			if(gen_method == "MCMC_dCS_IMRPhenomD_root_alpha_Full"){
+			if(gen_method == "MCMC_dCS_IMRPhenomD_root_alpha_Full"||gen_method == "MCMC_EdGB_IMRPhenomD_root_alpha_Full"){
 				waveform_params.betappe[0]=pow(param_m[8]/(3.e5), 4.);
 			}
 

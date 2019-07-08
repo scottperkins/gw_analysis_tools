@@ -1089,6 +1089,23 @@ void MCMC_method_specific_prep(std::string generation_method, int dimension,doub
 			seeding_var[8]=1e-20;
 		}
 	}
+	//Sampling parameter is root alpha in km
+	else if(dimension==9 && generation_method =="EdGB_IMRPhenomD_root_alpha"){
+		mcmc_Nmod = 1;
+		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, root alpha in km"<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
+			seeding_var[0]=.1;
+			seeding_var[1]=.1;
+			seeding_var[2]=.1;
+			seeding_var[3]=1;
+			seeding_var[4]=.5;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=10;
+		}
+	}
 	else if(dimension==9 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=true;
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
@@ -1318,6 +1335,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			|| mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" 
 			|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
 			|| mcmc_generation_method == "EdGB_IMRPhenomD"
+			|| mcmc_generation_method == "EdGB_IMRPhenomD_root_alpha" 
 			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_IMR_log"
 			|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"
@@ -1734,6 +1752,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 				|| mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" 
 				|| mcmc_generation_method == "EdGB_IMRPhenomD_log"
 				|| mcmc_generation_method == "EdGB_IMRPhenomD"
+				|| mcmc_generation_method == "EdGB_IMRPhenomD_root_alpha" 
 				|| mcmc_generation_method == "ppE_IMRPhenomD_IMR_log"
 				|| mcmc_generation_method == "ppE_IMRPhenomD_IMR"
 				|| mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log"
@@ -1746,7 +1765,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 			local_method = "dCS_IMRPhenomD";
 		}
 		if(mcmc_generation_method == "EdGB_IMRPhenomD_log" || 
-			mcmc_generation_method=="EdGB_IMRPhenomD"){
+			mcmc_generation_method=="EdGB_IMRPhenomD" ||
+			mcmc_generation_method == "EdGB_IMRPhenomD_root_alpha"){
 			local_method = "EdGB_IMRPhenomD";
 		}
 		if(mcmc_generation_method == "ppE_IMRPhenomD_Inspiral_log" || 
@@ -1779,7 +1799,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 				beta[j ] = param[8+j];	
 			}
 		}
-		if(mcmc_generation_method == "dCS_IMRPhenomD_root_alpha" ){
+		if(mcmc_generation_method == "dCS_IMRPhenomD_root_alpha"|| mcmc_generation_method == "EdGB_IMRPhenomD_root_alpha" ){
 			beta[0] = pow(beta[0]/(3.e5),4);
 		}
 		//std::cout.precision(15);
