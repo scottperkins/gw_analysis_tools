@@ -43,7 +43,7 @@ SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 #CUDA OPTIONS
 #LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal -lcuda -lcudart 
 #OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal 
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3
 OBJECTSCUDA := 
 ########################################################################
 
@@ -93,7 +93,7 @@ $(PROJ_SHARED_LIB) : $(OBJECTS) $(OBJECTSCUDA) | $(LDIR_LOCAL)
 $(LDIR_LOCAL):
 	mkdir -p $(LDIR_LOCAL)
 
-$(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_PYSRC)
+$(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYSRC)
 	make -C $(PYDIR) 
 	
 $(TESTFISHER) : $(OBJECTS) $(TESTFISHEROBJ) | $(TESTDIR)
@@ -105,7 +105,7 @@ $(TEST) : $(OBJECTS) $(OBJECTSCUDA) $(TESTOBJ) | $(TESTDIR)
 $(TESTDIR):
 	mkdir -p $(TESTDIR)
 
-Doxyfile: $(OBJECTS) $(OBJECTSCUDA)
+Doxyfile: $(OBJECTS) $(OBJECTSCUDA) $(PROJ_PYLIB)
 	doxygen Doxyfile
 	make -C docs/latex
 	cp docs/latex/refman.pdf ./

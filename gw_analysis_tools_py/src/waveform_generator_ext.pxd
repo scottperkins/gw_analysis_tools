@@ -59,15 +59,15 @@ cdef extern from "waveform_generator.h" :
     			string generation_method,
     			gen_params *parameters
     			)
-cdef extern from "waveform_util.h" :
-    double data_snr_maximized_extrinsic(double *frequencies,
-                                int length,
-                                double *data_real,
-                                double *data_imag,
-                                string detector,
-                                string generation_method,
-                                gen_params param
-                                )
+#cdef extern from "waveform_util.h" :
+#    double data_snr_maximized_extrinsic(double *frequencies,
+#                                int length,
+#                                double *data_real,
+#                                double *data_imag,
+#                                string detector,
+#                                string generation_method,
+#                                gen_params param
+#                                )
 
 cdef class gen_params_py:
     cdef gen_params params

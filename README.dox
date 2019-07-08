@@ -85,11 +85,11 @@ Two modules currently available:
 
 \subsubsection mcmcpy gw_analysis_tools_py.mcmc_routines_ext
 	
-Wraps the log_likelihood functions in mcmc_routines.cpp
+mcmc_routines_ext.pyx wraps the log_likelihood functions in mcmc_routines.cpp
 
 \subsubsection wavegenpy gw_analysis_tools_py.waveform_generator_ext
 
-Wraps the fourier_waveform function in waveform_generator.cpp
+waveform_generator_ext.pyx wraps the fourier_waveform function in waveform_generator.cpp
 
 Also contains the SNR calculation function
 
