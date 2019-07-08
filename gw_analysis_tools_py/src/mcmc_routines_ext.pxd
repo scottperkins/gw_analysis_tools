@@ -14,7 +14,7 @@ import sys
 cimport waveform_generator_ext
 #from waveform_generator_ext import gen_params
 
-cdef extern from "mcmc_routines.h" :
+cdef extern from "mcmc_gw.h" :
     struct fftw_outline:
         pass
     double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
@@ -54,5 +54,5 @@ cdef extern from "mcmc_routines.h" :
 				string generation_method,
 				fftw_outline *plan
 				)
-    void initiate_likelihood_function(fftw_outline *plan,int length)
-    void deactivate_likelihood_function(fftw_outline *plan) 
+    void allocate_FFTW_mem_forward(fftw_outline *plan,int length)
+    void deallocate_FFTW_mem(fftw_outline *plan) 

@@ -23,7 +23,7 @@ cdef class fftw_outline_py:
     cdef int N
     def __init__(self,N):
         self.N = N
-        mcmc_routines_ext.initiate_likelihood_function(&self.plan,N)
+        mcmc_routines_ext.allocate_FFTW_mem_forward(&self.plan,N)
     def __reduce__(self):
         return (self.__class__,(self.N,))
 
@@ -96,7 +96,7 @@ def maximized_coal_Log_Likelihood_py(double[::1] data_real,
                                 detector,
                                 generation_method,
                                 &plan.plan)
-def initiate_likelihood_function_py(fftw_outline_py plan,int length):
-    mcmc_routines_ext.initiate_likelihood_function(&plan.plan,length)
-def deactivate_likelihood_function_py(fftw_outline_py plan):
-    mcmc_routines_ext.deactivate_likelihood_function(&plan.plan)
+def allocate_FFTW_mem_forward_py(fftw_outline_py plan,int length):
+    mcmc_routines_ext.allocate_FFTW_mem_forward(&plan.plan,length)
+def deallocate_FFTW_mem_py(fftw_outline_py plan):
+    mcmc_routines_ext.deallocate_FFTW_mem(&plan.plan)

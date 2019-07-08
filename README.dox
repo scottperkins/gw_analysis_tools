@@ -71,7 +71,9 @@ The environment variable PYTHONPATH should include the directory \$(PROJECT_DIR)
 To include header files, use -I\$(PROJECT_DIRECTORY)/include
 
 \subsection link Link
-To link object files, use -L\$(PROJECT_DIRECTORY)/lib -lgwanalysistools
+To link object files, use -L\$(PROJECT_DIRECTORY)/lib -lgwat (the -L command is un-needed if you add $(PROJECT_DIRECTORY)/lib to the environment variable CPATH)
+
+For dynamic linking, the following environment variables for Linux (MacOs) should be updated to include $(PROJECT_DIRECTORY)/lib -- LD_LIBRARY_PATH (DYLD_LIBRARY_PATH)
 
 For Cuda code: use -lcuda -lcudart 
 

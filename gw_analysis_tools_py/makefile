@@ -1,6 +1,6 @@
 PYSRC=./src/*.pyx
 PYLIB=./*.so
-PROJ_LIB=../lib/libgwanalysistools.a
+PROJ_LIB=../lib/libgwat.so
 
 .PHONY: all
 all: $(PYLIB)

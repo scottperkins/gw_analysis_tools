@@ -25,9 +25,10 @@ void write_auto_corr_file_from_data_file(std::string autocorr_filename,
 			dimension, num_segments, target_corr, num_threads);	
 	deallocate_2D_array(chains,length, dimension);
 }
-
-void write_auto_corr_file_from_data(std::string autocorr_filename,
-				double **data,
+/*! \brief Writes the autocorrelation file from a data array
+ */
+void write_auto_corr_file_from_data(std::string autocorr_filename,/**<Name of the file to write the autocorrelation to */
+				double **data,/**< Input chains*/
 				int length, /**< length of input data*/
 				int dimension, /**< dimension of data*/
 				int num_segments, /**< number of segements to compute the auto-corr length*/
@@ -102,67 +103,18 @@ void auto_corr_from_data(double **data, /**<Input data */
 			fft_threads = 0;
 		}
 	}
-	//serial_threads=1;
-	//fft_threads=1;
 	
 	int step = length/(num_segments);
-	//int start[dimension];
-	//int end[num_segments*dimension];
 	int lengths[num_segments];
 	int fftw_lengths[num_segments];
 	fftw_outline *plans_forward= (fftw_outline *)malloc(sizeof(fftw_outline)*num_segments);
 	fftw_outline *plans_reverse= (fftw_outline *)malloc(sizeof(fftw_outline)*num_segments);
-	//for(int i =0 ; i<dimension ; i++){
-	//	start[i] = i*length;
-	//for(int j =0 ; j<num_segments; j++){
-	//	end[j] = (j+1)*step;
-	//}
-	//}
-	//for(int i =0 ; i<num_segments; i++){
-	//	lengths[i] = (i+1)*step;
-	//	if(lengths[i]>MAX_SERIAL){
-	//		fftw_lengths[i] = pow(2, std::ceil(std::log2(lengths[i])));	
-	//		initiate_likelihood_function(&plans_forward[i],fftw_lengths[i]);
-	//		allocate_FFTW3_mem_inverse(&plans_reverse[i],fftw_lengths[i]);
-	//	}
-	//}	
 	threaded_ac_jobs_serial jobs_s[num_segments*dimension];
 	threaded_ac_jobs_fft jobs_f[num_segments*dimension];
 	for(int i =0 ; i<num_segments; i++){
 		lengths[i] = (i+1)*step;
 	}
 	{	
-		//threadPool<threaded_ac_jobs_fft,comparator_ac_fft> fftw_jobs(fft_threads,threaded_ac_spectral);
-		//threadPool<threaded_ac_jobs_serial,comparator_ac_serial> serial_jobs(serial_threads,threaded_ac_serial);
-		//for(int j =0 ; j<dimension; j++){
-		//	for(int i =0 ; i< num_segments; i++)
-		//	{
-		//		if(lengths[i]>MAX_SERIAL){
-		//			jobs_f[j*num_segments + i].data = data_transpose;
-		//			jobs_f[j*num_segments + i].length = &lengths[i];
-		//			jobs_f[j*num_segments + i].target = &accuracy;		
-		//			jobs_f[j*num_segments + i].dimension = j;		
-		//			jobs_f[j*num_segments + i].lag = &output[j][i];
-		//			//job.start= &start[j];
-		//			//job.end = &end[i+j*num_segments];
-		//			jobs_f[j*num_segments + i].planforward = &plans_forward[i];
-		//			jobs_f[j*num_segments + i].planreverse = &plans_reverse[i];
-		//			fftw_jobs.enqueue(jobs_f[j*num_segments + i]);
-		//		}
-		//		else{
-		//			//threaded_ac_jobs_serial job;
-		//			jobs_s[j*num_segments+i].data = data_transpose;
-		//			jobs_s[j*num_segments+i].length = &lengths[i];
-		//			jobs_s[j*num_segments+i].target = &accuracy;		
-		//			jobs_s[j*num_segments+i].dimension = j;		
-		//			jobs_s[j*num_segments + i].lag = &output[j][i];
-		//			//job.start= &start[j];
-		//			//job.end = &end[i+j*num_segments];
-		//			serial_jobs.enqueue(jobs_s[j*num_segments+i]);
-		//		}
-
-		//	}		
-		//}	
 		{
 			threadPool<threaded_ac_jobs_serial,comparator_ac_serial> serial_jobs(num_threads,threaded_ac_serial);
 			for(int j =0 ; j<dimension; j++){
@@ -181,8 +133,8 @@ void auto_corr_from_data(double **data, /**<Input data */
 			for(int i =0 ; i<num_segments; i++){
 				if(lengths[i]>MAX_SERIAL){
 					fftw_lengths[i] = pow(2, std::ceil(std::log2(lengths[i])));	
-					initiate_likelihood_function(&plans_forward[i],fftw_lengths[i]);
-					allocate_FFTW3_mem_inverse(&plans_reverse[i],fftw_lengths[i]);
+					allocate_FFTW_mem_forward(&plans_forward[i],fftw_lengths[i]);
+					allocate_FFTW_mem_reverse(&plans_reverse[i],fftw_lengths[i]);
 				}
 			}	
 		}
@@ -206,13 +158,17 @@ void auto_corr_from_data(double **data, /**<Input data */
 	}
 	for(int i =0 ; i<num_segments; i++){
 		if(lengths[i]>MAX_SERIAL){
-			deactivate_likelihood_function(&plans_forward[i]);
-			deactivate_likelihood_function(&plans_reverse[i]);
+			deallocate_FFTW_mem(&plans_forward[i]);
+			deallocate_FFTW_mem(&plans_reverse[i]);
 		}
 	}	
 	deallocate_2D_array(data_transpose,dimension, length);
 }
 
+/*! \brief Internal routine to calculate an spectral autocorrelation job
+ *
+ * Allows for a more efficient use of the threadPool class
+ */
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job)
 {
 	double *ac = (double *)malloc(sizeof(double)*(*job.length));	
@@ -223,16 +179,25 @@ void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job)
 			break;
 		}	
 	}
-	//std::cout<<*job.lag<<std::endl;
 	free(ac);
 }
+/*! \brief Internal routine to calculate an serial autocorrelation job
+ *
+ * Allows for a more efficient use of the threadPool class
+ */
 void threaded_ac_serial(int thread, threaded_ac_jobs_serial job)
 {
 	
 	*job.lag = auto_correlation_serial(job.data[job.dimension], *job.length, 0, *job.target);
 }
 
-double auto_correlation_serial(double *arr, int length, int start, double target){
+/*! \brief Calculates the autocorrelation of a chain with the brute force method
+ */
+double auto_correlation_serial(double *arr, /**< input array*/
+		int length, /**< Length of input array*/
+		int start, /**< starting index (probably 0)*/
+		double target/**< Target autocorrelation for which ``length'' is defined*/
+		){
 	double sum =0;
 	int k;	
 	for(k =start ; k< length; k++){
@@ -259,12 +224,13 @@ double auto_correlation_serial(double *arr, int length, int start, double target
 
 		gamma = gamma_sum/(length-h);
 		rho = gamma/gamma_0;
-		//rho = auto_correlation_internal(arr, length, h, ave)/gamma_0;
 	}	
 	return h;
 
 }
 
+/*! \brief Wrapper function for convience -- assumes the data array starts at 0
+ */
 void auto_correlation_spectral(double *chain, int length, double *autocorr, fftw_outline *plan_forw, fftw_outline *plan_rev)
 {
 	auto_correlation_spectral(chain, length, 0, autocorr, plan_forw, plan_rev);
@@ -368,10 +334,6 @@ void auto_correlation_spectral(double *chain, int length, int start, double *aut
 		normadj[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
 	}
 	
-	//adjust the cov vector
-	//for(int i =0 ; i<length ; i++){
-	//	acov[i]/=normadj[i];
-	//}
 	
 	double var = acov[0];
 
@@ -396,119 +358,130 @@ void auto_correlation_spectral(double *chain, int length, int start, double *aut
  */
 void auto_correlation_spectral(double *chain, int length, double *autocorr)
 {
-	//Normalize
-	double *x_cent = (double *)malloc(sizeof(double)*length);
-	//Calculate Average
-	double ave = 0;
-	for(int i =0; i<length; i++)
-		ave+= chain[i];
-	ave /= length;
+	fftw_outline forward;
+	fftw_outline reverse;
+	int fftw_length = pow(2, std::ceil(std::log2(length)));	
+	allocate_FFTW_mem_forward(&forward,fftw_length);
+	allocate_FFTW_mem_reverse(&reverse,fftw_length);
+	auto_correlation_spectral(chain, length,autocorr, &forward, &reverse);
 	
-	//Create normalized vector
-	for(int i = 0 ; i<length; i++){
-		x_cent[i] = chain[i]-ave;
-	}
-
-	//Padded length
-	int L = pow(2, std::ceil( std::log2(length) ) );	
-
-	//Padded Vector
-	double *x_pad = (double *)malloc(sizeof(double)*L);
-
-	//Copy centered vector
-	for(int i = 0 ; i < length; i++){
-		x_pad[i] = x_cent[i];
-	}
-
-	//Add padding
-	for(int i = length ; i < L; i++){
-		x_pad[i] = 0;
-	}
-
-	//Allocate FFTW3 memory
-	double *norm = (double *)malloc(sizeof(double)*L);
-	fftw_outline plan;
-	initiate_likelihood_function(&plan, L);
-	
-	fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
-	fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
-	for(int i =0 ; i<L; i++){
-		in[i][0] = x_pad[i];
-		in[i][1] = 0;
-	}
-
-	//Execute Forward Transform
-	fftw_execute_dft(plan.p, in, out);
-
-	//Take norm^2 of the output
-	for(int i =0 ; i<L; i++){
-		norm[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
-	}
-	//Execute Reverse Transform
-	fftw_outline plan_inv;
-	allocate_FFTW3_mem_inverse(&plan_inv, L);
-	for(int i =0 ; i<L; i++){
-		in[i][0] = norm[i];
-		in[i][1] = 0;
-	}
-	fftw_execute_dft(plan_inv.p, in, out);
-	
-	//acov is the result
-	double *acov = (double *)malloc(sizeof(double)*length);
-	for(int i =0 ; i< length; i++){
-		acov[i] = out[i][0];	
-	}
-
-	//adjust the cov
-	double *mask = (double *)malloc(sizeof(double)*L);
-	//first length elements are 1
-	for(int i = 0 ; i < length; i++){
-		mask[i]=1;
-	}
-	// last L-length elements are 0
-	for(int i = length ; i < L; i++){
-		mask[i]=0;
-	}
-	for(int i =0 ; i<L; i++){
-		in[i][0] = mask[i];
-		in[i][1] = 0;
-	}
-
-	//execute fft
-	fftw_execute_dft(plan.p, in ,out);
-	
-	//output vector -- will be trimmed to length
-	double *normadj = (double *)malloc(sizeof(double)*length);
-	//trimmed output
-	for(int i =0 ; i< length; i++){
-		normadj[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
-	}
-	
-	//adjust the cov vector
-	//for(int i =0 ; i<length ; i++){
-	//	acov[i]/=normadj[i];
+	deallocate_FFTW_mem(&forward);
+	deallocate_FFTW_mem(&reverse);
+	////Normalize
+	//double *x_cent = (double *)malloc(sizeof(double)*length);
+	////Calculate Average
+	//double ave = 0;
+	//for(int i =0; i<length; i++)
+	//	ave+= chain[i];
+	//ave /= length;
+	//
+	////Create normalized vector
+	//for(int i = 0 ; i<length; i++){
+	//	x_cent[i] = chain[i]-ave;
 	//}
-	
-	double var = acov[0];
 
-	for(int i = 0 ; i< length; i++)
-		autocorr[i] = acov[i]/var;
+	////Padded length
+	//int L = pow(2, std::ceil( std::log2(length) ) );	
 
-	//Free memory
-	deactivate_likelihood_function(&plan);
-	deactivate_likelihood_function(&plan_inv);
-	free(norm);
-	free(mask);
-	free(normadj);
-	fftw_free(in);
-	fftw_free(out);
-	free(x_cent);
-	free(x_pad);
+	////Padded Vector
+	//double *x_pad = (double *)malloc(sizeof(double)*L);
+
+	////Copy centered vector
+	//for(int i = 0 ; i < length; i++){
+	//	x_pad[i] = x_cent[i];
+	//}
+
+	////Add padding
+	//for(int i = length ; i < L; i++){
+	//	x_pad[i] = 0;
+	//}
+
+	////Allocate FFTW3 memory
+	//double *norm = (double *)malloc(sizeof(double)*L);
+	//fftw_outline plan;
+	//initiate_likelihood_function(&plan, L);
+	//
+	//fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+	//fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+	//for(int i =0 ; i<L; i++){
+	//	in[i][0] = x_pad[i];
+	//	in[i][1] = 0;
+	//}
+
+	////Execute Forward Transform
+	//fftw_execute_dft(plan.p, in, out);
+
+	////Take norm^2 of the output
+	//for(int i =0 ; i<L; i++){
+	//	norm[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
+	//}
+	////Execute Reverse Transform
+	//fftw_outline plan_inv;
+	//allocate_FFTW3_mem_inverse(&plan_inv, L);
+	//for(int i =0 ; i<L; i++){
+	//	in[i][0] = norm[i];
+	//	in[i][1] = 0;
+	//}
+	//fftw_execute_dft(plan_inv.p, in, out);
+	//
+	////acov is the result
+	//double *acov = (double *)malloc(sizeof(double)*length);
+	//for(int i =0 ; i< length; i++){
+	//	acov[i] = out[i][0];	
+	//}
+
+	////adjust the cov
+	//double *mask = (double *)malloc(sizeof(double)*L);
+	////first length elements are 1
+	//for(int i = 0 ; i < length; i++){
+	//	mask[i]=1;
+	//}
+	//// last L-length elements are 0
+	//for(int i = length ; i < L; i++){
+	//	mask[i]=0;
+	//}
+	//for(int i =0 ; i<L; i++){
+	//	in[i][0] = mask[i];
+	//	in[i][1] = 0;
+	//}
+
+	////execute fft
+	//fftw_execute_dft(plan.p, in ,out);
+	//
+	////output vector -- will be trimmed to length
+	//double *normadj = (double *)malloc(sizeof(double)*length);
+	////trimmed output
+	//for(int i =0 ; i< length; i++){
+	//	normadj[i] = out[i][0]*out[i][0] + out[i][1]*out[i][1];
+	//}
+	//
+	////adjust the cov vector
+	////for(int i =0 ; i<length ; i++){
+	////	acov[i]/=normadj[i];
+	////}
+	//
+	//double var = acov[0];
+
+	//for(int i = 0 ; i< length; i++)
+	//	autocorr[i] = acov[i]/var;
+
+	////Free memory
+	//deactivate_likelihood_function(&plan);
+	//deactivate_likelihood_function(&plan_inv);
+	//free(norm);
+	//free(mask);
+	//free(normadj);
+	//fftw_free(in);
+	//fftw_free(out);
+	//free(x_cent);
+	//free(x_pad);
 }
 
 
 //Calculate the autocorrelation of a chain - if the chain is >100,000,
 //the program will use a box-search method to help with computation time
+/*! \brief OUTDATED -- numerically finds autocorrelation length -- not reliable 
+ */
 double auto_correlation(double *arr, int length , double tolerance){
 	
 	//if the chain is short enough, its easier to just calculate it in serial
@@ -572,7 +545,8 @@ double auto_correlation(double *arr, int length , double tolerance){
 	return h;
 }	
 
-//Serial version for short chains
+/*! \brief OUTDATED Calculates the autocorrelation -- less general version
+ */
 double auto_correlation_serial_old(double *arr, int length  ){
 
 	double sum =0;
@@ -594,19 +568,12 @@ double auto_correlation_serial_old(double *arr, int length  ){
 	int h = 1;
 	while(rho>.01){	
 		h++;
-		//gamma_sum=0;
-		//for(k=0;k<(length-h);k++){
-		//	gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
-		//}
-
-		//gamma = gamma_sum/(length-h);
-		//rho = gamma/gamma_0;
 		rho = auto_correlation_internal(arr, length, h, ave)/gamma_0;
 	}	
 	return h;
 }
 
-/*! \brief Grid search method of computing the autocorrelation 
+/*! \brief OUTDATED -- Grid search method of computing the autocorrelation -- unreliable
  *
  * Hopefully more reliable than the box-search method, which can sometimes get caught in a recursive loop when the stepsize isn't tuned, but also faster than the basic linear, serial search
  */
@@ -750,7 +717,8 @@ void auto_corr_intervals_outdated(double *data, /**<Input data */
 	free(temp);
 	
 }
-
+/*! \brief OUTDATED -- writes autocorrelation lengths for a data array, but only with the serial method and only for a target correlation of .01
+ */
 void write_auto_corr_file_from_data(std::string auto_corr_filename, 
 				double **output,
 				int intervals, 
@@ -774,6 +742,8 @@ void write_auto_corr_file_from_data(std::string auto_corr_filename,
 	deallocate_2D_array(ac,dimension+1, intervals);
 }
 
+/*! \brief OUTDATED -- writes autocorrelation lengths for a data file, but only with the serial method and only for a target correlation of .01
+ */
 void write_auto_corr_file_from_data_file(std::string auto_corr_filename, 
 				std::string output_file,
 				int intervals, 

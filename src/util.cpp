@@ -284,7 +284,7 @@ void printProgress (double percentage)
 /*! \brief Allocate memory for FFTW3 methods used in a lot of inner products
  * input is a locally defined structure that houses all the pertinent data
  */
-void initiate_likelihood_function(fftw_outline *plan, int length)
+void allocate_FFTW_mem_forward(fftw_outline *plan, int length)
 {
 	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
@@ -293,7 +293,7 @@ void initiate_likelihood_function(fftw_outline *plan, int length)
 /*! \brief Allocate memory for FFTW3 methods used in a lot of inner products --INVERSE
  * input is a locally defined structure that houses all the pertinent data
  */
-void allocate_FFTW3_mem_inverse(fftw_outline *plan, int length)
+void allocate_FFTW_mem_reverse(fftw_outline *plan, int length)
 {
 	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
 	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
@@ -301,7 +301,7 @@ void allocate_FFTW3_mem_inverse(fftw_outline *plan, int length)
 }
 /*!\brief deallocates the memory used for FFTW routines
  */
-void deactivate_likelihood_function(fftw_outline *plan)
+void deallocate_FFTW_mem(fftw_outline *plan)
 {
 	fftw_destroy_plan(plan->p);
 	fftw_free(plan->in);
@@ -841,7 +841,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	}
 	
 	fftw_outline plan;
-	initiate_likelihood_function(&plan, N_trimmed);
+	allocate_FFTW_mem_forward(&plan, N_trimmed);
 	std::complex<double> **fft_data = (std::complex<double> **)
 					malloc(sizeof(std::complex<double>*) * num_detectors);
 	for (int i =0; i < num_detectors; i++){
@@ -856,7 +856,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 		}
 		
 	}	
-	deactivate_likelihood_function(&plan);
+	deallocate_FFTW_mem(&plan);
 	double *freq_untrimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	for(int i =0; i<N_trimmed; i++){
 		freq_untrimmed[i]=i*df;

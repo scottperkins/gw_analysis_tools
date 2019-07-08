@@ -717,14 +717,14 @@ void test23()
 	}
 	fftw_outline plan_forw;
 	fftw_outline plan_rev;
-	initiate_likelihood_function(&plan_forw, pow(2, std::ceil( std::log2(length))));
-	allocate_FFTW3_mem_inverse(&plan_rev, pow(2, std::ceil( std::log2(length))));
+	allocate_FFTW_mem_forward(&plan_forw, pow(2, std::ceil( std::log2(length))));
+	allocate_FFTW_mem_reverse(&plan_rev, pow(2, std::ceil( std::log2(length))));
 	start = clock();
 	auto_correlation_spectral(chain, length, ac, &plan_forw, &plan_rev);
 	stop = clock();
 	std::cout<<"Spectral method timing: "<<(double)(stop-start)/CLOCKS_PER_SEC<<std::endl;
-	deactivate_likelihood_function(&plan_forw);
-	deactivate_likelihood_function(&plan_rev);
+	deallocate_FFTW_mem(&plan_forw);
+	deallocate_FFTW_mem(&plan_rev);
 	for(int i =1; i<length; i++)
 	{
 		if(ac[i]<.01){
@@ -1167,7 +1167,7 @@ void test19()
 	double phic;
 	double phicmax, tcmax;
 	fftw_outline plan;
-	initiate_likelihood_function(&plan, length);
+	allocate_FFTW_mem_forward(&plan, length);
 
 	//fisher(freqs, length, gen_method, detector,fishout,dim, &params,NULL, NULL, noise);
 	fourier_detector_response(freqs, length, response, detector, "IMRPhenomD",&params);
@@ -1197,7 +1197,7 @@ void test19()
 	}
 	deallocate_2D_array(fishout, dim , dim);
 	delete [] params.betappe;
-	deactivate_likelihood_function(&plan);
+	deallocate_FFTW_mem(&plan);
 }
 void test18()
 {
@@ -2273,7 +2273,7 @@ void test11()
 	//	initiate_likelihood_function(&plans[i] , length);
 	//}
 	fftw_outline plan;
-	initiate_likelihood_function(&plan, length);
+	allocate_FFTW_mem_forward(&plan, length);
 	double ll_true =maximized_Log_Likelihood(waveformout11, psd, freq,
 			length, &params_data, "Livingston", "IMRPhenomD", &plan);
 	std::cout<<"TRUE ll: "<<ll_true<<std::endl;	
@@ -2408,7 +2408,7 @@ void test11()
 	//	deactivate_likelihood_function(&plans[i]);
 	//}
 	//free(plans);
-	deactivate_likelihood_function(&plan);
+	deallocate_FFTW_mem(&plan);
 	deallocate_2D_array(output, loops,2);
 	free(freq);
 	free(DLs);
@@ -3257,7 +3257,7 @@ void test4()
 	//params.mass1 = 100;
 	//params.mass2 = 5;
 	fftw_outline plan;
-	initiate_likelihood_function(&plan,length);
+	allocate_FFTW_mem_forward(&plan,length);
 	
 	int masslen = 10;
 	//double chirp = calculate_chirpmass(params.mass1,params.mass2);
@@ -3343,7 +3343,7 @@ void test4()
 	delete [] params.betappe;
 	delete [] params.bppe;
 
-	deactivate_likelihood_function(&plan);	
+	deallocate_FFTW_mem(&plan);	
 }
 void test3()
 {
@@ -3524,7 +3524,7 @@ void test1()
 	double logl;
 	fftw_outline plan;
 	clock_t  start4, end4;
-	initiate_likelihood_function(&plan,length);
+	allocate_FFTW_mem_forward(&plan,length);
 	start4 = clock();
 	logl = maximized_coal_log_likelihood_IMRPhenomD(freq, length, waveformout, 
 				noise, snr, calculate_chirpmass(params.mass1,params.mass2), 
@@ -3554,7 +3554,7 @@ void test1()
 	cout<<logl2<<endl;
 	cout<<"LOGLnew: "<<logl3<<endl;
 	cout<<"LOGLold: "<<logl4<<endl;
-	deactivate_likelihood_function(&plan);	
+	deallocate_FFTW_mem(&plan);	
 
 
 

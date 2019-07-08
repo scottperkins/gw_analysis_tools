@@ -118,7 +118,7 @@ double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 				bool NSflag)
 {
 	fftw_outline plan;
-	initiate_likelihood_function(&plan, length);
+	allocate_FFTW_mem_forward(&plan, length);
 	std::complex<double> *data = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	for (int i =0; i<length; i++)
 		data[i] = std::complex<double>(real_data[i],imag_data[i]);
@@ -133,7 +133,7 @@ double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 				spin2,
 				NSflag,
 				&plan);
-	deactivate_likelihood_function(&plan);
+	deallocate_FFTW_mem(&plan);
 	free(data);
 	return out;
 }
@@ -295,7 +295,7 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 				bool NSflag)
 {
 	fftw_outline plan;
-	initiate_likelihood_function(&plan,length);
+	allocate_FFTW_mem_forward(&plan,length);
 	std::complex<double> *data = (std::complex<double> *) malloc(sizeof(std::complex<double> ) *length);
 	for (int i =0; i<length; i++)
 		data[i] = std::complex<double>(real_data[i],imag_data[i]);
@@ -313,7 +313,7 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 				iota,
 				NSflag,
 				&plan);
-	deactivate_likelihood_function(&plan);
+	deallocate_FFTW_mem(&plan);
 
 	free(data);
 
@@ -859,11 +859,12 @@ void MCMC_MH_GW(double ***output,
 		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 					)
 {
+	//std::cout<<"HELLO"<<std::endl;
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
 	for (int i =0;i<num_detectors;i++)
 	{	
-		initiate_likelihood_function(&plans[i] , data_length[i]);
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
 	}
 	mcmc_noise = noise_psd;	
 	mcmc_frequencies = frequencies;
@@ -891,7 +892,7 @@ void MCMC_MH_GW(double ***output,
 	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
-		deactivate_likelihood_function(&plans[i]);
+		deallocate_FFTW_mem(&plans[i]);
 	free(plans);
 	if(local_seeding){ delete [] seeding_var;}
 }
@@ -932,7 +933,7 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
 	for (int i =0;i<num_detectors;i++)
 	{	
-		initiate_likelihood_function(&plans[i] , data_length[i]);
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
 	}
 	mcmc_noise = noise_psd;	
 	mcmc_frequencies = frequencies;
@@ -957,7 +958,7 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 			auto_corr_filename, final_checkpoint_filename);
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
-		deactivate_likelihood_function(&plans[i]);
+		deallocate_FFTW_mem(&plans[i]);
 	free(plans);
 }
 

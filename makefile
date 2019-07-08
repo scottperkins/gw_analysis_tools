@@ -12,8 +12,10 @@ PROJ_PYSRC=$(addprefix $(PYDIR)/src/,$(PYSRC))
 PYLIB=mcmc_routines_ext.cpp waveform_generator_ext.cpp
 PROJ_PYLIB=$(addprefix $(PYDIR)/,$(PYLIB))
 
-LOCAL_LIB=libgwanalysistools.a
+LOCAL_LIB=libgwat.a
+LOCAL_SHARED_LIB=libgwat.so
 PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
+PROJ_SHARED_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_SHARED_LIB))
 
 TESTSRC=testing/test.cpp
 TESTOBJ=testing/test.o
@@ -58,7 +60,7 @@ CCCUDA=nvcc
 #CC=nvcc
 
 .PHONY: all
-all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB)
+all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB)
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) 
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -85,6 +87,9 @@ $(TESTFISHEROBJ): $(TESTFISHERSRC)
 $(PROJ_LIB) : $(OBJECTS) $(OBJECTSCUDA) | $(LDIR_LOCAL)
 	ar rcs $(LDIR_LOCAL)/$(LOCAL_LIB) $(OBJECTS) $(OBJECTSCUDA)
 
+$(PROJ_SHARED_LIB) : $(OBJECTS) $(OBJECTSCUDA) | $(LDIR_LOCAL)
+	$(CC) -shared -fopenmp $(OBJECTS) $(OBJECTSCUDA) -o $(LDIR_LOCAL)/$(LOCAL_SHARED_LIB) $(LIBS)
+
 $(LDIR_LOCAL):
 	mkdir -p $(LDIR_LOCAL)
 
@@ -109,16 +114,16 @@ Doxyfile: $(OBJECTS) $(OBJECTSCUDA)
 	
  
 .PHONY: c
-c: $(PROJ_LIB)
+c: $(PROJ_LIB) $(PROJ_SHARED_LIB) 
 
 .PHONY: test
-test: $(TEST) $(PROJ_LIB) $(PROJ_PYLIB) 
+test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) 
 
 .PHONY: testfisher
-testfisher: $(TESTFISHER) $(PROJ_LIB) 
+testfisher: $(TESTFISHER) $(PROJ_LIB) $(PROJ_SHARED_LIB)
 
 .PHONY: testc
-testc: $(TEST) $(PROJ_LIB)  
+testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB)
 
 .PHONY: clean
 clean:
@@ -126,5 +131,5 @@ clean:
 	rm build_cuda/*.o 
 .PHONY: remove
 remove:
-	rm build/*.o build_cuda/* $(TEST) lib/*.a
+	rm build/*.o build_cuda/* $(TEST) lib/*.a lib/*.so
 	make -C $(PYDIR) remove

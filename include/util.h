@@ -287,9 +287,9 @@ adouble cosmology_interpolation_function(adouble x, double *coeffs, int interp_d
 
 void printProgress (double percentage);
 
-void initiate_likelihood_function(fftw_outline *plan,int length);
-void allocate_FFTW3_mem_inverse(fftw_outline *plan,int length);
-void deactivate_likelihood_function(fftw_outline *plan);
+void allocate_FFTW_mem_forward(fftw_outline *plan,int length);
+void allocate_FFTW_mem_reverse(fftw_outline *plan,int length);
+void deallocate_FFTW_mem(fftw_outline *plan);
 
 double** allocate_2D_array( int dim1, int dim2);
 //int** allocate_2D_array( int dim1, int dim2);
