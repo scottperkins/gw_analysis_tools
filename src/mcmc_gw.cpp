@@ -879,6 +879,20 @@ void MCMC_MH_GW(double ***output,
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
 	bool local_seeding ;
 	if(!seeding_var)
 		local_seeding = true;
@@ -948,6 +962,20 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
 	bool local_seeding=false ;
 
 	MCMC_method_specific_prep(generation_method, dimension, NULL, local_seeding);
@@ -1575,6 +1603,102 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	}
 }
 
+
+
+double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std::string generation_method, int *data_length, double **frequencies, std::complex<double> **data, double **psd, std::string *detectors, fftw_outline *fftw_plans, int num_detectors, double RA, double DEC,double gps_time)
+{
+	double *phi = new double[num_detectors];
+	double *theta = new double[num_detectors];
+	celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
+	double tc_ref, phic_ref, ll=0, delta_t;
+	if (save_waveform){
+	//if (false){
+		std::complex<double> *hplus = 
+			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+				data_length[0]);
+		std::complex<double> *hcross = 
+			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+				data_length[0]);
+		std::complex<double> *response = 
+			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+				data_length[0]);
+		fourier_waveform(frequencies[0], data_length[0], 
+			hplus, hcross,generation_method, parameters);
+			
+		fourier_detector_response(frequencies[0], data_length[0], 
+			hplus, hcross, response, parameters->theta, parameters->phi, 
+			detectors[0]);
+		ll += maximized_coal_Log_Likelihood_internal(data[0], 
+				psd[0],
+				frequencies[0],
+				response,
+				(size_t) data_length[0],
+				&fftw_plans[0],
+				&tc_ref,
+				&phic_ref
+				);
+		for(int i=1; i < num_detectors; i++){
+			celestial_horizon_transform(RA,DEC, gps_time, 
+					mcmc_detectors[i], &phi[i], &theta[i]);
+			parameters->phi=phi[i];
+			parameters->theta=theta[i];
+			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+			parameters->tc = tc_ref + delta_t;
+			parameters->phic = phic_ref;	
+			fourier_detector_response(frequencies[i], 
+				data_length[i], hplus, hcross, response, 
+				parameters->theta, parameters->phi, 
+				detectors[i]);
+			for(int j =0; j<data_length[i]; j++){
+				response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
+			}
+			ll += Log_Likelihood_internal(data[i], 
+					psd[i],
+					frequencies[i],
+					response,
+					(size_t) data_length[i],
+					&fftw_plans[i]
+					);
+		}
+		free(hplus); free(hcross); free(response);
+	}
+	//Generally, the data lengths don't have to be the same
+	else{
+		//Referecne detector first
+		ll += maximized_coal_Log_Likelihood(data[0], 
+				psd[0],
+				frequencies[0],
+				(size_t) data_length[0],
+				parameters,
+				detectors[0],
+				generation_method,
+				&fftw_plans[0],
+				&tc_ref,
+				&phic_ref
+				);
+		for(int i=1; i < num_detectors; i++){
+			celestial_horizon_transform(RA,DEC, gps_time, 
+					detectors[i], &phi[i], &theta[i]);
+			parameters->phi=phi[i];
+			parameters->theta=theta[i];
+			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+			parameters->tc = tc_ref + delta_t;
+			parameters->phic = phic_ref;	
+			ll += Log_Likelihood(data[i], 
+					psd[i],
+					frequencies[i],
+					(size_t) data_length[i],
+					parameters,
+					detectors[i],
+					generation_method,
+					&fftw_plans[i]
+					);
+		}
+	}
+	delete [] phi;
+	delete [] theta;
+	return ll;
+}
 /*! \brief log likelihood function for MCMC for GW
  *
  * Wraps the above likelihood functions and unpacks parameters correctly for common GW analysis
@@ -1688,9 +1812,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double tc_ref =0;
 		double phic_ref =0;
 	
-		double *phi = new double[mcmc_num_detectors];
-		double *theta = new double[mcmc_num_detectors];
-		celestial_horizon_transform(RA,DEC, mcmc_gps_time, "Hanford", &phi[0], &theta[0]);
+		//double *phi = new double[mcmc_num_detectors];
+		//double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[0], &phi[0], &theta[0]);
 
 		//create gen_param struct
 		gen_params parameters; 
@@ -1707,43 +1831,102 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.tc = 0;
 		parameters.phic = 0;
 		parameters.incl_angle = incl;
-		parameters.phi=phi[0];
-		parameters.theta=theta[0];
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		parameters.phi=0;
+		parameters.theta=0;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		
-		//Referecne detector first
-		ll += maximized_coal_Log_Likelihood(mcmc_data[0], 
-				mcmc_noise[0],
-				mcmc_frequencies[0],
-				(size_t) mcmc_data_length[0],
-				&parameters,
-				mcmc_detectors[0],
-				mcmc_generation_method,
-				&mcmc_fftw_plans[0],
-				&tc_ref,
-				&phic_ref
-				);
-		for(int i=1; i < mcmc_num_detectors; i++){
-			celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
-					mcmc_detectors[i], &phi[i], &theta[i]);
-			parameters.phi=phi[i];
-			parameters.theta=theta[i];
-			delta_t = DTOA(theta[0], theta[i], mcmc_detectors[0], mcmc_detectors[i]);
-			parameters.tc = tc_ref + delta_t;
-			parameters.phic = phic_ref;	
-			ll += Log_Likelihood(mcmc_data[i], 
-					mcmc_noise[i],
-					mcmc_frequencies[i],
-					(size_t) mcmc_data_length[i],
-					&parameters,
-					mcmc_detectors[i],
-					mcmc_generation_method,
-					&mcmc_fftw_plans[i]
-					);
-		}
-		delete [] phi;
-		delete [] theta;
+		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		
+		//save time by reusing intrinisic part of the waveform
+		//if (samelength){
+		////if (false){
+		//	std::complex<double> *hplus = 
+		//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+		//			mcmc_data_length[0]);
+		//	std::complex<double> *hcross = 
+		//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+		//			mcmc_data_length[0]);
+		//	std::complex<double> *response = 
+		//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+		//			mcmc_data_length[0]);
+		//	fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], 
+		//		hplus, hcross,mcmc_generation_method, &parameters);
+		//		
+		//	fourier_detector_response(mcmc_frequencies[0], mcmc_data_length[0], 
+		//		hplus, hcross, response, parameters.theta, parameters.phi, 
+		//		mcmc_detectors[0]);
+		//	ll += maximized_coal_Log_Likelihood_internal(mcmc_data[0], 
+		//			mcmc_noise[0],
+		//			mcmc_frequencies[0],
+		//			response,
+		//			(size_t) mcmc_data_length[0],
+		//			&mcmc_fftw_plans[0],
+		//			&tc_ref,
+		//			&phic_ref
+		//			);
+		//	for(int i=1; i < mcmc_num_detectors; i++){
+		//		celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
+		//				mcmc_detectors[i], &phi[i], &theta[i]);
+		//		parameters.phi=phi[i];
+		//		parameters.theta=theta[i];
+		//		delta_t = DTOA(theta[0], theta[i], mcmc_detectors[0], mcmc_detectors[i]);
+		//		parameters.tc = tc_ref + delta_t;
+		//		parameters.phic = phic_ref;	
+		//		fourier_detector_response(mcmc_frequencies[i], 
+		//			mcmc_data_length[i], hplus, hcross, response, 
+		//			parameters.theta, parameters.phi, 
+		//			mcmc_detectors[i]);
+		//		for(int j =0; j<mcmc_data_length[i]; j++){
+		//			response[j] *=std::exp(std::complex<double>(0,-parameters.tc*2*M_PI*mcmc_frequencies[i][j]+ phic_ref) );	
+		//		}
+		//		ll += Log_Likelihood_internal(mcmc_data[i], 
+		//				mcmc_noise[i],
+		//				mcmc_frequencies[i],
+		//				response,
+		//				(size_t) mcmc_data_length[i],
+		//				&mcmc_fftw_plans[i]
+		//				);
+		//	}
+		//	free(hplus); free(hcross); free(response);
+		//}
+		////Generally, the data lengths don't have to be the same
+		//else{
+		//	//Referecne detector first
+		//	ll += maximized_coal_Log_Likelihood(mcmc_data[0], 
+		//			mcmc_noise[0],
+		//			mcmc_frequencies[0],
+		//			(size_t) mcmc_data_length[0],
+		//			&parameters,
+		//			mcmc_detectors[0],
+		//			mcmc_generation_method,
+		//			&mcmc_fftw_plans[0],
+		//			&tc_ref,
+		//			&phic_ref
+		//			);
+		//	for(int i=1; i < mcmc_num_detectors; i++){
+		//		celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
+		//				mcmc_detectors[i], &phi[i], &theta[i]);
+		//		parameters.phi=phi[i];
+		//		parameters.theta=theta[i];
+		//		delta_t = DTOA(theta[0], theta[i], mcmc_detectors[0], mcmc_detectors[i]);
+		//		parameters.tc = tc_ref + delta_t;
+		//		parameters.phic = phic_ref;	
+		//		ll += Log_Likelihood(mcmc_data[i], 
+		//				mcmc_noise[i],
+		//				mcmc_frequencies[i],
+		//				(size_t) mcmc_data_length[i],
+		//				&parameters,
+		//				mcmc_detectors[i],
+		//				mcmc_generation_method,
+		//				&mcmc_fftw_plans[i]
+		//				);
+		//	}
+		//}
+		//delete [] phi;
+		//delete [] theta;
 	}
 	//dCS or dCS_log doesn't matter, the two are the same until inside the waveform
 	//else if(false){
@@ -1808,9 +1991,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double tc_ref =0;
 		double phic_ref =0;
 	
-		double *phi = new double[mcmc_num_detectors];
-		double *theta = new double[mcmc_num_detectors];
-		celestial_horizon_transform(RA,DEC, mcmc_gps_time, "Hanford", &phi[0], &theta[0]);
+		//double *phi = new double[mcmc_num_detectors];
+		//double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, "Hanford", &phi[0], &theta[0]);
 
 		//create gen_param struct
 		gen_params parameters; 
@@ -1827,8 +2010,10 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.tc = 0;
 		parameters.phic = 0;
 		parameters.incl_angle = incl;
-		parameters.phi=phi[0];
-		parameters.theta=theta[0];
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		parameters.phi=0;
+		parameters.theta=0;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		parameters.Nmod = mcmc_Nmod;
@@ -1838,47 +2023,49 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		for (int j = 0 ; j<mcmc_Nmod; j++){
 			parameters.betappe[j] = beta[j];
 		}
+
+		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		//parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
 		//parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
 		
 		//Referecne detector first
-		ll += maximized_coal_Log_Likelihood(mcmc_data[0], 
-				mcmc_noise[0],
-				mcmc_frequencies[0],
-				(size_t) mcmc_data_length[0],
-				&parameters,
-				mcmc_detectors[0],
-				//mcmc_generation_method,
-				local_method,
-				&mcmc_fftw_plans[0],
-				&tc_ref,
-				&phic_ref
-				);
-		//double savell = ll;
-		//std::cout<<"HANFORD "<<ll<<std::endl;
-		for(int i=1; i < mcmc_num_detectors; i++){
-			celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
-					mcmc_detectors[i], &phi[i], &theta[i]);
-			parameters.phi=phi[i];
-			parameters.theta=theta[i];
-			delta_t = DTOA(theta[0], theta[i], mcmc_detectors[0], mcmc_detectors[i]);
-			parameters.tc = tc_ref + delta_t;
-			parameters.phic = phic_ref;	
-			ll += Log_Likelihood(mcmc_data[i], 
-					mcmc_noise[i],
-					mcmc_frequencies[i],
-					(size_t) mcmc_data_length[i],
-					&parameters,
-					mcmc_detectors[i],
-					//mcmc_generation_method,
-					local_method,
-					&mcmc_fftw_plans[i]
-					);
-			//std::cout<<"L/V "<<ll-savell<<std::endl;
-			//savell = ll;
-		}
-		delete [] phi;
-		delete [] theta;
+		//ll += maximized_coal_Log_Likelihood(mcmc_data[0], 
+		//		mcmc_noise[0],
+		//		mcmc_frequencies[0],
+		//		(size_t) mcmc_data_length[0],
+		//		&parameters,
+		//		mcmc_detectors[0],
+		//		//mcmc_generation_method,
+		//		local_method,
+		//		&mcmc_fftw_plans[0],
+		//		&tc_ref,
+		//		&phic_ref
+		//		);
+		////double savell = ll;
+		////std::cout<<"HANFORD "<<ll<<std::endl;
+		//for(int i=1; i < mcmc_num_detectors; i++){
+		//	celestial_horizon_transform(RA,DEC, mcmc_gps_time, 
+		//			mcmc_detectors[i], &phi[i], &theta[i]);
+		//	parameters.phi=phi[i];
+		//	parameters.theta=theta[i];
+		//	delta_t = DTOA(theta[0], theta[i], mcmc_detectors[0], mcmc_detectors[i]);
+		//	parameters.tc = tc_ref + delta_t;
+		//	parameters.phic = phic_ref;	
+		//	ll += Log_Likelihood(mcmc_data[i], 
+		//			mcmc_noise[i],
+		//			mcmc_frequencies[i],
+		//			(size_t) mcmc_data_length[i],
+		//			&parameters,
+		//			mcmc_detectors[i],
+		//			//mcmc_generation_method,
+		//			local_method,
+		//			&mcmc_fftw_plans[i]
+		//			);
+		//	//std::cout<<"L/V "<<ll-savell<<std::endl;
+		//	//savell = ll;
+		//}
+		//delete [] phi;
+		//delete [] theta;
 		delete [] parameters.betappe;
 	}
 	else if(mcmc_intrinsic && mcmc_generation_method =="IMRPhenomPv2"){	

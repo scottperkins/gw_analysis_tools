@@ -30,6 +30,7 @@ static gsl_interp_accel **mcmc_accels = NULL;
 static gsl_spline **mcmc_splines = NULL;
 static bool mcmc_log_beta;
 static bool mcmc_intrinsic;
+static bool mcmc_save_waveform;
 //########################################
 
 
@@ -238,6 +239,21 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 			std::string final_checkpoint_filename
 			);
 void MCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
+
+double MCMC_likelihood_extrinisic(bool save_waveform, 
+	gen_params *parameters,
+	std::string generation_method, 
+	int *data_length, 
+	double **frequencies, 
+	std::complex<double> **data, 
+	double **psd, 
+	std::string *detectors, 
+	fftw_outline *fftw_plans, 
+	int num_detectors, 
+	double RA, 
+	double DEC,
+	double gps_time);
+
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
 #endif
