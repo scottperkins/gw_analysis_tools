@@ -547,7 +547,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 		}
 
 		IMRPhenomD<double> model;
-		int dimension = 13;
+		int dimension = 14;
 		source_parameters<double> parameters_in;
 		gen_params waveform_params;
 		double param_p[dimension] ;
@@ -575,6 +575,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 		param_in[10] = spin1sph[2];
 		param_in[11] = spin2sph[2];
 		param_in[12] = parameters->phiRef;
+		param_in[13] = parameters->psi;
 		waveform_params.sky_average=parameters->sky_average;
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
 		std::complex<double> Qp, Qm;
@@ -610,6 +611,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.f_ref = parameters->f_ref;
 			waveform_params.NSflag = parameters->NSflag;
 			waveform_params.sky_average = parameters->sky_average;
+			waveform_params.psi = param_p[13];
 
 
 			fourier_detector_response(frequencies, 
@@ -651,6 +653,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.phiRef = param_m[12];
 			waveform_params.f_ref = parameters->f_ref;
 			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.psi = param_m[13];
 
 			fourier_detector_response(frequencies, 
 				length,

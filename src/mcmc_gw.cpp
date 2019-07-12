@@ -1150,9 +1150,9 @@ void MCMC_method_specific_prep(std::string generation_method, int dimension,doub
 			seeding_var[8]=.1;
 		}
 	}
-	else if(dimension==13 && generation_method =="IMRPhenomPv2"){
+	else if(dimension==14 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=false;
-		std::cout<<"Sampling in parameters: cos inclination, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2, phiRef (all at reference frequency)"<<std::endl;
+		std::cout<<"Sampling in parameters: cos inclination, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2, phiRef, psi (all at reference frequency)"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=.1;
@@ -1393,6 +1393,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		double phi1 = param[10];//Azimuthal angles of spins relative to L
 		double phi2 = param[11];
 		double phiref = param[12];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double psi = param[13];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
 		double delta_t = 0;
 		double tc_ref =0;
 		double fref = 20;
@@ -1427,6 +1428,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		parameters.phiRef=phiref;
 		parameters.f_ref=fref;
 		parameters.incl_angle = incl;
+		parameters.psi = psi;
 		//parameters.phi=phi[0];
 		//parameters.theta=theta[0];
 		parameters.phi=0;
@@ -1447,7 +1449,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			parameters.theta = theta[i];
 			fisher(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 13, &parameters, 
+				mcmc_detectors[i], temp_out, 14, &parameters, 
 				NULL, NULL, mcmc_noise[i]);
 			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
 			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
@@ -1759,7 +1761,7 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 				phic_ref = 0;
 			fourier_detector_response(frequencies[i], 
 				data_length[i], hplus, hcross, response, 
-				parameters->theta, parameters->phi, 
+				parameters->theta, parameters->phi, parameters->psi,
 				detectors[i]);
 			for(int j =0; j<data_length[i]; j++){
 				response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
@@ -2057,6 +2059,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		double phi1 = param[10];//Azimuthal angles of spins relative to L
 		double phi2 = param[11];
 		double phiref = param[12];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double psi = param[13];//Polarization angle
 		double delta_t = 0;
 		double tc_ref =0;
 		double fref = 20;

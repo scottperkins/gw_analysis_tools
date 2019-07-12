@@ -138,7 +138,7 @@ double calculate_snr(std::string detector, /**< detector name - must match the s
         return sqrt(integral);
 }
 
-/* \brief calculates the detector response for a given waveform and detector
+/* \brief calculates the detector response for a given waveform and detector -- polarization angle =0
  */
 int fourier_detector_response(double *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
@@ -171,6 +171,48 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 	{
 		detector_response[i] = fplus * hplus[i] 
 					+ (fcross )*hcross[i];
+	}	
+	return status;
+	
+}
+/* \brief calculates the detector response for a given waveform and detector
+ */
+int fourier_detector_response(double *frequencies, /**<array of frequencies corresponding to waveform*/
+			int length,/**< length of frequency/waveform arrays*/
+			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<double> *detector_response, /**< [out] detector response*/
+			double theta, /**< polar angle (rad) theta in detector frame*/
+			double phi, /**< azimuthal angle (rad) phi in detector frame*/ 
+			double psi, /**< polarization angle (rad) phi in detector frame*/ 
+			std::string detector/**< detector - list of supported detectors in noise_util*/
+			)
+{
+	int status=1;
+	double fplus, fcross, Fplus, Fcross, c2psi, s2psi;
+	
+	if(	detector == "LIGO" || 
+		detector == "Livingston" || 
+		detector == "LIVINGSTON" || 
+		detector == "livingston" || 
+		detector == "Hanford" || 
+		detector == "HANFORD" || 
+		detector == "hanford" || 
+		detector == "VIRGO" ||
+		detector == "Virgo" ||
+		detector == "virgo")
+	{
+		fplus = right_interferometer_plus(theta,phi);
+		fcross = right_interferometer_cross(theta,phi);	
+		c2psi = std::cos(2*psi);
+		s2psi = std::sin(2*psi);
+		Fplus = fplus*c2psi- fcross*s2psi;
+		Fcross = fplus*s2psi+ fcross*s2psi;
+	}
+	for (int i =0; i <length; i++)
+	{
+		detector_response[i] = Fplus * hplus[i] 
+					+ (Fcross )*hcross[i];
 	}	
 	return status;
 	
@@ -214,6 +256,7 @@ int fourier_detector_response(double *frequencies, /**< double array of frequenc
 			response, 
 			parameters->theta, 
 			parameters->phi, 
+			parameters->psi, 
 			detector 
 			) ;
 	

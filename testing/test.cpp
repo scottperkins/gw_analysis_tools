@@ -2135,7 +2135,7 @@ void test12()
 	double tc = 2;
 	params.phiRef=1;
 	params.f_ref =20;
-	params.Luminosity_Distance = 125.;
+	params.Luminosity_Distance = 100.;
 	params.NSflag = false;
 	params.incl_angle = 0.;//M_PI/3.;
 	params.sky_average=false;
@@ -2143,6 +2143,7 @@ void test12()
 	params.betappe = new double[1];
 	params.bppe[0] = -1;
 	params.betappe[0] = (pow(0./(3e5),4));
+	params.psi = 0;
 	//params.betappe[0] = log(pow(100./(3e5),4));
 	params.Nmod = 1;
 	//std::string injection_method = "dCS_IMRPhenomD";
@@ -2218,10 +2219,10 @@ void test12()
 	delete [] params.betappe;
 	//#########################################################
 	//mcmc options
-	int dimension = 13;
-	double initial_pos[dimension]={.99,2,.7,log(125),log(9.7), .2, .43,.01,.1,.1, .1,.1,1};
+	int dimension = 14;
+	double initial_pos[dimension]={.99,2,.7,log(100),log(9.7), .2, .43,.01,.1,.1, .1,.1,1, .1};
 	double *seeding_var = NULL;
-	int n_steps = 100000;
+	int n_steps = 150000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -3993,13 +3994,14 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	if (std::exp(pos[3])<10 || std::exp(pos[3])>10000){return a;}//DL
 	if (std::exp(pos[4])<2 || std::exp(pos[4])>100){return a;}//chirpmass
 	if ((pos[5])<.1 || (pos[5])>.249999){return a;}//eta
-	if ((pos[6])<-.9 || (pos[6])>.9){return a;}//chi1 
-	if ((pos[7])<-.9 || (pos[7])>.9){return a;}//chi2
+	if ((pos[6])<0 || (pos[6])>.9){return a;}//chi1 
+	if ((pos[7])<0 || (pos[7])>.9){return a;}//chi2
 	if ((pos[8])<0 || (pos[8])>M_PI){return a;}//theta1
 	if ((pos[9])<0 || (pos[9])>M_PI){return a;}//theta2
 	if ((pos[10])<0 || (pos[10])>2*M_PI){return a;}//phi1
 	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phi2
 	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phiRef
+	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//polarization angle
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
 	//else {return pos[4]+3*pos[3];}
 	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))

@@ -90,6 +90,8 @@ struct gen_params
 	/*! spherical angles for the source location relative to the detector*/
 	double theta;
 	double phi;
+	//Polarization angle
+	double psi =0 ;
 	/*! BOOL flag for early termination of NS binaries*/
 	bool NSflag;
 

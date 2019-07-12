@@ -38,6 +38,15 @@ int fourier_detector_response(double *frequencies,
 			double theta, 
 			double phi, 
 			std::string detector);
+int fourier_detector_response(double *frequencies, 
+			int length,
+			std::complex<double> *hplus, 
+			std::complex<double> *hcross, 
+			std::complex<double> *detector_response, 
+			double theta, 
+			double phi, 
+			double psi, 
+			std::string detector);
 
 int fourier_detector_response(double *frequencies, 
 			int length,
