@@ -82,6 +82,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	int i;
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
+	//std::cout<<MH_ratio<<std::endl;
 	if(MH_ratio< beta){
 		for ( i=0;i<sampler->dimension; i ++)
 		{

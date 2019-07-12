@@ -449,7 +449,6 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 						)
 {
 
-
 	//Calculate spin parameters chil and chip
 	T chi1_l = params->spin1z;
 	T chi2_l = params->spin2z;
@@ -503,7 +502,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 
 	//azimuthal angle of J0 in the source frame
 	T phiJ_sf;
-	phiJ_sf = atan(J0y_sf/J0x_sf); //*NOTE* lalsuite uses "atan2" - not standard
+	phiJ_sf = atan(J0y_sf/J0x_sf); //*NOTE* lalsuite uses "atan2" - doesn't work with adolc
 	params->phi_aligned = - phiJ_sf;
 
 	//Rotation of the system s.t. the total J is pointed in zhat
@@ -575,6 +574,10 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
   	T XdotPArun = tmp_x*PArunx_Jf+tmp_y*PAruny_Jf+tmp_z*PArunz_Jf;
   	T XdotQArun = tmp_x*QArunx_Jf+tmp_y*QAruny_Jf+tmp_z*QArunz_Jf;
   	params->zeta_polariz = atan(XdotQArun / XdotPArun);
+	//if(std::is_same< double, T>::value){
+	//	std::cout<<params->spin1z<<std::endl;
+	//
+	//}
 	
 }
 

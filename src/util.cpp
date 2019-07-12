@@ -1052,9 +1052,9 @@ double gps_to_JD(double gps_time)
  */
 void transform_cart_sph(double *cartvec, double *sphvec)
 {
-	sphvec[0]  = cartvec[0]*cartvec[0] +
+	sphvec[0]  = std::sqrt(cartvec[0]*cartvec[0] +
 			cartvec[2]*cartvec[2] +
-			cartvec[1] * cartvec[1] ;
+			cartvec[1] * cartvec[1]) ;
 	sphvec[1] = std::acos(cartvec[2]/ sphvec[0]);
 	sphvec[2] = std::atan(cartvec[1]/ cartvec[0]);
 

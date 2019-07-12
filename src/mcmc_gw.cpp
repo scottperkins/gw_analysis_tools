@@ -1150,6 +1150,26 @@ void MCMC_method_specific_prep(std::string generation_method, int dimension,doub
 			seeding_var[8]=.1;
 		}
 	}
+	else if(dimension==13 && generation_method =="IMRPhenomPv2"){
+		mcmc_intrinsic=false;
+		std::cout<<"Sampling in parameters: cos inclination, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2, phiRef (all at reference frequency)"<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
+			seeding_var[0]=.1;
+			seeding_var[1]=.5;
+			seeding_var[2]=.1;
+			seeding_var[3]=.1;
+			seeding_var[4]=.1;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=.1;
+			seeding_var[9]=.1;
+			seeding_var[10]=.1;
+			seeding_var[11]=.1;
+			seeding_var[12]=.1;
+		}
+	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral_log" 
 		|| generation_method == "ppE_IMRPhenomD_IMR_log"
 		|| generation_method == "ppE_IMRPhenomD_Inspiral"
@@ -1354,7 +1374,95 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				}
 			} 
 		}
+		delete [] phi; delete [] theta;
 
+		deallocate_2D_array(temp_out, dimension,dimension);
+	}
+	else if(!mcmc_intrinsic && mcmc_generation_method =="IMRPhenomPv2"){	
+		//unpack parameter vector
+		double incl = acos(param[0]);
+		double RA = param[1];
+		double DEC = param[2];
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
+		double eta = param[5];
+		double chi1 = param[6];
+		double chi2 = param[7];
+		double theta1 = param[8];//Polar angles of spins relative to L
+		double theta2 = param[9];
+		double phi1 = param[10];//Azimuthal angles of spins relative to L
+		double phi2 = param[11];
+		double phiref = param[12];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double delta_t = 0;
+		double tc_ref =0;
+		double fref = 20;
+		//transform
+		double spin1[3];
+		double spin2[3];
+		double spin1sphr[3] =  {chi1, theta1, phi1};
+		double spin2sphr[3] =  {chi2, theta2, phi2};
+		transform_sph_cart( &spin1sphr[0], &spin1[0]);
+		transform_sph_cart( &spin2sphr[0], &spin2[0]);
+		double *phi = new double[mcmc_num_detectors];
+		double *theta = new double[mcmc_num_detectors];
+	
+		//double *phi = new double[mcmc_num_detectors];
+		//double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[0], &phi[0], &theta[0]);
+
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = spin1[0];
+		parameters.spin1[1] = spin1[1];
+		parameters.spin1[2] = spin1[2];
+		parameters.spin2[0] = spin2[0];
+		parameters.spin2[1] = spin2[1];
+		parameters.spin2[2] = spin2[2];
+		parameters.Luminosity_Distance = DL;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		//parameters.phic = 0;
+		parameters.phiRef=phiref;
+		parameters.f_ref=fref;
+		parameters.incl_angle = incl;
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		
+		for(int j =0; j<dimension; j++){
+			for(int k =0; k<dimension; k++)
+			{
+				output[j][k] =0;
+			}
+		} 
+		double **temp_out = allocate_2D_array(dimension,dimension);
+		for (int i =0; i<mcmc_num_detectors; i++){
+			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
+			parameters.phi = phi[i];
+			parameters.theta = theta[i];
+			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+				"MCMC_"+mcmc_generation_method+"_Full", 
+				mcmc_detectors[i], temp_out, 13, &parameters, 
+				NULL, NULL, mcmc_noise[i]);
+			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
+			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
+			//	mcmc_detectors[i], &dphi_dra, &dtheta_dra, 
+			//	&dphi_ddec,&dtheta_ddec);
+			for(int j =0; j<dimension; j++){
+				for(int k =0; k<dimension; k++)
+				{
+					output[j][k] +=temp_out[j][k];
+					//std::cout<<j<<" "<<k<<" "<<output[j][k]<<std::endl;
+				}
+			} 
+		}
+
+		delete [] phi; delete [] theta;
 
 		deallocate_2D_array(temp_out, dimension,dimension);
 	}
@@ -1611,6 +1719,7 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 	double *theta = new double[num_detectors];
 	celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
 	double tc_ref, phic_ref, ll=0, delta_t;
+	//Needs some work
 	if (save_waveform){
 	//if (false){
 		std::complex<double> *hplus = 
@@ -1644,7 +1753,10 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 			parameters->theta=theta[i];
 			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
 			parameters->tc = tc_ref + delta_t;
-			parameters->phic = phic_ref;	
+			//parameters->phic = phic_ref;	
+			
+			if(generation_method=="IMRPhenomPv2")
+				phic_ref = 0;
 			fourier_detector_response(frequencies[i], 
 				data_length[i], hplus, hcross, response, 
 				parameters->theta, parameters->phi, 
@@ -1928,6 +2040,65 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		//delete [] phi;
 		//delete [] theta;
 	}
+	else if(!mcmc_intrinsic && mcmc_generation_method =="IMRPhenomPv2"){	
+	//else if(false){	
+		//unpack parameter vector
+		//All parameters defined at 20Hz
+		double incl = acos(param[0]);
+		double RA = param[1];
+		double DEC = param[2];
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
+		double eta = param[5];
+		double chi1 = param[6];
+		double chi2 = param[7];
+		double theta1 = param[8];//Polar angles of spins relative to L
+		double theta2 = param[9];
+		double phi1 = param[10];//Azimuthal angles of spins relative to L
+		double phi2 = param[11];
+		double phiref = param[12];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double delta_t = 0;
+		double tc_ref =0;
+		double fref = 20;
+		//transform
+		double spin1[3];
+		double spin2[3];
+		double spin1sphr[3] =  {chi1, theta1, phi1};
+		double spin2sphr[3] =  {chi2, theta2, phi2};
+		transform_sph_cart( &spin1sphr[0], &spin1[0]);
+		transform_sph_cart( &spin2sphr[0], &spin2[0]);
+	
+		//double *phi = new double[mcmc_num_detectors];
+		//double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[0], &phi[0], &theta[0]);
+
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = spin1[0];
+		parameters.spin1[1] = spin1[1];
+		parameters.spin1[2] = spin1[2];
+		parameters.spin2[0] = spin2[0];
+		parameters.spin2[1] = spin2[1];
+		parameters.spin2[2] = spin2[2];
+		parameters.Luminosity_Distance = DL;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		//parameters.phic = 0;
+		parameters.phiRef=phiref;
+		parameters.f_ref=fref;
+		parameters.incl_angle = incl;
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		
+		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		
+	}
 	//dCS or dCS_log doesn't matter, the two are the same until inside the waveform
 	//else if(false){
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="dCS_IMRPhenomD_log" 
@@ -2142,6 +2313,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	//if(isnan(ll)){
 		//std::cout<<ll<<std::endl;
 	//}
+	//cout.precision(15);
+	//std::cout<<ll<<std::endl;
 	//if(isnan(ll))
 	//	std::cout<<"NAN "<<chain_id<<std::endl;
 	return ll;

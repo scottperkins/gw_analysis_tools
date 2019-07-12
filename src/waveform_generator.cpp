@@ -208,6 +208,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			modeld.PhenomPv2_Param_Transform(&params);
 		else {
 			//compute transform with spins and J inclination
+			//Not supported at the moment
 			modeld.PhenomPv2_Param_Transform_J(&params);
 		}
 		//Calculate Waveform

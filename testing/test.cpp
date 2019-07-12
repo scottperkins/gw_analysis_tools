@@ -88,7 +88,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test18();	
+	test12();	
 	return 0;
 }
 
@@ -2087,31 +2087,15 @@ void test13()
 }
 void test12()
 {
-	//int raw_length = 28673;
-	//int cutoff = 600;
-	//int high_cut = 11000;
-	//int length = high_cut-cutoff;
-	
-	int raw_length=  4096;
-	int cutoff = 50;
-	int length = raw_length-cutoff;
-
+	int length = 4000;
+	//int num_detectors =3;
 	int num_detectors =2;
-	//int num_detectors =1;
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
+	//detectors[2] = "Virgo";
 
-	double **temp_data = allocate_2D_array(raw_length,2);
-	double *temp_psd = (double *)malloc(sizeof(double)*raw_length);
-	double *temp_freq = (double *)malloc(sizeof(double)*raw_length);
-	//std::string filebase = "testing/data/gw170608_";
-	//std::string filebase = "testing/data/gw151226_";
-	std::string filebase = "testing/data/gw150914_";
-	//std::string filebase = "testing/data/gw_150914_";
-	double gps_time = 1126259462;//TESTING -- gw150914
-	//double gps_time = 1135136350.6;//TESTING -- gw151226
-	//double gps_time = 1180922494.5; //TESTING -- gw170608
+	double gps_time = 1135136350.6;//TESTING -- gw151226
 
 	std::complex<double> **data= (std::complex<double>**)malloc(
 			sizeof(std::complex<double>*)*num_detectors);
@@ -2120,6 +2104,7 @@ void test12()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =length;
 	data_length[1] =length;
+	//data_length[2] =length;
 
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
@@ -2128,37 +2113,116 @@ void test12()
 		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
 		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
 	}
-	read_file(filebase+"data_h.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_h.csv",temp_psd);
-	read_file(filebase+"freq_h.csv",temp_freq);
-	//read_file(filebase+"data.csv",temp_data, raw_length,2);
-	//read_file(filebase+"psd.csv",temp_psd);
-	//read_file(filebase+"freq.csv",temp_freq);
-	for(int j = 0; j<data_length[0]; j++){
-		frequencies[0][j] = temp_freq[j+cutoff];	
-		psd[0][j] = (temp_psd[j+cutoff]);	
-		data[0][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
-	}
-	read_file(filebase+"data_l.csv",temp_data, raw_length,2);
-	read_file(filebase+"psd_l.csv",temp_psd);
-	read_file(filebase+"freq_l.csv",temp_freq);
-	for(int j = 0; j<data_length[1]; j++){
-		frequencies[1][j] = temp_freq[j+cutoff];	
-		psd[1][j] = (temp_psd[j+cutoff]);	
-		data[1][j] = std::complex<double>(temp_data[j+cutoff][0],temp_data[j+cutoff][1]);	
-	}
-
-	deallocate_2D_array(temp_data,raw_length,2);
-	free(temp_psd);
-	free(temp_freq);
+	//#########################################################
+	//Make trial data
+	gen_params params;
+	//double RA = 5.;
+	//double DEC = 1.;
+	double RA = 2;
+	double DEC = .7;
+	double chirpm = 9.71;
+	double eta =.2;
+	params.mass1 = calculate_mass1(chirpm,eta);
+	params.mass2 = calculate_mass2(chirpm,eta);
+	complex<double> waveformout[length];
+	params.spin1[0] = 0;
+	params.spin1[1] = .01;
+	params.spin1[2] = .43;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin2[2] = .0;
+	params.phic = .0;
+	double tc = 2;
+	params.phiRef=1;
+	params.f_ref =20;
+	params.Luminosity_Distance = 125.;
+	params.NSflag = false;
+	params.incl_angle = 0.;//M_PI/3.;
+	params.sky_average=false;
+	params.bppe = new int[1];
+	params.betappe = new double[1];
+	params.bppe[0] = -1;
+	params.betappe[0] = (pow(0./(3e5),4));
+	//params.betappe[0] = log(pow(100./(3e5),4));
+	params.Nmod = 1;
+	//std::string injection_method = "dCS_IMRPhenomD";
+	std::string injection_method = "IMRPhenomD";
+	//std::string injection_method = "IMRPhenomPv2";
+	//params.f_ref = 30.5011;
+	//params.phiRef =58.944425/2.;
 	
+	//############################################################
+	double fhigh =500;
+	double flow =10;
+	double df = (fhigh-flow)/(length-1);
+	//double *freq = (double *)malloc(sizeof(double) * length);
+	double freq[length];
+
+	cout<<"Freq spacing "<<df<<endl;
+
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+	//############################################################
+	double noise[length];
+	populate_noise(freq,"Hanford_O1_fitted", noise,length);
+	for (int i =0; i<length;i++){
+		noise[i] = noise[i]*noise[i];
+	}
+	//############################################################
+
+	params.phi = 0;
+	params.theta = 0;
+	params.tc = tc; 
+	celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
+	
+	fourier_detector_response(freq,length, waveformout,"Hanford",injection_method, &params);
+	double temptheta = params.theta;
+	for(int j = 0; j<data_length[0]; j++){
+		frequencies[0][j] = freq[j];	
+		psd[0][j] = noise[j];	
+		data[0][j] = waveformout[j];	
+	}
+	//double snr2 = pow(calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	double snr2 = pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Hanford", injection_method,&params),2);
+
+	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
+	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
+	std::cout<<"Time at Livingston of injection: "<<params.tc<<std::endl;
+	fourier_detector_response(freq,length, waveformout,"Livingston",injection_method, &params);
+
+	for(int j = 0; j<data_length[0]; j++){
+		frequencies[1][j] = freq[j];	
+		psd[1][j] = (noise[j]);	
+		data[1][j] = waveformout[j];	
+	}
+	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Livingston", injection_method,&params),2);
+	//celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
+	//params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
+	//std::cout<<"Time at Virgo of injection: "<<params.tc<<std::endl;
+	//fourier_detector_response(freq,length, waveformout,"Virgo",injection_method, &params);
+
+	//for(int j = 0; j<data_length[0]; j++){
+	//	frequencies[2][j] = freq[j];	
+	//	psd[2][j] = (noise[j]);	
+	//	data[2][j] = waveformout[j];	
+	//}
+	////#########################################################
+	////snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	//snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", injection_method,&params),2);
+	std::cout<<"SNR of injection: "<<sqrt(snr2)<<std::endl;
+	//snr = data_snr_maximized_extrinsic(freq,length, waveformout,"Hanford_O1_fitted",method,params );
+	//std::cout<<"SNR of injection calculated as data: "<<snr<<std::endl;
+
+	delete [] params.bppe;
+	delete [] params.betappe;
 	//#########################################################
 	//mcmc options
-	int dimension = 7;
-	double initial_pos[dimension]={0,log(30), .24, .0,.0,0,0};
+	int dimension = 13;
+	double initial_pos[dimension]={.99,2,.7,log(125),log(9.7), .2, .43,.01,.1,.1, .1,.1,1};
 	double *seeding_var = NULL;
-	int n_steps = 100;
-	int chain_N= 10;
+	int n_steps = 100000;
+	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -2170,8 +2234,8 @@ void test12()
 	
 	int Nmod = 0;
 	int *bppe = NULL;
-	int numThreads = 20;
-	bool pool = false;
+	int numThreads = 4;
+	bool pool = true;
 	//#########################################################
 	//gw options
 	std::string generation_method = "IMRPhenomPv2";
@@ -2203,7 +2267,7 @@ void test12()
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 	}
-	write_file(chainfile, output_transform, n_steps, dimension);
+	write_file(chainfile, output[0], n_steps, dimension);
 	//output hottest chain too
 	chainfile = "testing/data/mcmc_output_Pv2_hot.csv";
 	for(int j = 0; j<n_steps;j++){
@@ -2215,7 +2279,7 @@ void test12()
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 	}
-	write_file(chainfile, output_transform, n_steps, dimension);
+	write_file(chainfile, output[chain_N-1], n_steps, dimension);
 
 	deallocate_3D_array(output, chain_N, n_steps, dimension);
 	for(int i =0; i< num_detectors; i++){
@@ -3922,17 +3986,24 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
-	if ((pos[0])<-1 || (pos[0])>1){return a;}
-	else if (std::exp(pos[1])<2 || std::exp(pos[1])>100){return a;}
-	else if ((pos[2])<.1 || (pos[2])>.249999){return a;}
-	else if ((pos[3])<0 || (pos[3])>.9){return a;}
-	else if ((pos[4])<0 || (pos[4])>.9){return a;}
-	else if ((pos[5])<0|| (pos[5])>M_PI){return a;}
-	else if ((pos[6])<0|| (pos[6])>M_PI){return a;}
-	else if ((pos[7])<0|| (pos[5])>2*M_PI){return a;}
-	else if ((pos[8])<0|| (pos[6])>2*M_PI){return a;}
-	//Flat in cos(iota), cos(theta_i)
-	else {return  log(std::sin(pos[6])) +log( std::sin(pos[7]));}
+	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
+	if ((pos[0])<-1 || (pos[0])>1){return a;}//cos \iota
+	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}//RA
+	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}//DEC
+	if (std::exp(pos[3])<10 || std::exp(pos[3])>10000){return a;}//DL
+	if (std::exp(pos[4])<2 || std::exp(pos[4])>100){return a;}//chirpmass
+	if ((pos[5])<.1 || (pos[5])>.249999){return a;}//eta
+	if ((pos[6])<-.9 || (pos[6])>.9){return a;}//chi1 
+	if ((pos[7])<-.9 || (pos[7])>.9){return a;}//chi2
+	if ((pos[8])<0 || (pos[8])>M_PI){return a;}//theta1
+	if ((pos[9])<0 || (pos[9])>M_PI){return a;}//theta2
+	if ((pos[10])<0 || (pos[10])>2*M_PI){return a;}//phi1
+	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phi2
+	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phiRef
+	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
+	//else {return pos[4]+3*pos[3];}
+	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
+		+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 }
 double test_lp_GW_7dim(double *pos, int dim, int chain_id)
 {
