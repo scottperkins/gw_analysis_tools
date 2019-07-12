@@ -4,9 +4,9 @@ import corner
 import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
-burnin = 0
+burnin = 50000
 datasets = []
-numsets = 1
+numsets = 3
 for i in np.arange(numsets):
     #datasets.append( np.loadtxt("data/mcmc_output_injection{}.csv".format(i+1),delimiter=','))
     datasets.append( np.loadtxt("data/mcmc_output_injection{}_1226.csv".format(i+1),delimiter=','))
@@ -24,15 +24,15 @@ for x in data:
 #    if (i%10==0):
 #        data.append(dataload[i]) 
 #data = data[1000:]
-for i in np.arange(9):
-    parameter = [x[i] for x in data]
-    plt.plot(parameter)
-    plt.show()
-    plt.close()
+#for i in np.arange(9):
+#    parameter = [x[i] for x in data]
+#    plt.plot(parameter)
+#    plt.show()
+#    plt.close()
 ndim, nsamples = 8, len(data) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 #labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
-labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$", r'\sqrt{\alpha}']
+labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$", r"\sqrt{\alpha}"]
 
 figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 #plt.savefig("mcmc_testing_injection.pdf")

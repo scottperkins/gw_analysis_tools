@@ -7,12 +7,10 @@ from libcpp.vector cimport vector
 from libcpp.string cimport string
 from libcpp.complex cimport complex
 import os
-#scriptpath = os.path.dirname(os.path.realpath(__file__)) 
 import sys
-#sys.path.append(scriptpath)
-#sys.path.append(scriptpath+"/src")
 cimport waveform_generator_ext
 #from waveform_generator_ext import gen_params
+
 cdef extern from "autocorrelation.h" :
     void write_auto_corr_file_from_data_file( 
                 string autocorr_filename,
@@ -35,6 +33,15 @@ cdef extern from "autocorrelation.h" :
 cdef extern from "mcmc_gw.h" :
     struct fftw_outline:
         pass
+    #double Log_Likelihood(double *data_real,
+    #    double *data_imag,
+    #    double *psd,
+    #    size_t length,
+    #    gen_params *params,
+    #    string detector,
+    #    string generation_method,
+    #    fftw_outline *plan) 
+        
 #    double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 #				size_t length,
 #				double *real_data,
@@ -74,3 +81,4 @@ cdef extern from "mcmc_gw.h" :
 #				)
     void allocate_FFTW_mem_forward(fftw_outline *plan,int length)
     void deallocate_FFTW_mem(fftw_outline *plan) 
+    

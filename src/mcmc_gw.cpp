@@ -2024,7 +2024,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 			parameters.betappe[j] = beta[j];
 		}
 
-		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		//parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
 		//parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
 		

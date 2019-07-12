@@ -22,7 +22,7 @@ labels = [r"$cos\iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi
 dataplot = []
 for x in data:
     dataplot.append(x)
-    dataplot[-1][-1]=(dataplot[-1][-1])**(1./4.)*(3e5)
+    #dataplot[-1][-1]=(dataplot[-1][-1])**(1./4.)*(3e5)
 dataplot = np.asarray(dataplot)
 figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 plt.savefig("mcmc_testing_EdGB_singlerun.pdf")
@@ -40,36 +40,36 @@ plt.hist(alphahist,bins=100,density=True)
 plt.savefig("alpha_hist_EdGBsinglerun.pdf")
 plt.close()
 ##############################################################
-data = np.loadtxt("data/mcmc_output_EdGB_hot.csv",delimiter=',')
-if burnin:
-    data = data[burninlength:]
-#data = data[:30000]
-#data = data[:-100]
-#chirpmasses = [x[1] for x in data]
-#plt.plot(chirpmasses)
-#plt.show()
+#data = np.loadtxt("data/mcmc_output_EdGB_hot.csv",delimiter=',')
+#if burnin:
+#    data = data[burninlength:]
+##data = data[:30000]
+##data = data[:-100]
+##chirpmasses = [x[1] for x in data]
+##plt.plot(chirpmasses)
+##plt.show()
+##plt.close()
+#ndim, nsamples = 9, len(data) 
+##labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
+#
+#dataplot = []
+#for x in data:
+#    dataplot.append(x)
+#    dataplot[-1][-1]=(dataplot[-1][-1])**(1./4.)*(3e5)
+#figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
+#plt.savefig("mcmc_testing_EdGB_hot.pdf")
 #plt.close()
-ndim, nsamples = 9, len(data) 
-#labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
-
-dataplot = []
-for x in data:
-    dataplot.append(x)
-    dataplot[-1][-1]=(dataplot[-1][-1])**(1./4.)*(3e5)
-figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-plt.savefig("mcmc_testing_EdGB_hot.pdf")
-plt.close()
 
 ##############################################################
-autocorr = np.loadtxt("data/auto_corr_mcmc_EdGB.csv",delimiter=',')
-lengths = autocorr[0]
-autocorr = autocorr[1:]
-
-for i in np.arange(len(autocorr)):
-    plt.plot(lengths,autocorr[i], label=labels[i])
-plt.legend()
-plt.savefig("autocorr_testing_EdGB.pdf")
-plt.close()
+#autocorr = np.loadtxt("data/auto_corr_mcmc_EdGB.csv",delimiter=',')
+#lengths = autocorr[0]
+#autocorr = autocorr[1:]
+#
+#for i in np.arange(len(autocorr)):
+#    plt.plot(lengths,autocorr[i], label=labels[i])
+#plt.legend()
+#plt.savefig("autocorr_testing_EdGB.pdf")
+#plt.close()
 
 ##############################################################
 #data = np.loadtxt("data/mcmc_output_EdGB.csv",delimiter=',')

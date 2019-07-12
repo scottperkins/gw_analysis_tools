@@ -8,7 +8,7 @@ from phenompy.utilities import calculate_mass1, calculate_mass2
 burnin = False
 burninlength = 10000
 datasets = []
-numsets = 4
+numsets = 3
 for i in np.arange(numsets):
     datasets.append( np.loadtxt("data/mcmc_output_DFull{}.csv".format(i+1),delimiter=','))
 data = []

@@ -5,6 +5,8 @@ from phenompy.gr import IMRPhenomD_detector_frame as imr
 from phenompy.utilities import s_solm, mpc, calculate_mass1,calculate_mass2
 from phenompy.analysis_utilities import log_likelihood_maximized_coal as ll
 from time import time
+from gw_analysis_tools_py import waveform_generator_ext
+from gw_analysis_tools_py import mcmc_routines_ext
 
 show_plots = True
 

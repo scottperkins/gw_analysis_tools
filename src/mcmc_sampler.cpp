@@ -306,8 +306,11 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 
 	//########################################################
 	//########################################################
-	//Set chain 0 to highest priority
-	samplerptr->priority[0] = 0;
+	//Set chains with temp 1 to highest priority
+	for(int i =0 ;i<samplerptr->chain_N; i++){
+		if(samplerptr->chain_temps[i]==1)
+			samplerptr->priority[i] = 0;
+	}
 	//########################################################
 	//########################################################
 
@@ -391,8 +394,8 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	
 	//############################################################
 	//Write ll lp to file
-	write_file("testing/data/mcmc_ll_lp.csv",samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-	write_file("testing/data/mcmc_ll_lp_hot.csv",samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	//write_file("testing/data/mcmc_ll_lp.csv",samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	//write_file("testing/data/mcmc_ll_lp_hot.csv",samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
 	//############################################################
 	//##############################################################
 	int swp_accepted=0, swp_rejected=0;
@@ -534,8 +537,12 @@ void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for s
 	
 	//########################################################
 	//########################################################
-	//Set chain 0 to highest priority
-	samplerptr->priority[0] = 0;
+	//Set chains with temp 1 to highest priority
+	for(int i =0 ;i<samplerptr->chain_N; i++){
+		if(samplerptr->chain_temps[i]==1)
+			samplerptr->priority[i] = 0;
+	}
+	//########################################################
 	//########################################################
 	
 	//########################################################
@@ -728,8 +735,8 @@ void mcmc_step_threaded(int j)
 			update_history(samplerptr,samplerptr->output[j][k+i+1], j);
 		//##############################################################
 		//Trouble shooting -- save lp and ll
-		samplerptr->ll_lp_output[j][k+i+1][0]= samplerptr->current_likelihoods[j];
-		samplerptr->ll_lp_output[j][k+i+1][1]= samplerptr->lp(samplerptr->output[j][k+i+1],samplerptr->dimension, j);
+		//samplerptr->ll_lp_output[j][k+i+1][0]= samplerptr->current_likelihoods[j];
+		//samplerptr->ll_lp_output[j][k+i+1][1]= samplerptr->lp(samplerptr->output[j][k+i+1],samplerptr->dimension, j);
 		//##############################################################
 	}
 	if(!samplerptr->de_primed[j]) 

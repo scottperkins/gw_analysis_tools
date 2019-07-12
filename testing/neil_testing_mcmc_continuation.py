@@ -13,7 +13,7 @@ import corner
 #plt.hist(data,bins=100,density=True)
 #x = np.linspace(-3,3)
 data_sets = []
-numsets =3
+numsets =1
 for i in np.arange(numsets):
     data_sets.append(  np.loadtxt("data/neil_mcmc_output{}.csv".format(i+1),delimiter=','))
 combined_data = []

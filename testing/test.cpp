@@ -88,13 +88,13 @@ static double *psd=NULL;
 
 int main(){
 
-	test15();	
+	test18();	
 	return 0;
 }
 
 void test28()
 {
-	int length = 5000;
+	int length = 4000;
 	//int num_detectors =3;
 	int num_detectors =2;
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
@@ -140,22 +140,23 @@ void test28()
 	params.spin2[2] = .0;
 	params.phic = .0;
 	double tc = 2;
-	params.Luminosity_Distance = 525.;
+	params.Luminosity_Distance = 125.;
 	params.NSflag = false;
 	params.incl_angle = 0.;//M_PI/3.;
 	params.sky_average=false;
 	params.bppe = new int[1];
 	params.betappe = new double[1];
 	params.bppe[0] = -1;
-	params.betappe[0] = log(pow(10./(3e5),4));
+	params.betappe[0] = (pow(0./(3e5),4));
 	//params.betappe[0] = log(pow(100./(3e5),4));
 	params.Nmod = 1;
-	std::string injection_method = "dCS_IMRPhenomD_log";
+	//std::string injection_method = "dCS_IMRPhenomD";
+	std::string injection_method = "IMRPhenomD";
 	//params.f_ref = 30.5011;
 	//params.phiRef =58.944425/2.;
 	
 	//############################################################
-	double fhigh =1000;
+	double fhigh =500;
 	double flow =10;
 	double df = (fhigh-flow)/(length-1);
 	//double *freq = (double *)malloc(sizeof(double) * length);
@@ -165,7 +166,6 @@ void test28()
 
 	for(int i=0;i<length;i++)
 		freq[i]=flow+i*df;
-	//############################################################
 	//############################################################
 	double noise[length];
 	populate_noise(freq,"Hanford_O1_fitted", noise,length);
@@ -238,10 +238,11 @@ void test28()
 	bool pool = true;
 	//#########################################################
 	//gw options
-	std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	std::string generation_method = "dCS_IMRPhenomD_root_alpha";
 	
-	std::string iteration="9";
-	std::string previteration="8";
+	std::string iteration="3";
+	std::string previteration="2";
 	
 	//std::string autocorrfile = "testing/data/auto_corr_mcmc_injection"+iteration+".csv";
 	////std::string autocorrfile = "";
@@ -257,7 +258,7 @@ void test28()
 	std::string startcheckfile = "testing/data/mcmc_checkpoint_injection"+previteration+"_1226.csv";
 
 	continue_MCMC_MH_GW(startcheckfile,output, dimension, n_steps, 
-			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
+			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,"","",checkfile);	
@@ -276,14 +277,15 @@ void test28()
 			output_transform[j][5]=output[0][j][5];
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
-			output_transform[j][8]=exp(output[0][j][8]);
+			//output_transform[j][8]=exp(output[0][j][8]);
+			output_transform[j][8]=(output[0][j][8]);
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
 	int segs = 10;
 	double target_corr = .01;
 	//write_file_auto_corr_from_data_file_accel(autocorrfile, chainfile,dimension,n_steps,segs,target_corr);
-	write_auto_corr_file_from_data_file(autocorrfile, chainfile,n_steps,dimension,segs,target_corr,numThreads);
+	//write_auto_corr_file_from_data_file(autocorrfile, chainfile,n_steps,dimension,segs,target_corr,numThreads);
 
 	//output hottest chain too
 	chainfile = "testing/data/mcmc_output_injection"+iteration+"_1226_hot.csv";
@@ -296,7 +298,7 @@ void test28()
 			output_transform[j][5]=output[chain_N-1][j][5];
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
-			output_transform[j][8]=exp(output[chain_N-1][j][8]);
+			output_transform[j][8]=(output[chain_N-1][j][8]);
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -373,7 +375,7 @@ void test27()
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
-	int n_steps = 20000;
+	int n_steps = 100000;
 	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -381,15 +383,15 @@ void test27()
 	
 	int Nmod = 0;
 	int *bppe = NULL;
-	int numThreads = 15;
+	int numThreads = 4;
 	bool pool = true;
 	//bool pool = false;
 	//#########################################################
 	//gw options
 	std::string generation_method = "IMRPhenomD";
 	
-	std::string iteration="2";	
-	std::string previteration="1";	
+	std::string iteration="3";	
+	std::string previteration="2";	
 	
 	std::string autocorrfile = "testing/data/auto_corr_mcmc_DFull"+iteration+".csv";
 	//std::string autocorrfile = "";
@@ -1253,28 +1255,48 @@ void test18()
 	//double initial_pos[dimension]={.0, 1, 0.,log(300),log(10), .2,- .0,-.0,4* log(50000/(3e8))};
 	//double initial_pos[dimension]={.9, 2, 1.,log(300),log(10), .24,- .0,-.0,-40};
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(300),std::log(10), .24,- .0,-.0,7.7e-18};
-	double initial_pos[dimension]={.9, 2, 1.,std::log(300),std::log(10), .24,- .0,-.0,10};
+	double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22,- .0,.4,1};
 	double *seeding_var = NULL;
-	int n_steps = 20000;
+	int n_steps = 100000;
 	int chain_N=8 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
 	double chain_temps[chain_N];
+	double c = 1.4;
 	chain_temps[0]=1.;
-	double c = 1.2;
-	for(int i =1; i < chain_N;  i ++)
-		chain_temps[i] = c*chain_temps[i-1];
+	chain_temps[1] = c;
+	chain_temps[2] = c*c;
+	chain_temps[3] = c*c*c;
+	chain_temps[4] = 1;
+	chain_temps[5] = c;
+	chain_temps[6] = c*c;
+	chain_temps[7] = c*c*c;
+	//chain_temps[1] = 1.1;
+	//chain_temps[2] = 1.2;
+	//chain_temps[3] = 1.3;
+	//chain_temps[4] = 1.4;
+	//chain_temps[5] = 1.5;
+	//chain_temps[6] = 1.6;
+	//chain_temps[7] = 1.7;
+	//for(int i =1; i < chain_N;  i ++)
+	//	chain_temps[i] = c*chain_temps[i-1];
+	//double c = 1./std::sqrt(dimension);//optimum spacing of inverse temperature
+	//for(int i =1; i < chain_N;  i ++){
+	//	chain_temps[i] = chain_temps[i-1]/(1-chain_temps[i-1]*c);
+	//	std::cout<<chain_temps[i]<<std::endl;
+	//}
 	
 	int Nmod = 1;
 	int *bppe = NULL;
-	int numThreads = 8;
-	bool pool = true;
+	int numThreads = 4;
+	bool pool = false;
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";
 	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	std::string generation_method = "dCS_IMRPhenomD_root_alpha";
+	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
 	//std::string autocorrfile = "";
@@ -1310,9 +1332,11 @@ void test18()
 		output_transform[j][8]=output[0][j][8];
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
+	std::string chain2 = "testing/data/mcmc_output_dCS_2.csv";
+	write_file(chain2, output[4], n_steps, dimension);
 	//output hottest chain too
-	//chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
-	chainfile = "testing/data/mcmc_output_dCS_hot.csv";
+	chainfile = "testing/data/mcmc_output_EdGB_hot.csv";
+	//chainfile = "testing/data/mcmc_output_dCS_hot.csv";
 	for(int j = 0; j<n_steps;j++){
 		output_transform[j][0]=output[chain_N-1][j][0];
 		output_transform[j][1]=output[chain_N-1][j][1];
@@ -1451,7 +1475,7 @@ void test16()
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
 	double *seeding_var = NULL;
-	int n_steps = 20000;
+	int n_steps = 100000;
 	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -1464,7 +1488,7 @@ void test16()
 	
 	int Nmod = 0;
 	int *bppe = NULL;
-	int numThreads = 15;
+	int numThreads = 4;
 	bool pool = true;
 	//bool pool = false;
 	//#########################################################
@@ -1554,12 +1578,12 @@ void test16()
 void test15()
 {
 	int length = 4000;
-	int num_detectors =3;
-	//int num_detectors =2;
+	//int num_detectors =3;
+	int num_detectors =2;
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
-	detectors[2] = "Virgo";
+	//detectors[2] = "Virgo";
 
 	double gps_time = 1135136350.6;//TESTING -- gw151226
 
@@ -1570,7 +1594,7 @@ void test15()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =length;
 	data_length[1] =length;
-	data_length[2] =length;
+	//data_length[2] =length;
 
 	for (int i =0; i<num_detectors; i++){
 		data[i] = (std::complex<double> *)malloc(
@@ -1582,10 +1606,10 @@ void test15()
 	//#########################################################
 	//Make trial data
 	gen_params params;
-	double RA = 5.;
-	double DEC = 1.;
-	//double RA = 2;
-	//double DEC = .7;
+	//double RA = 5.;
+	//double DEC = 1.;
+	double RA = 2;
+	double DEC = .7;
 	double chirpm = 9.71;
 	double eta =.2;
 	params.mass1 = calculate_mass1(chirpm,eta);
@@ -1662,16 +1686,16 @@ void test15()
 	}
 	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
 	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", injection_method,&params),2);
-	celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
-	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
-	std::cout<<"Time at Virgo of injection: "<<params.tc<<std::endl;
-	fourier_detector_response(freq,length, waveformout,"Virgo",injection_method, &params);
+	//celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
+	//params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
+	//std::cout<<"Time at Virgo of injection: "<<params.tc<<std::endl;
+	//fourier_detector_response(freq,length, waveformout,"Virgo",injection_method, &params);
 
-	for(int j = 0; j<data_length[0]; j++){
-		frequencies[2][j] = freq[j];	
-		psd[2][j] = (noise[j]);	
-		data[2][j] = waveformout[j];	
-	}
+	//for(int j = 0; j<data_length[0]; j++){
+	//	frequencies[2][j] = freq[j];	
+	//	psd[2][j] = (noise[j]);	
+	//	data[2][j] = waveformout[j];	
+	//}
 	//#########################################################
 	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
 	snr2 += pow(data_snr_maximized_extrinsic(freq,length,waveformout, noise,"Virgo", injection_method,&params),2);
@@ -1685,10 +1709,10 @@ void test15()
 	//#########################################################
 	//mcmc options
 	//int dimension = 9;
-	int dimension = 8;
+	int dimension = 9;
 	//double initial_pos[dimension]={.3, 2., -0.2,log(400),log(40), .24,- .0,-.0};
-	//double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0, log( pow((50./(3e5)),4))};
-	double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0};
+	double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0, 5};
+	//double initial_pos[dimension]={.9, 2, .7,log(520),log(10), .2, .5,.0};
 	//double initial_pos[dimension]={-.9, 2, -1.2,log(410),log(30), .24,-.4,.3};
 	//double initial_pos[dimension]={-.0, 0, -0,log(500),log(50), .2,-.0,.0};
 	//double initial_pos[dimension]={-.99, 2, -1.2,log(410),log(30.78), .24,-.4,.3};
@@ -1712,7 +1736,8 @@ void test15()
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";
-	std::string generation_method = "IMRPhenomD";
+	//std::string generation_method = "IMRPhenomD";
+	std::string generation_method = "dCS_IMRPhenomD_root_alpha";
 	
 	
 	//std::string autocorrfile = "testing/data/auto_corr_mcmc_injection1_1226.csv";
@@ -1730,11 +1755,11 @@ void test15()
 	std::string checkfile = "testing/data/mcmc_checkpoint_injection1_1226.csv";
 
 	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
-			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
+			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
-			//generation_method,statfilename,"","", checkfile);	
-			generation_method,"","","", "");	
+			generation_method,statfilename,"","", checkfile);	
+			//generation_method,"","","", "");	
 	
 	std::cout<<"ended"<<std::endl;
 	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
@@ -1751,6 +1776,7 @@ void test15()
 			output_transform[j][6]=output[0][j][6];
 			output_transform[j][7]=output[0][j][7];
 			//output_transform[j][8]=exp(output[0][j][8]);
+			output_transform[j][8]=(output[0][j][8]);
 	}
 	write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -1771,6 +1797,7 @@ void test15()
 			output_transform[j][6]=output[chain_N-1][j][6];
 			output_transform[j][7]=output[chain_N-1][j][7];
 			//output_transform[j][8]=exp(output[chain_N-1][j][8]);
+			output_transform[j][8]=(output[chain_N-1][j][8]);
 	}
 	//write_file(chainfile, output_transform, n_steps, dimension);
 
@@ -2936,7 +2963,7 @@ void test7()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 1500;
+	int N_steps = 15000;
 	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -3936,7 +3963,8 @@ double test_lp_GW_DFull(double *pos, int dim, int chain_id)
 	if ((pos[6])<-.9 || (pos[6])>.9){return a;}//chi1 
 	if ((pos[7])<-.9 || (pos[7])>.9){return a;}//chi2
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	else {return pos[4]+3*pos[3];}
+	//else {return pos[4]+3*pos[3];}
+	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])));}
 	//else {return pos[4]+1*pos[3];}
 }
 double test_lp_GW_dCS(double *pos, int dim , int chain_id)

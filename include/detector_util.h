@@ -51,7 +51,8 @@ const double V_LONG =0.18333805213 ;//in rad
 //const double V_azimuth_offset = 0.33916285222;//in rad
 //const double V_azimuth_offset = 5.05155183261;//in rad
 const double V_azimuth_offset = 1.239;//in rad
-const double V_radius = 6374824.24470673;//in meters
+//const double V_radius = 6374824.24470673;//in meters
+const double V_radius = 6368051.92301;//in meters
 //const double V_elevation = 8;//in meters
 const double V_elevation = 51.884;//in meters
 
