@@ -875,6 +875,7 @@ void MCMC_MH_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -958,6 +959,7 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -1736,9 +1738,12 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 		fourier_waveform(frequencies[0], data_length[0], 
 			hplus, hcross,generation_method, parameters);
 			
-		fourier_detector_response(frequencies[0], data_length[0], 
-			hplus, hcross, response, parameters->theta, parameters->phi, 
-			detectors[0]);
+		//fourier_detector_response(frequencies[0], data_length[0], 
+		//	hplus, hcross, response, parameters->theta, parameters->phi, 
+		//	detectors[0]);
+		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
+			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+			parameters->gmst,detectors[0]);
 		ll += maximized_coal_Log_Likelihood_internal(data[0], 
 				psd[0],
 				frequencies[0],
@@ -1759,10 +1764,13 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 			
 			if(generation_method=="IMRPhenomPv2")
 				phic_ref = 0;
-			fourier_detector_response(frequencies[i], 
-				data_length[i], hplus, hcross, response, 
-				parameters->theta, parameters->phi, parameters->psi,
-				detectors[i]);
+			//fourier_detector_response(frequencies[i], 
+			//	data_length[i], hplus, hcross, response, 
+			//	parameters->theta, parameters->phi, parameters->psi,
+			//	detectors[i]);
+			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
+				hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+				parameters->gmst,detectors[i]);
 			for(int j =0; j<data_length[i]; j++){
 				response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
 			}
@@ -2096,6 +2104,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		//parameters.theta=theta[0];
 		parameters.phi=0;
 		parameters.theta=0;
+		parameters.RA=0;
+		parameters.DEC=0;
+		parameters.gmst=mcmc_gmst;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		

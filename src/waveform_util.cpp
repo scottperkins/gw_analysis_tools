@@ -150,29 +150,7 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
-	int status=1;
-	double fplus;
-	double fcross;
-	if(	detector == "LIGO" || 
-		detector == "Livingston" || 
-		detector == "LIVINGSTON" || 
-		detector == "livingston" || 
-		detector == "Hanford" || 
-		detector == "HANFORD" || 
-		detector == "hanford" || 
-		detector == "VIRGO" ||
-		detector == "Virgo" ||
-		detector == "virgo")
-	{
-		fplus = right_interferometer_plus(theta,phi);
-		fcross = right_interferometer_cross(theta,phi);	
-	}
-	for (int i =0; i <length; i++)
-	{
-		detector_response[i] = fplus * hplus[i] 
-					+ (fcross )*hcross[i];
-	}	
-	return status;
+	return fourier_detector_response(frequencies, length, hplus, hcross, detector_response, theta, phi, 0, detector);
 	
 }
 /* \brief calculates the detector response for a given waveform and detector
@@ -209,6 +187,33 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 		Fplus = fplus*c2psi- fcross*s2psi;
 		Fcross = fplus*s2psi+ fcross*s2psi;
 	}
+	for (int i =0; i <length; i++)
+	{
+		detector_response[i] = Fplus * hplus[i] 
+					+ (Fcross )*hcross[i];
+	}	
+	return status;
+	
+}
+/* \brief calculates the detector response for a given waveform and detector -- using equatorial coordinates and greenwich mean sidereal time
+ */
+int fourier_detector_response_equatorial(double *frequencies, /**<array of frequencies corresponding to waveform*/
+			int length,/**< length of frequency/waveform arrays*/
+			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<double> *detector_response, /**< [out] detector response*/
+			double ra, /**< Right Ascension in rad*/
+			double dec, /**< Declination in rad*/ 
+			double psi, /**< polarization angle (rad) */ 
+			double gmst, /**< greenwich mean sidereal time*/ 
+			std::string detector/**< detector - list of supported detectors in noise_util*/
+			)
+{
+	int status=1;
+	double Fplus, Fcross;
+	
+	detector_response_functions_equatorial(detector, ra, dec, psi, gmst, &Fplus, &Fcross);
+	
 	for (int i =0; i <length; i++)
 	{
 		detector_response[i] = Fplus * hplus[i] 
@@ -257,6 +262,56 @@ int fourier_detector_response(double *frequencies, /**< double array of frequenc
 			parameters->theta, 
 			parameters->phi, 
 			parameters->psi, 
+			detector 
+			) ;
+	
+		
+	//Deallocate memory
+	free(waveform_plus);
+	free(waveform_cross);
+
+	return status;
+}
+/*!\brief Function to produce the detector response caused by impinging gravitational waves from a quasi-circular binary for equatorial coordinates
+ *
+ * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * method of waveform generation - not all methods use the same parameters
+ *
+ * This puts the responsibility on the user to pass the necessary parameters
+ *
+ * Detector options include classic interferometers like LIGO/VIRGO (coming soon: ET and LISA)
+ * 	
+ * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
+ */
+int fourier_detector_response_equatorial(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
+			std::complex<double> *response, /**< [out] complex array for the output plus polarization waveform*/
+			std::string detector,
+			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+			gen_params *parameters/**<structure containing all the source parameters*/
+			)
+{
+	int status = 1;
+	//generate waveform
+	std::complex<double> *waveform_plus =
+		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
+	std::complex<double> *waveform_cross=
+		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
+	status = fourier_waveform(frequencies, 
+			length,
+			waveform_plus, 
+			waveform_cross, 
+			generation_method,
+			parameters
+			);
+	status = fourier_detector_response_equatorial(frequencies, 
+			length, 
+			waveform_plus, 
+			waveform_cross,
+			response, 
+			parameters->RA, 
+			parameters->DEC, 
+			parameters->psi, 
+			parameters->gmst, 
 			detector 
 			) ;
 	

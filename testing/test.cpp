@@ -2144,6 +2144,9 @@ void test12()
 	params.bppe[0] = -1;
 	params.betappe[0] = (pow(0./(3e5),4));
 	params.psi = 0;
+	params.gmst = gps_to_GMST(gps_time);
+	params.RA = RA;
+	params.DEC = DEC;
 	//params.betappe[0] = log(pow(100./(3e5),4));
 	params.Nmod = 1;
 	//std::string injection_method = "dCS_IMRPhenomD";
@@ -2176,7 +2179,7 @@ void test12()
 	params.tc = tc; 
 	celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
 	
-	fourier_detector_response(freq,length, waveformout,"Hanford",injection_method, &params);
+	fourier_detector_response_equatorial(freq,length, waveformout,"Hanford",injection_method, &params);
 	double temptheta = params.theta;
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[0][j] = freq[j];	
@@ -2189,7 +2192,7 @@ void test12()
 	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
 	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
 	std::cout<<"Time at Livingston of injection: "<<params.tc<<std::endl;
-	fourier_detector_response(freq,length, waveformout,"Livingston",injection_method, &params);
+	fourier_detector_response_equatorial(freq,length, waveformout,"Livingston",injection_method, &params);
 
 	for(int j = 0; j<data_length[0]; j++){
 		frequencies[1][j] = freq[j];	
@@ -2222,7 +2225,7 @@ void test12()
 	int dimension = 14;
 	double initial_pos[dimension]={.99,2,.7,log(100),log(9.7), .2, .43,.01,.1,.1, .1,.1,1, .1};
 	double *seeding_var = NULL;
-	int n_steps = 150000;
+	int n_steps = 50000;
 	int chain_N= 8;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );

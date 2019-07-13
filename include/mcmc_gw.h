@@ -24,6 +24,7 @@ static int *mcmc_data_length=NULL ;
 static fftw_outline *mcmc_fftw_plans=NULL ;
 static int mcmc_num_detectors=2;
 static double mcmc_gps_time=0;
+static double mcmc_gmst=0;
 static int mcmc_Nmod;
 static int *mcmc_bppe;
 static gsl_interp_accel **mcmc_accels = NULL;

@@ -60,6 +60,16 @@ const double V_elevation = 51.884;//in meters
 const double RE_polar =6357e3 ;//in meters
 const double RE_equatorial = 6378e3 ;//in meters
 
+const double Hanford_D[3][3] = {{-0.392632, -0.0776099, -0.247384}, {-0.0776099, 0.319499, 
+  0.227988}, {-0.247384, 0.227988, 0.0730968}};
+
+const double Livingston_D[3][3] = {{0.411318, 0.14021, 
+  0.247279}, {0.14021, -0.108998, -0.181597}, {0.247279, -0.181597, 
+-0.302236}};
+
+const double Virgo_D[3][3] = {{0.243903, -0.0990959, -0.232603}, {-0.0990959, -0.447841, 
+  0.187841}, {-0.232603, 0.187841, 0.203979}};
+
 
 
 
@@ -90,4 +100,21 @@ void derivative_celestial_horizon_transform(double RA,
 double DTOA(double theta1, double theta2, std::string detector1, std::string detector2);
 
 double radius_at_lat(double latitude, double elevation);
+
+void detector_response_functions_equatorial(double D[3][3],
+	double ra,
+	double dec,
+	double psi,
+	double gmst,
+	double *Fplus,
+	double *Fcross
+	);
+void detector_response_functions_equatorial(std::string detector,
+	double ra,
+	double dec,
+	double psi,
+	double gmst,
+	double *Fplus,
+	double *Fcross
+	);
 #endif 

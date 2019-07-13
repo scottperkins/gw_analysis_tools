@@ -47,8 +47,25 @@ int fourier_detector_response(double *frequencies,
 			double phi, 
 			double psi, 
 			std::string detector);
+int fourier_detector_response_equatorial(double *frequencies, 
+			int length,
+			std::complex<double> *hplus, 
+			std::complex<double> *hcross, 
+			std::complex<double> *detector_response, 
+			double ra, 
+			double dec, 
+			double psi, 
+			double gmst, 
+			std::string detector);
 
 int fourier_detector_response(double *frequencies, 
+			int length,
+			std::complex<double> *response, 
+			std::string detector,
+			std::string generation_method,
+			gen_params *parameters
+			);
+int fourier_detector_response_equatorial(double *frequencies, 
 			int length,
 			std::complex<double> *response, 
 			std::string detector,

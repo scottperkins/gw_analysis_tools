@@ -62,6 +62,8 @@ struct sph_harm
  * 
  * Structure to interface with the libraries - Units are in solar masses and mpc 
  *  contains the generation parameters including source parameters and theory parameters
+ *
+ *  *NOTE* not all the members of this structure need to be assigned for usage. In fact, some are reduntant. It's up to the user to determine what fields require an assignment. (Sorry)
  */
 struct gen_params
 {	
@@ -90,6 +92,10 @@ struct gen_params
 	/*! spherical angles for the source location relative to the detector*/
 	double theta;
 	double phi;
+	/*! Equatorial coordinates of source*/
+	double RA;
+	double DEC;
+	double gmst;
 	//Polarization angle
 	double psi =0 ;
 	/*! BOOL flag for early termination of NS binaries*/
