@@ -301,6 +301,55 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 					-sin(2.*params.zeta_polariz)*tempPlus;
 		}
 	}
+	else if(generation_method == "dCS_IMRPhenomPv2")
+	{
+		//########################################
+		//convert betappe for dCS (alpha**2) to the full betappe
+		//dCS only supports one modification
+		dCS_IMRPhenomD<double> dcs_phenomd;
+		params.Nmod = 1;
+		params.bppe = new int[1];
+		params.bppe[0] = -1;
+		params.betappe = new double[1];
+		params.betappe[0] = parameters->betappe[0];
+		params.betappe[0] = dcs_phenomd.dCS_phase_mod(&params);
+		//########################################
+
+		ppE_IMRPhenomPv2_Inspiral<double> model;
+		//Initialize Pv2 specific params	
+
+		//########################################
+		params.thetaJN = parameters->thetaJN;
+		params.alpha0 = parameters->alpha0;
+		params.zeta_polariz = parameters->zeta_polariz;
+		params.phi_aligned = parameters->phi_aligned;
+		params.chil = parameters->chil;
+		params.chip = parameters->chip;
+		//Check to see if thetaJN was used
+		//If not, its calculated
+		if(params.thetaJN==-1 )
+			//Compute transform with spins and L inclination
+			model.PhenomPv2_Param_Transform(&params);
+		else {
+			//compute transform with spins and J inclination
+			//Not supported at the moment
+			model.PhenomPv2_Param_Transform_J(&params);
+		}
+		//Calculate Waveform
+		status = model.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+		std::complex<double> tempPlus,tempCross;
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
+					+sin(2.*params.zeta_polariz)*tempCross;
+			waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
+					-sin(2.*params.zeta_polariz)*tempPlus;
+		}
+		delete [] params.bppe;
+		delete [] params.betappe;
+	}
 
 	return status ;
 }

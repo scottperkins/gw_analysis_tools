@@ -1173,6 +1173,29 @@ void MCMC_method_specific_prep(std::string generation_method, int dimension,doub
 			seeding_var[13]=.1;
 		}
 	}
+	else if(dimension==15 && generation_method =="dCS_IMRPhenomPv2_root_alpha"){
+		mcmc_intrinsic=false;
+		mcmc_Nmod = 1;
+		std::cout<<"Sampling in parameters: cos inclination, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2, phiRef, psi, sqrt alpha (all at reference frequency)"<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
+			seeding_var[0]=.1;
+			seeding_var[1]=.5;
+			seeding_var[2]=.1;
+			seeding_var[3]=.1;
+			seeding_var[4]=.1;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=.1;
+			seeding_var[9]=.1;
+			seeding_var[10]=.1;
+			seeding_var[11]=.1;
+			seeding_var[12]=.1;
+			seeding_var[13]=.1;
+			seeding_var[14]=5;
+		}
+	}
 	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral_log" 
 		|| generation_method == "ppE_IMRPhenomPv2_IMR_log"
 		|| generation_method == "ppE_IMRPhenomPv2_Inspiral"
@@ -1553,7 +1576,8 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
 		mcmc_generation_method == "ppE_IMRPhenomPv2_IMR" || 
  		mcmc_generation_method =="ppE_IMRPhenomPv2_Inspiral_log" ||
-		mcmc_generation_method =="ppE_IMRPhenomPv2_IMR_log")){	
+		mcmc_generation_method =="ppE_IMRPhenomPv2_IMR_log" ||
+		mcmc_generation_method == "dCS_IMRPhenomPv2_root_alpha")){	
 		//unpack parameter vector
 		double incl = acos(param[0]);
 		double RA = param[1];
@@ -1596,6 +1620,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				beta[j ] = param[14+j];	
 			}
 		}
+		//if(mcmc_generation_method == "dCS_IMRPhenomPv2_root_alpha"|| mcmc_generation_method == "EdGB_IMRPhenomPv2_root_alpha" ){
+		//	beta[0] = pow(beta[0]/(3.e5),4);
+		//}
 
 		//create gen_param struct
 		gen_params parameters; 
@@ -1949,6 +1976,7 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 				&tc_ref,
 				&phic_ref
 				);
+		
 		for(int i=1; i < num_detectors; i++){
 			celestial_horizon_transform(RA,DEC, gps_time, 
 					mcmc_detectors[i], &phi[i], &theta[i]);
@@ -2319,7 +2347,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
 		mcmc_generation_method == "ppE_IMRPhenomPv2_IMR" || 
  		mcmc_generation_method =="ppE_IMRPhenomPv2_Inspiral_log" ||
-		mcmc_generation_method =="ppE_IMRPhenomPv2_IMR_log")){	
+		mcmc_generation_method =="ppE_IMRPhenomPv2_IMR_log" || 
+		mcmc_generation_method == "dCS_IMRPhenomPv2_root_alpha")){	
 		std::string local_method ;
 		if(mcmc_generation_method == "ppE_IMRPhenomPv2_Inspiral_log" || 
 			mcmc_generation_method=="ppE_IMRPhenomPv2_Inspiral"){
@@ -2328,6 +2357,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		if(mcmc_generation_method == "ppE_IMRPhenomPv2_IMR_log" || 
 			mcmc_generation_method=="ppE_IMRPhenomPv2_IMR"){
 			local_method = "ppE_IMRPhenomPv2_IMR";
+		}
+		if(mcmc_generation_method == "dCS_IMRPhenomPv2_root_alpha"){
+			local_method = "dCS_IMRPhenomPv2";
 		}
 	//else if(false){	
 		//unpack parameter vector
@@ -2369,7 +2401,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 			}
 		}
 		if(mcmc_generation_method == "dCS_IMRPhenomPv2_root_alpha"|| mcmc_generation_method == "EdGB_IMRPhenomPv2_root_alpha" ){
-			beta[0] = pow(beta[0]/(3.e5),4);
+			beta[0] = pow(beta[0]/(3.e5),4.);
 		}
 		//double *phi = new double[mcmc_num_detectors];
 		//double *theta = new double[mcmc_num_detectors];
@@ -2408,8 +2440,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		for (int j = 0 ; j<mcmc_Nmod; j++){
 			parameters.betappe[j] = beta[j];
 		}
-		
-		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		delete [] parameters.betappe;
 		
 	}

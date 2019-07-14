@@ -329,9 +329,10 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 			phase = phase + (std::complex<T>)(2. * epsilon) ;
 			//################################################
+			//NEVER MIND
 			//The factor of .5 seems wrong, parameter estimation for DL is off by 2
-			//amp_vec[j] = amp/std::complex<T>(2.,0.0);
-			amp_vec[j] = amp;
+			amp_vec[j] = amp/std::complex<T>(2.,0.0);
+			//amp_vec[j] = amp;
 			//################################################
 			phase_vec[j] = phase;
 			hpfac_vec[j] = hp_factor;
