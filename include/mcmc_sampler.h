@@ -9,6 +9,29 @@
 void mcmc_step_threaded(int j);
 void mcmc_swap_threaded(int i, int j);
 
+void MCMC_MH_dynamic_PT_alloc_internal(double ***output_struct, 
+	int dimension, 	
+	int N_steps,	
+	int chain_N,	
+	int max_chain_N_thermo_ensemble,	
+	double *initial_pos, 	
+	double *seeding_var, 	
+	double *chain_temps,
+	int swp_freq,	
+	int t0,
+	int nu,
+	std::string chain_distribution_scheme, 
+	std::function<double(double*,int,int)> log_prior,
+	std::function<double(double*,int,int)> log_likelihood,
+	std::function<void(double*,int,double**,int)>fisher,
+	int numThreads, 
+	bool pool, 
+	bool show_prog, 
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string auto_corr_filename,
+	std::string checkpoint_file
+	);
 void continue_MCMC_MH(std::string start_checkpoint_file,
 	double ***output,
 	int N_steps,

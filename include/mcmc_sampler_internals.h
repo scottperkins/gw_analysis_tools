@@ -99,9 +99,11 @@ struct sampler
 	int *step_reject_ct;
 
 	//Pointer for testing -- stores log likelihood and log prior for output
-	//Quite a bit of memory, so probably not good to run every single time. Just for trouble
+	//Quite a bit of memory (order chain_N * N_steps * 2), so probably not good to run every single time. Just for trouble
 	//shooting.
 	double ***ll_lp_output;
+	bool log_ll=false;
+	bool log_lp=false;
 };
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);
@@ -154,4 +156,10 @@ void load_checkpoint_file(std::string check_file, sampler *sampler);
 
 void assign_ct_p(sampler *sampler, int step, int chain_index);
 void assign_ct_m(sampler *sampler, int step, int chain_index);
+
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, double *seeding_var) ;
+
+double PT_dynamical_timescale(int t0, int nu, int t);
+
+void update_temperatures(sampler *samplerptr);
 #endif

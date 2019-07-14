@@ -513,7 +513,10 @@ void allocate_sampler_mem(sampler *sampler)
 	
 
 	//Trouble Shooting:
-	//sampler->ll_lp_output = allocate_3D_array(sampler->chain_N, sampler->N_steps, 2);
+	if(sampler->log_ll || sampler->log_lp){
+		sampler->ll_lp_output = allocate_3D_array(sampler->chain_N, 
+			sampler->N_steps, 2);
+	}
 }
 
 void deallocate_sampler_mem(sampler *sampler)
@@ -576,7 +579,10 @@ void deallocate_sampler_mem(sampler *sampler)
 	
 
 	//Trouble shooting
-	//deallocate_3D_array(sampler->ll_lp_output,sampler->chain_N, sampler->N_steps, 2);
+	if(sampler->log_ll || sampler->log_lp){
+		deallocate_3D_array(sampler->ll_lp_output,
+			sampler->chain_N, sampler->N_steps, 2);
+	}
 	
 }
 
@@ -1088,4 +1094,108 @@ void assign_ct_m(sampler *sampler, int step, int chain_index)
 	else if(step ==1) sampler->de_reject_ct[chain_index]+=1;
 	else if(step ==2) sampler->mmala_reject_ct[chain_index]+=1;
 	else if(step ==3) sampler->fish_reject_ct[chain_index]+=1;
+}
+
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, double *seeding_var) 
+{
+	if(!seeding_var){ 
+		for (int j=0;j<samplerptr->chain_N;j++){
+			samplerptr->de_primed[j]=false;
+			for (int i = 0; i<samplerptr->dimension; i++)
+			{
+				//Only doing this last loop because there is sometimes ~5 elements 
+				//not initialized on the end of the output, which screw up plotting
+				for(int l =0; l<samplerptr->N_steps; l++)
+					samplerptr->output[j][l][i] = initial_pos[i];
+				
+			}
+			samplerptr->current_likelihoods[j] =
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+		}
+	}
+	//Seed non-zero chains normally with variance as specified
+	else{
+		int attempts = 0;
+		int max_attempts = 10;
+		double temp_pos[samplerptr->dimension];
+		for (int j=0;j<samplerptr->chain_N;j++){
+			samplerptr->de_primed[j]=false;
+			if(j == 0){
+				for (int i = 0; i<samplerptr->dimension; i++)
+				{
+				//Only doing this last loop because there is sometimes ~5 elements 
+				//not initialized on the end of the output, which screw up plotting
+					for(int l =0; l<samplerptr->N_steps; l++)
+						samplerptr->output[j][l][i] = initial_pos[i];
+				}
+			}
+			else{
+				do{
+					for(int i =0; i<samplerptr->dimension; i++){
+						temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
+					}
+					attempts+=1;
+				}while(samplerptr->lp(temp_pos, samplerptr->dimension,j) == limit_inf && attempts<max_attempts);
+				attempts =0;
+				if(samplerptr->lp(temp_pos, samplerptr->dimension,j) != limit_inf ){
+					for(int i =0; i<samplerptr->dimension;i++){
+						for(int l =0; l<samplerptr->N_steps; l++)
+							samplerptr->output[j][l][i] = temp_pos[i];
+					}
+				}
+				else{
+					for(int i =0; i<samplerptr->dimension;i++){
+						for(int l =0; l<samplerptr->N_steps; l++)
+							samplerptr->output[j][l][i] = initial_pos[i];
+					}
+			
+				}
+			}
+			
+			samplerptr->current_likelihoods[j] =
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+		}
+	}
+}
+
+/*! \brief Timescale of the PT dynamics
+ *
+ * kappa in the the language of arXiv:1501.05823v3
+ */
+double PT_dynamical_timescale(int t0, /**<Timescale of the dyanmics*/
+	int nu, /**<Initial amplitude (number of steps to base dynamics on)*/
+	int t/**< current time*/
+	)
+{
+	return (1./nu) * (double)(t0) / (t + t0);
+}
+
+/*! \brief updates the temperatures for a sampler such that all acceptance rates are equal
+ * 
+ * Follows the algorithm outlined in arXiv:1501.05823v3
+ *
+ * Fixed temperatures for the first and last chain
+ *
+ * used in MCMC_MH_dynamic_PT_alloc_internal
+ *
+ * For defined results, this should be used while the sampler is using non-pooling methods
+ */
+void update_temperatures(sampler *samplerptr)
+{
+	//acceptance ratios
+	double *A = new double[samplerptr->chain_N];
+	int acc_ref = 0;
+	int rej_ref = 0;
+	int acc, rej;
+	for(int i =0 ; i<samplerptr->chain_N; i++){
+		acc = samplerptr->swap_accept_ct[i]-acc_ref;	
+		rej = samplerptr->swap_reject_ct[i]-rej_ref;	
+		A[i] = (double)acc / (acc+rej);
+		acc_ref = acc;
+		rej_ref = rej;
+	}
+	for (int i =1 ; i<samplerptr->chain_N-1; i++){
+		
+	} 
+	delete [] A;
 }

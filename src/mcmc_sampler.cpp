@@ -179,6 +179,175 @@ private:
 	}
 };
 ThreadPool *poolptr;
+/*! \brief Starts an MCMC_MH, but with a dynamic number of chains dynamically tuned during the initial iterations of the sampler. 
+ *
+ * Based on arXiv:1501.05823v3
+ *
+ * Currently, Chain number is fixed
+ *
+ * max_chain_N_thermo_ensemble sets the maximium number of chains to use to in successively hotter chains to cover the likelihood surface while targeting an optimal swap acceptance target_swp_acc. 
+ *
+ * max_chain_N determines the total number of chains to run once thermodynamic equilibrium has been reached. This results in chains being added after the initial PT dynamics have finished according to chain_distribution_scheme.
+ *
+ * If no preference, set max_chain_N_thermo_ensemble = max_chain_N = numThreads = (number of cores (number of threads if hyperthreaded))-- this will most likely be the most optimal configuration. If the number of cores on the system is low, you may want to use n*numThreads for some integer n instead, depending on the system.
+ *
+ * chain_distribution_scheme:
+ *
+ * "cold": All chains are added at T=1 (untempered)
+ *
+ * "refine": Chains are added between the optimal temps geometrically -- this may be a good option as it will be a good approximation of the ideal distribution of chains, while keeping the initial dynamical time low 
+ *
+ * "double": Chains are added in order of rising temperature that mimic the distribution achieved by the earier PT dynamics
+ */
+void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int chain_N,/**< Maximum number of chains to use */
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+
+	sampler sampler;
+	samplerptr = &sampler;
+
+	//if Fisher is not provided, Fisher and MALA steps
+	//aren't used
+	if(fisher ==NULL){
+		samplerptr->fisher_exist = false;
+	}
+	else 
+		samplerptr->fisher_exist = true;
+	
+	
+	//Construct sampler structure
+	samplerptr->lp = log_prior;
+	samplerptr->ll = log_likelihood;
+	samplerptr->fish = fisher;
+	samplerptr->swp_freq = swp_freq;
+	//For PT dynamics
+	samplerptr->N_steps = N_steps;
+	samplerptr->dimension = dimension;
+	samplerptr->show_progress = show_prog;
+	samplerptr->num_threads = numThreads;
+	samplerptr->output =output;
+
+	//Start out with geometrically spaced chain
+	samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
+	samplerptr->chain_temps[0] = 1.;
+	samplerptr->chain_N = max_chain_N_thermo_ensemble;
+	double c = 1.2;
+	for(int i = 1; i<samplerptr->chain_N-1; i++){
+		samplerptr->chain_temps[i] = c * samplerptr->chain_temps[i-1];
+	}
+	//Set last chain essentially at infinity
+	samplerptr->chain_temps[samplerptr->chain_N -1] = 1.e15;
+
+	//NOTE: currently, update the history every step until length is 
+	//reached, then the history is updated every 20th step, always only
+	//keeping history of length history_length (overwrites the list as 
+	//it walks forward when it reaches the end)
+	samplerptr->history_length = 500;
+	samplerptr->history_update = 5;
+	//Number of steps to take with the fisher before updating the fisher 
+	//to a new value 
+	//NOTE: if this is too low, detailed balance isn't maintained without 
+	//accounting for the changing fisher (doesn't cancel in MH ratio)
+	//but if the number is high enough, detailed balance is approximately 
+	//kept without calculating second fisher
+	samplerptr->fisher_update_number = 200;
+
+	//samplerptr->output = output;
+	//During chain allocation, pooling isn't used
+	samplerptr->pool = false;
+	samplerptr->numThreads = numThreads;
+
+	allocate_sampler_mem(samplerptr);
+
+
+	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
+		assign_probabilities(samplerptr, chain_index);
+	
+
+	int  k=0;
+	//Assign initial position to start chains
+	assign_initial_pos(samplerptr, initial_pos,seeding_var);	
+	
+	//Average percent change in temperature 
+	double ave_dynamics= 1.;
+	//tolerance in percent change of temperature to determine equilibrium
+	double tolerance= .01;
+	//Frequency to check for equilibrium
+	int equilibrium_check_freq=100;
+	
+	double *old_temps = new double[samplerptr->chain_N];
+	for(int i =0; i<samplerptr->chain_N; i++){
+		old_temps[i]=samplerptr->chain_temps[i];
+	}
+
+	//For each loop, we walk forward till one more swap has happened, then we update temps
+	samplerptr->N_steps = swp_freq;
+	std::cout<<"Dynamical PT allocation (measured by average percent change in temperature): "<<std::endl;
+	
+	while(ave_dynamics>tolerance){
+		//step equilibrium_check_freq
+		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
+			//steps swp_freq
+			MCMC_MH_loop(samplerptr);	
+			//Move temperatures
+			update_temperatures(samplerptr);
+		}
+		//Calculate average percent change in temperature
+		double sum = 0;
+		for (int j =0; j<samplerptr->chain_N; j++){
+			sum += (samplerptr->chain_temps[j] - old_temps[j])/old_temps[j];
+		}
+		ave_dynamics = sum / samplerptr->chain_N;
+		if(samplerptr->show_progress){
+			printProgress(1. -  (ave_dynamics - tolerance)/(tolerance+ave_dynamics));
+		}
+	}
+
+	delete [] old_temps;
+	//##################################################################
+	std::string internal_checkpoint;	
+	if(checkpoint_file !=""){
+		internal_checkpoint = checkpoint_file;
+		write_checkpoint_file(samplerptr, checkpoint_file);
+	}
+	else {
+		internal_checkpoint = "temp_checkpoint_file.csv";;
+		write_checkpoint_file(samplerptr, internal_checkpoint);
+	}
+
+	deallocate_sampler_mem(samplerptr);
+	continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
+		log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
+		 chain_filename,auto_corr_filename, checkpoint_file);
+	if(checkpoint_file =="")
+		remove("temp_checkpoint_file.csv");
+	delete [] samplerptr->chain_temps;
+}
 
 /*!\brief Generic sampler, where the likelihood, prior are parameters supplied by the user
  *
@@ -322,72 +491,76 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	//int swp_accepted=0, swp_rejected=0;
 	int *step_accepted = (int *)malloc(sizeof(int)*samplerptr->chain_N);
 	int *step_rejected = (int *)malloc(sizeof(int)*samplerptr->chain_N);
+	for(int j=0; j<samplerptr->chain_N; j++){
+		step_accepted[j]=0;
+		step_rejected[j]=0;
+	}
 	
 	//samplerptr = &sampler;
 	//Assign initial position to start chains
-	//Currently, just set all chains to same initial position
-	if(!seeding_var){ 
-		for (int j=0;j<samplerptr->chain_N;j++){
-			samplerptr->de_primed[j]=false;
-			for (int i = 0; i<samplerptr->dimension; i++)
-			{
-				//Only doing this last loop because there is sometimes ~5 elements 
-				//not initialized on the end of the output, which screw up plotting
-				for(int l =0; l<samplerptr->N_steps; l++)
-					samplerptr->output[j][l][i] = initial_pos[i];
-				
-			}
-			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
-			step_accepted[j]=0;
-			step_rejected[j]=0;
-		}
-	}
-	//Seed non-zero chains normally with variance as specified
-	else{
-		int attempts = 0;
-		int max_attempts = 10;
-		double temp_pos[samplerptr->dimension];
-		for (int j=0;j<samplerptr->chain_N;j++){
-			samplerptr->de_primed[j]=false;
-			if(j == 0){
-				for (int i = 0; i<samplerptr->dimension; i++)
-				{
-				//Only doing this last loop because there is sometimes ~5 elements 
-				//not initialized on the end of the output, which screw up plotting
-					for(int l =0; l<samplerptr->N_steps; l++)
-						samplerptr->output[j][l][i] = initial_pos[i];
-				}
-			}
-			else{
-				do{
-					for(int i =0; i<samplerptr->dimension; i++){
-						temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
-					}
-					attempts+=1;
-				}while(samplerptr->lp(temp_pos, samplerptr->dimension,j) == limit_inf && attempts<max_attempts);
-				attempts =0;
-				if(samplerptr->lp(temp_pos, samplerptr->dimension,j) != limit_inf ){
-					for(int i =0; i<samplerptr->dimension;i++){
-						for(int l =0; l<samplerptr->N_steps; l++)
-							samplerptr->output[j][l][i] = temp_pos[i];
-					}
-				}
-				else{
-					for(int i =0; i<samplerptr->dimension;i++){
-						for(int l =0; l<samplerptr->N_steps; l++)
-							samplerptr->output[j][l][i] = initial_pos[i];
-					}
-			
-				}
-			}
-			
-			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
-			step_accepted[j]=0;
-			step_rejected[j]=0;
-		}
-	}
+	assign_initial_pos(samplerptr, initial_pos, seeding_var);	
+	//if(!seeding_var){ 
+	//	for (int j=0;j<samplerptr->chain_N;j++){
+	//		samplerptr->de_primed[j]=false;
+	//		for (int i = 0; i<samplerptr->dimension; i++)
+	//		{
+	//			//Only doing this last loop because there is sometimes ~5 elements 
+	//			//not initialized on the end of the output, which screw up plotting
+	//			for(int l =0; l<samplerptr->N_steps; l++)
+	//				samplerptr->output[j][l][i] = initial_pos[i];
+	//			
+	//		}
+	//		samplerptr->current_likelihoods[j] =
+	//			 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+	//		step_accepted[j]=0;
+	//		step_rejected[j]=0;
+	//	}
+	//}
+	////Seed non-zero chains normally with variance as specified
+	//else{
+	//	int attempts = 0;
+	//	int max_attempts = 10;
+	//	double temp_pos[samplerptr->dimension];
+	//	for (int j=0;j<samplerptr->chain_N;j++){
+	//		samplerptr->de_primed[j]=false;
+	//		if(j == 0){
+	//			for (int i = 0; i<samplerptr->dimension; i++)
+	//			{
+	//			//Only doing this last loop because there is sometimes ~5 elements 
+	//			//not initialized on the end of the output, which screw up plotting
+	//				for(int l =0; l<samplerptr->N_steps; l++)
+	//					samplerptr->output[j][l][i] = initial_pos[i];
+	//			}
+	//		}
+	//		else{
+	//			do{
+	//				for(int i =0; i<samplerptr->dimension; i++){
+	//					temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
+	//				}
+	//				attempts+=1;
+	//			}while(samplerptr->lp(temp_pos, samplerptr->dimension,j) == limit_inf && attempts<max_attempts);
+	//			attempts =0;
+	//			if(samplerptr->lp(temp_pos, samplerptr->dimension,j) != limit_inf ){
+	//				for(int i =0; i<samplerptr->dimension;i++){
+	//					for(int l =0; l<samplerptr->N_steps; l++)
+	//						samplerptr->output[j][l][i] = temp_pos[i];
+	//				}
+	//			}
+	//			else{
+	//				for(int i =0; i<samplerptr->dimension;i++){
+	//					for(int l =0; l<samplerptr->N_steps; l++)
+	//						samplerptr->output[j][l][i] = initial_pos[i];
+	//				}
+	//		
+	//			}
+	//		}
+	//		
+	//		samplerptr->current_likelihoods[j] =
+	//			 samplerptr->ll(samplerptr->output[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+	//		step_accepted[j]=0;
+	//		step_rejected[j]=0;
+	//	}
+	//}
 
 		
 	MCMC_MH_loop(samplerptr);	
@@ -647,6 +820,18 @@ void MCMC_MH_loop(sampler *sampler)
 						update_history(sampler,sampler->output[j][k+i+1], j);
 					else if(sampler->chain_pos[j]%sampler->history_update==0)
 						update_history(sampler,sampler->output[j][k+i+1], j);
+					//Log LogLikelihood and LogPrior	
+					if(sampler->log_ll){
+						samplerptr->ll_lp_output[j][k+i+1][0]= 
+							samplerptr->current_likelihoods[j];
+					}
+					if(sampler->log_lp){
+						samplerptr->ll_lp_output[j][k+i+1][1]= 
+							samplerptr->lp(
+							samplerptr->output[j][k+i+1],
+							samplerptr->dimension, j);
+					}
+					
 				}
 				if(!sampler->de_primed[j]) 
 				{
@@ -735,8 +920,15 @@ void mcmc_step_threaded(int j)
 			update_history(samplerptr,samplerptr->output[j][k+i+1], j);
 		//##############################################################
 		//Trouble shooting -- save lp and ll
-		//samplerptr->ll_lp_output[j][k+i+1][0]= samplerptr->current_likelihoods[j];
-		//samplerptr->ll_lp_output[j][k+i+1][1]= samplerptr->lp(samplerptr->output[j][k+i+1],samplerptr->dimension, j);
+		if(samplerptr->log_ll){
+			samplerptr->ll_lp_output[j][k+i+1][0]= 
+				samplerptr->current_likelihoods[j];
+		}
+		if(samplerptr->log_lp){
+			samplerptr->ll_lp_output[j][k+i+1][1]= 
+				samplerptr->lp(samplerptr->output[j][k+i+1],
+				samplerptr->dimension, j);
+		}
 		//##############################################################
 	}
 	if(!samplerptr->de_primed[j]) 
