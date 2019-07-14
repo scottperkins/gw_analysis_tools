@@ -297,40 +297,49 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			amp = 0.0;
 			waveform_plus[j] = 0.0;
 			waveform_cross[j] = 0.0;
+			amp_vec[j] = amp;
+			//################################################
+			phase_vec[j] = phase;
+			hpfac_vec[j] = hp_factor;
+			hcfac_vec[j] = hc_factor;
 		}
 		else{	
-		if (f<params->f1_phase)
-		{
-			this->precalc_powers_ins(f, M, &pows);
-		}
-		else{
-			pows.MFsixth = pow(M*f,1./6 );
-			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
-			pows.MFthird = pows.MFsixth * pows.MFsixth;
-			pows.MF2third =pows.MFthird* pows.MFthird;
-		}
-		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
-		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
-		this->WignerD(d2,dm2, &pows, params);
-		//Calculate Euler angles alpha and epsilon
-		this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
-		//Add offset to alpha
-		alpha = alpha - params->alpha0 + alpha_offset;
-		epsilon = epsilon - epsilon_offset;
+			if (f<params->f1_phase)
+			{
+				this->precalc_powers_ins(f, M, &pows);
+			}
+			else{
+				pows.MFsixth = pow(M*f,1./6 );
+				pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+				pows.MFthird = pows.MFsixth * pows.MFsixth;
+				pows.MF2third =pows.MFthird* pows.MFthird;
+			}
+			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
+			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+			//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
+			this->WignerD(d2,dm2, &pows, params);
+			//Calculate Euler angles alpha and epsilon
+			this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
+			//Add offset to alpha
+			alpha = alpha - params->alpha0 + alpha_offset;
+			epsilon = epsilon - epsilon_offset;
 
-		//Twist it up
-		calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
+			//Twist it up
+			calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
 
-		phase = phase + (std::complex<T>)(2. * epsilon) ;
-		amp_vec[j] = amp/std::complex<T>(2.,0.0);
-		phase_vec[j] = phase;
-		hpfac_vec[j] = hp_factor;
-		hcfac_vec[j] = hc_factor;
-		//waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
-		//waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
-		hp_factor = 0.;
-		hc_factor = 0.;
+			phase = phase + (std::complex<T>)(2. * epsilon) ;
+			//################################################
+			//The factor of .5 seems wrong, parameter estimation for DL is off by 2
+			//amp_vec[j] = amp/std::complex<T>(2.,0.0);
+			amp_vec[j] = amp;
+			//################################################
+			phase_vec[j] = phase;
+			hpfac_vec[j] = hp_factor;
+			hcfac_vec[j] = hc_factor;
+			//waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+			//waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
+			hp_factor = 0.;
+			hc_factor = 0.;
 		}
 
 	}

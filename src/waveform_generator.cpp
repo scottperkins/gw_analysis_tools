@@ -3,6 +3,7 @@
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
+#include "ppE_IMRPhenomP.h"
 #include "util.h"
 #include <complex>
 #include <time.h>
@@ -195,6 +196,82 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		IMRPhenomPv2<double> modeld;
 		//Initialize Pv2 specific params	
 
+		params.thetaJN = parameters->thetaJN;
+		params.alpha0 = parameters->alpha0;
+		params.zeta_polariz = parameters->zeta_polariz;
+		params.phi_aligned = parameters->phi_aligned;
+		params.chil = parameters->chil;
+		params.chip = parameters->chip;
+		//Check to see if thetaJN was used
+		//If not, its calculated
+		if(params.thetaJN==-1 )
+			//Compute transform with spins and L inclination
+			modeld.PhenomPv2_Param_Transform(&params);
+		else {
+			//compute transform with spins and J inclination
+			//Not supported at the moment
+			modeld.PhenomPv2_Param_Transform_J(&params);
+		}
+		//Calculate Waveform
+		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+		std::complex<double> tempPlus,tempCross;
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
+					+sin(2.*params.zeta_polariz)*tempCross;
+			waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
+					-sin(2.*params.zeta_polariz)*tempPlus;
+		}
+	}
+	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral")
+	{
+		ppE_IMRPhenomPv2_Inspiral<double> modeld;
+		//Initialize Pv2 specific params	
+
+		params.betappe = parameters->betappe;
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+		//########################################
+		params.thetaJN = parameters->thetaJN;
+		params.alpha0 = parameters->alpha0;
+		params.zeta_polariz = parameters->zeta_polariz;
+		params.phi_aligned = parameters->phi_aligned;
+		params.chil = parameters->chil;
+		params.chip = parameters->chip;
+		//Check to see if thetaJN was used
+		//If not, its calculated
+		if(params.thetaJN==-1 )
+			//Compute transform with spins and L inclination
+			modeld.PhenomPv2_Param_Transform(&params);
+		else {
+			//compute transform with spins and J inclination
+			//Not supported at the moment
+			modeld.PhenomPv2_Param_Transform_J(&params);
+		}
+		//Calculate Waveform
+		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+		std::complex<double> tempPlus,tempCross;
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
+					+sin(2.*params.zeta_polariz)*tempCross;
+			waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
+					-sin(2.*params.zeta_polariz)*tempPlus;
+		}
+	}
+	else if(generation_method == "ppE_IMRPhenomPv2_IMR")
+	{
+		ppE_IMRPhenomPv2_IMR<double> modeld;
+		//Initialize Pv2 specific params	
+
+		params.betappe = parameters->betappe;
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+		//########################################
 		params.thetaJN = parameters->thetaJN;
 		params.alpha0 = parameters->alpha0;
 		params.zeta_polariz = parameters->zeta_polariz;

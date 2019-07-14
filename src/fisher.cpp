@@ -563,8 +563,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 		transform_cart_sph(parameters->spin2, spin2sph);
 		
 		param_in[0] = cos(parameters->incl_angle);
-		param_in[1] = parameters->theta;
-		param_in[2] = parameters->phi;
+		param_in[1] = parameters->RA;
+		param_in[2] = parameters->DEC;
 		param_in[3] = parameters->Luminosity_Distance;//MPC
 		param_in[4] = chirpmass; //Sol mass
 		param_in[5] = eta;
@@ -577,6 +577,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 		param_in[12] = parameters->phiRef;
 		param_in[13] = parameters->psi;
 		waveform_params.sky_average=parameters->sky_average;
+		waveform_params.NSflag=parameters->NSflag;
+		waveform_params.gmst=parameters->gmst;
+		waveform_params.f_ref = parameters->f_ref;
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
 		std::complex<double> Qp, Qm;
 
@@ -605,16 +608,15 @@ void calculate_derivatives(double  **amplitude_deriv,
 			//waveform_params.phic = 0;
 			waveform_params.tc= 0;
 			waveform_params.incl_angle = acos(param_p[0]);
-			waveform_params.theta = param_p[1];
-			waveform_params.phi = param_p[2];
+			//waveform_params.theta = param_p[1];
+			//waveform_params.phi = param_p[2];
+			waveform_params.RA = param_p[1];
+			waveform_params.DEC = param_p[2];
+			
 			waveform_params.phiRef = param_p[12];
-			waveform_params.f_ref = parameters->f_ref;
-			waveform_params.NSflag = parameters->NSflag;
-			waveform_params.sky_average = parameters->sky_average;
 			waveform_params.psi = param_p[13];
 
-
-			fourier_detector_response(frequencies, 
+			fourier_detector_response_equatorial(frequencies, 
 				length,
 				response,
 				detector,
@@ -648,14 +650,14 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.phic = 0;
 			waveform_params.tc= 0;
 			waveform_params.incl_angle = acos(param_m[0]);
-			waveform_params.theta = param_m[1];
-			waveform_params.phi = param_m[2];
+			//waveform_params.theta = param_m[1];
+			//waveform_params.phi = param_m[2];
+			waveform_params.RA = param_m[1];
+			waveform_params.DEC = param_m[2];
 			waveform_params.phiRef = param_m[12];
-			waveform_params.f_ref = parameters->f_ref;
-			waveform_params.NSflag = parameters->NSflag;
 			waveform_params.psi = param_m[13];
 
-			fourier_detector_response(frequencies, 
+			fourier_detector_response_equatorial(frequencies, 
 				length,
 				response,
 				detector,
@@ -697,6 +699,237 @@ void calculate_derivatives(double  **amplitude_deriv,
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
 		delete [] response;
+	}
+	if (gen_method == "MCMC_ppE_IMRPhenomPv2_Inspiral_Full"||
+		gen_method =="MCMC_ppE_IMRPhenomPv2_IMR_Full" ||
+		gen_method =="MCMC_dCS_IMRPhenomPv2_root_alpha_Full" ||
+		gen_method =="MCMC_EdGB_IMRPhenomPv2_root_alpha_Full" 
+		){
+		std::string local_gen;
+		bool log_scaling = false;
+		if(gen_method == "MCMC_dCS_IMRPhenomPv2_log_Full"){
+			local_gen = "dCS_IMRPhenomPv2";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_dCS_IMRPhenomPv2_Full"){
+			local_gen = "dCS_IMRPhenomPv2";
+		}
+		else if(gen_method == "MCMC_dCS_IMRPhenomPv2_root_alpha_Full"){
+			local_gen = "dCS_IMRPhenomPv2";
+		}
+		else if(gen_method == "MCMC_EdGB_IMRPhenomPv2_log_Full"){
+			local_gen = "EdGB_IMRPhenomPv2";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_EdGB_IMRPhenomPv2_Full"){
+			local_gen = "EdGB_IMRPhenomPv2";
+		}
+		else if(gen_method == "MCMC_EdGB_IMRPhenomPv2_root_alpha_Full"){
+			local_gen = "EdGB_IMRPhenomPv2";
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomPv2_IMR_log_Full"){
+			local_gen = "ppE_IMRPhenomPv2_IMR";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomPv2_Inspiral_log_Full"){
+			local_gen = "ppE_IMRPhenomPv2_Inspiral";
+			log_scaling = true;
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomPv2_IMR_Full"){
+			local_gen = "ppE_IMRPhenomPv2_IMR";
+		}
+		else if(gen_method == "MCMC_ppE_IMRPhenomPv2_Inspiral_Full"){
+			local_gen = "ppE_IMRPhenomPv2_Inspiral";
+		}
+		std::complex<double> *response = new std::complex<double> [length];
+		fourier_detector_response(frequencies, 
+			length,
+			response,
+			detector,
+			local_gen,
+			parameters);	
+		for (int k =0; k<length; k++){
+			amplitude[k] =  std::abs(response[k]);
+		}
+
+		int dimension = 14+parameters->Nmod;
+		source_parameters<double> parameters_in;
+		gen_params waveform_params;
+		double param_p[dimension] ;
+		double param_m[dimension] ;
+		double param_in[dimension] ;
+		double param_out[dimension] ;
+		double chirpmass = calculate_chirpmass(parameters->mass1, parameters->mass2);
+		double eta = calculate_eta(parameters->mass1, parameters->mass2);
+		double spin1sph[3];
+		double spin2sph[3];
+		
+		transform_cart_sph(parameters->spin1, spin1sph);
+		transform_cart_sph(parameters->spin2, spin2sph);
+		
+		param_in[0] = cos(parameters->incl_angle);
+		param_in[1] = parameters->RA;
+		param_in[2] = parameters->DEC;
+		param_in[3] = parameters->Luminosity_Distance;//MPC
+		param_in[4] = chirpmass; //Sol mass
+		param_in[5] = eta;
+		param_in[6] = spin1sph[0];
+		param_in[7] = spin2sph[0];
+		param_in[8] = spin1sph[1];
+		param_in[9] = spin2sph[1];
+		param_in[10] = spin1sph[2];
+		param_in[11] = spin2sph[2];
+		param_in[12] = parameters->phiRef;
+		param_in[13] = parameters->psi;
+		for(int i = 0; i<parameters->Nmod; i++){
+			param_in[14+i] = parameters->betappe[i];
+		}
+		waveform_params.sky_average=parameters->sky_average;
+		waveform_params.bppe = new int[parameters->Nmod];
+		for(int i =0 ;i<parameters->Nmod; i++){
+			waveform_params.bppe[i] = parameters->bppe[i];
+		}
+		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
+		std::complex<double> Qp, Qm;
+
+		for (int i =0; i<dimension; i++){
+			for( int j =0;j<dimension;j++){
+				param_p[j] = param_in[j] ;
+				param_m[j] = param_in[j] ;
+			}
+			param_p[i] = param_in[i] + epsilon;
+			param_m[i] = param_in[i] - epsilon;
+
+			//cos \iota must lie within certain range
+			if(param_p[0]>1.)param_p[0]=1.;
+			else if( param_p[1]<-1.) param_p[0]=-1.;
+			if(param_m[0]>1.)param_m[0]=1.;
+			else if( param_m[1]<-1.) param_m[0]=-1.;
+
+			
+			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);//MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_p[3];//MPC_SEC;
+			double param_in_spin1p[3] = {param_p[6],param_p[8],param_p[10]};
+			transform_sph_cart(param_in_spin1p, waveform_params.spin1);
+			double param_in_spin2p[3] = {param_p[7],param_p[9],param_p[11]};
+			transform_sph_cart(param_in_spin2p, waveform_params.spin2);
+			//waveform_params.phic = 0;
+			waveform_params.tc= 0;
+			waveform_params.incl_angle = acos(param_p[0]);
+			//waveform_params.theta = param_p[1];
+			//waveform_params.phi = param_p[2];
+			waveform_params.RA = param_p[1];
+			waveform_params.DEC = param_p[2];
+			waveform_params.gmst = parameters->gmst;
+			waveform_params.phiRef = param_p[12];
+			waveform_params.f_ref = parameters->f_ref;
+			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.sky_average = parameters->sky_average;
+			waveform_params.psi = param_p[13];
+			waveform_params.betappe = new double[parameters->Nmod];
+			for (int j =0; j<parameters->Nmod; j++){
+				waveform_params.betappe[j] = param_p[14+j];
+			}
+			if(gen_method == "MCMC_dCS_IMRPhenomPv2_root_alpha_Full"||gen_method == "MCMC_EdGB_IMRPhenomPv2_root_alpha_Full"){
+				waveform_params.betappe[0]=pow(param_p[14]/(3.e5), 4.);
+			}
+
+
+			fourier_detector_response_equatorial(frequencies, 
+				length,
+				response,
+				detector,
+				local_gen,
+				&waveform_params);	
+			for (int k =0; k<length; k++){
+				amplitude_plus_plus[k] =  std::abs(response[k]);
+				phase_plus_plus[k] =  std::arg(response[k]);
+			}
+			//fourier_amplitude(frequencies, 
+			//	length,
+			//	amplitude_plus_plus,
+			//	//amplitude_cross_plus,
+			//	local_method,
+			//	&waveform_params);	
+			//fourier_phase(frequencies, 
+			//	length,
+			//	phase_plus_plus,
+			//	//amplitude_cross_plus,
+			//	local_method,
+			//	&waveform_params);	
+
+
+			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);//MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5]);//MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_m[3];//MPC_SEC;
+			double param_in_spin1m[3] = {param_m[6],param_m[8],param_m[10]};
+			transform_sph_cart(param_in_spin1m, waveform_params.spin1);
+			double param_in_spin2m[3] = {param_m[7],param_m[9],param_m[11]};
+			transform_sph_cart(param_in_spin2m, waveform_params.spin2);
+			waveform_params.phic = 0;
+			waveform_params.tc= 0;
+			waveform_params.incl_angle = acos(param_m[0]);
+			//waveform_params.theta = param_m[1];
+			//waveform_params.phi = param_m[2];
+			waveform_params.RA = param_m[1];
+			waveform_params.DEC = param_m[2];
+			waveform_params.gmst = parameters->gmst;
+			waveform_params.phiRef = param_m[12];
+			waveform_params.f_ref = parameters->f_ref;
+			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.psi = param_m[13];
+			for (int j =0; j<parameters->Nmod; j++){
+				waveform_params.betappe[j] = param_m[14+j];
+			}
+			if(gen_method == "MCMC_dCS_IMRPhenomPv2_root_alpha_Full"||gen_method == "MCMC_EdGB_IMRPhenomPv2_root_alpha_Full"){
+				waveform_params.betappe[0]=pow(param_m[14]/(3.e5), 4.);
+			}
+
+			fourier_detector_response_equatorial(frequencies, 
+				length,
+				response,
+				detector,
+				local_gen,
+				&waveform_params);	
+			for (int k =0; k<length; k++){
+				amplitude_plus_minus[k] =  std::abs(response[k]);
+				phase_plus_minus[k] =  std::arg(response[k]);
+				//std::cout<<amplitude_plus_plus[k]<<" "<<phase_plus_plus[k]<<" "<<response[k]<<std::endl;
+			}
+
+			//fourier_amplitude(frequencies, 
+			//	length,
+			//	amplitude_plus_minus,
+			//	//amplitude_cross_plus,
+			//	local_method,
+			//	&waveform_params);	
+			//fourier_phase(frequencies, 
+			//	length,
+			//	phase_plus_minus,
+			//	//amplitude_cross_plus,
+			//	local_method,
+			//	&waveform_params);	
+			for (int l =0;l<length;l++)
+			{
+				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
+				phase_deriv[i][l] = (phase_plus_plus[l] -phase_plus_minus[l])/(2*epsilon);
+			}
+			
+			delete [] waveform_params.betappe;
+		
+				
+		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+		}
+		delete [] response;
+		delete [] waveform_params.bppe;
 	}
 	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" 
 		|| gen_method == "MCMC_dCS_IMRPhenomD_Full"
@@ -779,6 +1012,10 @@ void calculate_derivatives(double  **amplitude_deriv,
 			param_in[8+i] = parameters->betappe[i];
 		}
 		waveform_params.sky_average=parameters->sky_average;
+		waveform_params.bppe = new int[parameters->Nmod];
+		for(int i =0 ;i<parameters->Nmod; i++){
+			waveform_params.bppe[i] = parameters->bppe[i];
+		}
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
 		std::complex<double> Qp, Qm;
 
@@ -855,7 +1092,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.theta = param_m[1];
 			waveform_params.phi = param_m[2];
 			waveform_params.NSflag = parameters->NSflag;
-			//waveform.bppe = new double[1];
 			for (int j =0; j<parameters->Nmod; j++){
 				waveform_params.betappe[j] = param_m[8+j];
 			}
@@ -892,6 +1128,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 		
 				
 		}
+		delete [] waveform_params.bppe;
 		//Normalize for log factors
 		for (int l =0;l<length;l++)
 		{
