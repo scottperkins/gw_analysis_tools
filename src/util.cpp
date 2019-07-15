@@ -1056,7 +1056,7 @@ void transform_cart_sph(double *cartvec, double *sphvec)
 			cartvec[2]*cartvec[2] +
 			cartvec[1] * cartvec[1]) ;
 	//sphvec[1] = std::acos(cartvec[2]/ sphvec[0]);
-	sphvec[1] = std::atan( sqrt(sphvec[0]*sphvec[0]+sphvec[1]*sphvec[1])/cartvec[2]);
+	sphvec[1] = std::atan( sqrt(cartvec[0]*cartvec[0]+cartvec[1]*cartvec[1])/cartvec[2]);
 	sphvec[2] = std::atan(cartvec[1]/ cartvec[0]);
 
 }

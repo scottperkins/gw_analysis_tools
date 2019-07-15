@@ -200,12 +200,14 @@ void test31()
 
 	//#########################################################
 	//mcmc options
-	int dimension = 15;
-	double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1,2};
+	//int dimension = 15;
+	int dimension = 14;
+	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1,2};
+	double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1};
 	//double initial_pos[dimension]={.9, 5, -1.,std::log(2000),std::log(50), .22, .4,.4,.01,.01,.01,.01,1,1,20};
 	double *seeding_var = NULL;
-	int n_steps = 150;
-	int chain_N=15 ;
+	int n_steps = 15;
+	int chain_N=2 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -218,15 +220,15 @@ void test31()
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 17;
-	bool pool = true;
+	int numThreads = 1;
+	bool pool = false;
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";
 	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
-	//std::string generation_method = "IMRPhenomPv2";
-	std::string generation_method = "dCS_IMRPhenomPv2_root_alpha";
+	std::string generation_method = "IMRPhenomPv2";
+	//std::string generation_method = "dCS_IMRPhenomPv2_root_alpha";
 	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
@@ -3954,18 +3956,19 @@ void test4()
 void test3()
 {
 	gen_params params;
-	int length = 900;
+	int length = 1000;
 	params.mass1 = 200;
 	params.mass2 = 50;
-	//string method= "IMRPhenomPv2";
+	string method= "IMRPhenomPv2";
 	//string method= "IMRPhenomD";
-	string method= "ppE_IMRPhenomPv2_IMR";
+	//string method= "ppE_IMRPhenomPv2_IMR";
 	//string method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
 	double amp[length];
 	double phaseout[length];
 	complex<double> waveformout_plus[length];
 	complex<double> waveformout_cross[length];
+	complex<double> response[length];
 	params.spin1[0] = .0;
 	params.spin1[1] = .01;
 	params.spin1[2] = -.2;
@@ -3983,6 +3986,7 @@ void test3()
 	params.bppe[0] = -1;
 	params.Nmod = 1;
 	params.NSflag = false;
+	params.sky_average = false;
 	//params.phi = M_PI/3.;
 	//params.theta = M_PI/3;
 	params.RA = 2;
@@ -4000,11 +4004,12 @@ void test3()
 
 	clock_t  start, end;
 	start = clock(); 
-	fourier_waveform(freq, length, waveformout_plus,waveformout_cross,method,&params);
+	//fourier_waveform(freq, length, waveformout_plus,waveformout_cross,method,&params);
+	fourier_detector_response_equatorial(freq, length, response,"Hanford",method,&params);
 	end=clock();
-	for(int i = 0 ;i<length; i++){
-		std::cout<<waveformout_plus[i]<<" "<<waveformout_cross[i]<<std::endl;
-	}
+	//for(int i = 0 ;i<length; i++){
+	//	std::cout<<waveformout_plus[i]<<" "<<waveformout_cross[i]<<std::endl;
+	//}
 	cout<<"TIMING waveform: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 	delete [] params.betappe;
 	delete [] params.bppe;

@@ -764,8 +764,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 		double spin1sph[3];
 		double spin2sph[3];
 		
-		transform_cart_sph(parameters->spin1, spin1sph);
-		transform_cart_sph(parameters->spin2, spin2sph);
+		transform_cart_sph(parameters->spin1, &spin1sph[0]);
+		transform_cart_sph(parameters->spin2, &spin2sph[0]);
 		
 		param_in[0] = cos(parameters->incl_angle);
 		param_in[1] = parameters->RA;
@@ -828,9 +828,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.sky_average = parameters->sky_average;
 			waveform_params.psi = param_p[13];
 			waveform_params.betappe = new double[parameters->Nmod];
-			for (int j =0; j<parameters->Nmod; j++){
-				waveform_params.betappe[j] = param_p[14+j];
-			}
 			if(gen_method == "MCMC_dCS_IMRPhenomPv2_root_alpha_Full"||gen_method == "MCMC_EdGB_IMRPhenomPv2_root_alpha_Full"){
 				waveform_params.betappe[0]=pow(param_p[14]/(3.e5), 4.);
 			}
