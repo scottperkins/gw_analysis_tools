@@ -1213,7 +1213,7 @@ void update_temperatures(sampler *samplerptr,
 	}
 	double power;
 	double kappa = PT_dynamical_timescale(t0, nu, t);
-	std::cout<<kappa<<std::endl;
+	//std::cout<<kappa<<std::endl;
 	for (int i =1 ; i<samplerptr->chain_N-1; i++){
 		power = kappa * (samplerptr->A[i] - samplerptr->A[i+1]);	
 		samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +

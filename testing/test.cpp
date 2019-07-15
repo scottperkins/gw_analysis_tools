@@ -95,19 +95,19 @@ static double *psd=NULL;
 
 int main(){
 
-	test32();	
+	test31();	
 	return 0;
 }
 void test32()
 {
 	int dimension = 2;
-	double initial_pos[2]={1,1.};
+	double initial_pos[2]={0,-2.};
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 100000;
-	int chain_N= 3;
-	int t0= 10000;
+	int N_steps = 500000;
+	int chain_N= 10;
+	int t0= 100000;
 	int nu= 10;
 	std::string chain_dist_method = "cold";
 	double ***output;
@@ -123,8 +123,8 @@ void test32()
 	std::string statfilename = "testing/data/neil_mcmc_statistics1_dynamicPT.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint1_dynamicPT.csv";
 	
-	int numThreads = 10;
-	bool pool = true;
+	int numThreads = 4;
+	bool pool = false;
 	
 	MCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,chain_N, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
@@ -204,8 +204,8 @@ void test31()
 	double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1,2};
 	//double initial_pos[dimension]={.9, 5, -1.,std::log(2000),std::log(50), .22, .4,.4,.01,.01,.01,.01,1,1,20};
 	double *seeding_var = NULL;
-	int n_steps = 150000;
-	int chain_N=12 ;
+	int n_steps = 150;
+	int chain_N=15 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -218,7 +218,7 @@ void test31()
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 10;
+	int numThreads = 17;
 	bool pool = true;
 	//#########################################################
 	//gw options
@@ -239,7 +239,8 @@ void test31()
 	//std::string chainfile = "testing/data/mcmc_output_Pv2.csv";
 	//std::string statfilename = "testing/data/mcmc_statistics_Pv2.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_Pv2.csv";
-	std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS_Pv2.csv";
+	std::string autocorrfile = "";
+	//std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS_Pv2.csv";
 	std::string chainfile = "testing/data/mcmc_output_dCS_Pv2.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_dCS_Pv2.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_dCS_Pv2.csv";

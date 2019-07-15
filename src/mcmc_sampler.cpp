@@ -253,10 +253,11 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->output =output;
 
 	//Start out with geometrically spaced chain
-	samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
+	//samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
+	samplerptr->chain_temps = chain_temps;
 	samplerptr->chain_temps[0] = 1.;
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
-	double c = 12;
+	double c = 1.5;
 	for(int i = 1; i<samplerptr->chain_N-1; i++){
 		samplerptr->chain_temps[i] = c * samplerptr->chain_temps[i-1];
 	}
@@ -282,7 +283,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	//During chain allocation, pooling isn't used
 	samplerptr->pool = false;
 	samplerptr->numThreads = numThreads;
-	samplerptr->A = new int[samplerptr->chain_N-1];
+	samplerptr->A = new int[samplerptr->chain_N];
 	samplerptr->PT_alloc = true;
 
 	allocate_sampler_mem(samplerptr);
@@ -317,13 +318,13 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	int t = 0;
 	samplerptr->show_progress = false;
 	while( t <= (N_steps-equilibrium_check_freq)){
-		if(ave_dynamics>tolerance ){
-			if(stability_ct > stability_tol)
-				break;
-			else
-				stability_ct++;
-		}
-		else stability_ct = 0;
+		//if(ave_dynamics>tolerance ){
+		//	if(stability_ct > stability_tol)
+		//		break;
+		//	else
+		//		stability_ct++;
+		//}
+		//else stability_ct = 0;
 		//step equilibrium_check_freq
 		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
 			//steps swp_freq
@@ -344,7 +345,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		ave_dynamics = sum / samplerptr->chain_N;
 		if(show_prog){
 			printProgress(1. -  (ave_dynamics - tolerance)/(tolerance+ave_dynamics));
-			std::cout<<ave_dynamics<<std::endl;
+			//std::cout<<ave_dynamics<<std::endl;
 			//std::cout<<"TIME: "<<t<<std::endl;
 		}
 	}
@@ -376,7 +377,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		 chain_filename,auto_corr_filename, checkpoint_file);
 	if(checkpoint_file =="")
 		remove("temp_checkpoint_file.csv");
-	delete [] samplerptr->chain_temps;
+	//delete [] samplerptr->chain_temps;
 }
 
 /*!\brief Generic sampler, where the likelihood, prior are parameters supplied by the user
