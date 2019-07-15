@@ -247,8 +247,8 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->swp_freq = swp_freq;
 	//For PT dynamics
 	samplerptr->N_steps = N_steps;
+
 	samplerptr->dimension = dimension;
-	samplerptr->show_progress = show_prog;
 	samplerptr->num_threads = numThreads;
 	samplerptr->output =output;
 
@@ -256,17 +256,18 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
 	samplerptr->chain_temps[0] = 1.;
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
-	double c = 1.2;
+	double c = 12;
 	for(int i = 1; i<samplerptr->chain_N-1; i++){
 		samplerptr->chain_temps[i] = c * samplerptr->chain_temps[i-1];
 	}
 	//Set last chain essentially at infinity
-	samplerptr->chain_temps[samplerptr->chain_N -1] = 1.e15;
+	samplerptr->chain_temps[samplerptr->chain_N -1] = 1.e14;
 
 	//NOTE: currently, update the history every step until length is 
 	//reached, then the history is updated every 20th step, always only
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
+	//samplerptr->history_length = 500;
 	samplerptr->history_length = 500;
 	samplerptr->history_update = 5;
 	//Number of steps to take with the fisher before updating the fisher 
@@ -281,6 +282,8 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	//During chain allocation, pooling isn't used
 	samplerptr->pool = false;
 	samplerptr->numThreads = numThreads;
+	samplerptr->A = new int[samplerptr->chain_N-1];
+	samplerptr->PT_alloc = true;
 
 	allocate_sampler_mem(samplerptr);
 
@@ -288,7 +291,6 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
 		assign_probabilities(samplerptr, chain_index);
 	
-
 	int  k=0;
 	//Assign initial position to start chains
 	assign_initial_pos(samplerptr, initial_pos,seeding_var);	
@@ -297,11 +299,14 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	double ave_dynamics= 1.;
 	//tolerance in percent change of temperature to determine equilibrium
 	double tolerance= .01;
+	int stability_ct = 0;
+	int stability_tol = 5;
 	//Frequency to check for equilibrium
-	int equilibrium_check_freq=100;
+	int equilibrium_check_freq=2*nu;
 	
 	double *old_temps = new double[samplerptr->chain_N];
 	for(int i =0; i<samplerptr->chain_N; i++){
+		std::cout<<samplerptr->chain_temps[i]<<std::endl;
 		old_temps[i]=samplerptr->chain_temps[i];
 	}
 
@@ -309,26 +314,51 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->N_steps = swp_freq;
 	std::cout<<"Dynamical PT allocation (measured by average percent change in temperature): "<<std::endl;
 	
-	while(ave_dynamics>tolerance){
+	int t = 0;
+	samplerptr->show_progress = false;
+	while( t <= (N_steps-equilibrium_check_freq)){
+		if(ave_dynamics>tolerance ){
+			if(stability_ct > stability_tol)
+				break;
+			else
+				stability_ct++;
+		}
+		else stability_ct = 0;
 		//step equilibrium_check_freq
 		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
 			//steps swp_freq
+			//samplerptr->N_steps += swp_freq;
 			MCMC_MH_loop(samplerptr);	
+			t+= samplerptr->N_steps;
+			//std::cout<<samplerptr->chain_pos[0]<<std::endl;
 			//Move temperatures
-			update_temperatures(samplerptr);
+			update_temperatures(samplerptr, t0, nu, t);
 		}
 		//Calculate average percent change in temperature
 		double sum = 0;
 		for (int j =0; j<samplerptr->chain_N; j++){
-			sum += (samplerptr->chain_temps[j] - old_temps[j])/old_temps[j];
+			//std::cout<<samplerptr->chain_temps[j]<<std::endl;
+			sum += std::abs((samplerptr->chain_temps[j] - old_temps[j])/old_temps[j]);
+			//std::cout<<"SUM: "<<sum<<std::endl;
 		}
 		ave_dynamics = sum / samplerptr->chain_N;
-		if(samplerptr->show_progress){
+		if(show_prog){
 			printProgress(1. -  (ave_dynamics - tolerance)/(tolerance+ave_dynamics));
+			std::cout<<ave_dynamics<<std::endl;
+			//std::cout<<"TIME: "<<t<<std::endl;
 		}
+	}
+	int acc, rej;
+	for (int j =0; j<samplerptr->chain_N; j++){
+		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
+		acc = samplerptr->swap_accept_ct[j];	
+		rej = samplerptr->swap_reject_ct[j];	
+		std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
+		
 	}
 
 	delete [] old_temps;
+	delete [] samplerptr->A;
 	//##################################################################
 	std::string internal_checkpoint;	
 	if(checkpoint_file !=""){
@@ -1148,4 +1178,113 @@ void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting c
 			chain_filename,
 			auto_corr_filename,
 			end_checkpoint_file);
+}
+void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int chain_N,/**< Maximum number of chains to use */
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	auto ll = [&log_likelihood](double *param, int dim, int chain_id){
+		return log_likelihood(param, dim);};
+
+	auto lp = [&log_prior](double *param, int dim, int chain_id){
+		return log_prior(param, dim);};
+	std::function<void(double*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm);};
+	}
+	MCMC_MH_dynamic_PT_alloc_internal(output,
+			dimension,
+			N_steps,
+			chain_N,
+			max_chain_N_thermo_ensemble,
+			initial_pos,
+			seeding_var,
+			chain_temps,
+			swp_freq,
+			t0,
+			nu,
+			chain_distribution_scheme,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			auto_corr_filename,
+			checkpoint_file);
+
+}
+void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int chain_N,/**< Maximum number of chains to use */
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	std::function<double(double*,int,int)> lp = log_prior;
+	std::function<double(double*,int,int)> ll = log_likelihood;
+	std::function<void(double*,int,double**,int)>f = fisher;
+	MCMC_MH_dynamic_PT_alloc_internal(output,
+			dimension,
+			N_steps,
+			chain_N,
+			max_chain_N_thermo_ensemble,
+			initial_pos,
+			seeding_var,
+			chain_temps,
+			swp_freq,
+			t0,
+			nu,
+			chain_distribution_scheme,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			auto_corr_filename,
+			checkpoint_file);
+
 }

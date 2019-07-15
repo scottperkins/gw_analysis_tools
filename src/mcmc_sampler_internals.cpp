@@ -283,10 +283,16 @@ void chain_swap(sampler *sampler, /**<sampler struct*/
 			//*swp_accepted+=1;
 			sampler->swap_accept_ct[i]+=1;
 			sampler->swap_accept_ct[i+1]+=1;
+			//PT dynamics
+			if(sampler->PT_alloc)
+				sampler->A[i+1] = 1;
 		}
 		else{
 			sampler->swap_reject_ct[i]+=1;
 			sampler->swap_reject_ct[i+1]+=1;
+			//PT dynamics
+			if(sampler->PT_alloc)
+				sampler->A[i+1] = 0;
 		}
 			//*swp_rejected+=1;
 	
@@ -1180,22 +1186,38 @@ double PT_dynamical_timescale(int t0, /**<Timescale of the dyanmics*/
  *
  * For defined results, this should be used while the sampler is using non-pooling methods
  */
-void update_temperatures(sampler *samplerptr)
+void update_temperatures(sampler *samplerptr,
+	int t0,
+	int nu,
+	int t
+	)
 {
-	//acceptance ratios
-	double *A = new double[samplerptr->chain_N];
-	int acc_ref = 0;
-	int rej_ref = 0;
-	int acc, rej;
-	for(int i =0 ; i<samplerptr->chain_N; i++){
-		acc = samplerptr->swap_accept_ct[i]-acc_ref;	
-		rej = samplerptr->swap_reject_ct[i]-rej_ref;	
-		A[i] = (double)acc / (acc+rej);
-		acc_ref = acc;
-		rej_ref = rej;
+	//acceptance ratios -- as defined by arXiv:1501.05823v3
+	//Need to transform, because I save the total acceptance count per chain
+	//not the acceptance count between chains
+	//double *A = new double[samplerptr->chain_N];
+	double *old_temps = new double[samplerptr->chain_N];
+	//int acc_ref = 0;
+	//int rej_ref = 0;
+	//int acc, rej;
+	for(int i =0 ; i<samplerptr->chain_N-1; i++){
+	//	acc = samplerptr->swap_accept_ct[i]-acc_ref;	
+	//	rej = samplerptr->swap_reject_ct[i]-rej_ref;	
+	//	A[i+1] = (double)acc / (acc+rej);
+	//	acc_ref = acc;
+	//	rej_ref = rej;
+		//std::cout<<"A_"<<i<<": "<<samplerptr->A[i+1]<<std::endl;
+	//	//std::cout<<"acc "<<i<<": "<<samplerptr->swap_accept_ct[i]<<std::endl;
+	//	//std::cout<<"rej "<<i<<": "<<samplerptr->swap_reject_ct[i]<<std::endl;
+		old_temps[i] = samplerptr->chain_temps[i];
 	}
+	double power;
+	double kappa = PT_dynamical_timescale(t0, nu, t);
+	std::cout<<kappa<<std::endl;
 	for (int i =1 ; i<samplerptr->chain_N-1; i++){
-		
+		power = kappa * (samplerptr->A[i] - samplerptr->A[i+1]);	
+		samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
+			(old_temps[i] - old_temps[i-1]) * std::exp(power);
 	} 
-	delete [] A;
+	delete [] old_temps;
 }

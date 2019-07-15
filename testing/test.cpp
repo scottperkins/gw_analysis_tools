@@ -65,6 +65,7 @@ void test28();
 void test29();
 void test30();
 void test31();
+void test32();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -94,8 +95,62 @@ static double *psd=NULL;
 
 int main(){
 
-	test31();	
+	test32();	
 	return 0;
+}
+void test32()
+{
+	int dimension = 2;
+	double initial_pos[2]={1,1.};
+	double *seeding_var = NULL;
+
+	
+	int N_steps = 100000;
+	int chain_N= 3;
+	int t0= 10000;
+	int nu= 10;
+	std::string chain_dist_method = "cold";
+	double ***output;
+	output = allocate_3D_array( chain_N, N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 5;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	//double chain_temps[chain_N] ={1};
+	std::string autocorrfile = "testing/data/neil_auto_corr_mcmc1_dynamicPT.csv";
+	//std::string autocorrfile = "";
+	std::string chainfile = "testing/data/neil_mcmc_output1_dynamicPT.csv";
+	std::string statfilename = "testing/data/neil_mcmc_statistics1_dynamicPT.txt";
+	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint1_dynamicPT.csv";
+	
+	int numThreads = 10;
+	bool pool = true;
+	
+	MCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,chain_N, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
+	std::cout<<"ENDED"<<std::endl;
+
+	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
+	//chainfile = "testing/data/neil_mcmc_output2.csv";
+	//statfilename = "testing/data/neil_mcmc_statistics2.txt";
+	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj32,NULL,statfilename,chainfile,autocorrfile );	
+	//std::cout<<"ENDED"<<std::endl;
+	
+
+
+	//write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
+	//ofstream mcmc_out;
+	//mcmc_out.open("testing/data/mcmc_output.csv");
+	//mcmc_out.precision(15);
+	////for(int i = 0;i<chain_N;i++){
+	//for(int j = 0; j<N_steps;j++){
+	//	//for(int k = 0; k<dimension; k++){
+	//		mcmc_out<<output[0][j][0]<<" , "<<output[0][j][1]<<endl;
+	//	//}
+	//}
+	////}
+	//mcmc_out.close();
+
+	deallocate_3D_array(output, chain_N, N_steps, dimension);
 }
 void test31()
 {
