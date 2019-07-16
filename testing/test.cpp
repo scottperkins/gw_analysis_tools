@@ -101,20 +101,20 @@ int main(){
 void test32()
 {
 	int dimension = 2;
-	double initial_pos[2]={0,-2.};
+	double initial_pos[2]={1,-2.};
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 10000;
+	int N_steps = 5000;
 	int chain_N= 16;
 	int max_chain_N_thermo= 8;
 	int t0= 1000;
-	int nu= 100;
+	int nu= 10;
 	std::string chain_dist_method = "cold";
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 5;
+	int swp_freq = 3;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//double chain_temps[chain_N] ={1};
@@ -138,6 +138,7 @@ void test32()
 			filecount+=1;
 		}
 	}
+	
 	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
 	//chainfile = "testing/data/neil_mcmc_output2.csv";
 	//statfilename = "testing/data/neil_mcmc_statistics2.txt";

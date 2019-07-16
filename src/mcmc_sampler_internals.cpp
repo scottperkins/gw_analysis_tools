@@ -82,7 +82,6 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int c
 	int i;
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
-	//std::cout<<MH_ratio<<std::endl;
 	if(MH_ratio< beta){
 		for ( i=0;i<sampler->dimension; i ++)
 		{
@@ -318,13 +317,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1;
 	double MH_ratio;
 	MH_ratio = pow;
-	//if (T1_index==0)std::cout<<pow<<" "<<T1<<" "<<ll1<<" "<<T2<<" "<<ll2<<std::endl;
 	//Averaging the two random numbers from each chains seed
 	double alpha = log( (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.);
-	//std::cout<<MH_ratio<<" "<<alpha<<std::endl;	
-	//std::cout<<T1<<" "<<T2<<std::endl;
-	//std::cout<<ll1<<" "<<ll2<<std::endl;
-	//std::cout<<(MH_ratio>alpha)<<std::endl;
 	if (MH_ratio<alpha)
 	{
 		return -1;
@@ -633,7 +627,6 @@ void write_stat_file(sampler *sampler,
 		rejected_swps+=sampler->swap_reject_ct[i];
 		accepted_steps[i]=sampler->step_accept_ct[i];
 		rejected_steps[i]=sampler->step_reject_ct[i];
-		//std::cout<<sampler->step_accept_ct[i]<<" "<<sampler->step_reject_ct[i]<<std::endl;
 	}
 	double total_swps= accepted_swps + rejected_swps;
 	double accepted_swp_fraction = (double)accepted_swps/(total_swps);		
@@ -1014,17 +1007,14 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		sampler->dimension = std::stod(item);
 		std::getline(lineStream, item, ',');
 		sampler->chain_N = std::stod(item);
-		//std::cout<<sampler->dimension<<" "<<sampler->chain_N<<std::endl;
 
 		//Second Row -- temps
 		std::getline(file_in,line);
 		std::stringstream lineStreamtemps(line);
 		sampler->chain_temps = (double *)malloc(sizeof(double)*sampler->chain_N);
 		i=0;
-		//std::cout<<"TEMPS"<<std::endl;
 		while(std::getline(lineStreamtemps, item, ',')){
 			sampler->chain_temps[i] = std::stod(item);
-			//std::cout<<sampler->chain_temps[i]<<std::endl;
 			i++;
 		}
 		
@@ -1034,34 +1024,29 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		//###################################
 
 		//third row+chain_N -- step widths
-		//std::cout<<"step widths"<<std::endl;
 		for(int j =0 ;j<sampler->chain_N; j++){
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreamwidths(line);
 			while(std::getline(lineStreamwidths, item, ',')){
 				sampler->randgauss_width[j][i] = std::stod(item);
-				//std::cout<<sampler->randgauss_width[j][i]<<std::endl;
 				i++;
 			}
 		}
 
 		//row 3 +chain_N  to 3+2 chain_N-- initial positions
-		//std::cout<<"pos "<<std::endl;
 		for(int j =0 ;j<sampler->chain_N; j++){
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreampos(line);
 			while(std::getline(lineStreampos, item, ',')){
 				sampler->output[j][0][i] = std::stod(item);
-				//std::cout<<sampler->output[j][0][i]<<std::endl;
 				i++;
 			}
 		}
 		std::getline(file_in,line);
 		std::stringstream lineStreamprimed(line);
 		std::getline(lineStreamprimed, item, ',');
-		//std::cout<<"history "<<std::endl;
 		if(item =="true"){
 			for(int j =0 ;j<sampler->chain_N; j++){
 				std::getline(file_in,line);
@@ -1071,7 +1056,6 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 					int step = i/sampler->dimension ;
 					int pos = i%sampler->dimension;
 					sampler->history[j][step][pos] = std::stod(item);	
-					//std::cout<<"Chain: "<<j<<" step: "<<step<<" dim: "<<pos<<std::endl;
 					i++;
 				}
 			}
@@ -1225,4 +1209,116 @@ void update_temperatures(sampler *samplerptr,
 		samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
 	} 
 	delete [] old_temps;
+}
+
+/*!  \brief For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains
+ *
+ * The output file will be reused, but the positions are set back to zero (copying the current position to position zero)
+ *
+ * Assumes the output, chain_temps have been allocated in memory for the final number of chains chain_N and steps N_steps
+ *
+ * Allocates memory for the new sampler sampler_new -> it's the user's responsibility to deallocate with deallocate_sampler_mem
+ */
+void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynamic sampler*/
+	int chain_N_thermo_ensemble, /**< Number of chains used in the thermodynamic ensemble*/
+	int chain_N,/**< Number of chains to use in the static sampler*/
+	std::string chain_allocation_scheme /**< Scheme to use to allocate any remaining chains*/
+	)
+{
+	//Check to see if more chains need to be allocated
+	bool allocate_chains = true;
+	if(chain_N_thermo_ensemble == chain_N){	allocate_chains = false;}
+	
+	//Allocate new sampler 
+	sampler_new->chain_N = chain_N;
+	sampler_new->ll = sampler_old->ll;
+	sampler_new->lp = sampler_old->lp;
+	sampler_new->fish = sampler_old->fish;
+	sampler_new->N_steps = sampler_old->N_steps;
+	sampler_new->dimension = sampler_old->dimension;
+	sampler_new->num_threads = sampler_old->num_threads;
+	sampler_new->numThreads = sampler_old->numThreads;
+	sampler_new->chain_temps = sampler_old->chain_temps;
+	sampler_new->history_length = sampler_old->history_length;
+	sampler_new->history_update = sampler_old->history_update;
+	sampler_new->fisher_update_number = sampler_old->fisher_update_number;
+	sampler_new->pool = sampler_old->pool;
+	sampler_new->swp_freq = sampler_old->swp_freq;
+	sampler_new->output = sampler_old->output;
+	sampler_new->fisher_exist = sampler_old->fisher_exist;
+	sampler_new->progress = 0;
+
+	allocate_sampler_mem(sampler_new);
+
+
+	
+	//Copy over pertinent sampler data: histories, step_widths, de_primed, current_hist_pos, copy current pos to first pos, current LL
+	//Only for chains 0 - chain_N_thermo_ensemble
+	for(int i =0; i<chain_N_thermo_ensemble; i++){
+		//history position:
+		sampler_new->current_hist_pos[i] = sampler_old->current_hist_pos[i];
+		sampler_new->de_primed[i] = sampler_old->de_primed[i];
+
+		if(!sampler_new->de_primed[i]){
+			for(int j = 0 ;j<=sampler_new->current_hist_pos[i]; j ++){
+				for(int k =0; k<sampler_new->dimension; k++){
+					sampler_new->history[i][j][k] = sampler_old->history[i][j][k];	
+				}
+			}
+		}
+		else{
+			for(int j = 0 ;j<sampler_new->history_length; j ++){
+				for(int k =0; k<sampler_new->dimension; k++){
+					sampler_new->history[i][j][k] = sampler_old->history[i][j][k];	
+				}
+			}
+
+		}
+	
+		//step widths
+		for(int j = 0 ; j<sampler_new->types_of_steps; j++){
+			sampler_new->randgauss_width[i][j] = sampler_old->randgauss_width[i][j];
+		}
+		
+		//Copy last position to start of output file
+		int pos = sampler_old->chain_pos[i];
+		for (int j = 0 ;j<sampler_new->dimension; j++){
+			sampler_new->output[i][0][j] = sampler_old->output[i][pos][j];
+		}
+		sampler_new->current_likelihoods[i] =sampler_old->current_likelihoods[i];
+
+		//Revert current_pos to 0 for each chain
+		sampler_new->chain_pos[i] = 0;
+		
+		//preserve priorities:
+		sampler_new->priority[i]=sampler_old->priority[i];
+	}
+
+	//Allocate extra chains if needed
+	//Only for chains chain_N_thermo_ensemble - chain_N
+	if(allocate_chains){
+		if(chain_allocation_scheme =="cold"){	
+			for(int i =chain_N_thermo_ensemble; i<chain_N; i++){
+				sampler_new->chain_temps[i] = 1;
+				sampler_new->priority[i] = 0;
+				sampler_new->de_primed[i]=false;
+				
+				//Right now, just copy cold chain pos over to new chain
+				int currentpos = sampler_new->chain_pos[0];
+				for(int j =0 ; j<sampler_new->dimension; j++){
+					sampler_new->output[i][0][j] = sampler_new->output[0][currentpos][j];
+				}
+				//sampler_new->current_likelihoods[i] =
+				// 	sampler_new->ll(sampler_new->output[i][0],sampler_new->dimension, i)/sampler_new->chain_temps[i];
+				sampler_new->current_likelihoods[i] =sampler_new->current_likelihoods[0];
+				sampler_new->chain_pos[i] = 0;
+			}		
+		}
+	}
+
+	//assign step probabilities for all chains
+	for(int i =0; i<sampler_new->chain_N; i++){
+		assign_probabilities(sampler_new, i);
+	}
+
 }

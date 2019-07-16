@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import corner 
 burn = False
 burnlength = 200000
+sets = 9
 
 #data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',',unpack=True)
 #burnin =1000
@@ -10,18 +11,22 @@ burnlength = 200000
 #data = data[burnin:]
 #plt.hist(data,bins=100,density=True)
 #x = np.linspace(-3,3)
-#datasets = []
-#datasets.append( np.loadtxt("data/neil_mcmc_output1_dynamicPT.csv",delimiter=',',unpack=True))
-#data = []
-#for i in datasets:
-#     
-#plt.plot(data[0])
-#plt.plot(data[1])
-#plt.show()
-#plt.close()
+datasets = []
+for i in np.arange(sets):
+    datasets.append( np.loadtxt("data/neil_mcmc_output{}_dynamicPT.csv".format(i+1),delimiter=','))
+data = [[],[]]
+for i in datasets:
+    for j in i:
+        data[0].append(j[0])
+        data[1].append(j[1])
+     
+
+plt.plot(data[0])
+plt.plot(data[1])
+plt.show()
+plt.close()
 datasets=[]
 data = []
-sets = 9
 for i in np.arange(sets):
     datasets.append( np.loadtxt("data/neil_mcmc_output{}_dynamicPT.csv".format(i+1),delimiter=','))
 for x in datasets:

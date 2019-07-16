@@ -170,4 +170,9 @@ void update_temperatures(sampler *samplerptr,
 	int nu,
 	int t
 	);
+void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, 
+	int chain_N_thermo_ensemble, 
+	int chain_N,
+	std::string chain_allocation_scheme
+	);
 #endif

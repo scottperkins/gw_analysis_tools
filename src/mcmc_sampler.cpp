@@ -228,8 +228,8 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	start = clock();
 	wstart = omp_get_wtime();
 
-	sampler sampler;
-	samplerptr = &sampler;
+	sampler samplerobj;
+	samplerptr = &samplerobj;
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
@@ -286,7 +286,9 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->A = new int[samplerptr->chain_N];
 	samplerptr->PT_alloc = true;
 
+	samplerptr->chain_N = chain_N;//For allocation purposes, this needs to be the maximium number of chains
 	allocate_sampler_mem(samplerptr);
+	samplerptr->chain_N = max_chain_N_thermo_ensemble;
 
 
 	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
@@ -367,32 +369,93 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	//
 	//#################################################################
 	
-	if(chain_distribution_scheme =="cold"){
-		for(int i =max_chain_N_thermo_ensemble;i<chain_N; i++){
-			samplerptr->chain_temps[i] = 1;
-		}
-	}
+	//if(chain_distribution_scheme =="cold"){
+	//	for(int i =max_chain_N_thermo_ensemble;i<chain_N; i++){
+	//		samplerptr->chain_temps[i] = 1;
+	//	}
+	//}
+	//write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
 	
+	sampler static_sampler;
+	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble, chain_N, chain_distribution_scheme);
 	delete [] old_temps;
 	delete [] samplerptr->A;
-	//##################################################################
-	std::string internal_checkpoint;	
-	if(checkpoint_file !=""){
-		internal_checkpoint = checkpoint_file;
-		write_checkpoint_file(samplerptr, checkpoint_file);
+	deallocate_sampler_mem(samplerptr);
+	static_sampler.show_progress=show_prog;
+	static_sampler.pool=pool;
+
+	samplerptr = &static_sampler;	
+	MCMC_MH_loop(&static_sampler);
+
+	end =clock();
+	wend =omp_get_wtime();
+
+	static_sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	static_sampler.time_elapsed_wall = (double)(wend-wstart);
+
+	std::cout<<std::endl;
+	
+	//###########################################################
+	//Auto-correlation
+	if(auto_corr_filename != ""){
+		std::cout<<"Calculating Autocorrelation: "<<std::endl;
+		int segments = 50;
+		double target_corr = .01;
+		write_auto_corr_file_from_data(auto_corr_filename, static_sampler.output[0],static_sampler.N_steps,static_sampler.dimension,segments, target_corr, static_sampler.num_threads);
 	}
-	else {
-		internal_checkpoint = "temp_checkpoint_file.csv";;
-		write_checkpoint_file(samplerptr, internal_checkpoint);
+	//###########################################################
+	acend =clock();
+	wacend =omp_get_wtime();
+	static_sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	static_sampler.time_elapsed_wall_ac = (double)(wacend - wend);
+
+	std::cout<<std::endl;
+	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
+	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
+	//std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of chain swaps (all chains): "<<rejected_percent<<std::endl;
+	//accepted_percent = (double)(step_accepted[0])/(step_accepted[0]+step_rejected[0]);
+	//rejected_percent = (double)(step_rejected[0])/(step_accepted[0]+step_rejected[0]);
+	//std::cout<<"Accepted percentage of steps (cold chain): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of steps (cold chain): "<<rejected_percent<<std::endl;
+	//double nansum=0;
+	//for (int i =0; i< chain_N; i++)
+	//	nansum+= samplerptr->nan_counter[i];
+	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
+	
+	if(statistics_filename != "")
+		write_stat_file(&static_sampler, statistics_filename);
+	
+	if(chain_filename != "")
+		write_file(chain_filename, static_sampler.output[0], static_sampler.N_steps,static_sampler.dimension);
+
+	if(checkpoint_file !=""){
+		write_checkpoint_file(&static_sampler, checkpoint_file);
 	}
 
-	//write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
-	deallocate_sampler_mem(samplerptr);
-	continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
-		log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
-		 chain_filename,auto_corr_filename, checkpoint_file);
-	if(checkpoint_file =="")
-		remove("temp_checkpoint_file.csv");
+	//free(step_accepted);
+	//free(step_rejected);
+	deallocate_sampler_mem(&static_sampler);
+	//##################################################################
+	//##################################################################
+	//##################################################################
+	//std::string internal_checkpoint;	
+	//if(checkpoint_file !=""){
+	//	internal_checkpoint = checkpoint_file;
+	//	write_checkpoint_file(samplerptr, checkpoint_file);
+	//}
+	//else {
+	//	internal_checkpoint = "temp_checkpoint_file.csv";;
+	//	write_checkpoint_file(samplerptr, internal_checkpoint);
+	//}
+
+	////write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
+	//deallocate_sampler_mem(samplerptr);
+	//continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
+	//	log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
+	//	 chain_filename,auto_corr_filename, checkpoint_file);
+	//if(checkpoint_file =="")
+	//	remove("temp_checkpoint_file.csv");
 	//delete [] samplerptr->chain_temps;
 }
 
@@ -1064,7 +1127,7 @@ void MCMC_MH_loop(sampler *sampler)
 					//and allowed to keep stepping at low priority-- 
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
-					else if(i !=0){
+					else if(sampler->chain_temps[i] !=1){
 
 						sampler->waiting[i]=false;
 						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
@@ -1077,6 +1140,10 @@ void MCMC_MH_loop(sampler *sampler)
 						sampler->chain_pos[i] = 0;
 
 						poolptr->enqueue(i);
+					}
+					else{
+						//If 0 T chain, just wait till everything else is done
+						sampler->waiting[i] = false;	
 					}
 				}
 				
