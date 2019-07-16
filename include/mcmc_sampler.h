@@ -110,6 +110,8 @@ void continue_MCMC_MH(std::string start_checkpoint_file,
 	);
 void MCMC_MH_loop(sampler *sampler);
 
+void MCMC_MH_step_incremental(sampler *sampler, int increment);
+
 void MCMC_MH(	double ***output, 
 		int dimension, 	
 		int N_steps,	

@@ -257,7 +257,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->chain_temps = chain_temps;
 	samplerptr->chain_temps[0] = 1.;
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
-	double c = 15;
+	double c = 1.5;
 	for(int i = 1; i<samplerptr->chain_N-1; i++){
 		samplerptr->chain_temps[i] = c * samplerptr->chain_temps[i-1];
 	}
@@ -296,6 +296,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	//Assign initial position to start chains
 	assign_initial_pos(samplerptr, initial_pos,seeding_var);	
 	
+	//NOTE: instead of dynamics, use variance over accept ratios over \nu steps
 	//Average percent change in temperature 
 	double ave_dynamics= 1.;
 	//tolerance in percent change of temperature to determine equilibrium
@@ -303,7 +304,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	int stability_ct = 0;
 	int stability_tol = 5;
 	//Frequency to check for equilibrium
-	int equilibrium_check_freq=2*nu;
+	int equilibrium_check_freq=10*nu;
 	
 	double *old_temps = new double[samplerptr->chain_N];
 	for(int i =0; i<samplerptr->chain_N; i++){
@@ -319,22 +320,22 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->show_progress = false;
 	while( t <= (N_steps-equilibrium_check_freq))
 	{
-		//if(ave_dynamics>tolerance ){
-		//	if(stability_ct > stability_tol)
-		//		break;
-		//	else
-		//		stability_ct++;
-		//}
-		//else stability_ct = 0;
+		if(ave_dynamics<tolerance ){
+			if(stability_ct > stability_tol)
+				break;
+			else
+				stability_ct++;
+		}
+		else stability_ct = 0;
 		//step equilibrium_check_freq
 		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
 			//steps swp_freq
 			//samplerptr->N_steps += swp_freq;
-			MCMC_MH_loop(samplerptr);	
-			t+= samplerptr->N_steps;
+			MCMC_MH_step_incremental(samplerptr, samplerptr->swp_freq);	
+			t+= samplerptr->swp_freq;
 			//std::cout<<"TIME: "<<t<<std::endl;
 			//Move temperatures
-			//update_temperatures(samplerptr, t0, nu, t);
+			update_temperatures(samplerptr, t0, nu, t);
 		}
 		//Calculate average percent change in temperature
 		double sum = 0;
@@ -346,7 +347,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		ave_dynamics = sum / samplerptr->chain_N;
 		if(show_prog){
 			printProgress(1. -  (ave_dynamics - tolerance)/(tolerance+ave_dynamics));
-			//std::cout<<ave_dynamics<<std::endl;
+			std::cout<<"DYNAMICS: "<<ave_dynamics<<std::endl;
 			//std::cout<<"TIME: "<<t<<std::endl;
 		}
 	}
@@ -360,6 +361,18 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		
 	}
 
+	//#################################################################
+	//
+	//Copy sampler to new sampler and run loop, skip checkpoint nonsense
+	//
+	//#################################################################
+	
+	if(chain_distribution_scheme =="cold"){
+		for(int i =max_chain_N_thermo_ensemble;i<chain_N; i++){
+			samplerptr->chain_temps[i] = 1;
+		}
+	}
+	
 	delete [] old_temps;
 	delete [] samplerptr->A;
 	//##################################################################
@@ -373,11 +386,11 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		write_checkpoint_file(samplerptr, internal_checkpoint);
 	}
 
-	write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
+	//write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
 	deallocate_sampler_mem(samplerptr);
-	//continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
-	//	log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
-	//	 chain_filename,auto_corr_filename, checkpoint_file);
+	continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
+		log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
+		 chain_filename,auto_corr_filename, checkpoint_file);
 	if(checkpoint_file =="")
 		remove("temp_checkpoint_file.csv");
 	//delete [] samplerptr->chain_temps;
@@ -817,58 +830,63 @@ void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for s
 	deallocate_sampler_mem(samplerptr);
 }
 					
-/*!\brief Internal function that runs the actual loop for the sampler
+/*!\brief Internal function that runs the actual loop for the sampler -- increment version
+ *
+ * The regular loop function runs for the entire range, this increment version will only step ``increment'' steps -- asynchronous: steps are measured by the 0th chain
  *
  */
 void MCMC_MH_step_incremental(sampler *sampler, int increment)
 {
-	int k =0;
-	int cutoff ;
+	//Make sure we're not going out of memory
+	if (sampler->progress + increment > sampler->N_steps)
+		increment = sampler->N_steps - sampler->progress;
 	//Sampler Loop - ``Deterministic'' swapping between chains
 	if (!sampler->pool)
 	{
+		int k =0;
+		int cutoff ;
+		int step_log;
 		omp_set_num_threads(sampler->num_threads);
 		#pragma omp parallel 
 		{
-		while (k<sampler->N_steps-1){
-			#pragma omp single
-			{
-				if( sampler->N_steps-k <= sampler->swp_freq) 
-					cutoff = sampler->N_steps-k-1;	
-				else cutoff = sampler->swp_freq;	
-			}
+		while (k<(increment-1) ){
 			#pragma omp for
 			for (int j=0; j<sampler->chain_N; j++)
 			{
+				if( sampler->N_steps-sampler->chain_pos[j] <= sampler->swp_freq) 
+					cutoff = sampler->N_steps-sampler->chain_pos[j]-1;	
+				else cutoff = sampler->swp_freq;	
+				if(j==0)
+					step_log = cutoff;
 				for (int i = 0 ; i< cutoff;i++)
 				{
 					int success;
-					success = mcmc_step(sampler, sampler->output[j][k+i], sampler->output[j][k+i+1],j);	
+					success = mcmc_step(sampler, sampler->output[j][sampler->chain_pos[j]], sampler->output[j][sampler->chain_pos[j]+1],j);	
 					sampler->chain_pos[j]+=1;
 					//if(success==1){step_accepted[j]+=1;}
 					//else{step_rejected[j]+=1;}
 					if(success==1){sampler->step_accept_ct[j]+=1;}
 					else{sampler->step_reject_ct[j]+=1;}
 					if(!sampler->de_primed[j])
-						update_history(sampler,sampler->output[j][k+i+1], j);
+						update_history(sampler,sampler->output[j][sampler->chain_pos[j]], j);
 					else if(sampler->chain_pos[j]%sampler->history_update==0)
-						update_history(sampler,sampler->output[j][k+i+1], j);
+						update_history(sampler,sampler->output[j][sampler->chain_pos[j]], j);
 					//Log LogLikelihood and LogPrior	
 					if(sampler->log_ll){
-						samplerptr->ll_lp_output[j][k+i+1][0]= 
+						samplerptr->ll_lp_output[j][sampler->chain_pos[j]][0]= 
 							samplerptr->current_likelihoods[j];
 					}
 					if(sampler->log_lp){
-						samplerptr->ll_lp_output[j][k+i+1][1]= 
+						samplerptr->ll_lp_output[j][sampler->chain_pos[j]][1]= 
 							samplerptr->lp(
-							samplerptr->output[j][k+i+1],
+							samplerptr->output[j][sampler->chain_pos[j]],
 							samplerptr->dimension, j);
 					}
 					
 				}
 				if(!sampler->de_primed[j]) 
 				{
-					if ((k+cutoff)>sampler->history_length)
+					if ((sampler->chain_pos[j])>sampler->history_length)
 					{
 						sampler->de_primed[j]=true;
 						assign_probabilities(sampler,j);	
@@ -877,13 +895,34 @@ void MCMC_MH_step_incremental(sampler *sampler, int increment)
 			}
 			#pragma omp single
 			{
-				k+= cutoff;
+				k+= step_log;
+				sampler->progress+=step_log;
 				int swp_accepted=0, swp_rejected=0;
-				chain_swap(sampler, sampler->output, k, &swp_accepted, &swp_rejected);
+				///NEEDS TO CHANGE
+				//chain_swap(sampler, sampler->output, sampler->chain_pos[0], &swp_accepted, &swp_rejected);
+				for(int i =0 ; i<sampler->chain_N-1; i++){
+					int k = sampler->chain_pos[i];
+					int l = sampler->chain_pos[i+1];
+					int success;
+					success = single_chain_swap(sampler, sampler->output[i][k], sampler->output[i+1][l],i,i+1);
+					//success = -1;
+					if(success ==1){
+						sampler->swap_accept_ct[i]+=1;	
+						sampler->swap_accept_ct[i+1]+=1;	
+						if(sampler->PT_alloc)
+							sampler->A[i+1] = 1;
+					}
+					else{
+						sampler->swap_reject_ct[i]+=1;	
+						sampler->swap_reject_ct[+1]+=1;	
+						if(sampler->PT_alloc)
+							sampler->A[i+1] = 0;
+					}
+				}
 				//sampler->swap_accept_ct+=swp_accepted;
 				//sampler->swap_reject_ct+=swp_rejected;
 				if(sampler->show_progress)
-					printProgress((double)k/sampler->N_steps);	
+					printProgress((double)sampler->progress/sampler->N_steps);	
 			}
 		}
 		}
@@ -894,7 +933,7 @@ void MCMC_MH_step_incremental(sampler *sampler, int increment)
 	{
 		ThreadPool pool(sampler->num_threads);
 		poolptr = &pool;
-		while(sampler->progress<sampler->N_steps-1)
+		while(sampler->progress<increment-1)
 		{
 			for(int i =0; i<sampler->chain_N; i++)
 			{
