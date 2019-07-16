@@ -257,7 +257,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	samplerptr->chain_temps = chain_temps;
 	samplerptr->chain_temps[0] = 1.;
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
-	double c = 1.5;
+	double c = 15;
 	for(int i = 1; i<samplerptr->chain_N-1; i++){
 		samplerptr->chain_temps[i] = c * samplerptr->chain_temps[i-1];
 	}
@@ -312,12 +312,13 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	}
 
 	//For each loop, we walk forward till one more swap has happened, then we update temps
-	samplerptr->N_steps = swp_freq;
+	//samplerptr->N_steps = swp_freq;
 	std::cout<<"Dynamical PT allocation (measured by average percent change in temperature): "<<std::endl;
 	
 	int t = 0;
 	samplerptr->show_progress = false;
-	while( t <= (N_steps-equilibrium_check_freq)){
+	while( t <= (N_steps-equilibrium_check_freq))
+	{
 		//if(ave_dynamics>tolerance ){
 		//	if(stability_ct > stability_tol)
 		//		break;
@@ -331,9 +332,9 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 			//samplerptr->N_steps += swp_freq;
 			MCMC_MH_loop(samplerptr);	
 			t+= samplerptr->N_steps;
-			//std::cout<<samplerptr->chain_pos[0]<<std::endl;
+			//std::cout<<"TIME: "<<t<<std::endl;
 			//Move temperatures
-			update_temperatures(samplerptr, t0, nu, t);
+			//update_temperatures(samplerptr, t0, nu, t);
 		}
 		//Calculate average percent change in temperature
 		double sum = 0;
@@ -355,6 +356,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		acc = samplerptr->swap_accept_ct[j];	
 		rej = samplerptr->swap_reject_ct[j];	
 		std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
+		std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
 		
 	}
 
@@ -371,10 +373,11 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		write_checkpoint_file(samplerptr, internal_checkpoint);
 	}
 
+	write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
 	deallocate_sampler_mem(samplerptr);
-	continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
-		log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
-		 chain_filename,auto_corr_filename, checkpoint_file);
+	//continue_MCMC_MH_internal(internal_checkpoint, output, N_steps, swp_freq, log_prior,
+	//	log_likelihood, fisher, numThreads, pool, show_prog, statistics_filename,
+	//	 chain_filename,auto_corr_filename, checkpoint_file);
 	if(checkpoint_file =="")
 		remove("temp_checkpoint_file.csv");
 	//delete [] samplerptr->chain_temps;
@@ -814,6 +817,121 @@ void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for s
 	deallocate_sampler_mem(samplerptr);
 }
 					
+/*!\brief Internal function that runs the actual loop for the sampler
+ *
+ */
+void MCMC_MH_step_incremental(sampler *sampler, int increment)
+{
+	int k =0;
+	int cutoff ;
+	//Sampler Loop - ``Deterministic'' swapping between chains
+	if (!sampler->pool)
+	{
+		omp_set_num_threads(sampler->num_threads);
+		#pragma omp parallel 
+		{
+		while (k<sampler->N_steps-1){
+			#pragma omp single
+			{
+				if( sampler->N_steps-k <= sampler->swp_freq) 
+					cutoff = sampler->N_steps-k-1;	
+				else cutoff = sampler->swp_freq;	
+			}
+			#pragma omp for
+			for (int j=0; j<sampler->chain_N; j++)
+			{
+				for (int i = 0 ; i< cutoff;i++)
+				{
+					int success;
+					success = mcmc_step(sampler, sampler->output[j][k+i], sampler->output[j][k+i+1],j);	
+					sampler->chain_pos[j]+=1;
+					//if(success==1){step_accepted[j]+=1;}
+					//else{step_rejected[j]+=1;}
+					if(success==1){sampler->step_accept_ct[j]+=1;}
+					else{sampler->step_reject_ct[j]+=1;}
+					if(!sampler->de_primed[j])
+						update_history(sampler,sampler->output[j][k+i+1], j);
+					else if(sampler->chain_pos[j]%sampler->history_update==0)
+						update_history(sampler,sampler->output[j][k+i+1], j);
+					//Log LogLikelihood and LogPrior	
+					if(sampler->log_ll){
+						samplerptr->ll_lp_output[j][k+i+1][0]= 
+							samplerptr->current_likelihoods[j];
+					}
+					if(sampler->log_lp){
+						samplerptr->ll_lp_output[j][k+i+1][1]= 
+							samplerptr->lp(
+							samplerptr->output[j][k+i+1],
+							samplerptr->dimension, j);
+					}
+					
+				}
+				if(!sampler->de_primed[j]) 
+				{
+					if ((k+cutoff)>sampler->history_length)
+					{
+						sampler->de_primed[j]=true;
+						assign_probabilities(sampler,j);	
+					}
+				}
+			}
+			#pragma omp single
+			{
+				k+= cutoff;
+				int swp_accepted=0, swp_rejected=0;
+				chain_swap(sampler, sampler->output, k, &swp_accepted, &swp_rejected);
+				//sampler->swap_accept_ct+=swp_accepted;
+				//sampler->swap_reject_ct+=swp_rejected;
+				if(sampler->show_progress)
+					printProgress((double)k/sampler->N_steps);	
+			}
+		}
+		}
+	}
+
+	//POOLING  -- ``Stochastic'' swapping between chains
+	else
+	{
+		ThreadPool pool(sampler->num_threads);
+		poolptr = &pool;
+		while(sampler->progress<sampler->N_steps-1)
+		{
+			for(int i =0; i<sampler->chain_N; i++)
+			{
+				if(sampler->waiting[i]){
+					if(sampler->chain_pos[i]<(sampler->N_steps-1))
+					{
+						sampler->waiting[i]=false;
+						//if(i==0) samplerptr->progress+=samplerptr->swp_freq;
+						poolptr->enqueue(i);
+					}
+					//If a chain finishes before chain 0, it's wrapped around 
+					//and allowed to keep stepping at low priority-- 
+					//not sure if this is the best
+					//method for keeping the 0th chain from finishing last or not
+					else if(i !=0){
+
+						sampler->waiting[i]=false;
+						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+						sampler->priority[i] = 2;
+						int pos = sampler->chain_pos[i];
+						for (int k =0; k<sampler->dimension; k++){
+							sampler->output[i][0][k] = 
+								sampler->output[i][pos][k] ;
+						}
+						sampler->chain_pos[i] = 0;
+
+						poolptr->enqueue(i);
+					}
+				}
+				
+			}
+			if(sampler->show_progress)
+				printProgress((double)sampler->progress/sampler->N_steps);
+			//usleep(300);
+		}
+	}
+}
 
 /*!\brief Internal function that runs the actual loop for the sampler
  *
@@ -878,8 +996,8 @@ void MCMC_MH_loop(sampler *sampler)
 				k+= cutoff;
 				int swp_accepted=0, swp_rejected=0;
 				chain_swap(sampler, sampler->output, k, &swp_accepted, &swp_rejected);
-				sampler->swap_accept_ct+=swp_accepted;
-				sampler->swap_reject_ct+=swp_rejected;
+				//sampler->swap_accept_ct+=swp_accepted;
+				//sampler->swap_reject_ct+=swp_rejected;
 				if(sampler->show_progress)
 					printProgress((double)k/sampler->N_steps);	
 			}

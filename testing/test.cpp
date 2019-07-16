@@ -95,7 +95,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test31();	
+	test32();	
 	return 0;
 }
 void test32()
@@ -106,9 +106,9 @@ void test32()
 
 	
 	int N_steps = 500000;
-	int chain_N= 10;
-	int t0= 100000;
-	int nu= 10;
+	int chain_N= 4;
+	int t0= 100;
+	int nu= 10000;
 	std::string chain_dist_method = "cold";
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -123,7 +123,7 @@ void test32()
 	std::string statfilename = "testing/data/neil_mcmc_statistics1_dynamicPT.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint1_dynamicPT.csv";
 	
-	int numThreads = 4;
+	int numThreads = 1;
 	bool pool = false;
 	
 	MCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,chain_N, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
@@ -200,14 +200,14 @@ void test31()
 
 	//#########################################################
 	//mcmc options
-	//int dimension = 15;
-	int dimension = 14;
-	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1,2};
-	double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1};
+	int dimension = 15;
+	//int dimension = 14;
+	double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1,2};
+	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1};
 	//double initial_pos[dimension]={.9, 5, -1.,std::log(2000),std::log(50), .22, .4,.4,.01,.01,.01,.01,1,1,20};
 	double *seeding_var = NULL;
-	int n_steps = 15;
-	int chain_N=2 ;
+	int n_steps = 1500;
+	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -220,15 +220,15 @@ void test31()
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 1;
-	bool pool = false;
+	int numThreads = 10;
+	bool pool = true;
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";
 	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
-	std::string generation_method = "IMRPhenomPv2";
-	//std::string generation_method = "dCS_IMRPhenomPv2_root_alpha";
+	//std::string generation_method = "IMRPhenomPv2";
+	std::string generation_method = "dCS_IMRPhenomPv2_root_alpha";
 	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
@@ -4493,6 +4493,9 @@ double test_lp_nts(double *pos, int dim, int chain_id){
 }
 double test_lp(double *pos, int dim)
 {
+	double a = -std::numeric_limits<double>::infinity();
+	if(pos[0]<-10 || pos[0]>10){return a;}
+	else if(pos[1]<-10 || pos[1]>10){return a;}
 	return 0;
 	//return -pos[0]*pos[0]/(10.)- pos[1]*pos[1]/20.;
 }	

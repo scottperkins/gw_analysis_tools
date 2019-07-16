@@ -8,12 +8,13 @@ burnlength = 200000
 #burnin =1000
 #burnin =0
 #data = data[burnin:]
-#plt.plot(data[0][burnin:])
-#plt.plot(data[1][burnin:])
-#plt.show()
-#plt.close()
 #plt.hist(data,bins=100,density=True)
 #x = np.linspace(-3,3)
+data = np.loadtxt("data/neil_mcmc_output1_dynamicPT.csv",delimiter=',',unpack=True)
+plt.plot(data[0])
+plt.plot(data[1])
+plt.show()
+plt.close()
 data = np.loadtxt("data/neil_mcmc_output1_dynamicPT.csv",delimiter=',')
 ndim, nsamples = 2, len(data) 
 labels = [r"x",r"y"]

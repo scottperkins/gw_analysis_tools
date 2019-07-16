@@ -785,10 +785,10 @@ void calculate_derivatives(double  **amplitude_deriv,
 			param_in[14+i] = parameters->betappe[i];
 		}
 		waveform_params.sky_average=parameters->sky_average;
-		waveform_params.bppe = new int[parameters->Nmod];
-		for(int i =0 ;i<parameters->Nmod; i++){
-			waveform_params.bppe[i] = parameters->bppe[i];
-		}
+		waveform_params.bppe = parameters->bppe;//new int[parameters->Nmod];
+		//for(int i =0 ;i<parameters->Nmod; i++){
+		//	waveform_params.bppe[i] = parameters->bppe[i];
+		//}
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
 		std::complex<double> Qp, Qm;
 
@@ -926,7 +926,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
 		delete [] response;
-		delete [] waveform_params.bppe;
+		//delete [] waveform_params.bppe;
 	}
 	else if (gen_method == "MCMC_dCS_IMRPhenomD_log_Full" 
 		|| gen_method == "MCMC_dCS_IMRPhenomD_Full"

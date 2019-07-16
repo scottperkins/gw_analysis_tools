@@ -321,7 +321,10 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	//if (T1_index==0)std::cout<<pow<<" "<<T1<<" "<<ll1<<" "<<T2<<" "<<ll2<<std::endl;
 	//Averaging the two random numbers from each chains seed
 	double alpha = log( (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.);
-	
+	//std::cout<<MH_ratio<<" "<<alpha<<std::endl;	
+	//std::cout<<T1<<" "<<T2<<std::endl;
+	//std::cout<<ll1<<" "<<ll2<<std::endl;
+	//std::cout<<(MH_ratio>alpha)<<std::endl;
 	if (MH_ratio<alpha)
 	{
 		return -1;
@@ -1218,6 +1221,8 @@ void update_temperatures(sampler *samplerptr,
 		power = kappa * (samplerptr->A[i] - samplerptr->A[i+1]);	
 		samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
 			(old_temps[i] - old_temps[i-1]) * std::exp(power);
+		//Replace LL, since I store it already scaled by the old temperature
+		samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
 	} 
 	delete [] old_temps;
 }

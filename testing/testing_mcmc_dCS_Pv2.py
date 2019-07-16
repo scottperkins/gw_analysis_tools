@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
-burn = True
+burn = False
 burnlength = 80000
 data = np.loadtxt("data/mcmc_output_dCS_Pv2.csv",delimiter=',')
 if burn:
