@@ -45,6 +45,14 @@ public:
 		return samplerptr->priority[i]>samplerptr->priority[j];	
 	}
 };
+class Comparatorswap
+{
+public:
+	bool operator()(int i, int j)
+	{
+		return false;	
+	}
+};
 class ThreadPool
 
 {
@@ -104,7 +112,8 @@ private:
 	//std::queue<int> mTasks;
 	//std::queue<int> mSwaps;
 	std::priority_queue<int,std::vector<int>,Comparator> mTasks;
-	std::priority_queue<int,std::vector<int>,Comparator> mSwaps;
+	//std::priority_queue<int,std::vector<int>,Comparator> mSwaps;
+	std::priority_queue<int,std::vector<int>,Comparatorswap> mSwaps;
 
 	void start(std::size_t numThreads)
 	{
@@ -321,6 +330,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	int t = 0;
 	samplerptr->show_progress = false;
 	while( t <= (N_steps-equilibrium_check_freq))
+	//while(true)
 	{
 		if(ave_dynamics<tolerance ){
 			if(stability_ct > stability_tol)

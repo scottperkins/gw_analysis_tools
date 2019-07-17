@@ -105,7 +105,7 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 5000;
+	int N_steps = 50000;
 	int chain_N= 16;
 	int max_chain_N_thermo= 8;
 	int t0= 1000;
