@@ -188,7 +188,7 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			int length,
 			fftw_outline *plan
 			);
-void MCMC_MH_GW(double ***output,
+void PTMCMC_MH_GW(double ***output,
 			int dimension,
 			int N_steps,
 			int chain_N,
@@ -215,7 +215,7 @@ void MCMC_MH_GW(double ***output,
 			std::string auto_corr_filename,
 			std::string checkpoint_filename
 			);
-void continue_MCMC_MH_GW(std::string start_checkpoint_file,
+void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			double ***output,
 			int dimension,
 			int N_steps,
@@ -239,7 +239,7 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 			std::string auto_corr_filename,
 			std::string final_checkpoint_filename
 			);
-void MCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
+void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
 
 double MCMC_likelihood_extrinisic(bool save_waveform, 
 	gen_params *parameters,

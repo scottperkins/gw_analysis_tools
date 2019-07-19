@@ -106,7 +106,7 @@ void test32()
 
 	
 	int N_steps = 50000;
-	int chain_N= 16;
+	int chain_N= 8;
 	int max_chain_N_thermo= 8;
 	int t0= 1000;
 	int nu= 10;
@@ -127,7 +127,7 @@ void test32()
 	int numThreads = 10;
 	bool pool = true;
 	
-	MCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,"",autocorrfile, checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,"",autocorrfile, checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 
 	int filecount = 1;
@@ -261,7 +261,7 @@ void test31()
 	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_Pv2_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -395,7 +395,7 @@ void test30()
 	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_Pv2_ppE,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -579,7 +579,7 @@ void test29()
 	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_Pv2,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -780,7 +780,7 @@ void test28()
 	std::string checkfile = "testing/data/mcmc_checkpoint_injection"+iteration+"_1226.csv";
 	std::string startcheckfile = "testing/data/mcmc_checkpoint_injection"+previteration+"_1226.csv";
 
-	continue_MCMC_MH_GW(startcheckfile,output, dimension, n_steps, 
+	continue_PTMCMC_MH_GW(startcheckfile,output, dimension, n_steps, 
 			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
@@ -928,7 +928,7 @@ void test27()
 	//std::string statfilename = "testing/data/mcmc_statistics_DFull.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_DFull.csv";
 
-	continue_MCMC_MH_GW(start_checkfile,output, dimension, n_steps, 
+	continue_PTMCMC_MH_GW(start_checkfile,output, dimension, n_steps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -1082,7 +1082,7 @@ void test26()
 	//std::string checkfile = "testing/data/mcmc_checkpoint_logflat_EdGB"+iteration+".csv";
 	//std::string startcheckfile = "testing/data/mcmc_checkpoint_logflat_EdGB"+previteration+".csv";
 
-	continue_MCMC_MH_GW(startcheckfile,output, dimension, n_steps, 
+	continue_PTMCMC_MH_GW(startcheckfile,output, dimension, n_steps, 
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -1186,7 +1186,7 @@ void test25()
 	int numThreads = 10;
 	bool pool = true;
 	
-	continue_MCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
+	continue_PTMCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 }
 void test24()
@@ -1392,7 +1392,7 @@ void test21()
 	std::string statfilename = "testing/data/mcmc_statistics_Pv2.txt";
 	std::string checkpointfile = "testing/data/mcmc_checkpoint_Pv2.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -1560,7 +1560,7 @@ void test20()
 	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -1832,7 +1832,7 @@ void test18()
 	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -2030,7 +2030,7 @@ void test16()
 	//std::string statfilename = "testing/data/mcmc_statistics_DFull.txt";
 	//std::string checkfile = "testing/data/mcmc_checkpoint_DFull.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
@@ -2277,7 +2277,7 @@ void test15()
 	std::string statfilename = "testing/data/mcmc_statistics_injection1_1226.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_injection1_1226.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
@@ -2541,7 +2541,7 @@ void test14()
 	std::string chainfile = "testing/data/mcmc_output_DFull_Neil.csv";
 	std::string statfilename = "testing/data/mcmc_statistics_DFull_Neil.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_DFull_Neil.csv";
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_DFull,numThreads, pool, show_progress, 
 			num_detectors, 
 			data, psd, 
@@ -2774,7 +2774,7 @@ void test12()
 	std::string statfilename = "testing/data/mcmc_statistics_Pv2.txt";
 	std::string checkpointfile = "testing/data/mcmc_checkpoint_Pv2.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_Pv2,numThreads, pool,show_progress, num_detectors, data, psd, 
 			frequencies, data_length, gps_time,detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile, checkpointfile);	
@@ -3131,7 +3131,7 @@ void test10()
 	std::string statfilename = "testing/data/mcmc_statistics_7dim.txt";
 	std::string checkfile= "testing/data/mcmc_checkpoint_7dim.csv";
 
-	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW_7dim,numThreads, pool,show_progress, num_detectors, data, psd, 
 			frequencies, data_length,gps_time, detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile, checkfile);	
@@ -3322,7 +3322,7 @@ void test9()
 	std::string statfilename = "testing/data/mcmc_statistics.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint.csv";
 
-	MCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, n_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW,numThreads, pool,show_progress, num_detectors, data, psd, 
 			frequencies, data_length,gps_time, detectors,Nmod, bppe, generation_method,
 			statfilename,"",autocorrfile, checkfile);	
@@ -3508,7 +3508,7 @@ void test8()
 	int numThreads = 20;
 	bool pool = true;
 
-	MCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
+	PTMCMC_MH_GW(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, 
 			swp_freq, test_lp_GW,numThreads, pool,show_progress, 
 			num_detectors, 
 			data, psd, 
@@ -3581,7 +3581,7 @@ void test7()
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3,statfilename,chainfile,autocorrfile );	
 	//auto lambda = [](double *x, int dim){return log_neil_proj3(x,dim);};
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile );	
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
+	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 
 	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";

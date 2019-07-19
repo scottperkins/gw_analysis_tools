@@ -15,12 +15,13 @@
 //typedef double (*log_likelihood_thread_safe)(double *param, int dimension);
 //typedef void (*fisher_thread_safe)(double *param, int dimension,double **fisher);
 
-/*! Structure storing everything that defines an instance of the sampler
- */
 const double limit_inf = -std::numeric_limits<double>::infinity();
 
-struct sampler
+/*! Class storing everything that defines an instance of the sampler
+ */
+class sampler
 {
+public:
 	int types_of_steps = 4;
 	double **step_prob;
 	double **prob_boundaries;
@@ -98,17 +99,21 @@ struct sampler
 	int *step_accept_ct;
 	int *step_reject_ct;
 
-	//Parameters for dynamic PT allocation
-	int *A;
-	bool PT_alloc=false;
-
 	//Pointer for testing -- stores log likelihood and log prior for output
 	//Quite a bit of memory (order chain_N * N_steps * 2), so probably not good to run every single time. Just for trouble
 	//shooting.
 	double ***ll_lp_output;
 	bool log_ll=false;
 	bool log_lp=false;
+
+
+
+	//Parameters for dynamic PT allocation
+	int *A;
+	bool PT_alloc=false;
+
 };
+
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);
 

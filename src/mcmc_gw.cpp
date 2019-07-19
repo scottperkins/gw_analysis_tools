@@ -831,7 +831,7 @@ double Log_Likelihood_internal(std::complex<double> *data,
  *
  * IMRPhenomPv2 - 9 dimensions -- cos J_N, ln chirpmass, eta, |chi1|, |chi1|, theta_1, theta_2, phi_1, phi_2
  */
-void MCMC_MH_GW(double ***output,
+void PTMCMC_MH_GW(double ***output,
 		int dimension,
 		int N_steps,
 		int chain_N,
@@ -899,9 +899,9 @@ void MCMC_MH_GW(double ***output,
 		local_seeding = true;
 	else
 		local_seeding = false;
-	MCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
 
-	MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
+	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename, checkpoint_file);
 	
@@ -919,7 +919,7 @@ void MCMC_MH_GW(double ***output,
  *
  * numThreads and pool do not necessarily have to be the same
  */
-void continue_MCMC_MH_GW(std::string start_checkpoint_file,
+void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			double ***output,
 			int dimension,
 			int N_steps,
@@ -980,9 +980,9 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
 
 	bool local_seeding=false ;
 
-	MCMC_method_specific_prep(generation_method, dimension, NULL, local_seeding);
+	PTMCMC_method_specific_prep(generation_method, dimension, NULL, local_seeding);
 
-	continue_MCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
+	continue_PTMCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
 			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
 			show_prog,statistics_filename,chain_filename,
 			auto_corr_filename, final_checkpoint_filename);
@@ -996,7 +996,7 @@ void continue_MCMC_MH_GW(std::string start_checkpoint_file,
  *
  * Populates seeding vector if non supplied, populates mcmc_Nmod, populates mcmc_log_beta, populates mcmc_intrinsic
  */
-void MCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding)
+void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding)
 {
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
@@ -1977,6 +1977,7 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 				&phic_ref
 				);
 		
+		parameters->phic = phic_ref;	
 		for(int i=1; i < num_detectors; i++){
 			celestial_horizon_transform(RA,DEC, gps_time, 
 					mcmc_detectors[i], &phi[i], &theta[i]);
@@ -1984,10 +1985,7 @@ double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std
 			parameters->theta=theta[i];
 			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
 			parameters->tc = tc_ref + delta_t;
-			//parameters->phic = phic_ref;	
 			
-			if(generation_method=="IMRPhenomPv2")
-				phic_ref = 0;
 			//fourier_detector_response(frequencies[i], 
 			//	data_length[i], hplus, hcross, response, 
 			//	parameters->theta, parameters->phi, parameters->psi,

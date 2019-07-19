@@ -188,6 +188,85 @@ private:
 	}
 };
 ThreadPool *poolptr;
+/*!\brief Generic reversable jump sampler, where the likelihood, prior, and reversable jump proposal are parameters supplied by the user
+ *
+ * Base of the sampler, generic, with user supplied quantities for most of the samplers
+ * properties
+ * 	
+ * Uses the Metropolis-Hastings method, with the option for Fisher/MALA steps if the Fisher
+ * routine is supplied.
+ *
+ * 3 modes to use - 
+ *
+ * single threaded (numThreads = 1) runs single threaded
+ *
+ * multi-threaded ``deterministic'' (numThreads>1 ; pool = false) progresses each chain in parallel for swp_freq steps, then waits for all threads to complete before swapping temperatures in sequenctial order (j, j+1) then (j+1, j+2) etc (sequenctially)
+ *
+ * multi-threaded ``stochastic'' (numThreads>2 ; pool = true) progresses each chain in parallel by queueing each temperature and evaluating them in the order they were submitted. Once finished, the threads are queued to swap, where they swapped in the order they are submitted. This means the chains are swapped randomly, and the chains do NOT finish at the same time. The sampler runs until the the 0th chain reaches the step number
+ *
+ * Note on limits: In the prior function, if a set of parameters should be disallowed, return -std::numeric_limits<double>::infinity()  -- (this is in the <limits> file in std)
+ *
+ * Format for the auto_corr file (compatable with csv, dat, txt extensions): each row is a dimension of the cold chain, with the first row being the lengths used for the auto-corr calculation:
+ *
+ * lengths: length1 , length2 ...
+ *
+ * dim1: length1 , length2 ...
+ *
+ * .
+ *
+ * .
+ *
+ * .
+ *
+ *
+ * Format for the chain file (compatable with csv, dat, txt extensions): each row is a step, each column a dimension:
+ *
+ * Step1: dim1 , dim2 , ..., max_dim, param_status1, param_status2, ...
+ *
+ * Step2: dim1 , dim2 , ..., max_dim, param_status1, param_status2, ...
+ *
+ * .
+ *
+ * .
+ *
+ * .
+ *
+ * Statistics_filename : should be txt extension
+ *
+ * checkpoint_file : This file saves the final position of all the chains, as well as other metadata, and can be loaded by the function <FUNCTION> to continue the chain from the point it left off. Not meant to be read by humans, the data order is custom to this software library. An empty string ("") means no checkpoint will be saved. For developers, the contents are:
+ *
+ * dimension, # of chains
+ *
+ * temps of chains
+ *
+ * Stepping widths of all chains
+ *
+ * Final position of all chains
+ */
+void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+	int max_dimension, 	/**< dimension of the parameter space being explored*/
+	int min_dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain*/
+	int chain_N,	/**< Number of chains*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	int initial_dim, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps,	/**<Double array of temperatures for the chains*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	std::function<double(double*,int,int)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+}
 /*! \brief Starts an MCMC_MH, but with a dynamic number of chains dynamically tuned during the initial iterations of the sampler. 
  *
  * Based on arXiv:1501.05823v3
@@ -208,7 +287,7 @@ ThreadPool *poolptr;
  *
  * "double": Chains are added in order of rising temperature that mimic the distribution achieved by the earier PT dynamics
  */
-void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -343,7 +422,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
 			//steps swp_freq
 			//samplerptr->N_steps += swp_freq;
-			MCMC_MH_step_incremental(samplerptr, samplerptr->swp_freq);	
+			PTMCMC_MH_step_incremental(samplerptr, samplerptr->swp_freq);	
 			t+= samplerptr->swp_freq;
 			//std::cout<<"TIME: "<<t<<std::endl;
 			//Move temperatures
@@ -395,7 +474,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
 	static_sampler.pool=pool;
 
 	samplerptr = &static_sampler;	
-	MCMC_MH_loop(&static_sampler);
+	PTMCMC_MH_loop(&static_sampler);
 
 	end =clock();
 	wend =omp_get_wtime();
@@ -524,7 +603,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chain
  *
  * Final position of all chains
  */
-void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain*/
 	int chain_N,	/**< Number of chains*/
@@ -683,7 +762,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
 	//}
 
 		
-	MCMC_MH_loop(samplerptr);	
+	PTMCMC_MH_loop(samplerptr);	
 	
 	//############################################################
 	//Write ll lp to file
@@ -754,7 +833,7 @@ void MCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is doub
  *
  * See MCMC_MH_internal for more details of parameters (pretty much all the same)
  */
-void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
@@ -839,7 +918,7 @@ void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for s
 	//########################################################
 	
 	//########################################################
-	MCMC_MH_loop(samplerptr);	
+	PTMCMC_MH_loop(samplerptr);	
 	//##############################################################
 	
 	//int swp_accepted=0, swp_rejected=0;
@@ -908,7 +987,7 @@ void continue_MCMC_MH_internal(std::string start_checkpoint_file,/**< File for s
  * The regular loop function runs for the entire range, this increment version will only step ``increment'' steps -- asynchronous: steps are measured by the 0th chain
  *
  */
-void MCMC_MH_step_incremental(sampler *sampler, int increment)
+void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 {
 	//Make sure we're not going out of memory
 	if (sampler->progress + increment > sampler->N_steps)
@@ -1048,7 +1127,7 @@ void MCMC_MH_step_incremental(sampler *sampler, int increment)
 /*!\brief Internal function that runs the actual loop for the sampler
  *
  */
-void MCMC_MH_loop(sampler *sampler)
+void PTMCMC_MH_loop(sampler *sampler)
 {
 	int k =0;
 	int cutoff ;
@@ -1275,7 +1354,7 @@ void mcmc_swap_threaded(int i, int j)
 	samplerptr->waiting[i]=true;
 	samplerptr->waiting[j]=true;
 }
-void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain*/
 	int chain_N,	/**< Number of chains*/
@@ -1306,11 +1385,11 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 			fisher(param, dim, fisherm);};
 	}
 	
-	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
+	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
 }
-void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain*/
 	int chain_N,	/**< Number of chains*/
@@ -1333,11 +1412,11 @@ void MCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_
 	std::function<double(double*,int,int)> lp = log_prior;
 	std::function<double(double*,int,int)> ll = log_likelihood;
 	std::function<void(double*,int,double**,int)>f = fisher;
-	MCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
+	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
 }
-void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
@@ -1357,7 +1436,7 @@ void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting c
 	std::function<double(double*,int,int)> lp = log_prior;
 	std::function<double(double*,int,int)> ll = log_likelihood;
 	std::function<void(double*,int,double**,int)>f = fisher;
-	continue_MCMC_MH_internal(start_checkpoint_file,
+	continue_PTMCMC_MH_internal(start_checkpoint_file,
 			output,
 			N_steps,
 			swp_freq,
@@ -1372,7 +1451,7 @@ void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting c
 			auto_corr_filename,
 			end_checkpoint_file);
 }
-void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
@@ -1399,7 +1478,7 @@ void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting c
 		f = [&fisher](double *param, int dim, double **fisherm, int chain_id){
 			fisher(param, dim, fisherm);};
 	}
-	continue_MCMC_MH_internal(start_checkpoint_file,
+	continue_PTMCMC_MH_internal(start_checkpoint_file,
 			output,
 			N_steps,
 			swp_freq,
@@ -1414,7 +1493,7 @@ void continue_MCMC_MH(std::string start_checkpoint_file,/**< File for starting c
 			auto_corr_filename,
 			end_checkpoint_file);
 }
-void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -1448,7 +1527,7 @@ void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape 
 		f = [&fisher](double *param, int dim, double **fisherm, int chain_id){
 			fisher(param, dim, fisherm);};
 	}
-	MCMC_MH_dynamic_PT_alloc_internal(output,
+	PTMCMC_MH_dynamic_PT_alloc_internal(output,
 			dimension,
 			N_steps,
 			chain_N,
@@ -1472,7 +1551,7 @@ void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape 
 			checkpoint_file);
 
 }
-void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -1499,7 +1578,7 @@ void MCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape 
 	std::function<double(double*,int,int)> lp = log_prior;
 	std::function<double(double*,int,int)> ll = log_likelihood;
 	std::function<void(double*,int,double**,int)>f = fisher;
-	MCMC_MH_dynamic_PT_alloc_internal(output,
+	PTMCMC_MH_dynamic_PT_alloc_internal(output,
 			dimension,
 			N_steps,
 			chain_N,

@@ -9,7 +9,30 @@
 void mcmc_step_threaded(int j);
 void mcmc_swap_threaded(int i, int j);
 
-void MCMC_MH_dynamic_PT_alloc_internal(double ***output, 
+void RJPTMCMC_MH_internal(double ***output, 
+	int max_dimension, 	
+	int min_dimension, 	
+	int N_steps,	
+	int chain_N,	
+	double *initial_pos, 	
+	int initial_dim, 	
+	double *seeding_var, 	
+	double *chain_temps,	
+	int swp_freq,	
+	std::function<double(double*,int,int)> log_prior,
+	std::function<double(double*,int,int)> log_likelihood,
+	std::function<void(double*,int,double**,int)>fisher,
+	std::function<double(double*,int,int)> RJ_proposal,
+	int numThreads, 
+	bool pool, 
+	bool show_prog, 
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string auto_corr_filename,
+	std::string checkpoint_file
+	);
+
+void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	
@@ -32,7 +55,7 @@ void MCMC_MH_dynamic_PT_alloc_internal(double ***output,
 	std::string auto_corr_filename,
 	std::string checkpoint_file
 	);
-void MCMC_MH_dynamic_PT_alloc(double ***output, 
+void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	
@@ -55,7 +78,7 @@ void MCMC_MH_dynamic_PT_alloc(double ***output,
 	std::string auto_corr_filename,
 	std::string checkpoint_file
 	);
-void MCMC_MH_dynamic_PT_alloc(double ***output, 
+void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	
@@ -78,7 +101,7 @@ void MCMC_MH_dynamic_PT_alloc(double ***output,
 	std::string auto_corr_filename,
 	std::string checkpoint_file
 	);
-void continue_MCMC_MH(std::string start_checkpoint_file,
+void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	double ***output,
 	int N_steps,
 	int swp_freq,
@@ -93,7 +116,7 @@ void continue_MCMC_MH(std::string start_checkpoint_file,
 	std::string auto_corr_filename,
 	std::string end_checkpoint_file
 	);
-void continue_MCMC_MH(std::string start_checkpoint_file,
+void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	double ***output,
 	int N_steps,
 	int swp_freq,
@@ -108,11 +131,11 @@ void continue_MCMC_MH(std::string start_checkpoint_file,
 	std::string auto_corr_filename,
 	std::string end_checkpoint_file
 	);
-void MCMC_MH_loop(sampler *sampler);
+void PTMCMC_MH_loop(sampler *sampler);
 
-void MCMC_MH_step_incremental(sampler *sampler, int increment);
+void PTMCMC_MH_step_incremental(sampler *sampler, int increment);
 
-void MCMC_MH(	double ***output, 
+void PTMCMC_MH(	double ***output, 
 		int dimension, 	
 		int N_steps,	
 		int chain_N,	
@@ -131,7 +154,7 @@ void MCMC_MH(	double ***output,
 		std::string auto_corr_filename,
 		std::string checkpoint_filename
 		);
-void MCMC_MH(	double ***output, 
+void PTMCMC_MH(	double ***output, 
 		int dimension, 	
 		int N_steps,	
 		int chain_N,	
@@ -150,7 +173,7 @@ void MCMC_MH(	double ***output,
 		std::string auto_corr_filename,
 		std::string checkpoint_filename
 		);
-void MCMC_MH_internal(	double ***output, 
+void PTMCMC_MH_internal(	double ***output, 
 		int dimension, 	
 		int N_steps,	
 		int chain_N,	
@@ -169,7 +192,7 @@ void MCMC_MH_internal(	double ***output,
 		std::string auto_corr_filename,
 		std::string checkpoint_filename
 		);
-void continue_MCMC_MH_internal(std::string start_checkpoint_file,
+void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,
 				double ***output,
 				int N_steps,
 				int swp_freq,
