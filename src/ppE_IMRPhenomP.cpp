@@ -3,6 +3,11 @@
 #include "util.h"
 #include <adolc/adouble.h>
 
+/*! \file
+ *
+ * Source code file for parameterized post Einsteinian Modifications to the precessing waveform model IMRPhenomP
+ */
+
 //Shamelessly stolen from lalsuite
 /* Macro functions to rotate the components of a vector about an axis */
 #define ROTATEZ(angle, vx, vy, vz)\
