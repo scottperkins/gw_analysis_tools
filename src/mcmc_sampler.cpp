@@ -190,6 +190,8 @@ private:
 ThreadPool *poolptr;
 /*!\brief Generic reversable jump sampler, where the likelihood, prior, and reversable jump proposal are parameters supplied by the user
  *
+ * Currently, no dynamic PT option, as it would be too many free parameters for the sampler to converge to a reasonable temperature distribution in a reasonable amount of time. Best use case, use the PTMCMC_MH_dyanmic_PT for the ``base'' dimension space, and use that temperature ladder.
+ *
  * Base of the sampler, generic, with user supplied quantities for most of the samplers
  * properties
  * 	
@@ -205,6 +207,8 @@ ThreadPool *poolptr;
  * multi-threaded ``stochastic'' (numThreads>2 ; pool = true) progresses each chain in parallel by queueing each temperature and evaluating them in the order they were submitted. Once finished, the threads are queued to swap, where they swapped in the order they are submitted. This means the chains are swapped randomly, and the chains do NOT finish at the same time. The sampler runs until the the 0th chain reaches the step number
  *
  * Note on limits: In the prior function, if a set of parameters should be disallowed, return -std::numeric_limits<double>::infinity()  -- (this is in the <limits> file in std)
+ *
+ * The parameter array uses the dimensions [0,min_dim] always, and [min_dim, max_dim] in RJPTMCMC fashion
  *
  * Format for the auto_corr file (compatable with csv, dat, txt extensions): each row is a dimension of the cold chain, with the first row being the lengths used for the auto-corr calculation:
  *
@@ -250,7 +254,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	int chain_N,	/**< Number of chains*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	int initial_dim, 	/**<Initial position in parameter space - shape double[dimension]*/
-	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
@@ -266,6 +270,13 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
+	//To Do:
+	//	Retrofit the sampler_internal functions to accept dim-status array -- for regular PTMCMC, just submit with all 1's
+	//		Includes all the steps
+	//		Includes statistics file, percentage of time spent on/off, etc
+	//	retrofit PTMCMC/PTMCMC_dynamic_PT, thread pool functions
+	//	Maybe get rid of sampler->output in favor of sampler->output with dimension [2xmax_dim][N_steps], for parameter status always
+		
 }
 /*! \brief Starts an MCMC_MH, but with a dynamic number of chains dynamically tuned during the initial iterations of the sampler. 
  *
@@ -1013,7 +1024,13 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 				for (int i = 0 ; i< cutoff;i++)
 				{
 					int success;
-					success = mcmc_step(sampler, sampler->output[j][sampler->chain_pos[j]], sampler->output[j][sampler->chain_pos[j]+1],j);	
+					if(!sampler->RJMCMC){
+						success = mcmc_step(sampler, sampler->output[j][sampler->chain_pos[j]], sampler->output[j][sampler->chain_pos[j]+1],sampler->param_status[j][0],sampler->param_status[j][0],j);	
+					}
+					else{
+						success = mcmc_step(sampler, sampler->output[j][sampler->chain_pos[j]], sampler->output[j][sampler->chain_pos[j]+1],sampler->param_status[j][sampler->chain_pos[j]],sampler->param_status[j][sampler->chain_pos[j]+1],j);	
+					}
+					//success = mcmc_step(sampler, sampler->output[j][sampler->chain_pos[j]], sampler->output[j][sampler->chain_pos[j]+1],j);	
 					sampler->chain_pos[j]+=1;
 					//if(success==1){step_accepted[j]+=1;}
 					//else{step_rejected[j]+=1;}
@@ -1150,7 +1167,12 @@ void PTMCMC_MH_loop(sampler *sampler)
 				for (int i = 0 ; i< cutoff;i++)
 				{
 					int success;
-					success = mcmc_step(sampler, sampler->output[j][k+i], sampler->output[j][k+i+1],j);	
+					if(!sampler->RJMCMC){
+						success = mcmc_step(sampler, sampler->output[j][k+i], sampler->output[j][k+i+1],sampler->param_status[j][0],sampler->param_status[j][0],j);	
+					}
+					else{
+						success = mcmc_step(sampler, sampler->output[j][k+i], sampler->output[j][k+i+1],sampler->param_status[j][k+i],sampler->param_status[j][k+i+1],j);	
+					}
 					sampler->chain_pos[j]+=1;
 					//if(success==1){step_accepted[j]+=1;}
 					//else{step_rejected[j]+=1;}
@@ -1254,7 +1276,13 @@ void mcmc_step_threaded(int j)
 	for (int i = 0 ; i< cutoff;i++)
 	{
 		int success;
-		success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
+		//success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],j);	
+		if(!samplerptr->RJMCMC){
+			success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],samplerptr->param_status[j][0],samplerptr->param_status[j][0],j);	
+		}
+		else{
+			success = mcmc_step(samplerptr, samplerptr->output[j][k+i], samplerptr->output[j][k+i+1],samplerptr->param_status[j][k+i],samplerptr->param_status[j][k+i+1],j);	
+		}
 	
 		if(success==1){samplerptr->step_accept_ct[j]+=1;}
 		else{samplerptr->step_reject_ct[j]+=1;}

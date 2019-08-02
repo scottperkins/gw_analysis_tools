@@ -19,7 +19,7 @@
 
 /*! \brief interface function between the sampler and the internal step functions
  */
-int mcmc_step(sampler *sampler, double *current_param, double *next_param, int chain_number)
+int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *current_status, int *proposed_status, int chain_number)
 {
 	//Random number to determine type of step
 	double alpha = gsl_rng_uniform(sampler->rvec[chain_number]);

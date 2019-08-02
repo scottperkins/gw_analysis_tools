@@ -36,7 +36,11 @@ public:
 	bool fisher_exist;
 	bool *de_primed;
 	int *priority;
+
 	double ***output;
+	int ***param_status;
+	bool RJMCMC=false;
+
 	bool pool;
 	int progress=0;
 	bool show_progress;
@@ -115,7 +119,7 @@ public:
 };
 
 
-int mcmc_step(sampler *sampler, double *current_param,double *next_param, int chain_number);
+int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *proposed_status, int chain_number);
 
 void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int chain_id);
 
