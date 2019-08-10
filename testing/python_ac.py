@@ -12,10 +12,10 @@ acfile = b"data/py_ac.csv"
 dat = b"data/mcmc_output_dCS.csv"
 datstring = "data/mcmc_output_dCS.csv"
 data = np.ascontiguousarray(np.loadtxt(datstring, delimiter=','))
-num_segments = 50
+num_segments = 10
 dim = 9
-length = 20000
-threads = 8
+length = 3000000
+threads = 12
 target_corr = .01
 
 #mcmc.write_auto_corr_file_from_data_file_py(acfile, dat, length, dim, num_segments, target_corr, threads)
