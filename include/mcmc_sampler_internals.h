@@ -36,6 +36,7 @@ public:
 	bool fisher_exist;
 	bool *de_primed;
 	int *priority;
+	bool *ref_chain_status;
 
 	double ***output;
 	int ***param_status;
@@ -136,6 +137,10 @@ void chain_swap(sampler *sampler, double ***output, int step_num,int *swp_accept
 int single_chain_swap(sampler *sampler, double *chain1, double *chain2,int T1_index, int T2_index);
 
 void assign_probabilities(sampler *sampler, int chain_index);
+
+bool check_sampler_status(sampler *samplerptr);
+
+void update_step_widths(sampler *samplerptr, int chain_id);
 
 void allocate_sampler_mem(sampler *sampler);
 

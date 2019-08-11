@@ -402,6 +402,67 @@ void assign_probabilities(sampler *sampler, int chain_index)
 	sampler->prob_boundaries[chain_index][3] = sampler->step_prob[chain_index][3]+sampler->prob_boundaries[chain_index][2];
 }	
 
+bool check_sampler_status(sampler *samplerptr)
+{
+	for(int i =0 ; i<samplerptr->chain_N; i++){
+		if(!samplerptr->ref_chain_status[i])
+			return false;
+	}
+	return true;
+}
+void update_step_widths(sampler *samplerptr, int chain_id)
+{
+	int j = chain_id;
+	//update stepsize to maximize step efficiency
+	//increases in stepsizes of 10%
+	double frac, acc, rej;
+	if(samplerptr->chain_pos[j]%samplerptr->check_stepsize_freq[j] == 0){
+		//Gaussian
+		if(samplerptr->step_prob[j][0]!= 0){
+			acc = samplerptr->gauss_accept_ct[j] - samplerptr->gauss_last_accept_ct[j];	
+			rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][0] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][0] *=1.1;	
+			}
+			samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
+			samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
+		}	
+		//de
+		if(samplerptr->step_prob[j][1]!= 0){
+			acc = samplerptr->de_accept_ct[j] - samplerptr->de_last_accept_ct[j];	
+			rej = samplerptr->de_reject_ct[j] - samplerptr->de_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][1] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][1] *=1.1;	
+			}
+			samplerptr->de_last_accept_ct[j]=samplerptr->de_accept_ct[j];
+			samplerptr->de_last_reject_ct[j]=samplerptr->de_reject_ct[j];
+		}	
+		//fisher
+		if(samplerptr->step_prob[j][3]!= 0){
+			acc = samplerptr->fish_accept_ct[j] - samplerptr->fish_last_accept_ct[j];	
+			rej = samplerptr->fish_reject_ct[j] - samplerptr->fish_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][3] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][3] *=1.1;	
+			}
+			samplerptr->fish_last_accept_ct[j]=samplerptr->fish_accept_ct[j];
+			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
+		}	
+		
+	}
+}
+
 void allocate_sampler_mem(sampler *sampler)
 {
 	gsl_rng_env_setup();
@@ -451,9 +512,18 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
 	sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->dimension);
+	sampler->ref_chain_status = (bool *) malloc(sizeof(bool)*sampler->chain_N);
 
 	for (i =0; i<sampler->chain_N; i++)
 	{
+		//designate T=1 chains as reference chains
+		if(sampler->chain_temps[i] == 1){
+			sampler->ref_chain_status[i] = false;
+		}
+		else{
+			sampler->ref_chain_status[i] = true;
+		}
+
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
 		sampler->prob_boundaries[i] = (double *)malloc(sizeof(double)*4);
 		sampler->de_primed[i] = false;
@@ -580,6 +650,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
 	deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->dimension);
+	free(sampler->ref_chain_status);
 	//gsl_rng_free(sampler->r);
 	
 
@@ -1214,20 +1285,9 @@ void update_temperatures(sampler *samplerptr,
 	//acceptance ratios -- as defined by arXiv:1501.05823v3
 	//Need to transform, because I save the total acceptance count per chain
 	//not the acceptance count between chains
-	//double *A = new double[samplerptr->chain_N];
 	double *old_temps = new double[samplerptr->chain_N];
-	//int acc_ref = 0;
-	//int rej_ref = 0;
-	//int acc, rej;
+
 	for(int i =0 ; i<samplerptr->chain_N-1; i++){
-	//	acc = samplerptr->swap_accept_ct[i]-acc_ref;	
-	//	rej = samplerptr->swap_reject_ct[i]-rej_ref;	
-	//	A[i+1] = (double)acc / (acc+rej);
-	//	acc_ref = acc;
-	//	rej_ref = rej;
-		//std::cout<<"A_"<<i<<": "<<samplerptr->A[i+1]<<std::endl;
-	//	//std::cout<<"acc "<<i<<": "<<samplerptr->swap_accept_ct[i]<<std::endl;
-	//	//std::cout<<"rej "<<i<<": "<<samplerptr->swap_reject_ct[i]<<std::endl;
 		old_temps[i] = samplerptr->chain_temps[i];
 	}
 	double power;

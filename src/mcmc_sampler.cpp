@@ -281,6 +281,8 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 
 /*! \brief Dyanmically tunes an MCMC for optimal spacing. step width, and chain number
  *
+ * NOTE: nu, and t0 parameters determine the dynamics, so these are important quantities. nu is related to how many swap attempts it takes to substantially change the temperature ladder, why t0 determines the length of the total dyanimcally period. Moderate initial choices would be 10 and 1000, respectively.
+ *
  * Based on arXiv:1501.05823v3
  *
  * Currently, Chain number is fixed
@@ -449,7 +451,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		ave_dynamics = sum / samplerptr->chain_N;
 		if(show_prog){
 			printProgress(1. -  (ave_dynamics - tolerance)/(tolerance+ave_dynamics));
-			std::cout<<"DYNAMICS: "<<ave_dynamics<<std::endl;
+			std::cout<<"DYNAMICS: "<<ave_dynamics<<" "<<samplerptr->chain_pos[0]<<std::endl;
 			//std::cout<<"TIME: "<<t<<std::endl;
 		}
 	}
@@ -989,7 +991,7 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 					
 /*!\brief Internal function that runs the actual loop for the sampler -- increment version
  *
- * The regular loop function runs for the entire range, this increment version will only step ``increment'' steps -- asynchronous: steps are measured by the 0th chain
+ * The regular loop function runs for the entire range, this increment version will only step ``increment'' steps -- asynchronous: steps are measured by the cold chains
  *
  */
 void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
@@ -1045,6 +1047,8 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 							samplerptr->output[j][sampler->chain_pos[j]],
 							samplerptr->dimension, j);
 					}
+					//Update step-widths to optimize acceptance ratio
+					update_step_widths(samplerptr, j);
 					
 				}
 				if(!sampler->de_primed[j]) 
@@ -1096,12 +1100,14 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 	{
 		ThreadPool pool(sampler->num_threads);
 		poolptr = &pool;
-		while(sampler->progress<increment-1)
+		//while(sampler->progress<increment-1)
+		while(!check_sampler_status(sampler))
 		{
 			for(int i =0; i<sampler->chain_N; i++)
 			{
 				if(sampler->waiting[i]){
-					if(sampler->chain_pos[i]<(sampler->N_steps-1))
+					//if(sampler->chain_pos[i]<(sampler->N_steps-1))
+					if(sampler->chain_pos[i]<(increment-1))
 					{
 						sampler->waiting[i]=false;
 						//if(i==0) samplerptr->progress+=samplerptr->swp_freq;
@@ -1111,7 +1117,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 					//and allowed to keep stepping at low priority-- 
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
-					else if(i !=0){
+					else if(sampler->chain_temps[i] !=1){
 
 						sampler->waiting[i]=false;
 						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
@@ -1124,6 +1130,11 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 						sampler->chain_pos[i] = 0;
 
 						poolptr->enqueue(i);
+					}
+					else{
+						//If 0 T chain, just wait till everything else is done
+						sampler->waiting[i] = false;	
+						sampler->ref_chain_status[i] = true;
 					}
 				}
 				
@@ -1187,6 +1198,8 @@ void PTMCMC_MH_loop(sampler *sampler)
 							samplerptr->output[j][k+i+1],
 							samplerptr->dimension, j);
 					}
+					//Update step-widths to optimize acceptance ratio
+					update_step_widths(samplerptr, j);
 					
 				}
 				if(!sampler->de_primed[j]) 
@@ -1217,7 +1230,8 @@ void PTMCMC_MH_loop(sampler *sampler)
 	{
 		ThreadPool pool(sampler->num_threads);
 		poolptr = &pool;
-		while(sampler->progress<sampler->N_steps-1)
+		//while(sampler->progress<sampler->N_steps-1)
+		while(!check_sampler_status(sampler))
 		{
 			for(int i =0; i<sampler->chain_N; i++)
 			{
@@ -1247,8 +1261,9 @@ void PTMCMC_MH_loop(sampler *sampler)
 						poolptr->enqueue(i);
 					}
 					else{
-						//If 0 T chain, just wait till everything else is done
+						//If 1 T chain, just wait till everything else is done
 						sampler->waiting[i] = false;	
+						sampler->ref_chain_status[i] = true;	
 					}
 				}
 				
@@ -1306,56 +1321,19 @@ void mcmc_step_threaded(int j)
 		}
 	}
 	samplerptr->chain_pos[j]+=cutoff;
-	if(j==0) samplerptr->progress+=cutoff;
+	//Keep track of progress of all cold chains - track the slowest
+	//Now that progress is only used for outputing progress bar, and not used
+	//for stopping criteria, just track chain 0, which should be a T=1 chain anyway
+	if(j==0) samplerptr->progress =samplerptr->chain_pos[j];
+	//if(samplerptr->chain_temps[j]==1) {
+	//	if(samplerptr->chain_pos[j]<samplerptr->progress){
+	//		samplerptr->progress+=samplerptr->chain_pos[j];
+	//	}
+	//}
 
 	//update stepsize to maximize step efficiency
 	//increases in stepsizes of 10%
-	double frac, acc, rej;
-	if(samplerptr->chain_pos[j]%samplerptr->check_stepsize_freq[j] == 0){
-		//Gaussian
-		if(samplerptr->step_prob[j][0]!= 0){
-			acc = samplerptr->gauss_accept_ct[j] - samplerptr->gauss_last_accept_ct[j];	
-			rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
-			frac = acc / (acc + rej);
-			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][0] *=.9;	
-			}
-			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][0] *=1.1;	
-			}
-			samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
-			samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
-		}	
-		//de
-		if(samplerptr->step_prob[j][1]!= 0){
-			acc = samplerptr->de_accept_ct[j] - samplerptr->de_last_accept_ct[j];	
-			rej = samplerptr->de_reject_ct[j] - samplerptr->de_last_reject_ct[j];	
-			frac = acc / (acc + rej);
-			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][1] *=.9;	
-			}
-			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][1] *=1.1;	
-			}
-			samplerptr->de_last_accept_ct[j]=samplerptr->de_accept_ct[j];
-			samplerptr->de_last_reject_ct[j]=samplerptr->de_reject_ct[j];
-		}	
-		//fisher
-		if(samplerptr->step_prob[j][3]!= 0){
-			acc = samplerptr->fish_accept_ct[j] - samplerptr->fish_last_accept_ct[j];	
-			rej = samplerptr->fish_reject_ct[j] - samplerptr->fish_last_reject_ct[j];	
-			frac = acc / (acc + rej);
-			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][3] *=.9;	
-			}
-			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][3] *=1.1;	
-			}
-			samplerptr->fish_last_accept_ct[j]=samplerptr->fish_accept_ct[j];
-			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
-		}	
-		
-	}
+	update_step_widths(samplerptr, j);
 	poolptr->enqueue_swap(j);
 }
 void mcmc_swap_threaded(int i, int j)
