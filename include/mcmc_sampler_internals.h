@@ -167,6 +167,8 @@ void write_checkpoint_file(sampler *sampler, std::string filename);
 
 void load_checkpoint_file(std::string check_file, sampler *sampler);
 
+void load_temps_checkpoint_file(std::string check_file, double *temps, int chain_N);
+
 void assign_ct_p(sampler *sampler, int step, int chain_index);
 void assign_ct_m(sampler *sampler, int step, int chain_index);
 

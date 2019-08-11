@@ -278,7 +278,8 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	//	Maybe get rid of sampler->output in favor of sampler->output with dimension [2xmax_dim][N_steps], for parameter status always
 		
 }
-/*! \brief Starts an MCMC_MH, but with a dynamic number of chains dynamically tuned during the initial iterations of the sampler. 
+
+/*! \brief Dyanmically tunes an MCMC for optimal spacing. step width, and chain number
  *
  * Based on arXiv:1501.05823v3
  *
@@ -318,7 +319,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -478,14 +478,22 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	
 	sampler static_sampler;
 	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble, chain_N, chain_distribution_scheme);
+
+	if(statistics_filename != "")
+		write_stat_file(samplerptr, statistics_filename);
+	
+	if(chain_filename != "")
+		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
 	delete [] old_temps;
 	delete [] samplerptr->A;
 	deallocate_sampler_mem(samplerptr);
+
 	static_sampler.show_progress=show_prog;
 	static_sampler.pool=pool;
 
 	samplerptr = &static_sampler;	
-	PTMCMC_MH_loop(&static_sampler);
+	write_checkpoint_file(samplerptr, checkpoint_file);
+	//PTMCMC_MH_loop(&static_sampler);
 
 	end =clock();
 	wend =omp_get_wtime();
@@ -495,15 +503,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 
 	std::cout<<std::endl;
 	
-	//###########################################################
-	//Auto-correlation
-	if(auto_corr_filename != ""){
-		std::cout<<"Calculating Autocorrelation: "<<std::endl;
-		int segments = 50;
-		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, static_sampler.output[0],static_sampler.N_steps,static_sampler.dimension,segments, target_corr, static_sampler.num_threads);
-	}
-	//###########################################################
 	acend =clock();
 	wacend =omp_get_wtime();
 	static_sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
@@ -523,11 +522,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//	nansum+= samplerptr->nan_counter[i];
 	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
 	
-	if(statistics_filename != "")
-		write_stat_file(&static_sampler, statistics_filename);
-	
-	if(chain_filename != "")
-		write_file(chain_filename, static_sampler.output[0], static_sampler.N_steps,static_sampler.dimension);
 
 	if(checkpoint_file !=""){
 		write_checkpoint_file(&static_sampler, checkpoint_file);
@@ -1541,7 +1535,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1575,7 +1568,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			show_prog,
 			statistics_filename,
 			chain_filename,
-			auto_corr_filename,
 			checkpoint_file);
 
 }
@@ -1599,7 +1591,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1626,7 +1617,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			show_prog,
 			statistics_filename,
 			chain_filename,
-			auto_corr_filename,
 			checkpoint_file);
 
 }

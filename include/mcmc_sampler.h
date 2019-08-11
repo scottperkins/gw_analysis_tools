@@ -52,7 +52,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
 	std::string checkpoint_file
 	);
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
@@ -75,7 +74,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
 	std::string checkpoint_file
 	);
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
@@ -98,7 +96,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
 	std::string checkpoint_file
 	);
 void continue_PTMCMC_MH(std::string start_checkpoint_file,

@@ -450,6 +450,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
+	sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->dimension);
 
 	for (i =0; i<sampler->chain_N; i++)
 	{
@@ -578,6 +579,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->max_target_accept_ratio);
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
+	deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->dimension);
 	//gsl_rng_free(sampler->r);
 	
 
@@ -983,6 +985,36 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 	}
 	else{
 		checkfile<<"false"<<std::endl;
+	}
+}
+
+
+/*! \brief load temperatures from checkpoint file 
+ *
+ * Assumed the temps array is already allocated in memory for the correct number of chains
+ * 	
+ * Just a utility routine to read temperatures from checkpoint file
+ *
+ * It would be easy to read in the chain number and allocate memory in the function, but I prefer to leave allocation/deallocation up to the client
+ */
+void load_temps_checkpoint_file(std::string check_file, double *temps, int chain_N)
+{
+	std::fstream file_in;
+	file_in.open(check_file, std::ios::in);
+	std::string line;
+	std::string item;
+	int i;
+	if(file_in){
+		std::getline(file_in,line);
+
+		//Second Row -- temps
+		std::getline(file_in,line);
+		std::stringstream lineStreamtemps(line);
+		i=0;
+		while(std::getline(lineStreamtemps, item, ',')){
+			temps[i] = std::stod(item);
+			i++;
+		}
 	}
 }
 
