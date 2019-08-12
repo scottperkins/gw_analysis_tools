@@ -96,7 +96,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test33();	
+	test7();	
 	return 0;
 }
 void test33()
@@ -105,9 +105,9 @@ void test33()
 	std::string chain = "testing/data/neil_mcmc_output1_dynamicPT.csv";
 	std::string check = "testing/data/neil_mcmc_checkpoknt1_dynamicPT-real.csv";
 	std::string stats = "testing/data/neil_mcmc_statistics1_dynamicPT-real.csv";
-	int N_steps = 5000;
+	int N_steps = 10000;
 	int dimension = 2;
-	int chain_N= 15;
+	int chain_N= 10;
 	int swp_freq = 3;
 	int threads = 10;
 	bool show_prog = true;
@@ -140,10 +140,10 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 500000;
-	int chain_N= 15;
+	int N_steps = 50000;
+	int chain_N= 10;
 	int max_chain_N_thermo= 6;
-	int t0= 10000;
+	int t0= 1000;
 	int nu= 100;
 	std::string chain_dist_method = "cold";
 	double ***output;
@@ -3584,12 +3584,12 @@ void test8()
 void test7()
 {
 	int dimension = 2;
-	double initial_pos[2]={1,1.};
+	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 10000;
-	int chain_N= 8;
+	int N_steps = 50000;
+	int chain_N= 10;
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;

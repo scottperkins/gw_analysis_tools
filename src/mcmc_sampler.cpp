@@ -479,6 +479,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//write_file(chain_filename, samplerptr->output[0], N_steps,samplerptr->dimension);
 	
 	sampler static_sampler;
+	static_sampler.A = new int[chain_N];
 	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble, chain_N, chain_distribution_scheme);
 
 	if(statistics_filename != "")
@@ -531,6 +532,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 
 	//free(step_accepted);
 	//free(step_rejected);
+	delete [] static_sampler.A;
 	deallocate_sampler_mem(&static_sampler);
 	//##################################################################
 	//##################################################################

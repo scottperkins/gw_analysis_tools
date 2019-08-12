@@ -402,6 +402,131 @@ void assign_probabilities(sampler *sampler, int chain_index)
 	sampler->prob_boundaries[chain_index][3] = sampler->step_prob[chain_index][3]+sampler->prob_boundaries[chain_index][2];
 }	
 
+/*! \brief Copies contents of one chain to another
+ *
+ * Transfers id_source in samplerptr_source to id_dest samplerptr_dest 
+ *
+ * NOTE: This copies the VALUE, not the reference. This could be expensive, so use with caution
+ *
+ * id_dest is ERASED
+ *
+ * samplerptr_dest and samplerptr_source MUST have the same dimension, the same sampling details (like having or not having a fisher) etc
+ * 	
+ * samplerptr_dest must be previously allocated properly
+ */
+void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_dest, int id_source)
+{	
+	//Position and output and likelihood and temp
+	samplerptr_dest->chain_temps[id_dest] = samplerptr_source->chain_temps[id_source];
+	samplerptr_dest->chain_pos[id_dest] 
+		= samplerptr_source->chain_pos[id_source];
+	for(int i =0 ;i <samplerptr_dest->chain_pos[id_dest]; i++){
+		for(int j =0; j<samplerptr_source->dimension; j++){
+			samplerptr_dest->output[id_dest][i][j] = 
+				samplerptr_source->output[id_source][i][j];
+			//Might only need to do this for RJMCMC
+			if(samplerptr_source->RJMCMC){
+				samplerptr_dest->param_status[id_dest][i][j] = 
+					samplerptr_source->param_status[id_source][i][j];
+			}
+		}
+	}
+	samplerptr_dest->current_likelihoods[id_dest] = samplerptr_source->current_likelihoods[id_source];
+
+	//Histories
+	samplerptr_dest->de_primed[id_dest] 
+		= samplerptr_source->de_primed[id_source];
+	samplerptr_dest->current_hist_pos[id_dest] 
+		= samplerptr_source->current_hist_pos[id_source];
+	for(int i =0 ;i <samplerptr_dest->current_hist_pos[id_dest]; i++){
+		for(int j =0; j<samplerptr_source->dimension; j++){
+			samplerptr_dest->history[id_dest][i][j] = 
+				samplerptr_source->history[id_source][i][j];
+		}
+	}
+
+	//Step parameters
+	samplerptr_dest->gauss_last_accept_ct[id_dest] 
+		= samplerptr_source->gauss_last_accept_ct[id_source]; 
+	samplerptr_dest->gauss_last_reject_ct[id_dest] 
+		= samplerptr_source->gauss_last_reject_ct[id_source]; 
+	samplerptr_dest->de_last_accept_ct[id_dest] 
+		= samplerptr_source->de_last_accept_ct[id_source]; 
+	samplerptr_dest->de_last_reject_ct[id_dest] 
+		= samplerptr_source->de_last_reject_ct[id_source]; 
+	samplerptr_dest->fish_last_accept_ct[id_dest] 
+		= samplerptr_source->fish_last_accept_ct[id_source]; 
+	samplerptr_dest->fish_last_reject_ct[id_dest] 
+		= samplerptr_source->fish_last_reject_ct[id_source]; 
+
+	samplerptr_dest->gauss_accept_ct[id_dest] 
+		= samplerptr_source->gauss_accept_ct[id_source]; 
+	samplerptr_dest->gauss_reject_ct[id_dest] 
+		= samplerptr_source->gauss_reject_ct[id_source]; 
+	samplerptr_dest->de_accept_ct[id_dest] 
+		= samplerptr_source->de_accept_ct[id_source]; 
+	samplerptr_dest->de_reject_ct[id_dest] 
+		= samplerptr_source->de_reject_ct[id_source]; 
+	samplerptr_dest->fish_accept_ct[id_dest] 
+		= samplerptr_source->fish_accept_ct[id_source]; 
+	samplerptr_dest->fish_reject_ct[id_dest] 
+		= samplerptr_source->fish_reject_ct[id_source]; 
+	samplerptr_dest->mmala_accept_ct[id_dest] 
+		= samplerptr_source->mmala_accept_ct[id_source]; 
+	samplerptr_dest->mmala_reject_ct[id_dest] 
+		= samplerptr_source->mmala_reject_ct[id_source]; 
+	for(int i =0 ;i<samplerptr_source->types_of_steps; i++){
+		samplerptr_dest->step_prob[id_dest][i] 
+			= samplerptr_source->step_prob[id_source][i];
+		samplerptr_dest->prob_boundaries[id_dest][i] 
+			= samplerptr_source->prob_boundaries[id_source][i];
+		samplerptr_dest->randgauss_width[id_dest][i] 
+			= samplerptr_source->randgauss_width[id_source][i];
+	}
+	//Fisher
+	if(samplerptr_source->fisher_exist){
+		for (int i =0 ; i<samplerptr_source->dimension; i++){
+			for (int j =0 ; i<samplerptr_source->dimension; i++){
+				samplerptr_dest->fisher_vecs[id_dest][i][j] = 
+					samplerptr_source->fisher_vecs[id_source][i][j];
+			}
+			samplerptr_dest->fisher_vals[id_dest][i] = 
+				samplerptr_source->fisher_vals[id_source][i];
+		}
+	}
+	samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_source->fisher_update_ct[id_source];
+
+	//Sampling parameters
+	samplerptr_dest->waiting[id_dest] = samplerptr_source->waiting[id_source];
+	samplerptr_dest->priority[id_dest] = samplerptr_source->priority[id_source];
+	samplerptr_dest->ref_chain_status[id_dest] = samplerptr_source->ref_chain_status[id_source];
+	samplerptr_dest->nan_counter[id_dest] = samplerptr_source->nan_counter[id_source];
+	samplerptr_dest->num_gauss[id_dest] = samplerptr_source->num_gauss[id_source];
+	samplerptr_dest->num_fish[id_dest] = samplerptr_source->num_fish[id_source];
+	samplerptr_dest->num_de[id_dest] = samplerptr_source->num_de[id_source];
+	samplerptr_dest->num_mmala[id_dest] = samplerptr_source->num_mmala[id_source];
+	samplerptr_dest->swap_accept_ct[id_dest] = samplerptr_source->swap_accept_ct[id_source];
+	samplerptr_dest->swap_reject_ct[id_dest] = samplerptr_source->swap_reject_ct[id_source];
+	samplerptr_dest->step_accept_ct[id_dest] = samplerptr_source->step_accept_ct[id_source];
+	samplerptr_dest->step_reject_ct[id_dest] = samplerptr_source->step_reject_ct[id_source];
+	if(samplerptr_source->log_ll){
+		for(int i =0 ; i<samplerptr_source->chain_pos[id_source]; i++)
+			samplerptr_dest->ll_lp_output[id_dest][i][0] 
+				= samplerptr_source->ll_lp_output[id_source][i][0];
+	}
+	if(samplerptr_source->log_lp){
+		for(int i =0 ; i<samplerptr_source->chain_pos[id_source]; i++)
+			samplerptr_dest->ll_lp_output[id_dest][i][1] 
+				= samplerptr_source->ll_lp_output[id_source][i][1];
+	}
+	if(samplerptr_source->PT_alloc)
+		samplerptr_dest->A[id_dest] = samplerptr_source->A[id_source];
+}
+
+/*! \brief Checks the status of a sampler for the stochastic sampling
+ *
+ * Just loops through the ref_chain_status variables
+ */
 bool check_sampler_status(sampler *samplerptr)
 {
 	for(int i =0 ; i<samplerptr->chain_N; i++){
@@ -410,6 +535,8 @@ bool check_sampler_status(sampler *samplerptr)
 	}
 	return true;
 }
+/*! \brief Updates the step widths, shooting for 20% acceptance ratios for each type of step
+ */
 void update_step_widths(sampler *samplerptr, int chain_id)
 {
 	int j = chain_id;
@@ -1347,70 +1474,48 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	//Copy over pertinent sampler data: histories, step_widths, de_primed, current_hist_pos, copy current pos to first pos, current LL
 	//Only for chains 0 - chain_N_thermo_ensemble
 	for(int i =0; i<chain_N_thermo_ensemble; i++){
-		//history position:
-		sampler_new->current_hist_pos[i] = sampler_old->current_hist_pos[i];
-		sampler_new->de_primed[i] = sampler_old->de_primed[i];
+		transfer_chain(sampler_new, sampler_old, i, i);
+		////Copy last position to start of output file
+		//int pos = sampler_old->chain_pos[i];
+		//for (int j = 0 ;j<sampler_new->dimension; j++){
+		//	sampler_new->output[i][0][j] = sampler_old->output[i][pos][j];
+		//}
+		//sampler_new->current_likelihoods[i] =sampler_old->current_likelihoods[i];
 
-		if(!sampler_new->de_primed[i]){
-			for(int j = 0 ;j<=sampler_new->current_hist_pos[i]; j ++){
-				for(int k =0; k<sampler_new->dimension; k++){
-					sampler_new->history[i][j][k] = sampler_old->history[i][j][k];	
-				}
-			}
-		}
-		else{
-			for(int j = 0 ;j<sampler_new->history_length; j ++){
-				for(int k =0; k<sampler_new->dimension; k++){
-					sampler_new->history[i][j][k] = sampler_old->history[i][j][k];	
-				}
-			}
-
-		}
-	
-		//step widths
-		for(int j = 0 ; j<sampler_new->types_of_steps; j++){
-			sampler_new->randgauss_width[i][j] = sampler_old->randgauss_width[i][j];
-		}
-		
-		//Copy last position to start of output file
-		int pos = sampler_old->chain_pos[i];
-		for (int j = 0 ;j<sampler_new->dimension; j++){
-			sampler_new->output[i][0][j] = sampler_old->output[i][pos][j];
-		}
-		sampler_new->current_likelihoods[i] =sampler_old->current_likelihoods[i];
-
-		//Revert current_pos to 0 for each chain
-		sampler_new->chain_pos[i] = 0;
-		
-		//preserve priorities:
-		sampler_new->priority[i]=sampler_old->priority[i];
+		////Revert current_pos to 0 for each chain
+		//sampler_new->chain_pos[i] = 0;
+		//
+		////preserve priorities:
+		//sampler_new->priority[i]=sampler_old->priority[i];
 	}
 
 	//Allocate extra chains if needed
 	//Only for chains chain_N_thermo_ensemble - chain_N
 	if(allocate_chains){
 		if(chain_allocation_scheme =="cold"){	
-			for(int i =chain_N_thermo_ensemble; i<chain_N; i++){
-				sampler_new->chain_temps[i] = 1;
-				sampler_new->priority[i] = 0;
-				sampler_new->de_primed[i]=false;
-				
-				//Right now, just copy cold chain pos over to new chain
-				int currentpos = sampler_new->chain_pos[0];
-				for(int j =0 ; j<sampler_new->dimension; j++){
-					sampler_new->output[i][0][j] = sampler_new->output[0][currentpos][j];
-				}
-				//sampler_new->current_likelihoods[i] =
-				// 	sampler_new->ll(sampler_new->output[i][0],sampler_new->dimension, i)/sampler_new->chain_temps[i];
-				sampler_new->current_likelihoods[i] =sampler_new->current_likelihoods[0];
-				sampler_new->chain_pos[i] = 0;
+			for(int i =sampler_old->chain_N; i<chain_N; i++){
+				transfer_chain(sampler_new, sampler_old, i, 0);
+		
+				//sampler_new->chain_temps[i] = 1;
+				//sampler_new->priority[i] = 0;
+				//sampler_new->de_primed[i]=false;
+				//
+				////Right now, just copy cold chain pos over to new chain
+				//int currentpos = sampler_new->chain_pos[0];
+				//for(int j =0 ; j<sampler_new->dimension; j++){
+				//	sampler_new->output[i][0][j] = sampler_new->output[0][currentpos][j];
+				//}
+				////sampler_new->current_likelihoods[i] =
+				//// 	sampler_new->ll(sampler_new->output[i][0],sampler_new->dimension, i)/sampler_new->chain_temps[i];
+				//sampler_new->current_likelihoods[i] =sampler_new->current_likelihoods[0];
+				//sampler_new->chain_pos[i] = 0;
 			}		
 		}
 	}
 
 	//assign step probabilities for all chains
-	for(int i =0; i<sampler_new->chain_N; i++){
-		assign_probabilities(sampler_new, i);
-	}
+	//for(int i =0; i<sampler_new->chain_N; i++){
+	//	assign_probabilities(sampler_new, i);
+	//}
 
 }

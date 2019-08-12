@@ -138,6 +138,8 @@ int single_chain_swap(sampler *sampler, double *chain1, double *chain2,int T1_in
 
 void assign_probabilities(sampler *sampler, int chain_index);
 
+void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_destination, int id_source);
+
 bool check_sampler_status(sampler *samplerptr);
 
 void update_step_widths(sampler *samplerptr, int chain_id);

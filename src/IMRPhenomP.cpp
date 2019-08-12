@@ -443,7 +443,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_J(source_parameters<T> *params /
 	IMRPhenomD<T> temp;
 	temp.precalc_powers_PI(&pows);
 	temp.precalc_powers_ins(params->f_ref, params->M, &pows);
-	double L0 = params->M * params-> M * this->L2PN(params->eta, &pows);
+	T L0 = params->M * params-> M * this->L2PN(params->eta, &pows);
 	
 	
 		

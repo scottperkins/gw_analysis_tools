@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import corner 
 burn = False
 burnlength = 200000
-sets =10 
+sets =5 
 
 #data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',',unpack=True)
 #burnin =1000
@@ -44,13 +44,13 @@ plt.savefig("neil_mcmc_testing_dynamicPT.pdf")
 plt.close()
 
 
-autocorr = np.loadtxt("data/neil_auto_corr_mcmc1_dynamicPT.csv",delimiter=',')
-lengths = autocorr[0]
-autocorr = autocorr[1:]
-for i in autocorr:
-    plt.plot(lengths,i)
-plt.savefig("neil_autocorr_testing_dynamicPT.pdf")
-plt.close()
+#autocorr = np.loadtxt("data/neil_auto_corr_mcmc1_dynamicPT.csv",delimiter=',')
+#lengths = autocorr[0]
+#autocorr = autocorr[1:]
+#for i in autocorr:
+#    plt.plot(lengths,i)
+#plt.savefig("neil_autocorr_testing_dynamicPT.pdf")
+#plt.close()
 
 
 
