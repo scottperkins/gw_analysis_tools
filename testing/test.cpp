@@ -96,7 +96,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test7();	
+	test32();	
 	return 0;
 }
 void test33()
@@ -140,9 +140,9 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 50000;
+	int N_steps = 10000;
 	int chain_N= 10;
-	int max_chain_N_thermo= 6;
+	int max_chain_N_thermo= 10;
 	int t0= 1000;
 	int nu= 100;
 	std::string chain_dist_method = "cold";

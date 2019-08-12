@@ -407,12 +407,36 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int stability_ct = 0;
 	int stability_tol = 5;
 	//Frequency to check for equilibrium
-	int equilibrium_check_freq=10*nu;
+	int equilibrium_check_freq=2*nu;
 	
 	double *old_temps = new double[samplerptr->chain_N];
 	for(int i =0; i<samplerptr->chain_N; i++){
 		std::cout<<samplerptr->chain_temps[i]<<std::endl;
 		old_temps[i]=samplerptr->chain_temps[i];
+	}
+
+
+	//Frequency to update chain number
+	int chain_pop_update_freq=5*nu;
+	int pop_check_var=chain_pop_update_freq;
+	//Target average acceptance ratio 
+	int chain_pop_target = .2;
+	//Tolerance on the above acceptance ratio
+	int chain_pop_tol = .1;
+	//Keep track of acceptance ratio in chuncks
+	int *running_accept_ct = new int[samplerptr->chain_N];
+	int *running_reject_ct = new int[samplerptr->chain_N];
+	int *prev_reject_ct = new int[samplerptr->chain_N];
+	int *prev_accept_ct = new int[samplerptr->chain_N];
+	double *running_ratio = new double[samplerptr->chain_N];
+	bool dynamic_chain_num = true;
+	bool chain_pop_target_reached = false;
+	for(int i =0; i<samplerptr->chain_N; i++){
+		running_accept_ct[i] = 0;
+		running_reject_ct[i] = 0;
+		prev_accept_ct[i] = 0;
+		prev_reject_ct[i] = 0;
+		running_ratio[i] = 0;
 	}
 
 	//For each loop, we walk forward till one more swap has happened, then we update temps
@@ -424,7 +448,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	while( t <= (N_steps-equilibrium_check_freq))
 	//while(true)
 	{
-		if(ave_dynamics<tolerance ){
+		if(ave_dynamics<tolerance && chain_pop_target_reached){
 			if(stability_ct > stability_tol)
 				break;
 			else
@@ -433,19 +457,139 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		else stability_ct = 0;
 		//step equilibrium_check_freq
 		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
-			//steps swp_freq
-			//samplerptr->N_steps += swp_freq;
 			PTMCMC_MH_step_incremental(samplerptr, samplerptr->swp_freq);	
 			t+= samplerptr->swp_freq;
-			//std::cout<<"TIME: "<<t<<std::endl;
 			//Move temperatures
 			update_temperatures(samplerptr, t0, nu, t);
+
+			if(dynamic_chain_num){
+				if(pop_check_var<t){
+					pop_check_var += chain_pop_update_freq;
+					for(int i =0 ;i < samplerptr->chain_N; i++){
+						running_accept_ct[i] = 
+							samplerptr->swap_accept_ct[i] 
+							- prev_accept_ct[i];
+						running_reject_ct[i] = 
+							samplerptr->swap_reject_ct[i] 
+							- prev_reject_ct[i];
+						running_ratio[i] = (double)running_accept_ct[i]/
+							(running_accept_ct[i] 
+							+ running_reject_ct[i]);	
+						std::cout<<i<<" "<<running_ratio[i]<<std::endl;
+					}
+					int ave_accept = 0;
+					for(int i =0; i<samplerptr->chain_N; i++){
+						ave_accept+=running_ratio[i];
+					}
+					ave_accept/=samplerptr->chain_N;
+					double diff = ave_accept - chain_pop_target;
+					if( std::abs(diff) < chain_pop_tol){
+						chain_pop_target = true;
+					}
+					else {
+						std::cout<<"Changing chain_N"<<std::endl;
+						chain_pop_target = false;
+						if(diff<0 && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+							//add chain
+							int min_id =0;
+							int min_val =1;
+							//Don't remove chain 0 and chain chain_N-1
+							for (int j =1 ;j <samplerptr->chain_N-1; j++){
+								if(running_ratio[j]<min_val){
+									min_id = j;
+									min_val = running_ratio[j];
+								}
+							}	
+							samplerptr->chain_N++;	
+							std::cout<<samplerptr->chain_N<<std::endl;
+							for(int i = samplerptr->chain_N-1; i>=min_id; i--){
+								transfer_chain(samplerptr,samplerptr, i, i+1);	
+								running_accept_ct[i+1] = running_accept_ct[i];
+								running_reject_ct[i+1] = running_reject_ct[i];
+								prev_accept_ct[i+1] = prev_accept_ct[i];
+								prev_reject_ct[i+1] = prev_reject_ct[i];
+							}
+							//Add new chain between two other chains, geometrically
+							samplerptr->chain_temps[min_id] = std::sqrt(samplerptr->chain_temps[min_id-1]*samplerptr->chain_temps[min_id+1]);
+							//populate all the necessary chain-specific parameters
+							for(int i =0 ;i<samplerptr->dimension; i++){
+								//MUST CHANGE
+								samplerptr->output[min_id][0][i] = 1.;
+							}
+							samplerptr->current_likelihoods[min_id] = samplerptr->ll(samplerptr->output[min_id][0],samplerptr->dimension, min_id)/samplerptr->chain_temps[min_id];
+							samplerptr->current_hist_pos[min_id] = 0;
+							samplerptr->chain_pos[min_id] = 0;
+							samplerptr->de_primed[min_id]=false;
+							samplerptr->gauss_last_accept_ct[min_id] = 0;
+							samplerptr->gauss_last_reject_ct[min_id]= 0;
+							samplerptr->de_last_accept_ct[min_id] = 0;
+							samplerptr->de_last_reject_ct[min_id] = 0;
+							samplerptr->fish_last_accept_ct[min_id] = 0;
+							samplerptr->fish_last_reject_ct[min_id] = 0;
+
+							samplerptr->gauss_accept_ct[min_id] = 0;
+							samplerptr->gauss_reject_ct[min_id] = 0;
+							samplerptr->de_accept_ct[min_id] = 0;
+							samplerptr->de_reject_ct[min_id] = 0;
+							samplerptr->fish_accept_ct[min_id] =0;
+							samplerptr->fish_reject_ct[min_id] = 0;
+							samplerptr->mmala_accept_ct[min_id] = 0;
+							samplerptr->mmala_reject_ct[min_id] = 0;
+							assign_probabilities(samplerptr, min_id);	
+							samplerptr->fisher_update_ct[min_id] = 0;	
+							samplerptr->waiting[min_id] = true;
+							samplerptr->priority[min_id] =1;
+							samplerptr->ref_chain_status[min_id]=true;
+							samplerptr->nan_counter[min_id] = 0;
+							samplerptr->num_gauss[min_id] =0;
+							samplerptr->num_fish[min_id] = 0;
+							samplerptr->num_de[min_id] = 0;
+							samplerptr->num_mmala[min_id] = 0;
+							samplerptr->swap_accept_ct[min_id] = 0;
+							samplerptr->swap_reject_ct[min_id] = 0;
+							samplerptr->step_accept_ct[min_id] = 0;
+							samplerptr->step_reject_ct[min_id] = 0;
+							if(samplerptr->log_ll){
+								samplerptr->ll_lp_output[min_id][0][0] = samplerptr->current_likelihoods[min_id];
+							}
+							if(samplerptr->log_lp){
+								samplerptr->ll_lp_output[min_id][0][1] = samplerptr->lp(samplerptr->output[min_id][0], samplerptr->dimension, min_id);
+							}
+							if(samplerptr->PT_alloc)
+								samplerptr->A[min_id] = 0;
+						}
+						else if (samplerptr->chain_N>3){
+							//remove chain
+							int max_id =0;
+							int max_val =0;
+							//Don't remove chain 0 and chain chain_N-1
+							for (int j =1 ;j <samplerptr->chain_N-1; j++){
+								if(running_ratio[j]>max_val){
+									max_id = j;
+									max_val = running_ratio[j];
+								}
+							}	
+							for(int i = max_id; i<samplerptr->chain_N-1; i++){
+								transfer_chain(samplerptr,samplerptr, i, i+1);	
+							}
+							samplerptr->chain_N-=1;
+						}
+						else{
+							chain_pop_target = true;
+
+						}
+					}
+				
+				}
+
+			}
 		}
 		//Calculate average percent change in temperature
 		double sum = 0;
 		for (int j =0; j<samplerptr->chain_N; j++){
 			//std::cout<<samplerptr->chain_temps[j]<<std::endl;
 			sum += std::abs((samplerptr->chain_temps[j] - old_temps[j])/old_temps[j]);
+			old_temps[j]=samplerptr->chain_temps[j];
 			//std::cout<<"SUM: "<<sum<<std::endl;
 		}
 		ave_dynamics = sum / samplerptr->chain_N;
@@ -464,6 +608,11 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
 		
 	}
+	delete [] running_accept_ct;
+	delete [] running_reject_ct;
+	delete [] prev_accept_ct;
+	delete [] prev_reject_ct;
+	delete [] running_ratio;
 
 	//#################################################################
 	//
@@ -480,7 +629,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	
 	sampler static_sampler;
 	static_sampler.A = new int[chain_N];
-	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble, chain_N, chain_distribution_scheme);
+	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N, chain_distribution_scheme);
 
 	if(statistics_filename != "")
 		write_stat_file(samplerptr, statistics_filename);
@@ -489,6 +638,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
 	delete [] old_temps;
 	delete [] samplerptr->A;
+	//If chains were added or removed, set chain N back to max for deallocation
+	samplerptr->chain_N = max_chain_N_thermo_ensemble;
 	deallocate_sampler_mem(samplerptr);
 
 	static_sampler.show_progress=show_prog;

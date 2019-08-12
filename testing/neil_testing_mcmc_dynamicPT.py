@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import corner 
 burn = False
 burnlength = 200000
-sets =5 
+sets =8
 
 #data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',',unpack=True)
 #burnin =1000

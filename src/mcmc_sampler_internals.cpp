@@ -1473,7 +1473,7 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	
 	//Copy over pertinent sampler data: histories, step_widths, de_primed, current_hist_pos, copy current pos to first pos, current LL
 	//Only for chains 0 - chain_N_thermo_ensemble
-	for(int i =0; i<chain_N_thermo_ensemble; i++){
+	for(int i =0; i<sampler_old->chain_N; i++){
 		transfer_chain(sampler_new, sampler_old, i, i);
 		////Copy last position to start of output file
 		//int pos = sampler_old->chain_pos[i];
