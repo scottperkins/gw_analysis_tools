@@ -421,11 +421,11 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	samplerptr_dest->chain_pos[id_dest] 
 		= samplerptr_source->chain_pos[id_source];
 	for(int i =0 ;i <samplerptr_dest->chain_pos[id_dest]; i++){
-		for(int j =0; j<samplerptr_source->dimension; j++){
+		for(int j =0; j<samplerptr_dest->dimension; j++){
 			samplerptr_dest->output[id_dest][i][j] = 
 				samplerptr_source->output[id_source][i][j];
 			//Might only need to do this for RJMCMC
-			if(samplerptr_source->RJMCMC){
+			if(samplerptr_dest->RJMCMC){
 				samplerptr_dest->param_status[id_dest][i][j] = 
 					samplerptr_source->param_status[id_source][i][j];
 			}
@@ -439,7 +439,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	samplerptr_dest->current_hist_pos[id_dest] 
 		= samplerptr_source->current_hist_pos[id_source];
 	for(int i =0 ;i <samplerptr_dest->current_hist_pos[id_dest]; i++){
-		for(int j =0; j<samplerptr_source->dimension; j++){
+		for(int j =0; j<samplerptr_dest->dimension; j++){
 			samplerptr_dest->history[id_dest][i][j] = 
 				samplerptr_source->history[id_source][i][j];
 		}
@@ -475,7 +475,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 		= samplerptr_source->mmala_accept_ct[id_source]; 
 	samplerptr_dest->mmala_reject_ct[id_dest] 
 		= samplerptr_source->mmala_reject_ct[id_source]; 
-	for(int i =0 ;i<samplerptr_source->types_of_steps; i++){
+	for(int i =0 ;i<samplerptr_dest->types_of_steps; i++){
 		samplerptr_dest->step_prob[id_dest][i] 
 			= samplerptr_source->step_prob[id_source][i];
 		samplerptr_dest->prob_boundaries[id_dest][i] 
@@ -484,7 +484,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 			= samplerptr_source->randgauss_width[id_source][i];
 	}
 	//Fisher
-	if(samplerptr_source->fisher_exist){
+	if(samplerptr_dest->fisher_exist){
 		for (int i =0 ; i<samplerptr_source->dimension; i++){
 			for (int j =0 ; i<samplerptr_source->dimension; i++){
 				samplerptr_dest->fisher_vecs[id_dest][i][j] = 
@@ -493,8 +493,8 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 			samplerptr_dest->fisher_vals[id_dest][i] = 
 				samplerptr_source->fisher_vals[id_source][i];
 		}
+		samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_source->fisher_update_ct[id_source];
 	}
-	samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_source->fisher_update_ct[id_source];
 
 	//Sampling parameters
 	samplerptr_dest->waiting[id_dest] = samplerptr_source->waiting[id_source];
@@ -1463,9 +1463,13 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	sampler_new->fisher_update_number = sampler_old->fisher_update_number;
 	sampler_new->pool = sampler_old->pool;
 	sampler_new->swp_freq = sampler_old->swp_freq;
-	sampler_new->output = sampler_old->output;
+
+	//This is a reference copy, not a value.
+	//sampler_new->output = sampler_old->output;
+	sampler_new->output = allocate_3D_array(chain_N, sampler_old->N_steps, sampler_old->dimension);
+
 	sampler_new->fisher_exist = sampler_old->fisher_exist;
-	sampler_new->progress = 0;
+	sampler_new->progress = sampler_old->progress;
 
 	allocate_sampler_mem(sampler_new);
 
@@ -1475,18 +1479,6 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	//Only for chains 0 - chain_N_thermo_ensemble
 	for(int i =0; i<sampler_old->chain_N; i++){
 		transfer_chain(sampler_new, sampler_old, i, i);
-		////Copy last position to start of output file
-		//int pos = sampler_old->chain_pos[i];
-		//for (int j = 0 ;j<sampler_new->dimension; j++){
-		//	sampler_new->output[i][0][j] = sampler_old->output[i][pos][j];
-		//}
-		//sampler_new->current_likelihoods[i] =sampler_old->current_likelihoods[i];
-
-		////Revert current_pos to 0 for each chain
-		//sampler_new->chain_pos[i] = 0;
-		//
-		////preserve priorities:
-		//sampler_new->priority[i]=sampler_old->priority[i];
 	}
 
 	//Allocate extra chains if needed
@@ -1495,20 +1487,6 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 		if(chain_allocation_scheme =="cold"){	
 			for(int i =sampler_old->chain_N; i<chain_N; i++){
 				transfer_chain(sampler_new, sampler_old, i, 0);
-		
-				//sampler_new->chain_temps[i] = 1;
-				//sampler_new->priority[i] = 0;
-				//sampler_new->de_primed[i]=false;
-				//
-				////Right now, just copy cold chain pos over to new chain
-				//int currentpos = sampler_new->chain_pos[0];
-				//for(int j =0 ; j<sampler_new->dimension; j++){
-				//	sampler_new->output[i][0][j] = sampler_new->output[0][currentpos][j];
-				//}
-				////sampler_new->current_likelihoods[i] =
-				//// 	sampler_new->ll(sampler_new->output[i][0],sampler_new->dimension, i)/sampler_new->chain_temps[i];
-				//sampler_new->current_likelihoods[i] =sampler_new->current_likelihoods[0];
-				//sampler_new->chain_pos[i] = 0;
 			}		
 		}
 		if(chain_allocation_scheme =="double"){	
@@ -1552,9 +1530,5 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 		}
 	}
 
-	//assign step probabilities for all chains
-	//for(int i =0; i<sampler_new->chain_N; i++){
-	//	assign_probabilities(sampler_new, i);
-	//}
 
 }

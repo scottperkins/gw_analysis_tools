@@ -430,8 +430,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	
 	//Boundaries that mark acceptable average acceptance ratios 
 	//for chain swapping in a chain population
-	int chain_pop_high = .5;
-	int chain_pop_low = .1;
+	double chain_pop_high = .5;
+	double chain_pop_low = .2;
 
 	//Keep track of acceptance ratio in chuncks
 	int *running_accept_ct = new int[samplerptr->chain_N];
@@ -439,7 +439,9 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int *prev_reject_ct = new int[samplerptr->chain_N];
 	int *prev_accept_ct = new int[samplerptr->chain_N];
 	double *running_ratio = new double[samplerptr->chain_N];
-	bool dynamic_chain_num = true;
+	//Testing
+	bool dynamic_chain_num = false;
+
 	bool chain_pop_target_reached = false;
 	for(int i =0; i<samplerptr->chain_N; i++){
 		running_accept_ct[i] = 0;
@@ -493,7 +495,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 					}
 					ave_accept/=samplerptr->chain_N;
 					//double diff = ave_accept - chain_pop_target;
-					std::cout<<ave_accept<<std::endl;
 					//if( std::abs(diff) < chain_pop_tol){
 					if(ave_accept < chain_pop_high && ave_accept> chain_pop_low){
 						chain_pop_target_reached = true;
@@ -526,8 +527,10 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							samplerptr->chain_temps[min_id] = std::sqrt(samplerptr->chain_temps[min_id-1]*samplerptr->chain_temps[min_id+1]);
 							//populate all the necessary chain-specific parameters
 							for(int i =0 ;i<samplerptr->dimension; i++){
-								//MUST CHANGE
-								samplerptr->output[min_id][0][i] = 1.;
+								//Just use the chain's last 
+								//position immediately
+								//below min_id 
+								samplerptr->output[min_id][0][i] = samplerptr->output[min_id-1][samplerptr->chain_pos[min_id-1]][i];
 							}
 							samplerptr->current_likelihoods[min_id] = samplerptr->ll(samplerptr->output[min_id][0],samplerptr->dimension, min_id)/samplerptr->chain_temps[min_id];
 							samplerptr->current_hist_pos[min_id] = 0;
@@ -700,6 +703,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	}
 	delete [] static_sampler.A;
 	deallocate_sampler_mem(&static_sampler);
+	deallocate_3D_array(static_sampler.output, chain_N, static_sampler.N_steps, static_sampler.dimension);
 	delete [] static_sampler.chain_temps;
 	//##################################################################
 	//##################################################################

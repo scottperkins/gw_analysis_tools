@@ -6,11 +6,11 @@ import numpy as np
 
 burn = False
 burnlength = 400000
-numfiles = 10
+numfiles = 13
 data = []
-labels = [0,3,5,7,9,11,13,15,17,19,21,23]
-#for i in np.arange(numfiles):
-for i in labels:
+#labels = [0,3,5,7,9,11,13,15,17,19,21,23]
+for i in np.arange(numfiles):
+#for i in labels:
     data.append(np.loadtxt("data/mcmc_output_Pv2_dpt{}.csv".format(i),delimiter=','))
 dataplot = []
 for x in data:
