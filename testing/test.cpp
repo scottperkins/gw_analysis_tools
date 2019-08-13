@@ -67,6 +67,8 @@ void test30();
 void test31();
 void test32();
 void test33();
+void test34();
+void test35();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -96,8 +98,203 @@ static double *psd=NULL;
 
 int main(){
 
-	test33();	
+	test35();	
 	return 0;
+}
+void test35()
+{
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
+	int datalength = 131075;
+	int num_detectors = 2, psd_length = 8032, length;
+	double gps_time = 1135136350.6;//TESTING -- gw151226
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+	//detectors[2] = "Virgo";
+	std::string *detector_files = new std::string[num_detectors];
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+ 	//double trigger_time= 1135136350.6;
+ 	double trigger_time = gps_time;
+	double **psd = allocate_2D_array(num_detectors,psd_length);
+	double **freqs = allocate_2D_array(num_detectors,psd_length);
+	std::complex<double> **data = (std::complex<double> **)malloc(sizeof(std::complex<double> *)*num_detectors);
+	for(int i =0; i<num_detectors; i++)
+		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
+
+	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
+
+
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =psd_length;
+	data_length[1] =psd_length;
+
+	//#########################################################
+	//mcmc options
+	int dimension = 14;
+	int n_steps = 50000;
+	int chain_N=24 ;
+	double ***output;
+	output = allocate_3D_array( chain_N, n_steps, dimension );
+	int swp_freq = 5;
+	double chain_temps[chain_N];
+	
+	int Nmod = 0;
+	int *bppe = NULL;
+	int numThreads = 10;
+	bool pool = true;
+	//#########################################################
+	//gw options
+	std::string generation_method = "IMRPhenomPv2";
+	
+	
+	std::string chainfile_base = "testing/data/mcmc_output_Pv2_dpt";
+	std::string statfilename = "testing/data/mcmc_statistics_Pv2_dpt.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_Pv2_dpt.csv";
+	std::string start_checkfile = "testing/data/mcmc_checkpoint_Pv2_dpt_alloc.csv";
+	double *temps = (double *)malloc(sizeof(double)*chain_N);
+	load_temps_checkpoint_file(start_checkfile,temps, chain_N);
+
+	continue_PTMCMC_MH_GW(start_checkfile, output, dimension, n_steps,   
+			swp_freq,  test_lp_GW_Pv2,numThreads, pool,show_progress,
+			num_detectors, 
+			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+			generation_method,statfilename,"","", checkfile);	
+
+
+	std::string chainfile;
+	for(int i =0; i < chain_N; i++){
+		std::cout<<temps[i]<<std::endl;
+		if(temps[i]==1){
+			chainfile = chainfile_base + to_string(i) + ".csv";
+			write_file(chainfile, output[i], n_steps, dimension);
+		}
+	}
+
+	deallocate_3D_array(output, chain_N, n_steps, dimension);
+	delete [] detectors;
+	free(data_length);
+	deallocate_2D_array(psd,num_detectors, psd_length);
+	deallocate_2D_array(freqs,num_detectors, psd_length);
+	for(int i =0; i<num_detectors; i++)
+		free(data[i]);
+	free(data);
+	delete [] detector_files;
+	delete [] temps;
+	
+}
+void test34()
+{
+	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
+	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
+	//int rows = 8032;
+	//int cols = 3;
+	int datalength = 131075;
+	//double **psd = allocate_2D_array(rows, cols);
+	//read_LOSC_PSD_file(psd_file, psd, rows, cols);
+	//double data_start_time, duration, fs;
+	int num_detectors = 2, psd_length = 8032, length;
+	//int num_detectors = 3, psd_length = 4016, length;
+	//int num_detectors = 2, psd_length = 4016, length;
+	double gps_time = 1135136350.6;//TESTING -- gw151226
+	//double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1185389807.3;//TESTING -- gw170729
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+	//detectors[2] = "Virgo";
+	std::string *detector_files = new std::string[num_detectors];
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+ 	//double trigger_time= 1135136350.6;
+ 	double trigger_time = gps_time;
+	double **psd = allocate_2D_array(num_detectors,psd_length);
+	double **freqs = allocate_2D_array(num_detectors,psd_length);
+	std::complex<double> **data = (std::complex<double> **)malloc(sizeof(std::complex<double> *)*num_detectors);
+	for(int i =0; i<num_detectors; i++)
+		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
+
+	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
+
+
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =psd_length;
+	data_length[1] =psd_length;
+	//data_length[2] =psd_length;
+
+	//#########################################################
+	//mcmc options
+	int dimension = 14;
+	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22,.4,.4,.1,.1,.1,.1,1,1};
+	//double initial_pos[dimension]={.9, 5.2,-1.,std::log(2000),std::log(55), .22,.4,.4,.1,.1,.1,.1,1,1};
+	double initial_pos[dimension]={.9, 5.2,-1.,std::log(500),std::log(9), .22,.4,.4,.1,.1,.1,.1,1,1};
+	double *seeding_var = NULL;
+	int n_steps = 50000;
+	int chain_N=24 ;
+	int max_thermo=12 ;
+	int t0 = 10000;
+	int nu = 100;
+	std::string chain_alloc = "half_ensemble";
+	double ***output;
+	output = allocate_3D_array( chain_N, n_steps, dimension );
+	int swp_freq = 5;
+	double chain_temps[chain_N];
+	double c = 1.3;
+	
+	int Nmod = 0;
+	int *bppe = NULL;
+	int numThreads = 10;
+	bool pool = true;
+	//#########################################################
+	//gw options
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "EdGB_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
+	std::string generation_method = "IMRPhenomPv2";
+	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
+	
+	
+	std::string chainfile = "testing/data/mcmc_output_Pv2_dpt_alloc.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_Pv2_dpt_alloc.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_Pv2_dpt_alloc.csv";
+
+	PTMCMC_MH_dynamic_PT_alloc_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
+			swp_freq, t0, nu, chain_alloc, test_lp_GW_Pv2,numThreads, pool,show_progress,
+			num_detectors, 
+			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+			generation_method,statfilename,"", checkfile);	
+
+
+	//write_file(chainfile, output[0], n_steps, dimension);
+
+	deallocate_3D_array(output, chain_N, n_steps, dimension);
+	delete [] detectors;
+	free(data_length);
+	//free_LOSC_data(data, psd,freqs, num_detectors, length);
+	deallocate_2D_array(psd,num_detectors, psd_length);
+	deallocate_2D_array(freqs,num_detectors, psd_length);
+	for(int i =0; i<num_detectors; i++)
+		free(data[i]);
+	free(data);
+	delete [] detector_files;
+
 }
 void test33()
 {

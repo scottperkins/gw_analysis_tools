@@ -859,7 +859,6 @@ void PTMCMC_MH_GW(double ***output,
 		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 					)
 {
-	//std::cout<<"HELLO"<<std::endl;
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
 	for (int i =0;i<num_detectors;i++)
@@ -911,6 +910,104 @@ void PTMCMC_MH_GW(double ***output,
 	free(plans);
 	if(local_seeding){ delete [] seeding_var;}
 }
+
+/*! \brief Takes in an MCMC checkpoint file and continues the chain
+ *
+ * Obviously, the user must be sure to correctly match the dimension, number of chains, the generation_method, 
+ * the prior function, the data, psds, freqs, and the detectors (number and name), and the gps_time to the 
+ * previous run, otherwise the behavior of the sampler is undefined.
+ *
+ * numThreads and pool do not necessarily have to be the same
+ */
+void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
+			int dimension,
+			int N_steps,
+			int chain_N,
+			int max_chain_N_thermo_ensemble,
+			double *initial_pos,
+			double *seeding_var,
+			double *chain_temps,
+			int swp_freq,
+			int t0,
+			int nu,
+			std::string chain_distribution_scheme,
+			double(*log_prior)(double *param, int dimension, int chain_id),
+			int numThreads,
+			bool pool,
+			bool show_prog,
+			int num_detectors,
+			std::complex<double> **data,
+			double **noise_psd,
+			double **frequencies,
+			int *data_length,
+			double gps_time,
+			std::string *detectors,
+			int Nmod,
+			int *bppe,
+			std::string generation_method,
+			std::string statistics_filename,
+			std::string chain_filename,
+			std::string checkpoint_filename
+			)
+{
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
+	}
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_generation_method = generation_method;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_Nmod = Nmod;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
+	bool local_seeding ;
+	if(!seeding_var)
+		local_seeding = true;
+	else
+		local_seeding = false;
+
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+
+	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N, 
+		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
+		swp_freq, t0, nu, chain_distribution_scheme,
+		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
+		show_prog,statistics_filename,
+		chain_filename, checkpoint_filename);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deallocate_FFTW_mem(&plans[i]);
+	free(plans);
+	if(local_seeding){ delete [] seeding_var;}
+}
+
+
+
 /*! \brief Takes in an MCMC checkpoint file and continues the chain
  *
  * Obviously, the user must be sure to correctly match the dimension, number of chains, the generation_method, 
