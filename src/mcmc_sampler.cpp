@@ -439,8 +439,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int *prev_reject_ct = new int[samplerptr->chain_N];
 	int *prev_accept_ct = new int[samplerptr->chain_N];
 	double *running_ratio = new double[samplerptr->chain_N];
-	//Testing
-	bool dynamic_chain_num = false;
+	bool dynamic_chain_num = true;
 
 	bool chain_pop_target_reached = false;
 	for(int i =0; i<samplerptr->chain_N; i++){
@@ -487,23 +486,17 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 						running_ratio[i] = ((double)running_accept_ct[i])/
 							(running_accept_ct[i] 
 							+ running_reject_ct[i]);	
-						//std::cout<<i<<" "<<running_ratio[i]<<std::endl;
 					}
 					double ave_accept = 0;
 					for(int i =0; i<samplerptr->chain_N; i++){
 						ave_accept+=running_ratio[i];
 					}
 					ave_accept/=samplerptr->chain_N;
-					//double diff = ave_accept - chain_pop_target;
-					//if( std::abs(diff) < chain_pop_tol){
 					if(ave_accept < chain_pop_high && ave_accept> chain_pop_low){
 						chain_pop_target_reached = true;
 					}
 					else {
-						//std::cout<<"Changing chain_N"<<std::endl;
-						//std::cout<<samplerptr->chain_N<<std::endl;
 						chain_pop_target_reached = false;
-						//if(diff<0 && samplerptr->chain_N < max_chain_N_thermo_ensemble){
 						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
 							//add chain
 							int min_id =0;
@@ -517,7 +510,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							}	
 							samplerptr->chain_N++;	
 							for(int i = samplerptr->chain_N-1; i>=min_id; i--){
-								transfer_chain(samplerptr,samplerptr, i+1, i);	
+								transfer_chain(samplerptr,samplerptr, i+1, i, true);	
 								running_accept_ct[i+1] = running_accept_ct[i];
 								running_reject_ct[i+1] = running_reject_ct[i];
 								prev_accept_ct[i+1] = prev_accept_ct[i];
@@ -574,7 +567,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							if(samplerptr->PT_alloc)
 								samplerptr->A[min_id] = 0;
 						}
-						//else if (diff > 0 && samplerptr->chain_N>3){
 						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
 							//remove chain
 							int max_id =0;
@@ -587,7 +579,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 								}
 							}	
 							for(int i = max_id; i<samplerptr->chain_N-1; i++){
-								transfer_chain(samplerptr,samplerptr, i, i+1);	
+								transfer_chain(samplerptr,samplerptr, i, i+1, true);	
 							}
 							samplerptr->chain_N-=1;
 						}
@@ -666,17 +658,17 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	write_checkpoint_file(&static_sampler, checkpoint_file);
 	//PTMCMC_MH_loop(&static_sampler);
 
-	end =clock();
-	wend =omp_get_wtime();
+	//end =clock();
+	//wend =omp_get_wtime();
 
-	static_sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
-	static_sampler.time_elapsed_wall = (double)(wend-wstart);
+	//static_sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	//static_sampler.time_elapsed_wall = (double)(wend-wstart);
 
-	
-	acend =clock();
-	wacend =omp_get_wtime();
-	static_sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
-	static_sampler.time_elapsed_wall_ac = (double)(wacend - wend);
+	//
+	//acend =clock();
+	//wacend =omp_get_wtime();
+	//static_sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	//static_sampler.time_elapsed_wall_ac = (double)(wacend - wend);
 
 	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
 	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
@@ -692,9 +684,9 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
 	
 
-	if(checkpoint_file !=""){
-		write_checkpoint_file(&static_sampler, checkpoint_file);
-	}
+	//if(checkpoint_file !=""){
+	//	write_checkpoint_file(&static_sampler, checkpoint_file);
+	//}
 
 	//free(step_accepted);
 	//free(step_rejected);
@@ -703,7 +695,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	}
 	delete [] static_sampler.A;
 	deallocate_sampler_mem(&static_sampler);
-	deallocate_3D_array(static_sampler.output, chain_N, static_sampler.N_steps, static_sampler.dimension);
+	//deallocate_3D_array(static_sampler.output, chain_N, static_sampler.N_steps, static_sampler.dimension);
 	delete [] static_sampler.chain_temps;
 	//##################################################################
 	//##################################################################

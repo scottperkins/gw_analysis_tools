@@ -6,7 +6,7 @@ import numpy as np
 
 burn = False
 burnlength = 400000
-numfiles = 13
+numfiles = 3
 data = []
 #labels = [0,3,5,7,9,11,13,15,17,19,21,23]
 for i in np.arange(numfiles):
@@ -20,12 +20,12 @@ if burn:
     data = data[burnlength:]
 labels = [r"$cos \iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\theta_1$", r"$\theta_2$",r"$\phi_1$", r"$\phi_2$",r"$\phi_{ref}$", r"$\psi$"]
 
-#dataplot=[]
-#for x in data:
-#    dataplot.append(x)
-#    dataplot[-1][3] = np.exp(dataplot[-1][3])
-#    dataplot[-1][4] = np.exp(dataplot[-1][4])
-figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
+dataplottrans=[]
+for x in dataplot:
+    dataplottrans.append(x)
+    dataplottrans[-1][3] = np.exp(dataplottrans[-1][3])
+    dataplottrans[-1][4] = np.exp(dataplottrans[-1][4])
+figure = corner.corner(dataplottrans, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 plt.savefig("mcmc_testing_Pv2_dpt.pdf")
 plt.close()
 
