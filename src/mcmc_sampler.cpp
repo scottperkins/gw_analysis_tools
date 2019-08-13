@@ -300,6 +300,8 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
  * "refine": Chains are added between the optimal temps geometrically -- this may be a good option as it will be a good approximation of the ideal distribution of chains, while keeping the initial dynamical time low 
  *
  * "double": Chains are added in order of rising temperature that mimic the distribution achieved by the earier PT dynamics
+ *
+ * "half_ensemble": For every cold chain added, half of the ensemble is added again. Effectively, two cold chains for every ensemble
  */
 void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
@@ -308,7 +310,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
-	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
 	int nu,/**< Initial amplitude of the dynamics (~100)*/
@@ -354,8 +356,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->output =output;
 
 	//Start out with geometrically spaced chain
-	//samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
-	samplerptr->chain_temps = chain_temps;
+	samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
+	//samplerptr->chain_temps = chain_temps;
 	samplerptr->chain_temps[0] = 1.;
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
 	double c = 1.5;
@@ -387,9 +389,9 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->A = new int[samplerptr->chain_N];
 	samplerptr->PT_alloc = true;
 
-	samplerptr->chain_N = chain_N;//For allocation purposes, this needs to be the maximium number of chains
+	//samplerptr->chain_N = ;//For allocation purposes, this needs to be the maximium number of chains
 	allocate_sampler_mem(samplerptr);
-	samplerptr->chain_N = max_chain_N_thermo_ensemble;
+	//samplerptr->chain_N = max_chain_N_thermo_ensemble;
 
 
 	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
@@ -405,7 +407,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//tolerance in percent change of temperature to determine equilibrium
 	double tolerance= .01;
 	int stability_ct = 0;
-	int stability_tol = 5;
+	int stability_tol = 10;
 	//Frequency to check for equilibrium
 	int equilibrium_check_freq=2*nu;
 	
@@ -420,9 +422,17 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int chain_pop_update_freq=5*nu;
 	int pop_check_var=chain_pop_update_freq;
 	//Target average acceptance ratio 
-	int chain_pop_target = .2;
+	//int chain_pop_target = .2;
+	
+	
 	//Tolerance on the above acceptance ratio
-	int chain_pop_tol = .1;
+	//int chain_pop_tol = .1;
+	
+	//Boundaries that mark acceptable average acceptance ratios 
+	//for chain swapping in a chain population
+	int chain_pop_high = .5;
+	int chain_pop_low = .1;
+
 	//Keep track of acceptance ratio in chuncks
 	int *running_accept_ct = new int[samplerptr->chain_N];
 	int *running_reject_ct = new int[samplerptr->chain_N];
@@ -472,28 +482,32 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 						running_reject_ct[i] = 
 							samplerptr->swap_reject_ct[i] 
 							- prev_reject_ct[i];
-						running_ratio[i] = (double)running_accept_ct[i]/
+						running_ratio[i] = ((double)running_accept_ct[i])/
 							(running_accept_ct[i] 
 							+ running_reject_ct[i]);	
-						std::cout<<i<<" "<<running_ratio[i]<<std::endl;
+						//std::cout<<i<<" "<<running_ratio[i]<<std::endl;
 					}
-					int ave_accept = 0;
+					double ave_accept = 0;
 					for(int i =0; i<samplerptr->chain_N; i++){
 						ave_accept+=running_ratio[i];
 					}
 					ave_accept/=samplerptr->chain_N;
-					double diff = ave_accept - chain_pop_target;
-					if( std::abs(diff) < chain_pop_tol){
-						chain_pop_target = true;
+					//double diff = ave_accept - chain_pop_target;
+					std::cout<<ave_accept<<std::endl;
+					//if( std::abs(diff) < chain_pop_tol){
+					if(ave_accept < chain_pop_high && ave_accept> chain_pop_low){
+						chain_pop_target_reached = true;
 					}
 					else {
-						std::cout<<"Changing chain_N"<<std::endl;
-						chain_pop_target = false;
-						if(diff<0 && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+						//std::cout<<"Changing chain_N"<<std::endl;
+						//std::cout<<samplerptr->chain_N<<std::endl;
+						chain_pop_target_reached = false;
+						//if(diff<0 && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
 							//add chain
 							int min_id =0;
 							int min_val =1;
-							//Don't remove chain 0 and chain chain_N-1
+							//Don't add chain 0 and chain chain_N-1
 							for (int j =1 ;j <samplerptr->chain_N-1; j++){
 								if(running_ratio[j]<min_val){
 									min_id = j;
@@ -501,9 +515,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 								}
 							}	
 							samplerptr->chain_N++;	
-							std::cout<<samplerptr->chain_N<<std::endl;
 							for(int i = samplerptr->chain_N-1; i>=min_id; i--){
-								transfer_chain(samplerptr,samplerptr, i, i+1);	
+								transfer_chain(samplerptr,samplerptr, i+1, i);	
 								running_accept_ct[i+1] = running_accept_ct[i];
 								running_reject_ct[i+1] = running_reject_ct[i];
 								prev_accept_ct[i+1] = prev_accept_ct[i];
@@ -558,7 +571,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							if(samplerptr->PT_alloc)
 								samplerptr->A[min_id] = 0;
 						}
-						else if (samplerptr->chain_N>3){
+						//else if (diff > 0 && samplerptr->chain_N>3){
+						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
 							//remove chain
 							int max_id =0;
 							int max_val =0;
@@ -575,7 +589,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							samplerptr->chain_N-=1;
 						}
 						else{
-							chain_pop_target = true;
+							chain_pop_target_reached = true;
 
 						}
 					}
@@ -587,15 +601,14 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		//Calculate average percent change in temperature
 		double sum = 0;
 		for (int j =0; j<samplerptr->chain_N; j++){
-			//std::cout<<samplerptr->chain_temps[j]<<std::endl;
 			sum += std::abs((samplerptr->chain_temps[j] - old_temps[j])/old_temps[j]);
 			old_temps[j]=samplerptr->chain_temps[j];
-			//std::cout<<"SUM: "<<sum<<std::endl;
 		}
 		ave_dynamics = sum / samplerptr->chain_N;
 		if(show_prog){
-			printProgress(1. -  (ave_dynamics - tolerance)/(tolerance+ave_dynamics));
-			std::cout<<"DYNAMICS: "<<ave_dynamics<<" "<<samplerptr->chain_pos[0]<<std::endl;
+			//printProgress(1. -  abs(ave_dynamics - tolerance)/(tolerance+ave_dynamics));
+			printProgress(  abs(ave_dynamics - tolerance)/(tolerance+ave_dynamics));
+			//std::cout<<"DYNAMICS: "<<ave_dynamics<<" "<<samplerptr->chain_pos[0]<<std::endl;
 			//std::cout<<"TIME: "<<t<<std::endl;
 		}
 	}
@@ -629,6 +642,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	
 	sampler static_sampler;
 	static_sampler.A = new int[chain_N];
+	static_sampler.chain_temps = new double[chain_N];
 	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N, chain_distribution_scheme);
 
 	if(statistics_filename != "")
@@ -641,12 +655,12 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//If chains were added or removed, set chain N back to max for deallocation
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
 	deallocate_sampler_mem(samplerptr);
+	delete [] samplerptr->chain_temps;
 
 	static_sampler.show_progress=show_prog;
 	static_sampler.pool=pool;
 
-	samplerptr = &static_sampler;	
-	write_checkpoint_file(samplerptr, checkpoint_file);
+	write_checkpoint_file(&static_sampler, checkpoint_file);
 	//PTMCMC_MH_loop(&static_sampler);
 
 	end =clock();
@@ -655,14 +669,12 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	static_sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
 	static_sampler.time_elapsed_wall = (double)(wend-wstart);
 
-	std::cout<<std::endl;
 	
 	acend =clock();
 	wacend =omp_get_wtime();
 	static_sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
 	static_sampler.time_elapsed_wall_ac = (double)(wacend - wend);
 
-	std::cout<<std::endl;
 	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
 	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
 	//std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
@@ -683,8 +695,12 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 
 	//free(step_accepted);
 	//free(step_rejected);
+	for(int j = 0; j<static_sampler.chain_N; j++){
+		chain_temps[j] = static_sampler.chain_temps[j];
+	}
 	delete [] static_sampler.A;
 	deallocate_sampler_mem(&static_sampler);
+	delete [] static_sampler.chain_temps;
 	//##################################################################
 	//##################################################################
 	//##################################################################
@@ -1234,7 +1250,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 					}
 					else{
 						sampler->swap_reject_ct[i]+=1;	
-						sampler->swap_reject_ct[+1]+=1;	
+						sampler->swap_reject_ct[i+1]+=1;	
 						if(sampler->PT_alloc)
 							sampler->A[i+1] = 0;
 					}

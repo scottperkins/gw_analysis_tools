@@ -1446,7 +1446,7 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 {
 	//Check to see if more chains need to be allocated
 	bool allocate_chains = true;
-	if(chain_N_thermo_ensemble == chain_N){	allocate_chains = false;}
+	if(sampler_old->chain_N == chain_N){	allocate_chains = false;}
 	
 	//Allocate new sampler 
 	sampler_new->chain_N = chain_N;
@@ -1457,7 +1457,7 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	sampler_new->dimension = sampler_old->dimension;
 	sampler_new->num_threads = sampler_old->num_threads;
 	sampler_new->numThreads = sampler_old->numThreads;
-	sampler_new->chain_temps = sampler_old->chain_temps;
+	//sampler_new->chain_temps = sampler_old->chain_temps;
 	sampler_new->history_length = sampler_old->history_length;
 	sampler_new->history_update = sampler_old->history_update;
 	sampler_new->fisher_update_number = sampler_old->fisher_update_number;
@@ -1510,6 +1510,45 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 				//sampler_new->current_likelihoods[i] =sampler_new->current_likelihoods[0];
 				//sampler_new->chain_pos[i] = 0;
 			}		
+		}
+		if(chain_allocation_scheme =="double"){	
+			for(int i =sampler_old->chain_N; i<chain_N; i++){
+				transfer_chain(sampler_new, sampler_old, i, i%sampler_old->chain_N);
+			}
+		}
+		//Continuously refine -- needs correction -- right now, its just adding the ``refinement'' temperatures repeatedly
+		if(chain_allocation_scheme =="refine"){	
+			for(int i =sampler_old->chain_N; i<chain_N; i++){
+				transfer_chain(sampler_new, sampler_old, i, i%sampler_old->chain_N);
+				double prev_temp = sampler_old->chain_temps[i%sampler_old->chain_N];
+				double next_temp = sampler_old->chain_temps[(i+1)%sampler_old->chain_N];
+				sampler_new->chain_temps[i] = std::sqrt(prev_temp*next_temp);
+			}
+		}
+		if(chain_allocation_scheme =="half_ensemble"){	
+			int i = sampler_old->chain_N;
+			bool even_odd = true;
+			int j = 2;
+			while(i	< chain_N){
+			//{
+				transfer_chain(sampler_new, sampler_old, i, 0);
+				i++;
+				if(i==chain_N) break;
+				while(j<sampler_old->chain_N){
+					transfer_chain(sampler_new, sampler_old, i, j);
+					j+=2;
+					i++;
+					if(i==chain_N) break;
+				}
+				if (even_odd){
+					j = 1;
+					even_odd = false;
+				}
+				else{
+					j = 2;
+					even_odd = true;
+				}
+			}
 		}
 	}
 

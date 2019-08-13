@@ -96,7 +96,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test32();	
+	test33();	
 	return 0;
 }
 void test33()
@@ -115,7 +115,6 @@ void test33()
 	double *temps = (double *)malloc(sizeof(double)*chain_N);
 	load_temps_checkpoint_file(start_check,temps, chain_N);
 
-	std::string chain_dist_method = "cold";
 
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -140,12 +139,12 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 10000;
+	int N_steps = 1000000;
 	int chain_N= 10;
-	int max_chain_N_thermo= 10;
-	int t0= 1000;
-	int nu= 100;
-	std::string chain_dist_method = "cold";
+	int max_chain_N_thermo= 8;
+	int t0= 10000;
+	int nu= 50;
+	std::string chain_dist_method = "half_ensemble";
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -163,6 +162,10 @@ void test32()
 	
 	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,"", checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
+	std::cout<<"Chain temps: "<<std::endl;
+	for(int i =0; i<chain_N; i++){
+		std::cout<<chain_temps[i]<<std::endl;
+	}
 
 	//int filecount = 1;
 	//std::string chainfilebase = "testing/data/neil_mcmc_output";
