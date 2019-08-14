@@ -69,6 +69,7 @@ void test32();
 void test33();
 void test34();
 void test35();
+void test36();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -98,8 +99,33 @@ static double *psd=NULL;
 
 int main(){
 
-	test35();	
+	test36();	
 	return 0;
+}
+
+//Proof of concept for PTMCMC (non-RJ) param_status array
+void test36()
+{
+	int length =10;
+	int width =12;	
+	//double **A = allocate_2D_array(length, width);
+	double **A = (double **)malloc(sizeof(double *)*length);
+	A[0] = (double*)malloc(sizeof(double)*width);
+	for(int i = 0 ;i<width; i++){
+		A[0][i]=i;
+	}
+	for(int i = 0 ;i<width; i++){
+		std::cout<<A[0][i]<<std::endl;	
+	}
+	A[1]=A[0];
+	A[2]=A[0];
+	for(int i = 0 ;i<width; i++){
+		std::cout<<A[1][i]<<std::endl;	
+		std::cout<<A[2][i]<<std::endl;	
+	}
+	free(A[0]);	
+	free(A);
+	//deallocate_2D_array(A, length,width);
 }
 void test35()
 {

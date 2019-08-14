@@ -248,8 +248,8 @@ ThreadPool *poolptr;
  * Final position of all chains
  */
 void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
-	int max_dimension, 	/**< dimension of the parameter space being explored*/
-	int min_dimension, 	/**< dimension of the parameter space being explored*/
+	int max_dimension, 	/**< maximum dimension of the parameter space being explored -- only consideration is memory, as memory scales with dimension. Keep this reasonable, unless memory is REALLY not an issue*/
+	int min_dimension, 	/**< minimum dimension of the parameter space being explored >=1*/
 	int N_steps,	/**< Number of total steps to be taken, per chain*/
 	int chain_N,	/**< Number of chains*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
@@ -257,10 +257,10 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
-	std::function<double(double*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
-	std::function<double(double*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
-	std::function<void(double*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
-	std::function<double(double*,int,int)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*, int*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
+	std::function<double(double*,int*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,int*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
+	std::function<double(double*,int*,int,int)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
@@ -351,7 +351,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//For PT dynamics
 	samplerptr->N_steps = N_steps;
 
-	samplerptr->dimension = dimension;
+	samplerptr->dimension =samplerptr->min_dim=samplerptr->max_dim= dimension;
 	samplerptr->num_threads = numThreads;
 	samplerptr->output =output;
 
@@ -820,7 +820,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	samplerptr->chain_temps = chain_temps;
 	samplerptr->chain_N = chain_N;
 	samplerptr->N_steps = N_steps;
-	samplerptr->dimension = dimension;
+	samplerptr->dimension =samplerptr->min_dim =samplerptr->max_dim = dimension;
 	samplerptr->show_progress = show_prog;
 	samplerptr->num_threads = numThreads;
 

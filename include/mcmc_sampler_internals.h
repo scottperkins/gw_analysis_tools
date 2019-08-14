@@ -22,7 +22,7 @@ const double limit_inf = -std::numeric_limits<double>::infinity();
 class sampler
 {
 public:
-	int types_of_steps = 4;
+	int types_of_steps = 5;
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
@@ -33,14 +33,14 @@ public:
 	int numThreads;
 	int N_steps;
 	int dimension;
+	int min_dim;
+	int max_dim;
 	bool fisher_exist;
 	bool *de_primed;
 	int *priority;
 	bool *ref_chain_status;
 
 	double ***output;
-	int ***param_status;
-	bool RJMCMC=false;
 
 	bool pool;
 	int progress=0;
@@ -84,6 +84,7 @@ public:
 	int *num_fish ;
 	int *num_de ;
 	int *num_mmala ;
+	int *num_RJstep ;
 
 	double time_elapsed_cpu;
 	double time_elapsed_wall;
@@ -98,6 +99,8 @@ public:
 	int *gauss_reject_ct;
 	int *mmala_accept_ct;
 	int *mmala_reject_ct;
+	int *RJstep_accept_ct;
+	int *RJstep_reject_ct;
 
 	int *swap_accept_ct;
 	int *swap_reject_ct;
@@ -117,20 +120,30 @@ public:
 	int *A;
 	bool PT_alloc=false;
 
+	//RJPTMCMC Parameterts
+	int ***param_status;
+	bool RJMCMC=false;
 };
 
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *proposed_status, int chain_number);
 
-void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int chain_id);
+void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status, int chain_id);
 
-void fisher_step(sampler *sampler,double *current_param, double *proposed_param, int chain_index);
+void fisher_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_index);
 
 void update_fisher(sampler *sampler, double *current_param, int chain_index);
 
-void mmala_step(sampler *sampler,double *current_param, double *proposed_param);
+void mmala_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status);
 
-void diff_ev_step(sampler *sampler,double *current_param, double *proposed_param, int chain_id);
+void diff_ev_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_id);
+
+void RJ_step(sampler *sampler, 
+	double *current_param, 
+	double *proposed_param, 
+	int *current_status, 
+	int *proposed_status, 
+	int chain_number);
 
 void chain_swap(sampler *sampler, double ***output, int step_num,int *swp_accepted, int *swp_rejected);
 

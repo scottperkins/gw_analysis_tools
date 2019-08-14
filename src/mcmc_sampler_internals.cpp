@@ -31,27 +31,33 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	//Determine which step to take and calculate proposed coord.
 	if (alpha<sampler->prob_boundaries[chain_number][0])
 	{
-		gaussian_step(sampler, current_param, proposed_param, chain_number);
+		gaussian_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
 		sampler->num_gauss[chain_number]+=1;
 		step = 0;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][1])
 	{
-		diff_ev_step(sampler, current_param, proposed_param, chain_number);
+		diff_ev_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
 		sampler->num_de[chain_number]+=1;
 		step = 1;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][2])
 	{
-		mmala_step(sampler, current_param, proposed_param);
+		mmala_step(sampler, current_param, proposed_param, current_status, proposed_status);
 		sampler->num_mmala[chain_number]+=1;
 		step= 2;
 	}
-	else 
+	else if (alpha<sampler->prob_boundaries[chain_number][3])
 	{
-		fisher_step(sampler, current_param, proposed_param, chain_number);
+		fisher_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
 		sampler->num_fish[chain_number]+=1;
 		step = 3;
+	}
+	else 
+	{
+		RJ_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
+		sampler->num_RJstep[chain_number]+=1;
+		step = 4;
 	}
 	
 	double current_lp = sampler->lp(current_param, sampler->dimension, chain_number);
@@ -109,6 +115,8 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
+		int *current_status,
+		int *proposed_status,
 		int chain_id
 		)
 {
@@ -126,6 +134,8 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 void fisher_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
+		int *current_status,
+		int *proposed_status,
 		int chain_index
 		)
 {
@@ -223,7 +233,9 @@ void update_fisher(sampler *sampler, double *current_param, int chain_index)
  */
 void mmala_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
-		double *proposed_param /**< [out] Proposed position in parameter space*/
+		double *proposed_param, /**< [out] Proposed position in parameter space*/
+		int *current_status,
+		int *proposed_status
 		)
 {
 	
@@ -239,6 +251,8 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
+		int *current_status,
+		int *proposed_status,
 		int chain_id
 		)
 {
@@ -259,6 +273,17 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		proposed_param[k] = current_param[k] + alpha*
 			(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
 	}
+}
+
+void RJ_step(sampler *sampler, /**< sampler*/
+	double *current_param, /**< current coordinates in parameter space*/
+	double *proposed_param, /**<[out] Proposed coordinates in parameter space*/
+	int *current_status, /**< Current status of parameters*/
+	int *proposed_status, /**<[out] Proposed status of parameters*/
+	int chain_number/**< chain mumber*/
+	)
+{
+
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
@@ -354,52 +379,100 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 void assign_probabilities(sampler *sampler, int chain_index)
 {
 
-	//no fisher and de not ready
-	if(!sampler->fisher_exist && !sampler->de_primed[chain_index])//Obviously must add up to 1
-	{
-		sampler->step_prob[chain_index][0]=1.;
-		sampler->step_prob[chain_index][1]=0.;
-		sampler->step_prob[chain_index][2]=0;
-		sampler->step_prob[chain_index][3]=0;
-	}
-	//fisher available, but de not yet ready
-	else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
-	{
-		//sampler->step_prob[chain_index][0]=.3;
-		//sampler->step_prob[chain_index][1]=0;
-		//sampler->step_prob[chain_index][2]=.3;
-		//sampler->step_prob[chain_index][3]=.4;
-		//Testing
-		sampler->step_prob[chain_index][0]=.1;
-		sampler->step_prob[chain_index][1]=0;
-		sampler->step_prob[chain_index][2]=.0;
-		sampler->step_prob[chain_index][3]=.9;
+	//non-RJPTMCMC
+	if(!sampler->RJMCMC){
+		sampler->step_prob[chain_index][4]=.0;
+		//no fisher and de not ready
+		if(!sampler->fisher_exist && !sampler->de_primed[chain_index])//Obviously must add up to 1
+		{
+			sampler->step_prob[chain_index][0]=1.;
+			sampler->step_prob[chain_index][1]=0.;
+			sampler->step_prob[chain_index][2]=0;
+			sampler->step_prob[chain_index][3]=0;
+			sampler->step_prob[chain_index][4]=.2;
+		}
+		//fisher available, but de not yet ready
+		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
+		{
+			//sampler->step_prob[chain_index][0]=.3;
+			//sampler->step_prob[chain_index][1]=0;
+			//sampler->step_prob[chain_index][2]=.3;
+			//sampler->step_prob[chain_index][3]=.4;
+			//Testing
+			sampler->step_prob[chain_index][0]=.1;
+			sampler->step_prob[chain_index][1]=0;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.9;
 
-	}
-	//No fisher, but de ready
-	else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
-	{
-		
-		sampler->step_prob[chain_index][0]=.2;
-		sampler->step_prob[chain_index][1]=.8;
-		sampler->step_prob[chain_index][2]=.0;
-		sampler->step_prob[chain_index][3]=.0;
+		}
+		//No fisher, but de ready
+		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
+		{
+			
+			sampler->step_prob[chain_index][0]=.2;
+			sampler->step_prob[chain_index][1]=.8;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.0;
 
-	}
-	//all methods available
-	else
-	{
-		sampler->step_prob[chain_index][0]=.05;
-		sampler->step_prob[chain_index][1]=.2;
-		sampler->step_prob[chain_index][2]=.0;
-		sampler->step_prob[chain_index][3]=.75;
+		}
+		//all methods available
+		else
+		{
+			sampler->step_prob[chain_index][0]=.05;
+			sampler->step_prob[chain_index][1]=.2;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.75;
 
+		}
+	}
+	else{
+		//no fisher and de not ready
+		if(!sampler->fisher_exist && !sampler->de_primed[chain_index])//Obviously must add up to 1
+		{
+			sampler->step_prob[chain_index][0]=.8;
+			sampler->step_prob[chain_index][1]=0.;
+			sampler->step_prob[chain_index][2]=0;
+			sampler->step_prob[chain_index][3]=0;
+			sampler->step_prob[chain_index][4]=.2;
+		}
+		//fisher available, but de not yet ready
+		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
+		{
+			sampler->step_prob[chain_index][0]=.05;
+			sampler->step_prob[chain_index][1]=0;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.75;
+			sampler->step_prob[chain_index][4]=.2;
+
+		}
+		//No fisher, but de ready
+		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
+		{
+			
+			sampler->step_prob[chain_index][0]=.1;
+			sampler->step_prob[chain_index][1]=.7;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.0;
+			sampler->step_prob[chain_index][4]=.2;
+
+		}
+		//all methods available
+		else
+		{
+			sampler->step_prob[chain_index][0]=.05;
+			sampler->step_prob[chain_index][1]=.15;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.6;
+			sampler->step_prob[chain_index][4]=.2;
+
+		}
 	}
 	//Split probabilities into boundaries for if-else loop
 	sampler->prob_boundaries[chain_index][0] = sampler->step_prob[chain_index][0];
 	sampler->prob_boundaries[chain_index][1] = sampler->step_prob[chain_index][1]+sampler->prob_boundaries[chain_index][0];
 	sampler->prob_boundaries[chain_index][2] = sampler->step_prob[chain_index][2]+sampler->prob_boundaries[chain_index][1];
 	sampler->prob_boundaries[chain_index][3] = sampler->step_prob[chain_index][3]+sampler->prob_boundaries[chain_index][2];
+	sampler->prob_boundaries[chain_index][4] = sampler->step_prob[chain_index][4]+sampler->prob_boundaries[chain_index][3];
 }	
 
 /*! \brief Copies contents of one chain to another
@@ -627,6 +700,8 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->gauss_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->mmala_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->mmala_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->RJstep_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->RJstep_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fisher_update_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->swap_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->swap_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -639,6 +714,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->num_fish = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->num_de = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->num_mmala = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->num_RJstep = (int *)malloc(sizeof(int) * sampler->chain_N);
 
 	sampler->priority = (int *)malloc(sizeof(int) * sampler->chain_N);
 
@@ -654,7 +730,10 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
-	sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->dimension);
+
+	//RJ parameters -- initialize status array with 1's for now, then repopulate with initial position
+	sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->max_dim);
+
 	sampler->ref_chain_status = (bool *) malloc(sizeof(bool)*sampler->chain_N);
 
 	for (i =0; i<sampler->chain_N; i++)
@@ -665,6 +744,10 @@ void allocate_sampler_mem(sampler *sampler)
 		}
 		else{
 			sampler->ref_chain_status[i] = true;
+		}
+		//initial value set to one's
+		for(int j = 0 ; j< sampler->max_dim ;j ++){
+			sampler->param_status[i][0][j] = 1;
 		}
 
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
@@ -679,6 +762,8 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->gauss_reject_ct[i]=0;
 		sampler->mmala_accept_ct[i]=0;
 		sampler->mmala_reject_ct[i]=0;
+		sampler->RJstep_accept_ct[i]=0;
+		sampler->RJstep_reject_ct[i]=0;
 		sampler->fisher_update_ct[i] = sampler->fisher_update_number;
 		sampler->chain_pos[i]=0;
 		sampler->waiting[i]=true;
@@ -692,6 +777,7 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->num_fish[i]=0;
 		sampler->num_de[i]=0;
 		sampler->num_mmala[i]=0;
+		sampler->num_RJstep[i]=0;
 	
 		sampler->priority[i] = 1; //Default priority
 
@@ -720,6 +806,8 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->randgauss_width[i][1]=.05;
 		sampler->randgauss_width[i][2]=.05;
 		sampler->randgauss_width[i][3]=.5;
+		//For RJPTMCMC, this may not be used, but it'll be available
+		sampler->randgauss_width[i][4]=.5;
 
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
@@ -758,6 +846,8 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->gauss_reject_ct);
 	free(sampler->mmala_accept_ct);
 	free(sampler->mmala_reject_ct);
+	free(sampler->RJstep_accept_ct);
+	free(sampler->RJstep_reject_ct);
 	free(sampler->chain_pos);
 	free(sampler->waiting);
 	free(sampler->swap_accept_ct);
@@ -770,6 +860,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->num_fish);
 	free(sampler->num_de);
 	free(sampler->num_mmala);
+	free(sampler->num_RJstep);
 
 	free(sampler->current_likelihoods);
 	free(sampler->priority);
