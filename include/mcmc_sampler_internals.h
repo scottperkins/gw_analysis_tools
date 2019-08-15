@@ -51,6 +51,7 @@ public:
 	int history_update;
 	int *current_hist_pos;
 	double ***history;
+	int ***history_status;
 	double *current_likelihoods;
 
 

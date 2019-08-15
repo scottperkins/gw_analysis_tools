@@ -259,22 +259,101 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
-	//First position ID
-	int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
-	//Second position ID
-	int j;
-	do{
-		j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
-	}while(j==i);
+	if(sampler->RJMCMC){
+		int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
+		double *eff_history_coord = new double[sampler->max_dim];
+		int *eff_history_status = new int[sampler->max_dim];
+		//Since there's no way to feasibly store a substantial 
+		//population of history items for every combination of dimensions:
+		//I'll assume the additional dimensions have small effects on the model
+		//described by dimensions 0-min_dim, so I pick an element from 
+		//the history file that has the smallest deviation from the base model, 
+		//but still has the additional dimension. This means that the extra dimensions
+		//beyond min_dim are indepent, but if the affects are indeed small, the benefit 
+		//of DE should still be recovered (this is only a proposal, after all)
+		if(sampler->min_dim != 0){
+			//Check which dimensions are included in the history element
+			int *bad_ids = new int[sampler->max_dim-sampler->min_dim];
+			int id_count = 0;
+			for (int j = sampler->min_dim ; j<sampler->max_dim; j++){
+				if(current_status[j] != sampler->history_status[chain_id][i][j]){
+					bad_ids[id_count] = j;	
+					id_count++;
+				}
+			}
+			for(int j = 0 ; j<sampler->max_dim; j ++){
+				eff_history_coord[j] = sampler->history[chain_id][i][j];
+				eff_history_status[j] = sampler->history_status[chain_id][i][j];
+
+			}
+			int min_dev_id = 0;
+			double min_dev = 0;
+			double current_dev = 0;
+			bool at_least_one = false; 
+			//For each bad_id, loop through history and find the smallest deviation
+			for(int k = 0 ; k<id_count; k++){
+				for(int l = 0 ; l<sampler->history_length; l++){
+					if(sampler->history_status[chain_id][k][bad_ids[k]]==1){
+						for(int j=0 ;j<sampler->min_dim; j++){
+								current_dev+= (sampler->history[chain_id][l][j] - sampler->history[chain_id][i][j])/sampler->history[chain_id][i][j];
+						}
+						current_dev/= sampler->min_dim;
+						if(!at_least_one){
+							min_dev = current_dev;		
+							min_dev_id = l;		
+							at_least_one = true;
+						}
+						else{
+							if(current_dev<min_dev){
+								min_dev = current_dev;		
+								min_dev_id = l;		
+							}
+						}
+					}
+				}
+				if(at_least_one){
+					eff_history_coord[k] = sampler->history[chain_id][min_dev_id][k];
+				}
+				else{
+					//Gaussian step for this dimension
+				}
+				at_least_one = false;
+			}
+			
+	
+			delete [] bad_ids;
+		}
+		//For models that are composed of discrete models (ie model A or B 
+		//and min_dim = 0), I just need to continue picking history members 
+		//until I get two that match the correct model.If two elements that 
+		//contain a given model, we just use a gaussian step and abandon DE 
+		//for this step.
+		else{
+
+		}
+		delete [] eff_history_coord;
+		delete [] eff_history_status;
 		
-	double alpha = .1;
-	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
-	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
-	for (int k = 0; k<sampler->dimension; k++)
-	{
-		proposed_param[k] = current_param[k] + alpha*
-			(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
+	}
+	//Regular PTMCMC
+	else{
+		//First position ID
+		int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
+		//Second position ID
+		int j;
+		do{
+			j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
+		}while(j==i);
+			
+		double alpha = .1;
+		double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
+		if(beta<.9)
+			alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
+		for (int k = 0; k<sampler->dimension; k++)
+		{
+			proposed_param[k] = current_param[k] + alpha*
+				(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
+		}
 	}
 }
 
@@ -738,7 +817,9 @@ void allocate_sampler_mem(sampler *sampler)
 
 	//RJ parameters -- initialize status array with 1's for now, then repopulate with initial position
 	if(sampler->RJMCMC){
-		sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->max_dim);	}
+		sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->max_dim);	
+		sampler->history_status = allocate_3D_array_int(sampler->chain_N, sampler->history_length,sampler->max_dim);	
+	}
 	else{
 		sampler->param_status = (int ***)malloc(sizeof(double **)*sampler->chain_N);
 		sampler->param_status[0] = (int **)malloc(sizeof(double *)*sampler->N_steps);
@@ -906,7 +987,8 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
 	if(sampler->RJMCMC){
-		deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->dimension);
+		deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->max_dim);
+		deallocate_3D_array(sampler->history_status,sampler->chain_N, sampler->history_length, sampler->max_dim);
 	}
 	else{
 		free(sampler->param_status[0][0]);
