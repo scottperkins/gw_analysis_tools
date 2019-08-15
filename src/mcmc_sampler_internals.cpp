@@ -259,10 +259,23 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
+	double *eff_history_coord = new double[sampler->max_dim];
+	int *eff_history_status = new int[sampler->max_dim];
+	double *eff_history_coord2 = new double[sampler->max_dim];
+	int *eff_history_status2 = new int[sampler->max_dim];
 	if(sampler->RJMCMC){
-		int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
-		double *eff_history_coord = new double[sampler->max_dim];
-		int *eff_history_status = new int[sampler->max_dim];
+		//Pick a history member
+		int i = (int)((sampler->history_length-1)
+			*(gsl_rng_uniform(sampler->rvec[chain_id])));
+		//Second position ID
+		int j;
+		do{
+			j=(int)((sampler->history_length-1)*
+				(gsl_rng_uniform(sampler->rvec[chain_id])));	
+		}while(j==i);
+
+		//We'll almost definitely need to do some transformation to it
+
 		//Since there's no way to feasibly store a substantial 
 		//population of history items for every combination of dimensions:
 		//I'll assume the additional dimensions have small effects on the model
@@ -272,56 +285,10 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		//beyond min_dim are indepent, but if the affects are indeed small, the benefit 
 		//of DE should still be recovered (this is only a proposal, after all)
 		if(sampler->min_dim != 0){
-			//Check which dimensions are included in the history element
-			int *bad_ids = new int[sampler->max_dim-sampler->min_dim];
-			int id_count = 0;
-			for (int j = sampler->min_dim ; j<sampler->max_dim; j++){
-				if(current_status[j] != sampler->history_status[chain_id][i][j]){
-					bad_ids[id_count] = j;	
-					id_count++;
-				}
-			}
-			for(int j = 0 ; j<sampler->max_dim; j ++){
-				eff_history_coord[j] = sampler->history[chain_id][i][j];
-				eff_history_status[j] = sampler->history_status[chain_id][i][j];
-
-			}
-			int min_dev_id = 0;
-			double min_dev = 0;
-			double current_dev = 0;
-			bool at_least_one = false; 
-			//For each bad_id, loop through history and find the smallest deviation
-			for(int k = 0 ; k<id_count; k++){
-				for(int l = 0 ; l<sampler->history_length; l++){
-					if(sampler->history_status[chain_id][k][bad_ids[k]]==1){
-						for(int j=0 ;j<sampler->min_dim; j++){
-								current_dev+= (sampler->history[chain_id][l][j] - sampler->history[chain_id][i][j])/sampler->history[chain_id][i][j];
-						}
-						current_dev/= sampler->min_dim;
-						if(!at_least_one){
-							min_dev = current_dev;		
-							min_dev_id = l;		
-							at_least_one = true;
-						}
-						else{
-							if(current_dev<min_dev){
-								min_dev = current_dev;		
-								min_dev_id = l;		
-							}
-						}
-					}
-				}
-				if(at_least_one){
-					eff_history_coord[k] = sampler->history[chain_id][min_dev_id][k];
-				}
-				else{
-					//Gaussian step for this dimension
-				}
-				at_least_one = false;
-			}
-			
-	
-			delete [] bad_ids;
+			RJ_smooth_history(sampler, current_status, i, eff_history_coord, 
+				eff_history_status,chain_id);
+			RJ_smooth_history(sampler, current_status, j, eff_history_coord2, 
+				eff_history_status2,chain_id);
 		}
 		//For models that are composed of discrete models (ie model A or B 
 		//and min_dim = 0), I just need to continue picking history members 
@@ -331,8 +298,6 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		else{
 
 		}
-		delete [] eff_history_coord;
-		delete [] eff_history_status;
 		
 	}
 	//Regular PTMCMC
@@ -344,17 +309,96 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		do{
 			j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
 		}while(j==i);
+
+		for(int k = 0 ; k <sampler->dimension; k++){
+			eff_history_coord[k] = sampler->history[chain_id][i][k];
+			eff_history_coord2[k] = sampler->history[chain_id][j][k];
+			eff_history_status[k] = sampler->param_status[chain_id][0][k];
+			eff_history_status2[k] = sampler->param_status[chain_id][0][k];
+			//eff_history_status[k] = sampler->history_status[chain_id][i][k];
+			//eff_history_status2[k] = sampler->history_status[chain_id][j][k];
+		}	
 			
-		double alpha = .1;
-		double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
-		if(beta<.9)
-			alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
-		for (int k = 0; k<sampler->dimension; k++)
-		{
-			proposed_param[k] = current_param[k] + alpha*
-				(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
+	}
+
+	
+	double alpha = .1;
+	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
+	if(beta<.9)
+		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
+	for (int k = 0; k<sampler->max_dim; k++)
+	{
+//		proposed_param[k] = current_param[k] + alpha*
+			//(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
+		proposed_param[k] = current_param[k] + alpha *
+			(eff_history_coord[k] - eff_history_coord2[k]);
+		proposed_status[k]=eff_history_status[k];
+	}
+	delete [] eff_history_coord;
+	delete [] eff_history_status;
+	delete [] eff_history_coord2;
+	delete [] eff_history_status2;
+}
+
+void RJ_smooth_history(sampler *sampler, /**<Current sampler */
+	int *current_param_status,/**<Current parameters to match*/
+	int base_history_id, /**<Original history element*/
+	double *eff_history_coord, /**<[out] Modified history coord*/
+	int *eff_history_status, /**<[out] Modified History status*/
+	int chain_id/**<Chain ID of the current chain*/
+	)
+{
+	//Check which dimensions are included in the history element
+	int *bad_ids = new int[sampler->max_dim-sampler->min_dim];
+	int id_count = 0;
+	for (int j = sampler->min_dim ; j<sampler->max_dim; j++){
+		if(current_param_status[j] != sampler->history_status[chain_id][base_history_id][j]){
+			bad_ids[id_count] = j;	
+			id_count++;
 		}
 	}
+	for(int j = 0 ; j<sampler->max_dim; j ++){
+		eff_history_coord[j] = sampler->history[chain_id][base_history_id][j];
+		eff_history_status[j] = sampler->history_status[chain_id][base_history_id][j];
+
+	}
+	int min_dev_id = 0;
+	double min_dev = 0;
+	double current_dev = 0;
+	bool at_least_one = false; 
+	//For each bad_id, loop through history and find the smallest deviation
+	for(int k = 0 ; k<id_count; k++){
+		for(int l = 0 ; l<sampler->history_length; l++){
+			if(sampler->history_status[chain_id][k][bad_ids[k]]==1){
+				for(int j=0 ;j<sampler->min_dim; j++){
+						current_dev+= (sampler->history[chain_id][l][j] - sampler->history[chain_id][base_history_id][j])/sampler->history[chain_id][base_history_id][j];
+				}
+				current_dev/= sampler->min_dim;
+				if(!at_least_one){
+					min_dev = current_dev;		
+					min_dev_id = l;		
+					at_least_one = true;
+				}
+				else{
+					if(current_dev<min_dev){
+						min_dev = current_dev;		
+						min_dev_id = l;		
+					}
+				}
+			}
+		}
+		if(at_least_one){
+			eff_history_coord[k] = sampler->history[chain_id][min_dev_id][k];
+		}
+		else{
+			//Gaussian step for this dimension
+		}
+		at_least_one = false;
+	}
+	
+	
+	delete [] bad_ids;
+
 }
 
 void RJ_step(sampler *sampler, /**< sampler*/
@@ -1452,7 +1496,7 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		std::getline(file_in,line);
 		std::stringstream lineStream(line);
 		std::getline(lineStream, item, ',');
-		sampler->dimension = std::stod(item);
+		sampler->dimension =sampler->min_dim=sampler->max_dim= std::stod(item);
 		std::getline(lineStream, item, ',');
 		sampler->chain_N = std::stod(item);
 
