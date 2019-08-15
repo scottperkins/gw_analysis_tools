@@ -99,7 +99,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test36();	
+	test33();	
 	return 0;
 }
 
@@ -108,21 +108,28 @@ void test36()
 {
 	int length =10;
 	int width =12;	
+	int depth =5;	
 	//double **A = allocate_2D_array(length, width);
-	double **A = (double **)malloc(sizeof(double *)*length);
-	A[0] = (double*)malloc(sizeof(double)*width);
-	for(int i = 0 ;i<width; i++){
-		A[0][i]=i;
+	double ***A = (double ***)malloc(sizeof(double **)*length);
+	A[0] = (double**)malloc(sizeof(double*)*width);
+	A[0][0] = (double*)malloc(sizeof(double)*depth);
+	for(int i = 0 ;i<depth; i++){
+		
+		A[0][0][i]=i;
 	}
-	for(int i = 0 ;i<width; i++){
-		std::cout<<A[0][i]<<std::endl;	
+	for(int i = 1 ;i<width; i++){
+		A[0][i] = A[0][0];
+	}
+	for(int i = 0 ;i<depth; i++){
+		std::cout<<A[0][0][i]<<std::endl;	
 	}
 	A[1]=A[0];
 	A[2]=A[0];
-	for(int i = 0 ;i<width; i++){
-		std::cout<<A[1][i]<<std::endl;	
-		std::cout<<A[2][i]<<std::endl;	
+	for(int i = 0 ;i<depth; i++){
+		std::cout<<A[1][0][i]<<std::endl;	
+		std::cout<<A[2][0][i]<<std::endl;	
 	}
+	free(A[0][0]);	
 	free(A[0]);	
 	free(A);
 	//deallocate_2D_array(A, length,width);
@@ -385,13 +392,13 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 1000000;
+	int N_steps = 100000;
 	int chain_N= 10;
 	int max_chain_N_thermo= 8;
 	int t0= 10000;
 	int nu= 50;
-	//std::string chain_dist_method = "half_ensemble";
-	std::string chain_dist_method = "cold";
+	std::string chain_dist_method = "half_ensemble";
+	//std::string chain_dist_method = "cold";
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;

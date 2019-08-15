@@ -73,9 +73,9 @@ public:
 	//log_prior lp;
 	//log_likelihood ll;
 	//fisher fish;
-	std::function<double(double*,int, int)> lp;
-	std::function<double(double*,int, int)> ll;
-	std::function<void(double*,int,double**,int)> fish;
+	std::function<double(double*,int *, int, int)> lp;
+	std::function<double(double*,int *,int, int)> ll;
+	std::function<void(double*,int *,int,double**,int)> fish;
  
 	gsl_rng ** rvec;
 
@@ -126,13 +126,13 @@ public:
 };
 
 
-int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *proposed_status, int chain_number);
+int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *next_status, int chain_number);
 
 void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status, int chain_id);
 
 void fisher_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_index);
 
-void update_fisher(sampler *sampler, double *current_param, int chain_index);
+void update_fisher(sampler *sampler, double *current_param, int *param_status,int chain_index);
 
 void mmala_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status);
 
@@ -145,9 +145,9 @@ void RJ_step(sampler *sampler,
 	int *proposed_status, 
 	int chain_number);
 
-void chain_swap(sampler *sampler, double ***output, int step_num,int *swp_accepted, int *swp_rejected);
+void chain_swap(sampler *sampler, double ***output, int ***param_status,int step_num,int *swp_accepted, int *swp_rejected);
 
-int single_chain_swap(sampler *sampler, double *chain1, double *chain2,int T1_index, int T2_index);
+int single_chain_swap(sampler *sampler, double *chain1, double *chain2,int *chain1_status, int *chain2_status, int T1_index, int T2_index);
 
 void assign_probabilities(sampler *sampler, int chain_index);
 
@@ -161,7 +161,7 @@ void allocate_sampler_mem(sampler *sampler);
 
 void deallocate_sampler_mem(sampler *sampler);
 
-void update_history(sampler *sampler, double *new_params, int chain_index);
+void update_history(sampler *sampler, double *new_params, int *new_param_status,int chain_index);
 
 
 //void auto_correlation_spectral(double *chain, int length, double *autocorr);
@@ -192,7 +192,7 @@ void load_temps_checkpoint_file(std::string check_file, double *temps, int chain
 void assign_ct_p(sampler *sampler, int step, int chain_index);
 void assign_ct_m(sampler *sampler, int step, int chain_index);
 
-void assign_initial_pos(sampler *samplerptr,double *initial_pos, double *seeding_var) ;
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,double *seeding_var) ;
 
 double PT_dynamical_timescale(int t0, int nu, int t);
 
