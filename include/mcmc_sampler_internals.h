@@ -139,6 +139,8 @@ void mmala_step(sampler *sampler,double *current_param, double *proposed_param,i
 
 void diff_ev_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_id);
 
+void RJ_smooth_history(sampler *sampler, int *current_param_status,int base_history_id, double *eff_history_coord, int *eff_history_status, int chain_id);
+
 void RJ_step(sampler *sampler, 
 	double *current_param, 
 	double *proposed_param, 
