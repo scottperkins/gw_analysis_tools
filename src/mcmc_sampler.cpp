@@ -377,15 +377,15 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
 	//samplerptr->history_length = 500;
-	samplerptr->history_length = 500;
-	samplerptr->history_update = 5;
+	//samplerptr->history_length = 500;
+	//samplerptr->history_update = 5;
 	//Number of steps to take with the fisher before updating the fisher 
 	//to a new value 
 	//NOTE: if this is too low, detailed balance isn't maintained without 
 	//accounting for the changing fisher (doesn't cancel in MH ratio)
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
-	samplerptr->fisher_update_number = 200;
+	//samplerptr->fisher_update_number = 200;
 
 	//samplerptr->output = output;
 	//During chain allocation, pooling isn't used
@@ -632,6 +632,17 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	delete [] prev_accept_ct;
 	delete [] prev_reject_ct;
 	delete [] running_ratio;
+	end =clock();
+	wend =omp_get_wtime();
+
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
+
+	
+	acend =clock();
+	wacend =omp_get_wtime();
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
 
 	//#################################################################
 	//
@@ -839,15 +850,15 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	//reached, then the history is updated every 20th step, always only
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
-	samplerptr->history_length = 500;
-	samplerptr->history_update = 5;
+	//samplerptr->history_length = 500;
+	//samplerptr->history_update = 5;
 	//Number of steps to take with the fisher before updating the fisher 
 	//to a new value 
 	//NOTE: if this is too low, detailed balance isn't maintained without 
 	//accounting for the changing fisher (doesn't cancel in MH ratio)
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
-	samplerptr->fisher_update_number = 200;
+	//samplerptr->fisher_update_number = 200;
 
 	samplerptr->output = output;
 	samplerptr->pool = pool;
@@ -1065,15 +1076,15 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	//reached, then the history is updated every 20th step, always only
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
-	samplerptr->history_length = 500;
-	samplerptr->history_update = 5;
+	//samplerptr->history_length = 500;
+	//samplerptr->history_update = 5;
 	//Number of steps to take with the fisher before updating the fisher 
 	//to a new value 
 	//NOTE: if this is too low, detailed balance isn't maintained without 
 	//accounting for the changing fisher (doesn't cancel in MH ratio)
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
-	samplerptr->fisher_update_number = 200;
+	//samplerptr->fisher_update_number = 200;
 
 	samplerptr->output = output;
 	samplerptr->pool = pool;

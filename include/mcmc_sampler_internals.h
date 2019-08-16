@@ -47,8 +47,8 @@ public:
 	bool show_progress;
 	int num_threads;
 
-	int history_length;
-	int history_update;
+	int history_length=500;
+		int history_update=5;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;
@@ -69,7 +69,7 @@ public:
 	double ***fisher_vecs;
 	double **fisher_vals;
 	int *fisher_update_ct;
-	int fisher_update_number;
+	int fisher_update_number=200;
 
 	//log_prior lp;
 	//log_likelihood ll;

@@ -356,11 +356,11 @@ void test33()
 {
 	std::string start_check = "testing/data/neil_mcmc_checkpoint1_dynamicPT.csv";
 	std::string chain = "testing/data/neil_mcmc_output1_dynamicPT.csv";
-	std::string check = "testing/data/neil_mcmc_checkpoknt1_dynamicPT-real.csv";
-	std::string stats = "testing/data/neil_mcmc_statistics1_dynamicPT-real.csv";
+	std::string check = "testing/data/neil_mcmc_checkpoint1_dynamicPT-real.csv";
+	std::string stats = "testing/data/neil_mcmc_statistics1_dynamicPT-real.txt";
 	int N_steps = 10000;
 	int dimension = 2;
-	int chain_N= 10;
+	int chain_N= 20;
 	int swp_freq = 3;
 	int threads = 10;
 	bool show_prog = true;
@@ -392,12 +392,13 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 100000;
-	int chain_N= 10;
+	int N_steps = 10000;
+	int chain_N= 20;
 	int max_chain_N_thermo= 8;
 	int t0= 10000;
 	int nu= 50;
-	std::string chain_dist_method = "half_ensemble";
+	//std::string chain_dist_method = "half_ensemble";
+	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
@@ -412,7 +413,7 @@ void test32()
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint1_dynamicPT.csv";
 	
 	int numThreads = 10;
-	bool pool = true;
+	bool pool = false;
 	
 	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,"", checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;

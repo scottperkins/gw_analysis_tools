@@ -129,6 +129,7 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = sampler->randgauss_width[chain_id][0];
 	for (i=0;i<sampler->dimension;i++){
 		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
+		proposed_status[i] = current_status[i];
 	}
 }
 
@@ -167,6 +168,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	{
 		proposed_param[i] = current_param[i] +
 			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+		proposed_status[i] = current_status[i];
 	}
 
 }
@@ -865,15 +867,9 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->history_status = allocate_3D_array_int(sampler->chain_N, sampler->history_length,sampler->max_dim);	
 	}
 	else{
-		sampler->param_status = (int ***)malloc(sizeof(double **)*sampler->chain_N);
-		sampler->param_status[0] = (int **)malloc(sizeof(double *)*sampler->N_steps);
-		sampler->param_status[0][0] = (int *)malloc(sizeof(double )*sampler->dimension);
-		for(int j = 0 ; j<sampler->dimension; j++){
-			sampler->param_status[0][0][j] = 1;
-		}
-		for(int j = 1 ; j<sampler->N_steps; j ++){
-			sampler->param_status[0][j] = sampler->param_status[0][0];
-		}
+		//Need one copy per chain at least -- just in case of race conditions
+		sampler->param_status = (int ***)malloc(sizeof(int **)*sampler->chain_N);
+		sampler->history_status = (int ***)malloc(sizeof(int **)*sampler->chain_N);
 	}
 
 	sampler->ref_chain_status = (bool *) malloc(sizeof(bool)*sampler->chain_N);
@@ -894,11 +890,26 @@ void allocate_sampler_mem(sampler *sampler)
 			}
 		}
 		else{
-			sampler->param_status[i] = sampler->param_status[0];
+			sampler->param_status[i] = (int **)malloc(sizeof(int *)*sampler->N_steps);
+			sampler->param_status[i][0] = (int *)malloc(sizeof(int )*sampler->dimension);
+			for(int k = 0 ; k<sampler->max_dim; k++){
+				sampler->param_status[i][0][k] = 1;
+			}
+			for(int k = 1 ; k<sampler->N_steps; k ++){
+				sampler->param_status[i][k] = sampler->param_status[i][0];
+			}
+			sampler->history_status[i] = (int **)malloc(sizeof(int *)*sampler->history_length);
+			sampler->history_status[i][0] = (int *)malloc(sizeof(int )*sampler->max_dim);
+			for(int k = 0 ; k<sampler->max_dim; k++){
+				sampler->history_status[i][0][k] = 1;
+			}
+			for(int k = 1 ; k<sampler->history_length; k ++){
+				sampler->history_status[i][k] = sampler->history_status[i][0];
+			}
 		}
 
-		sampler->step_prob[i] = (double *)malloc(sizeof(double)*4);
-		sampler->prob_boundaries[i] = (double *)malloc(sizeof(double)*4);
+		sampler->step_prob[i] = (double *)malloc(sizeof(double)*sampler->types_of_steps);
+		sampler->prob_boundaries[i] = (double *)malloc(sizeof(double)*sampler->types_of_steps);
 		sampler->de_primed[i] = false;
 		sampler->current_hist_pos[i] = 0;
 		sampler->fish_accept_ct[i]=0;
@@ -948,7 +959,6 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->de_last_reject_ct[i] = 0.;
 
 		//Initial width size for all chains, all steps is 1.
-		//for(int j=0; j<sampler->types_of_steps;j++)
 		sampler->randgauss_width[i][0]=.01;
 		sampler->randgauss_width[i][1]=.05;
 		sampler->randgauss_width[i][2]=.05;
@@ -1035,12 +1045,18 @@ void deallocate_sampler_mem(sampler *sampler)
 		deallocate_3D_array(sampler->history_status,sampler->chain_N, sampler->history_length, sampler->max_dim);
 	}
 	else{
-		free(sampler->param_status[0][0]);
-		free(sampler->param_status[0]);
+		for(int j = 0; j<sampler->chain_N; j++){
+			free(sampler->param_status[j][0]);
+			free(sampler->param_status[j]);
+		}
 		free(sampler->param_status);
+		for(int j = 0; j<sampler->chain_N; j++){
+			free(sampler->history_status[j][0]);
+			free(sampler->history_status[j]);
+		}
+		free(sampler->history_status);
 	}
 	free(sampler->ref_chain_status);
-	//gsl_rng_free(sampler->r);
 	
 
 	//Trouble shooting
@@ -1420,6 +1436,7 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 		}
 		for(int j =0; j<sampler->max_dim;j++){
 			checkfile<<" , "<<sampler->param_status[i][pos][j];
+			//std::cout<<sampler->param_status[i][pos][j]<<std::endl;
 		}
 		checkfile<<std::endl;
 	}
@@ -1502,8 +1519,9 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		sampler->min_dim = std::stod(item);
 		std::getline(lineStream, item, ',');
 		sampler->max_dim = std::stod(item);
-		if(sampler->min_dim == sampler->max_dim)
+		if(sampler->min_dim == sampler->max_dim){
 			sampler->dimension=sampler->min_dim;
+		}
 		std::getline(lineStream, item, ',');
 		sampler->chain_N = std::stod(item);
 
@@ -1538,7 +1556,9 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreampos(line);
-			while(i<sampler->max_dim && std::getline(lineStreampos, item, ',')){
+			//while(i<sampler->max_dim && std::getline(lineStreampos, item, ',')){
+			while(i<sampler->max_dim  ){
+				std::getline(lineStreampos, item, ',');
 				sampler->output[j][0][i] = std::stod(item);
 				i++;
 			}
@@ -1755,6 +1775,32 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	sampler_new->fisher_exist = sampler_old->fisher_exist;
 	sampler_new->progress = sampler_old->progress;
 
+	//TODO
+	//Need to populate the temps first, needed for allocation...
+	for(int i = 0 ; i<sampler_old->chain_N; i++){
+		sampler_new->chain_temps[i] = sampler_old->chain_temps[i];
+	}
+	for(int i = sampler_old->chain_N ; i<sampler_new->chain_N; i++){
+		if(chain_allocation_scheme=="cold"){
+			sampler_new->chain_temps[i] = sampler_old->chain_temps[0];
+		}
+		else if(chain_allocation_scheme=="double"){
+			sampler_new->chain_temps[i] = sampler_old->chain_temps[i%sampler_old->chain_N];
+		}
+		else if(chain_allocation_scheme=="refine"){
+			double prev_temp = sampler_old->chain_temps[i%sampler_old->chain_N];
+			double next_temp = sampler_old->chain_temps[(i+1)%sampler_old->chain_N];
+			sampler_new->chain_temps[i] = std::sqrt(prev_temp*next_temp);
+		}
+		else if(chain_allocation_scheme=="refine"){
+			double prev_temp = sampler_old->chain_temps[i%sampler_old->chain_N];
+			double next_temp = sampler_old->chain_temps[(i+1)%sampler_old->chain_N];
+			sampler_new->chain_temps[i] = std::sqrt(prev_temp*next_temp);
+		}
+		else if(chain_allocation_scheme=="half_ensemble"){
+			sampler_new->chain_temps[i] = 10;	
+		}
+	}
 	allocate_sampler_mem(sampler_new);
 
 
