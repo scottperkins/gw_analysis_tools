@@ -1396,7 +1396,7 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 	std::ofstream checkfile;
 	checkfile.open(filename);
 	checkfile.precision(15);
-	checkfile<<sampler->dimension<<" , "<<sampler->chain_N<<std::endl;//Dim, chain_N
+	checkfile<<sampler->min_dim<<" , "<<sampler->max_dim<<" , "<<sampler->chain_N<<std::endl;//Dim, chain_N
 	//Chain temps
 	checkfile<<sampler->chain_temps[0];
 	for(int i =1 ; i<sampler->chain_N; i++){
@@ -1415,8 +1415,11 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 	for(int i =0 ; i< sampler->chain_N; i++){
 		int pos = sampler->chain_pos[i];
 		checkfile<<sampler->output[i][pos][0];
-		for(int j =1; j<sampler->dimension;j++){
+		for(int j =1; j<sampler->max_dim;j++){
 			checkfile<<" , "<<sampler->output[i][pos][j];
+		}
+		for(int j =0; j<sampler->max_dim;j++){
+			checkfile<<" , "<<sampler->param_status[i][pos][j];
 		}
 		checkfile<<std::endl;
 	}
@@ -1496,7 +1499,11 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		std::getline(file_in,line);
 		std::stringstream lineStream(line);
 		std::getline(lineStream, item, ',');
-		sampler->dimension =sampler->min_dim=sampler->max_dim= std::stod(item);
+		sampler->min_dim = std::stod(item);
+		std::getline(lineStream, item, ',');
+		sampler->max_dim = std::stod(item);
+		if(sampler->min_dim == sampler->max_dim)
+			sampler->dimension=sampler->min_dim;
 		std::getline(lineStream, item, ',');
 		sampler->chain_N = std::stod(item);
 
@@ -1531,8 +1538,13 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreampos(line);
-			while(std::getline(lineStreampos, item, ',')){
+			while(i<sampler->max_dim && std::getline(lineStreampos, item, ',')){
 				sampler->output[j][0][i] = std::stod(item);
+				i++;
+			}
+			i=0;
+			while(std::getline(lineStreampos, item, ',')){
+				sampler->param_status[j][0][i] = std::stod(item);
 				i++;
 			}
 		}
@@ -1725,6 +1737,8 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	sampler_new->fish = sampler_old->fish;
 	sampler_new->N_steps = sampler_old->N_steps;
 	sampler_new->dimension = sampler_old->dimension;
+	sampler_new->min_dim = sampler_old->min_dim;
+	sampler_new->max_dim = sampler_old->max_dim;
 	sampler_new->num_threads = sampler_old->num_threads;
 	sampler_new->numThreads = sampler_old->numThreads;
 	//sampler_new->chain_temps = sampler_old->chain_temps;

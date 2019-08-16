@@ -354,7 +354,9 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//For PT dynamics
 	samplerptr->N_steps = N_steps;
 
-	samplerptr->dimension =samplerptr->min_dim=samplerptr->max_dim= dimension;
+	samplerptr->dimension =dimension;
+	samplerptr->min_dim=dimension;
+	samplerptr->max_dim= dimension;
 	samplerptr->num_threads = numThreads;
 	samplerptr->output =output;
 
