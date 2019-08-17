@@ -40,6 +40,10 @@ public:
 	int *priority;
 	bool *ref_chain_status;
 
+	//Sets the cold chains at higher priority to push them up the queue for
+	//swapping and stepping
+	bool prioritize_cold_chains = true;
+
 	double ***output;
 
 	bool pool;
@@ -47,8 +51,12 @@ public:
 	bool show_progress;
 	int num_threads;
 
+	//NOTE: currently, update the history every step until length is 
+	//reached, then the history is updated every 20th step, always only
+	//keeping history of length history_length (overwrites the list as 
+	//it walks forward when it reaches the end)
 	int history_length=500;
-		int history_update=5;
+	int history_update=5;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;
@@ -69,6 +77,12 @@ public:
 	double ***fisher_vecs;
 	double **fisher_vals;
 	int *fisher_update_ct;
+	//Number of steps to take with the fisher before updating the fisher 
+	//to a new value 
+	//NOTE: if this is too low, detailed balance isn't maintained without 
+	//accounting for the changing fisher (doesn't cancel in MH ratio)
+	//but if the number is high enough, detailed balance is approximately 
+	//kept without calculating second fisher
 	int fisher_update_number=200;
 
 	//log_prior lp;
@@ -124,6 +138,8 @@ public:
 	//RJPTMCMC Parameterts
 	int ***param_status;
 	bool RJMCMC=false;
+	std::function<void(double*,double*,int *,int *,int, int)> rj;
+	
 };
 
 

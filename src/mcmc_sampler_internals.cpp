@@ -25,8 +25,8 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	double alpha = gsl_rng_uniform(sampler->rvec[chain_number]);
 	
 
-	double proposed_param[sampler->dimension];
-	int proposed_status[sampler->dimension];
+	double proposed_param[sampler->max_dim];
+	int proposed_status[sampler->max_dim];
 
 	int step;	
 	//Determine which step to take and calculate proposed coord.
@@ -61,8 +61,8 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 		step = 4;
 	}
 	
-	double current_lp = sampler->lp(current_param, current_status,sampler->dimension, chain_number);
-	double proposed_lp = sampler->lp(proposed_param,proposed_status, sampler->dimension, chain_number);
+	double current_lp = sampler->lp(current_param, current_status,sampler->max_dim, chain_number);
+	double proposed_lp = sampler->lp(proposed_param,proposed_status, sampler->max_dim, chain_number);
 	double current_ll=0, proposed_ll=0;
 	double MH_ratio;
 	double power;
@@ -75,7 +75,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	else{
 		//Calculate log_likelihood and log prior
 		current_ll = sampler->current_likelihoods[chain_number];
-		proposed_ll = sampler->ll(proposed_param, proposed_status,sampler->dimension,chain_number);
+		proposed_ll = sampler->ll(proposed_param, proposed_status,sampler->max_dim,chain_number);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 		//Calculate MH ratio
 		if(std::isnan(proposed_ll)){
@@ -90,7 +90,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
 	if(MH_ratio< beta){
-		for ( i=0;i<sampler->dimension; i ++)
+		for ( i=0;i<sampler->max_dim; i ++)
 		{
 			next_param[i] = current_param[i];
 			next_status[i] = current_status[i];
@@ -100,7 +100,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	}	
 	else
 	{
-		for ( i=0;i<sampler->dimension; i ++)
+		for ( i=0;i<sampler->max_dim; i ++)
 		{
 			next_param[i] = proposed_param[i];
 			next_status[i] = proposed_status[i];
@@ -127,7 +127,7 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	//double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
 	//double alpha = .0005;
 	double alpha = sampler->randgauss_width[chain_id][0];
-	for (i=0;i<sampler->dimension;i++){
+	for (i=0;i<sampler->max_dim;i++){
 		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
 		proposed_status[i] = current_status[i];
 	}
@@ -151,7 +151,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	sampler->fisher_update_ct[chain_index] += 1;
 	
 	//beta determines direction to step in eigen directions
-	int beta = (int)((sampler->dimension)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+	int beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 	
 	double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
 				 sampler->randgauss_width[chain_index][3]);
@@ -164,7 +164,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 				sampler->chain_temps[chain_index];}
 	//Take step
-	for(int i =0; i< sampler->dimension;i++)
+	for(int i =0; i< sampler->max_dim;i++)
 	{
 		proposed_param[i] = current_param[i] +
 			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
@@ -177,23 +177,23 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 void update_fisher(sampler *sampler, double *current_param, int *param_status, int chain_index)
 {
 	//Fisher calculation
-	double **fisher=(double **)malloc(sizeof(double*)*sampler->dimension);	
-	for (int i =0; i<sampler->dimension;i++){
-		fisher[i] = (double*)malloc(sizeof(double)*sampler->dimension);
+	double **fisher=(double **)malloc(sizeof(double*)*sampler->max_dim);	
+	for (int i =0; i<sampler->max_dim;i++){
+		fisher[i] = (double*)malloc(sizeof(double)*sampler->max_dim);
 	}
-	sampler->fish(current_param, param_status,sampler->dimension, fisher,chain_index);
+	sampler->fish(current_param, param_status,sampler->max_dim, fisher,chain_index);
 
 	//Convert to 1D array for Eigen
-	double *oneDfisher=(double *)malloc(sizeof(double)*sampler->dimension*sampler->dimension);
-	for (int i =0; i<sampler->dimension;i++){
-		for (int j = 0; j<sampler->dimension; j++){
-			oneDfisher[sampler->dimension*i+j] = fisher[i][j];///
+	double *oneDfisher=(double *)malloc(sizeof(double)*sampler->max_dim*sampler->max_dim);
+	for (int i =0; i<sampler->max_dim;i++){
+		for (int j = 0; j<sampler->max_dim; j++){
+			oneDfisher[sampler->max_dim*i+j] = fisher[i][j];///
 		}
 		
 	}
 	
 	//Find eigen vectors and eigen values
-	Eigen::Map<Eigen::MatrixXd> m(oneDfisher,sampler->dimension,sampler->dimension);
+	Eigen::Map<Eigen::MatrixXd> m(oneDfisher,sampler->max_dim,sampler->max_dim);
  	Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(m);
  	Eigen::MatrixXd eigen_vecs = eigensolver.eigenvectors();
  	Eigen::VectorXd eigen_vals = eigensolver.eigenvalues();
@@ -206,15 +206,15 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	//To see impact of nans, variable is stored in sampler->nan_counter
 	//##############################################################
 	int nansum = 0;
-	for(int j = 0 ; j<sampler->dimension; j++){
-		for(int i =0; i<sampler->dimension; i++)
+	for(int j = 0 ; j<sampler->max_dim; j++){
+		for(int i =0; i<sampler->max_dim; i++)
 			nansum+= std::isnan(eigen_vecs.col(j)(i));	
 		nansum+= std::isnan(eigen_vals(j));
 	}
 	if(!nansum){
-		for (int i =0; i < sampler-> dimension; i++)
+		for (int i =0; i < sampler-> max_dim; i++)
 		{
-			for(int j = 0; j<sampler->dimension; j++)
+			for(int j = 0; j<sampler->max_dim; j++)
 			{
 				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
 			}
@@ -227,7 +227,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		sampler->nan_counter[chain_index]+=1;
 	}
 
-	for (int i =0; i<sampler->dimension;i++){
+	for (int i =0; i<sampler->max_dim;i++){
 		free(fisher[i]);
 	}
 	free(fisher);
@@ -312,7 +312,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 			j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
 		}while(j==i);
 
-		for(int k = 0 ; k <sampler->dimension; k++){
+		for(int k = 0 ; k <sampler->max_dim; k++){
 			eff_history_coord[k] = sampler->history[chain_id][i][k];
 			eff_history_coord2[k] = sampler->history[chain_id][j][k];
 			eff_history_status[k] = sampler->param_status[chain_id][0][k];
@@ -403,6 +403,10 @@ void RJ_smooth_history(sampler *sampler, /**<Current sampler */
 
 }
 
+/*! \brief RJ-proposal step for trans-dimensional MCMCs
+ *
+ * This extra step may seem unnecessary, I'm just adding it in in case the extra flexibility is useful in the future for preprocessing of the chain before sending it to the user's RJ_proposal
+ */
 void RJ_step(sampler *sampler, /**< sampler*/
 	double *current_param, /**< current coordinates in parameter space*/
 	double *proposed_param, /**<[out] Proposed coordinates in parameter space*/
@@ -411,7 +415,7 @@ void RJ_step(sampler *sampler, /**< sampler*/
 	int chain_number/**< chain mumber*/
 	)
 {
-
+	sampler->rj(current_param, proposed_param, current_status, proposed_status, sampler->max_dim,chain_number);
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
@@ -480,8 +484,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	}	
 	else
 	{
-		double temp[sampler->dimension];
-		for(int i =0; i < sampler->dimension;i++)
+		double temp[sampler->max_dim];
+		for(int i =0; i < sampler->max_dim;i++)
 		{
 			temp[i] = chain1[i];
 			chain1[i] = chain2[i];
@@ -627,7 +631,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	samplerptr_dest->chain_pos[id_dest] = samplerptr_source->chain_pos[id_source];
 	if(transfer_output){
 		for(int i =0 ;i <=samplerptr_dest->chain_pos[id_dest]; i++){
-			for(int j =0; j<samplerptr_dest->dimension; j++){
+			for(int j =0; j<samplerptr_dest->max_dim; j++){
 				samplerptr_dest->output[id_dest][i][j] = 
 					samplerptr_source->output[id_source][i][j];
 				//Might only need to do this for RJMCMC
@@ -648,7 +652,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	//If History not filled, only copy over till current pos
 	if(!samplerptr_dest->de_primed[id_dest]){
 		for(int i =0 ;i <=samplerptr_dest->current_hist_pos[id_dest]; i++){
-			for(int j =0; j<samplerptr_dest->dimension; j++){
+			for(int j =0; j<samplerptr_dest->max_dim; j++){
 				samplerptr_dest->history[id_dest][i][j] = 
 					samplerptr_source->history[id_source][i][j];
 			}
@@ -657,7 +661,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	//Else, copy over whole history
 	else{
 		for(int i =0 ;i <samplerptr_dest->history_length; i++){
-			for(int j =0; j<samplerptr_dest->dimension; j++){
+			for(int j =0; j<samplerptr_dest->max_dim; j++){
 				samplerptr_dest->history[id_dest][i][j] = 
 					samplerptr_source->history[id_source][i][j];
 			}
@@ -704,8 +708,8 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	}
 	//Fisher
 	if(samplerptr_dest->fisher_exist){
-		for (int i =0 ; i<samplerptr_source->dimension; i++){
-			for (int j =0 ; i<samplerptr_source->dimension; i++){
+		for (int i =0 ; i<samplerptr_source->max_dim; i++){
+			for (int j =0 ; i<samplerptr_source->max_dim; i++){
 				samplerptr_dest->fisher_vecs[id_dest][i][j] = 
 					samplerptr_source->fisher_vecs[id_source][i][j];
 			}
@@ -891,7 +895,7 @@ void allocate_sampler_mem(sampler *sampler)
 		}
 		else{
 			sampler->param_status[i] = (int **)malloc(sizeof(int *)*sampler->N_steps);
-			sampler->param_status[i][0] = (int *)malloc(sizeof(int )*sampler->dimension);
+			sampler->param_status[i][0] = (int *)malloc(sizeof(int )*sampler->max_dim);
 			for(int k = 0 ; k<sampler->max_dim; k++){
 				sampler->param_status[i][0][k] = 1;
 			}
@@ -968,10 +972,10 @@ void allocate_sampler_mem(sampler *sampler)
 
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
-				sampler->history_length, sampler->dimension);
+				sampler->history_length, sampler->max_dim);
 	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 
-				sampler->dimension, sampler->dimension);
-	sampler->fisher_vals = allocate_2D_array(sampler->chain_N, sampler->dimension);
+				sampler->max_dim, sampler->max_dim);
+	sampler->fisher_vals = allocate_2D_array(sampler->chain_N, sampler->max_dim);
 	
 
 	//Trouble Shooting:
@@ -1023,9 +1027,9 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->priority);
 
 	deallocate_3D_array(sampler->history,sampler->chain_N, 
-				sampler->history_length, sampler->dimension);
-	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->dimension, sampler->dimension);
-	deallocate_2D_array(sampler->fisher_vals, sampler->chain_N, sampler->dimension);
+				sampler->history_length, sampler->max_dim);
+	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->max_dim, sampler->max_dim);
+	deallocate_2D_array(sampler->fisher_vals, sampler->chain_N, sampler->max_dim);
  
 	free(sampler->fisher_update_ct);
 	free(sampler->rvec);
@@ -1077,7 +1081,7 @@ void update_history(sampler *sampler, double *new_params, int *new_param_status,
 	{
 		sampler->current_hist_pos[chain_index] = 0;
 	}
-	for (int i =0; i < sampler->dimension; i++)
+	for (int i =0; i < sampler->max_dim; i++)
 	{
 		sampler->history[chain_index][sampler->current_hist_pos[chain_index]][i] =
 			new_params[i];
@@ -1451,11 +1455,11 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 		
 		for(int i =0 ; i<sampler->chain_N; i++){
 			checkfile<<sampler->history[i][0][0];
-			for (int j = 1 ; j<sampler->dimension; j++){
+			for (int j = 1 ; j<sampler->max_dim; j++){
 				checkfile<<" , "<<sampler->history[i][0][j];
 			}
 			for(int k=1; k<sampler->history_length; k++){
-				for (int j = 0 ; j<sampler->dimension; j++){
+				for (int j = 0 ; j<sampler->max_dim; j++){
 
 					checkfile<<" , "<<sampler->history[i][k][j];
 				}
@@ -1577,8 +1581,8 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 				std::stringstream lineStreamhist(line);
 				i=0;
 				while(std::getline(lineStreamhist,item,',')){	
-					int step = i/sampler->dimension ;
-					int pos = i%sampler->dimension;
+					int step = i/sampler->max_dim ;
+					int pos = i%sampler->max_dim;
 					sampler->history[j][step][pos] = std::stod(item);	
 					i++;
 				}
@@ -1618,7 +1622,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 	if(!seeding_var){ 
 		for (int j=0;j<samplerptr->chain_N;j++){
 			samplerptr->de_primed[j]=false;
-			for (int i = 0; i<samplerptr->dimension; i++)
+			for (int i = 0; i<samplerptr->max_dim; i++)
 			{
 				//Only doing this last loop because there is sometimes ~5 elements 
 				//not initialized on the end of the output, which screw up plotting
@@ -1629,18 +1633,18 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 				
 			}
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j)/samplerptr->chain_temps[j];
 		}
 	}
 	//Seed non-zero chains normally with variance as specified
 	else{
 		int attempts = 0;
 		int max_attempts = 10;
-		double temp_pos[samplerptr->dimension];
+		double temp_pos[samplerptr->max_dim];
 		for (int j=0;j<samplerptr->chain_N;j++){
 			samplerptr->de_primed[j]=false;
 			if(j == 0){
-				for (int i = 0; i<samplerptr->dimension; i++)
+				for (int i = 0; i<samplerptr->max_dim; i++)
 				{
 				//Only doing this last loop because there is sometimes ~5 elements 
 				//not initialized on the end of the output, which screw up plotting
@@ -1652,14 +1656,14 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			}
 			else{
 				do{
-					for(int i =0; i<samplerptr->dimension; i++){
+					for(int i =0; i<samplerptr->max_dim; i++){
 						temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
 					}
 					attempts+=1;
-				}while(samplerptr->lp(temp_pos, initial_status,samplerptr->dimension,j) == limit_inf && attempts<max_attempts);
+				}while(samplerptr->lp(temp_pos, initial_status,samplerptr->max_dim,j) == limit_inf && attempts<max_attempts);
 				attempts =0;
-				if(samplerptr->lp(temp_pos, initial_status,samplerptr->dimension,j) != limit_inf ){
-					for(int i =0; i<samplerptr->dimension;i++){
+				if(samplerptr->lp(temp_pos, initial_status,samplerptr->max_dim,j) != limit_inf ){
+					for(int i =0; i<samplerptr->max_dim;i++){
 						for(int l =0; l<samplerptr->N_steps; l++){
 							samplerptr->output[j][l][i] = temp_pos[i];
 							samplerptr->param_status[j][l][i] = initial_status[i];
@@ -1667,7 +1671,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 					}
 				}
 				else{
-					for(int i =0; i<samplerptr->dimension;i++){
+					for(int i =0; i<samplerptr->max_dim;i++){
 						for(int l =0; l<samplerptr->N_steps; l++){
 							samplerptr->output[j][l][i] = initial_pos[i];
 							samplerptr->param_status[j][l][i] = initial_status[i];
@@ -1678,7 +1682,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			}
 			
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j)/samplerptr->chain_temps[j];
 		}
 	}
 }
