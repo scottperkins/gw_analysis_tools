@@ -531,7 +531,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=0.;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
-			sampler->step_prob[chain_index][4]=.2;
 		}
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
@@ -591,8 +590,13 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
 			
-			sampler->step_prob[chain_index][0]=.1;
-			sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.0;
+			//sampler->step_prob[chain_index][4]=.2;
+			sampler->step_prob[chain_index][0]=.8;
+			sampler->step_prob[chain_index][1]=.0;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
 			sampler->step_prob[chain_index][4]=.2;
