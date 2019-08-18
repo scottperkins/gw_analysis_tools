@@ -85,7 +85,6 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
 		}
 	}
-
 	int i;
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
@@ -123,12 +122,16 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
-	int i ;
 	//double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
 	//double alpha = .0005;
 	double alpha = sampler->randgauss_width[chain_id][0];
-	for (i=0;i<sampler->max_dim;i++){
-		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
+	for (int i=0;i<sampler->max_dim;i++){
+		if(current_status[i] == 1){
+			proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
+		}
+		else{
+			proposed_param[i] = 0;
+		}
 		proposed_status[i] = current_status[i];
 	}
 }
@@ -332,8 +335,13 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	{
 //		proposed_param[k] = current_param[k] + alpha*
 			//(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
-		proposed_param[k] = current_param[k] + alpha *
-			(eff_history_coord[k] - eff_history_coord2[k]);
+		if(current_status[k] == 1){
+			proposed_param[k] = current_param[k] + alpha *
+				(eff_history_coord[k] - eff_history_coord2[k]);
+		}
+		else{
+			proposed_param[k] = 0;
+		}
 		proposed_status[k]=eff_history_status[k];
 	}
 	delete [] eff_history_coord;
@@ -867,7 +875,7 @@ void allocate_sampler_mem(sampler *sampler)
 
 	//RJ parameters -- initialize status array with 1's for now, then repopulate with initial position
 	if(sampler->RJMCMC){
-		sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->max_dim);	
+		//sampler->param_status = allocate_3D_array_int(sampler->chain_N, sampler->N_steps,sampler->max_dim);	
 		sampler->history_status = allocate_3D_array_int(sampler->chain_N, sampler->history_length,sampler->max_dim);	
 	}
 	else{
@@ -889,9 +897,9 @@ void allocate_sampler_mem(sampler *sampler)
 		}
 		//initial value set to one's
 		if(sampler->RJMCMC){
-			for(int j = 0 ; j< sampler->max_dim ;j ++){
-				sampler->param_status[i][0][j] = 1;
-			}
+			//for(int j = 0 ; j< sampler->max_dim ;j ++){
+			//	sampler->param_status[i][0][j] = 1;
+			//}
 		}
 		else{
 			sampler->param_status[i] = (int **)malloc(sizeof(int *)*sampler->N_steps);
@@ -1045,7 +1053,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
 	if(sampler->RJMCMC){
-		deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->max_dim);
+		//deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->max_dim);
 		deallocate_3D_array(sampler->history_status,sampler->chain_N, sampler->history_length, sampler->max_dim);
 	}
 	else{

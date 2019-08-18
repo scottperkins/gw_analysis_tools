@@ -15,6 +15,7 @@
 #include <queue>
 #include <functional>
 #include <unistd.h>
+#include <fstream>
 
 #ifndef _OPENMP
 #define omp ignore
@@ -270,6 +271,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -296,6 +298,11 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		samplerptr->fisher_exist = true;
 
 	samplerptr->RJMCMC=true;
+
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -351,8 +358,8 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	//############################################################
 	//Write ll lp to file
 	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file("testing/data/mcmc_ll_lp.csv",samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		write_file("testing/data/mcmc_ll_lp_hot.csv",samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
 	}
 	//############################################################
 	//##############################################################
@@ -403,8 +410,23 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	if(statistics_filename != "")
 		write_stat_file(samplerptr, statistics_filename);
 	
-	if(chain_filename != "")
-		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->max_dim);
+	if(chain_filename != ""){
+		std::ofstream out_file;
+		out_file.open(chain_filename);
+		out_file.precision(15);
+		for(int i =0; i<samplerptr->N_steps; i++){
+			for(int j=0; j<samplerptr->max_dim;j++){
+				out_file<<samplerptr->output[0][i][j]<<" , ";
+			}
+			for(int j = 0 ; j<samplerptr->max_dim; j++){
+				if(j==samplerptr->max_dim-1)
+					out_file<<samplerptr->param_status[0][i][j]<<std::endl;
+				else
+					out_file<<samplerptr->param_status[0][i][j]<<" , ";
+			}
+		}
+		out_file.close();
+	}
 
 	if(checkpoint_file !=""){
 		write_checkpoint_file(samplerptr, checkpoint_file);
@@ -460,6 +482,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -479,6 +502,10 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	else 
 		samplerptr->fisher_exist = true;
 	
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -752,6 +779,13 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
 	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
 
+	//############################################################
+	//Write ll lp to file
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	}
+	//############################################################
 	//#################################################################
 	//
 	//Copy sampler to new sampler and run loop, skip checkpoint nonsense
@@ -894,6 +928,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -913,6 +948,10 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	else 
 		samplerptr->fisher_exist = true;
 	
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -966,8 +1005,8 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	//############################################################
 	//Write ll lp to file
 	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file("testing/data/mcmc_ll_lp.csv",samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		write_file("testing/data/mcmc_ll_lp_hot.csv",samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
 	}
 	//############################################################
 	//##############################################################
@@ -1047,6 +1086,7 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	)
 {
@@ -1065,6 +1105,11 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	}
 	else 
 		samplerptr->fisher_exist = true;
+
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
 	
 	
 	//Construct sampler structure
@@ -1114,6 +1159,13 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	samplerptr->time_elapsed_wall = (double)(wend-wstart);
 
 	std::cout<<std::endl;
+	//############################################################
+	//Write ll lp to file
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	}
+	//############################################################
 	
 	//###########################################################
 	//Auto-correlation
@@ -1552,6 +1604,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1573,7 +1626,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	
 	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
-			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
+			statistics_filename, chain_filename, auto_corr_filename,likelihood_log_filename, checkpoint_file);
 }
 void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
@@ -1592,6 +1645,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1611,7 +1665,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	}
 	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, numThreads, pool, show_prog, 
-			statistics_filename, chain_filename, auto_corr_filename, checkpoint_file);
+			statistics_filename, chain_filename, auto_corr_filename,likelihood_log_filename, checkpoint_file);
 }
 void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
@@ -1626,6 +1680,7 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	)
 {
@@ -1657,6 +1712,7 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			statistics_filename,
 			chain_filename,
 			auto_corr_filename,
+			likelihood_log_filename,
 			end_checkpoint_file);
 }
 void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
@@ -1672,6 +1728,7 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	)
 {
@@ -1710,6 +1767,7 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			statistics_filename,
 			chain_filename,
 			auto_corr_filename,
+			likelihood_log_filename,
 			end_checkpoint_file);
 }
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
@@ -1732,6 +1790,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1776,6 +1835,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			show_prog,
 			statistics_filename,
 			chain_filename,
+			likelihood_log_filename,
 			checkpoint_file);
 
 }
@@ -1799,6 +1859,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1836,6 +1897,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			show_prog,
 			statistics_filename,
 			chain_filename,
+			likelihood_log_filename,
 			checkpoint_file);
 
 }
@@ -1860,6 +1922,7 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -1898,5 +1961,6 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		statistics_filename,
 		chain_filename,
 		auto_corr_filename,
+		likelihood_log_filename,
 		checkpoint_file);
 }

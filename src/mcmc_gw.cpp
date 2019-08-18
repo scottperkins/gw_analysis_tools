@@ -856,6 +856,7 @@ void PTMCMC_MH_GW(double ***output,
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string likelihood_log_filename,
 		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 					)
 {
@@ -902,7 +903,7 @@ void PTMCMC_MH_GW(double ***output,
 
 	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
-		chain_filename,auto_corr_filename, checkpoint_file);
+		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
 	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
@@ -947,6 +948,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 			std::string generation_method,
 			std::string statistics_filename,
 			std::string chain_filename,
+			std::string likelihood_log_filename,
 			std::string checkpoint_filename
 			)
 {
@@ -997,7 +999,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 		swp_freq, t0, nu, chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
 		show_prog,statistics_filename,
-		chain_filename, checkpoint_filename);
+		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
@@ -1038,6 +1040,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			std::string statistics_filename,
 			std::string chain_filename,
 			std::string auto_corr_filename,
+			std::string likelihood_log_filename,
 			std::string final_checkpoint_filename
 			)
 {
@@ -1082,7 +1085,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	continue_PTMCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
 			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
 			show_prog,statistics_filename,chain_filename,
-			auto_corr_filename, final_checkpoint_filename);
+			auto_corr_filename, likelihood_log_filename,final_checkpoint_filename);
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
 		deallocate_FFTW_mem(&plans[i]);

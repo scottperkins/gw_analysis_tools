@@ -213,6 +213,7 @@ void PTMCMC_MH_GW(double ***output,
 			std::string statistics_filename,
 			std::string chain_filename,
 			std::string auto_corr_filename,
+			std::string likelihood_log_filename,
 			std::string checkpoint_filename
 			);
 void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
@@ -243,6 +244,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 			std::string generation_method,
 			std::string statistics_filename,
 			std::string chain_filename,
+			std::string likelihood_log_filename,
 			std::string checkpoint_filename
 			);
 void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
@@ -267,6 +269,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			std::string statistics_filename,
 			std::string chain_filename,
 			std::string auto_corr_filename,
+			std::string likelihood_log_filename,
 			std::string final_checkpoint_filename
 			);
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
