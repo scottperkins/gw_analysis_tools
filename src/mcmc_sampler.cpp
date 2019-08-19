@@ -1270,7 +1270,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 							samplerptr->lp(
 							samplerptr->output[j][sampler->chain_pos[j]],
 							samplerptr->param_status[j][sampler->chain_pos[j]],
-							samplerptr->dimension, j);
+							samplerptr->max_dim, j);
 					}
 					//Update step-widths to optimize acceptance ratio
 					update_step_widths(samplerptr, j);
@@ -1425,7 +1425,7 @@ void PTMCMC_MH_loop(sampler *sampler)
 							samplerptr->lp(
 							samplerptr->output[j][k+i+1],
 							samplerptr->param_status[j][k+i+1],
-							samplerptr->dimension, j);
+							samplerptr->max_dim, j);
 					}
 					//Update step-widths to optimize acceptance ratio
 					update_step_widths(samplerptr, j);
@@ -1481,7 +1481,7 @@ void PTMCMC_MH_loop(sampler *sampler)
 						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
 						sampler->priority[i] = 2;
 						int pos = sampler->chain_pos[i];
-						for (int k =0; k<sampler->dimension; k++){
+						for (int k =0; k<sampler->max_dim; k++){
 							sampler->output[i][0][k] = 
 								sampler->output[i][pos][k] ;
 							sampler->param_status[i][0][k] = 
@@ -1541,7 +1541,7 @@ void mcmc_step_threaded(int j)
 			samplerptr->ll_lp_output[j][k+i+1][1]= 
 				samplerptr->lp(samplerptr->output[j][k+i+1],
 				samplerptr->param_status[j][k+i+1],
-				samplerptr->dimension, j);
+				samplerptr->max_dim, j);
 		}
 		//##############################################################
 	}

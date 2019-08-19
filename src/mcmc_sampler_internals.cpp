@@ -290,9 +290,9 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		//beyond min_dim are indepent, but if the affects are indeed small, the benefit 
 		//of DE should still be recovered (this is only a proposal, after all)
 		if(sampler->min_dim != 0){
-			RJ_smooth_history(sampler, current_status, i, eff_history_coord, 
+			RJ_smooth_history(sampler, current_param,current_status, i, eff_history_coord, 
 				eff_history_status,chain_id);
-			RJ_smooth_history(sampler, current_status, j, eff_history_coord2, 
+			RJ_smooth_history(sampler, current_param, current_status, j, eff_history_coord2, 
 				eff_history_status2,chain_id);
 		}
 		//For models that are composed of discrete models (ie model A or B 
@@ -351,6 +351,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 }
 
 void RJ_smooth_history(sampler *sampler, /**<Current sampler */
+	double *current_param,/**<Current parameters to match*/
 	int *current_param_status,/**<Current parameters to match*/
 	int base_history_id, /**<Original history element*/
 	double *eff_history_coord, /**<[out] Modified history coord*/
@@ -362,16 +363,27 @@ void RJ_smooth_history(sampler *sampler, /**<Current sampler */
 	int *bad_ids = new int[sampler->max_dim-sampler->min_dim];
 	int id_count = 0;
 	for (int j = sampler->min_dim ; j<sampler->max_dim; j++){
-		if(current_param_status[j] != sampler->history_status[chain_id][base_history_id][j]){
+		//if(current_param_status[j] != sampler->history_status[chain_id][base_history_id][j]){
+		if(current_param_status[j] == 1 
+			&& sampler->history_status[chain_id][base_history_id][j] != 1){
+
 			bad_ids[id_count] = j;	
 			id_count++;
 		}
 	}
+	//Copy over all history params, even if they are zero to ensure no memory errors
 	for(int j = 0 ; j<sampler->max_dim; j ++){
-		eff_history_coord[j] = sampler->history[chain_id][base_history_id][j];
-		eff_history_status[j] = sampler->history_status[chain_id][base_history_id][j];
+		if(current_param_status[j] == 1 ){
+			eff_history_coord[j] = sampler->history[chain_id][base_history_id][j];
+			eff_history_status[j] = 1;
+		}
+		else{
+			eff_history_coord[j] =0;
+			eff_history_status[j] =0;
+		}
 
 	}
+	//Go back, and overwrite the params not part of the history params
 	int min_dev_id = 0;
 	double min_dev = 0;
 	double current_dev = 0;
@@ -379,7 +391,7 @@ void RJ_smooth_history(sampler *sampler, /**<Current sampler */
 	//For each bad_id, loop through history and find the smallest deviation
 	for(int k = 0 ; k<id_count; k++){
 		for(int l = 0 ; l<sampler->history_length; l++){
-			if(sampler->history_status[chain_id][k][bad_ids[k]]==1){
+			if(sampler->history_status[chain_id][l][bad_ids[k]]==1){
 				for(int j=0 ;j<sampler->min_dim; j++){
 						current_dev+= (sampler->history[chain_id][l][j] - sampler->history[chain_id][base_history_id][j])/sampler->history[chain_id][base_history_id][j];
 				}
@@ -396,12 +408,15 @@ void RJ_smooth_history(sampler *sampler, /**<Current sampler */
 					}
 				}
 			}
+			current_dev = 0 ;
 		}
 		if(at_least_one){
 			eff_history_coord[k] = sampler->history[chain_id][min_dev_id][k];
 		}
 		else{
 			//Gaussian step for this dimension
+			double alpha = gsl_ran_gaussian(sampler->rvec[chain_id],1);
+			eff_history_coord[k] = alpha+current_param[k];
 		}
 		at_least_one = false;
 	}
@@ -493,11 +508,15 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	else
 	{
 		double temp[sampler->max_dim];
+		int tempstat[sampler->max_dim];
 		for(int i =0; i < sampler->max_dim;i++)
 		{
 			temp[i] = chain1[i];
+			tempstat[i] = chain1_status[i];
 			chain1[i] = chain2[i];
+			chain1_status[i] = chain2_status[i];
 			chain2[i]=temp[i];
+			chain2_status[i]=tempstat[i];
 		}
 		double templl = sampler->current_likelihoods[T1_index];
 		sampler->current_likelihoods[T1_index] = 
@@ -590,16 +609,16 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
 			
-			//sampler->step_prob[chain_index][0]=.1;
-			//sampler->step_prob[chain_index][1]=.7;
-			//sampler->step_prob[chain_index][2]=.0;
-			//sampler->step_prob[chain_index][3]=.0;
-			//sampler->step_prob[chain_index][4]=.2;
-			sampler->step_prob[chain_index][0]=.8;
-			sampler->step_prob[chain_index][1]=.0;
+			sampler->step_prob[chain_index][0]=.1;
+			sampler->step_prob[chain_index][1]=.7;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
 			sampler->step_prob[chain_index][4]=.2;
+			//sampler->step_prob[chain_index][0]=.8;
+			//sampler->step_prob[chain_index][1]=.0;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.0;
+			//sampler->step_prob[chain_index][4]=.2;
 
 		}
 		//all methods available
@@ -1097,6 +1116,8 @@ void update_history(sampler *sampler, double *new_params, int *new_param_status,
 	{
 		sampler->history[chain_index][sampler->current_hist_pos[chain_index]][i] =
 			new_params[i];
+		sampler->history_status[chain_index][sampler->current_hist_pos[chain_index]][i] =
+			new_param_status[i];
 	}
 		
 
