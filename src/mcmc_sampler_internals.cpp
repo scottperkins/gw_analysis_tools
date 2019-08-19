@@ -1149,6 +1149,7 @@ void write_stat_file(sampler *sampler,
 	
 	std::ofstream out_file;
 	out_file.open(filename);	
+	out_file.precision(4);
 	//File variables
 	int width= 80;
 	int third = (int)((double)width/3.);
@@ -1157,15 +1158,19 @@ void write_stat_file(sampler *sampler,
 	int fifth = (int)((double)width/5.);
 	int sixth = (int)((double)width/6.);
 	int seventh = (int)((double)width/7.);
+	int eighth = (int)((double)width/8.);
+	int sixteenth = (int)((double)width/16.);
 	
 	//Sampler parameters
 	out_file<<std::setw(width)<<std::left<<
 		"Parameters of sampler: "<<std::endl;	
 	out_file<<
-		std::setw(fourth)<<std::left<<
-		"Dimension: "<<
-		std::setw(fourth)<<std::left<<
-		sampler->dimension<<
+		std::setw(eighth)<<std::left<<
+		"Max/Min dimension: "<<
+		std::setw(sixteenth)<<std::left<<
+		sampler->max_dim<<
+		std::setw(sixteenth)<<std::left<<
+		sampler->min_dim<<
 		std::setw(fourth)<<std::left<<
 		"Length of History: "<<
 		std::setw(fourth)<<std::left<<
@@ -1233,16 +1238,18 @@ void write_stat_file(sampler *sampler,
 		std::endl;
 	out_file<<
 		std::setw(width)<<std::left<<
-		"Probabilities of steps (Gaussian, DE, MMALA, FISHER): "<<std::endl;
+		"Probabilities of steps (Gaussian, DE, MMALA, FISHER, RJ): "<<std::endl;
 	out_file<<
-		std::setw(fourth)<<std::left<<
+		std::setw(fifth)<<std::left<<
 		sampler->step_prob[0][0]<<
-		std::setw(fourth)<<std::left<<
+		std::setw(fifth)<<std::left<<
 		sampler->step_prob[0][1]<<
-		std::setw(fourth)<<std::left<<
+		std::setw(fifth)<<std::left<<
 		sampler->step_prob[0][2]<<
-		std::setw(fourth)<<std::left<<
+		std::setw(fifth)<<std::left<<
 		sampler->step_prob[0][3]<<
+		std::setw(fifth)<<std::left<<
+		sampler->step_prob[0][4]<<
 		std::endl;
 	out_file<<std::endl;
 
@@ -1275,31 +1282,35 @@ void write_stat_file(sampler *sampler,
 		std::setw(width)<<std::left<<
 		"Fraction of steps per type : "<<std::endl;
 	out_file<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Chain Number"<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Gaussian"<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Diff. Ev."<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"MMALA"<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Fisher"<<
+		std::setw(sixth)<<std::left<<
+		"RJ"<<
 		std::endl;
 	for (int i =0; i < sampler->chain_N; i++){	
 	 	total_step_type= sampler->num_gauss[i]+sampler->num_mmala[i]+
 				sampler->num_de[i]+sampler->num_fish[i];
 		out_file<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			i<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->num_gauss[i]/total_step_type<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->num_de[i]/total_step_type<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->num_mmala[i]/total_step_type<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->num_fish[i]/total_step_type<<
+			std::setw(sixth)<<std::left<<
+			(double)sampler->num_RJstep[i]/total_step_type<<
 			std::endl;
 		
 	}
@@ -1310,29 +1321,33 @@ void write_stat_file(sampler *sampler,
 		std::setw(width)<<std::left<<
 		"Final width of Gaussian random number per step type: "<<std::endl;
 	out_file<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Chain Number"<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Gaussian"<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Diff. Ev."<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"MMALA"<<
-		std::setw(fifth)<<std::left<<
+		std::setw(sixth)<<std::left<<
 		"Fisher"<<
+		std::setw(sixth)<<std::left<<
+		"RJ"<<
 		std::endl;
 	for (int i =0; i < sampler->chain_N; i++){	
 		out_file<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			i<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->randgauss_width[i][0]<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->randgauss_width[i][1]<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->randgauss_width[i][2]<<
-			std::setw(fifth)<<std::left<<
+			std::setw(sixth)<<std::left<<
 			(double)sampler->randgauss_width[i][3]<<
+			std::setw(sixth)<<std::left<<
+			(double)sampler->randgauss_width[i][4]<<
 			std::endl;
 		
 	}
@@ -1347,12 +1362,13 @@ void write_stat_file(sampler *sampler,
 	out_file.width(width);
 	
 	out_file<<
-		std::left<<std::setw(sixth)<<"Chain ID"<<
-		std::setw(sixth)<<std::left<<"GAUSS"<<
-		std::setw(sixth)<<std::left<<"Diff Ev"<<
-		std::setw(sixth)<<std::left<<"MMALA"<<
-		std::setw(sixth)<<std::left<<"Fisher"<<
-		std::setw(sixth)<<std::left<<"Total"<<
+		std::left<<std::setw(seventh)<<"Chain ID"<<
+		std::setw(seventh)<<std::left<<"GAUSS"<<
+		std::setw(seventh)<<std::left<<"Diff Ev"<<
+		std::setw(seventh)<<std::left<<"MMALA"<<
+		std::setw(seventh)<<std::left<<"Fisher"<<
+		std::setw(seventh)<<std::left<<"RJ"<<
+		std::setw(seventh)<<std::left<<"Total"<<
 		std::endl;
 
 	double total ;
@@ -1362,19 +1378,23 @@ void write_stat_file(sampler *sampler,
 	double detotal ;
 	double mmtotal ;
 	double ftotal ;
+	double RJtotal ;
 	double gtotal_total =0;
 	double detotal_total =0;
 	double mmtotal_total =0;
 	double ftotal_total =0;
+	double RJtotal_total =0;
 	double total_total =0;
 	double gacc_frac = 0;
 	double deacc_frac = 0;
 	double mmacc_frac = 0;
 	double facc_frac = 0;
+	double RJacc_frac = 0;
 	double gacc_frac_total = 0;
 	double deacc_frac_total = 0;
 	double mmacc_frac_total = 0;
 	double facc_frac_total = 0;
+	double RJacc_frac_total = 0;
 	double acc_frac_total = 0;
 	for (int i =0; i<sampler->chain_N;i++){
 		//####################################
@@ -1389,6 +1409,9 @@ void write_stat_file(sampler *sampler,
 	
 		ftotal = sampler->fish_accept_ct[i]+sampler->fish_reject_ct[i];
 		facc_frac = (double)sampler->fish_accept_ct[i]/ftotal;
+
+		RJtotal = sampler->RJstep_accept_ct[i]+sampler->RJstep_reject_ct[i];
+		RJacc_frac = (double)sampler->RJstep_accept_ct[i]/ftotal;
 
 		total = accepted_steps[i]+rejected_steps[i];
 		acc_frac = (double)accepted_steps[i]/total;
@@ -1406,24 +1429,29 @@ void write_stat_file(sampler *sampler,
 		ftotal_total += ftotal;
 		facc_frac_total+=(double)sampler->fish_accept_ct[i];
 
+		RJtotal_total += RJtotal;
+		RJacc_frac_total+=(double)sampler->RJstep_accept_ct[i];
+
 		total_total += total;
 		acc_frac_total+=(double)accepted_steps[i];
 		//####################################
-		out_file<<std::left<<std::setw(sixth)<<i<<
-			std::left<<std::setw(sixth)<<gacc_frac<<
-			std::left<<std::setw(sixth)<<deacc_frac<<
-			std::left<<std::setw(sixth)<<mmacc_frac<<
-			std::left<<std::setw(sixth)<<facc_frac<<
-			std::left<<std::setw(sixth)<<acc_frac<<
+		out_file<<std::left<<std::setw(seventh)<<i<<
+			std::left<<std::setw(seventh)<<gacc_frac<<
+			std::left<<std::setw(seventh)<<deacc_frac<<
+			std::left<<std::setw(seventh)<<mmacc_frac<<
+			std::left<<std::setw(seventh)<<facc_frac<<
+			std::left<<std::setw(seventh)<<RJacc_frac<<
+			std::left<<std::setw(seventh)<<acc_frac<<
 			std::endl;
 	}
 	out_file<<
-		std::left<<std::setw(sixth)<<"TOTAL: "<<
-		std::setw(sixth)<<(double)gacc_frac_total/(gtotal_total)<<
-		std::setw(sixth)<<(double)deacc_frac_total/(detotal_total)<<
-		std::setw(sixth)<<(double)mmacc_frac_total/(mmtotal_total)<<
-		std::setw(sixth)<<(double)facc_frac_total/(ftotal_total)<<
-		std::setw(sixth)<<(double)acc_frac_total/(total_total)<<
+		std::left<<std::setw(seventh)<<"TOTAL: "<<
+		std::setw(seventh)<<(double)gacc_frac_total/(gtotal_total)<<
+		std::setw(seventh)<<(double)deacc_frac_total/(detotal_total)<<
+		std::setw(seventh)<<(double)mmacc_frac_total/(mmtotal_total)<<
+		std::setw(seventh)<<(double)facc_frac_total/(ftotal_total)<<
+		std::setw(seventh)<<(double)RJacc_frac_total/(RJtotal_total)<<
+		std::setw(seventh)<<(double)acc_frac_total/(total_total)<<
 		std::endl;
 
 	out_file<<std::endl;	
