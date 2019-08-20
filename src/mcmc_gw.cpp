@@ -808,6 +808,115 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	//std::cout<<"inner products not max: "<<DH<<" "<<HH<<std::endl;
 	return -0.5*(HH- 2*DH);
 }
+/*! \brief Wrapper for the RJPTMCMC_MH function, specifically for GW analysis
+ *
+ * Handles the details of setting up the MCMC sampler and wraps the fisher and log likelihood to conform to the format of the sampler
+ *
+ * *NOTE*  -- This sampler as a whole is NOT thread safe. There is global memory declared for each call to MCMC_MH_GW, so separate samplers should not be run in the same process space.
+ *
+ * Supported parameter combinations:
+ *
+ * IMRPhenomD - 8 dimensions --  
+ * 	MIN DIMENSIONS	-- cos inclination, RA, DEC, ln D_L, ln chirpmass, eta, chi1, chi2, 
+ * 	TRANSDIMENSIONAL DIMENSIONS	-- ppE parameters for the bppe array  specified
+ *
+ * If RJ_proposal is NULL, a default proposal is used.
+ */
+void RJPTMCMC_MH_GW(double ***output,
+		int ***status,
+		int max_dim,
+		int min_dim,
+		int N_steps,
+		int chain_N,
+		double *initial_pos,
+		int *initial_status,
+		double *seeding_var,	
+		double *chain_temps,
+		int swp_freq,
+		double(*log_prior)(double *param, int *status, int dimension, int chain_id),
+		void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width),
+		int numThreads,
+		bool pool,
+		bool show_prog,
+		int num_detectors,
+		std::complex<double> **data,
+		double **noise_psd,
+		double **frequencies,
+		int *data_length,
+		double gps_time,
+		std::string *detectors,
+		int Nmod_max,
+		int *bppe,
+		std::string generation_method,
+		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+		std::string likelihood_log_filename,
+		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+					)
+{
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
+	}
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_generation_method = generation_method;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_Nmod_max = Nmod_max;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
+	bool local_seeding ;
+	if(!seeding_var)
+		local_seeding = true;
+	else
+		local_seeding = false;
+	
+	//##################################################################
+	//std::function<void(double*, double*, int*, int*, int, int, double)> RJstep;
+	void (*RJstep)(double *, double *, int *, int *, int, int,double);
+	if(!RJ_proposal){
+		RJstep = RJPTMCMC_RJ_proposal;
+	}
+	else{
+		RJstep = RJ_proposal;
+	}
+	//##################################################################
+	PTMCMC_method_specific_prep(generation_method, max_dim, seeding_var, local_seeding);
+	
+	RJPTMCMC_MH(output, status,max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status,seeding_var, chain_temps, swp_freq,
+		 log_prior,RJPTMCMC_likelihood_wrapper, NULL, RJstep,numThreads, pool, show_prog,statistics_filename,
+		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deallocate_FFTW_mem(&plans[i]);
+	free(plans);
+	if(local_seeding){ delete [] seeding_var;}
+}
 
 /*! \brief Wrapper for the MCMC_MH function, specifically for GW analysis
  *
@@ -2040,7 +2149,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 
 
 
-double MCMC_likelihood_extrinisic(bool save_waveform, gen_params *parameters,std::string generation_method, int *data_length, double **frequencies, std::complex<double> **data, double **psd, std::string *detectors, fftw_outline *fftw_plans, int num_detectors, double RA, double DEC,double gps_time)
+double MCMC_likelihood_extrinsic(bool save_waveform, gen_params *parameters,std::string generation_method, int *data_length, double **frequencies, std::complex<double> **data, double **psd, std::string *detectors, fftw_outline *fftw_plans, int num_detectors, double RA, double DEC,double gps_time)
 {
 	double *phi = new double[num_detectors];
 	double *theta = new double[num_detectors];
@@ -2282,7 +2391,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		
-		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		
 		//save time by reusing intrinisic part of the waveform
 		//if (samelength){
@@ -2439,7 +2548,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		
-		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		
 	}
 	else if(!mcmc_intrinsic && (mcmc_generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
@@ -2538,7 +2647,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		for (int j = 0 ; j<mcmc_Nmod; j++){
 			parameters.betappe[j] = beta[j];
 		}
-		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		delete [] parameters.betappe;
 		
 	}
@@ -2638,7 +2747,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 			parameters.betappe[j] = beta[j];
 		}
 
-		ll =  MCMC_likelihood_extrinisic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		//parameters.Z_DL_spline_ptr = mcmc_splines[chain_id];
 		//parameters.Z_DL_accel_ptr = mcmc_accels[chain_id];
 		
@@ -2766,5 +2875,99 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	//return 2;
 }
 
+double RJPTMCMC_likelihood_wrapper(double *param, 
+	int *status,
+	int max_dim, 
+	int chain_id
+	) 
+{
+	if(!mcmc_intrinsic && mcmc_generation_methdo == "ppE_IMRPhenomD_Inspiral"){
+
+		std::string local_method ;
+		if(mcmc_generation_method == "ppE_IMRPhenomD_Inspiral" || 
+			local_method = "ppE_IMRPhenomD_Inspiral";
+		}
+	//else if(false){	
+		//unpack parameter vector
+		double incl = acos(param[0]);
+		double RA = param[1];
+		double DEC = param[2];
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
+		double eta = param[5];
+		double chi1 = param[6];
+		double chi2 = param[7];
+		double psi = param[8];
+		//double lnalpha2 = param[8];
+		double beta[mcmc_Nmod_max] ;
+		if(mcmc_log_beta){
+			for (int j = 0; j<mcmc_Nmod;j++){
+				beta[j ] = std::exp(param[8+j]);	
+			}
+		}
+		else{
+			for (int j = 0; j<mcmc_Nmod;j++){
+				beta[j ] = param[8+j];	
+			}
+		}
+		if(mcmc_generation_method == "dCS_IMRPhenomD_root_alpha"|| mcmc_generation_method == "EdGB_IMRPhenomD_root_alpha" ){
+			beta[0] = pow(beta[0]/(3.e5),4);
+		}
+		//std::cout.precision(15);
+		//std::cout<<"lnalpha2 "<<lnalpha2<<std::endl;
+		double delta_t = 0;
+		double tc_ref =0;
+		double phic_ref =0;
+	
+		//double *phi = new double[mcmc_num_detectors];
+		//double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, "Hanford", &phi[0], &theta[0]);
+
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = 0;
+		parameters.spin1[1] = 0;
+		parameters.spin1[2] = chi1;
+		parameters.spin2[0] = 0;
+		parameters.spin2[1] = 0;
+		parameters.spin2[2] = chi2;
+		parameters.Luminosity_Distance = DL;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		parameters.phic = 0;
+		parameters.incl_angle = incl;
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		parameters.psi = psi;
+		parameters.Nmod = mcmc_Nmod;
+		parameters.betappe = new double[mcmc_Nmod];
+		parameters.bppe = mcmc_bppe;
+		//parameters.betappe[0] = lnalpha2;
+		for (int j = 0 ; j<mcmc_Nmod; j++){
+			parameters.betappe[j] = beta[j];
+		}
+
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		delete [] parameters.betappe;
+	}
+
+}
+void RJPTMCMC_RJ_proposal(double *current_param, 
+	double *proposed_params, 
+	int *current_status, 
+	int *proposed_status,
+	int max_dim, 
+	int chain_id, 
+	double step_width
+	) 
+{
+
+}
 			
 

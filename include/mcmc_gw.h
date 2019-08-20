@@ -26,6 +26,7 @@ static int mcmc_num_detectors=2;
 static double mcmc_gps_time=0;
 static double mcmc_gmst=0;
 static int mcmc_Nmod;
+static int mcmc_Nmod_max;
 static int *mcmc_bppe;
 static gsl_interp_accel **mcmc_accels = NULL;
 static gsl_spline **mcmc_splines = NULL;
@@ -188,6 +189,38 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			int length,
 			fftw_outline *plan
 			);
+void RJPTMCMC_MH_GW(double ***output,
+		int ***status,
+		int max_dim,
+		int min_dim,
+		int N_steps,
+		int chain_N,
+		double *initial_pos,
+		int *initial_status,
+		double *seeding_var,	
+		double *chain_temps,
+		int swp_freq,
+		double(*log_prior)(double *param, int *status, int dimension, int chain_id),
+		void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width),
+		int numThreads,
+		bool pool,
+		bool show_prog,
+		int num_detectors,
+		std::complex<double> **data,
+		double **noise_psd,
+		double **frequencies,
+		int *data_length,
+		double gps_time,
+		std::string *detectors,
+		int Nmod_max,
+		int *bppe,
+		std::string generation_method,
+		std::string statistics_filename,
+		std::string chain_filename,
+		std::string auto_corr_filename,
+		std::string likelihood_log_filename,
+		std::string checkpoint_file);
+
 void PTMCMC_MH_GW(double ***output,
 			int dimension,
 			int N_steps,
@@ -274,7 +307,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			);
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
 
-double MCMC_likelihood_extrinisic(bool save_waveform, 
+double MCMC_likelihood_extrinsic(bool save_waveform, 
 	gen_params *parameters,
 	std::string generation_method, 
 	int *data_length, 
@@ -289,5 +322,10 @@ double MCMC_likelihood_extrinisic(bool save_waveform,
 	double gps_time);
 
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
+
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
+
+double RJPTMCMC_likelihood_wrapper(double *param, int *status,int max_dim, int chain_id) ;
+
+void RJPTMCMC_RJ_proposal(double *current_param, double *proposed_params, int *current_status, int *proposed_status,int max_dim, int chain_id, double step_width) ;
 #endif
