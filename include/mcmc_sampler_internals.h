@@ -72,6 +72,8 @@ public:
 	int *de_last_reject_ct;
 	int *fish_last_accept_ct;
 	int *fish_last_reject_ct;
+	int *RJstep_last_accept_ct;
+	int *RJstep_last_reject_ct;
 	double **randgauss_width;
 
 	double ***fisher_vecs;
@@ -138,7 +140,8 @@ public:
 	//RJPTMCMC Parameterts
 	int ***param_status;
 	bool RJMCMC=false;
-	std::function<void(double*,double*,int *,int *,int, int)> rj;
+	std::function<void(double*,double*,int *,int *,int, int, int)> rj;
+	bool update_RJ_width=true;
 	
 };
 

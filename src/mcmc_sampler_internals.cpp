@@ -122,8 +122,6 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		int chain_id
 		)
 {
-	//double alpha = gsl_rng_uniform(sampler->rvec[chain_id]);
-	//double alpha = .0005;
 	double alpha = sampler->randgauss_width[chain_id][0];
 	for (int i=0;i<sampler->max_dim;i++){
 		if(current_status[i] == 1){
@@ -438,7 +436,7 @@ void RJ_step(sampler *sampler, /**< sampler*/
 	int chain_number/**< chain mumber*/
 	)
 {
-	sampler->rj(current_param, proposed_param, current_status, proposed_status, sampler->max_dim,chain_number);
+	sampler->rj(current_param, proposed_param, current_status, proposed_status, sampler->max_dim,chain_number, sampler->randgauss_width[chain_number][4]);
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
@@ -840,6 +838,22 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 			samplerptr->fish_last_accept_ct[j]=samplerptr->fish_accept_ct[j];
 			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
 		}	
+		//RJ
+		if(samplerptr->update_RJ_width){
+			if(samplerptr->step_prob[j][4]!= 0){
+				acc = samplerptr->RJstep_accept_ct[j] - samplerptr->RJstep_last_accept_ct[j];	
+				rej = samplerptr->RJstep_reject_ct[j] - samplerptr->RJstep_last_reject_ct[j];	
+				frac = acc / (acc + rej);
+				if(frac<samplerptr->min_target_accept_ratio[j]){
+					samplerptr->randgauss_width[j][4] *=.9;	
+				}
+				else if(frac>samplerptr->max_target_accept_ratio[j]){
+					samplerptr->randgauss_width[j][4] *=1.1;	
+				}
+				samplerptr->RJstep_last_accept_ct[j]=samplerptr->RJstep_accept_ct[j];
+				samplerptr->RJstep_last_reject_ct[j]=samplerptr->RJstep_reject_ct[j];
+			}	
+		}
 		
 	}
 }
@@ -894,6 +908,10 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->fish_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	if(sampler->update_RJ_width){
+		sampler->RJstep_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+		sampler->RJstep_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	}
 	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
 
 	//RJ parameters -- initialize status array with 1's for now, then repopulate with initial position
@@ -992,6 +1010,10 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->fish_last_reject_ct[i] = 0.;
 		sampler->de_last_accept_ct[i] = 0.;
 		sampler->de_last_reject_ct[i] = 0.;
+		if(sampler->update_RJ_width){
+			sampler->RJstep_last_accept_ct[i] = 0.;
+			sampler->RJstep_last_reject_ct[i] = 0.;
+		}
 
 		//Initial width size for all chains, all steps is 1.
 		sampler->randgauss_width[i][0]=.01;
@@ -1072,6 +1094,10 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->de_last_reject_ct);
 	free(sampler->fish_last_accept_ct);
 	free(sampler->fish_last_reject_ct);
+	if(sampler->update_RJ_width){
+		free(sampler->RJstep_last_accept_ct);
+		free(sampler->RJstep_last_reject_ct);
+	}
 	free(sampler->max_target_accept_ratio);
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
@@ -1267,6 +1293,7 @@ void write_stat_file(sampler *sampler,
 		ts = sampler->fish_accept_ct[i]+sampler->fish_reject_ct[i]+
 			sampler->de_accept_ct[i]+sampler->de_reject_ct[i]+
 			sampler->mmala_accept_ct[i]+sampler->mmala_reject_ct[i]+
+			sampler->RJstep_accept_ct[i]+sampler->RJstep_reject_ct[i]+
 			sampler->gauss_accept_ct[i]+sampler->gauss_reject_ct[i];
 		swpa = sampler->swap_accept_ct[i];
 		swpt = sampler->swap_reject_ct[i] + swpa;
@@ -1297,7 +1324,7 @@ void write_stat_file(sampler *sampler,
 		std::endl;
 	for (int i =0; i < sampler->chain_N; i++){	
 	 	total_step_type= sampler->num_gauss[i]+sampler->num_mmala[i]+
-				sampler->num_de[i]+sampler->num_fish[i];
+				sampler->num_de[i]+sampler->num_fish[i]+sampler->num_RJstep[i];
 		out_file<<
 			std::setw(sixth)<<std::left<<
 			i<<
@@ -1411,7 +1438,7 @@ void write_stat_file(sampler *sampler,
 		facc_frac = (double)sampler->fish_accept_ct[i]/ftotal;
 
 		RJtotal = sampler->RJstep_accept_ct[i]+sampler->RJstep_reject_ct[i];
-		RJacc_frac = (double)sampler->RJstep_accept_ct[i]/ftotal;
+		RJacc_frac = (double)sampler->RJstep_accept_ct[i]/RJtotal;
 
 		total = accepted_steps[i]+rejected_steps[i];
 		acc_frac = (double)accepted_steps[i]/total;
@@ -1669,6 +1696,7 @@ void assign_ct_p(sampler *sampler, int step, int chain_index)
 	else if(step ==1) sampler->de_accept_ct[chain_index]+=1;
 	else if(step ==2) sampler->mmala_accept_ct[chain_index]+=1;
 	else if(step ==3) sampler->fish_accept_ct[chain_index]+=1;
+	else if(step ==4) sampler->RJstep_accept_ct[chain_index]+=1;
 }
 void assign_ct_m(sampler *sampler, int step, int chain_index)
 {
@@ -1676,6 +1704,7 @@ void assign_ct_m(sampler *sampler, int step, int chain_index)
 	else if(step ==1) sampler->de_reject_ct[chain_index]+=1;
 	else if(step ==2) sampler->mmala_reject_ct[chain_index]+=1;
 	else if(step ==3) sampler->fish_reject_ct[chain_index]+=1;
+	else if(step ==4) sampler->RJstep_reject_ct[chain_index]+=1;
 }
 
 void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,double *seeding_var) 
@@ -1744,6 +1773,15 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			
 			samplerptr->current_likelihoods[j] =
 				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j)/samplerptr->chain_temps[j];
+		}
+	}
+	if(samplerptr->log_ll || samplerptr->log_lp){
+		for(int i = 0 ; i<samplerptr->chain_N; i++){
+			samplerptr->ll_lp_output[i][0][0] = samplerptr->current_likelihoods[i];
+			samplerptr->ll_lp_output[i][0][1] = 
+				samplerptr->lp(samplerptr->output[i][0],
+				samplerptr->param_status[i][0],
+				samplerptr->max_dim,i);
 		}
 	}
 }

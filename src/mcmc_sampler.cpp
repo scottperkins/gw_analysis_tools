@@ -264,10 +264,11 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	std::function<double(double*, int*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int,int)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int,int, int)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	bool update_RJ_width, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
@@ -298,6 +299,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		samplerptr->fisher_exist = true;
 
 	samplerptr->RJMCMC=true;
+	samplerptr->update_RJ_width=update_RJ_width;
 
 	if(likelihood_log_filename !=""){
 		samplerptr->log_ll = true;
@@ -1937,8 +1939,8 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		f = [&fisher](double *param, int *param_status,int max_dim, double **fisherm, int chain_id){
 			fisher(param, param_status,max_dim, fisherm,chain_id);};
 	}
-	std::function<void(double*,double*, int*,int*,int,int)> rj =NULL;
-	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int max_dim, int chain_id){
+	std::function<void(double*,double*, int*,int*,int,int, int)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int max_dim, int chain_id, double width){
 			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,max_dim,chain_id);};
 	RJPTMCMC_MH_internal(output, 
 		parameter_status, 	
@@ -1958,6 +1960,71 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		numThreads, 
 		pool, 
 		show_prog, 
+		false, 
+		statistics_filename,
+		chain_filename,
+		auto_corr_filename,
+		likelihood_log_filename,
+		checkpoint_file);
+}
+void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
+	int ***parameter_status, /**< [out] Parameter status for each step corresponding to the output chains, shape is double[chain_N, N_steps,dimension]*/
+	int max_dimension, 	/**< maximum dimension of the parameter space being explored -- only consideration is memory, as memory scales with dimension. Keep this reasonable, unless memory is REALLY not an issue*/
+	int min_dimension, 	/**< minimum dimension of the parameter space being explored >=1*/
+	int N_steps,	/**< Number of total steps to be taken, per chain*/
+	int chain_N,	/**< Number of chains*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	int *initial_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
+	double *chain_temps,	/**<Double array of temperatures for the chains*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	double (*log_prior)(double *param, int *status, int max_dimension, int chain_id),	
+	double (*log_likelihood)(double *param, int *status, int max_dimension, int chain_id),
+	void (*fisher)(double *param, int *status,int max_dimension, double **fisher, int chain_id),
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dimension, int chain_id, double gaussian_width),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int max_dim, int chain_id){
+			return log_likelihood(param, param_status,max_dim,chain_id);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int max_dim, int chain_id){
+			return log_prior(param, param_status, max_dim,chain_id);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int max_dim, double **fisherm, int chain_id){
+			fisher(param, param_status,max_dim, fisherm,chain_id);};
+	}
+	std::function<void(double*,double*, int*,int*,int,int, double)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int max_dim, int chain_id, double width){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,max_dim,chain_id, width);};
+	RJPTMCMC_MH_internal(output, 
+		parameter_status, 	
+		max_dimension, 	
+		min_dimension, 	
+		N_steps,	
+		chain_N,	
+		initial_pos, 	
+		initial_status, 	
+		seeding_var, 	
+		chain_temps,	
+		swp_freq,	
+		lp,
+		ll,
+		f,
+		rj,
+		numThreads, 
+		pool, 
+		show_prog, 
+		true, 
 		statistics_filename,
 		chain_filename,
 		auto_corr_filename,
