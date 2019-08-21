@@ -340,8 +340,6 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 
 	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
 		assign_probabilities(samplerptr, chain_index);
-	
-
 	int  k=0;
 	//int swp_accepted=0, swp_rejected=0;
 	int *step_accepted = (int *)malloc(sizeof(int)*samplerptr->chain_N);
@@ -350,6 +348,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		step_accepted[j]=0;
 		step_rejected[j]=0;
 	}
+
 	
 	//Assign initial position to start chains
 	assign_initial_pos(samplerptr, initial_pos, initial_status,seeding_var);	

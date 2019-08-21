@@ -25,6 +25,8 @@ static fftw_outline *mcmc_fftw_plans=NULL ;
 static int mcmc_num_detectors=2;
 static double mcmc_gps_time=0;
 static double mcmc_gmst=0;
+static int mcmc_max_dim;
+static int mcmc_min_dim;
 static int mcmc_Nmod;
 static int mcmc_Nmod_max;
 static int *mcmc_bppe;
@@ -306,6 +308,8 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			std::string final_checkpoint_filename
 			);
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
+
+void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, int min_dim,double *seeding_var, bool local_seeding);
 
 double MCMC_likelihood_extrinsic(bool save_waveform, 
 	gen_params *parameters,

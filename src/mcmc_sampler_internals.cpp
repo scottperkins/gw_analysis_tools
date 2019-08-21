@@ -1720,6 +1720,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 					samplerptr->output[j][l][i] = initial_pos[i];
 					samplerptr->param_status[j][l][i] = initial_status[i];
 				}
+				//std::cout<<initial_pos[i]<<" "<<initial_status[i]<<std::endl;
 				
 			}
 			samplerptr->current_likelihoods[j] =
@@ -1731,6 +1732,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 		int attempts = 0;
 		int max_attempts = 10;
 		double temp_pos[samplerptr->max_dim];
+		int temp_status[samplerptr->max_dim];
 		for (int j=0;j<samplerptr->chain_N;j++){
 			samplerptr->de_primed[j]=false;
 			if(j == 0){
@@ -1747,16 +1749,24 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			else{
 				do{
 					for(int i =0; i<samplerptr->max_dim; i++){
-						temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
+						if(initial_status[i] ==1){
+							temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
+							temp_status[i]=1;
+						}
+						else{
+							temp_pos[i]=0;
+							temp_status[i]=0;
+						}
 					}
 					attempts+=1;
-				}while(samplerptr->lp(temp_pos, initial_status,samplerptr->max_dim,j) == limit_inf && attempts<max_attempts);
+					//std::cout<<samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j)<<std::endl;
+				}while(samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j) == limit_inf && attempts<max_attempts);
 				attempts =0;
-				if(samplerptr->lp(temp_pos, initial_status,samplerptr->max_dim,j) != limit_inf ){
+				if(samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j) != limit_inf ){
 					for(int i =0; i<samplerptr->max_dim;i++){
 						for(int l =0; l<samplerptr->N_steps; l++){
 							samplerptr->output[j][l][i] = temp_pos[i];
-							samplerptr->param_status[j][l][i] = initial_status[i];
+							samplerptr->param_status[j][l][i] = temp_status[i];
 						}
 					}
 				}

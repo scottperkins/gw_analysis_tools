@@ -15,16 +15,6 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 
-
-
-//#####################################################################
-//#####################################################################
-//
-//MEMORY LEAK IN MCMC ROUTINES -- MUST FIX
-//
-//#####################################################################
-//#####################################################################
-
 /*! \file 
  * Routines for implementation in MCMC algorithms specific to GW CBC analysis
  *
@@ -875,6 +865,8 @@ void RJPTMCMC_MH_GW(double ***output,
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
+	mcmc_max_dim = max_dim ;
+	mcmc_min_dim = min_dim ;
 
 	//To save time, intrinsic waveforms can be saved between detectors, if the 
 	//frequencies are all the same
@@ -905,9 +897,9 @@ void RJPTMCMC_MH_GW(double ***output,
 		RJstep = RJ_proposal;
 	}
 	//##################################################################
-	PTMCMC_method_specific_prep(generation_method, max_dim, seeding_var, local_seeding);
-	
-	RJPTMCMC_MH(output, status,max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status,seeding_var, chain_temps, swp_freq,
+	RJPTMCMC_method_specific_prep(generation_method, max_dim, min_dim,seeding_var, local_seeding);
+	//std::cout<<seeding_var[0]<<std::endl;
+	RJPTMCMC_MH(output, status,max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status,NULL, chain_temps, swp_freq,
 		 log_prior,RJPTMCMC_likelihood_wrapper, NULL, RJstep,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
 	
@@ -1199,6 +1191,38 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	for (int i =0;i<num_detectors;i++)
 		deallocate_FFTW_mem(&plans[i]);
 	free(plans);
+}
+/*! \brief Unpacks MCMC parameters for method specific initiation (RJ version)
+ *
+ * Populates seeding vector if non supplied, populates mcmc_Nmod, populates mcmc_log_beta, populates mcmc_intrinsic
+ */
+void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, int min_dim,double *seeding_var, bool local_seeding)
+{
+	if(min_dim==9 && (generation_method =="ppE_IMRPhenomD_Inspiral"|| generation_method =="ppE_IMRPhenomD_IMR")){
+		mcmc_intrinsic=false;
+		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL ,ln chirpmass, eta, chi1, chi2, psi";
+		for(int i =0; i<mcmc_Nmod_max; i++){
+			std::cout<<", beta"<<i<<" ("<<mcmc_bppe[i]<<")";
+		}
+		std::cout<<endl;
+		mcmc_log_beta = false;
+		if(local_seeding){
+			seeding_var = new double[max_dim];
+			seeding_var[0]=.1;
+			seeding_var[1]=.5;
+			seeding_var[2]=.1;
+			seeding_var[3]=.1;
+			seeding_var[4]=.1;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=.1;
+			for(int i =0; i< mcmc_Nmod_max;i++){
+				seeding_var[9 + i]=2;
+			}
+		}
+	}
+
 }
 
 /*! \brief Unpacks MCMC parameters for method specific initiation 
@@ -2881,13 +2905,16 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 	int chain_id
 	) 
 {
-	if(!mcmc_intrinsic && mcmc_generation_methdo == "ppE_IMRPhenomD_Inspiral"){
+	double ll = 0 ;
+	if(!mcmc_intrinsic && (mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"||mcmc_generation_method == "ppE_IMRPhenomD_IMR")){
 
 		std::string local_method ;
-		if(mcmc_generation_method == "ppE_IMRPhenomD_Inspiral" || 
+		if(mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"){
 			local_method = "ppE_IMRPhenomD_Inspiral";
 		}
-	//else if(false){	
+		else if(mcmc_generation_method == "ppE_IMRPhenomD_IMR"){
+			local_method = "ppE_IMRPhenomD_IMR";
+		}
 		//unpack parameter vector
 		double incl = acos(param[0]);
 		double RA = param[1];
@@ -2899,20 +2926,29 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		double chi2 = param[7];
 		double psi = param[8];
 		//double lnalpha2 = param[8];
-		double beta[mcmc_Nmod_max] ;
-		if(mcmc_log_beta){
-			for (int j = 0; j<mcmc_Nmod;j++){
-				beta[j ] = std::exp(param[8+j]);	
-			}
+		int mods_ct = 0;
+		int *local_bppe = new int[mcmc_Nmod_max];
+		double local_beta[mcmc_Nmod_max] ;
+		for(int i = mcmc_min_dim ; i < mcmc_max_dim; i++){
+			if(status[i] == 1){
+				mods_ct++;
+				local_bppe[mods_ct] = mcmc_bppe[i-mcmc_min_dim];
+				local_beta[mods_ct] = param[i];
+			}			
 		}
-		else{
-			for (int j = 0; j<mcmc_Nmod;j++){
-				beta[j ] = param[8+j];	
-			}
+		if(mods_ct ==0){
+			local_method="IMRPhenomD";
 		}
-		if(mcmc_generation_method == "dCS_IMRPhenomD_root_alpha"|| mcmc_generation_method == "EdGB_IMRPhenomD_root_alpha" ){
-			beta[0] = pow(beta[0]/(3.e5),4);
-		}
+		//if(mcmc_log_beta){
+		//	for (int j = 0; j<mcmc_Nmod_max;j++){
+		//		beta[j ] = std::exp(param[9+j]);	
+		//	}
+		//}
+		//else{
+		//	for (int j = 0; j<mcmc_Nmod_max;j++){
+		//		beta[j ] = param[9+j];	
+		//	}
+		//}
 		//std::cout.precision(15);
 		//std::cout<<"lnalpha2 "<<lnalpha2<<std::endl;
 		double delta_t = 0;
@@ -2945,20 +2981,21 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
-		parameters.Nmod = mcmc_Nmod;
-		parameters.betappe = new double[mcmc_Nmod];
-		parameters.bppe = mcmc_bppe;
+		parameters.Nmod =mods_ct;
+		parameters.betappe = new double[mods_ct];
+		parameters.bppe = local_bppe;
 		//parameters.betappe[0] = lnalpha2;
-		for (int j = 0 ; j<mcmc_Nmod; j++){
-			parameters.betappe[j] = beta[j];
+		for (int j = 0 ; j<mods_ct; j++){
+			parameters.betappe[j] = local_beta[j];
 		}
-
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		delete [] parameters.betappe;
 	}
+	std::cout<<ll<<std::endl;
+	return ll;
 
 }
-void RJPTMCMC_RJ_proposal(double *current_param, 
+void RJPTMCMC_RJ_proposal(double *current_params, 
 	double *proposed_params, 
 	int *current_status, 
 	int *proposed_status,
@@ -2967,7 +3004,10 @@ void RJPTMCMC_RJ_proposal(double *current_param,
 	double step_width
 	) 
 {
-
+	for(int i = 0 ; i < max_dim; i ++){
+		proposed_params[i]=current_params[i];
+		proposed_status[i]=current_status[i];
+	}
 }
 			
 
