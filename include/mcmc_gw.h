@@ -5,6 +5,8 @@
 #include "util.h"
 #include <iostream>
 #include <gsl/gsl_interp.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_rng.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
 /*! \file 
@@ -35,6 +37,7 @@ static gsl_spline **mcmc_splines = NULL;
 static bool mcmc_log_beta;
 static bool mcmc_intrinsic;
 static bool mcmc_save_waveform;
+static gsl_rng **mcmc_rvec;
 //########################################
 
 

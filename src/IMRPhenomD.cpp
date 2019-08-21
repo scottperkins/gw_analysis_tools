@@ -476,27 +476,26 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			waveform[j] = 0.0;
 		}
 		else{	
-		if (f<params->f1_phase)
-		{
-			precalc_powers_ins(f, M, &pows);
+			if (f<params->f1_phase)
+			{
+				precalc_powers_ins(f, M, &pows);
+			}
+			else
+			{
+				pows.MFsixth= pow(M*f,1./6.);	
+				pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+			}
+			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
+			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+			phase +=   (T)(tc*(f-f_ref) - phic);
+			waveform[j] = amp * std::exp(-i * phase);
 		}
-		else
-		{
-			pows.MFsixth= pow(M*f,1./6.);	
-			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
-		}
-		amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
-		phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		phase +=   (T)(tc*(f-f_ref) - phic);
-		waveform[j] = amp * std::exp(-i * phase);
-		}
+		//if(std::is_same< double, T>::value){
+		//	std::cout<<waveform[j]<<std::endl;
+		//}
 
 	}
-	//}
-	//std::cout<<"TEST d"<<std::endl;
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<waveform[length-1]<<std::endl;
-	//}
+	
 	return 1;
 }
 

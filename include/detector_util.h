@@ -78,6 +78,7 @@ void populate_noise(double *frequencies,std::string detector,double *noise_root,
 double aLIGO_analytic(double f);
 
 std::complex<double> Q(double theta, double phi, double iota);
+std::complex<double> Q(double theta, double phi, double iota, double psi);
 
 double right_interferometer_cross(double theta, double phi);
 

@@ -85,6 +85,10 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
 		}
 	}
+	//if(step==4){
+	//	std::cout<<proposed_ll<<" "<<current_ll<<std::endl;
+	//	std::cout<<proposed_lp<<" "<<current_lp<<std::endl;
+	//}
 	int i;
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));

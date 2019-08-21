@@ -97,19 +97,31 @@ double Hanford_O1_fitted(double f)
  *
  * For spin aligned, all the extrinsic parameters have the effect of an overall amplitude modulation and phase shift
  */
-std::complex<double> Q(double theta, double phi, double iota)
+std::complex<double> Q(double theta, double phi, double iota, double psi)
 {
 	double ct = cos(theta);
 	double cp2 = cos(2.*phi);
 	double sp2 = sin(2.*phi);
 	double ci = cos(iota);
+	double cpsi2 = cos(2*psi);
+	double spsi2 = sin(2*psi);
 
 	double Fplus = (1./2)*(1+ ct*ct)*cp2;
 	double Fcross = ct * sp2;
-	std::complex<double> Q = (1+ci*ci)/2. *Fplus + std::complex<double>(0,Fcross*ci);
+	//std::complex<double> Q = (1+ci*ci)/2. *Fplus + std::complex<double>(0,Fcross*ci);
+	std::complex<double> Q= (1+ci*ci)/2. *(Fplus*cpsi2 - Fcross*spsi2) + std::complex<double>(0,(Fcross *cpsi2 + Fplus*spsi2)*ci);
 	return Q;
 }
 
+/*! \brief Utility for the overall amplitude and phase shift for spin-aligned systems
+ *
+ * For spin aligned, all the extrinsic parameters have the effect of an overall amplitude modulation and phase shift
+ */
+std::complex<double> Q(double theta, double phi, double iota)
+{
+	std::complex<double> Qout= Q(theta, phi, iota, 0.);
+	return Qout;
+}
 
 /*! \brief Response function of a 90 deg interferometer for plus polarization
  *

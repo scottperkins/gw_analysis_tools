@@ -402,13 +402,13 @@ void calculate_derivatives(double  **amplitude_deriv,
 			"IMRPhenomD",
 			parameters);	
 		std::complex<double> Qtemp = 
-			Q(parameters->theta, parameters->phi, parameters->incl_angle);
+			Q(parameters->theta, parameters->phi, parameters->incl_angle, parameters->psi);
 		double a_corr = std::abs(Qtemp);
 		for (int k =0; k<length; k++)
 			amplitude[k] = a_corr * amplitude[k];
 
 		IMRPhenomD<double> model;
-		int dimension = 8;
+		int dimension = 9;
 		source_parameters<double> parameters_in;
 		gen_params waveform_params;
 		double param_p[dimension] ;
@@ -425,6 +425,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 		param_in[5] = eta;
 		param_in[6] = parameters->spin1[2];
 		param_in[7] = parameters->spin2[2];
+		param_in[8] = parameters->psi;
 		waveform_params.sky_average=parameters->sky_average;
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
 		std::complex<double> Qp, Qm;
@@ -459,9 +460,10 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.theta = param_p[1];
 			waveform_params.phi = param_p[2];
 			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.psi = param_p[8];
 
 
-			Qp = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
+			Qp = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle, waveform_params.psi);
 			a_corr_p = std::abs(Qp);
 			p_corr_p = std::arg(Qp);
 			
@@ -495,8 +497,9 @@ void calculate_derivatives(double  **amplitude_deriv,
 			waveform_params.theta = param_m[1];
 			waveform_params.phi = param_m[2];
 			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.psi = param_m[8];
 
-			Qm = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle);
+			Qm = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle, waveform_params.psi);
 			a_corr_m = std::abs(Qm);
 			p_corr_m = std::arg(Qm);
 
