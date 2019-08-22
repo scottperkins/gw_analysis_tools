@@ -99,7 +99,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test33();	
+	test34();	
 	return 0;
 }
 
@@ -244,23 +244,26 @@ void test34()
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
-	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
 	int datalength = 131075;
 	//double **psd = allocate_2D_array(rows, cols);
 	//read_LOSC_PSD_file(psd_file, psd, rows, cols);
 	//double data_start_time, duration, fs;
-	int num_detectors = 2, psd_length = 8032, length;
+	//int num_detectors = 2, psd_length = 8032, length;
+	int num_detectors = 3, psd_length = 4016, length;
 	//int num_detectors = 3, psd_length = 4016, length;
 	//int num_detectors = 2, psd_length = 4016, length;
 	//double gps_time = 1135136350.6;//TESTING -- gw151226
-	double gps_time = 1126259462;//TESTING -- gw150914
+	//double gps_time = 1126259462;//TESTING -- gw150914
+	double gps_time = 1185389807.3;//TESTING -- gw170729
 	//double gps_time = 1185389807.3;//TESTING -- gw170729
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
-	//detectors[2] = "Virgo";
+	detectors[2] = "Virgo";
 	std::string *detector_files = new std::string[num_detectors];
 	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
@@ -272,8 +275,11 @@ void test34()
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[2] =  "/home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
 	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
 	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
@@ -291,7 +297,7 @@ void test34()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
-	//data_length[2] =psd_length;
+	data_length[2] =psd_length;
 
 	//#########################################################
 	//mcmc options
@@ -301,13 +307,13 @@ void test34()
 	//double initial_pos[dimension]={.9, 5.2,-1.,std::log(500),std::log(9), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double initial_pos[dimension]={.9, 5.2,-1.,std::log(300),std::log(30), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double *seeding_var = NULL;
-	int n_steps = 5000;
+	int n_steps = 1000;
 	int chain_N=24 ;
 	int max_thermo=12 ;
 	int t0 = 10000;
 	int nu = 100;
-	std::string chain_alloc = "half_ensemble";
-	//std::string chain_alloc = "cold";
+	//std::string chain_alloc = "half_ensemble";
+	std::string chain_alloc = "cold";
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
 	int swp_freq = 5;
@@ -358,7 +364,7 @@ void test33()
 	std::string chain = "testing/data/neil_mcmc_output1_dynamicPT.csv";
 	std::string check = "testing/data/neil_mcmc_checkpoint1_dynamicPT-real.csv";
 	std::string stats = "testing/data/neil_mcmc_statistics1_dynamicPT-real.txt";
-	int N_steps = 10000;
+	int N_steps = 1000;
 	int dimension = 2;
 	int chain_N= 20;
 	int swp_freq = 3;
@@ -392,7 +398,7 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 10000;
+	int N_steps = 1000;
 	int chain_N= 20;
 	int max_chain_N_thermo= 8;
 	int t0= 10000;
@@ -457,7 +463,8 @@ void test32()
 void test31()
 {
 	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
-	std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
@@ -476,8 +483,10 @@ void test31()
 	detectors[1] = "Livingston";
 	//detectors[2] = "Virgo";
 	std::string *detector_files = new std::string[num_detectors];
-	detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
@@ -508,7 +517,7 @@ void test31()
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1};
 	//double initial_pos[dimension]={.9, 5, -1.,std::log(2000),std::log(50), .22, .4,.4,.01,.01,.01,.01,1,1,20};
 	double *seeding_var = NULL;
-	int n_steps = 1500;
+	int n_steps = 150;
 	int chain_N=10 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -767,7 +776,8 @@ void test29()
 	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
 	int datalength = 131075;
@@ -789,9 +799,13 @@ void test29()
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[2] =  "/home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
  	//double trigger_time= 1135136350.6;
  	double trigger_time = gps_time;
 	double **psd = allocate_2D_array(num_detectors,psd_length);
@@ -814,7 +828,7 @@ void test29()
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double initial_pos[dimension]={.9, 5.2,-1.,std::log(2000),std::log(55), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double *seeding_var = NULL;
-	int n_steps = 500000;
+	int n_steps = 500;
 	int chain_N=12 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );

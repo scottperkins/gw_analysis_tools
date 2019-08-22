@@ -1909,11 +1909,6 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 			double next_temp = sampler_old->chain_temps[(i+1)%sampler_old->chain_N];
 			sampler_new->chain_temps[i] = std::sqrt(prev_temp*next_temp);
 		}
-		else if(chain_allocation_scheme=="refine"){
-			double prev_temp = sampler_old->chain_temps[i%sampler_old->chain_N];
-			double next_temp = sampler_old->chain_temps[(i+1)%sampler_old->chain_N];
-			sampler_new->chain_temps[i] = std::sqrt(prev_temp*next_temp);
-		}
 		else if(chain_allocation_scheme=="half_ensemble"){
 			sampler_new->chain_temps[i] = 10;	
 		}

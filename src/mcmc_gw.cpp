@@ -1113,6 +1113,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, NULL,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
@@ -2433,6 +2434,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
+		parameters.gmst=mcmc_gmst;
+		parameters.RA=RA;
+		parameters.DEC=DEC;
 		
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		
@@ -2585,8 +2589,10 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		//parameters.theta=theta[0];
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.RA=0;
-		parameters.DEC=0;
+		//parameters.RA=0;
+		//parameters.DEC=0;
+		parameters.RA=RA;
+		parameters.DEC=DEC;
 		parameters.gmst=mcmc_gmst;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
@@ -2678,8 +2684,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		//parameters.theta=theta[0];
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.RA=0;
-		parameters.DEC=0;
+		parameters.RA=RA;
+		parameters.DEC=DEC;
 		parameters.gmst=mcmc_gmst;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
@@ -2785,6 +2791,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.Nmod = mcmc_Nmod;
 		parameters.betappe = new double[mcmc_Nmod];
 		parameters.bppe = mcmc_bppe;
+		parameters.RA=RA;
+		parameters.DEC=DEC;
+		parameters.gmst=mcmc_gmst;
 		//parameters.betappe[0] = lnalpha2;
 		for (int j = 0 ; j<mcmc_Nmod; j++){
 			parameters.betappe[j] = beta[j];
@@ -2955,27 +2964,9 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 				mods_ct++;
 			}			
 		}
-		//std::cout<<mods_ct<<std::endl;
 		if(mods_ct ==0){
-		//if(true){
 			local_method="IMRPhenomD";
 		}
-		//if(mcmc_log_beta){
-		//	for (int j = 0; j<mcmc_Nmod_max;j++){
-		//		beta[j ] = std::exp(param[9+j]);	
-		//	}
-		//}
-		//else{
-		//	for (int j = 0; j<mcmc_Nmod_max;j++){
-		//		beta[j ] = param[9+j];	
-		//	}
-		//}
-		//std::cout.precision(15);
-		//std::cout<<"lnalpha2 "<<lnalpha2<<std::endl;
-		double delta_t = 0;
-		double tc_ref =0;
-		double phic_ref =0;
-	
 
 		//create gen_param struct
 		gen_params parameters; 
@@ -2994,20 +2985,24 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.incl_angle = incl;
 		//parameters.phi=phi[0];
 		//parameters.theta=theta[0];
-		parameters.phi=0;
-		parameters.theta=0;
+		parameters.gmst=mcmc_gmst;
+		parameters.RA=RA;
+		parameters.DEC=DEC;
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
 		parameters.Nmod =mods_ct;
 		parameters.betappe = new double[mods_ct];
-		parameters.bppe = local_bppe;
+		parameters.bppe =new int[mods_ct] ;
 		//parameters.betappe[0] = lnalpha2;
 		for (int j = 0 ; j<mods_ct; j++){
 			parameters.betappe[j] = local_beta[j];
+			parameters.bppe[j] = local_bppe[j];
 		}
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		delete [] parameters.betappe;
+		delete [] parameters.bppe;
+		delete [] local_bppe;
 	}
 	//std::cout<<ll<<std::endl;
 	return ll;

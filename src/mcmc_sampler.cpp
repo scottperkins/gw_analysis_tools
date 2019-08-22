@@ -668,7 +668,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							//Add new chain between two other chains, geometrically
 							samplerptr->chain_temps[min_id] = std::sqrt(samplerptr->chain_temps[min_id-1]*samplerptr->chain_temps[min_id+1]);
 							//populate all the necessary chain-specific parameters
-							for(int i =0 ;i<samplerptr->dimension; i++){
+							for(int i =0 ;i<samplerptr->max_dim; i++){
 								//Just use the chain's last 
 								//position immediately
 								//below min_id 
@@ -695,7 +695,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							samplerptr->mmala_accept_ct[min_id] = 0;
 							samplerptr->mmala_reject_ct[min_id] = 0;
 							assign_probabilities(samplerptr, min_id);	
-							samplerptr->fisher_update_ct[min_id] = 0;	
+							samplerptr->fisher_update_ct[min_id] = samplerptr->fisher_update_number;
 							samplerptr->waiting[min_id] = true;
 							samplerptr->priority[min_id] =1;
 							samplerptr->ref_chain_status[min_id]=true;
