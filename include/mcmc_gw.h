@@ -334,5 +334,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
 
 double RJPTMCMC_likelihood_wrapper(double *param, int *status,int max_dim, int chain_id) ;
 
+void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **output, int chain_id);
 void RJPTMCMC_RJ_proposal(double *current_param, double *proposed_params, int *current_status, int *proposed_status,int max_dim, int chain_id, double step_width) ;
 #endif

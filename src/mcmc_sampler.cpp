@@ -191,7 +191,7 @@ private:
 ThreadPool *poolptr;
 /*!\brief Generic reversable jump sampler, where the likelihood, prior, and reversable jump proposal are parameters supplied by the user
  *
- * Note: Using a min_dimension tells the sampler that there is a ``base model'', and that the dimensions from min_dim to max_dim are ``small'' corrections to that model. This helps inform some of the proposal algorithms and speeds up computation. If using discrete models with no overlap of variables (ie model A or model B), set min_dim to 0. Even if reusing certain parameters, if the extra dimensions don't describe ``small'' deviations, it's probably best to set min_dim to 0.
+ * Note: Using a min_dimension tells the sampler that there is a ``base model'', and that the dimensions from min_dim to max_dim are ``small'' corrections to that model. This helps inform some of the proposal algorithms and speeds up computation. If using discrete models with no overlap of variables (ie model A or model B), set min_dim to 0. Even if reusing certain parameters, if the extra dimensions don't describe ``small'' deviations, it's probably best to set min_dim to 0.Since the  RJ  proposal is user specified, even if there are parameters that should never be removed, it's up to the user to dictate that. Using min_dim will not affect that aspect of the  sampler. If there's a ``base-model'', the fisher function should produce a fisher matrix for the base model only. The modifications are then normally distributed around the last parameter value. Then the fisher function should take the minimum dimension instead of the maximum, like the other functions.
  *
  * Currently, no dynamic PT option, as it would be too many free parameters for the sampler to converge to a reasonable temperature distribution in a reasonable amount of time. Best use case, use the PTMCMC_MH_dynamic for the ``base'' dimension space, and use that temperature ladder.
  *
@@ -412,21 +412,22 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != ""){
-		std::ofstream out_file;
-		out_file.open(chain_filename);
-		out_file.precision(15);
-		for(int i =0; i<samplerptr->N_steps; i++){
-			for(int j=0; j<samplerptr->max_dim;j++){
-				out_file<<samplerptr->output[0][i][j]<<" , ";
-			}
-			for(int j = 0 ; j<samplerptr->max_dim; j++){
-				if(j==samplerptr->max_dim-1)
-					out_file<<samplerptr->param_status[0][i][j]<<std::endl;
-				else
-					out_file<<samplerptr->param_status[0][i][j]<<" , ";
-			}
-		}
-		out_file.close();
+		//std::ofstream out_file;
+		//out_file.open(chain_filename);
+		//out_file.precision(15);
+		//for(int i =0; i<samplerptr->N_steps; i++){
+		//	for(int j=0; j<samplerptr->max_dim;j++){
+		//		out_file<<samplerptr->output[0][i][j]<<" , ";
+		//	}
+		//	for(int j = 0 ; j<samplerptr->max_dim; j++){
+		//		if(j==samplerptr->max_dim-1)
+		//			out_file<<samplerptr->param_status[0][i][j]<<std::endl;
+		//		else
+		//			out_file<<samplerptr->param_status[0][i][j]<<" , ";
+		//	}
+		//}
+		//out_file.close();
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output[0], samplerptr->param_status[0]);
 	}
 
 	if(checkpoint_file !=""){

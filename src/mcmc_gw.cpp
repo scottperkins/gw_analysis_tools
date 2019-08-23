@@ -910,7 +910,7 @@ void RJPTMCMC_MH_GW(double ***output,
 	//##################################################################
 	RJPTMCMC_method_specific_prep(generation_method, max_dim, min_dim,seeding_var, local_seeding);
 	RJPTMCMC_MH(output, status,max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status,seeding_var, chain_temps, swp_freq,
-		 log_prior,RJPTMCMC_likelihood_wrapper, NULL, RJstep,numThreads, pool, show_prog,statistics_filename,
+		 log_prior,RJPTMCMC_likelihood_wrapper, RJPTMCMC_fisher_wrapper, RJstep,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
 	
 	//Deallocate fftw plans
@@ -2914,17 +2914,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 					);
 		}
 	}
-	//if(isnan(ll)){
-		//std::cout<<ll<<std::endl;
-	//}
-	//cout.precision(15);
-	//std::cout<<ll<<std::endl;
-	//if(isnan(ll))
-	//	std::cout<<"NAN "<<chain_id<<std::endl;
 	return ll;
 
-	//testing detailed balance
-	//return 2;
 }
 
 double RJPTMCMC_likelihood_wrapper(double *param, 
@@ -3097,10 +3088,79 @@ void RJPTMCMC_RJ_proposal(double *current_params,
 			}
 		}
 	}
-	//for(int i = 0 ; i < max_dim; i ++){
-	//	std::cout<<current_params[i]<<" "<<proposed_params[i]<<std::endl;
-	//	std::cout<<current_status[i]<<" "<<proposed_status[i]<<std::endl;
-	//}
+}
+
+void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **output, int chain_id)
+{
+	if(!mcmc_intrinsic && (mcmc_generation_method =="ppE_IMRPhenomD_Inspiral"||mcmc_generation_method =="ppE_IMRPhenomD_IMR")){	
+		std::string local_method = "IMRPhenomD";
+		//unpack parameter vector
+		double incl = acos(param[0]);
+		double RA = param[1];
+		double DEC = param[2];
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
+		double eta = param[5];
+		double chi1 = param[6];
+		double chi2 = param[7];
+		double delta_t = 0;
+		double tc_ref =0;
+		double phic_ref =0;
+		double psi = param[8];
+	
+		double *phi = new double[mcmc_num_detectors];
+		double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, "Hanford", &phi[0], &theta[0]);
+
+	
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = 0;
+		parameters.spin1[1] = 0;
+		parameters.spin1[2] = chi1;
+		parameters.spin2[0] = 0;
+		parameters.spin2[1] = 0;
+		parameters.spin2[2] = chi2;
+		parameters.Luminosity_Distance = DL;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		parameters.phic = 0;
+		parameters.incl_angle = incl;
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		parameters.psi = psi;
+		
+		for(int j =0; j<min_dim; j++){
+			for(int k =0; k<min_dim; k++)
+			{
+				output[j][k] =0;
+			}
+		} 
+		double **temp_out = allocate_2D_array(min_dim,min_dim);
+		for (int i =0; i<mcmc_num_detectors; i++){
+			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
+			parameters.phi = phi[i];
+			parameters.theta = theta[i];
+			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+				"MCMC_"+local_method+"_Full", 
+				mcmc_detectors[i], temp_out, 9, &parameters, 
+				NULL, NULL, mcmc_noise[i]);
+			for(int j =0; j<min_dim; j++){
+				for(int k =0; k<min_dim; k++)
+				{
+					output[j][k] +=temp_out[j][k];
+				}
+			} 
+		}
+		delete [] phi; delete [] theta;
+
+		deallocate_2D_array(temp_out, min_dim,min_dim);
+	}
+
 }
 			
 

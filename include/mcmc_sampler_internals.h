@@ -228,4 +228,5 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old,
 	int chain_N,
 	std::string chain_allocation_scheme
 	);
+void write_output_file(std::string file, int step_num, int max_dimension, double **output, int **status);
 #endif

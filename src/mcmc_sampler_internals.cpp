@@ -148,32 +148,79 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		int chain_index
 		)
 {
-	//Check whether or not we need to update the fisher
-	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
-		update_fisher(sampler, current_param, current_status,chain_index);	
+	if(!sampler->RJMCMC || sampler->min_dim ==0){
+		//Check whether or not we need to update the fisher
+		if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
+			update_fisher(sampler, current_param, current_status,chain_index);	
 
-	//update the count of steps since last fisher update
-	sampler->fisher_update_ct[chain_index] += 1;
-	
-	//beta determines direction to step in eigen directions
-	int beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
-	
-	double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-				 sampler->randgauss_width[chain_index][3]);
+		//update the count of steps since last fisher update
+		sampler->fisher_update_ct[chain_index] += 1;
+		
+		//beta determines direction to step in eigen directions
+		int beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+		
+		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+					 sampler->randgauss_width[chain_index][3]);
 
-	double scaling = 0.0;
-	//ensure the steps aren't ridiculous
-	if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-	else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+		double scaling = 0.0;
+		//ensure the steps aren't ridiculous
+		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+		else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
 
-	else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
-				sampler->chain_temps[chain_index];}
-	//Take step
-	for(int i =0; i< sampler->max_dim;i++)
-	{
-		proposed_param[i] = current_param[i] +
-			alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
-		proposed_status[i] = current_status[i];
+		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+					sampler->chain_temps[chain_index];}
+		//Take step
+		for(int i =0; i< sampler->max_dim;i++)
+		{
+			proposed_param[i] = current_param[i] +
+				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+			proposed_status[i] = current_status[i];
+		}
+	}
+	//If RJPTMCMC and there's a base model, use the fisher for the base model, and gaussian steps for the modifications
+	else {
+		//Check whether or not we need to update the fisher
+		if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
+			update_fisher(sampler, current_param, current_status,chain_index);	
+
+		//update the count of steps since last fisher update
+		sampler->fisher_update_ct[chain_index] += 1;
+		
+		//beta determines direction to step in eigen directions
+		int beta = (int)((sampler->min_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+		
+		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+					 sampler->randgauss_width[chain_index][3]);
+
+		double scaling = 0.0;
+		//ensure the steps aren't ridiculous
+		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+		else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+
+		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+					sampler->chain_temps[chain_index];}
+		//Take step
+		for(int i =0; i< sampler->min_dim;i++)
+		{
+			proposed_param[i] = current_param[i] +
+				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+			proposed_status[i] = current_status[i];
+		}
+		//Generate new step for gaussian steps, using gaussian width	
+		alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+					 sampler->randgauss_width[chain_index][0]);
+		for(int i =sampler->min_dim; i< sampler->max_dim;i++)
+		{
+			if(current_status[i] == 1){
+				proposed_param[i] = alpha+current_param[i];
+				proposed_status[i] = current_status[i];
+			}
+			else{
+				proposed_param[i] = 0;
+				proposed_status[i] = current_status[i];
+			}
+		}
+		
 	}
 
 }
@@ -181,24 +228,26 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 
 void update_fisher(sampler *sampler, double *current_param, int *param_status, int chain_index)
 {
+	int local_dim = sampler->max_dim;
+	if(sampler->RJMCMC && sampler->min_dim !=0) local_dim=sampler->min_dim;
 	//Fisher calculation
-	double **fisher=(double **)malloc(sizeof(double*)*sampler->max_dim);	
-	for (int i =0; i<sampler->max_dim;i++){
-		fisher[i] = (double*)malloc(sizeof(double)*sampler->max_dim);
+	double **fisher=(double **)malloc(sizeof(double*)*local_dim);	
+	for (int i =0; i<local_dim;i++){
+		fisher[i] = (double*)malloc(sizeof(double)*local_dim);
 	}
-	sampler->fish(current_param, param_status,sampler->max_dim, fisher,chain_index);
+	sampler->fish(current_param, param_status,local_dim, fisher,chain_index);
 
 	//Convert to 1D array for Eigen
-	double *oneDfisher=(double *)malloc(sizeof(double)*sampler->max_dim*sampler->max_dim);
-	for (int i =0; i<sampler->max_dim;i++){
-		for (int j = 0; j<sampler->max_dim; j++){
-			oneDfisher[sampler->max_dim*i+j] = fisher[i][j];///
+	double *oneDfisher=(double *)malloc(sizeof(double)*local_dim*local_dim);
+	for (int i =0; i<local_dim;i++){
+		for (int j = 0; j<local_dim; j++){
+			oneDfisher[local_dim*i+j] = fisher[i][j];///
 		}
 		
 	}
 	
 	//Find eigen vectors and eigen values
-	Eigen::Map<Eigen::MatrixXd> m(oneDfisher,sampler->max_dim,sampler->max_dim);
+	Eigen::Map<Eigen::MatrixXd> m(oneDfisher,local_dim,local_dim);
  	Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(m);
  	Eigen::MatrixXd eigen_vecs = eigensolver.eigenvectors();
  	Eigen::VectorXd eigen_vals = eigensolver.eigenvalues();
@@ -211,15 +260,15 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	//To see impact of nans, variable is stored in sampler->nan_counter
 	//##############################################################
 	int nansum = 0;
-	for(int j = 0 ; j<sampler->max_dim; j++){
-		for(int i =0; i<sampler->max_dim; i++)
+	for(int j = 0 ; j<local_dim; j++){
+		for(int i =0; i<local_dim; i++)
 			nansum+= std::isnan(eigen_vecs.col(j)(i));	
 		nansum+= std::isnan(eigen_vals(j));
 	}
 	if(!nansum){
-		for (int i =0; i < sampler-> max_dim; i++)
+		for (int i =0; i < local_dim; i++)
 		{
-			for(int j = 0; j<sampler->max_dim; j++)
+			for(int j = 0; j<local_dim; j++)
 			{
 				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
 			}
@@ -232,7 +281,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		sampler->nan_counter[chain_index]+=1;
 	}
 
-	for (int i =0; i<sampler->max_dim;i++){
+	for (int i =0; i<local_dim;i++){
 		free(fisher[i]);
 	}
 	free(fisher);
@@ -1972,5 +2021,26 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 		}
 	}
 
+
+}
+/*! \brief Utility to write out the parameters and status of a sampler to a file
+ */
+void write_output_file(std::string file, int step_num, int max_dimension, double **output, int **status)
+{
+	std::ofstream out_file;
+	out_file.open(file);
+	out_file.precision(15);
+	for(int i =0; i<step_num; i++){
+		for(int j=0; j<max_dimension;j++){
+			out_file<<output[i][j]<<" , ";
+		}
+		for(int j = 0 ; j<max_dimension; j++){
+			if(j==max_dimension-1)
+				out_file<<status[i][j]<<std::endl;
+			else
+				out_file<<status[i][j]<<" , ";
+		}
+	}
+	out_file.close();
 
 }
