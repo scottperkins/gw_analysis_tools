@@ -909,7 +909,7 @@ void RJPTMCMC_MH_GW(double ***output,
 	}
 	//##################################################################
 	RJPTMCMC_method_specific_prep(generation_method, max_dim, min_dim,seeding_var, local_seeding);
-	RJPTMCMC_MH(output, status,max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status,NULL, chain_temps, swp_freq,
+	RJPTMCMC_MH(output, status,max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status,seeding_var, chain_temps, swp_freq,
 		 log_prior,RJPTMCMC_likelihood_wrapper, NULL, RJstep,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
 	
@@ -1713,7 +1713,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			parameters.theta = theta[i];
 			fisher(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 8, &parameters, 
+				mcmc_detectors[i], temp_out, 9, &parameters, 
 				NULL, NULL, mcmc_noise[i]);
 			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
 			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
@@ -2991,17 +2991,21 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.NSflag = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
-		parameters.Nmod =mods_ct;
-		parameters.betappe = new double[mods_ct];
-		parameters.bppe =new int[mods_ct] ;
-		//parameters.betappe[0] = lnalpha2;
-		for (int j = 0 ; j<mods_ct; j++){
-			parameters.betappe[j] = local_beta[j];
-			parameters.bppe[j] = local_bppe[j];
+		if(mods_ct !=0){
+			parameters.Nmod =mods_ct;
+			parameters.betappe = new double[mods_ct];
+			parameters.bppe =new int[mods_ct] ;
+			//parameters.betappe[0] = lnalpha2;
+			for (int j = 0 ; j<mods_ct; j++){
+				parameters.betappe[j] = local_beta[j];
+				parameters.bppe[j] = local_bppe[j];
+			}
 		}
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
-		delete [] parameters.betappe;
-		delete [] parameters.bppe;
+		if(mods_ct !=0){
+			delete [] parameters.betappe;
+			delete [] parameters.bppe;
+		}
 		delete [] local_bppe;
 	}
 	//std::cout<<ll<<std::endl;
@@ -3019,6 +3023,7 @@ void RJPTMCMC_RJ_proposal(double *current_params,
 {
 	//Sanity check -- only add or remove if you can
 	if(mcmc_max_dim == mcmc_min_dim){
+	//if(true){
 		for(int i = 0 ; i < max_dim; i ++){
 			proposed_params[i]=current_params[i];
 			proposed_status[i]=current_status[i];
