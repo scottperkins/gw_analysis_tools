@@ -616,11 +616,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
 			sampler->step_prob[chain_index][4]=.2;
-			//sampler->step_prob[chain_index][0]=.8;
-			//sampler->step_prob[chain_index][1]=.0;
-			//sampler->step_prob[chain_index][2]=.0;
-			//sampler->step_prob[chain_index][3]=.0;
-			//sampler->step_prob[chain_index][4]=.2;
 
 		}
 		//all methods available
