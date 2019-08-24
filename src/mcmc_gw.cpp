@@ -2926,6 +2926,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 {
 	double ll = 0 ;
 	if(!mcmc_intrinsic && (mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"||mcmc_generation_method == "ppE_IMRPhenomD_IMR")){
+	//if(false){
 
 		std::string local_method ;
 		if(mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"){
@@ -2999,6 +3000,99 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		}
 		delete [] local_bppe;
 	}
+	else if(!mcmc_intrinsic && (mcmc_generation_method == "ppE_IMRPhenomPv2_Inspiral"||mcmc_generation_method == "ppE_IMRPhenomPv2_IMR")){
+		std::string local_method ;
+		if(mcmc_generation_method == "ppE_IMRPhenomPv2_Inspiral"){
+			local_method = "ppE_IMRPhenomPv2_Inspiral";
+		}
+		else if(mcmc_generation_method == "ppE_IMRPhenomPv2_IMR"){
+			local_method = "ppE_IMRPhenomPv2_IMR";
+		}
+		//else if(false){	
+		//unpack parameter vector
+		//All parameters defined at 20Hz
+		double incl = acos(param[0]);
+		double RA = param[1];
+		double DEC = param[2];
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
+		double eta = param[5];
+		double chi1 = param[6];
+		double chi2 = param[7];
+		double theta1 = param[8];//Polar angles of spins relative to L
+		double theta2 = param[9];
+		double phi1 = param[10];//Azimuthal angles of spins relative to L
+		double phi2 = param[11];
+		double phiref = param[12];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double psi = param[13];//Polarization angle
+		double delta_t = 0;
+		double tc_ref =0;
+		double fref = 20;
+		//transform
+		double spin1[3];
+		double spin2[3];
+		double spin1sphr[3] =  {chi1, theta1, phi1};
+		double spin2sphr[3] =  {chi2, theta2, phi2};
+		transform_sph_cart( &spin1sphr[0], &spin1[0]);
+		transform_sph_cart( &spin2sphr[0], &spin2[0]);
+	
+		int mods_ct = 0;
+		int *local_bppe = new int[mcmc_Nmod_max];
+		double local_beta[mcmc_Nmod_max] ;
+		for(int i = mcmc_min_dim ; i < mcmc_max_dim; i++){
+			if(status[i] == 1){
+				local_bppe[mods_ct] = mcmc_bppe[i-mcmc_min_dim];
+				local_beta[mods_ct] = param[i];
+				mods_ct++;
+			}			
+		}
+		if(mods_ct ==0){
+			local_method="IMRPhenomPv2";
+		}
+
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = spin1[0];
+		parameters.spin1[1] = spin1[1];
+		parameters.spin1[2] = spin1[2];
+		parameters.spin2[0] = spin2[0];
+		parameters.spin2[1] = spin2[1];
+		parameters.spin2[2] = spin2[2];
+		parameters.Luminosity_Distance = DL;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		//parameters.phic = 0;
+		parameters.phiRef=phiref;
+		parameters.f_ref=fref;
+		parameters.incl_angle = incl;
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		parameters.phi=0;
+		parameters.theta=0;
+		parameters.RA=RA;
+		parameters.DEC=DEC;
+		parameters.gmst=mcmc_gmst;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		if(mods_ct !=0){
+			parameters.Nmod =mods_ct;
+			parameters.betappe = new double[mods_ct];
+			parameters.bppe =new int[mods_ct] ;
+			//parameters.betappe[0] = lnalpha2;
+			for (int j = 0 ; j<mods_ct; j++){
+				parameters.betappe[j] = local_beta[j];
+				parameters.bppe[j] = local_bppe[j];
+			}
+		}
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,local_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		if(mods_ct !=0){
+			delete [] parameters.betappe;
+			delete [] parameters.bppe;
+		}
+		delete [] local_bppe;
+	}
 	//std::cout<<ll<<std::endl;
 	return ll;
 
@@ -3020,7 +3114,7 @@ void RJPTMCMC_RJ_proposal(double *current_params,
 			proposed_status[i]=current_status[i];
 		}
 	}
-	else if(!mcmc_intrinsic && (mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"||mcmc_generation_method == "ppE_IMRPhenomD_IMR")){
+	else if(!mcmc_intrinsic && (mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"||mcmc_generation_method == "ppE_IMRPhenomD_IMR" || mcmc_generation_method=="ppE_IMRPhenomPv2_Inspiral"|| mcmc_generation_method=="ppE_IMRPhenomPv2_IMR")){
 		//copy over original
 		for(int i = 0 ; i < max_dim; i ++){
 			proposed_params[i]=current_params[i];
@@ -3159,6 +3253,100 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 		delete [] phi; delete [] theta;
 
 		deallocate_2D_array(temp_out, min_dim,min_dim);
+	}
+	else if(!mcmc_intrinsic && (mcmc_generation_method =="ppE_IMRPhenomPv2_Inspiral"||mcmc_generation_method =="ppE_IMRPhenomPv2_IMR")){	
+		std::string local_method = "IMRPhenomPv2";
+		//unpack parameter vector
+		double incl = acos(param[0]);
+		double RA = param[1];
+		double DEC = param[2];
+		double DL = std::exp(param[3]);
+		double chirpmass = std::exp(param[4]);
+		double eta = param[5];
+		double chi1 = param[6];
+		double chi2 = param[7];
+		double theta1 = param[8];//Polar angles of spins relative to L
+		double theta2 = param[9];
+		double phi1 = param[10];//Azimuthal angles of spins relative to L
+		double phi2 = param[11];
+		double phiref = param[12];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double psi = param[13];//Orbital phase at fref (20Hz) -- Someday, find a way to maximize this out
+		double delta_t = 0;
+		double tc_ref =0;
+		double fref = 20;
+		//transform
+		double spin1[3];
+		double spin2[3];
+		double spin1sphr[3] =  {chi1, theta1, phi1};
+		double spin2sphr[3] =  {chi2, theta2, phi2};
+		transform_sph_cart( &spin1sphr[0], &spin1[0]);
+		transform_sph_cart( &spin2sphr[0], &spin2[0]);
+		double *phi = new double[mcmc_num_detectors];
+		double *theta = new double[mcmc_num_detectors];
+	
+		//double *phi = new double[mcmc_num_detectors];
+		//double *theta = new double[mcmc_num_detectors];
+		//celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[0], &phi[0], &theta[0]);
+
+		//create gen_param struct
+		gen_params parameters; 
+		parameters.mass1 = calculate_mass1(chirpmass, eta);
+		parameters.mass2 = calculate_mass2(chirpmass, eta);
+		parameters.spin1[0] = spin1[0];
+		parameters.spin1[1] = spin1[1];
+		parameters.spin1[2] = spin1[2];
+		parameters.spin2[0] = spin2[0];
+		parameters.spin2[1] = spin2[1];
+		parameters.spin2[2] = spin2[2];
+		parameters.Luminosity_Distance = DL;
+		//The rest is maximized over for this option
+		parameters.tc = 0;
+		//parameters.phic = 0;
+		parameters.phiRef=phiref;
+		parameters.f_ref=fref;
+		parameters.incl_angle = incl;
+		parameters.psi = psi;
+		//parameters.phi=phi[0];
+		//parameters.theta=theta[0];
+		//parameters.phi=0;
+		//parameters.theta=0;
+		parameters.RA = RA;
+		parameters.DEC = DEC;
+		parameters.gmst = mcmc_gmst;
+		parameters.NSflag = false;
+		parameters.sky_average = false;
+		
+		for(int j =0; j<mcmc_min_dim; j++){
+			for(int k =0; k<mcmc_min_dim; k++)
+			{
+				output[j][k] =0;
+			}
+		} 
+		double **temp_out = allocate_2D_array(mcmc_min_dim,mcmc_min_dim);
+		for (int i =0; i<mcmc_num_detectors; i++){
+			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
+			parameters.phi = phi[i];
+			parameters.theta = theta[i];
+			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+				"MCMC_"+local_method+"_Full", 
+				mcmc_detectors[i], temp_out, 14, &parameters, 
+				NULL, NULL, mcmc_noise[i]);
+			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
+			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
+			//	mcmc_detectors[i], &dphi_dra, &dtheta_dra, 
+			//	&dphi_ddec,&dtheta_ddec);
+			for(int j =0; j<mcmc_min_dim; j++){
+				for(int k =0; k<mcmc_min_dim; k++)
+				{
+					output[j][k] +=temp_out[j][k];
+					//std::cout<<j<<" "<<k<<" "<<output[j][k]<<std::endl;
+				}
+			} 
+		}
+
+		delete [] phi; delete [] theta;
+
+		deallocate_2D_array(temp_out, mcmc_min_dim,mcmc_min_dim);
 	}
 
 }
