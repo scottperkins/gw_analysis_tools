@@ -1205,10 +1205,6 @@ void update_history(sampler *sampler, double *new_params, int *new_param_status,
 
 void write_stat_file(sampler *sampler, 
 		std::string filename
-		//int *accepted_steps,
-		//int *rejected_steps,
-		//int accepted_swps, 
-		//int rejected_swps
 		)
 {
 	int rejected_swps=0, accepted_swps=0;
@@ -1609,8 +1605,9 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 		}
 	}
 	else{
-		checkfile<<"false"<<std::endl;
+		std::cout<<"false"<<std::endl;
 	}
+	checkfile.close();
 }
 
 
@@ -1641,6 +1638,7 @@ void load_temps_checkpoint_file(std::string check_file, double *temps, int chain
 			i++;
 		}
 	}
+	file_in.close();
 }
 
 /*! \brief load checkpoint file into sampler struct
@@ -1666,6 +1664,10 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		sampler->max_dim = std::stod(item);
 		if(sampler->min_dim == sampler->max_dim){
 			sampler->dimension=sampler->min_dim;
+			sampler->RJMCMC = false;
+		}
+		else{
+			sampler->RJMCMC=true;
 		}
 		std::getline(lineStream, item, ',');
 		sampler->chain_N = std::stod(item);
@@ -1741,6 +1743,7 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		
 	}
 	else{std::cout<<"ERROR -- File "<<check_file<<" not found"<<std::endl; exit(1);}
+	file_in.close();
 }
 
 void assign_ct_p(sampler *sampler, int step, int chain_index)

@@ -6,6 +6,7 @@
 #include "fisher.h"
 #include "mcmc_sampler.h"
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <complex>
 #include <fftw3.h>
@@ -799,6 +800,128 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	
 	//std::cout<<"inner products not max: "<<DH<<" "<<HH<<std::endl;
 	return -0.5*(HH- 2*DH);
+}
+/*! \brief Takes in an MCMC checkpoint file and continues the chain
+ *
+ * Obviously, the user must be sure to correctly match the dimension, number of chains, the generation_method, 
+ * the prior function, the data, psds, freqs, and the detectors (number and name), and the gps_time to the 
+ * previous run, otherwise the behavior of the sampler is undefined.
+ *
+ * numThreads and pool do not necessarily have to be the same
+ */
+void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
+	double ***output,
+	int ***status,
+	int max_dim,
+	int min_dim,
+	int N_steps,
+	int swp_freq,
+	double(*log_prior)(double *param, int *status, int dimension, int chain_id),
+	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	int Nmod,
+	int *bppe,
+	std::string generation_method,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string auto_corr_filename,
+	std::string likelihood_log_filename,
+	std::string final_checkpoint_filename
+	)
+{
+	std::fstream file_in;
+	file_in.open(start_checkpoint_file,std::ios::in);
+	std::string line, item;
+	int chain_n;
+	if(file_in){
+		std::getline(file_in,line);
+		std::stringstream lineStream(line);
+		std::getline(lineStream, item, ',');
+		std::getline(lineStream, item, ',');
+		std::getline(lineStream, item, ',');
+		chain_n = std::stod(item);
+		
+	}
+	file_in.close();
+	
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
+	}
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_generation_method = generation_method;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_Nmod = Nmod;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
+
+	//Random numbers for RJstep:
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	mcmc_rvec = (gsl_rng **)malloc(sizeof(gsl_rng *)*chain_n);
+	for(int i = 0 ; i<chain_n; i++){
+		mcmc_rvec[i] = gsl_rng_alloc(T);
+		gsl_rng_set(mcmc_rvec[i],i*11);
+	}
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
+	//##################################################################
+	//std::function<void(double*, double*, int*, int*, int, int, double)> RJstep;
+	void (*RJstep)(double *, double *, int *, int *, int, int,double);
+	if(!RJ_proposal){
+		RJstep = RJPTMCMC_RJ_proposal;
+	}
+	else{
+		RJstep = RJ_proposal;
+	}
+	//#################################################################
+	bool local_seeding=false ;
+
+	RJPTMCMC_method_specific_prep(generation_method, max_dim,min_dim, NULL, local_seeding);
+
+	continue_RJPTMCMC_MH(start_checkpoint_file,output, status,N_steps,swp_freq,log_prior,
+			RJPTMCMC_likelihood_wrapper, RJPTMCMC_fisher_wrapper,RJstep,numThreads, pool, 
+			show_prog,statistics_filename,chain_filename,
+			auto_corr_filename, likelihood_log_filename,final_checkpoint_filename);
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deallocate_FFTW_mem(&plans[i]);
+	free(plans);
+	for(int i = 0 ; i<chain_n; i++){
+		gsl_rng_free(mcmc_rvec[i]);	
+	}
+	free(mcmc_rvec);
 }
 /*! \brief Wrapper for the RJPTMCMC_MH function, specifically for GW analysis
  *

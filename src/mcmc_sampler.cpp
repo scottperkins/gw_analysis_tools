@@ -189,6 +189,151 @@ private:
 	}
 };
 ThreadPool *poolptr;
+/*! \brief Routine to take a checkpoint file and begin a new chain at said checkpoint 
+ *
+ * See MCMC_MH_internal for more details of parameters (pretty much all the same)
+ */
+void continue_RJPTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int ***status,/**< [out] output parameter status array, dimensions: status[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	std::function<double(double*, int*,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
+	std::function<double(double*,int*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,int*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int,int, int)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	bool update_RJ_width, 
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output -- if multiple cold chains, it will append each output to the other, and write out the total*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+
+	sampler sampler;
+	samplerptr = &sampler;
+
+	//samplerptr->RJMCMC=true;
+	samplerptr->update_RJ_width=update_RJ_width;
+	//if Fisher is not provided, Fisher and MALA steps
+	//aren't used
+	if(fisher ==NULL){
+		samplerptr->fisher_exist = false;
+	}
+	else 
+		samplerptr->fisher_exist = true;
+
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
+	
+	
+	//Construct sampler structure
+	samplerptr->lp = log_prior;
+	samplerptr->ll = log_likelihood;
+	samplerptr->fish = fisher;
+	samplerptr->rj = RJ_proposal;
+	samplerptr->swp_freq = swp_freq;
+	samplerptr->N_steps = N_steps;
+	samplerptr->show_progress = show_prog;
+	samplerptr->num_threads = numThreads;
+
+
+	samplerptr->output = output;
+	samplerptr->param_status= status;
+	samplerptr->pool = pool;
+
+	//Unpack checkpoint file -- allocates memory internally -- separate call unneccessary
+	load_checkpoint_file(start_checkpoint_file, samplerptr);
+
+
+	//allocate other parameters
+	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
+		assign_probabilities(samplerptr, chain_index);
+	for (int j=0;j<samplerptr->chain_N;j++){
+		samplerptr->current_likelihoods[j] =
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+	}
+	
+	//Set chains with temp 1 to highest priority
+	if(samplerptr->prioritize_cold_chains){
+		for(int i =0 ;i<samplerptr->chain_N; i++){
+			if(samplerptr->chain_temps[i]==1)
+				samplerptr->priority[i] = 0;
+		}
+	}
+	
+	//########################################################
+	PTMCMC_MH_loop(samplerptr);	
+	//##############################################################
+	
+	end =clock();
+	wend =omp_get_wtime();
+
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
+
+	std::cout<<std::endl;
+	//############################################################
+	//Write ll lp to file
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	}
+	//############################################################
+	
+	//###########################################################
+	//Auto-correlation
+	if(auto_corr_filename != ""){
+		std::cout<<"Calculating Autocorrelation: "<<std::endl;
+		int segments = 50;
+		double target_corr = .01;
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads);
+	}
+	//###########################################################
+	acend =clock();
+	wacend =omp_get_wtime();
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
+
+	//std::cout<<std::endl;
+	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
+	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
+	//std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of chain swaps (all chains): "<<rejected_percent<<std::endl;
+	//accepted_percent = (double)(step_accepted[0])/(step_accepted[0]+step_rejected[0]);
+	//rejected_percent = (double)(step_rejected[0])/(step_accepted[0]+step_rejected[0]);
+	//std::cout<<"Accepted percentage of steps (cold chain): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of steps (cold chain): "<<rejected_percent<<std::endl;
+	//double nansum=0;
+	//for (int i =0; i< chain_N; i++)
+	//	nansum+= samplerptr->nan_counter[i];
+	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
+	
+	if(statistics_filename != "")
+		write_stat_file(samplerptr, statistics_filename);
+	
+	if(chain_filename != "")
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output[0], samplerptr->param_status[0]);
+
+	if(end_checkpoint_file !=""){
+		write_checkpoint_file(samplerptr, end_checkpoint_file);
+	}
+
+	//free(step_accepted);
+	//free(step_rejected);
+	//temps usually allocated by user, but for continued chains, this is done internally
+	free(samplerptr->chain_temps);
+	deallocate_sampler_mem(samplerptr);
+}
 /*!\brief Generic reversable jump sampler, where the likelihood, prior, and reversable jump proposal are parameters supplied by the user
  *
  * Note: Using a min_dimension tells the sampler that there is a ``base model'', and that the dimensions from min_dim to max_dim are ``small'' corrections to that model. This helps inform some of the proposal algorithms and speeds up computation. If using discrete models with no overlap of variables (ie model A or model B), set min_dim to 0. Even if reusing certain parameters, if the extra dimensions don't describe ``small'' deviations, it's probably best to set min_dim to 0.Since the  RJ  proposal is user specified, even if there are parameters that should never be removed, it's up to the user to dictate that. Using min_dim will not affect that aspect of the  sampler. If there's a ``base-model'', the fisher function should produce a fisher matrix for the base model only. The modifications are then normally distributed around the last parameter value. Then the fisher function should take the minimum dimension instead of the maximum, like the other functions.
@@ -270,7 +415,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	bool update_RJ_width, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output -- if multiple cold chains, it will append each output to the other, and write out the total*/
 	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
 	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
@@ -412,21 +557,6 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != ""){
-		//std::ofstream out_file;
-		//out_file.open(chain_filename);
-		//out_file.precision(15);
-		//for(int i =0; i<samplerptr->N_steps; i++){
-		//	for(int j=0; j<samplerptr->max_dim;j++){
-		//		out_file<<samplerptr->output[0][i][j]<<" , ";
-		//	}
-		//	for(int j = 0 ; j<samplerptr->max_dim; j++){
-		//		if(j==samplerptr->max_dim-1)
-		//			out_file<<samplerptr->param_status[0][i][j]<<std::endl;
-		//		else
-		//			out_file<<samplerptr->param_status[0][i][j]<<" , ";
-		//	}
-		//}
-		//out_file.close();
 		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output[0], samplerptr->param_status[0]);
 	}
 
@@ -2030,4 +2160,110 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		auto_corr_filename,
 		likelihood_log_filename,
 		checkpoint_file);
+}
+void continue_RJPTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int ***status,/**< [out] output parameter status array, dimensions: status[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	double (*log_prior)(double *param, int *status, int max_dimension, int chain_id),	
+	double (*log_likelihood)(double *param, int *status, int max_dimension, int chain_id),
+	void (*fisher)(double *param, int *status,int max_dimension, double **fisher, int chain_id),
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dimension, int chain_id, double gaussian_width),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int max_dim, int chain_id){
+			return log_likelihood(param, param_status,max_dim,chain_id);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int max_dim, int chain_id){
+			return log_prior(param, param_status, max_dim,chain_id);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int max_dim, double **fisherm, int chain_id){
+			fisher(param, param_status,max_dim, fisherm,chain_id);};
+	}
+	std::function<void(double*,double*, int*,int*,int,int, double)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int max_dim, int chain_id, double width){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,max_dim,chain_id, width);};
+	continue_RJPTMCMC_MH_internal(start_checkpoint_file,
+			output,
+			status,
+			N_steps,
+			swp_freq,
+			lp,
+			ll,
+			f,
+			rj,
+			numThreads,
+			pool,
+			show_prog,
+			true,
+			statistics_filename,
+			chain_filename,
+			auto_corr_filename,
+			likelihood_log_filename,
+			end_checkpoint_file);
+}
+void continue_RJPTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int ***status,/**< [out] output parameter status array, dimensions: status[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	double (*log_prior)(double *param, int *status, int max_dimension, int chain_id),	
+	double (*log_likelihood)(double *param, int *status, int max_dimension, int chain_id),
+	void (*fisher)(double *param, int *status,int max_dimension, double **fisher, int chain_id),
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dimension, int chain_id),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int max_dim, int chain_id){
+			return log_likelihood(param, param_status,max_dim,chain_id);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int max_dim, int chain_id){
+			return log_prior(param, param_status, max_dim,chain_id);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int max_dim, double **fisherm, int chain_id){
+			fisher(param, param_status,max_dim, fisherm,chain_id);};
+	}
+	std::function<void(double*,double*, int*,int*,int,int, double)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int max_dim, int chain_id, double width){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,max_dim,chain_id);};
+	continue_RJPTMCMC_MH_internal(start_checkpoint_file,
+			output,
+			status,
+			N_steps,
+			swp_freq,
+			lp,
+			ll,
+			f,
+			rj,
+			numThreads,
+			pool,
+			show_prog,
+			false,
+			statistics_filename,
+			chain_filename,
+			auto_corr_filename,
+			likelihood_log_filename,
+			end_checkpoint_file);
 }
