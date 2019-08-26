@@ -834,14 +834,6 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	int N_trimmed = Tobs*fs;
 	double *times_untrimmed = (double *)malloc(sizeof(double)*N);
 	double dt = 1./fs;
-	//MODIFIED HERE
-	//#################################################
-	//for (int j = 0; j< psd_length; j++){
-	//	for(int i =0; i< num_detectors ; i++){
-	//		psds[i][j] = psds[i][j]*df;
-	//	}
-	//}
-	//#################################################
 
 
 	for (int i =0; i < N; i++){
