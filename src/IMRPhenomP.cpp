@@ -299,9 +299,9 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			waveform_cross[j] = 0.0;
 			amp_vec[j] = amp;
 			//################################################
-			phase_vec[j] = phase;
-			hpfac_vec[j] = hp_factor;
-			hcfac_vec[j] = hc_factor;
+			phase_vec[j] = 0;
+			hpfac_vec[j] = 0;
+			hcfac_vec[j] = 0;
 		}
 		else{	
 			if (f<params->f1_phase)
@@ -329,14 +329,15 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 			phase = phase + (std::complex<T>)(2. * epsilon) ;
 			//################################################
-			//NEVER MIND
-			//The factor of .5 seems wrong, parameter estimation for DL is off by 2
 			amp_vec[j] = amp/std::complex<T>(2.,0.0);
-			//amp_vec[j] = amp;
 			//################################################
 			phase_vec[j] = phase;
 			hpfac_vec[j] = hp_factor;
 			hcfac_vec[j] = hc_factor;
+			
+			//if(std::is_same< double, T>::value){
+			//	std::cout<<hcfac_vec[j]<<std::endl;
+			//}
 			//waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 			//waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 			hp_factor = 0.;
@@ -345,10 +346,59 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	}
 	//Interpolate phase to set coalescence time to 0
+	gsl_interp_accel *acc_fixed = NULL;
+	gsl_spline *phiI_fixed = NULL;
+
+	int n_fixed = 10;
+	
+	adouble f_final_tmp =(adouble) params->fRD;//params->M;
+	double f_final = f_final_tmp.value();
+	std::cout<<f_final<<std::endl;
+	double freqs_fixed[n_fixed] ; 	
+	double phase_fixed[n_fixed] ; 	
+	double freqs_fixed_start = .8*(f_final);
+	double freqs_fixed_stop = 1.2*(f_final);
+	//if(freqs_fixed_stop  >  fcut){
+	//	freqs_fixed_stop = fcut;
+	//}
+	double delta_freqs_fixed  =  (freqs_fixed_stop-freqs_fixed_start)/(n_fixed-1);
+	for(int j =0; j<n_fixed; j++){
+		freqs_fixed[j] = freqs_fixed_start +  j *delta_freqs_fixed;
+	}
+	for (int j =  0 ;j<n_fixed; j++){
+		//std::complex<T> hphenom = 0.0;
+		T phasing = 0  ;
+		T f =  freqs_fixed[j];
+		pows.MFsixth = pow(M*f,1./6 );
+		pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+		pows.MFthird = pows.MFsixth * pows.MFsixth;
+		pows.MF2third =pows.MFthird* pows.MFthird;
+		phasing = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+		adouble adub_phasing = (adouble)phasing;
+		phase_fixed[j]= adub_phasing.value();
+	}
+
+	//Interpolation to  fix tc
+	acc_fixed = gsl_interp_accel_alloc();
+	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
+	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
+	double t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI);
+	std::cout<<t_corr_fixed<<std::endl;
+	//Clean up
+	gsl_spline_free(phiI_fixed);
+	gsl_interp_accel_free(acc_fixed);
 	
 	for (int j = 0; j<length;j++){
-		waveform_plus[j] = amp_vec[j] * hpfac_vec[j]*std::exp(-i * phase_vec[j]);
-		waveform_cross[j] = amp_vec[j] * hcfac_vec[j]*std::exp(-i * phase_vec[j]);
+		waveform_plus[j] = 
+			amp_vec[j] * hpfac_vec[j]*std::exp(
+			-i * (phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
+		waveform_cross[j] = 
+			amp_vec[j] * hcfac_vec[j]*std::exp(
+			-i *(phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
+			//if(std::is_same< double, T>::value){
+			//	std::cout<<waveform_cross[j]<<std::endl;
+			//}
+		
 	}
 	//}
 	free(amp_vec);
@@ -585,7 +635,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
   	T XdotQArun = tmp_x*QArunx_Jf+tmp_y*QAruny_Jf+tmp_z*QArunz_Jf;
   	params->zeta_polariz = atan(XdotQArun / XdotPArun);
 	//if(std::is_same< double, T>::value){
-	//	std::cout<<params->spin1z<<std::endl;
+	//	std::cout<<params->zeta_polariz<<std::endl;
 	//
 	//}
 	
