@@ -122,7 +122,6 @@ def fourier_waveform_polarizations_py(double[::1] frequencies ,
                                 &waveform_cross_imag[0],
                                 generation_method,
                                 &parameters.params)
-    print("TEST")
     cdef np.ndarray[np.complex128_t,ndim=1] waveform_plus = np.zeros((frequencies.size),dtype=np.complex128)
     cdef np.ndarray[np.complex128_t,ndim=1] waveform_cross = np.zeros((frequencies.size),dtype=np.complex128)
     cdef int i = 0

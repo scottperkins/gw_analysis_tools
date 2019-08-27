@@ -354,6 +354,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	return status ;
 }
 
+
+
+
+
+
+
 int fourier_waveform(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
 			int length,/**<integer length of all the arrays*/
 			double *waveform_plus_real, /**< complex array for the output waveform*/
@@ -364,18 +370,20 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			gen_params *parameters/**<structure containing all the source parameters*/
 			)
 {
-	std::complex<double> *waveform_plus = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
-	std::complex<double> *waveform_cross = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
-	fourier_waveform(frequencies, length, waveform_plus,waveform_cross, generation_method, parameters);
-	for(int i = 0 ;i<length;i++)
-	{
-		waveform_plus_real[i] = real(waveform_plus[i]);
-		waveform_plus_imag[i] = imag(waveform_plus[i]);
-		waveform_cross_real[i] = real(waveform_cross[i]);
-		waveform_cross_imag[i] = imag(waveform_cross[i]);
+	//std::complex<double> *waveform_plus = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	//std::complex<double> *waveform_cross = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
+	std::complex<double> *waveform_plus = new std::complex<double>[length];
+	std::complex<double> *waveform_cross = new std::complex<double>[length];
+	int status = fourier_waveform(frequencies, length, waveform_plus,waveform_cross, generation_method, parameters);
+	for(int l = 0 ; l<length;l++){
+		waveform_plus_real[l] = std::real(waveform_plus[l]);
+		waveform_plus_imag[l] = std::imag(waveform_plus[l]);
+		waveform_cross_real[l] = std::real(waveform_cross[l]);
+		waveform_cross_imag[l] = std::imag(waveform_cross[l]);
 	}
-	free(waveform_plus);
-	free(waveform_cross);
+	delete [] waveform_plus;
+	delete [] waveform_cross;
+	return status;
 }
 
 

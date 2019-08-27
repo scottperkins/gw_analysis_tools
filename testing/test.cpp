@@ -70,6 +70,7 @@ void test33();
 void test34();
 void test35();
 void test36();
+void test37();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -99,8 +100,75 @@ static double *psd=NULL;
 
 int main(){
 
-	test34();	
+	test37();	
 	return 0;
+}
+void test37()
+{
+	gen_params params;
+	int length = 160;
+	params.mass1 = 200;
+	params.mass2 = 50;
+	string method= "IMRPhenomPv2";
+	//string method= "IMRPhenomD";
+	//string method= "ppE_IMRPhenomPv2_IMR";
+	//string method= "IMRPhenomD";
+	//string method= "ppE_IMRPhenomD_Inspiral";
+	double amp[length];
+	double phaseout[length];
+	complex<double> waveformout_plus[length];
+	complex<double> waveformout_cross[length];
+	double waveformout_plus_real[length];
+	double waveformout_cross_real[length];
+	double waveformout_plus_imag[length];
+	double waveformout_cross_imag[length];
+	complex<double> response[length];
+	params.spin1[0] = .0;
+	params.spin1[1] = .01;
+	params.spin1[2] = -.2;
+	params.spin2[0] = .0;
+	params.spin2[1] = 0.1;
+	params.spin2[2] = .9;
+	double *spin1  = params.spin1;
+	double *spin2= params.spin2;
+	//params.phic = 2.0;
+	//params.tc = 8.0;
+	params.Luminosity_Distance = 800.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=1.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -1;
+	params.Nmod = 1;
+	params.NSflag = false;
+	params.sky_average = false;
+	//params.phi = M_PI/3.;
+	//params.theta = M_PI/3;
+	params.RA = 2;
+	params.DEC = 1;
+	params.gmst = 10;
+	params.phi = 0;
+	params.theta = 0;
+	params.incl_angle = 0;
+	params.phiRef = 10;
+	params.f_ref = 15;
+	
+	double freq[length];
+	for(int i=0;i<length;i++)
+		freq[i]=10.+i*1e-1;
+
+	clock_t  start, end;
+	start = clock(); 
+	//fourier_waveform(freq, length, waveformout_plus,waveformout_cross,method,&params);
+	fourier_waveform(freq, length, waveformout_plus_real,waveformout_plus_imag,waveformout_cross_real,waveformout_cross_imag,method,&params);
+	//fourier_detector_response_equatorial(freq, length, response,"Hanford",method,&params);
+	end=clock();
+	//for(int i = 0 ;i<length; i++){
+	//	std::cout<<waveformout_plus[i]<<" "<<waveformout_cross[i]<<std::endl;
+	//}
+	cout<<"TIMING waveform: "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
+	delete [] params.betappe;
+	delete [] params.bppe;
+	
 }
 
 //Proof of concept for PTMCMC (non-RJ) param_status array
