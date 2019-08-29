@@ -4,7 +4,7 @@ import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 from gw_analysis_tools_py import mcmc_routines_ext as mcmc
 
-burn = True
+burn = False
 burnlength = 400000
 data = np.loadtxt("data/mcmc_output_Pv2.csv",delimiter=',')
 if burn:
@@ -14,7 +14,7 @@ if burn:
 #plt.plot(chirpmasses)
 #plt.show()
 #plt.close()
-ndim, nsamples = 13, len(data) 
+ndim, nsamples = 14, len(data) 
 #labels = [r"$D_{L}$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 labels = [r"$cos \iota$",r"RA",r"DEC",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\theta_1$", r"$\theta_2$",r"$\phi_1$", r"$\phi_2$",r"$\phi_{ref}$", r"$\psi$"]
 
@@ -23,9 +23,9 @@ for x in data:
     dataplot.append(x)
     dataplot[-1][3] = np.exp(dataplot[-1][3])
     dataplot[-1][4] = np.exp(dataplot[-1][4])
-#figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-#plt.savefig("mcmc_testing_Pv2.pdf")
-#plt.close()
+figure = corner.corner(dataplot, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
+plt.savefig("mcmc_testing_Pv2.pdf")
+plt.close()
 
 ##############################################################
 data = np.loadtxt("data/mcmc_output_Pv2.csv",delimiter=',')
@@ -66,22 +66,22 @@ dataplot = np.asarray(dataplot)
 #plt.close()
 
 ##############################################################
-threads = 10
-segs = 50
-length = len(data)
-acfile=b"data/auto_corr_mcmc_Pv2_burned.csv"
-mcmc.write_auto_corr_file_from_data_py(acfile, data, length, 9, segs, .01, threads)
-
-autocorr = np.loadtxt("data/auto_corr_mcmc_Pv2_burned.csv",delimiter=',')
-lengths = autocorr[0]
-autocorr = autocorr[1:]
-
-
-for i in np.arange(len(autocorr)):
-    plt.plot(lengths,autocorr[i], label=labels[i])
-plt.legend()
-plt.savefig("autocorr_testing_Pv2_burned.pdf")
-plt.close()
+#threads = 10
+#segs = 50
+#length = len(data)
+#acfile=b"data/auto_corr_mcmc_Pv2_burned.csv"
+#mcmc.write_auto_corr_file_from_data_py(acfile, data, length, 9, segs, .01, threads)
+#
+#autocorr = np.loadtxt("data/auto_corr_mcmc_Pv2_burned.csv",delimiter=',')
+#lengths = autocorr[0]
+#autocorr = autocorr[1:]
+#
+#
+#for i in np.arange(len(autocorr)):
+#    plt.plot(lengths,autocorr[i], label=labels[i])
+#plt.legend()
+#plt.savefig("autocorr_testing_Pv2_burned.pdf")
+#plt.close()
 #autocorr = np.loadtxt("data/auto_corr_mcmc_Pv2.csv",delimiter=',')
 #lengths = autocorr[0]
 #autocorr = autocorr[1:]

@@ -6,7 +6,8 @@ import numpy as np
 
 burn = False
 burnlength = 400000
-numfiles = 3
+numfiles = 13
+
 data = []
 #labels = [0,3,5,7,9,11,13,15,17,19,21,23]
 for i in np.arange(numfiles):

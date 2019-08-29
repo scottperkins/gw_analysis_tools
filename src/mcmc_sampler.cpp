@@ -6,7 +6,6 @@
 #include <iostream>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include <omp.h>
 #include <time.h>
 #include <condition_variable>
 #include <mutex>
@@ -16,11 +15,17 @@
 #include <functional>
 #include <unistd.h>
 #include <fstream>
+#include "adolc/adolc.h"
+//#include <adolc/adolc_openmp.h>
 
 #ifndef _OPENMP
 #define omp ignore
 #endif
 
+#ifdef _OPENMP
+#include <adolc/adolc_openmp.h>
+#include <omp.h>
+#endif
 
 /*!\file 
  * Source file for the sampler foundation
@@ -1361,10 +1366,11 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 		int cutoff ;
 		int step_log;
 		omp_set_num_threads(sampler->num_threads);
-		#pragma omp parallel 
+		#pragma omp parallel ADOLC_OPENMP
 		{
 		while (k<(increment-1) ){
-			#pragma omp for
+			//#pragma omp for firstprivate(ADOLC_OpenMP_Handler)
+			#pragma omp for 
 			for (int j=0; j<sampler->chain_N; j++)
 			{
 				if( sampler->N_steps-sampler->chain_pos[j] <= sampler->swp_freq) 
@@ -1516,7 +1522,8 @@ void PTMCMC_MH_loop(sampler *sampler)
 	if (!sampler->pool)
 	{
 		omp_set_num_threads(sampler->num_threads);
-		#pragma omp parallel 
+		//#pragma omp parallel 
+		#pragma omp parallel ADOLC_OPENMP
 		{
 		while (k<sampler->N_steps-1){
 			#pragma omp single
@@ -1525,7 +1532,8 @@ void PTMCMC_MH_loop(sampler *sampler)
 					cutoff = sampler->N_steps-k-1;	
 				else cutoff = sampler->swp_freq;	
 			}
-			#pragma omp for
+			//#pragma omp for firstprivate(ADOLC_OpenMP_Handler)
+			#pragma omp for 
 			for (int j=0; j<sampler->chain_N; j++)
 			{
 				for (int i = 0 ; i< cutoff;i++)

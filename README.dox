@@ -18,7 +18,7 @@ Need nvcc -- known to work with v9.1 of CUDA
 
 Required non-standard C libraries:
 FFTW3
-ADOL-C
+ADOL-C -- (must be compiled with OpenMP option)
 GSL
 CUDA
 

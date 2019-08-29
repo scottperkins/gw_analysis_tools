@@ -223,7 +223,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			tempCross = waveform_cross[i];	
 			waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
 					+sin(2.*params.zeta_polariz)*tempCross;
-			waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
+			waveform_cross[i] = cos(2.*params.zeta_polariz)*tempCross
 					-sin(2.*params.zeta_polariz)*tempPlus;
 		}
 	}

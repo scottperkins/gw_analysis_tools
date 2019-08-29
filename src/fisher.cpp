@@ -669,21 +669,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 			for (int k =0; k<length; k++){
 				amplitude_plus_minus[k] =  std::abs(response[k]);
 				phase_plus_minus[k] =  std::arg(response[k]);
-				//std::cout<<amplitude_plus_plus[k]<<" "<<phase_plus_plus[k]<<" "<<response[k]<<std::endl;
 			}
 
-			//fourier_amplitude(frequencies, 
-			//	length,
-			//	amplitude_plus_minus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
-			//fourier_phase(frequencies, 
-			//	length,
-			//	phase_plus_minus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
 			for (int l =0;l<length;l++)
 			{
 				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
