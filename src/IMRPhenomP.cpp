@@ -359,19 +359,18 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	
 	adouble f_final_tmp =(adouble) params->fRD;//params->M;
 	double f_final = f_final_tmp.value();
-	if(std::isnan(f_final)){
-		std::cout<<params->chirpmass<<std::endl;
-		std::cout<<params->DL<<std::endl;
-		std::cout<<params->eta<<std::endl;
-		std::cout<<params->spin1x<<std::endl;
-		std::cout<<params->spin2x<<std::endl;
-		std::cout<<params->spin1y<<std::endl;
-		std::cout<<params->spin2y<<std::endl;
-		std::cout<<params->spin1z<<std::endl;
-		std::cout<<params->spin2z<<std::endl;
-		std::cout<<params->tc<<std::endl;
-		
-	}
+	//if(std::isnan(f_final)){
+	//	std::cout<<params->chirpmass<<std::endl;
+	//	std::cout<<params->DL<<std::endl;
+	//	std::cout<<params->eta<<std::endl;
+	//	std::cout<<params->spin1x<<std::endl;
+	//	std::cout<<params->spin2x<<std::endl;
+	//	std::cout<<params->spin1y<<std::endl;
+	//	std::cout<<params->spin2y<<std::endl;
+	//	std::cout<<params->spin1z<<std::endl;
+	//	std::cout<<params->spin2z<<std::endl;
+	//	std::cout<<params->tc<<std::endl;
+	//}
 	double freqs_fixed[n_fixed] ; 	
 	double phase_fixed[n_fixed] ; 	
 	double freqs_fixed_start = .8*(f_final);
@@ -403,7 +402,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	acc_fixed = gsl_interp_accel_alloc();
 	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
 	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
-	double t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	T t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
 	//Clean up
 	gsl_spline_free(phiI_fixed);
 	gsl_interp_accel_free(acc_fixed);

@@ -1,7 +1,7 @@
 import corner
 import matplotlib.pyplot as plt
 import numpy as np
-from phenompy.utilities import calculate_mass1, calculate_mass2
+#from phenompy.utilities import calculate_mass1, calculate_mass2
 from gw_analysis_tools_py import mcmc_routines_ext as mcmc
 
 burn = False

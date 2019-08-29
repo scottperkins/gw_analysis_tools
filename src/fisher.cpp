@@ -593,6 +593,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			}
 			param_p[i] = param_in[i] + epsilon;
 			param_m[i] = param_in[i] - epsilon;
+			//if(std::isnan(param_p[i]))std::cout<<i<<std::endl;
 
 			//cos \iota must lie within certain range
 			if(param_p[0]>1.)param_p[0]=1.;

@@ -864,7 +864,7 @@ void test29()
 	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
-	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
 	int datalength = 131075;
@@ -890,9 +890,9 @@ void test29()
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
 	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
 
-	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[2] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[2] =  "/home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
  	//double trigger_time= 1135136350.6;
  	double trigger_time = gps_time;
 	double **psd = allocate_2D_array(num_detectors,psd_length);
@@ -915,7 +915,7 @@ void test29()
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double initial_pos[dimension]={.9, 5.2,-1.,std::log(2000),std::log(55), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double *seeding_var = NULL;
-	int n_steps = 3500;
+	int n_steps = 60000;
 	int chain_N=12 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -4926,7 +4926,7 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}//RA
 	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}//DEC
 	if (std::exp(pos[3])<10 || std::exp(pos[3])>10000){return a;}//DL
-	if (std::exp(pos[4])<2 || std::exp(pos[4])>100){return a;}//chirpmass
+	if (std::exp(pos[4])<2 || std::exp(pos[4])>100 || std::isnan(pos[4])){return a;}//chirpmass
 	if ((pos[5])<.1 || (pos[5])>.249999){return a;}//eta
 	if ((pos[6])<0 || (pos[6])>.9){return a;}//chi1 
 	if ((pos[7])<0 || (pos[7])>.9){return a;}//chi2
