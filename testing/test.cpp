@@ -100,7 +100,7 @@ static double *psd=NULL;
 
 int main(){
 
-	test29();	
+	test35();	
 	return 0;
 }
 void test37()
@@ -254,11 +254,12 @@ void test35()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
+	data_length[2] =psd_length;
 
 	//#########################################################
 	//mcmc options
 	int dimension = 14;
-	int n_steps = 3000;
+	int n_steps = 50000;
 	int chain_N=24 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -285,7 +286,7 @@ void test35()
 			swp_freq,  test_lp_GW_Pv2,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"","", "",checkfile);	
+			generation_method,statfilename,"","", "testing/data/mcmc_log_likelihoods.csv",checkfile);	
 
 
 	std::string ind_chain_file;
@@ -409,8 +410,8 @@ void test34()
 	
 	int Nmod = 0;
 	int *bppe = NULL;
-	int numThreads = 2;
-	bool pool = false;
+	int numThreads = 10;
+	bool pool = true;
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";
@@ -864,7 +865,7 @@ void test29()
 	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
-	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
 	//int cols = 3;
 	int datalength = 131075;
@@ -890,9 +891,9 @@ void test29()
 	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
 	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
 
-	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
-	detector_files[2] =  "/home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[2] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
  	//double trigger_time= 1135136350.6;
  	double trigger_time = gps_time;
 	double **psd = allocate_2D_array(num_detectors,psd_length);
@@ -915,7 +916,7 @@ void test29()
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double initial_pos[dimension]={.9, 5.2,-1.,std::log(2000),std::log(55), .22,.4,.4,.1,.1,.1,.1,1,1};
 	double *seeding_var = NULL;
-	int n_steps = 60000;
+	int n_steps = 10000;
 	int chain_N=12 ;
 	double ***output;
 	output = allocate_3D_array( chain_N, n_steps, dimension );
@@ -948,7 +949,7 @@ void test29()
 	int Nmod = 0;
 	int *bppe = NULL;
 	int numThreads = 10;
-	bool pool = false;
+	bool pool = true;
 	//#########################################################
 	//gw options
 	//std::string generation_method = "dCS_IMRPhenomD_log";

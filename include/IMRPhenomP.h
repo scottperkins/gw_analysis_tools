@@ -49,6 +49,10 @@ virtual int construct_waveform(T *frequencies,
 				source_parameters<T> *params 
 				);
 
+//###############################################################################
+virtual T calculate_time_shift(source_parameters<T> *params, useful_powers<T> *pows, T *pn_phase_coeffs, lambda_parameters<T> *lambda);
+//###############################################################################
+
 virtual void WignerD(T d2[5], T dm2[5], useful_powers<T> *pows,source_parameters<T> *params);
 
 virtual void calculate_twistup( T alpha, std::complex<T> *hp_factor, std::complex<T> *hc_factor, T d2[5], T dm2[5], sph_harm<T> *sph_harm);

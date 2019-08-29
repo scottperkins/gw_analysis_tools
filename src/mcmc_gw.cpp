@@ -1872,6 +1872,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		double delta_t = 0;
 		double tc_ref =0;
 		double fref = 20;
+		if(isnan(chirpmass))std::cout<<"Input chirpmass for fisher  is nan"<<std::endl;
 		//transform
 		double spin1[3];
 		double spin2[3];

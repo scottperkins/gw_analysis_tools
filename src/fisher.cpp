@@ -303,6 +303,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			}
 			param_p[i] = param_in[i] + epsilon;
 			param_m[i] = param_in[i] - epsilon;
+			if(param_p[2]>.25) param_p[2] = .25;
 
 				
 			waveform_params.mass1 =calculate_mass1(param_p[1],param_p[2]);
@@ -600,8 +601,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 			else if( param_p[1]<-1.) param_p[0]=-1.;
 			if(param_m[0]>1.)param_m[0]=1.;
 			else if( param_m[1]<-1.) param_m[0]=-1.;
+			if(param_p[5]>.25) param_p[5] = .25;
 
-			
 			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
 			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);//MSOL_SEC;
 			waveform_params.Luminosity_Distance=param_p[3];//MPC_SEC;
@@ -1020,6 +1021,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 			else if( param_p[1]<-1.) param_p[0]=-1.;
 			if(param_m[0]>1.)param_m[0]=1.;
 			else if( param_m[1]<-1.) param_m[0]=-1.;
+			if(param_p[5]>.25) param_p[5] = .25;
 
 			
 			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
@@ -1179,6 +1181,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 			//param_p[i] = param_in[i]*(1. + epsilon);
 			//param_m[i] = param_in[i] *(1- epsilon);
 
+			if(param_p[4]>.25) param_p[4] = .25;
+
 			model.change_parameter_basis(param_p, param_out, parameters_in.sky_average);
 			//Spins already individual, reverse, but change_param_basis
 			//assumes you input chi_s and chi_a
@@ -1317,6 +1321,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 				param_p[j] = param_in[j] ;
 				param_m[j] = param_in[j] ;
 			}
+			if(param_p[1]>.25) param_p[1] = .25;
 			//if(i==0) epsilon = 1e-25;
 			//else epsilon = epsilonnaught;
 			param_p[i] = param_in[i] + epsilon;

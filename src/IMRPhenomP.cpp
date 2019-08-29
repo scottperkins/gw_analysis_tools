@@ -351,61 +351,13 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		}
 
 	}
-	//Interpolate phase to set coalescence time to 0
-	gsl_interp_accel *acc_fixed = NULL;
-	gsl_spline *phiI_fixed = NULL;
-
-	int n_fixed = 10;
-	
-	adouble f_final_tmp =(adouble) params->fRD;//params->M;
-	double f_final = f_final_tmp.value();
-	//if(std::isnan(f_final)){
-	//	std::cout<<params->chirpmass<<std::endl;
-	//	std::cout<<params->DL<<std::endl;
-	//	std::cout<<params->eta<<std::endl;
-	//	std::cout<<params->spin1x<<std::endl;
-	//	std::cout<<params->spin2x<<std::endl;
-	//	std::cout<<params->spin1y<<std::endl;
-	//	std::cout<<params->spin2y<<std::endl;
-	//	std::cout<<params->spin1z<<std::endl;
-	//	std::cout<<params->spin2z<<std::endl;
-	//	std::cout<<params->tc<<std::endl;
-	//}
-	double freqs_fixed[n_fixed] ; 	
-	double phase_fixed[n_fixed] ; 	
-	double freqs_fixed_start = .8*(f_final);
-	double freqs_fixed_stop = 1.2*(f_final);
-	double delta_freqs_fixed  =  (freqs_fixed_stop-freqs_fixed_start)/(n_fixed-1);
-	for(int j =0; j<n_fixed; j++){
-		freqs_fixed[j] = freqs_fixed_start +  j *delta_freqs_fixed;
-	}
-	for (int j =  0 ;j<n_fixed; j++){
-		//std::complex<T> hphenom = 0.0;
-		T phasing = 0  ;
-		T f =  freqs_fixed[j];
-		if (f<params->f1_phase)
-		{
-			this->precalc_powers_ins(f, M, &pows);
-		}
-		else{
-			pows.MFsixth = pow(M*f,1./6 );
-			pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
-			pows.MFthird = pows.MFsixth * pows.MFsixth;
-			pows.MF2third =pows.MFthird* pows.MFthird;
-		}
-		phasing = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		adouble adub_phasing = (adouble)phasing;
-		phase_fixed[j]= adub_phasing.value();
-	}
-
-	//Interpolation to  fix tc
-	acc_fixed = gsl_interp_accel_alloc();
-	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
-	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
-	T t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
-	//Clean up
-	gsl_spline_free(phiI_fixed);
-	gsl_interp_accel_free(acc_fixed);
+	//#########################################################
+	//Because this part requires the use of gsl_interpolation, and that requires
+	//a specific type (adouble not supported), this must be done for each specific
+	//type. The implementations are fundamentally different, so these templates must be 
+	//written explicitly. No way around it.
+	T t_corr_fixed = this->calculate_time_shift(params, &pows, pn_phase_coeffs, &lambda);
+	//#########################################################
 	
 	for (int j = 0; j<length;j++){
 		waveform_plus[j] = 
@@ -426,7 +378,116 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	free(hcfac_vec);
 	return 1;
 }
+/*! \brief Shifts the time of coalescence to the desired value
+ *
+ * Because GSL interpolation must have double (not adouble), the two cases must behandled  separately, explicitly.
+ */
+template<>
+double IMRPhenomPv2<double>::calculate_time_shift(source_parameters<double> *params, useful_powers<double> *pows, double *pn_phase_coeffs, lambda_parameters<double> *lambda)
+{
+	double M = params->M;
+	//#########################################################
+	//Interpolate phase to set coalescence time to 0
+	gsl_interp_accel *acc_fixed = NULL;
+	gsl_spline *phiI_fixed = NULL;
 
+	int n_fixed = 10;
+	
+	double f_final = params->fRD;
+	double freqs_fixed[n_fixed] ; 	
+	double phase_fixed[n_fixed] ; 	
+	double freqs_fixed_start = .8*(f_final);
+	double freqs_fixed_stop = 1.2*(f_final);
+	double delta_freqs_fixed  =  (freqs_fixed_stop-freqs_fixed_start)/(n_fixed-1);
+	for(int j =0; j<n_fixed; j++){
+		freqs_fixed[j] = freqs_fixed_start +  j *delta_freqs_fixed;
+	}
+	for (int j =  0 ;j<n_fixed; j++){
+		//std::complex<T> hphenom = 0.0;
+		double phasing = 0  ;
+		double f =  freqs_fixed[j];
+		if (f<params->f1_phase)
+		{
+			this->precalc_powers_ins(f, M, pows);
+		}
+		else{
+			pows->MFsixth = pow(M*f,1./6 );
+			pows->MF7sixth= pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth;
+			pows->MFthird = pows->MFsixth * pows->MFsixth;
+			pows->MF2third =pows->MFthird* pows->MFthird;
+		}
+		phasing = (this->build_phase(f,lambda,params,pows,pn_phase_coeffs));
+		phase_fixed[j]= phasing;
+	}
+
+	//Interpolation to  fix tc
+	acc_fixed = gsl_interp_accel_alloc();
+	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
+	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
+	double t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	//Clean up
+	gsl_spline_free(phiI_fixed);
+	gsl_interp_accel_free(acc_fixed);
+	//#########################################################
+	return t_corr_fixed;
+
+}
+/*! \brief Shifts the time of coalescence to the desired value
+ *
+ * Because GSL interpolation must have double (not adouble), the two cases must behandled  separately, explicitly.
+ */
+template<>
+adouble IMRPhenomPv2<adouble>::calculate_time_shift(source_parameters<adouble> *params, useful_powers<adouble> *pows, adouble *pn_phase_coeffs, lambda_parameters<adouble> *lambda)
+{
+	adouble M = params->M;
+	//#########################################################
+	//Interpolate phase to set coalescence time to 0
+	gsl_interp_accel *acc_fixed = NULL;
+	gsl_spline *phiI_fixed = NULL;
+
+	int n_fixed = 10;
+	
+	adouble f_final_tmp =(adouble) params->fRD;//params->M;
+	double f_final = f_final_tmp.value();
+	double freqs_fixed[n_fixed] ; 	
+	double phase_fixed[n_fixed] ; 	
+	double freqs_fixed_start = .8*(f_final);
+	double freqs_fixed_stop = 1.2*(f_final);
+	double delta_freqs_fixed  =  (freqs_fixed_stop-freqs_fixed_start)/(n_fixed-1);
+	for(int j =0; j<n_fixed; j++){
+		freqs_fixed[j] = freqs_fixed_start +  j *delta_freqs_fixed;
+	}
+	for (int j =  0 ;j<n_fixed; j++){
+		//std::complex<T> hphenom = 0.0;
+		adouble phasing = 0  ;
+		adouble f =  freqs_fixed[j];
+		if (f<params->f1_phase)
+		{
+			this->precalc_powers_ins(f, M, pows);
+		}
+		else{
+			pows->MFsixth = pow(M*f,1./6 );
+			pows->MF7sixth= pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth*pows->MFsixth;
+			pows->MFthird = pows->MFsixth * pows->MFsixth;
+			pows->MF2third =pows->MFthird* pows->MFthird;
+		}
+		phasing = (this->build_phase(f,lambda,params,pows,pn_phase_coeffs));
+		adouble adub_phasing = (adouble)phasing;
+		phase_fixed[j]= adub_phasing.value();
+	}
+
+	//Interpolation to  fix tc
+	acc_fixed = gsl_interp_accel_alloc();
+	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
+	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
+	adouble t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	//Clean up
+	gsl_spline_free(phiI_fixed);
+	gsl_interp_accel_free(acc_fixed);
+	//#########################################################
+	return (adouble)t_corr_fixed;
+
+}
 template<class T>
 void IMRPhenomPv2<T>::WignerD(T d2[5],T dm2[5], useful_powers<T> *pows, source_parameters<T> *params)
 {
