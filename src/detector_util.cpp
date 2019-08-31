@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <math.h>
+#include <adolc/adouble.h>
 
 /*! \file
  * Routines to construct noise curves for various detectors and for detector specific utilities for response functions and coordinate transformations
@@ -370,3 +371,24 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	}
 	detector_response_functions_equatorial(responseM, ra, dec, psi, gmst, Fplus, Fcross);
 }
+
+/*! \brief Time dependent detector response of LISA for non-precessing waveforms
+ *
+ * See https://arxiv.org/abs/gr-qc/0411129 or https://arxiv.org/abs/gr-qc/9703068
+ *
+ * All the arguments are ``barred'', using the notation in these two works. That is, they are relative to the solar system  barycenter.
+ */
+template<class T>
+T LISA_response_plus( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0)
+{
+
+}
+template<class T>
+T LISA_response_cross( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0)
+{
+
+}
+template double LISA_response_plus<double>( double, double , double , double,double , double);
+template adouble LISA_response_plus<adouble>( adouble, adouble , adouble , adouble,adouble , adouble);
+template double LISA_response_cross<double>( double, double , double , double,double , double);
+template adouble LISA_response_cross<adouble>( adouble, adouble , adouble , adouble,adouble , adouble);
