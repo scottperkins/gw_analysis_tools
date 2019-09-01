@@ -118,4 +118,10 @@ void detector_response_functions_equatorial(std::string detector,
 	double *Fplus,
 	double *Fcross
 	);
+
+template<class T>
+T LISA_response_plus( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0);
+template<class T>
+T LISA_response_cross( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0);
+
 #endif 
