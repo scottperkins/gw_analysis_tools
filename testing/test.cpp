@@ -639,25 +639,15 @@ void test31()
 	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
-	//std::string autocorrfile = "";
-	//std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS.csv";
-	//std::string chainfile = "testing/data/mcmc_output_dCS.csv";
-	//std::string statfilename = "testing/data/mcmc_statistics_dCS.txt";
-	//std::string checkfile = "testing/data/mcmc_checkpoint_dCS.csv";
-	//std::string autocorrfile = "testing/data/auto_corr_mcmc_Pv2.csv";
-	//std::string chainfile = "testing/data/mcmc_output_Pv2.csv";
-	//std::string statfilename = "testing/data/mcmc_statistics_Pv2.txt";
-	//std::string checkfile = "testing/data/mcmc_checkpoint_Pv2.csv";
 	std::string autocorrfile = "";
-	//std::string autocorrfile = "testing/data/auto_corr_mcmc_dCS_Pv2.csv";
-	std::string chainfile_base = "testing/data/mcmc_output_dCS_Pv2_";
-	std::string statfilename = "testing/data/mcmc_statistics_dCS_Pv2.txt";
-	std::string checkfile = "testing/data/mcmc_checkpoint_dCS_Pv2.csv";
-	std::string checkfile_pt = "testing/data/mcmc_checkpoint_dCS_Pv2_dynamicPTalloc.csv";
-	//std::string autocorrfile = "testing/data/auto_corr_mcmc_EdGB.csv";
-	//std::string chainfile = "testing/data/mcmc_output_EdGB.csv";
-	//std::string statfilename = "testing/data/mcmc_statistics_EdGB.txt";
-	//std::string checkfile = "testing/data/mcmc_checkpoint_EdGB.csv";
+	//std::string chainfile_base = "testing/data/mcmc_output_dCS_Pv2_";
+	//std::string statfilename = "testing/data/mcmc_statistics_dCS_Pv2.txt";
+	//std::string checkfile = "testing/data/mcmc_checkpoint_dCS_Pv2.csv";
+	//std::string checkfile_pt = "testing/data/mcmc_checkpoint_dCS_Pv2_dynamicPTalloc.csv";
+	std::string chainfile_base = "testing/data/mcmc_output_dCS_Pv2_run2_";
+	std::string statfilename = "testing/data/mcmc_statistics_dCS_Pv2_run2.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_dCS_Pv2_run2.csv";
+	std::string checkfile_pt = "testing/data/mcmc_checkpoint_dCS_Pv2.csv";
 	int t0 = 10000;
 	int nu = 100;
 	std::string chain_alloc = "half_ensemble";

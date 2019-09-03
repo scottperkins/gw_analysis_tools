@@ -9,6 +9,7 @@ num_files = 5
 data =[] 
 for i in np.arange(num_files):
     data.append(np.loadtxt("data/mcmc_output_dCS_Pv2_{}.csv".format(i),delimiter=','))
+    data.append(np.loadtxt("data/mcmc_output_dCS_Pv2_run2_{}.csv".format(i),delimiter=','))
 data_unpack = []
 for x in data:
     for y in x:
@@ -30,6 +31,7 @@ plt.close()
 data =[] 
 for i in np.arange(num_files):
     data.append(np.loadtxt("data/mcmc_output_dCS_Pv2_{}.csv".format(i),delimiter=','))
+    data.append(np.loadtxt("data/mcmc_output_dCS_Pv2_run2_{}.csv".format(i),delimiter=','))
 data_unpack = []
 for x in data:
     for y in x:
@@ -39,6 +41,8 @@ if burn:
 labelstrans = [r"$cos \iota$",r"RA",r"DEC",r"$D_L$",r"$M_1$",r"$M_2$",r"$\chi_{1}$",r"$\chi_{2}$",r"$cos(\theta_1)$",r"$cos(\theta_2)$",r"$\sqrt{\alpha}$"]
 #
 dataplot=[]
+alpha_hist = []
+ct = 0
 for x in data_unpack:
     dataplot.append(np.ones(11))
     dataplot[-1][0] = x[0]
@@ -52,6 +56,9 @@ for x in data_unpack:
     dataplot[-1][8]= np.cos(x[8])
     dataplot[-1][9]= np.cos(x[9])
     dataplot[-1][10]= x[14]
+    if ct%10 == 0:
+        alpha_hist.append(dataplot[-1][10])
+np.savetxt("data/dCS_alpha_plot.csv",alpha_hist)
 dataplot = np.asarray(dataplot)
 figure = corner.corner(dataplot, labels=labelstrans,quantiles=[.16,.5,.84], show_titles=True)
 plt.savefig("mcmc_testing_dCS_Pv2_transformed.pdf")
