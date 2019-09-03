@@ -42,7 +42,7 @@ public:
 
 	//Sets the cold chains at higher priority to push them up the queue for
 	//swapping and stepping
-	bool prioritize_cold_chains = true;
+	bool prioritize_cold_chains = false;
 
 	double ***output;
 

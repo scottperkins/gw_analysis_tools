@@ -610,7 +610,7 @@ void test31()
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1};
 	//double initial_pos[dimension]={.9, 5, -1.,std::log(2000),std::log(50), .22, .4,.4,.01,.01,.01,.01,1,1,20};
 	double *seeding_var = NULL;
-	int n_steps = 100000;
+	int n_steps = 300000;
 	int n_steps_pt_alloc = 50000;
 	int chain_N=20 ;
 	int max_thermo_ensemble=10 ;
@@ -627,7 +627,7 @@ void test31()
 	int Nmod = 1;
 	int *bppe = new int[Nmod];
 	bppe[0] = -1;
-	int numThreads = 10;
+	int numThreads = 6;
 	bool pool = true;
 	//#########################################################
 	//gw options

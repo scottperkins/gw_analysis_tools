@@ -602,6 +602,10 @@ void calculate_derivatives(double  **amplitude_deriv,
 			if(param_m[0]>1.)param_m[0]=1.;
 			else if( param_m[1]<-1.) param_m[0]=-1.;
 			if(param_p[5]>.25) param_p[5] = .25;
+			if(param_p[6]>.95) param_p[6] = .95;
+			if(param_p[6]<-.95) param_p[6] = -.95;
+			if(param_p[7]>.95) param_p[7] = .95;
+			if(param_p[7]<-.95) param_p[7] = -.95;
 
 			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
 			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5]);//MSOL_SEC;
@@ -797,6 +801,11 @@ void calculate_derivatives(double  **amplitude_deriv,
 			else if( param_p[1]<-1.) param_p[0]=-1.;
 			if(param_m[0]>1.)param_m[0]=1.;
 			else if( param_m[1]<-1.) param_m[0]=-1.;
+			if(param_p[5]>.25) param_p[5] = .25;
+			if(param_p[6]>.95) param_p[6] = .95;
+			if(param_p[6]<-.95) param_p[6] = -.95;
+			if(param_p[7]>.95) param_p[7] = .95;
+			if(param_p[7]<-.95) param_p[7] = -.95;
 
 			
 			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5]);//MSOL_SEC;
