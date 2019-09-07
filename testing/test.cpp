@@ -3,21 +3,21 @@
 #include <time.h>
 #include <complex>
 #include <string>
-#include "waveform_generator.h"
-#include "autocorrelation.h"
-#include "IMRPhenomD.h"
-#include "mcmc_gw.h"
-#include "mcmc_sampler_internals.h"
-#include "detector_util.h"
-#include "util.h"
-#include "waveform_util.h"
+#include "gwat/waveform_generator.h"
+#include "gwat/autocorrelation.h"
+#include "gwat/IMRPhenomD.h"
+#include "gwat/mcmc_gw.h"
+#include "gwat/mcmc_sampler_internals.h"
+#include "gwat/detector_util.h"
+#include "gwat/util.h"
+#include "gwat/waveform_util.h"
 #include <adolc/adouble.h>
-#include "fisher.h"
-#include "ppE_IMRPhenomD.h"
-#include "IMRPhenomP.h"
-#include "ppE_IMRPhenomP.h"
-#include "waveform_generator_C.h"
-#include "mcmc_sampler.h"
+#include "gwat/fisher.h"
+#include "gwat/ppE_IMRPhenomD.h"
+#include "gwat/IMRPhenomP.h"
+#include "gwat/ppE_IMRPhenomP.h"
+#include "gwat/waveform_generator_C.h"
+#include "gwat/mcmc_sampler.h"
 #include "gsl/gsl_sf_gamma.h"
 #include "gsl/gsl_rng.h"
 #include "adolc/adouble.h"
@@ -25,7 +25,7 @@
 #include "adolc/taping.h"
 #include "limits"
 
-#include "autocorrelation_cuda.h"
+#include "gwat/autocorrelation_cuda.h"
 
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>

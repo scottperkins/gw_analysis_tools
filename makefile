@@ -2,7 +2,7 @@
 SRCDIR=src
 ODIR=build
 ODIRCUDA=build_cuda
-IDIR=include
+IDIR=include/gwat/
 LDIR_LOCAL=lib
 
 PYDIR=gw_analysis_tools_py

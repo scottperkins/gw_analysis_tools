@@ -16,7 +16,7 @@ compile_args = ['-fopenmp','-fPIC','-Wall','-O2']
 
 exts = [Extension("gw_analysis_tools_py.*",['src/*.pyx'],
                 extra_compile_args=compile_args,
-                include_dirs=[numpy.get_include(),"../include","./src"],
+                include_dirs=[numpy.get_include(),"../include/gwat","./src"],
                 #extra_objects = ["../lib/libgwat.so"],
                 libraries = ['adolc','fftw3','gsl','gslcblas','gwat'],
                 extra_link_args=['-fopenmp'],

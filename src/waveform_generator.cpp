@@ -215,6 +215,13 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		//}
 		//Calculate Waveform
 		modeld.PhenomPv2_Param_Transform(&params);
+		
+		//std::cout<<"Zeta: "<<params.zeta_polariz<<std::endl;
+		//std::cout<<"alpha: "<<params.alpha0<<std::endl;
+		//std::cout<<"thetaJ: "<<params.thetaJN<<std::endl;
+		//std::cout<<"chil: "<<params.chil<<std::endl;
+		//std::cout<<"chip: "<<params.chip<<std::endl;
+		//std::cout<<"phi_aligned: "<<params.phi_aligned<<std::endl;
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;
 		for (int i =0;i < length; i++)

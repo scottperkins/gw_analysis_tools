@@ -642,7 +642,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 
 	//azimuthal angle of J0 in the source frame
 	T phiJ_sf;
-	phiJ_sf = atan(J0y_sf/J0x_sf); //*NOTE* lalsuite uses "atan2" - doesn't work with adolc
+	phiJ_sf = atan2(J0y_sf,J0x_sf); //*NOTE* lalsuite uses "atan2" - doesn't work with adolc
 	params->phi_aligned = - phiJ_sf;
 
 	//Rotation of the system s.t. the total J is pointed in zhat
@@ -658,7 +658,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	ROTATEZ(-phiJ_sf, tmp_x,tmp_y, tmp_z);
 	ROTATEY(-thetaJ_sf, tmp_x,tmp_y, tmp_z);
 	T kappa;
-	kappa = -atan(tmp_y/tmp_x);
+	kappa = -atan2(tmp_y,tmp_x);
 
 	//alpha0
 	tmp_x = 0.;
@@ -669,7 +669,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 	ROTATEY(-thetaJ_sf, tmp_x,tmp_y, tmp_z);
 	ROTATEZ(kappa, tmp_x,tmp_y, tmp_z);
 	
-	params->alpha0 = atan(tmp_y/tmp_x);
+	params->alpha0 = atan2(tmp_y,tmp_x);
 
 	tmp_x = Nx_sf;
   	tmp_y = Ny_sf;
@@ -713,7 +713,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
   	T QArunz_Jf = -Nx_Jf;
   	T XdotPArun = tmp_x*PArunx_Jf+tmp_y*PAruny_Jf+tmp_z*PArunz_Jf;
   	T XdotQArun = tmp_x*QArunx_Jf+tmp_y*QAruny_Jf+tmp_z*QArunz_Jf;
-  	params->zeta_polariz = atan(XdotQArun / XdotPArun);
+  	params->zeta_polariz = atan2(XdotQArun , XdotPArun);
 	//if(std::is_same< double, T>::value){
 	//	std::cout<<params->zeta_polariz<<std::endl;
 	//
