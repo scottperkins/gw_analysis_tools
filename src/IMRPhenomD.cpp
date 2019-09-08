@@ -405,6 +405,9 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	T DL = params->DL;
 	lambda_parameters<T> lambda, *lambda_ptr;
 	this->assign_lambda_param(params, &lambda);
+	if(std::is_same< double, T>::value){
+		std::cout<<lambda.gamma[0]<<" "<<lambda.gamma[1]<<" "<<lambda.gamma[2]<<" "<<std::endl;
+	}
 
 	/*Initialize the post merger quantities*/
 	this->post_merger_variables(params);
@@ -433,7 +436,8 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
 	//params->f_ref = 0;
-	if(params->f_ref != NULL ){
+	//if(params->f_ref != NULL ){
+	if(params->f_ref != 0 ){
 		//if(std::is_same< double, T>::value){
 		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
 		//}
@@ -483,7 +487,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			else
 			{
 				pows.MFsixth= pow(M*f,1./6.);	
-				pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+				pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
 			}
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
@@ -684,12 +688,6 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 	
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<"Connection coefficients alpha0"<<lambda.alpha[0]<<std::endl;
-	//	std::cout<<"Connection coefficients alpha1"<<lambda.alpha[1]<<std::endl;
-	//}
-		
-
 	//################################################################
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
@@ -719,11 +717,6 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//tc = 2*M_PI*params->tc + tc_shift;
 	tc = 2*M_PI*params->tc ;
 	
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<tc<<std::endl;	
-	//	std::cout<<phic<<std::endl;	
-	//	std::cout<<f_ref<<std::endl;	
-	//}
 	
 	T f;
 	
@@ -1023,15 +1016,6 @@ void IMRPhenomD<T>::assign_nonstatic_pn_phase_coeff(source_parameters<T> *source
 	T M = source_param->mass1 + source_param->mass2;
 	T logF = log(M_PI*M*f);
 
-	//coeff[5] = (1. + logF)* (38645.*M_PI/756 - 65.*M_PI*eta/9 + 
-    	//	delta*(-732985./2268 - 140.*eta/9)*chi_a + 
-    	//	(-732985./2268 + 24260.*eta/81 + 340.*eta2/9)*chi_s);
-
-    	//coeff[6] = 11583231236531./4694215680 - 6848.*gamma_E/21 -\
-     	//	640.*pi2/3 + (-15737765635./3048192 + 2255.*pi2/12)*eta + 
-     	//	76055.*eta2/1728 - 127825.*eta3/1296 
-     	//	+ 2270.*delta*chi_a*M_PI/3 + 
-     	//	(2270.*M_PI/3 - 520.*M_PI*eta)*chi_s - 6848.*(logF + log_64)/63;
 	coeff[5] = coeff[8] *(1.+logF);
 	coeff[6] = coeff[9]-6848.*(logF)/63.;
 }
@@ -1182,8 +1166,8 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        T sigma1 =0;
-        //T sigma1 = lambda->sigma[1];
+        //T sigma1 =0;
+        T sigma1 = lambda->sigma[1];
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
@@ -1242,8 +1226,8 @@ T IMRPhenomD<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambd
 
 	/*sigma0 and sigma1 can be reabsorbed into tc and phic*/	
 	T sigma0 = 0;
-        //T sigma1 =lambda->sigma[1];
-        T sigma1 =0 ;
+        T sigma1 =lambda->sigma[1];
+        //T sigma1 =0 ;
 	T sigma2 = lambda->sigma[2];
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
@@ -1405,19 +1389,6 @@ void IMRPhenomD<T>::phase_connection_coefficients(source_parameters<T> *param,
 				lambda_parameters<T> *lambda, 
 				T *pn_coeffs)
 {
-	//T f1 = param->f1_phase;
-	//T M = param->M;
-	//T eta = param->eta;
-	//useful_powers<T> powers;
-	//this->precalc_powers_ins(f1, M, &powers);	
-	//this->precalc_powers_PI(&powers);
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<"Internal connection 1"<<std::endl;
-	//	std::cout<<f1<<std::endl;
-	//	std::cout<<this->Dphase_ins(f1, param, pn_coeffs, lambda)<<std::endl;
-	//	std::cout<<this->Dphase_int(f1, param, lambda)<<std::endl;
-	//	
-	//}
 	lambda->beta[0] = 0;
 	lambda->beta[1] = 0;
 	lambda->alpha[0] = 0;
@@ -1427,15 +1398,6 @@ void IMRPhenomD<T>::phase_connection_coefficients(source_parameters<T> *param,
 	lambda->beta[0] =this->calculate_beta0(param,lambda,pn_coeffs);
 	lambda->alpha[1] =this->calculate_alpha1(param,lambda);
 	lambda->alpha[0] = this->calculate_alpha0(param,lambda);
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<"Internal connection"<<std::endl;
-	//	std::cout<<f1<<std::endl;
-	//	std::cout<<this->Dphase_ins(f1, param, pn_coeffs, lambda)<<std::endl;
-	//	std::cout<<this->Dphase_int(f1, param, lambda)<<std::endl;
-	//	std::cout<<lambda->beta[0]<<std::endl;
-	//	std::cout<<lambda->beta[1]<<std::endl;
-	//	
-	//}
 }
 
 template <class T>

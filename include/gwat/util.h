@@ -231,7 +231,7 @@ struct source_parameters
 	
 	T chip;
 
-	T f_ref;
+	T f_ref=0;
 	
 	T phi_aligned;
 

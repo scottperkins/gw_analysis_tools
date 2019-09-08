@@ -211,9 +211,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 				)
 {
-	//Phic comes from initial conditions
-	params->phic = 2*params->phi_aligned;
-	//params->phiRef = 2*params->phi_aligned;
 
 
 	//Initialize Spherical harmonics for polarization construction
@@ -259,11 +256,17 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
-
+	//#################################################################
+	T phic, f_ref, tc, phi_shift, tc_shift;
+	params->phiRef = params->phi_aligned;
+	f_ref = params->f_ref;
+	phic = 2*params->phiRef;
+	tc=0;
+	//#################################################################
 
 	//Rescale amplitude because we aren't just using (2,2) mode anymore
 	T A0 = params->A0* pow(M,7./6.) / (2. * sqrt(5. / (64.*M_PI)) );
-	//T A0 = params->A0* pow(M,7./6.) ;
+
 	T q = params->mass1/params->mass2;
 	params->q = q;
 	T d2[5] ;
@@ -314,18 +317,21 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			}
 			else{
 				pows.MFsixth = pow(M*f,1./6 );
-				pows.MF7sixth= pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+				pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*
+					//pows.MFsixth*pows.MFsixth*pows.MFsixth*
+					//pows.MFsixth*pows.MFsixth;
 				pows.MFthird = pows.MFsixth * pows.MFsixth;
 				pows.MF2third =pows.MFthird* pows.MFthird;
 			}
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 			//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
+			phase +=   (T)(tc*(f-f_ref) - phic);
 			this->WignerD(d2,dm2, &pows, params);
 			//Calculate Euler angles alpha and epsilon
 			this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
 			//Add offset to alpha
-			alpha = alpha - params->alpha0 + alpha_offset;
+			alpha = alpha + params->alpha0 - alpha_offset;
 			epsilon = epsilon - epsilon_offset;
 
 			//Twist it up
