@@ -213,6 +213,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 {
 	//Phic comes from initial conditions
 	params->phic = 2*params->phi_aligned;
+	//params->phiRef = 2*params->phi_aligned;
 
 
 	//Initialize Spherical harmonics for polarization construction
@@ -262,6 +263,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	//Rescale amplitude because we aren't just using (2,2) mode anymore
 	T A0 = params->A0* pow(M,7./6.) / (2. * sqrt(5. / (64.*M_PI)) );
+	//T A0 = params->A0* pow(M,7./6.) ;
 	T q = params->mass1/params->mass2;
 	params->q = q;
 	T d2[5] ;
@@ -341,11 +343,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			//	std::cout<<"cross: "<<hc_factor<<std::endl;
 			//}
 			
-			//if(std::is_same< double, T>::value){
-			//	std::cout<<hcfac_vec[j]<<std::endl;
-			//}
-			//waveform_plus[j] = amp *hp_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
-			//waveform_cross[j] = amp *hc_factor *  std::exp(-i * phase)/std::complex<T>(2.,0.0);
 			hp_factor = 0.;
 			hc_factor = 0.;
 		}
@@ -366,12 +363,8 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		waveform_cross[j] = 
 			amp_vec[j] * hcfac_vec[j]*std::exp(
 			-i *(phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
-			//if(std::is_same< double, T>::value){
-			//	std::cout<<waveform_cross[j]<<std::endl;
-			//}
 		
 	}
-	//}
 	free(amp_vec);
 	free(phase_vec);
 	free(hpfac_vec);
@@ -524,7 +517,7 @@ void IMRPhenomPv2<T>::calculate_twistup( T alpha, std::complex<T> *hp_factor, st
 {
 	std::complex<T> T2m;
 	std::complex<T> Tm2m;
-	std::complex<T> exp_a = std::exp(std::complex<T>(0,1) *alpha);
+	std::complex<T> exp_a = std::exp(std::complex<T>(0,1.) *alpha);
 	std::complex<T> exp_ma = std::complex<T>(1.,0.0)/exp_a;
 	std::complex<T> exp_2a = exp_a*exp_a;
 	std::complex<T> exp_m2a = exp_ma*exp_ma;

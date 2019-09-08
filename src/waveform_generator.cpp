@@ -262,15 +262,15 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		//Calculate Waveform
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;
-		for (int i =0;i < length; i++)
-		{
-			tempPlus = waveform_plus[i];	
-			tempCross = waveform_cross[i];	
-			waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
-					+sin(2.*params.zeta_polariz)*tempCross;
-			waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
-					-sin(2.*params.zeta_polariz)*tempPlus;
-		}
+		//for (int i =0;i < length; i++)
+		//{
+		//	tempPlus = waveform_plus[i];	
+		//	tempCross = waveform_cross[i];	
+		//	waveform_plus[i] = cos(2.*params.zeta_polariz)*tempPlus
+		//			+sin(2.*params.zeta_polariz)*tempCross;
+		//	waveform_cross[i] = (2.*params.zeta_polariz)*tempCross
+		//			-sin(2.*params.zeta_polariz)*tempPlus;
+		//}
 	}
 	else if(generation_method == "ppE_IMRPhenomPv2_IMR")
 	{
