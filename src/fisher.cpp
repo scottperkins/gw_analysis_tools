@@ -1502,7 +1502,7 @@ void fisher_autodiff(double *frequency,
 	if (generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> model;
-		model.fisher_calculation(frequency, 
+		model.fisher_calculation_sky_averaged(frequency, 
 			length, 
 			parameters,
 			amplitude_deriv, 

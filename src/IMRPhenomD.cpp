@@ -25,7 +25,7 @@ double log_64 = 4.15888308336;
 //#####################################################################################
 
 template <class T>
-void IMRPhenomD<T>::fisher_calculation(double *frequency, 
+void IMRPhenomD<T>::fisher_calculation_sky_averaged(double *frequency, 
 			int length, 
 			gen_params *parameters,
 			double **amplitude_deriv, 
@@ -35,58 +35,57 @@ void IMRPhenomD<T>::fisher_calculation(double *frequency,
 			int *phase_tapes
 			)
 {
-		IMRPhenomD<double> modeld;
-		int dimension = 7;
-		//populate model
-		source_parameters<double> input_params;
-		//double spin1vec[3] = {0,0,parameters[3]};
-		//double spin2vec[3] = {0,0,parameters[4]};
-		//###########################################################################
-		//DOUBLE CHECK ORDER OF PARAMETERS
-		//input_params = source_parameters<double>::populate_source_parameters(parameters[0],
-		//	parameters[1],parameters[2],spin1vec,spin2vec,parameters[5],parameters[6]);
-		//input_params = source_parameters<double>::populate_source_parameters(parameters->mass1,
-		//	parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
-		//	parameters->spin2,parameters->phic,parameters->tc);
-		input_params = source_parameters<double>::populate_source_parameters(parameters);
-		//Need the splitting frequency	
-		lambda_parameters<double> lambda, *lambda_ptr;
-		modeld.assign_lambda_param(&input_params, &lambda);
-		modeld.post_merger_variables(&input_params);
-		input_params.f1 = 0.014/(input_params.M);
-		input_params.f3 = modeld.fpeak(&input_params, &lambda);
-		input_params.f1_phase = 0.018/(input_params.M);
-		input_params.f2_phase = input_params.fRD/2.;
-		//###########################################################################
-
-		//populate derivative
-		modeld.construct_amplitude_derivative(frequency, 
-				length,
-				dimension, 
-				amplitude_deriv,
-				&input_params,
-				amp_tapes
-				);
-		
-		//PROBLEM SECTION
-		modeld.construct_phase_derivative(frequency, 
-				length,
-				dimension, 
-				phase_deriv,
-				&input_params,
-				phase_tapes
-				);
-		modeld.construct_amplitude(frequency, length, amplitude, &input_params);
-		//LOG FACTORS for A0, chirpmass, and eta)
-		for (int i = 0;i <length; i++)
-		{
-			amplitude_deriv[0][i] = (input_params.A0)*amplitude_deriv[0][i];
-			amplitude_deriv[3][i] = (input_params.chirpmass)*amplitude_deriv[3][i];
-			amplitude_deriv[4][i] = (input_params.eta)*amplitude_deriv[4][i];
-			phase_deriv[0][i] = (input_params.A0)*phase_deriv[0][i];
-			phase_deriv[3][i] = (input_params.chirpmass)*phase_deriv[3][i];
-			phase_deriv[4][i] = (input_params.eta)*phase_deriv[4][i];
-		}
+	IMRPhenomD<double> modeld;
+	int dimension = 7;
+	//populate model
+	source_parameters<double> input_params;
+	//double spin1vec[3] = {0,0,parameters[3]};
+	//double spin2vec[3] = {0,0,parameters[4]};
+	//###########################################################################
+	//DOUBLE CHECK ORDER OF PARAMETERS
+	//input_params = source_parameters<double>::populate_source_parameters(parameters[0],
+	//	parameters[1],parameters[2],spin1vec,spin2vec,parameters[5],parameters[6]);
+	//input_params = source_parameters<double>::populate_source_parameters(parameters->mass1,
+	//	parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
+	//	parameters->spin2,parameters->phic,parameters->tc);
+	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	//Need the splitting frequency	
+	lambda_parameters<double> lambda, *lambda_ptr;
+	modeld.assign_lambda_param(&input_params, &lambda);
+	modeld.post_merger_variables(&input_params);
+	input_params.f1 = 0.014/(input_params.M);
+	input_params.f3 = modeld.fpeak(&input_params, &lambda);
+	input_params.f1_phase = 0.018/(input_params.M);
+	input_params.f2_phase = input_params.fRD/2.;
+	//###########################################################################
+	//populate derivative
+	modeld.construct_amplitude_derivative(frequency, 
+			length,
+			dimension, 
+			amplitude_deriv,
+			&input_params,
+			amp_tapes
+			);
+	
+	//PROBLEM SECTION
+	modeld.construct_phase_derivative(frequency, 
+			length,
+			dimension, 
+			phase_deriv,
+			&input_params,
+			phase_tapes
+			);
+	modeld.construct_amplitude(frequency, length, amplitude, &input_params);
+	//LOG FACTORS for A0, chirpmass, and eta)
+	for (int i = 0;i <length; i++)
+	{
+		amplitude_deriv[0][i] = (input_params.A0)*amplitude_deriv[0][i];
+		amplitude_deriv[3][i] = (input_params.chirpmass)*amplitude_deriv[3][i];
+		amplitude_deriv[4][i] = (input_params.eta)*amplitude_deriv[4][i];
+		phase_deriv[0][i] = (input_params.A0)*phase_deriv[0][i];
+		phase_deriv[3][i] = (input_params.chirpmass)*phase_deriv[3][i];
+		phase_deriv[4][i] = (input_params.eta)*phase_deriv[4][i];
+	}
 
 }
 
@@ -104,7 +103,8 @@ void IMRPhenomD<T>::construct_amplitude_derivative(double *frequencies, /**< inp
 				int *tapes /**<int array of tape ids, if NULL, these will be calculated*/
 				)
 {
-	if(tapes==NULL)
+	//if(tapes==NULL)
+	if(!tapes)
 	{
 		int tape_temp[3];
 		tape_temp[0]=10;
@@ -134,30 +134,30 @@ void IMRPhenomD<T>::construct_amplitude_derivative(double *frequencies, /**< inp
 
 		}
 		else{	
-		if(evaluate_params[0]<input_params->f1)
-		{
-			gradient(tapes[0],dimension+1, evaluate_params, grad);
-			for(int j=0;j<dimension;j++)
+			if(evaluate_params[0]<input_params->f1)
 			{
-				amplitude_derivative[j][i] = grad[j+1];
-			} 
-		}
-		else if(evaluate_params[0] <input_params->f3)
-		{
-			gradient(tapes[1],dimension+1, evaluate_params, grad);
-			for(int j=0;j<dimension;j++)
+				gradient(tapes[0],dimension+1, evaluate_params, grad);
+				for(int j=0;j<dimension;j++)
+				{
+					amplitude_derivative[j][i] = grad[j+1];
+				} 
+			}
+			else if(evaluate_params[0] <input_params->f3)
 			{
-				amplitude_derivative[j][i] = grad[j+1];
-			} 
-		}
-		else
-		{
-			gradient(tapes[2],dimension+1, evaluate_params, grad);
-			for(int j=0;j<dimension;j++)
+				gradient(tapes[1],dimension+1, evaluate_params, grad);
+				for(int j=0;j<dimension;j++)
+				{
+					amplitude_derivative[j][i] = grad[j+1];
+				} 
+			}
+			else
 			{
-				amplitude_derivative[j][i] = grad[j+1];
-			} 
-		}
+				gradient(tapes[2],dimension+1, evaluate_params, grad);
+				for(int j=0;j<dimension;j++)
+				{
+					amplitude_derivative[j][i] = grad[j+1];
+				} 
+			}
 		}
 	}
 	
@@ -176,7 +176,8 @@ void IMRPhenomD<T>::construct_phase_derivative(double *frequencies, /**< input a
 				int *tapes /**<int array of tape ids, if NULL, these will be calculated*/
 				)
 {
-	if(tapes==NULL)
+	//if(tapes==NULL)
+	if(!tapes)
 	{
 		int tape_temp[3];
 		tape_temp[0]=13;
@@ -435,12 +436,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	//params->f_ref = 0;
-	//if(params->f_ref != NULL ){
 	if(params->f_ref != 0 ){
-		//if(std::is_same< double, T>::value){
-		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
-		//}
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -454,14 +450,8 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
-	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
-	//tc = 2*M_PI*params->tc + tc_shift;
-	tc = 2*M_PI*params->tc ;
-	if(std::is_same< double, T>::value){
-		//std::cout<<params->mass1/MSOL_SEC<<" "<<params->mass2/MSOL_SEC<<std::endl;
-		//std::cout<<params->chi_s<<" "<<params->chi_a<<std::endl;
-	}
+	tc = 2*M_PI*params->tc + tc_shift;
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);
@@ -542,11 +532,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	//params->f_ref = 0;
-	if(params->f_ref != NULL ){
-		//if(std::is_same< double, T>::value){
-		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
-		//}
+	if(params->f_ref != 0 ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -560,12 +546,8 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
-	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
-	//tc_shift = tc_shift - .00561069;
-	//tc_shift = 3.1734968285e2*M;
-	//tc = 2*M_PI*params->tc + tc_shift;
-	tc = 2*M_PI*params->tc ;
+	tc = 2*M_PI*params->tc + tc_shift;
 	//################################################################
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
@@ -692,11 +674,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	//params->f_ref = 0;
-	if(params->f_ref != NULL ){
-		//if(std::is_same< double, T>::value){
-		//std::cout<<"f_ref not  null "<<params->f_ref<<std::endl;
-		//}
+	if(params->f_ref != 0 ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -710,12 +688,9 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
-	//phi = 2*pi * tc * f  but instead (tc + tcshift)*f	
 	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
-	//tc_shift = tc_shift - .00561069;
-	//tc_shift = 3.1734968285e2*M;
-	//tc = 2*M_PI*params->tc + tc_shift;
-	tc = 2*M_PI*params->tc ;
+	tc = 2*M_PI*params->tc + tc_shift;
+	//################################################################
 	
 	
 	T f;

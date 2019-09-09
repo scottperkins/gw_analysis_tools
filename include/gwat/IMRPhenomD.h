@@ -31,7 +31,7 @@ class IMRPhenomD
 {
 public:
 
-virtual void fisher_calculation(double *frequency, 
+virtual void fisher_calculation_sky_averaged(double *frequency, 
 			int length, 
 			//double *parameters,
 			gen_params *parameters,

@@ -29,5 +29,18 @@ T t_2PN(T f, T eta, T chirpmass, T chi1, T chi2, T tc)
 	return t;
 }
 
+/*! \brief Utility function for the frequency at the innermost stable circular orbit (ISCO)
+ *
+ */
+template<class T>
+T FISCO(T mass)
+{
+	T inverse_fisco = pow_int(std::sqrt(6),3)*M_PI*mass;
+	return 1./inverse_fisco;
+}
+
+//#####################################################################################
 template double t_2PN<double>(double, double, double, double, double, double);
 template adouble t_2PN<adouble>(adouble, adouble, adouble, adouble, adouble, adouble);
+template adouble FISCO(adouble mass);
+template double FISCO(double mass);
