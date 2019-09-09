@@ -195,8 +195,16 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	{
 		IMRPhenomPv2<double> modeld;
 		//Calculate Waveform
-		modeld.PhenomPv2_Param_Transform(&params);
-		
+		if(parameters->thetaJN == -10){
+			modeld.PhenomPv2_Param_Transform(&params);
+		}
+		else{
+			params.thetaJN = parameters->thetaJN;
+			params.alpha0 = parameters->alpha0;
+			params.chip = parameters->chip;
+			params.spin1z = parameters->chi1_l;
+			params.spin2z = parameters->chi2_l;
+		}
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;
 		for (int i =0;i < length; i++)
@@ -218,23 +226,9 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		//########################################
-		params.thetaJN = parameters->thetaJN;
-		params.alpha0 = parameters->alpha0;
-		params.zeta_polariz = parameters->zeta_polariz;
-		params.phi_aligned = parameters->phi_aligned;
-		params.chil = parameters->chil;
-		params.chip = parameters->chip;
 		//Check to see if thetaJN was used
 		//If not, its calculated
-		if(params.thetaJN==-1 )
-			//Compute transform with spins and L inclination
-			modeld.PhenomPv2_Param_Transform(&params);
-		else {
-			//compute transform with spins and J inclination
-			//Not supported at the moment
-			modeld.PhenomPv2_Param_Transform_J(&params);
-		}
-		//Calculate Waveform
+		modeld.PhenomPv2_Param_Transform(&params);
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;
 		for (int i =0;i < length; i++)
@@ -256,22 +250,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		//########################################
-		params.thetaJN = parameters->thetaJN;
-		params.alpha0 = parameters->alpha0;
-		params.zeta_polariz = parameters->zeta_polariz;
-		params.phi_aligned = parameters->phi_aligned;
-		params.chil = parameters->chil;
-		params.chip = parameters->chip;
-		//Check to see if thetaJN was used
-		//If not, its calculated
-		if(params.thetaJN==-1 )
-			//Compute transform with spins and L inclination
-			modeld.PhenomPv2_Param_Transform(&params);
-		else {
-			//compute transform with spins and J inclination
-			//Not supported at the moment
-			modeld.PhenomPv2_Param_Transform_J(&params);
-		}
+		modeld.PhenomPv2_Param_Transform(&params);
 		//Calculate Waveform
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;
@@ -303,22 +282,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		//Initialize Pv2 specific params	
 
 		//########################################
-		params.thetaJN = parameters->thetaJN;
-		params.alpha0 = parameters->alpha0;
-		params.zeta_polariz = parameters->zeta_polariz;
-		params.phi_aligned = parameters->phi_aligned;
-		params.chil = parameters->chil;
-		params.chip = parameters->chip;
-		//Check to see if thetaJN was used
-		//If not, its calculated
-		if(params.thetaJN==-1 )
-			//Compute transform with spins and L inclination
-			model.PhenomPv2_Param_Transform(&params);
-		else {
-			//compute transform with spins and J inclination
-			//Not supported at the moment
-			model.PhenomPv2_Param_Transform_J(&params);
-		}
+		model.PhenomPv2_Param_Transform(&params);
 		//Calculate Waveform
 		status = model.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<double> tempPlus,tempCross;

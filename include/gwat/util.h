@@ -108,17 +108,25 @@ struct gen_params
 	
 	double phiRef=0;
 
-	double thetaJN = -1;
+	//###################################################
+	//Either define all these parameters for Pv2, or define
+	//all the source frame parameters above
+	/*!thetaJ -- optional domain is [0,M_PI]  */
+	double thetaJN = -10;
 
 	double alpha0 = 0;
 
-	double zeta_polariz = 0;
 
+	double chip = 0;
+
+	double chi1_l = 0;
+	double chi2_l = 0;
+	//###################################################
+	double zeta_polariz =0;
 	double phi_aligned = 0;
 
 	double chil = 0;
 
-	double chip = 0;
 
 	bool sky_average;
 	
@@ -264,6 +272,9 @@ struct source_parameters
 	T SL;
 
 	bool sky_average;
+
+	/*! Boolean -- shift time to 0 before shifting to tc or not*/
+	bool shift_time = true;
 
 	gsl_spline *Z_DL_spline_ptr=NULL;
 

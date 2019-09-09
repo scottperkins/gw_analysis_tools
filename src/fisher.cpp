@@ -236,13 +236,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
 				phase_deriv[i][l] = (phase_plus_plus[l] -phase_plus_minus[l])/(2*epsilon);
 			}
-			//ofstream ampfile
-			//for (int l = 0;l<length;l++)
-			//{
-			//	
-			//}
-			
-		
 				
 		}
 		//Normalize for log factors

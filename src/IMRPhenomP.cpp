@@ -359,7 +359,13 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	//a specific type (adouble not supported), this must be done for each specific
 	//type. The implementations are fundamentally different, so these templates must be 
 	//written explicitly. No way around it.
-	T t_corr_fixed = this->calculate_time_shift(params, &pows, pn_phase_coeffs, &lambda);
+	T t_corr_fixed;
+	if(params->shift_time){
+		t_corr_fixed = this->calculate_time_shift(params, &pows, pn_phase_coeffs, &lambda);
+	}
+	else{
+		t_corr_fixed = 0;
+	}
 	//#########################################################
 	
 	for (int j = 0; j<length;j++){
