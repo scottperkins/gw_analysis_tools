@@ -33,7 +33,7 @@
 
 using namespace std;
 
-bool show_progress = true;
+bool show_progress = false;
 void test1();
 void test2();
 void test3();
@@ -610,7 +610,7 @@ void test31()
 	//double initial_pos[dimension]={.9, 2, 1.,std::log(500),std::log(9), .22, .4,.4,.01,.01,.01,.01,1,1};
 	//double initial_pos[dimension]={.9, 5, -1.,std::log(2000),std::log(50), .22, .4,.4,.01,.01,.01,.01,1,1,20};
 	double *seeding_var = NULL;
-	int n_steps = 300000;
+	int n_steps = 100000;
 	int n_steps_pt_alloc = 50000;
 	int chain_N=20 ;
 	int max_thermo_ensemble=10 ;
