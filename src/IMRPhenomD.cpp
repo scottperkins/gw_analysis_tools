@@ -39,15 +39,6 @@ void IMRPhenomD<T>::fisher_calculation_sky_averaged(double *frequency,
 	int dimension = 7;
 	//populate model
 	source_parameters<double> input_params;
-	//double spin1vec[3] = {0,0,parameters[3]};
-	//double spin2vec[3] = {0,0,parameters[4]};
-	//###########################################################################
-	//DOUBLE CHECK ORDER OF PARAMETERS
-	//input_params = source_parameters<double>::populate_source_parameters(parameters[0],
-	//	parameters[1],parameters[2],spin1vec,spin2vec,parameters[5],parameters[6]);
-	//input_params = source_parameters<double>::populate_source_parameters(parameters->mass1,
-	//	parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
-	//	parameters->spin2,parameters->phic,parameters->tc);
 	input_params = source_parameters<double>::populate_source_parameters(parameters);
 	//Need the splitting frequency	
 	lambda_parameters<double> lambda, *lambda_ptr;

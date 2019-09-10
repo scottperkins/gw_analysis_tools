@@ -507,20 +507,11 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 		return 0;
 	}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
-	double mass1 = parameters->mass1;
-	double mass2 = parameters->mass2;
-	double Luminosity_Distance = parameters->Luminosity_Distance;
-	double *spin1 = parameters->spin1;
-	double *spin2 = parameters->spin2;
-	double phi_c = parameters->phic;
-	double t_c = parameters->tc;
 	source_parameters<double> params;
-	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
 	params = params.populate_source_parameters(parameters);
 	//params.f_ref = parameters->f_ref;
 	//params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
-
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -528,6 +519,9 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+		params.betappe = parameters->betappe;
 		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
@@ -553,6 +547,9 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+		params.betappe = parameters->betappe;
 		ppE_IMRPhenomD_IMR<double> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}

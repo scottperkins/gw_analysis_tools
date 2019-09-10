@@ -133,7 +133,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-5;
+	double epsilon = 1e-7;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -238,6 +238,117 @@ void calculate_derivatives(double  **amplitude_deriv,
 			}
 				
 		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[0][l] = amplitude_deriv[0][l]*param_in[0] ;
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
+			phase_deriv[0][l] = phase_deriv[0][l]*param_in[0] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+		}
+	}
+	if (gen_method == "ppE_IMRPhenomD_Inspiral"|| gen_method=="ppE_IMRPhenomD_IMR"){
+		IMRPhenomD<double> model;
+		int dimension = 7+parameters->Nmod;
+		source_parameters<double> parameters_in;
+		gen_params waveform_params;
+		parameters_in = parameters_in.populate_source_parameters(parameters); 
+		double param_p[dimension] ;
+		double param_m[dimension] ;
+		double param_in[dimension] ;
+		double param_out[dimension] ;
+		param_in[0] = parameters_in.A0;//seconds
+		param_in[1] = parameters_in.tc;
+		param_in[2] = parameters_in.phic;
+		param_in[3] = parameters_in.chirpmass;//seconds
+		param_in[4] = parameters_in.eta;
+		param_in[5] = parameters_in.chi_s;
+		param_in[6] = parameters_in.chi_a;
+		for(int i = 0 ; i<parameters->Nmod; i++){
+			param_in[7+i] = parameters->betappe[i];
+		}
+
+		waveform_params.sky_average=parameters->sky_average;
+		waveform_params.bppe = parameters->bppe;
+		waveform_params.Nmod = parameters->Nmod;
+		waveform_params.NSflag = parameters->NSflag;
+		waveform_params.betappe = new double[waveform_params.Nmod];
+
+		for (int i =0; i<dimension; i++){
+			for( int j =0;j<dimension;j++){
+				param_p[j] = param_in[j] ;
+				param_m[j] = param_in[j] ;
+			}
+			param_p[i] = param_in[i] + epsilon;
+			param_m[i] = param_in[i] - epsilon;
+
+			model.change_parameter_basis(param_p, param_out, parameters_in.sky_average);
+			waveform_params.mass1 = param_out[0]/MSOL_SEC;
+			waveform_params.mass2 = param_out[1]/MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_out[2]/MPC_SEC;
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_out[3];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_out[4];
+			waveform_params.phic = param_out[5];
+			waveform_params.tc= param_out[6];
+			for(int j = 0 ; j<waveform_params.Nmod ; j++){
+				waveform_params.betappe[j] = param_p[7+j];
+			}
+
+
+			fourier_amplitude(frequencies, 
+				length,
+				amplitude_plus_plus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			fourier_phase(frequencies, 
+				length,
+				phase_plus_plus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+
+			model.change_parameter_basis(param_m, param_out,parameters_in.sky_average);
+			waveform_params.mass1 = param_out[0]/MSOL_SEC;
+			waveform_params.mass2 = param_out[1]/MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_out[2]/MPC_SEC;
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_out[3];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_out[4];
+			waveform_params.phic = param_out[5];
+			waveform_params.tc= param_out[6];
+			for(int j = 0 ; j<waveform_params.Nmod ; j++){
+				waveform_params.betappe[j] = param_m[7+j];
+			}
+			fourier_amplitude(frequencies, 
+				length,
+				amplitude_plus_minus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			fourier_phase(frequencies, 
+				length,
+				phase_plus_minus,
+				//amplitude_cross_plus,
+				gen_method,
+				&waveform_params);	
+			for (int l =0;l<length;l++)
+			{
+				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
+				phase_deriv[i][l] = (phase_plus_plus[l] -phase_plus_minus[l])/(2*epsilon);
+			}
+				
+		}
+		delete [] waveform_params.betappe;
 		//Normalize for log factors
 		for (int l =0;l<length;l++)
 		{
@@ -628,18 +739,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 				amplitude_plus_plus[k] =  std::abs(response[k]);
 				phase_plus_plus[k] =  std::arg(response[k]);
 			}
-			//fourier_amplitude(frequencies, 
-			//	length,
-			//	amplitude_plus_plus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
-			//fourier_phase(frequencies, 
-			//	length,
-			//	phase_plus_plus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
 
 
 			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);//MSOL_SEC;
@@ -837,18 +936,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 				amplitude_plus_plus[k] =  std::abs(response[k]);
 				phase_plus_plus[k] =  std::arg(response[k]);
 			}
-			//fourier_amplitude(frequencies, 
-			//	length,
-			//	amplitude_plus_plus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
-			//fourier_phase(frequencies, 
-			//	length,
-			//	phase_plus_plus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
 
 
 			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5]);//MSOL_SEC;
@@ -889,18 +976,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 				//std::cout<<amplitude_plus_plus[k]<<" "<<phase_plus_plus[k]<<" "<<response[k]<<std::endl;
 			}
 
-			//fourier_amplitude(frequencies, 
-			//	length,
-			//	amplitude_plus_minus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
-			//fourier_phase(frequencies, 
-			//	length,
-			//	phase_plus_minus,
-			//	//amplitude_cross_plus,
-			//	local_method,
-			//	&waveform_params);	
 			for (int l =0;l<length;l++)
 			{
 				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
@@ -1095,19 +1170,14 @@ void calculate_derivatives(double  **amplitude_deriv,
 			a_corr_m = std::abs(Qm);
 			p_corr_m = std::arg(Qm);
 
-			//std::cout<<"Angles: "<<waveform_params.theta<<" "<< waveform_params.phi<<" "<<waveform_params.incl_angle<<std::endl;
-			//std::cout<<"Amp: "<<a_corr_p-a_corr_m<<std::endl;
-			//std::cout<<"Phase: "<<p_corr_p-p_corr_m<<std::endl;
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_minus,
-				//amplitude_cross_plus,
 				local_gen,
 				&waveform_params);	
 			fourier_phase(frequencies, 
 				length,
 				phase_plus_minus,
-				//amplitude_cross_plus,
 				local_gen,
 				&waveform_params);	
 			delete [] waveform_params.betappe;
@@ -1132,7 +1202,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 				for (int j =0 ; j<parameters->Nmod; j++){
 					amplitude_deriv[8+j][l] = 
 						amplitude_deriv[8+j][l]*param_in[8+j];	
-					//Why was I not scaling the phase derivative?
 					phase_deriv[8+j][l] = 
 						phase_deriv[8+j][l]*param_in[8+j];	
 				}
@@ -1463,8 +1532,8 @@ void calculate_derivatives(double  **amplitude_deriv,
  */
 void fisher_autodiff(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
-	string generation_method, 
-	string detector, 
+	std::string generation_method, 
+	std::string detector, 
 	double **output,/**< double [dimension][dimension]*/
 	int dimension, 
 	gen_params *parameters,
@@ -1476,18 +1545,18 @@ void fisher_autodiff(double *frequency,
 {
 	//populate noise and frequency
 	double internal_noise[length];
-	if (noise==NULL)
+	if (noise)
 	{
-		//double noise[length];
-		populate_noise(frequency,detector, internal_noise,length);
-		for (int i =0; i<length;i++)
-		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
-	}
-	else
 		for(int i = 0 ; i < length;i++)
 		{
 			internal_noise[i] = noise[i];
 		}
+	}
+	else{
+		populate_noise(frequency,detector, internal_noise,length);
+		for (int i =0; i<length;i++)
+		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
+	}
 		
 	//populate derivatives
 	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
@@ -1515,7 +1584,7 @@ void fisher_autodiff(double *frequency,
 	else if (generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
 		ppE_IMRPhenomD_Inspiral<double> ppemodel;
-		ppemodel.fisher_calculation(frequency, 
+		ppemodel.fisher_calculation_sky_averaged(frequency, 
 			length, 
 			parameters,
 			amplitude_deriv, 
@@ -1528,7 +1597,7 @@ void fisher_autodiff(double *frequency,
 	else if (generation_method == "ppE_IMRPhenomD_IMR")
 	{
 		ppE_IMRPhenomD_IMR<double> ppemodel;
-		ppemodel.fisher_calculation(frequency, 
+		ppemodel.fisher_calculation_sky_averaged(frequency, 
 			length, 
 			parameters,
 			amplitude_deriv, 
@@ -1538,8 +1607,7 @@ void fisher_autodiff(double *frequency,
 			phase_tapes
 			);
 	}
-
-	//PROBLEM 
+	
 	//calulate fisher elements
 	for (int j=0;j<dimension; j++)
 	{
@@ -1586,182 +1654,3 @@ void fisher_autodiff(double *frequency,
 
 
 
-//############################################################################
-//outdated
-
-//void intialize_tape()
-//{
-//	int dimension = 7;
-//	double A0 = 3.13e-22; 
-//	double tc = 0;
-//	double phic = 0;
-//	double chirpmass = 6e-05;
-//	double symm = .2222222;
-//	double chi_s = .55;
-//	double chi_a = -.35;
-//	double params[dimension] = {A0,tc,phic,chirpmass,symm,chi_s,chi_a};
-//	trace_on(1);
-//	
-//	deriv_params[0] <<= frequencies[2];
-//	for ( int i =0; i<dimension; i ++)
-//		deriv_params[i+1]<<= params[i];
-//	
-//	f = deriv_params[0];
-//	for ( int i =0; i<dimension; i ++)
-//		intermediate_params[i]= deriv_params[i+1];
-//	y = amp_fun(f, intermediate_params);
-//	y>>= out;
-//	delete[] deriv_params;
-//	delete[] intermediate_params;
-//	trace_off();
-//}
-//void amplitude_derivative(double *frequencies, 	
-//			int length, 
-//			double **amp_derivative,
-//			int dimension,
-//			double *params,
-//			adouble (*amp_fun)(adouble f, adouble *parameters)
-//			)
-//{
-//	adouble *intermediate_params = new adouble[dimension];
-//	adouble *deriv_params = new adouble[dimension+1]; 
-//	adouble f;
-//	adouble y ;
-//	double out ;
-//
-//	trace_on(1);
-//
-//	deriv_params[0] <<= frequencies[2];
-//	for ( int i =0; i<dimension; i ++)
-//		deriv_params[i+1]<<= params[i];
-//
-//	f = deriv_params[0];
-//	for ( int i =0; i<dimension; i ++)
-//		intermediate_params[i]= deriv_params[i+1];
-//	y = amp_fun(f, intermediate_params);
-//	y>>= out;
-//	delete[] deriv_params;
-//	delete[] intermediate_params;
-//	trace_off(1);
-//
-//	double evaluate_params[dimension +1] ;
-//	//double amp_deriv[dimension+1];
-//	double **amp_deriv = (double**)malloc(sizeof(**amp_deriv));
-//	amp_deriv[0] = (double *)malloc(dimension* sizeof(double));
-//	for ( int k =0; k<dimension; k ++)
-//		evaluate_params[k+1]= params[k];
-//	for (int i=0;i<length; i++)
-//	{
-//		evaluate_params[0] = frequencies[i];
-//		//gradient(1,dimension+1,evaluate_params , amp_deriv);
-//		jacobian(1,1,dimension+1,evaluate_params , amp_deriv);
-//		for(int j=0;j<dimension;j++)
-//		{
-//			//amp_derivative[j][i] = amp_deriv[j+1];
-//			amp_derivative[j][i] = amp_deriv[0][j+1];
-//		} 
-//	}
-//	
-//	
-//}
-//
-//void waveform_derivative(double *frequencies, 	
-//			int length, 
-//			std::complex<double> **waveform_derivative,
-//			int dimension,
-//			double *params,
-//			std::complex<adouble> (*waveform)(adouble f, adouble *parameters)
-//			)
-//{
-//	adouble *intermediate_params = new adouble[dimension];
-//	//double waveform_deriv[2][dimension];
-//	double **jac = (double **) malloc(dimension*sizeof(**jac));
-//	for (int i =0; i<dimension; i++)
-//		jac[i] = (double *)malloc(2*sizeof(double));
-//	adouble *deriv_params = new adouble[dimension+1]; 
-//	adouble f;
-//	std::complex<adouble> y ;
-//	double reout ;
-//	double imout ;
-//
-//	trace_on(1);
-//
-//	deriv_params[0] <<= frequencies[2];
-//	for ( int i =0; i<dimension; i ++)
-//		deriv_params[i+1]<<= params[i];
-//
-//	f = deriv_params[0];
-//	for ( int i =0; i<dimension; i ++)
-//		intermediate_params[i]= deriv_params[i+1];
-//	y = waveform(f, intermediate_params);
-//	std::real(y)>>= reout;
-//	std::imag(y)>>= imout;
-//	delete[] deriv_params;
-//	delete[] intermediate_params;
-//	trace_off();
-//
-//	double evaluate_params[dimension +1] ;
-//	for ( int k =0; k<dimension; k ++)
-//		evaluate_params[k+1]= params[k];
-//	for (int i=0;i<length; i++)
-//	{
-//		evaluate_params[0] = frequencies[i];
-//		jacobian(1,2,dimension+1,evaluate_params , jac);
-//		for(int j=0;j<dimension;j++)
-//		{
-//			waveform_derivative[j][i] = std::complex<double>(jac[0][j+1],jac[1][j+1]);
-//		} 
-//	}
-//	free(jac);
-//	
-//	
-//}
-//adouble IMRPhenomD_amp_parameter_tranform(adouble f, /**< frequency in Hz*/
-//					adouble *parameters/**< adouble array of source parameters - [A0,tc,phic, chirpmass, symmetric mass ratio, chi_s, chi_a]*/
-//				)
-//{
-//	//Parameter transformation
-//	adouble m1, m2, DL, spin1,spin2;
-//	m1 = calculate_mass1(parameters[3],parameters[4]);
-//	m2 = calculate_mass2(parameters[3],parameters[4]);
-//	adouble chirpmass_sec = parameters[3]*MSOL_SEC;
-//	DL =1/(parameters[0] * sqrt(30/M_PI) /(chirpmass_sec*chirpmass_sec)/
-//			pow(M_PI*chirpmass_sec,-7./6))/MPC_SEC  ;
-//	spin1 = parameters[5]+parameters[6];
-//	spin2 = parameters[5]-parameters[6];
-//	adouble spinvec1[3] ={0.,0.,spin1};
-//	adouble spinvec2[3] ={0.,0.,spin2};
-//
-//	source_parameters<adouble> s_params;
-//	
-//	s_params = s_params.populate_source_parameters(m1, m2, DL, spinvec1, spinvec2, parameters[2],parameters[1]);
-//
-//	IMRPhenomD<adouble> model;	
-//	return model.construct_amplitude(f,&s_params);
-//	
-//}
-//
-//std::complex<adouble> IMRPhenomD_waveform_parameter_tranform(adouble f, /**< frequency in Hz*/
-//					adouble *parameters/**< adouble array of source parameters - [A0,tc,phic, chirpmass, symmetric mass ratio, chi_s, chi_a]*/
-//				)
-//{
-//	//Parameter transformation
-//	adouble m1, m2, DL, spin1,spin2;
-//	m1 = calculate_mass1(parameters[3],parameters[4]);
-//	m2 = calculate_mass2(parameters[3],parameters[4]);
-//	adouble chirpmass_sec = parameters[3]*MSOL_SEC;
-//	DL =1/(parameters[0] * sqrt(30/M_PI) /(chirpmass_sec*chirpmass_sec)/
-//			pow(M_PI*chirpmass_sec,-7./6))/MPC_SEC  ;
-//	spin1 = parameters[5]+parameters[6];
-//	spin2 = parameters[5]-parameters[6];
-//	adouble spinvec1[3] ={0.,0.,spin1};
-//	adouble spinvec2[3] ={0.,0.,spin2};
-//
-//	source_parameters<adouble> s_params;
-//	
-//	s_params = s_params.populate_source_parameters(m1, m2, DL, spinvec1, spinvec2, parameters[2],parameters[1]);
-//
-//	IMRPhenomD<adouble> model;	
-//	return model.construct_waveform(f,&s_params);
-//	
-//}

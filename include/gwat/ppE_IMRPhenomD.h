@@ -20,7 +20,7 @@ virtual T phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 
 virtual T Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda);
 
-virtual void fisher_calculation(double *frequency, 
+virtual void fisher_calculation_sky_averaged(double *frequency, 
 			int length, 
 			gen_params *parameters,
 			double **amplitude_deriv, 
@@ -68,7 +68,7 @@ virtual T phase_mr(T f, source_parameters<T> *param, lambda_parameters<T> *lambd
 virtual T phase_int(T f, source_parameters<T> *param, lambda_parameters<T> *lambda );
 virtual T Dphase_int(T f, source_parameters<T> *param, lambda_parameters<T> *lambda);
 
-virtual void fisher_calculation(double *frequency, 
+virtual void fisher_calculation_sky_averaged(double *frequency, 
 			int length, 
 			gen_params *parameters,
 			double **amplitude_deriv, 

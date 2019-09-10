@@ -25,12 +25,6 @@ T dCS_IMRPhenomD<T>::dCS_phase_mod( source_parameters<T> *param)
 	T redshiftedM = M/(1.+Z);
 	T phase_mod = (param->betappe[0]);
 	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *this->dCS_phase_factor(param);
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<"dCS"<<std::endl;	
-	//	std::cout<<Z<<std::endl;
-	//	std::cout<<out<<std::endl;
-	//	std::cout<<param->betappe[0]<<std::endl;
-	//}
 	return out;
 } 
 
@@ -277,7 +271,7 @@ T ppE_IMRPhenomD_Inspiral<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn
 //Added additional ppE parameter to derivative calculations
 
 template <class T>
-void ppE_IMRPhenomD_Inspiral<T>::fisher_calculation(double *frequency, 
+void ppE_IMRPhenomD_Inspiral<T>::fisher_calculation_sky_averaged(double *frequency, 
 			int length, 
 			gen_params *parameters,
 			double **amplitude_deriv, 
@@ -287,56 +281,55 @@ void ppE_IMRPhenomD_Inspiral<T>::fisher_calculation(double *frequency,
 			int *phase_tapes
 			)
 {
-		ppE_IMRPhenomD_Inspiral<double> modeld;
-		int dimension = 7 + parameters->Nmod;
-		//populate model
-		source_parameters<double> input_params;
-		//###########################################################################
-		input_params = source_parameters<double>::populate_source_parameters_old(parameters->mass1,
-			parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
-			parameters->spin2,parameters->phic,parameters->tc, parameters->sky_average);
-		//Need the splitting frequency	
-		lambda_parameters<double> lambda, *lambda_ptr;
-		modeld.assign_lambda_param(&input_params, &lambda);
-		modeld.post_merger_variables(&input_params);
-		input_params.f1 = 0.014/(input_params.M);
-		input_params.f3 = modeld.fpeak(&input_params, &lambda);
-		input_params.f1_phase = 0.018/(input_params.M);
-		input_params.f2_phase = input_params.fRD/2.;
-		input_params.betappe = parameters->betappe;
-		input_params.bppe = parameters->bppe;
-		input_params.Nmod = parameters->Nmod;
-		//###########################################################################
-		//populate derivative
-		this->construct_amplitude_derivative(frequency, 
-				length,
-				dimension, 
-				amplitude_deriv,
-				&input_params,
-				amp_tapes
-				);
-		
-		//PROBLEM SECTION
-		this->construct_phase_derivative(frequency, 
-				length,
-				dimension, 
-				phase_deriv,
-				&input_params,
-				phase_tapes
-				);
-		modeld.construct_amplitude(frequency, length, amplitude, &input_params);
-		//LOG FACTORS for A0, chirpmass, and eta)
-		
-		for (int i = 0;i <length; i++)
-		{
-			amplitude_deriv[0][i] = (input_params.A0)*amplitude_deriv[0][i];
-			amplitude_deriv[3][i] = (input_params.chirpmass)*amplitude_deriv[3][i];
-			amplitude_deriv[4][i] = (input_params.eta)*amplitude_deriv[4][i];
-			phase_deriv[0][i] = (input_params.A0)*phase_deriv[0][i];
-			phase_deriv[3][i] = (input_params.chirpmass)*phase_deriv[3][i];
-			phase_deriv[4][i] = (input_params.eta)*phase_deriv[4][i];
-		}
-		
+	ppE_IMRPhenomD_Inspiral<double> modeld;
+	int dimension = 7 + parameters->Nmod;
+	//populate model
+	source_parameters<double> input_params;
+	//###########################################################################
+	//input_params = source_parameters<double>::populate_source_parameters_old(parameters->mass1,
+	//	parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
+	//	parameters->spin2,parameters->phic,parameters->tc, parameters->sky_average);
+	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	//Need the splitting frequency	
+	lambda_parameters<double> lambda, *lambda_ptr;
+	modeld.assign_lambda_param(&input_params, &lambda);
+	modeld.post_merger_variables(&input_params);
+	input_params.f1 = 0.014/(input_params.M);
+	input_params.f3 = modeld.fpeak(&input_params, &lambda);
+	input_params.f1_phase = 0.018/(input_params.M);
+	input_params.f2_phase = input_params.fRD/2.;
+	input_params.Nmod = parameters->Nmod;
+	input_params.bppe = parameters->bppe;
+	input_params.betappe = parameters->betappe;
+	//###########################################################################
+	//populate derivative
+	this->construct_amplitude_derivative(frequency, 
+			length,
+			dimension, 
+			amplitude_deriv,
+			&input_params,
+			amp_tapes
+			);
+	this->construct_phase_derivative(frequency, 
+			length,
+			dimension, 
+			phase_deriv,
+			&input_params,
+			phase_tapes
+			);
+	modeld.construct_amplitude(frequency, length, amplitude, &input_params);
+	//LOG FACTORS for A0, chirpmass, and eta)
+	
+	for (int i = 0;i <length; i++)
+	{
+		amplitude_deriv[0][i] = (input_params.A0)*amplitude_deriv[0][i];
+		amplitude_deriv[3][i] = (input_params.chirpmass)*amplitude_deriv[3][i];
+		amplitude_deriv[4][i] = (input_params.eta)*amplitude_deriv[4][i];
+		phase_deriv[0][i] = (input_params.A0)*phase_deriv[0][i];
+		phase_deriv[3][i] = (input_params.chirpmass)*phase_deriv[3][i];
+		phase_deriv[4][i] = (input_params.eta)*phase_deriv[4][i];
+	}
+	
 
 }
 /*! \brief Creates the tapes for derivatives of the amplitude
@@ -387,7 +380,6 @@ void ppE_IMRPhenomD_Inspiral<T>::amplitude_tape(source_parameters<double> *input
 		source_parameters<adouble> intermediate_params;
 		adouble betappe[input_params->Nmod];
 		int bppe[input_params->Nmod];
-		intermediate_params.Nmod = input_params->Nmod;
 		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6], input_params->sky_average);
@@ -397,6 +389,7 @@ void ppE_IMRPhenomD_Inspiral<T>::amplitude_tape(source_parameters<double> *input
 		}
 		intermediate_params.betappe = betappe;
 		intermediate_params.bppe = bppe;
+		intermediate_params.Nmod = input_params->Nmod;
 
 		adouble freqs[1] = {freq};
 		adouble amp_temp[1];
@@ -425,7 +418,6 @@ void ppE_IMRPhenomD_Inspiral<T>::phase_tape(source_parameters<double> *input_par
 	input_params->f2_phase = input_params->fRD/2.;
 	double f2 = (input_params->f1_phase + input_params->f2_phase)/2.;
 	double freqs[3] = {input_params->f1_phase * .9, f2, input_params->f2_phase * 1.1};
-	
 	for (int i =0; i<3;i ++)	
 	{
 		trace_on(tape[i]);
@@ -449,7 +441,6 @@ void ppE_IMRPhenomD_Inspiral<T>::phase_tape(source_parameters<double> *input_par
 		adouble new_params[7+input_params->Nmod];
 		model.change_parameter_basis(parameters, new_params,true);
 		source_parameters<adouble> intermediate_params;
-		intermediate_params.Nmod = input_params->Nmod;
 		adouble betappe[input_params->Nmod];
 		int bppe[input_params->Nmod];
 		adouble spin1vec[3] = {0,0,new_params[3]};
@@ -463,6 +454,7 @@ void ppE_IMRPhenomD_Inspiral<T>::phase_tape(source_parameters<double> *input_par
 		}
 		intermediate_params.betappe = betappe;
 		intermediate_params.bppe = bppe;
+		intermediate_params.Nmod = input_params->Nmod;
 		adouble freqs[1] = {freq};
 		adouble phase_temp[1];
 		model.construct_phase(freqs, 1,  phase_temp, &intermediate_params);
@@ -485,7 +477,7 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_amplitude_derivative(double *frequenc
 				int *tapes /**<int array of tape ids, if NULL, these will be calculated*/
 				)
 {
-	if(tapes==NULL)
+	if(!tapes)
 	{
 		int tape_temp[3];
 		tape_temp[0]=20;
@@ -519,30 +511,30 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_amplitude_derivative(double *frequenc
 
 		}
 		else{	
-		if(evaluate_params[0]<input_params->f1)
-		{
-			gradient(tapes[0],dimension+1, evaluate_params, grad);
-			for(int j=0;j<dimension;j++)
+			if(evaluate_params[0]<input_params->f1)
 			{
-				amplitude_derivative[j][i] = grad[j+1];
-			} 
-		}
-		else if(evaluate_params[0] <input_params->f3)
-		{
-			gradient(tapes[1],dimension+1, evaluate_params, grad);
-			for(int j=0;j<dimension;j++)
+				gradient(tapes[0],dimension+1, evaluate_params, grad);
+				for(int j=0;j<dimension;j++)
+				{
+					amplitude_derivative[j][i] = grad[j+1];
+				} 
+			}
+			else if(evaluate_params[0] <input_params->f3)
 			{
-				amplitude_derivative[j][i] = grad[j+1];
-			} 
-		}
-		else
-		{
-			gradient(tapes[2],dimension+1, evaluate_params, grad);
-			for(int j=0;j<dimension;j++)
+				gradient(tapes[1],dimension+1, evaluate_params, grad);
+				for(int j=0;j<dimension;j++)
+				{
+					amplitude_derivative[j][i] = grad[j+1];
+				} 
+			}
+			else
 			{
-				amplitude_derivative[j][i] = grad[j+1];
-			} 
-		}
+				gradient(tapes[2],dimension+1, evaluate_params, grad);
+				for(int j=0;j<dimension;j++)
+				{
+					amplitude_derivative[j][i] = grad[j+1];
+				} 
+			}
 		}
 	}
 	
@@ -561,7 +553,7 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_phase_derivative(double *frequencies,
 				int *tapes /**<int array of tape ids, if NULL, these will be calculated*/
 				)
 {
-	if(tapes==NULL)
+	if(!tapes)
 	{
 		int tape_temp[3];
 		tape_temp[0]=23;
@@ -673,7 +665,7 @@ T ppE_IMRPhenomD_IMR<T>::phase_int(T f, source_parameters<T> *param, lambda_para
 //Added additional ppE parameter to derivative calculations
 
 template <class T>
-void ppE_IMRPhenomD_IMR<T>::fisher_calculation(double *frequency, 
+void ppE_IMRPhenomD_IMR<T>::fisher_calculation_sky_averaged(double *frequency, 
 			int length, 
 			gen_params *parameters,
 			double **amplitude_deriv, 
@@ -752,7 +744,6 @@ void ppE_IMRPhenomD_IMR<T>::amplitude_tape(source_parameters<double> *input_para
 	input_params->f3 = modeld.fpeak(input_params, &lambda);
 	double f2 = (input_params->f1 + input_params->f3)/2.;
 	double freqs[3] = {input_params->f1 * .9, f2, input_params->f3 * 1.1};
-	int Nmod = input_params->Nmod;
 	
 	for (int i =0; i<3;i ++)	
 	{
@@ -760,10 +751,10 @@ void ppE_IMRPhenomD_IMR<T>::amplitude_tape(source_parameters<double> *input_para
 		double amp_out;
 
 		adouble freq  ;
-		adouble parameters[7+Nmod];
+		adouble parameters[7+input_params->Nmod];
 		//adouble amp ;
 		ppE_IMRPhenomD_IMR<adouble> model;
-		adouble new_params[7 + Nmod];
+		adouble new_params[7+input_params->Nmod];
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
@@ -773,35 +764,32 @@ void ppE_IMRPhenomD_IMR<T>::amplitude_tape(source_parameters<double> *input_para
 		parameters[4] <<= input_params-> eta;
 		parameters[5] <<= input_params-> chi_s;
 		parameters[6] <<= input_params-> chi_a;
-		for(int j =0 ; i<Nmod ; i++){
+
+		for(int j = 0; j<input_params->Nmod; j++)
 			parameters[7+j] <<= input_params-> betappe[j];
-		}
-		//parameters[3] = parameters[3]/MSOL_SEC;
 		model.change_parameter_basis(parameters, new_params,true);
 
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
 		source_parameters<adouble> intermediate_params;
-		intermediate_params.betappe = new adouble[Nmod];	
-		intermediate_params.bppe = new int[Nmod];	
-		intermediate_params.Nmod = input_params->Nmod;
+		adouble betappe[input_params->Nmod];
+		int bppe[input_params->Nmod];
 		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
-				new_params[6],input_params->sky_average);
-		for(int j = 0; i<Nmod; i++) {
-			intermediate_params.betappe[j] = parameters[6+j];
-			intermediate_params.bppe[j] = input_params->bppe[j];
+				new_params[6], input_params->sky_average);
+		for(int j = 0; j<input_params->Nmod; j++){
+			betappe[j] = parameters[7+j];
+			bppe[j] = input_params->bppe[j];
 		}
-			//intermediate_params.betappe = parameters[7];
-			//intermediate_params.bppe = input_params->bppe;
+		intermediate_params.betappe = betappe;
+		intermediate_params.bppe = bppe;
+		intermediate_params.Nmod = input_params->Nmod;
 
 		adouble freqs[1] = {freq};
 		adouble amp_temp[1];
 		model.construct_amplitude(freqs, 1,  amp_temp, &intermediate_params);
 		amp_temp[0]>>=amp_out;
 		trace_off();
-		delete [] intermediate_params.betappe;
-		delete [] intermediate_params.bppe;
 	}
 	
 }
@@ -824,15 +812,13 @@ void ppE_IMRPhenomD_IMR<T>::phase_tape(source_parameters<double> *input_params, 
 	input_params->f2_phase = input_params->fRD/2.;
 	double f2 = (input_params->f1_phase + input_params->f2_phase)/2.;
 	double freqs[3] = {input_params->f1_phase * .9, f2, input_params->f2_phase * 1.1};
-	int Nmod = input_params->Nmod;
-	
 	for (int i =0; i<3;i ++)	
 	{
 		trace_on(tape[i]);
 		double phase_out;
 
 		adouble freq  ;
-		adouble parameters[8+Nmod];
+		adouble parameters[7+input_params->Nmod];
 		adouble phase ;
 		ppE_IMRPhenomD_IMR<adouble> model;
 
@@ -844,36 +830,30 @@ void ppE_IMRPhenomD_IMR<T>::phase_tape(source_parameters<double> *input_params, 
 		parameters[4] <<= input_params-> eta;
 		parameters[5] <<= input_params-> chi_s;
 		parameters[6] <<= input_params-> chi_a;
-		//parameters[7] <<= input_params-> betappe;
-		for(int i =0 ; i<Nmod ; i++){
-			parameters[7+i] <<= input_params-> betappe[i];
-		}
-		//parameters[3] = parameters[3]/MSOL_SEC;
-		adouble new_params[8+Nmod];
+		for (int j =0 ; j<input_params->Nmod; j++)
+			parameters[7+j] <<= input_params->betappe[j];
+		adouble new_params[7+input_params->Nmod];
 		model.change_parameter_basis(parameters, new_params,true);
 		source_parameters<adouble> intermediate_params;
-		intermediate_params.betappe = new adouble[Nmod];	
-		intermediate_params.bppe = new int[Nmod];	
-		intermediate_params.Nmod = input_params->Nmod;
+		adouble betappe[input_params->Nmod];
+		int bppe[input_params->Nmod];
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
 		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6],input_params->sky_average);
-		for (int j = 0 ; j<Nmod; j++){
-			intermediate_params.betappe[j] = parameters[7+j];
-			intermediate_params.bppe[j] = input_params->bppe[j];
+		for(int j = 0; j<input_params->Nmod; j++){
+			betappe[j] = parameters[7+j];
+			bppe[j] = input_params->bppe[j];
 		}
-		//intermediate_params.betappe = parameters[7];
-		//intermediate_params.bppe = input_params->bppe;
+		intermediate_params.betappe = betappe;
+		intermediate_params.bppe = bppe;
+		intermediate_params.Nmod = input_params->Nmod;
 		adouble freqs[1] = {freq};
 		adouble phase_temp[1];
-		//model.construct_phase(freqs, 1,  phase_temp, &intermediate_params);
 		model.construct_phase(freqs, 1,  phase_temp, &intermediate_params);
 		phase_temp[0]>>=phase_out;
 		trace_off();
-		delete [] intermediate_params.betappe;
-		delete [] intermediate_params.bppe;
 	}
 	
 }
@@ -891,7 +871,7 @@ void ppE_IMRPhenomD_IMR<T>::construct_amplitude_derivative(double *frequencies, 
 				int *tapes /**<int array of tape ids, if NULL, these will be calculated*/
 				)
 {
-	if(tapes==NULL)
+	if(!tapes)
 	{
 		int tape_temp[3];
 		tape_temp[0]=20;
@@ -966,7 +946,7 @@ void ppE_IMRPhenomD_IMR<T>::construct_phase_derivative(double *frequencies, /**<
 				int *tapes /**<int array of tape ids, if NULL, these will be calculated*/
 				)
 {
-	if(tapes==NULL)
+	if(!tapes)
 	{
 		int tape_temp[3];
 		tape_temp[0]=23;
