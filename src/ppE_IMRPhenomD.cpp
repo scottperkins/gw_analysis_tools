@@ -249,9 +249,16 @@ T ppE_IMRPhenomD_Inspiral<T>::phase_ins(T f, source_parameters<T> *param, T *pn_
 	T PIMFcube = pow(M_PI * param->chirpmass * f, 1./3.);
 	T gr_ins = model.phase_ins(f, param, pn_coeff, lambda,powers);
 	T phaseout= gr_ins;
+	std::cout<<"GR:  "<<gr_ins<<std::endl;
+	std::cout<<"chirp:  "<<param->chirpmass<<std::endl;
+	std::cout<<"f:  "<<f<<std::endl;
+	std::cout<<"beta:  "<<param->betappe[0]<<std::endl;
+	std::cout<<"b:  "<<param->bppe[0]<<std::endl;
+	std::cout<<"Nmoc:  "<<param->Nmod<<std::endl;
 	
 	for(int i = 0; i<param->Nmod; i++)
 		phaseout =phaseout +  pow_int((PIMFcube),(int)param->bppe[i]) * param->betappe[i];
+	std::cout<<"nonGR:  "<<phaseout<<std::endl;
 	return phaseout;
 
 }
@@ -286,9 +293,6 @@ void ppE_IMRPhenomD_Inspiral<T>::fisher_calculation_sky_averaged(double *frequen
 	//populate model
 	source_parameters<double> input_params;
 	//###########################################################################
-	//input_params = source_parameters<double>::populate_source_parameters_old(parameters->mass1,
-	//	parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
-	//	parameters->spin2,parameters->phic,parameters->tc, parameters->sky_average);
 	input_params = source_parameters<double>::populate_source_parameters(parameters);
 	//Need the splitting frequency	
 	lambda_parameters<double> lambda, *lambda_ptr;

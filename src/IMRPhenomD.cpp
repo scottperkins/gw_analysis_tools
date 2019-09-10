@@ -397,9 +397,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	T DL = params->DL;
 	lambda_parameters<T> lambda, *lambda_ptr;
 	this->assign_lambda_param(params, &lambda);
-	if(std::is_same< double, T>::value){
-		std::cout<<lambda.gamma[0]<<" "<<lambda.gamma[1]<<" "<<lambda.gamma[2]<<" "<<std::endl;
-	}
 
 	/*Initialize the post merger quantities*/
 	this->post_merger_variables(params);
@@ -475,9 +472,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			phase +=   (T)(tc*(f-f_ref) - phic);
 			waveform[j] = amp * std::exp(-i * phase);
 		}
-		//if(std::is_same< double, T>::value){
-		//	std::cout<<waveform[j]<<std::endl;
-		//}
 
 	}
 	

@@ -41,18 +41,18 @@ void fisher(double *frequency,
 {
 	//populate noise and frequency
 	double internal_noise[length];
-	if (noise==NULL)
+	if (noise)
 	{
-		//double noise[length];
-		populate_noise(frequency,detector, internal_noise,length);
-		for (int i =0; i<length;i++)
-		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
-	}
-	else
 		for(int i = 0 ; i < length;i++)
 		{
 			internal_noise[i] = noise[i];
 		}
+	}
+	else{
+		populate_noise(frequency,detector, internal_noise,length);
+		for (int i =0; i<length;i++)
+		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
+	}
 		
 	//populate derivatives - Derivatives of DETECTOR RESPONSE
 	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
@@ -74,7 +74,6 @@ void fisher(double *frequency,
 			generation_method,
 			parameters);
 
-	//PROBLEM 
 	//calulate fisher elements
 	for (int j=0;j<dimension; j++)
 	{
@@ -299,18 +298,17 @@ void calculate_derivatives(double  **amplitude_deriv,
 			for(int j = 0 ; j<waveform_params.Nmod ; j++){
 				waveform_params.betappe[j] = param_p[7+j];
 			}
+			std::cout<<waveform_params.betappe[0]<<std::endl;
 
 
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_plus,
-				//amplitude_cross_plus,
 				gen_method,
 				&waveform_params);	
 			fourier_phase(frequencies, 
 				length,
 				phase_plus_plus,
-				//amplitude_cross_plus,
 				gen_method,
 				&waveform_params);	
 
@@ -332,13 +330,11 @@ void calculate_derivatives(double  **amplitude_deriv,
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_minus,
-				//amplitude_cross_plus,
 				gen_method,
 				&waveform_params);	
 			fourier_phase(frequencies, 
 				length,
 				phase_plus_minus,
-				//amplitude_cross_plus,
 				gen_method,
 				&waveform_params);	
 			for (int l =0;l<length;l++)
@@ -608,9 +604,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			a_corr_m = std::abs(Qm);
 			p_corr_m = std::arg(Qm);
 
-			//std::cout<<"Angles: "<<waveform_params.theta<<" "<< waveform_params.phi<<" "<<waveform_params.incl_angle<<std::endl;
-			//std::cout<<"Amp: "<<a_corr_p-a_corr_m<<std::endl;
-			//std::cout<<"Phase: "<<p_corr_p-p_corr_m<<std::endl;
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_minus,
@@ -698,7 +691,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			}
 			param_p[i] = param_in[i] + epsilon;
 			param_m[i] = param_in[i] - epsilon;
-			//if(std::isnan(param_p[i]))std::cout<<i<<std::endl;
 
 			//cos \iota must lie within certain range
 			if(param_p[0]>1.)param_p[0]=1.;
@@ -973,7 +965,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			for (int k =0; k<length; k++){
 				amplitude_plus_minus[k] =  std::abs(response[k]);
 				phase_plus_minus[k] =  std::arg(response[k]);
-				//std::cout<<amplitude_plus_plus[k]<<" "<<phase_plus_plus[k]<<" "<<response[k]<<std::endl;
 			}
 
 			for (int l =0;l<length;l++)
@@ -1529,6 +1520,8 @@ void calculate_derivatives(double  **amplitude_deriv,
 
 
 /*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
+ *
+ * Build  around  ADOL-C
  */
 void fisher_autodiff(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
