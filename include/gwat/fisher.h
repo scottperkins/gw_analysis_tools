@@ -42,30 +42,24 @@ void fisher_autodiff(double *frequency,
 	double *noise = NULL
 	);
 
+void PhenomP_fisher(double *frequency,
+	int length,
+	gen_params *parameters,
+	std::complex<double> **waveform_derivative,
+	int *amp_tapes,
+	int *phase_tapes,
+	std::string detector
+	);
 
+void construct_waveform_derivative(double *frequency, 
+	int length,
+	int dimension,
+	std::complex<double> **waveform_deriv,
+	source_parameters<double> *input_params,
+	int *waveform_tapes
+	);
 
-//##############################################################
-//outdated
-//void amplitude_derivative(double *frequencies, 	
-//			int length, 
-//			double **amp_derivative,
-//			int dimension,
-//			double *params,
-//			adouble (*amp_fun)(adouble f, adouble *parameters)
-//			);
-//
-//adouble IMRPhenomD_amp_parameter_tranform(adouble f, 
-//					adouble *parameters);
-//
-//std::complex<adouble> IMRPhenomD_waveform_parameter_tranform(adouble f, 					
-//					adouble *parameters);
-//void waveform_derivative(double *frequencies, 	
-//			int length, 
-//			std::complex<double> **waveform_derivative,
-//			int dimension,
-//			double *params,
-//			std::complex<adouble> (*waveform)(adouble f, adouble *parameters)
-//			);
-//void intialize_tape();
+void unpack_parameters(adouble *parameters, gen_params *input_params, std::string generation_method, int dim);
+//void repack_parameters(adouble *parameters, gen_params_ad *input_params, std::string generation_method, int dim);
 
 #endif

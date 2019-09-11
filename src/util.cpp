@@ -490,11 +490,12 @@ double pow_int(double base, int power)
 }
 adouble pow_int(adouble base, int power)
 {
+	if (power == 0) return 1.;
 	adouble prod = 1;
 	int pow = std::abs(power);
 	for (int i = 0; i< pow;i++)
 		prod = prod * base;
-	if (pow>0)
+	if (power>0)
 		return prod;
 	else
 		return 1./prod;

@@ -245,20 +245,12 @@ T ppE_IMRPhenomD_Inspiral<T>::phase_ins(T f, source_parameters<T> *param, T *pn_
 		lambda_parameters<T> *lambda, useful_powers<T> *powers)
 {
 	IMRPhenomD<T> model;
-	//T piMFcube = powers->MFthird * powers->PIcube;
 	T PIMFcube = pow(M_PI * param->chirpmass * f, 1./3.);
 	T gr_ins = model.phase_ins(f, param, pn_coeff, lambda,powers);
 	T phaseout= gr_ins;
-	std::cout<<"GR:  "<<gr_ins<<std::endl;
-	std::cout<<"chirp:  "<<param->chirpmass<<std::endl;
-	std::cout<<"f:  "<<f<<std::endl;
-	std::cout<<"beta:  "<<param->betappe[0]<<std::endl;
-	std::cout<<"b:  "<<param->bppe[0]<<std::endl;
-	std::cout<<"Nmoc:  "<<param->Nmod<<std::endl;
 	
 	for(int i = 0; i<param->Nmod; i++)
 		phaseout =phaseout +  pow_int((PIMFcube),(int)param->bppe[i]) * param->betappe[i];
-	std::cout<<"nonGR:  "<<phaseout<<std::endl;
 	return phaseout;
 
 }

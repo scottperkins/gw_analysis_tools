@@ -25,6 +25,8 @@ using namespace std;
  */
 
 /*!\brief Calculates the fisher matrix for the given arguments
+ *
+ * Utilizes numerical derivatives
  */
 void fisher(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
@@ -34,7 +36,7 @@ void fisher(double *frequency,
 	int dimension, 
 	gen_params *parameters,
 	//double *parameters,
-	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method -- if using numerical derivatives or speed isn't that important, just set to NULL*/
 	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
 	double *noise
 	)
@@ -132,7 +134,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-7;
+	double epsilon = 1e-9;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -298,7 +300,6 @@ void calculate_derivatives(double  **amplitude_deriv,
 			for(int j = 0 ; j<waveform_params.Nmod ; j++){
 				waveform_params.betappe[j] = param_p[7+j];
 			}
-			std::cout<<waveform_params.betappe[0]<<std::endl;
 
 
 			fourier_amplitude(frequencies, 
@@ -1643,6 +1644,74 @@ void fisher_autodiff(double *frequency,
 	free(phase_deriv);
 	free(amplitude);
 	free(integrand);
+}
+
+/*! \brief Calculate the full fisher matrix for a precessing waveform
+ *
+ * Calculates the fisher without maximizing the extrinsic parameters
+ *
+ * 15 dimensions: 
+ *
+ * cos \thetaJ
+ *
+ * RA
+ *
+ * DEC
+ *
+ * DL
+ *
+ * chirpmass
+ *
+ * eta
+ *
+ * spin1
+ *
+ * spin2
+ *
+ * theta1
+ *
+ * theta2
+ *
+ * phi1
+ *
+ * phi2
+ *
+ * phiRef
+ *
+ * psi
+ *
+ * all at reference frequency of 20hz
+ */
+void PhenomP_fisher(double *frequency,
+	int length,
+	gen_params *parameters,
+	std::complex<double> **waveform_deriv,
+	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
+	std::string detector
+	)
+{
+	int dimension = 15;
+	IMRPhenomPv2<adouble> modelad;
+	IMRPhenomPv2<double> modeld;
+	source_parameters<double> input_params;
+	//###########################################################################
+	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	//Need the splitting frequency	
+	lambda_parameters<double> lambda, *lambda_ptr;
+	modeld.assign_lambda_param(&input_params, &lambda);
+	modeld.post_merger_variables(&input_params);
+	input_params.f1 = 0.014/(input_params.M);
+	input_params.f3 = modeld.fpeak(&input_params, &lambda);
+	input_params.f1_phase = 0.018/(input_params.M);
+	input_params.f2_phase = input_params.fRD/2.;
+	construct_waveform_derivative(frequency, length, dimension, waveform_deriv, &input_params, waveform_tapes);
+	for (int i = 0;i <length; i++)
+	{
+		waveform_deriv[0][i] = (input_params.A0)*waveform_deriv[0][i];
+		waveform_deriv[3][i] = (input_params.chirpmass)*waveform_deriv[3][i];
+		waveform_deriv[4][i] = (input_params.eta)*waveform_deriv[4][i];
+	}
+
 }
 
 
