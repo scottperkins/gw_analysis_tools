@@ -30,47 +30,52 @@ double calculate_snr(std::string detector,
                         double *frequencies,
                         int length);
 
-int fourier_detector_response(double *frequencies, 
+template<class T>
+int fourier_detector_response(T *frequencies, 
 			int length,
-			std::complex<double> *hplus, 
-			std::complex<double> *hcross, 
-			std::complex<double> *detector_response, 
-			double theta, 
-			double phi, 
+			std::complex<T> *hplus, 
+			std::complex<T> *hcross, 
+			std::complex<T> *detector_response, 
+			T theta, 
+			T phi, 
 			std::string detector);
-int fourier_detector_response(double *frequencies, 
+template<class T>
+int fourier_detector_response(T *frequencies, 
 			int length,
-			std::complex<double> *hplus, 
-			std::complex<double> *hcross, 
-			std::complex<double> *detector_response, 
-			double theta, 
-			double phi, 
-			double psi, 
+			std::complex<T> *hplus, 
+			std::complex<T> *hcross, 
+			std::complex<T> *detector_response, 
+			T theta, 
+			T phi, 
+			T psi, 
 			std::string detector);
-int fourier_detector_response_equatorial(double *frequencies, 
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, 
 			int length,
-			std::complex<double> *hplus, 
-			std::complex<double> *hcross, 
-			std::complex<double> *detector_response, 
-			double ra, 
-			double dec, 
-			double psi, 
+			std::complex<T> *hplus, 
+			std::complex<T> *hcross, 
+			std::complex<T> *detector_response, 
+			T ra, 
+			T dec, 
+			T psi, 
 			double gmst, 
 			std::string detector);
 
-int fourier_detector_response(double *frequencies, 
+template<class T>
+int fourier_detector_response(T *frequencies, 
 			int length,
-			std::complex<double> *response, 
+			std::complex<T> *response, 
 			std::string detector,
 			std::string generation_method,
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			);
-int fourier_detector_response_equatorial(double *frequencies, 
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, 
 			int length,
-			std::complex<double> *response, 
+			std::complex<T> *response, 
 			std::string detector,
 			std::string generation_method,
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			);
 int fourier_detector_amplitude_phase(double *frequencies, 
 			int length,

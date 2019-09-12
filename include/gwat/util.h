@@ -67,65 +67,69 @@ struct sph_harm
  *
  *  *NOTE* not all the members of this structure need to be assigned for usage. In fact, some are reduntant. It's up to the user to determine what fields require an assignment. (Sorry)
  */
-struct gen_params
-{	
+
+template<class T>
+class gen_params_base
+{
+public:	
 	/*!mass of the larger body in Solar Masses*/
-	double mass1;
+	T mass1;
 	/*!mass of the smaller body in Solar Masses*/
-	double mass2;
+	T mass2;
 	/*!Luminosity distance to the source*/
-	double Luminosity_Distance;
+	T Luminosity_Distance;
 	/*!Spin vector of the larger mass [Sx,Sy,Sz]*/
-	double spin1[3];
+	T spin1[3];
 	/*!Spin vector of the smaller mass [Sx,Sy,Sz]*/
-	double spin2[3];
+	T spin2[3];
 	/*!coalescence phase of the binary*/
-	double phic=0;
+	T phic=0;
 	/*!coalescence time of the binary*/
-	double tc=0;
+	T tc=0;
 	/*!ppE b parameter (power of the frequency) - vector for multiple modifications*/
 	int *bppe;
 	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
-	double *betappe;
+	T *betappe;
 	/*!Number of phase modificatinos*/
 	int Nmod;
 	/*!*angle between angular momentum and the total momentum */
-	double incl_angle;
+	T incl_angle;
 	/*! spherical angles for the source location relative to the detector*/
-	double theta;
-	double phi;
+	T theta;
+	T phi;
 	/*! Equatorial coordinates of source*/
-	double RA;
-	double DEC;
+	T RA;
+	T DEC;
+	/*! Greenwich Mean Sidereal time (for detector orientation - start of data*/
 	double gmst;
 	//Polarization angle
-	double psi =0 ;
+	T psi =0 ;
 	/*! BOOL flag for early termination of NS binaries*/
 	bool NSflag;
 
 	/*! Reference frequency for PhenomPv2*/
-	double f_ref=0;
+	T f_ref=0;
 	
-	double phiRef=0;
+	T phiRef=0;
 
 	//###################################################
 	//Either define all these parameters for Pv2, or define
 	//all the source frame parameters above
 	/*!thetaJ -- optional domain is [0,M_PI]  */
-	double thetaJN = -10;
+	T thetaJN = -10;
 
-	double alpha0 = 0;
+	T alpha0 = 0;
 
 
-	double chip = 0;
+	T chip = 0;
 
-	double chi1_l = 0;
-	double chi2_l = 0;
+	T chi1_l = 0;
+	T chi2_l = 0;
 	//###################################################
-	double zeta_polariz =0;
-	double phi_aligned = 0;
+	T zeta_polariz =0;
+	T phi_aligned = 0;
 
-	double chil = 0;
+	T chil = 0;
 
 
 	bool sky_average;
@@ -137,6 +141,16 @@ struct gen_params
 	std::string cosmology="PLANCK15";
 };
 
+/*! \brief convience wrapper for the gen_params_base class
+ *
+ * If using the code in the intended way, this is all the user should ever have to use. Just allows the user to drop the template parameter
+ *
+ * Also implemented for backwards compatibility with previous versions of the code
+ */
+class gen_params:public gen_params_base<double>
+{
+
+};
 /*!\brief To speed up calculations within the for loops, we pre-calculate reoccuring powers of M*F and Pi, since the pow() function is prohibatively slow
  *
  * Powers of PI are initialized once, and powers of MF need to be calculated once per for loop (if in the inspiral portion).
@@ -282,7 +296,7 @@ struct source_parameters
 	
 	std::string cosmology;
 
-static source_parameters<T> populate_source_parameters(gen_params *param_in);
+static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(
 			T mass1, 
 			T mass2, 
@@ -373,11 +387,14 @@ adouble calculate_mass1(adouble chirpmass, adouble eta);
 double calculate_mass2(double chirpmass, double eta);
 adouble calculate_mass2(adouble chirpmass, adouble eta);
 
-void celestial_horizon_transform(double RA, double DEC, double gps_time, double LONG, double LAT,
-				double *phi, double *theta);
+template<class T>
+void celestial_horizon_transform(T RA, T DEC, double gps_time, T LONG, T LAT,
+				T *phi, T *theta);
 
-double gps_to_GMST(double gps_time);
-double gps_to_JD(double gps_time);
+template<class T>
+T gps_to_GMST(T gps_time);
+template<class T>
+T gps_to_JD(T gps_time);
 
 
 void transform_cart_sph(double *cartvec, double *sphvec);

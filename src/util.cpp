@@ -312,10 +312,13 @@ void deallocate_FFTW_mem(fftw_outline *plan)
 /*! \brief Builds the structure that shuttles source parameters between functions -updated version to incorporate structure argument
  *
  * Populates the structure that is passed to all generation methods - contains all relavent source parameters 
+ *
+ * Template type of source parameters and gen_parameters must match
+ *
  */
 template <class T>
 source_parameters<T> source_parameters<T>::populate_source_parameters(
-			gen_params *param_in
+			gen_params_base<T> *param_in
 			) 
 {
 
@@ -998,42 +1001,46 @@ void write_file(std::string filename, /**<Filename of output file, relative to e
  *
  * Outputs are the spherical polar angles defined by North as 0 degrees azimuth and the normal to the earth as 0 degree polar
  */
-void celestial_horizon_transform(double RA, /**< Right acsension (rad)*/
-				double DEC, /**< Declination (rad)*/
+template<class T>
+void celestial_horizon_transform(T RA, /**< Right acsension (rad)*/
+				T DEC, /**< Declination (rad)*/
 				double gps_time, /**<GPS time */
-				double LONG, /**< Longitude (rad)*/
-				double LAT,/**< Latitude (rad)*/
-				double *phi, /**<[out] horizon azimuthal angle (rad)*/
-				double *theta/**< [out] horizon polar angle (rad)*/
+				T LONG, /**< Longitude (rad)*/
+				T LAT,/**< Latitude (rad)*/
+				T *phi, /**<[out] horizon azimuthal angle (rad)*/
+				T *theta/**< [out] horizon polar angle (rad)*/
 				)
 {
 	//#################################
 	//NEED TRANSFORM FROM GPS TO SIDEREAL
-	double GMST = gps_to_GMST(gps_time);
+	T GMST = gps_to_GMST(gps_time);
 	//###############################
 	
 	//std::cout<<"GMST: "<<GMST<<std::endl;
-	double LMST = GMST + (LONG*180./M_PI)/15.; //Local mean sidereal in hours
-	double H = (LMST - (RA*180./M_PI)/15.)*15.*M_PI/180.;//Local hour angle in rad
+	T LMST = GMST + (LONG*180./M_PI)/15.; //Local mean sidereal in hours
+	T H = (LMST - (RA*180./M_PI)/15.)*15.*M_PI/180.;//Local hour angle in rad
 	
-	double alt = asin( sin(DEC) * sin(LAT) + cos(DEC) * cos(LAT) *cos(H) );//alt in rad
-	double a =  acos( (sin(DEC) - sin(alt)*sin(LAT) )/ (cos(alt)*cos(LAT))) ; //azimuth in rad
-	double azimuth ;
+	T alt = asin( sin(DEC) * sin(LAT) + cos(DEC) * cos(LAT) *cos(H) );//alt in rad
+	T a =  acos( (sin(DEC) - sin(alt)*sin(LAT) )/ (cos(alt)*cos(LAT))) ; //azimuth in rad
+	T azimuth ;
 	if (sin(H)<0) azimuth = a ;
 	else azimuth = 2*M_PI - a;
 	*phi = azimuth ;//output in rad
 	*theta = M_PI/2. - alt;//output in rad
 }
+template void celestial_horizon_transform<double>(double,double,double,double,double,double *,double *);
+template void celestial_horizon_transform<adouble>(adouble,adouble,double,adouble,adouble,adouble *,adouble *);
 
 /*! \brief Utility to transform from gps time to GMST
  * https://aa.usno.navy.mil/faq/docs/GAST.php
  */
-double gps_to_GMST(double gps_time)
+template<class  T>
+T gps_to_GMST(T gps_time)
 {
-	double J2000 = 2451545;
-	double JD = gps_to_JD(gps_time);
-	double JD0;
-	double H;
+	T J2000 = 2451545;
+	T JD = gps_to_JD(gps_time);
+	T JD0;
+	T H;
 	if((JD - floor(JD)) >.5){ 
 		JD0 = floor(JD)+.5;//Julian date of the previous midnight
 		H = (JD - JD0)*24;//Hours past midnight (in hours)
@@ -1042,25 +1049,38 @@ double gps_to_GMST(double gps_time)
 		JD0 = floor(JD) -1. ;
 		H = (JD - JD0)*24;
 	}
-	double D0 = JD0 -J2000;
-	double D = JD -J2000;
-	double T = D/ 36525.; //Centuries since J2000
+	T D0 = JD0 -J2000;
+	T D = JD -J2000;
+	T tau = D/ 36525.; //Centuries since J2000
 	//approximation of GMST from JD (from GPST)
-	double GMST_unscaled = 6.697374558 + 0.06570982441908*D0 + 1.00273790935*H + 0.000026*T*T;
-	int hours = (int)floor(GMST_unscaled)%24;
-	double fraction = GMST_unscaled - floor(GMST_unscaled);
+	T GMST_unscaled = 6.697374558 + 0.06570982441908*D0 + 1.00273790935*H + 0.000026*tau*tau;
+	T hours;
+	//if(std::is_same<double,T>::value){
+	hours = ((int)floor(GMST_unscaled)%24);
+	//}
+	//else{
+		//hours = trunc(floor(GMST_unscaled)/24.);
+		//hours = floor(GMST_unscaled)/24.-floor(floor(GMST_unscaled)/24.);
+	//}
+	//T hours = trunc(trunc(floor(GMST_unscaled))%24.);
+	T fraction = GMST_unscaled - floor(GMST_unscaled);
 	//return (6.697374558 + 0.06570982441908*D0 + 1.00273790935*H + 0.000026*T*T);
 	return hours + fraction;
 }
+template double gps_to_GMST<double>(double);
+//template adouble gps_to_GMST<adouble>(adouble);
 
 /*! \brief Utility to transform from gps to JD
  */
-double gps_to_JD(double gps_time)
+template<class T>
+T gps_to_JD(T gps_time)
 {
-	double J2000 = 2451545;
-	double J2000_GPST = 630763213.;
+	T J2000 = 2451545;
+	T J2000_GPST = 630763213.;
 	return J2000 + (gps_time-J2000_GPST)/(86400.);
 }
+template double gps_to_JD<double>(double);
+template adouble gps_to_JD<adouble>(adouble);
 
 /*! \brief utility to transform a vector from cartesian to spherical (radian)
  * 	

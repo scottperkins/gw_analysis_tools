@@ -81,13 +81,16 @@ double aLIGO_analytic(double f);
 std::complex<double> Q(double theta, double phi, double iota);
 std::complex<double> Q(double theta, double phi, double iota, double psi);
 
-double right_interferometer_cross(double theta, double phi);
+template<class T>
+T right_interferometer_cross(T theta, T phi);
 
-double right_interferometer_plus(double theta, double phi);
+template<class T>
+T right_interferometer_plus(T theta, T phi);
 
 double Hanford_O1_fitted(double f);
 
-void celestial_horizon_transform(double RA, double DEC, double gps_time, std::string detector, double *phi, double *theta);
+template<class T>
+void celestial_horizon_transform(T RA, T DEC, double gps_time, std::string detector, T *phi, T *theta);
 
 void derivative_celestial_horizon_transform(double RA, 
 		double DEC, 
@@ -103,45 +106,49 @@ double DTOA(double theta1, double theta2, std::string detector1, std::string det
 
 double radius_at_lat(double latitude, double elevation);
 
+template<class T>
 void detector_response_functions_equatorial(double D[3][3],
-	double ra,
-	double dec,
-	double psi,
+	T ra,
+	T dec,
+	T psi,
 	double gmst,
-	double *Fplus,
-	double *Fcross
+	T *Fplus,
+	T *Fcross
 	);
+template<class T>
 void detector_response_functions_equatorial(std::string detector,
-	double ra,
-	double dec,
-	double psi,
+	T ra,
+	T dec,
+	T psi,
 	double gmst,
-	double *Fplus,
-	double *Fcross
-	);
-void detector_response_functions_equatorial(std::string detector,
-	double ra,
-	double dec,
-	double psi,
-	double gmst,
-	double *times,
-	int length,
-	double LISA_alpha0,
-	double LISA_phi0,
-	double LISA_theta_l,
-	double LISA_phi_l,
-	double integration_time,
-	double *Fplus,
-	double *Fcross
+	T *Fplus,
+	T *Fcross
 	);
 
 template<class T>
-T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,T integration_time);
+void detector_response_functions_equatorial(std::string detector,
+	T ra,
+	T dec,
+	T psi,
+	double gmst,
+	T *times,
+	int length,
+	T LISA_alpha0,
+	T LISA_phi0,
+	T LISA_theta_l,
+	T LISA_phi_l,
+	double integration_time,
+	T *Fplus,
+	T *Fcross
+	);
+
 template<class T>
-T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,T integration_time);
+T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,double integration_time);
 template<class T>
-T LISA_response_plus( source_parameters<T> *params,T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f,T integration_time);
+T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,double integration_time);
 template<class T>
-T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f,T integration_time);
+T LISA_response_plus( source_parameters<T> *params,T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f,double integration_time);
+template<class T>
+T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f,double integration_time);
 
 #endif 

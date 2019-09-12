@@ -1682,7 +1682,7 @@ void fisher_autodiff(double *frequency,
  *
  * all at reference frequency of 20hz
  */
-void PhenomP_fisher(double *frequency,
+void calculate_derivatives_autodiff(double *frequency,
 	int length,
 	gen_params *parameters,
 	std::complex<double> **waveform_deriv,
@@ -1704,7 +1704,7 @@ void PhenomP_fisher(double *frequency,
 	input_params.f3 = modeld.fpeak(&input_params, &lambda);
 	input_params.f1_phase = 0.018/(input_params.M);
 	input_params.f2_phase = input_params.fRD/2.;
-	construct_waveform_derivative(frequency, length, dimension, waveform_deriv, &input_params, waveform_tapes);
+	//construct_waveform_derivative(frequency, length, dimension, waveform_deriv, &input_params, waveform_tapes);
 	for (int i = 0;i <length; i++)
 	{
 		waveform_deriv[0][i] = (input_params.A0)*waveform_deriv[0][i];

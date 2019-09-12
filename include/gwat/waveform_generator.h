@@ -9,12 +9,13 @@
 /*! \file 
  */
 
-int fourier_waveform(double *frequencies, 
+template<class  T>
+int fourier_waveform(T *frequencies, 
 			int length,
-			std::complex<double> *waveform_plus, 
-			std::complex<double> *waveform_cross, 
+			std::complex<T> *waveform_plus, 
+			std::complex<T> *waveform_cross, 
 			std::string generation_method,
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			);
 
 int fourier_waveform(double *frequencies, 

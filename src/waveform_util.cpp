@@ -140,34 +140,36 @@ double calculate_snr(std::string detector, /**< detector name - must match the s
 
 /* \brief calculates the detector response for a given waveform and detector -- polarization angle =0
  */
-int fourier_detector_response(double *frequencies, /**<array of frequencies corresponding to waveform*/
+template<class T>
+int fourier_detector_response(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
-			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
-			std::complex<double> *detector_response, /**< [out] detector response*/
-			double theta, /**< polar angle (rad) theta in detector frame*/
-			double phi, /**< azimuthal angle (rad) phi in detector frame*/ 
+			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<T> *detector_response, /**< [out] detector response*/
+			T theta, /**< polar angle (rad) theta in detector frame*/
+			T phi, /**< azimuthal angle (rad) phi in detector frame*/ 
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
-	return fourier_detector_response(frequencies, length, hplus, hcross, detector_response, theta, phi, 0, detector);
+	return fourier_detector_response(frequencies, length, hplus, hcross, detector_response, theta, phi, (T)0., detector);
 	
 }
 /* \brief calculates the detector response for a given waveform and detector
  */
-int fourier_detector_response(double *frequencies, /**<array of frequencies corresponding to waveform*/
+template<class T>
+int fourier_detector_response(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
-			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
-			std::complex<double> *detector_response, /**< [out] detector response*/
-			double theta, /**< polar angle (rad) theta in detector frame*/
-			double phi, /**< azimuthal angle (rad) phi in detector frame*/ 
-			double psi, /**< polarization angle (rad) phi in detector frame*/ 
+			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<T> *detector_response, /**< [out] detector response*/
+			T theta, /**< polar angle (rad) theta in detector frame*/
+			T phi, /**< azimuthal angle (rad) phi in detector frame*/ 
+			T psi, /**< polarization angle (rad) phi in detector frame*/ 
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
 	int status=1;
-	double fplus, fcross, Fplus, Fcross, c2psi, s2psi;
+	T fplus, fcross, Fplus, Fcross, c2psi, s2psi;
 	
 	if(	detector == "LIGO" || 
 		detector == "Livingston" || 
@@ -182,8 +184,8 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 	{
 		fplus = right_interferometer_plus(theta,phi);
 		fcross = right_interferometer_cross(theta,phi);	
-		c2psi = std::cos(2*psi);
-		s2psi = std::sin(2*psi);
+		c2psi = cos(2*psi);
+		s2psi = sin(2*psi);
 		Fplus = fplus*c2psi- fcross*s2psi;
 		Fcross = fplus*s2psi+ fcross*s2psi;
 	}
@@ -197,20 +199,21 @@ int fourier_detector_response(double *frequencies, /**<array of frequencies corr
 }
 /* \brief calculates the detector response for a given waveform and detector -- using equatorial coordinates and greenwich mean sidereal time
  */
-int fourier_detector_response_equatorial(double *frequencies, /**<array of frequencies corresponding to waveform*/
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
-			std::complex<double> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<double> *hcross, /**<precomputed cross polarization of the waveform*/ 
-			std::complex<double> *detector_response, /**< [out] detector response*/
-			double ra, /**< Right Ascension in rad*/
-			double dec, /**< Declination in rad*/ 
-			double psi, /**< polarization angle (rad) */ 
+			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<T> *detector_response, /**< [out] detector response*/
+			T ra, /**< Right Ascension in rad*/
+			T dec, /**< Declination in rad*/ 
+			T psi, /**< polarization angle (rad) */ 
 			double gmst, /**< greenwich mean sidereal time*/ 
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
 	int status=1;
-	double Fplus, Fcross;
+	T Fplus, Fcross;
 	
 	detector_response_functions_equatorial(detector, ra, dec, psi, gmst, &Fplus, &Fcross);
 	
@@ -234,19 +237,21 @@ int fourier_detector_response_equatorial(double *frequencies, /**<array of frequ
  * 	
  * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
  */
-int fourier_detector_response(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
-			std::complex<double> *response, /**< [out] complex array for the output plus polarization waveform*/
-			std::string detector,
-			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
-			gen_params *parameters/**<structure containing all the source parameters*/
-			)
+template<class T>
+int fourier_detector_response(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
+	int length,/**<integer length of all the arrays*/
+	std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
+	std::string detector,
+	std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+	gen_params_base<T> *parameters/**<structure containing all the source parameters*/
+	)
 {
 	int status = 1;
 	//generate waveform
-	std::complex<double> *waveform_plus =
-		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
-	std::complex<double> *waveform_cross=
-		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
+	std::complex<T> *waveform_plus =
+		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
+	std::complex<T> *waveform_cross=
+		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
 	status = fourier_waveform(frequencies, 
 			length,
 			waveform_plus, 
@@ -283,19 +288,20 @@ int fourier_detector_response(double *frequencies, /**< double array of frequenc
  * 	
  * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
  */
-int fourier_detector_response_equatorial(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
-			std::complex<double> *response, /**< [out] complex array for the output plus polarization waveform*/
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
+			std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
 			std::string detector,
 			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
-			gen_params *parameters/**<structure containing all the source parameters*/
+			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
 			)
 {
 	int status = 1;
 	//generate waveform
-	std::complex<double> *waveform_plus =
-		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
-	std::complex<double> *waveform_cross=
-		(std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
+	std::complex<T> *waveform_plus =
+		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
+	std::complex<T> *waveform_cross=
+		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
 	status = fourier_waveform(frequencies, 
 			length,
 			waveform_plus, 
@@ -348,3 +354,18 @@ int fourier_detector_amplitude_phase(double *frequencies,
 
 	free(response);
 }
+template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
+template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);
+//
+template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double, double, std::string);
+template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble, adouble, std::string);
+//
+//
+template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *);
+template int fourier_detector_response_equatorial<adouble>(adouble *, int , std::complex<adouble> *,std::string, std::string, gen_params_base<adouble> *);
+//
+template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double>*);
+template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble>*);
+//
+template int fourier_detector_response_equatorial<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double , double, double, std::string);
+template int fourier_detector_response_equatorial<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double, std::string);

@@ -27,7 +27,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 {
 	if(detector == "aLIGO_analytic")
 	{
-		if(frequencies == NULL)
+		if(!frequencies )
 		{
 			int len = 1000;
 			for (int i =0; i<len;i++)
@@ -47,7 +47,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	}
 	if(detector == "Hanford_O1_fitted")
 	{
-		if(frequencies == NULL)
+		if(!frequencies)
 		{
 			int len = 1000;
 			for (int i =0; i<len;i++)
@@ -129,12 +129,13 @@ std::complex<double> Q(double theta, double phi, double iota)
  *
  * Theta and phi are local, horizontal coordinates relative to the detector
  */
-double right_interferometer_plus(double theta, double phi)
+template<class T>
+T right_interferometer_plus(T theta, T phi)
 {
-	double ct = cos(theta);
-	double cp2 = cos(2.*phi);
+	T ct = cos(theta);
+	T cp2 = cos(2.*phi);
 
-	double Fplus = (1./2)*(1+ ct*ct)*cp2;
+	T Fplus = (1./2)*(1+ ct*ct)*cp2;
 	return Fplus;
 }
 
@@ -142,11 +143,12 @@ double right_interferometer_plus(double theta, double phi)
  *
  * Theta and phi are local, horizontal coordinates relative to the detector
  */
-double right_interferometer_cross(double theta, double phi)
+template<class T>
+T right_interferometer_cross(T theta, T phi)
 {
-	double ct = cos(theta);
-	double sp2 = sin(2.*phi);
-	double Fcross = ct * sp2;
+	T ct = cos(theta);
+	T sp2 = sin(2.*phi);
+	T Fcross = ct * sp2;
 	return Fcross;
 }
 
@@ -158,15 +160,16 @@ double right_interferometer_cross(double theta, double phi)
  *
  * detector is used to specify the lat and long of the local frame
  */
-void celestial_horizon_transform(double RA, /**< in RAD*/
-		double DEC, /**< in RAD*/
+template<class T>
+void celestial_horizon_transform(T RA, /**< in RAD*/
+		T DEC, /**< in RAD*/
 		double gps_time, 
 		std::string detector, 
-		double *phi, /**< in RAD*/
-		double *theta /**< in RAD*/
+		T *phi, /**< in RAD*/
+		T *theta /**< in RAD*/
 		)
 {
-	double LAT, LONG, azimuth_offset;
+	T LAT, LONG, azimuth_offset;
 	if (detector =="Hanford" || detector == "hanford")
 	{
 		LAT =  H_LAT;		
@@ -283,30 +286,33 @@ double radius_at_lat(double latitude, /**< latitude in degrees*/
  * Taken from LALSuite
  *
  * The response tensor for each of the operational detectors is precomputed in detector_util.h, but to create a new tensor, follow the outline in Anderson et al 36 PRD 63 042003 (2001) Appendix B
+ *
+ * For terrestial detectors
  */
+template<class T>
 void detector_response_functions_equatorial(double D[3][3],/**< Detector Response tensor (3x3)*/
-	double ra,/**<Right ascension in rad*/
-	double dec,/**<Declination in rad*/
-	double psi,/**< polarization angle in rad*/
+	T ra,/**<Right ascension in rad*/
+	T dec,/**<Declination in rad*/
+	T psi,/**< polarization angle in rad*/
 	double gmst,/**<Greenwich mean sidereal time (rad)*/
-	double *Fplus,/**< [out] Fplus response coefficient*/
-	double *Fcross	/**<[out] Fcross response coefficient*/
+	T *Fplus,/**< [out] Fplus response coefficient*/
+	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
 {
 	int i;
-	double X[3];
-	double Y[3];
+	T X[3];
+	T Y[3];
 	
 	/* Greenwich hour angle of source (radians). */
-	const double gha = gmst - ra;
+	const T gha = gmst - ra;
 	
 	/* pre-compute trig functions */
-	const double cosgha = cos(gha);
-	const double singha = sin(gha);
-	const double cosdec = cos(dec);
-	const double sindec = sin(dec);
-	const double cospsi = cos(psi);
-	const double sinpsi = sin(psi);
+	const T cosgha = cos(gha);
+	const T singha = sin(gha);
+	const T cosdec = cos(dec);
+	const T sindec = sin(dec);
+	const T cospsi = cos(psi);
+	const T sinpsi = sin(psi);
 	
 	/* Eq. (B4) of [ABCF].  Note that dec = pi/2 - theta, and gha =
 	 * -phi where theta and phi are the standard spherical coordinates
@@ -326,8 +332,8 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	 * with s+=1 and sx=0 to get F+, with s+=0 and sx=1 to get Fx */
 	*Fplus = *Fcross = 0.0;
 	for(i = 0; i < 3; i++) {
-	        const double DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
-	        const double DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
+	        const T DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
+	        const T DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
 	        *Fplus  += X[i] * DX - Y[i] * DY;
 	        *Fcross += X[i] * DY + Y[i] * DX;
 	}
@@ -337,36 +343,37 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
  *
  * For ground based detectors, the antenna pattern functions are not functions of time.
  */
+template <class T>
 void detector_response_functions_equatorial(std::string detector,/**< Detector */
-	double ra,/**<Right ascension in rad*/
-	double dec,/**<Declination in rad*/
-	double psi,/**< polarization angle in rad*/
+	T ra,/**<Right ascension in rad*/
+	T dec,/**<Declination in rad*/
+	T psi,/**< polarization angle in rad*/
 	double gmst,/**<Greenwich mean sidereal time (rad)*/
-	double *Fplus,/**< [out] Fplus response coefficient*/
-	double *Fcross	/**<[out] Fcross response coefficient*/
+	T *Fplus,/**< [out] Fplus response coefficient*/
+	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
 {
-	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,NULL,0,0,0,0,0,0, Fplus,Fcross);
+	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0.,0., Fplus,Fcross);
 }
 /*! \brief Same as the other function, but for active and future detectors
  */
+template<class T>
 void detector_response_functions_equatorial(std::string detector,/**< Detector */
-	double ra,/**<Right ascension in rad*/
-	double dec,/**<Declination in rad*/
-	double psi,/**< polarization angle in rad*/
+	T ra,/**<Right ascension in rad*/
+	T dec,/**<Declination in rad*/
+	T psi,/**< polarization angle in rad*/
 	double gmst,/**<Greenwich mean sidereal time (rad)*/
-	double *times,/**<Times at which to evaluate Fplus and Fcross, in which case the Fplus and Fcross pointers are arrays*/
+	T *times,/**<Times at which to evaluate Fplus and Fcross, in which case the Fplus and Fcross pointers are arrays*/
 	int length,
-	double LISA_alpha0,
-	double LISA_phi0,
-	double LISA_theta_l,
-	double LISA_phi_l,
+	T LISA_alpha0,
+	T LISA_phi0,
+	T LISA_theta_l,
+	T LISA_phi_l,
 	double integration_time,
-	double *Fplus,/**< [out] Fplus response coefficient*/
-	double *Fcross	/**<[out] Fcross response coefficient*/
+	T *Fplus,/**< [out] Fplus response coefficient*/
+	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
 {
-	double responseM[3][3];
 	//Time dependent antenna patterns
 	if(detector=="LISA" ||detector =="lisa"){
 		for(int i =0 ; i<length; i++){
@@ -376,6 +383,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	}
 	//Time independent response functions
 	else{
+		double responseM[3][3];
 		if(detector =="Hanford" || detector=="hanford"){
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
@@ -404,14 +412,15 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 		detector_response_functions_equatorial(responseM, ra, dec, psi, gmst, Fplus, Fcross);
 	}
 }
+
 template<class T>
-T LISA_response_plus(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f, T integration_time)
+T LISA_response_plus(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f, double integration_time)
 {
 	T t = t_2PN(f, params->eta, params->chirpmass, params->spin1z, params->spin2z, params->tc);
 	return LISA_response_plus_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t,integration_time);
 }
 template<class T>
-T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f, T integration_time)
+T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f, double integration_time)
 {
 	T t = t_2PN(f, params->eta, params->chirpmass, params->spin1z, params->spin2z, params->tc);
 	return LISA_response_cross_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t,integration_time);
@@ -426,7 +435,7 @@ T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_
  * To get the second interferometer's response, evaluate with phi_l - pi/4.
  */
 template<class T>
-T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t, T integration_time)
+T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t, double integration_time)
 {
 	//T_year defined in include/util.h
 	T phi_t = phi_0 + 2. * M_PI * t / integration_time;
@@ -436,7 +445,7 @@ T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T 
 	return std::sqrt(3./2.)*out;
 }
 template<class T>
-T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,T integration_time)
+T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,double integration_time)
 {
 	//T_year defined in include/util.h
 	T phi_t = phi_0 + 2. * M_PI * t / integration_time;
@@ -445,11 +454,34 @@ T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T
 	//Factor of sqrt(3/2) for the equilateral triangle
 	return std::sqrt(3./2.)*out;
 }
+//###########################################################
+//Explicit Declarations of the temlates for double and adouble
 template double LISA_response_plus_time<double>( double, double , double , double,double , double, double,double);
-template adouble LISA_response_plus_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble ,adouble,adouble);
+template adouble LISA_response_plus_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble ,adouble,double);
+//
 template double LISA_response_cross_time<double>( double, double , double , double,double , double, double,double);
-template adouble LISA_response_cross_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble, adouble,adouble);
+template adouble LISA_response_cross_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble, adouble,double);
+//
 template double LISA_response_plus<double>( source_parameters<double> *params,double, double , double , double,double , double, double,double);
-template adouble LISA_response_plus<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble ,adouble,adouble);
+template adouble LISA_response_plus<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble ,adouble,double);
+//
 template double LISA_response_cross<double>( source_parameters<double> *params,double, double , double , double,double , double, double,double);
-template adouble LISA_response_cross<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble, adouble,adouble);
+template adouble LISA_response_cross<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble, adouble,double);
+//
+template double  right_interferometer_cross<double>(double, double);
+template adouble right_interferometer_cross<adouble>(adouble, adouble);
+//
+template double right_interferometer_plus<double>(double, double);
+template adouble right_interferometer_plus<adouble>(adouble, adouble);
+//
+template void celestial_horizon_transform<double>(double, double, double, std::string, double *,double*);
+template void celestial_horizon_transform<adouble>(adouble, adouble, double, std::string, adouble *,adouble*);
+//
+template void detector_response_functions_equatorial<double>(double[3][3],double, double, double, double, double *, double*);
+template void detector_response_functions_equatorial<adouble>(double[3][3],adouble, adouble, adouble, double, adouble *, adouble*);
+//
+template void detector_response_functions_equatorial<double>(std::string, double, double, double, double, double*,int, double, double, double, double, double, double*, double*);
+template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble, double, adouble*,int, adouble, adouble, adouble, adouble, double, adouble*, adouble*);
+//
+template void detector_response_functions_equatorial<double>(std::string, double, double, double ,double ,double * , double *);
+template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble ,double ,adouble * , adouble *);
