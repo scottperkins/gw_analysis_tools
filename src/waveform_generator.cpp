@@ -477,13 +477,14 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			)
 {
 	std::complex<double> *waveform = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
-	fourier_waveform(frequencies, length, waveform, generation_method, parameters);
+	int status = fourier_waveform(frequencies, length, waveform, generation_method, parameters);
 	for(int i = 0 ;i<length;i++)
 	{
 		waveform_real[i] = real(waveform[i]);
 		waveform_imag[i] = imag(waveform[i]);
 	}
 	free(waveform);
+	return status;
 }
 
 /*!\brief Function to produce the amplitude of the (2,2) mode of an quasi-circular binary

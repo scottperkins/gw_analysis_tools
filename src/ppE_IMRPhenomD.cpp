@@ -58,20 +58,20 @@ template<class T>
 int dCS_IMRPhenomD<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
 	params->betappe[0] = this->dCS_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
 }
 
 template<class T>
 int dCS_IMRPhenomD<T>::construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params)
 {
-	ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
 }
 
 template<class T>
 int dCS_IMRPhenomD<T>::construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params)
 {
 	params->betappe[0] = this->dCS_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
 }
 
 
@@ -120,20 +120,20 @@ template<class T>
 int dCS_IMRPhenomD_log<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
 	params->betappe[0] = this->dCS_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
 }
 
 template<class T>
 int dCS_IMRPhenomD_log<T>::construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params)
 {
-	ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
 }
 
 template<class T>
 int dCS_IMRPhenomD_log<T>::construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params)
 {
 	params->betappe[0] = this->dCS_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
 }
 
 //####################################################################
@@ -170,20 +170,20 @@ template<class T>
 int EdGB_IMRPhenomD_log<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
 	params->betappe[0] = this->EdGB_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
 }
 
 template<class T>
 int EdGB_IMRPhenomD_log<T>::construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params)
 {
-	ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
 }
 
 template<class T>
 int EdGB_IMRPhenomD_log<T>::construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params)
 {
 	params->betappe[0] = this->EdGB_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
 }
 //####################################################################
 //####################################################################
@@ -220,20 +220,20 @@ template<class T>
 int EdGB_IMRPhenomD<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
 	params->betappe[0] = this->EdGB_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_waveform(frequencies, length, waveform, params);
 }
 
 template<class T>
 int EdGB_IMRPhenomD<T>::construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params)
 {
-	ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_amplitude(frequencies, length, amplitude, params);
 }
 
 template<class T>
 int EdGB_IMRPhenomD<T>::construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params)
 {
 	params->betappe[0] = this->EdGB_phase_mod(params);
-	ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
+	return ppE_IMRPhenomD_Inspiral<T>::construct_phase(frequencies, length, phase, params);
 }
 //####################################################################
 
