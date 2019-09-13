@@ -1684,35 +1684,154 @@ void fisher_autodiff(double *frequency,
  */
 void calculate_derivatives_autodiff(double *frequency,
 	int length,
+	int dimension,
+	std::string generation_method,
 	gen_params *parameters,
 	std::complex<double> **waveform_deriv,
 	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
 	std::string detector
 	)
 {
-	int dimension = 15;
-	IMRPhenomPv2<adouble> modelad;
-	IMRPhenomPv2<double> modeld;
-	source_parameters<double> input_params;
+	//IMRPhenomPv2<adouble> modelad;
+	//IMRPhenomPv2<double> modeld;
+	//source_parameters<double> input_params;
 	//###########################################################################
-	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	//input_params = source_parameters<double>::populate_source_parameters(parameters);
 	//Need the splitting frequency	
-	lambda_parameters<double> lambda, *lambda_ptr;
-	modeld.assign_lambda_param(&input_params, &lambda);
-	modeld.post_merger_variables(&input_params);
-	input_params.f1 = 0.014/(input_params.M);
-	input_params.f3 = modeld.fpeak(&input_params, &lambda);
-	input_params.f1_phase = 0.018/(input_params.M);
-	input_params.f2_phase = input_params.fRD/2.;
+	//lambda_parameters<double> lambda, *lambda_ptr;
+	//modeld.assign_lambda_param(&input_params, &lambda);
+	//modeld.post_merger_variables(&input_params);
+	//input_params.f1 = 0.014/(input_params.M);
+	//input_params.f3 = modeld.fpeak(&input_params, &lambda);
+	//input_params.f1_phase = 0.018/(input_params.M);
+	//input_params.f2_phase = input_params.fRD/2.;
 	//construct_waveform_derivative(frequency, length, dimension, waveform_deriv, &input_params, waveform_tapes);
+	
+
+	//Transform gen_params to double vectors
+	double vec_parameters[dimension+1];
+	bool log_factors[dimension];
+	double *freq_boundaries=NULL;
+	double *grad_freqs=NULL;
+	int boundary_num;
+	unpack_parameters(vec_parameters,log_factors, freq_boundaries,grad_freqs,&boundary_num,parameters, generation_method, dimension);
+	
+	//calculate_derivative tapes
+	int tapes[boundary_num];
+	
+	for(int i =0; i<boundary_num; i++){
+		tapes[i]=i;
+		trace_on(tapes[i]);
+		adouble avec_parameters[dimension+1];
+		avec_parameters[0] <<=grad_freqs[i];
+		for(int j = 1; j <= dimension; j++){
+			avec_parameters[j]<<=vec_parameters[j];	
+		}
+		//Repack parameters
+		gen_params_base<adouble> a_parameters;
+		adouble afreq;
+		repack_parameters(avec_parameters,&a_parameters, &afreq, generation_method, dimension);
+		std::complex<adouble> a_response;
+		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, generation_method, &a_parameters);
+
+		//###############################################
+		//THIS IS ONLY THE REAL PART -- THIS IS WRONG!!!!
+		//Just for testing
+		//###############################################
+		//double response;
+		//real(a_response) >>=  response;	
+		//###############################################
+		//###############################################
+		
+		double response[2];
+		real(a_response) >>=  response[0];	
+		imag(a_response) >>=  response[1];	
+
+		trace_off();
+		
+		
+	}
+
+	//Evaluate derivative tapes
+	int dep = 2;//Output is complex
+	int indep = dimension+1;//First element is for frequency
+	bool eval = false;//Keep track of when a boundary is hit
+	double **jacob = allocate_2D_array(dep,indep);
+	for(int j = 0 ; j<boundary_num; j++){
+		for(int k = 0 ;k <length; k++){
+			vec_parameters[0]=frequency[k];
+			for(int n = 0 ; n<boundary_num; n++){
+				if(vec_parameters[0]<freq_boundaries[n]){
+					jacobian(tapes[j], dep, indep, vec_parameters, jacob);
+					for(int i =1; i<=dimension; i++){
+						waveform_deriv[i][k] = jacob[0][i] + std::complex<double>(0,1)*jacob[1][i];
+					}
+					eval = true;
+				}
+			}
+			//If freq didn't fall in any boundary, set to 0
+			if(!eval){
+				for(int i =1; i<=dimension; i++){
+					waveform_deriv[j][k] = std::complex<double>(0,0);
+				}	
+			}
+			eval = false;
+		}
+	}
+	//Account for Log parameters
 	for (int i = 0;i <length; i++)
 	{
-		waveform_deriv[0][i] = (input_params.A0)*waveform_deriv[0][i];
-		waveform_deriv[3][i] = (input_params.chirpmass)*waveform_deriv[3][i];
-		waveform_deriv[4][i] = (input_params.eta)*waveform_deriv[4][i];
+		//waveform_deriv[0][i] = (input_params.A0)*waveform_deriv[0][i];
+		//waveform_deriv[3][i] = (input_params.chirpmass)*waveform_deriv[3][i];
+		//waveform_deriv[4][i] = (input_params.eta)*waveform_deriv[4][i];
+	}
+	deallocate_2D_array(jacob,dep,indep);
+	if(!freq_boundaries){
+		delete [] freq_boundaries;
+	}
+	if(!grad_freqs){
+		delete [] grad_freqs;
 	}
 
 }
+/*! \brief Transforms input gen_params into several base class arrays for use with adolc 
+ *
+ * This is one of the places where the generation-method/dimension/sky_average specific modifications should go
+ *
+ * DOES allocate memory for freq_boundaries and grad_freqs that must be deallocated by the use
+ */
+void unpack_parameters(double *parameters, 
+	bool *log_factors, 
+	double *freq_boundaries, 
+	double *grad_freqs, 
+	int *boundary_num, 
+	gen_params_base<double> *input_params, 
+	std::string generation_method, 
+	int dimension)
+{
+	if(generation_method =="IMRPhenomPv2" && !input_params->sky_average){
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[3] = true;//Distance
+		log_factors[4] = true;//chirpmass
+		*boundary_num = 6;
+		freq_boundaries = new double[*boundary_num];
+		freq_boundaries[0] = 0;
+		freq_boundaries[1] = 0;
+		freq_boundaries[2] = 0;
+		freq_boundaries[3] = 0;
+		freq_boundaries[4] = 0;
+		freq_boundaries[5] = 0;
+	}
+	
+	
+}
+/*! \brief Repack the parameters from an adouble vector to a gen_params_base<adouble> object and freqeuncy 
+ *
+ * This is one of the places where the generation-method/dimension/sky_average specific modifications should go
+ */
+void repack_parameters(adouble *avec_parameters, gen_params_base<adouble> *a_params, adouble *freq, std::string generation_method, int dim)
+{
 
-
-
+}

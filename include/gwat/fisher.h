@@ -59,7 +59,17 @@ void construct_waveform_derivative(double *frequency,
 	int *waveform_tapes
 	);
 
-void unpack_parameters(adouble *parameters, gen_params *input_params, std::string generation_method, int dim);
+void calculate_derivatives_autodiff(double *frequency,
+	int length,
+	int dimension,
+	std::string generation_method,
+	gen_params *parameters,
+	std::complex<double> **waveform_deriv,
+	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
+	std::string detector
+	);
+void unpack_parameters(double *parameters, bool *, double *,double*, int *,gen_params_base<double> *input_params, std::string generation_method, int dim);
+void repack_parameters(adouble *avec_parameters, gen_params_base<adouble> *a_params, adouble *freq, std::string generation_method, int dim);
 //void repack_parameters(adouble *parameters, gen_params_ad *input_params, std::string generation_method, int dim);
 
 #endif
