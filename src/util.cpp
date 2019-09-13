@@ -12,6 +12,8 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix_double.h>
+#include <gsl/gsl_linalg.h>
 /*! \file
  *
  * General utilities that are not necessarily specific to any part of the project at large
@@ -268,6 +270,34 @@ double cosmology_lookup(std::string cosmology)
 	return -1;
 }
 
+template<class T>
+void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
+{
+	gsl_matrix *matrix = gsl_matrix_alloc(dim, dim);
+	for(int row=0; row<dim; row++){
+		for(int column = 0 ;column<dim; column++){
+			gsl_matrix_set(matrix, row, column, input[row][column]);
+		}
+	}
+	gsl_permutation *p = gsl_permutation_alloc(dim);
+    	int s;
+	gsl_linalg_LU_decomp(matrix, p, &s);
+	gsl_matrix *inv = gsl_matrix_alloc(dim, dim);
+	gsl_linalg_LU_invert(matrix, p, inv);
+    
+	gsl_permutation_free(p);
+	
+	for(int row=0; row<dim; row++){
+		for(int column = 0 ;column<dim; column++){
+			inverse[row][column] = gsl_matrix_get(inv,row,column);
+		}
+	}
+	gsl_matrix_free(matrix);
+	gsl_matrix_free(inv);
+	
+    
+}
+template void gsl_LU_matrix_invert<double>(double **, double**, int );
 /*! \brief routine to print the progress of a process to the terminal as a progress bar
  *
  * Call everytime you want the progress printed

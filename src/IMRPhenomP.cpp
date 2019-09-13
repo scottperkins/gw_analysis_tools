@@ -322,9 +322,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			}
 			else{
 				pows.MFsixth = pow(M*f,1./6 );
-				pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*
-					//pows.MFsixth*pows.MFsixth*pows.MFsixth*
-					//pows.MFsixth*pows.MFsixth;
+				pows.MF7sixth= pow_int(pows.MFsixth,7);
 				pows.MFthird = pows.MFsixth * pows.MFsixth;
 				pows.MF2third =pows.MFthird* pows.MFthird;
 			}

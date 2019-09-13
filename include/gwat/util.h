@@ -319,6 +319,10 @@ double Z_from_DL(double DL, std::string cosmology);
 double DL_from_Z(double Z, std::string cosmology);
 double cosmology_interpolation_function(double x, double *coeffs, int interp_degree);
 double cosmology_lookup(std::string cosmology);
+
+template<class T>
+void gsl_LU_matrix_invert(T **input, T **inverse, int dim);
+
 adouble Z_from_DL(adouble DL, std::string cosmology);
 adouble DL_from_Z(adouble Z, std::string cosmology);
 adouble cosmology_interpolation_function(adouble x, double *coeffs, int interp_degree);
