@@ -298,10 +298,8 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 {
 	int status = 1;
 	//generate waveform
-	std::complex<T> *waveform_plus =
-		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
-	std::complex<T> *waveform_cross=
-		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
+	std::complex<T> *waveform_plus = new std::complex<T>[length];
+	std::complex<T> *waveform_cross = new std::complex<T>[length];
 	status = fourier_waveform(frequencies, 
 			length,
 			waveform_plus, 
@@ -323,8 +321,8 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 	
 		
 	//Deallocate memory
-	free(waveform_plus);
-	free(waveform_cross);
+	delete [] waveform_plus;
+	delete [] waveform_cross;
 
 	return status;
 }

@@ -1090,16 +1090,19 @@ template adouble gps_to_JD<adouble>(adouble);
  *
  * spherical: r, polar, azimuthal
  */
-void transform_cart_sph(double *cartvec, double *sphvec)
+template<class T>
+void transform_cart_sph(T *cartvec, T *sphvec)
 {
-	sphvec[0]  = std::sqrt(cartvec[0]*cartvec[0] +
+	sphvec[0]  = sqrt(cartvec[0]*cartvec[0] +
 			cartvec[2]*cartvec[2] +
 			cartvec[1] * cartvec[1]) ;
 	//sphvec[1] = std::acos(cartvec[2]/ sphvec[0]);
-	sphvec[1] = std::atan( sqrt(cartvec[0]*cartvec[0]+cartvec[1]*cartvec[1])/cartvec[2]);
-	sphvec[2] = std::atan(cartvec[1]/ cartvec[0]);
+	sphvec[1] = atan( sqrt(cartvec[0]*cartvec[0]+cartvec[1]*cartvec[1])/cartvec[2]);
+	sphvec[2] = atan(cartvec[1]/ cartvec[0]);
 
 }
+template void transform_cart_sph<double>(double*, double*);
+template void transform_cart_sph<adouble>(adouble*, adouble*);
 /*! \brief utility to transform a vector from spherical (radian) to cartesian
  *
  * order:
@@ -1108,12 +1111,15 @@ void transform_cart_sph(double *cartvec, double *sphvec)
  *
  * spherical: r, polar, azimuthal
  */
-void transform_sph_cart(double *sphvec, double *cartvec)
+template<class T>
+void transform_sph_cart(T *sphvec, T *cartvec)
 {
-	cartvec[0] = sphvec[0] * std::sin(sphvec[1]) * std::cos(sphvec[2]);
-	cartvec[1] = sphvec[0] * std::sin(sphvec[1]) * std::sin(sphvec[2]);
-	cartvec[2] = sphvec[0] * std::cos(sphvec[1]) ;
+	cartvec[0] = sphvec[0] * sin(sphvec[1]) * cos(sphvec[2]);
+	cartvec[1] = sphvec[0] * sin(sphvec[1]) * sin(sphvec[2]);
+	cartvec[2] = sphvec[0] * cos(sphvec[1]) ;
 }
+template void transform_sph_cart<double>(double*, double*);
+template void transform_sph_cart<adouble>(adouble*, adouble*);
 
 //################################################################
 template <class T>

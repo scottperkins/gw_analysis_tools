@@ -261,7 +261,8 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	params->phiRef = params->phi_aligned;
 	f_ref = params->f_ref;
 	phic = 2*params->phiRef;
-	tc=0;
+	//tc=0;
+	tc = params->tc;
 	//#################################################################
 
 	//Rescale amplitude because we aren't just using (2,2) mode anymore
@@ -282,10 +283,14 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	T f;
 	std::complex<T> amp, phase;
-	std::complex<T> *amp_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
-	std::complex<T> *phase_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
-	std::complex<T> *hpfac_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
-	std::complex<T> *hcfac_vec= (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	//std::complex<T> *amp_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	//std::complex<T> *phase_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	//std::complex<T> *hpfac_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	//std::complex<T> *hcfac_vec= (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
+	std::complex<T> *amp_vec = new std::complex<T>[length];
+	std::complex<T> *phase_vec =new std::complex<T>[length];
+	std::complex<T> *hpfac_vec =new std::complex<T>[length];
+	std::complex<T> *hcfac_vec= new std::complex<T>[length];
 	
 	//T amp, phase;
 	std::complex<T> i;
@@ -344,10 +349,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			phase_vec[j] = phase;
 			hpfac_vec[j] = hp_factor;
 			hcfac_vec[j] = hc_factor;
-			//if(std::is_same< double, T>::value){
-			//	std::cout<<"Plus: "<<hp_factor<<std::endl;
-			//	std::cout<<"cross: "<<hc_factor<<std::endl;
-			//}
 			
 			hp_factor = 0.;
 			hc_factor = 0.;
@@ -367,7 +368,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		t_corr_fixed = 0;
 	}
 	//#########################################################
-	
 	for (int j = 0; j<length;j++){
 		waveform_plus[j] = 
 			amp_vec[j] * hpfac_vec[j]*std::exp(
@@ -377,11 +377,16 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			-i *(phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
 		
 	}
-	free(amp_vec);
-	free(phase_vec);
-	free(hpfac_vec);
-	free(hcfac_vec);
+	//free(amp_vec);
+	//free(phase_vec);
+	//free(hpfac_vec);
+	//free(hcfac_vec);
+	delete [] amp_vec;
+	delete [] phase_vec;
+	delete [] hpfac_vec;
+	delete [] hcfac_vec;
 	return 1;
+	
 }
 /*! \brief Shifts the time of coalescence to the desired value
  *
@@ -593,7 +598,6 @@ template<class T>
 void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*< Source Parameters*/
 						)
 {
-
 	//Calculate spin parameters chil and chip
 	T chi1_l = params->spin1z;
 	T chi2_l = params->spin2z;
@@ -719,10 +723,6 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
   	T XdotPArun = tmp_x*PArunx_Jf+tmp_y*PAruny_Jf+tmp_z*PArunz_Jf;
   	T XdotQArun = tmp_x*QArunx_Jf+tmp_y*QAruny_Jf+tmp_z*QArunz_Jf;
   	params->zeta_polariz = atan2(XdotQArun , XdotPArun);
-	//if(std::is_same< double, T>::value){
-	//	std::cout<<params->zeta_polariz<<std::endl;
-	//
-	//}
 	
 }
 

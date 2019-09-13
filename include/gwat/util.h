@@ -139,6 +139,9 @@ public:
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
 		
 	std::string cosmology="PLANCK15";
+	
+	bool shift_time = true;
+	
 };
 
 /*! \brief convience wrapper for the gen_params_base class
@@ -397,9 +400,11 @@ template<class T>
 T gps_to_JD(T gps_time);
 
 
-void transform_cart_sph(double *cartvec, double *sphvec);
+template<class T>
+void transform_cart_sph(T *cartvec, T *sphvec);
 
-void transform_sph_cart(double *sphvec, double *cartvec);
+template<class T>
+void transform_sph_cart(T *sphvec, T *cartvec);
 
 /*!\brief Trapezoidal sum rule to approximate discrete integral - Uniform spacing
  *

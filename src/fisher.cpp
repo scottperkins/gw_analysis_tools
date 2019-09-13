@@ -1601,6 +1601,17 @@ void fisher_autodiff(double *frequency,
 			phase_tapes
 			);
 	}
+	else{
+		std::complex<double> **waveform_deriv = new std::complex<double>*[dimension];
+		for(int i = 0 ;i<dimension; i++){
+			waveform_deriv[i]=new std::complex<double>[length];
+		}
+		calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, waveform_deriv, NULL, detector);
+		for(int i = 0 ;i<dimension; i++){
+			delete [] waveform_deriv[i];	
+		}
+		delete [] waveform_deriv;
+	}
 	
 	//calulate fisher elements
 	for (int j=0;j<dimension; j++)
@@ -1692,33 +1703,16 @@ void calculate_derivatives_autodiff(double *frequency,
 	std::string detector
 	)
 {
-	//IMRPhenomPv2<adouble> modelad;
-	//IMRPhenomPv2<double> modeld;
-	//source_parameters<double> input_params;
-	//###########################################################################
-	//input_params = source_parameters<double>::populate_source_parameters(parameters);
-	//Need the splitting frequency	
-	//lambda_parameters<double> lambda, *lambda_ptr;
-	//modeld.assign_lambda_param(&input_params, &lambda);
-	//modeld.post_merger_variables(&input_params);
-	//input_params.f1 = 0.014/(input_params.M);
-	//input_params.f3 = modeld.fpeak(&input_params, &lambda);
-	//input_params.f1_phase = 0.018/(input_params.M);
-	//input_params.f2_phase = input_params.fRD/2.;
-	//construct_waveform_derivative(frequency, length, dimension, waveform_deriv, &input_params, waveform_tapes);
-	
-
 	//Transform gen_params to double vectors
 	double vec_parameters[dimension+1];
 	bool log_factors[dimension];
-	double *freq_boundaries=NULL;
-	double *grad_freqs=NULL;
-	int boundary_num;
-	unpack_parameters(vec_parameters,log_factors, freq_boundaries,grad_freqs,&boundary_num,parameters, generation_method, dimension);
+	int boundary_num= boundary_number(generation_method);
+	double *freq_boundaries=new double[boundary_num];
+	double *grad_freqs=new double[boundary_num];
+	unpack_parameters(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
 	
 	//calculate_derivative tapes
 	int tapes[boundary_num];
-	
 	for(int i =0; i<boundary_num; i++){
 		tapes[i]=i;
 		trace_on(tapes[i]);
@@ -1729,20 +1723,19 @@ void calculate_derivatives_autodiff(double *frequency,
 		}
 		//Repack parameters
 		gen_params_base<adouble> a_parameters;
+		//############################################
+		a_parameters.sky_average = parameters->sky_average;
+		a_parameters.f_ref = parameters->f_ref;
+		a_parameters.gmst = parameters->gmst;
+		a_parameters.NSflag = parameters->NSflag;
+		a_parameters.shift_time = false;
+		//############################################
 		adouble afreq;
 		repack_parameters(avec_parameters,&a_parameters, &afreq, generation_method, dimension);
 		std::complex<adouble> a_response;
+		//HERE
 		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, generation_method, &a_parameters);
 
-		//###############################################
-		//THIS IS ONLY THE REAL PART -- THIS IS WRONG!!!!
-		//Just for testing
-		//###############################################
-		//double response;
-		//real(a_response) >>=  response;	
-		//###############################################
-		//###############################################
-		
 		double response[2];
 		real(a_response) >>=  response[0];	
 		imag(a_response) >>=  response[1];	
@@ -1757,33 +1750,40 @@ void calculate_derivatives_autodiff(double *frequency,
 	int indep = dimension+1;//First element is for frequency
 	bool eval = false;//Keep track of when a boundary is hit
 	double **jacob = allocate_2D_array(dep,indep);
-	for(int j = 0 ; j<boundary_num; j++){
-		for(int k = 0 ;k <length; k++){
-			vec_parameters[0]=frequency[k];
-			for(int n = 0 ; n<boundary_num; n++){
-				if(vec_parameters[0]<freq_boundaries[n]){
-					jacobian(tapes[j], dep, indep, vec_parameters, jacob);
-					for(int i =1; i<=dimension; i++){
-						waveform_deriv[i][k] = jacob[0][i] + std::complex<double>(0,1)*jacob[1][i];
-					}
-					eval = true;
+	for(int k = 0 ;k <length; k++){
+		vec_parameters[0]=frequency[k];
+		for(int n = 0 ; n<boundary_num; n++){
+			if(vec_parameters[0]<freq_boundaries[n]){
+				jacobian(tapes[n], dep, indep, vec_parameters, jacob);
+				for(int i =0; i<dimension; i++){
+					waveform_deriv[i][k] = jacob[0][i+1] 
+						+ std::complex<double>(0,1)*jacob[1][i+1];
+					std::cout<<waveform_deriv[i][k]<<std::endl;
 				}
+				//std::cout<<n<<" "<<k<<std::endl;
+				//std::cout<<freq_boundaries[n]<<" "<<frequency[k]<<std::endl;
+				//Mark successful derivative
+				eval = true;
+				//Skip the rest of the bins
+				break;
 			}
-			//If freq didn't fall in any boundary, set to 0
-			if(!eval){
-				for(int i =1; i<=dimension; i++){
-					waveform_deriv[j][k] = std::complex<double>(0,0);
-				}	
-			}
-			eval = false;
 		}
+		//If freq didn't fall in any boundary, set to 0
+		if(!eval){
+			for(int i =0; i<dimension; i++){
+				waveform_deriv[i][k] = std::complex<double>(0,0);
+			}	
+		}
+		eval = false;
 	}
 	//Account for Log parameters
-	for (int i = 0;i <length; i++)
-	{
-		//waveform_deriv[0][i] = (input_params.A0)*waveform_deriv[0][i];
-		//waveform_deriv[3][i] = (input_params.chirpmass)*waveform_deriv[3][i];
-		//waveform_deriv[4][i] = (input_params.eta)*waveform_deriv[4][i];
+	for(int j = 0 ; j<dimension; j++){
+		if(log_factors[j]){
+			for (int i = 0;i <length; i++)
+			{
+				waveform_deriv[j][i] = (vec_parameters[j])*waveform_deriv[j][i];
+			}
+		}
 	}
 	deallocate_2D_array(jacob,dep,indep);
 	if(!freq_boundaries){
@@ -1793,6 +1793,17 @@ void calculate_derivatives_autodiff(double *frequency,
 		delete [] grad_freqs;
 	}
 
+}
+int boundary_number(std::string method)
+{
+	if(method == "IMRPhenomPv2"||
+		method=="IMRPhenomD"||
+		method=="ppE_IMRPhenomD_IMR"||
+		method=="ppE_IMRPhenomD_Inspiral"||
+		method=="ppE_IMRPhenomPv2_Inspiral"||
+		method=="ppE_IMRPhenomPv2_IMR"){
+		return 5;
+	}
 }
 /*! \brief Transforms input gen_params into several base class arrays for use with adolc 
  *
@@ -1804,25 +1815,67 @@ void unpack_parameters(double *parameters,
 	bool *log_factors, 
 	double *freq_boundaries, 
 	double *grad_freqs, 
-	int *boundary_num, 
+	int boundary_num, 
 	gen_params_base<double> *input_params, 
 	std::string generation_method, 
 	int dimension)
 {
+	source_parameters<double> s_param;
+	s_param = source_parameters<double>::populate_source_parameters(input_params);
+	lambda_parameters<double> lambda;
 	if(generation_method =="IMRPhenomPv2" && !input_params->sky_average){
 		for(int i = 0 ; i<dimension; i++){
 			log_factors[i] = false;
 		}
 		log_factors[3] = true;//Distance
 		log_factors[4] = true;//chirpmass
-		*boundary_num = 6;
-		freq_boundaries = new double[*boundary_num];
-		freq_boundaries[0] = 0;
-		freq_boundaries[1] = 0;
-		freq_boundaries[2] = 0;
-		freq_boundaries[3] = 0;
-		freq_boundaries[4] = 0;
-		freq_boundaries[5] = 0;
+		//###########################################
+		//###########################################
+		IMRPhenomPv2<double> modelp;
+		modelp.assign_lambda_param(&s_param, &lambda);
+		modelp.post_merger_variables(&s_param);
+		double M = s_param.M;
+		double fRD = s_param.fRD;
+		double fpeak = modelp.fpeak(&s_param, &lambda);;
+		//###########################################
+		freq_boundaries[0] = .014/M;
+		freq_boundaries[1] = .018/M;
+		if(fRD/2. < fpeak){
+			freq_boundaries[2] = fRD/2.;
+			freq_boundaries[3] = fpeak;
+		}
+		else{
+			freq_boundaries[3] = fRD/2.;
+			freq_boundaries[2] = fpeak;
+		}
+		freq_boundaries[4] = .2*M;//End waveform
+		//###########################################
+		grad_freqs[0] = freq_boundaries[0]*.9;
+		for(int i = 1 ; i<boundary_num; i++){
+			grad_freqs[i] = freq_boundaries[i-1]+(freq_boundaries[i]-freq_boundaries[i-1])/2.;
+		}
+		//###########################################
+		double spin1spher[3];
+		double spin2spher[3];
+		transform_cart_sph(input_params->spin1, spin1spher);
+		transform_cart_sph(input_params->spin2, spin2spher);
+		parameters[0]=grad_freqs[0];
+		parameters[1]=input_params->incl_angle;
+		parameters[2]=input_params->RA;
+		parameters[3]=input_params->DEC;
+		parameters[4]=s_param.DL;
+		parameters[5]=s_param.chirpmass;
+		parameters[6]=s_param.eta;
+		parameters[7]=spin1spher[0];
+		parameters[8]=spin2spher[0];
+		parameters[9]=spin1spher[1];
+		parameters[10]=spin2spher[1];
+		parameters[11]=spin1spher[2];
+		parameters[12]=spin2spher[2];
+		parameters[13]=input_params->phiRef;
+		parameters[14]=input_params->tc;
+		parameters[15]=input_params->psi;
+		
 	}
 	
 	
@@ -1833,5 +1886,21 @@ void unpack_parameters(double *parameters,
  */
 void repack_parameters(adouble *avec_parameters, gen_params_base<adouble> *a_params, adouble *freq, std::string generation_method, int dim)
 {
+	if(generation_method =="IMRPhenomPv2" && !a_params->sky_average){
+		*freq = avec_parameters[0];
+		a_params->mass1 = calculate_mass1(avec_parameters[5],avec_parameters[6])/MSOL_SEC;
+		a_params->mass2 = calculate_mass2(avec_parameters[5],avec_parameters[6])/MSOL_SEC;
+		a_params->Luminosity_Distance = avec_parameters[4]/MPC_SEC;
+		a_params->RA = avec_parameters[2];
+		a_params->DEC = avec_parameters[3];
+		a_params->psi = avec_parameters[15];
+		a_params->phiRef = avec_parameters[13];
+		a_params->tc = avec_parameters[14];
+		adouble spin1sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
+		adouble spin2sph[3] = {avec_parameters[8],avec_parameters[10],avec_parameters[12]};
+		transform_sph_cart(spin1sph,a_params->spin1);
+		transform_sph_cart(spin2sph,a_params->spin2);
+		a_params->incl_angle=avec_parameters[1];
+	}
 
 }
