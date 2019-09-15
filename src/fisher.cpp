@@ -57,74 +57,198 @@ void fisher(double *frequency,
 	}
 		
 	//populate derivatives - Derivatives of DETECTOR RESPONSE
-	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
-	for (int i = 0; i<dimension; i++)
-		amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
-	double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
-	for (int i = 0; i<dimension; i++)
-		phase_deriv[i] = (double *)malloc(length*sizeof(double));
-	double *amplitude = (double*)malloc(length*sizeof(double));
-	double *integrand = (double*)malloc(length*sizeof(double));
+	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
+	for (int i = 0 ; i<dimension; i++){
+		response_deriv[i] = new std::complex<double>[length];
+	}
 	
-
-	calculate_derivatives(amplitude_deriv, 
-			phase_deriv, 
-			amplitude,
+	calculate_derivatives(response_deriv, 
 			frequency,
 			length, 
+			dimension, 
 			detector, 
 			generation_method,
 			parameters);
 
+	//double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
+	//for (int i = 0; i<dimension; i++)
+	//	amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
+	//double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
+	//for (int i = 0; i<dimension; i++)
+	//	phase_deriv[i] = (double *)malloc(length*sizeof(double));
+	//double *amplitude = (double*)malloc(length*sizeof(double));
+	//calculate_derivatives_old(amplitude_deriv, 
+	//		phase_deriv, 
+	//		amplitude,
+	//		frequency,
+	//		length, 
+	//		detector, 
+	//		generation_method,
+	//		parameters);
+	//for (int i = 0 ; i<dimension; i++){
+	//	for(int j =0; j<length; j++){
+	//		response_deriv[i][j] = amplitude_deriv[i][j] + amplitude[j]*phase_deriv[i][j]*std::complex<double>(0,1);
+	//	}
+	//}
+	//for (int i =0;i<dimension;i++)
+	//{
+	//	free( amplitude_deriv[i]);
+	//	free( phase_deriv[i]);
+	//}
+	//free(amplitude_deriv);
+	//free(phase_deriv);
+	//free(amplitude);
+	//free(integrand);
+
 	//calulate fisher elements
-	for (int j=0;j<dimension; j++)
-	{
-		for (int k = 0; k<j; k++)
-		{
-			for (int i =0;i<length;i++)
-			{
-				integrand[i] = 
-					real( (amplitude_deriv[j][i]*amplitude_deriv[k][i]
-					+amplitude[i]*amplitude[i]*
-					phase_deriv[j][i]*phase_deriv[k][i])/internal_noise[i]);
-			}
-			output[j][k] = 4*simpsons_sum(
-						frequency[1]-frequency[0], length, integrand);	
-			output[k][j] = output[j][k];
-		}
-
+	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
+	for (int i = 0 ; i<dimension; i++){
+		delete [] response_deriv[i];	
 	}
-
-	for (int j = 0; j<dimension; j ++)
-	{
-
-		for (int i =0;i<length;i++)
-			integrand[i] = 
-				real( (amplitude_deriv[j][i]*amplitude_deriv[j][i]
-					+amplitude[i]*amplitude[i]*phase_deriv[j][i]*
-					phase_deriv[j][i])/internal_noise[i]);
-		output[j][j] = 4*simpsons_sum(
-					frequency[1]-frequency[0], length, integrand);	
-	}
-		
-
-
-	for (int i =0;i<dimension;i++)
-	{
-		free( amplitude_deriv[i]);
-		free( phase_deriv[i]);
-	}
-	free(amplitude_deriv);
-	free(phase_deriv);
-	free(amplitude);
-	free(integrand);
+	delete [] response_deriv;
 }
 
 
+void calculate_derivatives(std::complex<double>  **response_deriv, 
+       	double *frequencies,
+       	int length, 
+       	int dimension, 
+       	string detector, 
+       	string  gen_method,
+       	gen_params *parameters)
+{
+	double epsilon = 1e-7;
+	double parameters_vec[dimension];
+	bool log_factors[dimension];
+	double param_p[dimension];
+	double param_m[dimension];
+	//##########################################################
+	unpack_parameters(parameters_vec, parameters, gen_method, dimension, log_factors);
+	//##########################################################
+	gen_params waveform_params;
+	waveform_params.NSflag = parameters->NSflag;
+	waveform_params.gmst = parameters->gmst;
+	waveform_params.shift_time = parameters->shift_time;
+	waveform_params.sky_average = parameters->sky_average;
+	waveform_params.f_ref = parameters->f_ref;
+	if( check_ppE(gen_method)){
+		waveform_params.bppe = parameters->bppe;
+		waveform_params.Nmod = parameters->Nmod;
+		waveform_params.betappe = new double[waveform_params.Nmod];
+	}
+	//##########################################################
+	if(parameters->sky_average)
+	{
+		double *amplitude_plus = new double[length];
+		double *phase_plus = new double[length];
+		double *amplitude_minus = new double[length];
+		double *phase_minus = new double[length];
+		double *amplitude = new double[length];
+		fourier_amplitude(frequencies, 
+			length,
+			amplitude,
+			gen_method,
+			parameters);	
+		for(int i = 0 ; i<dimension; i++){
+			for (int i =0; i<dimension; i++){
+				for( int j =0;j<dimension;j++){
+					param_p[j] = parameters_vec[j] ;
+					param_m[j] = parameters_vec[j] ;
+				}
+				param_p[i] = parameters_vec[i] + epsilon;
+				param_m[i] = parameters_vec[i] - epsilon;
+				repack_parameters(param_p, &waveform_params, gen_method, dimension);
+				fourier_amplitude(frequencies, 
+					length,
+					amplitude_plus,
+					gen_method,
+					&waveform_params);	
+				fourier_phase(frequencies, 
+					length,
+					phase_plus,
+					gen_method,
+					&waveform_params);	
+
+				repack_parameters(param_m, &waveform_params, gen_method, dimension);
+				fourier_amplitude(frequencies, 
+					length,
+					amplitude_minus,
+					gen_method,
+					&waveform_params);	
+				fourier_phase(frequencies, 
+					length,
+					phase_minus,
+					gen_method,
+					&waveform_params);	
+				double amplitude_deriv, phase_deriv;
+				for (int l =0;l<length;l++)
+				{
+					amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
+					phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
+					response_deriv[i][l] = amplitude_deriv - 
+						std::complex<double>(0,1)*phase_deriv*amplitude[l];
+				}
+					
+			}
+		}
+		delete [] amplitude_plus, amplitude_minus,phase_plus, phase_minus, amplitude;
+
+	
+	}
+	else {
+		std::complex<double> *response_plus= new std::complex<double>[length];
+		std::complex<double> *response_minus= new std::complex<double>[length];
+		for(int i = 0 ; i<dimension; i++){
+			for (int i =0; i<dimension; i++){
+				for( int j =0;j<dimension;j++){
+					param_p[j] = parameters_vec[j] ;
+					param_m[j] = parameters_vec[j] ;
+				}
+				param_p[i] = parameters_vec[i] + epsilon;
+				param_m[i] = parameters_vec[i] - epsilon;
+				repack_parameters(param_p, &waveform_params, gen_method, dimension);
+				fourier_detector_response_equatorial(frequencies, 
+					length,
+					response_plus,
+					detector,
+					gen_method,
+					&waveform_params);	
+
+				repack_parameters(param_m, &waveform_params, gen_method, dimension);
+				fourier_detector_response_equatorial(frequencies, 
+					length,
+					response_minus,
+					detector,
+					gen_method,
+					&waveform_params);	
+				for (int l =0;l<length;l++)
+				{
+					response_deriv[i][l] = 
+						(response_plus[l]-response_minus[l])/(2.*epsilon);
+				}
+					
+			}
+		}
+
+		delete [] response_plus;
+		delete [] response_minus;
+	}
+	for(int l =0 ; l<dimension; l++){
+		if(log_factors[l]){
+			for(int j = 0 ; j<length; j++){
+				response_deriv[l][j] = response_deriv[l][j]*parameters_vec[l] ;
+			}
+		}
+	}
+	if( check_ppE(gen_method)){
+		delete [] waveform_params.betappe;
+	}
+
+}
 /*! \brief Abstraction layer for handling the case separation for the different waveforms
  *
  */
-void calculate_derivatives(double  **amplitude_deriv, 
+void calculate_derivatives_old(double  **amplitude_deriv, 
        	double **phase_deriv,
        	double *amplitude,
        	double *frequencies,
@@ -1608,7 +1732,15 @@ void calculate_derivatives(double  **amplitude_deriv,
 		//amplitude_cross_plus,
 		gen_method,
 		parameters);	
-
+	int dimension = 1;
+	for (int i =0;i<dimension;i++)
+	{
+		free( amplitude_deriv[i]);
+		free( phase_deriv[i]);
+	}
+	free(amplitude_deriv);
+	free(phase_deriv);
+	free(amplitude);
 	free(amplitude_plus_plus);
 	free(amplitude_plus_minus);
 	free(amplitude_cross_plus);
@@ -1643,10 +1775,6 @@ void fisher_autodiff(double *frequency,
 	if (noise)
 	{
 		internal_noise = noise;
-		//for(int i = 0 ; i < length;i++)
-		//{
-		//	internal_noise[i] = noise[i];
-		//}
 	}
 	else{
 		internal_noise = new double[length];
@@ -1657,7 +1785,6 @@ void fisher_autodiff(double *frequency,
 	}
 		
 	//populate derivatives
-	double *integrand = (double*)malloc(length*sizeof(double));
 
 	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
 	for(int i =0 ;i<dimension; i++){
@@ -1768,41 +1895,8 @@ void fisher_autodiff(double *frequency,
 	}
 	
 	//calulate fisher elements
-	for (int j=0;j<dimension; j++)
-	{
-		for (int k = 0; k<j; k++)
-		{
-			for (int i =0;i<length;i++)
-			{
-				integrand[i] = 
-					real( 
-					(response_deriv[j][i]*
-					std::conj(response_deriv[k][i]))
-					/internal_noise[i]);
-			}
-			
-			output[j][k] = 4*simpsons_sum(
-						frequency[1]-frequency[0], length, integrand);	
-			output[k][j] = output[j][k];
-		}
+	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
 
-	}
-
-	for (int j = 0; j<dimension; j ++)
-	{
-
-		for (int i =0;i<length;i++){
-				integrand[i] = 
-					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
-					/internal_noise[i]);
-		}
-		output[j][j] = 4*simpsons_sum(
-					frequency[1]-frequency[0], length, integrand);	
-	}
-		
-
-
-	free(integrand);
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<dimension; i++){
 		delete [] response_deriv[i];
@@ -1862,8 +1956,7 @@ void calculate_derivatives_autodiff(double *frequency,
 	int boundary_num= boundary_number(generation_method);
 	double *freq_boundaries=new double[boundary_num];
 	double *grad_freqs=new double[boundary_num];
-	unpack_parameters(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
-	
+	prep_fisher_calculation(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
 	//calculate_derivative tapes
 	int tapes[boundary_num];
 	for(int i =0; i<boundary_num; i++){
@@ -1882,11 +1975,16 @@ void calculate_derivatives_autodiff(double *frequency,
 		a_parameters.gmst = parameters->gmst;
 		a_parameters.NSflag = parameters->NSflag;
 		a_parameters.shift_time = false;
+		if( check_ppE(generation_method)){
+			a_parameters.bppe = parameters->bppe;
+			a_parameters.Nmod = parameters->Nmod;
+			a_parameters.betappe = new adouble[a_parameters.Nmod];
+		}
 		//############################################
 		adouble afreq;
-		repack_parameters(avec_parameters,&a_parameters, &afreq, generation_method, dimension);
+		afreq = avec_parameters[0];
+		repack_parameters(&avec_parameters[1],&a_parameters, generation_method, dimension);
 		std::complex<adouble> a_response;
-		//HERE
 		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, generation_method, &a_parameters);
 
 		double response[2];
@@ -1894,6 +1992,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		imag(a_response) >>=  response[1];	
 
 		trace_off();
+		if( check_ppE(generation_method)){
+			delete [] a_parameters.betappe	;
+		}
 		
 		
 	}
@@ -1962,7 +2063,7 @@ int boundary_number(std::string method)
  *
  * DOES allocate memory for freq_boundaries and grad_freqs that must be deallocated by the use
  */
-void unpack_parameters(double *parameters, 
+void prep_fisher_calculation(double *parameters, 
 	bool *log_factors, 
 	double *freq_boundaries, 
 	double *grad_freqs, 
@@ -1977,13 +2078,6 @@ void unpack_parameters(double *parameters,
 	//incl, RA, DEC, DL, chirpmass, eta, spin1, spin2, theta1, 
 	//theta2, phi1, phi2, phiRef, tc, psi
 	if(generation_method =="IMRPhenomPv2" && !input_params->sky_average){
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
-		}
-		log_factors[3] = true;//Distance
-		log_factors[4] = true;//chirpmass
-		//###########################################
-		//###########################################
 		IMRPhenomPv2<double> modelp;
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
@@ -2008,37 +2102,11 @@ void unpack_parameters(double *parameters,
 			grad_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
 		}
 		//###########################################
-		double spin1spher[3];
-		double spin2spher[3];
-		transform_cart_sph(input_params->spin1, spin1spher);
-		transform_cart_sph(input_params->spin2, spin2spher);
 		parameters[0]=grad_freqs[0];
-		parameters[1]=input_params->incl_angle;
-		parameters[2]=input_params->RA;
-		parameters[3]=input_params->DEC;
-		parameters[4]=s_param.DL;
-		parameters[5]=s_param.chirpmass;
-		parameters[6]=s_param.eta;
-		parameters[7]=spin1spher[0];
-		parameters[8]=spin2spher[0];
-		parameters[9]=spin1spher[1];
-		parameters[10]=spin2spher[1];
-		parameters[11]=spin1spher[2];
-		parameters[12]=spin2spher[2];
-		parameters[13]=input_params->phiRef;
-		parameters[14]=input_params->tc;
-		parameters[15]=input_params->psi;
-		
+		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 	}
 	//incl, RA,DEC,DL,chirpmass,eta, spin1,spin2,phiRef,tc,psi
-	else if(generation_method =="IMRPhenomD" && !input_params->sky_average){
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
-		}
-		log_factors[3] = true;//Distance
-		log_factors[4] = true;//chirpmass
-		//###########################################
-		//###########################################
+	else if((generation_method =="IMRPhenomD" || generation_method == "ppE_IMRPhenomD_Inspiral")&& !input_params->sky_average){
 		IMRPhenomD<double> modelp;
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
@@ -2063,62 +2131,170 @@ void unpack_parameters(double *parameters,
 			grad_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
 		}
 		//###########################################
-		double spin1spher[3];
-		double spin2spher[3];
 		parameters[0]=grad_freqs[0];
-		parameters[1]=input_params->incl_angle;
-		parameters[2]=input_params->RA;
-		parameters[3]=input_params->DEC;
-		parameters[4]=s_param.DL;
-		parameters[5]=s_param.chirpmass;
-		parameters[6]=s_param.eta;
-		parameters[7]=s_param.spin1z;
-		parameters[8]=s_param.spin2z;
-		parameters[9]=input_params->phiRef;
-		parameters[10]=input_params->tc;
-		parameters[11]=input_params->psi;
-		
+		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 	}
 	
 	
+}
+void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors)
+{
+	if(generation_method =="IMRPhenomPv2" && !input_params->sky_average){
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[3] = true;//Distance
+		log_factors[4] = true;//chirpmass
+
+		double spin1spher[3];
+		double spin2spher[3];
+		transform_cart_sph(input_params->spin1, spin1spher);
+		transform_cart_sph(input_params->spin2, spin2spher);
+		parameters[0]=input_params->incl_angle;
+		parameters[1]=input_params->RA;
+		parameters[2]=input_params->DEC;
+		parameters[3]=input_params->Luminosity_Distance;
+		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		parameters[6]=spin1spher[0];
+		parameters[7]=spin2spher[0];
+		parameters[8]=spin1spher[1];
+		parameters[9]=spin2spher[1];
+		parameters[10]=spin1spher[2];
+		parameters[11]=spin2spher[2];
+		parameters[12]=input_params->phiRef;
+		parameters[13]=input_params->tc;
+		parameters[14]=input_params->psi;
+	
+	}
+	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& !input_params->sky_average){
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[3] = true;//Distance
+		log_factors[4] = true;//chirpmass
+
+		double spin1spher[3];
+		double spin2spher[3];
+		parameters[0]=input_params->incl_angle;
+		parameters[1]=input_params->RA;
+		parameters[2]=input_params->DEC;
+		parameters[3]=input_params->Luminosity_Distance;
+		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		parameters[6]=input_params->spin1[2];
+		parameters[7]=input_params->spin2[2];
+		parameters[8]=input_params->phiRef;
+		parameters[9]=input_params->tc;
+		parameters[10]=input_params->psi;
+	}
+	if( check_ppE(generation_method)){
+		int base = dimension-input_params->Nmod;
+		for(int i = 0 ;i<input_params->Nmod; i++){
+			parameters[base+i] = input_params->betappe[i];
+		}
+	}
+
 }
 /*! \brief Repack the parameters from an adouble vector to a gen_params_base<adouble> object and freqeuncy 
  *
  * This is one of the places where the generation-method/dimension/sky_average specific modifications should go
  */
-void repack_parameters(adouble *avec_parameters, gen_params_base<adouble> *a_params, adouble *freq, std::string generation_method, int dim)
+template<class T>
+void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim)
 {
 	if(generation_method =="IMRPhenomPv2" && !a_params->sky_average){
-		*freq = avec_parameters[0];
-		a_params->mass1 = calculate_mass1(avec_parameters[5],avec_parameters[6])/MSOL_SEC;
-		a_params->mass2 = calculate_mass2(avec_parameters[5],avec_parameters[6])/MSOL_SEC;
-		a_params->Luminosity_Distance = avec_parameters[4]/MPC_SEC;
-		a_params->RA = avec_parameters[2];
-		a_params->DEC = avec_parameters[3];
-		a_params->psi = avec_parameters[15];
-		a_params->phiRef = avec_parameters[13];
-		a_params->tc = avec_parameters[14];
-		adouble spin1sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
-		adouble spin2sph[3] = {avec_parameters[8],avec_parameters[10],avec_parameters[12]};
+		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		a_params->Luminosity_Distance = avec_parameters[3];
+		a_params->RA = avec_parameters[1];
+		a_params->DEC = avec_parameters[2];
+		a_params->psi = avec_parameters[14];
+		a_params->phiRef = avec_parameters[12];
+		a_params->tc = avec_parameters[13];
+		T spin1sph[3] = {avec_parameters[6],avec_parameters[8],avec_parameters[10]};
+		T spin2sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
-		a_params->incl_angle=avec_parameters[1];
+		a_params->incl_angle=avec_parameters[0];
 	}
-	else if(generation_method =="IMRPhenomD" && !a_params->sky_average){
-		*freq = avec_parameters[0];
-		a_params->mass1 = calculate_mass1(avec_parameters[5],avec_parameters[6])/MSOL_SEC;
-		a_params->mass2 = calculate_mass2(avec_parameters[5],avec_parameters[6])/MSOL_SEC;
-		a_params->Luminosity_Distance = avec_parameters[4]/MPC_SEC;
-		a_params->RA = avec_parameters[2];
-		a_params->DEC = avec_parameters[3];
-		a_params->psi = avec_parameters[11];
-		a_params->phiRef = avec_parameters[9];
-		a_params->tc = avec_parameters[10];
-		adouble spin1sph[3] = {avec_parameters[7],0,0};
-		adouble spin2sph[3] = {avec_parameters[8],0,0};
+	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& !a_params->sky_average){
+		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		a_params->Luminosity_Distance = avec_parameters[3];
+		a_params->RA = avec_parameters[1];
+		a_params->DEC = avec_parameters[2];
+		a_params->psi = avec_parameters[10];
+		a_params->phiRef = avec_parameters[8];
+		a_params->tc = avec_parameters[9];
+		T spin1sph[3] = {avec_parameters[6],0,0};
+		T spin2sph[3] = {avec_parameters[7],0,0};
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
-		a_params->incl_angle=avec_parameters[1];
+		a_params->incl_angle=avec_parameters[0];
+	}
+	if( check_ppE(generation_method)){
+		int base = dim - a_params->Nmod;
+		for(int i = 0 ;i<a_params->Nmod; i++){
+			a_params->betappe[i] = avec_parameters[base+i];
+		}
 	}
 
 }
+
+bool check_ppE(std::string generation_method)
+{
+	if(generation_method == "ppE_IMRPhenomD_Inspiral" ||
+		generation_method == "ppE_IMRPhenomD_IMR" ||
+		generation_method == "ppE_IMRPhenomPv2_IMR" ||
+		generation_method == "ppE_IMRPhenomPv2_Inspiral" )
+	{
+		return true;
+	}
+	return false;
+}
+void calculate_fisher_elements(double *frequency, 
+	int length, 
+	int dimension, 
+	std::complex<double> **response_deriv, 
+	double **output,
+	double *psd)
+{
+	double *integrand=new double[length];
+	for (int j=0;j<dimension; j++)
+	{
+		for (int k = 0; k<j; k++)
+		{
+			for (int i =0;i<length;i++)
+			{
+				integrand[i] = 
+					real( 
+					(response_deriv[j][i]*
+					std::conj(response_deriv[k][i]))
+					/psd[i]);
+			}
+			
+			output[j][k] = 4*simpsons_sum(
+						frequency[1]-frequency[0], length, integrand);	
+			output[k][j] = output[j][k];
+		}
+
+	}
+
+	for (int j = 0; j<dimension; j ++)
+	{
+
+		for (int i =0;i<length;i++){
+				integrand[i] = 
+					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
+					/psd[i]);
+		}
+		output[j][j] = 4*simpsons_sum(
+					frequency[1]-frequency[0], length, integrand);	
+	}
+	delete [] integrand;	
+
+}
+//#################################################################
+template void repack_parameters<adouble>(adouble *, gen_params_base<adouble> *, std::string, int);
+template void repack_parameters<double>(double *, gen_params_base<double> *, std::string, int);

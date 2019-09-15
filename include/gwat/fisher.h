@@ -19,8 +19,8 @@ void fisher(double *frequency,
 	int *phase_tapes = NULL,
 	double *noise = NULL
 	);
-
-void calculate_derivatives(double  **amplitude_deriv, 
+void calculate_fisher_elements(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd);
+void calculate_derivatives_old(double  **amplitude_deriv, 
        	double **phase_deriv,
        	double *amplitude,
        	double *frequencies,
@@ -29,6 +29,13 @@ void calculate_derivatives(double  **amplitude_deriv,
        	string  gen_method,
        	gen_params *parameters);
 
+void calculate_derivatives(std::complex<double>  **response_deriv, 
+       	double *frequencies,
+       	int length, 
+       	int dimension, 
+       	string detector, 
+       	string  gen_method,
+       	gen_params *parameters);
 void fisher_autodiff(double *frequency, 
 	int length,
 	string generation_method, 
@@ -69,8 +76,15 @@ void calculate_derivatives_autodiff(double *frequency,
 	std::string detector
 	);
 int boundary_number(std::string method);
-void unpack_parameters(double *parameters, bool *, double *,double*, int,gen_params_base<double> *input_params, std::string generation_method, int dim);
-void repack_parameters(adouble *avec_parameters, gen_params_base<adouble> *a_params, adouble *freq, std::string generation_method, int dim);
+
+bool check_ppE(std::string generation_method);
+
+void prep_fisher_calculation(double *parameters, bool *, double *,double*, int,gen_params_base<double> *input_params, std::string generation_method, int dim);
+
+void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors);
+
+template<class T>
+void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim);
 //void repack_parameters(adouble *parameters, gen_params_ad *input_params, std::string generation_method, int dim);
 
 #endif
