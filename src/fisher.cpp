@@ -134,7 +134,7 @@ void calculate_derivatives(double  **amplitude_deriv,
        	gen_params *parameters)
 {
 	//Finite difference spacing
-	double epsilon = 1e-9;
+	double epsilon = 1e-7;
 	double epsilonnaught = 1e-7;
 	double *amplitude_plus_plus = (double *) malloc(sizeof(double)*length);
 	double *amplitude_plus_minus = (double *) malloc(sizeof(double)*length);
@@ -145,7 +145,7 @@ void calculate_derivatives(double  **amplitude_deriv,
 	double *phase_cross_plus = (double *) malloc(sizeof(double)*length);
 	double *phase_cross_minus = (double *) malloc(sizeof(double)*length);
 	
-	if (gen_method == "IMRPhenomD"){
+	if (parameters->sky_average && gen_method == "IMRPhenomD"){
 		IMRPhenomD<double> model;
 		int dimension = 7;
 		source_parameters<double> parameters_in;
@@ -249,6 +249,106 @@ void calculate_derivatives(double  **amplitude_deriv,
 			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
 			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
 		}
+	}
+	else if (!parameters->sky_average  && gen_method == "IMRPhenomD"){
+		IMRPhenomD<double> model;
+		int dimension = 11;
+		source_parameters<double> parameters_in;
+		gen_params waveform_params;
+		parameters_in = parameters_in.populate_source_parameters(parameters); 
+		double param_p[dimension] ;
+		double param_m[dimension] ;
+		double param_in[dimension] ;
+		double param_out[dimension] ;
+		param_in[0] = parameters->incl_angle;
+		param_in[1] = parameters->RA;
+		param_in[2] = parameters->DEC;
+		param_in[3] = parameters_in.DL/MPC_SEC;//MPC
+		param_in[4] = parameters_in.chirpmass;//seconds
+		param_in[5] = parameters_in.eta;
+		param_in[6] = parameters_in.spin1z;
+		param_in[7] = parameters_in.spin2z;
+		param_in[8] = parameters->phiRef;
+		param_in[9] = parameters_in.tc;
+		param_in[10] = parameters->psi;
+
+		waveform_params.sky_average=parameters->sky_average;
+		waveform_params.f_ref=parameters->f_ref;
+		waveform_params.NSflag = parameters->NSflag;
+		waveform_params.gmst = parameters->gmst;
+		waveform_params.shift_time =false;
+		std::complex<double> *response = new std::complex<double>[length];
+		for (int i =0; i<dimension; i++){
+			for( int j =0;j<dimension;j++){
+				param_p[j] = param_in[j] ;
+				param_m[j] = param_in[j] ;
+			}
+			param_p[i] = param_in[i] + epsilon;
+			param_m[i] = param_in[i] - epsilon;
+
+			waveform_params.mass1 = calculate_mass1(param_p[4],param_p[5])/MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_p[4],param_p[5])/MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_p[3];
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_p[6];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_p[7];
+			waveform_params.phiRef = param_p[8];
+			waveform_params.tc= param_p[9];
+			waveform_params.incl_angle = param_p[0];
+			waveform_params.RA = param_p[1];
+			waveform_params.DEC = param_p[2];
+			waveform_params.psi = param_p[10];
+
+			fourier_detector_response_equatorial(frequencies, length, 
+				response,detector, gen_method, &waveform_params);
+
+			for (int k =0; k<length; k++){
+				amplitude_plus_plus[k] =  std::abs(response[k]);
+				phase_plus_plus[k] =  std::arg(response[k]);
+			}
+			//##############################################
+			waveform_params.mass1 = calculate_mass1(param_m[4],param_m[5])/MSOL_SEC;
+			waveform_params.mass2 = calculate_mass2(param_m[4],param_m[5])/MSOL_SEC;
+			waveform_params.Luminosity_Distance=param_m[3];
+			waveform_params.spin1[0]=0;
+			waveform_params.spin1[1]=0;
+			waveform_params.spin1[2]=param_m[6];
+			waveform_params.spin2[0]=0;
+			waveform_params.spin2[1]=0;
+			waveform_params.spin2[2]=param_m[7];
+			waveform_params.phiRef = param_m[8];
+			waveform_params.tc= param_m[9];
+			waveform_params.incl_angle = param_m[0];
+			waveform_params.RA = param_m[1];
+			waveform_params.DEC = param_m[2];
+			waveform_params.psi = param_m[10];
+
+			fourier_detector_response_equatorial(frequencies, length, 
+				response,detector, gen_method, &waveform_params);
+
+			for (int k =0; k<length; k++){
+				amplitude_plus_minus[k] =  std::abs(response[k]);
+				phase_plus_minus[k] =  std::arg(response[k]);
+			}
+			for (int l =0;l<length;l++)
+			{
+				amplitude_deriv[i][l] = (amplitude_plus_plus[l] -amplitude_plus_minus[l])/(2*epsilon);
+				phase_deriv[i][l] = (phase_plus_plus[l] -phase_plus_minus[l])/(2*epsilon);
+			}
+				
+		}
+		//Normalize for log factors
+		for (int l =0;l<length;l++)
+		{
+			amplitude_deriv[4][l] = amplitude_deriv[4][l]*param_in[4] ;
+			amplitude_deriv[3][l] = amplitude_deriv[3][l]*param_in[3] ;
+			phase_deriv[4][l] = phase_deriv[4][l]*param_in[4] ;
+			phase_deriv[3][l] = phase_deriv[3][l]*param_in[3] ;
+		}
+		delete [] response;
 	}
 	if (gen_method == "ppE_IMRPhenomD_Inspiral"|| gen_method=="ppE_IMRPhenomD_IMR"){
 		IMRPhenomD<double> model;
@@ -1814,8 +1914,6 @@ void calculate_derivatives_autodiff(double *frequency,
 				}
 				//Mark successful derivative
 				eval = true;
-				//std::cout<<n<<std::endl;
-				//std::cout<<vec_parameters[0]<<" "<<freq_boundaries[n]<<std::endl;
 				//Skip the rest of the bins
 				break;
 			}
@@ -1906,12 +2004,8 @@ void unpack_parameters(double *parameters,
 		freq_boundaries[4] = .2/M;//End waveform
 		//###########################################
 		grad_freqs[0] = freq_boundaries[0]*.9;
-		//std::cout<<"eval freq "<<0<<": "<<grad_freqs[0]<<std::endl;
-		//std::cout<<"boundary freq "<<0<<": "<<freq_boundaries[0]<<std::endl;
 		for(int i = 1 ; i<boundary_num; i++){
 			grad_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
-			//std::cout<<"eval freq "<<i<<": "<<grad_freqs[i]<<std::endl;
-			//std::cout<<"boundary freq "<<i<<": "<<freq_boundaries[i]<<std::endl;
 		}
 		//###########################################
 		double spin1spher[3];
@@ -1965,12 +2059,8 @@ void unpack_parameters(double *parameters,
 		freq_boundaries[4] = .2/M;//End waveform
 		//###########################################
 		grad_freqs[0] = freq_boundaries[0]*.9;
-		//std::cout<<"eval freq "<<0<<": "<<grad_freqs[0]<<std::endl;
-		//std::cout<<"boundary freq "<<0<<": "<<freq_boundaries[0]<<std::endl;
 		for(int i = 1 ; i<boundary_num; i++){
 			grad_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
-			//std::cout<<"eval freq "<<i<<": "<<grad_freqs[i]<<std::endl;
-			//std::cout<<"boundary freq "<<i<<": "<<freq_boundaries[i]<<std::endl;
 		}
 		//###########################################
 		double spin1spher[3];
