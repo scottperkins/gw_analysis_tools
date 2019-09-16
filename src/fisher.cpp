@@ -22,6 +22,37 @@ using namespace std;
 /*!\file 
  *
  * All subroutines associated with waveform differentiation and Fisher analysis
+ *
+ * Fisher options (both autodiff and numerical):
+ *
+ * IMRPhenomD sky-averaged (7) -- ln A0, phic, tc, ln chirpmass, ln eta, chi_symm, chi_antisymm
+ * 
+ * ppE_IMRPhenomD_Inspiral sky-averaged (7 + mods)-- ln A0, phic, tc, ln chirpmass, ln eta, chi_symm, chi_antisymm, betas
+ * 
+ * ppE_IMRPhenomD_IMR sky-averaged (7 + mods)-- ln A0, phic, tc, ln chirpmass, ln eta, chi_symm, chi_antisymm, betas
+ *
+ * IMRPhenomD !sky_averaged (11) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi
+ * 
+ * ppE_IMRPhenomD_Inspiral !sky_averaged (11+mods) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, betas
+ * 
+ * ppE_IMRPhenomD_IMR !sky_averaged (11+mods) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, betas
+ * 
+ * dCS_IMRPhenomD !sky_averaged (12) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, \alpha^2 (sec^4)
+ * 
+ * EdGB_IMRPhenomD !sky_averaged (12) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, \alpha^2 (sec^4)
+ * 
+ * IMRPhenomPv2 !sky_averaged (15) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, (all at f_ref)
+ * 
+ * ppE_IMRPhenomPv2_Inspiral !sky_averaged (15+mods)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, betas (all at f_ref)
+ * 
+ * ppE_IMRPhenomPv2_IMR !sky_averaged (15+mods)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, betas (all at f_ref)
+ * 
+ * dCS_IMRPhenomPv2 !sky_averaged (16)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, \alpha^2 (sec^4)  (all at f_ref)
+ * 
+ * EdGB_IMRPhenomPv2 !sky_averaged (16)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, \alpha^2 (sec^4)  (all at f_ref)
+ *
+ *
+ * All MCMC options correspond to the base, minus the coalescence time (which is maximized over)
  */
 
 /*!\brief Calculates the fisher matrix for the given arguments
@@ -123,6 +154,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	double param_p[dimension];
 	double param_m[dimension];
 	//##########################################################
+	std::string local_gen_method = local_generation_method(gen_method);
 	unpack_parameters(parameters_vec, parameters, gen_method, dimension, log_factors);
 	//##########################################################
 	gen_params waveform_params;
@@ -161,24 +193,24 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				fourier_amplitude(frequencies, 
 					length,
 					amplitude_plus,
-					gen_method,
+					local_gen_method,
 					&waveform_params);	
 				fourier_phase(frequencies, 
 					length,
 					phase_plus,
-					gen_method,
+					local_gen_method,
 					&waveform_params);	
 
 				repack_parameters(param_m, &waveform_params, gen_method, dimension);
 				fourier_amplitude(frequencies, 
 					length,
 					amplitude_minus,
-					gen_method,
+					local_gen_method,
 					&waveform_params);	
 				fourier_phase(frequencies, 
 					length,
 					phase_minus,
-					gen_method,
+					local_gen_method,
 					&waveform_params);	
 				double amplitude_deriv, phase_deriv;
 				for (int l =0;l<length;l++)
@@ -212,7 +244,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					length,
 					response_plus,
 					detector,
-					gen_method,
+					local_gen_method,
 					&waveform_params);	
 
 				repack_parameters(param_m, &waveform_params, gen_method, dimension);
@@ -220,7 +252,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					length,
 					response_minus,
 					detector,
-					gen_method,
+					local_gen_method,
 					&waveform_params);	
 				for (int l =0;l<length;l++)
 				{
@@ -1963,8 +1995,13 @@ void calculate_derivatives_autodiff(double *frequency,
 	double vec_parameters[dimension+1];
 	bool log_factors[dimension];
 	int boundary_num= boundary_number(generation_method);
+	if(boundary_num == -1){
+		std::cout<<"Error -- unsupported generation method"<<std::endl;
+		exit(1);
+	}
 	double *freq_boundaries=new double[boundary_num];
 	double *grad_freqs=new double[boundary_num];
+	std::string local_gen_method = local_generation_method(generation_method);
 	prep_fisher_calculation(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
 	//calculate_derivative tapes
 	int tapes[boundary_num];
@@ -1994,9 +2031,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		//############################################
 		adouble afreq;
 		afreq = avec_parameters[0];
-		repack_parameters(&avec_parameters[1],&a_parameters, generation_method, dimension);
+		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension);
 		std::complex<adouble> a_response;
-		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, generation_method, &a_parameters);
+		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters);
 
 		double response[2];
 		real(a_response) >>=  response[0];	
@@ -2026,6 +2063,7 @@ void calculate_derivatives_autodiff(double *frequency,
 				}
 				//Mark successful derivative
 				eval = true;
+				//std::cout<<vec_parameters[0]<<" "<<freq_boundaries[n]<<std::endl;
 				//Skip the rest of the bins
 				break;
 			}
@@ -2035,6 +2073,8 @@ void calculate_derivatives_autodiff(double *frequency,
 			for(int i =0; i<dimension; i++){
 				waveform_deriv[i][k] = std::complex<double>(0,0);
 			}	
+			//std::cout<<"0"<<std::endl;
+			//std::cout<<vec_parameters[0]<<" "<<freq_boundaries[4]<<std::endl;
 		}
 		eval = false;
 	}
@@ -2065,16 +2105,24 @@ void calculate_derivatives_autodiff(double *frequency,
 	}
 
 }
+std::string local_generation_method(std::string generation_method)
+{
+	std::string local_gen_method = generation_method;
+	if(generation_method.find("MCMC") != std::string::npos && generation_method.find("Full") != std::string::npos)
+	{
+		local_gen_method.erase(0,5);
+		local_gen_method.erase(local_gen_method.length()-5,5);
+	}
+	return local_gen_method;
+		
+}
 int boundary_number(std::string method)
 {
-	if(method == "IMRPhenomPv2"||
-		method=="IMRPhenomD"||
-		method=="ppE_IMRPhenomD_IMR"||
-		method=="ppE_IMRPhenomD_Inspiral"||
-		method=="ppE_IMRPhenomPv2_Inspiral"||
-		method=="ppE_IMRPhenomPv2_IMR"){
+	if(method.find("IMRPhenomP") != std::string::npos || 
+		method.find("IMRPhenomD")!=std::string::npos){
 		return 5;
 	}
+	return -1;
 }
 /*! \brief Transforms input gen_params into several base class arrays for use with adolc 
  *
@@ -2092,16 +2140,35 @@ void prep_fisher_calculation(double *parameters,
 {
 	source_parameters<double> s_param;
 	s_param = source_parameters<double>::populate_source_parameters(input_params);
+	s_param.sky_average = input_params->sky_average;
+	s_param.f_ref = input_params->f_ref;
+	s_param.shift_time = false;
+	s_param.cosmology=input_params->cosmology;
+	s_param.incl_angle=input_params->incl_angle;
 	lambda_parameters<double> lambda;
 	//incl, RA, DEC, DL, chirpmass, eta, spin1, spin2, theta1, 
 	//theta2, phi1, phi2, phiRef, tc, psi
-	if(generation_method =="IMRPhenomPv2" && !input_params->sky_average){
+	if(	(
+		generation_method =="IMRPhenomPv2" ||
+		generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
+		generation_method =="ppE_IMRPhenomPv2_IMR" ||
+		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral_Full" ||
+		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR_Full" ||
+		generation_method =="dCS_IMRPhenomPv2" ||
+		generation_method =="EdGB_IMRPhenomPv2" ||
+		generation_method =="MCMC_dCS_IMRPhenomPv2_Full" ||
+		generation_method =="MCMC_EdGB_IMRPhenomPv2_Full" 
+		)
+		&& !input_params->sky_average){
+
+		//IMRPhenomPv2<double> modelp;
 		IMRPhenomPv2<double> modelp;
+		modelp.PhenomPv2_Param_Transform(&s_param);
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
 		double M = s_param.M;
 		double fRD = s_param.fRD;
-		double fpeak = modelp.fpeak(&s_param, &lambda);;
+		double fpeak = modelp.fpeak(&s_param, &lambda);
 		//###########################################
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
@@ -2124,13 +2191,28 @@ void prep_fisher_calculation(double *parameters,
 		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 	}
 	//incl, RA,DEC,DL,chirpmass,eta, spin1,spin2,phiRef,tc,psi
-	else if((generation_method =="IMRPhenomD" || generation_method == "ppE_IMRPhenomD_Inspiral")&& !input_params->sky_average){
-		IMRPhenomD<double> modelp;
-		modelp.assign_lambda_param(&s_param, &lambda);
-		modelp.post_merger_variables(&s_param);
+	else if(
+		(generation_method =="IMRPhenomD" || 
+		generation_method == "ppE_IMRPhenomD_Inspiral"|| 
+		generation_method == "ppE_IMRPhenomD_IMR") 
+		|| 
+		(generation_method =="MCMC_IMRPhenomD_Full" || 
+		generation_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 
+		generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full")
+		|| 
+		(generation_method =="MCMC_dCS_IMRPhenomD_Full" || 
+		generation_method == "MCMC_EdGB_IMRPhenomD_Full")
+		|| 
+		(generation_method =="dCS_IMRPhenomD" || 
+		generation_method == "EdGB_IMRPhenomD")
+		){
+
+		IMRPhenomD<double> modeld;
+		modeld.assign_lambda_param(&s_param, &lambda);
+		modeld.post_merger_variables(&s_param);
 		double M = s_param.M;
 		double fRD = s_param.fRD;
-		double fpeak = modelp.fpeak(&s_param, &lambda);;
+		double fpeak = modeld.fpeak(&s_param, &lambda);;
 		//###########################################
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
@@ -2157,7 +2239,52 @@ void prep_fisher_calculation(double *parameters,
 }
 void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors)
 {
-	if(generation_method =="IMRPhenomPv2" && !input_params->sky_average){
+	if(	(
+		generation_method =="IMRPhenomPv2"  || 
+		generation_method=="ppE_IMRPhenomPv2_Inspiral" || 
+		generation_method=="ppE_IMRPhenomPv2_IMR"||
+		generation_method=="dCS_IMRPhenomPv2"||
+		generation_method=="EdGB_IMRPhenomPv2"
+		)
+		&& 
+		!input_params->sky_average){
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[3] = true;//Distance
+		log_factors[4] = true;//chirpmass
+
+		double spin1spher[3];
+		double spin2spher[3];
+		transform_cart_sph(input_params->spin1, spin1spher);
+		transform_cart_sph(input_params->spin2, spin2spher);
+		
+		parameters[0]=input_params->incl_angle;
+		parameters[1]=input_params->RA;
+		parameters[2]=input_params->DEC;
+		parameters[3]=input_params->Luminosity_Distance;
+		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		parameters[6]=spin1spher[0];
+		parameters[7]=spin2spher[0];
+		parameters[8]=spin1spher[1];
+		parameters[9]=spin2spher[1];
+		parameters[10]=spin1spher[2];
+		parameters[11]=spin2spher[2];
+		parameters[12]=input_params->phiRef;
+		parameters[13]=input_params->tc;
+		parameters[14]=input_params->psi;
+	
+	}
+	if(	(
+		generation_method =="MCMC_IMRPhenomPv2_Full"  || 
+		generation_method=="MCMC_ppE_IMRPhenomPv2_Inspiral_Full" || 
+		generation_method=="MCMC_ppE_IMRPhenomPv2_Inspiral_Full"||
+		generation_method=="MCMC_EdGB_IMRPhenomPv2_Full"||
+		generation_method=="MCMC_dCS_IMRPhenomPv2_Full"
+		)
+		&& 
+		!input_params->sky_average){
 		for(int i = 0 ; i<dimension; i++){
 			log_factors[i] = false;
 		}
@@ -2181,11 +2308,19 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[10]=spin1spher[2];
 		parameters[11]=spin2spher[2];
 		parameters[12]=input_params->phiRef;
-		parameters[13]=input_params->tc;
-		parameters[14]=input_params->psi;
+		parameters[13]=input_params->psi;
 	
 	}
-	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& !input_params->sky_average){
+	else if(
+		(
+		generation_method =="IMRPhenomD" || 
+		generation_method=="ppE_IMRPhenomD_Inspiral"|| 
+		generation_method == "ppE_IMRPhenomD_IMR"||
+		generation_method == "dCS_IMRPhenomD"||
+		generation_method == "EdGB_IMRPhenomD"
+		)
+		&& 
+		!input_params->sky_average){
 		for(int i = 0 ; i<dimension; i++){
 			log_factors[i] = false;
 		}
@@ -2206,7 +2341,42 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[9]=input_params->tc;
 		parameters[10]=input_params->psi;
 	}
-	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& input_params->sky_average){
+	else if(
+		(generation_method =="MCMC_IMRPhenomD_Full" || 
+		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 	
+		generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full" ||
+		generation_method == "MCMC_dCS_IMRPhenomD_Full" ||
+		generation_method == "MCMC_EdGB_IMRPhenomD_Full"
+		)
+		&& 
+		!input_params->sky_average){
+
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[3] = true;//Distance
+		log_factors[4] = true;//chirpmass
+
+		double spin1spher[3];
+		double spin2spher[3];
+		parameters[0]=input_params->incl_angle;
+		parameters[1]=input_params->RA;
+		parameters[2]=input_params->DEC;
+		parameters[3]=input_params->Luminosity_Distance;
+		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		parameters[6]=input_params->spin1[2];
+		parameters[7]=input_params->spin2[2];
+		parameters[8]=input_params->phiRef;
+		parameters[9]=input_params->psi;
+	}
+	else if((generation_method =="IMRPhenomD" || 
+		generation_method=="ppE_IMRPhenomD_Inspiral"|| 
+		generation_method == "ppE_IMRPhenomD_IMR"
+		)
+		&& 
+		input_params->sky_average){
+
 		for(int i = 0 ; i<dimension; i++){
 			log_factors[i] = false;
 		}
@@ -2237,7 +2407,16 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 template<class T>
 void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim)
 {
-	if(generation_method =="IMRPhenomPv2" && !a_params->sky_average){
+	if(	(
+		generation_method =="IMRPhenomPv2" || 
+		generation_method =="ppE_IMRPhenomPv2_Inspiral"|| 
+		generation_method =="ppE_IMRPhenomPv2_IMR"||
+		generation_method =="dCS_IMRPhenomPv2"||
+		generation_method =="EdGB_IMRPhenomPv2"
+		) 
+		&& 
+		!a_params->sky_average){
+
 		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
 		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
 		a_params->Luminosity_Distance = avec_parameters[3];
@@ -2252,7 +2431,37 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
 	}
-	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& !a_params->sky_average){
+	if(	(
+		generation_method =="MCMC_IMRPhenomPv2_Full" || 
+		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral_Full"|| 
+		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR_Full"||
+		generation_method =="MCMC_dCS_IMRPhenomPv2_Full"||
+		generation_method =="MCMC_EdGB_IMRPhenomPv2_Full"
+		) 
+		&& 
+		!a_params->sky_average){
+
+		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		a_params->Luminosity_Distance = avec_parameters[3];
+		a_params->RA = avec_parameters[1];
+		a_params->DEC = avec_parameters[2];
+		a_params->psi = avec_parameters[13];
+		a_params->phiRef = avec_parameters[12];
+		T spin1sph[3] = {avec_parameters[6],avec_parameters[8],avec_parameters[10]};
+		T spin2sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
+		transform_sph_cart(spin1sph,a_params->spin1);
+		transform_sph_cart(spin2sph,a_params->spin2);
+		a_params->incl_angle=avec_parameters[0];
+	}
+	else if((generation_method =="IMRPhenomD" || 
+		generation_method=="ppE_IMRPhenomD_Inspiral" ||
+		generation_method=="ppE_IMRPhenomD_IMR"||
+		generation_method=="dCS_IMRPhenomD" ||
+		generation_method=="EdGB_IMRPhenomD"
+		)
+		&& 
+		!a_params->sky_average){
 		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
 		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
 		a_params->Luminosity_Distance = avec_parameters[3];
@@ -2267,7 +2476,39 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
 	}
-	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& a_params->sky_average){
+	else if(
+		(
+		generation_method =="MCMC_IMRPhenomD_Full" || 
+		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral_Full" ||
+		generation_method=="MCMC_ppE_IMRPhenomD_IMR_Full"|| 
+		generation_method=="MCMC_dCS_IMRPhenomD_Full"|| 
+		generation_method=="MCMC_EdGB_IMRPhenomD_Full"
+		)
+		&& 
+		!a_params->sky_average){
+
+		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		a_params->Luminosity_Distance = avec_parameters[3];
+		a_params->RA = avec_parameters[1];
+		a_params->DEC = avec_parameters[2];
+		a_params->psi = avec_parameters[9];
+		a_params->phiRef = avec_parameters[8];
+		T spin1sph[3] = {avec_parameters[6],0,0};
+		T spin2sph[3] = {avec_parameters[7],0,0};
+		transform_sph_cart(spin1sph,a_params->spin1);
+		transform_sph_cart(spin2sph,a_params->spin2);
+		a_params->incl_angle=avec_parameters[0];
+	}
+	else if(
+		(
+		generation_method =="IMRPhenomD" || 
+		generation_method=="ppE_IMRPhenomD_Inspiral" || 
+		generation_method == "ppE_IMRPhenomD_IMR"
+		)
+		&& 
+		a_params->sky_average){
+
 		a_params->mass1 = calculate_mass1(avec_parameters[3],avec_parameters[4]);
 		a_params->mass2 = calculate_mass2(avec_parameters[3],avec_parameters[4]);
 		a_params->Luminosity_Distance = DL_from_A0((T)(avec_parameters[3]*MSOL_SEC),avec_parameters[0],a_params->sky_average)/MPC_SEC;
@@ -2291,10 +2532,10 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 
 bool check_ppE(std::string generation_method)
 {
-	if(generation_method == "ppE_IMRPhenomD_Inspiral" ||
-		generation_method == "ppE_IMRPhenomD_IMR" ||
-		generation_method == "ppE_IMRPhenomPv2_IMR" ||
-		generation_method == "ppE_IMRPhenomPv2_Inspiral" )
+	if(generation_method.find("ppE") != std::string::npos || 
+		generation_method.find("dCS") !=std::string::npos ||
+		generation_method.find("EdGB") !=std::string::npos 
+		)
 	{
 		return true;
 	}

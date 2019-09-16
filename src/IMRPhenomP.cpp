@@ -375,10 +375,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			-i *(phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
 		
 	}
-	//free(amp_vec);
-	//free(phase_vec);
-	//free(hpfac_vec);
-	//free(hcfac_vec);
 	delete [] amp_vec;
 	delete [] phase_vec;
 	delete [] hpfac_vec;

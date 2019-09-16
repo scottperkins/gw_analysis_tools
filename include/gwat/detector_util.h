@@ -41,13 +41,25 @@ const double V_elevation = 51.884;//in meters
 const double RE_polar =6357e3 ;//in meters
 const double RE_equatorial = 6378e3 ;//in meters
 
+/*! Response Tensor for Hanford
+ *
+ * Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end -- see mathematica script
+ * */
 const double Hanford_D[3][3] = {{-0.392632, -0.0776099, -0.247384}, {-0.0776099, 0.319499, 
   0.227988}, {-0.247384, 0.227988, 0.0730968}};
 
+/*! Response Tensor for Livingston
+ *
+ * Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end -- see mathematica script
+ */
 const double Livingston_D[3][3] = {{0.411318, 0.14021, 
   0.247279}, {0.14021, -0.108998, -0.181597}, {0.247279, -0.181597, 
 -0.302236}};
 
+/*! Response Tensor for Virgo
+ *
+ * Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end -- see mathematica script
+ */
 const double Virgo_D[3][3] = {{0.243903, -0.0990959, -0.232603}, {-0.0990959, -0.447841, 
   0.187841}, {-0.232603, 0.187841, 0.203979}};
 

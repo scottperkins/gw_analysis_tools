@@ -353,7 +353,7 @@ source_parameters<T> source_parameters<T>::populate_source_parameters(
 {
 
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
-	source_parameters params;
+	source_parameters<T> params;
 	params.mass1 = param_in->mass1*MSOL_SEC;
 	params.mass2 = param_in->mass2*MSOL_SEC;
 	params.spin1x = param_in->spin1[0];
@@ -377,14 +377,6 @@ source_parameters<T> source_parameters<T>::populate_source_parameters(
 	params.tc = param_in->tc;
 	params.sky_average = param_in->sky_average;
 	params.A0 = A0_from_DL(params.chirpmass, params.DL, params.sky_average);
-	//if (param_in->sky_average){
-	//	params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
-	//	params.sky_average=true;
-	//}
-	//else{
-	//	params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
-	//	params.sky_average=false;
-	//}
 	return params;
 }
 /*! \brief Transforms between chirpmass and DL to overall amplitude factor A0
@@ -1161,8 +1153,8 @@ void transform_cart_sph(T *cartvec, T *sphvec)
 			cartvec[2]*cartvec[2] +
 			cartvec[1] * cartvec[1]) ;
 	//sphvec[1] = std::acos(cartvec[2]/ sphvec[0]);
-	sphvec[1] = atan( sqrt(cartvec[0]*cartvec[0]+cartvec[1]*cartvec[1])/cartvec[2]);
-	sphvec[2] = atan(cartvec[1]/ cartvec[0]);
+	sphvec[1] = atan2( sqrt(cartvec[0]*cartvec[0]+cartvec[1]*cartvec[1]),cartvec[2]);
+	sphvec[2] = atan2(cartvec[1], cartvec[0]);
 
 }
 template void transform_cart_sph<double>(double*, double*);

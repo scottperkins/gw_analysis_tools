@@ -75,6 +75,8 @@ void calculate_derivatives_autodiff(double *frequency,
 	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
 	std::string detector
 	);
+
+std::string local_generation_method(std::string generation_method);
 int boundary_number(std::string method);
 
 bool check_ppE(std::string generation_method);

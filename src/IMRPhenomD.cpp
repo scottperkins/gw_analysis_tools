@@ -687,9 +687,6 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 		{
 			this->precalc_powers_ins_phase(f, M, &pows);
 			
-			//if(std::is_same< double, T>::value){
-				//std::cout<<"Dphi_Ins"<<this->Dphase_ins(f, params,pn_phase_coeffs,&lambda)<<" "<<f<<std::endl;
-			//}
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 		phase[j] +=   (T)(tc*(f-f_ref) - phic);
@@ -746,8 +743,9 @@ T IMRPhenomD<T>::build_phase(T f,
 	{
 		return this->phase_mr(f, params, lambda);
 	}
-	else 
+	else {
 		return this->phase_int(f,params,lambda);
+	}
 }
 
 
