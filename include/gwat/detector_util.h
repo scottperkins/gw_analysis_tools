@@ -7,26 +7,6 @@
  * Header file for all detector-specific utilities
  */
 
-/*Detector Orientation  variables*/
-/*https://www.ligo.org/scientists/GW100916/GW100916-geometry.html*/
-/*Also see https://www.ligo.org/scientists/GW100916/detectors.txt*/
-/* All in degrees*/
-/*East is (-)*/
-//const double H_LAT =46+ 27*60 + 19*3600 ;
-//const double H_LONG =119+24*60 + 28*3600 ;
-//const double H_azimuth_offset = 36 + 90;
-//const double H_radius = 6367299.93401105;
-//const double H_elevation = 123.139;//in meters
-//const double L_LAT =30+33*60 + 46*3600 ;
-//const double L_LONG =90+46*60 + 27*3600 ;
-//const double L_azimuth_offset = 180 + 18;
-//const double L_radius = 6372795.50144497;
-//const double L_elevation = 13.1064;//in meters
-//const double V_LAT =43+37*60 + 53*2600 ;
-//const double V_LONG =-(10+30*60+16*3600) ;
-//const double V_azimuth_offset = 71;
-//const double V_radius = 6374824.24470673;//in meters
-//const double V_elevation = 8;//in meters
 
 /*Found LIGOs version see https://www.ligo.org/scientists/GW100916/detectors.txt*/
 const double H_LAT =0.81079526383 ;//in rad

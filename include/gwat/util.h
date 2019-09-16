@@ -310,6 +310,12 @@ static source_parameters<T> populate_source_parameters_old(
 			T t_c, 
 			bool sky_average) ;
 };
+template<class T>
+T A0_from_DL(T chirpmass, T DL, bool sky_average);
+
+template<class T>
+T DL_from_A0(T chirpmass, T A0, bool sky_average);
+
 void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr);
 void free_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL_spline_ptr);
 adouble Z_from_DL_interp(adouble DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *Z_DL_spline_ptr);

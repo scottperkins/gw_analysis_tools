@@ -375,16 +375,50 @@ source_parameters<T> source_parameters<T>::populate_source_parameters(
 	params.delta_mass = sqrt(1.-4*params.eta);
 	params.phic = param_in->phic;
 	params.tc = param_in->tc;
-	if (param_in->sky_average){
-		params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
-		params.sky_average=true;
-	}
-	else{
-		params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
-		params.sky_average=false;
-	}
+	params.sky_average = param_in->sky_average;
+	params.A0 = A0_from_DL(params.chirpmass, params.DL, params.sky_average);
+	//if (param_in->sky_average){
+	//	params.A0 = sqrt(M_PI/30)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	//	params.sky_average=true;
+	//}
+	//else{
+	//	params.A0 = sqrt(M_PI*40./192.)*params.chirpmass*params.chirpmass/params.DL * pow(M_PI*params.chirpmass,-7./6);
+	//	params.sky_average=false;
+	//}
 	return params;
 }
+/*! \brief Transforms between chirpmass and DL to overall amplitude factor A0
+ *
+ * All quantities in seconds
+ */
+template<class T>
+T A0_from_DL(T chirpmass, T DL, bool sky_average)
+{
+	if (sky_average){
+		return sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
+	}
+	else{
+		return sqrt(M_PI*40./192.)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
+	}
+}
+template double A0_from_DL<double>(double , double , bool);
+template adouble A0_from_DL<adouble>(adouble , adouble , bool);
+/*! \brief Transforms between amplitude factor A0 and chirpmass to DL 
+ *
+ * All quantities in seconds
+ */
+template<class T>
+T DL_from_A0(T chirpmass, T A0, bool sky_average)
+{
+	if (sky_average){
+		return sqrt(M_PI/30)*chirpmass*chirpmass/A0 * pow(M_PI*chirpmass,-7./6);
+	}
+	else{
+		return sqrt(M_PI*40./192.)*chirpmass*chirpmass/A0 * pow(M_PI*chirpmass,-7./6);
+	}
+}
+template double DL_from_A0<double>(double , double , bool);
+template adouble DL_from_A0<adouble>(adouble , adouble , bool);
 /*! \brief Builds the structure that shuttles source parameters between functions- outdated in favor of structure argument 
  *
  * Populates the structure that is passed to all generation methods - contains all relavent source parameters 

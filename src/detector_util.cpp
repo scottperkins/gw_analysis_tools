@@ -304,15 +304,15 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	T Y[3];
 	
 	/* Greenwich hour angle of source (radians). */
-	const T gha = gmst - ra;
+	T gha = gmst - ra;
 	
 	/* pre-compute trig functions */
-	const T cosgha = cos(gha);
-	const T singha = sin(gha);
-	const T cosdec = cos(dec);
-	const T sindec = sin(dec);
-	const T cospsi = cos(psi);
-	const T sinpsi = sin(psi);
+	T cosgha = cos(gha);
+	T singha = sin(gha);
+	T cosdec = cos(dec);
+	T sindec = sin(dec);
+	T cospsi = cos(psi);
+	T sinpsi = sin(psi);
 	
 	/* Eq. (B4) of [ABCF].  Note that dec = pi/2 - theta, and gha =
 	 * -phi where theta and phi are the standard spherical coordinates
@@ -332,8 +332,8 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	 * with s+=1 and sx=0 to get F+, with s+=0 and sx=1 to get Fx */
 	*Fplus = *Fcross = 0.0;
 	for(i = 0; i < 3; i++) {
-	        const T DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
-	        const T DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
+	        T DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
+	        T DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
 	        *Fplus  += X[i] * DX - Y[i] * DY;
 	        *Fcross += X[i] * DY + Y[i] * DX;
 	}

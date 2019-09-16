@@ -117,7 +117,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	string  gen_method,
        	gen_params *parameters)
 {
-	double epsilon = 1e-7;
+	double epsilon = 1e-8;
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
 	double param_p[dimension];
@@ -195,6 +195,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 
 	
 	}
+	//##########################################################
 	else {
 		std::complex<double> *response_plus= new std::complex<double>[length];
 		std::complex<double> *response_minus= new std::complex<double>[length];
@@ -236,9 +237,17 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	for(int l =0 ; l<dimension; l++){
 		if(log_factors[l]){
 			for(int j = 0 ; j<length; j++){
-				response_deriv[l][j] = response_deriv[l][j]*parameters_vec[l] ;
+				response_deriv[l][j] *=parameters_vec[l] ;
 			}
 		}
+		//double redat[length];
+		//double imagdat[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response_deriv[l][j]);
+		//	imagdat[j]=imag(response_deriv[l][j]);
+		//}
+		//write_file("data/fisher_deriv_real_"+std::to_string(l)+".csv",redat,length);
+		//write_file("data/fisher_deriv_imag_"+std::to_string(l)+".csv",imagdat,length);
 	}
 	if( check_ppE(gen_method)){
 		delete [] waveform_params.betappe;
@@ -1970,11 +1979,13 @@ void calculate_derivatives_autodiff(double *frequency,
 		//Repack parameters
 		gen_params_base<adouble> a_parameters;
 		//############################################
+		//Non variable parameters
 		a_parameters.sky_average = parameters->sky_average;
 		a_parameters.f_ref = parameters->f_ref;
 		a_parameters.gmst = parameters->gmst;
 		a_parameters.NSflag = parameters->NSflag;
 		a_parameters.shift_time = false;
+		//############################################
 		if( check_ppE(generation_method)){
 			a_parameters.bppe = parameters->bppe;
 			a_parameters.Nmod = parameters->Nmod;
@@ -2033,9 +2044,17 @@ void calculate_derivatives_autodiff(double *frequency,
 			for (int i = 0;i <length; i++)
 			{
 				//j+1 for vec_parameter because of freq in position 0
-				waveform_deriv[j][i] = (vec_parameters[j+1])*waveform_deriv[j][i];
+				waveform_deriv[j][i] *= (vec_parameters[j+1]);
 			}
 		}
+		//double redat[length];
+		//double imagdat[length];
+		//for(int i =0 ; i<length; i++){
+		//	redat[i]=real(waveform_deriv[j][i]);
+		//	imagdat[i]=imag(waveform_deriv[j][i]);
+		//}
+		//write_file("data/fisher_deriv_ad_real_"+std::to_string(j)+".csv",redat,length);
+		//write_file("data/fisher_deriv_ad_imag_"+std::to_string(j)+".csv",imagdat,length);
 	}
 	deallocate_2D_array(jacob,dep,indep);
 	if(!freq_boundaries){
@@ -2061,7 +2080,6 @@ int boundary_number(std::string method)
  *
  * This is one of the places where the generation-method/dimension/sky_average specific modifications should go
  *
- * DOES allocate memory for freq_boundaries and grad_freqs that must be deallocated by the use
  */
 void prep_fisher_calculation(double *parameters, 
 	bool *log_factors, 
@@ -2188,6 +2206,22 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[9]=input_params->tc;
 		parameters[10]=input_params->psi;
 	}
+	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& input_params->sky_average){
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[0] = true;//A0
+		log_factors[3] = true;//chirpmass
+		log_factors[4] = true;//eta
+
+		parameters[3] = calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[0] = A0_from_DL(parameters[3]*MSOL_SEC,input_params->Luminosity_Distance*MPC_SEC,input_params->sky_average);
+		parameters[1] = input_params->phic;
+		parameters[2] = input_params->tc;
+		parameters[4] = calculate_eta(input_params->mass1, input_params->mass2);;
+		parameters[5] = (input_params->spin1[2] + input_params->spin2[2])/2.;
+		parameters[6] = (input_params->spin1[2] - input_params->spin2[2])/2.;
+	}
 	if( check_ppE(generation_method)){
 		int base = dimension-input_params->Nmod;
 		for(int i = 0 ;i<input_params->Nmod; i++){
@@ -2233,6 +2267,19 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
 	}
+	else if((generation_method =="IMRPhenomD" || generation_method=="ppE_IMRPhenomD_Inspiral")&& a_params->sky_average){
+		a_params->mass1 = calculate_mass1(avec_parameters[3],avec_parameters[4]);
+		a_params->mass2 = calculate_mass2(avec_parameters[3],avec_parameters[4]);
+		a_params->Luminosity_Distance = DL_from_A0((T)(avec_parameters[3]*MSOL_SEC),avec_parameters[0],a_params->sky_average)/MPC_SEC;
+		a_params->tc = avec_parameters[2];
+		a_params->phic = avec_parameters[1];
+		T chi1 = avec_parameters[5] + avec_parameters[6];
+		T chi2 = avec_parameters[5] - avec_parameters[6];
+		T spin1sph[3] = {chi1,0,0};
+		T spin2sph[3] = {chi2,0,0};
+		transform_sph_cart(spin1sph,a_params->spin1);
+		transform_sph_cart(spin2sph,a_params->spin2);
+	}
 	if( check_ppE(generation_method)){
 		int base = dim - a_params->Nmod;
 		for(int i = 0 ;i<a_params->Nmod; i++){
@@ -2253,6 +2300,7 @@ bool check_ppE(std::string generation_method)
 	}
 	return false;
 }
+
 void calculate_fisher_elements(double *frequency, 
 	int length, 
 	int dimension, 
