@@ -59,7 +59,7 @@ using namespace std;
 
 /*!\brief Calculates the fisher matrix for the given arguments
  *
- * Utilizes numerical derivatives
+ * Utilizes numerical derivatives -- non-skyaveraged supports up to 4th order finite difference (sky averaged supports second order only)
  */
 void fisher(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
@@ -151,10 +151,20 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params *parameters)
 {
 	double epsilon = 1e-8;
+	int order; 
+	//Order of numerical derivative
+	order = 4;
+	//order = 2;
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
 	double param_p[dimension];
 	double param_m[dimension];
+	double *param_pp;
+	double *param_mm;
+	if(order >= 4){
+		param_pp = new double[dimension];
+		param_mm = new double[dimension];
+	}
 	//##########################################################
 	std::string local_gen_method = local_generation_method(gen_method);
 	unpack_parameters(parameters_vec, parameters, gen_method, dimension, log_factors);
@@ -178,6 +188,16 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		double *amplitude_minus = new double[length];
 		double *phase_minus = new double[length];
 		double *amplitude = new double[length];
+		double *amplitude_plus_plus; 
+		double *amplitude_minus_minus;
+		double *phase_plus_plus;
+		double *phase_minus_minus;
+		if(order>=4){
+			amplitude_plus_plus = new double[length];
+			amplitude_minus_minus = new double[length];
+			phase_plus_plus = new double[length];
+			phase_minus_minus = new double[length];
+		}
 		fourier_amplitude(frequencies, 
 			length,
 			amplitude,
@@ -191,6 +211,15 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				}
 				param_p[i] = parameters_vec[i] + epsilon;
 				param_m[i] = parameters_vec[i] - epsilon;
+				if(order>=4){
+					for( int j =0;j<dimension;j++){
+						param_pp[j] = parameters_vec[j] ;
+						param_mm[j] = parameters_vec[j] ;
+					}
+					param_pp[i] = parameters_vec[i] + 2*epsilon;
+					param_mm[i] = parameters_vec[i] - 2*epsilon;
+
+				}
 				repack_parameters(param_p, &waveform_params, gen_method, dimension);
 				fourier_amplitude(frequencies, 
 					length,
@@ -214,18 +243,58 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					phase_minus,
 					local_gen_method,
 					&waveform_params);	
+				if(order>=4){
+					repack_parameters(param_pp, &waveform_params, gen_method, dimension);
+					fourier_amplitude(frequencies, 
+						length,
+						amplitude_plus_plus,
+						local_gen_method,
+						&waveform_params);	
+					fourier_phase(frequencies, 
+						length,
+						phase_plus_plus,
+						local_gen_method,
+						&waveform_params);	
+
+					repack_parameters(param_mm, &waveform_params, gen_method, dimension);
+					fourier_amplitude(frequencies, 
+						length,
+						amplitude_minus_minus,
+						local_gen_method,
+						&waveform_params);	
+					fourier_phase(frequencies, 
+						length,
+						phase_minus_minus,
+						local_gen_method,
+						&waveform_params);	
+				}
 				double amplitude_deriv, phase_deriv;
-				for (int l =0;l<length;l++)
-				{
-					amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
-					phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
-					response_deriv[i][l] = amplitude_deriv - 
-						std::complex<double>(0,1)*phase_deriv*amplitude[l];
+				if(order==2){
+					for (int l =0;l<length;l++)
+					{
+						amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
+						phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
+						response_deriv[i][l] = amplitude_deriv - 
+							std::complex<double>(0,1)*phase_deriv*amplitude[l];
+					}
+				}
+				else if(order==4){
+					for (int l =0;l<length;l++)
+					{
+						amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
+						phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
+						response_deriv[i][l] = amplitude_deriv - 
+							std::complex<double>(0,1)*phase_deriv*amplitude[l];
+					}
 				}
 					
 			}
 		}
 		delete [] amplitude_plus, amplitude_minus,phase_plus, phase_minus, amplitude;
+		if(order>=4){
+			delete [] amplitude_plus_plus, amplitude_minus_minus, 
+				phase_plus_plus, phase_minus_minus;
+		}
 
 	
 	}
@@ -233,6 +302,12 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	else {
 		std::complex<double> *response_plus= new std::complex<double>[length];
 		std::complex<double> *response_minus= new std::complex<double>[length];
+		std::complex<double> *response_plus_plus;
+		std::complex<double> *response_minus_minus;
+		if(order >=4){
+			response_plus_plus= new std::complex<double>[length];
+			response_minus_minus= new std::complex<double>[length];
+		}
 		for(int i = 0 ; i<dimension; i++){
 			for (int i =0; i<dimension; i++){
 				for( int j =0;j<dimension;j++){
@@ -241,6 +316,14 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				}
 				param_p[i] = parameters_vec[i] + epsilon;
 				param_m[i] = parameters_vec[i] - epsilon;
+				if(order>=4){
+					for( int j =0;j<dimension;j++){
+						param_pp[j] = parameters_vec[j] ;
+						param_mm[j] = parameters_vec[j] ;
+					}
+					param_pp[i] = parameters_vec[i] +2 *epsilon;
+					param_mm[i] = parameters_vec[i] -2 *epsilon;
+				}
 				repack_parameters(param_p, &waveform_params, gen_method, dimension);
 				fourier_detector_response_equatorial(frequencies, 
 					length,
@@ -256,10 +339,36 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					detector,
 					local_gen_method,
 					&waveform_params);	
-				for (int l =0;l<length;l++)
-				{
-					response_deriv[i][l] = 
-						(response_plus[l]-response_minus[l])/(2.*epsilon);
+				if(order>=4){
+					repack_parameters(param_pp, &waveform_params, gen_method, dimension);
+					fourier_detector_response_equatorial(frequencies, 
+						length,
+						response_plus_plus,
+						detector,
+						local_gen_method,
+						&waveform_params);	
+
+					repack_parameters(param_mm, &waveform_params, gen_method, dimension);
+					fourier_detector_response_equatorial(frequencies, 
+						length,
+						response_minus_minus,
+						detector,
+						local_gen_method,
+						&waveform_params);	
+				}
+				if(order == 2){
+					for (int l =0;l<length;l++)
+					{
+						response_deriv[i][l] = 
+							(response_plus[l]-response_minus[l])/(2.*epsilon);
+					}
+				}
+				else if(order == 4){
+					for (int l =0;l<length;l++)
+					{
+						response_deriv[i][l] = 
+							(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(12.*epsilon);
+					}
 				}
 					
 			}
@@ -267,6 +376,12 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 
 		delete [] response_plus;
 		delete [] response_minus;
+		if(order>=4){
+			delete [] response_plus_plus, response_minus_minus;
+		}
+	}
+	if(order>= 4){
+		delete [] param_pp, param_mm;
 	}
 	for(int l =0 ; l<dimension; l++){
 		if(log_factors[l]){
@@ -1942,46 +2057,24 @@ void fisher_autodiff(double *frequency,
 
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<dimension; i++){
+		//double redat[length];
+		//double imagdat[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response_deriv[i][j]);
+		//	imagdat[j]=imag(response_deriv[i][j]);
+		//}
+		//write_file("data/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
+		//write_file("data/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
 		delete [] response_deriv[i];
 	}
 	delete [] response_deriv;
 }
 
-/*! \brief Calculate the full fisher matrix for a precessing waveform
+/*! \brief Calculates the derivatives of the detector response using automatic differentiation
  *
- * Calculates the fisher without maximizing the extrinsic parameters
+ * Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference
  *
- * 15 dimensions: 
- *
- * cos \thetaJ
- *
- * RA
- *
- * DEC
- *
- * DL
- *
- * chirpmass
- *
- * eta
- *
- * spin1
- *
- * spin2
- *
- * theta1
- *
- * theta2
- *
- * phi1
- *
- * phi2
- *
- * phiRef
- *
- * psi
- *
- * all at reference frequency of 20hz
+ * Higher dimensional fishers actually could be faster
  */
 void calculate_derivatives_autodiff(double *frequency,
 	int length,
@@ -1989,7 +2082,7 @@ void calculate_derivatives_autodiff(double *frequency,
 	std::string generation_method,
 	gen_params *parameters,
 	std::complex<double> **waveform_deriv,
-	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
+	int *waveform_tapes,
 	std::string detector
 	)
 {
@@ -2086,14 +2179,6 @@ void calculate_derivatives_autodiff(double *frequency,
 				waveform_deriv[j][i] *= (vec_parameters[j+1]);
 			}
 		}
-		//double redat[length];
-		//double imagdat[length];
-		//for(int i =0 ; i<length; i++){
-		//	redat[i]=real(waveform_deriv[j][i]);
-		//	imagdat[i]=imag(waveform_deriv[j][i]);
-		//}
-		//write_file("data/fisher_deriv_ad_real_"+std::to_string(j)+".csv",redat,length);
-		//write_file("data/fisher_deriv_ad_imag_"+std::to_string(j)+".csv",imagdat,length);
 	}
 	deallocate_2D_array(jacob,dep,indep);
 	if(!freq_boundaries){
@@ -2104,6 +2189,10 @@ void calculate_derivatives_autodiff(double *frequency,
 	}
 
 }
+/*! \brief Utility for mapping generation method string to one accepted by the waveform_generation routines
+ *
+ * Certain combinations of parameters are labeled by generation method strings not under the waveform_generation routines, so a transformation is needed
+ */
 std::string local_generation_method(std::string generation_method)
 {
 	std::string local_gen_method = generation_method;
@@ -2115,6 +2204,10 @@ std::string local_generation_method(std::string generation_method)
 	return local_gen_method;
 		
 }
+/*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
+ *
+ * The automatic derivative code requires a new tape for each logical branch of the program, so each waveform_generation method needs to add the number of branches here
+ */
 int boundary_number(std::string method)
 {
 	if(method.find("IMRPhenomP") != std::string::npos || 
@@ -2237,6 +2330,8 @@ void prep_fisher_calculation(double *parameters,
 	
 	
 }
+/*! \brief Unpacks the input gen_params object into a double array for use with the fisher routines
+ */
 void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors)
 {
 	if(	(
@@ -2430,22 +2525,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
-		//std::cout<<avec_parameters[0]<<" ";
-		//std::cout<<avec_parameters[1]<<" ";
-		//std::cout<<avec_parameters[2]<<" ";
-		//std::cout<<avec_parameters[3]<<" ";
-		//std::cout<<avec_parameters[4]<<" ";
-		//std::cout<<avec_parameters[5]<<" ";
-		//std::cout<<avec_parameters[6]<<" ";
-		//std::cout<<avec_parameters[7]<<" ";
-		//std::cout<<avec_parameters[8]<<" ";
-		//std::cout<<avec_parameters[9]<<" ";
-		//std::cout<<avec_parameters[10]<<" ";
-		//std::cout<<avec_parameters[11]<<" ";
-		//std::cout<<avec_parameters[12]<<" ";
-		//std::cout<<avec_parameters[13]<<" ";
-		//std::cout<<avec_parameters[14]<<" ";
-		//std::cout<<std::endl;
 	}
 	if(	(
 		generation_method =="MCMC_IMRPhenomPv2_Full" || 
