@@ -283,10 +283,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	T f;
 	std::complex<T> amp, phase;
-	//std::complex<T> *amp_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
-	//std::complex<T> *phase_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
-	//std::complex<T> *hpfac_vec = (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
-	//std::complex<T> *hcfac_vec= (std::complex<T> *)malloc(sizeof(std::complex<T>)*length);
 	std::complex<T> *amp_vec = new std::complex<T>[length];
 	std::complex<T> *phase_vec =new std::complex<T>[length];
 	std::complex<T> *hpfac_vec =new std::complex<T>[length];

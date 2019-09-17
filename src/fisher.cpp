@@ -53,6 +53,8 @@ using namespace std;
  *
  *
  * All MCMC options correspond to the base, minus the coalescence time (which is maximized over)
+ *
+ * Both fisher functions are compatible with OpenMP, but not with pthreads (if ADOL-C was installed with the openmp option)
  */
 
 /*!\brief Calculates the fisher matrix for the given arguments
@@ -2063,7 +2065,6 @@ void calculate_derivatives_autodiff(double *frequency,
 				}
 				//Mark successful derivative
 				eval = true;
-				//std::cout<<vec_parameters[0]<<" "<<freq_boundaries[n]<<std::endl;
 				//Skip the rest of the bins
 				break;
 			}
@@ -2073,8 +2074,6 @@ void calculate_derivatives_autodiff(double *frequency,
 			for(int i =0; i<dimension; i++){
 				waveform_deriv[i][k] = std::complex<double>(0,0);
 			}	
-			//std::cout<<"0"<<std::endl;
-			//std::cout<<vec_parameters[0]<<" "<<freq_boundaries[4]<<std::endl;
 		}
 		eval = false;
 	}
@@ -2142,6 +2141,7 @@ void prep_fisher_calculation(double *parameters,
 	s_param = source_parameters<double>::populate_source_parameters(input_params);
 	s_param.sky_average = input_params->sky_average;
 	s_param.f_ref = input_params->f_ref;
+	s_param.phiRef = input_params->phiRef;
 	s_param.shift_time = false;
 	s_param.cosmology=input_params->cosmology;
 	s_param.incl_angle=input_params->incl_angle;
@@ -2430,6 +2430,22 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
+		//std::cout<<avec_parameters[0]<<" ";
+		//std::cout<<avec_parameters[1]<<" ";
+		//std::cout<<avec_parameters[2]<<" ";
+		//std::cout<<avec_parameters[3]<<" ";
+		//std::cout<<avec_parameters[4]<<" ";
+		//std::cout<<avec_parameters[5]<<" ";
+		//std::cout<<avec_parameters[6]<<" ";
+		//std::cout<<avec_parameters[7]<<" ";
+		//std::cout<<avec_parameters[8]<<" ";
+		//std::cout<<avec_parameters[9]<<" ";
+		//std::cout<<avec_parameters[10]<<" ";
+		//std::cout<<avec_parameters[11]<<" ";
+		//std::cout<<avec_parameters[12]<<" ";
+		//std::cout<<avec_parameters[13]<<" ";
+		//std::cout<<avec_parameters[14]<<" ";
+		//std::cout<<std::endl;
 	}
 	if(	(
 		generation_method =="MCMC_IMRPhenomPv2_Full" || 
