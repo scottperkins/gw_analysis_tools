@@ -2455,7 +2455,8 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		parameters.phi=0;
 		parameters.theta=0;
 		parameters.NSflag = false;
-		parameters.sky_average = false;
+		parameters.sky_average = true;
+		parameters.shift_time = false;
 
 		//calculate log likelihood
 		for(int i=0; i < mcmc_num_detectors; i++){

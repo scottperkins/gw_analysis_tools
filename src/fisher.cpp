@@ -2303,6 +2303,10 @@ void prep_fisher_calculation(double *parameters,
 		|| 
 		(generation_method =="dCS_IMRPhenomD" || 
 		generation_method == "EdGB_IMRPhenomD")
+		|| 
+		(generation_method =="MCMC_IMRPhenomD" || 
+		generation_method == "MCMC_ppE_IMRPhenomD_Inspiral" ||
+		generation_method == "MCMC_ppE_IMRPhenomD_IMR" )
 		){
 
 		IMRPhenomD<double> modeld;
@@ -2470,6 +2474,28 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[8]=input_params->phiRef;
 		parameters[9]=input_params->psi;
 	}
+	else if(
+		(generation_method =="MCMC_IMRPhenomD" || 
+		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral"|| 	
+		generation_method == "MCMC_ppE_IMRPhenomD_IMR" ||
+		generation_method == "MCMC_dCS_IMRPhenomD" ||
+		generation_method == "MCMC_EdGB_IMRPhenomD"
+		)
+		&& 
+		input_params->sky_average){
+
+		for(int i = 0 ; i<dimension; i++){
+			log_factors[i] = false;
+		}
+		log_factors[0] = true;//chirpmass
+
+		double spin1spher[3];
+		double spin2spher[3];
+		parameters[0]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[1]=calculate_eta(input_params->mass1, input_params->mass2);
+		parameters[2]=input_params->spin1[2];
+		parameters[3]=input_params->spin2[2];
+	}
 	else if((generation_method =="IMRPhenomD" || 
 		generation_method=="ppE_IMRPhenomD_Inspiral"|| 
 		generation_method == "ppE_IMRPhenomD_IMR"
@@ -2605,6 +2631,29 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
+	}
+	else if(
+		(
+		generation_method =="MCMC_IMRPhenomD" || 
+		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral" ||
+		generation_method=="MCMC_ppE_IMRPhenomD_IMR"|| 
+		generation_method=="MCMC_dCS_IMRPhenomD"|| 
+		generation_method=="MCMC_EdGB_IMRPhenomD"
+		)
+		&& 
+		a_params->sky_average){
+
+		a_params->mass1 = calculate_mass1(avec_parameters[0],avec_parameters[1]);
+		a_params->mass2 = calculate_mass2(avec_parameters[0],avec_parameters[1]);
+		a_params->Luminosity_Distance = 1000;
+		T spin1sph[3] = {avec_parameters[2],0,0};
+		T spin2sph[3] = {avec_parameters[3],0,0};
+		transform_sph_cart(spin1sph,a_params->spin1);
+		transform_sph_cart(spin2sph,a_params->spin2);
+		a_params->incl_angle=0;
+		a_params->phic=0;
+		a_params->tc=0;
+	
 	}
 	else if(
 		(

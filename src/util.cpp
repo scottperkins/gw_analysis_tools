@@ -300,7 +300,7 @@ void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 }
 template void gsl_LU_matrix_invert<double>(double **, double**, int );
 
-void gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
+int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 {
 	gsl_matrix *matrix = gsl_matrix_alloc(dim, dim);
 	for(int row=0; row<dim; row++){
@@ -315,6 +315,7 @@ void gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 	status = gsl_linalg_pcholesky_invert(matrix,p,inv);
 	gsl_permutation_free(p);
 	
+	bool failed=false;
 	for(int row=0; row<dim; row++){
 		for(int column = 0 ;column<dim; column++){
 			if(!std::isnan(gsl_matrix_get(inv,row,column))){
@@ -322,11 +323,15 @@ void gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 			}
 			else{
 				std::cout<<"Inversion failed -- NAN in inverse matrix -- cholesky decomposition"<<std::endl;
-				exit(1);
+				failed=true;
+				break;
 			}
 		}
+		if(failed){break;}
 	}
 	gsl_matrix_free(matrix);
+	if(failed){return 0;}
+	return 1;
 	
     
 }

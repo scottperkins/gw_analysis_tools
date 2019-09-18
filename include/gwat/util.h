@@ -329,7 +329,7 @@ double cosmology_lookup(std::string cosmology);
 template<class T>
 void gsl_LU_matrix_invert(T **input, T **inverse, int dim);
 
-void gsl_cholesky_matrix_invert(double **input, double **inverse, int dim);
+int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim);
 
 adouble Z_from_DL(adouble DL, std::string cosmology);
 adouble DL_from_Z(adouble Z, std::string cosmology);
