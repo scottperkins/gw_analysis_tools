@@ -153,8 +153,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	double epsilon = 1e-8;
 	int order; 
 	//Order of numerical derivative
-	order = 4;
-	//order = 2;
+	//order = 4;
+	order = 2;
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
 	double param_p[dimension];
@@ -172,7 +172,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	gen_params waveform_params;
 	waveform_params.NSflag = parameters->NSflag;
 	waveform_params.gmst = parameters->gmst;
-	waveform_params.shift_time = parameters->shift_time;
+	waveform_params.shift_time = false;//parameters->shift_time;
 	waveform_params.sky_average = parameters->sky_average;
 	waveform_params.f_ref = parameters->f_ref;
 	if( check_ppE(gen_method)){
@@ -368,6 +368,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					{
 						response_deriv[i][l] = 
 							(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(12.*epsilon);
+						//std::cout<<response_plus_plus[l]<<std::endl;
+						//std::cout<<response_minus_minus[l]<<std::endl;
+						//std::cout<<response_plus[l]<<std::endl;
+						//std::cout<<response_minus[l]<<std::endl;
 					}
 				}
 					
@@ -395,8 +399,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		//	redat[j]=real(response_deriv[l][j]);
 		//	imagdat[j]=imag(response_deriv[l][j]);
 		//}
-		//write_file("data/fisher_deriv_real_"+std::to_string(l)+".csv",redat,length);
-		//write_file("data/fisher_deriv_imag_"+std::to_string(l)+".csv",imagdat,length);
+		//write_file("data/fisher/fisher_deriv_real_O2_"+std::to_string(l)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_imag_O2_"+std::to_string(l)+".csv",imagdat,length);
 	}
 	if( check_ppE(gen_method)){
 		delete [] waveform_params.betappe;
@@ -2063,8 +2067,8 @@ void fisher_autodiff(double *frequency,
 		//	redat[j]=real(response_deriv[i][j]);
 		//	imagdat[j]=imag(response_deriv[i][j]);
 		//}
-		//write_file("data/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
-		//write_file("data/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
+		//write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
 		delete [] response_deriv[i];
 	}
 	delete [] response_deriv;
@@ -2243,6 +2247,7 @@ void prep_fisher_calculation(double *parameters,
 	//theta2, phi1, phi2, phiRef, tc, psi
 	if(	(
 		generation_method =="IMRPhenomPv2" ||
+		generation_method =="MCMC_IMRPhenomPv2_Full" ||
 		generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
 		generation_method =="ppE_IMRPhenomPv2_IMR" ||
 		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral_Full" ||
@@ -2432,7 +2437,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
 		parameters[6]=input_params->spin1[2];
 		parameters[7]=input_params->spin2[2];
-		parameters[8]=input_params->phiRef;
+		parameters[8]=input_params->phic;
 		parameters[9]=input_params->tc;
 		parameters[10]=input_params->psi;
 	}
@@ -2525,6 +2530,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
+		//std::cout<<"SPIN1 ";
+		//std::cout<<spin1sph[0]<<" "<<spin1sph[1]<<" "<<spin1sph[2]<<std::endl;
+		//std::cout<<a_params->spin1[0]<<" "<<a_params->spin1[1]<<" "<<a_params->spin1[2]<<std::endl;
+		//std::cout<<"SPIN2 ";
+		//std::cout<<spin2sph[0]<<" "<<spin2sph[1]<<" "<<spin2sph[2]<<std::endl;
+		//std::cout<<a_params->spin2[0]<<" "<<a_params->spin2[1]<<" "<<a_params->spin2[2]<<std::endl;
 	}
 	if(	(
 		generation_method =="MCMC_IMRPhenomPv2_Full" || 
@@ -2563,7 +2574,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		a_params->RA = avec_parameters[1];
 		a_params->DEC = avec_parameters[2];
 		a_params->psi = avec_parameters[10];
-		a_params->phiRef = avec_parameters[8];
+		a_params->phic = avec_parameters[8];
 		a_params->tc = avec_parameters[9];
 		T spin1sph[3] = {avec_parameters[6],0,0};
 		T spin2sph[3] = {avec_parameters[7],0,0};

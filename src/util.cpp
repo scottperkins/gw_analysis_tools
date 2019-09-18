@@ -287,6 +287,7 @@ void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
     
 	gsl_permutation_free(p);
 	
+	
 	for(int row=0; row<dim; row++){
 		for(int column = 0 ;column<dim; column++){
 			inverse[row][column] = gsl_matrix_get(inv,row,column);
@@ -298,6 +299,37 @@ void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
     
 }
 template void gsl_LU_matrix_invert<double>(double **, double**, int );
+
+void gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
+{
+	gsl_matrix *matrix = gsl_matrix_alloc(dim, dim);
+	for(int row=0; row<dim; row++){
+		for(int column = 0 ;column<dim; column++){
+			gsl_matrix_set(matrix, row, column, input[row][column]);
+		}
+	}
+	
+	gsl_permutation *p = gsl_permutation_alloc(dim);
+	gsl_matrix *inv = gsl_matrix_alloc(dim, dim);
+	int status =gsl_linalg_pcholesky_decomp(matrix,p);
+	status = gsl_linalg_pcholesky_invert(matrix,p,inv);
+	gsl_permutation_free(p);
+	
+	for(int row=0; row<dim; row++){
+		for(int column = 0 ;column<dim; column++){
+			if(!std::isnan(gsl_matrix_get(inv,row,column))){
+				inverse[row][column] = gsl_matrix_get(inv,row,column);
+			}
+			else{
+				std::cout<<"Inversion failed -- NAN in inverse matrix -- cholesky decomposition"<<std::endl;
+				exit(1);
+			}
+		}
+	}
+	gsl_matrix_free(matrix);
+	
+    
+}
 /*! \brief routine to print the progress of a process to the terminal as a progress bar
  *
  * Call everytime you want the progress printed

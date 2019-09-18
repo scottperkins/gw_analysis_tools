@@ -40,6 +40,7 @@ void IMRPhenomD<T>::fisher_calculation_sky_averaged(double *frequency,
 	//populate model
 	source_parameters<double> input_params;
 	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	input_params.shift_time = parameters->shift_time;
 	//Need the splitting frequency	
 	lambda_parameters<double> lambda, *lambda_ptr;
 	modeld.assign_lambda_param(&input_params, &lambda);
@@ -273,6 +274,7 @@ void IMRPhenomD<T>::amplitude_tape(source_parameters<double> *input_params, /**<
 		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6],input_params->sky_average);
+		intermediate_params.shift_time = input_params->shift_time;
 
 		adouble freqs[1] = {freq};
 		adouble amp_temp[1];
@@ -330,6 +332,7 @@ void IMRPhenomD<T>::phase_tape(source_parameters<double> *input_params, /**< sou
 		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6], input_params->sky_average);
+		intermediate_params.shift_time = input_params->shift_time;
 		adouble freqs[1] = {freq};
 		adouble phase_temp[1];
 		model.construct_phase(freqs, 1,  phase_temp, &intermediate_params);
@@ -424,7 +427,8 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	if(params->f_ref != 0 ){
+	//if(params->f_ref != 0 ){
+	if(params->shift_time ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -438,7 +442,13 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
-	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	if(params->shift_time){
+		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	}
+	else{
+		tc_shift=0;
+	}
+	//tc_shift = 0;
 	tc = 2*M_PI*params->tc + tc_shift;
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
@@ -517,7 +527,8 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	if(params->f_ref != 0 ){
+	//if(params->f_ref != 0 ){
+	if(params->shift_time){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -531,7 +542,12 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
-	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	if(params->shift_time){
+		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	}
+	else{
+		tc_shift=0;	
+	}
 	tc = 2*M_PI*params->tc + tc_shift;
 	//################################################################
 
@@ -659,7 +675,8 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	if(params->f_ref != 0 ){
+	//if(params->f_ref != 0 ){
+	if(params->shift_time){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -673,7 +690,12 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
-	tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	if(params->shift_time){
+		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+	}
+	else{
+		tc_shift=0;	
+	}
 	tc = 2*M_PI*params->tc + tc_shift;
 	//################################################################
 	

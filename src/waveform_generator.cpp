@@ -80,6 +80,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
+	params.shift_time = parameters->shift_time;
+	params.sky_average = parameters->sky_average;
 	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 	if(generation_method == "IMRPhenomD")
 	{
@@ -379,6 +381,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
 	params.cosmology = parameters->cosmology;
+	params.shift_time = parameters->shift_time;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -514,6 +517,7 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	//params.f_ref = parameters->f_ref;
 	//params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
+	params.shift_time = parameters->shift_time;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -593,6 +597,7 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
+	params.shift_time = parameters->shift_time;
 
 	if(generation_method == "IMRPhenomD")
 	{

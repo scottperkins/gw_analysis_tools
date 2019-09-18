@@ -257,10 +257,13 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 	//#################################################################
+	//T phic, f_ref, tc, phi_shift, tc_shift;
+	//params->phiRef = params->phi_aligned;
+	//f_ref = params->f_ref;
+	//phic = 2*params->phiRef;
 	T phic, f_ref, tc, phi_shift, tc_shift;
-	params->phiRef = params->phi_aligned;
 	f_ref = params->f_ref;
-	phic = 2*params->phiRef;
+	phic = 2*params->phi_aligned;
 	//tc=0;
 	tc = params->tc;
 	//#################################################################
