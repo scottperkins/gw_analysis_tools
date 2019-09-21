@@ -82,9 +82,9 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
 	params.sky_average = parameters->sky_average;
-	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 	if(generation_method == "IMRPhenomD")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		IMRPhenomD<T> modeld;
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
 		for (int i =0 ; i < length; i++){
@@ -94,6 +94,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
@@ -106,6 +107,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "dCS_IMRPhenomD_log")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		bool local_spline = false;
 		dCS_IMRPhenomD_log<T> ppemodeld;
 		params.betappe = parameters->betappe;
@@ -127,6 +129,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		bool local_spline = false;
 		dCS_IMRPhenomD<T> ppemodeld;
 		params.betappe = parameters->betappe;
@@ -148,6 +151,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "EdGB_IMRPhenomD_log")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		EdGB_IMRPhenomD_log<T> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.Nmod = 1;
@@ -166,6 +170,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "EdGB_IMRPhenomD")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		EdGB_IMRPhenomD<T> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.Nmod = 1;
@@ -184,6 +189,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
 	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
