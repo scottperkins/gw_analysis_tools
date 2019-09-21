@@ -265,7 +265,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	f_ref = params->f_ref;
 	phic = 2*params->phi_aligned;
 	//tc=0;
-	tc = params->tc;
+	tc = 2*M_PI*params->tc;
 	//#################################################################
 
 	//Rescale amplitude because we aren't just using (2,2) mode anymore
@@ -640,7 +640,7 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform(source_parameters<T> *params /*<
 
 	//azimuthal angle of J0 in the source frame
 	T phiJ_sf;
-	phiJ_sf = atan2(J0y_sf,J0x_sf); //*NOTE* lalsuite uses "atan2" - doesn't work with adolc
+	phiJ_sf = atan2(J0y_sf,J0x_sf); 
 	params->phi_aligned = - phiJ_sf;
 
 	//Rotation of the system s.t. the total J is pointed in zhat

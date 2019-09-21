@@ -150,7 +150,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	string  gen_method,
        	gen_params *parameters)
 {
-	double epsilon = 1e-8;
+	double epsilon = 1e-10;
 	int order; 
 	//Order of numerical derivative
 	order = 4;
@@ -2379,6 +2379,23 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		//parameters[13]=input_params->tc;
 		//parameters[14]=input_params->psi;
 		
+		//parameters[0]=input_params->thetaJN;
+		//parameters[1]=input_params->RA;
+		//parameters[2]=input_params->DEC;
+		//parameters[3]=input_params->Luminosity_Distance;
+		//parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		//parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		//parameters[6]=input_params->spin1[2];
+		//parameters[7]=input_params->spin2[2];
+		//parameters[8]=input_params->chip;
+		//parameters[9]=input_params->alpha0;
+		//parameters[10]=input_params->phi_aligned;
+		//parameters[11]=input_params->tc;
+		//parameters[12]=input_params->psi;
+		//for(int i = 0 ; i<13; i++){
+		//	std::cout<<parameters[i]<<std::endl;
+		//}
+		//
 		parameters[0]=input_params->thetaJN;
 		parameters[1]=input_params->RA;
 		parameters[2]=input_params->DEC;
@@ -2388,13 +2405,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[6]=input_params->spin1[2];
 		parameters[7]=input_params->spin2[2];
 		parameters[8]=input_params->chip;
-		parameters[9]=input_params->alpha0;
-		parameters[10]=input_params->phi_aligned;
-		parameters[11]=input_params->tc;
-		parameters[12]=input_params->psi;
-		//for(int i = 0 ; i<13; i++){
-		//	std::cout<<parameters[i]<<std::endl;
-		//}
+		parameters[9]=input_params->phi_aligned;
+		parameters[10]=input_params->tc;
+		parameters[11]=input_params->psi;
 	
 	}
 	if(	(
@@ -2582,20 +2595,37 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		//transform_sph_cart(spin1sph,a_params->spin1);
 		//transform_sph_cart(spin2sph,a_params->spin2);
 		//a_params->incl_angle=avec_parameters[0];
+		
+		//a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		//a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		//a_params->Luminosity_Distance = avec_parameters[3];
+		//a_params->RA = avec_parameters[1];
+		//a_params->DEC = avec_parameters[2];
+		//a_params->psi = avec_parameters[12];
+		//a_params->phi_aligned = avec_parameters[10];
+		//a_params->tc = avec_parameters[11];
+		//a_params->chi1_l = avec_parameters[6];
+		//a_params->chi2_l = avec_parameters[7];
+		//a_params->spin1[2] = avec_parameters[6];
+		//a_params->spin2[2] = avec_parameters[7];
+		//a_params->chip = avec_parameters[8];
+		//a_params->alpha0 = avec_parameters[9];
+		//a_params->thetaJN=avec_parameters[0];
+
 		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
 		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
 		a_params->Luminosity_Distance = avec_parameters[3];
 		a_params->RA = avec_parameters[1];
 		a_params->DEC = avec_parameters[2];
-		a_params->psi = avec_parameters[12];
-		a_params->phi_aligned = avec_parameters[10];
-		a_params->tc = avec_parameters[11];
+		a_params->psi = avec_parameters[11];
+		a_params->phi_aligned = avec_parameters[9];
+		a_params->tc = avec_parameters[10];
 		a_params->chi1_l = avec_parameters[6];
 		a_params->chi2_l = avec_parameters[7];
 		a_params->spin1[2] = avec_parameters[6];
 		a_params->spin2[2] = avec_parameters[7];
 		a_params->chip = avec_parameters[8];
-		a_params->alpha0 = avec_parameters[9];
+		a_params->alpha0 = 1;
 		a_params->thetaJN=avec_parameters[0];
 	}
 	if(	(
