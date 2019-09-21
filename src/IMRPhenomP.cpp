@@ -578,10 +578,6 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_J(source_parameters<T> *params /
 	temp.precalc_powers_ins(params->f_ref, params->M, &pows);
 	T L0 = params->M * params-> M * this->L2PN(params->eta, &pows);
 	
-	
-		
-		
-
 }
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
  *

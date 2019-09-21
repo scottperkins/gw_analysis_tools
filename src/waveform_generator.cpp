@@ -205,8 +205,24 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			params.thetaJN = parameters->thetaJN;
 			params.alpha0 = parameters->alpha0;
 			params.chip = parameters->chip;
-			params.spin1z = parameters->chi1_l;
-			params.spin2z = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phi_aligned = parameters->phi_aligned;
+			params.SP = params.chip *params.mass1*params.mass1;
+			params.SL = params.spin1z *params.mass1*params.mass1 +
+					params.spin2z*params.mass2*params.mass2;
+
+			T chi1_l = params.spin1z;
+			T chi2_l = params.spin2z;
+			T q = params.mass1/params.mass2;
+			T chi_eff = (params.mass1*chi1_l + params.mass2*chi2_l) / params.M; /* Effective aligned spin */
+		  	T chil = (1.0+q)/q * chi_eff; /* dimensionless aligned spin of the largest BH */
+			params.chil = chil;
+			
+			//###################################################
+			//TESTING
+			params.zeta_polariz=0;
+			//###################################################
 		}
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<T> tempPlus,tempCross;
