@@ -2363,6 +2363,16 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		double spin2spher[3];
 		transform_cart_sph(input_params->spin1, spin1spher);
 		transform_cart_sph(input_params->spin2, spin2spher);
+		double backspin1[3];
+		double backspin2[3];
+		transform_sph_cart(spin1spher,backspin1);
+		transform_sph_cart(spin2spher,backspin2);
+		//std::cout<<input_params->spin1[0]<<" "<<input_params->spin1[1]<<" "<<input_params->spin1[2]<<std::endl;
+		//std::cout<<spin1spher[0]<<" "<<spin1spher[1]<<" "<<spin1spher[2]<<std::endl;
+		//std::cout<<backspin1[0]<<" "<<backspin1[1]<<" "<<backspin1[2]<<std::endl;
+		//std::cout<<input_params->spin2[0]<<" "<<input_params->spin2[1]<<" "<<input_params->spin2[2]<<std::endl;
+		//std::cout<<spin2spher[0]<<" "<<spin2spher[1]<<" "<<spin2spher[2]<<std::endl;
+		//std::cout<<backspin2[0]<<" "<<backspin2[1]<<" "<<backspin2[2]<<std::endl;
 		
 		parameters[0]=input_params->incl_angle;
 		parameters[1]=input_params->RA;
@@ -2379,6 +2389,21 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		parameters[12]=input_params->phiRef;
 		parameters[13]=input_params->tc;
 		parameters[14]=input_params->psi;
+		//
+		//parameters[0]=input_params->incl_angle;
+		//parameters[1]=input_params->RA;
+		//parameters[2]=input_params->DEC;
+		//parameters[3]=input_params->Luminosity_Distance;
+		//parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		//parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		//parameters[6]=spin1spher[0];
+		//parameters[7]=spin2spher[0];
+		//parameters[8]=spin1spher[1];
+		//parameters[9]=spin2spher[1];
+		//parameters[10]=spin1spher[2]-spin2spher[2];
+		//parameters[11]=input_params->phiRef;
+		//parameters[12]=input_params->tc;
+		//parameters[13]=input_params->psi;
 		
 		//parameters[0]=input_params->thetaJN;
 		//parameters[1]=input_params->RA;
@@ -2596,6 +2621,20 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		transform_sph_cart(spin1sph,a_params->spin1);
 		transform_sph_cart(spin2sph,a_params->spin2);
 		a_params->incl_angle=avec_parameters[0];
+
+		//a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		//a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		//a_params->Luminosity_Distance = avec_parameters[3];
+		//a_params->RA = avec_parameters[1];
+		//a_params->DEC = avec_parameters[2];
+		//a_params->psi = avec_parameters[13];
+		//a_params->phiRef = avec_parameters[11];
+		//a_params->tc = avec_parameters[12];
+		//T spin1sph[3] = {avec_parameters[6],avec_parameters[8],avec_parameters[10]};
+		//T spin2sph[3] = {avec_parameters[7],avec_parameters[9],0};
+		//transform_sph_cart(spin1sph,a_params->spin1);
+		//transform_sph_cart(spin2sph,a_params->spin2);
+		//a_params->incl_angle=avec_parameters[0];
 		
 		//a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
 		//a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);

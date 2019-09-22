@@ -270,7 +270,33 @@ double cosmology_lookup(std::string cosmology)
 	return -1;
 }
 
-
+void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_dim, int *removed_dims)
+{
+	int colct=0;
+	int rowct=0;
+	for(int j = 0 ;j <full_dim; j++){
+		if(!check_list(j, removed_dims, full_dim-reduced_dim)){
+			for(int k = 0 ; k<full_dim;  k++){
+				if(!check_list(k,removed_dims, full_dim-reduced_dim)){
+					output[rowct][colct] =input[j][k];
+					colct++;
+				}
+			}
+			rowct++;
+			colct = 0;
+		}
+	}
+}
+template<class T>
+bool check_list(T j, T *list, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if(j == list[i]) return true;
+	}
+	return false;
+}
+template bool check_list<int>(int, int*, int);
+template bool check_list<double>(double ,double*, int);
 template<class T>
 void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 {

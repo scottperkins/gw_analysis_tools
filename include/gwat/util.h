@@ -327,6 +327,10 @@ double cosmology_interpolation_function(double x, double *coeffs, int interp_deg
 double cosmology_lookup(std::string cosmology);
 
 template<class T>
+bool check_list(T j, T *list, int length);
+void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_dim, int *removed_dims);
+
+template<class T>
 void gsl_LU_matrix_invert(T **input, T **inverse, int dim);
 
 int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim);
