@@ -270,6 +270,7 @@ double cosmology_lookup(std::string cosmology)
 	return -1;
 }
 
+
 template<class T>
 void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 {
@@ -334,6 +335,42 @@ int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 	return 1;
 	
     
+}
+
+/*! \brief Normalize the Fisher matrix before inversion to try and tame singularity issues:
+ *
+ * arXiv:1108.1826v2 Equation 60-61
+ */
+int normalized_gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
+{
+	int status = 1;
+	double ** A = new double*[dim];
+	double ** out = new double*[dim];
+	for (int i = 0 ; i<dim; i++){
+		A[i] = new double[dim];
+		out[i] = new double[dim];
+		for(int j = 0 ; j<dim ; j++){
+			if((input[i][i] * input[j][j]) <0){
+				status=0;
+			}
+			A[i][j] = input[i][j] / sqrt(input[i][i] * input[j][j]);
+		}
+	}
+	if (status ==0){ 
+		std::cout<<"Error: Product of diagonal elements in Fisher normalization are negative"<<std::endl;
+		return status;
+	}
+	status = gsl_cholesky_matrix_invert(A, out, dim);
+	
+	for (int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j< dim; j++){
+			inverse[i][j] = out[i][j]/ sqrt(input[i][i] * input[j][j]);
+		}
+		delete [] A[i],out[i];
+	}
+	delete [] A,out;
+	return status;
+	
 }
 /*! \brief routine to print the progress of a process to the terminal as a progress bar
  *

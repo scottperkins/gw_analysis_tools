@@ -202,6 +202,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	}
 	else if(generation_method == "IMRPhenomPv2")
 	{
+		//std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
 		if(parameters->thetaJN == -10){
