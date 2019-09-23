@@ -357,6 +357,7 @@ int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 		if(failed){break;}
 	}
 	gsl_matrix_free(matrix);
+	gsl_matrix_free(inv);
 	if(failed){return 0;}
 	return 1;
 	
@@ -392,9 +393,11 @@ int normalized_gsl_cholesky_matrix_invert(double **input, double **inverse, int 
 		for(int j = 0 ; j< dim; j++){
 			inverse[i][j] = out[i][j]/ sqrt(input[i][i] * input[j][j]);
 		}
-		delete [] A[i],out[i];
+		delete [] A[i];
+		delete [] out[i];
 	}
-	delete [] A,out;
+	delete [] A;
+	delete [] out;
 	return status;
 	
 }

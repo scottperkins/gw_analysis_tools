@@ -87,6 +87,10 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 
 template<class T>
 void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim);
-//void repack_parameters(adouble *parameters, gen_params_ad *input_params, std::string generation_method, int dim);
 
+template<class T>
+void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method);
+
+template<class T>
+void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method);
 #endif

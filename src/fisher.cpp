@@ -170,16 +170,17 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	unpack_parameters(parameters_vec, parameters, gen_method, dimension, log_factors);
 	//##########################################################
 	gen_params waveform_params;
-	waveform_params.NSflag = parameters->NSflag;
-	waveform_params.gmst = parameters->gmst;
-	waveform_params.shift_time = false;//parameters->shift_time;
-	waveform_params.sky_average = parameters->sky_average;
-	waveform_params.f_ref = parameters->f_ref;
-	if( check_ppE(gen_method)){
-		waveform_params.bppe = parameters->bppe;
-		waveform_params.Nmod = parameters->Nmod;
-		waveform_params.betappe = new double[waveform_params.Nmod];
-	}
+	//waveform_params.NSflag = parameters->NSflag;
+	//waveform_params.gmst = parameters->gmst;
+	//waveform_params.shift_time = false;//parameters->shift_time;
+	//waveform_params.sky_average = parameters->sky_average;
+	//waveform_params.f_ref = parameters->f_ref;
+	repack_non_parameter_options(&waveform_params,parameters, gen_method);
+	//if( check_ppE(gen_method)){
+	//	waveform_params.bppe = parameters->bppe;
+	//	waveform_params.Nmod = parameters->Nmod;
+	//	waveform_params.betappe = new double[waveform_params.Nmod];
+	//}
 	//##########################################################
 	if(parameters->sky_average)
 	{
@@ -398,9 +399,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		//write_file("data/fisher/fisher_deriv_real_O4_"+std::to_string(l)+".csv",redat,length);
 		//write_file("data/fisher/fisher_deriv_imag_O4_"+std::to_string(l)+".csv",imagdat,length);
 	}
-	if( check_ppE(gen_method)){
-		delete [] waveform_params.betappe;
-	}
+	deallocate_non_param_options(&waveform_params, parameters, gen_method);
 
 }
 /*! \brief Abstraction layer for handling the case separation for the different waveforms
@@ -2112,17 +2111,13 @@ void calculate_derivatives_autodiff(double *frequency,
 		gen_params_base<adouble> a_parameters;
 		//############################################
 		//Non variable parameters
-		a_parameters.sky_average = parameters->sky_average;
-		a_parameters.f_ref = parameters->f_ref;
-		a_parameters.gmst = parameters->gmst;
-		a_parameters.NSflag = parameters->NSflag;
-		a_parameters.shift_time = false;
+		repack_non_parameter_options(&a_parameters,parameters,generation_method);
 		//############################################
-		if( check_ppE(generation_method)){
-			a_parameters.bppe = parameters->bppe;
-			a_parameters.Nmod = parameters->Nmod;
-			a_parameters.betappe = new adouble[a_parameters.Nmod];
-		}
+		//if( check_ppE(generation_method)){
+		//	a_parameters.bppe = parameters->bppe;
+		//	a_parameters.Nmod = parameters->Nmod;
+		//	a_parameters.betappe = new adouble[a_parameters.Nmod];
+		//}
 		//############################################
 		adouble afreq;
 		afreq = avec_parameters[0];
@@ -2135,9 +2130,10 @@ void calculate_derivatives_autodiff(double *frequency,
 		imag(a_response) >>=  response[1];	
 
 		trace_off();
-		if( check_ppE(generation_method)){
-			delete [] a_parameters.betappe	;
-		}
+		deallocate_non_param_options(&a_parameters, parameters, generation_method);
+		//if( check_ppE(generation_method)){
+		//	delete [] a_parameters.betappe	;
+		//}
 		
 		
 	}
@@ -2181,10 +2177,10 @@ void calculate_derivatives_autodiff(double *frequency,
 		}
 	}
 	deallocate_2D_array(jacob,dep,indep);
-	if(!freq_boundaries){
+	if(freq_boundaries){
 		delete [] freq_boundaries;
 	}
-	if(!grad_freqs){
+	if(grad_freqs){
 		delete [] grad_freqs;
 	}
 
@@ -2803,6 +2799,38 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	}
 
 }
+
+/*! \brief Utilitiy to transfer non-parameter options from one gen_params structure to another
+ *
+ * ALLOCATES MEMORY -- MUST be deallocated
+ */
+template<class T>
+void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
+{
+	waveform_params->sky_average = input_params->sky_average;
+	waveform_params->f_ref = input_params->f_ref;
+	waveform_params->gmst = input_params->gmst;
+	waveform_params->NSflag = input_params->NSflag;
+	waveform_params->shift_time = false;
+	if( check_ppE(gen_method)){
+		waveform_params->bppe = input_params->bppe;
+		waveform_params->Nmod = input_params->Nmod;
+		waveform_params->betappe = new T[waveform_params->Nmod];
+	}
+
+}
+template void repack_non_parameter_options<double>(gen_params_base<double> *, gen_params_base<double> *, std::string);
+template void repack_non_parameter_options<adouble>(gen_params_base<adouble> *, gen_params_base<double> *, std::string);
+
+template<class T>
+void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
+{
+	if( check_ppE(gen_method)){
+		delete [] waveform_params->betappe	;
+	}
+}
+template void deallocate_non_param_options<double>(gen_params_base<double> *, gen_params_base<double> *, std::string);
+template void deallocate_non_param_options<adouble>(gen_params_base<adouble> *, gen_params_base<double> *, std::string);
 
 bool check_ppE(std::string generation_method)
 {
