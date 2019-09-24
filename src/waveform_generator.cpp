@@ -206,7 +206,23 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
-		if(parameters->thetaJN == -10){
+		if(parameters->phip != -1){
+			params.chip = parameters->chip;
+			params.chi1_l = parameters->chi1_l;
+			params.chi2_l = parameters->chi2_l;
+			params.phip = parameters->phip;
+			modeld.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else if(parameters->thetaJL != -1){
+			
+			params.chip = parameters->chip;
+			params.chi1_l = parameters->chi1_l;
+			params.chi2_l = parameters->chi2_l;
+			params.phiJL = parameters->phiJL;
+			params.thetaJL = parameters->thetaJL;
+			modeld.PhenomPv2_Param_Transform_J(&params);
+		}
+		else if(parameters->thetaJN == -10){
 			modeld.PhenomPv2_Param_Transform(&params);
 		}
 		else{

@@ -120,11 +120,18 @@ public:
 
 	T alpha0 = 0;
 
-
 	T chip = 0;
 
+	//Azimuthal angle of chip in plane
+	T phip = -1;
+
+	//###################################################
+	//T chi1_p = 0;
+	//T chi2_p = 0;
 	T chi1_l = 0;
 	T chi2_l = 0;
+	T phiJL = 0 ;
+	T thetaJL = 0 ;
 	//###################################################
 	T zeta_polariz =0;
 	T phi_aligned = 0;
@@ -256,6 +263,9 @@ struct source_parameters
 	
 	T chip;
 
+	//Azimuthal angle of chip in plane
+	T phip = -1;
+
 	T f_ref=0;
 	
 	T phi_aligned;
@@ -270,6 +280,13 @@ struct source_parameters
 
 	T zeta_polariz;
 
+	//#####################################
+	T chi1_p = 0;
+	T chi2_p = 0;
+	T chi1_l = 0;
+	T chi2_l = 0;
+	T phiJL = 0 ;
+	T thetaJL = -1 ;
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
 	T *betappe;

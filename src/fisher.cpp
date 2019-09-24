@@ -221,7 +221,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					param_mm[i] = parameters_vec[i] - 2*epsilon;
 
 				}
-				repack_parameters(param_p, &waveform_params, gen_method, dimension);
+				repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
 				fourier_amplitude(frequencies, 
 					length,
 					amplitude_plus,
@@ -233,7 +233,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					local_gen_method,
 					&waveform_params);	
 
-				repack_parameters(param_m, &waveform_params, gen_method, dimension);
+				repack_parameters(param_m, &waveform_params, gen_method, dimension, parameters);
 				fourier_amplitude(frequencies, 
 					length,
 					amplitude_minus,
@@ -245,7 +245,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					local_gen_method,
 					&waveform_params);	
 				if(order>=4){
-					repack_parameters(param_pp, &waveform_params, gen_method, dimension);
+					repack_parameters(param_pp, &waveform_params, gen_method, dimension, parameters);
 					fourier_amplitude(frequencies, 
 						length,
 						amplitude_plus_plus,
@@ -257,7 +257,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 						local_gen_method,
 						&waveform_params);	
 
-					repack_parameters(param_mm, &waveform_params, gen_method, dimension);
+					repack_parameters(param_mm, &waveform_params, gen_method, dimension, parameters);
 					fourier_amplitude(frequencies, 
 						length,
 						amplitude_minus_minus,
@@ -325,7 +325,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					param_pp[i] = parameters_vec[i] +2 *epsilon;
 					param_mm[i] = parameters_vec[i] -2 *epsilon;
 				}
-				repack_parameters(param_p, &waveform_params, gen_method, dimension);
+				repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
 				fourier_detector_response_equatorial(frequencies, 
 					length,
 					response_plus,
@@ -333,7 +333,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					local_gen_method,
 					&waveform_params);	
 
-				repack_parameters(param_m, &waveform_params, gen_method, dimension);
+				repack_parameters(param_m, &waveform_params, gen_method, dimension, parameters);
 				fourier_detector_response_equatorial(frequencies, 
 					length,
 					response_minus,
@@ -341,7 +341,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 					local_gen_method,
 					&waveform_params);	
 				if(order>=4){
-					repack_parameters(param_pp, &waveform_params, gen_method, dimension);
+					repack_parameters(param_pp, &waveform_params, gen_method, dimension, parameters);
 					fourier_detector_response_equatorial(frequencies, 
 						length,
 						response_plus_plus,
@@ -349,7 +349,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 						local_gen_method,
 						&waveform_params);	
 
-					repack_parameters(param_mm, &waveform_params, gen_method, dimension);
+					repack_parameters(param_mm, &waveform_params, gen_method, dimension, parameters);
 					fourier_detector_response_equatorial(frequencies, 
 						length,
 						response_minus_minus,
@@ -1911,7 +1911,7 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 
 /*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
- * Build  around  ADOL-C
+ * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
  */
 void fisher_autodiff(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
@@ -1948,6 +1948,9 @@ void fisher_autodiff(double *frequency,
 		response_deriv[i] = new std::complex<double>[length];
 	}
 	
+	//##########################################################
+	//Old style fisher calculation for sky-averaged PhenomD-- less flexible
+	//##########################################################
 	if (parameters->sky_average && generation_method == "IMRPhenomD")
 	{
 		double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
@@ -2047,9 +2050,13 @@ void fisher_autodiff(double *frequency,
 		free(phase_deriv);
 		free(amplitude);
 	}
+	//##########################################################
+	//New style fisher calculation -- should be used for any future waveforms
+	//##########################################################
 	else{
 		calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
 	}
+	//##########################################################
 	
 	//calulate fisher elements
 	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
@@ -2113,15 +2120,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		//Non variable parameters
 		repack_non_parameter_options(&a_parameters,parameters,generation_method);
 		//############################################
-		//if( check_ppE(generation_method)){
-		//	a_parameters.bppe = parameters->bppe;
-		//	a_parameters.Nmod = parameters->Nmod;
-		//	a_parameters.betappe = new adouble[a_parameters.Nmod];
-		//}
-		//############################################
 		adouble afreq;
 		afreq = avec_parameters[0];
-		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension);
+		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension, parameters);
 		std::complex<adouble> a_response;
 		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters);
 
@@ -2131,11 +2132,6 @@ void calculate_derivatives_autodiff(double *frequency,
 
 		trace_off();
 		deallocate_non_param_options(&a_parameters, parameters, generation_method);
-		//if( check_ppE(generation_method)){
-		//	delete [] a_parameters.betappe	;
-		//}
-		
-		
 	}
 
 	//Evaluate derivative tapes
@@ -2235,8 +2231,6 @@ void prep_fisher_calculation(double *parameters,
 	s_param.cosmology=input_params->cosmology;
 	s_param.incl_angle=input_params->incl_angle;
 	lambda_parameters<double> lambda;
-	//incl, RA, DEC, DL, chirpmass, eta, spin1, spin2, theta1, 
-	//theta2, phi1, phi2, phiRef, tc, psi
 	if(	(
 		generation_method =="IMRPhenomPv2" ||
 		generation_method =="MCMC_IMRPhenomPv2_Full" ||
@@ -2251,12 +2245,7 @@ void prep_fisher_calculation(double *parameters,
 		)
 		&& !input_params->sky_average){
 
-		//IMRPhenomPv2<double> modelp;
 		IMRPhenomPv2<double> modelp;
-		//s_param.spin1z = input_params->chi1_l;
-		//s_param.spin2z = input_params->chi2_l;
-		//s_param.phic = input_params->phi_aligned;
-		//s_param.phi_aligned = input_params->phi_aligned;
 		modelp.PhenomPv2_Param_Transform(&s_param);
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
@@ -2284,7 +2273,6 @@ void prep_fisher_calculation(double *parameters,
 		parameters[0]=grad_freqs[0];
 		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 	}
-	//incl, RA,DEC,DL,chirpmass,eta, spin1,spin2,phiRef,tc,psi
 	else if(
 		(generation_method =="IMRPhenomD" || 
 		generation_method == "ppE_IMRPhenomD_Inspiral"|| 
@@ -2359,32 +2347,57 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		double spin2spher[3];
 		transform_cart_sph(input_params->spin1, spin1spher);
 		transform_cart_sph(input_params->spin2, spin2spher);
-		double backspin1[3];
-		double backspin2[3];
-		transform_sph_cart(spin1spher,backspin1);
-		transform_sph_cart(spin2spher,backspin2);
-		//std::cout<<input_params->spin1[0]<<" "<<input_params->spin1[1]<<" "<<input_params->spin1[2]<<std::endl;
-		//std::cout<<spin1spher[0]<<" "<<spin1spher[1]<<" "<<spin1spher[2]<<std::endl;
-		//std::cout<<backspin1[0]<<" "<<backspin1[1]<<" "<<backspin1[2]<<std::endl;
-		//std::cout<<input_params->spin2[0]<<" "<<input_params->spin2[1]<<" "<<input_params->spin2[2]<<std::endl;
-		//std::cout<<spin2spher[0]<<" "<<spin2spher[1]<<" "<<spin2spher[2]<<std::endl;
-		//std::cout<<backspin2[0]<<" "<<backspin2[1]<<" "<<backspin2[2]<<std::endl;
-		
+
 		parameters[0]=input_params->incl_angle;
 		parameters[1]=input_params->RA;
 		parameters[2]=input_params->DEC;
 		parameters[3]=input_params->Luminosity_Distance;
 		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
 		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[6]=spin1spher[0];
-		parameters[7]=spin2spher[0];
-		parameters[8]=spin1spher[1];
-		parameters[9]=spin2spher[1];
-		parameters[10]=spin1spher[2];
-		parameters[11]=spin2spher[2];
-		parameters[12]=input_params->phiRef;
-		parameters[13]=input_params->tc;
-		parameters[14]=input_params->psi;
+		parameters[6]=input_params->chi1_l;
+		parameters[7]=input_params->chi2_l;
+		parameters[8]=input_params->chip;
+		parameters[9]=input_params->phip;
+		parameters[10]=input_params->phiRef;
+		parameters[11]=input_params->tc;
+		parameters[12]=input_params->psi;
+
+		//double spin1spher[3];
+		//double spin2spher[3];
+		//transform_cart_sph(input_params->spin1, spin1spher);
+		//transform_cart_sph(input_params->spin2, spin2spher);
+
+		//parameters[0]=input_params->incl_angle;
+		//parameters[1]=input_params->RA;
+		//parameters[2]=input_params->DEC;
+		//parameters[3]=input_params->Luminosity_Distance;
+		//parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		//parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		//parameters[6]=spin1spher[0];
+		//parameters[7]=spin2spher[0];
+		//parameters[8]=spin1spher[1];
+		//parameters[9]=spin2spher[1];
+		//parameters[10] = spin1spher[2]-spin2spher[2];
+		//parameters[11] = spin1spher[2]+spin2spher[2];
+		//parameters[12]=input_params->phiRef;
+		//parameters[13]=input_params->tc;
+		//parameters[14]=input_params->psi;
+		
+		//parameters[0]=input_params->incl_angle;
+		//parameters[1]=input_params->RA;
+		//parameters[2]=input_params->DEC;
+		//parameters[3]=input_params->Luminosity_Distance;
+		//parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		//parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+		//parameters[6]=spin1spher[0];
+		//parameters[7]=spin2spher[0];
+		//parameters[8]=spin1spher[1];
+		//parameters[9]=spin2spher[1];
+		//parameters[10]=spin1spher[2];
+		//parameters[11]=spin2spher[2];
+		//parameters[12]=input_params->phiRef;
+		//parameters[13]=input_params->tc;
+		//parameters[14]=input_params->psi;
 		//
 		//parameters[0]=input_params->incl_angle;
 		//parameters[1]=input_params->RA;
@@ -2592,7 +2605,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
  * This is one of the places where the generation-method/dimension/sky_average specific modifications should go
  */
 template<class T>
-void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim)
+void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim, gen_params_base<double> *original_params)
 {
 	if(	(
 		generation_method =="IMRPhenomPv2" || 
@@ -2604,19 +2617,39 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		&& 
 		!a_params->sky_average){
 
+
 		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
 		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
 		a_params->Luminosity_Distance = avec_parameters[3];
 		a_params->RA = avec_parameters[1];
 		a_params->DEC = avec_parameters[2];
-		a_params->psi = avec_parameters[14];
-		a_params->phiRef = avec_parameters[12];
-		a_params->tc = avec_parameters[13];
-		T spin1sph[3] = {avec_parameters[6],avec_parameters[8],avec_parameters[10]};
-		T spin2sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
-		transform_sph_cart(spin1sph,a_params->spin1);
-		transform_sph_cart(spin2sph,a_params->spin2);
+		a_params->psi = avec_parameters[12];
+		a_params->phiRef = avec_parameters[10];
+		a_params->tc = avec_parameters[11];
+		a_params->chi1_l = avec_parameters[6];
+		a_params->chi2_l = avec_parameters[7];
+		a_params->chip = avec_parameters[8];
+		a_params->phip = avec_parameters[9];
 		a_params->incl_angle=avec_parameters[0];
+
+		//double spin1spher_temp[3];
+		//double spin2spher_temp[3];
+		//transform_cart_sph(original_params->spin1, spin1spher_temp);
+		//transform_cart_sph(original_params->spin2, spin2spher_temp);
+
+		//a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+		//a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+		//a_params->Luminosity_Distance = avec_parameters[3];
+		//a_params->RA = avec_parameters[1];
+		//a_params->DEC = avec_parameters[2];
+		//a_params->psi = avec_parameters[13];
+		//a_params->phiRef = avec_parameters[11];
+		//a_params->tc = avec_parameters[12];
+		//T spin1sph[3] = {avec_parameters[6],avec_parameters[8],spin1spher_temp[2]};
+		//T spin2sph[3] = {avec_parameters[7],avec_parameters[9],spin1spher_temp[2] - avec_parameters[10]};
+		//transform_sph_cart(spin1sph,a_params->spin1);
+		//transform_sph_cart(spin2sph,a_params->spin2);
+		//a_params->incl_angle=avec_parameters[0];
 
 		//a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
 		//a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
@@ -2812,6 +2845,15 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->NSflag = input_params->NSflag;
 	waveform_params->shift_time = false;
+	//if(gen_method == "IMRPhenomPv2" ||
+	//	gen_method == "ppE_IMRPhenomPv2_Inspiral" ||
+	//	gen_method == "ppE_IMRPhenomPv2_IMR" ||
+	//	gen_method == "dCS_IMRPhenomPv2" ||
+	//	gen_method == "EdGB_IMRPhenomPv2" 
+	//)
+	//{
+	//	waveform_params->spin
+	//}
 	if( check_ppE(gen_method)){
 		waveform_params->bppe = input_params->bppe;
 		waveform_params->Nmod = input_params->Nmod;
@@ -2887,5 +2929,5 @@ void calculate_fisher_elements(double *frequency,
 
 }
 //#################################################################
-template void repack_parameters<adouble>(adouble *, gen_params_base<adouble> *, std::string, int);
-template void repack_parameters<double>(double *, gen_params_base<double> *, std::string, int);
+template void repack_parameters<adouble>(adouble *, gen_params_base<adouble> *, std::string, int, gen_params_base<double> *);
+template void repack_parameters<double>(double *, gen_params_base<double> *, std::string, int, gen_params_base<double> *);

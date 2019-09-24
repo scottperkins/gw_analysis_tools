@@ -63,6 +63,8 @@ virtual void PhenomPv2_Param_Transform(source_parameters<T> *params);
 
 virtual void PhenomPv2_Param_Transform_J(source_parameters<T> *params);
 
+virtual void PhenomPv2_Param_Transform_reduced(source_parameters<T> *params);
+
 virtual T L2PN( T eta, useful_powers<T> *pow);
 
 };

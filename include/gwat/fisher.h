@@ -86,7 +86,7 @@ void prep_fisher_calculation(double *parameters, bool *, double *,double*, int,g
 void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors);
 
 template<class T>
-void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim);
+void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim, gen_params_base<double> *original_params);
 
 template<class T>
 void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method);
