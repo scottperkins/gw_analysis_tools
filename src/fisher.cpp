@@ -2246,7 +2246,13 @@ void prep_fisher_calculation(double *parameters,
 		&& !input_params->sky_average){
 
 		IMRPhenomPv2<double> modelp;
-		modelp.PhenomPv2_Param_Transform(&s_param);
+		s_param.chi1_l = input_params->chi1_l;
+		s_param.chi2_l = input_params->chi2_l;
+		s_param.spin1z = input_params->chi1_l;
+		s_param.spin2z = input_params->chi2_l;
+		s_param.chip = input_params->chip;
+		s_param.phip = input_params->phip;
+		modelp.PhenomPv2_Param_Transform_reduced(&s_param);
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
 		double M = s_param.M;

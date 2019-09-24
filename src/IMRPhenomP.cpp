@@ -328,7 +328,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 			//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
-			phase +=   (T)(tc*(f-f_ref) - phic);
+			//phase +=   (T)(tc*(f-f_ref) - phic);
 			this->WignerD(d2,dm2, &pows, params);
 			//Calculate Euler angles alpha and epsilon
 			this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
@@ -368,10 +368,10 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	for (int j = 0; j<length;j++){
 		waveform_plus[j] = 
 			amp_vec[j] * hpfac_vec[j]*std::exp(
-			-i * (phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
+			-i * (phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic)+(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
 		waveform_cross[j] = 
 			amp_vec[j] * hcfac_vec[j]*std::exp(
-			-i *(phase_vec[j]-(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
+			-i *(phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
 		
 	}
 	delete [] amp_vec;
@@ -420,14 +420,15 @@ double IMRPhenomPv2<double>::calculate_time_shift(source_parameters<double> *par
 			pows->MF2third =pows->MFthird* pows->MFthird;
 		}
 		phasing = (this->build_phase(f,lambda,params,pows,pn_phase_coeffs));
-		phase_fixed[j]= phasing;
+		phase_fixed[j]= -phasing;
 	}
 
 	//Interpolation to  fix tc
 	acc_fixed = gsl_interp_accel_alloc();
 	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
 	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
-	double t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	//double t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	double t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) ;
 	//Clean up
 	gsl_spline_free(phiI_fixed);
 	gsl_interp_accel_free(acc_fixed);
@@ -476,14 +477,15 @@ adouble IMRPhenomPv2<adouble>::calculate_time_shift(source_parameters<adouble> *
 		}
 		phasing = (this->build_phase(f,lambda,params,pows,pn_phase_coeffs));
 		adouble adub_phasing = (adouble)phasing;
-		phase_fixed[j]= adub_phasing.value();
+		phase_fixed[j]= -adub_phasing.value();
 	}
 
 	//Interpolation to  fix tc
 	acc_fixed = gsl_interp_accel_alloc();
 	phiI_fixed = gsl_spline_alloc(gsl_interp_cspline,n_fixed);
 	gsl_spline_init(phiI_fixed, freqs_fixed, phase_fixed, n_fixed);
-	adouble t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	//adouble t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) + params->tc;
+	adouble t_corr_fixed =  gsl_spline_eval_deriv(phiI_fixed, f_final, acc_fixed)/(2.*M_PI) ;
 	//Clean up
 	gsl_spline_free(phiI_fixed);
 	gsl_interp_accel_free(acc_fixed);

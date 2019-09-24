@@ -206,59 +206,73 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
+		//if(parameters->phip != -1){
+		//	params.chip = parameters->chip;
+		//	params.chi1_l = parameters->chi1_l;
+		//	params.chi2_l = parameters->chi2_l;
+		//	params.spin1z = parameters->chi1_l;
+		//	params.spin2z = parameters->chi2_l;
+		//	params.phip = parameters->phip;
+		//	modeld.PhenomPv2_Param_Transform_reduced(&params);
+		//}
+		//else if(parameters->thetaJL != -1){
+		//	
+		//	params.chip = parameters->chip;
+		//	params.chi1_l = parameters->chi1_l;
+		//	params.chi2_l = parameters->chi2_l;
+		//	params.phiJL = parameters->phiJL;
+		//	params.thetaJL = parameters->thetaJL;
+		//	modeld.PhenomPv2_Param_Transform_J(&params);
+		//}
+		//else if(parameters->thetaJN == -10){
+		//	modeld.PhenomPv2_Param_Transform(&params);
+		//}
+		//else{
+		//	params.thetaJN = parameters->thetaJN;
+		//	params.alpha0 = parameters->alpha0;
+		//	params.chip = parameters->chip;
+		//	params.spin1z = parameters->spin1[2];
+		//	params.spin2z = parameters->spin2[2];
+		//	params.phi_aligned = parameters->phi_aligned;
+		//	params.SP = params.chip *params.mass1*params.mass1;
+		//	params.SL = params.spin1z *params.mass1*params.mass1 +
+		//			params.spin2z*params.mass2*params.mass2;
+
+		//	T chi1_l = params.spin1z;
+		//	T chi2_l = params.spin2z;
+		//	T q = params.mass1/params.mass2;
+		//	T chi_eff = (params.mass1*chi1_l + params.mass2*chi2_l) / params.M; /* Effective aligned spin */
+		//  	T chil = (1.0+q)/q * chi_eff; /* dimensionless aligned spin of the largest BH */
+		//	params.chil = chil;
+		//	
+		//	//###################################################
+		//	//TESTING
+		//	params.zeta_polariz=0;
+		//	//###################################################
+		//}
 		if(parameters->phip != -1){
 			params.chip = parameters->chip;
 			params.chi1_l = parameters->chi1_l;
 			params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->chi1_l;
+			params.spin2z = parameters->chi2_l;
 			params.phip = parameters->phip;
 			modeld.PhenomPv2_Param_Transform_reduced(&params);
 		}
-		else if(parameters->thetaJL != -1){
-			
-			params.chip = parameters->chip;
-			params.chi1_l = parameters->chi1_l;
-			params.chi2_l = parameters->chi2_l;
-			params.phiJL = parameters->phiJL;
-			params.thetaJL = parameters->thetaJL;
-			modeld.PhenomPv2_Param_Transform_J(&params);
-		}
-		else if(parameters->thetaJN == -10){
+		else {
 			modeld.PhenomPv2_Param_Transform(&params);
-		}
-		else{
-			params.thetaJN = parameters->thetaJN;
-			params.alpha0 = parameters->alpha0;
-			params.chip = parameters->chip;
-			params.spin1z = parameters->spin1[2];
-			params.spin2z = parameters->spin2[2];
-			params.phi_aligned = parameters->phi_aligned;
-			params.SP = params.chip *params.mass1*params.mass1;
-			params.SL = params.spin1z *params.mass1*params.mass1 +
-					params.spin2z*params.mass2*params.mass2;
-
-			T chi1_l = params.spin1z;
-			T chi2_l = params.spin2z;
-			T q = params.mass1/params.mass2;
-			T chi_eff = (params.mass1*chi1_l + params.mass2*chi2_l) / params.M; /* Effective aligned spin */
-		  	T chil = (1.0+q)/q * chi_eff; /* dimensionless aligned spin of the largest BH */
-			params.chil = chil;
-			
-			//###################################################
-			//TESTING
-			params.zeta_polariz=0;
-			//###################################################
 		}
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<T> tempPlus,tempCross;
-		for (int i =0;i < length; i++)
-		{
-			tempPlus = waveform_plus[i];	
-			tempCross = waveform_cross[i];	
-			waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
-					+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
-			waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
-					-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
-		}
+		//for (int i =0;i < length; i++)
+		//{
+		//	tempPlus = waveform_plus[i];	
+		//	tempCross = waveform_cross[i];	
+		//	waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
+		//			+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
+		//	waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
+		//			-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
+		//}
 	}
 	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral")
 	{

@@ -97,8 +97,9 @@ public:
 	/*! spherical angles for the source location relative to the detector*/
 	T theta;
 	T phi;
-	/*! Equatorial coordinates of source*/
+	/*! Equatorial coordinates of source RA*/
 	T RA;
+	/*! Equatorial coordinates of source DEC*/
 	T DEC;
 	/*! Greenwich Mean Sidereal time (for detector orientation - start of data*/
 	double gmst;
