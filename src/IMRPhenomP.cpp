@@ -315,16 +315,17 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			hcfac_vec[j] = 0;
 		}
 		else{	
-			if (f<params->f1_phase)
-			{
-				this->precalc_powers_ins(f, M, &pows);
-			}
-			else{
-				pows.MFsixth = pow(M*f,1./6 );
-				pows.MF7sixth= pow_int(pows.MFsixth,7);
-				pows.MFthird = pows.MFsixth * pows.MFsixth;
-				pows.MF2third =pows.MFthird* pows.MFthird;
-			}
+			//if (f<params->f1_phase)
+			//{
+			//	this->precalc_powers_ins(f, M, &pows);
+			//}
+			//else{
+			//	pows.MFsixth = pow(M*f,1./6 );
+			//	pows.MF7sixth= pow_int(pows.MFsixth,7);
+			//	pows.MFthird = pows.MFsixth * pows.MFsixth;
+			//	pows.MF2third =pows.MFthird* pows.MFthird;
+			//}
+			this->precalc_powers_ins(f, M, &pows);
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 			//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
@@ -368,7 +369,7 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	for (int j = 0; j<length;j++){
 		waveform_plus[j] = 
 			amp_vec[j] * hpfac_vec[j]*std::exp(
-			-i * (phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic)+(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
+			-i * (phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
 		waveform_cross[j] = 
 			amp_vec[j] * hcfac_vec[j]*std::exp(
 			-i *(phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
