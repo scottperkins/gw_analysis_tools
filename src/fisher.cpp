@@ -41,20 +41,22 @@ using namespace std;
  * 
  * EdGB_IMRPhenomD !sky_averaged (12) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, \alpha^2 (sec^4)
  * 
- * IMRPhenomPv2 !sky_averaged (15) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, (all at f_ref)
+ * IMRPhenomPv2 !sky_averaged (13) --  RA, DEC, psi,phiRef, tc, \iota_L,  ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p (all at f_ref)
  * 
- * ppE_IMRPhenomPv2_Inspiral !sky_averaged (15+mods)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, betas (all at f_ref)
+ * ppE_IMRPhenomPv2_Inspiral !sky_averaged (13 + mods) --  RA, DEC, psi,phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p, \vec{beta} (all at f_ref)
  * 
- * ppE_IMRPhenomPv2_IMR !sky_averaged (15+mods)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, betas (all at f_ref)
+ * ppE_IMRPhenomPv2_IMR !sky_averaged (13 + mods) --  RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p, \vec{beta} (all at f_ref)
  * 
- * dCS_IMRPhenomPv2 !sky_averaged (16)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, \alpha^2 (sec^4)  (all at f_ref)
+ * dCS_IMRPhenomPv2 !sky_averaged (14) --  RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p,  \alpha (all at f_ref)
  * 
- * EdGB_IMRPhenomPv2 !sky_averaged (16)) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2,theta_1, theta_2, phi_1, phi_2 , phiRef, tc, psi, \alpha^2 (sec^4)  (all at f_ref)
+ * EdGB_IMRPhenomPv2 !sky_averaged (14) --  RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p,  \alpha (all at f_ref)
  *
  *
- * All MCMC options correspond to the base, minus the coalescence time (which is maximized over)
+ * All MCMC options correspond to the base, minus the coalescence time (which is maximized over) -- Reduced MCMC option correspond to the options above minus t_c (and phic for sky_averaged) -- Non reduced correspond to replacing \chi_1 \dot \hat{L}, \chi_2 \dot \hat{L}, \chi_p and \phi_p with |\chi_1|, |\chi_2|, \theta_1, \theta_2, \phi_1, and \phi_2
  *
  * Both fisher functions are compatible with OpenMP, but not with pthreads (if ADOL-C was installed with the openmp option)
+ *
+ * NOTE about non-sky-averaged: Matrices will most likely be singular if only using one detector, and still largly singular with 2. 3 detectors will mostly guarantee that the matrices are invertible. 
  */
 
 /*!\brief Calculates the fisher matrix for the given arguments
@@ -2341,28 +2343,23 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		for(int i = 0 ; i<dimension; i++){
 			log_factors[i] = false;
 		}
-		log_factors[3] = true;//Distance
-		log_factors[4] = true;//chirpmass
-		log_factors[5] = true;//eta
+		log_factors[6] = true;//Distance
+		log_factors[7] = true;//chirpmass
+		log_factors[8] = true;//eta
 
-		double spin1spher[3];
-		double spin2spher[3];
-		transform_cart_sph(input_params->spin1, spin1spher);
-		transform_cart_sph(input_params->spin2, spin2spher);
-
-		parameters[0]=input_params->incl_angle;
-		parameters[1]=input_params->RA;
-		parameters[2]=input_params->DEC;
-		parameters[3]=input_params->Luminosity_Distance;
-		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[6]=input_params->chi1_l;
-		parameters[7]=input_params->chi2_l;
-		parameters[8]=input_params->chip;
-		parameters[9]=input_params->phip;
-		parameters[10]=input_params->phiRef;
-		parameters[11]=input_params->tc;
-		parameters[12]=input_params->psi;
+		parameters[0]=input_params->RA;
+		parameters[1]=input_params->DEC;
+		parameters[2]=input_params->psi;
+		parameters[3]=input_params->phiRef;
+		parameters[4]=input_params->tc;
+		parameters[5]=input_params->incl_angle;
+		parameters[6]=input_params->Luminosity_Distance;
+		parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+		parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
+		parameters[9]=input_params->chi1_l;
+		parameters[10]=input_params->chi2_l;
+		parameters[11]=input_params->chip;
+		parameters[12]=input_params->phip;
 
 	
 	}
@@ -2530,19 +2527,19 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		!a_params->sky_average){
 
 
-		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
-		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
-		a_params->Luminosity_Distance = avec_parameters[3];
-		a_params->RA = avec_parameters[1];
-		a_params->DEC = avec_parameters[2];
-		a_params->psi = avec_parameters[12];
-		a_params->phiRef = avec_parameters[10];
-		a_params->tc = avec_parameters[11];
-		a_params->chi1_l = avec_parameters[6];
-		a_params->chi2_l = avec_parameters[7];
-		a_params->chip = avec_parameters[8];
-		a_params->phip = avec_parameters[9];
-		a_params->incl_angle=avec_parameters[0];
+		a_params->mass1 = calculate_mass1(avec_parameters[7],avec_parameters[8]);
+		a_params->mass2 = calculate_mass2(avec_parameters[7],avec_parameters[8]);
+		a_params->Luminosity_Distance = avec_parameters[6];
+		a_params->RA = avec_parameters[0];
+		a_params->DEC = avec_parameters[1];
+		a_params->psi = avec_parameters[2];
+		a_params->phiRef = avec_parameters[3];
+		a_params->tc = avec_parameters[4];
+		a_params->chi1_l = avec_parameters[9];
+		a_params->chi2_l = avec_parameters[10];
+		a_params->chip = avec_parameters[11];
+		a_params->phip = avec_parameters[12];
+		a_params->incl_angle=avec_parameters[5];
 
 	}
 	if(	(

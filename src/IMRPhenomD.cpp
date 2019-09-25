@@ -459,7 +459,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
 	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
-	
 	for (size_t j =0; j< length; j++)
 	{
 		f = frequencies[j];
