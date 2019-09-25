@@ -236,7 +236,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	/*Initialize the post merger quantities*/
 	this->post_merger_variables(params);
-
 	params->f1_phase = 0.018/(params->M);
 	params->f2_phase = params->fRD/2.;
 

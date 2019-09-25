@@ -220,15 +220,15 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		}
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<T> tempPlus,tempCross;
-		for (int i =0;i < length; i++)
-		{
-			tempPlus = waveform_plus[i];	
-			tempCross = waveform_cross[i];	
-			waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
-					+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
-			waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
-					-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
-		}
+		//for (int i =0;i < length; i++)
+		//{
+		//	tempPlus = waveform_plus[i];	
+		//	tempCross = waveform_cross[i];	
+		//	waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
+		//			+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
+		//	waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
+		//			-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
+		//}
 	}
 	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral")
 	{

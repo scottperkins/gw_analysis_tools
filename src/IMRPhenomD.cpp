@@ -1,4 +1,5 @@
 #include "IMRPhenomD.h"
+#include "QNM_data.h"
 //#include "general_parameter_structures.h"
 #include "util.h"
 #include <math.h>
@@ -10,6 +11,8 @@
 #include <adolc/drivers/drivers.h>
 #include <typeinfo>
 #include <omp.h>
+#include <gsl/gsl_interp.h>
+#include <gsl/gsl_spline.h>
 using namespace std;
 
 #ifndef _OPENMP
@@ -403,12 +406,12 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 
 	/*Initialize the post merger quantities*/
 	this->post_merger_variables(params);
-
 	params->f1_phase = 0.018/(params->M);
 	params->f2_phase = params->fRD/2.;
 
 	params->f1 = 0.014/(params->M);
 	params->f3 = this->fpeak(params, &lambda);
+	std::cout<<params->f1<<" "<<params->f3<<" "<<params->f3<<std::endl;
 	
 	useful_powers<T> pows;
 	this->precalc_powers_PI(&pows);
@@ -444,6 +447,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
 	if(params->shift_time){
 		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+		//tc_shift = this->Dphase_mr(params->f3, params, &lambda)/params->eta;
 	}
 	else{
 		tc_shift=0;
@@ -1030,42 +1034,228 @@ void IMRPhenomD<T>::assign_nonstatic_pn_phase_coeff_deriv(source_parameters<T> *
 template <class T>
 void IMRPhenomD<T>::post_merger_variables(source_parameters<T> *source_param)
 {
-	T chi1 = source_param->spin1z;
-	T chi2 = source_param->spin2z;
-	T eta = source_param->eta;
-	T M = source_param->M;
-	T m1 = source_param->mass1;
-	T m2 = source_param->mass2;
-	T eta2 = eta*eta;
-	T eta3 = eta2*eta;
-	T eta4 = eta3*eta;
-	T m12 = m1*m1;
-	T m22 = m2*m2;
-	T M2 = M*M;
-	
- 	T S = (chi1*m12 + chi2*m22)/M2 ;
-	T S2 = S*S;
-	T S3 = S2*S;
-	T S4 = S3*S;
+	calc_fring(source_param);
+	calc_fdamp(source_param);
+	//T chi1 = source_param->spin1z;
+	//T chi2 = source_param->spin2z;
+	//T eta = source_param->eta;
+	//T M = source_param->M;
+	//T m1 = source_param->mass1;
+	//T m2 = source_param->mass2;
+	//T eta2 = eta*eta;
+	//T eta3 = eta2*eta;
+	//T eta4 = eta3*eta;
+	//T m12 = m1*m1;
+	//T m22 = m2*m2;
+	//T M2 = M*M;
+	//
+ 	//T S = (chi1*m12 + chi2*m22)/M2 ;
+	//T S2 = S*S;
+	//T S3 = S2*S;
+	//T S4 = S3*S;
 
-    	T S_red = S/(1.-2.*eta);
-            
-    	T a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
-    		13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
-    		(-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+    	//T S_red = S/(1.-2.*eta);
+        //    
+    	//T a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
+    	//	13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
+    	//	(-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
 
-    	T E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
-    		0.960673*eta3 + 3.35241*eta4 ;
+    	//T E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
+    	//	0.960673*eta3 + 3.35241*eta4 ;
 
-	T E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
-		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
+	//T E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
+	//	(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
 
-	T MWRD = (1.5251-1.1568*pow(1-a,0.1292));
-	T MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
+	//T MWRD = (1.5251-1.1568*pow(1-a,0.1292));
+	//T MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
 
-	source_param->fRD =  (1./(2*M_PI))*(MWRD)/(M*(1. - E_rad));
-	source_param->fdamp = (1./(2*M_PI))*(MWdamp)/(M*(1. - E_rad));
+	//source_param->fRD =  (1./(2*M_PI))*(MWRD)/(M*(1. - E_rad));
+	//source_param->fdamp = (1./(2*M_PI))*(MWdamp)/(M*(1. - E_rad));
 }
+
+//#################################################################################
+//#################################################################################
+//ALL taken directly from LALsuite
+//#################################################################################
+//#################################################################################
+template <>
+void IMRPhenomD<double>::calc_fring( source_parameters<double> *source_param)
+{
+	double eta = source_param->eta;
+	double chi1 = source_param->spin1z;
+	double chi2 = source_param->spin2z;
+	double finspin = FinalSpin0815(eta,chi1,chi2);
+	double Erad = EradRational0815(eta,chi1,chi2);
+	gsl_interp_accel *acc = gsl_interp_accel_alloc();
+  	gsl_spline *iFring = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
+  	gsl_spline_init(iFring, QNMData_a, QNMData_fring, QNMData_length);
+
+  	double return_val = gsl_spline_eval(iFring, finspin, acc) / (1.0 - Erad);
+
+  	gsl_spline_free(iFring);
+  	gsl_interp_accel_free(acc);
+	
+  	source_param->fRD = return_val/source_param->M;
+}
+template <>
+void IMRPhenomD<double>::calc_fdamp(source_parameters<double> *source_param)
+{
+	double eta = source_param->eta;
+	double chi1 = source_param->spin1z;
+	double chi2 = source_param->spin2z;
+	double finspin = FinalSpin0815(eta,chi1,chi2);
+	double Erad = EradRational0815(eta,chi1,chi2);
+	gsl_interp_accel *acc = gsl_interp_accel_alloc();
+	gsl_spline *iFdamp = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
+	gsl_spline_init(iFdamp, QNMData_a, QNMData_fdamp, QNMData_length);
+	
+	double return_val = gsl_spline_eval(iFdamp, finspin, acc) / (1.0 - Erad);
+	
+	gsl_spline_free(iFdamp);
+	gsl_interp_accel_free(acc);
+	source_param->fdamp =  return_val/source_param->M;
+
+}
+template <>
+void IMRPhenomD<adouble>::calc_fring( source_parameters<adouble> *source_param)
+{
+	adouble chi1 = source_param->spin1z;
+	adouble chi2 = source_param->spin2z;
+	adouble eta = source_param->eta;
+	adouble M = source_param->M;
+	adouble m1 = source_param->mass1;
+	adouble m2 = source_param->mass2;
+	adouble eta2 = eta*eta;
+	adouble eta3 = eta2*eta;
+	adouble eta4 = eta3*eta;
+	adouble m12 = m1*m1;
+	adouble m22 = m2*m2;
+	adouble M2 = M*M;
+ 	adouble S = (chi1*m12 + chi2*m22)/M2 ;
+	adouble S2 = S*S;
+	adouble S3 = S2*S;
+	adouble S4 = S3*S;
+
+    	adouble S_red = S/(1.-2.*eta);
+
+    	adouble a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
+    	       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
+    	       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+
+    	adouble E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
+    	       0.960673*eta3 + 3.35241*eta4 ;
+
+	adouble E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
+		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
+	adouble MWRD = (1.5251-1.1568*pow(1-a,0.1292));
+	adouble MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
+	source_param->fRD =  (1./(2*M_PI))*(MWRD)/(M*(1. - E_rad));
+}
+template <>
+void IMRPhenomD<adouble>::calc_fdamp(source_parameters<adouble> *source_param)
+{
+	adouble chi1 = source_param->spin1z;
+	adouble chi2 = source_param->spin2z;
+	adouble eta = source_param->eta;
+	adouble M = source_param->M;
+	adouble m1 = source_param->mass1;
+	adouble m2 = source_param->mass2;
+	adouble eta2 = eta*eta;
+	adouble eta3 = eta2*eta;
+	adouble eta4 = eta3*eta;
+	adouble m12 = m1*m1;
+	adouble m22 = m2*m2;
+	adouble M2 = M*M;
+ 	adouble S = (chi1*m12 + chi2*m22)/M2 ;
+	adouble S2 = S*S;
+	adouble S3 = S2*S;
+	adouble S4 = S3*S;
+
+    	adouble S_red = S/(1.-2.*eta);
+    	adouble a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
+    	       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
+    	       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+
+    	adouble E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
+    	       0.960673*eta3 + 3.35241*eta4 ;
+
+	adouble E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
+		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
+	adouble MWRD = (1.5251-1.1568*pow(1-a,0.1292));
+	adouble MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
+	source_param->fdamp = (1./(2*M_PI))*(MWdamp)/(M*(1. - E_rad));
+
+}
+
+/**
+ * Formula to predict the final spin. Equation 3.6 arXiv:1508.07250
+ * s defined around Equation 3.6.
+ */
+template<class T>
+T IMRPhenomD<T>::FinalSpin0815_s(T eta, T s) {
+  T eta2 = eta*eta;
+  T eta3 = eta2*eta;
+  T s2 = s*s;
+  T s3 = s2*s;
+
+/* FIXME: there are quite a few int's withouth a . in this file */
+//FP: eta2, eta3 can be avoided
+return eta*(3.4641016151377544 - 4.399247300629289*eta +
+      9.397292189321194*eta2 - 13.180949901606242*eta3 +
+      s*((1.0/eta - 0.0850917821418767 - 5.837029316602263*eta) +
+      (0.1014665242971878 - 2.0967746996832157*eta)*s +
+      (-1.3546806617824356 + 4.108962025369336*eta)*s2 +
+      (-0.8676969352555539 + 2.064046835273906*eta)*s3));
+}
+/**
+ * Wrapper function for FinalSpin0815_s.
+ */
+template< class T>
+T IMRPhenomD<T>::FinalSpin0815(T eta, T chi1, T chi2) {
+  // Convention m1 >= m2
+  T Seta = sqrt(1.0 - 4.0*eta);
+  T m1 = 0.5 * (1.0 + Seta);
+  T m2 = 0.5 * (1.0 - Seta);
+  T m1s = m1*m1;
+  T m2s = m2*m2;
+  // s defined around Equation 3.6 arXiv:1508.07250
+  T s = (m1s * chi1 + m2s * chi2);
+  return FinalSpin0815_s(eta, s);
+}
+/**
+ * Formula to predict the total radiated energy. Equation 3.7 and 3.8 arXiv:1508.07250
+ * Input parameter s defined around Equation 3.7 and 3.8.
+ */
+template<class T>
+T IMRPhenomD<T>::EradRational0815_s(T eta, T s) {
+  T eta2 = eta*eta;
+  T eta3 = eta2*eta;
+
+  return (eta*(0.055974469826360077 + 0.5809510763115132*eta - 0.9606726679372312*eta2 + 3.352411249771192*eta3)*
+    (1. + (-0.0030302335878845507 - 2.0066110851351073*eta + 7.7050567802399215*eta2)*s))/(1. + (-0.6714403054720589 - 1.4756929437702908*eta + 7.304676214885011*eta2)*s);
+}
+/**
+ * Wrapper function for EradRational0815_s.
+ */
+template<class T>
+T IMRPhenomD<T>::EradRational0815(T eta, T chi1, T chi2) {
+  // Convention m1 >= m2
+  T Seta = sqrt(1.0 - 4.0*eta);
+  T m1 = 0.5 * (1.0 + Seta);
+  T m2 = 0.5 * (1.0 - Seta);
+  T m1s = m1*m1;
+  T m2s = m2*m2;
+  // arXiv:1508.07250
+  T s = (m1s * chi1 + m2s * chi2) / (m1s + m2s);
+
+  return EradRational0815_s(eta, s);
+}
+
+//#################################################################################
+//#################################################################################
+
+
+
 
 /*!\brief Solves for the peak frequency, where the waveform transitions from intermediate to merger-ringdown
  *
@@ -1277,10 +1467,15 @@ T IMRPhenomD<T>::Damp_mr(T f, source_parameters<T> *param, lambda_parameters<T> 
 	T fdamp = param->fdamp;
 	T fRD = param->fRD;
 	T M = param->M;
-	return -((exp(((-f + fRD)*gamma2)/(fdamp*gamma3))*gamma1*
-       		(pow(f,2)*gamma2 - 2*f*fRD*gamma2 + pow(fRD,2)*gamma2 + 2*f*fdamp*gamma3 - 2*fdamp*fRD*gamma3 + 
-         	pow(fdamp,2)*gamma2*pow(gamma3,2)))/
-     		(pow(pow(f,2) - 2*f*fRD + pow(fRD,2) + pow(fdamp,2)*pow(gamma3,2),2)*M));
+	return -((exp(((-f + fRD)*gamma2)/
+	         (fdamp*gamma3))*gamma1*
+	       (pow_int(f - fRD,2)*gamma2 + 
+	         2*fdamp*(f - fRD)*gamma3 + 
+	         pow_int(fdamp,2)*gamma2*
+	          pow(gamma3,2)))/
+	     (pow(pow_int(f - fRD,2) + 
+	         pow_int(fdamp,2)*pow_int(gamma3,2)
+	         ,2)*M));
 }
 
 /*! \brief Calculates the derivative of the merger-ringdown phase for frequency f
