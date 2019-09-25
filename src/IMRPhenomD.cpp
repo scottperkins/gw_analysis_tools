@@ -409,7 +409,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 
 	params->f1 = 0.014/(params->M);
 	params->f3 = this->fpeak(params, &lambda);
-
+	
 	useful_powers<T> pows;
 	this->precalc_powers_PI(&pows);
 

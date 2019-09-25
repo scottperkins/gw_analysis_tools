@@ -7,7 +7,7 @@
 using namespace std;
 
 
-void fisher(double *frequency, 
+void fisher_numerical(double *frequency, 
 	int length,
 	string generation_method, 
 	string detector, 
@@ -15,6 +15,7 @@ void fisher(double *frequency,
 	int dimension, 
 	//double *parameters,
 	gen_params *parameters,
+	int order,
 	int *amp_tapes = NULL,
 	int *phase_tapes = NULL,
 	double *noise = NULL

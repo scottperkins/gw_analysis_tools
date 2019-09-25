@@ -1766,9 +1766,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		} 
 		double **temp_out = allocate_2D_array(dimension,dimension);
 		for (int i =0; i<mcmc_num_detectors; i++){
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method, 
-				mcmc_detectors[i], temp_out, 4, &parameters, 
+				mcmc_detectors[i], temp_out, 4, &parameters,mcmc_deriv_order,
 				NULL, NULL, mcmc_noise[i]);
 			for(int j =0; j<dimension; j++){
 				for(int k =0; k<dimension; k++)
@@ -1833,9 +1833,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 9, &parameters, 
+				mcmc_detectors[i], temp_out, 9, &parameters, mcmc_deriv_order,
 				NULL, NULL, mcmc_noise[i]);
 			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
 			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
@@ -1926,9 +1926,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 14, &parameters, 
+				mcmc_detectors[i], temp_out, 14, &parameters,mcmc_deriv_order, 
 				NULL, NULL, mcmc_noise[i]);
 			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
 			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
@@ -2044,9 +2044,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 14+mcmc_Nmod, &parameters, 
+				mcmc_detectors[i], temp_out, 14+mcmc_Nmod, &parameters,mcmc_deriv_order, 
 				NULL, NULL, mcmc_noise[i]);
 			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
 			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
@@ -2153,9 +2153,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
 			//std::cout<<"IN: "<<parameters.betappe[0]<<std::endl;
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+mcmc_generation_method+"_Full", 
-				mcmc_detectors[i], temp_out, 9+mcmc_Nmod, &parameters, 
+				mcmc_detectors[i], temp_out, 9+mcmc_Nmod, &parameters,mcmc_deriv_order ,
 				NULL, NULL, mcmc_noise[i]);
 			//std::cout<<"out: "<<parameters.betappe[0]<<std::endl;
 			for(int j =0; j<dimension; j++){
@@ -2214,9 +2214,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		} 
 		double **temp_out = allocate_2D_array(dimension,dimension);
 		for (int i =0; i<mcmc_num_detectors; i++){
-			fisher(mcmc_frequencies[i], 
+			fisher_numerical(mcmc_frequencies[i], 
 				mcmc_data_length[i],"MCMC_"+mcmc_generation_method+"_ind_spins",
-				mcmc_detectors[i], output, 7, &parameters, NULL, NULL, 
+				mcmc_detectors[i], output, 7, &parameters,mcmc_deriv_order, NULL, NULL, 
 				mcmc_noise[i]);
 			for(int j =0; j<dimension; j++){
 				for(int k =0; k<dimension; k++)
@@ -2295,9 +2295,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		} 
 		double **temp_out = allocate_2D_array(dimension,dimension);
 		for (int i =0; i<mcmc_num_detectors; i++){
-			fisher(mcmc_frequencies[i], 
+			fisher_numerical(mcmc_frequencies[i], 
 				mcmc_data_length[i],"MCMC_"+mcmc_generation_method,
-				mcmc_detectors[i], output, 7, &parameters, NULL, NULL, 
+				mcmc_detectors[i], output, 7, &parameters,mcmc_deriv_order, NULL, NULL, 
 				mcmc_noise[i]);
 			for(int j =0; j<dimension; j++){
 				for(int k =0; k<dimension; k++)
@@ -3363,9 +3363,9 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+local_method+"_Full", 
-				mcmc_detectors[i], temp_out, 9, &parameters, 
+				mcmc_detectors[i], temp_out, 9, &parameters, mcmc_deriv_order,
 				NULL, NULL, mcmc_noise[i]);
 			for(int j =0; j<min_dim; j++){
 				for(int k =0; k<min_dim; k++)
@@ -3451,9 +3451,9 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 			celestial_horizon_transform(RA,DEC, mcmc_gps_time, mcmc_detectors[i], &phi[i], &theta[i]);
 			parameters.phi = phi[i];
 			parameters.theta = theta[i];
-			fisher(mcmc_frequencies[i], mcmc_data_length[i],
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
 				"MCMC_"+local_method+"_Full", 
-				mcmc_detectors[i], temp_out, 14, &parameters, 
+				mcmc_detectors[i], temp_out, 14, &parameters, mcmc_deriv_order,
 				NULL, NULL, mcmc_noise[i]);
 			//double dphi_dra, dtheta_dra,dphi_ddec, dtheta_ddec;
 			//derivative_celestial_horizon_transform(RA,DEC,mcmc_gps_time,
