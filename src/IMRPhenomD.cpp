@@ -20,10 +20,13 @@ using namespace std;
 #endif
 
 
+
 //double log_64 = 1.80617997398;//log base 10...
 double log_64 = 4.15888308336;
 /*! \file 
  * File that includes all the low level functions that go into constructing the waveform
+ *
+ * Matches LALsuite -- 2019_09_25
  */
 //#####################################################################################
 
@@ -411,7 +414,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 
 	params->f1 = 0.014/(params->M);
 	params->f3 = this->fpeak(params, &lambda);
-	std::cout<<params->f1<<" "<<params->f3<<" "<<params->f3<<std::endl;
 	
 	useful_powers<T> pows;
 	this->precalc_powers_PI(&pows);
@@ -430,7 +432,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	//if(params->f_ref != 0 ){
 	if(params->shift_time ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
@@ -446,13 +447,12 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
 	if(params->shift_time){
-		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
-		//tc_shift = this->Dphase_mr(params->f3, params, &lambda)/params->eta;
+		T alpha1_offset = assign_lambda_param_element(params,14);
+		tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
 	}
 	else{
 		tc_shift=0;
 	}
-	//tc_shift = 0;
 	tc = 2*M_PI*params->tc - tc_shift;
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
@@ -530,8 +530,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	//if(params->f_ref != 0 ){
-	if(params->shift_time){
+	if(params->shift_time ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -546,10 +545,11 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
 	if(params->shift_time){
-		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+		T alpha1_offset = assign_lambda_param_element(params,14);
+		tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
 	}
 	else{
-		tc_shift=0;	
+		tc_shift=0;
 	}
 	tc = 2*M_PI*params->tc - tc_shift;
 	//################################################################
@@ -678,8 +678,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	//if(params->f_ref != 0 ){
-	if(params->shift_time){
+	if(params->shift_time ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -694,10 +693,11 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
 	//This aligns more with the physical meaning of tc, but the phase is NO LONGER just
 	if(params->shift_time){
-		tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+		T alpha1_offset = assign_lambda_param_element(params,14);
+		tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
 	}
 	else{
-		tc_shift=0;	
+		tc_shift=0;
 	}
 	tc = 2*M_PI*params->tc - tc_shift;
 	//################################################################
@@ -1084,7 +1084,8 @@ void IMRPhenomD<double>::calc_fring( source_parameters<double> *source_param)
 	double eta = source_param->eta;
 	double chi1 = source_param->spin1z;
 	double chi2 = source_param->spin2z;
-	double finspin = FinalSpin0815(eta,chi1,chi2);
+	//double finspin = FinalSpin0815(eta,chi1,chi2);
+    	double finspin = final_spin(source_param);
 	double Erad = EradRational0815(eta,chi1,chi2);
 	gsl_interp_accel *acc = gsl_interp_accel_alloc();
   	gsl_spline *iFring = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
@@ -1103,7 +1104,8 @@ void IMRPhenomD<double>::calc_fdamp(source_parameters<double> *source_param)
 	double eta = source_param->eta;
 	double chi1 = source_param->spin1z;
 	double chi2 = source_param->spin2z;
-	double finspin = FinalSpin0815(eta,chi1,chi2);
+	//double finspin = FinalSpin0815(eta,chi1,chi2);
+    	double finspin = final_spin(source_param);
 	double Erad = EradRational0815(eta,chi1,chi2);
 	gsl_interp_accel *acc = gsl_interp_accel_alloc();
 	gsl_spline *iFdamp = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
@@ -1138,9 +1140,11 @@ void IMRPhenomD<adouble>::calc_fring( source_parameters<adouble> *source_param)
 
     	adouble S_red = S/(1.-2.*eta);
 
-    	adouble a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
-    	       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
-    	       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+    	//adouble a2 = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
+    	//       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
+    	//       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+    	adouble a = final_spin(source_param);
+	//std::cout<<a2.value() - a.value()<<" "<<a2.value()<<" "<<a.value()<<std::endl;
 
     	adouble E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
     	       0.960673*eta3 + 3.35241*eta4 ;
@@ -1172,9 +1176,10 @@ void IMRPhenomD<adouble>::calc_fdamp(source_parameters<adouble> *source_param)
 	adouble S4 = S3*S;
 
     	adouble S_red = S/(1.-2.*eta);
-    	adouble a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
-    	       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
-    	       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+    	//adouble a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
+    	//       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
+    	//       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
+    	adouble a = final_spin(source_param);
 
     	adouble E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
     	       0.960673*eta3 + 3.35241*eta4 ;
@@ -1187,25 +1192,29 @@ void IMRPhenomD<adouble>::calc_fdamp(source_parameters<adouble> *source_param)
 
 }
 
+template<class T>
+T IMRPhenomD<T>::final_spin(source_parameters<T> *params)
+{
+	return FinalSpin0815(params->eta, params->spin1z,params->spin2z);
+}
+
 /**
  * Formula to predict the final spin. Equation 3.6 arXiv:1508.07250
  * s defined around Equation 3.6.
  */
 template<class T>
 T IMRPhenomD<T>::FinalSpin0815_s(T eta, T s) {
-  T eta2 = eta*eta;
-  T eta3 = eta2*eta;
-  T s2 = s*s;
-  T s3 = s2*s;
+	T eta2 = eta*eta;
+	T eta3 = eta2*eta;
+	T s2 = s*s;
+	T s3 = s2*s;
 
-/* FIXME: there are quite a few int's withouth a . in this file */
-//FP: eta2, eta3 can be avoided
-return eta*(3.4641016151377544 - 4.399247300629289*eta +
-      9.397292189321194*eta2 - 13.180949901606242*eta3 +
-      s*((1.0/eta - 0.0850917821418767 - 5.837029316602263*eta) +
-      (0.1014665242971878 - 2.0967746996832157*eta)*s +
-      (-1.3546806617824356 + 4.108962025369336*eta)*s2 +
-      (-0.8676969352555539 + 2.064046835273906*eta)*s3));
+	return eta*(3.4641016151377544 - 4.399247300629289*eta +
+	      9.397292189321194*eta2 - 13.180949901606242*eta3 +
+	      s*((1.0/eta - 0.0850917821418767 - 5.837029316602263*eta) +
+	      (0.1014665242971878 - 2.0967746996832157*eta)*s +
+	      (-1.3546806617824356 + 4.108962025369336*eta)*s2 +
+	      (-0.8676969352555539 + 2.064046835273906*eta)*s3));
 }
 /**
  * Wrapper function for FinalSpin0815_s.

@@ -2220,15 +2220,17 @@ void prep_fisher_calculation(double *parameters,
 	std::string generation_method, 
 	int dimension)
 {
-	source_parameters<double> s_param;
-	s_param = source_parameters<double>::populate_source_parameters(input_params);
-	s_param.sky_average = input_params->sky_average;
-	s_param.f_ref = input_params->f_ref;
-	s_param.phiRef = input_params->phiRef;
+	gen_params_base<adouble> internal_params;
+	transform_parameters(input_params, &internal_params);
+	source_parameters<adouble> s_param;
+	s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
+	s_param.sky_average = internal_params.sky_average;
+	s_param.f_ref = internal_params.f_ref;
+	s_param.phiRef = internal_params.phiRef;
 	s_param.shift_time = false;
-	s_param.cosmology=input_params->cosmology;
-	s_param.incl_angle=input_params->incl_angle;
-	lambda_parameters<double> lambda;
+	s_param.cosmology=internal_params.cosmology;
+	s_param.incl_angle=internal_params.incl_angle;
+	lambda_parameters<adouble> lambda;
 	if(	(
 		generation_method =="IMRPhenomPv2" ||
 		generation_method =="MCMC_IMRPhenomPv2_Full" ||
@@ -2243,19 +2245,19 @@ void prep_fisher_calculation(double *parameters,
 		)
 		&& !input_params->sky_average){
 
-		IMRPhenomPv2<double> modelp;
-		s_param.chi1_l = input_params->chi1_l;
-		s_param.chi2_l = input_params->chi2_l;
-		s_param.spin1z = input_params->chi1_l;
-		s_param.spin2z = input_params->chi2_l;
-		s_param.chip = input_params->chip;
-		s_param.phip = input_params->phip;
+		IMRPhenomPv2<adouble> modelp;
+		s_param.chi1_l = internal_params.chi1_l;
+		s_param.chi2_l = internal_params.chi2_l;
+		s_param.spin1z = internal_params.chi1_l;
+		s_param.spin2z = internal_params.chi2_l;
+		s_param.chip = internal_params.chip;
+		s_param.phip = internal_params.phip;
 		modelp.PhenomPv2_Param_Transform_reduced(&s_param);
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
-		double M = s_param.M;
-		double fRD = s_param.fRD;
-		double fpeak = modelp.fpeak(&s_param, &lambda);
+		double M = s_param.M.value();
+		double fRD = s_param.fRD.value();
+		double fpeak = modelp.fpeak(&s_param, &lambda).value();
 		//###########################################
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
@@ -2297,12 +2299,12 @@ void prep_fisher_calculation(double *parameters,
 		generation_method == "MCMC_ppE_IMRPhenomD_IMR" )
 		){
 
-		IMRPhenomD<double> modeld;
+		IMRPhenomD<adouble> modeld;
 		modeld.assign_lambda_param(&s_param, &lambda);
 		modeld.post_merger_variables(&s_param);
-		double M = s_param.M;
-		double fRD = s_param.fRD;
-		double fpeak = modeld.fpeak(&s_param, &lambda);;
+		double M = s_param.M.value();
+		double fRD = s_param.fRD.value();
+		double fpeak = modeld.fpeak(&s_param, &lambda).value();
 		//###########################################
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
@@ -2324,6 +2326,8 @@ void prep_fisher_calculation(double *parameters,
 		parameters[0]=grad_freqs[0];
 		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 	}
+	if(internal_params.betappe){delete [] internal_params.betappe;}
+	if(internal_params.bppe){delete [] internal_params.bppe;}
 	
 	
 }

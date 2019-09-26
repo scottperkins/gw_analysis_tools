@@ -328,6 +328,9 @@ static source_parameters<T> populate_source_parameters_old(
 			T t_c, 
 			bool sky_average) ;
 };
+template<class T, class U>
+void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *param_out);
+
 template<class T>
 T A0_from_DL(T chirpmass, T DL, bool sky_average);
 
@@ -346,6 +349,8 @@ double cosmology_lookup(std::string cosmology);
 
 template<class T>
 bool check_list(T j, T *list, int length);
+template<class T>
+T copysign_internal(T val, T  sign);
 void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_dim, int *removed_dims);
 
 template<class T>

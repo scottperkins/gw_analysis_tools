@@ -55,6 +55,14 @@ int fourier_phase(double *frequencies,
 			std::string generation_method,
 			gen_params *parameters
 			);
+template<class T>
+int fourier_phase(T *frequencies, 
+			int length,
+			T *phase_plus, 
+			T *phase_cross, 
+			std::string generation_method,
+			gen_params_base<T> *parameters
+			);
 
 //int fourier_waveform_polarizations(double *frequencies,
 //				int length,

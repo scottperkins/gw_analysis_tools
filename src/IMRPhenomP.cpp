@@ -14,6 +14,8 @@
 /*! \file 
  *
  * Source code for IMRPhenomP
+ *
+ * Verified against LALsuite 2019_09_25
  */
 
 //Shamelessly stolen from lalsuite
@@ -328,7 +330,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 			//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
-			//phase +=   (T)(tc*(f-f_ref) - phic);
 			this->WignerD(d2,dm2, &pows, params);
 			//Calculate Euler angles alpha and epsilon
 			this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
@@ -375,6 +376,182 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 		
 	}
 	delete [] amp_vec;
+	delete [] phase_vec;
+	delete [] hpfac_vec;
+	delete [] hcfac_vec;
+	return 1;
+	
+}
+/*! \brief Constructs the phase for IMRPhenomPv2 - uses IMRPhenomD, then twists up
+ *
+ * arguments:
+ * 	array of frequencies, length of that array, a complex array for the output waveform, and a source_parameters structure
+ */
+template <class T>
+int IMRPhenomPv2<T>::construct_phase(T *frequencies, /**< T array of frequencies the waveform is to be evaluated at*/
+				int length, /**< integer length of the array of frequencies and the waveform*/	
+				T *phase_plus,/**< complex T array for the plus polariaztion waveform to be output*/ 
+				T *phase_cross,/**< complex T array for the cross polarization waveform to be output*/ 
+				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
+				)
+{
+
+
+	//Initialize Spherical harmonics for polarization construction
+	sph_harm<T> harmonics;
+	T phiHarm = 0.;
+	harmonics.Y22 = std::complex<T>(0.0,0.0);
+	harmonics.Y21 = std::complex<T>(0.0,0.0);
+	harmonics.Y20 = std::complex<T>(0.0,0.0);
+	harmonics.Y2m1 =std::complex<T>(0.0,0.0);
+	harmonics.Y2m2 =std::complex<T>(0.0,0.0);
+	harmonics.Y22 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,2);
+	harmonics.Y21 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,1);
+	harmonics.Y20 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,0);
+	harmonics.Y2m1 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,-1);
+	harmonics.Y2m2 = XLALSpinWeightedSphericalHarmonic(params->thetaJN,phiHarm, -2,2,-2);
+	
+	T M = params-> M;
+	T chirpmass = params->chirpmass;
+	T DL = params->DL;
+	T eta = params->eta;
+	lambda_parameters<T> lambda, *lambda_ptr;
+	this->assign_lambda_param(params, &lambda);
+
+	/*Initialize the post merger quantities*/
+	this->post_merger_variables(params);
+	params->f1_phase = 0.018/(params->M);
+	params->f2_phase = params->fRD/2.;
+
+	params->f1 = 0.014/(params->M);
+	params->f3 = this->fpeak(params, &lambda);
+
+	useful_powers<T> pows;
+	this->precalc_powers_PI(&pows);
+
+	T deltas[6];
+	T pn_amp_coeffs[7];
+	T pn_phase_coeffs[10];
+	
+
+	this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
+	this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
+
+	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
+	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
+	//#################################################################
+	//T phic, f_ref, tc, phi_shift, tc_shift;
+	//params->phiRef = params->phi_aligned;
+	//f_ref = params->f_ref;
+	//phic = 2*params->phiRef;
+	T phic, f_ref, tc, phi_shift, tc_shift;
+	f_ref = params->f_ref;
+	phic = 2*params->phi_aligned;
+	//tc=0;
+	tc = 2*M_PI*params->tc;
+	//#################################################################
+
+	//Rescale amplitude because we aren't just using (2,2) mode anymore
+	T A0 = params->A0* pow(M,7./6.) / (2. * sqrt(5. / (64.*M_PI)) );
+
+	T q = params->mass1/params->mass2;
+	params->q = q;
+	T d2[5] ;
+	T dm2[5];
+	std::complex<T> hp_factor = std::complex<T>(0.0,0.0);
+	std::complex<T> hc_factor = std::complex<T>(0.0,0.0);
+	T epsilon, epsilon_offset;
+	T alpha, alpha_offset;
+
+	alpha_coeffs<T> acoeffs;
+	epsilon_coeffs<T> ecoeffs;
+	this->calculate_euler_coeffs(&acoeffs, &ecoeffs, params);
+
+	T f;
+	T amp, phase;
+	T *phase_vec =new T[length];
+	std::complex<T> *hpfac_vec =new std::complex<T>[length];
+	std::complex<T> *hcfac_vec= new std::complex<T>[length];
+	
+	//T amp, phase;
+	std::complex<T> i;
+	i = std::complex<T> (0,1.);
+
+
+	//Calculate offsets at fRef
+	pows.MFthird = pow(params->M* params->f_ref, 1./3.);
+	pows.MF2third =pows.MFthird* pows.MFthird;
+	this->calculate_euler_angles(&alpha_offset, &epsilon_offset, &pows, &acoeffs, &ecoeffs);
+	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
+	for (int j =0; j< length; j++)
+	{
+		f = frequencies[j];
+		if(f>fcut){
+			//################################################
+			phase_vec[j] = 0;
+			hpfac_vec[j] = 0;
+			hcfac_vec[j] = 0;
+		}
+		else{	
+			//if (f<params->f1_phase)
+			//{
+			//	this->precalc_powers_ins(f, M, &pows);
+			//}
+			//else{
+			//	pows.MFsixth = pow(M*f,1./6 );
+			//	pows.MF7sixth= pow_int(pows.MFsixth,7);
+			//	pows.MFthird = pows.MFsixth * pows.MFsixth;
+			//	pows.MF2third =pows.MFthird* pows.MFthird;
+			//}
+			this->precalc_powers_ins(f, M, &pows);
+			//amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
+			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+			//Calculate WignerD matrices -- See mathematica nb for the forms: stolen from lalsuite
+			this->WignerD(d2,dm2, &pows, params);
+			//Calculate Euler angles alpha and epsilon
+			this->calculate_euler_angles(&alpha, &epsilon, &pows, &acoeffs, &ecoeffs);
+			//Add offset to alpha
+			alpha = alpha + params->alpha0 - alpha_offset;
+			epsilon = epsilon - epsilon_offset;
+
+			//Twist it up
+			calculate_twistup(alpha, &hp_factor, &hc_factor, d2, dm2, &harmonics);
+
+			phase = phase + (2. * epsilon) ;
+			//################################################
+			//amp_vec[j] = amp/std::complex<T>(2.,0.0);
+			//################################################
+			phase_vec[j] = phase;
+			hpfac_vec[j] = hp_factor;
+			hcfac_vec[j] = hc_factor;
+			
+			hp_factor = 0.;
+			hc_factor = 0.;
+		}
+
+	}
+	//#########################################################
+	//Because this part requires the use of gsl_interpolation, and that requires
+	//a specific type (adouble not supported), this must be done for each specific
+	//type. The implementations are fundamentally different, so these templates must be 
+	//written explicitly. No way around it.
+	T t_corr_fixed;
+	if(params->shift_time){
+		t_corr_fixed = this->calculate_time_shift(params, &pows, pn_phase_coeffs, &lambda);
+	}
+	else{
+		t_corr_fixed = 0;
+	}
+	//#########################################################
+	for (int j = 0; j<length;j++){
+		phase_plus[j] = 
+			arg(hpfac_vec[j])-
+			(phase_vec[j]+(tc*(frequencies[j]-f_ref) - phic)+(2*M_PI*t_corr_fixed*frequencies[j]));
+		phase_cross[j] = 
+			arg(hcfac_vec[j])-
+			(phase_vec[j]+(tc*(frequencies[j]-f_ref) - phic)+(2*M_PI*t_corr_fixed*frequencies[j]));
+		
+	}
 	delete [] phase_vec;
 	delete [] hpfac_vec;
 	delete [] hcfac_vec;
@@ -970,6 +1147,47 @@ T IMRPhenomPv2<T>::L2PN( T eta, useful_powers<T> *pow)
 	T eta2 = eta*eta;
 	return (eta*(1.0 + (1.5 + eta/6.0)*x + (3.375 - (19.0*eta)/8. - eta2/24.0)*x2)) / sqrt(x);
 }
+
+/**
+ *  * Wrapper for final-spin formula based on:
+ *   * - IMRPhenomD's FinalSpin0815() for aligned spins.
+ *    *
+ *     * We use their convention m1>m2
+ *      * and put <b>all in-plane spin on the larger BH</b>.
+ *       *
+ *        * In the aligned limit return the FinalSpin0815 value.
+ *         */
+template <class T>
+T IMRPhenomPv2<T>::FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BH(
+  T m1,     /**< Mass of companion 1 (solar masses) */
+  T m2,     /**< Mass of companion 2 (solar masses) */
+  T chi1_l, /**< Aligned spin of BH 1 */
+  T chi2_l, /**< Aligned spin of BH 2 */
+  T chip)   /**< Dimensionless spin in the orbital plane */
+{
+  T M = m1+m2;
+  T eta = m1*m2/(M*M);
+  T af_parallel, q_factor;
+  if (m1 >= m2) {
+    q_factor = m1/M;
+    af_parallel = this->FinalSpin0815(eta, chi1_l, chi2_l);
+  }
+  else {
+    q_factor = m2/M;
+    af_parallel = this->FinalSpin0815(eta, chi2_l, chi1_l);
+  }
+
+  T Sperp = chip * q_factor*q_factor;
+  T af = copysign_internal((T)1.0, af_parallel) * sqrt(Sperp*Sperp + af_parallel*af_parallel);
+  return af;
+}
+
+template<class T>
+T IMRPhenomPv2<T>::final_spin(source_parameters<T> *params)
+{
+	return FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BH(params->mass1,params->mass2,params->spin1z, params->spin2z, params->chip);
+}
+
 
 template class IMRPhenomPv2<double>;
 template class IMRPhenomPv2<adouble>;

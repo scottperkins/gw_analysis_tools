@@ -220,15 +220,15 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		}
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
 		std::complex<T> tempPlus,tempCross;
-		//for (int i =0;i < length; i++)
-		//{
-		//	tempPlus = waveform_plus[i];	
-		//	tempCross = waveform_cross[i];	
-		//	waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
-		//			+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
-		//	waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
-		//			-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
-		//}
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
+					+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
+			waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
+					-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
+		}
 	}
 	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral")
 	{
@@ -726,8 +726,182 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 
 	return status ;
 }
+/*!\brief Function to produce the phase of the plus and cross mode of a quasi-circular binary
+ *
+ * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * method of waveform generation - not all methods use the same parameters
+ */
+template<class T>
+int fourier_phase(T *frequencies, /**<double array of frequencies for the waveform to be evaluated at*/
+			int length,/**<integer length of all the arrays*/
+			T *phase_plus, /**<output array for the phase*/
+			T *phase_cross, /**<output array for the phase*/
+			string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+			gen_params_base<T> *parameters
+			)
+{
+	int status=1;
+	bool NSflag = parameters->NSflag;
+
+	/*Eventually, this will be where NS specific quantities are defined*/	
+	if (NSflag)
+	{
+		cout<<"NS waveforms still under develpment - BH only"<<endl;
+		return 0;
+	}
+	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
+	source_parameters<T> params;
+	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
+	params = params.populate_source_parameters(parameters);
+	params.phi = parameters->phi;
+	params.theta = parameters->theta;
+	params.incl_angle = parameters->incl_angle;
+	params.f_ref = parameters->f_ref;
+	params.phiRef = parameters->phiRef;
+	params.cosmology = parameters->cosmology;
+	params.shift_time = parameters->shift_time;
+	params.sky_average = parameters->sky_average;
+
+	if(generation_method == "IMRPhenomD")
+	{
+		IMRPhenomD<T> modeld;
+		status = modeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+	}
+	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
+	{
+		params.betappe = parameters->betappe;
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+	}
+	else if(generation_method == "dCS_IMRPhenomD_log")
+	{
+		bool local_spline = false;
+		params.betappe = parameters->betappe;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		T temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		dCS_IMRPhenomD_log<T> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+		
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "dCS_IMRPhenomD")
+	{
+		bool local_spline = false;
+		params.betappe = parameters->betappe;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-1};
+		params.bppe = tempbppe;
+		T temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		dCS_IMRPhenomD<T> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+		
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "EdGB_IMRPhenomD_log")
+	{
+		params.betappe = parameters->betappe;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		T temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		EdGB_IMRPhenomD_log<T> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "EdGB_IMRPhenomD")
+	{
+		params.betappe = parameters->betappe;
+		params.Nmod = 1;
+		int tempbppe[params.Nmod] = {-7};
+		params.bppe = tempbppe;
+		T temp[params.Nmod] ;
+		for( int i = 0; i < params.Nmod; i++)
+			temp[i] = params.betappe[i];
+		EdGB_IMRPhenomD<T> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+
+		for( int i = 0; i < params.Nmod; i++)
+			parameters->betappe[i] = temp[i];
+	}
+	else if(generation_method == "ppE_IMRPhenomD_IMR")
+	{
+		params.betappe = parameters->betappe;
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+		ppE_IMRPhenomD_IMR<T> ppemodeld;
+		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+	}
+	else if(generation_method == "IMRPhenomPv2")
+	{
+		//std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+
+		IMRPhenomPv2<T> modeld;
+		//Calculate Waveform
+		if(parameters->phip != -1){
+			params.chip = parameters->chip;
+			params.chi1_l = parameters->chi1_l;
+			params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->chi1_l;
+			params.spin2z = parameters->chi2_l;
+			params.phip = parameters->phip;
+			modeld.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			modeld.PhenomPv2_Param_Transform(&params);
+		}
+		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
+		//std::complex<T> tempPlus,tempCross;
+		//for (int i =0;i < length; i++)
+		//{
+		//	tempPlus = waveform_plus[i];	
+		//	tempCross = waveform_cross[i];	
+		//	waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
+		//			+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
+		//	waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
+		//			-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
+		//}
+	}
+
+	return status ;
+}
 
 
 
 template int fourier_waveform<double>(double *, int, std::complex<double> *,std::complex<double> *, std::string, gen_params_base<double> *);
 template int fourier_waveform<adouble>(adouble *, int, std::complex<adouble> *,std::complex<adouble> *, std::string, gen_params_base<adouble> *);
+template int fourier_phase<double>(double *, int, double *,double *, std::string, gen_params_base<double> *);
+template int fourier_phase<adouble>(adouble *, int, adouble *,adouble *, std::string, gen_params_base<adouble> *);

@@ -270,6 +270,14 @@ double cosmology_lookup(std::string cosmology)
 	return -1;
 }
 
+template <class T>
+T copysign_internal(T val, T sign)
+{
+	return sqrt(val*val/(sign*sign))*sign;
+}
+template double copysign_internal<double>(double , double);
+template adouble copysign_internal<adouble>(adouble , adouble);
+
 void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_dim, int *removed_dims)
 {
 	int colct=0;
@@ -482,6 +490,59 @@ source_parameters<T> source_parameters<T>::populate_source_parameters(
 	params.A0 = A0_from_DL(params.chirpmass, params.DL, params.sky_average);
 	return params;
 }
+/*! \brief Simple utility to copy the members of param_in to param_out, for whatever types those are.
+ *
+ * This is sometimes required to jump from double params to adouble params
+ *
+ * Memory MUST be allocated for betappe and bppe (if present), and this needs to be deallocated
+ *
+ */
+template<class T, class U>
+void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *param_out)
+{
+	param_out->mass1 = param_in->mass1;
+	param_out->mass2 = param_in->mass2;
+	param_out->Luminosity_Distance = param_in->Luminosity_Distance;
+	param_out->spin1[0] = param_in->spin1[0];
+	param_out->spin1[1] = param_in->spin1[1];
+	param_out->spin1[2] = param_in->spin1[2];
+	param_out->spin2[0] = param_in->spin2[0];
+	param_out->spin2[1] = param_in->spin2[1];
+	param_out->spin2[2] = param_in->spin2[2];
+	param_out->phic = param_in->phic;
+	param_out->phiRef = param_in->phiRef;
+	param_out->tc = param_in->tc;
+	param_out->Nmod = param_in->Nmod;
+	if(param_in->Nmod != 0){
+		param_out->bppe = new int[param_out->Nmod];
+		param_out->betappe = new U[param_out->Nmod];
+		for(int i = 0 ;i<param_in->Nmod; i++){
+			param_out->bppe[i] = param_in->bppe[i];
+			param_out->betappe[i] = param_in->betappe[i];
+		}
+	}
+	param_out->incl_angle = param_in->incl_angle;
+	param_out->theta = param_in->theta;
+	param_out->phi = param_in->phi;
+	param_out->RA = param_in->RA;
+	param_out->DEC = param_in->DEC;
+	param_out->gmst = param_in->gmst;
+	param_out->psi = param_in->psi;
+	param_out->NSflag = param_in->NSflag;
+	param_out->f_ref = param_in->f_ref;
+	param_out->thetaJN = param_in->thetaJN;
+	param_out->alpha0 = param_in->alpha0;
+	param_out->chip = param_in->chip;
+	param_out->phip = param_in->phip;
+	param_out->chi1_l = param_in->chi1_l;
+	param_out->phiJL = param_in->phiJL;
+	param_out->thetaJL = param_in->thetaJL;
+	param_out->zeta_polariz = param_in->zeta_polariz;
+	param_out->phi_aligned = param_in->phi_aligned;
+	param_out->chil = param_in->chil;
+	
+}
+template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> *);
 /*! \brief Transforms between chirpmass and DL to overall amplitude factor A0
  *
  * All quantities in seconds

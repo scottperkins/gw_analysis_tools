@@ -48,6 +48,12 @@ virtual int construct_waveform(T *frequencies,
 				std::complex<T> *waveform_cross,
 				source_parameters<T> *params 
 				);
+virtual int construct_phase(T *frequencies, 
+				int length, 
+				T *phase_plus,
+				T *phase_cross,
+				source_parameters<T> *params 
+				);
 
 //###############################################################################
 virtual T calculate_time_shift(source_parameters<T> *params, useful_powers<T> *pows, T *pn_phase_coeffs, lambda_parameters<T> *lambda);
@@ -66,6 +72,9 @@ virtual void PhenomPv2_Param_Transform_J(source_parameters<T> *params);
 virtual void PhenomPv2_Param_Transform_reduced(source_parameters<T> *params);
 
 virtual T L2PN( T eta, useful_powers<T> *pow);
+
+virtual T FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BH(T m1, T m2, T chi1_l, T chi2_l, T chip);
+virtual T final_spin(source_parameters<T> *params);
 
 };
 
