@@ -715,6 +715,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 		phase[j] +=   (T)(tc*(f-f_ref) - phic);
+		phase[j]*=(-1);
 
 	}
 	return 1;
