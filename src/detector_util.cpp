@@ -353,7 +353,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
 {
-	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0.,0., Fplus,Fcross);
+	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0., Fplus,Fcross);
 }
 /*! \brief Same as the other function, but for active and future detectors
  */
@@ -369,7 +369,6 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T LISA_phi0,
 	T LISA_theta_l,
 	T LISA_phi_l,
-	double integration_time,
 	T *Fplus,/**< [out] Fplus response coefficient*/
 	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
@@ -377,8 +376,8 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	//Time dependent antenna patterns
 	if(detector=="LISA" ||detector =="lisa"){
 		for(int i =0 ; i<length; i++){
-			Fplus[i]  = LISA_response_plus_time(dec,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i], integration_time );
-			Fcross[i]  = LISA_response_cross_time(dec,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i], integration_time);
+			Fplus[i]  = LISA_response_plus_time(dec,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
+			Fcross[i]  = LISA_response_cross_time(dec,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
 		}
 	}
 	//Time independent response functions
@@ -414,16 +413,16 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 }
 
 template<class T>
-T LISA_response_plus(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f, double integration_time)
+T LISA_response_plus(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f)
 {
 	T t = t_2PN(f, params->eta, params->chirpmass, params->spin1z, params->spin2z, params->tc);
-	return LISA_response_plus_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t,integration_time);
+	return LISA_response_plus_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t);
 }
 template<class T>
-T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f, double integration_time)
+T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f)
 {
 	T t = t_2PN(f, params->eta, params->chirpmass, params->spin1z, params->spin2z, params->tc);
-	return LISA_response_cross_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t,integration_time);
+	return LISA_response_cross_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t);
 }
 
 /*! \brief Time dependent detector response of LISA for non-precessing waveforms
@@ -435,20 +434,20 @@ T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_
  * To get the second interferometer's response, evaluate with phi_l - pi/4.
  */
 template<class T>
-T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t, double integration_time)
+T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t)
 {
 	//T_year defined in include/util.h
-	T phi_t = phi_0 + 2. * M_PI * t / integration_time;
+	T phi_t = phi_0 + 2. * M_PI * t / T_year;
 	T alpha1 = alpha_0;
 	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 - (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
 	//Factor of sqrt(3/2) for the equilateral triangle
 	return std::sqrt(3./2.)*out;
 }
 template<class T>
-T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t,double integration_time)
+T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t)
 {
 	//T_year defined in include/util.h
-	T phi_t = phi_0 + 2. * M_PI * t / integration_time;
+	T phi_t = phi_0 + 2. * M_PI * t / T_year;
 	T alpha1 = alpha_0;
 	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 + (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
 	//Factor of sqrt(3/2) for the equilateral triangle
@@ -456,17 +455,17 @@ T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T
 }
 //###########################################################
 //Explicit Declarations of the temlates for double and adouble
-template double LISA_response_plus_time<double>( double, double , double , double,double , double, double,double);
-template adouble LISA_response_plus_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble ,adouble,double);
+template double LISA_response_plus_time<double>( double, double , double , double,double , double, double);
+template adouble LISA_response_plus_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble ,adouble);
 //
-template double LISA_response_cross_time<double>( double, double , double , double,double , double, double,double);
-template adouble LISA_response_cross_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble, adouble,double);
+template double LISA_response_cross_time<double>( double, double , double , double,double , double, double);
+template adouble LISA_response_cross_time<adouble>( adouble, adouble , adouble , adouble,adouble , adouble, adouble);
 //
-template double LISA_response_plus<double>( source_parameters<double> *params,double, double , double , double,double , double, double,double);
-template adouble LISA_response_plus<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble ,adouble,double);
+template double LISA_response_plus<double>( source_parameters<double> *params,double, double , double , double,double , double, double);
+template adouble LISA_response_plus<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble ,adouble);
 //
-template double LISA_response_cross<double>( source_parameters<double> *params,double, double , double , double,double , double, double,double);
-template adouble LISA_response_cross<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble, adouble,double);
+template double LISA_response_cross<double>( source_parameters<double> *params,double, double , double , double,double , double, double);
+template adouble LISA_response_cross<adouble>( source_parameters<adouble> *params,adouble, adouble , adouble , adouble,adouble , adouble, adouble);
 //
 template double  right_interferometer_cross<double>(double, double);
 template adouble right_interferometer_cross<adouble>(adouble, adouble);
@@ -480,8 +479,8 @@ template void celestial_horizon_transform<adouble>(adouble, adouble, double, std
 template void detector_response_functions_equatorial<double>(double[3][3],double, double, double, double, double *, double*);
 template void detector_response_functions_equatorial<adouble>(double[3][3],adouble, adouble, adouble, double, adouble *, adouble*);
 //
-template void detector_response_functions_equatorial<double>(std::string, double, double, double, double, double*,int, double, double, double, double, double, double*, double*);
-template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble, double, adouble*,int, adouble, adouble, adouble, adouble, double, adouble*, adouble*);
+template void detector_response_functions_equatorial<double>(std::string, double, double, double, double, double*,int, double, double, double, double,  double*, double*);
+template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble, double, adouble*,int, adouble, adouble, adouble, adouble, adouble*, adouble*);
 //
 template void detector_response_functions_equatorial<double>(std::string, double, double, double ,double ,double * , double *);
 template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble ,double ,adouble * , adouble *);
