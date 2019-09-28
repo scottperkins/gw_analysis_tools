@@ -535,6 +535,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->chip = param_in->chip;
 	param_out->phip = param_in->phip;
 	param_out->chi1_l = param_in->chi1_l;
+	param_out->chi2_l = param_in->chi2_l;
 	param_out->phiJL = param_in->phiJL;
 	param_out->thetaJL = param_in->thetaJL;
 	param_out->zeta_polariz = param_in->zeta_polariz;

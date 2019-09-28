@@ -31,17 +31,17 @@ using namespace std;
  * 
  * ppE_IMRPhenomD_IMR sky-averaged (7 + mods)-- ln A0, phic, tc, ln chirpmass, ln eta, chi_symm, chi_antisymm, betas
  *
- * IMRPhenomD !sky_averaged (11) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi
+ * IMRPhenomD !sky_averaged (11) --  RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, eta, chi1, chi2
  * 
- * ppE_IMRPhenomD_Inspiral !sky_averaged (11+mods) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, betas
+ * ppE_IMRPhenomD_Inspiral !sky_averaged (11+mods) -- RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, eta, chi1, chi2, betas
  * 
- * ppE_IMRPhenomD_IMR !sky_averaged (11+mods) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, betas
+ * ppE_IMRPhenomD_IMR !sky_averaged (11+mods) -- RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, eta, chi1, chi2, betas
  * 
- * dCS_IMRPhenomD !sky_averaged (12) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, \alpha^2 (sec^4)
+ * dCS_IMRPhenomD !sky_averaged (12) -- RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, eta, chi1, chi2, \alpha^2 (sec^4)
  * 
- * EdGB_IMRPhenomD !sky_averaged (12) -- \iota_L (at f_ref), RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, phiRef, tc, psi, \alpha^2 (sec^4)
+ * EdGB_IMRPhenomD !sky_averaged (12) --RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, eta, chi1, chi2, \alpha^2 (sec^4)
  * 
- * IMRPhenomPv2 !sky_averaged (13) --  RA, DEC, psi,phiRef, tc, \iota_L,  ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p (all at f_ref)
+ * IMRPhenomPv2 !sky_averaged (13) --  RA, DEC, psi,phiRef, tc, \iota_L,  ln DL, ln chirpmass, eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p (all at f_ref)
  * 
  * ppE_IMRPhenomPv2_Inspiral !sky_averaged (13 + mods) --  RA, DEC, psi,phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p, \vec{beta} (all at f_ref)
  * 
@@ -2335,176 +2335,329 @@ void prep_fisher_calculation(double *parameters,
  */
 void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors)
 {
-	if(	(
-		generation_method =="IMRPhenomPv2"  || 
-		generation_method=="ppE_IMRPhenomPv2_Inspiral" || 
-		generation_method=="ppE_IMRPhenomPv2_IMR"||
-		generation_method=="dCS_IMRPhenomPv2"||
-		generation_method=="EdGB_IMRPhenomPv2"
-		)
-		&& 
-		!input_params->sky_average){
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
+	if(!input_params->sky_average){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+			if(generation_method.find("MCMC") != std::string::npos){
+				for(int i = 0 ; i<dimension; i++){
+					log_factors[i] = false;
+				}
+				log_factors[3] = true;//Distance
+				log_factors[4] = true;//chirpmass
+
+				double spin1spher[3];
+				double spin2spher[3];
+				transform_cart_sph(input_params->spin1, spin1spher);
+				transform_cart_sph(input_params->spin2, spin2spher);
+				parameters[0]=input_params->incl_angle;
+				parameters[1]=input_params->RA;
+				parameters[2]=input_params->DEC;
+				parameters[3]=input_params->Luminosity_Distance;
+				parameters[4]=calculate_chirpmass(input_params->mass1, 
+					input_params->mass2);
+				parameters[5]=calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				parameters[6]=spin1spher[0];
+				parameters[7]=spin2spher[0];
+				parameters[8]=spin1spher[1];
+				parameters[9]=spin2spher[1];
+				parameters[10]=spin1spher[2];
+				parameters[11]=spin2spher[2];
+				parameters[12]=input_params->phiRef;
+				parameters[13]=input_params->psi;
+
+			}
+			else{
+				for(int i = 0 ; i<dimension; i++){
+					log_factors[i] = false;
+				}
+				log_factors[6] = true;//Distance
+				log_factors[7] = true;//chirpmass
+
+				parameters[0]=input_params->RA;
+				parameters[1]=input_params->DEC;
+				parameters[2]=input_params->psi;
+				parameters[3]=input_params->phiRef;
+				parameters[4]=input_params->tc;
+				parameters[5]=input_params->incl_angle;
+				parameters[6]=input_params->Luminosity_Distance;
+				parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+				parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
+				parameters[9]=input_params->chi1_l;
+				parameters[10]=input_params->chi2_l;
+				parameters[11]=input_params->chip;
+				parameters[12]=input_params->phip;
+
+			}
+
 		}
-		log_factors[6] = true;//Distance
-		log_factors[7] = true;//chirpmass
-		log_factors[8] = true;//eta
+		else if(generation_method.find("IMRPhenomD") != std::string::npos){
+			if(generation_method.find("MCMC") != std::string::npos){
+				for(int i = 0 ; i<dimension; i++){
+					log_factors[i] = false;
+				}
+				log_factors[3] = true;//Distance
+				log_factors[4] = true;//chirpmass
 
-		parameters[0]=input_params->RA;
-		parameters[1]=input_params->DEC;
-		parameters[2]=input_params->psi;
-		parameters[3]=input_params->phiRef;
-		parameters[4]=input_params->tc;
-		parameters[5]=input_params->incl_angle;
-		parameters[6]=input_params->Luminosity_Distance;
-		parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[9]=input_params->chi1_l;
-		parameters[10]=input_params->chi2_l;
-		parameters[11]=input_params->chip;
-		parameters[12]=input_params->phip;
+				double spin1spher[3];
+				double spin2spher[3];
+				parameters[0]=input_params->incl_angle;
+				parameters[1]=input_params->RA;
+				parameters[2]=input_params->DEC;
+				parameters[3]=input_params->Luminosity_Distance;
+				parameters[4]=calculate_chirpmass(input_params->mass1, 
+					input_params->mass2);
+				parameters[5]=calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				parameters[6]=input_params->spin1[2];
+				parameters[7]=input_params->spin2[2];
+				parameters[8]=input_params->phiRef;
+				parameters[9]=input_params->psi;
 
+			}
+			else{
+				for(int i = 0 ; i<dimension; i++){
+					log_factors[i] = false;
+				}
+				log_factors[6] = true;//Distance
+				log_factors[7] = true;//chirpmass
+
+				parameters[0]=input_params->RA;
+				parameters[1]=input_params->DEC;
+				parameters[2]=input_params->psi;
+				parameters[3]=input_params->phic;
+				parameters[4]=input_params->tc;
+				parameters[5]=input_params->incl_angle;
+				parameters[6]=input_params->Luminosity_Distance;
+				parameters[7]=calculate_chirpmass(input_params->mass1, 
+					input_params->mass2);
+				parameters[8]=calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				parameters[9]=input_params->spin1[2];
+				parameters[10]=input_params->spin2[2];
+
+			}
+		
+		}
+
+	}
+	else{
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+			//Need to populate
+			if(generation_method.find("MCMC") != std::string::npos){
+
+			}
+			else{
+
+			}
 	
-	}
-	if(	(
-		generation_method =="MCMC_IMRPhenomPv2_Full"  || 
-		generation_method=="MCMC_ppE_IMRPhenomPv2_Inspiral_Full" || 
-		generation_method=="MCMC_ppE_IMRPhenomPv2_Inspiral_Full"||
-		generation_method=="MCMC_EdGB_IMRPhenomPv2_Full"||
-		generation_method=="MCMC_dCS_IMRPhenomPv2_Full"
-		)
-		&& 
-		!input_params->sky_average){
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
 		}
-		log_factors[3] = true;//Distance
-		log_factors[4] = true;//chirpmass
+		else if(generation_method.find("IMRPhenomD") != std::string::npos){
+			if(generation_method.find("MCMC") != std::string::npos){
+				for(int i = 0 ; i<dimension; i++){
+					log_factors[i] = false;
+				}
+				log_factors[0] = true;//chirpmass
 
-		double spin1spher[3];
-		double spin2spher[3];
-		transform_cart_sph(input_params->spin1, spin1spher);
-		transform_cart_sph(input_params->spin2, spin2spher);
-		parameters[0]=input_params->incl_angle;
-		parameters[1]=input_params->RA;
-		parameters[2]=input_params->DEC;
-		parameters[3]=input_params->Luminosity_Distance;
-		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[6]=spin1spher[0];
-		parameters[7]=spin2spher[0];
-		parameters[8]=spin1spher[1];
-		parameters[9]=spin2spher[1];
-		parameters[10]=spin1spher[2];
-		parameters[11]=spin2spher[2];
-		parameters[12]=input_params->phiRef;
-		parameters[13]=input_params->psi;
-	
-	}
-	else if(
-		(
-		generation_method =="IMRPhenomD" || 
-		generation_method=="ppE_IMRPhenomD_Inspiral"|| 
-		generation_method == "ppE_IMRPhenomD_IMR"||
-		generation_method == "dCS_IMRPhenomD"||
-		generation_method == "EdGB_IMRPhenomD"
-		)
-		&& 
-		!input_params->sky_average){
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
+				double spin1spher[3];
+				double spin2spher[3];
+				parameters[0]=calculate_chirpmass(input_params->mass1, 
+					input_params->mass2);
+				parameters[1]=calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				parameters[2]=input_params->spin1[2];
+				parameters[3]=input_params->spin2[2];
+
+			}
+			else{
+				for(int i = 0 ; i<dimension; i++){
+					log_factors[i] = false;
+				}
+				log_factors[0] = true;//A0
+				log_factors[3] = true;//chirpmass
+				log_factors[4] = true;//eta
+
+				parameters[3] = calculate_chirpmass(input_params->mass1, input_params->mass2);
+				parameters[0] = A0_from_DL(parameters[3]*MSOL_SEC,
+					input_params->Luminosity_Distance*MPC_SEC,
+					input_params->sky_average);
+				parameters[1] = input_params->phic;
+				parameters[2] = input_params->tc;
+				parameters[4] = calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				parameters[5] = (input_params->spin1[2] + input_params->spin2[2])/2.;
+				parameters[6] = (input_params->spin1[2] - input_params->spin2[2])/2.;
+
+			}
+		
 		}
-		log_factors[3] = true;//Distance
-		log_factors[4] = true;//chirpmass
-
-		double spin1spher[3];
-		double spin2spher[3];
-		parameters[0]=input_params->incl_angle;
-		parameters[1]=input_params->RA;
-		parameters[2]=input_params->DEC;
-		parameters[3]=input_params->Luminosity_Distance;
-		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[6]=input_params->spin1[2];
-		parameters[7]=input_params->spin2[2];
-		parameters[8]=input_params->phic;
-		parameters[9]=input_params->tc;
-		parameters[10]=input_params->psi;
 	}
-	else if(
-		(generation_method =="MCMC_IMRPhenomD_Full" || 
-		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 	
-		generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full" ||
-		generation_method == "MCMC_dCS_IMRPhenomD_Full" ||
-		generation_method == "MCMC_EdGB_IMRPhenomD_Full"
-		)
-		&& 
-		!input_params->sky_average){
+	//if(	(
+	//	generation_method =="IMRPhenomPv2"  || 
+	//	generation_method=="ppE_IMRPhenomPv2_Inspiral" || 
+	//	generation_method=="ppE_IMRPhenomPv2_IMR"||
+	//	generation_method=="dCS_IMRPhenomPv2"||
+	//	generation_method=="EdGB_IMRPhenomPv2"
+	//	)
+	//	&& 
+	//	!input_params->sky_average){
+	//	for(int i = 0 ; i<dimension; i++){
+	//		log_factors[i] = false;
+	//	}
+	//	log_factors[6] = true;//Distance
+	//	log_factors[7] = true;//chirpmass
 
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
-		}
-		log_factors[3] = true;//Distance
-		log_factors[4] = true;//chirpmass
+	//	parameters[0]=input_params->RA;
+	//	parameters[1]=input_params->DEC;
+	//	parameters[2]=input_params->psi;
+	//	parameters[3]=input_params->phiRef;
+	//	parameters[4]=input_params->tc;
+	//	parameters[5]=input_params->incl_angle;
+	//	parameters[6]=input_params->Luminosity_Distance;
+	//	parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+	//	parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
+	//	parameters[9]=input_params->chi1_l;
+	//	parameters[10]=input_params->chi2_l;
+	//	parameters[11]=input_params->chip;
+	//	parameters[12]=input_params->phip;
 
-		double spin1spher[3];
-		double spin2spher[3];
-		parameters[0]=input_params->incl_angle;
-		parameters[1]=input_params->RA;
-		parameters[2]=input_params->DEC;
-		parameters[3]=input_params->Luminosity_Distance;
-		parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[6]=input_params->spin1[2];
-		parameters[7]=input_params->spin2[2];
-		parameters[8]=input_params->phiRef;
-		parameters[9]=input_params->psi;
-	}
-	else if(
-		(generation_method =="MCMC_IMRPhenomD" || 
-		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral"|| 	
-		generation_method == "MCMC_ppE_IMRPhenomD_IMR" ||
-		generation_method == "MCMC_dCS_IMRPhenomD" ||
-		generation_method == "MCMC_EdGB_IMRPhenomD"
-		)
-		&& 
-		input_params->sky_average){
+	//
+	//}
+	//if(	(
+	//	generation_method =="MCMC_IMRPhenomPv2_Full"  || 
+	//	generation_method=="MCMC_ppE_IMRPhenomPv2_Inspiral_Full" || 
+	//	generation_method=="MCMC_ppE_IMRPhenomPv2_Inspiral_Full"||
+	//	generation_method=="MCMC_EdGB_IMRPhenomPv2_Full"||
+	//	generation_method=="MCMC_dCS_IMRPhenomPv2_Full"
+	//	)
+	//	&& 
+	//	!input_params->sky_average){
+	//	for(int i = 0 ; i<dimension; i++){
+	//		log_factors[i] = false;
+	//	}
+	//	log_factors[3] = true;//Distance
+	//	log_factors[4] = true;//chirpmass
 
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
-		}
-		log_factors[0] = true;//chirpmass
+	//	double spin1spher[3];
+	//	double spin2spher[3];
+	//	transform_cart_sph(input_params->spin1, spin1spher);
+	//	transform_cart_sph(input_params->spin2, spin2spher);
+	//	parameters[0]=input_params->incl_angle;
+	//	parameters[1]=input_params->RA;
+	//	parameters[2]=input_params->DEC;
+	//	parameters[3]=input_params->Luminosity_Distance;
+	//	parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+	//	parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+	//	parameters[6]=spin1spher[0];
+	//	parameters[7]=spin2spher[0];
+	//	parameters[8]=spin1spher[1];
+	//	parameters[9]=spin2spher[1];
+	//	parameters[10]=spin1spher[2];
+	//	parameters[11]=spin2spher[2];
+	//	parameters[12]=input_params->phiRef;
+	//	parameters[13]=input_params->psi;
+	//
+	//}
+	//else if(
+	//	(
+	//	generation_method =="IMRPhenomD" || 
+	//	generation_method=="ppE_IMRPhenomD_Inspiral"|| 
+	//	generation_method == "ppE_IMRPhenomD_IMR"||
+	//	generation_method == "dCS_IMRPhenomD"||
+	//	generation_method == "EdGB_IMRPhenomD"
+	//	)
+	//	&& 
+	//	!input_params->sky_average){
+	//	for(int i = 0 ; i<dimension; i++){
+	//		log_factors[i] = false;
+	//	}
+	//	log_factors[6] = true;//Distance
+	//	log_factors[7] = true;//chirpmass
 
-		double spin1spher[3];
-		double spin2spher[3];
-		parameters[0]=calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[1]=calculate_eta(input_params->mass1, input_params->mass2);
-		parameters[2]=input_params->spin1[2];
-		parameters[3]=input_params->spin2[2];
-	}
-	else if((generation_method =="IMRPhenomD" || 
-		generation_method=="ppE_IMRPhenomD_Inspiral"|| 
-		generation_method == "ppE_IMRPhenomD_IMR"
-		)
-		&& 
-		input_params->sky_average){
+	//	parameters[0]=input_params->RA;
+	//	parameters[1]=input_params->DEC;
+	//	parameters[2]=input_params->psi;
+	//	parameters[3]=input_params->phic;
+	//	parameters[4]=input_params->tc;
+	//	parameters[5]=input_params->incl_angle;
+	//	parameters[6]=input_params->Luminosity_Distance;
+	//	parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+	//	parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
+	//	parameters[9]=input_params->spin1[2];
+	//	parameters[10]=input_params->spin2[2];
+	//}
+	//else if(
+	//	(generation_method =="MCMC_IMRPhenomD_Full" || 
+	//	generation_method=="MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 	
+	//	generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full" ||
+	//	generation_method == "MCMC_dCS_IMRPhenomD_Full" ||
+	//	generation_method == "MCMC_EdGB_IMRPhenomD_Full"
+	//	)
+	//	&& 
+	//	!input_params->sky_average){
 
-		for(int i = 0 ; i<dimension; i++){
-			log_factors[i] = false;
-		}
-		log_factors[0] = true;//A0
-		log_factors[3] = true;//chirpmass
-		log_factors[4] = true;//eta
+	//	for(int i = 0 ; i<dimension; i++){
+	//		log_factors[i] = false;
+	//	}
+	//	log_factors[3] = true;//Distance
+	//	log_factors[4] = true;//chirpmass
 
-		parameters[3] = calculate_chirpmass(input_params->mass1, input_params->mass2);
-		parameters[0] = A0_from_DL(parameters[3]*MSOL_SEC,input_params->Luminosity_Distance*MPC_SEC,input_params->sky_average);
-		parameters[1] = input_params->phic;
-		parameters[2] = input_params->tc;
-		parameters[4] = calculate_eta(input_params->mass1, input_params->mass2);;
-		parameters[5] = (input_params->spin1[2] + input_params->spin2[2])/2.;
-		parameters[6] = (input_params->spin1[2] - input_params->spin2[2])/2.;
-	}
+	//	double spin1spher[3];
+	//	double spin2spher[3];
+	//	parameters[0]=input_params->incl_angle;
+	//	parameters[1]=input_params->RA;
+	//	parameters[2]=input_params->DEC;
+	//	parameters[3]=input_params->Luminosity_Distance;
+	//	parameters[4]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+	//	parameters[5]=calculate_eta(input_params->mass1, input_params->mass2);
+	//	parameters[6]=input_params->spin1[2];
+	//	parameters[7]=input_params->spin2[2];
+	//	parameters[8]=input_params->phiRef;
+	//	parameters[9]=input_params->psi;
+	//}
+	//else if(
+	//	(generation_method =="MCMC_IMRPhenomD" || 
+	//	generation_method=="MCMC_ppE_IMRPhenomD_Inspiral"|| 	
+	//	generation_method == "MCMC_ppE_IMRPhenomD_IMR" ||
+	//	generation_method == "MCMC_dCS_IMRPhenomD" ||
+	//	generation_method == "MCMC_EdGB_IMRPhenomD"
+	//	)
+	//	&& 
+	//	input_params->sky_average){
+
+	//	for(int i = 0 ; i<dimension; i++){
+	//		log_factors[i] = false;
+	//	}
+	//	log_factors[0] = true;//chirpmass
+
+	//	double spin1spher[3];
+	//	double spin2spher[3];
+	//	parameters[0]=calculate_chirpmass(input_params->mass1, input_params->mass2);
+	//	parameters[1]=calculate_eta(input_params->mass1, input_params->mass2);
+	//	parameters[2]=input_params->spin1[2];
+	//	parameters[3]=input_params->spin2[2];
+	//}
+	//else if((generation_method =="IMRPhenomD" || 
+	//	generation_method=="ppE_IMRPhenomD_Inspiral"|| 
+	//	generation_method == "ppE_IMRPhenomD_IMR"
+	//	)
+	//	&& 
+	//	input_params->sky_average){
+
+	//	for(int i = 0 ; i<dimension; i++){
+	//		log_factors[i] = false;
+	//	}
+	//	log_factors[0] = true;//A0
+	//	log_factors[3] = true;//chirpmass
+	//	log_factors[4] = true;//eta
+
+	//	parameters[3] = calculate_chirpmass(input_params->mass1, input_params->mass2);
+	//	parameters[0] = A0_from_DL(parameters[3]*MSOL_SEC,input_params->Luminosity_Distance*MPC_SEC,input_params->sky_average);
+	//	parameters[1] = input_params->phic;
+	//	parameters[2] = input_params->tc;
+	//	parameters[4] = calculate_eta(input_params->mass1, input_params->mass2);;
+	//	parameters[5] = (input_params->spin1[2] + input_params->spin2[2])/2.;
+	//	parameters[6] = (input_params->spin1[2] - input_params->spin2[2])/2.;
+	//}
 	if( check_ppE(generation_method)){
 		int base = dimension-input_params->Nmod;
 		for(int i = 0 ;i<input_params->Nmod; i++){
@@ -2520,146 +2673,269 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 template<class T>
 void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim, gen_params_base<double> *original_params)
 {
-	if(	(
-		generation_method =="IMRPhenomPv2" || 
-		generation_method =="ppE_IMRPhenomPv2_Inspiral"|| 
-		generation_method =="ppE_IMRPhenomPv2_IMR"||
-		generation_method =="dCS_IMRPhenomPv2"||
-		generation_method =="EdGB_IMRPhenomPv2"
-		) 
-		&& 
-		!a_params->sky_average){
+	if(!a_params->sky_average){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+			if(generation_method.find("MCMC")!=std::string::npos){
+				a_params->mass1 = calculate_mass1(avec_parameters[4],
+					avec_parameters[5]);
+				a_params->mass2 = calculate_mass2(avec_parameters[4],
+					avec_parameters[5]);
+				a_params->Luminosity_Distance = avec_parameters[3];
+				a_params->RA = avec_parameters[1];
+				a_params->DEC = avec_parameters[2];
+				a_params->psi = avec_parameters[13];
+				a_params->phiRef = avec_parameters[12];
+				T spin1sph[3] = {avec_parameters[6],avec_parameters[8],
+					avec_parameters[10]};
+				T spin2sph[3] = {avec_parameters[7],avec_parameters[9],
+					avec_parameters[11]};
+				transform_sph_cart(spin1sph,a_params->spin1);
+				transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->incl_angle=avec_parameters[0];
 
+			}
+			else{
+				a_params->mass1 = calculate_mass1(avec_parameters[7],
+					avec_parameters[8]);
+				a_params->mass2 = calculate_mass2(avec_parameters[7],
+					avec_parameters[8]);
+				a_params->Luminosity_Distance = avec_parameters[6];
+				a_params->RA = avec_parameters[0];
+				a_params->DEC = avec_parameters[1];
+				a_params->psi = avec_parameters[2];
+				a_params->phiRef = avec_parameters[3];
+				a_params->tc = avec_parameters[4];
+				a_params->chi1_l = avec_parameters[9];
+				a_params->chi2_l = avec_parameters[10];
+				a_params->chip = avec_parameters[11];
+				a_params->phip = avec_parameters[12];
+				a_params->incl_angle=avec_parameters[5];
 
-		a_params->mass1 = calculate_mass1(avec_parameters[7],avec_parameters[8]);
-		a_params->mass2 = calculate_mass2(avec_parameters[7],avec_parameters[8]);
-		a_params->Luminosity_Distance = avec_parameters[6];
-		a_params->RA = avec_parameters[0];
-		a_params->DEC = avec_parameters[1];
-		a_params->psi = avec_parameters[2];
-		a_params->phiRef = avec_parameters[3];
-		a_params->tc = avec_parameters[4];
-		a_params->chi1_l = avec_parameters[9];
-		a_params->chi2_l = avec_parameters[10];
-		a_params->chip = avec_parameters[11];
-		a_params->phip = avec_parameters[12];
-		a_params->incl_angle=avec_parameters[5];
+			}	
+		}	
+		else if(generation_method.find("IMRPhenomD") != std::string::npos){
+			if(generation_method.find("MCMC")!=std::string::npos){
+				a_params->mass1 = calculate_mass1(avec_parameters[4],
+					avec_parameters[5]);
+				a_params->mass2 = calculate_mass2(avec_parameters[4],
+					avec_parameters[5]);
+				a_params->Luminosity_Distance = avec_parameters[3];
+				a_params->RA = avec_parameters[1];
+				a_params->DEC = avec_parameters[2];
+				a_params->psi = avec_parameters[9];
+				a_params->phiRef = avec_parameters[8];
+				T spin1sph[3] = {avec_parameters[6],0,0};
+				T spin2sph[3] = {avec_parameters[7],0,0};
+				transform_sph_cart(spin1sph,a_params->spin1);
+				transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->incl_angle=avec_parameters[0];
+
+			}
+			else{
+				a_params->mass1 = calculate_mass1(avec_parameters[7],
+					avec_parameters[8]);
+				a_params->mass2 = calculate_mass2(avec_parameters[7],
+					avec_parameters[8]);
+				a_params->Luminosity_Distance = avec_parameters[6];
+				a_params->RA = avec_parameters[0];
+				a_params->DEC = avec_parameters[1];
+				a_params->psi = avec_parameters[2];
+				a_params->phic = avec_parameters[3];
+				a_params->tc = avec_parameters[4];
+				T spin1sph[3] = {avec_parameters[9],0,0};
+				T spin2sph[3] = {avec_parameters[10],0,0};
+				transform_sph_cart(spin1sph,a_params->spin1);
+				transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->incl_angle=avec_parameters[5];
+
+			}	
+		}	
+	}
+	else{
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+			if(generation_method.find("MCMC")!=std::string::npos){
+
+			}
+			else{
+
+			}	
+		}	
+		else if(generation_method.find("IMRPhenomD") != std::string::npos){
+			if(generation_method.find("MCMC")!=std::string::npos){
+				a_params->mass1 = calculate_mass1(avec_parameters[0],
+					avec_parameters[1]);
+				a_params->mass2 = calculate_mass2(avec_parameters[0],
+					avec_parameters[1]);
+				a_params->Luminosity_Distance = 1000;
+				T spin1sph[3] = {avec_parameters[2],0,0};
+				T spin2sph[3] = {avec_parameters[3],0,0};
+				transform_sph_cart(spin1sph,a_params->spin1);
+				transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->incl_angle=0;
+				a_params->phic=0;
+				a_params->tc=0;
+
+			}
+			else{
+				a_params->mass1 = calculate_mass1(avec_parameters[3],
+					avec_parameters[4]);
+				a_params->mass2 = calculate_mass2(avec_parameters[3],
+					avec_parameters[4]);
+				a_params->Luminosity_Distance = 
+					DL_from_A0((T)(avec_parameters[3]*MSOL_SEC),
+					avec_parameters[0],a_params->sky_average)/MPC_SEC;
+				a_params->tc = avec_parameters[2];
+				a_params->phic = avec_parameters[1];
+				T chi1 = avec_parameters[5] + avec_parameters[6];
+				T chi2 = avec_parameters[5] - avec_parameters[6];
+				T spin1sph[3] = {chi1,0,0};
+				T spin2sph[3] = {chi2,0,0};
+				transform_sph_cart(spin1sph,a_params->spin1);
+				transform_sph_cart(spin2sph,a_params->spin2);
+			}	
+		}	
 
 	}
-	if(	(
-		generation_method =="MCMC_IMRPhenomPv2_Full" || 
-		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral_Full"|| 
-		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR_Full"||
-		generation_method =="MCMC_dCS_IMRPhenomPv2_Full"||
-		generation_method =="MCMC_EdGB_IMRPhenomPv2_Full"
-		) 
-		&& 
-		!a_params->sky_average){
+	//if(	(
+	//	generation_method =="IMRPhenomPv2" || 
+	//	generation_method =="ppE_IMRPhenomPv2_Inspiral"|| 
+	//	generation_method =="ppE_IMRPhenomPv2_IMR"||
+	//	generation_method =="dCS_IMRPhenomPv2"||
+	//	generation_method =="EdGB_IMRPhenomPv2"
+	//	) 
+	//	&& 
+	//	!a_params->sky_average){
 
-		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
-		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
-		a_params->Luminosity_Distance = avec_parameters[3];
-		a_params->RA = avec_parameters[1];
-		a_params->DEC = avec_parameters[2];
-		a_params->psi = avec_parameters[13];
-		a_params->phiRef = avec_parameters[12];
-		T spin1sph[3] = {avec_parameters[6],avec_parameters[8],avec_parameters[10]};
-		T spin2sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
-		transform_sph_cart(spin1sph,a_params->spin1);
-		transform_sph_cart(spin2sph,a_params->spin2);
-		a_params->incl_angle=avec_parameters[0];
-	}
-	else if((generation_method =="IMRPhenomD" || 
-		generation_method=="ppE_IMRPhenomD_Inspiral" ||
-		generation_method=="ppE_IMRPhenomD_IMR"||
-		generation_method=="dCS_IMRPhenomD" ||
-		generation_method=="EdGB_IMRPhenomD"
-		)
-		&& 
-		!a_params->sky_average){
 
-		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
-		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
-		a_params->Luminosity_Distance = avec_parameters[3];
-		a_params->RA = avec_parameters[1];
-		a_params->DEC = avec_parameters[2];
-		a_params->psi = avec_parameters[10];
-		a_params->phic = avec_parameters[8];
-		a_params->tc = avec_parameters[9];
-		T spin1sph[3] = {avec_parameters[6],0,0};
-		T spin2sph[3] = {avec_parameters[7],0,0};
-		transform_sph_cart(spin1sph,a_params->spin1);
-		transform_sph_cart(spin2sph,a_params->spin2);
-		a_params->incl_angle=avec_parameters[0];
-	}
-	else if(
-		(
-		generation_method =="MCMC_IMRPhenomD_Full" || 
-		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral_Full" ||
-		generation_method=="MCMC_ppE_IMRPhenomD_IMR_Full"|| 
-		generation_method=="MCMC_dCS_IMRPhenomD_Full"|| 
-		generation_method=="MCMC_EdGB_IMRPhenomD_Full"
-		)
-		&& 
-		!a_params->sky_average){
+	//	a_params->mass1 = calculate_mass1(avec_parameters[7],avec_parameters[8]);
+	//	a_params->mass2 = calculate_mass2(avec_parameters[7],avec_parameters[8]);
+	//	a_params->Luminosity_Distance = avec_parameters[6];
+	//	a_params->RA = avec_parameters[0];
+	//	a_params->DEC = avec_parameters[1];
+	//	a_params->psi = avec_parameters[2];
+	//	a_params->phiRef = avec_parameters[3];
+	//	a_params->tc = avec_parameters[4];
+	//	a_params->chi1_l = avec_parameters[9];
+	//	a_params->chi2_l = avec_parameters[10];
+	//	a_params->chip = avec_parameters[11];
+	//	a_params->phip = avec_parameters[12];
+	//	a_params->incl_angle=avec_parameters[5];
 
-		a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
-		a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
-		a_params->Luminosity_Distance = avec_parameters[3];
-		a_params->RA = avec_parameters[1];
-		a_params->DEC = avec_parameters[2];
-		a_params->psi = avec_parameters[9];
-		a_params->phiRef = avec_parameters[8];
-		T spin1sph[3] = {avec_parameters[6],0,0};
-		T spin2sph[3] = {avec_parameters[7],0,0};
-		transform_sph_cart(spin1sph,a_params->spin1);
-		transform_sph_cart(spin2sph,a_params->spin2);
-		a_params->incl_angle=avec_parameters[0];
-	}
-	else if(
-		(
-		generation_method =="MCMC_IMRPhenomD" || 
-		generation_method=="MCMC_ppE_IMRPhenomD_Inspiral" ||
-		generation_method=="MCMC_ppE_IMRPhenomD_IMR"|| 
-		generation_method=="MCMC_dCS_IMRPhenomD"|| 
-		generation_method=="MCMC_EdGB_IMRPhenomD"
-		)
-		&& 
-		a_params->sky_average){
+	//}
+	//if(	(
+	//	generation_method =="MCMC_IMRPhenomPv2_Full" || 
+	//	generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral_Full"|| 
+	//	generation_method =="MCMC_ppE_IMRPhenomPv2_IMR_Full"||
+	//	generation_method =="MCMC_dCS_IMRPhenomPv2_Full"||
+	//	generation_method =="MCMC_EdGB_IMRPhenomPv2_Full"
+	//	) 
+	//	&& 
+	//	!a_params->sky_average){
 
-		a_params->mass1 = calculate_mass1(avec_parameters[0],avec_parameters[1]);
-		a_params->mass2 = calculate_mass2(avec_parameters[0],avec_parameters[1]);
-		a_params->Luminosity_Distance = 1000;
-		T spin1sph[3] = {avec_parameters[2],0,0};
-		T spin2sph[3] = {avec_parameters[3],0,0};
-		transform_sph_cart(spin1sph,a_params->spin1);
-		transform_sph_cart(spin2sph,a_params->spin2);
-		a_params->incl_angle=0;
-		a_params->phic=0;
-		a_params->tc=0;
-	
-	}
-	else if(
-		(
-		generation_method =="IMRPhenomD" || 
-		generation_method=="ppE_IMRPhenomD_Inspiral" || 
-		generation_method == "ppE_IMRPhenomD_IMR"
-		)
-		&& 
-		a_params->sky_average){
+	//	a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+	//	a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+	//	a_params->Luminosity_Distance = avec_parameters[3];
+	//	a_params->RA = avec_parameters[1];
+	//	a_params->DEC = avec_parameters[2];
+	//	a_params->psi = avec_parameters[13];
+	//	a_params->phiRef = avec_parameters[12];
+	//	T spin1sph[3] = {avec_parameters[6],avec_parameters[8],avec_parameters[10]};
+	//	T spin2sph[3] = {avec_parameters[7],avec_parameters[9],avec_parameters[11]};
+	//	transform_sph_cart(spin1sph,a_params->spin1);
+	//	transform_sph_cart(spin2sph,a_params->spin2);
+	//	a_params->incl_angle=avec_parameters[0];
+	//}
+	//else if((generation_method =="IMRPhenomD" || 
+	//	generation_method=="ppE_IMRPhenomD_Inspiral" ||
+	//	generation_method=="ppE_IMRPhenomD_IMR"||
+	//	generation_method=="dCS_IMRPhenomD" ||
+	//	generation_method=="EdGB_IMRPhenomD"
+	//	)
+	//	&& 
+	//	!a_params->sky_average){
 
-		a_params->mass1 = calculate_mass1(avec_parameters[3],avec_parameters[4]);
-		a_params->mass2 = calculate_mass2(avec_parameters[3],avec_parameters[4]);
-		a_params->Luminosity_Distance = DL_from_A0((T)(avec_parameters[3]*MSOL_SEC),avec_parameters[0],a_params->sky_average)/MPC_SEC;
-		a_params->tc = avec_parameters[2];
-		a_params->phic = avec_parameters[1];
-		T chi1 = avec_parameters[5] + avec_parameters[6];
-		T chi2 = avec_parameters[5] - avec_parameters[6];
-		T spin1sph[3] = {chi1,0,0};
-		T spin2sph[3] = {chi2,0,0};
-		transform_sph_cart(spin1sph,a_params->spin1);
-		transform_sph_cart(spin2sph,a_params->spin2);
-	}
+	//	a_params->mass1 = calculate_mass1(avec_parameters[7],avec_parameters[8]);
+	//	a_params->mass2 = calculate_mass2(avec_parameters[7],avec_parameters[8]);
+	//	a_params->Luminosity_Distance = avec_parameters[6];
+	//	a_params->RA = avec_parameters[0];
+	//	a_params->DEC = avec_parameters[1];
+	//	a_params->psi = avec_parameters[2];
+	//	a_params->phic = avec_parameters[3];
+	//	a_params->tc = avec_parameters[4];
+	//	T spin1sph[3] = {avec_parameters[9],0,0};
+	//	T spin2sph[3] = {avec_parameters[10],0,0};
+	//	transform_sph_cart(spin1sph,a_params->spin1);
+	//	transform_sph_cart(spin2sph,a_params->spin2);
+	//	a_params->incl_angle=avec_parameters[5];
+	//}
+	//else if(
+	//	(
+	//	generation_method =="MCMC_IMRPhenomD_Full" || 
+	//	generation_method=="MCMC_ppE_IMRPhenomD_Inspiral_Full" ||
+	//	generation_method=="MCMC_ppE_IMRPhenomD_IMR_Full"|| 
+	//	generation_method=="MCMC_dCS_IMRPhenomD_Full"|| 
+	//	generation_method=="MCMC_EdGB_IMRPhenomD_Full"
+	//	)
+	//	&& 
+	//	!a_params->sky_average){
+
+	//	a_params->mass1 = calculate_mass1(avec_parameters[4],avec_parameters[5]);
+	//	a_params->mass2 = calculate_mass2(avec_parameters[4],avec_parameters[5]);
+	//	a_params->Luminosity_Distance = avec_parameters[3];
+	//	a_params->RA = avec_parameters[1];
+	//	a_params->DEC = avec_parameters[2];
+	//	a_params->psi = avec_parameters[9];
+	//	a_params->phiRef = avec_parameters[8];
+	//	T spin1sph[3] = {avec_parameters[6],0,0};
+	//	T spin2sph[3] = {avec_parameters[7],0,0};
+	//	transform_sph_cart(spin1sph,a_params->spin1);
+	//	transform_sph_cart(spin2sph,a_params->spin2);
+	//	a_params->incl_angle=avec_parameters[0];
+	//}
+	//else if(
+	//	(
+	//	generation_method =="MCMC_IMRPhenomD" || 
+	//	generation_method=="MCMC_ppE_IMRPhenomD_Inspiral" ||
+	//	generation_method=="MCMC_ppE_IMRPhenomD_IMR"|| 
+	//	generation_method=="MCMC_dCS_IMRPhenomD"|| 
+	//	generation_method=="MCMC_EdGB_IMRPhenomD"
+	//	)
+	//	&& 
+	//	a_params->sky_average){
+
+	//	a_params->mass1 = calculate_mass1(avec_parameters[0],avec_parameters[1]);
+	//	a_params->mass2 = calculate_mass2(avec_parameters[0],avec_parameters[1]);
+	//	a_params->Luminosity_Distance = 1000;
+	//	T spin1sph[3] = {avec_parameters[2],0,0};
+	//	T spin2sph[3] = {avec_parameters[3],0,0};
+	//	transform_sph_cart(spin1sph,a_params->spin1);
+	//	transform_sph_cart(spin2sph,a_params->spin2);
+	//	a_params->incl_angle=0;
+	//	a_params->phic=0;
+	//	a_params->tc=0;
+	//
+	//}
+	//else if(
+	//	(
+	//	generation_method =="IMRPhenomD" || 
+	//	generation_method=="ppE_IMRPhenomD_Inspiral" || 
+	//	generation_method == "ppE_IMRPhenomD_IMR"
+	//	)
+	//	&& 
+	//	a_params->sky_average){
+
+	//	a_params->mass1 = calculate_mass1(avec_parameters[3],avec_parameters[4]);
+	//	a_params->mass2 = calculate_mass2(avec_parameters[3],avec_parameters[4]);
+	//	a_params->Luminosity_Distance = DL_from_A0((T)(avec_parameters[3]*MSOL_SEC),avec_parameters[0],a_params->sky_average)/MPC_SEC;
+	//	a_params->tc = avec_parameters[2];
+	//	a_params->phic = avec_parameters[1];
+	//	T chi1 = avec_parameters[5] + avec_parameters[6];
+	//	T chi2 = avec_parameters[5] - avec_parameters[6];
+	//	T spin1sph[3] = {chi1,0,0};
+	//	T spin2sph[3] = {chi2,0,0};
+	//	transform_sph_cart(spin1sph,a_params->spin1);
+	//	transform_sph_cart(spin2sph,a_params->spin2);
+	//}
 	if( check_ppE(generation_method)){
 		int base = dim - a_params->Nmod;
 		for(int i = 0 ;i<a_params->Nmod; i++){
