@@ -135,7 +135,7 @@ double Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan
@@ -153,7 +153,7 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan
@@ -163,7 +163,8 @@ double maximized_Log_Likelihood(double *data_real,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				//gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan
@@ -172,7 +173,7 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan,
@@ -344,7 +345,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, int min_dim,double *seeding_var, bool local_seeding);
 
 double MCMC_likelihood_extrinsic(bool save_waveform, 
-	gen_params *parameters,
+	gen_params_base<double> *parameters,
 	std::string generation_method, 
 	int *data_length, 
 	double **frequencies, 
@@ -358,6 +359,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	double gps_time);
 
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
+
+std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method);
 
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
 

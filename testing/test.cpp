@@ -145,7 +145,6 @@ void test38()
 
 	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
 
-
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
@@ -4253,8 +4252,8 @@ void test6()
 		output3[i] = (double*)malloc(dimensionmcmc*sizeof(double));
 	}
 	start7 = clock();
-	fisher(freq, length, "MCMC_IMRPhenomD_single_detect","Hanford_O1_fitted", 
-			output3, dimensionmcmc, &params );
+	fisher_numerical(freq, length, "MCMC_IMRPhenomD_single_detect","Hanford_O1_fitted", 
+			output3, dimensionmcmc, &params ,2);
 
 	end7 = clock();
 
@@ -4269,8 +4268,8 @@ void test6()
 	}
 	
 	start7 = clock();
-	fisher(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
-				&params );
+	fisher_numerical(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
+				&params ,2);
 
 	end7 = clock();
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
@@ -4366,8 +4365,8 @@ void test5()
 		output[i] = (double *)malloc(dimension*sizeof(double));
 	
 	start7 = clock();
-	fisher(freq, length, "ppE_IMRPhenomD_Inspiral","Hanford_O1_fitted", output, dimension, 
-				&params );
+	fisher_numerical(freq, length, "ppE_IMRPhenomD_Inspiral","Hanford_O1_fitted", output, dimension, 
+				&params ,2);
 
 	end7 = clock();
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
@@ -4911,8 +4910,8 @@ void test1()
 		output[i] = (double *)malloc(dimension*sizeof(double));
 	
 	start7 = clock();
-	fisher(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
-				&params );
+	fisher_numerical(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
+				&params ,2);
 
 	end7 = clock();
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;

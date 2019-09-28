@@ -153,7 +153,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	string  gen_method,
        	gen_params *parameters)
 {
-	double epsilon = 1e-10;
+	double epsilon = 1e-8;
 	int order; 
 	//Order of numerical derivative
 	order = 4;
@@ -173,11 +173,6 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	unpack_parameters(parameters_vec, parameters, gen_method, dimension, log_factors);
 	//##########################################################
 	gen_params waveform_params;
-	//waveform_params.NSflag = parameters->NSflag;
-	//waveform_params.gmst = parameters->gmst;
-	//waveform_params.shift_time = false;//parameters->shift_time;
-	//waveform_params.sky_average = parameters->sky_average;
-	//waveform_params.f_ref = parameters->f_ref;
 	repack_non_parameter_options(&waveform_params,parameters, gen_method);
 	//##########################################################
 	if(parameters->sky_average)
@@ -2191,6 +2186,10 @@ std::string local_generation_method(std::string generation_method)
 		local_gen_method.erase(0,5);
 		local_gen_method.erase(local_gen_method.length()-5,5);
 	}
+	else if(generation_method.find("MCMC") != std::string::npos)
+	{
+		local_gen_method.erase(0,5);
+	}
 	return local_gen_method;
 		
 }
@@ -2456,12 +2455,12 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
 				}
-				log_factors[0] = true;//chirpmass
+				//log_factors[0] = true;//chirpmass
 
 				double spin1spher[3];
 				double spin2spher[3];
-				parameters[0]=calculate_chirpmass(input_params->mass1, 
-					input_params->mass2);
+				parameters[0]=log(calculate_chirpmass(input_params->mass1, 
+					input_params->mass2));
 				parameters[1]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
 				parameters[2]=input_params->spin1[2];
@@ -2762,9 +2761,9 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 		else if(generation_method.find("IMRPhenomD") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(avec_parameters[0],
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),
 					avec_parameters[1]);
-				a_params->mass2 = calculate_mass2(avec_parameters[0],
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),
 					avec_parameters[1]);
 				a_params->Luminosity_Distance = 1000;
 				T spin1sph[3] = {avec_parameters[2],0,0};

@@ -362,7 +362,8 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				//gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan
@@ -403,7 +404,7 @@ double maximized_Log_Likelihood(double *data_real,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan
@@ -435,7 +436,7 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan,
@@ -538,7 +539,7 @@ double Log_Likelihood(std::complex<double> *data,
 				double *psd,
 				double *frequencies,
 				size_t length,
-				gen_params *params,
+				gen_params_base<double> *params,
 				std::string detector,
 				std::string generation_method,
 				fftw_outline *plan
@@ -617,15 +618,6 @@ double maximized_Log_Likelihood_aligned_spin_internal(std::complex<double> *data
 	free(g);
 	fftw_free(in);
 	fftw_free(out);
-	//std::cout<<"inner products: "<<max<<" "<<HH<<std::endl;
-
-	//return -0.5*(HH- 2*max);
-	//std::cout<<"ll: "<<.5*(max)/HH<<std::endl;
-	//std::cout<<"psd: "<<psd[1000]<<std::endl;
-	//std::cout<<"freq: "<<frequencies[1000]<<std::endl;
-	//std::cout<<"data: "<<data[1000]<<std::endl;
-	//std::cout<<"SNR**2 template "<<HH<<std::endl;
-	//return .5*(max*max)/HH;
 	return .5*(max)/HH;
 }
 
@@ -1756,7 +1748,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		parameters.phi=0;
 		parameters.theta=0;
 		parameters.NSflag = false;
-		parameters.sky_average = false;
+		parameters.sky_average = true;
 		
 		for(int j =0; j<dimension; j++){
 			for(int k =0; k<dimension; k++)
@@ -1774,6 +1766,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				for(int k =0; k<dimension; k++)
 				{
 					output[j][k] +=temp_out[j][k];
+					std::cout<<output[j][k]<<std::endl;
 				}
 			} 
 		}
@@ -2313,8 +2306,8 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 }
 
 
-
-double MCMC_likelihood_extrinsic(bool save_waveform, gen_params *parameters,std::string generation_method, int *data_length, double **frequencies, std::complex<double> **data, double **psd, std::string *detectors, fftw_outline *fftw_plans, int num_detectors, double RA, double DEC,double gps_time)
+//RA, DEC, and PSI were absorbed into gen_params structure -- remove from arguments
+double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *parameters,std::string generation_method, int *data_length, double **frequencies, std::complex<double> **data, double **psd, std::string *detectors, fftw_outline *fftw_plans, int num_detectors, double RA, double DEC,double gps_time)
 {
 	double *phi = new double[num_detectors];
 	double *theta = new double[num_detectors];
@@ -2417,13 +2410,83 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params *parameters,std:
 	delete [] theta;
 	return ll;
 }
-/*! \brief log likelihood function for MCMC for GW
+/*! \brief utility to do MCMC specific transformations on the input param vector before passing to the repacking utillity
+ *
+ * Returns the local generation method to be used in the LL functions
+ */
+std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method)
+{
+	for(int i = 0 ; i <dimension; i++){
+		temp_params[i]=param[i];
+	}
+	return generation_method;
+}
+double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
+{
+	double ll = 0;
+	double *temp_params = new double[dimension];
+	//#########################################################################
+	gen_params_base<double> gen_params;
+	if(mcmc_intrinsic) gen_params.sky_average = true;
+	else gen_params.sky_average = false;
+	gen_params.f_ref = 20;
+	gen_params.shift_time = true;
+	gen_params.gmst = mcmc_gmst;
+	gen_params.NSflag = false;
+	std::string local_gen = MCMC_prep_params(param, 
+		temp_params,&gen_params, dimension, mcmc_generation_method);
+	//#########################################################################
+	//#########################################################################
+	repack_parameters(temp_params, &gen_params, 
+		"MCMC_"+mcmc_generation_method, dimension, NULL);
+	//#########################################################################
+
+	if(mcmc_intrinsic){
+		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
+			for(int i=0; i < mcmc_num_detectors; i++){
+	
+				ll += maximized_Log_Likelihood(mcmc_data[i], 
+						mcmc_noise[i],
+						mcmc_frequencies[i],
+						(size_t) mcmc_data_length[i],
+						&gen_params,
+						mcmc_detectors[i],
+						local_gen,
+						&mcmc_fftw_plans[i]
+						);
+			}
+
+		}
+		else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+
+		}
+	}
+	else{
+		double RA = gen_params.RA;
+		double DEC = gen_params.DEC;
+		double PSI = gen_params.psi;
+		//if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
+			ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
+				&gen_params,local_gen, mcmc_data_length, 
+				mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, 
+				mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+
+		//}
+		//else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+
+		//}
+	}
+	delete [] temp_params;
+	return ll;
+
+}
+/*! \brief log likelihood function for MCMC for GW -- outdated version
  *
  * Wraps the above likelihood functions and unpacks parameters correctly for common GW analysis
  *
  * Supports all the method/parameter combinations found in MCMC_MH_GW
  */
-double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
+double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 {
 	double ll = 0;
 	//if(mcmc_num_detectors ==1 && mcmc_generation_method =="IMRPhenomD"){	
