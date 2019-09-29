@@ -2352,29 +2352,21 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
 				}
-				log_factors[3] = true;//Distance
-				log_factors[4] = true;//chirpmass
 
-				double spin1spher[3];
-				double spin2spher[3];
-				transform_cart_sph(input_params->spin1, spin1spher);
-				transform_cart_sph(input_params->spin2, spin2spher);
-				parameters[0]=input_params->incl_angle;
-				parameters[1]=input_params->RA;
-				parameters[2]=input_params->DEC;
-				parameters[3]=input_params->Luminosity_Distance;
-				parameters[4]=calculate_chirpmass(input_params->mass1, 
+				parameters[0]=input_params->RA;
+				parameters[1]=input_params->DEC;
+				parameters[2]=input_params->psi;
+				parameters[3]=input_params->phiRef;
+				parameters[4]=cos(input_params->incl_angle);
+				parameters[5]=log(input_params->Luminosity_Distance);
+				parameters[6]=log(calculate_chirpmass(input_params->mass1, 
+					input_params->mass2));
+				parameters[7]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[5]=calculate_eta(input_params->mass1, 
-					input_params->mass2);
-				parameters[6]=spin1spher[0];
-				parameters[7]=spin2spher[0];
-				parameters[8]=spin1spher[1];
-				parameters[9]=spin2spher[1];
-				parameters[10]=spin1spher[2];
-				parameters[11]=spin2spher[2];
-				parameters[12]=input_params->phiRef;
-				parameters[13]=input_params->psi;
+				parameters[8]=input_params->chi1_l;
+				parameters[9]=input_params->chi2_l;
+				parameters[10]=input_params->chip;
+				parameters[11]=input_params->phip;
 
 			}
 			else{
@@ -2406,23 +2398,20 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
 				}
-				log_factors[3] = true;//Distance
-				log_factors[4] = true;//chirpmass
 
 				double spin1spher[3];
 				double spin2spher[3];
-				parameters[0]=input_params->incl_angle;
-				parameters[1]=input_params->RA;
-				parameters[2]=input_params->DEC;
-				parameters[3]=input_params->Luminosity_Distance;
-				parameters[4]=calculate_chirpmass(input_params->mass1, 
+				parameters[0]=input_params->RA;
+				parameters[1]=input_params->DEC;
+				parameters[2]=input_params->psi;
+				parameters[3]=cos(input_params->incl_angle);
+				parameters[4]=log(input_params->Luminosity_Distance);
+				parameters[5]=log(calculate_chirpmass(input_params->mass1, 
+					input_params->mass2));
+				parameters[6]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[5]=calculate_eta(input_params->mass1, 
-					input_params->mass2);
-				parameters[6]=input_params->spin1[2];
-				parameters[7]=input_params->spin2[2];
-				parameters[8]=input_params->phiRef;
-				parameters[9]=input_params->psi;
+				parameters[7]=input_params->spin1[2];
+				parameters[8]=input_params->spin2[2];
 
 			}
 			else{
@@ -2685,22 +2674,23 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	if(!a_params->sky_average){
 		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(avec_parameters[4],
-					avec_parameters[5]);
-				a_params->mass2 = calculate_mass2(avec_parameters[4],
-					avec_parameters[5]);
-				a_params->Luminosity_Distance = avec_parameters[3];
-				a_params->RA = avec_parameters[1];
-				a_params->DEC = avec_parameters[2];
-				a_params->psi = avec_parameters[13];
-				a_params->phiRef = avec_parameters[12];
-				T spin1sph[3] = {avec_parameters[6],avec_parameters[8],
-					avec_parameters[10]};
-				T spin2sph[3] = {avec_parameters[7],avec_parameters[9],
-					avec_parameters[11]};
-				transform_sph_cart(spin1sph,a_params->spin1);
-				transform_sph_cart(spin2sph,a_params->spin2);
-				a_params->incl_angle=avec_parameters[0];
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[6]),
+					avec_parameters[7]);
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[6]),
+					avec_parameters[7]);
+				a_params->Luminosity_Distance = exp(avec_parameters[5]);
+				a_params->RA = avec_parameters[0];
+				a_params->DEC = avec_parameters[1];
+				a_params->psi = avec_parameters[2];
+				a_params->phiRef = avec_parameters[3];
+				a_params->chi1_l = avec_parameters[8];
+				a_params->chi2_l = avec_parameters[9];
+				a_params->spin1[2] = avec_parameters[8];
+				a_params->spin2[2] = avec_parameters[9];
+				a_params->chip = avec_parameters[10];
+				a_params->phip = avec_parameters[11];
+				a_params->incl_angle=acos(avec_parameters[4]);
+				a_params->tc=1;
 
 			}
 			else{
@@ -2724,20 +2714,22 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 		else if(generation_method.find("IMRPhenomD") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(avec_parameters[4],
-					avec_parameters[5]);
-				a_params->mass2 = calculate_mass2(avec_parameters[4],
-					avec_parameters[5]);
-				a_params->Luminosity_Distance = avec_parameters[3];
-				a_params->RA = avec_parameters[1];
-				a_params->DEC = avec_parameters[2];
-				a_params->psi = avec_parameters[9];
-				a_params->phiRef = avec_parameters[8];
-				T spin1sph[3] = {avec_parameters[6],0,0};
-				T spin2sph[3] = {avec_parameters[7],0,0};
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[5]),
+					avec_parameters[6]);
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[5]),
+					avec_parameters[6]);
+				a_params->Luminosity_Distance = exp(avec_parameters[4]);
+				a_params->RA = avec_parameters[0];
+				a_params->DEC = avec_parameters[1];
+				a_params->psi = avec_parameters[2];
+				a_params->incl_angle=acos(avec_parameters[3]);
+				T spin1sph[3] = {avec_parameters[7],0,0};
+				T spin2sph[3] = {avec_parameters[8],0,0};
 				transform_sph_cart(spin1sph,a_params->spin1);
 				transform_sph_cart(spin2sph,a_params->spin2);
-				a_params->incl_angle=avec_parameters[0];
+				//maximized out
+				a_params->phiRef = 0;
+				a_params->tc = 0;
 
 			}
 			else{
