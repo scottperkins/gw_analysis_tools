@@ -36,7 +36,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	int dimension, 
        	string detector, 
        	string  gen_method,
-       	gen_params *parameters);
+       	gen_params *parameters, 
+	int order);
 void fisher_autodiff(double *frequency, 
 	int length,
 	string generation_method, 

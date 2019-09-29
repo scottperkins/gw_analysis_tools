@@ -46,7 +46,8 @@ void IMRPhenomD<T>::fisher_calculation_sky_averaged(double *frequency,
 	//populate model
 	source_parameters<double> input_params;
 	input_params = source_parameters<double>::populate_source_parameters(parameters);
-	input_params.shift_time = parameters->shift_time;
+	//input_params.shift_time = parameters->shift_time;
+	input_params.shift_time = false;
 	//Need the splitting frequency	
 	lambda_parameters<double> lambda, *lambda_ptr;
 	modeld.assign_lambda_param(&input_params, &lambda);

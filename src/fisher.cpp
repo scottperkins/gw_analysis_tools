@@ -104,7 +104,8 @@ void fisher_numerical(double *frequency,
 			dimension, 
 			detector, 
 			generation_method,
-			parameters);
+			parameters,
+			order);
 
 	//double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
 	//for (int i = 0; i<dimension; i++)
@@ -151,13 +152,11 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	int dimension, 
        	string detector, 
        	string  gen_method,
-       	gen_params *parameters)
+       	gen_params *parameters,
+	int order)
 {
 	double epsilon = 1e-8;
-	int order; 
 	//Order of numerical derivative
-	order = 4;
-	//order = 2;
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
 	double param_p[dimension];
@@ -195,7 +194,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		fourier_amplitude(frequencies, 
 			length,
 			amplitude,
-			gen_method,
+			local_gen_method,
 			parameters);	
 		for(int i = 0 ; i<dimension; i++){
 			for (int i =0; i<dimension; i++){
@@ -281,6 +280,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 							std::complex<double>(0,1)*phase_deriv*amplitude[l];
 					}
 				}
+
 					
 			}
 		}
@@ -1940,113 +1940,114 @@ void fisher_autodiff(double *frequency,
 	for(int i =0 ;i<dimension; i++){
 		response_deriv[i] = new std::complex<double>[length];
 	}
-	
-	//##########################################################
-	//Old style fisher calculation for sky-averaged PhenomD-- less flexible
-	//##########################################################
-	if (parameters->sky_average && generation_method == "IMRPhenomD")
-	{
-		double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
-		for (int i = 0; i<dimension; i++)
-			amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
-		double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
-		for (int i = 0; i<dimension; i++)
-			phase_deriv[i] = (double *)malloc(length*sizeof(double));
-		double *amplitude = (double*)malloc(length*sizeof(double));
-		IMRPhenomD<double> model;
-		model.fisher_calculation_sky_averaged(frequency, 
-			length, 
-			parameters,
-			amplitude_deriv, 
-			phase_deriv, 
-			amplitude, 
-			amp_tapes, 
-			phase_tapes
-			);
-		for(int j = 0  ;j<dimension; j++){
-			for(int i = 0 ; i<length ; i++){
-				response_deriv[j][i] = amplitude_deriv[j][i] - std::complex<double>(0,1)*amplitude[i]*phase_deriv[j][i];
-			}
-		}
-		for (int i =0;i<dimension;i++)
-		{
-			free( amplitude_deriv[i]);
-			free( phase_deriv[i]);
-		}
-		free(amplitude_deriv);
-		free(phase_deriv);
-		free(amplitude);
-	}
-	else if (parameters->sky_average &&generation_method == "ppE_IMRPhenomD_Inspiral")
-	{
-		double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
-		for (int i = 0; i<dimension; i++)
-			amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
-		double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
-		for (int i = 0; i<dimension; i++)
-			phase_deriv[i] = (double *)malloc(length*sizeof(double));
-		double *amplitude = (double*)malloc(length*sizeof(double));
-		ppE_IMRPhenomD_Inspiral<double> ppemodel;
-		ppemodel.fisher_calculation_sky_averaged(frequency, 
-			length, 
-			parameters,
-			amplitude_deriv, 
-			phase_deriv, 
-			amplitude, 
-			amp_tapes, 
-			phase_tapes
-			);
-		for(int j = 0  ;j<dimension; j++){
-			for(int i = 0 ; i<length ; i++){
-				response_deriv[j][i] = amplitude_deriv[j][i] - std::complex<double>(0,1)*amplitude[i]*phase_deriv[j][i];
-			}
-		}
-		for (int i =0;i<dimension;i++)
-		{
-			free( amplitude_deriv[i]);
-			free( phase_deriv[i]);
-		}
-		free(amplitude_deriv);
-		free(phase_deriv);
-		free(amplitude);
-	}
-	else if (parameters->sky_average &&generation_method == "ppE_IMRPhenomD_IMR")
-	{
-		double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
-		for (int i = 0; i<dimension; i++)
-			amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
-		double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
-		for (int i = 0; i<dimension; i++)
-			phase_deriv[i] = (double *)malloc(length*sizeof(double));
-		double *amplitude = (double*)malloc(length*sizeof(double));
-		ppE_IMRPhenomD_IMR<double> ppemodel;
-		ppemodel.fisher_calculation_sky_averaged(frequency, 
-			length, 
-			parameters,
-			amplitude_deriv, 
-			phase_deriv, 
-			amplitude, 
-			amp_tapes, 
-			phase_tapes
-			);
-		for(int j = 0  ;j<dimension; j++){
-			for(int i = 0 ; i<length ; i++){
-				response_deriv[j][i] = amplitude_deriv[j][i] - std::complex<double>(0,1)*amplitude[i]*phase_deriv[j][i];
-			}
-		}
-		for (int i =0;i<dimension;i++)
-		{
-			free( amplitude_deriv[i]);
-			free( phase_deriv[i]);
-		}
-		free(amplitude_deriv);
-		free(phase_deriv);
-		free(amplitude);
-	}
+	//
+	////##########################################################
+	////Old style fisher calculation for sky-averaged PhenomD-- less flexible
+	////##########################################################
+	//if (parameters->sky_average && generation_method == "IMRPhenomD")
+	//{
+	//	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
+	//	for (int i = 0; i<dimension; i++)
+	//		amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
+	//	double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
+	//	for (int i = 0; i<dimension; i++)
+	//		phase_deriv[i] = (double *)malloc(length*sizeof(double));
+	//	double *amplitude = (double*)malloc(length*sizeof(double));
+	//	IMRPhenomD<double> model;
+	//	model.fisher_calculation_sky_averaged(frequency, 
+	//		length, 
+	//		parameters,
+	//		amplitude_deriv, 
+	//		phase_deriv, 
+	//		amplitude, 
+	//		amp_tapes, 
+	//		phase_tapes
+	//		);
+	//	for(int j = 0  ;j<dimension; j++){
+	//		for(int i = 0 ; i<length ; i++){
+	//			response_deriv[j][i] = amplitude_deriv[j][i] - std::complex<double>(0,1)*amplitude[i]*phase_deriv[j][i];
+	//		}
+	//	}
+	//	for (int i =0;i<dimension;i++)
+	//	{
+	//		free( amplitude_deriv[i]);
+	//		free( phase_deriv[i]);
+	//	}
+	//	free(amplitude_deriv);
+	//	free(phase_deriv);
+	//	free(amplitude);
+	//}
+	//else if (parameters->sky_average &&generation_method == "ppE_IMRPhenomD_Inspiral")
+	//{
+	//	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
+	//	for (int i = 0; i<dimension; i++)
+	//		amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
+	//	double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
+	//	for (int i = 0; i<dimension; i++)
+	//		phase_deriv[i] = (double *)malloc(length*sizeof(double));
+	//	double *amplitude = (double*)malloc(length*sizeof(double));
+	//	ppE_IMRPhenomD_Inspiral<double> ppemodel;
+	//	ppemodel.fisher_calculation_sky_averaged(frequency, 
+	//		length, 
+	//		parameters,
+	//		amplitude_deriv, 
+	//		phase_deriv, 
+	//		amplitude, 
+	//		amp_tapes, 
+	//		phase_tapes
+	//		);
+	//	for(int j = 0  ;j<dimension; j++){
+	//		for(int i = 0 ; i<length ; i++){
+	//			response_deriv[j][i] = amplitude_deriv[j][i] - std::complex<double>(0,1)*amplitude[i]*phase_deriv[j][i];
+	//		}
+	//	}
+	//	for (int i =0;i<dimension;i++)
+	//	{
+	//		free( amplitude_deriv[i]);
+	//		free( phase_deriv[i]);
+	//	}
+	//	free(amplitude_deriv);
+	//	free(phase_deriv);
+	//	free(amplitude);
+	//}
+	//else if (parameters->sky_average &&generation_method == "ppE_IMRPhenomD_IMR")
+	//{
+	//	double **amplitude_deriv = (double **)malloc(dimension*sizeof(**amplitude_deriv));
+	//	for (int i = 0; i<dimension; i++)
+	//		amplitude_deriv[i] = (double *)malloc(length*sizeof(double));
+	//	double **phase_deriv = (double **)malloc(dimension*sizeof(**phase_deriv));
+	//	for (int i = 0; i<dimension; i++)
+	//		phase_deriv[i] = (double *)malloc(length*sizeof(double));
+	//	double *amplitude = (double*)malloc(length*sizeof(double));
+	//	ppE_IMRPhenomD_IMR<double> ppemodel;
+	//	ppemodel.fisher_calculation_sky_averaged(frequency, 
+	//		length, 
+	//		parameters,
+	//		amplitude_deriv, 
+	//		phase_deriv, 
+	//		amplitude, 
+	//		amp_tapes, 
+	//		phase_tapes
+	//		);
+	//	for(int j = 0  ;j<dimension; j++){
+	//		for(int i = 0 ; i<length ; i++){
+	//			response_deriv[j][i] = amplitude_deriv[j][i] - std::complex<double>(0,1)*amplitude[i]*phase_deriv[j][i];
+	//		}
+	//	}
+	//	for (int i =0;i<dimension;i++)
+	//	{
+	//		free( amplitude_deriv[i]);
+	//		free( phase_deriv[i]);
+	//	}
+	//	free(amplitude_deriv);
+	//	free(phase_deriv);
+	//	free(amplitude);
+	//}
 	//##########################################################
 	//New style fisher calculation -- should be used for any future waveforms
 	//##########################################################
-	else{
+	//else
+	{
 		calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
 	}
 	//##########################################################
@@ -2117,8 +2118,19 @@ void calculate_derivatives_autodiff(double *frequency,
 		afreq = avec_parameters[0];
 		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension, parameters);
 		std::complex<adouble> a_response;
-		int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters);
+		if(!a_parameters.sky_average){
+			int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters);
 
+		}
+		else{
+			adouble a_amp;
+			adouble a_phase;
+		
+			int status  = fourier_amplitude(&afreq, 1, &a_amp, local_gen_method, &a_parameters);
+			status  = fourier_phase(&afreq, 1, &a_phase,  local_gen_method, &a_parameters);
+			a_response = a_amp * exp(std::complex<adouble>(0,-a_phase));
+
+		}
 		double response[2];
 		real(a_response) >>=  response[0];	
 		imag(a_response) >>=  response[1];	
@@ -2457,8 +2469,6 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				}
 				//log_factors[0] = true;//chirpmass
 
-				double spin1spher[3];
-				double spin2spher[3];
 				parameters[0]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
 				parameters[1]=calculate_eta(input_params->mass1, 
@@ -2770,9 +2780,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				T spin2sph[3] = {avec_parameters[3],0,0};
 				transform_sph_cart(spin1sph,a_params->spin1);
 				transform_sph_cart(spin2sph,a_params->spin2);
-				a_params->incl_angle=0;
 				a_params->phic=0;
 				a_params->tc=0;
+				//a_params->incl_angle=0;
+				//a_params->RA=1.;
+				//a_params->DEC=1.;
+				//a_params->psi=1.;
+				//a_params->gmst=1185389807.3;
 
 			}
 			else{
@@ -2791,6 +2805,11 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				T spin2sph[3] = {chi2,0,0};
 				transform_sph_cart(spin1sph,a_params->spin1);
 				transform_sph_cart(spin2sph,a_params->spin2);
+				//a_params->incl_angle=0;
+				//a_params->RA=1.;
+				//a_params->DEC=1.;
+				//a_params->psi=1.;
+				//a_params->gmst=1185389807.3;
 			}	
 		}	
 

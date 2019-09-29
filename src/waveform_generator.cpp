@@ -538,11 +538,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
  * By using the structure parameter, the function is allowed to be more flexible in using different 
  * method of waveform generation - not all methods use the same parameters
  */
-int fourier_amplitude(double *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
+template<class T>
+int fourier_amplitude(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
 			int length,/**<integer length of all the arrays*/
-			double *amplitude, /**< output array for the amplitude*/
+			T *amplitude, /**< output array for the amplitude*/
 			string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			)
 {
 	int status=1;
@@ -555,7 +556,7 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 		return 0;
 	}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
-	source_parameters<double> params;
+	source_parameters<T> params;
 	params = params.populate_source_parameters(parameters);
 	//params.f_ref = parameters->f_ref;
 	//params.phiRef = parameters->phiRef;
@@ -563,7 +564,7 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 	params.shift_time = parameters->shift_time;
 	if(generation_method == "IMRPhenomD")
 	{
-		IMRPhenomD<double> modeld;
+		IMRPhenomD<T> modeld;
 		status = modeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
@@ -571,27 +572,27 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		params.betappe = parameters->betappe;
-		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
+		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "dCS_IMRPhenomD_log")
 	{
-		dCS_IMRPhenomD_log<double> ppemodeld;
+		dCS_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
-		dCS_IMRPhenomD<double> ppemodeld;
+		dCS_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "EdGB_IMRPhenomD_log")
 	{
-		EdGB_IMRPhenomD_log<double> ppemodeld;
+		EdGB_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "EdGB_IMRPhenomD")
 	{
-		EdGB_IMRPhenomD<double> ppemodeld;
+		EdGB_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "ppE_IMRPhenomD_IMR")
@@ -599,22 +600,25 @@ int fourier_amplitude(double *frequencies, /**< double array of frequencies for 
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		params.betappe = parameters->betappe;
-		ppE_IMRPhenomD_IMR<double> ppemodeld;
+		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 
 	return status ;
 }
+template int fourier_amplitude<double>(double *, int , double * ,std::string, gen_params_base<double> *);
+template int fourier_amplitude<adouble>(adouble *, int , adouble * ,std::string, gen_params_base<adouble> *);
 /*!\brief Function to produce the phase of the (2,2) mode of an quasi-circular binary
  *
  * By using the structure parameter, the function is allowed to be more flexible in using different 
  * method of waveform generation - not all methods use the same parameters
  */
-int fourier_phase(double *frequencies, /**<double array of frequencies for the waveform to be evaluated at*/
+template<class T>
+int fourier_phase(T *frequencies, /**<double array of frequencies for the waveform to be evaluated at*/
 			int length,/**<integer length of all the arrays*/
-			double *phase, /**<output array for the phase*/
+			T *phase, /**<output array for the phase*/
 			string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			)
 {
 	int status=1;
@@ -627,14 +631,14 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		return 0;
 	}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
-	double mass1 = parameters->mass1;
-	double mass2 = parameters->mass2;
-	double Luminosity_Distance = parameters->Luminosity_Distance;
-	double *spin1 = parameters->spin1;
-	double *spin2 = parameters->spin2;
-	double phi_c = parameters->phic;
-	double t_c = parameters->tc;
-	source_parameters<double> params;
+	//double mass1 = parameters->mass1;
+	//double mass2 = parameters->mass2;
+	//double Luminosity_Distance = parameters->Luminosity_Distance;
+	//double *spin1 = parameters->spin1;
+	//double *spin2 = parameters->spin2;
+	//double phi_c = parameters->phic;
+	//double t_c = parameters->tc;
+	source_parameters<T> params;
 	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
 	params = params.populate_source_parameters(parameters);
 	params.f_ref = parameters->f_ref;
@@ -644,7 +648,7 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 
 	if(generation_method == "IMRPhenomD")
 	{
-		IMRPhenomD<double> modeld;
+		IMRPhenomD<T> modeld;
 		status = modeld.construct_phase(frequencies, length, phase, &params);	
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
@@ -652,7 +656,7 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
-		ppE_IMRPhenomD_Inspiral<double> ppemodeld;
+		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 	}
 	else if(generation_method == "dCS_IMRPhenomD_log")
@@ -662,10 +666,10 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.Nmod = 1;
 		int tempbppe[params.Nmod] = {-1};
 		params.bppe = tempbppe;
-		double temp[params.Nmod] ;
+		T temp[params.Nmod] ;
 		for( int i = 0; i < params.Nmod; i++)
 			temp[i] = params.betappe[i];
-		dCS_IMRPhenomD_log<double> ppemodeld;
+		dCS_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 		
 		for( int i = 0; i < params.Nmod; i++)
@@ -678,10 +682,10 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.Nmod = 1;
 		int tempbppe[params.Nmod] = {-1};
 		params.bppe = tempbppe;
-		double temp[params.Nmod] ;
+		T temp[params.Nmod] ;
 		for( int i = 0; i < params.Nmod; i++)
 			temp[i] = params.betappe[i];
-		dCS_IMRPhenomD<double> ppemodeld;
+		dCS_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 		
 		for( int i = 0; i < params.Nmod; i++)
@@ -693,10 +697,10 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.Nmod = 1;
 		int tempbppe[params.Nmod] = {-7};
 		params.bppe = tempbppe;
-		double temp[params.Nmod] ;
+		T temp[params.Nmod] ;
 		for( int i = 0; i < params.Nmod; i++)
 			temp[i] = params.betappe[i];
-		EdGB_IMRPhenomD_log<double> ppemodeld;
+		EdGB_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
@@ -707,10 +711,10 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.Nmod = 1;
 		int tempbppe[params.Nmod] = {-7};
 		params.bppe = tempbppe;
-		double temp[params.Nmod] ;
+		T temp[params.Nmod] ;
 		for( int i = 0; i < params.Nmod; i++)
 			temp[i] = params.betappe[i];
-		EdGB_IMRPhenomD<double> ppemodeld;
+		EdGB_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
@@ -720,12 +724,14 @@ int fourier_phase(double *frequencies, /**<double array of frequencies for the w
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
-		ppE_IMRPhenomD_IMR<double> ppemodeld;
+		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
 	}
 
 	return status ;
 }
+template int fourier_phase<double>(double *, int , double * , std::string, gen_params_base<double> *);
+template int fourier_phase<adouble>(adouble *, int , adouble * , std::string,gen_params_base<adouble> *);
 /*!\brief Function to produce the phase of the plus and cross mode of a quasi-circular binary
  *
  * By using the structure parameter, the function is allowed to be more flexible in using different 

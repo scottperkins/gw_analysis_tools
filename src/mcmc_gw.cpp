@@ -373,7 +373,6 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 	if(	generation_method  == "IMRPhenomD" ||
 		generation_method  == "ppE_IMRPhenomD_Inspiral" ||
 		generation_method  == "ppE_IMRPhenomD_IMR" ){
-		//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->spin1[2]<<" "<<params->spin2[2]<<std::endl;	
 		std::complex<double> *response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 		fourier_detector_response(frequencies, length, response, detector, generation_method, params);
@@ -390,7 +389,6 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 		std::complex<double> *hc =
 				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 		fourier_waveform(frequencies,length,hp,hc,generation_method,params);
-		//std::cout<<"WAVEFORM"<<hp[0]<<std::endl;
 		ll = maximized_Log_Likelihood_unaligned_spin_internal(data,psd,frequencies,hp,hc, length, plan);
 
 		free(hp);
@@ -447,10 +445,8 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 	std::complex<double> *response =
 		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
-	//std::cout<<params->betappe[0]<<std::endl;
 	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,
 				response, length, plan, tc, phic);
-	//std::cout<<detector<<std::endl;
 	free(response);
 	return ll;
 }
@@ -516,7 +512,6 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	double Tau = 1./delta_f;
 	*tc = (double)(max_index)/length * ( Tau );
 	*phic = std::arg(gc[max_index]);
-	//std::cout<<*tc<<std::endl;
 	//double max = *std::max_element(g, g+length)*delta_f; 
 
 	free(integrand);
@@ -524,8 +519,6 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	free(gc);
 	fftw_free(in);
 	fftw_free(out);
-	//std::cout<<"inner products: "<<max_val<<" "<<HH<<std::endl;
-	//std::cout<<"inner products max: "<<max_val<<" "<<HH<<std::endl;
 
 	return -0.5*(HH- 2*max_val);
 	//return .5*(max*max)/HH;
@@ -550,12 +543,9 @@ double Log_Likelihood(std::complex<double> *data,
 	std::complex<double> *detect_response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 	fourier_detector_response(frequencies,length,detect_response,detector, generation_method,params);
-	//std::cout<<detect_response[length/2]<<std::endl;
 	ll = Log_Likelihood_internal(data,psd,frequencies,detect_response, length, plan);
 
 	//if(ll>0){
-	//std::cout<<detector<<std::endl;
-	//std::cout<<ll<<std::endl;
 	//}
 	free(detect_response);
 	return ll;
@@ -790,7 +780,6 @@ double Log_Likelihood_internal(std::complex<double> *data,
 
 	free(integrand);
 	
-	//std::cout<<"inner products not max: "<<DH<<" "<<HH<<std::endl;
 	return -0.5*(HH- 2*DH);
 }
 /*! \brief Takes in an MCMC checkpoint file and continues the chain
@@ -1766,7 +1755,6 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				for(int k =0; k<dimension; k++)
 				{
 					output[j][k] +=temp_out[j][k];
-					std::cout<<output[j][k]<<std::endl;
 				}
 			} 
 		}
@@ -1838,7 +1826,6 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				for(int k =0; k<dimension; k++)
 				{
 					output[j][k] +=temp_out[j][k];
-					//std::cout<<j<<" "<<k<<" "<<output[j][k]<<std::endl;
 				}
 			} 
 		}
@@ -2416,6 +2403,17 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
  */
 std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method)
 {
+	if(mcmc_intrinsic) gen_params->sky_average = true;
+	else gen_params->sky_average = false;
+	gen_params->f_ref = 20;
+	gen_params->shift_time = true;
+	gen_params->gmst = mcmc_gmst;
+	gen_params->NSflag = false;
+	if(check_ppE(generation_method)){
+		gen_params->bppe=mcmc_bppe;
+		gen_params->Nmod=mcmc_Nmod;
+		gen_params->betappe=new double[gen_params->Nmod];
+	}
 	for(int i = 0 ; i <dimension; i++){
 		temp_params[i]=param[i];
 	}
@@ -2427,12 +2425,6 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	double *temp_params = new double[dimension];
 	//#########################################################################
 	gen_params_base<double> gen_params;
-	if(mcmc_intrinsic) gen_params.sky_average = true;
-	else gen_params.sky_average = false;
-	gen_params.f_ref = 20;
-	gen_params.shift_time = true;
-	gen_params.gmst = mcmc_gmst;
-	gen_params.NSflag = false;
 	std::string local_gen = MCMC_prep_params(param, 
 		temp_params,&gen_params, dimension, mcmc_generation_method);
 	//#########################################################################
@@ -2440,11 +2432,17 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	repack_parameters(temp_params, &gen_params, 
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
 	//#########################################################################
+	//#########################################################################
 
 	if(mcmc_intrinsic){
 		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
 			for(int i=0; i < mcmc_num_detectors; i++){
-	
+				gen_params.theta=0;	
+				gen_params.phi=0;	
+				gen_params.psi=0;	
+				gen_params.phiRef = 0;
+				gen_params.f_ref = 10;
+				gen_params.incl_angle=0;	
 				ll += maximized_Log_Likelihood(mcmc_data[i], 
 						mcmc_noise[i],
 						mcmc_frequencies[i],
@@ -2477,6 +2475,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		//}
 	}
 	delete [] temp_params;
+	if(check_ppE(local_gen)){
+		delete [] gen_params.betappe;
+	}
 	return ll;
 
 }

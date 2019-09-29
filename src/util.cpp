@@ -541,6 +541,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->zeta_polariz = param_in->zeta_polariz;
 	param_out->phi_aligned = param_in->phi_aligned;
 	param_out->chil = param_in->chil;
+	param_out->sky_average = param_in->sky_average;
 	
 }
 template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> *);

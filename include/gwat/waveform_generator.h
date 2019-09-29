@@ -42,18 +42,20 @@ int fourier_waveform(double *frequencies,
 			std::string generation_method,
 			gen_params *parameters);
 
-int fourier_amplitude(double *frequencies, 
+template<class T>
+int fourier_amplitude(T *frequencies, 
 			int length,
-			double *amplitude, 
+			T *amplitude, 
 			std::string generation_method,
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			);
 
-int fourier_phase(double *frequencies, 
+template<class T>
+int fourier_phase(T *frequencies, 
 			int length,
-			double *phase, 
+			T *phase, 
 			std::string generation_method,
-			gen_params *parameters
+			gen_params_base<T> *parameters
 			);
 template<class T>
 int fourier_phase(T *frequencies, 
