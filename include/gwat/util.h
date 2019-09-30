@@ -149,6 +149,13 @@ public:
 	std::string cosmology="PLANCK15";
 	
 	bool shift_time = true;
+
+
+	//LISA SPECIFIC OPTIONS
+	T  LISA_alpha0;
+	T  LISA_phi0;
+	T  LISA_thetal;
+	T  LISA_phil;
 	
 };
 

@@ -18,8 +18,7 @@ using namespace std;
 
 
 
-
-/*!\file 
+/*! \file 
  *
  * All subroutines associated with waveform differentiation and Fisher analysis
  *
@@ -1901,6 +1900,63 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 	free(phase_cross_minus);
 }
 
+/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention in ``batch'' mode for modifications to GR
+ *
+ * Built  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
+ *
+ * This constructs the fisher for a list of modifications in the usual way, but skips elements of the fisher that correspond to (mod, mod) elements. Specifically, it calculates all the fisher elements except (i, j ) i>GR_dimension && j > GR_dimension && i!=j.
+ *
+ * To find the fisher for one of the modifications, simply remove all the other  dimensions associated with the extra modifications using rm_fisher_dim in util.h
+ *
+ * !NOTE!:This routine only works as intended when GR is the injected value, that is all the  betas are evaluated at 0. And since the covariances between modifications are not computed, this should only be used to look at one modification at a time.
+ */
+void fisher_autodiff_batch_mod(double *frequency, 
+	int length,/**< if 0, standard frequency range for the detector is used*/ 
+	std::string generation_method, 
+	std::string detector, 
+	double **output,/**< double [dimension][dimension]*/
+	int base_dimension, /**< GR dimensionality*/
+	int full_dimension, /**< Total dimension of the output fisher (ie GR_dimension + Nmod)*/
+	gen_params *parameters,
+	//double *parameters,
+	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	double *noise
+	)
+{
+	//populate noise and frequency
+	double *internal_noise;
+	bool local_noise=false;
+	if (noise)
+	{
+		internal_noise = noise;
+	}
+	else{
+		internal_noise = new double[length];
+		populate_noise(frequency,detector, internal_noise,length);
+		for (int i =0; i<length;i++)
+		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
+		local_noise=true;
+	}
+		
+	//populate derivatives
+
+	std::complex<double> **response_deriv = new std::complex<double>*[full_dimension];
+	for(int i =0 ;i<full_dimension; i++){
+		response_deriv[i] = new std::complex<double>[length];
+	}
+	calculate_derivatives_autodiff(frequency,length, full_dimension,generation_method, parameters, response_deriv, NULL, detector);
+	//##########################################################
+	
+	//calulate fisher elements
+	calculate_fisher_elements_batch(frequency, length,base_dimension, full_dimension, response_deriv, output,  internal_noise);
+
+	if(local_noise){delete [] internal_noise;}
+	for(int i =0 ;i<full_dimension; i++){
+		delete [] response_deriv[i];
+	}
+	delete [] response_deriv;
+}
 
 /*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
@@ -2110,16 +2166,25 @@ void calculate_derivatives_autodiff(double *frequency,
 		}
 		//Repack parameters
 		gen_params_base<adouble> a_parameters;
+		adouble afreq;
+		afreq = avec_parameters[0];
 		//############################################
 		//Non variable parameters
 		repack_non_parameter_options(&a_parameters,parameters,generation_method);
 		//############################################
-		adouble afreq;
-		afreq = avec_parameters[0];
 		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension, parameters);
+		//############################################
+		adouble *times=NULL;
+		if(detector=="LISA"){
+			times = new adouble[1];
+			//correct time needs to stay false for now
+			time_phase_corrected(times, 1,&afreq,  &a_parameters, local_gen_method, false);
+			map_extrinsic_angles(&a_parameters);
+		}
+		//############################################
 		std::complex<adouble> a_response;
 		if(!a_parameters.sky_average){
-			int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters);
+			int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, times);
 
 		}
 		else{
@@ -2136,6 +2201,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		imag(a_response) >>=  response[1];	
 
 		trace_off();
+		if(times){
+			delete  [] times;
+		}
 		deallocate_non_param_options(&a_parameters, parameters, generation_method);
 	}
 
@@ -2970,6 +3038,8 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->NSflag = input_params->NSflag;
 	waveform_params->shift_time = false;
+	waveform_params->LISA_alpha0 = input_params->LISA_alpha0;
+	waveform_params->LISA_phi0 = input_params->LISA_phi0;
 	if( check_ppE(gen_method)){
 		waveform_params->bppe = input_params->bppe;
 		waveform_params->Nmod = input_params->Nmod;
@@ -3003,6 +3073,71 @@ bool check_ppE(std::string generation_method)
 	return false;
 }
 
+/*! \brief Subroutine to calculate fisher elements for a subset of the fisher
+ *
+ * Skips elements that have dimensions (i,j) for i!=j && i>base_dim && j>base_dim
+ *
+ * Sets non-computed elements to zero
+ *
+ */
+void calculate_fisher_elements_batch(double *frequency, 
+	int length, 
+	int base_dimension, 
+	int full_dimension, 
+	std::complex<double> **response_deriv, 
+	double **output,
+	double *psd)
+{
+	//list of modifications
+	int mod_list[full_dimension-base_dimension];
+	for(int i = base_dimension; i<full_dimension; i++){
+		mod_list[i-base_dimension]=i;
+	}
+
+	double *integrand=new double[length];
+	for (int j=0;j<full_dimension; j++)
+	{
+		
+		for (int k = 0; k<j; k++)
+		{
+			//Mod mod element of fisher, set to zero
+			if(check_list(k, mod_list, full_dimension-base_dimension) &&check_list(k, mod_list, full_dimension-base_dimension)){
+				output[j][k] = 0;	
+			}
+			//GR GR or GR mod element of the fisher
+			else{
+				for (int i =0;i<length;i++)
+				{
+					integrand[i] = 
+						real( 
+						(response_deriv[j][i]*
+						std::conj(response_deriv[k][i]))
+						/psd[i]);
+				}
+				
+				output[j][k] = 4*simpsons_sum(
+							frequency[1]-frequency[0], length, integrand);	
+			}
+			output[k][j] = output[j][k];
+		}
+
+	}
+
+	//All diagonal terms are calculated
+	for (int j = 0; j<full_dimension; j ++)
+	{
+
+		for (int i =0;i<length;i++){
+				integrand[i] = 
+					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
+					/psd[i]);
+		}
+		output[j][j] = 4*simpsons_sum(
+					frequency[1]-frequency[0], length, integrand);	
+	}
+	delete [] integrand;	
+
+}
 void calculate_fisher_elements(double *frequency, 
 	int length, 
 	int dimension, 

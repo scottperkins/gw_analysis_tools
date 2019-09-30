@@ -2356,6 +2356,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	double *theta = new double[num_detectors];
 	celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
 	double tc_ref, phic_ref, ll=0, delta_t;
+	double LISA_alpha0,LISA_phi0, LISA_thetal, LISA_phil;
+	double *times=NULL;
 	//Needs some work
 	if (save_waveform){
 	//if (false){
@@ -2376,7 +2378,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		//	detectors[0]);
 		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
 			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
-			parameters->gmst,detectors[0]);
+			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
 		ll += maximized_coal_Log_Likelihood_internal(data[0], 
 				psd[0],
 				frequencies[0],
@@ -2406,7 +2408,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			//	detectors[i]);
 			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
 				hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
-				parameters->gmst,detectors[i]);
+				parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
 			for(int j =0; j<data_length[i]; j++){
 				response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
 			}

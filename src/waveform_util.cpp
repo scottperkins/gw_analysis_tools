@@ -7,6 +7,7 @@
 #include <complex>
 #include <vector>
 #include <string>
+#include "IMRPhenomD.h"
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
@@ -197,34 +198,6 @@ int fourier_detector_response(T *frequencies, /**<array of frequencies correspon
 	return status;
 	
 }
-/* \brief calculates the detector response for a given waveform and detector -- using equatorial coordinates and greenwich mean sidereal time
- */
-template<class T>
-int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencies corresponding to waveform*/
-			int length,/**< length of frequency/waveform arrays*/
-			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
-			std::complex<T> *detector_response, /**< [out] detector response*/
-			T ra, /**< Right Ascension in rad*/
-			T dec, /**< Declination in rad*/ 
-			T psi, /**< polarization angle (rad) */ 
-			double gmst, /**< greenwich mean sidereal time*/ 
-			std::string detector/**< detector - list of supported detectors in noise_util*/
-			)
-{
-	int status=1;
-	T Fplus, Fcross;
-	
-	detector_response_functions_equatorial(detector, ra, dec, psi, gmst, &Fplus, &Fcross);
-	
-	for (int i =0; i <length; i++)
-	{
-		detector_response[i] = Fplus * hplus[i] 
-					+ (Fcross )*hcross[i];
-	}	
-	return status;
-	
-}
 
 /*!\brief Function to produce the detector response caused by impinging gravitational waves from a quasi-circular binary
  *
@@ -277,6 +250,68 @@ int fourier_detector_response(T *frequencies, /**< double array of frequencies f
 
 	return status;
 }
+/* \brief calculates the detector response for a given waveform and detector -- using equatorial coordinates and greenwich mean sidereal time
+ */
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencies corresponding to waveform*/
+			int length,/**< length of frequency/waveform arrays*/
+			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			std::complex<T> *detector_response, /**< [out] detector response*/
+			T ra, /**< Right Ascension in rad*/
+			T dec, /**< Declination in rad*/ 
+			T psi, /**< polarization angle (rad) */ 
+			double gmst, /**< greenwich mean sidereal time*/ 
+			T *times,
+			T LISA_alpha0,
+			T LISA_phi0,
+			T LISA_thetal,
+			T LISA_phil,
+			std::string detector/**< detector - list of supported detectors in noise_util*/
+			)
+{
+	int status=1;
+	T Fplus, Fcross;
+
+	detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,LISA_thetal,LISA_phil, &Fplus, &Fcross);
+	
+	if(detector == "LISA"){
+
+	}
+	else{
+		for (int i =0; i <length; i++)
+		{
+			detector_response[i] = Fplus * hplus[i] 
+						+ (Fcross )*hcross[i];
+		}	
+	}
+	return status;
+	
+}
+/*!\brief Function to produce the detector response caused by impinging gravitational waves from a quasi-circular binary for equatorial coordinates for TERRESTIAL detectors, where the earth's rotation during the signal is minor
+ *
+ * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * method of waveform generation - not all methods use the same parameters
+ *
+ * This puts the responsibility on the user to pass the necessary parameters
+ *
+ * Detector options include classic interferometers like LIGO/VIRGO (coming soon: ET and LISA)
+ * 	
+ * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
+ */
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ 
+			int length,/**<integer length of all the arrays*/
+			std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
+			std::string detector,
+			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
+			)
+{
+	T *times=NULL;
+	return fourier_detector_response_equatorial(frequencies, length,response, detector, generation_method, parameters, times);	
+
+}
 /*!\brief Function to produce the detector response caused by impinging gravitational waves from a quasi-circular binary for equatorial coordinates
  *
  * By using the structure parameter, the function is allowed to be more flexible in using different 
@@ -289,11 +324,13 @@ int fourier_detector_response(T *frequencies, /**< double array of frequencies f
  * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
  */
 template<class T>
-int fourier_detector_response_equatorial(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ int length,/**<integer length of all the arrays*/
+int fourier_detector_response_equatorial(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/ 
+			int length,/**<integer length of all the arrays*/
 			std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
 			std::string detector,
 			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
-			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
+			gen_params_base<T> *parameters,/**<structure containing all the source parameters*/
+			T *times
 			)
 {
 	int status = 1;
@@ -316,6 +353,11 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 			parameters->DEC, 
 			parameters->psi, 
 			parameters->gmst, 
+			times,
+			parameters->LISA_alpha0,
+			parameters->LISA_phi0,
+			parameters->LISA_thetal,
+			parameters->LISA_phil,
 			detector 
 			) ;
 	
@@ -352,6 +394,144 @@ int fourier_detector_amplitude_phase(double *frequencies,
 
 	free(response);
 }
+
+/*! \brief Mapping from phase to time 
+ *
+ * Made for use with detectors like LISA
+ *
+ * Using https://arxiv.org/abs/1809.04799 t = (1/2PI) d phi/ d f
+ *
+ * This breaks down near merger,so at fRD, the relationship between frequency and time is extrapolated as a line
+ *
+ * Currently, just uses IMRPhenomD as a proxy regardless of what method is being used, as this is the analytically known function
+ *
+ * For IMRPhenomPv2, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
+ *
+ * Just uses a second order numerical derivative for now
+ */
+template<class T>
+void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time)
+{
+	bool save_shift_time = params->shift_time;
+	params->shift_time = true;
+	std::string local_gen = "IMRPhenomD";
+	//################################################
+	T *phase_plusp = new T[length];
+	T *phase_crossp = new T[length];
+	T *phase_plusm = new T[length];
+	T *phase_crossm = new T[length];
+	T *fp = new T[length];
+	T *fm = new T[length];
+	//################################################
+	double epsilon = 1e-5;
+	for(int i = 0  ; i<length; i++){
+		fp[i]=frequencies[i]+epsilon;	
+		fm[i]=frequencies[i]-epsilon;	
+	}
+	//################################################
+	fourier_phase(fp, length, phase_plusp, phase_crossp, local_gen, params);
+	fourier_phase(fm, length, phase_plusm, phase_crossm, local_gen, params);
+	//################################################
+	source_parameters<T> s_param;
+	s_param = source_parameters<T>::populate_source_parameters(params);
+	IMRPhenomD<T> model;
+	lambda_parameters<T> lambda;
+	model.assign_lambda_param(&s_param,&lambda);	
+	model.post_merger_variables(&s_param);
+	T fRD = s_param.fRD;
+	T fdamp = s_param.fdamp;
+	T fpeak = model.fpeak(&s_param , &lambda);
+	//################################################
+	//Factor of 2 pi for the definition of time from frequency
+	//IMRPhenomD returns (-) phase
+	if(local_gen == "IMRPhenomD"){
+		//Currently using Nico's fix
+		if(correct_time){
+			T f;// = frequencies[0];
+			bool check = true, check2=true;
+			T pt1, pt2, f1,f2;
+			int i = 0 ;
+			while(f < .95*fRD && i<length)
+			{
+				f = frequencies[i];
+				times[i] = (-phase_plusp[i]+phase_plusm[i])/(4.*M_PI*epsilon );
+				if(check){
+					if(f>fpeak){
+						pt1 = times[i];
+						f1 = f;
+						check=false;
+					}
+				}
+				else{
+					if(check2){
+						if(f>.9*fRD){
+							pt2 = times[i];
+							f2 = f;
+							check2=false;
+						}
+					}
+				}
+				i++;
+			}	
+			T f_intercept = times[i-1];
+			T f_mr = f;
+			T freq_slope_pm = (pt2-pt1)/(f2-f1);
+			while(f<1.5*fRD && i<length)
+			{
+				f = frequencies[i];
+				times[i] =f_intercept+ (f-f_mr)*freq_slope_pm;
+				//Stop if observation goes past 20 years
+				i++;
+				if(times[i-1]>(params->tc+630720000)){
+					break;
+				}
+
+			}
+			T time_transition = times[i-1];
+			T f_transition = f;
+			while(i<length)
+			{
+				f = frequencies[i];
+				times[i] = time_transition +pow_int(f-f_transition,2);
+				//std::cout<<(f-f_transition)<<std::endl;
+				//Stop if observation goes past 20 years
+				i++;
+				if(times[i-1]>(params->tc+630720000)){
+					break;
+				}
+				
+			}
+			//if stopped at 20 years, fill out with frozen time
+			if(i != length){
+				while(i<length){
+					times[i] = times[i-1];
+					i++;
+				}
+			}
+		}
+		else{
+			for(int i = 0  ;i<length; i++){
+				times[i] = (-phase_plusp[i]+phase_plusm[i])/(4.*M_PI*epsilon );
+			}
+		}
+	}
+	//################################################
+	delete [] phase_plusp, phase_crossp,phase_plusm, phase_crossm, fp, fm;
+	params->shift_time = save_shift_time;
+}
+
+template<class T>
+void map_extrinsic_angles(gen_params_base<T> *params)
+{
+	params->LISA_thetal = params->incl_angle;
+	params->LISA_phil = params->psi;
+}
+template void map_extrinsic_angles<double>(gen_params_base<double> *);
+template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
+
+template void  time_phase_corrected<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
+template void  time_phase_corrected<adouble>(adouble *, int, adouble *, gen_params_base<adouble> *, std::string, bool);
+
 template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
 template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);
 //
@@ -361,9 +541,11 @@ template int fourier_detector_response<adouble>(adouble *, int, std::complex<ado
 //
 template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *);
 template int fourier_detector_response_equatorial<adouble>(adouble *, int , std::complex<adouble> *,std::string, std::string, gen_params_base<adouble> *);
+template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *, double *);
+template int fourier_detector_response_equatorial<adouble>(adouble *, int , std::complex<adouble> *,std::string, std::string, gen_params_base<adouble> *, adouble *);
 //
 template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double>*);
 template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble>*);
 //
-template int fourier_detector_response_equatorial<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double , double, double, std::string);
-template int fourier_detector_response_equatorial<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double, std::string);
+template int fourier_detector_response_equatorial<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double , double, double,double *, double, double, double, double, std::string);
+template int fourier_detector_response_equatorial<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double,adouble*, adouble, adouble, adouble, adouble,  std::string);

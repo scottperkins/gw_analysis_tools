@@ -21,6 +21,15 @@ void fisher_numerical(double *frequency,
 	double *noise = NULL
 	);
 void calculate_fisher_elements(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd);
+
+void calculate_fisher_elements_batch(double *frequency, 
+	int length, 
+	int base_dimension, 
+	int full_dimension, 
+	std::complex<double> **response_deriv, 
+	double **output,
+	double *psd);
+
 void calculate_derivatives_old(double  **amplitude_deriv, 
        	double **phase_deriv,
        	double *amplitude,
@@ -38,6 +47,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	string  gen_method,
        	gen_params_base<double> *parameters, 
 	int order);
+
 void fisher_autodiff(double *frequency, 
 	int length,
 	string generation_method, 
@@ -50,6 +60,20 @@ void fisher_autodiff(double *frequency,
 	int *phase_tapes = NULL,
 	double *noise = NULL
 	);
+
+void fisher_autodiff_batch_mod(double *frequency, 
+	int length,
+	string generation_method, 
+	string detector, 
+	double **output,
+	int base_dimension, 
+	int full_dimension, 
+	gen_params *parameters,
+	int *amp_tapes = NULL,
+	int *phase_tapes = NULL,
+	double *noise = NULL
+	);
+
 
 void PhenomP_fisher(double *frequency,
 	int length,

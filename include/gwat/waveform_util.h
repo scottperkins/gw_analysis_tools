@@ -59,6 +59,11 @@ int fourier_detector_response_equatorial(T *frequencies,
 			T dec, 
 			T psi, 
 			double gmst, 
+			T *times,
+			T LISA_alpha0,
+			T LISA_phi0,
+			T LISA_thetal,
+			T LISA_phil,
 			std::string detector);
 
 template<class T>
@@ -77,6 +82,23 @@ int fourier_detector_response_equatorial(T *frequencies,
 			std::string generation_method,
 			gen_params_base<T> *parameters
 			);
+template<class T>
+int fourier_detector_response_equatorial(T *frequencies, 
+			int length,
+			std::complex<T> *response, 
+			std::string detector,
+			std::string generation_method,
+			gen_params_base<T> *parameters,
+			T *times
+			);
+template<class T>
+void time_phase_corrected(T *times, 
+	int length, 
+	T *frequencies, 
+	gen_params_base<T> *params,
+	std::string generation_method,
+	bool correct_time
+	);
 int fourier_detector_amplitude_phase(double *frequencies, 
 			int length,
 			double *amplitude, 
@@ -85,6 +107,8 @@ int fourier_detector_amplitude_phase(double *frequencies,
 			std::string generation_method,
 			gen_params *parameters
 			);
+template<class T>
+void map_extrinsic_angles(gen_params_base<T> *params);
 
 #endif
 

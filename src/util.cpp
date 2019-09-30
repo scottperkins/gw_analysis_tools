@@ -278,6 +278,10 @@ T copysign_internal(T val, T sign)
 template double copysign_internal<double>(double , double);
 template adouble copysign_internal<adouble>(adouble , adouble);
 
+/*! \brief Removes a dimension from a matrix (made with fishers in mind, but this is general)
+ *
+ * Note: the removed_dims list is indexed from 0
+ */
 void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_dim, int *removed_dims)
 {
 	int colct=0;
@@ -295,6 +299,11 @@ void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_di
 		}
 	}
 }
+
+/*! \brief Just a quick utility to see if an item is in a list
+ *
+ * Didn't want to keep rewriting this loop
+ */
 template<class T>
 bool check_list(T j, T *list, int length)
 {
