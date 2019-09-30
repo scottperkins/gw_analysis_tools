@@ -751,8 +751,8 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_reduced(source_parameters<T> *pa
 						)
 {
 	//Calculate spin parameters chil and chip
-	T chi1_l = params->chi1_l;
-	T chi2_l = params->chi2_l;
+	T chi1_l = params->spin1z;
+	T chi2_l = params->spin2z;
 
 	T q = params->mass1/params->mass2;
 	T chi_eff = (params->mass1*chi1_l + params->mass2*chi2_l) / params->M; /* Effective aligned spin */
@@ -875,8 +875,8 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_J(source_parameters<T> *params /
 {
 	//T phiJ_sf = params->phiJL;
 	//Calculate spin parameters chil and chip
-	T chi1_l = params->chi1_l;
-	T chi2_l = params->chi2_l;
+	T chi1_l = params->spin1z;
+	T chi2_l = params->spin2z;
 	T chip = params->chip;
 
 	T q = params->mass1/params->mass2;

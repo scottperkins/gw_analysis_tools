@@ -91,7 +91,7 @@ public:
 	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
 	T *betappe;
 	/*!Number of phase modificatinos*/
-	int Nmod;
+	int Nmod=0;
 	/*!*angle between angular momentum and the total momentum */
 	T incl_angle;
 	/*! spherical angles for the source location relative to the detector*/

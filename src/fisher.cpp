@@ -69,7 +69,7 @@ void fisher_numerical(double *frequency,
 	string detector, 
 	double **output,/**< double [dimension][dimension]*/
 	int dimension, 
-	gen_params *parameters,
+	gen_params_base<double> *parameters,
 	int order,/**< Order of the numerical derivative (2 or 4)**/
 	//double *parameters,
 	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method -- if using numerical derivatives or speed isn't that important, just set to NULL*/
@@ -152,7 +152,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	int dimension, 
        	string detector, 
        	string  gen_method,
-       	gen_params *parameters,
+       	gen_params_base<double> *parameters,
 	int order)
 {
 	double epsilon = 1e-8;
@@ -2244,23 +2244,23 @@ void prep_fisher_calculation(double *parameters,
 	lambda_parameters<adouble> lambda;
 	if(	(
 		generation_method =="IMRPhenomPv2" ||
-		generation_method =="MCMC_IMRPhenomPv2_Full" ||
+		generation_method =="MCMC_IMRPhenomPv2" ||
 		generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
 		generation_method =="ppE_IMRPhenomPv2_IMR" ||
-		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral_Full" ||
-		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR_Full" ||
+		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral" ||
+		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR" ||
 		generation_method =="dCS_IMRPhenomPv2" ||
 		generation_method =="EdGB_IMRPhenomPv2" ||
-		generation_method =="MCMC_dCS_IMRPhenomPv2_Full" ||
-		generation_method =="MCMC_EdGB_IMRPhenomPv2_Full" 
+		generation_method =="MCMC_dCS_IMRPhenomPv2" ||
+		generation_method =="MCMC_EdGB_IMRPhenomPv2" 
 		)
 		&& !input_params->sky_average){
 
 		IMRPhenomPv2<adouble> modelp;
-		s_param.chi1_l = internal_params.chi1_l;
-		s_param.chi2_l = internal_params.chi2_l;
-		s_param.spin1z = internal_params.chi1_l;
-		s_param.spin2z = internal_params.chi2_l;
+		//s_param.chi1_l = internal_params.chi1_l;
+		//s_param.chi2_l = internal_params.chi2_l;
+		s_param.spin1z = internal_params.spin1[2];
+		s_param.spin2z = internal_params.spin2[2];
 		s_param.chip = internal_params.chip;
 		s_param.phip = internal_params.phip;
 		modelp.PhenomPv2_Param_Transform_reduced(&s_param);
@@ -2337,8 +2337,10 @@ void prep_fisher_calculation(double *parameters,
 		parameters[0]=grad_freqs[0];
 		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 	}
-	if(internal_params.betappe){delete [] internal_params.betappe;}
-	if(internal_params.bppe){delete [] internal_params.bppe;}
+	if(check_ppE(generation_method)){
+		delete [] internal_params.betappe;
+		delete [] internal_params.bppe;
+	}
 	
 	
 }
@@ -2352,7 +2354,6 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
 				}
-
 				parameters[0]=input_params->RA;
 				parameters[1]=input_params->DEC;
 				parameters[2]=input_params->psi;
@@ -2363,8 +2364,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					input_params->mass2));
 				parameters[7]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[8]=input_params->chi1_l;
-				parameters[9]=input_params->chi2_l;
+				parameters[8]=input_params->spin1[2];
+				parameters[9]=input_params->spin2[2];
 				parameters[10]=input_params->chip;
 				parameters[11]=input_params->phip;
 
@@ -2385,8 +2386,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[6]=input_params->Luminosity_Distance;
 				parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
 				parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
-				parameters[9]=input_params->chi1_l;
-				parameters[10]=input_params->chi2_l;
+				parameters[9]=input_params->spin1[2];
+				parameters[10]=input_params->spin2[2];
 				parameters[11]=input_params->chip;
 				parameters[12]=input_params->phip;
 
@@ -2398,7 +2399,6 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
 				}
-
 				double spin1spher[3];
 				double spin2spher[3];
 				parameters[0]=input_params->RA;
@@ -2683,8 +2683,8 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->DEC = avec_parameters[1];
 				a_params->psi = avec_parameters[2];
 				a_params->phiRef = avec_parameters[3];
-				a_params->chi1_l = avec_parameters[8];
-				a_params->chi2_l = avec_parameters[9];
+				//a_params->chi1_l = avec_parameters[8];
+				//a_params->chi2_l = avec_parameters[9];
 				a_params->spin1[2] = avec_parameters[8];
 				a_params->spin2[2] = avec_parameters[9];
 				a_params->chip = avec_parameters[10];
@@ -2704,8 +2704,10 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->psi = avec_parameters[2];
 				a_params->phiRef = avec_parameters[3];
 				a_params->tc = avec_parameters[4];
-				a_params->chi1_l = avec_parameters[9];
-				a_params->chi2_l = avec_parameters[10];
+				//a_params->chi1_l = avec_parameters[9];
+				//a_params->chi2_l = avec_parameters[10];
+				a_params->spin1[2] = avec_parameters[9];
+				a_params->spin2[2] = avec_parameters[10];
 				a_params->chip = avec_parameters[11];
 				a_params->phip = avec_parameters[12];
 				a_params->incl_angle=avec_parameters[5];
@@ -2729,6 +2731,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				transform_sph_cart(spin2sph,a_params->spin2);
 				//maximized out
 				a_params->phiRef = 0;
+				a_params->phic = 0;
 				a_params->tc = 0;
 
 			}
@@ -2995,6 +2998,7 @@ bool check_ppE(std::string generation_method)
 		)
 	{
 		return true;
+		
 	}
 	return false;
 }

@@ -208,10 +208,10 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		//Calculate Waveform
 		if(parameters->phip != -1){
 			params.chip = parameters->chip;
-			params.chi1_l = parameters->chi1_l;
-			params.chi2_l = parameters->chi2_l;
-			params.spin1z = parameters->chi1_l;
-			params.spin2z = parameters->chi2_l;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
 			modeld.PhenomPv2_Param_Transform_reduced(&params);
 		}
@@ -243,10 +243,10 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		//If not, its calculated
 		if(parameters->phip != -1){
 			params.chip = parameters->chip;
-			params.chi1_l = parameters->chi1_l;
-			params.chi2_l = parameters->chi2_l;
-			params.spin1z = parameters->chi1_l;
-			params.spin2z = parameters->chi2_l;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
 			modeld.PhenomPv2_Param_Transform_reduced(&params);
 		}
@@ -276,10 +276,10 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		//########################################
 		if(parameters->phip != -1){
 			params.chip = parameters->chip;
-			params.chi1_l = parameters->chi1_l;
-			params.chi2_l = parameters->chi2_l;
-			params.spin1z = parameters->chi1_l;
-			params.spin2z = parameters->chi2_l;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
 			modeld.PhenomPv2_Param_Transform_reduced(&params);
 		}
@@ -319,10 +319,10 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		//########################################
 		if(parameters->phip != -1){
 			params.chip = parameters->chip;
-			params.chi1_l = parameters->chi1_l;
-			params.chi2_l = parameters->chi2_l;
-			params.spin1z = parameters->chi1_l;
-			params.spin2z = parameters->chi2_l;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
 			model.PhenomPv2_Param_Transform_reduced(&params);
 		}
@@ -879,10 +879,10 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		//Calculate Waveform
 		if(parameters->phip != -1){
 			params.chip = parameters->chip;
-			params.chi1_l = parameters->chi1_l;
-			params.chi2_l = parameters->chi2_l;
-			params.spin1z = parameters->chi1_l;
-			params.spin2z = parameters->chi2_l;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
 			modeld.PhenomPv2_Param_Transform_reduced(&params);
 		}
