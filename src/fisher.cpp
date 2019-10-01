@@ -2178,7 +2178,10 @@ void calculate_derivatives_autodiff(double *frequency,
 		if(detector=="LISA"){
 			times = new adouble[1];
 			//correct time needs to stay false for now
-			time_phase_corrected(times, 1,&afreq,  &a_parameters, local_gen_method, false);
+			adouble tempf[2];
+			tempf[0]=afreq;
+			tempf[1]=1.0001*afreq;
+			time_phase_corrected(times, 2,tempf,  &a_parameters, local_gen_method, false);
 			map_extrinsic_angles(&a_parameters);
 		}
 		//############################################

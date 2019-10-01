@@ -271,18 +271,36 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 			)
 {
 	int status=1;
-	T Fplus, Fcross;
+	//Not an elegant solution, but should work..
+	T fplus ;
+	T fcross ;
+	T *Fplus;
+	T *Fcross;
+	if(detector=="LISA"){
+		Fplus = new T[length];
+		Fcross = new T[length];
+		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,LISA_thetal,LISA_phil, Fplus, Fcross);
+	}
+	else{
+		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,LISA_thetal,LISA_phil, &fplus, &fcross);
+	}
 
-	detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,LISA_thetal,LISA_phil, &Fplus, &Fcross);
 	
 	if(detector == "LISA"){
+		for (int i =0; i <length; i++)
+		{
+			detector_response[i] = Fplus[i] * hplus[i] 
+						+ (Fcross[i] )*hcross[i];
+		}	
+		delete [] Fplus; 
+		delete [] Fcross;
 
 	}
 	else{
 		for (int i =0; i <length; i++)
 		{
-			detector_response[i] = Fplus * hplus[i] 
-						+ (Fcross )*hcross[i];
+			detector_response[i] = fplus * hplus[i] 
+						+ (fcross )*hcross[i];
 		}	
 	}
 	return status;
@@ -416,21 +434,11 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	params->shift_time = true;
 	std::string local_gen = "IMRPhenomD";
 	//################################################
-	T *phase_plusp = new T[length];
-	T *phase_crossp = new T[length];
-	T *phase_plusm = new T[length];
-	T *phase_crossm = new T[length];
-	T *fp = new T[length];
-	T *fm = new T[length];
+	T *phase_plus = new T[length];
+	T *phase_cross = new T[length];
 	//################################################
-	double epsilon = 1e-5;
-	for(int i = 0  ; i<length; i++){
-		fp[i]=frequencies[i]+epsilon;	
-		fm[i]=frequencies[i]-epsilon;	
-	}
 	//################################################
-	fourier_phase(fp, length, phase_plusp, phase_crossp, local_gen, params);
-	fourier_phase(fm, length, phase_plusm, phase_crossm, local_gen, params);
+	fourier_phase(frequencies, length, phase_plus, phase_cross, local_gen, params);
 	//################################################
 	source_parameters<T> s_param;
 	s_param = source_parameters<T>::populate_source_parameters(params);
@@ -441,20 +449,25 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	T fRD = s_param.fRD;
 	T fdamp = s_param.fdamp;
 	T fpeak = model.fpeak(&s_param , &lambda);
+	T deltaf = frequencies[1]-frequencies[0];
 	//################################################
 	//Factor of 2 pi for the definition of time from frequency
 	//IMRPhenomD returns (-) phase
 	if(local_gen == "IMRPhenomD"){
 		//Currently using Nico's fix
 		if(correct_time){
-			T f;// = frequencies[0];
+			T f = frequencies[0];
 			bool check = true, check2=true;
 			T pt1, pt2, f1,f2;
 			int i = 0 ;
-			while(f < .95*fRD && i<length)
+			//One sided, to start it off
+			times[0] = -(phase_plus[1]-phase_plus[0])/(2.*M_PI*deltaf);
+			i++;
+			while(f < .95*fRD && i<length-1)
 			{
 				f = frequencies[i];
-				times[i] = (-phase_plusp[i]+phase_plusm[i])/(4.*M_PI*epsilon );
+				//central difference for the rest of the steps
+				times[i] = -(phase_plus[i+1]-phase_plus[i-1])/(4.*M_PI*deltaf);
 				if(check){
 					if(f>fpeak){
 						pt1 = times[i];
@@ -476,7 +489,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 			T f_intercept = times[i-1];
 			T f_mr = f;
 			T freq_slope_pm = (pt2-pt1)/(f2-f1);
-			while(f<1.5*fRD && i<length)
+			while(f<1.5*fRD && i<length-1)
 			{
 				f = frequencies[i];
 				times[i] =f_intercept+ (f-f_mr)*freq_slope_pm;
@@ -489,7 +502,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 			}
 			T time_transition = times[i-1];
 			T f_transition = f;
-			while(i<length)
+			while(i<length-1)
 			{
 				f = frequencies[i];
 				times[i] = time_transition +pow_int(f-f_transition,2);
@@ -508,15 +521,23 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 					i++;
 				}
 			}
+			else{
+				times[length-1] = -(phase_plus[length-1] - phase_plus[length-2])/(2*M_PI*deltaf);
+			}
 		}
 		else{
-			for(int i = 0  ;i<length; i++){
-				times[i] = (-phase_plusp[i]+phase_plusm[i])/(4.*M_PI*epsilon );
+			times[0] = -(phase_plus[1]-phase_plus[0])/(2*M_PI*deltaf);
+			if(length>2){
+				for(int i = 1  ;i<length-1; i++){
+					times[i] = -(phase_plus[i+1]-phase_plus[i-1])/(4*M_PI*deltaf);
+				}
+				times[length-1] = -(phase_plus[length-1]-phase_plus[length-2])/(2*M_PI*deltaf);
 			}
 		}
 	}
 	//################################################
-	delete [] phase_plusp, phase_crossp,phase_plusm, phase_crossm, fp, fm;
+	delete [] phase_plus;
+	delete [] phase_cross;
 	params->shift_time = save_shift_time;
 }
 
