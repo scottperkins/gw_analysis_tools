@@ -1,13 +1,16 @@
 #include "waveform_util.h"
 #include "util.h"
 #include "waveform_generator.h"
+#include "IMRPhenomP.h"
+#include "IMRPhenomD.h"
+#include "ppE_IMRPhenomD.h"
+#include "ppE_IMRPhenomP.h"
 #include "detector_util.h"
 #include <fftw3.h>
 #include <algorithm>
 #include <complex>
 #include <vector>
 #include <string>
-#include "IMRPhenomD.h"
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
@@ -413,7 +416,61 @@ int fourier_detector_amplitude_phase(double *frequencies,
 	free(response);
 }
 
-/*! \brief Mapping from phase to time 
+/*! \brief Mapping from phase to time AUTODIFFERENTIATION using ADOL-C
+ *
+ * This is NOT autodiff safe. ADOL-C does not support wrapping a section of code as active twice. To find the derivative of this function, you must use the hessian function of ADOL-C
+ *
+ * Made for use with detectors like LISA
+ *
+ * Using https://arxiv.org/abs/1809.04799 t = (1/2PI) d phi/ d f
+ *
+ * This breaks down near merger,so at fRD, the relationship between frequency and time is extrapolated as a line
+ *
+ * Currently, just uses IMRPhenomD as a proxy regardless of what method is being used, as this is the analytically known function
+ *
+ * For IMRPhenomPv2, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
+ *
+ */
+template<class T>
+void time_phase_corrected_autodiff(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time)
+{
+	int boundary_num = boundary_number(generation_method);
+	double freq_boundaries[boundary_num];
+	double grad_freqs[boundary_num];
+	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);	
+	//calculate derivative of phase
+
+}
+/*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
+ *
+ * If specific derivatives need to taken, take this routine as a template and write it yourself.
+ *
+ * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
+ *
+ */
+template<class T>
+void time_phase_corrected_derivative_autodiff(T **dt, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, int dimension, bool correct_time)
+{
+	int boundary_num = boundary_number(generation_method);
+	double freq_boundaries[boundary_num];
+	double grad_freqs[boundary_num];
+	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);	
+	//calculate hessian of phase, take [0][j] components to get the derivative of time
+
+}
+/*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
+ *
+ * The automatic derivative code requires a new tape for each logical branch of the program, so each waveform_generation method needs to add the number of branches here
+ */
+int boundary_number(std::string method)
+{
+	if(method.find("IMRPhenomP") != std::string::npos || 
+		method.find("IMRPhenomD")!=std::string::npos){
+		return 5;
+	}
+	return -1;
+}
+/*! \brief Mapping from phase to time NUMERICAL
  *
  * Made for use with detectors like LISA
  *
@@ -430,8 +487,8 @@ int fourier_detector_amplitude_phase(double *frequencies,
 template<class T>
 void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time)
 {
-	bool save_shift_time = params->shift_time;
-	params->shift_time = true;
+	//bool save_shift_time = params->shift_time;
+	//params->shift_time = false;
 	std::string local_gen = "IMRPhenomD";
 	//################################################
 	T *phase_plus = new T[length];
@@ -442,6 +499,11 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	//################################################
 	source_parameters<T> s_param;
 	s_param = source_parameters<T>::populate_source_parameters(params);
+	s_param.sky_average = params->sky_average;
+	s_param.f_ref = params->f_ref;
+	s_param.phiRef = params->phiRef;
+	s_param.cosmology=params->cosmology;
+	s_param.incl_angle=params->incl_angle;
 	IMRPhenomD<T> model;
 	lambda_parameters<T> lambda;
 	model.assign_lambda_param(&s_param,&lambda);	
@@ -538,20 +600,151 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	//################################################
 	delete [] phase_plus;
 	delete [] phase_cross;
-	params->shift_time = save_shift_time;
+	//params->shift_time = save_shift_time;
 }
 
+/*! \brief map between inclination angle and polarization angle to the spherical coordinates of the binary's total angular momentum in the SS frame
+ *
+ * CURRENTLY NOT RIGHT MUST FIX
+ */
 template<class T>
 void map_extrinsic_angles(gen_params_base<T> *params)
 {
 	params->LISA_thetal = params->incl_angle;
 	params->LISA_phil = params->psi;
 }
+
+void assign_freq_boundaries(double *freq_boundaries, 
+	double *intermediate_freqs, 
+	int boundary_num, 
+	gen_params_base<double> *input_params, 
+	std::string generation_method)
+{
+	gen_params_base<adouble> internal_params;
+	transform_parameters(input_params, &internal_params);
+	source_parameters<adouble> s_param;
+	s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
+	s_param.sky_average = internal_params.sky_average;
+	s_param.f_ref = internal_params.f_ref;
+	s_param.phiRef = internal_params.phiRef;
+	s_param.shift_time = false;
+	s_param.cosmology=internal_params.cosmology;
+	s_param.incl_angle=internal_params.incl_angle;
+	lambda_parameters<adouble> lambda;
+	if(	(
+		generation_method =="IMRPhenomPv2" ||
+		generation_method =="MCMC_IMRPhenomPv2" ||
+		generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
+		generation_method =="ppE_IMRPhenomPv2_IMR" ||
+		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral" ||
+		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR" ||
+		generation_method =="dCS_IMRPhenomPv2" ||
+		generation_method =="EdGB_IMRPhenomPv2" ||
+		generation_method =="MCMC_dCS_IMRPhenomPv2" ||
+		generation_method =="MCMC_EdGB_IMRPhenomPv2" 
+		)
+		&& !input_params->sky_average){
+
+		IMRPhenomPv2<adouble> modelp;
+		s_param.spin1z = internal_params.spin1[2];
+		s_param.spin2z = internal_params.spin2[2];
+		s_param.chip = internal_params.chip;
+		s_param.phip = internal_params.phip;
+		modelp.PhenomPv2_Param_Transform_reduced(&s_param);
+		modelp.assign_lambda_param(&s_param, &lambda);
+		modelp.post_merger_variables(&s_param);
+		double M = s_param.M.value();
+		double fRD = s_param.fRD.value();
+		double fpeak = modelp.fpeak(&s_param, &lambda).value();
+		//###########################################
+		freq_boundaries[0] = .014/M;
+		freq_boundaries[1] = .018/M;
+		if(fRD/2. < fpeak){
+			freq_boundaries[2] = fRD/2.;
+			freq_boundaries[3] = fpeak;
+		}
+		else{
+			freq_boundaries[3] = fRD/2.;
+			freq_boundaries[2] = fpeak;
+		}
+		freq_boundaries[4] = .2/M;//End waveform
+		//###########################################
+		intermediate_freqs[0] = freq_boundaries[0]*.9;
+		for(int i = 1 ; i<boundary_num; i++){
+			intermediate_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
+		}
+	}
+	else if(
+		(generation_method =="IMRPhenomD" || 
+		generation_method == "ppE_IMRPhenomD_Inspiral"|| 
+		generation_method == "ppE_IMRPhenomD_IMR") 
+		|| 
+		(generation_method =="MCMC_IMRPhenomD_Full" || 
+		generation_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 
+		generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full")
+		|| 
+		(generation_method =="MCMC_dCS_IMRPhenomD_Full" || 
+		generation_method == "MCMC_EdGB_IMRPhenomD_Full")
+		|| 
+		(generation_method =="dCS_IMRPhenomD" || 
+		generation_method == "EdGB_IMRPhenomD")
+		|| 
+		(generation_method =="MCMC_IMRPhenomD" || 
+		generation_method == "MCMC_ppE_IMRPhenomD_Inspiral" ||
+		generation_method == "MCMC_ppE_IMRPhenomD_IMR" )
+		){
+
+		IMRPhenomD<adouble> modeld;
+		modeld.assign_lambda_param(&s_param, &lambda);
+		modeld.post_merger_variables(&s_param);
+		double M = s_param.M.value();
+		double fRD = s_param.fRD.value();
+		double fpeak = modeld.fpeak(&s_param, &lambda).value();
+		//###########################################
+		freq_boundaries[0] = .014/M;
+		freq_boundaries[1] = .018/M;
+		if(fRD/2. < fpeak){
+			freq_boundaries[2] = fRD/2.;
+			freq_boundaries[3] = fpeak;
+		}
+		else{
+			freq_boundaries[3] = fRD/2.;
+			freq_boundaries[2] = fpeak;
+		}
+		freq_boundaries[4] = .2/M;//End waveform
+		//###########################################
+		intermediate_freqs[0] = freq_boundaries[0]*.9;
+		for(int i = 1 ; i<boundary_num; i++){
+			intermediate_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
+		}
+	}
+	if(check_ppE(generation_method)){
+		delete [] internal_params.betappe;
+		delete [] internal_params.bppe;
+	}
+	
+	
+
+}
+bool check_ppE(std::string generation_method)
+{
+	if(generation_method.find("ppE") != std::string::npos || 
+		generation_method.find("dCS") !=std::string::npos ||
+		generation_method.find("EdGB") !=std::string::npos 
+		)
+	{
+		return true;
+		
+	}
+	return false;
+}
 template void map_extrinsic_angles<double>(gen_params_base<double> *);
 template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
 
 template void  time_phase_corrected<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
 template void  time_phase_corrected<adouble>(adouble *, int, adouble *, gen_params_base<adouble> *, std::string, bool);
+template void  time_phase_corrected_autodiff<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
+template void  time_phase_corrected_derivative_autodiff<double>(double **, int, double *, gen_params_base<double> *, std::string, int, bool );
 
 template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
 template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);

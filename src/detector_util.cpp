@@ -10,6 +10,14 @@
 /*! \file
  * Routines to construct noise curves for various detectors and for detector specific utilities for response functions and coordinate transformations
  */
+void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
+		std::string detector, /**< String to designate the detector noise curve to be used */
+		double *noise_root, /**< ouptput double array for the square root of the PSD of the noise of the specified detector*/
+		int length/**< integer length of the output and input arrays*/
+		)
+{
+	populate_noise(frequencies, detector, noise_root, length, 12);
+}
 
 /*! \brief Function to populate the squareroot of the noise curve for various detectors
  *
@@ -17,12 +25,25 @@
  *
  * Detector names must be spelled exactly
  *
- * Detectors include: aLIGO_analytic, Hanford_O1_fitted
+ * Detectors include: 
+ * 	
+ * 	aLIGO_analytic -- analytic approximation of the advanced LIGO sensitivity curve
+ *
+ * 	Hanford_O1_fitted -- Fitted function to the O1 noise curve for Hanford
+ *
+ * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel
+ *
+ * 	LISA_CONF -- LISA sensitivity curve with out sky averaging for a single channel including confusion noise from the galatic white dwarf population
+ *
+ * 	LISA_SADC -- LISA sensitivity curve with sky averaging for a dual channel
+ *
+ * 	LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel including confusion noise from the galatic white dwarf population
  */
 void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
 		std::string detector, /**< String to designate the detector noise curve to be used */
 		double *noise_root, /**< ouptput double array for the square root of the PSD of the noise of the specified detector*/
-		int length/**< integer length of the output and input arrays*/
+		int length,/**< integer length of the output and input arrays*/
+		double integration_time /**< Integration time in months (only important for LISA_conf*/
 		)
 {
 	if(detector == "aLIGO_analytic")
@@ -45,7 +66,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 			}
 		}
 	}
-	if(detector == "Hanford_O1_fitted")
+	else if(detector == "Hanford_O1_fitted")
 	{
 		if(!frequencies)
 		{
@@ -65,6 +86,30 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 			}
 		}
 	}
+	else if(detector =="LISA_SADC" ){
+		for(int i = 0 ; i<length; i++){
+			noise_root[i] = sqrt(LISA_analytic_SADC(frequencies[i]));
+		}
+	}
+	else if(detector == "LISA_SADC_CONF"){
+		double alpha, beta, kappa, gamma, fk;
+		sort_LISA_SC_coeffs(&alpha, &beta, &kappa,  &gamma, &fk, integration_time);
+		for(int i = 0 ; i<length; i++){
+			noise_root[i] = sqrt(LISA_analytic_SADC(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
+		}
+	}
+	else if(detector =="LISA" ){
+		for(int i = 0 ; i<length; i++){
+			noise_root[i] = sqrt(LISA_analytic(frequencies[i]));
+		}
+	}
+	else if(detector == "LISA_CONF"){
+		double alpha, beta, kappa, gamma, fk;
+		sort_LISA_SC_coeffs(&alpha, &beta, &kappa,  &gamma, &fk, integration_time);
+		for(int i = 0 ; i<length; i++){
+			noise_root[i] = sqrt(LISA_analytic(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
+		}
+	}
 			
 		
 }
@@ -80,6 +125,114 @@ double aLIGO_analytic(double f)
 	double x = fknee/f;
 	double x4 = x*x*x*x;
 	return sqrt( S * (x4 + 2 + 2*x*x)/5 );
+}
+/*! \brief Analytic function approximating the PSD for LISA sensitivity curve -- this is S, not root S and does not sky average, treats the 2 channels separately, and the geometrical factor of \sqrt{3}/2 is included in the waveform.
+ *
+ * NON Sky averaged -  single channel
+ *
+ * arXiv:1905.08811 -- equation 14-17
+ */
+double LISA_analytic(double f)
+{
+	double L = 2.5 * pow_int(10.,9);
+	double fstar = 19.09*pow_int(10.,-3);
+	double twopi = 2.*M_PI;
+	double POMS = LISA_POMS(f);
+	double PACC = LISA_PACC(f);
+	double S = 10./(3. * L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
+	return  S;
+}
+/*! \brief Analytic function approximating the PSD for LISA sensitivity curve -- this is S, not root S 
+ *
+ * Sky averaged -  dual channel
+ *
+ * arXiv:1803.01944 -- equation 13
+ *
+ * NOTE: may need to divide by \sqrt{3}/2.. My LISA response functions already include this factor
+ */
+double LISA_analytic_SADC(double f)
+{
+	double L = 2.5 * pow_int(10.,9);
+	double fstar = 19.09*pow_int(10.,-3);
+	double twopi = 2.*M_PI;
+	double POMS = LISA_POMS(f);
+	double PACC = LISA_PACC(f);
+	double S = 10./(3. * L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
+	return  S;
+}
+/*! \breif Optical metrology noise function
+ *
+ * arXiv:1803.01944 -- equation 10
+ */
+double LISA_POMS(double f)
+{
+	double factor = 1.5 * pow_int(10., -11);
+	return factor * factor * (1. + pow_int( (.002/f) ,4) );
+}
+
+/*! \breif Single test mass accelartion noise
+ *
+ * arXiv:1803.01944 -- equation 11
+ */
+double LISA_PACC(double f)
+{
+	double factor = 3.* pow_int(10.,-15);
+	return factor * factor * (1. + pow_int(.0004/f,2) ) * ( 1. + pow_int(f/.008,4));
+
+}
+
+/*! \breif Confusion noise  -- this is S, not root  S
+ *
+ * arXiv:1803.01944 -- 14
+ *
+ * integration_time is the observation time in months -- options are 6, 12, 24, and 48
+ */
+double LISA_SC(double f, double alpha, double beta, double kappa, double gamma, double fk)
+{
+	double A = 9.* pow_int(10.,-45);
+	double SC = A * pow(f,-7./3.) * exp( -pow(f,alpha) + beta * f * sin(kappa * f )) * ( 1. + tanh(gamma * (fk - f)));
+	
+	return  SC;
+}
+
+/*! \breif LISA confusion noise coefficients 
+ *
+ * arXiv:1803.01944 -- Table 1
+ *
+ * integration_time is the observation time in months -- options are 6, 12, 24, and 48
+ *
+ */
+void sort_LISA_SC_coeffs(double *alpha, double *beta, double *kappa, double *gamma, double *fk, double  integration_time)
+{
+	if(integration_time ==6){
+		*alpha = 0.133;
+		*beta = 243.;
+		*kappa = 482.;
+		*gamma = 917.;
+		*fk = .00258;
+	}
+	else if(integration_time ==12){
+		*alpha = 0.171;
+		*beta = 292.;
+		*kappa = 1020.;
+		*gamma = 1680.;
+		*fk = .00215;
+	}
+	else if(integration_time ==24){
+		*alpha = 0.165;
+		*beta = 299.;
+		*kappa = 611.;
+		*gamma = 1340.;
+		*fk = .00173;
+	}
+	else if(integration_time ==48){
+		*alpha = 0.138;
+		*beta = -221.;
+		*kappa = 521.;
+		*gamma = 1680.;
+		*fk = .00113;
+	}
+
 }
 
 /*! \brief Numerically fit PSD to the Hanford Detector's O1

@@ -67,8 +67,16 @@ const double Virgo_D[3][3] = {{0.243903, -0.0990959, -0.232603}, {-0.0990959, -0
 
 
 void populate_noise(double *frequencies,std::string detector,double *noise_root,  int length=0);
+void populate_noise(double *frequencies,std::string detector,double *noise_root,  int length, double integration_time);
 
 double aLIGO_analytic(double f);
+
+double LISA_analytic_SADC(double f);
+double LISA_analytic(double f);
+double LISA_POMS(double f);
+double LISA_PACC(double f);
+double LISA_SC(double f, double alpha, double beta, double kappa, double gamma, double fk);
+void sort_LISA_SC_coeffs( double *alpha, double *beta, double  *kappa, double *gamma, double *fk,  double integration_time);
 
 std::complex<double> Q(double theta, double phi, double iota);
 std::complex<double> Q(double theta, double phi, double iota, double psi);

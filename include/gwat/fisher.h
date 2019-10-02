@@ -103,13 +103,23 @@ void calculate_derivatives_autodiff(double *frequency,
 	);
 
 std::string local_generation_method(std::string generation_method);
-int boundary_number(std::string method);
 
-bool check_ppE(std::string generation_method);
 
 void prep_fisher_calculation(double *parameters, bool *, double *,double*, int,gen_params_base<double> *input_params, std::string generation_method, int dim);
 
-void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors);
+void detect_adjust_parameters( double *freq_boundaries,
+	double *grad_freqs, 
+	int *boundary_num,
+	gen_params_base<double> *input_params, 
+	std::string generation_method, 
+	std::string detector, 
+	int dim);
+
+void unpack_parameters(double *parameters, 
+	gen_params_base<double> *input_params, 
+	std::string generation_method, 
+	int dimension, 
+	bool *log_factors);
 
 template<class T>
 void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim, gen_params_base<double> *original_params);
