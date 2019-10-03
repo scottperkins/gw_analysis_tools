@@ -650,6 +650,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	{
 		IMRPhenomD<T> modeld;
 		status = modeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
@@ -658,6 +661,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 	}
 	else if(generation_method == "dCS_IMRPhenomD_log")
 	{
@@ -671,6 +677,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			temp[i] = params.betappe[i];
 		dCS_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 		
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
@@ -687,6 +696,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			temp[i] = params.betappe[i];
 		dCS_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 		
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
@@ -702,6 +714,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			temp[i] = params.betappe[i];
 		EdGB_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
 	}
@@ -716,6 +731,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			temp[i] = params.betappe[i];
 		EdGB_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
 	}
@@ -726,6 +744,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
 	}
 
 	return status ;
@@ -773,6 +794,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		IMRPhenomD<T> modeld;
 		status = modeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 	}
@@ -784,6 +806,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 	}
@@ -800,6 +823,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		dCS_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 		
@@ -819,6 +843,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		dCS_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 		
@@ -837,6 +862,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		EdGB_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 		for( int i = 0; i < params.Nmod; i++)
@@ -854,6 +880,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		EdGB_IMRPhenomD<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 
@@ -868,6 +895,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 	}

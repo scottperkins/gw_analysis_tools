@@ -436,8 +436,7 @@ int fourier_detector_amplitude_phase(double *frequencies,
  * For IMRPhenomPv2, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
  *
  */
-template<class T>
-void time_phase_corrected_autodiff(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time)
+void time_phase_corrected_autodiff(double *times, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, bool correct_time)
 {
 	int boundary_num = boundary_number(generation_method);
 	double freq_boundaries[boundary_num];
@@ -454,7 +453,7 @@ void time_phase_corrected_autodiff(T *times, int length, T *frequencies,gen_para
 		adouble phasep, phasec;
 		fourier_phase(&freq, 1, &phasep, &phasec, generation_method, &aparams);
 		double phaseout;
-		-phasep>>=phaseout;
+		phasep>>=phaseout;
 		trace_off();
 	}
 	
@@ -486,35 +485,6 @@ void time_phase_corrected_autodiff(T *times, int length, T *frequencies,gen_para
 		delete [] aparams.bppe;
 	}
 	
-}
-/*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
- *
- * If specific derivatives need to taken, take this routine as a template and write it yourself.
- *
- * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
- *
- */
-template<class T>
-void time_phase_corrected_derivative_autodiff(T **dt, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, int dimension, bool correct_time)
-{
-	//calculate hessian of phase, take [0][j] components to get the derivative of time
-	int param_length = dimension +1 ;//+1 for frequency 
-	int boundary_num = boundary_number(generation_method);
-	double freq_boundaries[boundary_num];
-	double grad_freqs[boundary_num];
-	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);
-	double parameters[param_length];
-	bool *log_factors=NULL;
-	//unpack_parameters(&parameters[1], params, generation_method, dimension, log_factors);
-	
-	//calculate derivative of phase
-	//int tapes[boundary_num];
-	//for(int i = 0 ; i < boundary_num ; i++){
-	//	tabes[i] = i*10212; //Random tape id 
-	//	trace_on(tapes[i]);
-	//	adouble 
-	//}
-
 }
 /*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
  *
@@ -581,13 +551,13 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 			T pt1, pt2, f1,f2;
 			int i = 0 ;
 			//One sided, to start it off
-			times[0] = -(phase_plus[1]-phase_plus[0])/(2.*M_PI*deltaf);
+			times[0] = (phase_plus[1]-phase_plus[0])/(2.*M_PI*deltaf);
 			i++;
 			while(f < .95*fRD && i<length-1)
 			{
 				f = frequencies[i];
 				//central difference for the rest of the steps
-				times[i] = -(phase_plus[i+1]-phase_plus[i-1])/(4.*M_PI*deltaf);
+				times[i] = (phase_plus[i+1]-phase_plus[i-1])/(4.*M_PI*deltaf);
 				if(check){
 					if(f>fpeak){
 						pt1 = times[i];
@@ -642,16 +612,16 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 				}
 			}
 			else{
-				times[length-1] = -(phase_plus[length-1] - phase_plus[length-2])/(2*M_PI*deltaf);
+				times[length-1] = (phase_plus[length-1] - phase_plus[length-2])/(2*M_PI*deltaf);
 			}
 		}
 		else{
-			times[0] = -(phase_plus[1]-phase_plus[0])/(2*M_PI*deltaf);
+			times[0] = (phase_plus[1]-phase_plus[0])/(2*M_PI*deltaf);
 			if(length>2){
 				for(int i = 1  ;i<length-1; i++){
-					times[i] = -(phase_plus[i+1]-phase_plus[i-1])/(4*M_PI*deltaf);
+					times[i] = (phase_plus[i+1]-phase_plus[i-1])/(4*M_PI*deltaf);
 				}
-				times[length-1] = -(phase_plus[length-1]-phase_plus[length-2])/(2*M_PI*deltaf);
+				times[length-1] = (phase_plus[length-1]-phase_plus[length-2])/(2*M_PI*deltaf);
 			}
 		}
 	}
@@ -802,8 +772,6 @@ template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
 
 template void  time_phase_corrected<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
 template void  time_phase_corrected<adouble>(adouble *, int, adouble *, gen_params_base<adouble> *, std::string, bool);
-template void  time_phase_corrected_autodiff<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
-template void  time_phase_corrected_derivative_autodiff<double>(double **, int, double *, gen_params_base<double> *, std::string, int, bool );
 
 template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
 template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);

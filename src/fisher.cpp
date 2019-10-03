@@ -2181,6 +2181,8 @@ void fisher_autodiff(double *frequency,
  * Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference
  *
  * Higher dimensional fishers actually could be faster
+ *
+ * NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv)
  */
 void calculate_derivatives_autodiff(double *frequency,
 	int length,
@@ -2196,6 +2198,7 @@ void calculate_derivatives_autodiff(double *frequency,
 	//double vec_parameters[dimension+1];
 	int vec_param_length= dimension +1;
 	if(detector == "LISA"){
+		//take derivative wrt time as well, for the chain rule
 		vec_param_length += 1;
 	}
 	double vec_parameters[vec_param_length];
@@ -2213,16 +2216,19 @@ void calculate_derivatives_autodiff(double *frequency,
 	vec_parameters[0]=grad_freqs[0];
 	unpack_parameters(&vec_parameters[1], parameters, generation_method,dimension, log_factors);
 	//detect_adjust_parameters(freq_boundaries, grad_freqs, &boundary_num, parameters, generation_method, detector,dimension);
-	//calculate_derivative tapes
 	double *grad_times=NULL;
 	double **dt=NULL;
+	double *eval_times=NULL;
 	if(detector == "LISA"){
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
-		dt = allocate_2D_array(dimension+1, dimension+1);	
+		dt = allocate_2D_array(dimension+1, length);	
 		time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
+		eval_times = new double[length];
+		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
 			
 	}
+	//calculate_derivative tapes
 	int tapes[boundary_num];
 	for(int i =0; i<boundary_num; i++){
 		tapes[i]=i;
@@ -2245,6 +2251,7 @@ void calculate_derivatives_autodiff(double *frequency,
 		adouble time;
 		if(detector == "LISA"){
 			time <<= grad_times[i];
+			map_extrinsic_angles(&a_parameters);
 		}
 		//############################################
 		//adouble *times=NULL;
@@ -2285,7 +2292,6 @@ void calculate_derivatives_autodiff(double *frequency,
 		//}
 		deallocate_non_param_options(&a_parameters, parameters, generation_method);
 	}
-
 	//Evaluate derivative tapes
 	int dep = 2;//Output is complex
 	//int indep = dimension+1;//First element is for frequency
@@ -2296,13 +2302,18 @@ void calculate_derivatives_autodiff(double *frequency,
 		vec_parameters[0]=frequency[k];
 		for(int n = 0 ; n<boundary_num; n++){
 			if(vec_parameters[0]<freq_boundaries[n]){
+				if(detector == "LISA"){
+					vec_parameters[vec_param_length -1] = eval_times[k];
+				}
 				jacobian(tapes[n], dep, indep, vec_parameters, jacob);
 				for(int i =0; i<dimension; i++){
 					waveform_deriv[i][k] = jacob[0][i+1] 
 						+ std::complex<double>(0,1)*jacob[1][i+1];
 					//correct for time deriv for LISA
 					if(detector == "LISA"){
-						waveform_deriv[i][k]+= 0;
+						waveform_deriv[i][k]+= 
+							(jacob[0][vec_param_length-1] + std::complex<double>(0,1)*jacob[1][vec_param_length-1]) //Time derivative of WF
+							* dt[i+1][k];//Derivative of time wrt source parameter
 					}
 				}
 				//Mark successful derivative
@@ -2340,7 +2351,96 @@ void calculate_derivatives_autodiff(double *frequency,
 		delete [] grad_times;	
 	}
 	if(dt){
-		deallocate_2D_array(dt, dimension+1, dimension+1);
+		deallocate_2D_array(dt, dimension+1, length);
+	}
+	if(eval_times){
+		delete [] eval_times;
+	}
+
+}
+/*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
+ *
+ * If specific derivatives need to taken, take this routine as a template and write it yourself.
+ *
+ * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
+ *
+ */
+void time_phase_corrected_derivative_autodiff(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time)
+{
+	//calculate hessian of phase, take [0][j] components to get the derivative of time
+	int vec_param_length = dimension +1 ;//+1 for frequency 
+	int boundary_num = boundary_number(generation_method);
+	double freq_boundaries[boundary_num];
+	double grad_freqs[boundary_num];
+	std::string local_gen_method = local_generation_method(generation_method);
+	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);
+	double vec_parameters[vec_param_length];
+	bool log_factors[dimension];
+	unpack_parameters(&vec_parameters[1], params, generation_method, dimension, log_factors);
+	
+	//calculate derivative of phase
+	int tapes[boundary_num];
+	for(int i = 0 ; i < boundary_num ; i++){
+		tapes[i] = i*12; //Random tape id 
+		trace_on(tapes[i]);
+		adouble avec_parameters[vec_param_length];
+		avec_parameters[0] <<=grad_freqs[i];
+		for(int j = 1; j <= dimension; j++){
+			avec_parameters[j]<<=vec_parameters[j];	
+		}
+		//Repack parameters
+		gen_params_base<adouble> a_parameters;
+		adouble afreq;
+		afreq = avec_parameters[0];
+		//############################################
+		//Non variable parameters
+		repack_non_parameter_options(&a_parameters,params,generation_method);
+		//############################################
+		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+		adouble time;
+		adouble phasep, phasec;
+		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
+		double phase;
+		phasep >>= phase;
+
+		trace_off();
+		deallocate_non_param_options(&a_parameters, params, generation_method);
+	}
+	int indep = vec_param_length;//First element is for frequency
+	bool eval = false;//Keep track of when a boundary is hit
+	double **hess = allocate_2D_array(indep,indep);
+	for(int k = 0 ;k <length; k++){
+		vec_parameters[0]=frequencies[k];
+		for(int n = 0 ; n<boundary_num; n++){
+			if(vec_parameters[0]<freq_boundaries[n]){
+				hessian(tapes[n], indep, vec_parameters, hess);
+				for(int i =0; i<vec_param_length; i++){
+					dt[i][k] = hess[i][0] ;
+					//for(int j = 0 ; j<vec_param_length; j++){
+					//	std::cout<<hess[j][i]<<" ";
+					//}
+					//std::cout<<std::endl;
+				}
+				//Mark successful derivative
+				eval = true;
+				//Skip the rest of the bins
+				break;
+			}
+		}
+		//If freq didn't fall in any boundary, set to 0
+		if(!eval){
+			for(int i =0; i<vec_param_length; i++){
+				dt[i][k] = 0.;
+			}	
+		}
+		eval = false;
+	}
+	deallocate_2D_array(hess,indep,indep);
+	//divide by 2 PI
+	for(int j = 0 ; j < vec_param_length; j++){
+		for(int i = 0 ; i<length; i++){
+			dt[j][i]/=(2.*M_PI);
+		}
 	}
 
 }

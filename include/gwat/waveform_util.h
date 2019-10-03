@@ -94,14 +94,12 @@ int fourier_detector_response_equatorial(T *frequencies,
 
 int boundary_number(std::string method);
 
-template<class T>
-void time_phase_corrected_autodiff(T *times, 
+void time_phase_corrected_autodiff(double *times, 
 	int length, 
-	T *frequencies,gen_params_base<T> *params, 
+	double *frequencies,
+	gen_params_base<double> *params, 
 	std::string generation_method, 
 	bool correct_time);
-template<class T>
-void time_phase_corrected_derivative_autodiff(T **dt, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, int dimension, bool correct_time);
 
 template<class T>
 void time_phase_corrected(T *times, 
