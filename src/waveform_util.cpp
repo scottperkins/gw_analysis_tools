@@ -11,10 +11,15 @@
 #include <complex>
 #include <vector>
 #include <string>
+#include <adolc/taping.h>
+#include <adolc/adouble.h>
+#include <adolc/drivers/drivers.h>
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
  * includes snr and detector response
+ *
+ * Includes some utilities useful for MCMC and fisher calculations, as well as time-frequency methods for detectors like LISA
  */
 
 
@@ -438,8 +443,49 @@ void time_phase_corrected_autodiff(T *times, int length, T *frequencies,gen_para
 	double freq_boundaries[boundary_num];
 	double grad_freqs[boundary_num];
 	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);	
-	//calculate derivative of phase
+	gen_params_base<adouble> aparams;
+	transform_parameters(params, &aparams);
+	int tapes[boundary_num];
+	for(int i = 0 ; i<boundary_num ; i++){
+		tapes[i]=i*8;	
+		trace_on(tapes[i]);
+		adouble freq;
+		freq <<= grad_freqs[i];
+		adouble phasep, phasec;
+		fourier_phase(&freq, 1, &phasep, &phasec, generation_method, &aparams);
+		double phaseout;
+		-phasep>>=phaseout;
+		trace_off();
+	}
+	
+	bool eval = false;
+	double freq;	
+	for(int k = 0; k<length; k++){
+		freq = frequencies[k];
+		for(int n = 0; n<boundary_num ; n++){
+			if(freq < freq_boundaries[n]){
+				gradient(tapes[n], 1, &freq, &times[k]);
+				//Mark successful derivative
+				eval = true;
+				//Skip the rest of the bins
+				break;
+			}
+		}
+		if(!eval){
+			times[k]=0;
+		}
+		eval = false;
+	}
 
+	//divide by 2 PI
+	for(int i = 0 ; i<length; i++){
+		times[i]/=(2.*M_PI);
+	}
+	if(check_ppE(generation_method)){
+		delete [] aparams.betappe;
+		delete [] aparams.bppe;
+	}
+	
 }
 /*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
  *
@@ -451,11 +497,23 @@ void time_phase_corrected_autodiff(T *times, int length, T *frequencies,gen_para
 template<class T>
 void time_phase_corrected_derivative_autodiff(T **dt, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, int dimension, bool correct_time)
 {
+	//calculate hessian of phase, take [0][j] components to get the derivative of time
+	int param_length = dimension +1 ;//+1 for frequency 
 	int boundary_num = boundary_number(generation_method);
 	double freq_boundaries[boundary_num];
 	double grad_freqs[boundary_num];
-	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);	
-	//calculate hessian of phase, take [0][j] components to get the derivative of time
+	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);
+	double parameters[param_length];
+	bool *log_factors=NULL;
+	//unpack_parameters(&parameters[1], params, generation_method, dimension, log_factors);
+	
+	//calculate derivative of phase
+	//int tapes[boundary_num];
+	//for(int i = 0 ; i < boundary_num ; i++){
+	//	tabes[i] = i*10212; //Random tape id 
+	//	trace_on(tapes[i]);
+	//	adouble 
+	//}
 
 }
 /*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
@@ -738,6 +796,7 @@ bool check_ppE(std::string generation_method)
 	}
 	return false;
 }
+//###########################################################################
 template void map_extrinsic_angles<double>(gen_params_base<double> *);
 template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
 
