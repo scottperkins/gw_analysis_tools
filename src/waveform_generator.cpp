@@ -918,16 +918,52 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			modeld.PhenomPv2_Param_Transform(&params);
 		}
 		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
-		//std::complex<T> tempPlus,tempCross;
-		//for (int i =0;i < length; i++)
-		//{
-		//	tempPlus = waveform_plus[i];	
-		//	tempCross = waveform_cross[i];	
-		//	waveform_plus[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempPlus
-		//			+std::complex<T>(sin(2.*params.zeta_polariz),0)*tempCross;
-		//	waveform_cross[i] = std::complex<T>(cos(2.*params.zeta_polariz),0)*tempCross
-		//			-std::complex<T>(sin(2.*params.zeta_polariz),0)*tempPlus;
-		//}
+	}
+	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral")
+	{
+		//std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		params.betappe = parameters->betappe;
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+
+		ppE_IMRPhenomPv2_Inspiral<T> modeld;
+		//Calculate Waveform
+		if(parameters->phip != -1){
+			params.chip = parameters->chip;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			modeld.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			modeld.PhenomPv2_Param_Transform(&params);
+		}
+		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
+	}
+	else if(generation_method == "ppE_IMRPhenomPv2_IMR")
+	{
+		//std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		params.betappe = parameters->betappe;
+		params.bppe = parameters->bppe;
+		params.Nmod = parameters->Nmod;
+
+		ppE_IMRPhenomPv2_IMR<T> modeld;
+		//Calculate Waveform
+		if(parameters->phip != -1){
+			params.chip = parameters->chip;
+			//params.chi1_l = parameters->chi1_l;
+			//params.chi2_l = parameters->chi2_l;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			modeld.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			modeld.PhenomPv2_Param_Transform(&params);
+		}
+		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
 	}
 
 	return status ;
