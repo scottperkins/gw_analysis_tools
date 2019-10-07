@@ -128,5 +128,16 @@ void assign_freq_boundaries(double *freq_boundaries,
 
 bool check_ppE(std::string generation_method);
 
+void integration_bounds(gen_params_base<double> *params, 
+	std::string generation_method,
+	std::string detector, 
+	std::string sensitivity_curve, 
+	double fmin, 
+	double fmax, 
+	double signal_to_noise,
+	double tol,
+	double *integration_bounds
+	) ;
+
 #endif
 

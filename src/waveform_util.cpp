@@ -596,7 +596,6 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 			{
 				f = frequencies[i];
 				times[i] = time_transition +pow_int(f-f_transition,2);
-				//std::cout<<(f-f_transition)<<std::endl;
 				//Stop if observation goes past 20 years
 				i++;
 				if(times[i-1]>(params->tc+630720000)){
@@ -765,6 +764,186 @@ bool check_ppE(std::string generation_method)
 		
 	}
 	return false;
+}
+
+/*! \brief Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation
+ *
+ * Numerically finds the frequencies at which the Fisher should be evaluated at. Uses the bisection search algorithm.
+ *
+ * integrand_bounds[0] ~ frequency at which |h|/(sqrt S) ~signal_to_noise +/- tol
+ *
+ * integrand_bounds[1] ~ frequency at which |h|/(sqrt S) ~signal_to_noise +/- tol
+ */
+void integration_bounds(gen_params_base<double> *params, /**< Parameters of the waveform*/
+	std::string generation_method, /*<< Generation method to use for the waveform*/
+	std::string detector, /**< Detector to use for the response function*/
+	std::string sensitivity_curve, /**< Sensitivity curve to use (must be one of the analytic curves in the detector_utilitiy file*/
+	double fmin, /**< minimum frequency to use (specific to the detector)*/
+	double fmax, /**< max frequency to use (specific to the detector)*/
+	double signal_to_noise,/**< Target ratio of |h|/ sqrt(S) (typically ~0.1)*/
+	double tol,/**< This is a numerical algorithm, so the tolerance must be specified*/
+	double *integration_bounds/**< [out] bounds fo the integral shape -- [2] -- (fmin,fmax)*/
+	) 
+{
+	double integration_time = 12;
+	bool lower=false, upper=false;
+	std::complex<double> response;
+	double eval_freq;
+	double time;
+	double psd;
+	double ratio;
+	
+	//Check lowest frequency
+	eval_freq = fmin;	
+	time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+		generation_method, true);
+	fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
+		generation_method, params, &time);
+	populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
+	ratio = std::abs(response)/psd ;
+	if( ratio>(signal_to_noise-tol))
+	{
+		integration_bounds[0] = eval_freq;
+		lower = true;
+	}
+
+	//Check highest frequency
+	eval_freq = fmax;
+	time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+		generation_method, true);
+	fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
+		generation_method, params, &time);
+	populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
+	ratio = std::abs(response)/psd ;
+	if( ratio>(signal_to_noise-tol))
+	{
+		integration_bounds[1] = eval_freq;
+		upper = true;
+	}
+
+	//Search for bounds
+	double fmin_search = fmin;	
+	double fmax_search = fmax;	
+	bool continue_search=true;
+	if(upper && !lower)
+	{
+		while(continue_search)
+		{
+			//Bisection in log freq space
+			eval_freq=sqrt(fmax_search*fmin_search);
+			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+				generation_method, true);
+			fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
+				generation_method, params, &time);
+			populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
+			ratio = std::abs(response)/psd ;
+			
+			//The function can be so steep the algorithm cannot determine a valid 
+			//frequency with the required tolerance because of floating point error
+			//check to see if the difference is at all meaningful
+			if(2*(fmax_search - fmin_search)/(fmax_search+fmin_search) <1e-12){
+				continue_search =false;
+				integration_bounds[1]=eval_freq;
+
+			}
+			if(ratio > (signal_to_noise + tol)){
+				fmax_search = eval_freq;
+			}
+			else if(ratio < (signal_to_noise - tol)){
+				fmin_search = eval_freq;
+			}
+			else{
+				continue_search =false;
+				integration_bounds[0]=eval_freq;
+			}
+		}
+	}
+	else if(lower && !upper){
+		while(continue_search)
+		{
+			//Bisection in log freq space
+			eval_freq=sqrt(fmax_search*fmin_search);
+			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+				generation_method, true);
+			fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
+				generation_method, params, &time);
+			populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
+			ratio = std::abs(response)/psd ;
+
+			//The function can be so steep the algorithm cannot determine a valid 
+			//frequency with the required tolerance because of floating point error
+			//check to see if the difference is at all meaningful
+			if(2*(fmax_search - fmin_search)/(fmax_search+fmin_search) <1e-12){
+				continue_search =false;
+				integration_bounds[1]=eval_freq;
+
+			}
+			if(ratio > (signal_to_noise + tol)){
+				fmin_search = eval_freq;
+			}
+			else if(ratio < (signal_to_noise - tol)){
+				fmax_search = eval_freq;
+			}
+			else{
+				continue_search =false;
+				integration_bounds[1]=eval_freq;
+			}
+		}
+
+	}
+	//For now, just doing a sparse grid search. This can be refined later 
+	//After doing grid search, it would be best to do a bisection search like above
+	//with the new bounds after the grid search
+	else if(!lower && !upper){
+		//Grid search to see if any point is above the noise curve
+		int vec_length= 100;
+		std::complex<double> response_vec[vec_length];
+		double time_vec[vec_length];
+		double freq_vec[vec_length];
+		double psd_vec[vec_length];
+		double ratio_vec[vec_length];
+
+		//Logarithmically space frequencies
+		double delta_f_factor = pow(fmax/fmin,1./(vec_length-1));
+		for(int i = 0 ; i<vec_length; i++){
+			freq_vec[i]= pow_int(delta_f_factor,i)*fmin;
+		}
+		time_phase_corrected_autodiff(time_vec, vec_length, freq_vec, params, 
+			generation_method, true);
+		fourier_detector_response_equatorial(freq_vec, vec_length, response_vec, detector, 
+			generation_method, params, time_vec);
+		populate_noise(freq_vec, sensitivity_curve, psd_vec, vec_length,integration_time);
+		for(int i = 0 ; i<vec_length; i++){
+			ratio_vec[i]=std::abs(response_vec[i])/psd_vec[i];
+		}
+		bool search_lower = true, search_upper = true;
+		for(int i = 0 ; i<vec_length; i++){
+			if(search_lower)
+			{
+				if(ratio_vec[i] >(signal_to_noise -tol) )
+				{
+					fmin_search = freq_vec[i];
+					search_lower=false;
+				}		
+			}
+			else if(search_upper){
+				if(ratio_vec[i] <(signal_to_noise -tol) )
+				{
+					fmax_search = freq_vec[i];
+					search_upper=false;
+					break;
+				}
+			}
+		}
+		if(!search_lower && !search_upper){
+			integration_bounds[0]=fmin_search;
+			integration_bounds[1]=fmax_search;
+		}
+		else{
+			integration_bounds[0]=fmin;
+			integration_bounds[1]=fmax;
+		}
+	}
 }
 //###########################################################################
 template void map_extrinsic_angles<double>(gen_params_base<double> *);
