@@ -371,6 +371,7 @@ adouble Z_from_DL(adouble DL, std::string cosmology);
 adouble DL_from_Z(adouble Z, std::string cosmology);
 adouble cosmology_interpolation_function(adouble x, double *coeffs, int interp_degree);
 
+double std_omega(double RA, double std_RA, double std_DEC, double cov_RA_DEC);
 void printProgress (double percentage);
 
 void allocate_FFTW_mem_forward(fftw_outline *plan,int length);

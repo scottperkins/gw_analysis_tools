@@ -418,6 +418,18 @@ int normalized_gsl_cholesky_matrix_invert(double **input, double **inverse, int 
 	return status;
 	
 }
+
+/*! \brief map the error on RA and DEC to error on solid angle \Omega
+ *
+ * All quantities in rad
+ *
+ * From arXiv:0906.4269
+ */
+double std_omega(double RA, double std_RA, double std_DEC, double cov_RA_DEC)
+{
+	return 2.*M_PI*( std::abs(sin(RA)) * sqrt( std_RA*std_DEC - cov_RA_DEC*cov_RA_DEC));
+}
+
 /*! \brief routine to print the progress of a process to the terminal as a progress bar
  *
  * Call everytime you want the progress printed

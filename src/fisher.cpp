@@ -2225,6 +2225,7 @@ void calculate_derivatives_autodiff(double *frequency,
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
 		dt = allocate_2D_array(dimension+1, length);	
+		//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
 		time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
@@ -2360,6 +2361,54 @@ void calculate_derivatives_autodiff(double *frequency,
 	}
 
 }
+
+void num_src_params(int *N_src_params, std::string generation_method, gen_params_base<double> *params)
+{
+	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
+		*N_src_params = 9+1;	
+	}
+	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
+		*N_src_params = 6+1;	
+	}
+	if(check_ppE(generation_method))
+	{
+		*N_src_params += params->Nmod;
+	}
+}
+void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_method, gen_params_base<double>*params)
+{
+	int gr_dim, gr_param_dim;
+	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
+		src_params[0]=0;
+		src_params[1]=4;
+		src_params[2]=5;
+		src_params[3]=6;
+		src_params[4]=8;
+		src_params[5]=9;
+		src_params[6]=10;
+		src_params[7]=11;
+		src_params[8]=12;
+		src_params[9]=13;
+		gr_dim = 14;
+		gr_param_dim = 10;
+	}
+	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
+		src_params[0]=0;
+		src_params[1]=4;
+		src_params[2]=5;
+		src_params[3]=8;
+		src_params[4]=9;
+		src_params[5]=10;
+		src_params[6]=11;
+		gr_dim = 12;
+		gr_param_dim = 7;
+	}
+	if(check_ppE(generation_method)){
+		for(int i = 0; i<params->Nmod;i++){
+			src_params[gr_dim+i]=gr_param_dim+i;
+		}
+	}
+}
 /*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
  *
  * If specific derivatives need to taken, take this routine as a template and write it yourself.
@@ -2380,8 +2429,12 @@ void time_phase_corrected_derivative_autodiff(double **dt, int length, double *f
 	bool log_factors[dimension];
 	unpack_parameters(&vec_parameters[1], params, generation_method, dimension, log_factors);
 	
-	int source_param[7] = {5,8,9,10,11,12,13};
-	int num_sp = 7;
+	//int source_param[7] = {5,8,9,10,11,12,13};
+	//int num_sp = 7;
+	int N_src_params;
+	num_src_params(&N_src_params, generation_method, params);
+	int src_params[N_src_params];
+	reduce_extrinsic(src_params, N_src_params, generation_method, params);
 	
 	for(int i = 0 ; i<vec_param_length; i++){
 		for(int j = 0 ; j<length; j++){
@@ -2428,26 +2481,25 @@ void time_phase_corrected_derivative_autodiff(double **dt, int length, double *f
                 S[k][j] = (k==j)?1.0:0.0;
         }
 	int dim = binomi(p+d,d);
-	int jvec[indep];
-	jvec[0]=1;//Freq derivative
+	int jvec[d];
+	jvec[1]=1;//Freq derivative
         double **tensor = new double*[dep];
         for(int k = 0 ; k<dep; k++)
              tensor[k] = new double[dim];
-	//double **hess = allocate_2D_array(indep,indep);
 	for(int k = 0 ;k <length; k++){
 		vec_parameters[0]=frequencies[k];
 		for(int n = 0 ; n<boundary_num; n++){
 			if(vec_parameters[0]<freq_boundaries[n]){
 				//tensor_eval(tapes[n], dep,indep, d,p,vec_parameters,tensor,S );
 				for(int i =0; i<indep; i++){
-					if(check_list(i, source_param, num_sp)){
+					if(check_list(i, src_params, N_src_params)){
 						for(int l = 0 ; l<indep; l++){
 							S[l][1]=(i==l)? 1.0:0.0;
 						}
 						tensor_eval(tapes[n], dep,indep, d,p,vec_parameters,tensor,S );
-						jvec[1]=i+1;	
+						//jvec[0]=i+1;	
+						jvec[0]=2;	
 						dt[i][k] = tensor[0][tensor_address(d,jvec)] ;
-						//std::cout<<std::endl;
 					}
 				}
 				//Mark successful derivative
@@ -2464,6 +2516,12 @@ void time_phase_corrected_derivative_autodiff(double **dt, int length, double *f
 		}
 		eval = false;
 	}
+	//for(int k = 0 ; k<length; k++){
+	//	for(int i = 0 ; i<indep;i++){
+	//		std::cout<<dt[i][k]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	//deallocate_2D_array(hess,indep,indep);
 	//divide by 2 PI
 	for(int j = 0 ; j < vec_param_length; j++){
@@ -2543,9 +2601,7 @@ void time_phase_corrected_derivative_autodiff_sparse(double **dt, int length, do
 	int options[2]; options[0]=0; options[1]=0;
 	int nnz;
 	vec_parameters[0]=frequencies[0];
-	std::cout<<"TEST"<<std::endl;
 	sparse_hess(tapes[0], indep, 0,vec_parameters,&nnz, &rind, &cind, &values,options );
-	std::cout<<"TEST"<<std::endl;
 	for(int k = 0 ;k <length; k++){
 		vec_parameters[0]=frequencies[k];
 		for(int n = 0 ; n<boundary_num; n++){
@@ -2642,10 +2698,7 @@ void time_phase_corrected_derivative_autodiff_full_hess(double **dt, int length,
 				hessian(tapes[n], indep, vec_parameters, hess);
 				for(int i =0; i<vec_param_length; i++){
 					dt[i][k] = hess[i][0] ;
-					//for(int j = 0 ; j<vec_param_length; j++){
-					//	std::cout<<hess[i][j]<<" ";
-					//}
-					//std::cout<<std::endl;
+					//std::cout<<hess[i][0]<<" ";
 				}
 				//std::cout<<std::endl;
 				//Mark successful derivative
@@ -2670,6 +2723,135 @@ void time_phase_corrected_derivative_autodiff_full_hess(double **dt, int length,
 		}
 	}
 
+}
+/*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase -- numerical 
+ *
+ * IN PROGRESS -- DO NOT USE
+ *
+ * If specific derivatives need to taken, take this routine as a template and write it yourself.
+ *
+ * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the (full) source parameters)
+ *
+ */
+template<class T>
+void time_phase_corrected_derivative_numerical(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time)
+{
+	//bool save_shift_time = params->shift_time;
+	//params->shift_time = false;
+	std::string local_gen = "IMRPhenomD";
+	//################################################
+	T *phase_pp = new T[length];//source param plus
+	T *phase_cross = new T[length];
+	T *phase_pm = new T[length];//source param minus
+	//################################################
+	//################################################
+	fourier_phase(frequencies, length, phase_pp, phase_cross, local_gen, params);
+	fourier_phase(frequencies, length, phase_pm, phase_cross, local_gen, params);
+	//################################################
+	source_parameters<T> s_param;
+	s_param = source_parameters<T>::populate_source_parameters(params);
+	s_param.sky_average = params->sky_average;
+	s_param.f_ref = params->f_ref;
+	s_param.phiRef = params->phiRef;
+	s_param.cosmology=params->cosmology;
+	s_param.incl_angle=params->incl_angle;
+	IMRPhenomD<T> model;
+	lambda_parameters<T> lambda;
+	model.assign_lambda_param(&s_param,&lambda);	
+	model.post_merger_variables(&s_param);
+	T fRD = s_param.fRD;
+	T fdamp = s_param.fdamp;
+	T fpeak = model.fpeak(&s_param , &lambda);
+	T deltaf = frequencies[1]-frequencies[0];
+	//################################################
+	//Factor of 2 pi for the definition of time from frequency
+	//IMRPhenomD returns (-) phase
+	//if(local_gen == "IMRPhenomD"){
+	//	//Currently using Nico's fix
+	//	if(correct_time){
+	//		T f = frequencies[0];
+	//		bool check = true, check2=true;
+	//		T pt1, pt2, f1,f2;
+	//		int i = 0 ;
+	//		//One sided, to start it off
+	//		dt[0] = (phase_plus[1]-phase_plus[0])/(2.*M_PI*deltaf);
+	//		i++;
+	//		while(f < .95*fRD && i<length-1)
+	//		{
+	//			f = frequencies[i];
+	//			//central difference for the rest of the steps
+	//			dt[i] = (phase_plus[i+1]-phase_plus[i-1])/(4.*M_PI*deltaf);
+	//			if(check){
+	//				if(f>fpeak){
+	//					pt1 = times[i];
+	//					f1 = f;
+	//					check=false;
+	//				}
+	//			}
+	//			else{
+	//				if(check2){
+	//					if(f>.9*fRD){
+	//						pt2 = times[i];
+	//						f2 = f;
+	//						check2=false;
+	//					}
+	//				}
+	//			}
+	//			i++;
+	//		}	
+	//		T f_intercept = times[i-1];
+	//		T f_mr = f;
+	//		T freq_slope_pm = (pt2-pt1)/(f2-f1);
+	//		while(f<1.5*fRD && i<length-1)
+	//		{
+	//			f = frequencies[i];
+	//			times[i] =f_intercept+ (f-f_mr)*freq_slope_pm;
+	//			//Stop if observation goes past 20 years
+	//			i++;
+	//			if(times[i-1]>(params->tc+630720000)){
+	//				break;
+	//			}
+
+	//		}
+	//		T time_transition = times[i-1];
+	//		T f_transition = f;
+	//		while(i<length-1)
+	//		{
+	//			f = frequencies[i];
+	//			times[i] = time_transition +pow_int(f-f_transition,2);
+	//			//Stop if observation goes past 20 years
+	//			i++;
+	//			if(times[i-1]>(params->tc+630720000)){
+	//				break;
+	//			}
+	//			
+	//		}
+	//		//if stopped at 20 years, fill out with frozen time
+	//		if(i != length){
+	//			while(i<length){
+	//				times[i] = times[i-1];
+	//				i++;
+	//			}
+	//		}
+	//		else{
+	//			times[length-1] = (phase_plus[length-1] - phase_plus[length-2])/(2*M_PI*deltaf);
+	//		}
+	//	}
+	//	else{
+	//		times[0] = (phase_plus[1]-phase_plus[0])/(2*M_PI*deltaf);
+	//		if(length>2){
+	//			for(int i = 1  ;i<length-1; i++){
+	//				times[i] = (phase_plus[i+1]-phase_plus[i-1])/(4*M_PI*deltaf);
+	//			}
+	//			times[length-1] = (phase_plus[length-1]-phase_plus[length-2])/(2*M_PI*deltaf);
+	//		}
+	//	}
+	//}
+	//################################################
+	delete [] phase_pp;
+	delete [] phase_pm;
+	delete [] phase_cross;
+	//params->shift_time = save_shift_time;
 }
 /*! \brief Utility for mapping generation method string to one accepted by the waveform_generation routines
  *
