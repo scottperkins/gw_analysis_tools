@@ -768,7 +768,11 @@ bool check_ppE(std::string generation_method)
 
 /*! \brief Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation
  *
- * Numerically finds the frequencies at which the Fisher should be evaluated at. Uses the bisection search algorithm.
+ * Numerically finds the frequencies at which the Fisher should be evaluated at. 
+ * 
+ * Uses the bisection search algorithm for the cases where the waveform enters/leaves the band at SNR>1
+ *
+ * Uses a 100 pt grid search (logarithmically spaced) if the signal has SNR<1 when entering and leaving
  *
  * integrand_bounds[0] ~ frequency at which |h|/(sqrt S) ~signal_to_noise +/- tol
  *
@@ -945,6 +949,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 		}
 	}
 }
+
 //###########################################################################
 template void map_extrinsic_angles<double>(gen_params_base<double> *);
 template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);

@@ -101,6 +101,13 @@ void calculate_derivatives_autodiff(double *frequency,
 	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
 	std::string detector
 	);
+void time_phase_corrected_derivative_autodiff_full_hess(double **dt, 
+	int length, 
+	double *frequencies,
+	gen_params_base<double> *params, 
+	std::string generation_method, 
+	int dimension, 
+	bool correct_time);
 void time_phase_corrected_derivative_autodiff(double **dt, 
 	int length, 
 	double *frequencies,
