@@ -2380,8 +2380,8 @@ void time_phase_corrected_derivative_autodiff(double **dt, int length, double *f
 	bool log_factors[dimension];
 	unpack_parameters(&vec_parameters[1], params, generation_method, dimension, log_factors);
 	
-	int source_param[8] = {5,8,9,10,11,12,13,14};
-	int num_sp = 8;
+	int source_param[7] = {5,8,9,10,11,12,13};
+	int num_sp = 7;
 	
 	for(int i = 0 ; i<vec_param_length; i++){
 		for(int j = 0 ; j<length; j++){
