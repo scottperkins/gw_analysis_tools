@@ -517,7 +517,8 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 {
 	//bool save_shift_time = params->shift_time;
 	//params->shift_time = false;
-	std::string local_gen = "IMRPhenomD";
+	//std::string local_gen = "IMRPhenomD";
+	std::string local_gen = generation_method;
 	//################################################
 	T *phase_plus = new T[length];
 	T *phase_cross = new T[length];
@@ -525,25 +526,47 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	//################################################
 	fourier_phase(frequencies, length, phase_plus, phase_cross, local_gen, params);
 	//################################################
-	source_parameters<T> s_param;
-	s_param = source_parameters<T>::populate_source_parameters(params);
-	s_param.sky_average = params->sky_average;
-	s_param.f_ref = params->f_ref;
-	s_param.phiRef = params->phiRef;
-	s_param.cosmology=params->cosmology;
-	s_param.incl_angle=params->incl_angle;
-	IMRPhenomD<T> model;
-	lambda_parameters<T> lambda;
-	model.assign_lambda_param(&s_param,&lambda);	
-	model.post_merger_variables(&s_param);
-	T fRD = s_param.fRD;
-	T fdamp = s_param.fdamp;
-	T fpeak = model.fpeak(&s_param , &lambda);
-	T deltaf = frequencies[1]-frequencies[0];
+	T fdamp, fRD, fpeak, deltaf;
+	if(local_gen.find("IMRPhenomD")!=std::string::npos){
+		source_parameters<T> s_param;
+		s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.sky_average = params->sky_average;
+		s_param.f_ref = params->f_ref;
+		s_param.phiRef = params->phiRef;
+		s_param.cosmology=params->cosmology;
+		s_param.incl_angle=params->incl_angle;
+		IMRPhenomD<T> model;
+		lambda_parameters<T> lambda;
+		model.assign_lambda_param(&s_param,&lambda);	
+		model.post_merger_variables(&s_param);
+		fRD = s_param.fRD;
+		fdamp = s_param.fdamp;
+		fpeak = model.fpeak(&s_param , &lambda);
+		deltaf = frequencies[1]-frequencies[0];
+	}
+	else if(local_gen.find("IMRPhenomPv2")!=std::string::npos){
+		source_parameters<T> s_param;
+		s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.sky_average = params->sky_average;
+		s_param.f_ref = params->f_ref;
+		s_param.phiRef = params->phiRef;
+		s_param.cosmology=params->cosmology;
+		s_param.incl_angle=params->incl_angle;
+		s_param.chip = params->chip;
+		s_param.phip = params->phip;
+		IMRPhenomPv2<T> model;
+		lambda_parameters<T> lambda;
+		model.assign_lambda_param(&s_param,&lambda);	
+		model.post_merger_variables(&s_param);
+		fRD = s_param.fRD;
+		fdamp = s_param.fdamp;
+		fpeak = model.fpeak(&s_param , &lambda);
+		deltaf = frequencies[1]-frequencies[0];
+	}
 	//################################################
 	//Factor of 2 pi for the definition of time from frequency
 	//IMRPhenomD returns (-) phase
-	if(local_gen == "IMRPhenomD"){
+	if(local_gen.find("IMRPhenom") !=std::string::npos){
 		//Currently using Nico's fix
 		if(correct_time){
 			T f = frequencies[0];
