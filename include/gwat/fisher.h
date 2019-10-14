@@ -123,6 +123,7 @@ void time_phase_corrected_derivative_numerical(T **dt,
 	std::string generation_method, 
 	int dimension, 
 	bool correct_time);
+void time_phase_corrected_derivative_autodiff_numerical(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time);
 
 std::string local_generation_method(std::string generation_method);
 

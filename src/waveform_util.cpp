@@ -973,6 +973,25 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	}
 }
 
+/*! \brief Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve
+ *
+ * Sensitivity curve has to be one of the options in detector_util analytic options
+ */
+void integration_interval(double sampling_freq, 
+	double integration_time, 
+	std::string detector, 
+	std::string sensitivity_curve, 
+	gen_params_base<double> *params)
+{
+	double fmax = sampling_freq /2.; //Nyquist limit
+	double fmin= 0; //DC component
+	double delta_f =  1./integration_time;
+	int N = (fmax-fmin)/delta_f;
+	double *frequencies = new double[N];
+
+	delete [] frequencies;
+}
+
 //###########################################################################
 template void map_extrinsic_angles<double>(gen_params_base<double> *);
 template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);

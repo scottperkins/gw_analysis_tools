@@ -414,10 +414,12 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			//One sided difference for now, because the difference 
 			//in time is not constant 
 			//(central difference depends on symmetric spacing?
-			for(int i = 0 ; i<length; i++){
+			for(int i = 0 ; i<length-1; i++){
 				deriv_t[i] = 
 					(response_plus[i+1]-response_plus[i])/(times[i+1]-times[i]);
 			}
+			deriv_t[length-1] = 
+				(response_plus[length-1]-response_plus[length-2])/(times[length-1]-times[length-2]);
 			for(int i = 0 ; i<dimension; i++){
 				for(int j = 0 ; j<length; j++){
 					response_deriv[i][j]+=deriv_t[j] * dt[i][j];
@@ -448,14 +450,14 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				response_deriv[l][j] *=parameters_vec[l] ;
 			}
 		}
-		double redat[length];
-		double imagdat[length];
-		for(int j =0 ; j<length; j++){
-			redat[j]=real(response_deriv[l][j]);
-			imagdat[j]=imag(response_deriv[l][j]);
-		}
-		write_file("data/fisher/fisher_deriv_real_O2_"+std::to_string(l)+".csv",redat,length);
-		write_file("data/fisher/fisher_deriv_imag_O2_"+std::to_string(l)+".csv",imagdat,length);
+		//double redat[length];
+		//double imagdat[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response_deriv[l][j]);
+		//	imagdat[j]=imag(response_deriv[l][j]);
+		//}
+		//write_file("data/fisher/fisher_deriv_real_O2_"+std::to_string(l)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_imag_O2_"+std::to_string(l)+".csv",imagdat,length);
 	}
 	deallocate_non_param_options(&waveform_params, parameters, gen_method);
 
@@ -2188,14 +2190,14 @@ void fisher_autodiff(double *frequency,
 
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<dimension; i++){
-		double redat[length];
-		double imagdat[length];
-		for(int j =0 ; j<length; j++){
-			redat[j]=real(response_deriv[i][j]);
-			imagdat[j]=imag(response_deriv[i][j]);
-		}
-		write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
-		write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
+		//double redat[length];
+		//double imagdat[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response_deriv[i][j]);
+		//	imagdat[j]=imag(response_deriv[i][j]);
+		//}
+		//write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
 		delete [] response_deriv[i];
 	}
 	delete [] response_deriv;
@@ -2248,8 +2250,12 @@ void calculate_derivatives_autodiff(double *frequency,
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
 		dt = allocate_2D_array(dimension+1, length);	
 		//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
+		time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
 		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
-		time_phase_corrected_derivative_numerical(&dt[1], length, frequency, parameters, generation_method, dimension, false);
+		//time_phase_corrected_derivative_numerical(&dt[1], length, frequency, parameters, generation_method, dimension, false);
+		//write_file("data/fisher/time_derivatives.csv",&dt[1],dimension, length);
+		//write_file("data/fisher/time_derivatives_fh.csv",&dt[1],dimension, length);
+		//write_file("data/fisher/time_derivatives_an.csv",&dt[1],dimension, length);
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
 			
@@ -2307,7 +2313,6 @@ void calculate_derivatives_autodiff(double *frequency,
 	}
 	//Evaluate derivative tapes
 	int dep = 2;//Output is complex
-	//int indep = dimension+1;//First element is for frequency
 	int indep = vec_param_length;//First element is for frequency
 	bool eval = false;//Keep track of when a boundary is hit
 	double **jacob = allocate_2D_array(dep,indep);
@@ -2420,6 +2425,115 @@ void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_
 			src_params[gr_dim+i]=gr_param_dim+i;
 		}
 	}
+}
+/*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
+ *
+ * If specific derivatives need to taken, take this routine as a template and write it yourself.
+ *
+ * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
+ *
+ */
+void time_phase_corrected_derivative_autodiff_numerical(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time)
+{
+	//calculate hessian of phase, take [0][j] components to get the derivative of time
+	int vec_param_length = dimension +1 ;//+1 for frequency 
+	int boundary_num = boundary_number(generation_method);
+	double freq_boundaries[boundary_num];
+	double grad_freqs[boundary_num];
+	std::string local_gen_method = local_generation_method(generation_method);
+	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);
+	double vec_parameters[vec_param_length];
+	bool log_factors[dimension];
+	unpack_parameters(&vec_parameters[1], params, generation_method, dimension, log_factors);
+	
+	for(int i = 0 ; i<vec_param_length; i++){
+		for(int j = 0 ; j<length; j++){
+			dt[i][j] = 0;
+		}
+	}
+	//calculate derivative of phase
+	int tapes[boundary_num];
+	for(int i = 0 ; i < boundary_num ; i++){
+		tapes[i] = i*12; //Random tape id 
+		trace_on(tapes[i]);
+		adouble avec_parameters[vec_param_length];
+		avec_parameters[0] <<=grad_freqs[i];
+		for(int j = 1; j <= dimension; j++){
+			avec_parameters[j]<<=vec_parameters[j];	
+		}
+		//Repack parameters
+		gen_params_base<adouble> a_parameters;
+		adouble afreq;
+		afreq = avec_parameters[0];
+		//############################################
+		//Non variable parameters
+		repack_non_parameter_options(&a_parameters,params,generation_method);
+		//############################################
+		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+		adouble time;
+		adouble phasep, phasec;
+		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
+		double phase;
+		phasep >>= phase;
+
+		trace_off();
+		deallocate_non_param_options(&a_parameters, params, generation_method);
+	}
+	int indep = vec_param_length;//First element is for frequency
+	bool eval = false;//Keep track of when a boundary is hit
+	int dep = 1;
+	double **jacob = allocate_2D_array(dep,indep);
+	double **source_param_deriv= allocate_2D_array(indep, length);
+	for(int k = 0 ;k <length; k++){
+		vec_parameters[0]=frequencies[k];
+		for(int n = 0 ; n<boundary_num; n++){
+			if(vec_parameters[0]<freq_boundaries[n]){
+				//tensor_eval(tapes[n], dep,indep, d,p,vec_parameters,tensor,S );
+				jacobian(tapes[n], dep, indep, vec_parameters, jacob);
+				for(int i =0; i<vec_param_length; i++){
+					source_param_deriv[i][k] = jacob[0][i];
+					//std::cout<<hess[i][0]<<" ";
+				}
+				//std::cout<<std::endl;
+				//Mark successful derivative
+				eval = true;
+				//Skip the rest of the bins
+				break;
+			}
+		}
+		//If freq didn't fall in any boundary, set to 0
+		if(!eval){
+			for(int i =0; i<vec_param_length; i++){
+				source_param_deriv[i][k] = 0.;
+			}	
+		}
+		eval = false;
+	}
+	deallocate_2D_array(jacob, dep, indep);
+	double deltaf = frequencies[1]-frequencies[0];
+	for(int k = 0 ; k<vec_param_length; k++){
+		//forward deriv
+		dt[k][0] = (source_param_deriv[k][1] - source_param_deriv[k][0])/(2*M_PI*deltaf);
+		//central difference 2nd
+		dt[k][1] = (source_param_deriv[k][2] - source_param_deriv[k][0])/(4*M_PI*deltaf);
+		//Central difference
+		for(int i = 2 ; i<length-2; i ++){
+			//dt[k][i]=(source_param_deriv[k][i+1] - source_param_deriv[k][i-1])/(4*M_PI*deltaf);
+			dt[k][i]=(-source_param_deriv[k][i+2] + 8.*source_param_deriv[k][i+1]-8.*source_param_deriv[k][i-1]+source_param_deriv[k][i-2])/(24.*M_PI*deltaf);
+		}
+		//central difference 2nd
+		dt[k][length-2] = (source_param_deriv[k][length-1] - source_param_deriv[k][length-3])/(4.*M_PI*deltaf);
+		//backwards deriv
+		dt[k][length - 1] = (source_param_deriv[k][length-1] - source_param_deriv[k][length-2])/(2.*M_PI*deltaf);
+	}
+	//divide by 2 PI
+	//for(int j = 0 ; j < vec_param_length; j++){
+	//	for(int i = 0 ; i<length; i++){
+	//		dt[j][i]/=(2.*M_PI);
+	//	}
+	//}
+	deallocate_2D_array(source_param_deriv, indep, length);
+
 }
 /*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
  *
@@ -2760,7 +2874,7 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 	T *parameters_vec = new T[dimension];
 	T *param_p = new T[dimension];
 	T *param_m = new T[dimension];
-	double epsilon = 1e-8;
+	double epsilon = 1e-6;
 	T deltaf = frequencies[1]-frequencies[0];
 	lambda_parameters<T> lambda;
 	source_parameters<T> s_param;
@@ -2780,10 +2894,10 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 		gen_params waveform_params;
 		repack_non_parameter_options(&waveform_params,params, generation_method);
 		repack_parameters(param_p, &waveform_params, generation_method, dimension, params);
-		fourier_phase(frequencies, length, phase_pp, phase_cross, local_gen, params);
-		repack_parameters(param_p, &waveform_params, generation_method, dimension, params);
-		fourier_phase(frequencies, length, phase_pm, phase_cross, local_gen, params);
-			
+		fourier_phase(frequencies, length, phase_pp, phase_cross, local_gen, &waveform_params);
+
+		repack_parameters(param_m, &waveform_params, generation_method, dimension, params);
+		fourier_phase(frequencies, length, phase_pm, phase_cross, local_gen, &waveform_params);
 		//################################################
 		T fRD, fdamp,fpeak;
 		if(local_gen.find("IMRPhenomPv2")!=std::string::npos){
@@ -2793,12 +2907,12 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 			s_param.spin2z = params->spin2[2];
 			s_param.chip = params->chip;
 			s_param.phip = params->phip;
+			s_param.phiRef = params->phiRef;
+			s_param.f_ref = params->f_ref;
+			s_param.incl_angle = params->incl_angle;
 			modelp.PhenomPv2_Param_Transform_reduced(&s_param);
 			s_param.sky_average = params->sky_average;
-			s_param.f_ref = params->f_ref;
-			s_param.phiRef = params->phiRef;
 			s_param.cosmology=params->cosmology;
-			s_param.incl_angle=params->incl_angle;
 			modelp.assign_lambda_param(&s_param,&lambda);	
 			modelp.post_merger_variables(&s_param);
 			fRD = s_param.fRD;
@@ -2894,12 +3008,16 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 				//}
 			}
 			else{
-				dt[k][0] = (phase_pp[1]-phase_pm[1]-phase_pp[0] + phase_pm[0])/(4*M_PI*deltaf * epsilon);
+				//dt[k][0] = (phase_pp[1]-phase_pm[1]-phase_pp[0] + phase_pm[0])/(8*M_PI*deltaf * epsilon);
 				if(length>2){
 					for(int i = 1  ;i<length-1; i++){
 						dt[k][i] = (phase_pp[i+1] - phase_pm[i+1] -phase_pp[i-1]+phase_pm[i-1])/(8*M_PI*deltaf*epsilon);
 					}
-				dt[k][length-1] = (phase_pp[length-1]-phase_pm[length-1]-phase_pp[length-2]+phase_pm[length-2])/(4*M_PI*deltaf*epsilon);
+				//dt[k][length-1] = (phase_pp[length-1]-phase_pm[length-1]-phase_pp[length-2]+phase_pm[length-2])/(4*M_PI*deltaf*epsilon);
+					//YES THIS IS WRONG
+					dt[k][length-1] = dt[k][length-2];
+					dt[k][0] = dt[k][1];
+				
 				}
 			}
 		}
