@@ -566,6 +566,18 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->shift_time = param_in->shift_time;
 	
 }
+bool check_ppE(std::string generation_method)
+{
+	if(generation_method.find("ppE") != std::string::npos || 
+		generation_method.find("dCS") !=std::string::npos ||
+		generation_method.find("EdGB") !=std::string::npos 
+		)
+	{
+		return true;
+		
+	}
+	return false;
+}
 template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> *);
 /*! \brief Transforms between chirpmass and DL to overall amplitude factor A0
  *

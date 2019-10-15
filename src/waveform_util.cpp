@@ -645,6 +645,10 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 				}
 				times[length-1] = (phase_plus[length-1]-phase_plus[length-2])/(2*M_PI*deltaf);
 			}
+			else{
+				//only option with length 2 vector
+				times[1] = times[0];
+			}
 		}
 	}
 	//################################################
@@ -682,16 +686,17 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.incl_angle=internal_params.incl_angle;
 	lambda_parameters<adouble> lambda;
 	if(	(
-		generation_method =="IMRPhenomPv2" ||
-		generation_method =="MCMC_IMRPhenomPv2" ||
-		generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
-		generation_method =="ppE_IMRPhenomPv2_IMR" ||
-		generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral" ||
-		generation_method =="MCMC_ppE_IMRPhenomPv2_IMR" ||
-		generation_method =="dCS_IMRPhenomPv2" ||
-		generation_method =="EdGB_IMRPhenomPv2" ||
-		generation_method =="MCMC_dCS_IMRPhenomPv2" ||
-		generation_method =="MCMC_EdGB_IMRPhenomPv2" 
+		//generation_method =="IMRPhenomPv2" ||
+		//generation_method =="MCMC_IMRPhenomPv2" ||
+		//generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
+		//generation_method =="ppE_IMRPhenomPv2_IMR" ||
+		//generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral" ||
+		//generation_method =="MCMC_ppE_IMRPhenomPv2_IMR" ||
+		//generation_method =="dCS_IMRPhenomPv2" ||
+		//generation_method =="EdGB_IMRPhenomPv2" ||
+		//generation_method =="MCMC_dCS_IMRPhenomPv2" ||
+		//generation_method =="MCMC_EdGB_IMRPhenomPv2" 
+		generation_method.find("IMRPhenomPv2") != std::string::npos
 		)
 		&& !input_params->sky_average){
 
@@ -725,23 +730,24 @@ void assign_freq_boundaries(double *freq_boundaries,
 		}
 	}
 	else if(
-		(generation_method =="IMRPhenomD" || 
-		generation_method == "ppE_IMRPhenomD_Inspiral"|| 
-		generation_method == "ppE_IMRPhenomD_IMR") 
-		|| 
-		(generation_method =="MCMC_IMRPhenomD_Full" || 
-		generation_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 
-		generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full")
-		|| 
-		(generation_method =="MCMC_dCS_IMRPhenomD_Full" || 
-		generation_method == "MCMC_EdGB_IMRPhenomD_Full")
-		|| 
-		(generation_method =="dCS_IMRPhenomD" || 
-		generation_method == "EdGB_IMRPhenomD")
-		|| 
-		(generation_method =="MCMC_IMRPhenomD" || 
-		generation_method == "MCMC_ppE_IMRPhenomD_Inspiral" ||
-		generation_method == "MCMC_ppE_IMRPhenomD_IMR" )
+		//(generation_method =="IMRPhenomD" || 
+		//generation_method == "ppE_IMRPhenomD_Inspiral"|| 
+		//generation_method == "ppE_IMRPhenomD_IMR") 
+		//|| 
+		//(generation_method =="MCMC_IMRPhenomD_Full" || 
+		//generation_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 
+		//generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full")
+		//|| 
+		//(generation_method =="MCMC_dCS_IMRPhenomD_Full" || 
+		//generation_method == "MCMC_EdGB_IMRPhenomD_Full")
+		//|| 
+		//(generation_method =="dCS_IMRPhenomD" || 
+		//generation_method == "EdGB_IMRPhenomD")
+		//|| 
+		//(generation_method =="MCMC_IMRPhenomD" || 
+		//generation_method == "MCMC_ppE_IMRPhenomD_Inspiral" ||
+		//generation_method == "MCMC_ppE_IMRPhenomD_IMR" )
+		generation_method.find("IMRPhenomD") != std::string::npos
 		){
 
 		IMRPhenomD<adouble> modeld;
@@ -775,18 +781,6 @@ void assign_freq_boundaries(double *freq_boundaries,
 	
 	
 
-}
-bool check_ppE(std::string generation_method)
-{
-	if(generation_method.find("ppE") != std::string::npos || 
-		generation_method.find("dCS") !=std::string::npos ||
-		generation_method.find("EdGB") !=std::string::npos 
-		)
-	{
-		return true;
-		
-	}
-	return false;
 }
 
 /*! \brief Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation
@@ -944,24 +938,43 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 			ratio_vec[i]=std::abs(response_vec[i])/psd_vec[i];
 		}
 		bool search_lower = true, search_upper = true;
-		for(int i = 0 ; i<vec_length; i++){
-			if(search_lower)
+		for(int i = 0 ;i<vec_length; i++){
+			if(ratio_vec[i] >(signal_to_noise -tol) )
 			{
-				if(ratio_vec[i] >(signal_to_noise -tol) )
-				{
-					fmin_search = freq_vec[i];
-					search_lower=false;
-				}		
-			}
-			else if(search_upper){
-				if(ratio_vec[i] <(signal_to_noise -tol) )
-				{
-					fmax_search = freq_vec[i];
-					search_upper=false;
-					break;
-				}
-			}
+				fmin_search = freq_vec[i];
+				search_lower=false;
+				break;
+			}		
+
 		}
+		for(int i = vec_length-1 ;i>0; i--){
+			if(ratio_vec[i] >(signal_to_noise -tol) )
+			{
+				fmax_search = freq_vec[i];
+				search_upper=false;
+				break;
+			}		
+
+		}
+		//for(int i = 0 ; i<vec_length; i++){
+		//	std::cout<<i<<" "<<ratio_vec[i]<<" "<<freq_vec[i]<<std::endl;
+		//	if(search_lower)
+		//	{
+		//		if(ratio_vec[i] >(signal_to_noise -tol) )
+		//		{
+		//			fmin_search = freq_vec[i];
+		//			search_lower=false;
+		//		}		
+		//	}
+		//	else if(search_upper){
+		//		if(ratio_vec[i] <(signal_to_noise -tol) )
+		//		{
+		//			fmax_search = freq_vec[i];
+		//			search_upper=false;
+		//			break;
+		//		}
+		//	}
+		//}
 		if(!search_lower && !search_upper){
 			integration_bounds[0]=fmin_search;
 			integration_bounds[1]=fmax_search;
@@ -976,19 +989,97 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 /*! \brief Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve
  *
  * Sensitivity curve has to be one of the options in detector_util analytic options
+ *
+ * The current scheme is to use the frequency bounds determined by the SNR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f_integration_time, f_high_band)
  */
-void integration_interval(double sampling_freq, 
-	double integration_time, 
-	std::string detector, 
-	std::string sensitivity_curve, 
-	gen_params_base<double> *params)
+void integration_interval(double sampling_freq, /**< Frequency at which the detector operates*/
+	double integration_time, /**< Time of observation in seconds*/
+	std::string detector, /**< Detector to use for the response function*/
+	std::string sensitivity_curve, /**< Sensitivity curve to use -- must match analytic choices in detector_util*/
+	std::string generation_method,/**< method to use for the waveform generation*/
+	gen_params_base<double> *params,/**< parameters of the source*/
+	double *freq_bounds/**< [out] Output bounds*/
+	)
 {
 	double fmax = sampling_freq /2.; //Nyquist limit
-	double fmin= 0; //DC component
+	//double fmin= 0; //DC component
+	double fmin= 1e-6; //DC component
 	double delta_f =  1./integration_time;
 	int N = (fmax-fmin)/delta_f;
 	double *frequencies = new double[N];
+	for(int i = 0 ; i<N; i++){
+		frequencies[i] = fmin + i*delta_f;	
+	}
+	
+	double bounds_from_band[2];
 
+	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band);
+	std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
+	double times[2];
+	time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
+	double T_band = times[1]-times[0];
+
+	//Conform the output of the band calculation to the pre-set frequency grid
+	bool max_found=false, min_found=false;
+	int max_id , min_id ;
+	int i=0 ;
+	while((!max_found || !min_found) && i<N){
+		if(bounds_from_band[1] >= (frequencies[i]-delta_f/2. ) &&
+			bounds_from_band[1] <= (frequencies[i]+delta_f/2. )){
+			max_id = i;
+			max_found = true;
+		}
+		if(bounds_from_band[0] >= (frequencies[i]-delta_f/2. ) &&
+			bounds_from_band[0] <= (frequencies[i]+delta_f/2. )){
+			min_id = i;
+			min_found = true;
+		}
+		i++;
+	}
+
+	if(T_band < integration_time){
+		freq_bounds[0]=frequencies[min_id];	
+		freq_bounds[1]=frequencies[max_id];	
+		std::cout<<"Band"<<std::endl;
+		std::cout<<T_band<<std::endl;
+		std::cout<<times[0]<<" "<<times[1]<<std::endl;
+	}
+	else{
+		freq_bounds[1] = frequencies[max_id];
+		bool continue_search=true;
+		double fmax_search = freq_bounds[1];
+		double fmin_search = freq_bounds[0];
+		double eval_freq, time;
+		int min_id_search=min_id, max_id_search=max_id, eval_id;
+		double tolerance = .1*integration_time;
+		std::cout<<"Truncated"<<std::endl;
+		
+		while(continue_search)
+		{
+			eval_id = (max_id_search +min_id_search)/2;
+			eval_freq = frequencies[eval_id];
+			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+				generation_method, true);
+			if( 	( ( (times[1] - time) > integration_time-tolerance )  && 
+				( (times[1] - time) < integration_time+tolerance) )
+				||
+				(freq_bounds[1]-eval_freq < 100*delta_f) ) 
+			{
+
+				continue_search = false;
+				freq_bounds[0]=eval_freq;
+				std::cout<<(times[1]-time)<<std::endl;
+			}
+			else if(( (times[1] - time) < (integration_time-tolerance) )){
+				max_id_search = eval_id;
+			}
+			else if(( (times[1] - time) > (integration_time+tolerance) )){
+				min_id_search = eval_id;
+			}
+
+		}
+	}
+	
 	delete [] frequencies;
 }
 

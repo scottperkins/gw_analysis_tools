@@ -126,7 +126,6 @@ void assign_freq_boundaries(double *freq_boundaries,
 	gen_params_base<double> *input_params, 
 	std::string generation_method);
 
-bool check_ppE(std::string generation_method);
 
 void integration_bounds(gen_params_base<double> *params, 
 	std::string generation_method,
@@ -138,6 +137,13 @@ void integration_bounds(gen_params_base<double> *params,
 	double tol,
 	double *integration_bounds
 	) ;
+void integration_interval(double sampling_freq, 
+	double integration_time, 
+	std::string detector, 
+	std::string sensitivity_curve, 
+	std::string generation_method,
+	gen_params_base<double> *params,
+	double *freq_bounds);
 
 #endif
 

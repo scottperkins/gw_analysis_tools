@@ -918,6 +918,10 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			modeld.PhenomPv2_Param_Transform(&params);
 		}
 		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
+		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
+			phase_cross[i]*= (T)(-1.);
+		}
 	}
 	else if(generation_method == "ppE_IMRPhenomPv2_Inspiral")
 	{
@@ -941,6 +945,10 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			modeld.PhenomPv2_Param_Transform(&params);
 		}
 		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
+		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
+			phase_cross[i]*= (T)(-1.);
+		}
 	}
 	else if(generation_method == "ppE_IMRPhenomPv2_IMR")
 	{
@@ -964,6 +972,10 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			modeld.PhenomPv2_Param_Transform(&params);
 		}
 		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
+		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
+			phase_cross[i]*= (T)(-1.);
+		}
 	}
 
 	return status ;
