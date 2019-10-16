@@ -156,6 +156,20 @@ public:
 	T  LISA_phi0;
 	T  LISA_thetal;
 	T  LISA_phil;
+
+	//gIMR quantities
+	int Nmod_beta=0;
+	int Nmod_alpha=0;
+	int Nmod_sigma=0;
+	int Nmod_phi=0;
+	int *betai;
+	int *alphai;
+	int *sigmai;
+	int *phii;
+	T *delta_beta;
+	T *delta_alpha;
+	T *delta_sigma;
+	T *delta_phi;
 	
 };
 
@@ -323,6 +337,19 @@ struct source_parameters
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
 	
 	std::string cosmology;
+	//gIMR quantities
+	int Nmod_beta=0;
+	int Nmod_alpha=0;
+	int Nmod_sigma=0;
+	int Nmod_phi=0;
+	int *betai;
+	int *alphai;
+	int *sigmai;
+	int *phii;
+	T *delta_beta;
+	T *delta_alpha;
+	T *delta_sigma;
+	T *delta_phi;
 
 static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(
@@ -357,6 +384,8 @@ double cosmology_lookup(std::string cosmology);
 template<class T>
 bool check_list(T j, T *list, int length);
 template<class T>
+int check_list_id(T j, T *list, int length);
+template<class T>
 T copysign_internal(T val, T  sign);
 void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_dim, int *removed_dims);
 
@@ -372,7 +401,7 @@ adouble DL_from_Z(adouble Z, std::string cosmology);
 adouble cosmology_interpolation_function(adouble x, double *coeffs, int interp_degree);
 
 double std_omega(double RA, double std_RA, double std_DEC, double cov_RA_DEC);
-bool check_ppE(std::string generation_method);
+bool check_mod(std::string generation_method);
 void printProgress (double percentage);
 
 void allocate_FFTW_mem_forward(fftw_outline *plan,int length);

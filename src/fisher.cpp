@@ -2387,7 +2387,7 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
 		*N_src_params = 6+1;	
 	}
-	if(check_ppE(generation_method))
+	if(check_mod(generation_method))
 	{
 		*N_src_params += params->Nmod;
 	}
@@ -2420,7 +2420,7 @@ void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_
 		gr_dim = 12;
 		gr_param_dim = 7;
 	}
-	if(check_ppE(generation_method)){
+	if(check_mod(generation_method)){
 		for(int i = 0; i<params->Nmod;i++){
 			src_params[gr_dim+i]=gr_param_dim+i;
 		}
@@ -3169,7 +3169,7 @@ std::string local_generation_method(std::string generation_method)
 //		parameters[0]=grad_freqs[0];
 //		unpack_parameters(&parameters[1], input_params, generation_method,dimension, log_factors);
 //	}
-//	if(check_ppE(generation_method)){
+//	if(check_mod(generation_method)){
 //		delete [] internal_params.betappe;
 //		delete [] internal_params.bppe;
 //	}
@@ -3533,7 +3533,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 	//	parameters[5] = (input_params->spin1[2] + input_params->spin2[2])/2.;
 	//	parameters[6] = (input_params->spin1[2] - input_params->spin2[2])/2.;
 	//}
-	if( check_ppE(generation_method)){
+	if( check_mod(generation_method)){
 		int base = dimension-input_params->Nmod;
 		for(int i = 0 ;i<input_params->Nmod; i++){
 			parameters[base+i] = input_params->betappe[i];
@@ -3826,7 +3826,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	//	transform_sph_cart(spin1sph,a_params->spin1);
 	//	transform_sph_cart(spin2sph,a_params->spin2);
 	//}
-	if( check_ppE(generation_method)){
+	if( check_mod(generation_method)){
 		int base = dim - a_params->Nmod;
 		for(int i = 0 ;i<a_params->Nmod; i++){
 			a_params->betappe[i] = avec_parameters[base+i];
@@ -3849,7 +3849,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->shift_time = false;
 	waveform_params->LISA_alpha0 = input_params->LISA_alpha0;
 	waveform_params->LISA_phi0 = input_params->LISA_phi0;
-	if( check_ppE(gen_method)){
+	if( check_mod(gen_method)){
 		waveform_params->bppe = input_params->bppe;
 		waveform_params->Nmod = input_params->Nmod;
 		waveform_params->betappe = new T[waveform_params->Nmod];
@@ -3862,7 +3862,7 @@ template void repack_non_parameter_options<adouble>(gen_params_base<adouble> *, 
 template<class T>
 void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
 {
-	if( check_ppE(gen_method)){
+	if( check_mod(gen_method)){
 		delete [] waveform_params->betappe	;
 	}
 }

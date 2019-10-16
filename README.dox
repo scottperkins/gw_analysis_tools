@@ -101,11 +101,10 @@ Create class, using other waveforms as template -- need interface to create full
 
 Add the option as a waveform to waveform_generation.cpp, including the header file at the top of the waveform_generation.cpp file
 
-For autodiff Fishers -- write the class as a template with double and adouble types for all variables. Then write the necessary fisher subroutines (see fisher file to determine whats necessary)
+Add option to check_mod in util.h if applicable.
 
-For numerical Fishers -- write finite difference method, following the template of the previous waveforms
+For Fishers and MCMC -- write the class as a template with double and adouble types for all variables. Add the option to unpack_parameters, repack_parameters, and repack_non_parameters. Add `MCMC_'' if using MCMC-specific version separate from the fisher version.
 
-For MCMC sampling -- write mcmc_fisher_wrapper and mcmc_likelihood_wrapper options and write any necessary initialization in MCMC_MH_GW 
 
 
 

@@ -4,6 +4,7 @@
 #include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
+#include "gIMRPhenomD.h"
 #include "util.h"
 #include <complex>
 #include <time.h>
@@ -198,6 +199,28 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		for (int i =0 ; i < length; i++){
 			waveform_cross[i] = ci*std::complex<T>(0,1) * waveform_plus[i];
 			waveform_plus[i] = waveform_plus[i] * std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
+		}
+	}
+	else if(generation_method == "gIMRPhenomD")
+	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		gIMRPhenomD<T> gmodeld;
+		params.delta_phi = parameters->delta_phi;
+		params.delta_sigma = parameters->delta_sigma;
+		params.delta_beta = parameters->delta_beta;
+		params.delta_alpha = parameters->delta_alpha;
+		params.phii = parameters->phii;
+		params.sigmai = parameters->sigmai;
+		params.betai = parameters->betai;
+		params.alphai = parameters->alphai;
+		params.Nmod_phi = parameters->Nmod_phi;
+		params.Nmod_sigma = parameters->Nmod_sigma;
+		params.Nmod_beta = parameters->Nmod_beta;
+		params.Nmod_alpha = parameters->Nmod_alpha;
+		status = gmodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+		for (int i =0 ; i < length; i++){
+			waveform_cross[i] = ci*std::complex<T>(0,1) * waveform_plus[i];
+			waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
 	}
 	else if(generation_method == "IMRPhenomPv2")
@@ -894,6 +917,27 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+		for(int i = 0 ; i<length; i++){
+			phase_plus[i]*= (T)(-1.);
+			phase_cross[i] = phase_plus[i]+ M_PI/2.;
+		}
+	}
+	else if(generation_method == "gIMRPhenomD")
+	{
+		params.delta_phi = parameters->delta_phi;
+		params.delta_sigma = parameters->delta_sigma;
+		params.delta_beta = parameters->delta_beta;
+		params.delta_alpha = parameters->delta_alpha;
+		params.phii = parameters->phii;
+		params.sigmai = parameters->sigmai;
+		params.betai = parameters->betai;
+		params.alphai = parameters->alphai;
+		params.Nmod_phi = parameters->Nmod_phi;
+		params.Nmod_sigma = parameters->Nmod_sigma;
+		params.Nmod_beta = parameters->Nmod_beta;
+		params.Nmod_alpha = parameters->Nmod_alpha;
+		gIMRPhenomD<T> gmodeld;
+		status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);	
 		for(int i = 0 ; i<length; i++){
 			phase_plus[i]*= (T)(-1.);
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;

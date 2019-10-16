@@ -480,7 +480,7 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 	for(int i = 0 ; i<length; i++){
 		times[i]/=(2.*M_PI);
 	}
-	if(check_ppE(generation_method)){
+	if(check_mod(generation_method)){
 		delete [] aparams.betappe;
 		delete [] aparams.bppe;
 	}
@@ -774,7 +774,7 @@ void assign_freq_boundaries(double *freq_boundaries,
 			intermediate_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
 		}
 	}
-	if(check_ppE(generation_method)){
+	if(check_mod(generation_method)){
 		delete [] internal_params.betappe;
 		delete [] internal_params.bppe;
 	}

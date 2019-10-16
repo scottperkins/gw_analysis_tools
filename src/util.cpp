@@ -314,6 +314,24 @@ bool check_list(T j, T *list, int length)
 }
 template bool check_list<int>(int, int*, int);
 template bool check_list<double>(double ,double*, int);
+/*! \brief Just a quick utility to see if an item is in a list
+ *
+ * Didn't want to keep rewriting this loop
+ *
+ * Now returns the id of the element
+ *
+ * Returns -1 if not found
+ */
+template<class T>
+int check_list_id(T j, T *list, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if(j == list[i]) return i;
+	}
+	return -1;
+}
+template int check_list_id<int>(int, int*, int);
+template int check_list_id<double>(double ,double*, int);
 template<class T>
 void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 {
@@ -566,11 +584,12 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->shift_time = param_in->shift_time;
 	
 }
-bool check_ppE(std::string generation_method)
+bool check_mod(std::string generation_method)
 {
 	if(generation_method.find("ppE") != std::string::npos || 
 		generation_method.find("dCS") !=std::string::npos ||
-		generation_method.find("EdGB") !=std::string::npos 
+		generation_method.find("EdGB") !=std::string::npos ||
+		generation_method.find("gIMRPhenom") !=std::string::npos 
 		)
 	{
 		return true;

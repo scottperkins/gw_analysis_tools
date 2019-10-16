@@ -1749,7 +1749,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 
 	//Cleanup
 	delete [] temp_params;
-	if(check_ppE(local_gen)){
+	if(check_mod(local_gen)){
 		delete [] gen_params.betappe;
 	}
 
@@ -2471,7 +2471,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->shift_time = true;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->NSflag = false;
-	if(check_ppE(generation_method)){
+	if(check_mod(generation_method)){
 		gen_params->bppe=mcmc_bppe;
 		gen_params->Nmod=mcmc_Nmod;
 		gen_params->betappe=new double[gen_params->Nmod];
@@ -2538,7 +2538,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 	}
 	//Cleanup
 	delete [] temp_params;
-	if(check_ppE(local_gen)){
+	if(check_mod(local_gen)){
 		delete [] gen_params.betappe;
 	}
 	return ll;
