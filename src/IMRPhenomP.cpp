@@ -265,7 +265,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	f_ref = params->f_ref;
 	phic = 2*params->phi_aligned;
-	//tc=0;
 	tc = 2*M_PI*params->tc;
 	//#################################################################
 
@@ -447,7 +446,6 @@ int IMRPhenomPv2<T>::construct_phase(T *frequencies, /**< T array of frequencies
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	f_ref = params->f_ref;
 	phic = 2*params->phi_aligned;
-	//tc=0;
 	tc = 2*M_PI*params->tc;
 	//#################################################################
 
