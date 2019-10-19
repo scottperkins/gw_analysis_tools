@@ -2076,6 +2076,7 @@ void fisher_autodiff_interp(double *frequency,
 	if(res != 0) length_ds+=1;
 	std::complex<double> **temp_deriv = new std::complex<double>*[dimension];
 	double *temp_deriv_c = new double[length_ds];
+	double *temp_deriv_phase = new double[length_ds];
 	double *freqs_ds = new double[length_ds];
 	for(int i = 0 ; i<dimension; i++){
 		temp_deriv[i] = new std::complex<double>[length_ds];
@@ -2092,11 +2093,11 @@ void fisher_autodiff_interp(double *frequency,
 	calculate_derivatives_autodiff(freqs_ds,length_ds, dimension,generation_method, parameters, temp_deriv, NULL, detector);
 	//Interpolate derivatives here to get back to full length
 	gsl_interp_accel *my_accel_ptr= gsl_interp_accel_alloc ();
-	gsl_spline *my_spline_ptr= gsl_spline_alloc (gsl_interp_cspline, length_ds);
+	gsl_spline *my_spline_ptr= gsl_spline_alloc (gsl_interp_linear, length_ds);
 	double val;
 	for(int i =0 ; i<dimension; i++){
 		for(int j =0 ;  j<length_ds; j++){
-			temp_deriv_c[j] = std::real(temp_deriv[i][j]);
+			temp_deriv_c[j] = std::abs(temp_deriv[i][j]);
 		}
 		gsl_spline_init (my_spline_ptr, freqs_ds, temp_deriv_c, length_ds);
 		for(int j=0; j<length; j++){
@@ -2104,11 +2105,13 @@ void fisher_autodiff_interp(double *frequency,
 			//y_deriv2 = gsl_spline_eval_deriv2 (my_spline_ptr, x, my_accel_ptr);
 		}
 		for(int j =0 ;  j<length_ds; j++){
-			temp_deriv_c[j] = std::imag(temp_deriv[i][j]);
+			temp_deriv_c[j] = std::arg(temp_deriv[i][j]);
 		}
-		gsl_spline_init (my_spline_ptr, freqs_ds, temp_deriv_c, length_ds);
+		unwrap_array(temp_deriv_c,temp_deriv_phase,length_ds);
+		gsl_spline_init (my_spline_ptr, freqs_ds, temp_deriv_phase, length_ds);
 		for(int j=0; j<length; j++){
-			response_deriv[i][j] +=std::complex<double>(0, gsl_spline_eval (my_spline_ptr, frequency[j], my_accel_ptr));
+			//response_deriv[i][j] +=std::complex<double>(0, gsl_spline_eval (my_spline_ptr, frequency[j], my_accel_ptr));
+			response_deriv[i][j] *=std::exp(std::complex<double>(0, gsl_spline_eval (my_spline_ptr, frequency[j], my_accel_ptr)));
 			//y_deriv2 = gsl_spline_eval_deriv2 (my_spline_ptr, x, my_accel_ptr);
 		}
 	}
@@ -2144,6 +2147,7 @@ void fisher_autodiff_interp(double *frequency,
 	delete [] response_deriv;
 	delete [] temp_deriv;
 	delete [] temp_deriv_c;
+	delete [] temp_deriv_phase;
 	delete [] freqs_ds;
 }
 
@@ -2370,8 +2374,8 @@ void calculate_derivatives_autodiff(double *frequency,
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
 		dt = allocate_2D_array(dimension+1, length);	
-		//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
-		time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
+		time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
+		//time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
 		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
 		//time_phase_corrected_derivative_numerical(&dt[1], length, frequency, parameters, generation_method, dimension, false);
 		//write_file("data/fisher/time_derivatives.csv",&dt[1],dimension, length);

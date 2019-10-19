@@ -485,6 +485,8 @@ void transform_cart_sph(T *cartvec, T *sphvec);
 template<class T>
 void transform_sph_cart(T *sphvec, T *cartvec);
 
+template<class T>
+void unwrap_array(T *in, T *out, int len) ;
 /*!\brief Trapezoidal sum rule to approximate discrete integral - Uniform spacing
  *
  * This version is faster than the general version, as it has half the function calls

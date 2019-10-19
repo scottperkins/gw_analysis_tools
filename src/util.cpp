@@ -1396,6 +1396,30 @@ void transform_sph_cart(T *sphvec, T *cartvec)
 template void transform_sph_cart<double>(double*, double*);
 template void transform_sph_cart<adouble>(adouble*, adouble*);
 
+/*! \brief Unwrap angles from arctan 
+ *
+ * Stolen from stack exchange.. https://stackoverflow.com/questions/15634400/continous-angles-in-c-eq-unwrap-function-in-matlab
+ *
+ * Modified
+ */
+template <class T>
+void unwrap_array(T *in, T *out, int len) {
+    out[0] = in[0];
+    T d;
+    for (int i = 1; i < len; i++) {
+        d = in[i] - in[i-1];
+        //d = d > M_PI ? d - 2 * M_PI : (d < -M_PI ? d + 2 * M_PI : d);
+        if(d>M_PI){
+		d -=2*M_PI;
+	}
+	else if(d<-M_PI){
+		d+=2.*M_PI;
+	}
+        out[i] = out[i-1] + d;
+    }
+}
+template void unwrap_array<double>(double * , double *, int);
+template void unwrap_array<adouble>(adouble * , adouble *, int);
 //################################################################
 template <class T>
 std::complex<T> cpolar(T mag, T phase)

@@ -961,7 +961,13 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		else {
 			modeld.PhenomPv2_Param_Transform(&params);
 		}
-		status = modeld.construct_phase(frequencies, length, phase_plus, phase_cross, &params);
+		T *phase_plus_temp = new T[length];
+		T *phase_cross_temp = new T[length];
+		status = modeld.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
+		unwrap_array(phase_plus_temp, phase_plus, length);
+		unwrap_array(phase_cross_temp, phase_cross, length);
+		delete [] phase_plus_temp;
+		delete [] phase_cross_temp;
 		for(int i = 0 ; i<length; i++){
 			phase_plus[i]*= (T)(-1.);
 			phase_cross[i]*= (T)(-1.);
