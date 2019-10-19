@@ -13,6 +13,9 @@
 #include "ppE_IMRPhenomD.h"
 #include "waveform_generator.h"
 #include "waveform_util.h"
+#include <gsl/gsl_interp.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
 
 
 using namespace std;
@@ -79,7 +82,7 @@ void fisher_numerical(double *frequency,
 	)
 {
 	//populate noise and frequency
-	double internal_noise[length];
+	double *internal_noise = new double[length];
 	if (noise)
 	{
 		for(int i = 0 ; i < length;i++)
@@ -123,6 +126,7 @@ void fisher_numerical(double *frequency,
 		delete [] response_deriv[i];	
 	}
 	delete [] response_deriv;
+	delete [] internal_noise;
 }
 
 
@@ -2025,6 +2029,123 @@ void fisher_autodiff_batch_mod(double *frequency,
 	}
 	delete [] response_deriv;
 }
+/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
+ *
+ * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
+ */
+void fisher_autodiff_interp(double *frequency, 
+	int length,/**< if 0, standard frequency range for the detector is used*/ 
+	std::string generation_method, 
+	std::string detector, 
+	double **output,/**< double [dimension][dimension]*/
+	int dimension, 
+	gen_params *parameters,
+	int downsampling_factor,
+	//double *parameters,
+	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	double *noise
+	)
+{
+	//populate noise and frequency
+	double *internal_noise;
+	bool local_noise=false;
+	if (noise)
+	{
+		internal_noise = noise;
+	}
+	else{
+		internal_noise = new double[length];
+		populate_noise(frequency,detector, internal_noise,length);
+		for (int i =0; i<length;i++)
+		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
+		local_noise=true;
+	}
+		
+	//populate derivatives
+
+	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
+	for(int i =0 ;i<dimension; i++){
+		response_deriv[i] = new std::complex<double>[length];
+	}
+
+	//Decimate frequencies by downsampling factor
+	//Ensure the final point is the end of the array
+	int res = length%downsampling_factor;
+	int length_ds = length/downsampling_factor; //downsampled length
+	if(res != 0) length_ds+=1;
+	std::complex<double> **temp_deriv = new std::complex<double>*[dimension];
+	double *temp_deriv_c = new double[length_ds];
+	double *freqs_ds = new double[length_ds];
+	for(int i = 0 ; i<dimension; i++){
+		temp_deriv[i] = new std::complex<double>[length_ds];
+	}
+	int ct = 0 ;
+	for(int i = 0 ; i<length; i++){
+		if(i%downsampling_factor ==0  && ct < length_ds-1){
+			freqs_ds[ct] = frequency[i];
+			ct++;
+		}
+	}
+	freqs_ds[length_ds-1] = frequency[length-1];
+	//calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
+	calculate_derivatives_autodiff(freqs_ds,length_ds, dimension,generation_method, parameters, temp_deriv, NULL, detector);
+	//Interpolate derivatives here to get back to full length
+	gsl_interp_accel *my_accel_ptr= gsl_interp_accel_alloc ();
+	gsl_spline *my_spline_ptr= gsl_spline_alloc (gsl_interp_cspline, length_ds);
+	double val;
+	for(int i =0 ; i<dimension; i++){
+		for(int j =0 ;  j<length_ds; j++){
+			temp_deriv_c[j] = std::real(temp_deriv[i][j]);
+		}
+		gsl_spline_init (my_spline_ptr, freqs_ds, temp_deriv_c, length_ds);
+		for(int j=0; j<length; j++){
+			response_deriv[i][j] = gsl_spline_eval (my_spline_ptr, frequency[j], my_accel_ptr);
+			//y_deriv2 = gsl_spline_eval_deriv2 (my_spline_ptr, x, my_accel_ptr);
+		}
+		for(int j =0 ;  j<length_ds; j++){
+			temp_deriv_c[j] = std::imag(temp_deriv[i][j]);
+		}
+		gsl_spline_init (my_spline_ptr, freqs_ds, temp_deriv_c, length_ds);
+		for(int j=0; j<length; j++){
+			response_deriv[i][j] +=std::complex<double>(0, gsl_spline_eval (my_spline_ptr, frequency[j], my_accel_ptr));
+			//y_deriv2 = gsl_spline_eval_deriv2 (my_spline_ptr, x, my_accel_ptr);
+		}
+	}
+	gsl_spline_free (my_spline_ptr);
+	gsl_interp_accel_free(my_accel_ptr);
+	//##########################################################
+	
+	//calulate fisher elements
+	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
+
+	//Factor of 2 for LISA's second arm
+	if(detector == "LISA"){
+		for(int i = 0 ; i<dimension;i++){
+			for(int j = 0  ;j<dimension; j++){
+				output[i][j]*=2;
+			}	
+		}
+	}
+
+	if(local_noise){delete [] internal_noise;}
+	for(int i =0 ;i<dimension; i++){
+		//double redat[length];
+		//double imagdat[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response_deriv[i][j]);
+		//	imagdat[j]=imag(response_deriv[i][j]);
+		//}
+		//write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
+		delete [] response_deriv[i];
+		delete [] temp_deriv[i];
+	}
+	delete [] response_deriv;
+	delete [] temp_deriv;
+	delete [] temp_deriv_c;
+	delete [] freqs_ds;
+}
 
 /*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
@@ -2432,6 +2553,8 @@ void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_
  *
  * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
  *
+ * This takes the autodiff derivative wrt source parameters, and a numerical derivative for the frequency
+ *
  */
 void time_phase_corrected_derivative_autodiff_numerical(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time)
 {
@@ -2488,13 +2611,10 @@ void time_phase_corrected_derivative_autodiff_numerical(double **dt, int length,
 		vec_parameters[0]=frequencies[k];
 		for(int n = 0 ; n<boundary_num; n++){
 			if(vec_parameters[0]<freq_boundaries[n]){
-				//tensor_eval(tapes[n], dep,indep, d,p,vec_parameters,tensor,S );
 				jacobian(tapes[n], dep, indep, vec_parameters, jacob);
 				for(int i =0; i<vec_param_length; i++){
 					source_param_deriv[i][k] = jacob[0][i];
-					//std::cout<<hess[i][0]<<" ";
 				}
-				//std::cout<<std::endl;
 				//Mark successful derivative
 				eval = true;
 				//Skip the rest of the bins
@@ -2516,7 +2636,7 @@ void time_phase_corrected_derivative_autodiff_numerical(double **dt, int length,
 		dt[k][0] = (source_param_deriv[k][1] - source_param_deriv[k][0])/(2*M_PI*deltaf);
 		//central difference 2nd
 		dt[k][1] = (source_param_deriv[k][2] - source_param_deriv[k][0])/(4*M_PI*deltaf);
-		//Central difference
+		//Central difference 4th order
 		for(int i = 2 ; i<length-2; i ++){
 			//dt[k][i]=(source_param_deriv[k][i+1] - source_param_deriv[k][i-1])/(4*M_PI*deltaf);
 			dt[k][i]=(-source_param_deriv[k][i+2] + 8.*source_param_deriv[k][i+1]-8.*source_param_deriv[k][i-1]+source_param_deriv[k][i-2])/(24.*M_PI*deltaf);
