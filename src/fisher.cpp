@@ -2133,14 +2133,16 @@ void fisher_autodiff_interp(double *frequency,
 
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<dimension; i++){
-		//double redat[length];
-		//double imagdat[length];
+		//double *redat= new double[length];
+		//double *imagdat= new double[length];
 		//for(int j =0 ; j<length; j++){
 		//	redat[j]=real(response_deriv[i][j]);
 		//	imagdat[j]=imag(response_deriv[i][j]);
 		//}
-		//write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
-		//write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
+		//write_file("data/fisher/fisher_deriv_ad_interp_real_"+std::to_string(i)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_ad_interp_imag_"+std::to_string(i)+".csv",imagdat,length);
+		//delete [] redat;
+		//delete [] imagdat;
 		delete [] response_deriv[i];
 		delete [] temp_deriv[i];
 	}
@@ -2315,14 +2317,16 @@ void fisher_autodiff(double *frequency,
 
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<dimension; i++){
-		//double redat[length];
-		//double imagdat[length];
+		//double *redat = new double[length];
+		//double *imagdat = new double[length];
 		//for(int j =0 ; j<length; j++){
 		//	redat[j]=real(response_deriv[i][j]);
 		//	imagdat[j]=imag(response_deriv[i][j]);
 		//}
 		//write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
 		//write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
+		//delete [] redat;
+		//delete [] imagdat;
 		delete [] response_deriv[i];
 	}
 	delete [] response_deriv;
@@ -2374,8 +2378,8 @@ void calculate_derivatives_autodiff(double *frequency,
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
 		dt = allocate_2D_array(dimension+1, length);	
-		time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
-		//time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
+		//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
+		time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
 		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
 		//time_phase_corrected_derivative_numerical(&dt[1], length, frequency, parameters, generation_method, dimension, false);
 		//write_file("data/fisher/time_derivatives.csv",&dt[1],dimension, length);
@@ -4104,3 +4108,175 @@ void calculate_fisher_elements(double *frequency,
 //#################################################################
 template void repack_parameters<adouble>(adouble *, gen_params_base<adouble> *, std::string, int, gen_params_base<double> *);
 template void repack_parameters<double>(double *, gen_params_base<double> *, std::string, int, gen_params_base<double> *);
+
+/*! \brief Calculates the derivatives of the detector response using automatic differentiation -- one frequency for gsl_integration
+ *
+ * Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference
+ *
+ * Higher dimensional fishers actually could be faster
+ *
+ * NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv)
+ */
+void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_in)
+	//int dimension,
+	//std::string generation_method,
+	//gen_params *parameters,
+	//std::complex<double> **waveform_deriv,
+	//int *waveform_tapes,
+	//std::string detector
+	//)
+{
+	gsl_subroutine params_packed = *(gsl_subroutine *)params_in;
+	std::string detector=  params_packed.detector;
+	std::string generation_method=  params_packed.generation_method;
+	gen_params *parameters = params_packed.gen_params_in;
+	int dimension = params_packed.dim;
+	std::complex<double> waveform_deriv[dimension];
+	//Transform gen_params to double vectors
+	//double vec_parameters[dimension+1];
+	int vec_param_length= dimension +1;
+	if(detector == "LISA"){
+		//take derivative wrt time as well, for the chain rule
+		vec_param_length += 1;
+	}
+	double vec_parameters[vec_param_length];
+	bool log_factors[dimension];
+	int boundary_num= boundary_number(generation_method);
+	if(boundary_num == -1){
+		std::cout<<"Error -- unsupported generation method"<<std::endl;
+		exit(1);
+	}
+	double *freq_boundaries=new double[boundary_num];
+	double *grad_freqs=new double[boundary_num];
+	std::string local_gen_method = local_generation_method(generation_method);
+	//prep_fisher_calculation(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
+	assign_freq_boundaries(freq_boundaries, grad_freqs,boundary_num, parameters, generation_method);
+	vec_parameters[0]=grad_freqs[0];
+	unpack_parameters(&vec_parameters[1], parameters, generation_method,dimension, log_factors);
+	double *grad_times=NULL;
+	double **dt=NULL;
+	double eval_times;
+	if(detector == "LISA"){
+		grad_times = new double[boundary_num];
+		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
+		dt = allocate_2D_array(dimension+1, 1);	
+		time_phase_corrected_derivative_autodiff_full_hess(dt, 1, &frequency, parameters, generation_method, dimension, false);
+		//time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
+		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
+		//time_phase_corrected_derivative_numerical(&dt[1], length, frequency, parameters, generation_method, dimension, false);
+		//write_file("data/fisher/time_derivatives.csv",&dt[1],dimension, length);
+		//write_file("data/fisher/time_derivatives_fh.csv",&dt[1],dimension, length);
+		//write_file("data/fisher/time_derivatives_an.csv",&dt[1],dimension, length);
+			
+		time_phase_corrected_autodiff(&eval_times, 1, &frequency, parameters, generation_method, false);
+			
+	}
+	//calculate_derivative tapes
+	int tapes[boundary_num];
+	for(int i =0; i<boundary_num; i++){
+		tapes[i]=i;
+		trace_on(tapes[i]);
+		//adouble avec_parameters[dimension+1];
+		adouble avec_parameters[vec_param_length];
+		avec_parameters[0] <<=grad_freqs[i];
+		for(int j = 1; j <= dimension; j++){
+			avec_parameters[j]<<=vec_parameters[j];	
+		}
+		//Repack parameters
+		gen_params_base<adouble> a_parameters;
+		adouble afreq;
+		afreq = avec_parameters[0];
+		//############################################
+		//Non variable parameters
+		repack_non_parameter_options(&a_parameters,parameters,generation_method);
+		//############################################
+		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension, parameters);
+		adouble time;
+		if(detector == "LISA"){
+			time <<= grad_times[i];
+			map_extrinsic_angles(&a_parameters);
+		}
+		std::complex<adouble> a_response;
+		if(!a_parameters.sky_average){
+			//int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, times);
+			int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
+
+		}
+		else{
+			adouble a_amp;
+			adouble a_phasep;
+			adouble a_phasec;
+		
+			int status  = fourier_amplitude(&afreq, 1, &a_amp, local_gen_method, &a_parameters);
+			status  = fourier_phase(&afreq, 1, &a_phasep,  &a_phasec,local_gen_method, &a_parameters);
+			a_response = a_amp * exp(std::complex<adouble>(0,a_phasep));
+
+		}
+		double response[2];
+		real(a_response) >>=  response[0];	
+		imag(a_response) >>=  response[1];	
+
+		trace_off();
+		//if(times){
+		//	delete  [] times;
+		//}
+		deallocate_non_param_options(&a_parameters, parameters, generation_method);
+	}
+	//Evaluate derivative tapes
+	int dep = 2;//Output is complex
+	int indep = vec_param_length;//First element is for frequency
+	bool eval = false;//Keep track of when a boundary is hit
+	double **jacob = allocate_2D_array(dep,indep);
+	vec_parameters[0]=frequency;
+	for(int n = 0 ; n<boundary_num; n++){
+		if(vec_parameters[0]<freq_boundaries[n]){
+			if(detector == "LISA"){
+				vec_parameters[vec_param_length -1] = eval_times;
+			}
+			jacobian(tapes[n], dep, indep, vec_parameters, jacob);
+			for(int i =0; i<dimension; i++){
+				waveform_deriv[i] = jacob[0][i+1] 
+					+ std::complex<double>(0,1)*jacob[1][i+1];
+				//correct for time deriv for LISA
+				if(detector == "LISA"){
+				//if(false){
+					waveform_deriv[i]+= 
+						(jacob[0][vec_param_length-1] + std::complex<double>(0,1)*jacob[1][vec_param_length-1]) //Time derivative of WF
+						* dt[i+1][0];//Derivative of time wrt source parameter
+					//std::cout<<waveform_deriv[i][k]<<" "<<jacob[0][vec_param_length-1]<<" "<<dt[i+1][k]<<std::endl;
+				}
+			}
+			//Mark successful derivative
+			eval = true;
+			//Skip the rest of the bins
+			break;
+		}
+	}
+	//If freq didn't fall in any boundary, set to 0
+	if(!eval){
+		for(int i =0; i<dimension; i++){
+			waveform_deriv[i] = std::complex<double>(0,0);
+		}	
+	}
+	//Account for Log parameters
+	for(int j = 0 ; j<dimension; j++){
+		if(log_factors[j]){
+			//j+1 for vec_parameter because of freq in position 0
+			waveform_deriv[j] *= (vec_parameters[j+1]);
+		}
+	}
+	deallocate_2D_array(jacob,dep,indep);
+	if(freq_boundaries){
+		delete [] freq_boundaries;
+	}
+	if(grad_freqs){
+		delete [] grad_freqs;
+	}
+	if(grad_times){
+		delete [] grad_times;	
+	}
+	if(dt){
+		deallocate_2D_array(dt, dimension+1,1);
+	}
+
+}

@@ -1,10 +1,19 @@
 #ifndef FISHER_H
 #define FISHER_H
 #include "util.h"
+#include <string>
 
 /*! \file 
  */
 using namespace std;
+
+struct gsl_subroutine
+{
+	string detector;
+	string generation_method;
+	gen_params *gen_params_in;
+	int dim;
+};
 
 
 void fisher_numerical(double *frequency, 
