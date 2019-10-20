@@ -13,6 +13,8 @@ struct gsl_subroutine
 	string generation_method;
 	gen_params *gen_params_in;
 	int dim;
+	int id1;
+	int id2;
 };
 
 

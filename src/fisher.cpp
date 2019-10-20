@@ -4130,15 +4130,19 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	std::string detector=  params_packed.detector;
 	std::string generation_method=  params_packed.generation_method;
 	gen_params *parameters = params_packed.gen_params_in;
+	int id1 = params_packed.id1;
+	int id2 = params_packed.id2;
 	int dimension = params_packed.dim;
-	std::complex<double> waveform_deriv[dimension];
 	//Transform gen_params to double vectors
 	//double vec_parameters[dimension+1];
 	int vec_param_length= dimension +1;
+	int indep= 2;
 	if(detector == "LISA"){
 		//take derivative wrt time as well, for the chain rule
 		vec_param_length += 1;
+		indep +=1;
 	}
+	std::complex<double> waveform_deriv[indep];
 	double vec_parameters[vec_param_length];
 	bool log_factors[dimension];
 	int boundary_num= boundary_number(generation_method);
@@ -4178,9 +4182,14 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 		trace_on(tapes[i]);
 		//adouble avec_parameters[dimension+1];
 		adouble avec_parameters[vec_param_length];
-		avec_parameters[0] <<=grad_freqs[i];
+		avec_parameters[0] =grad_freqs[i];
 		for(int j = 1; j <= dimension; j++){
-			avec_parameters[j]<<=vec_parameters[j];	
+			if(j == id1+1 || j == id2+1){
+				avec_parameters[j]<<=vec_parameters[j];	
+			}
+			else{
+				avec_parameters[j]=vec_parameters[j];	
+			}
 		}
 		//Repack parameters
 		gen_params_base<adouble> a_parameters;
@@ -4224,25 +4233,34 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	}
 	//Evaluate derivative tapes
 	int dep = 2;//Output is complex
-	int indep = vec_param_length;//First element is for frequency
 	bool eval = false;//Keep track of when a boundary is hit
+	double indep_vec[indep];
 	double **jacob = allocate_2D_array(dep,indep);
 	vec_parameters[0]=frequency;
+	indep_vec[0] = vec_parameters[id1+1];
+	indep_vec[1] = vec_parameters[id2+1];
+	if(detector == "LISA"){
+		indep_vec[indep -1] = eval_times;
+	}
 	for(int n = 0 ; n<boundary_num; n++){
 		if(vec_parameters[0]<freq_boundaries[n]){
-			if(detector == "LISA"){
-				vec_parameters[vec_param_length -1] = eval_times;
-			}
-			jacobian(tapes[n], dep, indep, vec_parameters, jacob);
-			for(int i =0; i<dimension; i++){
-				waveform_deriv[i] = jacob[0][i+1] 
-					+ std::complex<double>(0,1)*jacob[1][i+1];
+			jacobian(tapes[n], dep, indep, indep_vec, jacob);
+			for(int i =0; i<2; i++){
+				waveform_deriv[i] = jacob[0][1] 
+					+ std::complex<double>(0,1)*jacob[1][1];
 				//correct for time deriv for LISA
 				if(detector == "LISA"){
 				//if(false){
-					waveform_deriv[i]+= 
-						(jacob[0][vec_param_length-1] + std::complex<double>(0,1)*jacob[1][vec_param_length-1]) //Time derivative of WF
-						* dt[i+1][0];//Derivative of time wrt source parameter
+					if(i == 0){
+						waveform_deriv[i]+= 
+							(jacob[0][indep-1] + std::complex<double>(0,1)*jacob[1][indep-1]) //Time derivative of WF
+							* dt[id1][0];//Derivative of time wrt source parameter
+					}
+					if(i == 0){
+						waveform_deriv[i]+= 
+							(jacob[0][indep-1] + std::complex<double>(0,1)*jacob[1][indep-1]) //Time derivative of WF
+							* dt[id2][0];//Derivative of time wrt source parameter
+					}
 					//std::cout<<waveform_deriv[i][k]<<" "<<jacob[0][vec_param_length-1]<<" "<<dt[i+1][k]<<std::endl;
 				}
 			}
@@ -4254,15 +4272,18 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	}
 	//If freq didn't fall in any boundary, set to 0
 	if(!eval){
-		for(int i =0; i<dimension; i++){
+		for(int i =0; i<indep; i++){
 			waveform_deriv[i] = std::complex<double>(0,0);
 		}	
 	}
 	//Account for Log parameters
-	for(int j = 0 ; j<dimension; j++){
-		if(log_factors[j]){
+	for(int j = 0 ; j<2; j++){
+		bool criteria;
+		if(j ==0 ) criteria = log_factors[id1];
+		else criteria = log_factors[id2];
+		if(criteria){
 			//j+1 for vec_parameter because of freq in position 0
-			waveform_deriv[j] *= (vec_parameters[j+1]);
+			waveform_deriv[j] *= (vec_parameters[j]);
 		}
 	}
 	deallocate_2D_array(jacob,dep,indep);
