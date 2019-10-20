@@ -16,6 +16,7 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_integration.h>
 
 
 using namespace std;
@@ -4083,6 +4084,8 @@ void calculate_fisher_elements(double *frequency,
 					std::conj(response_deriv[k][i]))
 					/psd[i]);
 			}
+			write_file("data/int_testing/full_int_"+to_string(j)+"_"+to_string(k)+".csv",integrand, length);
+			write_file("data/int_testing/full_int_f.csv",frequency, length);
 			
 			output[j][k] = 4*simpsons_sum(
 						frequency[1]-frequency[0], length, integrand);	
@@ -4109,6 +4112,74 @@ void calculate_fisher_elements(double *frequency,
 template void repack_parameters<adouble>(adouble *, gen_params_base<adouble> *, std::string, int, gen_params_base<double> *);
 template void repack_parameters<double>(double *, gen_params_base<double> *, std::string, int, gen_params_base<double> *);
 
+void fisher_autodiff_gsl_integration(double *frequency_bounds, 
+	string generation_method, 
+	string sensitivity_curve, 
+	string detector, 
+	double **output,
+	int dimension, 
+	gen_params *parameters,
+	int *amp_tapes ,
+	int *phase_tapes 
+	)
+{
+	//calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
+	gsl_subroutine params_packed ;
+	params_packed.detector = detector;
+	params_packed.sensitivity_curve = sensitivity_curve;
+	params_packed.generation_method = generation_method;
+	params_packed.gen_params_in = parameters;
+	params_packed.dim = dimension;
+	params_packed.id1 = 8;
+	params_packed.id2 = 9;
+	std::cout<<"SN: "<<sensitivity_curve<<std::endl;
+	std::cout<<"DET: "<<detector<<std::endl;
+	std::cout<<"gen meth: "<<generation_method<<std::endl;
+	std::cout<<"Element meth: "<<params_packed.id1<<" "<<params_packed.id2<<std::endl;
+	double abserr = 0, relerr = 1e-5;
+	double result;	
+	double error;	
+	gsl_function F;
+	F.function = &calculate_integrand_autodiff_gsl_subroutine;
+	F.params = &params_packed;
+	size_t np = 1000;	
+	//size_t neval ;	
+	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
+
+	//gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &error);
+	//gsl_integration_qng(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr,  &result, &error, &neval);
+	//std::cout<<"2*Result "<<2*result<<std::endl;
+	//std::cout<<"Error "<<error<<std::endl;
+	//std::cout<<"intervals "<<w->size<<std::endl;
+	//std::cout<<"Evals "<<neval<<std::endl;
+	int length = 1e3;
+	double integrand[length];
+	double f[length];
+	double deltaf = (1.-1e-5)/length;
+	for(int i = 0 ; i<length; i++){
+		f[i]=1e-5 + deltaf* i;
+		integrand[i]=calculate_integrand_autodiff_gsl_subroutine(f[i], (void *)&params_packed);	
+	}
+	write_file("data/int_testing/gs_int.csv",integrand,length);
+	write_file("data/int_testing/gs_int_f.csv",f,length);
+	
+	for(int i = 0 ; i<dimension;i++){
+		for(int j = 0  ;j<dimension; j++){
+			output[i][j]=0;
+		}	
+	}
+
+	//Assign output to fisher elements ** MULITPLY BY 4
+	if(detector == "LISA"){
+		for(int i = 0 ; i<dimension;i++){
+			for(int j = 0  ;j<dimension; j++){
+				output[i][j]*=2;
+			}	
+		}
+	}
+
+
+}
 /*! \brief Calculates the derivatives of the detector response using automatic differentiation -- one frequency for gsl_integration
  *
  * Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference
@@ -4117,7 +4188,7 @@ template void repack_parameters<double>(double *, gen_params_base<double> *, std
  *
  * NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv)
  */
-void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_in)
+double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_in)
 	//int dimension,
 	//std::string generation_method,
 	//gen_params *parameters,
@@ -4130,6 +4201,8 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	std::string detector=  params_packed.detector;
 	std::string generation_method=  params_packed.generation_method;
 	gen_params *parameters = params_packed.gen_params_in;
+	std::string sensitivity_curve = params_packed.sensitivity_curve;
+
 	int id1 = params_packed.id1;
 	int id2 = params_packed.id2;
 	int dimension = params_packed.dim;
@@ -4153,26 +4226,19 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	double *freq_boundaries=new double[boundary_num];
 	double *grad_freqs=new double[boundary_num];
 	std::string local_gen_method = local_generation_method(generation_method);
-	//prep_fisher_calculation(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
 	assign_freq_boundaries(freq_boundaries, grad_freqs,boundary_num, parameters, generation_method);
 	vec_parameters[0]=grad_freqs[0];
 	unpack_parameters(&vec_parameters[1], parameters, generation_method,dimension, log_factors);
 	double *grad_times=NULL;
 	double **dt=NULL;
-	double eval_times;
+	double eval_time;
 	if(detector == "LISA"){
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
 		dt = allocate_2D_array(dimension+1, 1);	
 		time_phase_corrected_derivative_autodiff_full_hess(dt, 1, &frequency, parameters, generation_method, dimension, false);
-		//time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
-		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
-		//time_phase_corrected_derivative_numerical(&dt[1], length, frequency, parameters, generation_method, dimension, false);
-		//write_file("data/fisher/time_derivatives.csv",&dt[1],dimension, length);
-		//write_file("data/fisher/time_derivatives_fh.csv",&dt[1],dimension, length);
-		//write_file("data/fisher/time_derivatives_an.csv",&dt[1],dimension, length);
-			
-		time_phase_corrected_autodiff(&eval_times, 1, &frequency, parameters, generation_method, false);
+		//time_phase_corrected_derivative_autodiff_numerical(dt, 1, &frequency, parameters, generation_method, dimension, false);
+		time_phase_corrected_autodiff(&eval_time, 1, &frequency, parameters, generation_method, false);
 			
 	}
 	//calculate_derivative tapes
@@ -4240,26 +4306,26 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	indep_vec[0] = vec_parameters[id1+1];
 	indep_vec[1] = vec_parameters[id2+1];
 	if(detector == "LISA"){
-		indep_vec[indep -1] = eval_times;
+		indep_vec[indep -1] = eval_time;
 	}
 	for(int n = 0 ; n<boundary_num; n++){
 		if(vec_parameters[0]<freq_boundaries[n]){
 			jacobian(tapes[n], dep, indep, indep_vec, jacob);
 			for(int i =0; i<2; i++){
-				waveform_deriv[i] = jacob[0][1] 
-					+ std::complex<double>(0,1)*jacob[1][1];
+				waveform_deriv[i] = jacob[0][i] 
+					+ std::complex<double>(0,1)*jacob[1][i];
 				//correct for time deriv for LISA
 				if(detector == "LISA"){
 				//if(false){
 					if(i == 0){
 						waveform_deriv[i]+= 
 							(jacob[0][indep-1] + std::complex<double>(0,1)*jacob[1][indep-1]) //Time derivative of WF
-							* dt[id1][0];//Derivative of time wrt source parameter
+							* dt[id1+1][0];//Derivative of time wrt source parameter
 					}
-					if(i == 0){
+					if(i == 1){
 						waveform_deriv[i]+= 
 							(jacob[0][indep-1] + std::complex<double>(0,1)*jacob[1][indep-1]) //Time derivative of WF
-							* dt[id2][0];//Derivative of time wrt source parameter
+							* dt[id2+1][0];//Derivative of time wrt source parameter
 					}
 					//std::cout<<waveform_deriv[i][k]<<" "<<jacob[0][vec_param_length-1]<<" "<<dt[i+1][k]<<std::endl;
 				}
@@ -4277,14 +4343,11 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 		}	
 	}
 	//Account for Log parameters
-	for(int j = 0 ; j<2; j++){
-		bool criteria;
-		if(j ==0 ) criteria = log_factors[id1];
-		else criteria = log_factors[id2];
-		if(criteria){
-			//j+1 for vec_parameter because of freq in position 0
-			waveform_deriv[j] *= (vec_parameters[j]);
-		}
+	if(log_factors[id1]){
+		waveform_deriv[0] *= vec_parameters[id1+1];
+	}
+	if(log_factors[id2]){
+		waveform_deriv[1] *= vec_parameters[id2+1];
 	}
 	deallocate_2D_array(jacob,dep,indep);
 	if(freq_boundaries){
@@ -4299,5 +4362,7 @@ void calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_
 	if(dt){
 		deallocate_2D_array(dt, dimension+1,1);
 	}
-
+	double psdroot;
+	populate_noise(&frequency,sensitivity_curve, &psdroot, 1);
+	return std::real((waveform_deriv[0]*conj(waveform_deriv[1])))/(psdroot*psdroot);
 }

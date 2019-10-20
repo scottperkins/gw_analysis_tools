@@ -11,6 +11,7 @@ struct gsl_subroutine
 {
 	string detector;
 	string generation_method;
+	string sensitivity_curve;
 	gen_params *gen_params_in;
 	int dim;
 	int id1;
@@ -176,4 +177,15 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 
 template<class T>
 void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method);
+double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *params_in);
+void fisher_autodiff_gsl_integration(double *frequency_bounds, 
+	string generation_method, 
+	string sensitivity_curve, 
+	string detector, 
+	double **output,
+	int dimension, 
+	gen_params *parameters,
+	int *amp_tapes = NULL,
+	int *phase_tapes = NULL
+	);
 #endif
