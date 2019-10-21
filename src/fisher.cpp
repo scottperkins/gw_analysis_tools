@@ -4331,7 +4331,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds,
 	params_packed.gen_params_in = parameters;
 	params_packed.dim = dimension;
 	gsl_function F;
-	double abserr = 0, relerr = 1e-2;
+	double abserr = 0, relerr = 1e-3;
 	double result;	
 	double error;	
 	int id1,id2;
