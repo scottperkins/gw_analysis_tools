@@ -4126,8 +4126,10 @@ void prep_gsl_subroutine(gsl_subroutine *params_packed)
 	params_packed->grad_freqs = new double[boundary_num];
 	params_packed->log_factors = new bool[dimension];
 	params_packed->waveform_tapes = new int[boundary_num];
-	if(detector=="LISA")
+	if(detector=="LISA"){
 		params_packed->time_tapes = new int[boundary_num];
+		params_packed->phase_tapes = new int[boundary_num];
+	}
 	double *freq_boundaries = params_packed->freq_boundaries;
 	double *grad_freqs = params_packed->grad_freqs;
 	bool *log_factors = params_packed->log_factors;
@@ -4156,18 +4158,16 @@ void tape_phase_gsl_subroutine(gsl_subroutine * params_packed)
 	int *tapes = params_packed->phase_tapes;
 	gen_params_base<adouble> aparams;
 	transform_parameters(params, &aparams);
-	for(int i = 0 ; i < boundary_num ; i++){
-		for(int i = 0 ; i<boundary_num ; i++){
-			tapes[i]=(i+1)*31;	
-			trace_on(tapes[i]);
-			adouble freq;
-			freq <<= grad_freqs[i];
-			adouble phasep, phasec;
-			fourier_phase(&freq, 1, &phasep, &phasec, generation_method, &aparams);
-			double phaseout;
-			phasep>>=phaseout;
-			trace_off();
-		}
+	for(int i = 0 ; i<boundary_num ; i++){
+		tapes[i]=(i+1)*31;	
+		trace_on(tapes[i]);
+		adouble freq;
+		freq <<= grad_freqs[i];
+		adouble phasep, phasec;
+		fourier_phase(&freq, 1, &phasep, &phasec, generation_method, &aparams);
+		double phaseout;
+		phasep>>=phaseout;
+		trace_off();
 	}
 	if(check_mod(generation_method)){
 		delete [] aparams.betappe;
@@ -4313,15 +4313,30 @@ void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed)
 	}
 }
 
-void fisher_autodiff_gsl_integration(double *frequency_bounds, 
-	string generation_method, 
-	string sensitivity_curve, 
-	string detector, 
-	double **output,
-	int dimension, 
-	gen_params *parameters,
-	int *amp_tapes ,
-	int *phase_tapes 
+/*! \brief Routine that implements GSL numerical integration to calculate the Fishers
+ *
+ * This can be faster than brute force calculations in fisher_autodiff, but that depends
+ *
+ * Trade offs: 
+ *
+ * Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.
+ *
+ * However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
+ *
+ * Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be'' to calculate the fisher
+ *
+ * Implements (GSL_INTEG_GAUSS15)
+ */
+void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of integration in fourier space*/
+	string generation_method, /**<Method of waveform generation*/
+	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
+	string detector, /**< Detector to use for the response function*/
+	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [dimension][dimension]*/
+	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [dimension][dimension]*/
+	int dimension, /**<Dimension of the Fisher */
+	gen_params *parameters,/**< Generation parameters specifying source parameters and waveform options*/
+	double abserr,/**<Target absolute error (0 if this should be ignored -- ONE type of error must be specified)*/
+	double relerr/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
 	)
 {
 	gsl_subroutine params_packed ;
@@ -4331,25 +4346,22 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds,
 	params_packed.gen_params_in = parameters;
 	params_packed.dim = dimension;
 	gsl_function F;
-	double abserr = 0, relerr = 1e-3;
+	//double abserr = 0, relerr = 1e-3;
 	double result;	
-	double error;	
+	double err;	
 	int id1,id2;
 	size_t np = 1e5;	//Max number of division
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 	for(int i = 0 ; i<dimension; i++){
-		for(int j = 0 ; j<i ; j++){
+		for(int j = 0 ; j<=i ; j++){
 			//i>j
 			params_packed.id1 = j;
 			params_packed.id2 = i;
 			//Find boundary_num, boundary_freqs, grad_freqs
-			std::cout<<"Prepping for "<<i<<" "<<j<<std::endl;
 			prep_gsl_subroutine(&params_packed);
 			//Tape functions
-			std::cout<<"Taping for "<<i<<" "<<j<<std::endl;
 			tape_waveform_gsl_subroutine( &params_packed);
 			if(detector == "LISA"){
-				std::cout<<"Taping for time for "<<i<<" "<<j<<std::endl;
 				tape_time_gsl_subroutine(&params_packed);
 				tape_phase_gsl_subroutine(&params_packed);
 			}
@@ -4359,26 +4371,26 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds,
 			F.params = &params_packed;
 
 			std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
-			gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &error);
+			gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
 
 			output[i][j] = 4*result;
 			output[j][i] = output[i][j];
+			error[i][j] = err;
+			error[j][i] = error[i][j];
 		
 			delete [] params_packed.waveform_tapes;
-			if(detector=="LISA")delete [] params_packed.time_tapes;
+			if(detector=="LISA"){
+				delete [] params_packed.time_tapes;
+				delete [] params_packed.phase_tapes;
+			}
 			delete [] params_packed.freq_boundaries ;
 			delete [] params_packed.grad_freqs ;
 			delete [] params_packed.log_factors ;
 
 			std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-			std::cout<<"Error "<<error<<std::endl;
+			std::cout<<"Error "<<err<<std::endl;
 			std::cout<<"intervals "<<w->size<<std::endl;
 		}
-	}
-	//Diagonal elements
-	
-	for(int i = 0 ; i<dimension;i++){
-		output[i][i]=0;
 	}
 
 	gsl_integration_workspace_free (w);
@@ -4386,6 +4398,115 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds,
 	if(detector == "LISA"){
 		for(int i = 0 ; i<dimension;i++){
 			for(int j = 0  ;j<dimension; j++){
+				output[i][j]*=2;
+			}	
+		}
+	}
+
+
+}
+/*! \brief Routine that implements GSL numerical integration to calculate the Fishers -- batch modifications version
+ *
+ * Calculates Fisher for multiple modifications at a time, neglecting covariance between modifications (set to 0 in Fisher)
+ *
+ * Modifications MUST BE evaluated at 0 for this routine to calculate correct results
+ *
+ * This can be faster than brute force calculations in fisher_autodiff, but that depends
+ *
+ * Trade offs: 
+ *
+ * Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.
+ *
+ * However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
+ *
+ * Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be'' to calculate the fisher
+ *
+ * Implements (GSL_INTEG_GAUSS15)
+ */
+void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bounds of integration in fourier space*/
+	string generation_method, /**<Method of waveform generation*/
+	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
+	string detector, /**< Detector to use for the response function*/
+	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [full_dimension][full_dimension]*/
+	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [full_dimension][full_dimension]*/
+	int base_dimension, /**< Dimension of base model (ie GR dimension)*/
+	int full_dimension, /**< Full dimension (GR dimension + Nmod)*/
+	gen_params *parameters,/**< Generation parameters specifying source parameters and waveform options*/
+	double abserr,/**<Target absolute error (0 if this should be ignored -- ONE type of error must be specified)*/
+	double relerr/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
+	)
+{
+	int mod_list[full_dimension-base_dimension];
+	for(int i = base_dimension; i<full_dimension; i++){
+		mod_list[i-base_dimension]=i;
+	}
+	gsl_subroutine params_packed ;
+	params_packed.detector = detector;
+	params_packed.sensitivity_curve = sensitivity_curve;
+	params_packed.generation_method = generation_method;
+	params_packed.gen_params_in = parameters;
+	params_packed.dim = full_dimension;
+	gsl_function F;
+	//double abserr = 0, relerr = 1e-3;
+	double result;	
+	double err;	
+	int id1,id2;
+	size_t np = 1e5;	//Max number of division
+	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
+	for(int i = 0 ; i<full_dimension; i++){
+		for(int j = 0 ; j<=i ; j++){
+			//i>j
+			if(check_list(i, mod_list, full_dimension-base_dimension) &&check_list(j, mod_list, full_dimension-base_dimension && i!=j)){
+				output[i][j] = 0;	
+				output[j][i] = 0;	
+				error[i][j] = 0;	
+				error[j][i] = 0;	
+			}
+			else{
+				params_packed.id1 = j;
+				params_packed.id2 = i;
+				//Find boundary_num, boundary_freqs, grad_freqs
+				prep_gsl_subroutine(&params_packed);
+				//Tape functions
+				tape_waveform_gsl_subroutine( &params_packed);
+				if(detector == "LISA"){
+					tape_time_gsl_subroutine(&params_packed);
+					tape_phase_gsl_subroutine(&params_packed);
+				}
+
+
+				F.function = &calculate_integrand_autodiff_gsl_subroutine;
+				F.params = &params_packed;
+
+				std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+				gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
+
+				output[i][j] = 4*result;
+				output[j][i] = output[i][j];
+				error[i][j] = err;
+				error[j][i] = error[i][j];
+		
+				delete [] params_packed.waveform_tapes;
+				if(detector=="LISA"){
+					delete [] params_packed.time_tapes;
+					delete [] params_packed.phase_tapes;
+				}
+				delete [] params_packed.freq_boundaries ;
+				delete [] params_packed.grad_freqs ;
+				delete [] params_packed.log_factors ;
+
+			}
+			std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+			std::cout<<"Error "<<err<<std::endl;
+			std::cout<<"intervals "<<w->size<<std::endl;
+		}
+	}
+
+	gsl_integration_workspace_free (w);
+	//Assign output to fisher elements ** MULITPLY BY 4
+	if(detector == "LISA"){
+		for(int i = 0 ; i<full_dimension;i++){
+			for(int j = 0  ;j<full_dimension; j++){
 				output[i][j]*=2;
 			}	
 		}
@@ -4420,7 +4541,13 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 
 	//Transform gen_params to double vectors
 	int vec_param_length= dimension +1;
-	int indep= 3;//2 plus frequency
+	int indep ;
+	if(id1!=id2){
+		indep= 3;//2 plus frequency
+	}
+	else{
+		indep = 2;//1 plus frequency
+	}
 	if(detector == "LISA"){
 		//take derivative wrt time as well, for the chain rule
 		vec_param_length += 1;
@@ -4434,7 +4561,6 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	//start = clock();
 	if(detector == "LISA"){
 		time_phase_corrected_autodiff(&eval_time, 1, &frequency, parameters, generation_method, false, params_packed.phase_tapes);
-			
 	}
 	//std::cout<<"Time calc time: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
 	//start = clock();
@@ -4447,41 +4573,57 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	vec_parameters[0]=frequency;
 	indep_vec[0] = frequency;
 	indep_vec[1] = vec_parameters[id1+1];
-	indep_vec[2] = vec_parameters[id2+1];
+	if(id1!=id2){
+		indep_vec[2] = vec_parameters[id2+1];
+	}
 	if(detector == "LISA"){
 		indep_vec[indep -1] = eval_time;
 	}
 	//std::cout<<indep_vec[0]<<" "<<indep_vec[1]<<" "<<indep_vec[2]<<" "<<indep_vec[3]<<" "<<std::endl;
+	double **dt_hess;
 	for(int n = 0 ; n<boundary_num; n++){
 		if(indep_vec[0]<freq_boundaries[n]){
 			jacobian(wf_tapes[n], dep, indep, indep_vec, jacob);
-			for(int i =0; i<2; i++){
+			
+			if(detector=="LISA"){
+			//if(false){
+				dt_hess = new double*[indep-1];
+				for(int j = 0 ; j<indep-1; j++){
+					dt_hess[j]=new double[indep-1];
+				}
+				double time_eval[indep-1];
+				time_eval[0]=indep_vec[0];
+				time_eval[1]=indep_vec[1];
+				if(id1!=id2){
+					time_eval[2]=indep_vec[2];
+				}
+				hessian(time_tapes[n], indep-1, time_eval, dt_hess);
+				//std::cout<<dt_hess[0][0]<<" "<<dt_hess[1][0]<<std::endl;
+			}
+			int derivs;
+			if(id1!=id2){derivs =2;}
+			else{derivs =1;}
+			for(int i =0; i<derivs; i++){
 				waveform_deriv[i] = jacob[0][i+1] 
 					+ std::complex<double>(0,1)*jacob[1][i+1];
 				//correct for time deriv for LISA
 				if(detector == "LISA" ){
-					double **dt_hess = new double*[3];
-					for(int j = 0 ; j<3; j++){
-						dt_hess[j]=new double[3];
-					}
-					double time_eval[3];
-					time_eval[0]=indep_vec[0];
-					time_eval[1]=indep_vec[1];
-					time_eval[2]=indep_vec[2];
-					//std::cout<<"HESS"<<std::endl;
-					hessian(time_tapes[n], 3, time_eval, dt_hess);
-					//std::cout<<"HESS DONE"<<std::endl;
+				//if(false ){
 					waveform_deriv[i]+= 
 						(jacob[0][indep-1] + std::complex<double>(0,1)*jacob[1][indep-1]) //Time derivative of WF
 						* dt_hess[i+1][0];//Derivative of time wrt source parameter
-					for(int j = 0 ; j<3; j++){
-						delete [] dt_hess[j];
-					}
-					delete [] dt_hess;
 				}
+			}
+			if(detector=="LISA"){
+			//if(false){
+				for(int j = 0 ; j<indep-1; j++){
+					delete [] dt_hess[j];
+				}
+				delete [] dt_hess;
 			}
 			//Mark successful derivative
 			eval = true;
+			if(id1==id2){waveform_deriv[1]=waveform_deriv[0];}
 			//Skip the rest of the bins
 			break;
 		}
@@ -4498,11 +4640,14 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	if(log_factors[id1]){
 		waveform_deriv[0] *= vec_parameters[id1+1];
 	}
-	if(log_factors[id2]){
-		waveform_deriv[1] *= vec_parameters[id2+1];
+	if(id1!=id2){
+		if(log_factors[id2]){
+			waveform_deriv[1] *= vec_parameters[id2+1];
+		}
 	}
 	deallocate_2D_array(jacob,dep,indep);
 	double psdroot;
 	populate_noise(&frequency,sensitivity_curve, &psdroot, 1);
+	//std::cout<<std::real((waveform_deriv[0]*conj(waveform_deriv[1])))/(psdroot*psdroot)<<std::endl;
 	return std::real((waveform_deriv[0]*conj(waveform_deriv[1])))/(psdroot*psdroot);
 }

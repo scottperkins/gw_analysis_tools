@@ -195,9 +195,22 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds,
 	string sensitivity_curve, 
 	string detector, 
 	double **output,
+	double **error,
 	int dimension, 
 	gen_params *parameters,
-	int *amp_tapes = NULL,
-	int *phase_tapes = NULL
+	double abserr,
+	double relerr
+	);
+void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, 
+	string generation_method, 
+	string sensitivity_curve, 
+	string detector, 
+	double **output,
+	double **error,
+	int base_dimension, 
+	int full_dimension, 
+	gen_params *parameters,
+	double abserr,
+	double relerr
 	);
 #endif

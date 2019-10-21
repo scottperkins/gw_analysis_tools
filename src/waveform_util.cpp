@@ -462,7 +462,6 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 			trace_off();
 		}
 	}
-	
 	bool eval = false;
 	double freq;	
 	for(int k = 0; k<length; k++){
@@ -486,11 +485,13 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 	for(int i = 0 ; i<length; i++){
 		times[i]/=(2.*M_PI);
 	}
-	if(check_mod(generation_method)){
-		delete [] aparams.betappe;
-		delete [] aparams.bppe;
+	if(!tapes_in){
+		delete [] tapes;
+		if(check_mod(generation_method)){
+			delete [] aparams.betappe;
+			delete [] aparams.bppe;
+		}
 	}
-	if(!tapes_in){delete [] tapes;}
 	
 }
 /*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
@@ -693,16 +694,6 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.incl_angle=internal_params.incl_angle;
 	lambda_parameters<adouble> lambda;
 	if(	(
-		//generation_method =="IMRPhenomPv2" ||
-		//generation_method =="MCMC_IMRPhenomPv2" ||
-		//generation_method =="ppE_IMRPhenomPv2_Inspiral" ||
-		//generation_method =="ppE_IMRPhenomPv2_IMR" ||
-		//generation_method =="MCMC_ppE_IMRPhenomPv2_Inspiral" ||
-		//generation_method =="MCMC_ppE_IMRPhenomPv2_IMR" ||
-		//generation_method =="dCS_IMRPhenomPv2" ||
-		//generation_method =="EdGB_IMRPhenomPv2" ||
-		//generation_method =="MCMC_dCS_IMRPhenomPv2" ||
-		//generation_method =="MCMC_EdGB_IMRPhenomPv2" 
 		generation_method.find("IMRPhenomPv2") != std::string::npos
 		)
 		&& !input_params->sky_average){
@@ -737,23 +728,6 @@ void assign_freq_boundaries(double *freq_boundaries,
 		}
 	}
 	else if(
-		//(generation_method =="IMRPhenomD" || 
-		//generation_method == "ppE_IMRPhenomD_Inspiral"|| 
-		//generation_method == "ppE_IMRPhenomD_IMR") 
-		//|| 
-		//(generation_method =="MCMC_IMRPhenomD_Full" || 
-		//generation_method == "MCMC_ppE_IMRPhenomD_Inspiral_Full"|| 
-		//generation_method == "MCMC_ppE_IMRPhenomD_IMR_Full")
-		//|| 
-		//(generation_method =="MCMC_dCS_IMRPhenomD_Full" || 
-		//generation_method == "MCMC_EdGB_IMRPhenomD_Full")
-		//|| 
-		//(generation_method =="dCS_IMRPhenomD" || 
-		//generation_method == "EdGB_IMRPhenomD")
-		//|| 
-		//(generation_method =="MCMC_IMRPhenomD" || 
-		//generation_method == "MCMC_ppE_IMRPhenomD_Inspiral" ||
-		//generation_method == "MCMC_ppE_IMRPhenomD_IMR" )
 		generation_method.find("IMRPhenomD") != std::string::npos
 		){
 
@@ -1021,7 +995,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	double bounds_from_band[2];
 
 	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band);
-	std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
+	//std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
 	double times[2];
 	time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
 	double T_band = times[1]-times[0];
@@ -1047,19 +1021,19 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	if(T_band < integration_time){
 		freq_bounds[0]=frequencies[min_id];	
 		freq_bounds[1]=frequencies[max_id];	
-		std::cout<<"Band"<<std::endl;
-		std::cout<<T_band<<std::endl;
-		std::cout<<times[0]<<" "<<times[1]<<std::endl;
+		//std::cout<<"Band"<<std::endl;
+		//std::cout<<T_band<<std::endl;
+		//std::cout<<times[0]<<" "<<times[1]<<std::endl;
 	}
 	else{
 		freq_bounds[1] = frequencies[max_id];
 		bool continue_search=true;
-		double fmax_search = freq_bounds[1];
-		double fmin_search = freq_bounds[0];
+		//double fmax_search = freq_bounds[1];
+		//double fmin_search = freq_bounds[0];
 		double eval_freq, time;
 		int min_id_search=min_id, max_id_search=max_id, eval_id;
 		double tolerance = .1*integration_time;
-		std::cout<<"Truncated"<<std::endl;
+		//std::cout<<"Truncated"<<std::endl;
 		
 		while(continue_search)
 		{
@@ -1075,7 +1049,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 
 				continue_search = false;
 				freq_bounds[0]=eval_freq;
-				std::cout<<(times[1]-time)<<std::endl;
+				//std::cout<<(times[1]-time)<<std::endl;
 			}
 			else if(( (times[1] - time) < (integration_time-tolerance) )){
 				max_id_search = eval_id;
@@ -1088,6 +1062,107 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	}
 	
 	delete [] frequencies;
+}
+template<class T>
+void postmerger_params(gen_params_base<T>*params,
+	std::string generation_method,
+	T *fpeak,
+	T *fdamp,
+	T *fRD
+	)
+{
+	if(generation_method.find("IMRPhenomD")!=std::string::npos){
+		source_parameters<T> s_param;
+		s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.sky_average = params->sky_average;
+		s_param.f_ref = params->f_ref;
+		s_param.phiRef = params->phiRef;
+		s_param.cosmology=params->cosmology;
+		s_param.incl_angle=params->incl_angle;
+		IMRPhenomD<T> model;
+		lambda_parameters<T> lambda;
+		model.assign_lambda_param(&s_param,&lambda);	
+		model.post_merger_variables(&s_param);
+		*fRD = s_param.fRD;
+		*fdamp = s_param.fdamp;
+		*fpeak = model.fpeak(&s_param , &lambda);
+	}
+	else if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
+		source_parameters<T> s_param;
+		s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.sky_average = params->sky_average;
+		s_param.f_ref = params->f_ref;
+		s_param.phiRef = params->phiRef;
+		s_param.cosmology=params->cosmology;
+		s_param.incl_angle=params->incl_angle;
+		s_param.chip = params->chip;
+		s_param.phip = params->phip;
+		IMRPhenomPv2<T> model;
+		lambda_parameters<T> lambda;
+		model.assign_lambda_param(&s_param,&lambda);	
+		model.post_merger_variables(&s_param);
+		*fRD = s_param.fRD;
+		*fdamp = s_param.fdamp;
+		*fpeak = model.fpeak(&s_param , &lambda);
+	}
+
+}
+template void postmerger_params<double>(gen_params_base<double> *,std::string, double *, double *, double*);
+template void postmerger_params<adouble>(gen_params_base<adouble> *,std::string, adouble *, adouble *, adouble*);
+void Tbm_to_freq(gen_params_base<double> *params,
+	std::string generation_method,
+	double Tbm,
+	double *freq,
+	double tol 
+	)
+{
+	double fpeak,fRD,fdamp ;
+	postmerger_params(params, generation_method, &fpeak, &fdamp, &fRD);
+	double time_peak, time_Tbm;
+	time_phase_corrected_autodiff(&time_peak, 1, &fpeak, params, 
+		generation_method, false);
+		
+	bool continue_search = true;
+	double Tbmp = (1+tol)*Tbm;
+	double Tbmm = (1-tol)*Tbm;
+	double eval_freq, time;
+	double fmax_search = fpeak;
+	double fmin_search = fpeak;
+	double T=0;
+	while(T<Tbm){
+		fmin_search = .1*fmin_search;
+		time_phase_corrected_autodiff(&time, 1, &fmin_search, params, 
+			generation_method, false);
+		T = time_peak- time;
+		
+	
+	}
+	while(continue_search)
+	{
+		//Bisection in log freq space
+		eval_freq=sqrt(fmax_search*fmin_search);
+		time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			generation_method, true);
+		T = time_peak-time;	
+		//The function can be so steep the algorithm cannot determine a valid 
+		//frequency with the required tolerance because of floating point error
+		//check to see if the difference is at all meaningful
+		if(2*(fmax_search - fmin_search)/(fmax_search+fmin_search) <1e-12){
+			continue_search =false;
+			*freq=eval_freq;
+
+		}
+		if(T > (Tbmp )){
+			fmin_search = eval_freq;
+		}
+		else if(T< (Tbmm)){
+			fmax_search = eval_freq;
+		}
+		else{
+			continue_search =false;
+			*freq=eval_freq;
+		}
+	}
 }
 
 //###########################################################################

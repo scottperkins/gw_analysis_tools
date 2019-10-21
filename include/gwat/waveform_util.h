@@ -145,6 +145,19 @@ void integration_interval(double sampling_freq,
 	std::string generation_method,
 	gen_params_base<double> *params,
 	double *freq_bounds);
+void Tbm_to_freq(gen_params_base<double> *params,
+	std::string generation_method,
+	double Tbm,
+	double *freq,
+	double tol 
+	);
+template<class T>
+void postmerger_params(gen_params_base<T>*params,
+	std::string generation_method,
+	T *fpeak,
+	T *fdamp,
+	T *fRD
+	);
 
 #endif
 
