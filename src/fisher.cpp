@@ -4158,7 +4158,7 @@ void tape_phase_gsl_subroutine(gsl_subroutine * params_packed)
 	transform_parameters(params, &aparams);
 	for(int i = 0 ; i < boundary_num ; i++){
 		for(int i = 0 ; i<boundary_num ; i++){
-			tapes[i]=(i+1)*8;	
+			tapes[i]=(i+1)*31;	
 			trace_on(tapes[i]);
 			adouble freq;
 			freq <<= grad_freqs[i];
@@ -4196,7 +4196,7 @@ void tape_time_gsl_subroutine(gsl_subroutine * params_packed)
 	//calculate derivative of phase
 	int *tapes = params_packed->time_tapes;
 	for(int i = 0 ; i < boundary_num ; i++){
-		tapes[i] = (i+1)*12; //Random tape id 
+		tapes[i] = (i+1)*17; //Random tape id 
 		trace_on(tapes[i]);
 		adouble avec_parameters[vec_param_length];
 		avec_parameters[0] <<=grad_freqs[i];
@@ -4258,7 +4258,7 @@ void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed)
 	//calculate_derivative tapes
 	int *tapes = params_packed->waveform_tapes;
 	for(int i =0; i<boundary_num; i++){
-		tapes[i]= i+5;
+		tapes[i]= (i+1)*7;
 		trace_on(tapes[i]);
 		//adouble avec_parameters[dimension+1];
 		adouble avec_parameters[vec_param_length];
