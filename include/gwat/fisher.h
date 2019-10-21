@@ -16,8 +16,20 @@ struct gsl_subroutine
 	int dim;
 	int id1;
 	int id2;
+	int *waveform_tapes;
+	int *time_tapes;
+	int *phase_tapes;
+	double *freq_boundaries;
+	double *grad_freqs;
+	int boundary_num;
+	bool *log_factors;
+	
 };
 
+void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed);
+void tape_time_gsl_subroutine(gsl_subroutine * params_packed);
+void tape_phase_gsl_subroutine(gsl_subroutine * params_packed);
+void prep_gsl_subroutine(gsl_subroutine *params_packed);
 
 void fisher_numerical(double *frequency, 
 	int length,

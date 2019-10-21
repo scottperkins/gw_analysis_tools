@@ -99,7 +99,8 @@ void time_phase_corrected_autodiff(double *times,
 	double *frequencies,
 	gen_params_base<double> *params, 
 	std::string generation_method, 
-	bool correct_time);
+	bool correct_time,
+	int *tapes_in = NULL);
 
 template<class T>
 void time_phase_corrected(T *times, 

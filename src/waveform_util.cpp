@@ -436,25 +436,31 @@ int fourier_detector_amplitude_phase(double *frequencies,
  * For IMRPhenomPv2, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
  *
  */
-void time_phase_corrected_autodiff(double *times, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, bool correct_time)
+void time_phase_corrected_autodiff(double *times, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, bool correct_time, int *tapes_in)
 {
 	int boundary_num = boundary_number(generation_method);
 	double freq_boundaries[boundary_num];
 	double grad_freqs[boundary_num];
 	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);	
+	int *tapes;
 	gen_params_base<adouble> aparams;
-	transform_parameters(params, &aparams);
-	int tapes[boundary_num];
-	for(int i = 0 ; i<boundary_num ; i++){
-		tapes[i]=i*8;	
-		trace_on(tapes[i]);
-		adouble freq;
-		freq <<= grad_freqs[i];
-		adouble phasep, phasec;
-		fourier_phase(&freq, 1, &phasep, &phasec, generation_method, &aparams);
-		double phaseout;
-		phasep>>=phaseout;
-		trace_off();
+	if(tapes_in){ 
+		tapes = tapes_in;
+	}
+	else{
+		tapes = new int[boundary_num];
+		transform_parameters(params, &aparams);
+		for(int i = 0 ; i<boundary_num ; i++){
+			tapes[i]=(i+1)*8;	
+			trace_on(tapes[i]);
+			adouble freq;
+			freq <<= grad_freqs[i];
+			adouble phasep, phasec;
+			fourier_phase(&freq, 1, &phasep, &phasec, generation_method, &aparams);
+			double phaseout;
+			phasep>>=phaseout;
+			trace_off();
+		}
 	}
 	
 	bool eval = false;
@@ -484,6 +490,7 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 		delete [] aparams.betappe;
 		delete [] aparams.bppe;
 	}
+	if(!tapes_in){delete [] tapes;}
 	
 }
 /*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
