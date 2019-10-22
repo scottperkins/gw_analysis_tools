@@ -4370,7 +4370,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			F.function = &calculate_integrand_autodiff_gsl_subroutine;
 			F.params = &params_packed;
 
-			std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+			//std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
 			gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
 
 			output[i][j] = 4*result;
@@ -4387,9 +4387,9 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			delete [] params_packed.grad_freqs ;
 			delete [] params_packed.log_factors ;
 
-			std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-			std::cout<<"Error "<<err<<std::endl;
-			std::cout<<"intervals "<<w->size<<std::endl;
+			//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+			//std::cout<<"Error "<<err<<std::endl;
+			//std::cout<<"intervals "<<w->size<<std::endl;
 		}
 	}
 
@@ -4478,7 +4478,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				F.function = &calculate_integrand_autodiff_gsl_subroutine;
 				F.params = &params_packed;
 
-				std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+				//std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
 				gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
 
 				output[i][j] = 4*result;
@@ -4496,9 +4496,9 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				delete [] params_packed.log_factors ;
 
 			}
-			std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-			std::cout<<"Error "<<err<<std::endl;
-			std::cout<<"intervals "<<w->size<<std::endl;
+			//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+			//std::cout<<"Error "<<err<<std::endl;
+			//std::cout<<"intervals "<<w->size<<std::endl;
 		}
 	}
 
@@ -4611,7 +4611,7 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 				//if(false ){
 					waveform_deriv[i]+= 
 						(jacob[0][indep-1] + std::complex<double>(0,1)*jacob[1][indep-1]) //Time derivative of WF
-						* dt_hess[i+1][0];//Derivative of time wrt source parameter
+						* dt_hess[i+1][0]/(2*M_PI);//Derivative of time wrt source parameter -- 2 pi from definition of time 
 				}
 			}
 			if(detector=="LISA"){

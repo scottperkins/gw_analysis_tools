@@ -124,18 +124,42 @@ double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used b
 	free(data);
 	return snr;
 }
+
+double calculate_snr(std::string sensitivity_curve,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<double> *params,
+	double *frequencies,
+	int length)
+{
+	double *times;
+	if(detector == "LISA"){
+		times = new double[length];
+		time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
+	}
+	std::complex<double> *response = new std::complex<double>[length];
+	fourier_detector_response_equatorial(frequencies, length, response, detector, generation_method, params,times);
+	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
+	delete [] response;	
+	if(detector == "LISA"){
+		delete [] times;
+		snr*=2; //Two detectors
+	}
+	return snr;
+
+}
 /*! \brief Caclulates the snr given a detector and waveform (complex) and frequencies
  *      
  * This function computes the un-normalized snr: \sqrt( ( H | H ) )
  */     
-double calculate_snr(std::string detector, /**< detector name - must match the string of populate_noise precisely*/
+double calculate_snr(std::string sensitivity_curve, /**< detector name - must match the string of populate_noise precisely*/
                         std::complex<double> *waveform,/**< complex waveform */
                         double *frequencies,/**< double array of frequencies that the waveform is evaluated at*/
                         int length/**< length of the above two arrays*/
                         )
 {
         double *noise = (double *)malloc(sizeof(double)*length);
-        populate_noise(frequencies,detector, noise,  length);
+        populate_noise(frequencies,sensitivity_curve, noise,  length);
         for (int i = 0; i< length; i++)
                 noise[i] = noise[i]*noise[i];
         double *integrand = (double *) malloc(sizeof(double)*length);
@@ -1004,6 +1028,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	bool max_found=false, min_found=false;
 	int max_id , min_id ;
 	int i=0 ;
+
 	while((!max_found || !min_found) && i<N){
 		if(bounds_from_band[1] >= (frequencies[i]-delta_f/2. ) &&
 			bounds_from_band[1] <= (frequencies[i]+delta_f/2. )){
@@ -1033,7 +1058,6 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 		double eval_freq, time;
 		int min_id_search=min_id, max_id_search=max_id, eval_id;
 		double tolerance = .1*integration_time;
-		//std::cout<<"Truncated"<<std::endl;
 		
 		while(continue_search)
 		{
@@ -1049,7 +1073,6 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 
 				continue_search = false;
 				freq_bounds[0]=eval_freq;
-				//std::cout<<(times[1]-time)<<std::endl;
 			}
 			else if(( (times[1] - time) < (integration_time-tolerance) )){
 				max_id_search = eval_id;

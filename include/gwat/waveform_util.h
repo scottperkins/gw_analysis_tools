@@ -25,8 +25,14 @@ double data_snr_maximized_extrinsic(double *frequencies,
 	std::string generation_method,
 	gen_params *param
 	);
-double calculate_snr(std::string detector,
+double calculate_snr(std::string sensitivity_curve,
         std::complex<double> *waveform,
+        double *frequencies,
+        int length);
+double calculate_snr(std::string sensitivity_curve,
+	std::string detector,
+	std::string generation_method,
+        gen_params_base<double> *params,
         double *frequencies,
         int length);
 

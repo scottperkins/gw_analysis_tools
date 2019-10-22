@@ -506,6 +506,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
 {
+	//FIX -- dec goes frorm pi/2 to -pi/2 while theta goes from 0 to pi
 	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0., Fplus,Fcross);
 }
 /*! \brief Same as the other function, but for active and future detectors
