@@ -1047,7 +1047,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 		freq_bounds[0]=frequencies[min_id];	
 		freq_bounds[1]=frequencies[max_id];	
 		//std::cout<<"Band"<<std::endl;
-		//std::cout<<T_band<<std::endl;
+		//std::cout<<T_band/T_year<<std::endl;
 		//std::cout<<times[0]<<" "<<times[1]<<std::endl;
 	}
 	else{
@@ -1073,6 +1073,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 
 				continue_search = false;
 				freq_bounds[0]=eval_freq;
+				//std::cout<<(times[1]-time)/T_year<<std::endl;
 			}
 			else if(( (times[1] - time) < (integration_time-tolerance) )){
 				max_id_search = eval_id;
@@ -1184,6 +1185,7 @@ void Tbm_to_freq(gen_params_base<double> *params,
 		else{
 			continue_search =false;
 			*freq=eval_freq;
+			//std::cout<<T/T_year<<std::endl;
 		}
 	}
 }

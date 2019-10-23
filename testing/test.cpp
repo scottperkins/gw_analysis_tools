@@ -72,6 +72,7 @@ void test35();
 void test36();
 void test37();
 void test38();
+void test39();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -102,8 +103,29 @@ static double *psd=NULL;
 
 int main(){
 
-	test38();	
+	//test38();	
+	test39();	
 	return 0;
+}
+void test39()
+{
+	int length = 100;
+	double phase_in[length];
+	double phase_out[length];
+	double phase_corr[length];
+	double deltap  = .1;
+	for (int i = 0 ;i < length; i++){
+		phase_in[i]= -i*deltap;
+		phase_out[i]= std::atan2(std::sin(phase_in[i]), std::cos(phase_in[i]));
+	}
+	unwrap_array(phase_out, phase_corr, length);
+	//phase_corr[0]=phase_out[0];
+	//for(int i = 1 ; i<length; i++){
+	//	phase_corr[i] = unwrap( phase_corr[i-1], phase_out[i]);
+	//}
+	for (int i = 0 ;i < length; i++){
+		std::cout<<phase_in[i]<<" "<<phase_out[i]<<" "<<phase_corr[i]<<std::endl;
+	}
 }
 void test38()
 {

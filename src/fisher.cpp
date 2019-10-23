@@ -4059,6 +4059,7 @@ void calculate_fisher_elements_batch(double *frequency,
 					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
 					/psd[i]);
 		}
+		
 		output[j][j] = 4*simpsons_sum(
 					frequency[1]-frequency[0], length, integrand);	
 	}
@@ -4370,7 +4371,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			F.function = &calculate_integrand_autodiff_gsl_subroutine;
 			F.params = &params_packed;
 
-			//std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+			std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
 			gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
 
 			output[i][j] = 4*result;
@@ -4387,14 +4388,14 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			delete [] params_packed.grad_freqs ;
 			delete [] params_packed.log_factors ;
 
-			//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-			//std::cout<<"Error "<<err<<std::endl;
-			//std::cout<<"intervals "<<w->size<<std::endl;
+			std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+			std::cout<<"Error "<<err<<std::endl;
+			std::cout<<"intervals "<<w->size<<std::endl;
 		}
 	}
 
 	gsl_integration_workspace_free (w);
-	//Assign output to fisher elements ** MULITPLY BY 4
+
 	if(detector == "LISA"){
 		for(int i = 0 ; i<dimension;i++){
 			for(int j = 0  ;j<dimension; j++){
@@ -4456,7 +4457,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	for(int i = 0 ; i<full_dimension; i++){
 		for(int j = 0 ; j<=i ; j++){
 			//i>j
-			if(check_list(i, mod_list, full_dimension-base_dimension) &&check_list(j, mod_list, full_dimension-base_dimension && i!=j)){
+			if(check_list(i, mod_list, full_dimension-base_dimension) && check_list(j, mod_list, full_dimension-base_dimension) && i!=j){
 				output[i][j] = 0;	
 				output[j][i] = 0;	
 				error[i][j] = 0;	
@@ -4478,7 +4479,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				F.function = &calculate_integrand_autodiff_gsl_subroutine;
 				F.params = &params_packed;
 
-				//std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+				std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
 				gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
 
 				output[i][j] = 4*result;
@@ -4494,16 +4495,16 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				delete [] params_packed.freq_boundaries ;
 				delete [] params_packed.grad_freqs ;
 				delete [] params_packed.log_factors ;
+				std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+				std::cout<<"Error "<<err<<std::endl;
+				std::cout<<"intervals "<<w->size<<std::endl;
 
 			}
-			//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-			//std::cout<<"Error "<<err<<std::endl;
-			//std::cout<<"intervals "<<w->size<<std::endl;
 		}
 	}
 
 	gsl_integration_workspace_free (w);
-	//Assign output to fisher elements ** MULITPLY BY 4
+
 	if(detector == "LISA"){
 		for(int i = 0 ; i<full_dimension;i++){
 			for(int j = 0  ;j<full_dimension; j++){
@@ -4538,6 +4539,7 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	int id1 = params_packed.id1;
 	int id2 = params_packed.id2;
 	int dimension = params_packed.dim;
+	//std::cout<<id1<<" "<<id2<<std::endl;
 
 	//Transform gen_params to double vectors
 	int vec_param_length= dimension +1;
@@ -4598,7 +4600,10 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 					time_eval[2]=indep_vec[2];
 				}
 				hessian(time_tapes[n], indep-1, time_eval, dt_hess);
-				//std::cout<<dt_hess[0][0]<<" "<<dt_hess[1][0]<<std::endl;
+				//if(id1!=id2)	
+				//std::cout<<dt_hess[1][0]<<" "<<dt_hess[2][0]<<std::endl;
+				//else
+				//std::cout<<dt_hess[1][0]<<std::endl;
 			}
 			int derivs;
 			if(id1!=id2){derivs =2;}
@@ -4640,10 +4645,10 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	if(log_factors[id1]){
 		waveform_deriv[0] *= vec_parameters[id1+1];
 	}
-	if(id1!=id2){
-		if(log_factors[id2]){
-			waveform_deriv[1] *= vec_parameters[id2+1];
-		}
+	//if(id1!=id2){
+	//This needs to be here even if id1==id2
+	if(log_factors[id2]){
+		waveform_deriv[1] *= vec_parameters[id2+1];
 	}
 	deallocate_2D_array(jacob,dep,indep);
 	double psdroot;

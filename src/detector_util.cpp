@@ -110,6 +110,9 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 			noise_root[i] = sqrt(LISA_analytic(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
 		}
 	}
+	else{
+		std::cout<<"Detector not supported"<<std::endl;
+	}
 			
 		
 }
@@ -529,9 +532,15 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 {
 	//Time dependent antenna patterns
 	if(detector=="LISA" ||detector =="lisa"){
+		//Polar angle theta runs 0,PI , dec runs -PI/2,PI/2
+		T thetas;
+		if(dec>=0)thetas = M_PI/2. - dec;
+		else if(dec<0)thetas = M_PI/2. + dec;
+		//RA is the same as phi_s
 		for(int i =0 ; i<length; i++){
-			Fplus[i]  = LISA_response_plus_time(dec,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
-			Fcross[i]  = LISA_response_cross_time(dec,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
+
+			Fplus[i]  = LISA_response_plus_time(thetas,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
+			Fcross[i]  = LISA_response_cross_time(thetas,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
 		}
 	}
 	//Time independent response functions
