@@ -534,8 +534,9 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	if(detector=="LISA" ||detector =="lisa"){
 		//Polar angle theta runs 0,PI , dec runs -PI/2,PI/2
 		T thetas;
-		if(dec>=0)thetas = M_PI/2. - dec;
-		else if(dec<0)thetas = M_PI/2. + dec;
+		thetas = M_PI/2. - dec;
+		//if(dec>=0)thetas = M_PI/2. - dec;
+		//else if(dec<0)thetas = M_PI/2. - dec;
 		//RA is the same as phi_s
 		for(int i =0 ; i<length; i++){
 
