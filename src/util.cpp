@@ -681,6 +681,19 @@ source_parameters<T> source_parameters<T>::populate_source_parameters_old(
 }
 
 
+/*! \brief Routine to transform from the equatorial coordinate system spherical polar desscription of the total angular momentum to the detector specific polarization angle and inclination angle
+ *
+ * For the terrestial network, this calculates the polarization angle for a detector at the center of Earth in equatorial coordinates, which is the polarization angle used in the detector_response_equatorial functions
+ */
+template<class T>
+void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota)
+{
+	//PSI only appears as 2*PSI in detector response, so atan should be fine. Periodicity of pi
+	*pol = atan(cos(DEC)*1./tan(thetaj)*1./sin(phij - RA) - 1./tan(phij - RA)*sin(DEC));
+	*iota = acos(cos(thetaj)*sin(DEC) + cos(DEC)*cos(phij - RA)*sin(thetaj));
+}
+template void terr_pol_iota_from_equat_sph<double>(double, double, double, double, double *, double*);
+template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, adouble, adouble *, adouble*);
 /*! \brief Calculates the chirp mass from the two component masses
  *
  * The output units are whatever units the input masses are

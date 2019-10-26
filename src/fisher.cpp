@@ -2024,6 +2024,14 @@ void fisher_autodiff_batch_mod(double *frequency,
 	
 	//calulate fisher elements
 	calculate_fisher_elements_batch(frequency, length,base_dimension, full_dimension, response_deriv, output,  internal_noise);
+	//Factor of 2 for LISA's second arm
+	if(detector == "LISA"){
+		for(int i = 0 ; i<full_dimension;i++){
+			for(int j = 0  ;j<full_dimension; j++){
+				output[i][j]*=2;
+			}	
+		}
+	}
 
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<full_dimension; i++){
@@ -4506,6 +4514,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	gsl_integration_workspace_free (w);
 
 	if(detector == "LISA"){
+		std::cout<<"Doubling"<<std::endl;
 		for(int i = 0 ; i<full_dimension;i++){
 			for(int j = 0  ;j<full_dimension; j++){
 				output[i][j]*=2;

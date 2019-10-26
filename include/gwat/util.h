@@ -457,6 +457,9 @@ void tukey_window(double *window,
 void write_file(std::string filename, double **input, int rows, int cols);
 void write_file(std::string filename, double *input, int length);
 
+template<class T>
+void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota);
+
 double calculate_eta(double mass1, double mass2);
 adouble calculate_eta(adouble mass1, adouble mass2);
 
