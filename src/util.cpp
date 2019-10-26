@@ -694,6 +694,60 @@ void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota
 }
 template void terr_pol_iota_from_equat_sph<double>(double, double, double, double, double *, double*);
 template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, adouble, adouble *, adouble*);
+
+/*! \brief Utility to map source frame vectors to equatorial frame vectors
+ *
+ * Needs the equatorial vectors for the line of sight and the orbital angular momentum
+ *
+ * Needs the inclination angle and the reference phase
+ * 
+ * Works by constructing a third vector from the cross product of the two others, in both frames. This defines a family of 3 vectors that can uniquely determine a rotation matrix
+ * from source frame to equatorial, which was done analytically in mathematica ( see the nb)
+ *
+ * K = LxN
+ *
+ * A = {LSF,NSF, KSF}
+ * 
+ * B={LEQ,NEQ,KEQ}
+ *
+ * R = B.A^-1
+ *
+ */
+template<class T>
+void equatorial_from_SF(T *SFvec,/**< Input, source frame vector, as defined by LAL (L = z_hat)*/
+	T thetal, /**< Polar angle in equatorial coordinates of the orbital angular momentum*/
+	T phil, /**< Azimuthal angle in equatorial coordinates of the orbital angular momentum*/
+	T thetas,  /**< Polar angle in equatorial coordinates of the direction of propagation*/
+	T phis,/**< Azimuthal angle in equatorial coordinates of the direction of propagation*/
+	T iota, /**< Inclination angle between the orbiatl angular momentum and the direction of propagation*/
+	T phi_ref,/**<Reference frequency for the waveform (defines the LAL frame ) ( orbital phase)*/
+	T *EQvec/**< [out] Out vector in equatorial coordinates*/)
+{
+	T cp = cos(phi_ref);
+	T sp = sin(phi_ref);
+	T ci = cos(iota);
+	T si = sin(iota);
+	T ctl = cos(thetal);
+	T stl = sin(thetal);
+	T cts = cos(thetas);
+	T sts = sin(thetas);
+	T cps = cos(phis);
+	T sps = sin(phis);
+	T cpl = cos(phil);
+	T spl = sin(phil);
+	T Jxn = SFvec[0];
+	T Jyn = SFvec[1];
+	T Jzn = SFvec[2];
+
+	EQvec[0] =  (pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl + sp*(cpl*Jzn*si*sp*stl - cts*Jxn*spl*stl + cps*Jyn*sts + ctl*Jxn*sps*sts) + 
+     cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
+	EQvec[1] = (pow_int(cp,2)*Jzn*si*spl*stl + cp*(-(cpl*cts*Jyn*stl) - ci*Jxn*spl*stl + cps*ctl*Jyn*sts + Jxn*sps*sts) + 
+     sp*(cpl*cts*Jxn*stl - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl - cps*ctl*Jxn*sts + Jyn*sps*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
+	EQvec[2] = (cp*cts*Jxn + pow_int(cp,2)*ctl*Jzn*si - ci*ctl*(cp*Jxn + Jyn*sp) + cp*Jyn*(-(cps*spl) + cpl*sps)*stl*sts + sp*(cts*Jyn + ctl*Jzn*si*sp + Jxn*(cps*spl - cpl*sps)*stl*sts))/
+   (si*(pow_int(cp,2) + pow_int(sp,2)));
+}
+template void equatorial_from_SF<double>(double *, double, double, double, double, double, double,double *);
+template void equatorial_from_SF<adouble>(adouble *, adouble, adouble, adouble, adouble, adouble, adouble,adouble *);
 /*! \brief Calculates the chirp mass from the two component masses
  *
  * The output units are whatever units the input masses are

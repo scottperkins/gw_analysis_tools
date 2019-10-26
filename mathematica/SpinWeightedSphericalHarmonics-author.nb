@@ -1,0 +1,1269 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 6.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[     49601,       1260]
+NotebookOptionsPosition[     45329,       1127]
+NotebookOutlinePosition[     46926,       1177]
+CellTagsIndexPosition[     46598,       1165]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Spin-Weighted Spherical Harmonics", "DemoTitle",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.443837436512295*^9, 3.443837453554635*^9}, {
+   3.4438813038675213`*^9, 3.4438813076168957`*^9}, {3.443883958506048*^9, 
+   3.443883958771682*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["", "InitializationSection"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"Y", "[", 
+    RowBox[{"s_", ",", "l_", ",", "m_", ",", "\[Theta]_", ",", "\[Phi]_"}], 
+    "]"}], ":=", 
+   RowBox[{
+    SuperscriptBox[
+     RowBox[{"(", 
+      RowBox[{"-", "1"}], ")"}], "m"], 
+    RowBox[{"Simplify", "[", 
+     RowBox[{
+      RowBox[{
+       SqrtBox[
+        FractionBox[
+         RowBox[{
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{"l", "+", "m"}], ")"}], "!"}], 
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{"l", "-", "m"}], ")"}], "!"}], 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"2", "l"}], "+", "1"}], ")"}]}], 
+         RowBox[{
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{"l", "+", "s"}], ")"}], "!"}], 
+          RowBox[{
+           RowBox[{"(", 
+            RowBox[{"l", "-", "s"}], ")"}], "!"}], "4", "\[Pi]"}]]], 
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"Sin", "[", 
+          FractionBox["\[Theta]", "2"], "]"}], ")"}], 
+        RowBox[{"2", "l"}]], 
+       RowBox[{
+        SubsuperscriptBox["\[Sum]", 
+         RowBox[{"r", "=", "0"}], 
+         RowBox[{"l", "-", "s"}]], 
+        RowBox[{"(", 
+         RowBox[{
+          RowBox[{"Binomial", "[", 
+           RowBox[{
+            RowBox[{"l", "-", "s"}], ",", "r"}], "]"}], 
+          RowBox[{"Binomial", "[", 
+           RowBox[{
+            RowBox[{"l", "+", "s"}], ",", 
+            RowBox[{"r", "+", "s", "-", "m"}]}], "]"}], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"-", "1"}], ")"}], 
+           RowBox[{"l", "-", "r", "-", "s"}]], 
+          SuperscriptBox["\[ExponentialE]", 
+           RowBox[{"\[ImaginaryI]", " ", "m", " ", "\[Phi]"}]], 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{"Cot", "[", 
+             FractionBox["\[Theta]", "2"], "]"}], ")"}], 
+           RowBox[{
+            RowBox[{"2", "r"}], "+", "s", "-", "m"}]]}], ")"}]}]}], ",", 
+      RowBox[{"Assumptions", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"\[Phi]", "\[Element]", "Reals"}], ",", 
+         RowBox[{"\[Theta]", "\[Element]", "Reals"}]}], "}"}]}]}], "]"}]}]}], 
+  ";"}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{3.35696210375764*^9, 3.4438347818257523`*^9, 
+  3.444079861687627*^9, 3.4440799965236473`*^9},
+ CellID->1156620916]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["", "ManipulateSection"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Manipulate", "[", "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"l", "<", "s"}], ",", 
+      RowBox[{"l", "=", "s"}]}], "]"}], ";", "\[IndentingNewLine]", 
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"m", "<", 
+       RowBox[{"-", "l"}]}], ",", 
+      RowBox[{"m", "=", 
+       RowBox[{"-", "l"}]}]}], "]"}], ";", "\[IndentingNewLine]", 
+    RowBox[{"If", "[", 
+     RowBox[{
+      RowBox[{"m", ">", "l"}], ",", 
+      RowBox[{"m", "=", "l"}]}], "]"}], ";", "\[IndentingNewLine]", 
+    RowBox[{"ParametricPlot3D", "[", "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"Evaluate", "[", 
+       RowBox[{
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{
+           RowBox[{"Cos", "[", "p", "]"}], 
+           RowBox[{"Sin", "[", "t", "]"}]}], ",", 
+          RowBox[{
+           RowBox[{"Sin", "[", "p", "]"}], 
+           RowBox[{"Sin", "[", "t", "]"}]}], ",", 
+          RowBox[{"Cos", "[", "t", "]"}]}], "}"}], 
+        RowBox[{"Abs", "[", 
+         RowBox[{"Y", "[", 
+          RowBox[{"s", ",", "l", ",", "m", ",", "t", ",", "p"}], "]"}], 
+         "]"}]}], "]"}], ",", "\[IndentingNewLine]", 
+      RowBox[{"{", 
+       RowBox[{"p", ",", 
+        RowBox[{"-", "Pi"}], ",", "Pi"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"t", ",", "0", ",", "Pi"}], "}"}], ",", 
+      RowBox[{"PlotRange", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"-", ".55"}], ",", ".55"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"-", ".55"}], ",", ".55"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"-", "1.1"}], ",", "1.1"}], "}"}]}], "}"}]}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{"Mesh", "\[Rule]", "False"}], ",", 
+      RowBox[{"PlotPoints", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"36", ",", "18"}], "}"}]}], ",", 
+      RowBox[{"MaxRecursion", "\[Rule]", 
+       RowBox[{"ControlActive", "[", 
+        RowBox[{"0", ",", "2"}], "]"}]}], ",", 
+      RowBox[{"ImageSize", " ", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"500", ",", "377"}], "}"}]}], ",", 
+      RowBox[{"Axes", "\[Rule]", "False"}], ",", 
+      RowBox[{"Boxed", "\[Rule]", "False"}], ",", 
+      RowBox[{"ViewAngle", "\[Rule]", 
+       RowBox[{"\[Pi]", "/", "10"}]}], ",", 
+      RowBox[{"SphericalRegion", "\[Rule]", "True"}], ",", 
+      RowBox[{"PlotLabel", "\[Rule]", 
+       RowBox[{"Style", "[", 
+        RowBox[{
+         RowBox[{"Row", "[", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"Style", "[", 
+             RowBox[{"\"\<r\>\"", ",", "Italic"}], "]"}], ",", "\"\< = \>\"", 
+            ",", 
+            RowBox[{"Subscript", "[", 
+             RowBox[{"\"\<\>\"", ",", "s"}], "]"}], ",", 
+            RowBox[{"With", "[", 
+             RowBox[{
+              RowBox[{"{", 
+               RowBox[{
+                RowBox[{"s", "=", "s"}], ",", 
+                RowBox[{"l", "=", "l"}], ",", 
+                RowBox[{"m", "=", 
+                 RowBox[{"Round", "@", "m"}]}]}], "}"}], ",", 
+              RowBox[{"TraditionalForm", "[", 
+               RowBox[{"HoldForm", "[", "\[InvisibleSpace]", 
+                RowBox[{"SphericalHarmonicY", "[", 
+                 RowBox[{"l", ",", "m", ",", "\[Theta]", ",", "\[Phi]"}], 
+                 "]"}], "]"}], "]"}]}], "]"}]}], "}"}], "]"}], ",", "25"}], 
+        "]"}]}]}], "]"}]}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"s", ",", "0", ",", "\"\<degree s\>\""}], "}"}], ",", 
+     RowBox[{"Range", "[", 
+      RowBox[{"0", ",", "8"}], "]"}], ",", "SetterBar"}], "}"}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"l", ",", "0", ",", "\"\<degree l\>\""}], "}"}], ",", 
+     RowBox[{"Range", "[", 
+      RowBox[{"s", ",", "8"}], "]"}], ",", "SetterBar"}], "}"}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"m", ",", "0", ",", "\"\<order m\>\""}], "}"}], ",", 
+     RowBox[{"Range", "[", 
+      RowBox[{
+       RowBox[{"-", "l"}], ",", "l"}], "]"}], ",", "SetterBar"}], "}"}], ",", 
+   RowBox[{"SaveDefinitions", "\[Rule]", "True"}], ",", 
+   RowBox[{"AutorunSequencing", "\[Rule]", 
+    RowBox[{"{", "1", "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4444020129640923`*^9, 3.4444020427764015`*^9}, {
+   3.444402073182457*^9, 3.444402141822643*^9}, 3.4444022489630537`*^9, {
+   3.4444025172445726`*^9, 3.4444025205727186`*^9}, {3.44440256766677*^9, 
+   3.4444025891356573`*^9}, {3.44440296055991*^9, 3.444402986575701*^9}, {
+   3.4444030231853104`*^9, 3.444403081826311*^9}, {3.44440313096725*^9, 
+   3.444403135311028*^9}, {3.44440355131369*^9, 3.444403575501345*^9}, 
+   3.4444037850651865`*^9, {3.4444078568256207`*^9, 3.4444078830289135`*^9}, {
+   3.4444079178260107`*^9, 3.4444079180447626`*^9}, {3.444407991545233*^9, 
+   3.4444079940296235`*^9}, 3.444408132389884*^9, {3.4444957209727087`*^9, 
+   3.4444960043200407`*^9}, {3.4444971081334114`*^9, 3.444497110899688*^9}, {
+   3.444499776583764*^9, 3.444499781596265*^9}},
+ CellID->339752226],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`l$$ = 0, $CellContext`m$$ = 
+    0, $CellContext`s$$ = 0, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`s$$], 0, "degree s"}, {0, 1, 2, 3, 4, 5, 6, 7, 8}}, {{
+       Hold[$CellContext`l$$], 0, "degree l"}, 
+      Dynamic[
+       Range[$CellContext`s$$, 8]]}, {{
+       Hold[$CellContext`m$$], 0, "order m"}, 
+      Dynamic[
+       Range[-$CellContext`l$$, $CellContext`l$$]]}}, Typeset`size$$ = {
+    500., {186., 191.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = False, $CellContext`s$15562$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`l$$ = 0, $CellContext`m$$ = 
+        0, $CellContext`s$$ = 0}, "ControllerVariables" :> {
+        Hold[$CellContext`s$$, $CellContext`s$15562$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> (
+       If[$CellContext`l$$ < $CellContext`s$$, $CellContext`l$$ = \
+$CellContext`s$$]; 
+       If[$CellContext`m$$ < -$CellContext`l$$, $CellContext`m$$ = \
+-$CellContext`l$$]; 
+       If[$CellContext`m$$ > $CellContext`l$$, $CellContext`m$$ = \
+$CellContext`l$$]; ParametricPlot3D[
+         Evaluate[{
+           Cos[$CellContext`p] Sin[$CellContext`t], Sin[$CellContext`p] 
+            Sin[$CellContext`t], 
+            Cos[$CellContext`t]} Abs[
+            $CellContext`Y[$CellContext`s$$, $CellContext`l$$, \
+$CellContext`m$$, $CellContext`t, $CellContext`p]]], {$CellContext`p, -Pi, 
+          Pi}, {$CellContext`t, 0, Pi}, 
+         PlotRange -> {{-0.55, 0.55}, {-0.55, 0.55}, {-1.1, 1.1}}, Mesh -> 
+         False, PlotPoints -> {36, 18}, MaxRecursion -> ControlActive[0, 2], 
+         ImageSize -> {500, 377}, Axes -> False, Boxed -> False, ViewAngle -> 
+         Pi/10, SphericalRegion -> True, PlotLabel -> Style[
+           Row[{
+             Style["r", Italic], " = ", 
+             Subscript["", $CellContext`s$$], 
+             
+             With[{$CellContext`s = $CellContext`s$$, $CellContext`l = \
+$CellContext`l$$, $CellContext`m = Round[$CellContext`m$$]}, 
+              TraditionalForm[
+               HoldForm[
+                
+                SphericalHarmonicY[$CellContext`l, $CellContext`m, \
+$CellContext`\[Theta], $CellContext`\[Phi]]]]]}], 25]]), 
+      "Specifications" :> {{{$CellContext`s$$, 0, "degree s"}, {0, 1, 2, 3, 4,
+          5, 6, 7, 8}, ControlType -> 
+         SetterBar}, {{$CellContext`l$$, 0, "degree l"}, 
+         Dynamic[
+          Range[$CellContext`s$$, 8]], ControlType -> 
+         SetterBar}, {{$CellContext`m$$, 0, "order m"}, 
+         Dynamic[
+          Range[-$CellContext`l$$, $CellContext`l$$]], ControlType -> 
+         SetterBar}}, "Options" :> {AutorunSequencing -> {1}}, 
+      "DefaultOptions" :> {ControllerLinking -> True}],
+     ImageSizeCache->{549., {253., 258.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    Initialization:>({$CellContext`Y[
+         Pattern[$CellContext`s, 
+          Blank[]], 
+         Pattern[$CellContext`l, 
+          Blank[]], 
+         Pattern[$CellContext`m, 
+          Blank[]], 
+         Pattern[$CellContext`\[Theta], 
+          Blank[]], 
+         Pattern[$CellContext`\[Phi], 
+          Blank[]]] := (-1)^$CellContext`m 
+        Simplify[
+         Sqrt[(Factorial[$CellContext`l + $CellContext`m] 
+             Factorial[$CellContext`l - $CellContext`m] (2 $CellContext`l + 
+              1))/(Factorial[$CellContext`l + $CellContext`s] 
+            Factorial[$CellContext`l - $CellContext`s] 4 Pi)] 
+          Sin[$CellContext`\[Theta]/2]^(2 $CellContext`l) 
+          Sum[Binomial[$CellContext`l - $CellContext`s, $CellContext`r] 
+            
+            Binomial[$CellContext`l + $CellContext`s, $CellContext`r + \
+$CellContext`s - $CellContext`m] (-1)^($CellContext`l - $CellContext`r - \
+$CellContext`s) E^(I $CellContext`m $CellContext`\[Phi]) 
+            Cot[$CellContext`\[Theta]/2]^(
+              2 $CellContext`r + $CellContext`s - $CellContext`m), \
+{$CellContext`r, 0, $CellContext`l - $CellContext`s}], Assumptions -> {
+            Element[$CellContext`\[Phi], Reals], 
+            Element[$CellContext`\[Theta], Reals]}], 
+       Attributes[PlotRange] = {ReadProtected}, 
+       Attributes[Subscript] = {NHoldRest}}; Typeset`initDone$$ = True),
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellID->32489954]
+}, {2}]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ManipulateCaptionSection"],
+
+Cell["\<\
+Spin-weighted spherical harmonics are generalizations of standard spherical \
+harmonics and like them are complex functions on the sphere. The multipole \
+expansions of an electromagnetic field can be expressed in terms of \
+spin-weighted spherical harmonics. They are particularly important in the \
+theory of gravitational waves.\
+\>", "ManipulateCaption",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4438351055906687`*^9, 3.443835152562834*^9}, {
+   3.4438838761144156`*^9, 3.443883918817814*^9}, 3.44409033746567*^9, {
+   3.444161730884346*^9, 3.444161820771906*^9}, {3.4444031695768723`*^9, 
+   3.444403182311329*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ThumbnailSection"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`l$$ = 8, $CellContext`m$$ = 
+    0, $CellContext`s$$ = 2, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`s$$], 2, "degree s"}, {0, 1, 2, 3, 4, 5, 6, 7, 8}}, {{
+       Hold[$CellContext`l$$], 8, "degree l"}, 
+      Dynamic[
+       Range[$CellContext`s$$, 8]]}, {{
+       Hold[$CellContext`m$$], 0, "order m"}, 
+      Dynamic[
+       Range[-$CellContext`l$$, $CellContext`l$$]]}}, Typeset`size$$ = {
+    500., {186., 191.}}, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = False, $CellContext`s$15617$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`l$$ = 8, $CellContext`m$$ = 
+        0, $CellContext`s$$ = 2}, "ControllerVariables" :> {
+        Hold[$CellContext`s$$, $CellContext`s$15617$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> (
+       If[$CellContext`l$$ < $CellContext`s$$, $CellContext`l$$ = \
+$CellContext`s$$]; 
+       If[$CellContext`m$$ < -$CellContext`l$$, $CellContext`m$$ = \
+-$CellContext`l$$]; 
+       If[$CellContext`m$$ > $CellContext`l$$, $CellContext`m$$ = \
+$CellContext`l$$]; ParametricPlot3D[
+         Evaluate[{
+           Cos[$CellContext`p] Sin[$CellContext`t], Sin[$CellContext`p] 
+            Sin[$CellContext`t], 
+            Cos[$CellContext`t]} Abs[
+            $CellContext`Y[$CellContext`s$$, $CellContext`l$$, \
+$CellContext`m$$, $CellContext`t, $CellContext`p]]], {$CellContext`p, -Pi, 
+          Pi}, {$CellContext`t, 0, Pi}, 
+         PlotRange -> {{-0.55, 0.55}, {-0.55, 0.55}, {-1.1, 1.1}}, Mesh -> 
+         False, PlotPoints -> {36, 18}, MaxRecursion -> ControlActive[0, 2], 
+         ImageSize -> {500, 377}, Axes -> False, Boxed -> False, ViewAngle -> 
+         Pi/10, SphericalRegion -> True, PlotLabel -> Style[
+           Row[{
+             Style["r", Italic], " = ", 
+             Subscript["", $CellContext`s$$], 
+             
+             With[{$CellContext`s = $CellContext`s$$, $CellContext`l = \
+$CellContext`l$$, $CellContext`m = Round[$CellContext`m$$]}, 
+              TraditionalForm[
+               HoldForm[
+                
+                SphericalHarmonicY[$CellContext`l, $CellContext`m, \
+$CellContext`\[Theta], $CellContext`\[Phi]]]]]}], 25]]), 
+      "Specifications" :> {{{$CellContext`s$$, 2, "degree s"}, {0, 1, 2, 3, 4,
+          5, 6, 7, 8}, ControlType -> 
+         SetterBar}, {{$CellContext`l$$, 8, "degree l"}, 
+         Dynamic[
+          Range[$CellContext`s$$, 8]], ControlType -> 
+         SetterBar}, {{$CellContext`m$$, 0, "order m"}, 
+         Dynamic[
+          Range[-$CellContext`l$$, $CellContext`l$$]], ControlType -> 
+         SetterBar}}, "Options" :> {AutorunSequencing -> {1}}, 
+      "DefaultOptions" :> {ControllerLinking -> True}],
+     ImageSizeCache->{549., {253., 258.}},
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    Initialization:>({$CellContext`Y[
+         Pattern[$CellContext`s, 
+          Blank[]], 
+         Pattern[$CellContext`l, 
+          Blank[]], 
+         Pattern[$CellContext`m, 
+          Blank[]], 
+         Pattern[$CellContext`\[Theta], 
+          Blank[]], 
+         Pattern[$CellContext`\[Phi], 
+          Blank[]]] := (-1)^$CellContext`m 
+        Simplify[
+         Sqrt[(Factorial[$CellContext`l + $CellContext`m] 
+             Factorial[$CellContext`l - $CellContext`m] (2 $CellContext`l + 
+              1))/(Factorial[$CellContext`l + $CellContext`s] 
+            Factorial[$CellContext`l - $CellContext`s] 4 Pi)] 
+          Sin[$CellContext`\[Theta]/2]^(2 $CellContext`l) 
+          Sum[Binomial[$CellContext`l - $CellContext`s, $CellContext`r] 
+            
+            Binomial[$CellContext`l + $CellContext`s, $CellContext`r + \
+$CellContext`s - $CellContext`m] (-1)^($CellContext`l - $CellContext`r - \
+$CellContext`s) E^(I $CellContext`m $CellContext`\[Phi]) 
+            Cot[$CellContext`\[Theta]/2]^(
+              2 $CellContext`r + $CellContext`s - $CellContext`m), \
+{$CellContext`r, 0, $CellContext`l - $CellContext`s}], Assumptions -> {
+            Element[$CellContext`\[Phi], Reals], 
+            Element[$CellContext`\[Theta], Reals]}], 
+       Attributes[PlotRange] = {ReadProtected}, 
+       Attributes[Subscript] = {NHoldRest}}; Typeset`initDone$$ = True),
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellID->47784607]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "SnapshotsSection"],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`l$$ = $CellContext`s$$, $CellContext`m$$ = 
+    0, $CellContext`s$$ = 2, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`s$$], 2, "degree s"}, {0, 1, 2, 3, 4, 5, 6, 7, 8}}, {{
+       Hold[$CellContext`l$$], $CellContext`s$$, "degree l"}, 
+      Dynamic[
+       Range[$CellContext`s$$, 8]]}, {{
+       Hold[$CellContext`m$$], 0, "order m"}, 
+      Dynamic[
+       Range[-$CellContext`l$$, $CellContext`l$$]]}}, Typeset`size$$ = 
+    Automatic, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = False, $CellContext`s$15672$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`l$$ = $CellContext`s$$, $CellContext`m$$ = 
+        0, $CellContext`s$$ = 2}, "ControllerVariables" :> {
+        Hold[$CellContext`s$$, $CellContext`s$15672$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> (
+       If[$CellContext`l$$ < $CellContext`s$$, $CellContext`l$$ = \
+$CellContext`s$$]; 
+       If[$CellContext`m$$ < -$CellContext`l$$, $CellContext`m$$ = \
+-$CellContext`l$$]; 
+       If[$CellContext`m$$ > $CellContext`l$$, $CellContext`m$$ = \
+$CellContext`l$$]; ParametricPlot3D[
+         Evaluate[{
+           Cos[$CellContext`p] Sin[$CellContext`t], Sin[$CellContext`p] 
+            Sin[$CellContext`t], 
+            Cos[$CellContext`t]} Abs[
+            $CellContext`Y[$CellContext`s$$, $CellContext`l$$, \
+$CellContext`m$$, $CellContext`t, $CellContext`p]]], {$CellContext`p, -Pi, 
+          Pi}, {$CellContext`t, 0, Pi}, 
+         PlotRange -> {{-0.55, 0.55}, {-0.55, 0.55}, {-1.1, 1.1}}, Mesh -> 
+         False, PlotPoints -> {36, 18}, MaxRecursion -> ControlActive[0, 2], 
+         ImageSize -> {500, 377}, Axes -> False, Boxed -> False, ViewAngle -> 
+         Pi/10, SphericalRegion -> True, PlotLabel -> Style[
+           Row[{
+             Style["r", Italic], " = ", 
+             Subscript["", $CellContext`s$$], 
+             
+             With[{$CellContext`s = $CellContext`s$$, $CellContext`l = \
+$CellContext`l$$, $CellContext`m = Round[$CellContext`m$$]}, 
+              TraditionalForm[
+               HoldForm[
+                
+                SphericalHarmonicY[$CellContext`l, $CellContext`m, \
+$CellContext`\[Theta], $CellContext`\[Phi]]]]]}], 25]]), 
+      "Specifications" :> {{{$CellContext`s$$, 2, "degree s"}, {0, 1, 2, 3, 4,
+          5, 6, 7, 8}, ControlType -> 
+         SetterBar}, {{$CellContext`l$$, $CellContext`s$$, "degree l"}, 
+         Dynamic[
+          Range[$CellContext`s$$, 8]], ControlType -> 
+         SetterBar}, {{$CellContext`m$$, 0, "order m"}, 
+         Dynamic[
+          Range[-$CellContext`l$$, $CellContext`l$$]], ControlType -> 
+         SetterBar}}, "Options" :> {AutorunSequencing -> {1}}, 
+      "DefaultOptions" :> {ControllerLinking -> True}],
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    Initialization:>({$CellContext`Y[
+         Pattern[$CellContext`s, 
+          Blank[]], 
+         Pattern[$CellContext`l, 
+          Blank[]], 
+         Pattern[$CellContext`m, 
+          Blank[]], 
+         Pattern[$CellContext`\[Theta], 
+          Blank[]], 
+         Pattern[$CellContext`\[Phi], 
+          Blank[]]] := (-1)^$CellContext`m 
+        Simplify[
+         Sqrt[(Factorial[$CellContext`l + $CellContext`m] 
+             Factorial[$CellContext`l - $CellContext`m] (2 $CellContext`l + 
+              1))/(Factorial[$CellContext`l + $CellContext`s] 
+            Factorial[$CellContext`l - $CellContext`s] 4 Pi)] 
+          Sin[$CellContext`\[Theta]/2]^(2 $CellContext`l) 
+          Sum[Binomial[$CellContext`l - $CellContext`s, $CellContext`r] 
+            
+            Binomial[$CellContext`l + $CellContext`s, $CellContext`r + \
+$CellContext`s - $CellContext`m] (-1)^($CellContext`l - $CellContext`r - \
+$CellContext`s) E^(I $CellContext`m $CellContext`\[Phi]) 
+            Cot[$CellContext`\[Theta]/2]^(
+              2 $CellContext`r + $CellContext`s - $CellContext`m), \
+{$CellContext`r, 0, $CellContext`l - $CellContext`s}], Assumptions -> {
+            Element[$CellContext`\[Phi], Reals], 
+            Element[$CellContext`\[Theta], Reals]}], 
+       Attributes[PlotRange] = {ReadProtected}, 
+       Attributes[Subscript] = {NHoldRest}}; Typeset`initDone$$ = True),
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellID->423542607],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`l$$ = 5, $CellContext`m$$ = 
+    0, $CellContext`s$$ = 2, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`s$$], 2, "degree s"}, {0, 1, 2, 3, 4, 5, 6, 7, 8}}, {{
+       Hold[$CellContext`l$$], 5, "degree l"}, 
+      Dynamic[
+       Range[$CellContext`s$$, 8]]}, {{
+       Hold[$CellContext`m$$], 0, "order m"}, 
+      Dynamic[
+       Range[-$CellContext`l$$, $CellContext`l$$]]}}, Typeset`size$$ = 
+    Automatic, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = False, $CellContext`s$15727$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`l$$ = 5, $CellContext`m$$ = 
+        0, $CellContext`s$$ = 2}, "ControllerVariables" :> {
+        Hold[$CellContext`s$$, $CellContext`s$15727$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> (
+       If[$CellContext`l$$ < $CellContext`s$$, $CellContext`l$$ = \
+$CellContext`s$$]; 
+       If[$CellContext`m$$ < -$CellContext`l$$, $CellContext`m$$ = \
+-$CellContext`l$$]; 
+       If[$CellContext`m$$ > $CellContext`l$$, $CellContext`m$$ = \
+$CellContext`l$$]; ParametricPlot3D[
+         Evaluate[{
+           Cos[$CellContext`p] Sin[$CellContext`t], Sin[$CellContext`p] 
+            Sin[$CellContext`t], 
+            Cos[$CellContext`t]} Abs[
+            $CellContext`Y[$CellContext`s$$, $CellContext`l$$, \
+$CellContext`m$$, $CellContext`t, $CellContext`p]]], {$CellContext`p, -Pi, 
+          Pi}, {$CellContext`t, 0, Pi}, 
+         PlotRange -> {{-0.55, 0.55}, {-0.55, 0.55}, {-1.1, 1.1}}, Mesh -> 
+         False, PlotPoints -> {36, 18}, MaxRecursion -> ControlActive[0, 2], 
+         ImageSize -> {500, 377}, Axes -> False, Boxed -> False, ViewAngle -> 
+         Pi/10, SphericalRegion -> True, PlotLabel -> Style[
+           Row[{
+             Style["r", Italic], " = ", 
+             Subscript["", $CellContext`s$$], 
+             
+             With[{$CellContext`s = $CellContext`s$$, $CellContext`l = \
+$CellContext`l$$, $CellContext`m = Round[$CellContext`m$$]}, 
+              TraditionalForm[
+               HoldForm[
+                
+                SphericalHarmonicY[$CellContext`l, $CellContext`m, \
+$CellContext`\[Theta], $CellContext`\[Phi]]]]]}], 25]]), 
+      "Specifications" :> {{{$CellContext`s$$, 2, "degree s"}, {0, 1, 2, 3, 4,
+          5, 6, 7, 8}, ControlType -> 
+         SetterBar}, {{$CellContext`l$$, 5, "degree l"}, 
+         Dynamic[
+          Range[$CellContext`s$$, 8]], ControlType -> 
+         SetterBar}, {{$CellContext`m$$, 0, "order m"}, 
+         Dynamic[
+          Range[-$CellContext`l$$, $CellContext`l$$]], ControlType -> 
+         SetterBar}}, "Options" :> {AutorunSequencing -> {1}}, 
+      "DefaultOptions" :> {ControllerLinking -> True}],
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    Initialization:>({$CellContext`Y[
+         Pattern[$CellContext`s, 
+          Blank[]], 
+         Pattern[$CellContext`l, 
+          Blank[]], 
+         Pattern[$CellContext`m, 
+          Blank[]], 
+         Pattern[$CellContext`\[Theta], 
+          Blank[]], 
+         Pattern[$CellContext`\[Phi], 
+          Blank[]]] := (-1)^$CellContext`m 
+        Simplify[
+         Sqrt[(Factorial[$CellContext`l + $CellContext`m] 
+             Factorial[$CellContext`l - $CellContext`m] (2 $CellContext`l + 
+              1))/(Factorial[$CellContext`l + $CellContext`s] 
+            Factorial[$CellContext`l - $CellContext`s] 4 Pi)] 
+          Sin[$CellContext`\[Theta]/2]^(2 $CellContext`l) 
+          Sum[Binomial[$CellContext`l - $CellContext`s, $CellContext`r] 
+            Binomial[$CellContext`l + $CellContext`s, $CellContext`r + \
+$CellContext`s - $CellContext`m] (-1)^($CellContext`l - $CellContext`r - \
+$CellContext`s) E^(I $CellContext`m $CellContext`\[Phi]) 
+            Cot[$CellContext`\[Theta]/2]^(
+              2 $CellContext`r + $CellContext`s - $CellContext`m), \
+{$CellContext`r, 0, $CellContext`l - $CellContext`s}], Assumptions -> {
+            Element[$CellContext`\[Phi], Reals], 
+            Element[$CellContext`\[Theta], Reals]}], 
+       Attributes[PlotRange] = {ReadProtected}, 
+       Attributes[Subscript] = {NHoldRest}}; Typeset`initDone$$ = True),
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellID->934575819],
+
+Cell[BoxData[
+ TagBox[
+  StyleBox[
+   DynamicModuleBox[{$CellContext`l$$ = 5, $CellContext`m$$ = 
+    3., $CellContext`s$$ = 2, Typeset`show$$ = True, 
+    Typeset`bookmarkList$$ = {}, Typeset`bookmarkMode$$ = "Menu", 
+    Typeset`animator$$, Typeset`animvar$$ = 1, Typeset`name$$ = 
+    "\"untitled\"", Typeset`specs$$ = {{{
+       Hold[$CellContext`s$$], 2, "degree s"}, {0, 1, 2, 3, 4, 5, 6, 7, 8}}, {{
+       Hold[$CellContext`l$$], 5, "degree l"}, 
+      Dynamic[
+       Range[$CellContext`s$$, 8]]}, {{
+       Hold[$CellContext`m$$], 3., "order m"}, 
+      Dynamic[
+       Range[-$CellContext`l$$, $CellContext`l$$]]}}, Typeset`size$$ = 
+    Automatic, Typeset`update$$ = 0, Typeset`initDone$$, 
+    Typeset`skipInitDone$$ = False, $CellContext`s$15782$$ = 0}, 
+    DynamicBox[Manipulate`ManipulateBoxes[
+     1, StandardForm, 
+      "Variables" :> {$CellContext`l$$ = 5, $CellContext`m$$ = 
+        3., $CellContext`s$$ = 2}, "ControllerVariables" :> {
+        Hold[$CellContext`s$$, $CellContext`s$15782$$, 0]}, 
+      "OtherVariables" :> {
+       Typeset`show$$, Typeset`bookmarkList$$, Typeset`bookmarkMode$$, 
+        Typeset`animator$$, Typeset`animvar$$, Typeset`name$$, 
+        Typeset`specs$$, Typeset`size$$, Typeset`update$$, Typeset`initDone$$,
+         Typeset`skipInitDone$$}, 
+      "Body" :> (
+       If[$CellContext`l$$ < $CellContext`s$$, $CellContext`l$$ = \
+$CellContext`s$$]; 
+       If[$CellContext`m$$ < -$CellContext`l$$, $CellContext`m$$ = \
+-$CellContext`l$$]; 
+       If[$CellContext`m$$ > $CellContext`l$$, $CellContext`m$$ = \
+$CellContext`l$$]; ParametricPlot3D[
+         Evaluate[{
+           Cos[$CellContext`p] Sin[$CellContext`t], Sin[$CellContext`p] 
+            Sin[$CellContext`t], 
+            Cos[$CellContext`t]} Abs[
+            $CellContext`Y[$CellContext`s$$, $CellContext`l$$, \
+$CellContext`m$$, $CellContext`t, $CellContext`p]]], {$CellContext`p, -Pi, 
+          Pi}, {$CellContext`t, 0, Pi}, 
+         PlotRange -> {{-0.55, 0.55}, {-0.55, 0.55}, {-1.1, 1.1}}, Mesh -> 
+         False, PlotPoints -> {36, 18}, MaxRecursion -> ControlActive[0, 2], 
+         ImageSize -> {500, 377}, Axes -> False, Boxed -> False, ViewAngle -> 
+         Pi/10, SphericalRegion -> True, PlotLabel -> Style[
+           Row[{
+             Style["r", Italic], " = ", 
+             Subscript["", $CellContext`s$$], 
+             
+             With[{$CellContext`s = $CellContext`s$$, $CellContext`l = \
+$CellContext`l$$, $CellContext`m = Round[$CellContext`m$$]}, 
+              TraditionalForm[
+               HoldForm[
+                
+                SphericalHarmonicY[$CellContext`l, $CellContext`m, \
+$CellContext`\[Theta], $CellContext`\[Phi]]]]]}], 25]]), 
+      "Specifications" :> {{{$CellContext`s$$, 2, "degree s"}, {0, 1, 2, 3, 4,
+          5, 6, 7, 8}, ControlType -> 
+         SetterBar}, {{$CellContext`l$$, 5, "degree l"}, 
+         Dynamic[
+          Range[$CellContext`s$$, 8]], ControlType -> 
+         SetterBar}, {{$CellContext`m$$, 3., "order m"}, 
+         Dynamic[
+          Range[-$CellContext`l$$, $CellContext`l$$]], ControlType -> 
+         SetterBar}}, "Options" :> {AutorunSequencing -> {1}}, 
+      "DefaultOptions" :> {ControllerLinking -> True}],
+     SingleEvaluation->True],
+    Deinitialization:>None,
+    DynamicModuleValues:>{},
+    Initialization:>({$CellContext`Y[
+         Pattern[$CellContext`s, 
+          Blank[]], 
+         Pattern[$CellContext`l, 
+          Blank[]], 
+         Pattern[$CellContext`m, 
+          Blank[]], 
+         Pattern[$CellContext`\[Theta], 
+          Blank[]], 
+         Pattern[$CellContext`\[Phi], 
+          Blank[]]] := (-1)^$CellContext`m 
+        Simplify[
+         Sqrt[(Factorial[$CellContext`l + $CellContext`m] 
+             Factorial[$CellContext`l - $CellContext`m] (2 $CellContext`l + 
+              1))/(Factorial[$CellContext`l + $CellContext`s] 
+            Factorial[$CellContext`l - $CellContext`s] 4 Pi)] 
+          Sin[$CellContext`\[Theta]/2]^(2 $CellContext`l) 
+          Sum[Binomial[$CellContext`l - $CellContext`s, $CellContext`r] 
+            
+            Binomial[$CellContext`l + $CellContext`s, $CellContext`r + \
+$CellContext`s - $CellContext`m] (-1)^($CellContext`l - $CellContext`r - \
+$CellContext`s) E^(I $CellContext`m $CellContext`\[Phi]) 
+            Cot[$CellContext`\[Theta]/2]^(
+              2 $CellContext`r + $CellContext`s - $CellContext`m), \
+{$CellContext`r, 0, $CellContext`l - $CellContext`s}], Assumptions -> {
+            Element[$CellContext`\[Phi], Reals], 
+            Element[$CellContext`\[Theta], Reals]}], 
+       Attributes[PlotRange] = {ReadProtected}, 
+       Attributes[Subscript] = {NHoldRest}}; Typeset`initDone$$ = True),
+    SynchronousInitialization->True,
+    UnsavedVariables:>{Typeset`initDone$$},
+    UntrackedVariables:>{Typeset`size$$}], "Manipulate",
+   Deployed->True,
+   StripOnInput->False],
+  Manipulate`InterpretManipulate[1]]], "Output",
+ CellID->197372909]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "DetailsSection"],
+
+Cell[TextData[{
+ "For spin weight ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"s", "=", "0"}], TraditionalForm]], "InlineMath"],
+ ", the spin-weighted spherical harmonics become identical to the spherical \
+harmonics. The case of spin weight ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"s", "=", "2"}], TraditionalForm]], "InlineMath"],
+ " is important for describing gravitational waves. In this Demonstration you \
+can choose different values of the spin weight ",
+ Cell[BoxData[
+  FormBox["s", TraditionalForm]], "InlineMath"],
+ " to see the angular distribution in space for different ",
+ Cell[BoxData[
+  FormBox["l", TraditionalForm]], "InlineMath"],
+ " and ",
+ Cell[BoxData[
+  FormBox["m", TraditionalForm]], "InlineMath"],
+ " modes."
+}], "DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.444162921034657*^9, 3.44416299471751*^9}, {
+   3.444163052512985*^9, 3.4441631162709618`*^9}, {3.444163255460783*^9, 
+   3.444163320843397*^9}, {3.444163405238357*^9, 3.444163408971698*^9}, {
+   3.444163473868258*^9, 3.4441635941887693`*^9}, {3.4443908782695494`*^9, 
+   3.4443908987716*^9}, {3.444390944458168*^9, 3.4443909446091833`*^9}, 
+   3.444390988511573*^9, {3.444403313577794*^9, 3.4444033533749237`*^9}},
+ CellID->983415489],
+
+Cell["1) Introductory level reference:", "DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.444087570676962*^9, 3.444087595264555*^9}, {
+   3.444161841214628*^9, 3.4441618978123293`*^9}, {3.444162036115941*^9, 
+   3.444162049702159*^9}, 3.4441621066930656`*^9},
+ CellID->1069367645],
+
+Cell[TextData[ButtonBox["http://en.wikipedia.org/wiki/Spin-weighted_spherical \
+_harmonics",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["http://en.wikipedia.org/wiki/Spin-weighted_spherical_harmonics"], 
+   None},
+ ButtonNote->
+  "http://en.wikipedia.org/wiki/Spin-weighted_spherical_harmonics"]], \
+"DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.444161901786606*^9, 3.4441619017883377`*^9}, 
+   3.444162108332499*^9, {3.4443909060823307`*^9, 3.4443909133740597`*^9}},
+ CellID->1578758267],
+
+Cell["\<\
+2) Intermediate level reference:\
+\>", "DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4444838199134855`*^9, 3.4444838419056845`*^9}},
+ CellID->98372923],
+
+Cell[TextData[{
+ "J. J. G. Scanio, \"Spin-Weighted Spherical Harmonics and Electromagnetic \
+Multipole Expansions,\" ",
+ StyleBox["Am. J. Phys.",
+  FontSlant->"Italic"],
+ ", ",
+ StyleBox["45",
+  FontWeight->"Bold"],
+ "(2), 1977 pp. 173\[Dash]178."
+}], "DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4444838199134855`*^9, 3.444483851041598*^9}},
+ CellID->115696924],
+
+Cell["3) Advanced level reference:", "DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4444838199134855`*^9, 3.4444838432568197`*^9}},
+ CellID->299528253],
+
+Cell[TextData[{
+ "J. N. Goldberg, A. J. Macfarlane, E. T. Newman, F. Rohrlich, and E. C. G. \
+Sudarshan, \"Spin-",
+ Cell[BoxData[
+  FormBox["s", TraditionalForm]], "InlineMath",
+  FormatType->"TraditionalForm"],
+ " Spherical Harmonics and ",
+ Cell[BoxData[
+  FormBox["\[Eth]", TraditionalForm]], "InlineMath",
+  FormatType->"TraditionalForm"],
+ ",\" ",
+ StyleBox["J. Math. Phys.",
+  FontSlant->"Italic"],
+ ", ",
+ StyleBox["8",
+  FontWeight->"Bold"],
+ "(11), 1967 pp. 2155\[Dash]2161."
+}], "DetailNotes",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4444838199134855`*^9, 3.444483843254819*^9}, {
+   3.4444838780923023`*^9, 3.444483880887582*^9}, {3.444488855241635*^9, 
+   3.4444888658906994`*^9}, {3.44448892369948*^9, 3.4444889239205017`*^9}},
+ CellID->76862331]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ControlSuggestionsSection"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[True], Cell[" Resize Images"]}],
+  "\"Click inside an image to reveal its orange resize frame.\\nDrag any of \
+the orange resize handles to resize the image.\"",
+  TooltipDelay->0.35]], "ControlSuggestions",
+ CellChangeTimes->{3.35696210375764*^9, 3.443881463725505*^9},
+ FontFamily->"Verdana",
+ CellTags->"ResizeImages"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[True], Cell[" Rotate and Zoom in 3D"]}],
+  RowBox[{
+   "\"Drag a 3D graphic to rotate it. Starting the drag near the center \
+tumbles\\nthe graphic; starting near a corner turns it parallel to the plane \
+of the screen.\\nHold down \"", 
+    FrameBox[
+    "Ctrl", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], "\" (or \"", 
+    FrameBox[
+    "Cmd", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], "\" on Mac) and drag up and down to zoom.\""}],
+  TooltipDelay->0.35]], "ControlSuggestions",
+ CellChangeTimes->{3.35696210375764*^9, 3.44388146437357*^9},
+ FontFamily->"Verdana",
+ CellTags->"RotateAndZoomIn3D"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[False], Cell[" Drag Locators"]}],
+  RowBox[{"\"Drag any locator (\"", 
+    GraphicsBox[
+     LocatorBox[
+      Scaled[{0.5, 0.5}]], ImageSize -> 20], 
+    "\", etc.) to move it around.\""}],
+  TooltipDelay->0.35]], "ControlSuggestions",
+ FontFamily->"Verdana",
+ CellTags->"DragLocators"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[False], Cell[" Create and Delete Locators"]}],
+  RowBox[{"\"Insert a new locator in the graphic by holding down the \"", 
+    FrameBox[
+    "Alt", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], 
+    "\" key\\nand clicking where you want it to be. Delete a locator by \
+clicking it\\nwhile holding down the \"", 
+    FrameBox[
+    "Alt", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], "\" key.\""}],
+  TooltipDelay->0.35]], "ControlSuggestions",
+ FontFamily->"Verdana",
+ CellTags->"CreateAndDeleteLocators"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[False], Cell[" Slider Zoom"]}],
+  RowBox[{"\"Hold down the \"", 
+    FrameBox[
+    "Alt", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], 
+    "\" key while moving a slider to make fine adjustments in the slider \
+value.\\nHold \"", 
+    FrameBox[
+    "Ctrl", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], "\" and/or \"", 
+    FrameBox[
+    "Shift", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], "\" at the same time as \"", 
+    FrameBox[
+    "Alt", Background -> GrayLevel[0.9], FrameMargins -> 2, FrameStyle -> 
+     GrayLevel[0.9]], "\" to make ever finer adjustments.\""}],
+  TooltipDelay->0.35]], "ControlSuggestions",
+ FontFamily->"Verdana",
+ CellTags->"SliderZoom"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[False], Cell[" Gamepad Controls"]}],
+  "\"Control this Demonstration with a gamepad or other\\nhuman interface \
+device connected to your computer.\"",
+  TooltipDelay->0.35]], "ControlSuggestions",
+ CellChangeTimes->{3.35696210375764*^9, 3.3895522232313623`*^9},
+ FontFamily->"Verdana",
+ CellTags->"GamepadControls"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[False], Cell[" Automatic Animation"]}],
+  RowBox[{"\"Animate a slider in this Demonstration by clicking the\"", 
+    AdjustmentBox[
+     Cell[
+      GraphicsData[
+      "CompressedBitmap", 
+       "eJzzTSzJSM1NLMlMTlRwL0osyMhMLlZwyy8CCjEzMjAwcIKwAgOI/R/IhBKc\n\
+/4EAyGAG0f+nTZsGwgysIJIRKsWKLAXGIHFmEpUgLADxWUAkI24jZs+eTaEt\n\
+IG+wQKRmzJgBlYf5lhEA30OqWA=="], "Graphics", ImageSize -> {9, 9}, ImageMargins -> 
+      0, CellBaseline -> Baseline], BoxBaselineShift -> 0.1839080459770115, 
+     BoxMargins -> {{0., 0.}, {-0.1839080459770115, 0.1839080459770115}}], 
+    "\"button\\nnext to the slider, and then clicking the play button that \
+appears.\\nAnimate all controls by selecting \"", 
+    StyleBox["Autorun", FontWeight -> "Bold"], "\" from the\"", 
+    AdjustmentBox[
+     Cell[
+      GraphicsData[
+      "CompressedBitmap", 
+       "eJyNULENwyAQfEySIlMwTVJlCGRFsosokeNtqBmDBagoaZjAI1C8/8GUUUC6\n\
+57h7cQ8PvU7Pl17nUav7oj/TPH7V7b2QJAUAXBkKmCPRowxICy64bRvGGNF7\n\
+X8CctGoDSN4xhIDGGDhzFXwUh3/ClBKrDQPmnGXtI6u0OOd+tZBVUqy1xSaH\n\
+UqiK6pPe4XdEdAz6563tx/gejuORGMxJaz8mdpJn7hc="], "Graphics", 
+      ImageSize -> {10, 10}, ImageMargins -> 0, CellBaseline -> Baseline], 
+     BoxBaselineShift -> 0.1839080459770115, 
+     BoxMargins -> {{0., 0.}, {-0.1839080459770115, 0.1839080459770115}}], 
+    "\"menu.\""}],
+  TooltipDelay->0.35]], "ControlSuggestions",
+ FontFamily->"Verdana",
+ CellTags->"AutomaticAnimation"],
+
+Cell[BoxData[
+ TooltipBox[
+  RowBox[{
+   CheckboxBox[False], Cell[" Bookmark Animation"]}],
+  RowBox[{
+   "\"See a prepared animation of this Demonstration by selecting\\n\"", 
+    StyleBox["Animate Bookmarks", FontWeight -> "Bold"], "\" from the\"", 
+    AdjustmentBox[
+     Cell[
+      GraphicsData[
+      "CompressedBitmap", 
+       "eJyNULENwyAQfEySIlMwTVJlCGRFsosokeNtqBmDBagoaZjAI1C8/8GUUUC6\n\
+57h7cQ8PvU7Pl17nUav7oj/TPH7V7b2QJAUAXBkKmCPRowxICy64bRvGGNF7\n\
+X8CctGoDSN4xhIDGGDhzFXwUh3/ClBKrDQPmnGXtI6u0OOd+tZBVUqy1xSaH\n\
+UqiK6pPe4XdEdAz6563tx/gejuORGMxJaz8mdpJn7hc="], "Graphics", 
+      ImageSize -> {10, 10}, ImageMargins -> 0, CellBaseline -> Baseline], 
+     BoxBaselineShift -> 0.1839080459770115, 
+     BoxMargins -> {{0., 0.}, {-0.1839080459770115, 0.1839080459770115}}], 
+    "\"menu.\""}],
+  TooltipDelay->0.35]], "ControlSuggestions",
+ FontFamily->"Verdana",
+ CellTags->"BookmarkAnimation"]
+}, Open  ]],
+
+Cell["", "SearchTermsSection"],
+
+Cell[CellGroupData[{
+
+Cell["", "RelatedLinksSection"],
+
+Cell[TextData[ButtonBox["Gravitational Wave",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["http://scienceworld.wolfram.com/physics/GravitationalWave.html"], 
+   None}]], "RelatedLinks",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.44388150357749*^9, 3.443881513737506*^9}},
+ CellID->21153645],
+
+Cell[TextData[ButtonBox["Spherical Harmonic",
+ BaseStyle->"Hyperlink",
+ ButtonData->{
+   URL["http://mathworld.wolfram.com/SphericalHarmonic.html"], 
+   None}]], "RelatedLinks",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4438815512412558`*^9, 3.443881562530385*^9}},
+ CellID->133709269]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "AuthorSection"],
+
+Cell[TextData[{
+ "Contributed by: ",
+ ButtonBox["Satya Mohapatra",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://demonstrations.wolfram.com/author.html?author=Satya+\
+Mohapatra"], None},
+  ButtonNote->
+   "http://demonstrations.wolfram.com/author.html?author=Satya+Mohapatra"]
+}], "Author",
+ CellChangeTimes->{
+  3.35696210375764*^9, {3.4438347263631697`*^9, 3.4438347310409107`*^9}, {
+   3.4438358012736063`*^9, 3.443835801276232*^9}}],
+
+Cell[TextData[{
+ "Based on a program by: ",
+ ButtonBox["Stephen Wolfram",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://demonstrations.wolfram.com/author.html?author=Stephen+\
+Wolfram"], None},
+  ButtonNote->
+   "http://demonstrations.wolfram.com/author.html?author=Stephen+Wolfram"]
+}], "Author",
+ CellChangeTimes->{
+  3.35696210375764*^9, 3.443835802646356*^9, {3.443835881054016*^9, 
+   3.443835895561948*^9}, 3.443835947912434*^9, {3.443836036348054*^9, 
+   3.443836042851068*^9}},
+ CellID->331249611]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{723, 926},
+WindowMargins->{{20, Automatic}, {Automatic, -2}},
+FrontEndVersion->"7.0 for Microsoft Windows (64-bit) (November 10, 2008)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "Demonstration.nb", 
+  CharacterEncoding -> "WindowsANSI"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "ResizeImages"->{
+  Cell[37880, 915, 374, 9, 22, "ControlSuggestions",
+   CellTags->"ResizeImages"]},
+ "RotateAndZoomIn3D"->{
+  Cell[38257, 926, 739, 17, 22, "ControlSuggestions",
+   CellTags->"RotateAndZoomIn3D"]},
+ "DragLocators"->{
+  Cell[38999, 945, 340, 11, 22, "ControlSuggestions",
+   CellTags->"DragLocators"]},
+ "CreateAndDeleteLocators"->{
+  Cell[39342, 958, 637, 15, 22, "ControlSuggestions",
+   CellTags->"CreateAndDeleteLocators"]},
+ "SliderZoom"->{
+  Cell[39982, 975, 844, 21, 22, "ControlSuggestions",
+   CellTags->"SliderZoom"]},
+ "GamepadControls"->{
+  Cell[40829, 998, 369, 9, 22, "ControlSuggestions",
+   CellTags->"GamepadControls"]},
+ "AutomaticAnimation"->{
+  Cell[41201, 1009, 1464, 31, 22, "ControlSuggestions",
+   CellTags->"AutomaticAnimation"]},
+ "BookmarkAnimation"->{
+  Cell[42668, 1042, 908, 21, 22, "ControlSuggestions",
+   CellTags->"BookmarkAnimation"]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"ResizeImages", 45705, 1138},
+ {"RotateAndZoomIn3D", 45813, 1141},
+ {"DragLocators", 45922, 1144},
+ {"CreateAndDeleteLocators", 46037, 1147},
+ {"SliderZoom", 46150, 1150},
+ {"GamepadControls", 46255, 1153},
+ {"AutomaticAnimation", 46367, 1156},
+ {"BookmarkAnimation", 46484, 1159}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 248, 4, 74, "DemoTitle"],
+Cell[CellGroupData[{
+Cell[840, 30, 33, 0, 266, "InitializationSection"],
+Cell[876, 32, 2349, 71, 153, "Input",
+ InitializationCell->True,
+ CellID->1156620916]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[3262, 108, 29, 0, 188, "ManipulateSection"],
+Cell[CellGroupData[{
+Cell[3316, 112, 5201, 129, 368, "Input",
+ CellID->339752226],
+Cell[8520, 243, 4986, 105, 523, "Output",
+ CellID->32489954]
+}, {2}]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13552, 354, 36, 0, 166, "ManipulateCaptionSection"],
+Cell[13591, 356, 635, 11, 67, "ManipulateCaption"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14263, 372, 28, 0, 168, "ThumbnailSection"],
+Cell[14294, 374, 4986, 105, 523, "Output",
+ CellID->47784607]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19317, 484, 28, 0, 138, "SnapshotsSection"],
+Cell[19348, 486, 4993, 104, 37, "Output",
+ CellID->423542607],
+Cell[24344, 592, 4920, 103, 37, "Output",
+ CellID->934575819],
+Cell[29267, 697, 4937, 104, 37, "Output",
+ CellID->197372909]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[34241, 806, 26, 0, 332, "DetailsSection"],
+Cell[34270, 808, 1232, 29, 71, "DetailNotes",
+ CellID->983415489],
+Cell[35505, 839, 292, 5, 22, "DetailNotes",
+ CellID->1069367645],
+Cell[35800, 846, 507, 12, 22, "DetailNotes",
+ CellID->1578758267],
+Cell[36310, 860, 176, 5, 22, "DetailNotes",
+ CellID->98372923],
+Cell[36489, 867, 378, 12, 37, "DetailNotes",
+ CellID->115696924],
+Cell[36870, 881, 165, 3, 22, "DetailNotes",
+ CellID->299528253],
+Cell[37038, 886, 765, 22, 39, "DetailNotes",
+ CellID->76862331]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[37840, 913, 37, 0, 120, "ControlSuggestionsSection"],
+Cell[37880, 915, 374, 9, 22, "ControlSuggestions",
+ CellTags->"ResizeImages"],
+Cell[38257, 926, 739, 17, 22, "ControlSuggestions",
+ CellTags->"RotateAndZoomIn3D"],
+Cell[38999, 945, 340, 11, 22, "ControlSuggestions",
+ CellTags->"DragLocators"],
+Cell[39342, 958, 637, 15, 22, "ControlSuggestions",
+ CellTags->"CreateAndDeleteLocators"],
+Cell[39982, 975, 844, 21, 22, "ControlSuggestions",
+ CellTags->"SliderZoom"],
+Cell[40829, 998, 369, 9, 22, "ControlSuggestions",
+ CellTags->"GamepadControls"],
+Cell[41201, 1009, 1464, 31, 22, "ControlSuggestions",
+ CellTags->"AutomaticAnimation"],
+Cell[42668, 1042, 908, 21, 22, "ControlSuggestions",
+ CellTags->"BookmarkAnimation"]
+}, Open  ]],
+Cell[43591, 1066, 30, 0, 152, "SearchTermsSection"],
+Cell[CellGroupData[{
+Cell[43646, 1070, 31, 0, 126, "RelatedLinksSection"],
+Cell[43680, 1072, 296, 7, 22, "RelatedLinks",
+ CellID->21153645],
+Cell[43979, 1081, 289, 7, 22, "RelatedLinks",
+ CellID->133709269]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[44305, 1093, 25, 0, 136, "AuthorSection"],
+Cell[44333, 1095, 448, 12, 22, "Author"],
+Cell[44784, 1109, 517, 14, 22, "Author",
+ CellID->331249611]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

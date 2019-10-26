@@ -460,6 +460,9 @@ void write_file(std::string filename, double *input, int length);
 template<class T>
 void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota);
 
+template<class T>
+void equatorial_from_SF(T *SFvec,T thetal, T phil, T thetas, T phis, T iota, T phi_ref,T *EQvec);
+
 double calculate_eta(double mass1, double mass2);
 adouble calculate_eta(adouble mass1, adouble mass2);
 
