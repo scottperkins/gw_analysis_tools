@@ -567,7 +567,8 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->DEC = param_in->DEC;
 	param_out->gmst = param_in->gmst;
 	param_out->psi = param_in->psi;
-	param_out->NSflag = param_in->NSflag;
+	param_out->NSflag1 = param_in->NSflag1;
+	param_out->NSflag2 = param_in->NSflag2;
 	param_out->f_ref = param_in->f_ref;
 	param_out->thetaJN = param_in->thetaJN;
 	param_out->alpha0 = param_in->alpha0;
@@ -695,6 +696,34 @@ void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota
 template void terr_pol_iota_from_equat_sph<double>(double, double, double, double, double *, double*);
 template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, adouble, adouble *, adouble*);
 
+
+/*! \brief transform spherical angles from equatorial to ecliptic 
+ *
+ * NEEDS TESTING
+ *
+ * Rotation about the vernal equinox (x-hat in both coordinate systems) by the axial tilt or obliquity
+ */
+template<class T>
+void ecl_from_eq(T theta_eq, T phi_eq, T *theta_ecl, T *phi_ecl)
+{
+	T lambda; //Longitude
+	T beta; //Latitude
+	T RA = phi_eq;
+	T DEC = M_PI/2. - theta_eq;
+	T sra = sin(RA);
+	T cra = cos(RA);
+	T cdec = cos(DEC);
+	T sdec = sin(DEC);
+	T ce = cos(AXIAL_TILT);
+	T se = sin(AXIAL_TILT);
+	
+	lambda = atan2(sra*ce + sdec/cdec * se, cra);
+	beta = asin(sdec*ce - cdec* se*sra);
+	*theta_ecl =M_PI/2. - beta ;
+	*phi_ecl =lambda ;
+}
+template void ecl_from_eq<double>( double , double, double *, double*);
+template void ecl_from_eq<adouble>( adouble , adouble, adouble *, adouble*);
 /*! \brief Utility to map source frame vectors to equatorial frame vectors
  *
  * Needs the equatorial vectors for the line of sight and the orbital angular momentum

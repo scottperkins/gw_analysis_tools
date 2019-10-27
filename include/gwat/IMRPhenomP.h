@@ -42,6 +42,7 @@ virtual void calculate_euler_coeffs(alpha_coeffs<T> *acoeffs, epsilon_coeffs<T> 
 
 virtual T d(int l, int mp, int m,T s);
 
+virtual void PhenomPv2_JSF_from_params(gen_params_base<T> *params, T *JSF);
 virtual int construct_waveform(T *frequencies, 
 				int length, 
 				std::complex<T> *waveform_plus,

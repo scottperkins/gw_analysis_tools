@@ -54,7 +54,8 @@ double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 	params.spin2[2]= spin2;
 	params.phic=0;
 	params.tc=0;
-	params.NSflag=NSflag;
+	params.NSflag1=NSflag;
+	params.NSflag2=NSflag;
 	//fourier_waveform(frequencies, length, template_strain, "IMRPhenomD", m1,m2,Dl,spin1vec,
 	//				spin2vec);
 	fourier_waveform(frequencies, length, template_strain, "IMRPhenomD", &params);
@@ -192,7 +193,8 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	params.spin2[2]= spin2;
 	params.phic=0.;
 	params.tc=0.0;
-	params.NSflag=NSflag;
+	params.NSflag1=NSflag;
+	params.NSflag2=NSflag;
 
 	fourier_waveform(frequencies, length, template_strain, "IMRPhenomD", &params);
 	std::complex<double> q = Q(theta,phi,iota);
@@ -375,7 +377,7 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 		generation_method  == "ppE_IMRPhenomD_IMR" ){
 		std::complex<double> *response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-		fourier_detector_response(frequencies, length, response, detector, generation_method, params);
+		fourier_detector_response_horizon(frequencies, length, response, detector, generation_method, params);
 		ll = maximized_Log_Likelihood_aligned_spin_internal(data, psd, frequencies,response, length, plan);
 		
 		free(response);
@@ -444,7 +446,7 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 {
 	std::complex<double> *response =
 		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
+	fourier_detector_response_horizon(frequencies, length, response, detector, generation_method, params);
 	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,
 				response, length, plan, tc, phic);
 	free(response);
@@ -542,7 +544,7 @@ double Log_Likelihood(std::complex<double> *data,
 
 	std::complex<double> *detect_response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	fourier_detector_response(frequencies,length,detect_response,detector, generation_method,params);
+	fourier_detector_response_horizon(frequencies,length,detect_response,detector, generation_method,params);
 	ll = Log_Likelihood_internal(data,psd,frequencies,detect_response, length, plan);
 
 	//if(ll>0){
@@ -1789,7 +1791,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.incl_angle = 0;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = true;
 		
 		for(int j =0; j<dimension; j++){
@@ -1853,7 +1856,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.incl_angle = incl;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.shift_time = false;
 		parameters.psi = psi;
@@ -1946,7 +1950,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.RA = RA;
 		parameters.DEC = DEC;
 		parameters.gmst = mcmc_gmst;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.shift_time = false;
 		
@@ -2054,7 +2059,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.RA=RA;
 		parameters.DEC=DEC;
 		parameters.gmst=mcmc_gmst;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.Nmod = mcmc_Nmod;
 		parameters.betappe = new double[mcmc_Nmod];
@@ -2168,7 +2174,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.incl_angle = incl;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.RA = RA;	
 		parameters.DEC = DEC;	
@@ -2235,7 +2242,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.incl_angle = 0;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 	
 		//*NOTE* Current fisher is log \eta -- sampler is in \eta -- 
@@ -2319,7 +2327,8 @@ void MCMC_fisher_wrapper_old(double *param, int dimension, double **output, int 
 		parameters.phi=0;
 		parameters.theta=0;
 		parameters.Luminosity_Distance = dl_prime;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 
 		
@@ -2470,7 +2479,8 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->gmst = mcmc_gmst;
-	gen_params->NSflag = false;
+	gen_params->NSflag1 = false;
+	gen_params->NSflag2 = false;
 	if(check_mod(generation_method)){
 		gen_params->bppe=mcmc_bppe;
 		gen_params->Nmod=mcmc_Nmod;
@@ -2581,7 +2591,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		parameters.incl_angle = 0;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = true;
 		parameters.shift_time = false;
 
@@ -2626,7 +2637,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		parameters.incl_angle = 0;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 
 		
@@ -2682,7 +2694,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		//parameters.theta=theta[0];
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
 		parameters.gmst=mcmc_gmst;
@@ -2845,7 +2858,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		parameters.RA=RA;
 		parameters.DEC=DEC;
 		parameters.gmst=mcmc_gmst;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, &parameters,mcmc_generation_method, mcmc_data_length, mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
@@ -2938,7 +2952,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		parameters.RA=RA;
 		parameters.DEC=DEC;
 		parameters.gmst=mcmc_gmst;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.Nmod = mcmc_Nmod;
 		parameters.bppe = mcmc_bppe;
@@ -3037,7 +3052,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		//parameters.theta=theta[0];
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.Nmod = mcmc_Nmod;
 		parameters.betappe = new double[mcmc_Nmod];
@@ -3148,7 +3164,8 @@ double MCMC_likelihood_wrapper_old(double *param, int dimension, int chain_id)
 		parameters.phi=0;
 		parameters.theta=0;
 		parameters.Luminosity_Distance = dl_prime;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 
 		
@@ -3231,7 +3248,8 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.gmst=mcmc_gmst;
 		parameters.RA=RA;
 		parameters.DEC=DEC;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
 		if(mods_ct !=0){
@@ -3325,7 +3343,8 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.RA=RA;
 		parameters.DEC=DEC;
 		parameters.gmst=mcmc_gmst;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		if(mods_ct !=0){
 			parameters.Nmod =mods_ct;
@@ -3475,7 +3494,8 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 		parameters.incl_angle = incl;
 		parameters.phi=0;
 		parameters.theta=0;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		parameters.psi = psi;
 		
@@ -3564,7 +3584,8 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 		parameters.RA = RA;
 		parameters.DEC = DEC;
 		parameters.gmst = mcmc_gmst;
-		parameters.NSflag = false;
+		parameters.NSflag1 = false;
+		parameters.NSflag2 = false;
 		parameters.sky_average = false;
 		
 		for(int j =0; j<mcmc_min_dim; j++){

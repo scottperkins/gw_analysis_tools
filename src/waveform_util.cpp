@@ -49,7 +49,7 @@ double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used b
 	double *integrand
 			 = (double *)malloc(sizeof(double)*length);
 	/*produce the waveform*/
-	fourier_detector_response(frequencies, length, detector_response, detector,generation_method, param);
+	fourier_detector_response_horizon(frequencies, length, detector_response, detector,generation_method, param);
 
 	/*Calculate the template snr integrand 4*Re(h* h /S(f)) - factor of q for the plus, cross modes 
  * 	effect on the detector*/
@@ -174,7 +174,7 @@ double calculate_snr(std::string sensitivity_curve, /**< detector name - must ma
 /* \brief calculates the detector response for a given waveform and detector -- polarization angle =0
  */
 template<class T>
-int fourier_detector_response(T *frequencies, /**<array of frequencies corresponding to waveform*/
+int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
 			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
 			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
@@ -184,13 +184,13 @@ int fourier_detector_response(T *frequencies, /**<array of frequencies correspon
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
-	return fourier_detector_response(frequencies, length, hplus, hcross, detector_response, theta, phi, (T)0., detector);
+	return fourier_detector_response_horizon(frequencies, length, hplus, hcross, detector_response, theta, phi, (T)0., detector);
 	
 }
 /* \brief calculates the detector response for a given waveform and detector
  */
 template<class T>
-int fourier_detector_response(T *frequencies, /**<array of frequencies corresponding to waveform*/
+int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
 			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
 			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
@@ -243,7 +243,7 @@ int fourier_detector_response(T *frequencies, /**<array of frequencies correspon
  * This is a wrapper that combines generation with response functions: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and VIRGO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
  */
 template<class T>
-int fourier_detector_response(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
+int fourier_detector_response_horizon(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
 	int length,/**<integer length of all the arrays*/
 	std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
 	std::string detector,
@@ -264,7 +264,7 @@ int fourier_detector_response(T *frequencies, /**< double array of frequencies f
 			generation_method,
 			parameters
 			);
-	status = fourier_detector_response(frequencies, 
+	status = fourier_detector_response_horizon(frequencies, 
 			length, 
 			waveform_plus, 
 			waveform_cross,
@@ -387,6 +387,9 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 	//generate waveform
 	std::complex<T> *waveform_plus = new std::complex<T>[length];
 	std::complex<T> *waveform_cross = new std::complex<T>[length];
+	if(parameters->equatorial_orientation){
+		transform_orientation_coords(parameters, generation_method,detector);
+	}
 	status = fourier_waveform(frequencies, 
 			length,
 			waveform_plus, 
@@ -418,6 +421,33 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 
 	return status;
 }
+
+/*! \brief Wrapper to handle all detector_response calls -- horizon and equatorial
+ *
+ */
+template<class T>
+int fourier_detector_response(T *frequencies,
+	int length,
+	std::complex<T> *response,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters,
+	T *times)
+{
+	int status;
+	if(parameters->horizon_coord){
+		status=fourier_detector_response_horizon(frequencies, length, response, detector, generation_method, parameters);
+	}
+	else{
+		status=fourier_detector_response_equatorial(frequencies, length, response, detector, generation_method, parameters, times);
+
+	}
+	return status;
+
+}
+template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double> *, double *);
+template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble> *, adouble *);
+
 /*! \brief Calculates the amplitude (magnitude) and phase (argument) of the response of a given detector
  *
  * This is for general waveforms, and will work for precessing waveforms
@@ -435,7 +465,7 @@ int fourier_detector_amplitude_phase(double *frequencies,
 {
 	std::complex<double> *response = (std::complex<double>*)malloc(
 			sizeof(std::complex<double> ) * length);	
-	fourier_detector_response(frequencies, length,
+	fourier_detector_response_horizon(frequencies, length,
 				response, detector, generation_method, parameters);
 	for(int i =0 ; i< length; i++){
 		amplitude[i] = std::abs(response[i]);
@@ -689,6 +719,47 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	//params->shift_time = save_shift_time;
 }
 
+template<class T>
+void transform_orientation_coords(gen_params_base<T> *parameters,std::string generation_method,std::string detector)
+{
+	if(generation_method.find("IMRPhenomP") != std::string::npos){
+		T theta_s = M_PI/2. - parameters->DEC;
+		T phi_s = parameters->RA;
+		T Neq[3] = {sin(theta_s)*cos(phi_s), sin(theta_s)*sin(phi_s), cos(theta_s)};
+		T Leq[3] = {sin(parameters->theta_l)*cos(parameters->phi_l), 
+			sin(parameters->theta_l)*sin(parameters->phi_l), 
+			cos(parameters->theta_l)};
+		parameters->incl_angle = acos(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2]);
+		//Populate JSF here
+		T JSF[3];
+		IMRPhenomPv2<T> model;
+		model.PhenomPv2_JSF_from_params(parameters, JSF);
+		T Jeq[3];
+		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l, theta_s, phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
+		T Jeqsph[3];
+		transform_cart_sph(Jeq,Jeqsph);
+		T theta_j = Jeqsph[1];
+		T phi_j= Jeqsph[2];
+		T iota_j;
+		if(detector!="LISA"){
+			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
+		}
+		else{
+			ecl_from_eq(theta_j, phi_j, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
+		}
+	}
+	else{
+		if(detector!="LISA"){
+			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC,parameters->theta_l, parameters->phi_l, &parameters->psi, &parameters->incl_angle);
+		}
+		else{
+			ecl_from_eq(parameters->theta_l, parameters->phi_l, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
+		}
+	
+	}
+}
+template void transform_orientation_coords<double>(gen_params_base<double> *, std::string,std::string);
+template void transform_orientation_coords<adouble>(gen_params_base<adouble> *, std::string,std::string);
 /*! \brief map between inclination angle and polarization angle to the spherical coordinates of the binary's total angular momentum in the SS frame
  *
  * CURRENTLY NOT RIGHT MUST FIX
@@ -1197,11 +1268,11 @@ template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
 template void  time_phase_corrected<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
 template void  time_phase_corrected<adouble>(adouble *, int, adouble *, gen_params_base<adouble> *, std::string, bool);
 
-template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
-template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);
+template int fourier_detector_response_horizon<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
+template int fourier_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);
 //
-template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double, double, std::string);
-template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble, adouble, std::string);
+template int fourier_detector_response_horizon<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double, double, std::string);
+template int fourier_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble, adouble, std::string);
 //
 //
 template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *);
@@ -1209,8 +1280,8 @@ template int fourier_detector_response_equatorial<adouble>(adouble *, int , std:
 template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *, double *);
 template int fourier_detector_response_equatorial<adouble>(adouble *, int , std::complex<adouble> *,std::string, std::string, gen_params_base<adouble> *, adouble *);
 //
-template int fourier_detector_response<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double>*);
-template int fourier_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble>*);
+template int fourier_detector_response_horizon<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double>*);
+template int fourier_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble>*);
 //
 template int fourier_detector_response_equatorial<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double , double, double,double *, double, double, double, double, std::string);
 template int fourier_detector_response_equatorial<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double,adouble*, adouble, adouble, adouble, adouble,  std::string);

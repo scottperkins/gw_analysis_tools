@@ -535,7 +535,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 
 
 			fourier_amplitude(frequencies, 
@@ -566,7 +567,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_minus,
@@ -621,7 +623,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 
 		waveform_params.sky_average=parameters->sky_average;
 		waveform_params.f_ref=parameters->f_ref;
-		waveform_params.NSflag = parameters->NSflag;
+		waveform_params.NSflag1 = parameters->NSflag1;
+		waveform_params.NSflag2 = parameters->NSflag2;
 		waveform_params.gmst = parameters->gmst;
 		waveform_params.shift_time =false;
 		std::complex<double> *response = new std::complex<double>[length];
@@ -721,7 +724,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 		waveform_params.sky_average=parameters->sky_average;
 		waveform_params.bppe = parameters->bppe;
 		waveform_params.Nmod = parameters->Nmod;
-		waveform_params.NSflag = parameters->NSflag;
+		waveform_params.NSflag1 = parameters->NSflag1;
+		waveform_params.NSflag2 = parameters->NSflag2;
 		waveform_params.betappe = new double[waveform_params.Nmod];
 
 		for (int i =0; i<dimension; i++){
@@ -866,7 +870,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = std::acos(param_p[0]);
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 
 
 			fourier_detector_amplitude_phase(frequencies, 
@@ -902,7 +907,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = std::acos(param_m[0]);
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			fourier_detector_amplitude_phase(frequencies, 
 				length,
 				amplitude_plus_minus,
@@ -1008,7 +1014,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = acos(param_p[0]);
 			waveform_params.theta = param_p[1];
 			waveform_params.phi = param_p[2];
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			waveform_params.psi = param_p[8];
 
 
@@ -1045,7 +1052,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = acos(param_m[0]);
 			waveform_params.theta = param_m[1];
 			waveform_params.phi = param_m[2];
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			waveform_params.psi = param_m[8];
 
 			Qm = Q(waveform_params.theta, waveform_params.phi, waveform_params.incl_angle, waveform_params.psi);
@@ -1085,7 +1093,7 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 	if (gen_method == "MCMC_IMRPhenomPv2_Full"){
 		std::string local_method = "IMRPhenomPv2";
 		std::complex<double> *response = new std::complex<double> [length];
-		fourier_detector_response(frequencies, 
+		fourier_detector_response_horizon(frequencies, 
 			length,
 			response,
 			detector,
@@ -1126,7 +1134,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 		param_in[12] = parameters->phiRef;
 		param_in[13] = parameters->psi;
 		waveform_params.sky_average=parameters->sky_average;
-		waveform_params.NSflag=parameters->NSflag;
+		waveform_params.NSflag1 = parameters->NSflag1;
+		waveform_params.NSflag2 = parameters->NSflag2;
 		waveform_params.gmst=parameters->gmst;
 		waveform_params.f_ref = parameters->f_ref;
 		double m1, m2,Fpp,Fcc, a_corr_p, a_corr_m, p_corr_p, p_corr_m;
@@ -1270,7 +1279,7 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			local_gen = "ppE_IMRPhenomPv2_Inspiral";
 		}
 		std::complex<double> *response = new std::complex<double> [length];
-		fourier_detector_response(frequencies, 
+		fourier_detector_response_horizon(frequencies, 
 			length,
 			response,
 			detector,
@@ -1357,7 +1366,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.gmst = parameters->gmst;
 			waveform_params.phiRef = param_p[12];
 			waveform_params.f_ref = parameters->f_ref;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			waveform_params.sky_average = parameters->sky_average;
 			waveform_params.psi = param_p[13];
 			waveform_params.betappe = new double[parameters->Nmod];
@@ -1395,7 +1405,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.gmst = parameters->gmst;
 			waveform_params.phiRef = param_m[12];
 			waveform_params.f_ref = parameters->f_ref;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			waveform_params.psi = param_m[13];
 			for (int j =0; j<parameters->Nmod; j++){
 				waveform_params.betappe[j] = param_m[14+j];
@@ -1554,7 +1565,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = acos(param_p[0]);
 			waveform_params.theta = param_p[1];
 			waveform_params.phi = param_p[2];
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			waveform_params.betappe = new double[parameters->Nmod];
 			for (int j =0; j<parameters->Nmod; j++){
 				waveform_params.betappe[j] = param_p[8+j];
@@ -1597,7 +1609,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = acos(param_m[0]);
 			waveform_params.theta = param_m[1];
 			waveform_params.phi = param_m[2];
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			for (int j =0; j<parameters->Nmod; j++){
 				waveform_params.betappe[j] = param_m[8+j];
 			}
@@ -1714,7 +1727,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 
 
 			fourier_amplitude(frequencies, 
@@ -1751,7 +1765,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 			fourier_amplitude(frequencies, 
 				length,
 				amplitude_plus_minus,
@@ -1861,7 +1876,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 
 
 			fourier_amplitude(frequencies, 
@@ -1904,7 +1920,8 @@ void calculate_derivatives_old(double  **amplitude_deriv,
 			waveform_params.incl_angle = parameters->incl_angle;
 			waveform_params.theta = parameters->theta;
 			waveform_params.phi = parameters->phi;
-			waveform_params.NSflag = parameters->NSflag;
+			waveform_params.NSflag1 = parameters->NSflag1;
+			waveform_params.NSflag2 = parameters->NSflag2;
 
 
 			fourier_amplitude(frequencies, 
@@ -3372,8 +3389,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[0]=input_params->RA;
 				parameters[1]=input_params->DEC;
 				parameters[2]=input_params->psi;
-				parameters[3]=input_params->phiRef;
-				parameters[4]=cos(input_params->incl_angle);
+				parameters[3]=cos(input_params->incl_angle);
+				parameters[4]=input_params->phiRef;
 				parameters[5]=log(input_params->Luminosity_Distance);
 				parameters[6]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
@@ -3395,9 +3412,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[0]=input_params->RA;
 				parameters[1]=input_params->DEC;
 				parameters[2]=input_params->psi;
-				parameters[3]=input_params->phiRef;
-				parameters[4]=input_params->tc;
-				parameters[5]=input_params->incl_angle;
+				parameters[3]=input_params->incl_angle;
+				parameters[4]=input_params->phiRef;
+				parameters[5]=input_params->tc;
 				parameters[6]=input_params->Luminosity_Distance;
 				parameters[7]=calculate_chirpmass(input_params->mass1, input_params->mass2);
 				parameters[8]=calculate_eta(input_params->mass1, input_params->mass2);
@@ -3439,9 +3456,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[0]=input_params->RA;
 				parameters[1]=input_params->DEC;
 				parameters[2]=input_params->psi;
-				parameters[3]=input_params->phic;
-				parameters[4]=input_params->tc;
-				parameters[5]=input_params->incl_angle;
+				parameters[3]=input_params->incl_angle;
+				parameters[4]=input_params->phic;
+				parameters[5]=input_params->tc;
 				parameters[6]=input_params->Luminosity_Distance;
 				parameters[7]=calculate_chirpmass(input_params->mass1, 
 					input_params->mass2);
@@ -3697,14 +3714,14 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = avec_parameters[1];
 				a_params->psi = avec_parameters[2];
-				a_params->phiRef = avec_parameters[3];
+				a_params->phiRef = avec_parameters[4];
 				//a_params->chi1_l = avec_parameters[8];
 				//a_params->chi2_l = avec_parameters[9];
 				a_params->spin1[2] = avec_parameters[8];
 				a_params->spin2[2] = avec_parameters[9];
 				a_params->chip = avec_parameters[10];
 				a_params->phip = avec_parameters[11];
-				a_params->incl_angle=acos(avec_parameters[4]);
+				a_params->incl_angle=acos(avec_parameters[3]);
 				a_params->tc=1;
 
 			}
@@ -3717,15 +3734,15 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = avec_parameters[1];
 				a_params->psi = avec_parameters[2];
-				a_params->phiRef = avec_parameters[3];
-				a_params->tc = avec_parameters[4];
+				a_params->phiRef = avec_parameters[4];
+				a_params->tc = avec_parameters[5];
 				//a_params->chi1_l = avec_parameters[9];
 				//a_params->chi2_l = avec_parameters[10];
 				a_params->spin1[2] = avec_parameters[9];
 				a_params->spin2[2] = avec_parameters[10];
 				a_params->chip = avec_parameters[11];
 				a_params->phip = avec_parameters[12];
-				a_params->incl_angle=avec_parameters[5];
+				a_params->incl_angle=avec_parameters[3];
 
 			}	
 		}	
@@ -3759,13 +3776,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = avec_parameters[1];
 				a_params->psi = avec_parameters[2];
-				a_params->phic = avec_parameters[3];
-				a_params->tc = avec_parameters[4];
+				a_params->phic = avec_parameters[4];
+				a_params->tc = avec_parameters[5];
 				T spin1sph[3] = {avec_parameters[9],0,0};
 				T spin2sph[3] = {avec_parameters[10],0,0};
 				transform_sph_cart(spin1sph,a_params->spin1);
 				transform_sph_cart(spin2sph,a_params->spin2);
-				a_params->incl_angle=avec_parameters[5];
+				a_params->incl_angle=avec_parameters[3];
 
 			}	
 		}	
@@ -3983,7 +4000,8 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->sky_average = input_params->sky_average;
 	waveform_params->f_ref = input_params->f_ref;
 	waveform_params->gmst = input_params->gmst;
-	waveform_params->NSflag = input_params->NSflag;
+	waveform_params->NSflag1 = input_params->NSflag1;
+	waveform_params->NSflag2 = input_params->NSflag2;
 	waveform_params->shift_time = false;
 	waveform_params->LISA_alpha0 = input_params->LISA_alpha0;
 	waveform_params->LISA_phi0 = input_params->LISA_phi0;

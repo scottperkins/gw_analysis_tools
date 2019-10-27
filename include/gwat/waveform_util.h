@@ -37,7 +37,7 @@ double calculate_snr(std::string sensitivity_curve,
         int length);
 
 template<class T>
-int fourier_detector_response(T *frequencies, 
+int fourier_detector_response_horizon(T *frequencies, 
 	int length,
 	std::complex<T> *hplus, 
 	std::complex<T> *hcross, 
@@ -46,7 +46,7 @@ int fourier_detector_response(T *frequencies,
 	T phi, 
 	std::string detector);
 template<class T>
-int fourier_detector_response(T *frequencies, 
+int fourier_detector_response_horizon(T *frequencies, 
 	int length,
 	std::complex<T> *hplus, 
 	std::complex<T> *hcross, 
@@ -55,6 +55,14 @@ int fourier_detector_response(T *frequencies,
 	T phi, 
 	T psi, 
 	std::string detector);
+template<class T>
+int fourier_detector_response_horizon(T *frequencies, 
+	int length,
+	std::complex<T> *response, 
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters
+	);
 template<class T>
 int fourier_detector_response_equatorial(T *frequencies, 
 	int length,
@@ -73,14 +81,6 @@ int fourier_detector_response_equatorial(T *frequencies,
 	std::string detector);
 
 template<class T>
-int fourier_detector_response(T *frequencies, 
-	int length,
-	std::complex<T> *response, 
-	std::string detector,
-	std::string generation_method,
-	gen_params_base<T> *parameters
-	);
-template<class T>
 int fourier_detector_response_equatorial(T *frequencies, 
 	int length,
 	std::complex<T> *response, 
@@ -97,6 +97,16 @@ int fourier_detector_response_equatorial(T *frequencies,
 	gen_params_base<T> *parameters,
 	T *times
 	);
+
+template<class T>
+int fourier_detector_response(T *frequencies,
+	int length,
+	std::complex<T> *response,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters,
+	T *times=NULL);
+
 
 int boundary_number(std::string method);
 
@@ -124,6 +134,8 @@ int fourier_detector_amplitude_phase(double *frequencies,
 	std::string generation_method,
 	gen_params *parameters
 	);
+template<class T>
+void transform_orientation_coords(gen_params_base<T> *parameters,std::string generation_method,std::string detector);
 template<class T>
 void map_extrinsic_angles(gen_params_base<T> *params);
 

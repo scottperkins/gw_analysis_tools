@@ -435,7 +435,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	if(params->shift_time ){
+	if(params->shift_phase ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -533,7 +533,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	if(params->shift_time ){
+	if(params->shift_phase ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
@@ -681,7 +681,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//Calculate phase and coalescence time variables
 	T phic, f_ref, tc, phi_shift, tc_shift;
 	//If phic is unspecified - use f_ref and phiRef
-	if(params->shift_time ){
+	if(params->shift_phase ){
 		f_ref = params->f_ref;
 		precalc_powers_ins(f_ref, M, &pows);
 		phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));

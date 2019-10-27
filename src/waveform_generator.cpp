@@ -56,10 +56,11 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			)
 {
 	int status=1;
-	bool NSflag = parameters->NSflag;
+	bool NSflag1 = parameters->NSflag1;
+	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag)
+	if (NSflag1 || NSflag2)
 	{
 		cout<<"NS waveforms still under develpment - BH only"<<endl;
 		return 0;
@@ -83,6 +84,9 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
 	params.sky_average = parameters->sky_average;
+	params.shift_phase = parameters->shift_phase;
+	params.NSflag1 = parameters->NSflag1;
+	params.NSflag2 = parameters->NSflag2;
 	if(generation_method == "IMRPhenomD")
 	{
 		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
@@ -422,10 +426,11 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 {
 	
 	int status=1;
-	bool NSflag = parameters->NSflag;
+	bool NSflag1 = parameters->NSflag1;
+	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag)
+	if (NSflag1 || NSflag2)
 	{
 		cout<<"NS waveforms still under develpment - BH only"<<endl;
 		return 0;
@@ -448,6 +453,9 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.theta = parameters->theta;
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
+	params.shift_phase = parameters->shift_phase;
+	params.NSflag1 = parameters->NSflag1;
+	params.NSflag2 = parameters->NSflag2;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -570,10 +578,11 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 			)
 {
 	int status=1;
-	bool NSflag = parameters->NSflag;
+	bool NSflag1 = parameters->NSflag1;
+	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag)
+	if (NSflag1 || NSflag2)
 	{
 		cout<<"NS waveforms still under develpment - BH only"<<endl;
 		return 0;
@@ -585,6 +594,9 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	//params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
+	params.shift_phase = parameters->shift_phase;
+	params.NSflag1 = parameters->NSflag1;
+	params.NSflag2 = parameters->NSflag2;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<T> modeld;
@@ -645,10 +657,11 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			)
 {
 	int status=1;
-	bool NSflag = parameters->NSflag;
+	bool NSflag1 = parameters->NSflag1;
+	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag)
+	if (NSflag1 || NSflag2)
 	{
 		cout<<"NS waveforms still under develpment - BH only"<<endl;
 		return 0;
@@ -668,6 +681,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
+	params.shift_phase = parameters->shift_phase;
+	params.NSflag1 = parameters->NSflag1;
+	params.NSflag2 = parameters->NSflag2;
 
 	if(generation_method == "IMRPhenomD")
 	{
@@ -791,10 +807,11 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			)
 {
 	int status=1;
-	bool NSflag = parameters->NSflag;
+	bool NSflag1 = parameters->NSflag1;
+	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag)
+	if (NSflag1 || NSflag2)
 	{
 		cout<<"NS waveforms still under develpment - BH only"<<endl;
 		return 0;
@@ -810,6 +827,9 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	params.phiRef = parameters->phiRef;
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
+	params.shift_phase = parameters->shift_phase;
+	params.NSflag1 = parameters->NSflag1;
+	params.NSflag2 = parameters->NSflag2;
 	params.sky_average = parameters->sky_average;
 
 	if(generation_method == "IMRPhenomD")

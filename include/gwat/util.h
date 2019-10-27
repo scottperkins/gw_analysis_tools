@@ -28,6 +28,8 @@ const double MSOL_SEC =4.925491025543575903411922162094833998e-6 ;
 const double MPC_SEC = 3.085677581491367278913937957796471611e22/c; 
 /*!1 year in seconds*/
 const double T_year = 31557600.;
+/*! Earth's Axial tilt in radian*/
+const double AXIAL_TILT=0.46140780742;
 
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
@@ -72,6 +74,7 @@ template<class T>
 class gen_params_base
 {
 public:	
+	std::string cosmology="PLANCK15";
 	/*!mass of the larger body in Solar Masses*/
 	T mass1;
 	/*!mass of the smaller body in Solar Masses*/
@@ -82,20 +85,26 @@ public:
 	T spin1[3];
 	/*!Spin vector of the smaller mass [Sx,Sy,Sz]*/
 	T spin2[3];
-	/*!coalescence phase of the binary*/
-	T phic=0;
 	/*!coalescence time of the binary*/
 	T tc=0;
-	/*!ppE b parameter (power of the frequency) - vector for multiple modifications*/
-	int *bppe;
-	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
-	T *betappe;
-	/*!Number of phase modificatinos*/
-	int Nmod=0;
+
+	//Polarization angle
+	T psi =0 ;
 	/*!*angle between angular momentum and the total momentum */
 	T incl_angle;
-	/*! spherical angles for the source location relative to the detector*/
+
+	/*! boolean flag indicating equatorial orientation coordinates should be used*/
+	bool equatorial_orientation=false;
+	/*! Equatorial Spherical angles for the orbital angular momentum*/
+	T theta_l;
+	/*! Equatorial Spherical angles for the orbital angular momentum*/
+	T phi_l;
+
+	/*! Boolean flag indicating local, horizon coordinates should be used*/
+	bool horizon_coord=false;
+	/*! Polar angle in detector-centered coordinates*/
 	T theta;
+	/*! azimuthal angle in detector-centered coordinates*/
 	T phi;
 	/*! Equatorial coordinates of source RA*/
 	T RA;
@@ -103,16 +112,23 @@ public:
 	T DEC;
 	/*! Greenwich Mean Sidereal time (for detector orientation - start of data*/
 	double gmst;
-	//Polarization angle
-	T psi =0 ;
 	/*! BOOL flag for early termination of NS binaries*/
-	bool NSflag;
+	//bool NSflag;
+	bool NSflag1=false;
+	bool NSflag2=false;
 
 	/*! Reference frequency for PhenomPv2*/
 	T f_ref=0;
 	
+	/*! Shift time detemines if times are shifted so coalescence is more accurately*/
+	bool shift_time = true;
+	/*! Shift time detemines if phic or phiRef is used*/
+	bool shift_phase = true;
 	T phiRef=0;
+	/*!coalescence phase of the binary*/
+	T phic=0;
 
+	bool sky_average=false;
 	//###################################################
 	//Either define all these parameters for Pv2, or define
 	//all the source frame parameters above
@@ -126,6 +142,39 @@ public:
 	//Azimuthal angle of chip in plane
 	T phip = -1;
 
+	bool precess_reduced_flag=false;
+
+	//LISA SPECIFIC OPTIONS
+	T  LISA_alpha0;
+	T  LISA_phi0;
+	/*! Polar angle in ecliptic coordinates*/
+	T  LISA_thetal;
+	T  theta_j_ecl;
+	/*! Azimuthal angle in ecliptic coordinates*/
+	T  LISA_phil;
+	T  phi_j_ecl;
+
+	//gIMR quantities
+	int Nmod_beta=0;
+	int Nmod_alpha=0;
+	int Nmod_sigma=0;
+	int Nmod_phi=0;
+
+	int *betai;
+	int *alphai;
+	int *sigmai;
+	int *phii;
+
+	T *delta_beta;
+	T *delta_alpha;
+	T *delta_sigma;
+	T *delta_phi;
+	/*!ppE b parameter (power of the frequency) - vector for multiple modifications*/
+	int *bppe;
+	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
+	T *betappe;
+	/*!Number of phase modificatinos*/
+	int Nmod=0;
 	//###################################################
 	//T chi1_p = 0;
 	//T chi2_p = 0;
@@ -133,43 +182,20 @@ public:
 	T chi2_l = 0;
 	T phiJL = 0 ;
 	T thetaJL = 0 ;
-	//###################################################
 	T zeta_polariz =0;
 	T phi_aligned = 0;
 
 	T chil = 0;
+	//###################################################
 
 
-	bool sky_average;
 	
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
 		
-	std::string cosmology="PLANCK15";
-	
-	bool shift_time = true;
 
 
-	//LISA SPECIFIC OPTIONS
-	T  LISA_alpha0;
-	T  LISA_phi0;
-	T  LISA_thetal;
-	T  LISA_phil;
-
-	//gIMR quantities
-	int Nmod_beta=0;
-	int Nmod_alpha=0;
-	int Nmod_sigma=0;
-	int Nmod_phi=0;
-	int *betai;
-	int *alphai;
-	int *sigmai;
-	int *phii;
-	T *delta_beta;
-	T *delta_alpha;
-	T *delta_sigma;
-	T *delta_phi;
 	
 };
 
@@ -276,7 +302,11 @@ struct source_parameters
 	T tc;
 	/*overall amplitude factor*/	
 	T A0;
+	/*! Shift time detemines if phic or phiRef is used*/
+	bool shift_phase = true;
 	
+	bool NSflag1;
+	bool NSflag2;
 	//############################################
 	//PhenomP
 	T s ;
@@ -459,6 +489,9 @@ void write_file(std::string filename, double *input, int length);
 
 template<class T>
 void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota);
+
+template<class T>
+void ecl_from_eq(T theta_eq, T phi_eq, T *theta_ecl, T *phi_ecl);
 
 template<class T>
 void equatorial_from_SF(T *SFvec,T thetal, T phil, T thetas, T phis, T iota, T phi_ref,T *EQvec);

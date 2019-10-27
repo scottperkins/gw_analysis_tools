@@ -740,6 +740,53 @@ void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, useful_powers
                 + ecoeffs->coeff5*omega_cbrt);
 
 }
+
+/*!\brief Calculate the unit vector in the direction of the total angular momentum
+ * 
+ * 
+ */
+template<class T>
+void IMRPhenomPv2<T>::PhenomPv2_JSF_from_params(gen_params_base<T> *params, T *JSF)
+{
+	//Calculate spin parameters chil and chip
+	T chi1_l = params->spin1[2];
+	T chi2_l = params->spin2[2];
+
+	T q = params->mass1/params->mass2;
+	T chi_eff = (params->mass1*chi1_l + params->mass2*chi2_l) / (params->mass1 + params->mass2); /* Effective aligned spin */
+  	T chil = (1.0+q)/q * chi_eff; /* dimensionless aligned spin of the largest BH */
+	//params->chil = chil;
+
+	T eta = calculate_eta(params->mass1, params->mass2);
+	
+	T m1_2 = params->mass1 * params->mass1;
+	T m2_2 = params->mass2 * params->mass2;
+
+	T m1 = q/(1+q);
+	T m2 = 1./(1+q);
+	//params->SP = params->chip * m1*m1;
+	//params->SL = chi1_l * m1 * m1 + chi2_l *m2 * m2;
+	
+	//Compute the rotation operations for L, J0 at fref	
+	T L0 = 0.0;
+	useful_powers<T> pows;
+	IMRPhenomD<T> temp;
+	temp.precalc_powers_PI(&pows);
+	temp.precalc_powers_ins(params->f_ref, params->mass1+params->mass2, &pows);
+	
+	L0 = pow_int(params->mass1+params->mass2,2) * this->L2PN(eta, &pows);
+	
+	//_sf denotes source frame - ie L_hat propto z_hat
+	T J0x_sf = m1_2*params->chip *cos(params->phip)  ;	
+	T J0y_sf = m1_2*params->chip *sin(params->phip)  ;	
+	T J0z_sf = L0 + m1_2* chi1_l + m2_2 * chi2_l;
+		
+	T J0 = sqrt(J0x_sf * J0x_sf + J0y_sf * J0y_sf + J0z_sf * J0z_sf ) ;
+	
+	JSF[0] =J0x_sf/J0;
+	JSF[1] =J0y_sf/J0;
+	JSF[2] =J0z_sf/J0;
+}
 /*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
  *
  * Pretty much stolen verbatim from lalsuite

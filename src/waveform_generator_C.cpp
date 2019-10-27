@@ -54,7 +54,8 @@ int fourier_waveformC(double *frequencies,
 	params.phi = phi;
 	params.phiRef = phiRef;
 	params.f_ref = f_ref;
-	params.NSflag=false;
+	params.NSflag1=false;
+	params.NSflag2=false;
 	params.sky_average=false;
 	std::complex<double> *waveform_plus = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	std::complex<double> *waveform_cross = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
@@ -112,7 +113,8 @@ int fourier_amplitudeC(double *frequencies,
 	params.incl_angle = incl_angle;
 	params.theta = theta;
 	params.phi = phi;
-	params.NSflag=false;
+	params.NSflag1=false;
+	params.NSflag2=false;
 	params.sky_average=false;
 	amplitude[0] = 10;
 	fourier_amplitude(frequencies, length, amplitude, method,&params);	
@@ -164,7 +166,8 @@ int fourier_phaseC(double *frequencies,
 	params.phi = phi;
 	params.phiRef = phiRef;
 	params.f_ref = f_ref;
-	params.NSflag=false;
+	params.NSflag1=false;
+	params.NSflag2=false;
 	params.sky_average=false;
 	fourier_phase(frequencies, length, phase, method,&params);	
 	return 1;
