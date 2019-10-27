@@ -513,6 +513,10 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0., Fplus,Fcross);
 }
 /*! \brief Same as the other function, but for active and future detectors
+ *
+ * If terrestial detectors, it will use ra, dec, psi, and gmst
+ *
+ * If space detector, it will use ra, dec transformed to ecliptic coord, and LISA_alpha0, LISA_phi0 and theta_j_ecl, phi_j_ecl, which are the offsets for LISA and the spherical angles for the unit vector in the total angular momemntum in the ecliptic system
  */
 template<class T>
 void detector_response_functions_equatorial(std::string detector,/**< Detector */
@@ -521,11 +525,11 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T psi,/**< polarization angle in rad*/
 	double gmst,/**<Greenwich mean sidereal time (rad)*/
 	T *times,/**<Times at which to evaluate Fplus and Fcross, in which case the Fplus and Fcross pointers are arrays*/
-	int length,
-	T LISA_alpha0,
-	T LISA_phi0,
-	T LISA_theta_l,
-	T LISA_phi_l,
+	int length,/**< Length of the arrays*/
+	T LISA_alpha0,/**< Offset for alpha*/
+	T LISA_phi0,/**<Offset for phi*/
+	T theta_j_ecl,/**< Ecliptic spherical polar angle of Lhat (Jhat for precessing systems)*/
+	T phi_j_ecl,/**< Ecliptic sherical azimuthal angle (Jhat  for precessing systems)*/
 	T *Fplus,/**< [out] Fplus response coefficient*/
 	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
@@ -533,15 +537,16 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	//Time dependent antenna patterns
 	if(detector=="LISA" ||detector =="lisa"){
 		//Polar angle theta runs 0,PI , dec runs -PI/2,PI/2
-		T thetas;
-		thetas = M_PI/2. - dec;
-		//if(dec>=0)thetas = M_PI/2. - dec;
-		//else if(dec<0)thetas = M_PI/2. - dec;
-		//RA is the same as phi_s
+		//Ecliptic  coord
+		T theta_s;
+		T phi_s;
+		//M_PI/2 - dec is polar angle in equatorial
+		//RA is azimuthal angle in equatorial
+		ecl_from_eq((T)( M_PI/2. - dec), ra, &theta_s, &phi_s);
 		for(int i =0 ; i<length; i++){
 
-			Fplus[i]  = LISA_response_plus_time(thetas,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
-			Fcross[i]  = LISA_response_cross_time(thetas,ra, LISA_theta_l,LISA_phi_l,LISA_alpha0,LISA_phi0, times[i]);
+			Fplus[i]  = LISA_response_plus_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
+			Fcross[i]  = LISA_response_cross_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
 		}
 	}
 	//Time independent response functions
@@ -577,16 +582,16 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 }
 
 template<class T>
-T LISA_response_plus(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f)
+T LISA_response_plus(source_parameters<T> *params, T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f)
 {
 	T t = t_2PN(f, params->eta, params->chirpmass, params->spin1z, params->spin2z, params->tc);
-	return LISA_response_plus_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t);
+	return LISA_response_plus_time(theta_s, phi_s, theta_j, phi_j, alpha_0, phi_0, t);
 }
 template<class T>
-T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f)
+T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f)
 {
 	T t = t_2PN(f, params->eta, params->chirpmass, params->spin1z, params->spin2z, params->tc);
-	return LISA_response_cross_time(theta_s, phi_s, theta_l, phi_l, alpha_0, phi_0, t);
+	return LISA_response_cross_time(theta_s, phi_s, theta_j, phi_j, alpha_0, phi_0, t);
 }
 
 /*! \brief Time dependent detector response of LISA for non-precessing waveforms
@@ -595,25 +600,27 @@ T LISA_response_cross(source_parameters<T> *params, T theta_s, T phi_s, T theta_
  *
  * All the arguments are ``barred'', using the notation in these two works. That is, they are relative to the solar system  barycenter.
  *
- * To get the second interferometer's response, evaluate with phi_l - pi/4.
+ * To get the second interferometer's response, evaluate with phi_j - pi/4.
+ *
+ * All the coordinates are in the ecliptic coordinate system
  */
 template<class T>
-T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t)
+T LISA_response_plus_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T t)
 {
 	//T_year defined in include/util.h
 	T phi_t = phi_0 + 2. * M_PI * t / T_year;
 	T alpha1 = alpha_0;
-	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 - (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
+	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 - (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
 	//Factor of sqrt(3/2) for the equilateral triangle
 	return std::sqrt(3./2.)*out;
 }
 template<class T>
-T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t)
+T LISA_response_cross_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T t)
 {
 	//T_year defined in include/util.h
 	T phi_t = phi_0 + 2. * M_PI * t / T_year;
 	T alpha1 = alpha_0;
-	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 + (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_l) * cos(theta_s) + sin(theta_l) * sin(theta_s) * cos(phi_l - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_l) / 0.2e1 - sqrt(0.3e1) * sin(theta_l) * cos(-phi_t + phi_l) / 0.2e1) / (sin(theta_l) * sin(theta_s) * sin(phi_l - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_l) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_l) * sin(phi_l)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_l) * cos(phi_l) - cos(theta_l) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
+	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 + (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
 	//Factor of sqrt(3/2) for the equilateral triangle
 	return std::sqrt(3./2.)*out;
 }

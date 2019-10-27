@@ -49,7 +49,7 @@ double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used b
 	double *integrand
 			 = (double *)malloc(sizeof(double)*length);
 	/*produce the waveform*/
-	fourier_detector_response_horizon(frequencies, length, detector_response, detector,generation_method, param);
+	fourier_detector_response(frequencies, length, detector_response, detector,generation_method, param);
 
 	/*Calculate the template snr integrand 4*Re(h* h /S(f)) - factor of q for the plus, cross modes 
  * 	effect on the detector*/
@@ -138,7 +138,7 @@ double calculate_snr(std::string sensitivity_curve,
 		time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
 	}
 	std::complex<double> *response = new std::complex<double>[length];
-	fourier_detector_response_equatorial(frequencies, length, response, detector, generation_method, params,times);
+	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);
 	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
 	delete [] response;	
 	if(detector == "LISA"){
@@ -297,8 +297,8 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 			T *times,
 			T LISA_alpha0,
 			T LISA_phi0,
-			T LISA_thetal,
-			T LISA_phil,
+			T theta_j_ecl,
+			T phi_j_ecl,
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
@@ -311,10 +311,10 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 	if(detector=="LISA"){
 		Fplus = new T[length];
 		Fcross = new T[length];
-		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,LISA_thetal,LISA_phil, Fplus, Fcross);
+		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, Fplus, Fcross);
 	}
 	else{
-		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,LISA_thetal,LISA_phil, &fplus, &fcross);
+		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, &fplus, &fcross);
 	}
 
 	
@@ -409,8 +409,8 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 			times,
 			parameters->LISA_alpha0,
 			parameters->LISA_phi0,
-			parameters->LISA_thetal,
-			parameters->LISA_phil,
+			parameters->theta_j_ecl,
+			parameters->phi_j_ecl,
 			detector 
 			) ;
 	
@@ -732,8 +732,13 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		parameters->incl_angle = acos(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2]);
 		//Populate JSF here
 		T JSF[3];
-		IMRPhenomPv2<T> model;
-		model.PhenomPv2_JSF_from_params(parameters, JSF);
+		if(generation_method.find("Pv2")!=std::string::npos){
+			IMRPhenomPv2<T> model;
+			model.PhenomPv2_JSF_from_params(parameters, JSF);
+		}
+		else{
+			std::cout<<"ERROR -- Only Pv2 is supported right now"<<std::endl;	
+		}
 		T Jeq[3];
 		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l, theta_s, phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
 		T Jeqsph[3];
@@ -764,12 +769,12 @@ template void transform_orientation_coords<adouble>(gen_params_base<adouble> *, 
  *
  * CURRENTLY NOT RIGHT MUST FIX
  */
-template<class T>
-void map_extrinsic_angles(gen_params_base<T> *params)
-{
-	params->LISA_thetal = params->incl_angle;
-	params->LISA_phil = params->psi;
-}
+//template<class T>
+//void map_extrinsic_angles(gen_params_base<T> *params)
+//{
+//	params->LISA_thetal = params->incl_angle;
+//	params->LISA_phil = params->psi;
+//}
 
 void assign_freq_boundaries(double *freq_boundaries, 
 	double *intermediate_freqs, 
@@ -1262,8 +1267,8 @@ void Tbm_to_freq(gen_params_base<double> *params,
 }
 
 //###########################################################################
-template void map_extrinsic_angles<double>(gen_params_base<double> *);
-template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
+//template void map_extrinsic_angles<double>(gen_params_base<double> *);
+//template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);
 
 template void  time_phase_corrected<double>(double *, int, double *, gen_params_base<double> *, std::string, bool );
 template void  time_phase_corrected<adouble>(adouble *, int, adouble *, gen_params_base<adouble> *, std::string, bool);

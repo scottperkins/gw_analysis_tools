@@ -54,14 +54,14 @@ void calculate_fisher_elements_batch(double *frequency,
 	double **output,
 	double *psd);
 
-void calculate_derivatives_old(double  **amplitude_deriv, 
-       	double **phase_deriv,
-       	double *amplitude,
-       	double *frequencies,
-       	int length, 
-       	string detector, 
-       	string  gen_method,
-       	gen_params *parameters);
+//void calculate_derivatives_old(double  **amplitude_deriv, 
+//       	double **phase_deriv,
+//       	double *amplitude,
+//       	double *frequencies,
+//       	int length, 
+//       	string detector, 
+//       	string  gen_method,
+//       	gen_params *parameters);
 
 void calculate_derivatives(std::complex<double>  **response_deriv, 
        	double *frequencies,

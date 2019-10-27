@@ -135,19 +135,19 @@ void detector_response_functions_equatorial(std::string detector,
 	int length,
 	T LISA_alpha0,
 	T LISA_phi0,
-	T LISA_theta_l,
-	T LISA_phi_l,
+	T theta_j_ecl,
+	T phi_j_ecl,
 	T *Fplus,
 	T *Fcross
 	);
 
 template<class T>
-T LISA_response_plus_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t);
+T LISA_response_plus_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T t);
 template<class T>
-T LISA_response_cross_time( T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T t);
+T LISA_response_cross_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T t);
 template<class T>
-T LISA_response_plus( source_parameters<T> *params,T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f);
+T LISA_response_plus( source_parameters<T> *params,T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f);
 template<class T>
-T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_l, T phi_l, T alpha_0, T phi_0, T f);
+T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f);
 
 #endif 

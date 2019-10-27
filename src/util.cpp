@@ -702,6 +702,8 @@ template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, a
  * NEEDS TESTING
  *
  * Rotation about the vernal equinox (x-hat in both coordinate systems) by the axial tilt or obliquity
+ *
+ * From wikipedia
  */
 template<class T>
 void ecl_from_eq(T theta_eq, T phi_eq, T *theta_ecl, T *phi_ecl)

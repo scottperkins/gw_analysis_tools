@@ -76,8 +76,8 @@ int fourier_detector_response_equatorial(T *frequencies,
 	T *times,
 	T LISA_alpha0,
 	T LISA_phi0,
-	T LISA_thetal,
-	T LISA_phil,
+	T theta_j_ecl,
+	T phi_j_ecl,
 	std::string detector);
 
 template<class T>
