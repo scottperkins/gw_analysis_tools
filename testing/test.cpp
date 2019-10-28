@@ -75,6 +75,7 @@ void test38();
 void test39();
 void test40();
 void test41();
+void test42();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -106,23 +107,45 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test41();	
+	test42();	
 	return 0;
+}
+void test42()
+{
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	gsl_rng * r = gsl_rng_alloc(T);
+	gsl_rng_set(r, 1);
+	
+	int tests=2000;
+	double sphvec[3];
+	double cartvec[3];
+	for(int i = 0 ; i<tests; i++){
+		for(int j = 0 ; j<3; j++){
+			cartvec[j] = gsl_rng_uniform(r);		
+		}
+		transform_cart_sph(cartvec,sphvec);	
+		std::cout<<cartvec[0] - sphvec[0]*sin(sphvec[1]	)*cos(sphvec[2])<<" ";
+		std::cout<<cartvec[1] - sphvec[0]*sin(sphvec[1]	)*sin(sphvec[2])<<" ";
+		std::cout<<cartvec[2] - sphvec[0]*cos(sphvec[1]	)<<" ";
+		std::cout<<std::endl;	
+	}
+	gsl_rng_free(r);
 }
 void test41()
 {
 	gen_params params;
-	double RA=1, DEC=.2;
+	double RA=M_PI/2., DEC=.0;
 	double gps_time = 1185389807.3;//TESTING -- gw170729
-	params.mass1 = 8;
-	params.mass2 = 4;
-	params.spin1[0] = .01;
-	params.spin1[1] = 0;
-	params.spin2[0] = 0;
-	params.spin2[1] = 0;
-	params.spin1[2] = .1;
-	params.spin2[2] = .1;
-	params.chip = .1;
+	params.mass1 = 80;
+	params.mass2 = 40;
+	//params.spin1[0] = .01;
+	//params.spin1[1] = 0;
+	//params.spin2[0] = 0;
+	//params.spin2[1] = 0;
+	params.spin1[2] = .8;
+	params.spin2[2] = .3;
+	params.chip = .8;
 	params.phip = .1;
 	params.sky_average = false;
 	params.NSflag1 = false;
@@ -133,12 +156,14 @@ void test41()
 	params.equatorial_orientation=true;
 	params.theta_l = M_PI/3.;
 	params.phi_l = M_PI/3.;
+	//params.theta_l = 0;
+	//params.phi_l = 0;
 	params.RA = RA;
 	params.DEC = DEC;
 	//params.theta = 0;
 	//params.phi = 0;
 	params.Luminosity_Distance = 400;
-	params.phiRef = 0;
+	params.phiRef = M_PI/2.;
 	params.f_ref=20;
 	params.tc = 0;
 	params.gmst=gps_to_GMST(gps_time);
@@ -167,15 +192,14 @@ void test41()
 	params.psi = 1.44304830664865;
 	fourier_detector_response(freqs, length, response2, detector, gen_method,&params);
 
-	celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
-	params.horizon_coord=true;
-	fourier_detector_response(freqs, length, response3, detector, gen_method,&params);
+	//celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
+	//params.horizon_coord=true;
+	//params.psi = M_PI;
+	//fourier_detector_response(freqs, length, response3, detector, gen_method,&params);
 	double temptheta = params.theta;
-	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
-	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
 
 	for(int i = 0 ; i<length; i++){
-		std::cout<<(response[i]-response3[i])/response[i]<<std::endl;
+		std::cout<<(response[i]-response2[i])/response[i]<<std::endl;
 	}
 }
 void test40()

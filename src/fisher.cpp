@@ -18,6 +18,7 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_integration.h>
 #include <time.h>
+#include <fstream>
 
 
 using namespace std;
@@ -4053,6 +4054,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->NSflag1 = input_params->NSflag1;
 	waveform_params->NSflag2 = input_params->NSflag2;
 	waveform_params->shift_time = false;
+	waveform_params->shift_phase = input_params->shift_phase;
 	waveform_params->LISA_alpha0 = input_params->LISA_alpha0;
 	waveform_params->LISA_phi0 = input_params->LISA_phi0;
 	if( check_mod(gen_method)){
@@ -4389,7 +4391,6 @@ void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed)
 		delete [] grad_times;
 	}
 }
-
 /*! \brief Routine that implements GSL numerical integration to calculate the Fishers
  *
  * This can be faster than brute force calculations in fisher_autodiff, but that depends
@@ -4416,6 +4417,39 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 	double relerr/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
 	)
 {
+	fisher_autodiff_gsl_integration(frequency_bounds, generation_method, sensitivity_curve, detector, output,error, dimension, parameters, abserr, relerr, "", false);
+}
+
+/*! \brief Routine that implements GSL numerical integration to calculate the Fishers
+ *
+ * This can be faster than brute force calculations in fisher_autodiff, but that depends
+ *
+ * Trade offs: 
+ *
+ * Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.
+ *
+ * However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
+ *
+ * Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be'' to calculate the fisher
+ *
+ * Implements (GSL_INTEG_GAUSS15)
+ *
+ * Now includes option to log error instead of ending program for certain types of errors
+ */
+void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of integration in fourier space*/
+	string generation_method, /**<Method of waveform generation*/
+	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
+	string detector, /**< Detector to use for the response function*/
+	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [dimension][dimension]*/
+	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [dimension][dimension]*/
+	int dimension, /**<Dimension of the Fisher */
+	gen_params *parameters,/**< Generation parameters specifying source parameters and waveform options*/
+	double abserr,/**<Target absolute error (0 if this should be ignored -- ONE type of error must be specified)*/
+	double relerr,/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
+	std::string error_log,/**< File to write non-critical error codes to (roundoff error)*/
+	bool logerr/**<Whether or not to end program with certain error codes, or to log them and continue*/
+	)
+{
 	gsl_subroutine params_packed ;
 	params_packed.detector = detector;
 	params_packed.sensitivity_curve = sensitivity_curve;
@@ -4428,6 +4462,16 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 	double err;	
 	int id1,id2;
 	size_t np = 1e5;	//Max number of division
+	std::ofstream log_file;
+	//int *err_rows;
+	//int *err_cols;
+	bool no_err=true;
+	if(logerr){
+		log_file.open(error_log);	
+		//err_rows = new int [dimension];
+		//err_cols = new int [dimension];
+		
+	}
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 	for(int i = 0 ; i<dimension; i++){
 		for(int j = 0 ; j<=i ; j++){
@@ -4448,7 +4492,21 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			F.params = &params_packed;
 
 			std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
-			gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
+			if(logerr){
+				gsl_set_error_handler_off();
+			}
+			int errcode = gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
+			if(logerr && errcode){
+				if(errcode == 18){
+					log_file<<i<<" "<<j<<" : "<<gsl_strerror(errcode);
+					no_err = false;
+					//err_rows[
+				}
+				else{
+					std::cout<<"Error -- not roundoff"<<std::endl;;
+					exit(-1);
+				}
+			}	
 
 			output[i][j] = 4*result;
 			output[j][i] = output[i][j];
@@ -4468,6 +4526,12 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			std::cout<<"Error "<<err<<std::endl;
 			std::cout<<"intervals "<<w->size<<std::endl;
 		}
+	}
+	if(logerr){
+		log_file.close();
+	}
+	if(logerr && no_err){
+		std::remove(error_log.c_str());
 	}
 
 	gsl_integration_workspace_free (w);
@@ -4513,6 +4577,44 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	double relerr/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
 	)
 {
+	fisher_autodiff_gsl_integration_batch_mod(frequency_bounds, generation_method,
+		sensitivity_curve, detector, output, error, base_dimension, full_dimension, parameters, abserr, relerr, "",false);
+}
+/*! \brief Routine that implements GSL numerical integration to calculate the Fishers -- batch modifications version
+ *
+ * Calculates Fisher for multiple modifications at a time, neglecting covariance between modifications (set to 0 in Fisher)
+ *
+ * Modifications MUST BE evaluated at 0 for this routine to calculate correct results
+ *
+ * This can be faster than brute force calculations in fisher_autodiff, but that depends
+ *
+ * Trade offs: 
+ *
+ * Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.
+ *
+ * However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
+ *
+ * Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be'' to calculate the fisher
+ *
+ * Implements (GSL_INTEG_GAUSS15)
+ *
+ * Now includes option to log error instead of ending program for certain types of errors
+ */
+void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bounds of integration in fourier space*/
+	string generation_method, /**<Method of waveform generation*/
+	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
+	string detector, /**< Detector to use for the response function*/
+	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [full_dimension][full_dimension]*/
+	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [full_dimension][full_dimension]*/
+	int base_dimension, /**< Dimension of base model (ie GR dimension)*/
+	int full_dimension, /**< Full dimension (GR dimension + Nmod)*/
+	gen_params *parameters,/**< Generation parameters specifying source parameters and waveform options*/
+	double abserr,/**<Target absolute error (0 if this should be ignored -- ONE type of error must be specified)*/
+	double relerr,/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
+	std::string error_log,/**< File to write non-critical error codes to (roundoff error)*/
+	bool logerr/**<Whether or not to end program with certain error codes, or to log them and continue*/
+	)
+{
 	int mod_list[full_dimension-base_dimension];
 	for(int i = base_dimension; i<full_dimension; i++){
 		mod_list[i-base_dimension]=i;
@@ -4529,6 +4631,11 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	double err;	
 	int id1,id2;
 	size_t np = 1e5;	//Max number of division
+	std::ofstream log_file;
+	bool no_err = true;
+	if(logerr){
+		log_file.open(error_log);	
+	}
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 	for(int i = 0 ; i<full_dimension; i++){
 		for(int j = 0 ; j<=i ; j++){
@@ -4556,8 +4663,20 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				F.params = &params_packed;
 
 				std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
-				gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
-
+				if(logerr){
+					gsl_set_error_handler_off();
+				}
+				int errcode = gsl_integration_qag(&F, frequency_bounds[0],frequency_bounds[1], abserr, relerr, np, GSL_INTEG_GAUSS15, w, &result, &err);
+				if(logerr && errcode){
+					if(errcode == 18){
+						log_file<<i<<" "<<j<<" : "<<gsl_strerror(errcode)<<std::endl;
+						no_err = false;
+					}
+					else{
+						std::cout<<"Error -- not roundoff"<<std::endl;;
+						exit(-1);
+					}
+				}	
 				output[i][j] = 4*result;
 				output[j][i] = output[i][j];
 				error[i][j] = err;
@@ -4577,6 +4696,12 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 
 			}
 		}
+	}
+	if(logerr){
+		log_file.close();
+	}
+	if(logerr && no_err){
+		std::remove(error_log.c_str());
 	}
 
 	gsl_integration_workspace_free (w);

@@ -188,15 +188,10 @@ public:
 	T chil = 0;
 	//###################################################
 
-
-	
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
 		
-
-
-	
 };
 
 /*! \brief convience wrapper for the gen_params_base class

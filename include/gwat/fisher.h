@@ -201,6 +201,19 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds,
 	double abserr,
 	double relerr
 	);
+void fisher_autodiff_gsl_integration(double *frequency_bounds, 
+	string generation_method, 
+	string sensitivity_curve, 
+	string detector, 
+	double **output,
+	double **error,
+	int dimension, 
+	gen_params *parameters,
+	double abserr,
+	double relerr,
+	std::string error_log,
+	bool logerr
+	);
 void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, 
 	string generation_method, 
 	string sensitivity_curve, 
@@ -212,5 +225,19 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds,
 	gen_params *parameters,
 	double abserr,
 	double relerr
+	);
+void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, 
+	string generation_method, 
+	string sensitivity_curve, 
+	string detector, 
+	double **output,
+	double **error,
+	int base_dimension, 
+	int full_dimension, 
+	gen_params *parameters,
+	double abserr,
+	double relerr,
+	std::string error_log,
+	bool logerr
 	);
 #endif

@@ -135,16 +135,18 @@ double calculate_snr(std::string sensitivity_curve,
 	double *times;
 	if(detector == "LISA"){
 		times = new double[length];
-		time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
+		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
+		time_phase_corrected(times, length, frequencies, params, generation_method, false);
 	}
 	std::complex<double> *response = new std::complex<double>[length];
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);
 	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
-	delete [] response;	
 	if(detector == "LISA"){
+		//snr+=calculate_snr(sensitivity_curve, response, frequencies, length);
 		delete [] times;
-		snr*=2; //Two detectors
+		snr*=sqrt(2); //Two detectors
 	}
+	delete [] response;	
 	return snr;
 
 }
@@ -391,6 +393,11 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 		transform_orientation_coords(parameters, generation_method,detector);
 		//std::cout.precision(15);
 		//std::cout<<parameters->psi<<" "<<parameters->incl_angle<<std::endl;
+	}
+	else{
+		if(detector=="LISA"){
+			std::cout<<"ERROR -- fourier_detector_response_equatorial -- LISA currently only accepts equatorial_orientation parameters"<<std::endl;
+		}
 	}
 	status = fourier_waveform(frequencies, 
 			length,
@@ -747,9 +754,23 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		transform_cart_sph(Jeq,Jeqsph);
 		T theta_j = Jeqsph[1];
 		T phi_j= Jeqsph[2];
+
+		//Testing
+		//T dotJLeq = Leq[0] * Jeq[0] + Leq[1]*Jeq[1]+ Leq[2]*Jeq[2];
+		//T dotJLsf = JSF[2];
+		//T dotJNeq = Neq[0] * Jeq[0] + Neq[1]*Jeq[1]+ Neq[2]*Jeq[2];
+		//T dotJNeq = Neq[0] * sin(theta_j)*cos(phi_j) + Neq[1]*sin(theta_j)*sin(phi_j)+ Neq[2]*cos(theta_j);
+		//T dotJNsf = JSF[0]*sin(parameters->incl_angle)*cos(M_PI/2. - parameters->phiRef) + JSF[1]*sin(parameters->incl_angle)*sin(M_PI/2. - parameters->phiRef) + JSF[2] * cos(parameters->incl_angle);
+		//std::cout<<parameters->incl_angle<<std::endl;
+		//std::cout<<Jeq[0]<<" "<<Jeq[1]<<" "<<Jeq[2]<<std::endl;
+		//std::cout<<JSF[0]<<" "<<JSF[1]<<" "<<JSF[2]<<std::endl;
+		//std::cout<<dotJLeq<<" "<<dotJLsf<<std::endl;
+		//std::cout<<dotJNeq<<" "<<dotJNsf<<std::endl;
+
 		T iota_j;
 		if(detector!="LISA"){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
+			//std::cout<<parameters->psi<<std::endl;
 		}
 		else{
 			ecl_from_eq(theta_j, phi_j, &parameters->theta_j_ecl, &parameters->phi_j_ecl);

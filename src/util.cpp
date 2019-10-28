@@ -733,14 +733,16 @@ template void ecl_from_eq<adouble>( adouble , adouble, adouble *, adouble*);
  *
  * Needs the inclination angle and the reference phase
  * 
- * Works by constructing a third vector from the cross product of the two others, in both frames. This defines a family of 3 vectors that can uniquely determine a rotation matrix
- * from source frame to equatorial, which was done analytically in mathematica ( see the nb)
+ * Works by constructing a third vector from the cross product of the two others, in both frames. This defines a family of 3 vectors 
+ * that can uniquely determine a rotation matrix from source frame to equatorial, which was done analytically in mathematica ( see the nb)
  *
  * K = LxN
  *
  * A = {LSF,NSF, KSF}
  * 
  * B={LEQ,NEQ,KEQ}
+ *
+ * B = R.A
  *
  * R = B.A^-1
  *
@@ -755,8 +757,8 @@ void equatorial_from_SF(T *SFvec,/**< Input, source frame vector, as defined by 
 	T phi_ref,/**<Reference frequency for the waveform (defines the LAL frame ) ( orbital phase)*/
 	T *EQvec/**< [out] Out vector in equatorial coordinates*/)
 {
-	T cp = cos(phi_ref);
-	T sp = sin(phi_ref);
+	T cp = cos(M_PI/2.-phi_ref);
+	T sp = sin(M_PI/2.-phi_ref);
 	T ci = cos(iota);
 	T si = sin(iota);
 	T ctl = cos(thetal);

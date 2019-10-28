@@ -772,7 +772,7 @@ void IMRPhenomPv2<T>::PhenomPv2_JSF_from_params(gen_params_base<T> *params, T *J
 	useful_powers<T> pows;
 	IMRPhenomD<T> temp;
 	temp.precalc_powers_PI(&pows);
-	temp.precalc_powers_ins(params->f_ref, params->mass1+params->mass2, &pows);
+	temp.precalc_powers_ins(params->f_ref, (params->mass1+params->mass2)*MSOL_SEC, &pows);
 	
 	L0 = pow_int(params->mass1+params->mass2,2) * this->L2PN(eta, &pows);
 	
@@ -827,7 +827,6 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_reduced(source_parameters<T> *pa
 	T J0x_sf = m1_2*params->chip *cos(params->phip)  ;	
 	T J0y_sf = m1_2*params->chip *sin(params->phip)  ;	
 	T J0z_sf = L0 + m1_2* params->spin1z + m2_2 * params->spin2z;
-		
 	T J0 = sqrt(J0x_sf * J0x_sf + J0y_sf * J0y_sf + J0z_sf * J0z_sf ) ;
 	
 	//thetaJ_sf is the angle between J0 and L (zhat)
