@@ -389,6 +389,8 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 	std::complex<T> *waveform_cross = new std::complex<T>[length];
 	if(parameters->equatorial_orientation){
 		transform_orientation_coords(parameters, generation_method,detector);
+		//std::cout.precision(15);
+		//std::cout<<parameters->psi<<" "<<parameters->incl_angle<<std::endl;
 	}
 	status = fourier_waveform(frequencies, 
 			length,

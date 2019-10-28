@@ -73,6 +73,8 @@ void test36();
 void test37();
 void test38();
 void test39();
+void test40();
+void test41();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -104,11 +106,90 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test39();	
+	test41();	
 	return 0;
+}
+void test41()
+{
+	gen_params params;
+	double RA=1, DEC=.2;
+	double gps_time = 1185389807.3;//TESTING -- gw170729
+	params.mass1 = 8;
+	params.mass2 = 4;
+	params.spin1[0] = .01;
+	params.spin1[1] = 0;
+	params.spin2[0] = 0;
+	params.spin2[1] = 0;
+	params.spin1[2] = .1;
+	params.spin2[2] = .1;
+	params.chip = .1;
+	params.phip = .1;
+	params.sky_average = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.shift_time = false;
+	params.shift_phase = false;
+
+	params.equatorial_orientation=true;
+	params.theta_l = M_PI/3.;
+	params.phi_l = M_PI/3.;
+	params.RA = RA;
+	params.DEC = DEC;
+	//params.theta = 0;
+	//params.phi = 0;
+	params.Luminosity_Distance = 400;
+	params.phiRef = 0;
+	params.f_ref=20;
+	params.tc = 0;
+	params.gmst=gps_to_GMST(gps_time);
+	//std::string gen_method = "MCMC_dCS_IMRPhenomD_log_Full";
+	std::string gen_method = "IMRPhenomPv2";
+	std::string detector = "Hanford";
+	
+	int length = 100;
+	double freqs[length];
+	double fhigh = 1024;
+	double flow = 10;
+	double fstep = (fhigh-flow)/length;
+	for(int i =0; i<length; i++){
+		freqs[i] = flow + i*fstep;
+	}
+	std::complex<double> response[length];
+	std::complex<double> response2[length];
+	std::complex<double> response3[length];
+	double tc=2;
+	params.tc = tc;
+
+	fourier_detector_response(freqs, length, response, detector, gen_method,&params);
+
+	params.equatorial_orientation=false;
+	params.incl_angle =  0.326558168896834;
+	params.psi = 1.44304830664865;
+	fourier_detector_response(freqs, length, response2, detector, gen_method,&params);
+
+	celestial_horizon_transform(RA, DEC, gps_time, "Hanford", &params.phi, &params.theta);
+	params.horizon_coord=true;
+	fourier_detector_response(freqs, length, response3, detector, gen_method,&params);
+	double temptheta = params.theta;
+	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
+	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
+
+	for(int i = 0 ; i<length; i++){
+		std::cout<<(response[i]-response3[i])/response[i]<<std::endl;
+	}
+}
+void test40()
+{
+	double phi_eq = 285.*M_PI/180.;
+	double theta_eq = M_PI/2. - 20.*M_PI/180.;
+	double theta_ecl;
+	double phi_ecl;
+	ecl_from_eq(theta_eq, phi_eq, &theta_ecl, &phi_ecl);
+	std::cout<<M_PI/2. - theta_ecl<<" "<<phi_ecl<<std::endl;
 }
 void test39()
 {
+	
 	int length = 100;
 	double phase_in[length];
 	double phase_out[length];
@@ -317,7 +398,8 @@ void test37()
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.sky_average = false;
 	//params.phi = M_PI/3.;
 	//params.theta = M_PI/3;
@@ -1262,7 +1344,8 @@ void test28()
 	params.phic = .0;
 	double tc = 2;
 	params.Luminosity_Distance = 125.;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.incl_angle = 0.;//M_PI/3.;
 	params.sky_average=false;
 	params.bppe = new int[1];
@@ -2258,7 +2341,8 @@ void test19()
 	params.betappe= new double[params.Nmod];
 	params.betappe[0] = -1;
 	params.sky_average = false;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.incl_angle = M_PI/3.;
 	params.theta = 0;
 	params.phi = 0;
@@ -2745,7 +2829,8 @@ void test15()
 	params.phic = .0;
 	double tc = 2;
 	params.Luminosity_Distance = 125.;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.incl_angle = 0.;//M_PI/3.;
 	params.sky_average=false;
 	params.bppe = new int[1];
@@ -3087,7 +3172,8 @@ void test14()
 	params.phic = .0;
 	double tc = 2;
 	params.Luminosity_Distance = 425.;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.incl_angle = 0;
 	params.sky_average=false;
 
@@ -3257,7 +3343,8 @@ void test12()
 	params.phiRef=1;
 	params.f_ref =20;
 	params.Luminosity_Distance = 100.;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.incl_angle = 0.;//M_PI/3.;
 	params.sky_average=false;
 	params.bppe = new int[1];
@@ -3460,7 +3547,8 @@ void test11()
 	params_data.phic = .0;
 	params_data.tc = 5;
 	params_data.Luminosity_Distance = 400.;
-	params_data.NSflag = false;
+	params_data.NSflag1 = false;
+	params_data.NSflag2 = false;
 	celestial_horizon_transform(Ra, Dec, gps_time, "Hanford", &params_data.phi, &params_data.theta);	
 	//params_data.phi = 0;
 	//params_data.theta = 0;
@@ -3526,7 +3614,8 @@ void test11()
 			params.phic = .0;
 			params.tc = 0;
 			params.Luminosity_Distance = DLs[i];
-			params.NSflag = false;
+			params.NSflag1 = false;
+			params.NSflag2 = false;
 			celestial_horizon_transform(Ra, Dec, gps_time, "Hanford",&params.phi,&params.theta);	
 			params.incl_angle = 0;
 			params.sky_average=false;
@@ -4012,7 +4101,8 @@ void test8()
 	params.phic = .0;
 	double tc = 1;
 	params.Luminosity_Distance = 810.;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.incl_angle = 0;
 	params.sky_average=false;
 	//params.f_ref = 30.5011;
@@ -4238,7 +4328,8 @@ void test6()
 	//params.bppe  =new int[1];
 	//params.bppe[0] = -3;
 	//params.Nmod = 1;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;
@@ -4360,7 +4451,8 @@ void test5()
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;
@@ -4451,7 +4543,8 @@ void test4()
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.phi = 1.2;
 	params.theta =3.4;
 	params.incl_angle = 1.3;
@@ -4593,7 +4686,8 @@ void test3()
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.sky_average = false;
 	//params.phi = M_PI/3.;
 	//params.theta = M_PI/3;
@@ -4671,7 +4765,8 @@ void test1()
 	params.bppe  =new int[1];
 	params.bppe[0] = -1;
 	params.Nmod = 1;
-	params.NSflag = false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
 	params.phi = 0;
 	params.theta = 0;
 	params.incl_angle = 0;

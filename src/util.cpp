@@ -723,6 +723,7 @@ void ecl_from_eq(T theta_eq, T phi_eq, T *theta_ecl, T *phi_ecl)
 	beta = asin(sdec*ce - cdec* se*sra);
 	*theta_ecl =M_PI/2. - beta ;
 	*phi_ecl =lambda ;
+	if((*phi_ecl)<0) *phi_ecl+=2*M_PI;
 }
 template void ecl_from_eq<double>( double , double, double *, double*);
 template void ecl_from_eq<adouble>( adouble , adouble, adouble *, adouble*);

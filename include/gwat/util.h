@@ -29,7 +29,7 @@ const double MPC_SEC = 3.085677581491367278913937957796471611e22/c;
 /*!1 year in seconds*/
 const double T_year = 31557600.;
 /*! Earth's Axial tilt in radian*/
-const double AXIAL_TILT=0.46140780742;
+const double AXIAL_TILT=0.409092627749;
 
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"

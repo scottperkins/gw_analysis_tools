@@ -354,6 +354,7 @@ void celestial_horizon_transform(T RA, /**< in RAD*/
 	celestial_horizon_transform(RA,DEC, gps_time, LONG, LAT, phi, theta);
 	*phi += azimuth_offset;
 	if(*phi>2*M_PI) *phi -=2*M_PI;
+	if(*phi<2*M_PI) *phi +=2*M_PI;
 }
 
 /*! \brief Numerical derivative of the transformation
@@ -443,7 +444,7 @@ double radius_at_lat(double latitude, /**< latitude in degrees*/
  *
  * The response tensor for each of the operational detectors is precomputed in detector_util.h, but to create a new tensor, follow the outline in Anderson et al 36 PRD 63 042003 (2001) Appendix B
  *
- * For terrestial detectors
+ * For terrestial detectors -- psi is the polarization angle from a detector at earth's center, aligned with equatorial coordinates
  */
 template<class T>
 void detector_response_functions_equatorial(double D[3][3],/**< Detector Response tensor (3x3)*/
