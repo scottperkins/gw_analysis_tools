@@ -768,7 +768,11 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		//std::cout<<dotJNeq<<" "<<dotJNsf<<std::endl;
 
 		T iota_j;
-		if(detector!="LISA"){
+		if(detector==""){
+			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
+			ecl_from_eq(theta_j, phi_j, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
+		}
+		else if(detector!="LISA"){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
 			//std::cout<<parameters->psi<<std::endl;
 		}
@@ -805,6 +809,9 @@ void assign_freq_boundaries(double *freq_boundaries,
 	gen_params_base<double> *input_params, 
 	std::string generation_method)
 {
+	if(input_params->equatorial_orientation){
+		transform_orientation_coords(input_params,generation_method,"");
+	}
 	gen_params_base<adouble> internal_params;
 	transform_parameters(input_params, &internal_params);
 	source_parameters<adouble> s_param;
@@ -910,6 +917,9 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	double *integration_bounds/**< [out] bounds fo the integral shape -- [2] -- (fmin,fmax)*/
 	) 
 {
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params,generation_method,"");
+	}
 	double integration_time = 12;
 	bool lower=false, upper=false;
 	std::complex<double> response;
@@ -1105,6 +1115,9 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	double *freq_bounds/**< [out] Output bounds*/
 	)
 {
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params,generation_method,detector);
+	}
 	double fmax = sampling_freq /2.; //Nyquist limit
 	//double fmin= 0; //DC component
 	double fmin= 1e-6; //DC component
@@ -1239,6 +1252,9 @@ void Tbm_to_freq(gen_params_base<double> *params,
 	double tol 
 	)
 {
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params,generation_method,"");
+	}
 	double fpeak,fRD,fdamp ;
 	postmerger_params(params, generation_method, &fpeak, &fdamp, &fRD);
 	double time_peak, time_Tbm;

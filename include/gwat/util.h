@@ -145,8 +145,8 @@ public:
 	bool precess_reduced_flag=false;
 
 	//LISA SPECIFIC OPTIONS
-	T  LISA_alpha0;
-	T  LISA_phi0;
+	T  LISA_alpha0=0;
+	T  LISA_phi0=0;
 	/*! Polar angle in ecliptic coordinates*/
 	T  LISA_thetal;
 	T  theta_j_ecl;
