@@ -2053,6 +2053,16 @@ void fisher_autodiff_batch_mod(double *frequency,
 
 	if(local_noise){delete [] internal_noise;}
 	for(int i =0 ;i<full_dimension; i++){
+		//double *redat = new double[length];
+		//double *imagdat = new double[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response_deriv[i][j]);
+		//	imagdat[j]=imag(response_deriv[i][j]);
+		//}
+		//write_file("data/fisher/fisher_deriv_ad_real_"+std::to_string(i)+".csv",redat,length);
+		//write_file("data/fisher/fisher_deriv_ad_imag_"+std::to_string(i)+".csv",imagdat,length);
+		//delete [] redat;
+		//delete [] imagdat;
 		delete [] response_deriv[i];
 	}
 	delete [] response_deriv;
@@ -4164,8 +4174,8 @@ void calculate_fisher_elements(double *frequency,
 					std::conj(response_deriv[k][i]))
 					/psd[i]);
 			}
-			write_file("data/int_testing/full_int_"+to_string(j)+"_"+to_string(k)+".csv",integrand, length);
-			write_file("data/int_testing/full_int_f.csv",frequency, length);
+			//write_file("data/int_testing/full_int_"+to_string(j)+"_"+to_string(k)+".csv",integrand, length);
+			//write_file("data/int_testing/full_int_f.csv",frequency, length);
 			
 			output[j][k] = 4*simpsons_sum(
 						frequency[1]-frequency[0], length, integrand);	

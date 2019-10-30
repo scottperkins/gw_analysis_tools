@@ -114,7 +114,7 @@ int main(){
 void test43()
 {
 	gen_params params;
-	double RA=0*M_PI/2., DEC=-AXIAL_TILT;
+	double RA=M_PI, DEC=0.0;
 	double gps_time = 1185389807.3;//TESTING -- gw170729
 	params.mass1 = 35.1;
 	params.mass2 = 29.5;
@@ -126,15 +126,16 @@ void test43()
 	params.spin2[2] = .39;
 	params.chip = .1;
 	params.phip = .1;
-	params.sky_average = true;
+	params.sky_average = false;
 	params.NSflag1 = false;
 	params.NSflag2 = false;
 	params.shift_time = false;
-	params.shift_phase = true;
+	params.shift_phase = false;
 
 	params.equatorial_orientation=true;
-	params.theta_l = M_PI/2. - DEC+.01;
-	params.phi_l = -RA;
+	//params.theta_l = M_PI/2. - DEC+.01;
+	params.theta_l = M_PI/2.;
+	params.phi_l = .01;
 	//params.theta_l = 0;
 	//params.phi_l = 0;
 	params.RA = RA;
@@ -147,7 +148,7 @@ void test43()
 	params.tc = 0;
 	params.gmst=gps_to_GMST(gps_time);
 	//std::string gen_method = "MCMC_dCS_IMRPhenomD_log_Full";
-	std::string gen_method = "IMRPhenomD";
+	std::string gen_method = "IMRPhenomPv2";
 	
 	int length = 1000;
 	double freqs[length];
@@ -167,8 +168,9 @@ void test43()
 	double tc=2;
 	params.tc = tc;
 	transform_orientation_coords(&params, gen_method, "");
-	//std::cout<<"Inclination angle "<<params.incl_angle<<std::endl;
+	std::cout<<"Inclination angle "<<params.incl_angle<<std::endl;
 	
+	std::cout<<params.incl_angle<<" "<<params.psi<<std::endl;
 	fourier_waveform(freqs, length, hp,hc,  gen_method,&params);
 	double snr = calculate_snr("LISA_SADC_CONF",hp, freqs, length);
 	std::cout<<"SA and DC: "<<snr<<std::endl;

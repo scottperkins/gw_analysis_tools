@@ -30,6 +30,8 @@ const double MPC_SEC = 3.085677581491367278913937957796471611e22/c;
 const double T_year = 31557600.;
 /*! Earth's Axial tilt in radian*/
 const double AXIAL_TILT=0.409092627749;
+/*! 1AU in seconds*/
+const double AU_SEC = 499.005;
 
 /*! Sqrt(3) comes up often, precompute it*/
 const double ROOT_THREE = std::sqrt(3.);

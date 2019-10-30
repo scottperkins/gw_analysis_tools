@@ -324,8 +324,14 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 	if(detector == "LISA"){
 		for (int i =0; i <length; i++)
 		{
-			detector_response[i] = Fplus[i] * hplus[i] 
-						+ (Fcross[i] )*hcross[i];
+			//Doppler phase shift
+			T theta_s, phi_s, phi_t;
+			ecl_from_eq((T)(M_PI/2. - dec), ra, &theta_s, &phi_s);
+			phi_t = LISA_phi0 + 2. * M_PI * times[i] / T_year;
+			T doppler_phase_shift = 2*M_PI * frequencies[i] * AU_SEC *sin(theta_s) *cos(phi_t - phi_s);
+
+			detector_response[i] = (Fplus[i] * hplus[i] 
+						+ (Fcross[i] )*hcross[i]) * std::exp(std::complex<T>(0, - doppler_phase_shift ) );
 		}	
 		delete [] Fplus; 
 		delete [] Fcross;
@@ -735,10 +741,13 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 	if(generation_method.find("IMRPhenomP") != std::string::npos){
 		T theta_s = M_PI/2. - parameters->DEC;
 		T phi_s = parameters->RA;
-		T Neq[3] = {sin(theta_s)*cos(phi_s), sin(theta_s)*sin(phi_s), cos(theta_s)};
+		//N should point source to detector
+		T Neq[3] = {-sin(theta_s)*cos(phi_s), -sin(theta_s)*sin(phi_s), -cos(theta_s)};
+		//T Neq[3] = {sin(theta_s)*cos(phi_s), sin(theta_s)*sin(phi_s), cos(theta_s)};
 		T Leq[3] = {sin(parameters->theta_l)*cos(parameters->phi_l), 
 			sin(parameters->theta_l)*sin(parameters->phi_l), 
 			cos(parameters->theta_l)};
+		//std::cout<<"Dot product: "<<(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2])<<std::endl;
 		parameters->incl_angle = acos(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2]);
 		if(parameters->incl_angle == 0 || parameters->incl_angle == M_PI){
 			std::cout<<"ERROR -- L == N || L == -N : The source frame is ill defined, and the conversion between theta_l and phi_l to theta_j and phi_j should not be trusted"<<std::endl; 
@@ -753,7 +762,8 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 			std::cout<<"ERROR -- Only Pv2 is supported right now"<<std::endl;	
 		}
 		T Jeq[3];
-		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l, theta_s, phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
+		//equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
+		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s+M_PI), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
 		T Jeqsph[3];
 		transform_cart_sph(Jeq,Jeqsph);
 		T theta_j = Jeqsph[1];
@@ -774,10 +784,11 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		if(detector==""){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
 			ecl_from_eq(theta_j, phi_j, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
+			//std::cout<<parameters->psi<<std::endl;
+			//std::cout<<parameters->incl_angle<<std::endl;
 		}
 		else if(detector!="LISA"){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
-			//std::cout<<parameters->psi<<std::endl;
 		}
 		else{
 			ecl_from_eq(theta_j, phi_j, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
@@ -1260,10 +1271,11 @@ void Tbm_to_freq(gen_params_base<double> *params,
 	}
 	double fpeak,fRD,fdamp ;
 	postmerger_params(params, generation_method, &fpeak, &fdamp, &fRD);
-	double time_peak, time_Tbm;
+	//std::cout<<"f fpeak "<<fpeak<<std::endl;	
+	double time_peak=1, time_Tbm;
 	time_phase_corrected_autodiff(&time_peak, 1, &fpeak, params, 
 		generation_method, false);
-		
+	//std::cout<<"Time fpeak "<<time_peak<<std::endl;	
 	bool continue_search = true;
 	double Tbmp = (1+tol)*Tbm;
 	double Tbmm = (1-tol)*Tbm;
@@ -1277,6 +1289,7 @@ void Tbm_to_freq(gen_params_base<double> *params,
 			generation_method, false);
 		//T = time_peak- time;
 		T = -time_peak+ time;
+		//std::cout<<"Time  "<<time<<std::endl;	
 	
 	}
 	while(continue_search)

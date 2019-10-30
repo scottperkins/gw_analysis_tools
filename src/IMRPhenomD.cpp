@@ -457,6 +457,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		tc_shift=0;
 	}
 	tc = 2*M_PI*params->tc - tc_shift;
+	//std::cout<<f_ref<<" "<<tc<<" "<<phic<<std::endl;
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);

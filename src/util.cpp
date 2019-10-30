@@ -691,7 +691,9 @@ void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota
 {
 	//PSI only appears as 2*PSI in detector response, so atan should be fine. Periodicity of pi
 	*pol = atan(cos(DEC)*1./tan(thetaj)*1./sin(phij - RA) - 1./tan(phij - RA)*sin(DEC));
-	*iota = acos(cos(thetaj)*sin(DEC) + cos(DEC)*cos(phij - RA)*sin(thetaj));
+	//*iota = acos(cos(thetaj)*sin(DEC) + cos(DEC)*cos(phij - RA)*sin(thetaj));
+	//-Neq
+	*iota = acos(-(cos(thetaj)*sin(DEC)) - cos(DEC)*cos(phij - RA)*sin(thetaj));
 }
 template void terr_pol_iota_from_equat_sph<double>(double, double, double, double, double *, double*);
 template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, adouble, adouble *, adouble*);
