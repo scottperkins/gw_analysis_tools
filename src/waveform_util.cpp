@@ -162,8 +162,9 @@ double calculate_snr(std::string sensitivity_curve, /**< detector name - must ma
 {
         double *noise = (double *)malloc(sizeof(double)*length);
         populate_noise(frequencies,sensitivity_curve, noise,  length);
-        for (int i = 0; i< length; i++)
+        for (int i = 0; i< length; i++){
                 noise[i] = noise[i]*noise[i];
+	}
         double *integrand = (double *) malloc(sizeof(double)*length);
         for (int i = 0; i<length; i++)
                 integrand[i] = 4.* real(conj(waveform[i])*waveform[i]/noise[i]);
@@ -739,6 +740,9 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 			sin(parameters->theta_l)*sin(parameters->phi_l), 
 			cos(parameters->theta_l)};
 		parameters->incl_angle = acos(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2]);
+		if(parameters->incl_angle == 0 || parameters->incl_angle == M_PI){
+			std::cout<<"ERROR -- L == N || L == -N : The source frame is ill defined, and the conversion between theta_l and phi_l to theta_j and phi_j should not be trusted"<<std::endl; 
+		}
 		//Populate JSF here
 		T JSF[3];
 		if(generation_method.find("Pv2")!=std::string::npos){
@@ -754,7 +758,6 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		transform_cart_sph(Jeq,Jeqsph);
 		T theta_j = Jeqsph[1];
 		T phi_j= Jeqsph[2];
-
 		//Testing
 		//T dotJLeq = Leq[0] * Jeq[0] + Leq[1]*Jeq[1]+ Leq[2]*Jeq[2];
 		//T dotJLsf = JSF[2];
@@ -1272,8 +1275,8 @@ void Tbm_to_freq(gen_params_base<double> *params,
 		fmin_search = .1*fmin_search;
 		time_phase_corrected_autodiff(&time, 1, &fmin_search, params, 
 			generation_method, false);
-		T = time_peak- time;
-		
+		//T = time_peak- time;
+		T = -time_peak+ time;
 	
 	}
 	while(continue_search)
@@ -1282,7 +1285,8 @@ void Tbm_to_freq(gen_params_base<double> *params,
 		eval_freq=sqrt(fmax_search*fmin_search);
 		time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 			generation_method, true);
-		T = time_peak-time;	
+		//T = time_peak-time;	
+		T = -time_peak+time;	
 		//The function can be so steep the algorithm cannot determine a valid 
 		//frequency with the required tolerance because of floating point error
 		//check to see if the difference is at all meaningful

@@ -31,6 +31,8 @@ const double T_year = 31557600.;
 /*! Earth's Axial tilt in radian*/
 const double AXIAL_TILT=0.409092627749;
 
+/*! Sqrt(3) comes up often, precompute it*/
+const double ROOT_THREE = std::sqrt(3.);
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60

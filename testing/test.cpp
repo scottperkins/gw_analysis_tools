@@ -76,6 +76,7 @@ void test39();
 void test40();
 void test41();
 void test42();
+void test43();
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -107,8 +108,82 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test41();	
+	test43();	
 	return 0;
+}
+void test43()
+{
+	gen_params params;
+	double RA=0*M_PI/2., DEC=-AXIAL_TILT;
+	double gps_time = 1185389807.3;//TESTING -- gw170729
+	params.mass1 = 35.1;
+	params.mass2 = 29.5;
+	//params.spin1[0] = .01;
+	//params.spin1[1] = 0;
+	//params.spin2[0] = 0;
+	//params.spin2[1] = 0;
+	params.spin1[2] = .31;
+	params.spin2[2] = .39;
+	params.chip = .1;
+	params.phip = .1;
+	params.sky_average = true;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.shift_time = false;
+	params.shift_phase = true;
+
+	params.equatorial_orientation=true;
+	params.theta_l = M_PI/2. - DEC+.01;
+	params.phi_l = -RA;
+	//params.theta_l = 0;
+	//params.phi_l = 0;
+	params.RA = RA;
+	params.DEC = DEC;
+	//params.theta = 0;
+	//params.phi = 0;
+	params.Luminosity_Distance = 400;
+	params.phiRef = M_PI/2.;
+	params.f_ref=20;
+	params.tc = 0;
+	params.gmst=gps_to_GMST(gps_time);
+	//std::string gen_method = "MCMC_dCS_IMRPhenomD_log_Full";
+	std::string gen_method = "IMRPhenomD";
+	
+	int length = 1000;
+	double freqs[length];
+	//double fhigh = 1.6e-2;
+	//double flow = 1.3e-2;
+	double fhigh=1, flow;
+	Tbm_to_freq(&params, gen_method, 5.1*T_year, &flow, .01);
+	//flow = 1.5e-1;
+	std::cout<<"Low frequency cutoff "<<flow<<std::endl;
+	double fstep = (fhigh-flow)/length;
+	for(int i =0; i<length; i++){
+		freqs[i] = flow + i*fstep;
+	}
+	std::complex<double> response[length];
+	std::complex<double> hp[length];
+	std::complex<double> hc[length];
+	double tc=2;
+	params.tc = tc;
+	transform_orientation_coords(&params, gen_method, "");
+	//std::cout<<"Inclination angle "<<params.incl_angle<<std::endl;
+	
+	fourier_waveform(freqs, length, hp,hc,  gen_method,&params);
+	double snr = calculate_snr("LISA_SADC_CONF",hp, freqs, length);
+	std::cout<<"SA and DC: "<<snr<<std::endl;
+
+	params.sky_average=false;
+	double times[length];
+	time_phase_corrected_autodiff(times, length, freqs, &params, gen_method, false,NULL);	
+	std::cout<<"Integration time: "<<(times[0]-times[length-1])/T_year<<std::endl;
+	fourier_detector_response(freqs, length, response, "LISA", gen_method,&params,times);
+	for(int i = 0 ; i<length; i++){
+		//std::cout<<response[i]<<std::endl;
+	}
+	snr = calculate_snr("LISA_CONF",response, freqs, length);
+	std::cout<<"Not SA, dual channel "<<sqrt(2.)*snr<<std::endl;
+
 }
 void test42()
 {

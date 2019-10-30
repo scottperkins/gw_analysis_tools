@@ -31,13 +31,21 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
  *
  * 	Hanford_O1_fitted -- Fitted function to the O1 noise curve for Hanford
  *
- * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel
+ * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel 
+ * 		
+ * 		-- does NOT include the factor of sqrt(3)/2, which is taken care of in the response function for LISA
  *
  * 	LISA_CONF -- LISA sensitivity curve with out sky averaging for a single channel including confusion noise from the galatic white dwarf population
  *
- * 	LISA_SADC -- LISA sensitivity curve with sky averaging for a dual channel
+ * 		-- does NOT include the factor of sqrt(3)/2, which is taken care of in the response function for LISA
+ *
+ * 	LISA_SADC -- LISA sensitivity curve with sky averaging for a dual channel 
+ *
+ * 		-- does include the factor of sqrt(3)/2
  *
  * 	LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel including confusion noise from the galatic white dwarf population
+ *
+ * 		-- does include the factor of sqrt(3)/2
  */
 void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
 		std::string detector, /**< String to designate the detector noise curve to be used */
@@ -142,7 +150,7 @@ double LISA_analytic(double f)
 	double twopi = 2.*M_PI;
 	double POMS = LISA_POMS(f);
 	double PACC = LISA_PACC(f);
-	double S = 10./(3. * L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
+	double S = 1./(  L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
 	return  S;
 }
 /*! \brief Analytic function approximating the PSD for LISA sensitivity curve -- this is S, not root S 
@@ -151,7 +159,9 @@ double LISA_analytic(double f)
  *
  * arXiv:1803.01944 -- equation 13
  *
- * NOTE: may need to divide by \sqrt{3}/2.. My LISA response functions already include this factor
+ * NOTE: may need to divide by \sqrt{3}/2.. My LISA response functions already include this factor -- factor 0f 3./4. (sqrt(3)/2)**2
+ *
+ * Keeping the factor of sqrt(3)/2, since this will probably be used without the beam patter functions (that's where the factor of sqrt(3)/2 usually appears)
  */
 double LISA_analytic_SADC(double f)
 {
@@ -160,6 +170,7 @@ double LISA_analytic_SADC(double f)
 	double twopi = 2.*M_PI;
 	double POMS = LISA_POMS(f);
 	double PACC = LISA_PACC(f);
+	//double S = (3./4.)*10./(3. * L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
 	double S = 10./(3. * L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
 	return  S;
 }
@@ -613,7 +624,7 @@ T LISA_response_plus_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T 
 	T alpha1 = alpha_0;
 	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 - (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
 	//Factor of sqrt(3/2) for the equilateral triangle
-	return std::sqrt(3./2.)*out;
+	return ROOT_THREE/2.*out;
 }
 template<class T>
 T LISA_response_cross_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T t)
@@ -623,7 +634,7 @@ T LISA_response_cross_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T
 	T alpha1 = alpha_0;
 	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 + (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
 	//Factor of sqrt(3/2) for the equilateral triangle
-	return std::sqrt(3./2.)*out;
+	return ROOT_THREE/2.*out;
 }
 //###########################################################
 //Explicit Declarations of the temlates for double and adouble

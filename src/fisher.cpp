@@ -4543,8 +4543,6 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			}	
 		}
 	}
-
-
 }
 /*! \brief Routine that implements GSL numerical integration to calculate the Fishers -- batch modifications version
  *
