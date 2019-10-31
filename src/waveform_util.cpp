@@ -136,7 +136,7 @@ double calculate_snr(std::string sensitivity_curve,
 	if(detector == "LISA"){
 		times = new double[length];
 		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
-		time_phase_corrected(times, length, frequencies, params, generation_method, false);
+		time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false);
 	}
 	std::complex<double> *response = new std::complex<double>[length];
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);

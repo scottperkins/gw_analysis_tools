@@ -2497,9 +2497,12 @@ void calculate_derivatives_autodiff(double *frequency,
 					//correct for time deriv for LISA
 					if(detector == "LISA"){
 					//if(false){
+						//std::complex<double> temp=waveform_deriv[i][k];
 						waveform_deriv[i][k]+= 
 							(jacob[0][vec_param_length-1] + std::complex<double>(0,1)*jacob[1][vec_param_length-1]) //Time derivative of WF
 							* dt[i+1][k];//Derivative of time wrt source parameter
+						//if(i==5)std::cout<<waveform_deriv[i][k]-temp<<std::endl;
+						//if(i==4)std::cout<<dt[i+1][k]<<std::endl;
 						//std::cout<<waveform_deriv[i][k]<<" "<<jacob[0][vec_param_length-1]<<" "<<dt[i+1][k]<<std::endl;
 					}
 				}
