@@ -136,10 +136,23 @@ double calculate_snr(std::string sensitivity_curve,
 	if(detector == "LISA"){
 		times = new double[length];
 		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
-		time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false);
+		time_phase_corrected(times, length, frequencies, params, generation_method, false);
+		//for(int  i =0; i<length; i++){
+		//	times[i]=1;
+		//}
 	}
 	std::complex<double> *response = new std::complex<double>[length];
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);
+		//double *redat = new double[length];
+		//double *imagdat = new double[length];
+		//for(int j =0 ; j<length; j++){
+		//	redat[j]=real(response[j]);
+		//	imagdat[j]=imag(response[j]);
+		//}
+		//write_file("data/fisher/fisher_wf_real.csv",redat,length);
+		//write_file("data/fisher/fisher_wf_imag.csv",imagdat,length);
+		//delete [] redat;
+		//delete [] imagdat;
 	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
 	if(detector == "LISA"){
 		//snr+=calculate_snr(sensitivity_curve, response, frequencies, length);
@@ -795,6 +808,19 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		}
 	}
 	else{
+		T theta_s = M_PI/2. - parameters->DEC;
+		T phi_s = parameters->RA;
+		//N should point source to detector
+		T Neq[3] = {-sin(theta_s)*cos(phi_s), -sin(theta_s)*sin(phi_s), -cos(theta_s)};
+		//T Neq[3] = {sin(theta_s)*cos(phi_s), sin(theta_s)*sin(phi_s), cos(theta_s)};
+		T Leq[3] = {sin(parameters->theta_l)*cos(parameters->phi_l), 
+			sin(parameters->theta_l)*sin(parameters->phi_l), 
+			cos(parameters->theta_l)};
+		parameters->incl_angle = acos(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2]);
+		if(detector==""){
+			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC,parameters->theta_l, parameters->phi_l, &parameters->psi, &parameters->incl_angle);
+			ecl_from_eq(parameters->theta_l, parameters->phi_l, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
+		}
 		if(detector!="LISA"){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC,parameters->theta_l, parameters->phi_l, &parameters->psi, &parameters->incl_angle);
 		}
@@ -934,7 +960,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	if(params->equatorial_orientation){
 		transform_orientation_coords(params,generation_method,"");
 	}
-	double integration_time = 12;
+	double integration_time = 12;//Just for sensitivity curve
 	bool lower=false, upper=false;
 	std::complex<double> response;
 	double eval_freq;
@@ -1136,19 +1162,19 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	//double fmin= 0; //DC component
 	double fmin= 1e-6; //DC component
 	double delta_f =  1./integration_time;
-	int N = (fmax-fmin)/delta_f;
+	int N = (fmax-fmin)/(delta_f)+1;
 	double *frequencies = new double[N];
 	for(int i = 0 ; i<N; i++){
 		frequencies[i] = fmin + i*delta_f;	
 	}
 	
 	double bounds_from_band[2];
-
 	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band);
 	//std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
 	double times[2];
 	time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
-	double T_band = times[1]-times[0];
+	double T_band = -times[1]+times[0];
+	//std::cout<<T_band<<std::endl;
 
 	//Conform the output of the band calculation to the pre-set frequency grid
 	bool max_found=false, min_found=false;
@@ -1172,15 +1198,10 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	if(T_band < integration_time){
 		freq_bounds[0]=frequencies[min_id];	
 		freq_bounds[1]=frequencies[max_id];	
-		//std::cout<<"Band"<<std::endl;
-		//std::cout<<T_band/T_year<<std::endl;
-		//std::cout<<times[0]<<" "<<times[1]<<std::endl;
 	}
 	else{
 		freq_bounds[1] = frequencies[max_id];
 		bool continue_search=true;
-		//double fmax_search = freq_bounds[1];
-		//double fmin_search = freq_bounds[0];
 		double eval_freq, time;
 		int min_id_search=min_id, max_id_search=max_id, eval_id;
 		double tolerance = .1*integration_time;
@@ -1191,8 +1212,8 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 			eval_freq = frequencies[eval_id];
 			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 				generation_method, true);
-			if( 	( ( (times[1] - time) > integration_time-tolerance )  && 
-				( (times[1] - time) < integration_time+tolerance) )
+			if( 	( ( (-times[1] + time) > integration_time-tolerance )  && 
+				( (-times[1] + time) < integration_time+tolerance) )
 				||
 				(freq_bounds[1]-eval_freq < 100*delta_f) ) 
 			{
@@ -1201,10 +1222,10 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 				freq_bounds[0]=eval_freq;
 				//std::cout<<(times[1]-time)/T_year<<std::endl;
 			}
-			else if(( (times[1] - time) < (integration_time-tolerance) )){
+			else if(( (-times[1] + time) < (integration_time-tolerance) )){
 				max_id_search = eval_id;
 			}
-			else if(( (times[1] - time) > (integration_time+tolerance) )){
+			else if(( (-times[1] + time) > (integration_time+tolerance) )){
 				min_id_search = eval_id;
 			}
 

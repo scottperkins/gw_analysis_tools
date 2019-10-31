@@ -2415,6 +2415,9 @@ void calculate_derivatives_autodiff(double *frequency,
 	if(detector == "LISA"){
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
+		//for(int  i  = 0 ;  i<boundary_num;  i++){
+		//	grad_times[i] =  1;
+		//}
 		dt = allocate_2D_array(dimension+1, length);	
 		//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
 		time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
@@ -2425,6 +2428,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		//write_file("data/fisher/time_derivatives_an.csv",&dt[1],dimension, length);
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
+		//for(int  i  = 0 ;  i<length;  i++){
+		//	eval_times[i] =  1;
+		//}
 			
 	}
 	//calculate_derivative tapes

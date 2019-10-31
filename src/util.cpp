@@ -583,6 +583,15 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->chil = param_in->chil;
 	param_out->sky_average = param_in->sky_average;
 	param_out->shift_time = param_in->shift_time;
+	param_out->shift_phase = param_in->shift_phase;
+	param_out->equatorial_orientation = param_in->equatorial_orientation;
+	param_out->theta_l = param_in->theta_l;
+	param_out->phi_l = param_in->phi_l;
+	param_out->LISA_alpha0 = param_in->LISA_alpha0;
+	param_out->LISA_phi0 = param_in->LISA_phi0;
+	param_out->theta_j_ecl = param_in->theta_j_ecl;
+	param_out->phi_j_ecl = param_in->phi_j_ecl;
+	param_out->precess_reduced_flag = param_in->precess_reduced_flag;
 	
 }
 bool check_mod(std::string generation_method)
