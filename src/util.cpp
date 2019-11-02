@@ -1181,8 +1181,11 @@ void read_LOSC_PSD_file(std::string filename,
  * Output is in order of PSD columns -- string vector of detectos MUST match order of PSD cols
  *
  * Output shapes-- 
+ *
  * 		psds = [num_detectors][psd_length]
+ *
  * 		data = [num_detectors][psd_length]	
+ *
  * 		freqs = [num_detectors][psd_length]	
  *
  * Total observation time = 1/( freq[i] - freq[i-1]) (from PSD file)
