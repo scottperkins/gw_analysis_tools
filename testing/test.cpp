@@ -24,6 +24,7 @@
 #include "adolc/drivers/drivers.h"
 #include "adolc/taping.h"
 #include "limits"
+#include "gwat/mc_reject.h"
 
 #include "gwat/autocorrelation_cuda.h"
 
@@ -77,6 +78,8 @@ void test40();
 void test41();
 void test42();
 void test43();
+void test44();
+void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
@@ -108,8 +111,46 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test43();	
+	test44();	
 	return 0;
+}
+void test44()
+{
+	int dim = 3;
+	int threads = 4;
+	bool thread_safe = true;
+	double param_ranges_max[dim];
+	double param_ranges_min[dim];
+	param_ranges_max[0]=10;
+	param_ranges_max[1]=10;
+	param_ranges_max[2]=10;
+	param_ranges_min[0]=-10;
+	param_ranges_min[1]=-10;
+	param_ranges_min[2]=-10;
+	mcr_sampler sampler(test_prob, NULL,dim, param_ranges_max, param_ranges_min, threads, thread_safe);
+	int N_samples = 1e4-1;
+	double **output = allocate_2D_array(N_samples, dim);
+
+	sampler.sample_distribution(N_samples, (void **)output);
+	//for(int i = 0 ;i<10; i++){
+	//	std::cout<<output[i][0]<<" "<<output[i][1]<<" "<<output[i][2]<<std::endl;
+	//}
+	write_file("testing/data/mcr_sampling.dat",output, N_samples,dim);
+	
+	deallocate_2D_array(output, N_samples, dim);
+}
+void test_prob(double *prob, void *param, int d, int thread_id)
+{
+	double *internal_param = (double *)param;
+	double sigma1 = 2;
+	double sigma2 = 3;
+	double sigma3 = 2;
+	double sigma4 = 2;
+	double gauss1 = 1./(sqrt(M_PI*sigma1*sigma1)) * exp(-(internal_param[0]-2)*(internal_param[0]-2)/(2.*sigma1*sigma1));
+	double gauss2 = 1./(sqrt(M_PI*sigma2*sigma2)) * exp(-internal_param[1]*internal_param[1]/(2.*sigma2*sigma2));
+	double gauss3 = 1./(sqrt(M_PI*sigma3*sigma3)) * exp(-internal_param[2]*internal_param[2]/(2.*sigma3*sigma3));
+	double gauss4 = 1./(sqrt(M_PI*sigma4*sigma4)) * exp(-internal_param[0]*internal_param[2]/(2.*sigma4*sigma4));
+	*prob = gauss1*gauss2*gauss3*gauss4;
 }
 void test43()
 {

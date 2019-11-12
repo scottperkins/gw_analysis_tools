@@ -59,7 +59,8 @@ cdef class gen_params_py:
         self.params.phi = phi
         self.params.f_ref = f_ref
         self.params.phiRef = phiRef
-        self.params.NSflag = NSflag
+        self.params.NSflag1 = NSflag
+        self.params.NSflag2 = NSflag
          
 ##Computes the waveform in Fourier space
 # @param frequencies The array of frequencies to use

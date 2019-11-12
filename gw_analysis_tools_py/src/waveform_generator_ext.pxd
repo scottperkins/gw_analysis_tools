@@ -26,7 +26,8 @@ cdef extern from "util.h" :
         double incl_angle
         double theta
         double phi
-        bool NSflag
+        bool NSflag2
+        bool NSflag1
         double f_ref
         double phiRef
 
