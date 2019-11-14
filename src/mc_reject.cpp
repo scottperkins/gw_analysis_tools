@@ -17,31 +17,62 @@
 /*! \brief Class constructor for Monte Carlo Rejection Sampler
  *
  * Assumes no parallel threading
+ *
+ * ``probability'' is the function that should return the probability of a given sample
+ *
+ * ``draw_parameters'' -- NULL, if default should be used. Otherwise, this should propose another parameter set
+ *
+ * param_ranges_max/min are only used if the default draw_parameter is used, otherwise can be NULL
  */
-mcr_sampler::mcr_sampler(void (*probability)(double *prob, void *parameters, int d, int threadid), 
-	void (*draw_parameters)(void *prop_parameters, int d, int threadid, gsl_rng *r), 
-	int dimension, 
-	double *param_ranges_max, 
-	double *param_ranges_min)
+mcr_sampler::mcr_sampler(void (*probability)(double *prob, /**< [out] Probability*/
+		void *parameters, /**<Parameters*/
+		int d, /**<Dimension*/
+		int threadid /**<Thread ID*/),
+	void (*draw_parameters)(void *prop_parameters, /**<[out] Proposed Parameters*/
+		int d, /**<Dimension*/
+		int threadid, /**< Thread ID*/
+		gsl_rng *r /**< GSL random number seed*/), 
+	int dimension, /**< Dimension*/
+	double *param_ranges_max, /**< Max allowed parameters -- Shape [dimension]*/
+	double * param_ranges_min/**< Min allowed parameters -- Shape [dimension]*/
+	)
 {
 	this->init(probability, draw_parameters, dimension, param_ranges_max,param_ranges_min, 1, false);
 }
 /*! \brief Class constructor for Monte Carlo Rejection Sampler
  *
  * Allows parallel threading 
+ *
+ * ``probability'' is the function that should return the probability of a given sample
+ *
+ * ``draw_parameters'' -- NULL, if default should be used. Otherwise, this should propose another parameter set
+ *
+ * param_ranges_max/min are only used if the default draw_parameter is used, otherwise can be NULL
  */
-mcr_sampler::mcr_sampler(void (*probability)(double *prob, void *parameters, int d, int threadid), 
-	void (*draw_parameters)(void *prop_parameters, int d, int threadid, gsl_rng *r), 
-	int dimension, 
-	double *param_ranges_max, 
-	double * param_ranges_min,
-	int thread_num, 
-	bool thread_safe)
+mcr_sampler::mcr_sampler(void (*probability)(double *prob, /**< [out] Probability*/
+		void *parameters, /**<Parameters*/
+		int d, /**<Dimension*/
+		int threadid /**<Thread ID*/),
+	void (*draw_parameters)(void *prop_parameters, /**<[out] Proposed Parameters*/
+		int d, /**<Dimension*/
+		int threadid, /**< Thread ID*/
+		gsl_rng *r /**< GSL random number seed*/), 
+	int dimension, /**< Dimension*/
+	double *param_ranges_max, /**< Max allowed parameters -- Shape [dimension]*/
+	double * param_ranges_min,/**< Min allowed parameters -- Shape [dimension]*/
+	int thread_num, /**<Thread number to use*/
+	bool thread_safe /**< Bool thread safe -- true if parallel threading should be used*/)
 {
 	this->init(probability, draw_parameters, dimension, param_ranges_max,param_ranges_min, thread_num, thread_safe);
 }
-void mcr_sampler::init(void (*probability)(double *prob, void *parameters, int d, int threadid), 
-	void (*draw_parameters)(void *prop_parameters, int d, int threadid, gsl_rng *r), 
+void mcr_sampler::init(void (*probability)(double *prob, 
+		void *parameters, 
+		int d, 
+		int threadid), 
+	void (*draw_parameters)(void *prop_parameters, 
+		int d, 
+		int threadid, 
+		gsl_rng *r), 
 	int dimension, 
 	double *param_ranges_max, 
 	double * param_ranges_min,
@@ -53,10 +84,9 @@ void mcr_sampler::init(void (*probability)(double *prob, void *parameters, int d
 	this->dimension = dimension;
 	this->param_ranges_max = param_ranges_max;
 	this->param_ranges_min = param_ranges_min;
-	//this->pfn = [&probability](double *prob_out, void * param, int d, int tid){ probability(prob_out, param, d, tid);};
 	this->pfn = probability;
 	if(draw_parameters){
-		this->draw_param = [&draw_parameters](void * prop_param, int d, int tid, gsl_rng * r){ draw_parameters( prop_param, d, tid, r);};
+		this->draw_param = draw_parameters;
 	}
 	else{
 		this->draw_param=std::bind(&mcr_sampler::draw_param_standard, this, 
@@ -86,8 +116,12 @@ mcr_sampler::~mcr_sampler()
 }
 
 
-void mcr_sampler::sample_distribution(int N_samples, 
-	void **output)
+/*! \brief Main driver -- Samples from distribution that has been associated with a sampler object
+ *
+ */
+void mcr_sampler::sample_distribution(int N_samples, /*<< Number of samples to produce*/
+	void **output/**< [out] Output array shape [N_samples][dimension] Caste to void ** */
+	)
 {
 	if(!this->thread_safe){
 		int i =0 ;
@@ -125,7 +159,17 @@ void mcr_sampler::sample_distribution(int N_samples,
 		}
 	}
 }
-void mcr_sampler::draw_param_standard(void *prop_params, int d, int threadid, gsl_rng *r)
+/*! \brief Standard option to draw samples randomly 
+ *
+ * Assumes the parameter vector is of type double * 
+ *
+ * Uses the ranges provided by the user to randomly draw samples uniformly
+ */
+void mcr_sampler::draw_param_standard(void *prop_params, /**<[out] Proposed Param*/
+	int d, /**< Dimension of parameter space*/
+	int threadid, /**< Thread ID for parallel execution*/
+	gsl_rng *r /**< GSL random number seed*/
+	)
 {
 	double *tmp_params = (double *) prop_params;
 	for(int i = 0 ; i<this->dimension; i++){
@@ -136,7 +180,13 @@ void mcr_sampler::draw_param_standard(void *prop_params, int d, int threadid, gs
 
 }
 
-void mcr_sampler::sample(void *output, int threadid)
+/*! \brief Internal routine to return one accepted sample
+ *
+ * Should not be used directly by user -- couldn't make private though
+ */
+void mcr_sampler::sample(void *output, /**< [out] Output, accepted parameter set*/
+	int threadid /**< Thread id -- not currently used, but included for future proofing*/
+	)
 {
 	bool successful_draw = false;
 	double r, prob;
@@ -146,11 +196,20 @@ void mcr_sampler::sample(void *output, int threadid)
 		r = gsl_rng_uniform(this->rvec[threadid]);
 		if(r<prob){
 			successful_draw=true;
+			std::cout<<"Success"<<std::endl;
 		}
 	}
 
 }
-void parallel_sample(int threadid, mcr_job job)
+/*! \brief internal routine to draw N samples
+ *
+ * Should not be called by the user
+ *
+ * Just made this separate from the class for now for convenience
+ */
+void parallel_sample(int threadid, /*<<thread id*/
+	mcr_job job/**< mcr job -- see mc_reject.h */
+	)
 {
 	for(int i = job.starting_index ; i<job.starting_index+job.job_length; i++){
 		job.sampler->sample(job.output[i], threadid);

@@ -4,6 +4,11 @@
 #include <gsl/gsl_rng.h>
 
 
+/*! \file
+ *
+ * Header file for the Monte Carlo Rejection Sampler
+ */
+
 class mcr_sampler
 {
 public:

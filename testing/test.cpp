@@ -111,7 +111,7 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test44();	
+	test32();	
 	return 0;
 }
 void test44()

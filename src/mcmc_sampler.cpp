@@ -693,6 +693,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	}
 	assign_initial_pos(samplerptr, initial_pos,initial_status,seeding_var);	
 	delete [] initial_status;
+	std::cout<<"TEST"<<std::endl;
 	
 	//NOTE: instead of dynamics, use variance over accept ratios over \nu steps
 	//Average percent change in temperature 
