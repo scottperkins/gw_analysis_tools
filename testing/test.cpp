@@ -132,23 +132,23 @@ void test45()
 	params.spin2[2]=0.2;
 	params.phip = 0;
 	params.chip = .4;
-	params.Luminosity_Distance = 3000;
-	params.RA = .1;
-	params.DEC = 1.1;
+	params.Luminosity_Distance = 300;
+	params.RA = 1.1;
+	params.DEC = .1;
 	params.psi=1.;
 	params.tc = 2;
-	double gps_time = 100000;
+	double gps_time = 1185389807.3;//TESTING -- gw170729
 	params.gmst = gps_to_GMST(gps_time);
 	params.shift_time = false;
-	params.shift_phase = false;
+	params.shift_phase = true;
 	params.equatorial_orientation=false;
 	params.phiRef = 2;
 	params.f_ref = 20;
-	params.incl_angle = 0.;
+	params.incl_angle = 0.001;
 	params.NSflag1=false;
 	params.NSflag2=false;
 	params.sky_average=false;
-	int n_detect = 3;
+	int n_detect = 2;
 	int length = 1000;
 	std::string gen_meth="IMRPhenomPv2";
 	int lengths[3] = {length,length,length};
@@ -197,7 +197,7 @@ void test45()
 		temps[i] = temps[i-1]*c;
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
-	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
 	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
@@ -5461,18 +5461,18 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
 	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
-	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//cos \iota
-	if ((pos[1])<-M_PI || (pos[1])>M_PI){return a;}//RA
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//DEC
-	if ((pos[3])<-1 || (pos[3])>1){return a;}//DEC
-	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//cos \iota
+	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
+	if ((pos[1])<-M_PI || (pos[1])>M_PI){return a;}//DEC
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if (std::exp(pos[5])<10 || std::exp(pos[5])>10000){return a;}//DL
 	if (std::exp(pos[6])<2 || std::exp(pos[6])>100 || std::isnan(pos[4])){return a;}//chirpmass
 	if ((pos[7])<.1 || (pos[7])>.249999){return a;}//eta
 	if ((pos[8])<0 || (pos[8])>.9){return a;}//chi1 
 	if ((pos[9])<0 || (pos[9])>.9){return a;}//chi2
-	if ((pos[10])<0 || (pos[10])>.9){return a;}//chi2
-	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phi1
+	if ((pos[10])<0 || (pos[10])>.9){return a;}//chip
+	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phip
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
 	else {return pos[6]+3*pos[5];}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))

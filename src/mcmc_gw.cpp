@@ -544,7 +544,7 @@ double Log_Likelihood(std::complex<double> *data,
 
 	std::complex<double> *detect_response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	fourier_detector_response_horizon(frequencies,length,detect_response,detector, generation_method,params);
+	fourier_detector_response(frequencies,length,detect_response,detector, generation_method,params);
 	ll = Log_Likelihood_internal(data,psd,frequencies,detect_response, length, plan);
 
 	//if(ll>0){
@@ -1768,8 +1768,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	double LISA_alpha0,LISA_phi0, LISA_thetal, LISA_phil;
 	double *times=NULL;
 	//Needs some work
-	if (save_waveform){
-	//if (false){
+	//if (save_waveform){
+	if (false){
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
@@ -1852,7 +1852,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			parameters->theta=theta[i];
 			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
 			parameters->tc = tc_ref + delta_t;
-			parameters->phic = phic_ref;	
+			//parameters->phic = phic_ref;	
 			ll += Log_Likelihood(data[i], 
 					psd[i],
 					frequencies[i],
@@ -1878,7 +1878,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	else gen_params->sky_average = false;
 	gen_params->f_ref = 20;
 	gen_params->shift_time = false;
-	gen_params->shift_phase = false;
+	gen_params->shift_phase = true;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
 	gen_params->NSflag1 = false;
