@@ -1054,112 +1054,112 @@ void IMRPhenomD<T>::post_merger_variables(source_parameters<T> *source_param)
 //#################################################################################
 //Matches ADOL-C
 //#################################################################################
-//template <>
-//void IMRPhenomD<double>::calc_fring( source_parameters<double> *source_param)
-//{
-//	double chi1 = source_param->spin1z;
-//	double chi2 = source_param->spin2z;
-//	double eta = source_param->eta;
-//	double M = source_param->M;
-//	double m1 = source_param->mass1;
-//	double m2 = source_param->mass2;
-//	double eta2 = eta*eta;
-//	double eta3 = eta2*eta;
-//	double eta4 = eta3*eta;
-//	double m12 = m1*m1;
-//	double m22 = m2*m2;
-//	double M2 = M*M;
-// 	double S = (chi1*m12 + chi2*m22)/M2 ;
-//	double S2 = S*S;
-//	double S3 = S2*S;
-//	double S4 = S3*S;
-//
-//    	double S_red = S/(1.-2.*eta);
-//
-//    	double a = final_spin(source_param);
-//
-//    	double E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
-//    	       0.960673*eta3 + 3.35241*eta4 ;
-//
-//	double E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
-//		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
-//	double MWRD = (1.5251-1.1568*pow(1-a,0.1292));
-//	double MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
-//	source_param->fRD =  (1./(2*M_PI))*(MWRD)/(M*(1. - E_rad));
-//}
-//template <>
-//void IMRPhenomD<double>::calc_fdamp(source_parameters<double> *source_param)
-//{
-//	double chi1 = source_param->spin1z;
-//	double chi2 = source_param->spin2z;
-//	double eta = source_param->eta;
-//	double M = source_param->M;
-//	double m1 = source_param->mass1;
-//	double m2 = source_param->mass2;
-//	double eta2 = eta*eta;
-//	double eta3 = eta2*eta;
-//	double eta4 = eta3*eta;
-//	double m12 = m1*m1;
-//	double m22 = m2*m2;
-//	double M2 = M*M;
-// 	double S = (chi1*m12 + chi2*m22)/M2 ;
-//	double S2 = S*S;
-//	double S3 = S2*S;
-//	double S4 = S3*S;
-//
-//    	double S_red = S/(1.-2.*eta);
-//    	double a = final_spin(source_param);
-//
-//    	double E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
-//    	       0.960673*eta3 + 3.35241*eta4 ;
-//
-//	double E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
-//		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
-//	double MWRD = (1.5251-1.1568*pow(1-a,0.1292));
-//	double MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
-//	source_param->fdamp = (1./(2*M_PI))*(MWdamp)/(M*(1. - E_rad));
-//
-//}
-//#################################################################################
-//Matches LALSuite
 template <>
 void IMRPhenomD<double>::calc_fring( source_parameters<double> *source_param)
 {
-	double eta = source_param->eta;
 	double chi1 = source_param->spin1z;
 	double chi2 = source_param->spin2z;
-    	double finspin = final_spin(source_param);
-	double Erad = EradRational0815(eta,chi1,chi2);
-	gsl_interp_accel *acc = gsl_interp_accel_alloc();
-  	gsl_spline *iFring = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
-  	gsl_spline_init(iFring, QNMData_a, QNMData_fring, QNMData_length);
+	double eta = source_param->eta;
+	double M = source_param->M;
+	double m1 = source_param->mass1;
+	double m2 = source_param->mass2;
+	double eta2 = eta*eta;
+	double eta3 = eta2*eta;
+	double eta4 = eta3*eta;
+	double m12 = m1*m1;
+	double m22 = m2*m2;
+	double M2 = M*M;
+ 	double S = (chi1*m12 + chi2*m22)/M2 ;
+	double S2 = S*S;
+	double S3 = S2*S;
+	double S4 = S3*S;
 
-  	double return_val = gsl_spline_eval(iFring, finspin, acc) / (1.0 - Erad);
+    	double S_red = S/(1.-2.*eta);
 
-  	gsl_spline_free(iFring);
-  	gsl_interp_accel_free(acc);
-	
-  	source_param->fRD = return_val/source_param->M;
+    	double a = final_spin(source_param);
+
+    	double E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
+    	       0.960673*eta3 + 3.35241*eta4 ;
+
+	double E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
+		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
+	double MWRD = (1.5251-1.1568*pow(1-a,0.1292));
+	double MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
+	source_param->fRD =  (1./(2*M_PI))*(MWRD)/(M*(1. - E_rad));
 }
 template <>
 void IMRPhenomD<double>::calc_fdamp(source_parameters<double> *source_param)
 {
-	double eta = source_param->eta;
 	double chi1 = source_param->spin1z;
 	double chi2 = source_param->spin2z;
-    	double finspin = final_spin(source_param);
-	double Erad = EradRational0815(eta,chi1,chi2);
-	gsl_interp_accel *acc = gsl_interp_accel_alloc();
-	gsl_spline *iFdamp = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
-	gsl_spline_init(iFdamp, QNMData_a, QNMData_fdamp, QNMData_length);
-	
-	double return_val = gsl_spline_eval(iFdamp, finspin, acc) / (1.0 - Erad);
-	
-	gsl_spline_free(iFdamp);
-	gsl_interp_accel_free(acc);
-	source_param->fdamp =  return_val/source_param->M;
+	double eta = source_param->eta;
+	double M = source_param->M;
+	double m1 = source_param->mass1;
+	double m2 = source_param->mass2;
+	double eta2 = eta*eta;
+	double eta3 = eta2*eta;
+	double eta4 = eta3*eta;
+	double m12 = m1*m1;
+	double m22 = m2*m2;
+	double M2 = M*M;
+ 	double S = (chi1*m12 + chi2*m22)/M2 ;
+	double S2 = S*S;
+	double S3 = S2*S;
+	double S4 = S3*S;
+
+    	double S_red = S/(1.-2.*eta);
+    	double a = final_spin(source_param);
+
+    	double E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
+    	       0.960673*eta3 + 3.35241*eta4 ;
+
+	double E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
+		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
+	double MWRD = (1.5251-1.1568*pow(1-a,0.1292));
+	double MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
+	source_param->fdamp = (1./(2*M_PI))*(MWdamp)/(M*(1. - E_rad));
 
 }
+//#################################################################################
+//Matches LALSuite
+//template <>
+//void IMRPhenomD<double>::calc_fring( source_parameters<double> *source_param)
+//{
+//	double eta = source_param->eta;
+//	double chi1 = source_param->spin1z;
+//	double chi2 = source_param->spin2z;
+//    	double finspin = final_spin(source_param);
+//	double Erad = EradRational0815(eta,chi1,chi2);
+//	gsl_interp_accel *acc = gsl_interp_accel_alloc();
+//  	gsl_spline *iFring = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
+//  	gsl_spline_init(iFring, QNMData_a, QNMData_fring, QNMData_length);
+//
+//  	double return_val = gsl_spline_eval(iFring, finspin, acc) / (1.0 - Erad);
+//
+//  	gsl_spline_free(iFring);
+//  	gsl_interp_accel_free(acc);
+//	
+//  	source_param->fRD = return_val/source_param->M;
+//}
+//template <>
+//void IMRPhenomD<double>::calc_fdamp(source_parameters<double> *source_param)
+//{
+//	double eta = source_param->eta;
+//	double chi1 = source_param->spin1z;
+//	double chi2 = source_param->spin2z;
+//    	double finspin = final_spin(source_param);
+//	double Erad = EradRational0815(eta,chi1,chi2);
+//	gsl_interp_accel *acc = gsl_interp_accel_alloc();
+//	gsl_spline *iFdamp = gsl_spline_alloc(gsl_interp_cspline, QNMData_length);
+//	gsl_spline_init(iFdamp, QNMData_a, QNMData_fdamp, QNMData_length);
+//	
+//	double return_val = gsl_spline_eval(iFdamp, finspin, acc) / (1.0 - Erad);
+//	
+//	gsl_spline_free(iFdamp);
+//	gsl_interp_accel_free(acc);
+//	source_param->fdamp =  return_val/source_param->M;
+//
+//}
 //#################################################################################
 template <>
 void IMRPhenomD<adouble>::calc_fring( source_parameters<adouble> *source_param)

@@ -79,6 +79,7 @@ void test41();
 void test42();
 void test43();
 void test44();
+void test45();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
@@ -111,8 +112,105 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test32();	
+	test45();	
 	return 0;
+}
+void test45()
+{
+	int dim = 12;
+	int threads = 10;
+	gen_params params;
+	params.mass1 = 50;
+	params.mass2 = 30;
+	double chirp = calculate_chirpmass(params.mass1,params.mass2);
+	double eta = calculate_eta(params.mass1,params.mass2);
+	//params.spin1[0]=0.5;
+	//params.spin1[1]=0.7;
+	params.spin1[2]=0.3;
+	//params.spin2[0]=0.2;
+	//params.spin2[1]=0.1;
+	params.spin2[2]=0.2;
+	params.phip = 0;
+	params.chip = .4;
+	params.Luminosity_Distance = 3000;
+	params.RA = .1;
+	params.DEC = 1.1;
+	params.psi=1.;
+	params.tc = 2;
+	double gps_time = 100000;
+	params.gmst = gps_to_GMST(gps_time);
+	params.shift_time = false;
+	params.shift_phase = false;
+	params.equatorial_orientation=false;
+	params.phiRef = 2;
+	params.f_ref = 20;
+	params.incl_angle = 0.;
+	params.NSflag1=false;
+	params.NSflag2=false;
+	params.sky_average=false;
+	int n_detect = 3;
+	int length = 1000;
+	std::string gen_meth="IMRPhenomPv2";
+	int lengths[3] = {length,length,length};
+	double fmax = 1024;
+	double fmin = 10;
+	double delta_f = (fmax-fmin)/(length-1);
+	double **freqs= new double*[n_detect];
+	double **psds= new double*[n_detect];
+	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
+	std::complex<double> **data = new std::complex<double>*[n_detect];
+	for(int i = 0 ; i<n_detect; i++){
+		data[i] = new std::complex<double>[length];
+		freqs[i] = new double[length];
+		psds[i] = new double[length];
+		for(int j = 0 ; j<length; j++){
+			freqs[i][j] = fmin + j*delta_f;
+		}	
+		populate_noise(freqs[i],"aLIGO_analytic", psds[i],lengths[i]);
+		for(int j = 0 ; j<length; j++){
+			psds[i][j]=pow_int(psds[i][j],2);
+		}
+		fourier_detector_response(freqs[i], lengths[i],data[i], detectors[i], gen_meth, &params, (double *)NULL);
+	}
+
+	
+	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
+	double *seeding_var = NULL;
+	int swp_freq = 5;
+	bool pool = true;
+	bool show_prog=true;
+	int Nmod= 0;
+	int *bppe = NULL;
+	std::string statf = "testing/data/mcmc_pv2_stat.txt";
+	std::string chainf = "testing/data/mcmc_pv2_chain.csv";
+	std::string checkf = "testing/data/mcmc_pv2_check.csv";
+	int chain_n=10;
+	int max_thermo=10;
+	int steps =5e4;
+	int stepsalloc =3e4;
+	double temps[chain_n];
+	int t0 = 1e3;
+	int nu = 1e2;
+	double c = 1.2;
+	temps[0]=1;
+	for(int i = 1 ; i<chain_n; i++){
+		temps[i] = temps[i-1]*c;
+	}
+	double ***output=allocate_3D_array(chain_n, steps, dim);
+	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+
+	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
+	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
+	
+	deallocate_3D_array(output,chain_n, steps,dim);
+	for(int i = 0 ; i<n_detect; i++){
+		delete [] data[i];
+		delete [] freqs[i];
+		delete [] psds[i];
+	}
+	delete [] data;
+	delete [] freqs;
+	delete [] psds;
 }
 void test44()
 {
@@ -5363,25 +5461,47 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
 	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
-	if ((pos[0])<-1 || (pos[0])>1){return a;}//cos \iota
-	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}//RA
-	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}//DEC
-	if (std::exp(pos[3])<10 || std::exp(pos[3])>10000){return a;}//DL
-	if (std::exp(pos[4])<2 || std::exp(pos[4])>100 || std::isnan(pos[4])){return a;}//chirpmass
-	if ((pos[5])<.1 || (pos[5])>.249999){return a;}//eta
-	if ((pos[6])<0 || (pos[6])>.9){return a;}//chi1 
-	if ((pos[7])<0 || (pos[7])>.9){return a;}//chi2
-	if ((pos[8])<0 || (pos[8])>M_PI){return a;}//theta1
-	if ((pos[9])<0 || (pos[9])>M_PI){return a;}//theta2
-	if ((pos[10])<0 || (pos[10])>2*M_PI){return a;}//phi1
-	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phi2
-	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phiRef
-	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//polarization angle
+	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//cos \iota
+	if ((pos[1])<-M_PI || (pos[1])>M_PI){return a;}//RA
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//DEC
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//DEC
+	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//cos \iota
+	if (std::exp(pos[5])<10 || std::exp(pos[5])>10000){return a;}//DL
+	if (std::exp(pos[6])<2 || std::exp(pos[6])>100 || std::isnan(pos[4])){return a;}//chirpmass
+	if ((pos[7])<.1 || (pos[7])>.249999){return a;}//eta
+	if ((pos[8])<0 || (pos[8])>.9){return a;}//chi1 
+	if ((pos[9])<0 || (pos[9])>.9){return a;}//chi2
+	if ((pos[10])<0 || (pos[10])>.9){return a;}//chi2
+	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phi1
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	//else {return pos[4]+3*pos[3];}
-	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
-		+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
+	else {return pos[6]+3*pos[5];}
+	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
+	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 }
+//double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
+//{
+//	double a = -std::numeric_limits<double>::infinity();
+//	//Flat priors across physical regions
+//	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
+//	if ((pos[0])<-1 || (pos[0])>1){return a;}//cos \iota
+//	if ((pos[1])<0 || (pos[1])>2*M_PI){return a;}//RA
+//	if ((pos[2])<-M_PI/2. || (pos[2])>M_PI/2.){return a;}//DEC
+//	if (std::exp(pos[3])<10 || std::exp(pos[3])>10000){return a;}//DL
+//	if (std::exp(pos[4])<2 || std::exp(pos[4])>100 || std::isnan(pos[4])){return a;}//chirpmass
+//	if ((pos[5])<.1 || (pos[5])>.249999){return a;}//eta
+//	if ((pos[6])<0 || (pos[6])>.9){return a;}//chi1 
+//	if ((pos[7])<0 || (pos[7])>.9){return a;}//chi2
+//	if ((pos[8])<0 || (pos[8])>M_PI){return a;}//theta1
+//	if ((pos[9])<0 || (pos[9])>M_PI){return a;}//theta2
+//	if ((pos[10])<0 || (pos[10])>2*M_PI){return a;}//phi1
+//	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phi2
+//	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phiRef
+//	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//polarization angle
+//	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
+//	//else {return pos[4]+3*pos[3];}
+//	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
+//		+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
+//}
 double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id)
 {
 	double a = -std::numeric_limits<double>::infinity();
