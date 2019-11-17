@@ -86,6 +86,7 @@ double test_lp(double *pos, int dim);
 double test_lp_nts(double *pos, int dim, int chain_id);
 double test_lp_GW(double *pos, int dim, int chain_id);
 double test_lp_GW_Pv2(double *pos, int dim, int chain_id);
+double test_lp_GW_D(double *pos, int dim, int chain_id);
 double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id);
 double test_lp_GW_Pv2_dCS_root_alpha(double *pos, int dim, int chain_id);
 double test_lp_GW_7dim(double *pos, int dim, int chain_id);
@@ -124,6 +125,8 @@ void test45()
 	params.mass2 = 30;
 	double chirp = calculate_chirpmass(params.mass1,params.mass2);
 	double eta = calculate_eta(params.mass1,params.mass2);
+	std::cout<<"CHIRP: "<<chirp<<std::endl;
+	std::cout<<"eta: "<<eta<<std::endl;
 	//params.spin1[0]=0.5;
 	//params.spin1[1]=0.7;
 	params.spin1[2]=0.3;
@@ -133,10 +136,11 @@ void test45()
 	params.phip = 0;
 	params.chip = .4;
 	params.Luminosity_Distance = 300;
-	params.RA = 1.1;
-	params.DEC = .1;
+	params.RA = 3.1;
+	params.DEC = 0;
 	params.psi=1.;
-	params.tc = 2;
+	double tcref = 1;
+	params.tc = tcref;
 	double gps_time = 1185389807.3;//TESTING -- gw170729
 	params.gmst = gps_to_GMST(gps_time);
 	params.shift_time = false;
@@ -148,8 +152,8 @@ void test45()
 	params.NSflag1=false;
 	params.NSflag2=false;
 	params.sky_average=false;
-	int n_detect = 2;
-	int length = 1000;
+	int n_detect = 3;
+	int length = 4000;
 	std::string gen_meth="IMRPhenomPv2";
 	int lengths[3] = {length,length,length};
 	double fmax = 1024;
@@ -157,8 +161,11 @@ void test45()
 	double delta_f = (fmax-fmin)/(length-1);
 	double **freqs= new double*[n_detect];
 	double **psds= new double*[n_detect];
-	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
+	std::string detectors[3] = {"Hanford","Virgo","Livingston"};
 	std::complex<double> **data = new std::complex<double>*[n_detect];
+	double phis[n_detect];
+	double thetas[n_detect];
+	celestial_horizon_transform(params.RA, params.DEC, gps_time, "Hanford", &phis[0], &thetas[0]);
 	for(int i = 0 ; i<n_detect; i++){
 		data[i] = new std::complex<double>[length];
 		freqs[i] = new double[length];
@@ -170,24 +177,30 @@ void test45()
 		for(int j = 0 ; j<length; j++){
 			psds[i][j]=pow_int(psds[i][j],2);
 		}
+			
+		celestial_horizon_transform(params.RA, params.DEC, gps_time, detectors[i], &phis[i], &thetas[i]);
+		params.tc = tcref+ DTOA(thetas[0], thetas[i], "Hanford",detectors[i]); 
+		std::cout<<DTOA(thetas[0], thetas[i], "Hanford",detectors[i])<<std::endl;
 		fourier_detector_response(freqs[i], lengths[i],data[i], detectors[i], gen_meth, &params, (double *)NULL);
 	}
 
 	
 	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
+	//double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2]};
 	double *seeding_var = NULL;
 	int swp_freq = 5;
 	bool pool = true;
+	//threads=1;
 	bool show_prog=true;
 	int Nmod= 0;
 	int *bppe = NULL;
 	std::string statf = "testing/data/mcmc_pv2_stat.txt";
 	std::string chainf = "testing/data/mcmc_pv2_chain.csv";
 	std::string checkf = "testing/data/mcmc_pv2_check.csv";
-	int chain_n=10;
-	int max_thermo=10;
+	int chain_n=40;
+	int max_thermo=40;
 	int steps =5e4;
-	int stepsalloc =3e4;
+	int stepsalloc =4e4;
 	double temps[chain_n];
 	int t0 = 1e3;
 	int nu = 1e2;
@@ -197,7 +210,7 @@ void test45()
 		temps[i] = temps[i-1]*c;
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
-	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
 	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
@@ -5455,6 +5468,24 @@ double test_lp_GW(double *pos, int dim, int chain_id)
 	else {return pos[0] ;}
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10);}
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10)-(pos[1]-.24)*(pos[1]-.24)/(2*.010);}
+}
+double test_lp_GW_D(double *pos, int dim, int chain_id)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
+	if ((pos[1])<-M_PI || (pos[1])>M_PI){return a;}//DEC
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	if (std::exp(pos[4])<10 || std::exp(pos[4])>10000){return a;}//DL
+	if (std::exp(pos[5])<2 || std::exp(pos[5])>100 || std::isnan(pos[4])){return a;}//chirpmass
+	if ((pos[6])<.1 || (pos[6])>.249999){return a;}//eta
+	if ((pos[7])<0 || (pos[7])>.9){return a;}//chi1 
+	if ((pos[8])<0 || (pos[8])>.9){return a;}//chi2
+	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
+	else {return pos[5]+3*pos[4];}
+	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
+	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
+
 }
 double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 {

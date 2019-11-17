@@ -446,7 +446,7 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 {
 	std::complex<double> *response =
 		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-	fourier_detector_response_horizon(frequencies, length, response, detector, generation_method, params);
+	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
 	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,
 				response, length, plan, tc, phic);
 	free(response);
@@ -1768,6 +1768,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	double LISA_alpha0,LISA_phi0, LISA_thetal, LISA_phil;
 	double *times=NULL;
 	//Needs some work
+	//#######################################################################3
 	//if (save_waveform){
 	if (false){
 		std::complex<double> *hplus = 
@@ -1779,6 +1780,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		std::complex<double> *response = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
+		parameters->tc=0;
 		fourier_waveform(frequencies[0], data_length[0], 
 			hplus, hcross,generation_method, parameters);
 		//std::cout<<hplus[100]<<" "<<hcross[100]<<std::endl;	
@@ -1803,6 +1805,9 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		if(generation_method.find("IMRPhenomD")==std::string::npos){
 			phic_ref=0;
 		}
+		//if(generation_method.find("IMRPhenomD")!=std::string::npos){
+		//	parameters->phiRef=phic_ref;
+		//}
 		for(int i=1; i < num_detectors; i++){
 			celestial_horizon_transform(RA,DEC, gps_time, 
 					mcmc_detectors[i], &phi[i], &theta[i]);
@@ -1819,7 +1824,9 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 				hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
 				parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
 			for(int j =0; j<data_length[i]; j++){
-				response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
+				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
+				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]) + phic_ref);	
+				response[j] *=std::exp(std::complex<double>(0,2*M_PI*parameters->tc*frequencies[i][j]) + phic_ref);	
 			}
 			ll += Log_Likelihood_internal(data[i], 
 					psd[i],
@@ -1831,6 +1838,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		}
 		free(hplus); free(hcross); free(response);
 	}
+	//#######################################################################3
 	//Generally, the data lengths don't have to be the same
 	else{
 		//Referecne detector first
@@ -1852,7 +1860,10 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			parameters->theta=theta[i];
 			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
 			parameters->tc = tc_ref + delta_t;
-			//parameters->phic = phic_ref;	
+		
+			if(generation_method.find("IMRPhenomD")!=std::string::npos){
+				parameters->phic = phic_ref;	
+			}
 			ll += Log_Likelihood(data[i], 
 					psd[i],
 					frequencies[i],
