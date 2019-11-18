@@ -1801,7 +1801,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->spin2[2] = avec_parameters[9];
 				a_params->chip = avec_parameters[10];
 				a_params->phip = avec_parameters[11];
-				a_params->tc=1;
+				a_params->tc=0;
 
 			}
 			else{

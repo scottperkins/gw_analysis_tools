@@ -137,7 +137,7 @@ void test45()
 	params.chip = .4;
 	params.Luminosity_Distance = 300;
 	params.RA = 3.1;
-	params.DEC = 0;
+	params.DEC = .5;
 	params.psi=1.;
 	double tcref = 1;
 	params.tc = tcref;
@@ -148,12 +148,12 @@ void test45()
 	params.equatorial_orientation=false;
 	params.phiRef = 2;
 	params.f_ref = 20;
-	params.incl_angle = 0.001;
+	params.incl_angle = 0.3;
 	params.NSflag1=false;
 	params.NSflag2=false;
 	params.sky_average=false;
 	int n_detect = 3;
-	int length = 4000;
+	int length = 2000;
 	std::string gen_meth="IMRPhenomPv2";
 	int lengths[3] = {length,length,length};
 	double fmax = 1024;
@@ -197,8 +197,8 @@ void test45()
 	std::string statf = "testing/data/mcmc_pv2_stat.txt";
 	std::string chainf = "testing/data/mcmc_pv2_chain.csv";
 	std::string checkf = "testing/data/mcmc_pv2_check.csv";
-	int chain_n=40;
-	int max_thermo=40;
+	int chain_n=20;
+	int max_thermo=20;
 	int steps =5e4;
 	int stepsalloc =4e4;
 	double temps[chain_n];
@@ -210,7 +210,7 @@ void test45()
 		temps[i] = temps[i-1]*c;
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
-	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
 	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
@@ -5477,7 +5477,7 @@ double test_lp_GW_D(double *pos, int dim, int chain_id)
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if (std::exp(pos[4])<10 || std::exp(pos[4])>10000){return a;}//DL
-	if (std::exp(pos[5])<2 || std::exp(pos[5])>100 || std::isnan(pos[4])){return a;}//chirpmass
+	if (std::exp(pos[5])<2 || std::exp(pos[5])>100 ){return a;}//chirpmass
 	if ((pos[6])<.1 || (pos[6])>.249999){return a;}//eta
 	if ((pos[7])<0 || (pos[7])>.9){return a;}//chi1 
 	if ((pos[8])<0 || (pos[8])>.9){return a;}//chi2

@@ -1889,7 +1889,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	else gen_params->sky_average = false;
 	gen_params->f_ref = 20;
 	gen_params->shift_time = false;
-	gen_params->shift_phase = true;
+	gen_params->shift_phase = false;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
 	gen_params->NSflag1 = false;
