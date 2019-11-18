@@ -31,6 +31,7 @@
 #include <gsl/gsl_interp.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -80,6 +81,9 @@ void test42();
 void test43();
 void test44();
 void test45();
+void test46();
+void test47();
+void test48();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
@@ -113,8 +117,228 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test45();	
+	test48();	
 	return 0;
+}
+void test48()
+{
+
+	int lenA = 2e1;
+	int lenB = 4e1;
+	int lenD = 3e1;
+	int lenE = 5e1;
+	int **A = new int*[lenA];
+	int **B = new int*[lenB];
+	int **D = new int*[lenD];
+	int **E = new int*[lenE];
+	int *Avals = new int[lenA];
+	int *Bvals = new int[lenB];
+	int *Dvals = new int[lenD];
+	int *Evals = new int[lenE];
+	int lenC,lenG;
+	for(int i = 0 ; i<lenA; i++){
+		Avals[i] = 3*i;
+		A[i] = &Avals[i];
+	}
+	for(int i = 0 ; i<lenB; i++){
+		Bvals[i] = i;
+		B[i] = &Bvals[i];
+	}
+	for(int i = 0 ; i<lenD; i++){
+		Dvals[i] = 4*i;
+		D[i] = &Dvals[i];
+	}
+	for(int i = 0 ; i<lenE; i++){
+		Evals[i] = 6*i;
+		E[i] = &Evals[i];
+	}
+	int **C = new int*[lenE];
+	//int **G = new int*[lenE];
+	int **G =new int*[lenE];
+	clock_t start = clock();
+	list_intersect_ptrs(A,lenA,B,lenB,C,&lenC);
+	for(int i = 0 ; i<lenC ;i++){
+		std::cout<<*C[i]<<std::endl;
+	}
+	std::cout<<std::endl;
+	//G = C;
+	for(int i = 0 ; i<lenC; i++){
+		G[i] = C[i];	
+		//std::cout<<*G[i]<<std::endl;
+	}
+	std::cout<<G<<std::endl;
+	std::cout<<*G<<std::endl;
+	std::cout<<G[1]<<std::endl;
+	std::cout<<&(*(G[1]))<<std::endl;
+	std::cout<<&((*G)[1])<<std::endl;
+	std::cout<<*(G[1])<<std::endl;
+	std::cout<<(*G)[1]<<std::endl;
+	lenG=lenC;
+	//for(int i = 0 ; i<lenG; i++){
+	//	std::cout<<G[i]<<std::endl;
+	//}
+	list_intersect_ptrs(G,lenG,D,lenD,C,&lenC);
+	//list_intersect(D,lenD,*G,lenG,C,&lenC);
+	for(int i = 0 ; i<lenC ;i++){
+		std::cout<<*C[i]<<std::endl;
+	}
+	//std::cout<<std::endl;
+	//G = C;
+	for(int i = 0 ; i<lenC; i++){
+		G[i] = C[i];	
+		//std::cout<<G[i]<<" "<<C[i]<<std::endl;
+		//std::cout<<(*G)[i]<<" "<<C[i]<<std::endl;
+		//std::cout<<*G[i]<<std::endl;
+	}
+	std::cout<<G<<std::endl;
+	std::cout<<*G<<std::endl;
+	std::cout<<G[1]<<std::endl;
+	std::cout<<&(*(G[1]))<<std::endl;
+	std::cout<<&((*G)[1])<<std::endl;
+	std::cout<<*(G[1])<<std::endl;
+	std::cout<<(*G)[1]<<std::endl;
+	lenG=lenC;
+	//for(int i = 0 ; i<lenG; i++){
+	//	std::cout<<G[i]<<std::endl;
+	//}
+	list_intersect_ptrs(G,lenG,E,lenE,C,&lenC);
+	////list_intersect(E,lenE,*G,lenG,C,&lenC);
+
+	std::cout<<lenC<<" "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
+	for(int i = 0 ; i<lenC ;i++){
+		std::cout<<*C[i]<<std::endl;
+	}
+	////for(int i = 0 ; i<lenA ;i++){
+	////	std::cout<<A[i]<<std::endl;
+	////}
+	//start = clock();
+	//std::vector<int> v(lenB);                      // 0  0  0  0  0  0  0  0  0  0
+	//std::vector<int>::iterator it;
+	//it=std::set_intersection (A, A+lenA, B, B+lenB, v.begin());
+	//v.resize(it-v.begin());
+	//std::cout<<v.size()<<" "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
+	//delete [] A;
+	//delete [] B;
+	//delete [] C;
+}
+void test47()
+{
+	int a[2] = {7,8};
+	int b[2] = {10,11};
+	int **c = new int *[2];
+	int **d = new int *[2];
+	c[0] = &a[0];
+	c[1] = &a[1];
+	d[0] = c[0];
+	d[1] = c[1];
+	c[0] = &b[0];	
+	c[1] = &b[1];	
+	c[1] = &(*d[0]);
+	std::cout<<*d[0]<<std::endl;
+	std::cout<<*d[1]<<std::endl;
+	std::cout<<*c[0]<<std::endl;
+	std::cout<<*c[1]<<std::endl;
+	d[0] = c[0];
+	d[1] = c[1];
+	c[0] =&(* d[1]);
+	c[1] = &a[0];
+	std::cout<<*c[0]<<std::endl;
+	std::cout<<*c[1]<<std::endl;
+	
+
+}
+void test46()
+{
+
+	int lenA = 2e1;
+	int lenB = 4e1;
+	int lenD = 3e1;
+	int lenE = 5e1;
+	int *A = new int[lenA];
+	int *B = new int[lenB];
+	int *D = new int[lenD];
+	int *E = new int[lenE];
+	int lenC,lenG;
+	for(int i = 0 ; i<lenA; i++){
+		A[i] = 3*i;
+	}
+	for(int i = 0 ; i<lenB; i++){
+		B[i] = i;
+	}
+	for(int i = 0 ; i<lenD; i++){
+		D[i] = 4*i;
+	}
+	for(int i = 0 ; i<lenE; i++){
+		E[i] = 6*i;
+	}
+	int **C = new int*[lenE];
+	//int **G = new int*[lenE];
+	int **G =new int*[lenE];
+	clock_t start = clock();
+	list_intersect(A,lenA,B,lenB,C,&lenC);
+	for(int i = 0 ; i<lenC ;i++){
+		std::cout<<*C[i]<<std::endl;
+	}
+	std::cout<<std::endl;
+	G = C;
+	//for(int i = 0 ; i<lenC; i++){
+	//	G[i] = C[i];	
+	//	//std::cout<<*G[i]<<std::endl;
+	//}
+	std::cout<<G<<std::endl;
+	std::cout<<*G<<std::endl;
+	std::cout<<G[1]<<std::endl;
+	std::cout<<&(*(G[1]))<<std::endl;
+	std::cout<<&((*G)[1])<<std::endl;
+	std::cout<<*(G[1])<<std::endl;
+	std::cout<<(*G)[1]<<std::endl;
+	lenG=lenC;
+	//for(int i = 0 ; i<lenG; i++){
+	//	std::cout<<G[i]<<std::endl;
+	//}
+	list_intersect(*G,lenG,D,lenD,C,&lenC);
+	//list_intersect(D,lenD,*G,lenG,C,&lenC);
+	for(int i = 0 ; i<lenC ;i++){
+		std::cout<<*C[i]<<std::endl;
+	}
+	std::cout<<std::endl;
+	G = C;
+	//for(int i = 0 ; i<lenC; i++){
+	//	G[i] = C[i];	
+	//	//std::cout<<G[i]<<" "<<C[i]<<std::endl;
+	//	//std::cout<<(*G)[i]<<" "<<C[i]<<std::endl;
+	//	//std::cout<<*G[i]<<std::endl;
+	//}
+	std::cout<<G<<std::endl;
+	std::cout<<*G<<std::endl;
+	std::cout<<G[1]<<std::endl;
+	std::cout<<&(*(G[1]))<<std::endl;
+	std::cout<<&((*G)[1])<<std::endl;
+	std::cout<<*(G[1])<<std::endl;
+	std::cout<<(*G)[1]<<std::endl;
+	lenG=lenC;
+	//for(int i = 0 ; i<lenG; i++){
+	//	std::cout<<G[i]<<std::endl;
+	//}
+	list_intersect(*G,lenG,E,lenE,C,&lenC);
+	//list_intersect(E,lenE,*G,lenG,C,&lenC);
+
+	std::cout<<lenC<<" "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
+	for(int i = 0 ; i<lenC ;i++){
+		std::cout<<*C[i]<<std::endl;
+	}
+	//for(int i = 0 ; i<lenA ;i++){
+	//	std::cout<<A[i]<<std::endl;
+	//}
+	start = clock();
+	std::vector<int> v(lenB);                      // 0  0  0  0  0  0  0  0  0  0
+	std::vector<int>::iterator it;
+	it=std::set_intersection (A, A+lenA, B, B+lenB, v.begin());
+	v.resize(it-v.begin());
+	std::cout<<v.size()<<" "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
+	delete [] A;
+	delete [] B;
+	//delete [] C;
 }
 void test45()
 {

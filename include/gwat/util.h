@@ -411,6 +411,11 @@ double cosmology_interpolation_function(double x, double *coeffs, int interp_deg
 double cosmology_lookup(std::string cosmology);
 
 template<class T>
+void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC);
+template<class T>
+void list_intersect(T *A, int lenA,T *B,int lenB, T **C,int *lenC);
+
+template<class T>
 bool check_list(T j, T *list, int length);
 template<class T>
 int check_list_id(T j, T *list, int length);
