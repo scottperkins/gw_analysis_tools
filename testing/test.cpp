@@ -157,6 +157,7 @@ void test48()
 	int **G =new int*[lenE];
 	clock_t start = clock();
 	list_intersect_ptrs(A,lenA,B,lenB,C,&lenC);
+	std::cout<<lenC<<std::endl;
 	for(int i = 0 ; i<lenC ;i++){
 		std::cout<<*C[i]<<std::endl;
 	}
@@ -166,13 +167,13 @@ void test48()
 		G[i] = C[i];	
 		//std::cout<<*G[i]<<std::endl;
 	}
-	std::cout<<G<<std::endl;
-	std::cout<<*G<<std::endl;
-	std::cout<<G[1]<<std::endl;
-	std::cout<<&(*(G[1]))<<std::endl;
-	std::cout<<&((*G)[1])<<std::endl;
-	std::cout<<*(G[1])<<std::endl;
-	std::cout<<(*G)[1]<<std::endl;
+	//std::cout<<G<<std::endl;
+	//std::cout<<*G<<std::endl;
+	//std::cout<<G[1]<<std::endl;
+	//std::cout<<&(*(G[1]))<<std::endl;
+	//std::cout<<&((*G)[1])<<std::endl;
+	//std::cout<<*(G[1])<<std::endl;
+	//std::cout<<(*G)[1]<<std::endl;
 	lenG=lenC;
 	//for(int i = 0 ; i<lenG; i++){
 	//	std::cout<<G[i]<<std::endl;
@@ -190,13 +191,13 @@ void test48()
 		//std::cout<<(*G)[i]<<" "<<C[i]<<std::endl;
 		//std::cout<<*G[i]<<std::endl;
 	}
-	std::cout<<G<<std::endl;
-	std::cout<<*G<<std::endl;
-	std::cout<<G[1]<<std::endl;
-	std::cout<<&(*(G[1]))<<std::endl;
-	std::cout<<&((*G)[1])<<std::endl;
-	std::cout<<*(G[1])<<std::endl;
-	std::cout<<(*G)[1]<<std::endl;
+	//std::cout<<G<<std::endl;
+	//std::cout<<*G<<std::endl;
+	//std::cout<<G[1]<<std::endl;
+	//std::cout<<&(*(G[1]))<<std::endl;
+	//std::cout<<&((*G)[1])<<std::endl;
+	//std::cout<<*(G[1])<<std::endl;
+	//std::cout<<(*G)[1]<<std::endl;
 	lenG=lenC;
 	//for(int i = 0 ; i<lenG; i++){
 	//	std::cout<<G[i]<<std::endl;

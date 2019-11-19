@@ -321,7 +321,6 @@ void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC)
 	int i_C = 0;
 	while(i_A<lenA && i_B < lenB){
 		if(*(A[i_A]) == *(B[i_B])){
-			std::cout<<A[i_A]<<" "<<B[i_B]<<std::endl;
 			C[i_C] = (A[i_A]);
 			i_C++;
 			i_A++;
@@ -329,11 +328,9 @@ void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC)
 		}
 		else{
 			if(*(A[i_A])>*(B[i_B])){
-				std::cout<<"B "<<B[i_B]<<std::endl;
 				i_B++;
 			}
 			else{
-				std::cout<<"A "<<A[i_A]<<std::endl;
 				i_A++;
 			}
 		}
