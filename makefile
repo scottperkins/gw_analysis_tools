@@ -5,7 +5,7 @@ ODIRCUDA=build_cuda
 IDIR=include/gwat/
 LDIR_LOCAL=lib
 
-PYDIR=gw_analysis_tools_py
+PYDIR=gwatpy
 PYSRC=mcmc_routines_ext.pyx waveform_generator_ext.pyx
 PROJ_PYSRC=$(addprefix $(PYDIR)/src/,$(PYSRC))
 
@@ -54,7 +54,7 @@ DEPS:= $(shell find $(IDIR) -type f -name *.$(IEXT))
 IEXTCUDA := hu
 DEPSCUDA:= $(shell find $(IDIR) -type f -name *.$(IEXTCUDA))
 
-CC=g++-7
+CC=g++-9
 #CC=g++
 CCCUDA=nvcc
 #CC=nvcc

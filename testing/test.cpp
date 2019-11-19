@@ -117,7 +117,7 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test48();	
+	test7();	
 	return 0;
 }
 void test48()
@@ -4741,13 +4741,13 @@ void test7()
 	std::string statfilename = "testing/data/neil_mcmc_statistics1.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint1.csv";
 	
-	int numThreads = 10;
-	bool pool = true;
+	int numThreads = 1;
+	bool pool = false;
 	
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,fisher_neil_proj3,statfilename,chainfile,autocorrfile );	
 	//auto lambda = [](double *x, int dim){return log_neil_proj3(x,dim);};
 	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile );	
-	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp_nts, log_neil_proj3_nts,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 
 	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
@@ -5628,10 +5628,12 @@ adouble dist(adouble *pos, int dimension){
 }
 double log_neil_proj3_nts (double *c,int dim, int chainid)
 {
+	std::cout<<chainid<<std::endl;
 	return log_neil_proj3(c,dim);
 }
 double log_neil_proj3 (double *c,int dim)
 {
+	std::cout<<"ll"<<std::endl;
 	double x = c[0];
 	double y = c[1];
 	double prefactor = 16./(M_PI*3.);
