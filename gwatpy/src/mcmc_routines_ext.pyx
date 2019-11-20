@@ -17,7 +17,8 @@ import sys
 #sys.path.append(scriptpath)
 #sys.path.append(scriptpath+"/src")
 cimport mcmc_routines_ext
-cimport waveform_generator_ext
+#cimport waveform_generator_ext
+#import waveform_generator_ext
 #from waveform_generator_ext import gen_params_py
 
 
