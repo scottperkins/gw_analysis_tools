@@ -5628,12 +5628,10 @@ adouble dist(adouble *pos, int dimension){
 }
 double log_neil_proj3_nts (double *c,int dim, int chainid)
 {
-	std::cout<<chainid<<std::endl;
 	return log_neil_proj3(c,dim);
 }
 double log_neil_proj3 (double *c,int dim)
 {
-	std::cout<<"ll"<<std::endl;
 	double x = c[0];
 	double y = c[1];
 	double prefactor = 16./(M_PI*3.);
