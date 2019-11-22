@@ -1443,15 +1443,20 @@ void write_file(std::string filename, /**<Filename of output file, relative to e
 	std::ofstream out_file;
 	out_file.open(filename);
 	out_file.precision(15);
-	for(int i =0; i<rows; i++){
-		for(int j=0; j<cols;j++){
-			if(j==cols-1)
-				out_file<<input[i][j]<<std::endl;
-			else
-				out_file<<input[i][j]<<" , ";
+	if(out_file){
+		for(int i =0; i<rows; i++){
+			for(int j=0; j<cols;j++){
+				if(j==cols-1)
+					out_file<<input[i][j]<<std::endl;
+				else
+					out_file<<input[i][j]<<" , ";
+			}
 		}
+		out_file.close();
 	}
-	out_file.close();
+	else{
+		std::cout<<"ERROR -- Could not open file"<<std::endl;
+	}
 }
 /*! \brief Utility to write 1D array to file
  *
@@ -1465,10 +1470,14 @@ void write_file(std::string filename, /**<Filename of output file, relative to e
 	std::ofstream out_file;
 	out_file.open(filename);
 	out_file.precision(15);
-	for(int j =0; j<length; j++)
-		out_file<<input[j]<<std::endl;
-	out_file.close();
-
+	if(out_file){
+		for(int j =0; j<length; j++)
+			out_file<<input[j]<<std::endl;
+		out_file.close();
+	}
+	else{
+		std::cout<<"ERROR -- Could not open file"<<std::endl;
+	}
 }
 
 /*! \brief Utility to transform from celestial coord RA and DEC to local horizon coord for detector response functions
