@@ -3,6 +3,11 @@
 #include "IMRPhenomD.h"
 #include "util.h"
 
+/*! \file 
+ *
+ * Header file for gIMRPhenomD
+ */
+
 template<class T>
 class gIMRPhenomD: public IMRPhenomD<T>
 {

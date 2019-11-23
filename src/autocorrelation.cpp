@@ -4,64 +4,121 @@
 #include <iostream>
 
 /*! Max length of array to use serial calculation*/
-#define MAX_SERIAL 200000
+#define MAX_SERIAL 20000
 
 /*! \file 
  *
  * Turns out calculating the autocorrelation is more complicated if you want to do it fast, so it gets its own file now
+ *
+ * First row is the starting index of that segment
+ *
+ * Second row is the length of that segment
+ *
+ * If cumulative, the ac is calculated in the following format:
+ *
+ * |-------|
+ * 
+ * |--------------|
+ * 
+ * |-------------------------|
+ *
+ * ...
+ *
+ * Else, the ac is calculated as :
+ *
+ * |-------|
+ * 
+ *         |------|
+ * 
+ *                 |--------|
+ *
+ * ...
  */
 void write_auto_corr_file_from_data_file(std::string autocorr_filename,
-				std::string datafile,
-				int length, /**< length of input data*/
-				int dimension, /**< dimension of data*/
-				int num_segments, /**< number of segements to compute the auto-corr length*/
-				double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
-				int num_threads /**< Total number of threads to use*/
-				)
+	std::string datafile,
+	int length, /**< length of input data*/
+	int dimension, /**< dimension of data*/
+	int num_segments, /**< number of segements to compute the auto-corr length*/
+	double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
+	int num_threads, /**< Total number of threads to use*/
+	bool cumulative /**< Boolean to calculate the autocorrelation cumulatively*/
+	)
 {
 	double **chains = allocate_2D_array(length, dimension);
 	read_file(datafile, chains, length, dimension);
 	write_auto_corr_file_from_data(autocorr_filename, chains, length, 
-			dimension, num_segments, target_corr, num_threads);	
+			dimension, num_segments, target_corr, num_threads,cumulative);	
 	deallocate_2D_array(chains,length, dimension);
 }
 /*! \brief Writes the autocorrelation file from a data array
+ *
+ * First row is the starting index of that segment
+ *
+ * Second row is the length of that segment
+ *
+ * If cumulative, the ac is calculated in the following format:
+ *
+ * |-------|
+ * 
+ * |--------------|
+ * 
+ * |-------------------------|
+ *
+ * ...
+ *
+ * Else, the ac is calculated as :
+ *
+ * |-------|
+ * 
+ *         |------|
+ * 
+ *                 |--------|
+ *
+ * ...
  */
 void write_auto_corr_file_from_data(std::string autocorr_filename,/**<Name of the file to write the autocorrelation to */
-				double **data,/**< Input chains*/
-				int length, /**< length of input data*/
-				int dimension, /**< dimension of data*/
-				int num_segments, /**< number of segements to compute the auto-corr length*/
-				double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
-				int num_threads /**< Total number of threads to use*/
-				)
+	double **data,/**< Input chains*/
+	int length, /**< length of input data*/
+	int dimension, /**< dimension of data*/
+	int num_segments, /**< number of segements to compute the auto-corr length*/
+	double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
+	int num_threads, /**< Total number of threads to use*/
+	bool cumulative /**< Boolean to calculate the autocorrelation cumulatively*/
+	)
 {
-	double **autocorrout= allocate_2D_array(dimension+1, num_segments);//double just because thats what my internal functions are written for (write_file)
+	double **autocorrout= allocate_2D_array(dimension+2, num_segments);//double just because thats what my internal functions are written for (write_file)
 	int **autocorr= (int **)malloc(sizeof(int *)*dimension);
 	for(int i =0 ; i<dimension; i++)
 		autocorr[i] = (int *)malloc(sizeof(int)*num_segments);
 
 	auto_corr_from_data(data, length, dimension, autocorr, 	
-			num_segments, target_corr, num_threads);
+			num_segments, target_corr, num_threads,cumulative);
 
 	int step = length/(num_segments);
 	for(int i; i<num_segments; i++){
-		autocorrout[0][i] = (i+1)*step;	
+		if(cumulative){
+			autocorrout[0][i] = 0;	
+			autocorrout[1][i] = step*(i+1);	
+		}
+		else{
+			autocorrout[0][i] = (i)*step;	
+			autocorrout[1][i] = step;	
+		}
 	}
 
 	for(int i =0 ; i<dimension; i++){
 		for(int j =0 ; j<num_segments; j++){
-			autocorrout[i+1][j] = autocorr[i][j];
+			autocorrout[i+2][j] = autocorr[i][j];
 		}
 	}
 	
-	write_file(autocorr_filename, autocorrout, dimension+1, num_segments);
+	write_file(autocorr_filename, autocorrout, dimension+2, num_segments);
 
 	for(int i =0 ; i<dimension; i++){
 		free(autocorr[i]);
 	}
 	free(autocorr);
-	deallocate_2D_array(autocorrout, dimension+1, num_segments);
+	deallocate_2D_array(autocorrout, dimension+2, num_segments);
 }
 				
 
@@ -70,6 +127,26 @@ void write_auto_corr_file_from_data(std::string autocorr_filename,/**<Name of th
  * Takes in the data from a sampler, shape data[N_steps][dimension]
  *
  * Outputs lags that correspond to the target_corr -- shape output[dimension][num_segments]
+ *
+ * If cumulative, the ac is calculated in the following format:
+ *
+ * |-------|
+ * 
+ * |--------------|
+ * 
+ * |-------------------------|
+ *
+ * ...
+ *
+ * Else, the ac is calculated as :
+ *
+ * |-------|
+ * 
+ *         |------|
+ * 
+ *                 |--------|
+ *
+ * ...
  */
 void auto_corr_from_data(double **data, /**<Input data */
 			int length, /**< length of input data*/
@@ -77,7 +154,8 @@ void auto_corr_from_data(double **data, /**<Input data */
 			int **output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
 			int num_segments, /**< number of segements to compute the auto-corr length*/
 			double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
-			int num_threads /**< Total number of threads to use*/
+			int num_threads, /**< Total number of threads to use*/
+			bool cumulative /**< Boolean to calculate the autocorrelation cumulatively*/
 			)
 {
 	//transpose data
@@ -106,13 +184,24 @@ void auto_corr_from_data(double **data, /**<Input data */
 	
 	int step = length/(num_segments);
 	int lengths[num_segments];
+	int startids[num_segments];
+	int endids[num_segments];
 	int fftw_lengths[num_segments];
 	fftw_outline *plans_forward= (fftw_outline *)malloc(sizeof(fftw_outline)*num_segments);
 	fftw_outline *plans_reverse= (fftw_outline *)malloc(sizeof(fftw_outline)*num_segments);
 	threaded_ac_jobs_serial jobs_s[num_segments*dimension];
 	threaded_ac_jobs_fft jobs_f[num_segments*dimension];
 	for(int i =0 ; i<num_segments; i++){
-		lengths[i] = (i+1)*step;
+		if(cumulative){
+			lengths[i] = (i+1)*step;
+			startids[i] = 0;
+			endids[i] = lengths[i];
+		}
+		else{
+			lengths[i] = step;
+			startids[i] = (i)*step;
+			endids[i] = (i+1)*step;
+		}
 	}
 	{	
 		{
@@ -125,6 +214,8 @@ void auto_corr_from_data(double **data, /**<Input data */
 						jobs_s[j*num_segments + i].length = &lengths[i];
 						jobs_s[j*num_segments + i].target = &target_corr;		
 						jobs_s[j*num_segments + i].dimension = j;		
+						jobs_s[j*num_segments + i].start = &startids[i];		
+						jobs_s[j*num_segments + i].end = &endids[i];
 						jobs_s[j*num_segments + i].lag = &output[j][i];
 						serial_jobs.enqueue(jobs_s[j*num_segments + i]);
 					}
@@ -148,6 +239,8 @@ void auto_corr_from_data(double **data, /**<Input data */
 					jobs_f[j*num_segments + i].length = &lengths[i];
 					jobs_f[j*num_segments + i].target = &target_corr;		
 					jobs_f[j*num_segments + i].dimension = j;		
+					jobs_f[j*num_segments + i].start = &startids[i];		
+					jobs_f[j*num_segments + i].end =&endids[i];
 					jobs_f[j*num_segments + i].lag = &output[j][i];
 					jobs_f[j*num_segments + i].planforward = &plans_forward[i];
 					jobs_f[j*num_segments + i].planreverse = &plans_reverse[i];
@@ -172,7 +265,7 @@ void auto_corr_from_data(double **data, /**<Input data */
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job)
 {
 	double *ac = (double *)malloc(sizeof(double)*(*job.length));	
-	auto_correlation_spectral(job.data[job.dimension], *job.length, ac, job.planforward, job.planreverse);
+	auto_correlation_spectral(job.data[job.dimension], *job.length, *job.start,ac, job.planforward, job.planreverse);
 	for(int i =0; i<*job.length; i++){
 		if(ac[i]<*job.target){
 			*job.lag = i;
@@ -181,14 +274,13 @@ void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job)
 	}
 	free(ac);
 }
-/*! \brief Internal routine to calculate an serial autocorrelation job
+/*! \brief Internal routine to calculate a serial autocorrelation job
  *
  * Allows for a more efficient use of the threadPool class
  */
 void threaded_ac_serial(int thread, threaded_ac_jobs_serial job)
 {
-	
-	*job.lag = auto_correlation_serial(job.data[job.dimension], *job.length, 0, *job.target);
+	*job.lag = auto_correlation_serial(job.data[job.dimension], *job.length, *job.start, *job.target);
 }
 
 /*! \brief Calculates the autocorrelation of a chain with the brute force method
@@ -200,12 +292,13 @@ double auto_correlation_serial(double *arr, /**< input array*/
 		){
 	double sum =0;
 	int k;	
-	for(k =start ; k< length; k++){
+	double end = start + length;
+	for(k =start ; k< end; k++){
 		sum+= arr[k];
 	}
 	double ave = sum/length;
 	double gamma_0_sum = 0;
-	for (k=start;k<length;k++){
+	for (k=start;k<end;k++){
 		 gamma_0_sum += (arr[k] - ave) * (arr[k] - ave);
 	}
 	double gamma_0 = gamma_0_sum/length;
@@ -215,10 +308,11 @@ double auto_correlation_serial(double *arr, /**< input array*/
 	double gamma_sum, gamma;
 	int counter = 0;
 	int h = 1;
+	//int h = start;
 	while(rho>target){	
 		h++;
 		gamma_sum=0;
-		for(k=start;k<(length-h);k++){
+		for(k=start;k<(end-h);k++){
 			gamma_sum += (arr[k+h] - ave)*(arr[k]-ave);
 		}
 

@@ -21,7 +21,8 @@ cdef extern from "autocorrelation.h" :
                 int dimension,
                 int num_segments,
                 double target_corr,
-                int num_threads)
+                int num_threads,
+                bool cumulative)
 
     void write_auto_corr_file_from_data( 
                 string autocorr_filename,
@@ -30,7 +31,8 @@ cdef extern from "autocorrelation.h" :
                 int dimension,
                 int num_segments,
                 double target_corr,
-                int num_threads)
+                int num_threads,
+                bool cumulative)
 
 cdef extern from "mcmc_gw.h" :
     struct fftw_outline:

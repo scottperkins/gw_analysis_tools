@@ -107,9 +107,9 @@ $(TESTDIR):
 
 Doxyfile: $(OBJECTS) $(OBJECTSCUDA) $(PROJ_PYLIB)
 	doxygen Doxyfile
-	make -C docs/latex
-	cp docs/latex/refman.pdf ./
-	make -C docs/latex clean
+	#make -C docs/latex
+	#cp docs/latex/refman.pdf ./
+	#make -C docs/latex clean
 	 
 	
  

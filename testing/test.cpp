@@ -2288,7 +2288,7 @@ void test26()
 	double target_corr = .01;
 
 	//write_file_auto_corr_from_data_file_accel(autocorrfile, chainfile,dimension,n_steps,segs,target_corr);
-	write_auto_corr_file_from_data_file(autocorrfile, chainfile,n_steps,dimension,segs,target_corr, numThreads);
+	write_auto_corr_file_from_data_file(autocorrfile, chainfile,n_steps,dimension,segs,target_corr, numThreads,false);
 
 	deallocate_3D_array(output, chain_N, n_steps, dimension);
 	for(int i =0; i< n_steps; i++){
@@ -2369,7 +2369,7 @@ void test24()
 	double wstart, wend;
 	wstart = omp_get_wtime();
 	//auto_corr_from_data(data, length, dim, ac, segs, accuracy, num_threads);
-	write_auto_corr_file_from_data(acfile, data, length, dim, segs, accuracy, num_threads);
+	write_auto_corr_file_from_data(acfile, data, length, dim, segs, accuracy, num_threads,false);
 	wend = omp_get_wtime();
 	std::cout<<"DONE: TIME: "<<wend-wstart<<std::endl;
 	//for(int i =0 ; i<dim; i++){
@@ -2768,7 +2768,7 @@ void test20()
 	double target_corr = .01;
 
 	//write_file_auto_corr_from_data_file_accel(autocorrfile, chainfile,dimension,n_steps,segs,target_corr);
-	write_auto_corr_file_from_data_file(autocorrfile, chainfile,n_steps,dimension,segs,target_corr, numThreads);
+	write_auto_corr_file_from_data_file(autocorrfile, chainfile,n_steps,dimension,segs,target_corr, numThreads,false);
 
 	deallocate_3D_array(output, chain_N, n_steps, dimension);
 	for(int i =0; i< n_steps; i++){

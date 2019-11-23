@@ -46,8 +46,8 @@ class comparator_ac_fft
 public:
 	bool operator()(threaded_ac_jobs_fft t, threaded_ac_jobs_fft k)
 	{
-		int t_length = t.end - t.start;
-		int k_length = k.end - k.start;
+		int t_length = *t.end - *t.start;
+		int k_length = *k.end - *k.start;
 		//return false;
 		if(t_length<k_length){ return true;}
 		else{ return true;}
@@ -62,16 +62,16 @@ class comparator_ac_serial
 public:
 	bool operator()(threaded_ac_jobs_serial t, threaded_ac_jobs_serial k)
 	{
-		int t_length = t.end - t.start;
-		int k_length = k.end - k.start;
+		int t_length = *t.end - *t.start;
+		int k_length = *k.end - *k.start;
 		//return false;
 		if(t_length<k_length){ return true;}
 		else{ return true;}
 	}	
 };
-void write_auto_corr_file_from_data_file(std::string autocorr_filename,std::string datafile,int length, int dimension, int num_segments,double target_corr, int num_threads);
-void write_auto_corr_file_from_data(std::string autocorr_filename,double **data,int length, int dimension, int num_segments,double target_corr, int num_threads);
-void auto_corr_from_data(double **data, int length, int dimension, int **output, int num_segments,  double target_corr, int num_threads);
+void write_auto_corr_file_from_data_file(std::string autocorr_filename,std::string datafile,int length, int dimension, int num_segments,double target_corr, int num_threads,bool cumulative);
+void write_auto_corr_file_from_data(std::string autocorr_filename,double **data,int length, int dimension, int num_segments,double target_corr, int num_threads,bool cumulative);
+void auto_corr_from_data(double **data, int length, int dimension, int **output, int num_segments,  double target_corr, int num_threads,bool cumulative);
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job);
 void threaded_ac_serial(int thread, threaded_ac_jobs_serial job);
 double auto_correlation_serial(double *arr, int length, int start, double target);

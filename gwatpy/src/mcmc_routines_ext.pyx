@@ -39,8 +39,9 @@ def write_auto_corr_file_from_data_file_py(
         int dimension,
         int num_segments,
         double target_corr,
-        int num_threads):
-    return write_auto_corr_file_from_data_file(autocorr_filename, datafile,length, dimension, num_segments, target_corr,num_threads)
+        int num_threads,
+        bool cumulative):
+    return write_auto_corr_file_from_data_file(autocorr_filename, datafile,length, dimension, num_segments, target_corr,num_threads,cumulative)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -51,12 +52,13 @@ def write_auto_corr_file_from_data_py(
         int dimension,
         int num_segments,
         double target_corr,
-        int num_threads):
+        int num_threads,
+        bool cumulative):
     #Not ideal -- have to wrap the memview in a real c++ array
     cdef double **temparr = <double **>malloc(sizeof(double*) * length)
     for i in np.arange(length):
         temparr[i] = &data[i,0]
-    write_auto_corr_file_from_data(autocorr_filename, temparr,length, dimension, num_segments, target_corr,num_threads)
+    write_auto_corr_file_from_data(autocorr_filename, temparr,length, dimension, num_segments, target_corr,num_threads,cumulative)
     #for i in np.arange(length):
     #    free(temparr[i])
     free(temparr)

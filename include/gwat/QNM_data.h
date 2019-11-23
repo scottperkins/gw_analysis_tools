@@ -1,6 +1,13 @@
 #ifndef QNM_DATA_H
 #define QNM_DATA_H
 
+/*! \file 
+ *
+ * Interpolation data from taken directly from LALSuite
+ *
+ * TODO: Add reference to the webpage
+ */
+
 static const int QNMData_length = 1003;
 static const double QNMData_a[] = { -1.0, -0.999, -0.998,-0.996,         -0.994, -0.992, -0.99, -0.988, -0.986, -0.984, -0.982, \
 -0.98, -0.978, -0.976, -0.974, -0.972, -0.97, -0.968, -0.966, -0.964, \

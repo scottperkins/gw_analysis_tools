@@ -301,7 +301,7 @@ void continue_RJPTMCMC_MH_internal(std::string start_checkpoint_file,/**< File f
 		std::cout<<"Calculating Autocorrelation: "<<std::endl;
 		int segments = 50;
 		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads);
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
 	}
 	//###########################################################
 	acend =clock();
@@ -536,7 +536,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		std::cout<<"Calculating Autocorrelation: "<<std::endl;
 		int segments = 50;
 		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->max_dim,segments, target_corr, samplerptr->num_threads);
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->max_dim,segments, target_corr, samplerptr->num_threads, false);
 	}
 	//###########################################################
 	acend =clock();
@@ -1169,7 +1169,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 		std::cout<<"Calculating Autocorrelation: "<<std::endl;
 		int segments = 50;
 		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads);
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
 	}
 	//###########################################################
 	acend =clock();
@@ -1310,7 +1310,7 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 		std::cout<<"Calculating Autocorrelation: "<<std::endl;
 		int segments = 50;
 		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads);
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
 	}
 	//###########################################################
 	acend =clock();
