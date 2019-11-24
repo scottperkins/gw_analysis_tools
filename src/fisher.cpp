@@ -1613,15 +1613,16 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					parameters[3]=cos(input_params->incl_angle);
 				}
 				parameters[4]=input_params->phiRef;
-				parameters[5]=log(input_params->Luminosity_Distance);
-				parameters[6]=log(calculate_chirpmass(input_params->mass1, 
+				parameters[5]=input_params->tc;
+				parameters[6]=log(input_params->Luminosity_Distance);
+				parameters[7]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				parameters[7]=calculate_eta(input_params->mass1, 
+				parameters[8]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[8]=input_params->spin1[2];
-				parameters[9]=input_params->spin2[2];
-				parameters[10]=input_params->chip;
-				parameters[11]=input_params->phip;
+				parameters[9]=input_params->spin1[2];
+				parameters[10]=input_params->spin2[2];
+				parameters[11]=input_params->chip;
+				parameters[12]=input_params->phip;
 
 			}
 			else{
@@ -1779,11 +1780,11 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	if(!a_params->sky_average){
 		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(exp(avec_parameters[6]),
-					avec_parameters[7]);
-				a_params->mass2 = calculate_mass2(exp(avec_parameters[6]),
-					avec_parameters[7]);
-				a_params->Luminosity_Distance = exp(avec_parameters[5]);
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
+					avec_parameters[8]);
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
+					avec_parameters[8]);
+				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = avec_parameters[1];
 				if(a_params->equatorial_orientation){
@@ -1797,11 +1798,11 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->phiRef = avec_parameters[4];
 				//a_params->chi1_l = avec_parameters[8];
 				//a_params->chi2_l = avec_parameters[9];
-				a_params->spin1[2] = avec_parameters[8];
-				a_params->spin2[2] = avec_parameters[9];
-				a_params->chip = avec_parameters[10];
-				a_params->phip = avec_parameters[11];
-				a_params->tc=0;
+				a_params->spin1[2] = avec_parameters[9];
+				a_params->spin2[2] = avec_parameters[10];
+				a_params->chip = avec_parameters[11];
+				a_params->phip = avec_parameters[12];
+				a_params->tc=avec_parameters[5];
 
 			}
 			else{

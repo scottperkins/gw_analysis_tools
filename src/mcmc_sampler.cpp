@@ -327,7 +327,7 @@ void continue_RJPTMCMC_MH_internal(std::string start_checkpoint_file,/**< File f
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != "")
-		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output[0], samplerptr->param_status[0]);
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,true);
 
 	if(end_checkpoint_file !=""){
 		write_checkpoint_file(samplerptr, end_checkpoint_file);
@@ -562,7 +562,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != ""){
-		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output[0], samplerptr->param_status[0]);
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps, true);
 	}
 
 	if(checkpoint_file !=""){
@@ -939,7 +939,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != "")
-		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
+
 	delete [] old_temps;
 	delete [] samplerptr->A;
 	//If chains were added or removed, set chain N back to max for deallocation
@@ -1195,7 +1196,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != "")
-		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
 
 	if(checkpoint_file !=""){
 		write_checkpoint_file(samplerptr, checkpoint_file);
@@ -1336,7 +1337,7 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 		write_stat_file(samplerptr, statistics_filename);
 	
 	if(chain_filename != "")
-		write_file(chain_filename, samplerptr->output[0], samplerptr->N_steps,samplerptr->dimension);
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
 
 	if(end_checkpoint_file !=""){
 		write_checkpoint_file(samplerptr, end_checkpoint_file);

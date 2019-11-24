@@ -2029,22 +2029,44 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 }
 /*! \brief Utility to write out the parameters and status of a sampler to a file
  */
-void write_output_file(std::string file, int step_num, int max_dimension, double **output, int **status)
+void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status,int chain_N,double *temps,bool RJ)
 {
 	std::ofstream out_file;
 	out_file.open(file);
 	out_file.precision(15);
-	for(int i =0; i<step_num; i++){
-		for(int j=0; j<max_dimension;j++){
-			out_file<<output[i][j]<<" , ";
-		}
-		for(int j = 0 ; j<max_dimension; j++){
-			if(j==max_dimension-1)
-				out_file<<status[i][j]<<std::endl;
-			else
-				out_file<<status[i][j]<<" , ";
+	//Loop through chains
+	for(int k = 0 ; k<chain_N; k++){
+		//If cold, write out
+		if(temps[k] == 1){
+			//loop through steps in chain
+			for(int i =0; i<step_num; i++){
+				//if RJ, write out status too
+				if(RJ){
+					for(int j=0; j<max_dimension;j++){
+						out_file<<output[k][i][j]<<" , ";
+					}
+					for(int j = 0 ; j<max_dimension; j++){
+						if(j==max_dimension-1)
+							out_file<<status[k][i][j]<<std::endl;
+						else
+							out_file<<status[k][i][j]<<" , ";
+					}
+				}
+				//Else, just parameters
+				else{
+					for(int j=0; j<max_dimension;j++){
+						if(j == max_dimension -1 ){
+							out_file<<output[k][i][j]<<std::endl;
+						}
+						else{
+							out_file<<output[k][i][j]<<" , ";
+						}
+					}
+				}
+			}
 		}
 	}
 	out_file.close();
 
 }
+

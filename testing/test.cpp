@@ -117,7 +117,8 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test7();	
+	//test7();	
+	test45();	
 	return 0;
 }
 void test48()
@@ -343,7 +344,7 @@ void test46()
 }
 void test45()
 {
-	int dim = 12;
+	int dim = 13;
 	int threads = 10;
 	gen_params params;
 	params.mass1 = 50;
@@ -410,7 +411,7 @@ void test45()
 	}
 
 	
-	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
+	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,tcref,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
 	//double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2]};
 	double *seeding_var = NULL;
 	int swp_freq = 5;
@@ -419,13 +420,14 @@ void test45()
 	bool show_prog=true;
 	int Nmod= 0;
 	int *bppe = NULL;
-	std::string statf = "testing/data/mcmc_pv2_stat.txt";
-	std::string chainf = "testing/data/mcmc_pv2_chain.csv";
+	std::string statf = "testing/data/mcmc_pv2_stat2.txt";
+	std::string chainf = "testing/data/mcmc_pv2_chain2.csv";
 	std::string checkf = "testing/data/mcmc_pv2_check.csv";
+	std::string checkf2 = "testing/data/mcmc_pv2_check22.csv";
 	int chain_n=20;
 	int max_thermo=20;
 	int steps =5e4;
-	int stepsalloc =4e4;
+	int stepsalloc =1e4;
 	double temps[chain_n];
 	int t0 = 1e3;
 	int nu = 1e2;
@@ -435,9 +437,9 @@ void test45()
 		temps[i] = temps[i-1]*c;
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
-	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
-	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
+	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf2);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
 	
 	deallocate_3D_array(output,chain_n, steps,dim);
@@ -5722,15 +5724,16 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
-	if (std::exp(pos[5])<10 || std::exp(pos[5])>10000){return a;}//DL
-	if (std::exp(pos[6])<2 || std::exp(pos[6])>100 || std::isnan(pos[4])){return a;}//chirpmass
-	if ((pos[7])<.1 || (pos[7])>.249999){return a;}//eta
-	if ((pos[8])<0 || (pos[8])>.9){return a;}//chi1 
-	if ((pos[9])<0 || (pos[9])>.9){return a;}//chi2
-	if ((pos[10])<0 || (pos[10])>.9){return a;}//chip
-	if ((pos[11])<0 || (pos[11])>2*M_PI){return a;}//phip
+	if ((pos[5])<0 || (pos[5])>10){return a;}//PhiRef
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
+	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 || std::isnan(pos[4])){return a;}//chirpmass
+	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
+	if ((pos[9])<0 || (pos[9])>.9){return a;}//chi1 
+	if ((pos[10])<0 || (pos[10])>.9){return a;}//chi2
+	if ((pos[11])<0 || (pos[11])>.9){return a;}//chip
+	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phip
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	else {return pos[6]+3*pos[5];}
+	else {return pos[7]+3*pos[6];}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 }

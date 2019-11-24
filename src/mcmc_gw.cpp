@@ -1492,7 +1492,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[8]=10;
 		}
 	}
-	else if(dimension==12 && generation_method =="IMRPhenomPv2"){
+	else if(dimension==13 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=false;
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
 		if(local_seeding){
@@ -1509,6 +1509,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[9]=.1;
 			seeding_var[10]=.1;
 			seeding_var[11]=.1;
+			seeding_var[12]=.1;
 		}
 	}
 	else if(dimension==14 && generation_method =="IMRPhenomPv2"){
@@ -1770,7 +1771,77 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//Needs some work
 	//#######################################################################3
 	//if (save_waveform){
-	if (false){
+	//if (false){
+	//	std::complex<double> *hplus = 
+	//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+	//			data_length[0]);
+	//	std::complex<double> *hcross = 
+	//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+	//			data_length[0]);
+	//	std::complex<double> *response = 
+	//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+	//			data_length[0]);
+	//	parameters->tc=0;
+	//	fourier_waveform(frequencies[0], data_length[0], 
+	//		hplus, hcross,generation_method, parameters);
+	//	//std::cout<<hplus[100]<<" "<<hcross[100]<<std::endl;	
+	//	//fourier_detector_response(frequencies[0], data_length[0], 
+	//	//	hplus, hcross, response, parameters->theta, parameters->phi, 
+	//	//	detectors[0]);
+	//	fourier_detector_response_equatorial(frequencies[0], data_length[0], 
+	//		hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+	//		parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
+	//	ll += maximized_coal_Log_Likelihood_internal(data[0], 
+	//			psd[0],
+	//			frequencies[0],
+	//			response,
+	//			(size_t) data_length[0],
+	//			&fftw_plans[0],
+	//			&tc_ref,
+	//			&phic_ref
+	//			);
+	//	
+	//	//Use maximum LL phic if using PhenomD, but if using Pv2
+	//	//PhiRef is already a parameter
+	//	if(generation_method.find("IMRPhenomD")==std::string::npos){
+	//		phic_ref=0;
+	//	}
+	//	//if(generation_method.find("IMRPhenomD")!=std::string::npos){
+	//	//	parameters->phiRef=phic_ref;
+	//	//}
+	//	for(int i=1; i < num_detectors; i++){
+	//		celestial_horizon_transform(RA,DEC, gps_time, 
+	//				mcmc_detectors[i], &phi[i], &theta[i]);
+	//		parameters->phi=phi[i];
+	//		parameters->theta=theta[i];
+	//		delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+	//		parameters->tc = tc_ref + delta_t;
+	//		
+	//		//fourier_detector_response(frequencies[i], 
+	//		//	data_length[i], hplus, hcross, response, 
+	//		//	parameters->theta, parameters->phi, parameters->psi,
+	//		//	detectors[i]);
+	//		fourier_detector_response_equatorial(frequencies[i], data_length[i], 
+	//			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+	//			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
+	//		for(int j =0; j<data_length[i]; j++){
+	//			//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
+	//			//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]) + phic_ref);	
+	//			response[j] *=std::exp(std::complex<double>(0,2*M_PI*parameters->tc*frequencies[i][j]) + phic_ref);	
+	//		}
+	//		ll += Log_Likelihood_internal(data[i], 
+	//				psd[i],
+	//				frequencies[i],
+	//				response,
+	//				(size_t) data_length[i],
+	//				&fftw_plans[i]
+	//				);
+	//	}
+	//	free(hplus); free(hcross); free(response);
+	//}
+	//#######################################################################3
+	//Generally, the data lengths don't have to be the same
+	if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
@@ -1780,66 +1851,91 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		std::complex<double> *response = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
+		tc_ref = parameters->tc;
+		double tc = tc_ref;
+		tc*=2.*M_PI;
 		parameters->tc=0;
 		fourier_waveform(frequencies[0], data_length[0], 
 			hplus, hcross,generation_method, parameters);
-		//std::cout<<hplus[100]<<" "<<hcross[100]<<std::endl;	
-		//fourier_detector_response(frequencies[0], data_length[0], 
-		//	hplus, hcross, response, parameters->theta, parameters->phi, 
-		//	detectors[0]);
 		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
 			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
 			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
-		ll += maximized_coal_Log_Likelihood_internal(data[0], 
+		celestial_horizon_transform(RA,DEC, gps_time, 
+				detectors[0], &phi[0], &theta[0]);
+		for(int i = 0 ; i<data_length[0];i++){
+			response[i]*=exp(-std::complex<double>(0,tc*(frequencies[0][i]-parameters->f_ref)));
+		}	
+		//Referecne detector first
+		ll += Log_Likelihood_internal(data[0], 
 				psd[0],
 				frequencies[0],
 				response,
 				(size_t) data_length[0],
-				&fftw_plans[0],
-				&tc_ref,
-				&phic_ref
+				&fftw_plans[0]
 				);
-		
-		//Use maximum LL phic if using PhenomD, but if using Pv2
-		//PhiRef is already a parameter
-		if(generation_method.find("IMRPhenomD")==std::string::npos){
-			phic_ref=0;
-		}
-		//if(generation_method.find("IMRPhenomD")!=std::string::npos){
-		//	parameters->phiRef=phic_ref;
-		//}
 		for(int i=1; i < num_detectors; i++){
 			celestial_horizon_transform(RA,DEC, gps_time, 
-					mcmc_detectors[i], &phi[i], &theta[i]);
+					detectors[i], &phi[i], &theta[i]);
 			parameters->phi=phi[i];
 			parameters->theta=theta[i];
 			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
-			parameters->tc = tc_ref + delta_t;
-			
-			//fourier_detector_response(frequencies[i], 
-			//	data_length[i], hplus, hcross, response, 
-			//	parameters->theta, parameters->phi, parameters->psi,
-			//	detectors[i]);
+			tc = tc_ref + delta_t;
 			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
-				hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
-				parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
-			for(int j =0; j<data_length[i]; j++){
-				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
-				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]) + phic_ref);	
-				response[j] *=std::exp(std::complex<double>(0,2*M_PI*parameters->tc*frequencies[i][j]) + phic_ref);	
-			}
+				hplus, hcross, response, parameters->RA, parameters->DEC, 
+				parameters->psi,parameters->gmst,times, LISA_alpha0, 
+				LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
+			tc*=2.*M_PI;
+			for(int j = 0 ; j<data_length[i];j++){
+				response[j]*=exp(-std::complex<double>(
+					0,tc*(frequencies[i][j]-parameters->f_ref)
+					));
+			}	
+		
 			ll += Log_Likelihood_internal(data[i], 
-					psd[i],
-					frequencies[i],
-					response,
-					(size_t) data_length[i],
-					&fftw_plans[i]
-					);
+				psd[i],
+				frequencies[i],
+				response,
+				(size_t) data_length[i],
+				&fftw_plans[i]
+				);
 		}
-		free(hplus); free(hcross); free(response);
+		delete [] hplus;
+		delete [] hcross;
+		delete [] response;
+		//Referecne detector first
+		//ll += Log_Likelihood(data[0], 
+		//		psd[0],
+		//		frequencies[0],
+		//		(size_t) data_length[0],
+		//		parameters,
+		//		detectors[0],
+		//		generation_method,
+		//		&fftw_plans[0]
+		//		);
+		//tc_ref = parameters->tc;
+		//for(int i=1; i < num_detectors; i++){
+		//	celestial_horizon_transform(RA,DEC, gps_time, 
+		//			detectors[i], &phi[i], &theta[i]);
+		//	parameters->phi=phi[i];
+		//	parameters->theta=theta[i];
+		//	delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+		//	parameters->tc = tc_ref + delta_t;
+		//
+		//	if(generation_method.find("IMRPhenomD")!=std::string::npos){
+		//		parameters->phic = phic_ref;	
+		//	}
+		//	ll += Log_Likelihood(data[i], 
+		//			psd[i],
+		//			frequencies[i],
+		//			(size_t) data_length[i],
+		//			parameters,
+		//			detectors[i],
+		//			generation_method,
+		//			&fftw_plans[i]
+		//			);
+		//}
+
 	}
-	//#######################################################################3
-	//Generally, the data lengths don't have to be the same
 	else{
 		//Referecne detector first
 		ll += maximized_coal_Log_Likelihood(data[0], 
