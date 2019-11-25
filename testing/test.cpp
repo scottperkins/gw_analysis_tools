@@ -124,8 +124,6 @@ int main(){
 }
 void test49()
 {
-	int dim = 11;
-	int threads = 10;
 	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
@@ -173,11 +171,13 @@ void test49()
 	data_length[1] =psd_length;
 	//data_length[2] =psd_length;
 	//#####################################################################	
-	//std::string gen_meth= "IMRPhenomPv2";
-	std::string gen_meth= "IMRPhenomD";
+	int dim = 13;
+	int threads = 10;
+	std::string gen_meth= "IMRPhenomPv2";
+	//std::string gen_meth= "IMRPhenomD";
 	//double init_pos[dim] = {6.,-1.,1.,.9,1.,3.,log(2400),log(58),.24,0,0,.01,1.};
-	//double init_pos[dim] = {1.,-1.,1.,.9,1.,3.,log(400),log(28),.24,0,0,.01,1.};
-	double init_pos[dim] = {1.,-1.,1.,.9,1.,1.,log(400),log(28),.24,0,0};
+	double init_pos[dim] = {1.,-1.,1.,.9,1.,3.,log(400),log(28),.24,0,0,.01,1.};
+	//double init_pos[dim] = {1.,-1.,1.,.9,1.,1.,log(400),log(28),.24,0,0};
 	double *seeding_var = NULL;
 	int swp_freq = 5;
 	bool pool = true;
@@ -202,9 +202,9 @@ void test49()
 		temps[i] = temps[i-1]*c;
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
-	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
-	continue_PTMCMC_MH_GW(checkf2,output, dim, steps,  swp_freq, test_lp_GW_D,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf2);
+	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "testing/data/ll.csv",checkf2);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psd, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
 	
 	deallocate_3D_array(output,chain_n, steps,dim);
@@ -441,7 +441,7 @@ void test46()
 }
 void test45()
 {
-	int dim = 11;
+	int dim = 13;
 	int threads = 10;
 	gen_params params;
 	params.mass1 = 50;
@@ -477,7 +477,7 @@ void test45()
 	params.sky_average=false;
 	int n_detect = 3;
 	int length = 2000;
-	std::string gen_meth="IMRPhenomD";
+	std::string gen_meth="IMRPhenomPv2";
 	int lengths[3] = {length,length,length};
 	double fmax = 1024;
 	double fmin = 10;
@@ -508,8 +508,8 @@ void test45()
 	}
 
 	
-	//double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,tcref,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
-	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,params.tc,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2]};
+	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,tcref,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
+	//double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,params.tc,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2]};
 	double *seeding_var = NULL;
 	int swp_freq = 5;
 	bool pool = true;
@@ -534,9 +534,9 @@ void test45()
 		temps[i] = temps[i-1]*c;
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
-	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
+	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
-	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_D,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf2);
+	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf2);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_Pv2,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
 	
 	deallocate_3D_array(output,chain_n, steps,dim);
@@ -5808,8 +5808,8 @@ double test_lp_GW_D(double *pos, int dim, int chain_id)
 	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//chi1 
 	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//chi2
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	//else { return pos[7]+3*pos[6]+log(abs(cos(pos[1])));}
-	else {return pos[7]+3*pos[6];}
+	else { return pos[7]+3*pos[6]+log(abs(cos(pos[1])));}
+	//else {return pos[7]+3*pos[6];}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 
@@ -5834,7 +5834,8 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	if ((pos[11])<0 || (pos[11])>.9){return a;}//chip
 	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phip
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	else {return pos[7]+3*pos[6] ;}
+	else {return pos[7]+3*pos[6]+log(cos(pos[1])) ;}
+	//else {return pos[7]+3*pos[6] ;}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 }
