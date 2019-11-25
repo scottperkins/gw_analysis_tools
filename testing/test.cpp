@@ -5821,7 +5821,7 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	//Flat priors across physical regions
 	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-M_PI || (pos[1])>M_PI){return a;}//DEC
+	if ((pos[1])<-M_PI/2 || (pos[1])>M_PI/2){return a;}//DEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
