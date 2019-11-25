@@ -1375,7 +1375,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[6]=.1;
 		}
 	}
-	else if(dimension==9 && generation_method =="IMRPhenomD"){
+	else if(dimension==11 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, psi"<<std::endl;
 		mcmc_intrinsic=false;
 		if(local_seeding){
@@ -1390,6 +1390,8 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[7]=.1;
 			seeding_var[8]=.1;
 			seeding_var[9]=.1;
+			seeding_var[10]=.1;
+			seeding_var[11]=.1;
 		}
 	}
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD_log"){
@@ -1841,7 +1843,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//}
 	//#######################################################################3
 	//Generally, the data lengths don't have to be the same
-	if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
+	//if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
+	{
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
@@ -1860,8 +1863,6 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
 			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
 			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
-		celestial_horizon_transform(RA,DEC, gps_time, 
-				detectors[0], &phi[0], &theta[0]);
 		for(int i = 0 ; i<data_length[0];i++){
 			response[i]*=exp(-std::complex<double>(0,tc*(frequencies[0][i]-parameters->f_ref)));
 		}	
@@ -1899,9 +1900,9 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 				&fftw_plans[i]
 				);
 		}
-		delete [] hplus;
-		delete [] hcross;
-		delete [] response;
+		free( hplus);
+		free( hcross);
+		free( response);
 		//Referecne detector first
 		//ll += Log_Likelihood(data[0], 
 		//		psd[0],
@@ -1936,41 +1937,41 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		//}
 
 	}
-	else{
-		//Referecne detector first
-		ll += maximized_coal_Log_Likelihood(data[0], 
-				psd[0],
-				frequencies[0],
-				(size_t) data_length[0],
-				parameters,
-				detectors[0],
-				generation_method,
-				&fftw_plans[0],
-				&tc_ref,
-				&phic_ref
-				);
-		for(int i=1; i < num_detectors; i++){
-			celestial_horizon_transform(RA,DEC, gps_time, 
-					detectors[i], &phi[i], &theta[i]);
-			parameters->phi=phi[i];
-			parameters->theta=theta[i];
-			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
-			parameters->tc = tc_ref + delta_t;
-		
-			if(generation_method.find("IMRPhenomD")!=std::string::npos){
-				parameters->phic = phic_ref;	
-			}
-			ll += Log_Likelihood(data[i], 
-					psd[i],
-					frequencies[i],
-					(size_t) data_length[i],
-					parameters,
-					detectors[i],
-					generation_method,
-					&fftw_plans[i]
-					);
-		}
-	}
+	//else{
+	//	//Referecne detector first
+	//	ll += maximized_coal_Log_Likelihood(data[0], 
+	//			psd[0],
+	//			frequencies[0],
+	//			(size_t) data_length[0],
+	//			parameters,
+	//			detectors[0],
+	//			generation_method,
+	//			&fftw_plans[0],
+	//			&tc_ref,
+	//			&phic_ref
+	//			);
+	//	for(int i=1; i < num_detectors; i++){
+	//		celestial_horizon_transform(RA,DEC, gps_time, 
+	//				detectors[i], &phi[i], &theta[i]);
+	//		parameters->phi=phi[i];
+	//		parameters->theta=theta[i];
+	//		delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+	//		parameters->tc = tc_ref + delta_t;
+	//	
+	//		if(generation_method.find("IMRPhenomD")!=std::string::npos){
+	//			parameters->phic = phic_ref;	
+	//		}
+	//		ll += Log_Likelihood(data[i], 
+	//				psd[i],
+	//				frequencies[i],
+	//				(size_t) data_length[i],
+	//				parameters,
+	//				detectors[i],
+	//				generation_method,
+	//				&fftw_plans[i]
+	//				);
+	//	}
+	//}
 	delete [] phi;
 	delete [] theta;
 	return ll;
@@ -1985,7 +1986,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	else gen_params->sky_average = false;
 	gen_params->f_ref = 20;
 	gen_params->shift_time = false;
-	gen_params->shift_phase = false;
+	gen_params->shift_phase = true;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
 	gen_params->NSflag1 = false;

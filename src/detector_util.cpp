@@ -498,7 +498,8 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	
 	/* Now compute Eq. (B7) of [ABCF] for each polarization state, i.e.,
 	 * with s+=1 and sx=0 to get F+, with s+=0 and sx=1 to get Fx */
-	*Fplus = *Fcross = 0.0;
+	*Fplus = 0.0;
+	*Fcross = 0.0;
 	for(i = 0; i < 3; i++) {
 	        T DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
 	        T DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
