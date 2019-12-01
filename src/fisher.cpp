@@ -1689,7 +1689,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				}
 				else{
 					parameters[2]=input_params->psi;
-					parameters[3]=cos(input_params->incl_angle);
+					parameters[3]=(input_params->incl_angle);
 				}
 				parameters[4] = input_params->phiRef;
 				parameters[5] = input_params->tc;
@@ -1868,7 +1868,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				}
 				else{
 					a_params->psi = avec_parameters[2];
-					a_params->incl_angle=acos(avec_parameters[3]);
+					a_params->incl_angle=(avec_parameters[3]);
 				}
 				T spin1sph[3] = {avec_parameters[9],0,0};
 				T spin2sph[3] = {avec_parameters[10],0,0};

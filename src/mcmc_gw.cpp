@@ -1124,6 +1124,7 @@ void PTMCMC_MH_GW(double ***output,
 
 	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, show_prog,statistics_filename,
+		 //log_prior,MCMC_likelihood_wrapper, NULL,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
 	
 	//Deallocate fftw plans
@@ -1219,6 +1220,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, NULL,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
@@ -1305,6 +1307,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 
 	continue_PTMCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
 			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,numThreads, pool, 
+			//MCMC_likelihood_wrapper, NULL,numThreads, pool, 
 			show_prog,statistics_filename,chain_filename,
 			auto_corr_filename, likelihood_log_filename,final_checkpoint_filename);
 	//Deallocate fftw plans
@@ -1383,7 +1386,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[0]=.1;
 			seeding_var[1]=.1;
 			seeding_var[2]=.1;
-			seeding_var[3]=1;
+			seeding_var[3]=.1;
 			seeding_var[4]=.5;
 			seeding_var[5]=.1;
 			seeding_var[6]=.1;
@@ -1746,7 +1749,9 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			for(int k =0; k<dimension; k++)
 			{
 				output[j][k] +=temp_out[j][k];
-				//std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
+				//if(std::isnan(output[j][k])){
+				//	std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
+				//}
 			}
 		} 
 	}
@@ -1844,6 +1849,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//#######################################################################3
 	//Generally, the data lengths don't have to be the same
 	//if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
+	//if(false)
 	{
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
@@ -1975,6 +1981,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	delete [] phi;
 	delete [] theta;
 	return ll;
+	//return 1;
 }
 /*! \brief utility to do MCMC specific transformations on the input param vector before passing to the repacking utillity
  *
