@@ -1,4 +1,3 @@
-
 SRCDIR=src
 ODIR=build
 ODIRCUDA=build_cuda
@@ -26,6 +25,7 @@ TESTFISHERSRC=testing/fisher_comparison.cpp
 TESTFISHEROBJ=testing/fisher_comparison.o
 TESTFISHER=$(addprefix $(TESTDIR)/,exefisher.a)
 
+CONFIGFILE:=include/gwat/GWATConfig.h
 
 #CFLAGS=-I$(IDIR) -I/opt/lalsuite/lalsimulation/src -I/opt/lalsuite/include -Wall -fPIC -g -O3 -std=c++11
 CFLAGS=-I$(IDIR) -fopenmp -fPIC -g -O2 -std=c++11
@@ -62,8 +62,15 @@ CCCUDA=nvcc
 .PHONY: all
 all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB)
 
-$(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) 
+$(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(CONFIGFILE)
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+#Write pertinent information to config file -- ie filepaths
+$(CONFIGFILE): 
+	@cp data/Config_template.txt $(CONFIGFILE)
+	@pwd | awk '{print "#define GWAT_ROOT_DIRECTORY \""$$1"/\""}' >> $(CONFIGFILE)
+	@echo "">>$(CONFIGFILE)
+	@echo "#endif">>$(CONFIGFILE)
 
 $(ODIRCUDA)/%.o : $(SRCDIR)/%.$(SRCEXTCUDA) $(DEPS) $(DEPSCUDA)
 	$(CCCUDA) $(CFLAGSCUDA) -c -o $@ $<
@@ -127,9 +134,11 @@ testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB)
 
 .PHONY: clean
 clean:
-	rm build/*.o 
-	rm build_cuda/*.o 
+	-rm build/*.o 
+	-rm build_cuda/*.o 
 .PHONY: remove
 remove:
-	rm build/*.o build_cuda/* $(TEST) lib/*.a lib/*.so
-	make -C $(PYDIR) remove
+	-rm build/*.o build_cuda/* $(TEST) lib/*.a lib/*.so
+	-rm include/gwat/GWATConfig.h
+	-make -C $(PYDIR) remove
+

@@ -85,6 +85,8 @@ void test46();
 void test47();
 void test48();
 void test49();
+void test50();
+void test51();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
@@ -119,8 +121,40 @@ int main(){
 
 	//test38();	
 	//test7();	
-	test49();	
+	test51();	
 	return 0;
+}
+void test51()
+{
+	std::cout.precision(15);
+	double rho_thresh = 8;
+	double rho_opt = 9;
+	double prob = p_triple_detector_interp(0.8001);
+	std::cout<<fixed<<prob<<std::endl;
+	prob = p_single_detector_interp(0.8001);
+	std::cout<<fixed<<prob<<std::endl;
+}
+void test50()
+{
+	std::cout.precision(15);
+	double prob ;
+	int length =1000;
+	double results[length];
+	double omegas[length];
+	double deltaomega = 1./(length);
+	double init = deltaomega;
+	#pragma omp parallel for
+	for(int i = 0; i<length; i++){
+		double omega = init + i * deltaomega;	
+		omegas[i] = omega;
+		//prob = p_single_detector(omega, 1e9);
+		prob = p_single_detector_fit(omega);
+		results[i]=prob;
+		
+	}
+	for(int i = 0 ; i<length; i++){
+		std::cout<<omegas[i]<<" "<<fixed<<results[i]<<std::endl;
+	}
 }
 void test49()
 {

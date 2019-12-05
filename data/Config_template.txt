@@ -1,0 +1,14 @@
+#ifndef GWATConfig_H
+#define GWATConfig_H
+/*! \file
+ *
+ * Configuration file containing parameters relevant to a specific
+ * installation of GWAT
+ *
+ * Should not have to edit -- taken care of in the makefile
+ */
+
+// the configured options and settings for Tutorial
+#define GWAT_VERSION_MAJOR 1
+#define GWAT_VERSION_MINOR 0
+

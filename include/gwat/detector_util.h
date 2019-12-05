@@ -87,6 +87,9 @@ T right_interferometer_cross(T theta, T phi);
 template<class T>
 T right_interferometer_plus(T theta, T phi);
 
+template<class T>
+void right_interferometer(T *fplus, T *fcross, T theta, T phi, T psi);
+
 double Hanford_O1_fitted(double f);
 
 template<class T>

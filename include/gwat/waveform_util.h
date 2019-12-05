@@ -176,6 +176,11 @@ void postmerger_params(gen_params_base<T>*params,
 	T *fdamp,
 	T *fRD
 	);
-
+double p_single_detector(double omega, int samples);
+double p_single_detector_fit(double omega);
+double p_triple_detector_fit(double omega);
+double pdet_triple_detector_fit(double rho_thresh,double rho_opt);
+double p_triple_detector_interp(double omega);
+double p_single_detector_interp(double omega);
 #endif
 
