@@ -87,6 +87,7 @@ void test48();
 void test49();
 void test50();
 void test51();
+void test52();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
@@ -121,8 +122,19 @@ int main(){
 
 	//test38();	
 	//test7();	
-	test51();	
+	test52();	
 	return 0;
+}
+void test52()
+{
+	int length = 1000;
+	double freqs[length];
+	for(int i = 0 ; i<length; i++){
+		freqs[i]= 10 + i*1;
+	}
+	double psd[length];
+	populate_noise(freqs, "AdLIGOMidHigh",psd, length);
+	write_file("testing/data/AdLIGOMidHigh.csv",psd,length);
 }
 void test51()
 {
@@ -494,7 +506,7 @@ void test45()
 	params.spin2[2]=0.2;
 	params.phip = 0;
 	params.chip = .4;
-	params.Luminosity_Distance = 500;
+	params.Luminosity_Distance = 400;
 	params.RA = 3.1;
 	params.DEC = -.5;
 	params.psi=1.;
@@ -507,11 +519,11 @@ void test45()
 	params.equatorial_orientation=false;
 	params.phiRef = 2;
 	params.f_ref = 20;
-	params.incl_angle = 0.01;
+	params.incl_angle = 0.31;
 	params.NSflag1=false;
 	params.NSflag2=false;
 	params.sky_average=false;
-	int n_detect = 2;
+	int n_detect = 3;
 	int length = 2000;
 	std::string gen_meth="IMRPhenomD";
 	int lengths[3] = {length,length,length};
@@ -520,7 +532,7 @@ void test45()
 	double delta_f = (fmax-fmin)/(length-1);
 	double **freqs= new double*[n_detect];
 	double **psds= new double*[n_detect];
-	std::string SN="Hanford_O1_fitted";
+	std::string SN="aLIGO_analytic";
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 	std::complex<double> **data = new std::complex<double>*[n_detect];
 	double phis[n_detect];
@@ -549,7 +561,7 @@ void test45()
 
 	
 	//double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,tcref,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2],params.chip,params.phip};
-	double init_pos[dim] = {params.RA,params.DEC,params.psi,cos(params.incl_angle),params.phiRef,params.tc,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2]};
+	double init_pos[dim] = {params.RA,params.DEC,params.psi,(params.incl_angle),params.phiRef,params.tc,log(params.Luminosity_Distance),log(chirp),eta,params.spin1[2],params.spin2[2]};
 	double *seeding_var = NULL;
 	int swp_freq = 5;
 	bool pool = true;
@@ -563,7 +575,7 @@ void test45()
 	std::string checkf2 = "testing/data/mcmc_pv2_check2.csv";
 	int chain_n=8;
 	int max_thermo=8;
-	int steps =1e5;
+	int steps =3e5;
 	int stepsalloc =1e4;
 	double temps[chain_n];
 	int t0 = 1e3;

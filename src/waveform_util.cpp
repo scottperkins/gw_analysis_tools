@@ -1,5 +1,6 @@
 #include "waveform_util.h"
 #include "util.h"
+#include "GWATConfig.h"
 #include "waveform_generator.h"
 #include "IMRPhenomP.h"
 #include "IMRPhenomD.h"
@@ -14,6 +15,11 @@
 #include <adolc/taping.h>
 #include <adolc/adouble.h>
 #include <adolc/drivers/drivers.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
+#include <functional>
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
@@ -133,7 +139,7 @@ double calculate_snr(std::string sensitivity_curve,
 	int length)
 {
 	double *times;
-	if(detector == "LISA"){
+	if(detector == "LISA" && !params->sky_average){
 		times = new double[length];
 		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
 		time_phase_corrected(times, length, frequencies, params, generation_method, false);
@@ -156,7 +162,9 @@ double calculate_snr(std::string sensitivity_curve,
 	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
 	if(detector == "LISA"){
 		//snr+=calculate_snr(sensitivity_curve, response, frequencies, length);
-		delete [] times;
+		if(!params->sky_average){
+			delete [] times;
+		}
 		snr*=sqrt(2); //Two detectors
 	}
 	delete [] response;	
@@ -184,6 +192,19 @@ double calculate_snr(std::string sensitivity_curve, /**< detector name - must ma
         double integral = trapezoidal_sum(frequencies, length, integrand);
 	free(integrand);
 	free(noise);
+        return sqrt(integral);
+}
+
+double calculate_snr_internal(double *psd, 
+	std::complex<double>*waveform,
+	double *frequencies, 
+	int length)
+{
+        double *integrand = (double *) malloc(sizeof(double)*length);
+        for (int i = 0; i<length; i++)
+                integrand[i] = 4.* real(conj(waveform[i])*waveform[i]/psd[i]);
+        double integral = trapezoidal_sum(frequencies, length, integrand);
+	free(integrand);
         return sqrt(integral);
 }
 
@@ -236,7 +257,7 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 		c2psi = cos(2*psi);
 		s2psi = sin(2*psi);
 		Fplus = fplus*c2psi- fcross*s2psi;
-		Fcross = fplus*s2psi+ fcross*s2psi;
+		Fcross = fplus*s2psi+ fcross*c2psi;
 	}
 	for (int i =0; i <length; i++)
 	{
@@ -832,16 +853,6 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 }
 template void transform_orientation_coords<double>(gen_params_base<double> *, std::string,std::string);
 template void transform_orientation_coords<adouble>(gen_params_base<adouble> *, std::string,std::string);
-/*! \brief map between inclination angle and polarization angle to the spherical coordinates of the binary's total angular momentum in the SS frame
- *
- * CURRENTLY NOT RIGHT MUST FIX
- */
-//template<class T>
-//void map_extrinsic_angles(gen_params_base<T> *params)
-//{
-//	params->LISA_thetal = params->incl_angle;
-//	params->LISA_phil = params->psi;
-//}
 
 void assign_freq_boundaries(double *freq_boundaries, 
 	double *intermediate_freqs, 
@@ -1343,6 +1354,183 @@ void Tbm_to_freq(gen_params_base<double> *params,
 	}
 }
 
+
+/*! \brief Utility to calculate the cumulative amplitude distribution for a single detector
+ *
+ * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
+ * 
+ * Integrated over the volume which \omega' is larger than \omega
+ *
+ * Integrates using Monte Carlo integration
+ *
+ * Uniform sampling in \psi, cos(\iota), cos(\theta) , and \phi
+ */
+double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
+	int samples/**< number of monte carlo samples to use**/
+	)
+{
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	gsl_rng *r = gsl_rng_alloc(T);
+	gsl_rng_set(r, 1323);
+	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota, 
+		costheta, phi,theta,iota;
+	double twopi = 2.*M_PI;
+	double omega_squared = omega*omega;
+	double sum = 0;
+	for(int i= 0 ; i<samples ; i++){
+		psi = gsl_rng_uniform(r)*twopi;	
+		cosiota = gsl_rng_uniform(r)*2.-1.;	
+		costheta = gsl_rng_uniform(r)*2.-1.;	
+		phi = gsl_rng_uniform(r)*twopi;	
+		iota = acos(cosiota);
+		theta = acos(costheta);
+		right_interferometer(&Fplus, &Fcross, theta, phi, psi);
+		//std::cout<<Fplus<<" "<<Fcross<<std::endl;
+		//omega_prime = sqrt(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
+		//Do squared to avoid the expensive sqrt function
+		omega_prime_squared =(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
+		if(omega_prime_squared>omega_squared){sum++;}
+		
+	}	
+	gsl_rng_free(r);
+	//std::cout<<sum<<std::endl;
+	return sum/=samples;
+}
+/*! \brief Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit 
+ *
+ * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
+ * 
+ * Integrated over the volume which \omega' is larger than \omega
+ *
+ * see arXiv:1405.7016
+ */
+double p_single_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
+	)
+{
+	double alpha=1., a2 = 0.374222, a4 = 2.04216, a8 =-2.63948;
+	double omega_term = 1-omega/alpha;
+	return (a2 * pow_int( omega_term, 2) 
+		+ a4* pow_int(omega_term,4) 
+		+ a8* pow_int(omega_term,8)
+		+ (1 - a2 - a4 - a8) * pow_int(omega_term, 10));
+}
+/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- Numerical Fit 
+ *
+ * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
+ * 
+ * Integrated over the volume which \omega' is larger than \omega
+ *
+ * see arXiv:1405.7016
+ */
+double p_triple_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
+	)
+{
+	double alpha=1.4, a2 =  1.19549, a4 =  1.61758, a8 =-4.87024;
+	double omega_term = 1-omega/alpha;
+	return (a2 * pow_int( omega_term, 2) 
+		+ a4* pow_int(omega_term,4) 
+		+ a8* pow_int(omega_term,8)
+		+ (1 - a2 - a4 - a8) * pow_int(omega_term, 10));
+}
+/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/ 
+ *
+ * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
+ * 
+ * Integrated over the volume which \omega' is larger than \omega
+ *
+ * see arXiv:1405.7016
+ */
+double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
+	)
+{
+	double pomega = 0;	
+	int data_length = 141;
+	gsl_interp_accel *accel  = gsl_interp_accel_alloc();
+	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,data_length);
+
+	double omegas[data_length];
+	double pomega_numerical[data_length];
+	double **temp =  new double*[data_length];
+	for(int i=0 ; i<data_length; i ++){
+		temp[i]=new double[2];
+	}
+	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/Pw_three.csv", temp, data_length,2);
+	for(int i=0 ; i<data_length; i ++){
+		//std::cout<<temp[i][0]<<" "<<temp[i][1]<<std::endl;
+		omegas[i] = temp[i][0];	
+		pomega_numerical[i] = temp[i][1];	
+	}
+	
+	gsl_spline_init(spline, omegas, pomega_numerical,data_length);
+
+	pomega = gsl_spline_eval(spline, omega, accel);
+	gsl_spline_free(spline);
+	gsl_interp_accel_free(accel);
+	for(int i = 0 ; i<data_length; i++){
+		delete [] temp[i];
+	}
+	delete[] temp;
+	return pomega;
+}
+/*! \brief Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/ 
+ *
+ * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
+ * 
+ * Integrated over the volume which \omega' is larger than \omega
+ *
+ * see arXiv:1405.7016
+ */
+double p_single_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
+	)
+{
+	double pomega = 0;	
+	int data_length = 1001;
+	gsl_interp_accel *accel  = gsl_interp_accel_alloc();
+	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,data_length);
+
+	double omegas[data_length];
+	double pomega_numerical[data_length];
+	double **temp =  new double*[data_length];
+	for(int i=0 ; i<data_length; i ++){
+		temp[i]=new double[2];
+	}
+	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/Pw_single.csv", temp, data_length,2);
+	for(int i=0 ; i<data_length; i ++){
+		//std::cout<<temp[i][0]<<" "<<temp[i][1]<<std::endl;
+		omegas[i] = temp[i][0];	
+		pomega_numerical[i] = temp[i][1];	
+	}
+	
+	gsl_spline_init(spline, omegas, pomega_numerical,data_length);
+
+	pomega = gsl_spline_eval(spline, omega, accel);
+	gsl_spline_free(spline);
+	gsl_interp_accel_free(accel);
+	for(int i = 0 ; i<data_length; i++){
+		delete [] temp[i];
+	}
+	delete[] temp;
+	return pomega;
+}
+
+double pdet_triple_detector_fit(double rho_thresh, double rho_opt)
+{
+	int np = 1e3;
+	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
+	gsl_function F;
+	double result, err; 
+	double abserr=0, relerr = 1e-5;
+	//std::function<double(double, void*)> wrapper=NULL;
+	//wrapper = [](double omega, void * param){ return p_triple_detector_fit(omega);};	
+	F.function = [](double omega, void * param){ return p_triple_detector_fit(omega);};	
+
+	int errcode = gsl_integration_qag(&F, rho_thresh/rho_opt, 1, abserr, relerr, 
+		np, GSL_INTEG_GAUSS15, w, &result, &err);
+	gsl_integration_workspace_free(w);
+	
+	return result;
+}
 //###########################################################################
 //template void map_extrinsic_angles<double>(gen_params_base<double> *);
 //template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);

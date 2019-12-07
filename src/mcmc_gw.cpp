@@ -1954,7 +1954,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//			generation_method,
 	//			&fftw_plans[0],
 	//			&tc_ref,
-	//			&phic_ref
+	//		&phic_ref
 	//			);
 	//	for(int i=1; i < num_detectors; i++){
 	//		celestial_horizon_transform(RA,DEC, gps_time, 
@@ -1996,6 +1996,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->shift_phase = true;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
+	gen_params->horizon_coord=false;
 	gen_params->NSflag1 = false;
 	gen_params->NSflag2 = false;
 	if(check_mod(generation_method)){
@@ -2060,6 +2061,15 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 			&gen_params,local_gen, mcmc_data_length, 
 			mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, 
 			mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		//ll = Log_Likelihood(mcmc_data[0], 
+		//		mcmc_noise[0],
+		//		mcmc_frequencies[0],
+		//		mcmc_data_length[0],
+		//		&gen_params,
+		//		mcmc_detectors[0],
+		//		local_gen,
+		//		&mcmc_fftw_plans[0]
+		//		);
 
 		//}
 		//else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){

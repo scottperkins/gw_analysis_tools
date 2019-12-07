@@ -1,6 +1,7 @@
 #include "detector_util.h"
 #include "util.h"
 #include "pn_waveform_util.h"
+#include "GWATConfig.h"
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -30,6 +31,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
  * 	aLIGO_analytic -- analytic approximation of the advanced LIGO sensitivity curve
  *
  * 	Hanford_O1_fitted -- Fitted function to the O1 noise curve for Hanford
+ * 		
+ * 	AdLIGOMidHigh -- from Emanuele Berti
  *
  * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel 
  * 		
@@ -117,6 +120,32 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		for(int i = 0 ; i<length; i++){
 			noise_root[i] = sqrt(LISA_analytic(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
 		}
+	}
+	else if(detector=="AdLIGOMidHigh"){
+		int dat_length = 3000;
+		gsl_interp_accel *accel = gsl_interp_accel_alloc();
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		double **data = new double*[dat_length];
+		for(int i = 0 ;i<dat_length; i++){
+			data[i] = new double[2];
+		}
+		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdLIGOMidHigh.csv",data, dat_length, 2);
+		double psd[dat_length];
+		double f[dat_length];
+		for(int i = 0 ;i<dat_length; i++){
+			psd[i]=data[i][1];	
+			f[i]=data[i][0];	
+		}
+		gsl_spline_init(spline, f, psd, dat_length);
+		for(int i = 0 ; i<length; i++){
+			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
+		}	
+		gsl_spline_free(spline);
+		gsl_interp_accel_free(accel);
+		for(int i = 0 ; i<dat_length; i++){
+			delete [] data[i];
+		}
+		delete [] data;
 	}
 	else{
 		std::cout<<"Detector not supported"<<std::endl;
@@ -305,7 +334,6 @@ T right_interferometer_plus(T theta, T phi)
 	T Fplus = (1./2)*(1+ ct*ct)*cp2;
 	return Fplus;
 }
-
 /*! \brief Response function of a 90 deg interferometer for cross polarization
  *
  * Theta and phi are local, horizontal coordinates relative to the detector
@@ -318,6 +346,23 @@ T right_interferometer_cross(T theta, T phi)
 	T Fcross = ct * sp2;
 	return Fcross;
 }
+/*! \brief Response function of a 90 deg interferometer 
+ *
+ * Theta and phi are local, horizontal coordinates relative to the detector
+ *
+ * With general psi
+ */
+template<class T>
+void right_interferometer(T *fplus, T *fcross,T theta, T phi, T psi)
+{
+	T Fplus = right_interferometer_plus(theta,phi);
+	T Fcross = right_interferometer_cross(theta,phi);
+	T c2psi = cos(2.*psi);
+	T s2psi = sin(2.*psi);
+	*fplus = Fplus*c2psi - Fcross*s2psi;
+	*fcross = Fplus*s2psi + Fcross*c2psi;
+}
+
 
 /*! \brief Transform from celestial coordinates to local horizontal coords
  *
@@ -656,6 +701,9 @@ template adouble right_interferometer_cross<adouble>(adouble, adouble);
 //
 template double right_interferometer_plus<double>(double, double);
 template adouble right_interferometer_plus<adouble>(adouble, adouble);
+//
+template void right_interferometer<double>(double*, double*,double, double,double);
+template void right_interferometer<adouble>(adouble*, adouble*,adouble,adouble, adouble);
 //
 template void celestial_horizon_transform<double>(double, double, double, std::string, double *,double*);
 template void celestial_horizon_transform<adouble>(adouble, adouble, double, std::string, adouble *,adouble*);

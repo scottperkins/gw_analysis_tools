@@ -29,6 +29,19 @@ T t_2PN(T f, T eta, T chirpmass, T chi1, T chi2, T tc)
 	return t;
 }
 
+/*! \brief utility to get frequency from time before merger
+ *
+ * See https://arxiv.org/pdf/1902.00021.pdf
+ */
+template<class T>
+T f_0PN(T t, T chirpmass)
+{
+	//5^(3/8)/(8 pi) 
+	T factor = 0.07275685064;
+	return factor * pow(chirpmass, -5./8.) * pow(t,-3./8);
+}
+
+
 /*! \brief Utility function for the frequency at the innermost stable circular orbit (ISCO)
  *
  */
@@ -42,5 +55,7 @@ T FISCO(T mass)
 //#####################################################################################
 template double t_2PN<double>(double, double, double, double, double, double);
 template adouble t_2PN<adouble>(adouble, adouble, adouble, adouble, adouble, adouble);
+template double f_0PN<double>(double, double);
+template adouble f_0PN<adouble>(adouble, adouble);
 template adouble FISCO(adouble mass);
 template double FISCO(double mass);

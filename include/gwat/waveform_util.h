@@ -29,6 +29,10 @@ double calculate_snr(std::string sensitivity_curve,
         std::complex<double> *waveform,
         double *frequencies,
         int length);
+double calculate_snr_internal(double *psd,
+        std::complex<double> *waveform,
+        double *frequencies,
+        int length);
 double calculate_snr(std::string sensitivity_curve,
 	std::string detector,
 	std::string generation_method,

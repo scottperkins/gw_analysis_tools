@@ -1870,10 +1870,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					a_params->psi = avec_parameters[2];
 					a_params->incl_angle=(avec_parameters[3]);
 				}
-				T spin1sph[3] = {avec_parameters[9],0,0};
-				T spin2sph[3] = {avec_parameters[10],0,0};
-				transform_sph_cart(spin1sph,a_params->spin1);
-				transform_sph_cart(spin2sph,a_params->spin2);
+				//T spin1sph[3] = {avec_parameters[9],0,0};
+				//T spin2sph[3] = {avec_parameters[10],0,0};
+				a_params->spin1[2] = avec_parameters[9];
+				a_params->spin2[2] = avec_parameters[10];
+				//transform_sph_cart(spin1sph,a_params->spin1);
+				//transform_sph_cart(spin2sph,a_params->spin2);
 				//maximized out
 				a_params->phiRef = avec_parameters[4];
 				a_params->phic = 0;
@@ -1898,10 +1900,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				}
 				a_params->phic = avec_parameters[4];
 				a_params->tc = avec_parameters[5];
-				T spin1sph[3] = {avec_parameters[9],0,0};
-				T spin2sph[3] = {avec_parameters[10],0,0};
-				transform_sph_cart(spin1sph,a_params->spin1);
-				transform_sph_cart(spin2sph,a_params->spin2);
+				//T spin1sph[3] = {avec_parameters[9],0,0};
+				//T spin2sph[3] = {avec_parameters[10],0,0};
+				//transform_sph_cart(spin1sph,a_params->spin1);
+				//transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->spin1[2] = avec_parameters[9];
+				a_params->spin2[2] = avec_parameters[10];
 
 			}	
 		}	
@@ -1922,10 +1926,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),
 					avec_parameters[1]);
 				a_params->Luminosity_Distance = 1000;
-				T spin1sph[3] = {avec_parameters[2],0,0};
-				T spin2sph[3] = {avec_parameters[3],0,0};
-				transform_sph_cart(spin1sph,a_params->spin1);
-				transform_sph_cart(spin2sph,a_params->spin2);
+				//T spin1sph[3] = {avec_parameters[2],0,0};
+				//T spin2sph[3] = {avec_parameters[3],0,0};
+				//transform_sph_cart(spin1sph,a_params->spin1);
+				//transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->spin1[2] = avec_parameters[2];
+				a_params->spin2[2] = avec_parameters[3];
 				a_params->phic=0;
 				a_params->tc=0;
 				//a_params->incl_angle=0;
@@ -1947,10 +1953,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->phic = avec_parameters[1];
 				T chi1 = avec_parameters[5] + avec_parameters[6];
 				T chi2 = avec_parameters[5] - avec_parameters[6];
-				T spin1sph[3] = {chi1,0,0};
-				T spin2sph[3] = {chi2,0,0};
-				transform_sph_cart(spin1sph,a_params->spin1);
-				transform_sph_cart(spin2sph,a_params->spin2);
+				//T spin1sph[3] = {chi1,0,0};
+				//T spin2sph[3] = {chi2,0,0};
+				//transform_sph_cart(spin1sph,a_params->spin1);
+				//transform_sph_cart(spin2sph,a_params->spin2);
+				a_params->spin1[2]  = chi1;
+				a_params->spin2[2]  = chi2;
 				//a_params->incl_angle=0;
 				//a_params->RA=1.;
 				//a_params->DEC=1.;

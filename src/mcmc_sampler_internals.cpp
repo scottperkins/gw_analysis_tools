@@ -2034,33 +2034,39 @@ void write_output_file(std::string file, int step_num, int max_dimension, double
 	std::ofstream out_file;
 	out_file.open(file);
 	out_file.precision(15);
-	//Loop through chains
+	int coldchains=0;
+	int cold_chain_ids[chain_N];
 	for(int k = 0 ; k<chain_N; k++){
-		//If cold, write out
 		if(temps[k] == 1){
-			//loop through steps in chain
-			for(int i =0; i<step_num; i++){
-				//if RJ, write out status too
-				if(RJ){
-					for(int j=0; j<max_dimension;j++){
-						out_file<<output[k][i][j]<<" , ";
-					}
-					for(int j = 0 ; j<max_dimension; j++){
-						if(j==max_dimension-1)
-							out_file<<status[k][i][j]<<std::endl;
-						else
-							out_file<<status[k][i][j]<<" , ";
-					}
+			cold_chain_ids[coldchains]=k;
+			coldchains++;
+		}	
+	}
+	//Loop through chains
+	for(int i =0; i<step_num; i++){
+		//if RJ, write out status too
+		if(RJ){
+			for(int k = 0 ; k<coldchains; k++){
+				for(int j=0; j<max_dimension;j++){
+					out_file<<output[cold_chain_ids[k]][i][j]<<" , ";
 				}
-				//Else, just parameters
-				else{
-					for(int j=0; j<max_dimension;j++){
-						if(j == max_dimension -1 ){
-							out_file<<output[k][i][j]<<std::endl;
-						}
-						else{
-							out_file<<output[k][i][j]<<" , ";
-						}
+				for(int j = 0 ; j<max_dimension; j++){
+					if(j==max_dimension-1)
+						out_file<<status[cold_chain_ids[k]][i][j]<<std::endl;
+					else
+						out_file<<status[cold_chain_ids[k]][i][j]<<" , ";
+				}
+			}
+		}
+		//Else, just parameters
+		else{
+			for(int k = 0 ; k<coldchains; k++){
+				for(int j=0; j<max_dimension;j++){
+					if(j == max_dimension -1 ){
+						out_file<<output[cold_chain_ids[k]][i][j]<<std::endl;
+					}
+					else{
+						out_file<<output[cold_chain_ids[k]][i][j]<<" , ";
 					}
 				}
 			}

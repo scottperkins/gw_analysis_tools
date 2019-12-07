@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 #data = np.genfromtxt("data/mcmc_pv2_chain.csv",delimiter=",")
 data = np.genfromtxt("data/mcmc_pv2_chain_data.csv",delimiter=",")
-#data = data[60000:]
+data = data[20000:]
 for x in data:
     #x[3] = np.arccos(x[3])
     x[6] = np.exp(x[6])
