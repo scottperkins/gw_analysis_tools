@@ -90,7 +90,6 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	if(generation_method == "IMRPhenomD")
 	{
 		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-		//std::cout<<params.incl_angle<<std::endl;
 		IMRPhenomD<T> modeld;
 		status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
 		for (int i =0 ; i < length; i++){
