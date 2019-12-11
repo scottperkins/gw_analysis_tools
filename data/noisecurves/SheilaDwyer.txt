@@ -1,0 +1,6 @@
+Hi Emanuele,
+Nice to meet you the other day.
+I attached the text file of the collection of sensitivity curves that Matt Evans put together, (they are amplitude spectra densities in strain,  and the second file describes what the columns are, with some references I added.  The ones that are probably most interesting are CE2 wide and ET, but feel free to compare them all. I'll be interested to hear what you think could be an interesting science target for these kind of curves.
+
+Cheers,
+Sheila
