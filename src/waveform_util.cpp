@@ -7,6 +7,7 @@
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "detector_util.h"
+#include "pn_waveform_util.h"
 #include <fftw3.h>
 #include <algorithm>
 #include <complex>
@@ -1291,11 +1292,15 @@ void postmerger_params(gen_params_base<T>*params,
 }
 template void postmerger_params<double>(gen_params_base<double> *,std::string, double *, double *, double*);
 template void postmerger_params<adouble>(gen_params_base<adouble> *,std::string, adouble *, adouble *, adouble*);
-void Tbm_to_freq(gen_params_base<double> *params,
-	std::string generation_method,
-	double Tbm,
-	double *freq,
-	double tol 
+
+/*! \brief Convenience function to Calculate the time before merger using numerical methods
+ *
+ */
+void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of the source*/
+	std::string generation_method,/**< Generation method for the waveform*/
+	double Tbm,/**< target time before merger*/
+	double *freq,/**< Frequency at the input time before merger*/
+	double tol /**< Tolerance for the scheme*/
 	)
 {
 	if(params->equatorial_orientation){
@@ -1352,6 +1357,129 @@ void Tbm_to_freq(gen_params_base<double> *params,
 			//std::cout<<T/T_year<<std::endl;
 		}
 	}
+}
+/*! \brief Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh
+ *
+ * See arXiv 1902.00021
+ *
+ * Binary must merge within time T_wait
+ *
+ * SNR is calculated with frequencies [f(t_mer),f(t_mer-T_obs)] or [f(t_mer),0] depending on whether the binary has merged or not
+ *
+ * Assumes sky average -- Only supports PhenomD for now
+ *
+ * If no time before merger satisfies the requirements, both are set to -1
+ */
+void threshold_times(gen_params_base<double> *params,
+	std::string generation_method, /**<Generation method to use for the waveform*/
+	double T_obs, /**<Observation time -- also specifies the frequency spacing (\delta f = 1./T_obs)*/
+	double T_wait, /**<Wait time -- Maximum time for binaries to coalesce */
+	double f_lower,/**<Lower bound of search*/
+	double f_upper,/**<upper bound of search*/
+	std::string SN,/**< Noise curve name*/
+	double SNR_thresh, /**< Threshold SNR */
+	double *threshold_times_out,/**<[out] Output frequencies */
+	double tolerance /**< Percent tolerance on SNR search*/
+	)
+{
+	int length = (f_upper-f_lower)/T_obs;
+	double deltaf = 1./T_obs;
+	double *freqs = new double[length];
+	for(int i = 0 ; i<length; i++){
+		freqs[i]=f_lower +i*deltaf;
+	}
+	double *SN_curve = new double[length];
+	populate_noise(freqs, SN, SN_curve, length);
+	for(int i = 0 ; i<length; i++){
+		SN_curve[i] = SN_curve[i]*SN_curve[i];	
+	}
+	threshold_times(params, generation_method, T_obs, T_wait, freqs, SN_curve, length, SNR_thresh, threshold_times_out,tolerance);
+	delete [] freqs;
+	delete [] SN_curve;
+
+}
+
+/*! \brief Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh
+ *
+ * See arXiv 1902.00021
+ *
+ * Binary must merge within time T_wait
+ *
+ * SNR is calculated with frequencies [f(t_mer),f(t_mer-T_obs)] or [f(t_mer),0] depending on whether the binary has merged or not
+ *
+ * Assumes sky average -- Only supports PhenomD for now -- No angular dependence used ( only uses plus polarization -- assumes iota = psi = 0 )
+ *
+ * Assumes this is for multiband -- ie stellar mass BHs -- Only uses pn approximation of time frequency relation
+ *
+ * If no time before merger satisfies the requirements, both are set to -1
+ */
+void threshold_times(gen_params_base<double> *params,
+	std::string generation_method, /**<Generation method to use for the waveform*/
+	double T_obs, /**<Observation time -- also specifies the frequency spacing (\delta f = 1./T_obs)*/
+	double T_wait, /**<Wait time -- Maximum time for binaries to coalesce */
+	double *freqs,/**<Maximum frequency array*/
+	double *SN,/**< Noise curve array, should be prepopulated from f_lower to f_upper with spacing 1./T_obs*/
+	int length,/**< Length of maximum frequency array*/
+	double SNR_thresh, /**< Threshold SNR */
+	double *threshold_times_out,/**<[out] Output frequencies */
+	double tolerance /**< Percent tolerance on SNR search*/
+	)
+{
+	//Max number of iterations -- safety net
+	int max_iter = 1000;
+	int ct = 0;
+	double chirpmass = calculate_chirpmass(params->mass1, params->mass2);
+	std::complex<double> *hplus= new std::complex<double>[length];
+	std::complex<double> *hcross= new std::complex<double>[length];
+	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
+	bool not_found = true;
+	int bound_id_lower = 0, bound_id_upper = length-1;//Current ids
+	double t_mer=0; //Time before merger
+	double freq_temp=0;
+	double snr;
+	//Determine if any t_mer between [0,T_wait] allows for an SNR>SNR_thresh 
+	
+	//Frequency T_obs before it leaves band
+	//Tbm_to_freq(params,generation_method,T_obs,&freq_temp,tolerance);
+	//Using PN f(t) instead of local, because its faster and simpler -- maybe upgrade later
+	double time_lower=t_0PN(freqs[bound_id_upper], chirpmass);
+	freq_temp= f_0PN(T_obs+time_lower, chirpmass);
+	for(int i = length-1 ; i <=0; i--){
+		if(freqs[i]<freq_temp){
+			bound_id_lower = i;
+			break;
+		}	
+	}
+	fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+	snr = calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+	if(snr>SNR_thresh){not_found= false;}
+	else{
+		while(not_found && ct < max_iter){
+			Tbm_to_freq(params,generation_method,T_obs,&freq_temp,tolerance);
+			for(int i = length-1 ; i <=0; i--){
+				if(freqs[i]<freq_temp){
+					bound_id_lower = i;
+					break;
+				}	
+			}
+			
+			fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+			snr = calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+			ct++;
+		}
+	}	
+	
+	//If no SNR is larger than threshold, return 
+	if(not_found){
+		threshold_times_out[0] = -1;
+		threshold_times_out[1] = -1;
+		return;
+	}
+	//Find roots
+	
+	//Cleanup
+	delete [] hplus;
+	delete [] hcross;
 }
 
 

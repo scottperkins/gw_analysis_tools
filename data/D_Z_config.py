@@ -36,13 +36,13 @@ def func(x, l,a, b ,c, d, e, f, g, h, i, j ,k):
             g*x**(7./2.) + h*x*x*x*x + i*x**(9./2.) + j*x**(10./2.) + k*x**(11./2.) )
             
 if __name__=="__main__":
-
+    testing_cosmo = cosmos.FlatLambdaCDM(H0=70,Om0=0.3)
     data_filetree = os.path.dirname(os.path.realpath(__file__))
     include_filetree = data_filetree[:-4] + "include"
     #config_header = open(include_filetree+'/D_Z_Config.h','w')
-    with open(include_filetree+'/D_Z_Config.h','w') as config_header:
-        cosmologies = [cosmos.Planck15, cosmos.Planck13, cosmos.WMAP9,cosmos.WMAP7, cosmos.WMAP5]
-        cosmology_names = ["PLANCK15", "PLANCK13", "WMAP9","WMAP7", "WMAP5"]
+    with open(include_filetree+'/gwat/D_Z_Config.h','w') as config_header:
+        cosmologies = [cosmos.Planck15, cosmos.Planck13, cosmos.WMAP9,cosmos.WMAP7, cosmos.WMAP5,testing_cosmo]
+        cosmology_names = ["PLANCK15", "PLANCK13", "WMAP9","WMAP7", "WMAP5","TESTING_COSMOLOGY"]
         deg = np.ones((len(cosmologies),))*12 #Number of parameters in the fitting function
         num_segments = np.ones((len(cosmologies),))*3 #This is how many chunks the interpolation range is broken up into 
         pts_seg = []

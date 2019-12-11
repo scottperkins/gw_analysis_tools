@@ -41,7 +41,14 @@ T f_0PN(T t, T chirpmass)
 	return factor * pow(chirpmass, -5./8.) * pow(t,-3./8);
 }
 
-
+/*! \brief Inverse of f_0PN
+ */
+template<class T>
+T t_0PN(T f, T chirpmass)
+{
+	T factor = 0.07275685064;
+	return pow(f/factor * pow(chirpmass, 5./8.) , -8./3.);
+}
 /*! \brief Utility function for the frequency at the innermost stable circular orbit (ISCO)
  *
  */
@@ -57,5 +64,7 @@ template double t_2PN<double>(double, double, double, double, double, double);
 template adouble t_2PN<adouble>(adouble, adouble, adouble, adouble, adouble, adouble);
 template double f_0PN<double>(double, double);
 template adouble f_0PN<adouble>(adouble, adouble);
+template double t_0PN<double>(double, double);
+template adouble t_0PN<adouble>(adouble, adouble);
 template adouble FISCO(adouble mass);
 template double FISCO(double mass);

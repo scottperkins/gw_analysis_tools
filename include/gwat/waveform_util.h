@@ -186,5 +186,27 @@ double p_triple_detector_fit(double omega);
 double pdet_triple_detector_fit(double rho_thresh,double rho_opt);
 double p_triple_detector_interp(double omega);
 double p_single_detector_interp(double omega);
+void threshold_times(gen_params_base<double> *params,
+	std::string generation_method,
+	double T_obs, 
+	double T_wait,
+	double f_lower,
+	double f_upper,
+	std::string SN,
+	double SNR_thresh, 
+	double *threshold_times_out,
+	double tolerance
+	);
+void threshold_times(gen_params_base<double> *params,
+	std::string generation_method,
+	double T_obs, 
+	double T_wait, 
+	double *freqs,
+	double *SN,
+	int length,
+	double SNR_thresh, 
+	double *threshold_times_out,
+	double tolerance
+	);
 #endif
 
