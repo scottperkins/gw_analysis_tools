@@ -1442,8 +1442,8 @@ void threshold_times(gen_params_base<double> *params,
 	//Frequency T_obs before it leaves band
 	//Tbm_to_freq(params,generation_method,T_obs,&freq_temp,tolerance);
 	//Using PN f(t) instead of local, because its faster and simpler -- maybe upgrade later
-	double time_lower=t_0PN(freqs[bound_id_upper], chirpmass);
-	freq_temp= f_0PN(T_obs+time_lower, chirpmass);
+	t_mer= t_0PN(freqs[bound_id_upper], chirpmass);
+	freq_temp = f_0PN(T_obs+t_mer, chirpmass);
 	for(int i = length-1 ; i <=0; i--){
 		if(freqs[i]<freq_temp){
 			bound_id_lower = i;
@@ -1466,6 +1466,7 @@ void threshold_times(gen_params_base<double> *params,
 			fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
 			snr = calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
 			ct++;
+			if(snr>SNR_thresh){not_found=false;}
 		}
 	}	
 	
