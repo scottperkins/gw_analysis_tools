@@ -135,8 +135,8 @@ void test53()
 	double SNR_thresh = 8;
 
 	gen_params params;
-	params.mass1 = 36.8;
-	params.mass2 = 29.3;
+	params.mass1 = 36.;
+	params.mass2 = 29.;
 	//params.spin1[2] =-0.3;
 	//params.spin2[2] = 0.8;
 	params.spin1[2] = 0.0;
@@ -160,19 +160,20 @@ void test53()
 	int length = (f_upper-f_lower)*T_obs;
 	double *freqs = new double[length];
 	double *SN = new double[length];
-	for(int i = 0 ; i<length; i++){
-		freqs[i] = f_lower + i / T_obs;
-	}
-	populate_noise(freqs, "LISA_SADC_CONF", SN, length,4*12);
-	for(int i = 0 ; i<length; i++){
-		SN[i]=SN[i]*SN[i];	
-	}
+	//for(int i = 0 ; i<length; i++){
+	//	freqs[i] = f_lower + i / T_obs;
+	//}
+	//populate_noise(freqs, "LISA_SADC_CONF", SN, length,4*12);
+	//for(int i = 0 ; i<length; i++){
+	//	SN[i]=SN[i]*SN[i];	
+	//}
 
-	std::cout<<"Calculating Threshold times: "<<std::endl;
-	clock_t start = clock();
+	clock_t start;
+	//std::cout<<"Calculating Threshold times: "<<std::endl;
+	//start = clock();
 	//threshold_times(&params, "IMRPhenomD", T_obs, T_wait, freqs, SN, length, SNR_thresh, times, tolerance);
-	std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
-	std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
+	//std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
+	//std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
 
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
 	params.sky_average=true;	

@@ -1650,7 +1650,6 @@ void threshold_times_gsl(gen_params_base<double> *params,
 	)
 {
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
-	
 	params->sky_average = false;
 	double bounds[2];
 	
