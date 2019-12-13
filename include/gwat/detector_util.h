@@ -153,4 +153,10 @@ T LISA_response_plus( source_parameters<T> *params,T theta_s, T phi_s, T theta_j
 template<class T>
 T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f);
 
+double p_single_detector(double omega, int samples);
+double p_single_detector_fit(double omega);
+double p_triple_detector_fit(double omega);
+double pdet_triple_detector_fit(double rho_thresh,double rho_opt);
+double p_triple_detector_interp(double omega);
+double p_single_detector_interp(double omega);
 #endif 

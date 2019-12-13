@@ -3,6 +3,7 @@
 #include "waveform_generator.h"
 #include "util.h"
 #include <string>
+#include <gsl/gsl_integration.h>
 
 /*! \file 
  * Header file for waveform specific utilites
@@ -180,12 +181,6 @@ void postmerger_params(gen_params_base<T>*params,
 	T *fdamp,
 	T *fRD
 	);
-double p_single_detector(double omega, int samples);
-double p_single_detector_fit(double omega);
-double p_triple_detector_fit(double omega);
-double pdet_triple_detector_fit(double rho_thresh,double rho_opt);
-double p_triple_detector_interp(double omega);
-double p_single_detector_interp(double omega);
 void threshold_times(gen_params_base<double> *params,
 	std::string generation_method,
 	double T_obs, 
@@ -207,6 +202,21 @@ void threshold_times(gen_params_base<double> *params,
 	double SNR_thresh, 
 	double *threshold_times_out,
 	double tolerance
+	);
+double integrand_threshold_subroutine(double f, void *subroutine_params);
+double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np);
+void threshold_times_gsl(gen_params_base<double> *params,
+	std::string generation_method, 
+	double T_obs, 
+	double T_wait, 
+	double fmin,
+	double fmax,
+	std::string SN,
+	double SNR_thresh, 
+	double *threshold_times_out,
+	double tolerance, 
+	gsl_integration_workspace *w,
+	int np
 	);
 #endif
 

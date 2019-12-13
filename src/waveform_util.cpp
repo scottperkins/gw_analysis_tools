@@ -16,11 +16,7 @@
 #include <adolc/taping.h>
 #include <adolc/adouble.h>
 #include <adolc/drivers/drivers.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
-#include <functional>
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
@@ -1425,48 +1421,87 @@ void threshold_times(gen_params_base<double> *params,
 	double tolerance /**< Percent tolerance on SNR search*/
 	)
 {
+	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
+	
+	params->sky_average = false;
+	double bounds[2];
+	
 	//Max number of iterations -- safety net
-	int max_iter = 1000;
+	int max_iter = 100;
 	int ct = 0;
-	double chirpmass = calculate_chirpmass(params->mass1, params->mass2);
+	double deltaf = freqs[1]-freqs[0];
+	double chirpmass = calculate_chirpmass(params->mass1, params->mass2)*MSOL_SEC;
 	std::complex<double> *hplus= new std::complex<double>[length];
 	std::complex<double> *hcross= new std::complex<double>[length];
-	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	bool not_found = true;
 	int bound_id_lower = 0, bound_id_upper = length-1;//Current ids
+	int bound_id_lower_prev = 0, bound_id_upper_prev = length-1;//Current ids
 	double t_mer=0; //Time before merger
-	double freq_temp=0;
-	double snr;
+	double snr, snr_prev;
+	int precalc_wf_id;
 	//Determine if any t_mer between [0,T_wait] allows for an SNR>SNR_thresh 
 	
 	//Frequency T_obs before it leaves band
-	//Tbm_to_freq(params,generation_method,T_obs,&freq_temp,tolerance);
 	//Using PN f(t) instead of local, because its faster and simpler -- maybe upgrade later
-	t_mer= t_0PN(freqs[bound_id_upper], chirpmass);
-	freq_temp = f_0PN(T_obs+t_mer, chirpmass);
-	for(int i = length-1 ; i <=0; i--){
-		if(freqs[i]<freq_temp){
-			bound_id_lower = i;
-			break;
-		}	
-	}
+	//Shouldn't matter this far from merger
+	t_mer= t_0PN(freqs[bound_id_upper], chirpmass)+T_obs;
+	bound_id_lower = (f_0PN(t_mer, chirpmass)- freqs[0])/deltaf;
+
 	fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
-	snr = calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+	precalc_wf_id = bound_id_lower;
+	snr = std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+	snr_prev=snr;
+	bound_id_lower_prev = bound_id_lower;
+	bound_id_upper_prev = bound_id_lower;
+	double t1 = t_mer, t2=t_mer;
 	if(snr>SNR_thresh){not_found= false;}
 	else{
-		while(not_found && ct < max_iter){
-			Tbm_to_freq(params,generation_method,T_obs,&freq_temp,tolerance);
-			for(int i = length-1 ; i <=0; i--){
-				if(freqs[i]<freq_temp){
-					bound_id_lower = i;
-					break;
-				}	
+		bool bound_search=true, t1_moved=true,t2_moved=true;
+		while(bound_search){
+			t_mer *=2.;
+			bound_id_lower = (f_0PN(t_mer, chirpmass)- freqs[0])/deltaf;
+			bound_id_upper = (f_0PN(t_mer-T_obs, chirpmass)- freqs[0])/deltaf;
+
+			fourier_waveform(&freqs[bound_id_lower], bound_id_lower_prev-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+			precalc_wf_id = bound_id_lower;
+			snr = std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+			if(snr<snr_prev){bound_search=false;}	
+		}	
+		snr_prev=snr;
+		t2 = t_mer;
+		while(not_found &&ct < max_iter && t_mer < T_wait && (t2-t1)>T_day){
+			t_mer = (t1+t2)/2.;
+			bound_id_lower = ( f_0PN(t_mer ,chirpmass) - freqs[0])/deltaf;
+			if(t_mer-T_obs > 0){
+				bound_id_upper = ( std::min( f_0PN(  t_mer - T_obs,chirpmass) , freqs[length-1] ) - freqs[0])/deltaf;
 			}
-			
-			fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
-			snr = calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+			else{
+				bound_id_upper = (  freqs[length-1]  - freqs[0])/deltaf;
+
+			}
+			//Update waveform if using new frequencies
+			if(bound_id_lower < precalc_wf_id){
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				precalc_wf_id = bound_id_lower;
+			}
+			bound_id_lower_prev= bound_id_lower;
+			bound_id_upper_prev= bound_id_upper;
+			snr =std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
 			ct++;
 			if(snr>SNR_thresh){not_found=false;}
+			else{
+				if(t1_moved){
+					if(snr>snr_prev){t1=t_mer;t1_moved=true; t2_moved=false;}
+					else{t2=t_mer;t2_moved=true; t1_moved=false;;}
+				}
+				if(t2_moved){
+					if(snr>snr_prev){t2=t_mer;t2_moved=true; t1_moved=false;}
+					else{t1=t_mer;t1_moved=true; t2_moved=false;;}
+
+				}
+			}
+			snr_prev = snr;
+
 		}
 	}	
 	
@@ -1474,192 +1509,327 @@ void threshold_times(gen_params_base<double> *params,
 	if(not_found){
 		threshold_times_out[0] = -1;
 		threshold_times_out[1] = -1;
-		return;
 	}
 	//Find roots
-	
+	else{
+		double t_save = t_mer;
+		ct=0;
+		bool found_lower_root=false;	
+		bool found_upper_root=false;	
+		t1=t_save, t2=t_save;//We know t_mer is over the threshold
+		//Find a lower bound for bisection search
+		while(snr>SNR_thresh){
+			t1/=2.;
+			bound_id_lower = ( f_0PN(t1 ,chirpmass) - freqs[0])/deltaf;
+			if(t1-T_obs > 0){
+				bound_id_upper = ( std::min( f_0PN(  t1 - T_obs,chirpmass) , freqs[length-1] ) - freqs[0])/deltaf;
+			}
+			else{
+				bound_id_upper = (  freqs[length-1]  - freqs[0])/deltaf;
+
+			}
+			snr =std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+		}
+		while(!found_lower_root){
+			
+			t_mer = (t1+t2)/2.;
+			//Find new frequency bound ids
+			bound_id_lower = ( f_0PN(t_mer ,chirpmass) - freqs[0])/deltaf;
+			if(t_mer-T_obs > 0){
+				bound_id_upper = ( std::min( f_0PN(  t_mer - T_obs,chirpmass) , freqs[length-1] ) - freqs[0])/deltaf;
+			}
+			else{
+				bound_id_upper = (  freqs[length-1]  - freqs[0])/deltaf;
+
+			}
+			//Update waveform if using new frequencies
+			if(bound_id_lower < precalc_wf_id){
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				precalc_wf_id = bound_id_lower;
+			}
+			bound_id_lower_prev= bound_id_lower;
+			bound_id_upper_prev= bound_id_upper;
+			snr =std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+			ct++;
+			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
+			else{
+				if(snr>SNR_thresh){ t2 = t_mer;	}
+				else{ t1=t_mer;}
+			}
+			snr_prev=snr;
+			
+		}
+		ct=0;
+		t1=t_save; t2=t_save;
+		do{
+			t2*=2.;
+			if(t2>T_wait){t2=T_wait;}	
+			bound_id_lower = ( f_0PN(t2 ,chirpmass) - freqs[0])/deltaf;
+			if(t2-T_obs > 0){
+				bound_id_upper = ( std::min( f_0PN(  t2 - T_obs,chirpmass) , freqs[length-1] ) - freqs[0])/deltaf;
+			}
+			else{
+				bound_id_upper = (  freqs[length-1]  - freqs[0])/deltaf;
+
+			}
+			if(bound_id_lower < precalc_wf_id){
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				precalc_wf_id = bound_id_lower;
+			}
+			snr =std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+			if(t2==T_wait && snr>SNR_thresh){ found_upper_root=true; threshold_times_out[1]=T_wait;break;}
+		}while(snr>SNR_thresh  );
+		while(!found_upper_root){
+			
+			t_mer = (t1+t2)/2.;
+			//Find new frequency bound ids
+			bound_id_lower = ( f_0PN(t_mer ,chirpmass) - freqs[0])/deltaf;
+			if(t_mer-T_obs > 0){
+				bound_id_upper = ( std::min( f_0PN(  t_mer - T_obs,chirpmass) , freqs[length-1] ) - freqs[0])/deltaf;
+			}
+			else{
+				bound_id_upper = (  freqs[length-1]  - freqs[0])/deltaf;
+
+			}
+			//Update waveform if using new frequencies
+			if(bound_id_lower < precalc_wf_id){
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				precalc_wf_id = bound_id_lower;
+			}
+			bound_id_lower_prev= bound_id_lower;
+			bound_id_upper_prev= bound_id_upper;
+			snr =std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+			ct++;
+			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
+			else{
+				if(snr>SNR_thresh){ t1 = t_mer;	}
+				else{ t2=t_mer;}
+			}
+			snr_prev=snr;
+			
+		}
+	}
 	//Cleanup
 	delete [] hplus;
 	delete [] hcross;
 }
 
+struct threshold_struct
+{
+	gen_params_base<double> *params;
+	std::string SN;
+	std::string generation_method;
+};
 
-/*! \brief Utility to calculate the cumulative amplitude distribution for a single detector
+/*! \brief Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh --GSL quad integration implementation
  *
- * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
- * Integrated over the volume which \omega' is larger than \omega
+ * See arXiv 1902.00021
  *
- * Integrates using Monte Carlo integration
+ * Binary must merge within time T_wait
  *
- * Uniform sampling in \psi, cos(\iota), cos(\theta) , and \phi
+ * SNR is calculated with frequencies [f(t_mer),f(t_mer-T_obs)] or [f(t_mer),0] depending on whether the binary has merged or not
+ *
+ * Assumes sky average -- Only supports PhenomD for now -- No angular dependence used ( only uses plus polarization -- assumes iota = psi = 0 )
+ *
+ * Assumes this is for multiband -- ie stellar mass BHs -- Only uses pn approximation of time frequency relation
+ *
+ * If no time before merger satisfies the requirements, both are set to -1
  */
-double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
-	int samples/**< number of monte carlo samples to use**/
+void threshold_times_gsl(gen_params_base<double> *params,
+	std::string generation_method, /**<Generation method to use for the waveform*/
+	double T_obs, /**<Observation time -- also specifies the frequency spacing (\delta f = 1./T_obs)*/
+	double T_wait, /**<Wait time -- Maximum time for binaries to coalesce */
+	double fmin,/**<Maximum frequency array*/
+	double fmax,/**<Maximum frequency array*/
+	std::string SN,/**< Noise curve array, should be prepopulated from f_lower to f_upper with spacing 1./T_obs*/
+	double SNR_thresh, /**< Threshold SNR */
+	double *threshold_times_out,/**<[out] Output frequencies */
+	double tolerance, /**< Percent tolerance on SNR search*/
+	gsl_integration_workspace *w,
+	int np
 	)
 {
-	gsl_rng_env_setup();
-	const gsl_rng_type *T = gsl_rng_default;
-	gsl_rng *r = gsl_rng_alloc(T);
-	gsl_rng_set(r, 1323);
-	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota, 
-		costheta, phi,theta,iota;
-	double twopi = 2.*M_PI;
-	double omega_squared = omega*omega;
-	double sum = 0;
-	for(int i= 0 ; i<samples ; i++){
-		psi = gsl_rng_uniform(r)*twopi;	
-		cosiota = gsl_rng_uniform(r)*2.-1.;	
-		costheta = gsl_rng_uniform(r)*2.-1.;	
-		phi = gsl_rng_uniform(r)*twopi;	
-		iota = acos(cosiota);
-		theta = acos(costheta);
-		right_interferometer(&Fplus, &Fcross, theta, phi, psi);
-		//std::cout<<Fplus<<" "<<Fcross<<std::endl;
-		//omega_prime = sqrt(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
-		//Do squared to avoid the expensive sqrt function
-		omega_prime_squared =(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
-		if(omega_prime_squared>omega_squared){sum++;}
-		
+	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
+	
+	params->sky_average = false;
+	double bounds[2];
+	
+	//Max number of iterations -- safety net
+	double chirpmass = calculate_chirpmass(params->mass1, params->mass2)*MSOL_SEC;
+	bool not_found = true;
+	double f_lower = fmin, f_upper = fmax;//Current ids
+	double f_lower_prev = fmin, f_upper_prev = fmax;//Current ids
+	double t_mer=0; //Time before merger
+	double snr, snr_prev;
+	double rel_err = tolerance;
+	//Determine if any t_mer between [0,T_wait] allows for an SNR>SNR_thresh 
+	
+	//Frequency T_obs before it leaves band
+	//Using PN f(t) instead of local, because its faster and simpler -- maybe upgrade later
+	//Shouldn't matter this far from merger
+	t_mer= t_0PN(f_upper, chirpmass)+T_obs;
+	f_lower = f_0PN(t_mer,chirpmass);	
+
+	//fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+	//precalc_wf_id = bound_id_lower;
+	//snr = std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
+	snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+	//std::cout<<snr<<std::endl;
+	snr_prev=snr;
+	double t1 = t_mer, t2=t_mer;
+	if(snr>SNR_thresh){not_found= false;}
+	else{
+		bool bound_search=true, t1_moved=true,t2_moved=true;
+		while(bound_search){
+			t_mer *=2.;
+			f_lower = (f_0PN(t_mer, chirpmass));
+			f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(snr<snr_prev){bound_search=false;}	
+		}	
+		snr_prev=snr;
+		t2 = t_mer;
+		while(not_found && t_mer < T_wait && (t2-t1)>T_day){
+			t_mer = (t1+t2)/2.;
+			f_lower =  f_0PN(t_mer ,chirpmass) ;
+			if(t_mer-T_obs > 0){
+				f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+			}
+			else{
+				f_upper =   fmax;
+
+			}
+			f_lower_prev= f_lower;
+			f_upper_prev= f_upper;
+			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(snr>SNR_thresh){not_found=false;}
+			else{
+				if(t1_moved){
+					if(snr>snr_prev){t1=t_mer;t1_moved=true; t2_moved=false;}
+					else{t2=t_mer;t2_moved=true; t1_moved=false;;}
+				}
+				if(t2_moved){
+					if(snr>snr_prev){t2=t_mer;t2_moved=true; t1_moved=false;}
+					else{t1=t_mer;t1_moved=true; t2_moved=false;;}
+
+				}
+			}
+			snr_prev = snr;
+
+		}
 	}	
-	gsl_rng_free(r);
-	//std::cout<<sum<<std::endl;
-	return sum/=samples;
-}
-/*! \brief Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit 
- *
- * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
- * Integrated over the volume which \omega' is larger than \omega
- *
- * see arXiv:1405.7016
- */
-double p_single_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
-	)
-{
-	double alpha=1., a2 = 0.374222, a4 = 2.04216, a8 =-2.63948;
-	double omega_term = 1-omega/alpha;
-	return (a2 * pow_int( omega_term, 2) 
-		+ a4* pow_int(omega_term,4) 
-		+ a8* pow_int(omega_term,8)
-		+ (1 - a2 - a4 - a8) * pow_int(omega_term, 10));
-}
-/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- Numerical Fit 
- *
- * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
- * Integrated over the volume which \omega' is larger than \omega
- *
- * see arXiv:1405.7016
- */
-double p_triple_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
-	)
-{
-	double alpha=1.4, a2 =  1.19549, a4 =  1.61758, a8 =-4.87024;
-	double omega_term = 1-omega/alpha;
-	return (a2 * pow_int( omega_term, 2) 
-		+ a4* pow_int(omega_term,4) 
-		+ a8* pow_int(omega_term,8)
-		+ (1 - a2 - a4 - a8) * pow_int(omega_term, 10));
-}
-/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/ 
- *
- * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
- * Integrated over the volume which \omega' is larger than \omega
- *
- * see arXiv:1405.7016
- */
-double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
-	)
-{
-	double pomega = 0;	
-	int data_length = 141;
-	gsl_interp_accel *accel  = gsl_interp_accel_alloc();
-	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,data_length);
-
-	double omegas[data_length];
-	double pomega_numerical[data_length];
-	double **temp =  new double*[data_length];
-	for(int i=0 ; i<data_length; i ++){
-		temp[i]=new double[2];
-	}
-	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/Pw_three.csv", temp, data_length,2);
-	for(int i=0 ; i<data_length; i ++){
-		//std::cout<<temp[i][0]<<" "<<temp[i][1]<<std::endl;
-		omegas[i] = temp[i][0];	
-		pomega_numerical[i] = temp[i][1];	
-	}
 	
-	gsl_spline_init(spline, omegas, pomega_numerical,data_length);
-
-	pomega = gsl_spline_eval(spline, omega, accel);
-	gsl_spline_free(spline);
-	gsl_interp_accel_free(accel);
-	for(int i = 0 ; i<data_length; i++){
-		delete [] temp[i];
+	//If no SNR is larger than threshold, return 
+	if(not_found){
+		threshold_times_out[0] = -1;
+		threshold_times_out[1] = -1;
 	}
-	delete[] temp;
-	return pomega;
+	//Find roots
+	else{
+		double t_save = t_mer;
+		bool found_lower_root=false;	
+		bool found_upper_root=false;	
+		t1=t_save, t2=t_save;//We know t_mer is over the threshold
+		//Find a lower bound for bisection search
+		while(snr>SNR_thresh){
+			t1/=2.;
+			f_lower =  f_0PN(t1 ,chirpmass) ;
+			if(t1-T_obs > 0){
+				f_upper =  std::min( f_0PN(  t1 - T_obs,chirpmass) , fmax ) ;
+			}
+			else{
+				f_upper =   fmax;
+
+			}
+			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+		}
+		while(!found_lower_root){
+			
+			t_mer = (t1+t2)/2.;
+			//Find new frequency bound ids
+			f_lower =  f_0PN(t_mer ,chirpmass) ;
+			if(t_mer-T_obs > 0){
+				f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax);
+			}
+			else{
+				f_upper = fmax;
+
+			}
+			f_lower_prev= f_lower;
+			f_upper_prev= f_upper;
+			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
+			else{
+				if(snr>SNR_thresh){ t2 = t_mer;	}
+				else{ t1=t_mer;}
+			}
+			snr_prev=snr;
+			
+		}
+		t1=t_save; t2=t_save;
+		do{
+			t2*=2.;
+			if(t2>T_wait){t2=T_wait;}	
+			f_lower =  f_0PN(t2 ,chirpmass) ;
+			if(t2-T_obs > 0){
+				f_upper =  std::min( f_0PN(  t2 - T_obs,chirpmass) , fmax ) ;
+			}
+			else{
+				f_upper =fmax;
+
+			}
+			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(t2==T_wait && snr>SNR_thresh){ found_upper_root=true; threshold_times_out[1]=T_wait;break;}
+		}while(snr>SNR_thresh  );
+		while(!found_upper_root){
+			
+			t_mer = (t1+t2)/2.;
+			//Find new frequency bound ids
+			f_lower =  f_0PN(t_mer ,chirpmass) ;
+			if(t_mer-T_obs > 0){
+				f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+			}
+			else{
+				f_upper = fmax;
+
+			}
+			f_lower_prev= f_lower;
+			f_upper_prev= f_upper;
+			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
+			else{
+				if(snr>SNR_thresh){ t1 = t_mer;	}
+				else{ t2=t_mer;}
+			}
+			snr_prev=snr;
+			
+		}
+	}
 }
-/*! \brief Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/ 
- *
- * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
- * Integrated over the volume which \omega' is larger than \omega
- *
- * see arXiv:1405.7016
- */
-double p_single_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
-	)
+double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np)
 {
-	double pomega = 0;	
-	int data_length = 1001;
-	gsl_interp_accel *accel  = gsl_interp_accel_alloc();
-	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,data_length);
-
-	double omegas[data_length];
-	double pomega_numerical[data_length];
-	double **temp =  new double*[data_length];
-	for(int i=0 ; i<data_length; i ++){
-		temp[i]=new double[2];
-	}
-	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/Pw_single.csv", temp, data_length,2);
-	for(int i=0 ; i<data_length; i ++){
-		//std::cout<<temp[i][0]<<" "<<temp[i][1]<<std::endl;
-		omegas[i] = temp[i][0];	
-		pomega_numerical[i] = temp[i][1];	
-	}
-	
-	gsl_spline_init(spline, omegas, pomega_numerical,data_length);
-
-	pomega = gsl_spline_eval(spline, omega, accel);
-	gsl_spline_free(spline);
-	gsl_interp_accel_free(accel);
-	for(int i = 0 ; i<data_length; i++){
-		delete [] temp[i];
-	}
-	delete[] temp;
-	return pomega;
-}
-
-double pdet_triple_detector_fit(double rho_thresh, double rho_opt)
-{
-	int np = 1e3;
-	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
+	threshold_struct helper_params;
+	helper_params.params = params;
+	helper_params.generation_method = generation_method;
+	helper_params.SN = SN;
 	gsl_function F;
-	double result, err; 
-	double abserr=0, relerr = 1e-5;
-	//std::function<double(double, void*)> wrapper=NULL;
-	//wrapper = [](double omega, void * param){ return p_triple_detector_fit(omega);};	
-	F.function = [](double omega, void * param){ return p_triple_detector_fit(omega);};	
-
-	int errcode = gsl_integration_qag(&F, rho_thresh/rho_opt, 1, abserr, relerr, 
-		np, GSL_INTEG_GAUSS15, w, &result, &err);
-	gsl_integration_workspace_free(w);
-	
-	return result;
+	F.function = [](double f, void *param){return integrand_threshold_subroutine(f,param);};
+	F.params = (void *)&helper_params;
+	double result, err;
+	int errcode = gsl_integration_qag(&F,fmin, fmax, 0,rel_err, np, GSL_INTEG_GAUSS15,w, &result, &err);
+	return sqrt(result);
 }
+double integrand_threshold_subroutine(double f, void *subroutine_params)
+{
+	threshold_struct cast_params = *(threshold_struct *)subroutine_params;
+	std::complex<double> wfp, wfc;
+	fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
+	double SN;
+	populate_noise(&f, cast_params.SN, &SN, 1);
+	SN*=SN;
+	return 4*std::real(std::conj(wfp)*wfp)/SN;
+}
+
 //###########################################################################
 //template void map_extrinsic_angles<double>(gen_params_base<double> *);
 //template void map_extrinsic_angles<adouble>(gen_params_base<adouble> *);

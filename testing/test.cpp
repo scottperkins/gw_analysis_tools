@@ -88,6 +88,7 @@ void test49();
 void test50();
 void test51();
 void test52();
+void test53();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
@@ -122,8 +123,68 @@ int main(){
 
 	//test38();	
 	//test7();	
-	test52();	
+	test53();	
 	return 0;
+}
+void test53()
+{
+	double T_obs = 4*T_year;
+	double T_wait = 5*T_obs;
+	double tolerance = 0.005;
+	double times[2];
+	double SNR_thresh = 8;
+
+	gen_params params;
+	params.mass1 = 36.8;
+	params.mass2 = 29.3;
+	//params.spin1[2] =-0.3;
+	//params.spin2[2] = 0.8;
+	params.spin1[2] = 0.0;
+	params.spin2[2] = 0.0;
+	params.Luminosity_Distance=200;
+	params.sky_average=true;
+	params.incl_angle = 0;
+	params.phi=0;params.theta=0;params.psi=0;
+	params.equatorial_orientation=false;
+	params.horizon_coord=true;
+	params.tc = T_obs;
+	params.phiRef = 1;
+	params.f_ref = 20;
+	params.NSflag1=false;
+	params.NSflag2=false;
+	params.shift_time = false;
+	params.shift_phase = true;
+
+	double f_lower = 1e-4;
+	double f_upper = 1;
+	int length = (f_upper-f_lower)*T_obs;
+	double *freqs = new double[length];
+	double *SN = new double[length];
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = f_lower + i / T_obs;
+	}
+	populate_noise(freqs, "LISA_SADC_CONF", SN, length,4*12);
+	for(int i = 0 ; i<length; i++){
+		SN[i]=SN[i]*SN[i];	
+	}
+
+	std::cout<<"Calculating Threshold times: "<<std::endl;
+	clock_t start = clock();
+	//threshold_times(&params, "IMRPhenomD", T_obs, T_wait, freqs, SN, length, SNR_thresh, times, tolerance);
+	std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
+	std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
+
+	gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+	params.sky_average=true;	
+
+	start = clock();
+	threshold_times_gsl(&params, "IMRPhenomD", T_obs, T_wait, f_lower,f_upper,"LISA_SADC_CONF",  SNR_thresh, times, tolerance,w,1000);
+	std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
+	std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
+
+	delete [] freqs;
+	delete [] SN;
+	gsl_integration_workspace_free(w);
 }
 void test52()
 {
