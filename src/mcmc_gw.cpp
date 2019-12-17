@@ -398,6 +398,7 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 	}
 	return ll;
 }
+
 					
 double maximized_Log_Likelihood(double *data_real, 
 				double *data_imag,
@@ -1992,7 +1993,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
 	gen_params->f_ref = 20;
-	gen_params->shift_time = false;
+	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
@@ -2029,22 +2030,68 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 
 	if(mcmc_intrinsic){
 		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
-			for(int i=0; i < mcmc_num_detectors; i++){
+			if(!mcmc_save_waveform){
+				for(int i=0; i < mcmc_num_detectors; i++){
+					gen_params.theta=0;	
+					gen_params.phi=0;	
+					gen_params.psi=0;	
+					gen_params.phiRef = 1;
+					gen_params.f_ref = 10;
+					gen_params.incl_angle=0;	
+					gen_params.tc =1;
+					std::complex<double> *response =
+						(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[i]);
+					fourier_detector_response_horizon(mcmc_frequencies[i], mcmc_data_length[i], response, mcmc_detectors[i], local_gen, &gen_params);
+					ll += maximized_Log_Likelihood_aligned_spin_internal(mcmc_data[i], 
+							mcmc_noise[i],
+							mcmc_frequencies[i],
+							response,
+							(size_t) mcmc_data_length[i],
+							&mcmc_fftw_plans[i]
+							);
+					//ll += maximized_Log_Likelihood(mcmc_data[i], 
+					//		mcmc_noise[i],
+					//		mcmc_frequencies[i],
+					//		(size_t) mcmc_data_length[i],
+					//		&gen_params,
+					//		mcmc_detectors[i],
+					//		local_gen,
+					//		&mcmc_fftw_plans[i]
+					//		);
+					free(response);
+				}
+			}
+			else{
 				gen_params.theta=0;	
 				gen_params.phi=0;	
 				gen_params.psi=0;	
-				gen_params.phiRef = 0;
+				gen_params.phiRef = 1;
 				gen_params.f_ref = 10;
 				gen_params.incl_angle=0;	
-				ll += maximized_Log_Likelihood(mcmc_data[i], 
-						mcmc_noise[i],
-						mcmc_frequencies[i],
-						(size_t) mcmc_data_length[i],
-						&gen_params,
-						mcmc_detectors[i],
-						local_gen,
-						&mcmc_fftw_plans[i]
-						);
+				gen_params.tc =1;
+				std::complex<double> *response =
+					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+				fourier_detector_response_horizon(mcmc_frequencies[0], mcmc_data_length[0], response, mcmc_detectors[0], local_gen, &gen_params);
+				for(int i=0; i < mcmc_num_detectors; i++){
+					ll += maximized_Log_Likelihood_aligned_spin_internal(mcmc_data[i], 
+							mcmc_noise[i],
+							mcmc_frequencies[i],
+							response,
+							(size_t) mcmc_data_length[i],
+							&mcmc_fftw_plans[i]
+							);
+					//ll += maximized_Log_Likelihood(mcmc_data[i], 
+					//		mcmc_noise[i],
+					//		mcmc_frequencies[i],
+					//		(size_t) mcmc_data_length[i],
+					//		&gen_params,
+					//		mcmc_detectors[i],
+					//		local_gen,
+					//		&mcmc_fftw_plans[i]
+					//		);
+				}
+				free(response);
+
 			}
 
 		}
