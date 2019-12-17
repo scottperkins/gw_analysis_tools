@@ -166,7 +166,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		double scaling = 0.0;
 		//ensure the steps aren't ridiculous
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-		else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
 
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 					sampler->chain_temps[chain_index];}

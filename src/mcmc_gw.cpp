@@ -1779,74 +1779,75 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//Needs some work
 	//#######################################################################3
 	//if (save_waveform){
-	//if (false){
-	//	std::complex<double> *hplus = 
-	//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-	//			data_length[0]);
-	//	std::complex<double> *hcross = 
-	//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-	//			data_length[0]);
-	//	std::complex<double> *response = 
-	//		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-	//			data_length[0]);
-	//	parameters->tc=0;
-	//	fourier_waveform(frequencies[0], data_length[0], 
-	//		hplus, hcross,generation_method, parameters);
-	//	//std::cout<<hplus[100]<<" "<<hcross[100]<<std::endl;	
-	//	//fourier_detector_response(frequencies[0], data_length[0], 
-	//	//	hplus, hcross, response, parameters->theta, parameters->phi, 
-	//	//	detectors[0]);
-	//	fourier_detector_response_equatorial(frequencies[0], data_length[0], 
-	//		hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
-	//		parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
-	//	ll += maximized_coal_Log_Likelihood_internal(data[0], 
-	//			psd[0],
-	//			frequencies[0],
-	//			response,
-	//			(size_t) data_length[0],
-	//			&fftw_plans[0],
-	//			&tc_ref,
-	//			&phic_ref
-	//			);
-	//	
-	//	//Use maximum LL phic if using PhenomD, but if using Pv2
-	//	//PhiRef is already a parameter
-	//	if(generation_method.find("IMRPhenomD")==std::string::npos){
-	//		phic_ref=0;
-	//	}
-	//	//if(generation_method.find("IMRPhenomD")!=std::string::npos){
-	//	//	parameters->phiRef=phic_ref;
-	//	//}
-	//	for(int i=1; i < num_detectors; i++){
-	//		celestial_horizon_transform(RA,DEC, gps_time, 
-	//				mcmc_detectors[i], &phi[i], &theta[i]);
-	//		parameters->phi=phi[i];
-	//		parameters->theta=theta[i];
-	//		delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
-	//		parameters->tc = tc_ref + delta_t;
-	//		
-	//		//fourier_detector_response(frequencies[i], 
-	//		//	data_length[i], hplus, hcross, response, 
-	//		//	parameters->theta, parameters->phi, parameters->psi,
-	//		//	detectors[i]);
-	//		fourier_detector_response_equatorial(frequencies[i], data_length[i], 
-	//			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
-	//			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
-	//		for(int j =0; j<data_length[i]; j++){
-	//			//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
-	//			//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]) + phic_ref);	
-	//			response[j] *=std::exp(std::complex<double>(0,2*M_PI*parameters->tc*frequencies[i][j]) + phic_ref);	
-	//		}
-	//		ll += Log_Likelihood_internal(data[i], 
-	//				psd[i],
-	//				frequencies[i],
-	//				response,
-	//				(size_t) data_length[i],
-	//				&fftw_plans[i]
-	//				);
-	//	}
-	//	free(hplus); free(hcross); free(response);
-	//}
+	if (false){
+		std::complex<double> *hplus = 
+			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+				data_length[0]);
+		std::complex<double> *hcross = 
+			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+				data_length[0]);
+		std::complex<double> *response = 
+			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+				data_length[0]);
+		parameters->tc=0;
+		fourier_waveform(frequencies[0], data_length[0], 
+			hplus, hcross,generation_method, parameters);
+		//std::cout<<hplus[100]<<" "<<hcross[100]<<std::endl;	
+		//fourier_detector_response(frequencies[0], data_length[0], 
+		//	hplus, hcross, response, parameters->theta, parameters->phi, 
+		//	detectors[0]);
+		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
+			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
+		ll += maximized_coal_Log_Likelihood_internal(data[0], 
+				psd[0],
+				frequencies[0],
+				response,
+				(size_t) data_length[0],
+				&fftw_plans[0],
+				&tc_ref,
+				&phic_ref
+				);
+		
+		//Use maximum LL phic if using PhenomD, but if using Pv2
+		//PhiRef is already a parameter
+		if(generation_method.find("IMRPhenomD")==std::string::npos){
+			phic_ref=0;
+		}
+		//if(generation_method.find("IMRPhenomD")!=std::string::npos){
+		//	parameters->phiRef=phic_ref;
+		//}
+		for(int i=1; i < num_detectors; i++){
+			celestial_horizon_transform(RA,DEC, gps_time, 
+					mcmc_detectors[i], &phi[i], &theta[i]);
+			parameters->phi=phi[i];
+			parameters->theta=theta[i];
+			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+			parameters->tc = tc_ref + delta_t;
+			
+			//fourier_detector_response(frequencies[i], 
+			//	data_length[i], hplus, hcross, response, 
+			//	parameters->theta, parameters->phi, parameters->psi,
+			//	detectors[i]);
+			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
+				hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+				parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
+			for(int j =0; j<data_length[i]; j++){
+				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
+				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]) + phic_ref);	
+				//response[j] *=std::exp(std::complex<double>(0,2*M_PI*parameters->tc*frequencies[i][j]) + phic_ref);	
+				response[j] *=std::exp(std::complex<double>(0,parameters->tc*frequencies[i][j]) + phic_ref);	
+			}
+			ll += Log_Likelihood_internal(data[i], 
+					psd[i],
+					frequencies[i],
+					response,
+					(size_t) data_length[i],
+					&fftw_plans[i]
+					);
+		}
+		free(hplus); free(hcross); free(response);
+	}
 	//#######################################################################3
 	//Generally, the data lengths don't have to be the same
 	//if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
@@ -1995,6 +1996,8 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
+	//gen_params->shift_time = false;
+	//gen_params->shift_phase = false;
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
 	gen_params->horizon_coord=false;
