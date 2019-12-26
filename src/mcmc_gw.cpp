@@ -1983,7 +1983,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	delete [] phi;
 	delete [] theta;
 	return ll;
-	//return 1;
+	//return 2;
 }
 /*! \brief utility to do MCMC specific transformations on the input param vector before passing to the repacking utillity
  *
@@ -2030,6 +2030,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id)
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
 	//#########################################################################
 	//#########################################################################
+	//return 1;
 
 	if(mcmc_intrinsic){
 		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){

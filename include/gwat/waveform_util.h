@@ -40,7 +40,27 @@ double calculate_snr(std::string sensitivity_curve,
         gen_params_base<double> *params,
         double *frequencies,
         int length);
+double calculate_snr_gsl(std::string sensitivity_curve,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<double> *params,
+	double f_min,
+	double f_max,
+	double relative_error
+	);
+double calculate_snr_gsl(std::string sensitivity_curve,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<double> *params,
+	double f_min,
+	double f_max,
+	double relative_error,
+	gsl_integration_workspace *w, 
+	int np
+	);
 
+double integrand_snr_SA_subroutine(double f, void *subroutine_params);
+double integrand_snr_subroutine(double f, void *subroutine_params);
 template<class T>
 int fourier_detector_response_horizon(T *frequencies, 
 	int length,

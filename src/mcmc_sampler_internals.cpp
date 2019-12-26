@@ -85,6 +85,12 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
 		}
 	}
+	//std::cout<<step<<" "<<sampler->prop_MH_factor[chain_number]<<std::endl;
+	//Some proposals are not symmetric
+	MH_ratio += sampler->prop_MH_factor[chain_number];
+	//Reset proposal factor to 0 because some proposals assume symmetry
+	sampler->prop_MH_factor[chain_number]=0;
+
 	//if(sampler->chain_temps[chain_number]==1 && sampler->chain_pos[chain_number]%1000==0){
 	//	std::cout<<proposed_ll<<" "<<current_ll<<std::endl;
 	//	std::cout<<proposed_lp<<" "<<current_lp<<std::endl;
@@ -149,25 +155,19 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		int chain_index
 		)
 {
+	double scaling;
+	int beta;
 	if(!sampler->RJMCMC || sampler->min_dim ==0){
-		//Check whether or not we need to update the fisher
-		if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
-			update_fisher(sampler, current_param, current_status,chain_index);	
-
-		//update the count of steps since last fisher update
-		sampler->fisher_update_ct[chain_index] += 1;
-		
 		//beta determines direction to step in eigen directions
-		int beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+		beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 		
 		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
 					 sampler->randgauss_width[chain_index][3]);
 
-		double scaling = 0.0;
+		scaling = 0.0;
 		//ensure the steps aren't ridiculous
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
 		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
-
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 					sampler->chain_temps[chain_index];}
 		//Take step
@@ -177,26 +177,21 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 			proposed_status[i] = current_status[i];
 		}
+		
 	}
 	//If RJPTMCMC and there's a base model, use the fisher for the base model, and gaussian steps for the modifications
 	else {
-		//Check whether or not we need to update the fisher
-		if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number)
-			update_fisher(sampler, current_param, current_status,chain_index);	
-
-		//update the count of steps since last fisher update
-		sampler->fisher_update_ct[chain_index] += 1;
 		
 		//beta determines direction to step in eigen directions
-		int beta = (int)((sampler->min_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+		beta = (int)((sampler->min_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 		
 		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
 					 sampler->randgauss_width[chain_index][3]);
 
-		double scaling = 0.0;
+		scaling = 0.0;
 		//ensure the steps aren't ridiculous
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-		else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+		//else if(abs(sampler->fisher_vals[chain_index][beta])>10000){scaling = 1000.;}
 
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 					sampler->chain_temps[chain_index];}
@@ -223,6 +218,66 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		}
 		
 	}
+	double lp =sampler->lp(proposed_param,proposed_status, sampler->max_dim, chain_index) ;
+	//Check whether or not we need to update the fisher
+	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
+	{
+ 		if(lp != limit_inf)
+		{
+			//std::cout<<"Updating fisher"<<std::endl;
+			//std::cout<<std::endl<<sampler->prop_MH_factor[chain_index]<<std::endl;
+			sampler->prop_MH_factor[chain_index]=0;
+			//std::cout<<std::endl<<sampler->prop_MH_factor[chain_index]<<std::endl;
+			//Calculate old proposal prob
+			sampler->prop_MH_factor[chain_index]-= -0.5*log(scaling) ;
+			for(int i = 0 ; i<sampler->max_dim; i++){
+				for(int j = 0 ; j<sampler->max_dim; j++){
+					if(proposed_status[i] == 1 && proposed_status[j]==1){
+						sampler->prop_MH_factor[chain_index] -= - 0.5 * 
+							( current_param[i]-proposed_param[i])*
+							(current_param[j]-proposed_param[j]) *
+							sampler->fisher_matrix[chain_index][i][j];
+					}
+				}
+			}
+			//std::cout<<std::endl<<sampler->prop_MH_factor[chain_index]<<std::endl;
+			//Update fisher
+			update_fisher(sampler, proposed_param, proposed_status,chain_index);	
+			//Update failed
+			if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number-1){
+				sampler->prop_MH_factor[chain_index] = 0;	
+			}
+			//Finish prop_MH_factor calc
+			else{
+				//Calculate new proposal prob
+				//ensure the steps aren't ridiculous
+				if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+				else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+							sampler->chain_temps[chain_index];}
+				sampler->prop_MH_factor[chain_index]+= -0.5*log(scaling) ;
+				for(int i = 0 ; i<sampler->max_dim; i++){
+					for(int j = 0 ; j<sampler->max_dim; j++){
+						if(proposed_status[i] == 1 && proposed_status[j]==1){
+							sampler->prop_MH_factor[chain_index] += - 0.5 * 
+								( current_param[i]-proposed_param[i])*
+								(current_param[j]-proposed_param[j]) *
+								sampler->fisher_matrix[chain_index][i][j];
+						}
+					}
+				}
+			}
+			//std::cout<<sampler->prop_MH_factor[chain_index]<<std::endl;
+		}
+		else {
+			//std::cout<<"Tried updating fisher"<<std::endl;
+			//Should update, but need to wait for a better proposal
+			//Ensures the counts stay lined up
+			sampler->fisher_update_ct[chain_index]-=1;	
+		}
+	}
+
+	//update the count of steps since last fisher update
+	sampler->fisher_update_ct[chain_index] += 1;
 
 }
 
@@ -271,6 +326,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		{
 			for(int j = 0; j<local_dim; j++)
 			{
+				sampler->fisher_matrix[chain_index][i][j] = fisher[i][j];
 				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
 			}
 			sampler->fisher_vals[chain_index][i]=eigen_vals[i];
@@ -967,6 +1023,7 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->RJstep_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	}
 	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
+	sampler->prop_MH_factor = (double *)malloc(sizeof(double) *sampler->chain_N);
 
 	//RJ parameters -- initialize status array with 1's for now, then repopulate with initial position
 	if(sampler->RJMCMC){
@@ -1077,12 +1134,19 @@ void allocate_sampler_mem(sampler *sampler)
 		//For RJPTMCMC, this may not be used, but it'll be available
 		sampler->randgauss_width[i][4]=.5;
 
+		sampler->prop_MH_factor[i]=0;
 	}		
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->max_dim);
 	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 
 				sampler->max_dim, sampler->max_dim);
 	sampler->fisher_vals = allocate_2D_array(sampler->chain_N, sampler->max_dim);
+	sampler->fisher_vecs_prev = allocate_3D_array(sampler->chain_N, 
+				sampler->max_dim, sampler->max_dim);
+	sampler->fisher_vals_prev = allocate_2D_array(sampler->chain_N, sampler->max_dim);
+	sampler->fisher_matrix = allocate_3D_array(sampler->chain_N, 
+				sampler->max_dim, sampler->max_dim);
+	sampler->fisher_matrix_prev = allocate_3D_array(sampler->chain_N, sampler->max_dim,sampler->max_dim);
 	
 
 	//Trouble Shooting:
@@ -1137,6 +1201,10 @@ void deallocate_sampler_mem(sampler *sampler)
 				sampler->history_length, sampler->max_dim);
 	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->max_dim, sampler->max_dim);
 	deallocate_2D_array(sampler->fisher_vals, sampler->chain_N, sampler->max_dim);
+	deallocate_3D_array(sampler->fisher_vecs_prev, sampler->chain_N, sampler->max_dim, sampler->max_dim);
+	deallocate_2D_array(sampler->fisher_vals_prev, sampler->chain_N, sampler->max_dim);
+	deallocate_3D_array(sampler->fisher_matrix, sampler->chain_N, sampler->max_dim,sampler->max_dim);
+	deallocate_3D_array(sampler->fisher_matrix_prev, sampler->chain_N, sampler->max_dim,sampler->max_dim);
  
 	free(sampler->fisher_update_ct);
 	free(sampler->rvec);
@@ -1179,6 +1247,7 @@ void deallocate_sampler_mem(sampler *sampler)
 		deallocate_3D_array(sampler->ll_lp_output,
 			sampler->chain_N, sampler->N_steps, 2);
 	}
+	free(sampler->prop_MH_factor);
 	
 }
 
@@ -1745,6 +1814,13 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 	}
 	else{std::cout<<"ERROR -- File "<<check_file<<" not found"<<std::endl; exit(1);}
 	file_in.close();
+	if(sampler->fisher_exist){
+		//check whether or not we need to update the fisher
+		for(int i=0 ; i<sampler->chain_N; i++){
+			update_fisher(sampler, sampler->output[i][0], sampler->param_status[i][0],i);	
+		}
+	}
+
 }
 
 void assign_ct_p(sampler *sampler, int step, int chain_index)
@@ -1849,6 +1925,12 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 				samplerptr->lp(samplerptr->output[i][0],
 				samplerptr->param_status[i][0],
 				samplerptr->max_dim,i);
+		}
+	}
+	if(samplerptr->fisher_exist){
+		//check whether or not we need to update the fisher
+		for(int i=0 ; i<samplerptr->chain_N; i++){
+			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
 		}
 	}
 }
@@ -2073,6 +2155,46 @@ void write_output_file(std::string file, int step_num, int max_dimension, double
 		}
 	}
 	out_file.close();
+
+}
+
+int count_cold_chains(double *temps, int chain_N)
+{
+	int coldchains=0;
+	for(int k = 0 ; k<chain_N; k++){
+		if(temps[k] == 1){
+			coldchains++;
+		}	
+	}
+	return coldchains;
+
+}
+
+/*! \brief Utility to write out the parameters and status of a sampler to a file
+ */
+void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,double **output_new, int **status_new,int chain_N,double *temps,bool RJ)
+{
+	int coldchains=0;
+	int cold_chain_ids[chain_N];
+	for(int k = 0 ; k<chain_N; k++){
+		if(temps[k] == 1){
+			cold_chain_ids[coldchains]=k;
+			coldchains++;
+		}	
+	}
+	//int final_length = step_num*coldchains;
+	for(int i =0; i<step_num; i++){
+		for(int j = 0 ; j<coldchains; j++){
+			for(int k = 0 ; k<max_dimension; k++){
+				output_new[i*coldchains + j][k] = output_old[cold_chain_ids[j]][i][k];
+				if(RJ){
+					status_new[i*coldchains + j][k] = 
+						status_old[cold_chain_ids[j]][i][k];
+				}
+			}
+	
+		}
+	}
 
 }
 

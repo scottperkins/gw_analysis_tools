@@ -28,6 +28,8 @@ using namespace std;
 
 /*! \file 
  *
+ */
+/*
  * All subroutines associated with waveform differentiation and Fisher analysis
  *
  * Fisher options (both autodiff and numerical):

@@ -78,14 +78,20 @@ public:
 
 	double ***fisher_vecs;
 	double **fisher_vals;
+	double ***fisher_vecs_prev;
+	double **fisher_vals_prev;
+	double ***fisher_matrix;
+	double ***fisher_matrix_prev;
 	int *fisher_update_ct;
+	double *prop_MH_factor;
 	//Number of steps to take with the fisher before updating the fisher 
 	//to a new value 
 	//NOTE: if this is too low, detailed balance isn't maintained without 
 	//accounting for the changing fisher (doesn't cancel in MH ratio)
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
-	int fisher_update_number=200;
+	//int fisher_update_number=200;
+	int fisher_update_number=50;
 
 	//log_prior lp;
 	//log_likelihood ll;
@@ -229,4 +235,8 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old,
 	std::string chain_allocation_scheme
 	);
 void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status, int chain_N,double *temps,bool RJ);
+
+void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,double **output_new, int **status_new,int chain_N,double *temps,bool RJ);
+
+int count_cold_chains(double *temps, int chain_N);
 #endif

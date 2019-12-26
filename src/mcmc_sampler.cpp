@@ -39,6 +39,8 @@ const gsl_rng_type *T;
 gsl_rng * r;
 sampler *samplerptr;
 
+//######################################################################################
+//######################################################################################
 /*! \brief Class to facilitate the comparing of chains for priority
  *
  * 3 levels of priority: 0 (high) 1 (default) 2 (low)
@@ -194,6 +196,194 @@ private:
 	}
 };
 ThreadPool *poolptr;
+//######################################################################################
+//######################################################################################
+
+
+//######################################################################################
+//######################################################################################
+/*! \brief Parallel tempered, dynamic chain allocation MCMC with output samples with specified maximum autocorrelation. 
+ *
+ * Runs dynamic chain allocation until the autocorrelation lengths stabilize, then it will run the PTMCMC routine repeatedly, periodically thinning the chain to ensure the auto-correlation length is below the threshold
+ */
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int chain_N,/**< Maximum number of chains to use */
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	int corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
+	int corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
+	double corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
+	int corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	std::function<double(double*,int* ,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+
+	bool continue_dynamic_search=true;
+	
+	int status = 0;
+	
+	bool cumulative=true;
+	bool internal_prog=false;
+	//int check_converg_segments=corr_segments/2;
+	
+
+	int check_convergence_segments;
+	if(corr_segments>=10){
+		check_convergence_segments=corr_segments/3;
+	}
+	else if(corr_segments>=5){
+		check_convergence_segments=corr_segments/2;
+	}
+	else {
+		check_convergence_segments=corr_segments;
+	}
+
+	double ave_ac;
+	int **temp_ac = allocate_2D_array_int(dimension, corr_segments);
+	
+	//while loop
+	//Dynamic pt allocation
+	//	check autocorrelation for convergence -- 10 chuncks, with the last three ac's within 5%
+	int dynamic_search_length = .3*N_steps;
+	int temp_length = N_steps;
+	double ***temp_output = allocate_3D_array(chain_N,1.1*N_steps, dimension);
+	while(continue_dynamic_search){
+
+		PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
+			dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
+			initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
+			chain_distribution_scheme, log_prior, log_likelihood,fisher,
+			numThreads, pool,internal_prog,"","","",checkpoint_file);
+		
+		//Dynamic chain allocation will only have one cold chain at index 0
+		std::cout<<"Checking AC "<<std::endl;
+		auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
+		continue_dynamic_search=false;
+		for(int i = 0 ; i<dimension; i++){
+			ave_ac=0;
+			for(int j = 0 ; j<check_convergence_segments; j++){
+				ave_ac += temp_ac[i][corr_segments-j-1];
+			}
+			ave_ac/=check_convergence_segments;
+			for(int j = 0 ; j<check_convergence_segments; j++){
+				if(abs((double)temp_ac[i][corr_segments-j-1] - ave_ac)/ave_ac >corr_converge_thresh){
+					continue_dynamic_search=true;
+					dynamic_search_length*=1.1;
+					break;
+				}
+			}
+		}
+		std::cout<<"Finished Checking AC "<<std::endl;
+		//continue_dynamic_search=false;
+		//delete [] reduced_temp_output;
+	}
+
+	//for loop 
+	//continue_ptmcmc
+	//	if the chain is 80% done, step for 20% of original amount 
+	//	otherwise, step for whatever is still 110% of whats left
+	//	
+	//	Save what uncorrelated samples have been harvested
+	//	
+	//	For autocorrelation check, look at the max value
+	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
+	//print out progress
+	int coldchains = count_cold_chains(chain_temps, chain_N);
+	double **reduced_temp_output, **reduced_temp_output_thinned ;
+	while(status<N_steps){
+		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, temp_length, 
+			swp_freq,log_prior, log_likelihood, fisher, numThreads, pool, 
+			internal_prog, statistics_filename, chain_filename, 
+			"",likelihood_log_filename, checkpoint_file);
+			
+		reduced_temp_output =  allocate_2D_array(coldchains*temp_length, dimension);	
+		reduce_output(temp_length, dimension, temp_output, (int ***)NULL,
+			reduced_temp_output,(int **)NULL,chain_N, chain_temps,false);
+		double max_ac=1;
+		int subsample_freq=1;
+		int ct=0;
+		int ac_length = coldchains*temp_length;
+		do{
+			if(max_ac>10.*corr_threshold){
+				subsample_freq = 10;
+			}
+			else{
+				subsample_freq=2;
+			}
+			
+			ct=0;
+			for(int i = 0 ;i<ac_length; i++){
+				if(i%subsample_freq == 0){
+					for(int j = 0 ; j<dimension; j++){
+						reduced_temp_output[ct][j] = 
+							reduced_temp_output[i][j];
+					}
+					ct++;
+				}
+			}
+			ac_length = ct;
+			auto_corr_from_data(reduced_temp_output, ac_length, 
+				dimension, temp_ac, corr_segments, corr_target_ac, 
+				numThreads, cumulative);
+			max_ac=0;
+			for(int i = 0 ; i<dimension; i++){
+				if(temp_ac[i][corr_segments-1]>max_ac){
+					max_ac = temp_ac[i][corr_segments-1];
+				}	
+			}
+		}while(max_ac>corr_threshold);
+		ct=0;
+		for(int i = 0 ;i<ac_length; i++){
+			for(int j = 0 ; j<dimension; j++){
+				if(status+i <N_steps){
+					output[0][status+i][j] = 
+						reduced_temp_output[i][j];
+				}
+			}
+			ct++;
+		}
+		std::cout<<"CT: "<<ct<<std::endl;
+		
+		deallocate_2D_array(reduced_temp_output,coldchains*temp_length, 
+			dimension);
+		status += ct;
+		temp_length = 1.1*N_steps-status;
+		printProgress((double)status/N_steps);
+	}
+	//Write out final chain file
+	
+	//Maybe write new stat file format
+	
+	if(chain_filename != "")
+		write_file(chain_filename, output[0], N_steps, dimension);
+
+	//Cleanup
+	deallocate_3D_array(temp_output, chain_N, 1.1*N_steps, dimension);
+	deallocate_2D_array(temp_ac, dimension, corr_segments);
+}
+//######################################################################################
+//######################################################################################
 /*! \brief Routine to take a checkpoint file and begin a new chain at said checkpoint 
  *
  * See MCMC_MH_internal for more details of parameters (pretty much all the same)
@@ -339,6 +529,8 @@ void continue_RJPTMCMC_MH_internal(std::string start_checkpoint_file,/**< File f
 	free(samplerptr->chain_temps);
 	deallocate_sampler_mem(samplerptr);
 }
+//######################################################################################
+//######################################################################################
 /*!\brief Generic reversable jump sampler, where the likelihood, prior, and reversable jump proposal are parameters supplied by the user
  *
  * Note: Using a min_dimension tells the sampler that there is a ``base model'', and that the dimensions from min_dim to max_dim are ``small'' corrections to that model. This helps inform some of the proposal algorithms and speeds up computation. If using discrete models with no overlap of variables (ie model A or model B), set min_dim to 0. Even if reusing certain parameters, if the extra dimensions don't describe ``small'' deviations, it's probably best to set min_dim to 0.Since the  RJ  proposal is user specified, even if there are parameters that should never be removed, it's up to the user to dictate that. Using min_dim will not affect that aspect of the  sampler. If there's a ``base-model'', the fisher function should produce a fisher matrix for the base model only. The modifications are then normally distributed around the last parameter value. Then the fisher function should take the minimum dimension instead of the maximum, like the other functions.
@@ -575,6 +767,8 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 		
 }
 
+//######################################################################################
+//######################################################################################
 /*! \brief Dyanmically tunes an MCMC for optimal spacing. step width, and chain number
  *
  * NOTE: nu, and t0 parameters determine the dynamics, so these are important quantities. nu is related to how many swap attempts it takes to substantially change the temperature ladder, why t0 determines the length of the total dyanimcally period. Moderate initial choices would be 10 and 1000, respectively.
@@ -994,6 +1188,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	delete [] static_sampler.chain_temps;
 }
 
+//######################################################################################
+//######################################################################################
 /*!\brief Generic sampler, where the likelihood, prior are parameters supplied by the user
  *
  * Base of the sampler, generic, with user supplied quantities for most of the samplers
@@ -1207,6 +1403,8 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	deallocate_sampler_mem(samplerptr);
 }
 
+//######################################################################################
+//######################################################################################
 /*! \brief Routine to take a checkpoint file and begin a new chain at said checkpoint
  *
  * See MCMC_MH_internal for more details of parameters (pretty much all the same)
@@ -1350,6 +1548,8 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	deallocate_sampler_mem(samplerptr);
 }
 					
+//######################################################################################
+//######################################################################################
 /*!\brief Internal function that runs the actual loop for the sampler -- increment version
  *
  * The regular loop function runs for the entire range, this increment version will only step ``increment'' steps -- asynchronous: steps are measured by the cold chains
@@ -1511,7 +1711,8 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 		}
 	}
 }
-
+//######################################################################################
+//######################################################################################
 /*!\brief Internal function that runs the actual loop for the sampler
  *
  */
@@ -1648,6 +1849,8 @@ void PTMCMC_MH_loop(sampler *sampler)
 }
 
 
+//######################################################################################
+//######################################################################################
 void mcmc_step_threaded(int j)
 {
 	int k = samplerptr->chain_pos[j];
@@ -1710,6 +1913,8 @@ void mcmc_step_threaded(int j)
 	update_step_widths(samplerptr, j);
 	poolptr->enqueue_swap(j);
 }
+//######################################################################################
+//######################################################################################
 void mcmc_swap_threaded(int i, int j)
 {
 	int k = samplerptr->chain_pos[i];
@@ -1728,6 +1933,8 @@ void mcmc_swap_threaded(int i, int j)
 	samplerptr->waiting[i]=true;
 	samplerptr->waiting[j]=true;
 }
+//######################################################################################
+//######################################################################################
 void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain*/
@@ -1808,6 +2015,8 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 			lp, ll, f, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename, auto_corr_filename,likelihood_log_filename, checkpoint_file);
 }
+//######################################################################################
+//######################################################################################
 void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
@@ -1911,6 +2120,8 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			likelihood_log_filename,
 			end_checkpoint_file);
 }
+//######################################################################################
+//######################################################################################
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
@@ -2042,6 +2253,8 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			checkpoint_file);
 
 }
+//######################################################################################
+//######################################################################################
 void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int ***parameter_status, /**< [out] Parameter status for each step corresponding to the output chains, shape is double[chain_N, N_steps,dimension]*/
 	int max_dimension, 	/**< maximum dimension of the parameter space being explored -- only consideration is memory, as memory scales with dimension. Keep this reasonable, unless memory is REALLY not an issue*/
@@ -2170,6 +2383,8 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		likelihood_log_filename,
 		checkpoint_file);
 }
+//######################################################################################
+//######################################################################################
 void continue_RJPTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int ***status,/**< [out] output parameter status array, dimensions: status[chain_N][N_steps][dimension]*/

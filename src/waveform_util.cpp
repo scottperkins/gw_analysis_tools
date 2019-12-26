@@ -25,6 +25,13 @@
  * Includes some utilities useful for MCMC and fisher calculations, as well as time-frequency methods for detectors like LISA
  */
 
+struct gsl_snr_struct
+{
+	gen_params_base<double> *params;
+	std::string SN;
+	std::string generation_method;
+	std::string detector;
+};
 
 /*! \brief Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc
  *
@@ -140,22 +147,9 @@ double calculate_snr(std::string sensitivity_curve,
 		times = new double[length];
 		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
 		time_phase_corrected(times, length, frequencies, params, generation_method, false);
-		//for(int  i =0; i<length; i++){
-		//	times[i]=1;
-		//}
 	}
 	std::complex<double> *response = new std::complex<double>[length];
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);
-		//double *redat = new double[length];
-		//double *imagdat = new double[length];
-		//for(int j =0 ; j<length; j++){
-		//	redat[j]=real(response[j]);
-		//	imagdat[j]=imag(response[j]);
-		//}
-		//write_file("data/fisher/fisher_wf_real.csv",redat,length);
-		//write_file("data/fisher/fisher_wf_imag.csv",imagdat,length);
-		//delete [] redat;
-		//delete [] imagdat;
 	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
 	if(detector == "LISA"){
 		//snr+=calculate_snr(sensitivity_curve, response, frequencies, length);
@@ -167,6 +161,89 @@ double calculate_snr(std::string sensitivity_curve,
 	delete [] response;	
 	return snr;
 
+}
+/**< \brief Routine to calculate the SNR of a template with GSL quadrature integration
+ *
+ * Sometimes, this is faster than the ``grid'' style integration
+ *
+ * Supports sky-averaged templates, but this should only be used with non-precessing waveforms
+ *
+ */
+double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
+	std::string detector,/**<Detector to compute response -- can be empty is SA*/
+	std::string generation_method,/**<Generation method */
+	gen_params_base<double> *params,/**< Source Parameters*/
+	double f_min,/**< Lower frequency bound*/
+	double f_max,/**< Upper frequency bound*/
+	double relative_error/**< Relative error threshold*/
+	)
+{
+	int np=1000;
+	gsl_integration_workspace *w=gsl_integration_workspace_alloc(np) ;
+	double snr =  calculate_snr_gsl(sensitivity_curve, detector, generation_method, params, f_min, f_max,relative_error,w,np);
+	gsl_integration_workspace_free(w);
+	return snr;
+}
+/**< \brief Routine to calculate the SNR of a template with GSL quadrature integration
+ *
+ * Sometimes, this is faster than the ``grid'' style integration
+ *
+ * Supports sky-averaged templates, but this should only be used with non-precessing waveforms
+ *
+ */
+double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
+	std::string detector,/**<Detector to compute response -- can be empty is SA*/
+	std::string generation_method,/**<Generation method */
+	gen_params_base<double> *params,/**< Source Parameters*/
+	double f_min,/**< Lower frequency bound*/
+	double f_max,/**< Upper frequency bound*/
+	double relative_error,/**< Relative error threshold*/
+	gsl_integration_workspace *w, /**< User-allocated gsl_integration_workspace*/
+	int np/**<Size of gsl_integration_workspace allocation*/
+	)
+{
+	double snr;
+	gsl_snr_struct helper_params;
+	helper_params.params = params;
+	helper_params.generation_method = generation_method;
+	helper_params.SN = sensitivity_curve;
+	helper_params.detector = detector;
+	gsl_function F;
+	if(params->sky_average){
+		F.function = [](double f, void *param){return integrand_snr_SA_subroutine(f,param);};
+	}
+	else{
+		F.function = [](double f, void *param){return integrand_snr_subroutine(f,param);};
+	}
+	F.params = (void *)&helper_params;
+	double result, err;
+	int errcode = gsl_integration_qag(&F,f_min, f_max, 0,relative_error, np, GSL_INTEG_GAUSS15,w, &result, &err);
+	return sqrt(result);
+}
+
+/*! \brief Internal function to calculate the SNR integrand for sky-averaged waveforms
+ */
+double integrand_snr_SA_subroutine(double f, void *subroutine_params)
+{
+	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
+	std::complex<double> wfp, wfc;
+	fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
+	double SN;
+	populate_noise(&f, cast_params.SN, &SN, 1);
+	SN*=SN;
+	return 4*std::real(std::conj(wfp)*wfp)/SN;
+}
+/*! \brief Internal function to calculate the SNR integrand for full waveforms
+ */
+double integrand_snr_subroutine(double f, void *subroutine_params)
+{
+	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
+	std::complex<double> response;
+	fourier_detector_response(&f, 1,&response, cast_params.detector,cast_params.generation_method, cast_params.params);
+	double SN;
+	populate_noise(&f, cast_params.SN, &SN, 1);
+	SN*=SN;
+	return 4*std::real(std::conj(response)*response)/SN;
 }
 /*! \brief Caclulates the snr given a detector and waveform (complex) and frequencies
  *      
@@ -350,7 +427,6 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 	else{
 		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, &fplus, &fcross);
 	}
-
 	
 	if(detector == "LISA"){
 		for (int i =0; i <length; i++)
@@ -429,8 +505,6 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 	std::complex<T> *waveform_cross = new std::complex<T>[length];
 	if(parameters->equatorial_orientation){
 		transform_orientation_coords(parameters, generation_method,detector);
-		//std::cout.precision(15);
-		//std::cout<<parameters->psi<<" "<<parameters->incl_angle<<std::endl;
 	}
 	else{
 		if(detector=="LISA"){
@@ -1614,12 +1688,6 @@ void threshold_times(gen_params_base<double> *params,
 	delete [] hcross;
 }
 
-struct threshold_struct
-{
-	gen_params_base<double> *params;
-	std::string SN;
-	std::string generation_method;
-};
 
 /*! \brief Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh --GSL quad integration implementation
  *
@@ -1807,26 +1875,16 @@ void threshold_times_gsl(gen_params_base<double> *params,
 }
 double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np)
 {
-	threshold_struct helper_params;
+	gsl_snr_struct helper_params;
 	helper_params.params = params;
 	helper_params.generation_method = generation_method;
 	helper_params.SN = SN;
 	gsl_function F;
-	F.function = [](double f, void *param){return integrand_threshold_subroutine(f,param);};
+	F.function = [](double f, void *param){return integrand_snr_SA_subroutine(f,param);};
 	F.params = (void *)&helper_params;
 	double result, err;
 	int errcode = gsl_integration_qag(&F,fmin, fmax, 0,rel_err, np, GSL_INTEG_GAUSS15,w, &result, &err);
 	return sqrt(result);
-}
-double integrand_threshold_subroutine(double f, void *subroutine_params)
-{
-	threshold_struct cast_params = *(threshold_struct *)subroutine_params;
-	std::complex<double> wfp, wfc;
-	fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
-	double SN;
-	populate_noise(&f, cast_params.SN, &SN, 1);
-	SN*=SN;
-	return 4*std::real(std::conj(wfp)*wfp)/SN;
 }
 
 //###########################################################################

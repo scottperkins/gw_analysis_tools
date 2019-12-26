@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import corner 
+import gwatpy.mcmc_routines_ext as mcmc
 
 #data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',',unpack=True)
 #burnin =1000
@@ -12,7 +13,7 @@ import corner
 #plt.close()
 #plt.hist(data,bins=100,density=True)
 #x = np.linspace(-3,3)
-data = np.loadtxt("data/neil_mcmc_output.csv",delimiter=',')
+data = np.loadtxt("data/neil_mcmc_output_uncorr.csv",delimiter=',')
 ndim, nsamples = 2, len(data) 
 labels = [r"x",r"y"]
 
@@ -20,16 +21,17 @@ labels = [r"x",r"y"]
 #    x[0] = abs(x[0])
 #    x[1] = abs(x[1])
 figure = corner.corner(data, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
-plt.savefig("neil_mcmc_testing.pdf")
+plt.savefig("neil_mcmc_testing_uncorr.pdf")
 plt.close()
 
-
-autocorr = np.loadtxt("data/neil_auto_corr_mcmc.csv",delimiter=',')
-lengths = autocorr[1]
-autocorr = autocorr[2:]
+mcmc.write_auto_corr_file_from_data_py(b'data/neil_autocorr_uncorr.csv',np.ascontiguousarray(data), len(data), 2,10,.1,10,True)
+autocorr=np.loadtxt('data/neil_autocorr_uncorr.csv',delimiter=',')
+print(autocorr)
+lengths =autocorr[1]
+autocorr=autocorr[2:]
 for i in autocorr:
     plt.plot(lengths,i)
-plt.savefig("neil_autocorr_testing.pdf")
+plt.savefig("neil_autocorr_testing_uncorr.pdf")
 plt.close()
 
 
