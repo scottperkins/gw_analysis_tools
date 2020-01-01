@@ -90,6 +90,7 @@ void test51();
 void test52();
 void test53();
 void test54();
+void test55();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim);
 double test_lp(double *pos, int dim);
@@ -123,9 +124,58 @@ static double *psd=NULL;
 int main(){
 
 	//test38();	
-	test54();	
+	//test54();	
+	test55();	
+	//test6();	
 	//test45();	
 	return 0;
+}
+void test55()
+{
+	int dimension = 2;
+	double initial_pos[2]={1,-2.};
+	double seeding_var[2] ={2,2} ;
+
+	
+	int N_steps = 1000000;
+	int chain_N= 8;
+	int max_chain_N_thermo= 8;
+	int t0= 10000;
+	int nu= 50;
+	//std::string chain_dist_method = "half_ensemble";
+	std::string chain_dist_method = "double";
+	//std::string chain_dist_method = "cold";
+	double ***output;
+	output = allocate_3D_array(  chain_N,N_steps, dimension );
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 3;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	//double chain_temps[chain_N] ={1};
+	//std::string autocorrfile = "";
+	//std::string chainfile = "testing/data/neil_mcmc_output_uncorr2.csv";
+	std::string chainfile = "";
+	std::string statfilename = "testing/data/neil_mcmc_statistics_uncorr2.txt";
+	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint_uncorr2.csv";
+	std::string checkpointfile_start = "testing/data/neil_mcmc_checkpoint_uncorr.csv";
+	
+	int numThreads = 1;
+	bool pool = false;
+
+	int corr_threshold = 50;
+	int corr_segments = 50;
+	double corr_converge_thresh = 0.5;
+	double corr_target_ac = .01;
+
+	std::function<double(double* , int *,int, int)> lp = [](double *param, int * status,int dim, int chain_id){ return test_lp_nts(param,dim,chain_id);};
+	std::function<double(double* , int*,int, int)> ll = [](double *param, int *status,int dim, int chain_id){ return log_neil_proj3_nts(param,dim,chain_id);};
+	std::function<void(double* , int*,int, double**,int)> f = [](double *param, int *status,int dim, double **fish,int chain_id){ fisher_neil_proj3(param,dim,fish,chain_id);};
+	f=NULL;
+	
+	continue_PTMCMC_MH_dynamic_PT_alloc(checkpointfile_start ,output,  N_steps, max_chain_N_thermo, chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
+	std::cout<<"ENDED"<<std::endl;
+
+	deallocate_3D_array(output,chain_N, N_steps, dimension);
 }
 void test54()
 {
@@ -134,7 +184,7 @@ void test54()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 50000;
+	int N_steps = 5000;
 	int chain_N= 8;
 	int max_chain_N_thermo= 8;
 	int t0= 10000;
@@ -142,6 +192,8 @@ void test54()
 	//std::string chain_dist_method = "half_ensemble";
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
+	//double **output;
+	//output = allocate_2D_array(  N_steps, dimension );
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
@@ -154,59 +206,30 @@ void test54()
 	std::string statfilename = "testing/data/neil_mcmc_statistics_uncorr.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint_uncorr.csv";
 	
-	int numThreads = 10;
-	bool pool = true;
+	int numThreads = 1;
+	bool pool = false;
 
 	int corr_threshold = 50;
 	int corr_segments = 50;
-	double corr_converge_thresh = 0.5;
-	int corr_target_ac = .01;
+	double corr_converge_thresh = 0.1;
+	double corr_target_ac = .01;
 
 	std::function<double(double* , int *,int, int)> lp = [](double *param, int * status,int dim, int chain_id){ return test_lp_nts(param,dim,chain_id);};
 	std::function<double(double* , int*,int, int)> ll = [](double *param, int *status,int dim, int chain_id){ return log_neil_proj3_nts(param,dim,chain_id);};
 	std::function<void(double* , int*,int, double**,int)> f = [](double *param, int *status,int dim, double **fish,int chain_id){ fisher_neil_proj3(param,dim,fish,chain_id);};
 	f=NULL;
 	
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,chainfile, "",checkpointfile );	
+	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,chainfile, "","",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
-	//PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
-	std::cout<<"Chain temps: "<<std::endl;
-	for(int i =0; i<chain_N; i++){
-		std::cout<<chain_temps[i]<<std::endl;
-	}
-
-	//int filecount = 1;
-	//std::string chainfilebase = "testing/data/neil_mcmc_output";
+	//std::cout<<"Chain temps: "<<std::endl;
 	//for(int i =0; i<chain_N; i++){
-	//	if(chain_temps[i] == 1){
-	//		write_file(chainfilebase+to_string(filecount)+"_dynamicPT.csv", output[i],N_steps, dimension);
-	//		filecount+=1;
-	//	}
+	//	std::cout<<chain_temps[i]<<std::endl;
 	//}
-	
-	//autocorrfile = "testing/data/neil_auto_corr_mcmc2.csv";
-	//chainfile = "testing/data/neil_mcmc_output2.csv";
-	//statfilename = "testing/data/neil_mcmc_statistics2.txt";
-	//MCMC_MH(output, dimension, N_steps, chain_N, initial_pos,chain_temps, swp_freq, test_lp, log_neil_proj32,NULL,statfilename,chainfile,autocorrfile );	
-	//std::cout<<"ENDED"<<std::endl;
-	
 
 
-	//write_file("testing/data/mcmc_output.csv", output[0],N_steps, dimension);
-	//ofstream mcmc_out;
-	//mcmc_out.open("testing/data/mcmc_output.csv");
-	//mcmc_out.precision(15);
-	////for(int i = 0;i<chain_N;i++){
-	//for(int j = 0; j<N_steps;j++){
-	//	//for(int k = 0; k<dimension; k++){
-	//		mcmc_out<<output[0][j][0]<<" , "<<output[0][j][1]<<endl;
-	//	//}
-	//}
-	////}
-	//mcmc_out.close();
-
-	deallocate_3D_array(output, chain_N, N_steps, dimension);
+	deallocate_3D_array(output,chain_N,  N_steps, dimension);
 }
 void test53()
 {
@@ -5074,11 +5097,13 @@ void test6()
 	gen_params params;
 	IMRPhenomD<double> modeld;
 	IMRPhenomD<adouble> modela;
-	int length = 8;
+	int length = 4000;
 	double chirpm = 49.78;
 	double eta =.21;
-	params.mass1 = calculate_mass1(chirpm,eta);
-	params.mass2 = calculate_mass2(chirpm,eta);
+	//params.mass1 = calculate_mass1(chirpm,eta);
+	//params.mass2 = calculate_mass2(chirpm,eta);
+	params.mass1 = 14.9 ;
+	params.mass2 = 8.4;
 	string method= "IMRPhenomD";
 	//string method= "ppE_IMRPhenomD_Inspiral";
 	double amp[length];
@@ -5086,20 +5111,22 @@ void test6()
 	complex<double> waveformout[length];
 	params.spin1[0] = 0;
 	params.spin1[1] = 0;
-	params.spin1[2] = -.2;
+	params.spin1[2] = 0.28221897810218977;
 	params.spin2[0] = 0;
 	params.spin2[1] = 0;
-	params.spin2[2] = .4;
+	params.spin2[2] = 0;
 	double *spin1  = params.spin1;
 	double *spin2= params.spin2;
+	params.shift_phase=false;
+	params.shift_time=false;
 	params.phic = .0;
 	params.tc = -.0;
-	params.Luminosity_Distance = 410.;
-	//params.betappe = new double[1] ;
-	//params.betappe[0]=-100.;
-	//params.bppe  =new int[1];
-	//params.bppe[0] = -3;
-	//params.Nmod = 1;
+	params.Luminosity_Distance = 334.;
+	params.betappe = new double[1] ;
+	params.betappe[0]=00.;
+	params.bppe  =new int[1];
+	params.bppe[0] = -3;
+	params.Nmod = 1;
 	params.NSflag1 = false;
 	params.NSflag2 = false;
 	params.phi = 0;
@@ -5109,8 +5136,8 @@ void test6()
 	//params.f_ref = 100;
 	//params.phiRef = 1.0;
 	
-	double fhigh =300;
-	double flow =15;
+	double fhigh =1000;
+	double flow =10;
 	double df = (fhigh-flow)/(length-1);
 	double *freq = (double *)malloc(sizeof(double) * length);
 
@@ -5119,7 +5146,7 @@ void test6()
 	for(int i=0;i<length;i++)
 		freq[i]=flow+i*df;
 
-	int dimension = 7;
+	int dimension = 8;
 	int dimensionmcmc = 5;
 
 	clock_t start7,end7;
@@ -5144,21 +5171,22 @@ void test6()
 
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
 
-	cout.precision(5);
+	cout.precision(15);
 	for (int i = 0;i <dimensionmcmc;i++)
 	{
-		for (int j=0;j <dimensionmcmc; j++)
+		for (int j=0;j <dimensionmcmc; j++){
 			cout<<output3[i][j]<<"   ";
+		}
 		cout<<endl;
 	}
 	
 	start7 = clock();
-	fisher_numerical(freq, length, "IMRPhenomD","Hanford_O1_fitted", output, dimension, 
-				&params ,2);
+	fisher_numerical(freq, length, "dCS_IMRPhenomD","Hanford_O1_fitted", output, dimension, 
+				&params ,2,NULL,NULL,NULL);
 
 	end7 = clock();
 	cout<<"TIMING: FISHER: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
-	cout.precision(5);
+	cout.precision(15);
 	for (int i = 0;i <dimension;i++)
 	{
 		for (int j=0;j <dimension; j++)
@@ -5166,17 +5194,29 @@ void test6()
 		cout<<endl;
 	}
 	start7 = clock();
-	fisher_autodiff(freq, length, "IMRPhenomD","Hanford_O1_fitted", output2, dimension, 
+	fisher_autodiff(freq, length, "dCS_IMRPhenomD","Hanford_O1_fitted", output2, dimension, 
 				&params );
 
 	end7 = clock();
 	cout<<"TIMING: FISHER autodiff: "<<(double)(end7-start7)/CLOCKS_PER_SEC<<endl;
 	for (int i = 0;i <dimension;i++)
 	{
-		for (int j=0;j <dimension; j++)
+		for (int j=0;j <dimension; j++){
 			cout<<output2[i][j]<<"   ";
+			output2[i][j]*=(3);
+		}
 		cout<<endl;
 	}
+	std::cout<<"#########################################"<<std::endl<<"INVERSE"<<std::endl;
+	double **inverse = allocate_2D_array(dimension,dimension);
+	gsl_LU_matrix_invert(output2,inverse, dimension);
+	for (int i = 0;i <dimension;i++)
+	{
+		//for (int j=0;j <dimension; j++)
+		cout<<sqrt(inverse[i][i])<<"   ";
+		cout<<endl;
+	}
+	deallocate_2D_array(inverse, dimension, dimension);
 	std::cout<<"fractional DIFF: "<<std::endl;
 	for (int i = 0;i <dimension;i++)
 	{
@@ -5892,23 +5932,28 @@ void test1()
 void fisher_neil_proj3 (double *pos,int dimension, double **fisher,int chain_id)
 {
 	//int alpha = (int)(gsl_rng_uniform(g)*1e7);
- 	adouble* x = new adouble[dimension];
- 	adouble y = 1;  
- 	double out =1;
- 	trace_on(1);
- 	for (int i =0; i< dimension; i++){
- 	        x[i]<<= pos[i];
- 	}
- 	y =-1* log(dist(x, dimension));
- 	y>>=out;
- 	delete[] x;
- 	trace_off();
- 	hessian(1,dimension,pos,fisher);
-	for (int i = 0 ; i<dimension; i++){
-        	for (int j=0;j<i;j++){
-        	        if (i!=j) fisher[j][i] =fisher[i][j];
-        	}
-	}
+	
+ 	//adouble* x = new adouble[dimension];
+ 	//adouble y = 1;  
+ 	//double out =1;
+ 	//trace_on(1);
+ 	//for (int i =0; i< dimension; i++){
+ 	//        x[i]<<= pos[i];
+ 	//}
+ 	//y =-1* log(dist(x, dimension));
+ 	//y>>=out;
+ 	//delete[] x;
+ 	//trace_off();
+ 	//hessian(1,dimension,pos,fisher);
+	//for (int i = 0 ; i<dimension; i++){
+        //	for (int j=0;j<i;j++){
+        //	        if (i!=j) fisher[j][i] =fisher[i][j];
+        //	}
+	//}
+	fisher[0][0]=10;
+	fisher[1][0]=0;
+	fisher[0][1]=0;
+	fisher[1][1]=10;
 
 }
 adouble dist(adouble *pos, int dimension){

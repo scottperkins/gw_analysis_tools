@@ -205,8 +205,10 @@ ThreadPool *poolptr;
 /*! \brief Parallel tempered, dynamic chain allocation MCMC with output samples with specified maximum autocorrelation. 
  *
  * Runs dynamic chain allocation until the autocorrelation lengths stabilize, then it will run the PTMCMC routine repeatedly, periodically thinning the chain to ensure the auto-correlation length is below the threshold
+ *
+ * Note: smallest batch size is .2*N_steps, so the target correlation length should be << less than this number
  */
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out] Output shape is double[N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -220,7 +222,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 	int corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
 	int corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
 	double corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
-	int corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+	double corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	std::function<double(double*,int* ,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
@@ -231,6 +233,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file_start,/**< Filename to start from checkpoint -- if empty string, start from scratch*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -258,6 +261,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 	else {
 		check_convergence_segments=corr_segments;
 	}
+	//check_convergence_segments = corr_segments;
 
 	double ave_ac;
 	int **temp_ac = allocate_2D_array_int(dimension, corr_segments);
@@ -268,16 +272,40 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 	int dynamic_search_length = .3*N_steps;
 	int temp_length = N_steps;
 	double ***temp_output = allocate_3D_array(chain_N,1.1*N_steps, dimension);
+	//#####################################################################
+	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
+		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
+		initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
+		chain_distribution_scheme, log_prior, log_likelihood,fisher,
+		numThreads, pool,internal_prog,"","","",checkpoint_file);
+	
+	//Dynamic chain allocation will only have one cold chain at index 0
+	auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
+	continue_dynamic_search=false;
+	for(int i = 0 ; i<dimension; i++){
+		ave_ac=0;
+		for(int j = 0 ; j<check_convergence_segments; j++){
+			ave_ac += temp_ac[i][corr_segments-j-1];
+		}
+		ave_ac/=check_convergence_segments;
+		for(int j = 0 ; j<check_convergence_segments; j++){
+			if(abs((double)temp_ac[i][corr_segments-j-1] - ave_ac)/ave_ac >corr_converge_thresh){
+				continue_dynamic_search=true;
+				//dynamic_search_length*=1.1;
+				break;
+			}
+		}
+	}
+	//#####################################################################
 	while(continue_dynamic_search){
 
-		PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
-			dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
-			initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
+		continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
+			dynamic_search_length,  max_chain_N_thermo_ensemble, 
+			 chain_temps, swp_freq, t0, nu,
 			chain_distribution_scheme, log_prior, log_likelihood,fisher,
 			numThreads, pool,internal_prog,"","","",checkpoint_file);
 		
 		//Dynamic chain allocation will only have one cold chain at index 0
-		std::cout<<"Checking AC "<<std::endl;
 		auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
 		continue_dynamic_search=false;
 		for(int i = 0 ; i<dimension; i++){
@@ -294,8 +322,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 				}
 			}
 		}
-		std::cout<<"Finished Checking AC "<<std::endl;
-		//continue_dynamic_search=false;
+		continue_dynamic_search=false;
 		//delete [] reduced_temp_output;
 	}
 
@@ -355,19 +382,24 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 		}while(max_ac>corr_threshold);
 		ct=0;
 		for(int i = 0 ;i<ac_length; i++){
-			for(int j = 0 ; j<dimension; j++){
-				if(status+i <N_steps){
-					output[0][status+i][j] = 
+			if( (status+i) <N_steps){
+				for(int j = 0 ; j<dimension; j++){
+					output[status+i][j] = 
 						reduced_temp_output[i][j];
 				}
+				ct++;
 			}
-			ct++;
 		}
 		std::cout<<"CT: "<<ct<<std::endl;
 		
 		deallocate_2D_array(reduced_temp_output,coldchains*temp_length, 
 			dimension);
 		status += ct;
+		std::cout<<"status: "<<status<<std::endl;
+		//Write file out as checkpoint
+		if(chain_filename != ""){
+			write_file(chain_filename, output, status, dimension);
+		}
 		temp_length = 1.1*N_steps-status;
 		printProgress((double)status/N_steps);
 	}
@@ -375,12 +407,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output, /**< [ou
 	
 	//Maybe write new stat file format
 	
-	if(chain_filename != "")
-		write_file(chain_filename, output[0], N_steps, dimension);
 
 	//Cleanup
 	deallocate_3D_array(temp_output, chain_N, 1.1*N_steps, dimension);
 	deallocate_2D_array(temp_ac, dimension, corr_segments);
+	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
 }
 //######################################################################################
 //######################################################################################
@@ -769,6 +800,195 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 
 //######################################################################################
 //######################################################################################
+/*! \brief Continue dyanmically tunes an MCMC for optimal spacing. step width, and chain number
+ *
+ * NOTE: nu, and t0 parameters determine the dynamics, so these are important quantities. nu is related to how many swap attempts it takes to substantially change the temperature ladder, why t0 determines the length of the total dyanimcally period. Moderate initial choices would be 10 and 1000, respectively.
+ *
+ * Based on arXiv:1501.05823v3
+ *
+ * Currently, Chain number is fixed
+ *
+ * max_chain_N_thermo_ensemble sets the maximium number of chains to use to in successively hotter chains to cover the likelihood surface while targeting an optimal swap acceptance target_swp_acc. 
+ *
+ * max_chain_N determines the total number of chains to run once thermodynamic equilibrium has been reached. This results in chains being added after the initial PT dynamics have finished according to chain_distribution_scheme.
+ *
+ * If no preference, set max_chain_N_thermo_ensemble = max_chain_N = numThreads = (number of cores (number of threads if hyperthreaded))-- this will most likely be the most optimal configuration. If the number of cores on the system is low, you may want to use n*numThreads for some integer n instead, depending on the system.
+ *
+ * chain_distribution_scheme:
+ *
+ * "cold": All chains are added at T=1 (untempered)
+ *
+ * "refine": Chains are added between the optimal temps geometrically -- this may be a good option as it will be a good approximation of the ideal distribution of chains, while keeping the initial dynamical time low 
+ *
+ * "double": Chains are added in order of rising temperature that mimic the distribution achieved by the earier PT dynamics
+ *
+ * "half_ensemble": For every cold chain added, half of the ensemble is added again. Effectively, two cold chains for every ensemble
+ */
+void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_start,
+	double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	std::function<double(double*,int* ,int,int)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int*,int,int)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int*,int,double**,int)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+
+	sampler samplerobj;
+	samplerptr = &samplerobj;
+
+	//if Fisher is not provided, Fisher and MALA steps
+	//aren't used
+	if(fisher ==NULL){
+		samplerptr->fisher_exist = false;
+	}
+	else 
+		samplerptr->fisher_exist = true;
+	
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
+	
+	//Construct sampler structure
+	samplerptr->lp = log_prior;
+	samplerptr->ll = log_likelihood;
+	samplerptr->fish = fisher;
+	samplerptr->swp_freq = swp_freq;
+	//For PT dynamics
+	samplerptr->N_steps = N_steps;
+
+	samplerptr->num_threads = numThreads;
+	samplerptr->output =output;
+
+	load_checkpoint_file(checkpoint_file_start,samplerptr);
+
+	//During chain allocation, pooling isn't used
+	samplerptr->pool = false;
+	samplerptr->numThreads = numThreads;
+	samplerptr->A = new int[samplerptr->chain_N];
+	samplerptr->PT_alloc = true;
+
+	//samplerptr->chain_N = ;//For allocation purposes, this needs to be the maximium number of chains
+	//allocate_sampler_mem(samplerptr);
+	
+
+
+	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
+		assign_probabilities(samplerptr, chain_index);
+	
+	for (int j=0;j<samplerptr->chain_N;j++){
+		samplerptr->current_likelihoods[j] =
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->dimension, j)/samplerptr->chain_temps[j];
+		//std::cout<<samplerptr->current_likelihoods[j]<<std::endl;
+		//step_accepted[j]=0;
+		//step_rejected[j]=0;
+	}
+	
+	//Set chains with temp 1 to highest priority
+	if(samplerptr->prioritize_cold_chains){
+		for(int i =0 ;i<samplerptr->chain_N; i++){
+			if(samplerptr->chain_temps[i]==1)
+				samplerptr->priority[i] = 0;
+		}
+	}
+	int chain_N_max = samplerptr->chain_N;
+	int ct = 1  ;
+	for(int i = 1 ; i<samplerptr->chain_N; i++){
+		if(samplerptr->chain_temps[i]!=1){
+			ct++;	
+		}
+		else{
+			break;
+		}
+	}	
+	samplerptr->chain_N = ct;
+	
+	
+	//#########################################################################
+	//#########################################################################
+	//#########################################################################
+	//#########################################################################
+	//#########################################################################
+	
+	dyanmic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
+	std::cout<<"FINISHED"<<std::endl;	
+
+	//#######################################################################
+	//#######################################################################
+	//#######################################################################
+	//#######################################################################
+	end =clock();
+	wend =omp_get_wtime();
+
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
+
+	
+	acend =clock();
+	wacend =omp_get_wtime();
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
+
+	//############################################################
+	//Write ll lp to file
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	}
+	//############################################################
+	//#################################################################
+	//
+	//Copy sampler to new sampler and run loop, skip checkpoint nonsense
+	//
+	//#################################################################
+	
+	sampler static_sampler;
+	static_sampler.A = new int[chain_N_max];
+	static_sampler.chain_temps = new double[chain_N_max];
+	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N_max, chain_distribution_scheme);
+
+	if(statistics_filename != "")
+		write_stat_file(samplerptr, statistics_filename);
+	
+	if(chain_filename != "")
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
+
+	delete [] samplerptr->A;
+	//If chains were added or removed, set chain N back to max for deallocation
+	samplerptr->chain_N = chain_N_max;
+	//samplerptr->chain_N = max_chain_N_thermo_ensemble;
+	deallocate_sampler_mem(samplerptr);
+	//delete [] samplerptr->chain_temps;
+	free(samplerptr->chain_temps);
+
+	static_sampler.show_progress=show_prog;
+	static_sampler.pool=pool;
+
+	write_checkpoint_file(&static_sampler, checkpoint_file);
+	for(int j = 0; j<static_sampler.chain_N; j++){
+		chain_temps[j] = static_sampler.chain_temps[j];
+	}
+	delete [] static_sampler.A;
+	deallocate_sampler_mem(&static_sampler);
+	delete [] static_sampler.chain_temps;
+}
 /*! \brief Dyanmically tunes an MCMC for optimal spacing. step width, and chain number
  *
  * NOTE: nu, and t0 parameters determine the dynamics, so these are important quantities. nu is related to how many swap attempts it takes to substantially change the temperature ladder, why t0 determines the length of the total dyanimcally period. Moderate initial choices would be 10 and 1000, respectively.
@@ -888,6 +1108,77 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	assign_initial_pos(samplerptr, initial_pos,initial_status,seeding_var);	
 	delete [] initial_status;
 	
+	
+	//#########################################################################
+	//#########################################################################
+	//#########################################################################
+	//#########################################################################
+	//#########################################################################
+	
+	dyanmic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
+
+	//#######################################################################
+	//#######################################################################
+	//#######################################################################
+	//#######################################################################
+	end =clock();
+	wend =omp_get_wtime();
+
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
+
+	
+	acend =clock();
+	wacend =omp_get_wtime();
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
+
+	//############################################################
+	//Write ll lp to file
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	}
+	//############################################################
+	//#################################################################
+	//
+	//Copy sampler to new sampler and run loop, skip checkpoint nonsense
+	//
+	//#################################################################
+	
+	
+	sampler static_sampler;
+	static_sampler.A = new int[chain_N];
+	static_sampler.chain_temps = new double[chain_N];
+	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N, chain_distribution_scheme);
+
+	if(statistics_filename != "")
+		write_stat_file(samplerptr, statistics_filename);
+	
+	if(chain_filename != "")
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
+
+	delete [] samplerptr->A;
+	//If chains were added or removed, set chain N back to max for deallocation
+	samplerptr->chain_N = max_chain_N_thermo_ensemble;
+	deallocate_sampler_mem(samplerptr);
+	delete [] samplerptr->chain_temps;
+
+	static_sampler.show_progress=show_prog;
+	static_sampler.pool=pool;
+
+	write_checkpoint_file(&static_sampler, checkpoint_file);
+	for(int j = 0; j<static_sampler.chain_N; j++){
+		chain_temps[j] = static_sampler.chain_temps[j];
+	}
+	delete [] static_sampler.A;
+	deallocate_sampler_mem(&static_sampler);
+	delete [] static_sampler.chain_temps;
+}
+
+void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, int t0,int swp_freq, int max_chain_N_thermo_ensemble, bool show_prog)
+{
+	
 	//NOTE: instead of dynamics, use variance over accept ratios over \nu steps
 	//Average percent change in temperature 
 	double ave_dynamics= 1.;
@@ -919,7 +1210,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int *prev_reject_ct = new int[samplerptr->chain_N];
 	int *prev_accept_ct = new int[samplerptr->chain_N];
 	double *running_ratio = new double[samplerptr->chain_N];
-	bool dynamic_chain_num = true;
+	//bool dynamic_chain_num = true;
+	bool dynamic_chain_num = false;
 
 	bool chain_pop_target_reached = false;
 	for(int i =0; i<samplerptr->chain_N; i++){
@@ -977,6 +1269,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 					else {
 						chain_pop_target_reached = false;
 						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+							std::cout<<"add"<<std::endl;
 							//add chain
 							int min_id =0;
 							int min_val =1;
@@ -1046,8 +1339,13 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 							}
 							if(samplerptr->PT_alloc)
 								samplerptr->A[min_id] = 0;
+							if(samplerptr->fisher_exist){
+								update_fisher(samplerptr, samplerptr->output[min_id][0], samplerptr->param_status[min_id][0],min_id);	
+							}
+						
 						}
 						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
+							std::cout<<"rm"<<std::endl;
 							//remove chain
 							int max_id =0;
 							int max_val =0;
@@ -1085,6 +1383,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		}
 	}
 	int acc, rej;
+	std::cout<<"FINISHED1 "<<samplerptr->chain_N<<std::endl;
 	for (int j =0; j<samplerptr->chain_N; j++){
 		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
 		acc = samplerptr->swap_accept_ct[j];	
@@ -1098,94 +1397,9 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	delete [] prev_accept_ct;
 	delete [] prev_reject_ct;
 	delete [] running_ratio;
-	end =clock();
-	wend =omp_get_wtime();
-
-	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
-	samplerptr->time_elapsed_wall = (double)(wend-wstart);
-
-	
-	acend =clock();
-	wacend =omp_get_wtime();
-	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
-	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
-
-	//############################################################
-	//Write ll lp to file
-	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
-	}
-	//############################################################
-	//#################################################################
-	//
-	//Copy sampler to new sampler and run loop, skip checkpoint nonsense
-	//
-	//#################################################################
-	
-	
-	sampler static_sampler;
-	static_sampler.A = new int[chain_N];
-	static_sampler.chain_temps = new double[chain_N];
-	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N, chain_distribution_scheme);
-
-	if(statistics_filename != "")
-		write_stat_file(samplerptr, statistics_filename);
-	
-	if(chain_filename != "")
-		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
-
 	delete [] old_temps;
-	delete [] samplerptr->A;
-	//If chains were added or removed, set chain N back to max for deallocation
-	samplerptr->chain_N = max_chain_N_thermo_ensemble;
-	deallocate_sampler_mem(samplerptr);
-	delete [] samplerptr->chain_temps;
 
-	static_sampler.show_progress=show_prog;
-	static_sampler.pool=pool;
 
-	write_checkpoint_file(&static_sampler, checkpoint_file);
-	//PTMCMC_MH_loop(&static_sampler);
-
-	//end =clock();
-	//wend =omp_get_wtime();
-
-	//static_sampler.time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
-	//static_sampler.time_elapsed_wall = (double)(wend-wstart);
-
-	//
-	//acend =clock();
-	//wacend =omp_get_wtime();
-	//static_sampler.time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
-	//static_sampler.time_elapsed_wall_ac = (double)(wacend - wend);
-
-	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
-	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
-	//std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
-	//std::cout<<"Rejected percentage of chain swaps (all chains): "<<rejected_percent<<std::endl;
-	//accepted_percent = (double)(step_accepted[0])/(step_accepted[0]+step_rejected[0]);
-	//rejected_percent = (double)(step_rejected[0])/(step_accepted[0]+step_rejected[0]);
-	//std::cout<<"Accepted percentage of steps (cold chain): "<<accepted_percent<<std::endl;
-	//std::cout<<"Rejected percentage of steps (cold chain): "<<rejected_percent<<std::endl;
-	//double nansum=0;
-	//for (int i =0; i< chain_N; i++)
-	//	nansum+= samplerptr->nan_counter[i];
-	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
-	
-
-	//if(checkpoint_file !=""){
-	//	write_checkpoint_file(&static_sampler, checkpoint_file);
-	//}
-
-	//free(step_accepted);
-	//free(step_rejected);
-	for(int j = 0; j<static_sampler.chain_N; j++){
-		chain_temps[j] = static_sampler.chain_temps[j];
-	}
-	delete [] static_sampler.A;
-	deallocate_sampler_mem(&static_sampler);
-	delete [] static_sampler.chain_temps;
 }
 
 //######################################################################################
@@ -2122,6 +2336,114 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 }
 //######################################################################################
 //######################################################################################
+void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
+	double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int dim, int chain_id){
+			return log_likelihood(param, dim);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int dim, int chain_id){
+			return log_prior(param, dim);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm);};
+	}
+	continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file_start,
+			output,
+			N_steps,
+			max_chain_N_thermo_ensemble,
+			chain_temps,
+			swp_freq,
+			t0,
+			nu,
+			chain_distribution_scheme,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			likelihood_log_filename,
+			checkpoint_file);
+
+}
+void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
+	double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int dim, int chain_id){
+			return log_likelihood(param, dim,chain_id);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int dim, int chain_id){
+			return log_prior(param, dim,chain_id);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm,chain_id);};
+	}
+	continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file_start, 
+			output,
+			N_steps,
+			max_chain_N_thermo_ensemble,
+			chain_temps,
+			swp_freq,
+			t0,
+			nu,
+			chain_distribution_scheme,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			likelihood_log_filename,
+			checkpoint_file);
+
+}
+//######################################################################################
+//######################################################################################
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shape is double[max_chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
@@ -2250,6 +2572,159 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			statistics_filename,
 			chain_filename,
 			likelihood_log_filename,
+			checkpoint_file);
+
+}
+//######################################################################################
+//######################################################################################
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output , shape is double[N_steps,dimension]*/
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int chain_N,/**< Maximum number of chains to use */
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	int corr_threshold,
+	int corr_segments,
+	double corr_converge_thresh,
+	double corr_target_ac,
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	double (*log_prior)(double *param, int dimension),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file_start,/**< Filename to start from checkpoint -- if empty string, start from scratch*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	//auto ll = [&log_likelihood](double *param, int dim, int chain_id){
+	//	return log_likelihood(param, dim);};
+
+	//auto lp = [&log_prior](double *param, int dim, int chain_id){
+	//	return log_prior(param, dim);};
+	//std::function<void(double*,int,double**,int)> f =NULL;
+	//if(fisher){
+	//	f = [&fisher](double *param, int dim, double **fisherm, int chain_id){
+	//		fisher(param, dim, fisherm);};
+	//}
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int dim, int chain_id){
+			return log_likelihood(param, dim);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int dim, int chain_id){
+			return log_prior(param, dim);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm);};
+	}
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(output,
+			dimension,
+			N_steps,
+			chain_N,
+			max_chain_N_thermo_ensemble,
+			initial_pos,
+			seeding_var,
+			chain_temps,
+			swp_freq,
+			t0,
+			nu,
+			corr_threshold,
+			corr_segments,
+			corr_converge_thresh,
+			corr_target_ac,
+			chain_distribution_scheme,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			likelihood_log_filename,
+			checkpoint_file_start,
+			checkpoint_file);
+
+}
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output, shape is double[N_steps,dimension]*/
+	int dimension, 	/**< dimension of the parameter space being explored*/
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int chain_N,/**< Maximum number of chains to use */
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
+	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	int corr_threshold,
+	int corr_segments,
+	double corr_converge_thresh,
+	double corr_target_ac,
+	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+	double (*log_prior)(double *param, int dimension, int chain_id),	/**<Funcion pointer for the log_prior*/
+	double (*log_likelihood)(double *param, int dimension, int chain_id),	/**<Function pointer for the log_likelihood*/
+	void (*fisher)(double *param, int dimension, double **fisher, int chain_id),	/**<Function pointer for the fisher - if NULL, fisher steps are not used*/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file_start,/**< Filename to start from checkpoint -- if empty string, start from scratch*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	//std::function<double(double*,int,int)> lp = log_prior;
+	//std::function<double(double*,int,int)> ll = log_likelihood;
+	//std::function<void(double*,int,double**,int)>f = fisher;
+	std::function<double(double*,int*,int,int)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int dim, int chain_id){
+			return log_likelihood(param, dim,chain_id);};
+	std::function<double(double*,int*,int,int)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int dim, int chain_id){
+			return log_prior(param, dim,chain_id);};
+	std::function<void(double*,int*,int,double**,int)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id){
+			fisher(param, dim, fisherm,chain_id);};
+	}
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(output,
+			dimension,
+			N_steps,
+			chain_N,
+			max_chain_N_thermo_ensemble,
+			initial_pos,
+			seeding_var,
+			chain_temps,
+			swp_freq,
+			t0,
+			nu,
+			corr_threshold,
+			corr_segments,
+			corr_converge_thresh,
+			corr_target_ac,
+			chain_distribution_scheme,
+			lp,
+			ll,
+			f,
+			numThreads,
+			pool,
+			show_prog,
+			statistics_filename,
+			chain_filename,
+			likelihood_log_filename,
+			checkpoint_file_start,
 			checkpoint_file);
 
 }

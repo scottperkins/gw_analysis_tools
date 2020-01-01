@@ -50,7 +50,7 @@ T dCS_IMRPhenomD<T>::dCS_phase_factor(source_parameters<T> *param)
 	T s2  = s2temp/(2.*chi2*chi2*chi2);
 	
 	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
-	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 305./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
+	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 350./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
 	return g;
 }
 
@@ -112,7 +112,7 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_factor(source_parameters<T> *param)
 	T s2  = s2temp/(2.*chi2*chi2*chi2);
 	
 	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
-	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 305./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
+	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 350./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
 	return g;
 }
 
