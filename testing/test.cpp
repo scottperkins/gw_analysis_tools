@@ -140,7 +140,7 @@ void test56()
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
-	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
@@ -170,8 +170,8 @@ void test56()
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
@@ -202,10 +202,11 @@ void test56()
 	//#########################################################
 	//mcmc options
 	int dimension = 13;
-	double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
+	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
+	double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.001),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
 	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1};
 	double *seeding_var = NULL;
-	int n_steps = 15000;
+	int n_steps = 1500;
 	int chain_N=8 ;
 	int max_thermo=8 ;
 	int t0 = 10000;
@@ -6171,8 +6172,12 @@ double test_lp_GW_D(double *pos, int dim, int chain_id,void *parameters)
 	double a = -std::numeric_limits<double>::infinity();
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+
+	//if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	//if ((pos[3])<0 || (pos[3])>1){return a;}//cos \iota
+
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if ((pos[5])<0 || (pos[5])>10){return a;}//tc
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
@@ -6211,8 +6216,12 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id,void *parameters)
 	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+
+	//if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	//if ((pos[3])<0 || (pos[3])>1){return a;}//cos \iota
+
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if ((pos[5])<0 || (pos[5])>10){return a;}//PhiRef
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL

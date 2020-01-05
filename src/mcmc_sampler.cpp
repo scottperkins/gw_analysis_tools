@@ -206,7 +206,11 @@ ThreadPool *poolptr;
  *
  * Runs dynamic chain allocation until the autocorrelation lengths stabilize, then it will run the PTMCMC routine repeatedly, periodically thinning the chain to ensure the auto-correlation length is below the threshold
  *
- * Note: smallest batch size is .2*N_steps, so the target correlation length should be << less than this number
+ * Note: smallest batch size is .5*N_steps, so the target correlation length should be << less than this number
+ *
+ * Note: This routine only works if the requested number of samples is larger than the typical correlation length of the unthinned chains. This is because the chains are run and tested in batches the size of the requested sample number.
+ *
+ * Note: This method does NOT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end.
  */
 void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out] Output shape is double[N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
@@ -360,7 +364,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	coldchains = count_cold_chains(chain_temps, chain_N);
 	int realloc_temps_freq = 0.1 * N_steps;//Steps before re-allocating chain temps
 	while(status<N_steps){
-		if(status%realloc_temps_freq){
+		if(status%realloc_temps_freq==0){
 			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
 				temp_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,

@@ -11,12 +11,13 @@ import matplotlib.pyplot as plt
 
 dim = 13
 data =np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
-data=data[2000:]
+#data=data[2000:]
 
 dataT =np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',', unpack=True)
 i = 0 
 for x in dataT:
-    plt.plot(x[2000:])
+    #plt.plot(x[2000:])
+    plt.plot(x)
     plt.savefig("temp{}".format(i))
     plt.close()
     i+=1
