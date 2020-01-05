@@ -358,7 +358,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
+	int realloc_temps_freq = 0.1 * N_steps;//Steps before re-allocating chain temps
 	while(status<N_steps){
+		if(status%realloc_temps_freq){
+			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
+				temp_length,  max_chain_N_thermo_ensemble, 
+				 chain_temps, swp_freq, t0, nu,
+				chain_distribution_scheme, log_prior, log_likelihood,fisher,
+				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+
+		}
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
