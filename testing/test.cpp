@@ -91,28 +91,29 @@ void test52();
 void test53();
 void test54();
 void test55();
+void test56();
 void test_prob(double *prob, void *param, int d, int threadid);
-double test_ll(double *pos, int dim);
-double test_lp(double *pos, int dim);
-double test_lp_nts(double *pos, int dim, int chain_id);
-double test_lp_GW(double *pos, int dim, int chain_id);
-double test_lp_GW_Pv2(double *pos, int dim, int chain_id);
-double test_lp_GW_D(double *pos, int dim, int chain_id);
-double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id);
-double test_lp_GW_Pv2_dCS_root_alpha(double *pos, int dim, int chain_id);
-double test_lp_GW_7dim(double *pos, int dim, int chain_id);
-double test_lp_GW_DFull(double *pos, int dim, int chain_id);
-double test_lp_GW_dCS(double *pos, int dim, int chain_id);
-double test_lp_GW_dCS_log(double *pos, int dim, int chain_id);
-double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id);
-double test_lp_GW_ppE(double *pos, int dim, int chain_id);
-double test_lp_reduceddim(double *pos, int dim, int chain_id);
-void test_fisher(double *pos, int dim, double **fisher);
-double log_student_t (double *x,int dim);
-double log_neil_proj3 (double *x,int dim);
-double log_neil_proj3_nts (double *x,int dim, int chain_id);
-double log_neil_proj32 (double *c,int dim);
-void fisher_neil_proj3 (double *x,int dim, double **fish, int chain_id);
+double test_ll(double *pos, int dim,void *parameters);
+double test_lp(double *pos, int dim,void *parameters);
+double test_lp_nts(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_Pv2(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_D(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_Pv2_dCS_root_alpha(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_7dim(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_DFull(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_dCS(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_dCS_log(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id,void *parameters);
+double test_lp_GW_ppE(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_reduceddim(double *pos, int dim, int chain_id,void *parameters);
+void test_fisher(double *pos, int dim, double **fisher,void *parameters);
+double log_student_t (double *x,int dim,void *parameters);
+double log_neil_proj3 (double *x,int dim,void *parameters);
+double log_neil_proj3_nts (double *x,int dim, int chain_id,void *parameters);
+double log_neil_proj32 (double *c,int dim,void *parameters);
+void fisher_neil_proj3 (double *x,int dim, double **fish, int chain_id,void *parameters);
 adouble dist(adouble *pos, int dimension);
 
 const gsl_rng_type* Y;
@@ -125,10 +126,141 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test55();	
+	test56();	
 	//test6();	
 	//test45();	
 	return 0;
+}
+void test56()
+{
+	//std::string psd_file = "testing/data/GWTC1_GW150914_PSDs.dat.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW151226_PSDs.dat.txt";
+	//std::string data_file = "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//std::string psd_file = "testing/data/GWTC1_GW170729_PSDs.dat.txt";
+	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
+	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
+	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
+	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
+	//int rows = 8032;
+	//int cols = 3;
+	int datalength = 131075;
+	//double **psd = allocate_2D_array(rows, cols);
+	//read_LOSC_PSD_file(psd_file, psd, rows, cols);
+	//double data_start_time, duration, fs;
+	int num_detectors = 2, psd_length = 8032, length;
+	//int num_detectors = 3, psd_length = 4016, length;
+	//int num_detectors = 3, psd_length = 4016, length;
+	//int num_detectors = 2, psd_length = 4016, length;
+	//double gps_time = 1135136350.6;//TESTING -- gw151226
+	double gps_time = 1126259462.4;//TESTING -- gw150914
+	//double gps_time = 1185389807.3;//TESTING -- gw170729
+	//double gps_time = 1185389807.3;//TESTING -- gw170729
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+	//detectors[2] = "Virgo";
+	std::string *detector_files = new std::string[num_detectors];
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "/home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[0] =  "testing/data/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[1] =  "testing/data/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//detector_files[2] =  "testing/data/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+ 	//double trigger_time= 1135136350.6;
+ 	double trigger_time = gps_time;
+	double **psd = allocate_2D_array(num_detectors,psd_length);
+	double **freqs = allocate_2D_array(num_detectors,psd_length);
+	std::complex<double> **data = (std::complex<double> **)malloc(sizeof(std::complex<double> *)*num_detectors);
+	for(int i =0; i<num_detectors; i++)
+		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
+
+	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
+
+
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =psd_length;
+	data_length[1] =psd_length;
+	//data_length[2] =psd_length;
+
+	//#########################################################
+	//mcmc options
+	int dimension = 13;
+	double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
+	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1};
+	double *seeding_var = NULL;
+	int n_steps = 15000;
+	int chain_N=8 ;
+	int max_thermo=4 ;
+	int t0 = 10000;
+	int nu = 100;
+	std::string chain_alloc = "double";
+	//std::string chain_alloc = "cold";
+	double **output;
+	output = allocate_2D_array(n_steps, dimension );
+	int swp_freq = 5;
+	double chain_temps[chain_N];
+	double c = 1.3;
+	
+	int Nmod = 0;
+	int *bppe = NULL;
+	int numThreads = 10;
+	bool pool = true;
+	//#########################################################
+	//gw options
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "EdGB_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
+	//std::string generation_method = "IMRPhenomD";
+	std::string generation_method = "IMRPhenomPv2";
+	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
+	
+	
+	std::string chainfile = "testing/data/mcmc_output_uncorr_P.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_uncorr_P.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_uncorr_P.csv";
+
+	int corr_threshold = 50;
+	int corr_segments = 10;
+	double corr_converge_thresh = 0.50;
+	double corr_target_ac = .01;
+
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
+			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_Pv2,numThreads, pool,show_progress,
+			num_detectors, 
+			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+			generation_method,statfilename,chainfile, "",checkfile);	
+
+
+	//write_file(chainfile, output[0], n_steps, dimension);
+
+	deallocate_2D_array(output, n_steps, dimension);
+	delete [] detectors;
+	free(data_length);
+	//free_LOSC_data(data, psd,freqs, num_detectors, length);
+	deallocate_2D_array(psd,num_detectors, psd_length);
+	deallocate_2D_array(freqs,num_detectors, psd_length);
+	for(int i =0; i<num_detectors; i++)
+		free(data[i]);
+	free(data);
+	delete [] detector_files;
+
 }
 void test55()
 {
@@ -167,12 +299,12 @@ void test55()
 	double corr_converge_thresh = 0.5;
 	double corr_target_ac = .01;
 
-	std::function<double(double* , int *,int, int)> lp = [](double *param, int * status,int dim, int chain_id){ return test_lp_nts(param,dim,chain_id);};
-	std::function<double(double* , int*,int, int)> ll = [](double *param, int *status,int dim, int chain_id){ return log_neil_proj3_nts(param,dim,chain_id);};
-	std::function<void(double* , int*,int, double**,int)> f = [](double *param, int *status,int dim, double **fish,int chain_id){ fisher_neil_proj3(param,dim,fish,chain_id);};
+	std::function<double(double* , int *,int, int,void *)> lp = [](double *param, int * status,int dim, int chain_id,void *parameters){ return test_lp_nts(param,dim,chain_id,parameters);};
+	std::function<double(double* , int*,int, int,void *)> ll = [](double *param, int *status,int dim, int chain_id,void *parameters){ return log_neil_proj3_nts(param,dim,chain_id,parameters);};
+	std::function<void(double* , int*,int, double**,int,void *)> f = [](double *param, int *status,int dim, double **fish,int chain_id,void *parameters){ fisher_neil_proj3(param,dim,fish,chain_id,parameters);};
 	f=NULL;
 	
-	continue_PTMCMC_MH_dynamic_PT_alloc(checkpointfile_start ,output,  N_steps, max_chain_N_thermo, chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
+	continue_PTMCMC_MH_dynamic_PT_alloc(checkpointfile_start ,output,  N_steps, max_chain_N_thermo, chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 
 	deallocate_3D_array(output,chain_N, N_steps, dimension);
@@ -214,14 +346,14 @@ void test54()
 	double corr_converge_thresh = 0.1;
 	double corr_target_ac = .01;
 
-	std::function<double(double* , int *,int, int)> lp = [](double *param, int * status,int dim, int chain_id){ return test_lp_nts(param,dim,chain_id);};
-	std::function<double(double* , int*,int, int)> ll = [](double *param, int *status,int dim, int chain_id){ return log_neil_proj3_nts(param,dim,chain_id);};
-	std::function<void(double* , int*,int, double**,int)> f = [](double *param, int *status,int dim, double **fish,int chain_id){ fisher_neil_proj3(param,dim,fish,chain_id);};
+	std::function<double(double* , int *,int, int,void *)> lp = [](double *param, int * status,int dim, int chain_id,void *parameters){ return test_lp_nts(param,dim,chain_id,parameters);};
+	std::function<double(double* , int*,int, int,void *)> ll = [](double *param, int *status,int dim, int chain_id,void *parameters){ return log_neil_proj3_nts(param,dim,chain_id,parameters);};
+	std::function<void(double* , int*,int, double**,int,void *)> f = [](double *param, int *status,int dim, double **fish,int chain_id,void *parameters){ fisher_neil_proj3(param,dim,fish,chain_id,parameters);};
 	f=NULL;
 	
 	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,chainfile, "","",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
-	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 	//std::cout<<"Chain temps: "<<std::endl;
 	//for(int i =0; i<chain_N; i++){
@@ -1528,7 +1660,7 @@ void test33()
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 
-	continue_PTMCMC_MH(start_check, output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL, threads, pool, show_prog, stats, "", "", "",check);	
+	continue_PTMCMC_MH(start_check, output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL, (void **)NULL,threads, pool, show_prog, stats, "", "", "",check);	
 	int filecount = 1;
 	std::string chainfilebase = "testing/data/neil_mcmc_output";
 	for(int i =0; i<chain_N; i++){
@@ -1571,7 +1703,7 @@ void test32()
 	int numThreads = 10;
 	bool pool = false;
 	
-	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp, log_neil_proj3,NULL,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 	std::cout<<"Chain temps: "<<std::endl;
 	for(int i =0; i<chain_N; i++){
@@ -2664,7 +2796,7 @@ void test25()
 	int numThreads = 10;
 	bool pool = true;
 	
-	continue_PTMCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	continue_PTMCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 }
 void test24()
@@ -5063,7 +5195,7 @@ void test7()
 	int numThreads = 1;
 	bool pool = false;
 	
-	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
 	//PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, test_lp_nts, log_neil_proj3_nts,NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 
@@ -5929,7 +6061,7 @@ void test1()
 	free_LumD_Z_interp(&Z_DL_accel_ptr, &Z_DL_spline_ptr);
 }
 
-void fisher_neil_proj3 (double *pos,int dimension, double **fisher,int chain_id)
+void fisher_neil_proj3 (double *pos,int dimension, double **fisher,int chain_id,void *parameters)
 {
 	//int alpha = (int)(gsl_rng_uniform(g)*1e7);
 	
@@ -5965,12 +6097,12 @@ adouble dist(adouble *pos, int dimension){
  
         return out;
 }
-double log_neil_proj3_nts (double *c,int dim, int chainid)
+double log_neil_proj3_nts (double *c,int dim, int chainid,void *parameters)
 {
-	return log_neil_proj3(c,dim);
+	return log_neil_proj3(c,dim,parameters);
 	//return 2;
 }
-double log_neil_proj3 (double *c,int dim)
+double log_neil_proj3 (double *c,int dim,void *parameters)
 {
 	double x = c[0];
 	double y = c[1];
@@ -5980,7 +6112,7 @@ double log_neil_proj3 (double *c,int dim)
 	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
 	//return 2.;
 }
-double log_neil_proj32 (double *c,int dim)
+double log_neil_proj32 (double *c,int dim,void *parameters)
 {
 	double x = c[0]*c[1];
 	double y = c[0]/c[1];
@@ -5990,7 +6122,7 @@ double log_neil_proj32 (double *c,int dim)
 	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
 	//return 2.;
 }
-double log_student_t (double *x,int dim){
+double log_student_t (double *x,int dim,void *parameters){
 
 	double  mu=1, nu=3,  sigma=1;
         double g1 = gsl_sf_gamma( (nu + 1) / 2 ) ;
@@ -5998,21 +6130,21 @@ double log_student_t (double *x,int dim){
         double parenth = 1 + (1/nu) *pow( (x[0] - mu) / sigma, 2 );
         return log(g1 / (g2 * sqrt(nu * M_PI ) * sigma ) * pow(parenth,-(nu+1)/2    ));
 }
-void test_fisher(double *pos, int dim, double **fisher)
+void test_fisher(double *pos, int dim, double **fisher,void *parameters)
 {
 	fisher[0][0] = .5;
 }
-double test_ll(double *pos, int dim)
+double test_ll(double *pos, int dim,void *parameters)
 {
 	//std::cout<<"LL"<<std::endl;
 	//std::cout<<"Pos in LL: "<<pos[0]<<std::endl;
 	return -pos[0]*pos[0]/(4.);
 	//return  0;
 }
-double test_lp_nts(double *pos, int dim, int chain_id){
-	return test_lp(pos,dim);
+double test_lp_nts(double *pos, int dim, int chain_id,void *parameters){
+	return test_lp(pos,dim,parameters);
 }
-double test_lp(double *pos, int dim)
+double test_lp(double *pos, int dim,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	if(pos[0]<-10 || pos[0]>10){return a;}
@@ -6020,7 +6152,7 @@ double test_lp(double *pos, int dim)
 	return 0;
 	//return -pos[0]*pos[0]/(10.)- pos[1]*pos[1]/20.;
 }	
-double test_lp_GW(double *pos, int dim, int chain_id)
+double test_lp_GW(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
@@ -6034,13 +6166,13 @@ double test_lp_GW(double *pos, int dim, int chain_id)
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10);}
 	//else {return log(std::exp(pos[0])/MSOL_SEC)-(std::exp(pos[0])/MSOL_SEC-30)*(std::exp(pos[0])/MSOL_SEC-30)/(2*10)-(pos[1]-.24)*(pos[1]-.24)/(2*.010);}
 }
-double test_lp_GW_D(double *pos, int dim, int chain_id)
+double test_lp_GW_D(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-M_PI/2. || (pos[1])>M_PI/2.){return a;}//DEC
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
-	if ((pos[3])<0 || (pos[3])>M_PI){return a;}//\iota
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if ((pos[5])<0 || (pos[5])>10){return a;}//tc
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
@@ -6050,21 +6182,36 @@ double test_lp_GW_D(double *pos, int dim, int chain_id)
 	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//chi2
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
 	//else { return pos[7]+3*pos[6]+log(abs(cos(pos[1]))) + log( abs( sin(pos[3])));}
-	else { return pos[7]+3*pos[6]+log(abs(cos(pos[1]))) ;}
+	else { return pos[7]+3*pos[6] ;}
 	//else {return pos[7]+3*pos[6];}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 
 }
-double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
+double test_lp_GW_Pv2(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
-	if(sqrt(pos[9]*pos[9] + pos[10]*pos[10]+pos[11]*pos[11]) >0.95) {return a;}
+	//if(sqrt(pos[9]*pos[9] + pos[10]*pos[10]+pos[11]*pos[11]) >0.95) {return a;}
+	double chirp = std::exp(pos[7]);
+	double eta = pos[8];
+	double m1 = calculate_mass1(chirp,eta );
+	double m2 = calculate_mass2(chirp,eta );
+	double q =m1/m2;
+	double W = (3*q +4)/ ( 4*q*q +3*q);
+	//Max values
+	double chi1l = pos[9];
+	double chi2l = pos[10];
+	double chi1p = std::sqrt(1- chi1l*chi1l);
+	double chi2p = std::sqrt(1- chi2l*chi2l);
+	double chi_thresh=chi2p ;
+	if(chi1p > W*chi2p){ chi_thresh =chi1p;}
+	if(pos[11] > chi_thresh){ return a;}
+
 	//Flat priors across physical regions
 	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-M_PI/2 || (pos[1])>M_PI/2){return a;}//DEC
-	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if ((pos[5])<0 || (pos[5])>10){return a;}//PhiRef
@@ -6076,7 +6223,7 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 	if ((pos[11])<0 || (pos[11])>.9){return a;}//chip
 	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phip
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	else {return pos[7]+3*pos[6]+log(cos(pos[1])) ;}
+	else {return pos[7]+3*pos[6];}
 	//else {return pos[7]+3*pos[6] ;}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
@@ -6105,19 +6252,19 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id)
 //	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 //		+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
 //}
-double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id)
+double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	if ((pos[14])<-100 || (pos[14])>100){return a;}//ppE beta
-	else{return test_lp_GW_Pv2(pos,dim,chain_id);}
+	else{return test_lp_GW_Pv2(pos,dim,chain_id,parameters);}
 }
-double test_lp_GW_Pv2_dCS_root_alpha(double *pos, int dim, int chain_id)
+double test_lp_GW_Pv2_dCS_root_alpha(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	if ((pos[14])<0 || (pos[14])>100){return a;}//ppE beta
-	else{return test_lp_GW_Pv2(pos,dim,chain_id);}
+	else{return test_lp_GW_Pv2(pos,dim,chain_id,parameters);}
 }
-double test_lp_GW_7dim(double *pos, int dim, int chain_id)
+double test_lp_GW_7dim(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
@@ -6132,7 +6279,7 @@ double test_lp_GW_7dim(double *pos, int dim, int chain_id)
 	//else {return log(std::exp(pos[3])*std::exp(pos[0])*std::exp(pos[0])*std::exp(pos[0]));}
 	else {return pos[3]+4*pos[0];}
 }
-double test_lp_GW_DFull(double *pos, int dim, int chain_id)
+double test_lp_GW_DFull(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//Flat priors across physical regions
@@ -6150,7 +6297,7 @@ double test_lp_GW_DFull(double *pos, int dim, int chain_id)
 	else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])));}
 	//else {return pos[4]+1*pos[3];}
 }
-double test_lp_GW_dCS(double *pos, int dim , int chain_id)
+double test_lp_GW_dCS(double *pos, int dim , int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	double alphasqmin = 0;
@@ -6163,10 +6310,10 @@ double test_lp_GW_dCS(double *pos, int dim , int chain_id)
 	if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){return a;}
 	
 	//Uniform prior on \alpha^2, not \alpha
-	else { return test_lp_GW_DFull(pos,dim,chain_id)-.75*std::log(pos[8]);}
+	else { return test_lp_GW_DFull(pos,dim,chain_id,parameters)-.75*std::log(pos[8]);}
 	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }
-double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id)
+double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	double alphasqmin = 0;
@@ -6179,10 +6326,10 @@ double test_lp_GW_dCS_root_alpha(double *pos, int dim , int chain_id)
 	if(((pos[8])<alphasqmin )|| (pos[8]>alphasqmax  )){return a;}
 	
 	//Uniform prior on \alpha^2, not \alpha
-	else { return test_lp_GW_DFull(pos,dim,chain_id);}
+	else { return test_lp_GW_DFull(pos,dim,chain_id,parameters);}
 	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }
-double test_lp_GW_dCS_log(double *pos, int dim , int chain_id)
+double test_lp_GW_dCS_log(double *pos, int dim , int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//double lnalphamin = -500;//Corresponds to a limit on root alpha of 10^-46 m
@@ -6195,21 +6342,21 @@ double test_lp_GW_dCS_log(double *pos, int dim , int chain_id)
 	if(((pos[8])<lnalphamin)|| (pos[8]>lnalphamax) ){return a;}
 	
 	//Uniform prior on \alpha^.5, not \alpha
-	else { return test_lp_GW_DFull(pos,dim,chain_id)+.25*pos[8];}
+	else { return test_lp_GW_DFull(pos,dim,chain_id,parameters)+.25*pos[8];}
 	//Uniform in ln \alpha^2
 	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }
-double test_lp_GW_ppE(double *pos, int dim , int chain_id)
+double test_lp_GW_ppE(double *pos, int dim , int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	//if(((pos[8])<lnalphamin)|| (pos[8]>lnalphamax) ){return a;}
 	//Uniform prior on \alpha^.5, not \alpha
 	//else { return test_lp_GW_DFull(pos,dim,chain_id)+.25*pos[8];}
 	//Uniform in ln \alpha^2
-	{ return test_lp_GW_DFull(pos,dim,chain_id);}
+	{ return test_lp_GW_DFull(pos,dim,chain_id,parameters);}
 	//else { return test_lp_GW_DFull(pos,dim,chain_id);}
 }
-double test_lp_reduceddim(double *pos, int dim, int chain_id)
+double test_lp_reduceddim(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	if (std::exp(pos[0])<2 || std::exp(pos[0])>100){return a;}//chirpmass

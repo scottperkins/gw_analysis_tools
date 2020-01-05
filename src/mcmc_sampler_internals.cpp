@@ -61,8 +61,8 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 		step = 4;
 	}
 	
-	double current_lp = sampler->lp(current_param, current_status,sampler->max_dim, chain_number);
-	double proposed_lp = sampler->lp(proposed_param,proposed_status, sampler->max_dim, chain_number);
+	double current_lp = sampler->lp(current_param, current_status,sampler->max_dim, chain_number, sampler->user_parameters[chain_number]);
+	double proposed_lp = sampler->lp(proposed_param,proposed_status, sampler->max_dim, chain_number, sampler->user_parameters[chain_number]);
 	double current_ll=0, proposed_ll=0;
 	double MH_ratio;
 	double power;
@@ -75,7 +75,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	else{
 		//Calculate log_likelihood and log prior
 		current_ll = sampler->current_likelihoods[chain_number];
-		proposed_ll = sampler->ll(proposed_param, proposed_status,sampler->max_dim,chain_number);
+		proposed_ll = sampler->ll(proposed_param, proposed_status,sampler->max_dim,chain_number, sampler->user_parameters[chain_number]);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 		//Calculate MH ratio
 		if(std::isnan(proposed_ll)){
@@ -218,7 +218,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		}
 		
 	}
-	double lp =sampler->lp(proposed_param,proposed_status, sampler->max_dim, chain_index) ;
+	double lp =sampler->lp(proposed_param,proposed_status, sampler->max_dim, chain_index, sampler->user_parameters[chain_index]) ;
 	//Check whether or not we need to update the fisher
 	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
 	{
@@ -291,7 +291,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	for (int i =0; i<local_dim;i++){
 		fisher[i] = (double*)malloc(sizeof(double)*local_dim);
 	}
-	sampler->fish(current_param, param_status,local_dim, fisher,chain_index);
+	sampler->fish(current_param, param_status,local_dim, fisher,chain_index, sampler->user_parameters[chain_index]);
 
 	//Convert to 1D array for Eigen
 	double *oneDfisher=(double *)malloc(sizeof(double)*local_dim*local_dim);
@@ -546,7 +546,7 @@ void RJ_step(sampler *sampler, /**< sampler*/
 	int chain_number/**< chain mumber*/
 	)
 {
-	sampler->rj(current_param, proposed_param, current_status, proposed_status, sampler->max_dim,chain_number, sampler->randgauss_width[chain_number][4]);
+	sampler->rj(current_param, proposed_param, current_status, proposed_status, sampler->max_dim,chain_number, sampler->randgauss_width[chain_number][4],sampler->user_parameters[chain_number]);
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
@@ -976,6 +976,10 @@ void allocate_sampler_mem(sampler *sampler)
 	const gsl_rng_type *T= gsl_rng_default;
 
 	int i;
+	if (!sampler->user_parameters){
+		sampler->local_param_allocation=true;
+		sampler->user_parameters = new void*[sampler->chain_N];
+	}
 	sampler->step_prob = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->prob_boundaries = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->de_primed = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
@@ -1168,6 +1172,9 @@ void deallocate_sampler_mem(sampler *sampler)
 		gsl_rng_free(sampler->rvec[i]);
 
 	}		
+	if(sampler->local_param_allocation){
+		delete [] sampler->user_parameters;
+	}
 	free(sampler->step_prob); 
 	free(sampler->prob_boundaries); 
 	free(sampler->de_primed);
@@ -1859,7 +1866,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 				
 			}
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j)/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j, samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 		}
 	}
 	//Seed non-zero chains normally with variance as specified
@@ -1895,9 +1902,9 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 					}
 					attempts+=1;
 					//std::cout<<samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j)<<std::endl;
-				}while(samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j) == limit_inf && attempts<max_attempts);
+				}while(samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j, samplerptr->user_parameters[j]) == limit_inf && attempts<max_attempts);
 				attempts =0;
-				if(samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j) != limit_inf ){
+				if(samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j, samplerptr->user_parameters[j]) != limit_inf ){
 					for(int i =0; i<samplerptr->max_dim;i++){
 						for(int l =0; l<samplerptr->N_steps; l++){
 							samplerptr->output[j][l][i] = temp_pos[i];
@@ -1917,7 +1924,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			}
 			
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j)/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->max_dim, j, samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 		}
 	}
 	if(samplerptr->log_ll || samplerptr->log_lp){
@@ -1926,7 +1933,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			samplerptr->ll_lp_output[i][0][1] = 
 				samplerptr->lp(samplerptr->output[i][0],
 				samplerptr->param_status[i][0],
-				samplerptr->max_dim,i);
+				samplerptr->max_dim,i, samplerptr->user_parameters[i]);
 		}
 	}
 	if(samplerptr->fisher_exist){

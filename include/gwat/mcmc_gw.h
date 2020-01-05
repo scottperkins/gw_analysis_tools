@@ -203,8 +203,8 @@ void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
 	int min_dim,
 	int N_steps,
 	int swp_freq,
-	double(*log_prior)(double *param, int *status, int dimension, int chain_id),
-	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width),
+	double(*log_prior)(double *param, int *status, int dimension, int chain_id,void *parameters),
+	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -235,8 +235,8 @@ void RJPTMCMC_MH_GW(double ***output,
 	double *seeding_var,	
 	double *chain_temps,
 	int swp_freq,
-	double(*log_prior)(double *param, int *status, int dimension, int chain_id),
-	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width),
+	double(*log_prior)(double *param, int *status, int dimension, int chain_id,void *parameters),
+	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -264,7 +264,7 @@ void PTMCMC_MH_GW(double ***output,
 	double *seeding_var,
 	double *chain_temps,
 	int swp_freq,
-	double(*log_prior)(double *param, int dimension, int chain_id),
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -300,7 +300,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	double corr_converge_thresh,
 	double corr_target_ac,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int dimension, int chain_id),
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -317,7 +317,6 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	std::string statistics_filename,
 	std::string chain_filename,
 	std::string likelihood_log_filename,
-	std::string checkpoint_filename_start,
 	std::string checkpoint_filename
 	);
 void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
@@ -332,7 +331,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	int t0,
 	int nu,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int dimension, int chain_id),
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -356,7 +355,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	int dimension,
 	int N_steps,
 	int swp_freq,
-	double(*log_prior)(double *param, int dimension, int chain_id),
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -394,14 +393,14 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	double DEC,
 	double gps_time);
 
-void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id) ;
+void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id,void *parameters) ;
 
 std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method);
 
-double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id) ;
+double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *parameters) ;
 
-double RJPTMCMC_likelihood_wrapper(double *param, int *status,int max_dim, int chain_id) ;
+double RJPTMCMC_likelihood_wrapper(double *param, int *status,int max_dim, int chain_id,void *parameters) ;
 
-void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **output, int chain_id);
-void RJPTMCMC_RJ_proposal(double *current_param, double *proposed_params, int *current_status, int *proposed_status,int max_dim, int chain_id, double step_width) ;
+void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **output, int chain_id,void *parameters);
+void RJPTMCMC_RJ_proposal(double *current_param, double *proposed_params, int *current_status, int *proposed_status,int max_dim, int chain_id, double step_width,void *parameters) ;
 #endif

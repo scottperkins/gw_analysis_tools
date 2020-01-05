@@ -96,9 +96,12 @@ public:
 	//log_prior lp;
 	//log_likelihood ll;
 	//fisher fish;
-	std::function<double(double*,int *, int, int)> lp;
-	std::function<double(double*,int *,int, int)> ll;
-	std::function<void(double*,int *,int,double**,int)> fish;
+	std::function<double(double*,int *, int, int, void *)> lp;
+	std::function<double(double*,int *,int, int, void *)> ll;
+	std::function<void(double*,int *,int,double**,int, void *)> fish;
+	
+	void ** user_parameters;
+	bool local_param_allocation=false;
  
 	gsl_rng ** rvec;
 
@@ -146,7 +149,7 @@ public:
 	//RJPTMCMC Parameterts
 	int ***param_status;
 	bool RJMCMC=false;
-	std::function<void(double*,double*,int *,int *,int, int, int)> rj;
+	std::function<void(double*,double*,int *,int *,int, int, int,void *)> rj;
 	bool update_RJ_width=true;
 	
 };

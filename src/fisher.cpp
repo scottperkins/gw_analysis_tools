@@ -1605,7 +1605,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					log_factors[i] = false;
 				}
 				parameters[0]=input_params->RA;
-				parameters[1]=input_params->DEC;
+				parameters[1]=sin(input_params->DEC);
 				if(input_params->equatorial_orientation){
 					parameters[2]=input_params->theta_l;
 					parameters[3]=input_params->phi_l;
@@ -1685,14 +1685,14 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				double spin1spher[3];
 				double spin2spher[3];
 				parameters[0]=input_params->RA;
-				parameters[1]=input_params->DEC;
+				parameters[1]=sin(input_params->DEC);
 				if(input_params->equatorial_orientation){
 					parameters[2]=input_params->theta_l;
 					parameters[3]=input_params->phi_l;
 				}
 				else{
 					parameters[2]=input_params->psi;
-					parameters[3]=(input_params->incl_angle);
+					parameters[3]=cos(input_params->incl_angle);
 				}
 				parameters[4] = input_params->phiRef;
 				parameters[5] = input_params->tc;
@@ -1810,7 +1810,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					avec_parameters[8]);
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
-				a_params->DEC = avec_parameters[1];
+				a_params->DEC = asin(avec_parameters[1]);
 				if(a_params->equatorial_orientation){
 					a_params->theta_l = avec_parameters[2];
 					a_params->phi_l=avec_parameters[3];
@@ -1864,14 +1864,14 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					avec_parameters[8]);
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
-				a_params->DEC = avec_parameters[1];
+				a_params->DEC = asin(avec_parameters[1]);
 				if(a_params->equatorial_orientation){
 					a_params->theta_l = avec_parameters[2];
 					a_params->phi_l=avec_parameters[3];
 				}
 				else{
 					a_params->psi = avec_parameters[2];
-					a_params->incl_angle=(avec_parameters[3]);
+					a_params->incl_angle=acos(avec_parameters[3]);
 				}
 				//T spin1sph[3] = {avec_parameters[9],0,0};
 				//T spin2sph[3] = {avec_parameters[10],0,0};

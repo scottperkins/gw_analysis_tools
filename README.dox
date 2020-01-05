@@ -14,6 +14,8 @@ Known to work with gcc/g++-9
 
 Need nvcc -- known to work with v9.1 of CUDA
 
+Need GSL-2.6 or higher
+
 \section external_libs Required Software
 
 Required non-standard C libraries:
