@@ -272,8 +272,6 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	int dynamic_search_length = 1.*N_steps;
 	int temp_length = N_steps;
 	double ***temp_output = allocate_3D_array(chain_N,1.1*N_steps, dimension);
-	int coldchains = count_cold_chains(chain_temps, chain_N);
-	double **reduced_temp_output, **reduced_temp_output_thinned ;
 	//#####################################################################
 	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
 		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
@@ -284,6 +282,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	//Dynamic chain allocation will only have one cold chain at index 0
 	auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
 	continue_dynamic_search=false;
+	int coldchains = count_cold_chains(chain_temps, chain_N);
+	double **reduced_temp_output, **reduced_temp_output_thinned ;
+	//#####################################################################
 	for(int i = 0 ; i<dimension; i++){
 		ave_ac=0;
 		for(int j = 0 ; j<check_convergence_segments; j++){
@@ -300,13 +301,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	}
 	//#####################################################################
 	int dynamic_ct = 0 ;
+	int dynamic_temp_freq = 3;
 	while(continue_dynamic_search && dynamic_ct<10){
 
-		continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
-			dynamic_search_length,  max_chain_N_thermo_ensemble, 
-			 chain_temps, swp_freq, t0, nu,
-			chain_distribution_scheme, log_prior, log_likelihood,fisher,
-			user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+		if(dynamic_ct%dynamic_temp_freq ==0){
+			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
+				dynamic_search_length,  max_chain_N_thermo_ensemble, 
+				 chain_temps, swp_freq, t0, nu,
+				chain_distribution_scheme, log_prior, log_likelihood,fisher,
+				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+		}
 		
 		coldchains = count_cold_chains(chain_temps, chain_N);
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, dynamic_search_length, 
@@ -955,7 +959,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	//#########################################################################
 	
 	dyanmic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
-	std::cout<<"FINISHED"<<std::endl;	
 
 	//#######################################################################
 	//#######################################################################
@@ -1239,8 +1242,8 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int *prev_reject_ct = new int[samplerptr->chain_N];
 	int *prev_accept_ct = new int[samplerptr->chain_N];
 	double *running_ratio = new double[samplerptr->chain_N];
-	//bool dynamic_chain_num = true;
-	bool dynamic_chain_num = false;
+	bool dynamic_chain_num = true;
+	//bool dynamic_chain_num = false;
 
 	bool chain_pop_target_reached = false;
 	for(int i =0; i<samplerptr->chain_N; i++){
@@ -1310,7 +1313,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 								}
 							}	
 							samplerptr->chain_N++;	
-							for(int i = samplerptr->chain_N-1; i>=min_id; i--){
+							for(int i = samplerptr->chain_N-2; i>=min_id; i--){
 								transfer_chain(samplerptr,samplerptr, i+1, i, true);	
 								running_accept_ct[i+1] = running_accept_ct[i];
 								running_reject_ct[i+1] = running_reject_ct[i];
@@ -1412,7 +1415,6 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 		}
 	}
 	int acc, rej;
-	std::cout<<"FINISHED1 "<<samplerptr->chain_N<<std::endl;
 	for (int j =0; j<samplerptr->chain_N; j++){
 		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
 		acc = samplerptr->swap_accept_ct[j];	

@@ -140,7 +140,7 @@ void test56()
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
-	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
@@ -170,8 +170,8 @@ void test56()
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
@@ -207,7 +207,7 @@ void test56()
 	double *seeding_var = NULL;
 	int n_steps = 15000;
 	int chain_N=8 ;
-	int max_thermo=4 ;
+	int max_thermo=8 ;
 	int t0 = 10000;
 	int nu = 100;
 	std::string chain_alloc = "double";
