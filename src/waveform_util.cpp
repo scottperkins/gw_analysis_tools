@@ -231,6 +231,7 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 	double SN;
 	populate_noise(&f, cast_params.SN, &SN, 1);
 	SN*=SN;
+	//std::cout<<f<<" "<<wfp<<" "<<SN<<std::endl;
 	return 4*std::real(std::conj(wfp)*wfp)/SN;
 }
 /*! \brief Internal function to calculate the SNR integrand for full waveforms
@@ -1702,8 +1703,18 @@ void threshold_times(gen_params_base<double> *params,
  * Assumes this is for multiband -- ie stellar mass BHs -- Only uses pn approximation of time frequency relation
  *
  * If no time before merger satisfies the requirements, both are set to -1
+ *
+ * ALL temporal quantities in seconds or Hz
+ *
+ * Return values: 
+ * 	
+ * 	0 -- success
+ * 	
+ * 	11-- Failure: SNR was 0 in lower bound
+ *
+ * 	12-- Failure: SNR was 0 in upper bound
  */
-void threshold_times_gsl(gen_params_base<double> *params,
+int threshold_times_gsl(gen_params_base<double> *params,
 	std::string generation_method, /**<Generation method to use for the waveform*/
 	double T_obs, /**<Observation time -- also specifies the frequency spacing (\delta f = 1./T_obs)*/
 	double T_wait, /**<Wait time -- Maximum time for binaries to coalesce */
@@ -1711,7 +1722,7 @@ void threshold_times_gsl(gen_params_base<double> *params,
 	double fmax,/**<Maximum frequency array*/
 	std::string SN,/**< Noise curve array, should be prepopulated from f_lower to f_upper with spacing 1./T_obs*/
 	double SNR_thresh, /**< Threshold SNR */
-	double *threshold_times_out,/**<[out] Output frequencies */
+	double *threshold_times_out,/**<[out] Output times */
 	double tolerance, /**< Percent tolerance on SNR search*/
 	gsl_integration_workspace *w,
 	int np
@@ -1753,6 +1764,10 @@ void threshold_times_gsl(gen_params_base<double> *params,
 			f_upper = (f_0PN(t_mer-T_obs, chirpmass));
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(snr<snr_prev){bound_search=false;}	
+			else if(f_lower < fmin){ 
+				t_mer = t_0PN(fmin, chirpmass); 
+				bound_search=false;
+			}
 		}	
 		snr_prev=snr;
 		t2 = t_mer;
@@ -1809,6 +1824,7 @@ void threshold_times_gsl(gen_params_base<double> *params,
 
 			}
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
 		}
 		while(!found_lower_root){
 			
@@ -1827,11 +1843,20 @@ void threshold_times_gsl(gen_params_base<double> *params,
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
 			else{
-				if(snr>SNR_thresh){ t2 = t_mer;	}
-				else{ t1=t_mer;}
+				//Sometimes, integration messes up
+				if(snr==0){
+					threshold_times_out[0] = -1;
+					threshold_times_out[1] = -1;
+					return 11;
+					
+				}
+				else{
+					if(snr>SNR_thresh){ t2 = t_mer;	}
+					else{ t1=t_mer;}
+				}
 			}
 			snr_prev=snr;
-			
+			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
 		}
 		t1=t_save; t2=t_save;
 		do{
@@ -1865,13 +1890,23 @@ void threshold_times_gsl(gen_params_base<double> *params,
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
 			else{
-				if(snr>SNR_thresh){ t1 = t_mer;	}
-				else{ t2=t_mer;}
+				if(snr==0){
+					threshold_times_out[0] = -1;
+					threshold_times_out[1] = -1;
+					return 12;
+					
+				}
+				else{
+					if(snr>SNR_thresh){ t1 = t_mer;	}
+					else{ t2=t_mer;}
+				}
 			}
 			snr_prev=snr;
+			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
 			
 		}
 	}
+	return 0;
 }
 double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np)
 {
