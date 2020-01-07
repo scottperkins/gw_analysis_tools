@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
-data = np.loadtxt("data/mcmc_output_DFull1.csv",delimiter=',')
+data = np.loadtxt("data/mcmc_output_.csv",delimiter=',')
 #data = data[10000:]
 #for i in np.arange(8):
 #    parameter = [x[i] for x in data]

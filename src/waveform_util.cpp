@@ -1713,6 +1713,8 @@ void threshold_times(gen_params_base<double> *params,
  * 	11-- Failure: SNR was 0 in lower bound
  *
  * 	12-- Failure: SNR was 0 in upper bound
+ *
+ * 	13 -- partial success: Closest values output, but roundoff error prevented the routine from reaching the desired accuracy
  */
 int threshold_times_gsl(gen_params_base<double> *params,
 	std::string generation_method, /**<Generation method to use for the waveform*/
@@ -1728,6 +1730,9 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	int np
 	)
 {
+	//std::cout.precision(15);	
+	bool round_off_error=false;	
+	
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	params->sky_average = false;
 	double bounds[2];
@@ -1800,7 +1805,6 @@ int threshold_times_gsl(gen_params_base<double> *params,
 
 		}
 	}	
-	
 	//If no SNR is larger than threshold, return 
 	if(not_found){
 		threshold_times_out[0] = -1;
@@ -1842,6 +1846,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			f_upper_prev= f_upper;
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
+			else if( (fabs(t1-t2)*2/fabs(t1+t2)<1e-14) ){
+				found_lower_root=true;
+				threshold_times_out[0]=t_mer;	
+				round_off_error = true;
+			}
 			else{
 				//Sometimes, integration messes up
 				if(snr==0){
@@ -1856,7 +1865,8 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			snr_prev=snr;
-			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
+			//std::cout<<"LOWER: "<<f_lower<<" "<<f_upper<<" "<<t1<<" "<<t2<<" "<<snr<<std::endl;
+			//std::cout<<(fabs(t1-t2)*2/fabs(t1+t2)<1e-14)<<std::endl;
 		}
 		t1=t_save; t2=t_save;
 		do{
@@ -1889,6 +1899,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			f_upper_prev= f_upper;
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
+			else if( (fabs(t1-t2)*2/fabs(t1+t2)<1e-14) ){
+				found_upper_root=true;
+				threshold_times_out[1]=t_mer;	
+				round_off_error = true;
+			}
 			else{
 				if(snr==0){
 					threshold_times_out[0] = -1;
@@ -1902,9 +1917,12 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			snr_prev=snr;
-			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
+			//std::cout<<"Upper: "<<f_lower<<" "<<f_upper<<" "<<snr<<std::endl;
 			
 		}
+	}
+	if(round_off_error){
+		return 13;
 	}
 	return 0;
 }
