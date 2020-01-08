@@ -595,6 +595,7 @@ int fourier_detector_amplitude_phase(double *frequencies,
 	}
 
 	free(response);
+	return 0;
 }
 
 /*! \brief Mapping from phase to time AUTODIFFERENTIATION using ADOL-C
