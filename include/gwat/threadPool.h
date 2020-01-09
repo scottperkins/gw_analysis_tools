@@ -142,7 +142,7 @@ private:
 	void stop() noexcept
 	{
 		std::cout<<std::endl;
-		std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
+		//std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
 		{
 			std::unique_lock<std::mutex> lock{EventMutex};
 			stopping = true;
