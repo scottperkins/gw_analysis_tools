@@ -289,22 +289,22 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	int coldchains = count_cold_chains(chain_temps, chain_N);
 	double **reduced_temp_output, **reduced_temp_output_thinned ;
 	//#####################################################################
-	for(int i = 0 ; i<dimension; i++){
-		ave_ac=0;
-		for(int j = 0 ; j<check_convergence_segments; j++){
-			ave_ac += temp_ac[i][corr_segments-j-1];
-		}
-		ave_ac/=check_convergence_segments;
-		for(int j = 0 ; j<check_convergence_segments; j++){
-			if(abs((double)temp_ac[i][corr_segments-j-1] - ave_ac)/ave_ac >corr_converge_thresh){
-				continue_dynamic_search=true;
-				//dynamic_search_length*=1.1;
-				break;
-			}
-		}
-	}
+	//for(int i = 0 ; i<dimension; i++){
+	//	ave_ac=0;
+	//	for(int j = 0 ; j<check_convergence_segments; j++){
+	//		ave_ac += temp_ac[i][corr_segments-j-1];
+	//	}
+	//	ave_ac/=check_convergence_segments;
+	//	for(int j = 0 ; j<check_convergence_segments; j++){
+	//		if(abs((double)temp_ac[i][corr_segments-j-1] - ave_ac)/ave_ac >corr_converge_thresh){
+	//			continue_dynamic_search=true;
+	//			//dynamic_search_length*=1.1;
+	//			break;
+	//		}
+	//	}
+	//}
 	//#####################################################################
-	int dynamic_ct = 0 ;
+	int dynamic_ct = 1 ;
 	int dynamic_temp_freq = 3;
 	while(continue_dynamic_search && dynamic_ct<10){
 
@@ -316,12 +316,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
 		}
 		
-		coldchains = count_cold_chains(chain_temps, chain_N);
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			chain_filename, "",likelihood_log_filename, checkpoint_file);
 			
+		coldchains = count_cold_chains(chain_temps, chain_N);
 		reduced_temp_output =  allocate_2D_array(coldchains*temp_length, dimension);	
 		reduce_output(temp_length, dimension, temp_output, (int ***)NULL,
 			reduced_temp_output,(int **)NULL,chain_N, chain_temps,false);
@@ -362,15 +362,17 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	int realloc_temps_freq = 0.1 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = 0.2 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_thresh = realloc_temps_length;
 	while(status<N_steps){
-		if(status%realloc_temps_freq==0){
+		if(status>realloc_temps_thresh){
 			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
 				temp_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
 				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
 
+				realloc_temps_thresh+=realloc_temps_length;
 		}
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
