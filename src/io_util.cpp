@@ -52,7 +52,7 @@ int unpack_input_io_file(std::string input_param_file,
 			std::getline(lineStream,temp,'[');
 			if(temp.find("#") == std::string::npos){
 				ct++;
-				std::cout<<line<<std::endl;
+				//std::cout<<line<<std::endl;
 				std::getline(lineStream,dtype,']');
 				std::getline(lineStream,param,'=');
 				std::getline(lineStream,value);
