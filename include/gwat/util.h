@@ -454,44 +454,10 @@ int*** allocate_3D_array_int( int dim1, int dim2, int dim3);
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3);
 void deallocate_3D_array(int ***array, int dim1, int dim2, int dim3);
 
-void read_file(std::string filename,double **output, int rows, int cols );
-void read_file(std::string filename, double *output );
-
-void read_LOSC_data_file(std::string filename, 
-			double *output,
-			double *data_start_time,
-			double *duration,
-			double *fs);
-
-void read_LOSC_PSD_file(std::string filename, 
-			double **output,
-			int rows,
-			int cols);
-
-void allocate_LOSC_data(std::string *data_files, 
-			std::string psd_file, 
-			int num_detectors,
-			int psd_length,
-			int data_file_length,
-			double trigger_time,
-			std::complex<double> **data,
-			double **psds,
-			double **freqs
-			);
-
-void free_LOSC_data(std::complex<double> **data,
-		double **psds,
-		double **freqs,
-		int num_detectors,
-		int length
-		);
-
 void tukey_window(double *window,
 		int length,
 		double alpha);
 
-void write_file(std::string filename, double **input, int rows, int cols);
-void write_file(std::string filename, double *input, int length);
 
 template<class T>
 void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota);

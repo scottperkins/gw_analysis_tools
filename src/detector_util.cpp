@@ -2,6 +2,7 @@
 #include "util.h"
 #include "pn_waveform_util.h"
 #include "GWATConfig.h"
+#include "io_util.h"
 #include <fstream>
 #include <iostream>
 #include <string>

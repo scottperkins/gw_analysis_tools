@@ -3,6 +3,7 @@
 #include "util.h"
 #include "mcmc_sampler_internals.h"
 #include "threadPool.h"
+#include "io_util.h"
 #include <iostream>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
@@ -180,8 +181,8 @@ private:
 	}
 	void stop() noexcept
 	{
-		std::cout<<std::endl;
-		std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
+		//std::cout<<std::endl;
+		//std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
 		{
 			std::unique_lock<std::mutex> lock{mEventMutex};
 			//std::unique_lock<std::mutex> lock{mEventMutexSWP};

@@ -1,6 +1,7 @@
 #include "autocorrelation.h"
 #include "util.h"
 #include "threadPool.h"
+#include "io_util.h"
 #include <iostream>
 
 /*! Max length of array to use serial calculation*/

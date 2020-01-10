@@ -4,6 +4,7 @@
 #include <complex>
 #include <string>
 #include "gwat/waveform_generator.h"
+#include "gwat/io_util.h"
 #include "gwat/autocorrelation.h"
 #include "gwat/IMRPhenomD.h"
 #include "gwat/mcmc_gw.h"
