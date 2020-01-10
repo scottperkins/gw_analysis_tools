@@ -1,6 +1,7 @@
 #include "autocorrelation_cuda.h"
 #include "autocorrelation_cuda.hu"
 #include "util.h"
+#include "io_util.h"
 #include <iostream>
 #include <condition_variable>
 #include <thread>
