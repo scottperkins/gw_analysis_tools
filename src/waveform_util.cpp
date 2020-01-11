@@ -1869,6 +1869,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			//std::cout<<"LOWER: "<<f_lower<<" "<<f_upper<<" "<<t1<<" "<<t2<<" "<<snr<<std::endl;
 			//std::cout<<(fabs(t1-t2)*2/fabs(t1+t2)<1e-14)<<std::endl;
 		}
+		//std::cout<<"FINISHED LOWER"<<std::endl;
 		t1=t_save; t2=t_save;
 		do{
 			t2*=2.;
@@ -1881,8 +1882,10 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				f_upper =fmax;
 
 			}
+			//std::cout<<"UPPER SEARCH: "<<f_upper<<" "<<f_lower<<" "<<t1<<" "<<t2<<T_wait<<std::endl;
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(t2==T_wait && snr>SNR_thresh){ found_upper_root=true; threshold_times_out[1]=T_wait;break;}
+			//std::cout<<"UPPER SEARCH: "<<snr<<std::endl;
 		}while(snr>SNR_thresh  );
 		while(!found_upper_root){
 			
