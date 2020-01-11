@@ -1949,7 +1949,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 					else if(sampler->chain_temps[i] !=1){
 
 						sampler->waiting[i]=false;
-						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
 						sampler->priority[i] = 2;
 						int pos = sampler->chain_pos[i];
 						for (int k =0; k<sampler->dimension; k++){
@@ -2085,7 +2085,7 @@ void PTMCMC_MH_loop(sampler *sampler)
 					else if(sampler->chain_temps[i] !=1){
 
 						sampler->waiting[i]=false;
-						std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
+						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
 						sampler->priority[i] = 2;
 						int pos = sampler->chain_pos[i];
 						for (int k =0; k<sampler->max_dim; k++){
