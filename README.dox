@@ -50,6 +50,10 @@ Run 'make test' to build a test program that will create an executable.
 
 \section functionality Supported Functionality 
 
+\subsection cmdtools Command Line Tools
+
+bin/mcmc_gw_tool -- executable that takes in a parameter file and runs an MCMC on LOSC data for parameter estimation -- See mcmc_gw_tool.cpp for documentation
+
 \subsection wave_gen Waveform Generation
 IMRPhenomD, IMRPhenomPv2
 
