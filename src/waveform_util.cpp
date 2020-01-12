@@ -244,6 +244,8 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
 	double SN;
 	populate_noise(&f, cast_params.SN, &SN, 1);
 	SN*=SN;
+	//std::cout<<4*std::real(std::conj(response)*response)/SN<<std::endl;
+	//std::cout<<SN<<" "<<std::real(std::conj(response)*response)<<std::endl;
 	return 4*std::real(std::conj(response)*response)/SN;
 }
 /*! \brief Caclulates the snr given a detector and waveform (complex) and frequencies
