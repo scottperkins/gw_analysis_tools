@@ -65,7 +65,6 @@ CCCUDA=nvcc
 all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(CONFIGFILE)
-	@echo $@
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 #Write pertinent information to config file -- ie filepaths

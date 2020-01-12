@@ -31,9 +31,9 @@
 #Number of threads to use
 [int] thread number = 10
 #correlation threshold
-[int] correlation threshold = 50
+[int] correlation threshold = 10
 #Segments over which to split the data to calculate convergence in correlation
-[int] correlation segments = 10
+[int] correlation segments = 20
 #Threshold to determine convergence 
 [dbl] correlation convergence threshold = 0.5
 #Target correlation for calculating autocorrelation length

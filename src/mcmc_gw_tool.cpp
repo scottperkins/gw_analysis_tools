@@ -89,8 +89,10 @@ int main(int argc, char *argv[])
 	data_lengths[1] =psd_length;
 	//########################################################################
 	int dimension = 11;
-	double initial_pos[dimension];
-	read_file(initial_position_file, intial_pos,1,dimension);
+	double **initial_position = new double*[1];
+	initial_position[0] = new double[dimension];
+	read_file(initial_position_file, initial_position,1,dimension);
+	double *init_pos = initial_position[0];
 	double *seeding_var = NULL;
 	double **output;
 	output = allocate_2D_array(samples, dimension );
@@ -103,7 +105,7 @@ int main(int argc, char *argv[])
 	//#########################################################
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-			max_thermo_chain_N, initial_pos,seeding_var,chain_temps, 
+			max_thermo_chain_N, init_pos,seeding_var,chain_temps, 
 			swap_freq, t0, nu, correlation_thresh, correlation_segs,
 			correlation_convergence_thresh , ac_target,allocation_scheme, 
 			standard_log_prior_D,threads, pool,show_progress,detector_N, 
@@ -122,6 +124,7 @@ int main(int argc, char *argv[])
 		free(data[i]);
 	free(data);
 
+	delete [] initial_position[0]; delete [] initial_position;
 	
 	return 0;
 
