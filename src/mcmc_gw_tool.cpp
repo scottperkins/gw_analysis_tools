@@ -6,6 +6,25 @@
 #include <string>
 #include <limits>
 
+/*! \file 
+ *
+ * Command line tool for analyzing LOSC GW data
+ *
+ * Runs the ``uncorrelated'' MCMC sampler with a generic prior
+ *
+ * See mcmc_sampler.cpp documentation for more explanation on the sampler
+ *
+ * See mcmc_gw.cpp for GW specific explanation
+ *
+ * Usage:
+ * 	
+ * 	mcmc_gw_tool /PATH/TO/PARAM/FILE
+ *
+ * See data/mcmc_gw_tool_param_template.dat for an example parameter file
+ *
+ * See data/sample_init_pos.csv for an example initial position file
+ */
+
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
 int main(int argc, char *argv[])

@@ -178,7 +178,7 @@ double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
 	double relative_error/**< Relative error threshold*/
 	)
 {
-	int np=1000;
+	int np=10000;
 	gsl_integration_workspace *w=gsl_integration_workspace_alloc(np) ;
 	double snr =  calculate_snr_gsl(sensitivity_curve, detector, generation_method, params, f_min, f_max,relative_error,w,np);
 	gsl_integration_workspace_free(w);
@@ -239,8 +239,15 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 double integrand_snr_subroutine(double f, void *subroutine_params)
 {
 	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
+	double time;
+	if(cast_params.detector == "LISA" && !cast_params.params->sky_average){
+		//times = new double[length];
+		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
+		time_phase_corrected(&time, 1, &f, cast_params.params, cast_params.generation_method, false);
+	}
+
 	std::complex<double> response;
-	fourier_detector_response(&f, 1,&response, cast_params.detector,cast_params.generation_method, cast_params.params);
+	fourier_detector_response(&f, 1,&response, cast_params.detector,cast_params.generation_method, cast_params.params, &time);
 	double SN;
 	populate_noise(&f, cast_params.SN, &SN, 1);
 	SN*=SN;
