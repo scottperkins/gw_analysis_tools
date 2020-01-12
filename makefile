@@ -15,6 +15,8 @@ LOCAL_LIB=libgwat.a
 LOCAL_SHARED_LIB=libgwat.so
 PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
 PROJ_SHARED_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_SHARED_LIB))
+EXEDIR:=bin
+MCMC_TOOL:=$(EXEDIR)/mcmc_gw_tool
 
 TESTSRC=testing/test.cpp
 TESTOBJ=testing/test.o
@@ -41,10 +43,10 @@ SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 
 ############################################################################
 #CUDA OPTIONS
-#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
-#OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3
-OBJECTSCUDA := 
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
+OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3
+#OBJECTSCUDA := 
 ########################################################################
 
 IEXT := h
@@ -59,10 +61,11 @@ CC=$(CXX)
 CCCUDA=nvcc
 #CC=nvcc
 
-.PHONY: all
-all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB)
+.PHONY: all 
+all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(CONFIGFILE)
+	@echo $@
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 #Write pertinent information to config file -- ie filepaths
@@ -121,7 +124,7 @@ Doxyfile: $(OBJECTS) $(OBJECTSCUDA) $(PROJ_PYLIB)
 	
  
 .PHONY: c
-c: $(PROJ_LIB) $(PROJ_SHARED_LIB) 
+c: $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
 
 .PHONY: test
 test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) 
@@ -142,3 +145,5 @@ remove:
 	-rm include/gwat/GWATConfig.h
 	-make -C $(PYDIR) remove
 
+$(MCMC_TOOL): $(OBJECTS)
+	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)

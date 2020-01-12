@@ -1,0 +1,48 @@
+#Number of detectors
+[int] detector number = 2
+#Name of the detectors
+[str] detector name 0 = Hanford
+[str] detector name 1 = Livingston
+#GPS time of the trigger
+[dbl] gps = 1126259462.4
+#File path to the PSD file
+[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
+#File path to each data file
+[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
+[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
+#Length of data in seconds
+[dbl] data length = 32
+#Generation method 
+[str] generation method = IMRPhenomD
+#Number of ~uncorrelated samples to take
+[int] samples = 15000
+#Number of chains
+[int] chain number = 8
+#Maximum number of chains per thermodynamic ensemble
+[int] max thermo chain number = 8
+#Dynamic chain allocation parameter t0 -- approximately how many steps chains are allowed to move
+[int] t0=10000
+#Dynamic chain allocation parameter nu -- approximately how many steps swapping effects are averaged over
+[int] nu=100
+#Chain allocation -- how to place the rest of the chains after thermodynamic equilibrium is reached
+[str] allocation scheme  = double
+#Swap frequency between chains in steps
+[int] swap frequency = 5
+#Number of threads to use
+[int] thread number = 10
+#correlation threshold
+[int] correlation threshold = 50
+#Segments over which to split the data to calculate convergence in correlation
+[int] correlation segments = 10
+#Threshold to determine convergence 
+[dbl] correlation convergence threshold = 0.5
+#Target correlation for calculating autocorrelation length
+[dbl] autocorrelation target = 0.01
+#Output data file -- will be csv
+[str] output data file = testing/data/test.csv
+#Output statistics file -- will be txt
+[str] output stat file = testing/data/test_stat.txt
+#Checkpoint file -- csv file
+[str] checkpoint file = testing/data/test_checkpoint.csv
+#Initial position file
+[str] initial position file = data/sample_init_pos.csv
