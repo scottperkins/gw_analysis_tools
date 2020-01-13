@@ -239,12 +239,15 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 double integrand_snr_subroutine(double f, void *subroutine_params)
 {
 	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
-	double time;
-	if(cast_params.detector == "LISA" && !cast_params.params->sky_average){
+	double times[2];
+	if(cast_params.detector == "LISA" ){
+		//PROBLEM
+		double temp_f[2] = {f, f+1.e-5};
 		//times = new double[length];
 		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
-		time_phase_corrected(&time, 1, &f, cast_params.params, cast_params.generation_method, false);
+		time_phase_corrected(times, 2, temp_f, cast_params.params, cast_params.generation_method, false);
 	}
+	double time = times[0];
 
 	std::complex<double> response;
 	fourier_detector_response(&f, 1,&response, cast_params.detector,cast_params.generation_method, cast_params.params, &time);
