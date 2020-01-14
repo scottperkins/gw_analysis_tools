@@ -169,7 +169,8 @@ double calculate_snr(std::string sensitivity_curve,
  * Supports sky-averaged templates, but this should only be used with non-precessing waveforms
  *
  */
-double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
+int calculate_snr_gsl(double *snr,/**< [out] SNR*/
+	std::string sensitivity_curve,/**< Noise curve */
 	std::string detector,/**<Detector to compute response -- can be empty is SA*/
 	std::string generation_method,/**<Generation method */
 	gen_params_base<double> *params,/**< Source Parameters*/
@@ -180,9 +181,9 @@ double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
 {
 	int np=10000;
 	gsl_integration_workspace *w=gsl_integration_workspace_alloc(np) ;
-	double snr =  calculate_snr_gsl(sensitivity_curve, detector, generation_method, params, f_min, f_max,relative_error,w,np);
+	int err =  calculate_snr_gsl(snr,sensitivity_curve, detector, generation_method, params, f_min, f_max,relative_error,w,np);
 	gsl_integration_workspace_free(w);
-	return snr;
+	return err;
 }
 /**< \brief Routine to calculate the SNR of a template with GSL quadrature integration
  *
@@ -191,7 +192,8 @@ double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
  * Supports sky-averaged templates, but this should only be used with non-precessing waveforms
  *
  */
-double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
+int calculate_snr_gsl(double *snr,
+	std::string sensitivity_curve,/**< Noise curve */
 	std::string detector,/**<Detector to compute response -- can be empty is SA*/
 	std::string generation_method,/**<Generation method */
 	gen_params_base<double> *params,/**< Source Parameters*/
@@ -202,7 +204,6 @@ double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
 	int np/**<Size of gsl_integration_workspace allocation*/
 	)
 {
-	double snr;
 	gsl_snr_struct helper_params;
 	helper_params.params = params;
 	helper_params.generation_method = generation_method;
@@ -217,8 +218,14 @@ double calculate_snr_gsl(std::string sensitivity_curve,/**< Noise curve */
 	}
 	F.params = (void *)&helper_params;
 	double result, err;
+	gsl_set_error_handler_off();
 	int errcode = gsl_integration_qag(&F,f_min, f_max, 0,relative_error, np, GSL_INTEG_GAUSS15,w, &result, &err);
-	return sqrt(result);
+	*snr = sqrt(result);
+	//sqrt 2 for second LISA detector
+	if(detector=="LISA"){
+		*snr *=sqrt(2.);	
+	}
+	return errcode;
 }
 
 /*! \brief Internal function to calculate the SNR integrand for sky-averaged waveforms
@@ -712,10 +719,22 @@ int boundary_number(std::string method)
 template<class T>
 void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time)
 {
+	std::string local_gen = generation_method;
+	if(length ==1){
+		T temp_f[2];
+		T epsilon =1e-6;
+		temp_f[0] = frequencies[0]-epsilon;
+		temp_f[1] = frequencies[0]+epsilon;
+		T temp_deltaf = 2*epsilon;
+		T temp_phase_plus[2];
+		T temp_phase_cross[2];
+		fourier_phase(temp_f, 2, temp_phase_plus, temp_phase_cross, local_gen, params);
+		times[0] = (temp_phase_plus[1]-temp_phase_plus[0])/(2*M_PI*temp_deltaf);
+		return ;
+	}
 	//bool save_shift_time = params->shift_time;
 	//params->shift_time = false;
 	//std::string local_gen = "IMRPhenomD";
-	std::string local_gen = generation_method;
 	//################################################
 	T *phase_plus = new T[length];
 	T *phase_cross = new T[length];
@@ -1066,7 +1085,9 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	
 	//Check lowest frequency
 	eval_freq = fmin;	
-	time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+	//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+	//	generation_method, true);
+	time_phase_corrected(&time, 1, &eval_freq, params, 
 		generation_method, true);
 	fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 		generation_method, params, &time);
@@ -1080,7 +1101,9 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 
 	//Check highest frequency
 	eval_freq = fmax;
-	time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+	//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+	//	generation_method, true);
+	time_phase_corrected(&time, 1, &eval_freq, params, 
 		generation_method, true);
 	fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 		generation_method, params, &time);
@@ -1102,7 +1125,9 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 		{
 			//Bisection in log freq space
 			eval_freq=sqrt(fmax_search*fmin_search);
-			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//	generation_method, true);
+			time_phase_corrected(&time, 1, &eval_freq, params, 
 				generation_method, true);
 			fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 				generation_method, params, &time);
@@ -1134,7 +1159,9 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 		{
 			//Bisection in log freq space
 			eval_freq=sqrt(fmax_search*fmin_search);
-			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//	generation_method, true);
+			time_phase_corrected(&time, 1, &eval_freq, params, 
 				generation_method, true);
 			fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 				generation_method, params, &time);
@@ -1179,7 +1206,9 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 		for(int i = 0 ; i<vec_length; i++){
 			freq_vec[i]= pow_int(delta_f_factor,i)*fmin;
 		}
-		time_phase_corrected_autodiff(time_vec, vec_length, freq_vec, params, 
+		//time_phase_corrected_autodiff(time_vec, vec_length, freq_vec, params, 
+		//	generation_method, true);
+		time_phase_corrected(time_vec, vec_length, freq_vec, params, 
 			generation_method, true);
 		fourier_detector_response_equatorial(freq_vec, vec_length, response_vec, detector, 
 			generation_method, params, time_vec);
@@ -1235,7 +1264,6 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 		}
 	}
 }
-
 /*! \brief Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve
  *
  * Sensitivity curve has to be one of the options in detector_util analytic options
@@ -1243,6 +1271,80 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
  * The current scheme is to use the frequency bounds determined by the SNR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f_integration_time, f_high_band)
  */
 void integration_interval(double sampling_freq, /**< Frequency at which the detector operates*/
+	double integration_time, /**< Time of observation in seconds*/
+	std::string detector, /**< Detector to use for the response function*/
+	std::string sensitivity_curve, /**< Sensitivity curve to use -- must match analytic choices in detector_util*/
+	std::string generation_method,/**< method to use for the waveform generation*/
+	gen_params_base<double> *params,/**< parameters of the source*/
+	double *freq_bounds/**< [out] Output bounds*/
+	)
+{
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params,generation_method,detector);
+	}
+	double fmax = sampling_freq /2.; //Nyquist limit
+	//double fmin= 0; //DC component
+	double fmin= 1e-6; //DC component
+	double delta_f =  1./integration_time;
+	
+	double bounds_from_band[2];
+	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band);
+	//std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
+	double times[2];
+	//time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
+	time_phase_corrected(&times[0], 1, &bounds_from_band[0], params, generation_method, false);
+	time_phase_corrected(&times[1], 1, &bounds_from_band[1], params, generation_method, false);
+	double T_band = -times[1]+times[0];
+	//std::cout<<T_band<<std::endl;
+
+	//Conform the output of the band calculation to the pre-set frequency grid
+	bool max_found=false, min_found=false;
+
+	if(T_band < integration_time){
+		freq_bounds[0]=bounds_from_band[0];	
+		freq_bounds[1]=bounds_from_band[1];	
+	}
+	else{
+		freq_bounds[1] = bounds_from_band[1];
+		bool continue_search=true;
+		double eval_freq, time;
+		double max_search=bounds_from_band[1], min_search=bounds_from_band[0];
+		double tolerance = .1*integration_time;
+		
+		while(continue_search)
+		{
+			//eval_id = (max_id_search +min_id_search)/2;
+			eval_freq = (max_search +min_search)/2;
+			//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//	generation_method, true);
+			time_phase_corrected(&time, 1, &eval_freq, params, 
+				generation_method, false);
+			if( 	( ( (-times[1] + time) > integration_time-tolerance )  && 
+				( (-times[1] + time) < integration_time+tolerance) ) ) 
+			{
+				continue_search = false;
+				freq_bounds[0]=eval_freq;
+				//std::cout<<(times[1]-time)/T_year<<std::endl;
+			}
+			else if(( (-times[1] + time) < (integration_time-tolerance) )){
+				max_search = eval_freq;
+			}
+			else if(( (-times[1] + time) > (integration_time+tolerance) )){
+				min_search = eval_freq;
+			}
+
+		}
+	}
+	
+}
+
+/*! \brief Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve
+ *
+ * Sensitivity curve has to be one of the options in detector_util analytic options
+ *
+ * The current scheme is to use the frequency bounds determined by the SNR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f_integration_time, f_high_band)
+ */
+void integration_interval_discrete(double sampling_freq, /**< Frequency at which the detector operates*/
 	double integration_time, /**< Time of observation in seconds*/
 	std::string detector, /**< Detector to use for the response function*/
 	std::string sensitivity_curve, /**< Sensitivity curve to use -- must match analytic choices in detector_util*/
@@ -1268,7 +1370,8 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band);
 	//std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
 	double times[2];
-	time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
+	//time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
+	time_phase_corrected(times, 2, bounds_from_band, params, generation_method, true);
 	double T_band = -times[1]+times[0];
 	//std::cout<<T_band<<std::endl;
 
@@ -1306,7 +1409,9 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 		{
 			eval_id = (max_id_search +min_id_search)/2;
 			eval_freq = frequencies[eval_id];
-			time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+			//	generation_method, true);
+			time_phase_corrected(&time, 1, &eval_freq, params, 
 				generation_method, true);
 			if( 	( ( (-times[1] + time) > integration_time-tolerance )  && 
 				( (-times[1] + time) < integration_time+tolerance) )
@@ -1379,6 +1484,7 @@ template void postmerger_params<adouble>(gen_params_base<adouble> *,std::string,
 
 /*! \brief Convenience function to Calculate the time before merger using numerical methods
  *
+ * Uses autodiff -- omp safe but not thread safe
  */
 void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of the source*/
 	std::string generation_method,/**< Generation method for the waveform*/
@@ -1406,7 +1512,9 @@ void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of t
 	double T=0;
 	while(T<Tbm){
 		fmin_search = .1*fmin_search;
-		time_phase_corrected_autodiff(&time, 1, &fmin_search, params, 
+		//time_phase_corrected_autodiff(&time, 1, &fmin_search, params, 
+		//	generation_method, false);
+		time_phase_corrected(&time, 1, &fmin_search, params, 
 			generation_method, false);
 		//T = time_peak- time;
 		T = -time_peak+ time;
@@ -1417,7 +1525,9 @@ void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of t
 	{
 		//Bisection in log freq space
 		eval_freq=sqrt(fmax_search*fmin_search);
-		time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+		//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
+		//	generation_method, true);
+		time_phase_corrected(&time, 1, &eval_freq, params, 
 			generation_method, true);
 		//T = time_peak-time;	
 		T = -time_peak+time;	
