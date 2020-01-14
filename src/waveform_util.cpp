@@ -222,9 +222,9 @@ int calculate_snr_gsl(double *snr,
 	int errcode = gsl_integration_qag(&F,f_min, f_max, 0,relative_error, np, GSL_INTEG_GAUSS15,w, &result, &err);
 	*snr = sqrt(result);
 	//sqrt 2 for second LISA detector
-	if(detector=="LISA"){
-		*snr *=sqrt(2.);	
-	}
+	//if(detector=="LISA"){
+	//	*snr *=sqrt(2.);	
+	//}
 	return errcode;
 }
 
