@@ -729,7 +729,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		T temp_phase_plus[2];
 		T temp_phase_cross[2];
 		fourier_phase(temp_f, 2, temp_phase_plus, temp_phase_cross, local_gen, params);
-		times[0] = (temp_phase_plus[1]-temp_phase_plus[0])/(2*M_PI*temp_deltaf);
+		times[0] = (temp_phase_plus[1]-temp_phase_plus[0])/(4*M_PI*temp_deltaf);
 		return ;
 	}
 	//bool save_shift_time = params->shift_time;
@@ -901,7 +901,7 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		}
 		T Jeq[3];
 		//equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
-		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s+M_PI), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
+		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
 		T Jeqsph[3];
 		transform_cart_sph(Jeq,Jeqsph);
 		T theta_j = Jeqsph[1];

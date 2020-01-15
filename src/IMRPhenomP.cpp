@@ -787,7 +787,7 @@ void IMRPhenomPv2<T>::PhenomPv2_JSF_from_params(gen_params_base<T> *params, T *J
 	JSF[1] =J0y_sf/J0;
 	JSF[2] =J0z_sf/J0;
 }
-/*! /Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters
+/*! /Brief Parameter transformation to pre-calculate needed parameters for PhenomP from source parameters
  *
  * Pretty much stolen verbatim from lalsuite
  */

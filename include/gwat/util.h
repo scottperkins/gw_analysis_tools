@@ -32,6 +32,7 @@ const double T_year = 31557600.;
 const double T_day = 24*3600.;
 /*! Earth's Axial tilt in radian*/
 const double AXIAL_TILT=0.409092627749;
+//const double AXIAL_TILT=0.4075;
 /*! 1AU in seconds*/
 const double AU_SEC = 499.005;
 
@@ -154,10 +155,10 @@ public:
 	T  LISA_alpha0=0;
 	T  LISA_phi0=0;
 	/*! Polar angle in ecliptic coordinates*/
-	T  LISA_thetal;
+	//T  LISA_thetal;
+	//T  LISA_phil;
+	/*! Azimuthal angle in ecliptic coordinates for the total angular momentum -- internal, and should not be specified*/
 	T  theta_j_ecl;
-	/*! Azimuthal angle in ecliptic coordinates*/
-	T  LISA_phil;
 	T  phi_j_ecl;
 
 	//gIMR quantities

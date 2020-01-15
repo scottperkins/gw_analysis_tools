@@ -775,15 +775,32 @@ source_parameters<T> source_parameters<T>::populate_source_parameters_old(
 }
 
 
-/*! \brief Routine to transform from the equatorial coordinate system spherical polar desscription of the total angular momentum to the detector specific polarization angle and inclination angle
+/*! \brief Routine to transform from the equatorial coordinate system spherical polar description of the total angular momentum to the detector specific polarization angle and inclination angle (of the total angular momentum)
  *
- * For the terrestial network, this calculates the polarization angle for a detector at the center of Earth in equatorial coordinates, which is the polarization angle used in the detector_response_equatorial functions
+ * For the terrestrial network, this calculates the polarization angle for a detector at the center of Earth in equatorial coordinates, which is the polarization angle used in the detector_response_equatorial functions
+ *
+ * Polarization angle is defined as:
+ *
+ *  tan \psi = ( J.z - (J.N)(z.N) ) / (N.(Jxz)) 
+ *
+ *  Where z is the axis of rotation of earth (equatorial z), and N is the line of sight to the source (direction of propagation is -N)
+ *
+ *  The inclination angle is between the direction of propagation and the total angular momentum
  */
 template<class T>
-void terr_pol_iota_from_equat_sph(T RA, T DEC, T thetaj, T phij, T *pol, T *iota)
+void terr_pol_iota_from_equat_sph(T RA, /**< Right ascension in rad*/
+	T DEC, /**< Declination in rad*/
+	T thetaj, /**< spherical polar angle of the total angular momentum in equatorial coordinates*/
+	T phij, /**< spherical azimuthal angle of the total angular momentum in equatorial coordinates*/
+	T *pol, /**< polarization defined by tan \psi = ( J.z - (J.N)(z.N) ) / (N.(Jxz)) */
+	T *iota /**< Inclination angle of the TOTAL angular momentum and the direction of propagation -N*/
+	)
 {
+	std::cout<<"INTERNAL: RA: "<<RA<<" DEC: "<<DEC<<" thetaj: "<<thetaj<<" phij: "<<phij<<std::endl;
 	//PSI only appears as 2*PSI in detector response, so atan should be fine. Periodicity of pi
-	*pol = atan(cos(DEC)*1./tan(thetaj)*1./sin(phij - RA) - 1./tan(phij - RA)*sin(DEC));
+	T temp_pol = atan(cos(DEC)*1./tan(thetaj)*1./sin(phij - RA) - 1./tan(phij - RA)*sin(DEC));
+	*pol=M_PI/2. - temp_pol;
+	//if(*pol<0){*pol+=M_PI;}//Fix range
 	//*iota = acos(cos(thetaj)*sin(DEC) + cos(DEC)*cos(phij - RA)*sin(thetaj));
 	//-Neq
 	*iota = acos(-(cos(thetaj)*sin(DEC)) - cos(DEC)*cos(phij - RA)*sin(thetaj));
@@ -794,14 +811,19 @@ template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, a
 
 /*! \brief transform spherical angles from equatorial to ecliptic 
  *
- * NEEDS TESTING
  *
  * Rotation about the vernal equinox (x-hat in both coordinate systems) by the axial tilt or obliquity
  *
  * From wikipedia
+ *
+ * Compared against astropy and agrees
  */
 template<class T>
-void ecl_from_eq(T theta_eq, T phi_eq, T *theta_ecl, T *phi_ecl)
+void ecl_from_eq(T theta_eq, /**<Equatorial spherical polar angle */
+	T phi_eq, /**< Equatorial spherical azimuthal angle*/
+	T *theta_ecl, /**<Ecliptic spherical polar angle*/
+	T *phi_ecl/**< Ecliptic spherical Azimuthal angle*/
+	)
 {
 	T lambda; //Longitude
 	T beta; //Latitude
@@ -817,7 +839,7 @@ void ecl_from_eq(T theta_eq, T phi_eq, T *theta_ecl, T *phi_ecl)
 	lambda = atan2(sra*ce + sdec/cdec * se, cra);
 	beta = asin(sdec*ce - cdec* se*sra);
 	*theta_ecl =M_PI/2. - beta ;
-	*phi_ecl =lambda ;
+	*phi_ecl =lambda;
 	if((*phi_ecl)<0) *phi_ecl+=2*M_PI;
 }
 template void ecl_from_eq<double>( double , double, double *, double*);
@@ -841,16 +863,17 @@ template void ecl_from_eq<adouble>( adouble , adouble, adouble *, adouble*);
  *
  * R = B.A^-1
  *
+ * Verified with specific cases and with dot products with vectors before and after rotation
  */
 template<class T>
-void equatorial_from_SF(T *SFvec,/**< Input, source frame vector, as defined by LAL (L = z_hat)*/
-	T thetal, /**< Polar angle in equatorial coordinates of the orbital angular momentum*/
-	T phil, /**< Azimuthal angle in equatorial coordinates of the orbital angular momentum*/
-	T thetas,  /**< Polar angle in equatorial coordinates of the direction of propagation*/
-	T phis,/**< Azimuthal angle in equatorial coordinates of the direction of propagation*/
-	T iota, /**< Inclination angle between the orbiatl angular momentum and the direction of propagation*/
-	T phi_ref,/**<Reference frequency for the waveform (defines the LAL frame ) ( orbital phase)*/
-	T *EQvec/**< [out] Out vector in equatorial coordinates*/)
+void equatorial_from_SF(T *SFvec,/**< Input, source frame vector, as defined by LAL (L = z_hat) in cartesian*/
+	T thetal, /**< Polar angle in equatorial coordinates of the orbital angular momentum at the reference frequency*/
+	T phil, /**< Azimuthal angle in equatorial coordinates of the orbital angular momentum at the reference frequency*/
+	T thetas,  /**< Polar angle in equatorial coordinates of the source (not direction of propagation)*/
+	T phis,/**< Azimuthal angle in equatorial coordinates of the source (not direction of propagation)*/
+	T iota, /**< Inclination angle between the orbiatl angular momentum and the direction of propagation at the reference frequency*/
+	T phi_ref,/**<Reference frequency for the waveform (defines the LAL frame ) ( orbital phase) at the reference frequency*/
+	T *EQvec/**< [out] Out vector in equatorial coordinates in cartesian*/)
 {
 	T cp = cos(M_PI/2.-phi_ref);
 	T sp = sin(M_PI/2.-phi_ref);
@@ -868,12 +891,26 @@ void equatorial_from_SF(T *SFvec,/**< Input, source frame vector, as defined by 
 	T Jyn = SFvec[1];
 	T Jzn = SFvec[2];
 
-	EQvec[0] =  (pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl + sp*(cpl*Jzn*si*sp*stl - cts*Jxn*spl*stl + cps*Jyn*sts + ctl*Jxn*sps*sts) + 
-     cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
-	EQvec[1] = (pow_int(cp,2)*Jzn*si*spl*stl + cp*(-(cpl*cts*Jyn*stl) - ci*Jxn*spl*stl + cps*ctl*Jyn*sts + Jxn*sps*sts) + 
-     sp*(cpl*cts*Jxn*stl - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl - cps*ctl*Jxn*sts + Jyn*sps*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
-	EQvec[2] = (cp*cts*Jxn + pow_int(cp,2)*ctl*Jzn*si - ci*ctl*(cp*Jxn + Jyn*sp) + cp*Jyn*(-(cps*spl) + cpl*sps)*stl*sts + sp*(cts*Jyn + ctl*Jzn*si*sp + Jxn*(cps*spl - cpl*sps)*stl*sts))/
-   (si*(pow_int(cp,2) + pow_int(sp,2)));
+	//T EQvec_test[3];
+	//T EQvec_old[3];
+	//EQvec_old[0] =  (pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl + sp*(cpl*Jzn*si*sp*stl - cts*Jxn*spl*stl + cps*Jyn*sts + ctl*Jxn*sps*sts) + cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
+	//EQvec_old[1] = (pow_int(cp,2)*Jzn*si*spl*stl + cp*(-(cpl*cts*Jyn*stl) - ci*Jxn*spl*stl + cps*ctl*Jyn*sts + Jxn*sps*sts) + sp*(cpl*cts*Jxn*stl - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl - cps*ctl*Jxn*sts + Jyn*sps*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
+	//EQvec_old[2] = (cp*cts*Jxn + pow_int(cp,2)*ctl*Jzn*si - ci*ctl*(cp*Jxn + Jyn*sp) + cp*Jyn*(-(cps*spl) + cpl*sps)*stl*sts + sp*(cts*Jyn + ctl*Jzn*si*sp + Jxn*(cps*spl - cpl*sps)*stl*sts))/(si*(pow_int(cp,2) + pow_int(sp,2)));
+	//EQvec_test[0] = (pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl + sp*(cpl*Jzn*si*sp*stl - cts*Jxn*spl*stl + cps*Jyn*sts + ctl*Jxn*sps*sts) +cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts))/si ;
+	//EQvec_test[1] = (pow_int(cp,2)*Jzn*si*spl*stl + cp*(-(cpl*cts*Jyn*stl) - ci*Jxn*spl*stl + cps*ctl*Jyn*sts + Jxn*sps*sts) + sp*(cpl*cts*Jxn*stl - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl - cps*ctl*Jxn*sts + Jyn*sps*sts))/si;
+	//EQvec_test[2] = (cp*cts*Jxn + pow_int(cp,2)*ctl*Jzn*si - ci*ctl*(cp*Jxn + Jyn*sp) + cp*Jyn*(-(cps*spl) + cpl*sps)*stl*sts + sp*(cts*Jyn + ctl*Jzn*si*sp + Jxn*(cps*spl - cpl*sps)*stl*sts))/si;
+
+	EQvec[0]=(pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl - cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts) + 
+     sp*(cpl*Jzn*si*sp*stl + cts*Jxn*spl*stl - (cps*Jyn + ctl*Jxn*sps)*sts))/si;
+	EQvec[1] = (pow_int(cp,2)*Jzn*si*spl*stl + sp*(-(cpl*cts*Jxn*stl) - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl + cps*ctl*Jxn*sts - Jyn*sps*sts) + 
+     cp*(cpl*cts*Jyn*stl - ci*Jxn*spl*stl - (cps*ctl*Jyn + Jxn*sps)*sts))/si;
+	EQvec[2] = (ctl*Jzn*si - Jxn*(ci*cp*ctl + cp*cts + sp*(cps*spl - cpl*sps)*stl*sts) - Jyn*(ci*ctl*sp + cts*sp + cp*(-(cps*spl) + cpl*sps)*stl*sts))/si ;
+	//std::cout<<EQvec[0]-EQvec_test[0]<<std::endl;
+	//std::cout<<EQvec[1]-EQvec_test[1]<<std::endl;
+	//std::cout<<EQvec[2]-EQvec_test[2]<<std::endl;
+	//std::cout<<EQvec[0]-EQvec_old[0]<<std::endl;
+	//std::cout<<EQvec[1]-EQvec_old[1]<<std::endl;
+	//std::cout<<EQvec[2]-EQvec_old[2]<<std::endl;
 }
 template void equatorial_from_SF<double>(double *, double, double, double, double, double, double,double *);
 template void equatorial_from_SF<adouble>(adouble *, adouble, adouble, adouble, adouble, adouble, adouble,adouble *);
@@ -1204,6 +1241,8 @@ template adouble gps_to_JD<adouble>(adouble);
  * cart: x, y, z
  *
  * spherical: r, polar, azimuthal
+ *
+ * Tested in all octants
  */
 template<class T>
 void transform_cart_sph(T *cartvec, T *sphvec)
@@ -1211,20 +1250,26 @@ void transform_cart_sph(T *cartvec, T *sphvec)
 	sphvec[0]  = sqrt(cartvec[0]*cartvec[0] +
 			cartvec[2]*cartvec[2] +
 			cartvec[1] * cartvec[1]) ;
-	//sphvec[1] = std::acos(cartvec[2]/ sphvec[0]);
-	sphvec[1] = atan2( sqrt(cartvec[0]*cartvec[0]+cartvec[1]*cartvec[1]),cartvec[2]);
+	sphvec[1] = acos(cartvec[2]/sphvec[0]);
 	sphvec[2] = atan2(cartvec[1], cartvec[0]);
+	if(sphvec[2]<0){sphvec[2]+=2*M_PI;}
 
 }
 template void transform_cart_sph<double>(double*, double*);
 template void transform_cart_sph<adouble>(adouble*, adouble*);
 /*! \brief utility to transform a vector from spherical (radian) to cartesian
  *
+ * Range: \theta \el [0,\pi]
+ *
+ * \phi \el [0,2 \pi]
+ *
  * order:
  *
  * cart: x, y, z
  *
  * spherical: r, polar, azimuthal
+ *
+ * Tested in all octants
  */
 template<class T>
 void transform_sph_cart(T *sphvec, T *cartvec)
