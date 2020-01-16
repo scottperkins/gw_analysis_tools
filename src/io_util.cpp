@@ -9,7 +9,9 @@
 #include <cctype>
 #include <complex>
 
-/*! \brief unpacks standard parameter file for input for runtime parameters
+/*! \file 
+ *
+ * unpacks standard parameter file for input for runtime parameters
  *
  * Returns the number of parameters unpacked, (-1 if error)
  * The format MUST be exact:
