@@ -881,11 +881,9 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		T phi_s = parameters->RA;
 		//N should point source to detector
 		T Neq[3] = {-sin(theta_s)*cos(phi_s), -sin(theta_s)*sin(phi_s), -cos(theta_s)};
-		//T Neq[3] = {sin(theta_s)*cos(phi_s), sin(theta_s)*sin(phi_s), cos(theta_s)};
 		T Leq[3] = {sin(parameters->theta_l)*cos(parameters->phi_l), 
 			sin(parameters->theta_l)*sin(parameters->phi_l), 
 			cos(parameters->theta_l)};
-		//std::cout<<"Dot product: "<<(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2])<<std::endl;
 		parameters->incl_angle = acos(Neq[0]*Leq[0]+Neq[1]*Leq[1]+Neq[2]*Leq[2]);
 		if(parameters->incl_angle == 0 || parameters->incl_angle == M_PI){
 			std::cout<<"ERROR -- L == N || L == -N : The source frame is ill defined, and the conversion between theta_l and phi_l to theta_j and phi_j should not be trusted"<<std::endl; 
@@ -900,30 +898,16 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 			std::cout<<"ERROR -- Only Pv2 is supported right now"<<std::endl;	
 		}
 		T Jeq[3];
-		//equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
 		equatorial_from_SF(JSF, parameters->theta_l, parameters->phi_l,(T) (theta_s), phi_s, parameters->incl_angle, parameters->phiRef, Jeq);
 		T Jeqsph[3];
 		transform_cart_sph(Jeq,Jeqsph);
 		T theta_j = Jeqsph[1];
 		T phi_j= Jeqsph[2];
-		//Testing
-		//T dotJLeq = Leq[0] * Jeq[0] + Leq[1]*Jeq[1]+ Leq[2]*Jeq[2];
-		//T dotJLsf = JSF[2];
-		//T dotJNeq = Neq[0] * Jeq[0] + Neq[1]*Jeq[1]+ Neq[2]*Jeq[2];
-		//T dotJNeq = Neq[0] * sin(theta_j)*cos(phi_j) + Neq[1]*sin(theta_j)*sin(phi_j)+ Neq[2]*cos(theta_j);
-		//T dotJNsf = JSF[0]*sin(parameters->incl_angle)*cos(M_PI/2. - parameters->phiRef) + JSF[1]*sin(parameters->incl_angle)*sin(M_PI/2. - parameters->phiRef) + JSF[2] * cos(parameters->incl_angle);
-		//std::cout<<parameters->incl_angle<<std::endl;
-		//std::cout<<Jeq[0]<<" "<<Jeq[1]<<" "<<Jeq[2]<<std::endl;
-		//std::cout<<JSF[0]<<" "<<JSF[1]<<" "<<JSF[2]<<std::endl;
-		//std::cout<<dotJLeq<<" "<<dotJLsf<<std::endl;
-		//std::cout<<dotJNeq<<" "<<dotJNsf<<std::endl;
 
 		T iota_j;
 		if(detector==""){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
 			ecl_from_eq(theta_j, phi_j, &parameters->theta_j_ecl, &parameters->phi_j_ecl);
-			//std::cout<<parameters->psi<<std::endl;
-			//std::cout<<parameters->incl_angle<<std::endl;
 		}
 		else if(detector!="LISA"){
 			terr_pol_iota_from_equat_sph(parameters->RA, parameters->DEC, theta_j, phi_j,&parameters->psi, &iota_j);
@@ -937,7 +921,6 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 		T phi_s = parameters->RA;
 		//N should point source to detector
 		T Neq[3] = {-sin(theta_s)*cos(phi_s), -sin(theta_s)*sin(phi_s), -cos(theta_s)};
-		//T Neq[3] = {sin(theta_s)*cos(phi_s), sin(theta_s)*sin(phi_s), cos(theta_s)};
 		T Leq[3] = {sin(parameters->theta_l)*cos(parameters->phi_l), 
 			sin(parameters->theta_l)*sin(parameters->phi_l), 
 			cos(parameters->theta_l)};
@@ -998,7 +981,7 @@ void assign_freq_boundaries(double *freq_boundaries,
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
 		if(fRD/2. < fpeak){
-			freq_boundaries[2] = fRD/2.;
+			freq_boundarie[2] = fRD/2.;
 			freq_boundaries[3] = fpeak;
 		}
 		else{
@@ -1876,11 +1859,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	t_mer= t_0PN(f_upper, chirpmass)+T_obs;
 	f_lower = f_0PN(t_mer,chirpmass);	
 
-	//fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
-	//precalc_wf_id = bound_id_lower;
-	//snr = std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
 	snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
-	//std::cout<<snr<<std::endl;
 	snr_prev=snr;
 	double t1 = t_mer, t2=t_mer;
 	if(snr>SNR_thresh){not_found= false;}
@@ -1989,9 +1968,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			snr_prev=snr;
 			//std::cout<<"LOWER: "<<f_lower<<" "<<f_upper<<" "<<t1<<" "<<t2<<" "<<snr<<std::endl;
-			//std::cout<<(fabs(t1-t2)*2/fabs(t1+t2)<1e-14)<<std::endl;
 		}
-		//std::cout<<"FINISHED LOWER"<<std::endl;
 		t1=t_save; t2=t_save;
 		do{
 			t2*=2.;

@@ -14,6 +14,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix_double.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 /*! \file
  *
  * General utilities that are not necessarily specific to any part of the project at large
@@ -269,6 +271,23 @@ double cosmology_lookup(std::string cosmology)
 	}
 	return -1;
 }
+
+/*! \brief Calculates a random number from the Maxwell-Boltzmann distribution using 3 gaussian random numbers
+ *
+ * Maxwell-Boltzmann describes a gaussian distributed vector in 3 space, so the magnitude is the RMS of the components of that vector
+ *
+ * Assumed mean is at 0
+ *
+ * Sigma would be equivalent to sqrt(kT/m) in the real maxwell boltzmann distribution
+ *
+ */
+double gsl_maxwell_boltzmann_distribution(double sigma, gsl_rng *r)
+{
+	double v1=gsl_ran_gaussian(r, sigma);
+	double v2=gsl_ran_gaussian(r, sigma);
+	double v3=gsl_ran_gaussian(r, sigma);
+	return sqrt(v1*v1 + v2*v2 + v3*v3);
+} 
 
 template <class T>
 T copysign_internal(T val, T sign)
@@ -796,7 +815,7 @@ void terr_pol_iota_from_equat_sph(T RA, /**< Right ascension in rad*/
 	T *iota /**< Inclination angle of the TOTAL angular momentum and the direction of propagation -N*/
 	)
 {
-	std::cout<<"INTERNAL: RA: "<<RA<<" DEC: "<<DEC<<" thetaj: "<<thetaj<<" phij: "<<phij<<std::endl;
+	//std::cout<<"INTERNAL: RA: "<<RA<<" DEC: "<<DEC<<" thetaj: "<<thetaj<<" phij: "<<phij<<std::endl;
 	//PSI only appears as 2*PSI in detector response, so atan should be fine. Periodicity of pi
 	T temp_pol = atan(cos(DEC)*1./tan(thetaj)*1./sin(phij - RA) - 1./tan(phij - RA)*sin(DEC));
 	*pol=M_PI/2. - temp_pol;

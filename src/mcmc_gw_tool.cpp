@@ -180,7 +180,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	double chi2l = pos[10];
 	double chi1p = std::sqrt(1- chi1l*chi1l);
 	double chi2p = std::sqrt(1- chi2l*chi2l);
-	double chi_thresh=chi2p ;
+	double chi_thresh=W*chi2p ;
 	if(chi1p > W*chi2p){ chi_thresh =chi1p;}
 	if(pos[11] > chi_thresh){ return a;}
 
