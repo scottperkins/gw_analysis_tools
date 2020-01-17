@@ -974,6 +974,9 @@ void time_phase_corrected_derivative_autodiff_numerical(double **dt, int length,
 		repack_non_parameter_options(&a_parameters,params,generation_method);
 		//############################################
 		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+		if(params->equatorial_orientation){
+			transform_orientation_coords(&a_parameters, generation_method, "");
+		}
 		adouble time;
 		adouble phasep, phasec;
 		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
@@ -1087,6 +1090,9 @@ void time_phase_corrected_derivative_autodiff(double **dt, int length, double *f
 		repack_non_parameter_options(&a_parameters,params,generation_method);
 		//############################################
 		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+		if(params->equatorial_orientation){
+			transform_orientation_coords(&a_parameters, generation_method, "");
+		}
 		adouble time;
 		adouble phasep, phasec;
 		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
@@ -1204,6 +1210,9 @@ void time_phase_corrected_derivative_autodiff_sparse(double **dt, int length, do
 		repack_non_parameter_options(&a_parameters,params,generation_method);
 		//############################################
 		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+		if(params->equatorial_orientation){
+			transform_orientation_coords(&a_parameters, generation_method, "");
+		}
 		adouble time;
 		adouble phasep, phasec;
 		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
@@ -1300,6 +1309,9 @@ void time_phase_corrected_derivative_autodiff_full_hess(double **dt, int length,
 		repack_non_parameter_options(&a_parameters,params,generation_method);
 		//############################################
 		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+		if(params->equatorial_orientation){
+			transform_orientation_coords(&a_parameters, generation_method, "");
+		}
 		adouble time;
 		adouble phasep, phasec;
 		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);

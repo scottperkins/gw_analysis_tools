@@ -652,6 +652,9 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 	else{
 		tapes = new int[boundary_num];
 		transform_parameters(params, &aparams);
+		if(params->equatorial_orientation){
+			transform_orientation_coords(&aparams,generation_method,"");
+		}
 		for(int i = 0 ; i<boundary_num ; i++){
 			tapes[i]=(i+1)*8;	
 			trace_on(tapes[i]);
@@ -725,6 +728,9 @@ int boundary_number(std::string method)
 template<class T>
 void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time)
 {
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params,generation_method,"");
+	}
 	std::string local_gen = generation_method;
 	if(length ==1){
 		T temp_f[2];
@@ -1298,7 +1304,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 		bool continue_search=true;
 		double eval_freq, time;
 		double max_search=bounds_from_band[1], min_search=bounds_from_band[0];
-		double tolerance = .1*integration_time;
+		double tolerance = .01*integration_time;
 		
 		while(continue_search)
 		{

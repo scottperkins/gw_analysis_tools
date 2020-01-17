@@ -48,7 +48,9 @@ T dCS_IMRPhenomD<T>::dCS_phase_factor(source_parameters<T> *param)
 	chi2 +=1e-10;
 	T s1  = s1temp/(2.*chi1*chi1*chi1);
 	T s2  = s2temp/(2.*chi2*chi2*chi2);
-	
+	//Neutron stars don't source scalar charge
+	if(param->NSflag1){s1 =0;}	
+	if(param->NSflag2){s2 =0;}	
 	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
 	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 350./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
 	return g;
@@ -110,6 +112,8 @@ T dCS_IMRPhenomD_log<T>::dCS_phase_factor(source_parameters<T> *param)
 	chi2 +=1e-10;
 	T s1  = s1temp/(2.*chi1*chi1*chi1);
 	T s2  = s2temp/(2.*chi2*chi2*chi2);
+	if(param->NSflag1){s1 =0;}	
+	if(param->NSflag2){s2 =0;}	
 	
 	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
 	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 350./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
@@ -214,6 +218,8 @@ T EdGB_IMRPhenomD<T>::EdGB_phase_factor( source_parameters<T> *param)
 	chi2 += 1.e-10;
 	T s1 = temp1/(chi1*chi1);
 	T s2 = temp2/(chi2*chi2);
+	if(param->NSflag1){s1 =0;}	
+	if(param->NSflag2){s2 =0;}	
 	return (-5./7168.)* pow_int((m1*m1 * s2 - m2*m2 * s1),2) / (pow_int(M,4) * pow(eta,(18./5)));
 } 
 template<class T>

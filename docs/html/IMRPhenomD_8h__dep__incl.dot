@@ -1,0 +1,43 @@
+digraph "include/gwat/IMRPhenomD.h"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="include/gwat/IMRPhenomD.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="src/fisher.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$fisher_8cpp.html",tooltip=" "];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="src/gIMRPhenomD.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$gIMRPhenomD_8cpp.html",tooltip=" "];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="src/IMRPhenomD.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$IMRPhenomD_8cpp.html",tooltip=" "];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="src/IMRPhenomP.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$IMRPhenomP_8cpp.html",tooltip=" "];
+  Node1 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="src/waveform_generator.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$waveform__generator_8cpp.html",tooltip=" "];
+  Node1 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="src/waveform_util.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$waveform__util_8cpp.html",tooltip=" "];
+  Node1 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="include/gwat/gIMRPhenomD.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$gIMRPhenomD_8h.html",tooltip=" "];
+  Node8 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="include/gwat/IMRPhenomP.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$IMRPhenomP_8h.html",tooltip=" "];
+  Node9 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="include/gwat/ppE_IMRPhenomP.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ppE__IMRPhenomP_8h.html",tooltip=" "];
+  Node10 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="src/ppE_IMRPhenomP.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ppE__IMRPhenomP_8cpp.html",tooltip=" "];
+  Node10 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="include/gwat/ppE_IMRPhenomD.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ppE__IMRPhenomD_8h.html",tooltip=" "];
+  Node12 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="src/ppE_IMRPhenomD.cpp",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$ppE__IMRPhenomD_8cpp.html",tooltip=" "];
+  Node12 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

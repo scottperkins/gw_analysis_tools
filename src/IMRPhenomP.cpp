@@ -214,7 +214,6 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 				)
 {
 
-
 	//Initialize Spherical harmonics for polarization construction
 	sph_harm<T> harmonics;
 	T phiHarm = 0.;
@@ -838,7 +837,6 @@ void IMRPhenomPv2<T>::PhenomPv2_Param_Transform_reduced(source_parameters<T> *pa
 	phiJ_sf = atan2(J0y_sf,J0x_sf); 
 	params->phi_aligned = - phiJ_sf;
 
-	std::cout<<params->incl_angle<<std::endl;
 	//Rotation of the system s.t. the total J is pointed in zhat
 	T tmp1,tmp2;
 	T incl = params->incl_angle;
