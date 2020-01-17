@@ -1317,7 +1317,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 					else {
 						chain_pop_target_reached = false;
 						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
-							std::cout<<"add"<<std::endl;
+							//std::cout<<"add"<<std::endl;
 							//add chain
 							int min_id =0;
 							int min_val =1;
@@ -1393,7 +1393,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 						
 						}
 						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
-							std::cout<<"rm"<<std::endl;
+							//std::cout<<"rm"<<std::endl;
 							//remove chain
 							int max_id =0;
 							int max_val =0;

@@ -15,7 +15,7 @@
 #Generation method 
 [str] generation method = IMRPhenomD
 #Number of ~uncorrelated samples to take
-[int] samples = 15000
+[int] samples = 1500
 #Number of chains
 [int] chain number = 8
 #Maximum number of chains per thermodynamic ensemble

@@ -172,7 +172,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output,
 	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double ***output, 
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	

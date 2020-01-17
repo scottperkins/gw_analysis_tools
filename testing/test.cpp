@@ -127,7 +127,7 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test56();	
+	test54();	
 	//test6();	
 	//test45();	
 	return 0;
@@ -280,7 +280,7 @@ void test55()
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
 	double ***output;
-	output = allocate_3D_array(  chain_N,N_steps, dimension );
+	output = allocate_3D_array(chain_N, N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 3;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -309,7 +309,7 @@ void test55()
 	continue_PTMCMC_MH_dynamic_PT_alloc(checkpointfile_start ,output,  N_steps, max_chain_N_thermo, chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 
-	deallocate_3D_array(output,chain_N, N_steps, dimension);
+	deallocate_3D_array( output,chain_N,N_steps, dimension);
 }
 void test54()
 {
@@ -328,8 +328,8 @@ void test54()
 	//std::string chain_dist_method = "cold";
 	//double **output;
 	//output = allocate_2D_array(  N_steps, dimension );
-	double ***output;
-	output = allocate_3D_array( chain_N, N_steps, dimension );
+	double **output;
+	output = allocate_2D_array(N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 3;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -353,9 +353,9 @@ void test54()
 	std::function<void(double* , int*,int, double**,int,void *)> f = [](double *param, int *status,int dim, double **fish,int chain_id,void *parameters){ fisher_neil_proj3(param,dim,fish,chain_id,parameters);};
 	f=NULL;
 	
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,numThreads, pool,show_progress, statfilename,chainfile, "","",checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, "",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
-	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
+	//PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
 	//std::cout<<"Chain temps: "<<std::endl;
 	//for(int i =0; i<chain_N; i++){
@@ -363,7 +363,7 @@ void test54()
 	//}
 
 
-	deallocate_3D_array(output,chain_N,  N_steps, dimension);
+	deallocate_2D_array(output,  N_steps, dimension);
 }
 void test53()
 {
@@ -1682,11 +1682,11 @@ void test32()
 	double *seeding_var = NULL;
 
 	
-	int N_steps = 1000;
+	int N_steps = 100000;
 	int chain_N= 20;
-	int max_chain_N_thermo= 8;
+	int max_chain_N_thermo= 4;
 	int t0= 10000;
-	int nu= 50;
+	int nu= 5;
 	//std::string chain_dist_method = "half_ensemble";
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";

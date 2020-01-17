@@ -143,6 +143,9 @@ double calculate_snr(std::string sensitivity_curve,
 	int length)
 {
 	double *times;
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params, generation_method,detector);
+	}
 	if(detector == "LISA" && !params->sky_average){
 		times = new double[length];
 		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
@@ -179,6 +182,9 @@ int calculate_snr_gsl(double *snr,/**< [out] SNR*/
 	double relative_error/**< Relative error threshold*/
 	)
 {
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params, generation_method,detector);
+	}
 	int np=10000;
 	gsl_integration_workspace *w=gsl_integration_workspace_alloc(np) ;
 	int err =  calculate_snr_gsl(snr,sensitivity_curve, detector, generation_method, params, f_min, f_max,relative_error,w,np);
@@ -981,7 +987,7 @@ void assign_freq_boundaries(double *freq_boundaries,
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
 		if(fRD/2. < fpeak){
-			freq_boundarie[2] = fRD/2.;
+			freq_boundaries[2] = fRD/2.;
 			freq_boundaries[3] = fpeak;
 		}
 		else{

@@ -43,10 +43,10 @@ SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 
 ############################################################################
 #CUDA OPTIONS
-#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
-#OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3
-OBJECTSCUDA := 
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
+OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3
+#OBJECTSCUDA := 
 ########################################################################
 
 IEXT := h
@@ -108,7 +108,9 @@ $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYSRC)
 $(TESTFISHER) : $(OBJECTS) $(TESTFISHEROBJ) | $(TESTDIR)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
-$(TEST) : $(OBJECTS) $(OBJECTSCUDA) $(TESTOBJ) | $(TESTDIR)
+OBJECTS_TEST:=$(filter-out build/mcmc_gw_tool.o, $(OBJECTS))
+$(TEST) : $(OBJECTS_TEST) $(OBJECTSCUDA) $(TESTOBJ) | $(TESTDIR)
+	@echo $(OBJECTS_TEST)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
 $(TESTDIR):
