@@ -1,0 +1,26 @@
+\hypertarget{mcmc__routines__ext_8pyx}{}\doxysection{gw\+\_\+analysis\+\_\+tools\+\_\+py/src/mcmc\+\_\+routines\+\_\+ext.pyx File Reference}
+\label{mcmc__routines__ext_8pyx}\index{gw\_analysis\_tools\_py/src/mcmc\_routines\_ext.pyx@{gw\_analysis\_tools\_py/src/mcmc\_routines\_ext.pyx}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classmcmc__routines__ext_1_1fftw__outline__py}{mcmc\+\_\+routines\+\_\+ext.\+fftw\+\_\+outline\+\_\+py}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{mcmc__routines__ext_8pyx_a4af6e8af3dcbd95cf0b916785ad45758}\label{mcmc__routines__ext_8pyx_a4af6e8af3dcbd95cf0b916785ad45758}} 
+def {\bfseries mcmc\+\_\+routines\+\_\+ext.\+write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data\+\_\+file\+\_\+py} (string, autocorr\+\_\+filename, string, datafile, int, length, int, dimension, int, num\+\_\+segments, double, target\+\_\+corr, int, num\+\_\+threads)
+\item 
+\mbox{\Hypertarget{mcmc__routines__ext_8pyx_a90e23085cba2e2c09de85ff6d9bdfb2d}\label{mcmc__routines__ext_8pyx_a90e23085cba2e2c09de85ff6d9bdfb2d}} 
+def {\bfseries mcmc\+\_\+routines\+\_\+ext.\+arange} (string, autocorr\+\_\+filename, \+:1\mbox{]} data, int length, int dimension, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads)\+:\#Not ideal -\/-\/ have to wrap the memview in a real \mbox{\hyperlink{util_8h_a8fc6defe4e499b1b9b9c275689e44352}{c}}++array cdef double $\ast$$\ast$temparr=$<$ double $\ast$$\ast$ $>$malloc(sizeof(double $\ast$double, length)
+\item 
+\mbox{\Hypertarget{mcmc__routines__ext_8pyx_ae84752a228b432b02e58512158e2908e}\label{mcmc__routines__ext_8pyx_ae84752a228b432b02e58512158e2908e}} 
+def {\bfseries mcmc\+\_\+routines\+\_\+ext.\+allocate\+\_\+\+F\+F\+T\+W\+\_\+mem\+\_\+forward\+\_\+py} (fftw\+\_\+outline\+\_\+py, plan, int, length)
+\item 
+\mbox{\Hypertarget{mcmc__routines__ext_8pyx_aad855ceb8f6e2bcae713827e94c81690}\label{mcmc__routines__ext_8pyx_aad855ceb8f6e2bcae713827e94c81690}} 
+def {\bfseries mcmc\+\_\+routines\+\_\+ext.\+deallocate\+\_\+\+F\+F\+T\+W\+\_\+mem\+\_\+py} (fftw\+\_\+outline\+\_\+py, plan)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+File that wraps the code in \mbox{\hyperlink{mcmc__gw_8cpp}{mcmc\+\_\+gw.\+cpp}}, \mbox{\hyperlink{mcmc__sampler_8cpp}{mcmc\+\_\+sampler.\+cpp}}, \mbox{\hyperlink{mcmc__sampler__internals_8cpp}{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}, \mbox{\hyperlink{autocorrelation_8cpp}{autocorrelation.\+cpp}} 

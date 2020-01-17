@@ -1,0 +1,343 @@
+\hypertarget{autocorrelation_8cpp}{}\doxysection{src/autocorrelation.cpp File Reference}
+\label{autocorrelation_8cpp}\index{src/autocorrelation.cpp@{src/autocorrelation.cpp}}
+{\ttfamily \#include \char`\"{}autocorrelation.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}thread\+Pool.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}io\+\_\+util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+Include dependency graph for autocorrelation.\+cpp\+:
+% FIG 0
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{autocorrelation_8cpp_a997bd514ed5e4f822888206a11fc8065}{M\+A\+X\+\_\+\+S\+E\+R\+I\+AL}}~20000
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_ad6715011761c1397d215f817654c96b3}{write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data\+\_\+file}} (std\+::string autocorr\+\_\+filename, std\+::string datafile, int length, int dimension, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads, bool cumulative)
+\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_ae925ee63b98024b9832ef2a72c6bca2d}{write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data}} (std\+::string autocorr\+\_\+filename, double $\ast$$\ast$data, int length, int dimension, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads, bool cumulative)
+\begin{DoxyCompactList}\small\item\em Writes the autocorrelation file from a data array. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_a393fd6777961493a09c5c0923b185d3d}{auto\+\_\+corr\+\_\+from\+\_\+data}} (double $\ast$$\ast$data, int length, int dimension, int $\ast$$\ast$output, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads, bool cumulative)
+\begin{DoxyCompactList}\small\item\em Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes F\+F\+T\+W3 for longer chuncks of the chains. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_a94af5456a8ff9599890ad79deb2101e1}{threaded\+\_\+ac\+\_\+spectral}} (int thread, \mbox{\hyperlink{classthreaded__ac__jobs__fft}{threaded\+\_\+ac\+\_\+jobs\+\_\+fft}} job)
+\begin{DoxyCompactList}\small\item\em Internal routine to calculate an spectral autocorrelation job. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_a45c4e43aab21b064274576841fd9f439}{threaded\+\_\+ac\+\_\+serial}} (int thread, \mbox{\hyperlink{classthreaded__ac__jobs__serial}{threaded\+\_\+ac\+\_\+jobs\+\_\+serial}} job)
+\begin{DoxyCompactList}\small\item\em Internal routine to calculate a serial autocorrelation job. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{autocorrelation_8cpp_a0e07c16caec7cc0be12258458c96d364}{auto\+\_\+correlation\+\_\+serial}} (double $\ast$arr, int length, int start, double target)
+\begin{DoxyCompactList}\small\item\em Calculates the autocorrelation of a chain with the brute force method. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{autocorrelation_8cpp_ab2b46532c9a5857bc08a5b7af33c19d2}\label{autocorrelation_8cpp_ab2b46532c9a5857bc08a5b7af33c19d2}} 
+void \mbox{\hyperlink{autocorrelation_8cpp_ab2b46532c9a5857bc08a5b7af33c19d2}{auto\+\_\+correlation\+\_\+spectral}} (double $\ast$chain, int length, double $\ast$autocorr, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan\+\_\+forw, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan\+\_\+rev)
+\begin{DoxyCompactList}\small\item\em Wrapper function for convience -- assumes the data array starts at 0. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_a495b7476fb13c79c22c6785ca5c37e9c}{auto\+\_\+correlation\+\_\+spectral}} (double $\ast$chain, int length, int start, double $\ast$autocorr, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan\+\_\+forw, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan\+\_\+rev)
+\begin{DoxyCompactList}\small\item\em Faster approximation of the autocorrelation of a chain. Implements F\+F\+T/\+I\+F\+FT -- accepts F\+F\+TW plan as argument for plan reuse and multi-\/threaded applications. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_af5ffdd85c751c9128af46d0459bb4687}{auto\+\_\+correlation\+\_\+spectral}} (double $\ast$chain, int length, double $\ast$autocorr)
+\begin{DoxyCompactList}\small\item\em Faster approximation of the autocorrelation of a chain. Implements F\+F\+T/\+I\+F\+FT. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{autocorrelation_8cpp_ab1cc0e008417e22feb67c596f9d84391}\label{autocorrelation_8cpp_ab1cc0e008417e22feb67c596f9d84391}} 
+double \mbox{\hyperlink{autocorrelation_8cpp_ab1cc0e008417e22feb67c596f9d84391}{auto\+\_\+correlation}} (double $\ast$arr, int length, double tolerance)
+\begin{DoxyCompactList}\small\item\em O\+U\+T\+D\+A\+T\+ED -- numerically finds autocorrelation length -- not reliable. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{autocorrelation_8cpp_ad21465a6ab600a7776dd763e2f8dd577}\label{autocorrelation_8cpp_ad21465a6ab600a7776dd763e2f8dd577}} 
+double \mbox{\hyperlink{autocorrelation_8cpp_ad21465a6ab600a7776dd763e2f8dd577}{auto\+\_\+correlation\+\_\+serial\+\_\+old}} (double $\ast$arr, int length)
+\begin{DoxyCompactList}\small\item\em O\+U\+T\+D\+A\+T\+ED Calculates the autocorrelation -- less general version. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{autocorrelation_8cpp_a70938f64f11cb3ede5017ebfc6f8f3bd}{auto\+\_\+correlation\+\_\+grid\+\_\+search}} (double $\ast$arr, int length, int box\+\_\+num, int final\+\_\+length, double target\+\_\+length)
+\begin{DoxyCompactList}\small\item\em O\+U\+T\+D\+A\+T\+ED -- Grid search method of computing the autocorrelation -- unreliable. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{autocorrelation_8cpp_aee6b6cec0369e5a89823512fde296792}{auto\+\_\+correlation\+\_\+internal}} (double $\ast$arr, int length, int lag, double ave)
+\begin{DoxyCompactList}\small\item\em Internal function to compute the auto correlation for a given lag. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8cpp_a59cc7470885bbc68e5c9a7725fb237d9}{auto\+\_\+corr\+\_\+intervals\+\_\+outdated}} (double $\ast$data, int length, double $\ast$output, int num\+\_\+segments, double accuracy)
+\begin{DoxyCompactList}\small\item\em Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{autocorrelation_8cpp_a8abac9254fd541e086a0fd45ac2a7b11}\label{autocorrelation_8cpp_a8abac9254fd541e086a0fd45ac2a7b11}} 
+void \mbox{\hyperlink{autocorrelation_8cpp_a8abac9254fd541e086a0fd45ac2a7b11}{write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data}} (std\+::string auto\+\_\+corr\+\_\+filename, double $\ast$$\ast$output, int intervals, int dimension, int N\+\_\+steps)
+\begin{DoxyCompactList}\small\item\em O\+U\+T\+D\+A\+T\+ED -- writes autocorrelation lengths for a data array, but only with the serial method and only for a target correlation of .01. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{autocorrelation_8cpp_a96dd06128ac57370dd1acadefb780910}\label{autocorrelation_8cpp_a96dd06128ac57370dd1acadefb780910}} 
+void \mbox{\hyperlink{autocorrelation_8cpp_a96dd06128ac57370dd1acadefb780910}{write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data\+\_\+file}} (std\+::string auto\+\_\+corr\+\_\+filename, std\+::string output\+\_\+file, int intervals, int dimension, int N\+\_\+steps)
+\begin{DoxyCompactList}\small\item\em O\+U\+T\+D\+A\+T\+ED -- writes autocorrelation lengths for a data file, but only with the serial method and only for a target correlation of .01. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Turns out calculating the autocorrelation is more complicated if you want to do it fast, so it gets its own file now
+
+First row is the starting index of that segment
+
+Second row is the length of that segment
+
+If cumulative, the ac is calculated in the following format\+:
+
+$\vert$-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+...
+
+Else, the ac is calculated as \+:
+
+$\vert$-\/-\/-\/-\/---$\vert$ \begin{DoxyVerb}    |------|
+
+            |--------|
+\end{DoxyVerb}
+
+
+... 
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{autocorrelation_8cpp_a997bd514ed5e4f822888206a11fc8065}\label{autocorrelation_8cpp_a997bd514ed5e4f822888206a11fc8065}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!MAX\_SERIAL@{MAX\_SERIAL}}
+\index{MAX\_SERIAL@{MAX\_SERIAL}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{MAX\_SERIAL}{MAX\_SERIAL}}
+{\footnotesize\ttfamily \#define M\+A\+X\+\_\+\+S\+E\+R\+I\+AL~20000}
+
+Max length of array to use serial calculation 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{autocorrelation_8cpp_a393fd6777961493a09c5c0923b185d3d}\label{autocorrelation_8cpp_a393fd6777961493a09c5c0923b185d3d}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_corr\_from\_data@{auto\_corr\_from\_data}}
+\index{auto\_corr\_from\_data@{auto\_corr\_from\_data}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_corr\_from\_data()}{auto\_corr\_from\_data()}}
+{\footnotesize\ttfamily void auto\+\_\+corr\+\_\+from\+\_\+data (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{data,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{int $\ast$$\ast$}]{output,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr,  }\item[{int}]{num\+\_\+threads,  }\item[{bool}]{cumulative }\end{DoxyParamCaption})}
+
+
+
+Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes F\+F\+T\+W3 for longer chuncks of the chains. 
+
+Takes in the data from a sampler, shape data\mbox{[}N\+\_\+steps\mbox{]}\mbox{[}dimension\mbox{]}
+
+Outputs lags that correspond to the target\+\_\+corr -- shape output\mbox{[}dimension\mbox{]}\mbox{[}num\+\_\+segments\mbox{]}
+
+If cumulative, the ac is calculated in the following format\+:
+
+$\vert$-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+...
+
+Else, the ac is calculated as \+:
+
+$\vert$-\/-\/-\/-\/---$\vert$ \begin{DoxyVerb}    |------|
+
+            |--------|
+\end{DoxyVerb}
+
+
+... 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em data} & Input data \\
+\hline
+ & {\em length} & length of input data \\
+\hline
+ & {\em dimension} & dimension of data \\
+\hline
+\mbox{\texttt{ out}}  & {\em output} & array that stores the auto-\/corr lengths -\/-\/ array\mbox{[}num\+\_\+segments\mbox{]} \\
+\hline
+ & {\em num\+\_\+segments} & number of segements to compute the auto-\/corr length \\
+\hline
+ & {\em target\+\_\+corr} & Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target\+\_\+corr) \\
+\hline
+ & {\em num\+\_\+threads} & Total number of threads to use \\
+\hline
+ & {\em cumulative} & Boolean to calculate the autocorrelation cumulatively \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation_8cpp_a59cc7470885bbc68e5c9a7725fb237d9}\label{autocorrelation_8cpp_a59cc7470885bbc68e5c9a7725fb237d9}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_corr\_intervals\_outdated@{auto\_corr\_intervals\_outdated}}
+\index{auto\_corr\_intervals\_outdated@{auto\_corr\_intervals\_outdated}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_corr\_intervals\_outdated()}{auto\_corr\_intervals\_outdated()}}
+{\footnotesize\ttfamily void auto\+\_\+corr\+\_\+intervals\+\_\+outdated (\begin{DoxyParamCaption}\item[{double $\ast$}]{data,  }\item[{int}]{length,  }\item[{double $\ast$}]{output,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{accuracy }\end{DoxyParamCaption})}
+
+
+
+Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence. 
+
+outdated version -- new version uses F\+F\+Ts 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em data} & Input data \\
+\hline
+ & {\em length} & length of input data \\
+\hline
+\mbox{\texttt{ out}}  & {\em output} & array that stores the auto-\/corr lengths -\/-\/ array\mbox{[}num\+\_\+segments\mbox{]} \\
+\hline
+ & {\em num\+\_\+segments} & number of segements to compute the auto-\/corr length \\
+\hline
+ & {\em accuracy} & longer chains are computed numerically, this specifies the tolerance \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation_8cpp_a70938f64f11cb3ede5017ebfc6f8f3bd}\label{autocorrelation_8cpp_a70938f64f11cb3ede5017ebfc6f8f3bd}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_correlation\_grid\_search@{auto\_correlation\_grid\_search}}
+\index{auto\_correlation\_grid\_search@{auto\_correlation\_grid\_search}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_correlation\_grid\_search()}{auto\_correlation\_grid\_search()}}
+{\footnotesize\ttfamily double auto\+\_\+correlation\+\_\+grid\+\_\+search (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{int}]{box\+\_\+num,  }\item[{int}]{final\+\_\+length,  }\item[{double}]{target\+\_\+length }\end{DoxyParamCaption})}
+
+
+
+O\+U\+T\+D\+A\+T\+ED -- Grid search method of computing the autocorrelation -- unreliable. 
+
+Hopefully more reliable than the box-\/search method, which can sometimes get caught in a recursive loop when the stepsize isn\textquotesingle{}t tuned, but also faster than the basic linear, serial search 
+\begin{DoxyParams}{Parameters}
+{\em arr} & Input array to use for autocorrelation \\
+\hline
+{\em length} & Length of input array \\
+\hline
+{\em box\+\_\+num} & number of boxes to use for each iteration, default is 10 \\
+\hline
+{\em final\+\_\+length} & number of elements per box at which the grid search ends and the serial calculation begins \\
+\hline
+{\em target\+\_\+length} & target correlation that corresponds to the returned lag \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation_8cpp_aee6b6cec0369e5a89823512fde296792}\label{autocorrelation_8cpp_aee6b6cec0369e5a89823512fde296792}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_correlation\_internal@{auto\_correlation\_internal}}
+\index{auto\_correlation\_internal@{auto\_correlation\_internal}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_correlation\_internal()}{auto\_correlation\_internal()}}
+{\footnotesize\ttfamily double auto\+\_\+correlation\+\_\+internal (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{int}]{lag,  }\item[{double}]{ave }\end{DoxyParamCaption})}
+
+
+
+Internal function to compute the auto correlation for a given lag. 
+
+\mbox{\Hypertarget{autocorrelation_8cpp_a0e07c16caec7cc0be12258458c96d364}\label{autocorrelation_8cpp_a0e07c16caec7cc0be12258458c96d364}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_correlation\_serial@{auto\_correlation\_serial}}
+\index{auto\_correlation\_serial@{auto\_correlation\_serial}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_correlation\_serial()}{auto\_correlation\_serial()}}
+{\footnotesize\ttfamily double auto\+\_\+correlation\+\_\+serial (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{int}]{start,  }\item[{double}]{target }\end{DoxyParamCaption})}
+
+
+
+Calculates the autocorrelation of a chain with the brute force method. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em arr} & input array \\
+\hline
+{\em length} & Length of input array \\
+\hline
+{\em start} & starting index (probably 0) \\
+\hline
+{\em target} & Target autocorrelation for which \`{}\`{}length\textquotesingle{}\textquotesingle{} is defined \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation_8cpp_af5ffdd85c751c9128af46d0459bb4687}\label{autocorrelation_8cpp_af5ffdd85c751c9128af46d0459bb4687}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_correlation\_spectral@{auto\_correlation\_spectral}}
+\index{auto\_correlation\_spectral@{auto\_correlation\_spectral}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_correlation\_spectral()}{auto\_correlation\_spectral()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void auto\+\_\+correlation\+\_\+spectral (\begin{DoxyParamCaption}\item[{double $\ast$}]{chain,  }\item[{int}]{length,  }\item[{double $\ast$}]{autocorr }\end{DoxyParamCaption})}
+
+
+
+Faster approximation of the autocorrelation of a chain. Implements F\+F\+T/\+I\+F\+FT. 
+
+Based on the Wiener-\/\+Khinchin Theorem.
+
+Algorithm used from \href{https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/}{\texttt{ https\+://lingpipe-\/blog.\+com/2012/06/08/autocorrelation-\/fft-\/kiss-\/eigen/}} \mbox{\Hypertarget{autocorrelation_8cpp_a495b7476fb13c79c22c6785ca5c37e9c}\label{autocorrelation_8cpp_a495b7476fb13c79c22c6785ca5c37e9c}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!auto\_correlation\_spectral@{auto\_correlation\_spectral}}
+\index{auto\_correlation\_spectral@{auto\_correlation\_spectral}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{auto\_correlation\_spectral()}{auto\_correlation\_spectral()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void auto\+\_\+correlation\+\_\+spectral (\begin{DoxyParamCaption}\item[{double $\ast$}]{chain,  }\item[{int}]{length,  }\item[{int}]{start,  }\item[{double $\ast$}]{autocorr,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan\+\_\+forw,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan\+\_\+rev }\end{DoxyParamCaption})}
+
+
+
+Faster approximation of the autocorrelation of a chain. Implements F\+F\+T/\+I\+F\+FT -- accepts F\+F\+TW plan as argument for plan reuse and multi-\/threaded applications. 
+
+Based on the Wiener-\/\+Khinchin Theorem.
+
+Algorithm used from \href{https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/}{\texttt{ https\+://lingpipe-\/blog.\+com/2012/06/08/autocorrelation-\/fft-\/kiss-\/eigen/}}
+
+{\itshape N\+O\+TE} the length used in initializing the fftw plans should be L = pow(2, std\+::ceil( std\+::log2(length) ) ) -- the plans are padded so the total length is a power of two
+
+Option to provide starting index for multi-\/dimension arrays in collapsed to one dimension
+
+length is the length of the segment to be analyzed, not necessarily the dimension of the chain \mbox{\Hypertarget{autocorrelation_8cpp_a45c4e43aab21b064274576841fd9f439}\label{autocorrelation_8cpp_a45c4e43aab21b064274576841fd9f439}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!threaded\_ac\_serial@{threaded\_ac\_serial}}
+\index{threaded\_ac\_serial@{threaded\_ac\_serial}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{threaded\_ac\_serial()}{threaded\_ac\_serial()}}
+{\footnotesize\ttfamily void threaded\+\_\+ac\+\_\+serial (\begin{DoxyParamCaption}\item[{int}]{thread,  }\item[{\mbox{\hyperlink{classthreaded__ac__jobs__serial}{threaded\+\_\+ac\+\_\+jobs\+\_\+serial}}}]{job }\end{DoxyParamCaption})}
+
+
+
+Internal routine to calculate a serial autocorrelation job. 
+
+Allows for a more efficient use of the \mbox{\hyperlink{classthreadPool}{thread\+Pool}} class \mbox{\Hypertarget{autocorrelation_8cpp_a94af5456a8ff9599890ad79deb2101e1}\label{autocorrelation_8cpp_a94af5456a8ff9599890ad79deb2101e1}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!threaded\_ac\_spectral@{threaded\_ac\_spectral}}
+\index{threaded\_ac\_spectral@{threaded\_ac\_spectral}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{threaded\_ac\_spectral()}{threaded\_ac\_spectral()}}
+{\footnotesize\ttfamily void threaded\+\_\+ac\+\_\+spectral (\begin{DoxyParamCaption}\item[{int}]{thread,  }\item[{\mbox{\hyperlink{classthreaded__ac__jobs__fft}{threaded\+\_\+ac\+\_\+jobs\+\_\+fft}}}]{job }\end{DoxyParamCaption})}
+
+
+
+Internal routine to calculate an spectral autocorrelation job. 
+
+Allows for a more efficient use of the \mbox{\hyperlink{classthreadPool}{thread\+Pool}} class \mbox{\Hypertarget{autocorrelation_8cpp_ae925ee63b98024b9832ef2a72c6bca2d}\label{autocorrelation_8cpp_ae925ee63b98024b9832ef2a72c6bca2d}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!write\_auto\_corr\_file\_from\_data@{write\_auto\_corr\_file\_from\_data}}
+\index{write\_auto\_corr\_file\_from\_data@{write\_auto\_corr\_file\_from\_data}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{write\_auto\_corr\_file\_from\_data()}{write\_auto\_corr\_file\_from\_data()}}
+{\footnotesize\ttfamily void write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data (\begin{DoxyParamCaption}\item[{std\+::string}]{autocorr\+\_\+filename,  }\item[{double $\ast$$\ast$}]{data,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr,  }\item[{int}]{num\+\_\+threads,  }\item[{bool}]{cumulative }\end{DoxyParamCaption})}
+
+
+
+Writes the autocorrelation file from a data array. 
+
+First row is the starting index of that segment
+
+Second row is the length of that segment
+
+If cumulative, the ac is calculated in the following format\+:
+
+$\vert$-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+...
+
+Else, the ac is calculated as \+:
+
+$\vert$-\/-\/-\/-\/---$\vert$ \begin{DoxyVerb}    |------|
+
+            |--------|
+\end{DoxyVerb}
+
+
+... 
+\begin{DoxyParams}{Parameters}
+{\em autocorr\+\_\+filename} & Name of the file to write the autocorrelation to \\
+\hline
+{\em data} & Input chains \\
+\hline
+{\em length} & length of input data \\
+\hline
+{\em dimension} & dimension of data \\
+\hline
+{\em num\+\_\+segments} & number of segements to compute the auto-\/corr length \\
+\hline
+{\em target\+\_\+corr} & Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target\+\_\+corr) \\
+\hline
+{\em num\+\_\+threads} & Total number of threads to use \\
+\hline
+{\em cumulative} & Boolean to calculate the autocorrelation cumulatively \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation_8cpp_ad6715011761c1397d215f817654c96b3}\label{autocorrelation_8cpp_ad6715011761c1397d215f817654c96b3}} 
+\index{autocorrelation.cpp@{autocorrelation.cpp}!write\_auto\_corr\_file\_from\_data\_file@{write\_auto\_corr\_file\_from\_data\_file}}
+\index{write\_auto\_corr\_file\_from\_data\_file@{write\_auto\_corr\_file\_from\_data\_file}!autocorrelation.cpp@{autocorrelation.cpp}}
+\doxysubsubsection{\texorpdfstring{write\_auto\_corr\_file\_from\_data\_file()}{write\_auto\_corr\_file\_from\_data\_file()}}
+{\footnotesize\ttfamily void write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{autocorr\+\_\+filename,  }\item[{std\+::string}]{datafile,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr,  }\item[{int}]{num\+\_\+threads,  }\item[{bool}]{cumulative }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em length} & length of input data \\
+\hline
+{\em dimension} & dimension of data \\
+\hline
+{\em num\+\_\+segments} & number of segements to compute the auto-\/corr length \\
+\hline
+{\em target\+\_\+corr} & Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target\+\_\+corr) \\
+\hline
+{\em num\+\_\+threads} & Total number of threads to use \\
+\hline
+{\em cumulative} & Boolean to calculate the autocorrelation cumulatively \\
+\hline
+\end{DoxyParams}

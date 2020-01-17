@@ -1,0 +1,263 @@
+\hypertarget{autocorrelation__cuda_8cu}{}\doxysection{src/autocorrelation\+\_\+cuda.cu File Reference}
+\label{autocorrelation__cuda_8cu}\index{src/autocorrelation\_cuda.cu@{src/autocorrelation\_cuda.cu}}
+{\ttfamily \#include \char`\"{}autocorrelation\+\_\+cuda.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}autocorrelation\+\_\+cuda.\+hu\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}io\+\_\+util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$condition\+\_\+variable$>$}\newline
+{\ttfamily \#include $<$thread$>$}\newline
+{\ttfamily \#include $<$queue$>$}\newline
+{\ttfamily \#include $<$functional$>$}\newline
+{\ttfamily \#include $<$mutex$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$thread\+Pool.\+h$>$}\newline
+{\ttfamily \#include $<$cufft.\+h$>$}\newline
+Include dependency graph for autocorrelation\+\_\+cuda.\+cu\+:
+% FIG 0
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\+\_\+\+\_\+device\+\_\+\+\_\+ \+\_\+\+\_\+host\+\_\+\+\_\+ void \mbox{\hyperlink{autocorrelation__cuda_8cu_a366f884938ea0477409e8d52f0309a44}{auto\+\_\+corr\+\_\+internal}} (double $\ast$arr, int length, int lag, double average, double $\ast$corr, int start\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Internal function to calculate the autocorrelation for a given lag Customized for the thread pool architecture, with extra arguments because of the way the memory is allocated. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{autocorrelation__cuda_8cu_ad8cff0e627281b397e017fec619b38a5}{auto\+\_\+corr\+\_\+internal\+\_\+kernal}} (double $\ast$arr, int length, double average, int $\ast$rho\+\_\+index, double target\+\_\+corr, double var, int start\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Internal function to launch the C\+U\+DA kernel for a range of autocorrelations. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a4b4ed2b89a95a13abf59d6e373316770}{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel}} (std\+::string acfile, std\+::string chains\+\_\+file, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr)
+\begin{DoxyCompactList}\small\item\em Write data file for autocorrelation lengths of the data given a data file name, as written by the mcmc\+\_\+sampler. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a2ba6f84b0a37e4fc578791f745ee9912}{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}} (std\+::string acfile, double $\ast$$\ast$chains, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr)
+\begin{DoxyCompactList}\small\item\em Write data file given output chains, as formatted by the mcmc\+\_\+sampler. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a32229785a7faa2b81d4894aafc640ed5}{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr, double $\ast$$\ast$autocorr)
+\begin{DoxyCompactList}\small\item\em Find autocorrelation of data at different points in the chain length and output to autocorr. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a51bcc72596ce81494ca39a8aa7a74c53}{ac\+\_\+gpu\+\_\+wrapper}} (int thread, int job\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Wrapper function for the thread pool. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a3cf30342474041a00ac261eb5e7afed3}\label{autocorrelation__cuda_8cu_a3cf30342474041a00ac261eb5e7afed3}} 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a3cf30342474041a00ac261eb5e7afed3}{launch\+\_\+ac\+\_\+gpu}} (int device, int element, double $\ast$$\ast$data, int length, int dimension, double target\+\_\+corr, int num\+\_\+segments)
+\begin{DoxyCompactList}\small\item\em Launch the G\+PU kernel, formatted for the thread pool. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a0516461a0e02bf12da6c199061247a77}{allocate\+\_\+gpu\+\_\+plan}} (\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$plan, int data\+\_\+length, int dimension, int num\+\_\+segments)
+\begin{DoxyCompactList}\small\item\em Allocates memory for autocorrelation--G\+PU structure. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a131867ca45185be0af927a5ec7d7645d}{deallocate\+\_\+gpu\+\_\+plan}} (\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$plan, int data\+\_\+length, int dimension, int num\+\_\+segments)
+\begin{DoxyCompactList}\small\item\em Deallocates memory for the autocorrelation--G\+PU structure. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation__cuda_8cu_a00159a0e9eb7e40725a034becb3110c0}{copy\+\_\+data\+\_\+to\+\_\+device}} (\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$plan, double $\ast$$\ast$input\+\_\+data, int data\+\_\+length, int dimension, int num\+\_\+segments)
+\begin{DoxyCompactList}\small\item\em Copy data to device before starting kernels. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a64b38211e5791c7f4eef2bfaf85e1149}\label{autocorrelation__cuda_8cu_a64b38211e5791c7f4eef2bfaf85e1149}} 
+\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$ {\bfseries plans\+\_\+global}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a51bcc72596ce81494ca39a8aa7a74c53}\label{autocorrelation__cuda_8cu_a51bcc72596ce81494ca39a8aa7a74c53}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!ac\_gpu\_wrapper@{ac\_gpu\_wrapper}}
+\index{ac\_gpu\_wrapper@{ac\_gpu\_wrapper}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{ac\_gpu\_wrapper()}{ac\_gpu\_wrapper()}}
+{\footnotesize\ttfamily void ac\+\_\+gpu\+\_\+wrapper (\begin{DoxyParamCaption}\item[{int}]{thread,  }\item[{int}]{job\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Wrapper function for the thread pool. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em thread} & Host thread \\
+\hline
+{\em job\+\_\+id} & Job ID \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a0516461a0e02bf12da6c199061247a77}\label{autocorrelation__cuda_8cu_a0516461a0e02bf12da6c199061247a77}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!allocate\_gpu\_plan@{allocate\_gpu\_plan}}
+\index{allocate\_gpu\_plan@{allocate\_gpu\_plan}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{allocate\_gpu\_plan()}{allocate\_gpu\_plan()}}
+{\footnotesize\ttfamily void allocate\+\_\+gpu\+\_\+plan (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$}]{plan,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
+
+
+
+Allocates memory for autocorrelation--G\+PU structure. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em plan} & Structure for G\+PU plan \\
+\hline
+{\em data\+\_\+length} & Length of data \\
+\hline
+{\em dimension} & Dimension of the data \\
+\hline
+{\em num\+\_\+segments} & Number of segments to calculate the autocorrelation length \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a32229785a7faa2b81d4894aafc640ed5}\label{autocorrelation__cuda_8cu_a32229785a7faa2b81d4894aafc640ed5}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!auto\_corr\_from\_data\_accel@{auto\_corr\_from\_data\_accel}}
+\index{auto\_corr\_from\_data\_accel@{auto\_corr\_from\_data\_accel}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{auto\_corr\_from\_data\_accel()}{auto\_corr\_from\_data\_accel()}}
+{\footnotesize\ttfamily void auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr,  }\item[{double $\ast$$\ast$}]{autocorr }\end{DoxyParamCaption})}
+
+
+
+Find autocorrelation of data at different points in the chain length and output to autocorr. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em output} & Chain data input \\
+\hline
+ & {\em dimension} & Dimension of the data \\
+\hline
+ & {\em N\+\_\+steps} & Number of steps in the data \\
+\hline
+ & {\em num\+\_\+segments} & number of segments to calculate the autocorrelation length \\
+\hline
+ & {\em target\+\_\+corr} & Target correlation ratio \\
+\hline
+\mbox{\texttt{ out}}  & {\em autocorr} & Autocorrelation lengths for the different segments \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a366f884938ea0477409e8d52f0309a44}\label{autocorrelation__cuda_8cu_a366f884938ea0477409e8d52f0309a44}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!auto\_corr\_internal@{auto\_corr\_internal}}
+\index{auto\_corr\_internal@{auto\_corr\_internal}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{auto\_corr\_internal()}{auto\_corr\_internal()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ \+\_\+\+\_\+host\+\_\+\+\_\+ void auto\+\_\+corr\+\_\+internal (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{int}]{lag,  }\item[{double}]{average,  }\item[{double $\ast$}]{corr,  }\item[{int}]{start\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Internal function to calculate the autocorrelation for a given lag Customized for the thread pool architecture, with extra arguments because of the way the memory is allocated. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em arr} & Input array of data \\
+\hline
+ & {\em length} & Length of input array \\
+\hline
+ & {\em lag} & Lag to be used to calculate the correlation \\
+\hline
+ & {\em average} & Average of the array arr \\
+\hline
+\mbox{\texttt{ out}}  & {\em corr} & output correlation \\
+\hline
+ & {\em start\+\_\+id} & ID of location to start calculation -\/-\/ input arrary arr is assumed to be contiguous for multiple dimensions \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_ad8cff0e627281b397e017fec619b38a5}\label{autocorrelation__cuda_8cu_ad8cff0e627281b397e017fec619b38a5}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!auto\_corr\_internal\_kernal@{auto\_corr\_internal\_kernal}}
+\index{auto\_corr\_internal\_kernal@{auto\_corr\_internal\_kernal}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{auto\_corr\_internal\_kernal()}{auto\_corr\_internal\_kernal()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void auto\+\_\+corr\+\_\+internal\+\_\+kernal (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{double}]{average,  }\item[{int $\ast$}]{rho\+\_\+index,  }\item[{double}]{target\+\_\+corr,  }\item[{double}]{var,  }\item[{int}]{start\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Internal function to launch the C\+U\+DA kernel for a range of autocorrelations. 
+
+Correlation function used\+:
+
+rho(lag) = 1 / (length -\/ lag) \textbackslash{}sum (arr\mbox{[}i+lag\mbox{]}-\/average) ( arr\mbox{[}i\mbox{]}-\/ average)
+
+target\+\_\+corr = rho(rho\+\_\+index)/rho(0) = rho(rho\+\_\+index)/var 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em arr} & Input array of data \\
+\hline
+ & {\em length} & Length of data array \\
+\hline
+ & {\em average} & Average of input data \\
+\hline
+\mbox{\texttt{ out}}  & {\em rho\+\_\+index} & Index of the lag that results ina correlation ratio target\+\_\+corr \\
+\hline
+ & {\em target\+\_\+corr} & Target correlation ratio rho(lag)/rho(0) = target\+\_\+corr \\
+\hline
+ & {\em var} & Variance rho(0) \\
+\hline
+ & {\em start\+\_\+id} & Starting index to use for the data array arr \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a00159a0e9eb7e40725a034becb3110c0}\label{autocorrelation__cuda_8cu_a00159a0e9eb7e40725a034becb3110c0}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!copy\_data\_to\_device@{copy\_data\_to\_device}}
+\index{copy\_data\_to\_device@{copy\_data\_to\_device}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{copy\_data\_to\_device()}{copy\_data\_to\_device()}}
+{\footnotesize\ttfamily void copy\+\_\+data\+\_\+to\+\_\+device (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$}]{plan,  }\item[{double $\ast$$\ast$}]{input\+\_\+data,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
+
+
+
+Copy data to device before starting kernels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em plan} & G\+PU plan \\
+\hline
+{\em input\+\_\+data} & Input chain data \\
+\hline
+{\em data\+\_\+length} & Length of data \\
+\hline
+{\em dimension} & Dimension of the data \\
+\hline
+{\em num\+\_\+segments} & Number of segments to calculate the autocorrelation length \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a131867ca45185be0af927a5ec7d7645d}\label{autocorrelation__cuda_8cu_a131867ca45185be0af927a5ec7d7645d}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!deallocate\_gpu\_plan@{deallocate\_gpu\_plan}}
+\index{deallocate\_gpu\_plan@{deallocate\_gpu\_plan}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{deallocate\_gpu\_plan()}{deallocate\_gpu\_plan()}}
+{\footnotesize\ttfamily void deallocate\+\_\+gpu\+\_\+plan (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$}]{plan,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
+
+
+
+Deallocates memory for the autocorrelation--G\+PU structure. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em plan} & Structure for the G\+PU plan \\
+\hline
+{\em data\+\_\+length} & Length of data \\
+\hline
+{\em dimension} & Dimension of the data \\
+\hline
+{\em num\+\_\+segments} & Number of segments to calculate the autocorrelation length \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a2ba6f84b0a37e4fc578791f745ee9912}\label{autocorrelation__cuda_8cu_a2ba6f84b0a37e4fc578791f745ee9912}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!write\_file\_auto\_corr\_from\_data\_accel@{write\_file\_auto\_corr\_from\_data\_accel}}
+\index{write\_file\_auto\_corr\_from\_data\_accel@{write\_file\_auto\_corr\_from\_data\_accel}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{write\_file\_auto\_corr\_from\_data\_accel()}{write\_file\_auto\_corr\_from\_data\_accel()}}
+{\footnotesize\ttfamily void write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel (\begin{DoxyParamCaption}\item[{std\+::string}]{acfile,  }\item[{double $\ast$$\ast$}]{chains,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr }\end{DoxyParamCaption})}
+
+
+
+Write data file given output chains, as formatted by the mcmc\+\_\+sampler. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em acfile} & Output autocorrelation filename \\
+\hline
+{\em chains} & Chain data from M\+C\+M\+C\+\_\+sampler \\
+\hline
+{\em dimension} & Dimension of the data \\
+\hline
+{\em N\+\_\+steps} & Number of steps in the chain \\
+\hline
+{\em num\+\_\+segments} & Number of segments to check the autocorrelation length for each dimension \\
+\hline
+{\em target\+\_\+corr} & Target correlation ratio to use for the correlation length calculation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation__cuda_8cu_a4b4ed2b89a95a13abf59d6e373316770}\label{autocorrelation__cuda_8cu_a4b4ed2b89a95a13abf59d6e373316770}} 
+\index{autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}!write\_file\_auto\_corr\_from\_data\_file\_accel@{write\_file\_auto\_corr\_from\_data\_file\_accel}}
+\index{write\_file\_auto\_corr\_from\_data\_file\_accel@{write\_file\_auto\_corr\_from\_data\_file\_accel}!autocorrelation\_cuda.cu@{autocorrelation\_cuda.cu}}
+\doxysubsubsection{\texorpdfstring{write\_file\_auto\_corr\_from\_data\_file\_accel()}{write\_file\_auto\_corr\_from\_data\_file\_accel()}}
+{\footnotesize\ttfamily void write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel (\begin{DoxyParamCaption}\item[{std\+::string}]{acfile,  }\item[{std\+::string}]{chains\+\_\+file,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr }\end{DoxyParamCaption})}
+
+
+
+Write data file for autocorrelation lengths of the data given a data file name, as written by the mcmc\+\_\+sampler. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em acfile} & Filename of the autocorrelation data \\
+\hline
+{\em chains\+\_\+file} & Filename of the data file for the chains \\
+\hline
+{\em dimension} & Dimension of the data \\
+\hline
+{\em N\+\_\+steps} & Number of steps in the chain \\
+\hline
+{\em num\+\_\+segments} & Number of segments to check the autocorrelation length for each dimension \\
+\hline
+{\em target\+\_\+corr} & Target correlation ratio to use for the correlation length calculation \\
+\hline
+\end{DoxyParams}

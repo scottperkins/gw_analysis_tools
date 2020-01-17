@@ -1,0 +1,64 @@
+A suite of analysis tools useful for gravitational wave science. All code is written in C++, with some of the interface classes wrapped in Cython to allow for python-\/access.\hypertarget{index_compat}{}\doxysection{Compatibility}\label{index_compat}
+Known to work with gcc/g++-\/7
+
+Known to work with gcc/g++-\/9
+
+Need nvcc -- known to work with v9.\+1 of C\+U\+DA
+
+Need G\+S\+L-\/2.\+6 or higher\hypertarget{index_external_libs}{}\doxysection{Required Software}\label{index_external_libs}
+Required non-\/standard C libraries\+: F\+F\+T\+W3 A\+D\+O\+L-\/C -- (must be compiled with Open\+MP option) G\+SL C\+U\+DA
+
+Required non-\/standard Python packages\+: Cython
+
+Required non-\/standard packages for documentation\+: Doxygen\hypertarget{index_dev}{}\doxysection{Current Development}\label{index_dev}
+N\+O\+TE\+: currently using static parameters to share data between threads for \mbox{\hyperlink{mcmc__gw_8cpp}{mcmc\+\_\+gw.\+cpp}}. This could cause issues when running multiple samplers at the same time. Investigating further.
+
+To do\+:
+
+Change M\+C\+M\+C\+\_\+\+MH to use the more general \mbox{\hyperlink{classthreadPool}{thread\+Pool}} class instead of a custom threadpool, incorporate job class and comparator\hypertarget{index_installation}{}\doxysection{Installation}\label{index_installation}
+For proper compilation, update or create the enviornment variables C\+P\+A\+TH, L\+I\+B\+R\+A\+R\+Y\+\_\+\+P\+A\+TH,and L\+D\+\_\+\+L\+I\+B\+R\+A\+R\+Y\+\_\+\+P\+A\+TH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries.
+
+Also, the P\+Y\+T\+H\+O\+N\+P\+A\+TH environment variables must point to /gw\+\_\+analysis\+\_\+tools\+\_\+py/src because I can\textquotesingle{}t figure how to get this shit to work.
+
+In the root directory of the project, run \textquotesingle{}make\textquotesingle{} to compile source files, create the library file and create the cython modules, and create the documentation.
+
+To just create C++/C files, run \textquotesingle{}make c\textquotesingle{}.
+
+Run \textquotesingle{}make test\textquotesingle{} to build a test program that will create an executable.\hypertarget{index_functionality}{}\doxysection{Supported Functionality}\label{index_functionality}
+\hypertarget{index_cmdtools}{}\doxysubsection{Command Line Tools}\label{index_cmdtools}
+bin/mcmc\+\_\+gw\+\_\+tool -- executable that takes in a parameter file and runs an M\+C\+MC on L\+O\+SC data for parameter estimation -- See \mbox{\hyperlink{mcmc__gw__tool_8cpp}{mcmc\+\_\+gw\+\_\+tool.\+cpp}} for documentation\hypertarget{index_wave_gen}{}\doxysubsection{Waveform Generation}\label{index_wave_gen}
+\mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}}, \mbox{\hyperlink{classIMRPhenomPv2}{I\+M\+R\+Phenom\+Pv2}}\hypertarget{index_mod_grav}{}\doxysubsection{Modified Gravity}\label{index_mod_grav}
+\mbox{\hyperlink{classppE__IMRPhenomD__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Inspiral}} \mbox{\hyperlink{classppE__IMRPhenomD__IMR}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+I\+MR}} \mbox{\hyperlink{classppE__IMRPhenomPv2__Inspiral}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+Pv2\+\_\+\+Inspiral}} \mbox{\hyperlink{classppE__IMRPhenomPv2__IMR}{pp\+E\+\_\+\+I\+M\+R\+Phenom\+Pv2\+\_\+\+I\+MR}}\hypertarget{index_fisher}{}\doxysubsection{Fisher Analysis}\label{index_fisher}
+utilizes the above waveform templates\hypertarget{index_mcmc}{}\doxysubsection{M\+C\+M\+C Routines}\label{index_mcmc}
+Has a generic M\+C\+MC sampler, M\+C\+M\+C\+\_\+\+MH, that utilizes gaussian steps, differential evolution steps, and Fisher informed steps. Includes wrapping M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW for GW specific sampling, currently only for one detector.
+
+Includes log likelihood caclulation for implementation in other samplers.\hypertarget{index_usage}{}\doxysection{Usage}\label{index_usage}
+\hypertarget{index_var}{}\doxysubsection{Environment variables}\label{index_var}
+The environment variable P\+Y\+T\+H\+O\+N\+P\+A\+TH should include the directory \$(P\+R\+O\+J\+E\+C\+T\+\_\+\+D\+IR)\hypertarget{index_include}{}\doxysubsection{Include}\label{index_include}
+To include header files, use -\/I\$(P\+R\+O\+J\+E\+C\+T\+\_\+\+D\+I\+R\+E\+C\+T\+O\+RY)/include\hypertarget{index_link}{}\doxysubsection{Link}\label{index_link}
+To link object files, use -\/L\$(P\+R\+O\+J\+E\+C\+T\+\_\+\+D\+I\+R\+E\+C\+T\+O\+RY)/lib -\/lgwat (the -\/L command is un-\/needed if you add /lib to the environment variable C\+P\+A\+TH)
+
+For dynamic linking, the following environment variables for Linux (Mac\+Os) should be updated to include /lib -- L\+D\+\_\+\+L\+I\+B\+R\+A\+R\+Y\+\_\+\+P\+A\+TH (D\+Y\+L\+D\+\_\+\+L\+I\+B\+R\+A\+R\+Y\+\_\+\+P\+A\+TH)
+
+For Cuda code\+: use -\/lcuda -\/lcudart
+
+For Cuda, may need to link to /usr/local/cuda/lib64/ (or wherever this library is on your machine)\hypertarget{index_py}{}\doxysubsection{Python Importable Code}\label{index_py}
+Two modules currently available\+:\hypertarget{index_mcmcpy}{}\doxysubsubsection{gw\+\_\+analysis\+\_\+tools\+\_\+py.\+mcmc\+\_\+routines\+\_\+ext}\label{index_mcmcpy}
+mcmc\+\_\+routines\+\_\+ext.\+pyx wraps the log\+\_\+likelihood functions in mcmc\+\_\+routines.\+cpp\hypertarget{index_wavegenpy}{}\doxysubsubsection{gw\+\_\+analysis\+\_\+tools\+\_\+py.\+waveform\+\_\+generator\+\_\+ext}\label{index_wavegenpy}
+waveform\+\_\+generator\+\_\+ext.\+pyx wraps the fourier\+\_\+waveform function in \mbox{\hyperlink{waveform__generator_8cpp}{waveform\+\_\+generator.\+cpp}}
+
+Also contains the S\+NR calculation function\hypertarget{index_adding_waveforms}{}\doxysubsubsection{Custom Waveforms}\label{index_adding_waveforms}
+If adding waveforms and to have full accesibility\+:
+
+Create class, using other waveforms as template -- need interface to create full waveform (plus,cross polarization), and amplitude/phase
+
+Add the option as a waveform to waveform\+\_\+generation.\+cpp, including the header file at the top of the waveform\+\_\+generation.\+cpp file
+
+Add option to check\+\_\+mod in \mbox{\hyperlink{util_8h}{util.\+h}} if applicable.
+
+For Fishers and M\+C\+MC -- write the class as a template with double and adouble types for all variables. Add the option to unpack\+\_\+parameters, repack\+\_\+parameters, and repack\+\_\+non\+\_\+parameters. Add `M\+C\+M\+C\+\_\+'\textquotesingle{} if using M\+C\+M\+C-\/specific version separate from the fisher version.
+
+\begin{DoxyAuthor}{Author}
+Scott Perkins
+\end{DoxyAuthor}
+Contact\+: \href{mailto:scottep3@illinois.edu}{\texttt{ scottep3@illinois.\+edu}} 

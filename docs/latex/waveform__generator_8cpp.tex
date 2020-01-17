@@ -1,0 +1,249 @@
+\hypertarget{waveform__generator_8cpp}{}\doxysection{src/waveform\+\_\+generator.cpp File Reference}
+\label{waveform__generator_8cpp}\index{src/waveform\_generator.cpp@{src/waveform\_generator.cpp}}
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include \char`\"{}waveform\+\_\+generator.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}I\+M\+R\+Phenom\+P.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pp\+E\+\_\+\+I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}g\+I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
+Include dependency graph for waveform\+\_\+generator.\+cpp\+:
+% FIG 0
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__generator_8cpp_a8591c44df6b24c56f9cf6778eaaff211}{fourier\+\_\+waveform}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$waveform\+\_\+plus, std\+::complex$<$ T $>$ $\ast$waveform\+\_\+cross, string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the plus/cross polarizations of an quasi-\/circular binary. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{waveform__generator_8cpp_ae1722eb2df95b1de6495650b9e5ff630}{fourier\+\_\+waveform}} (double $\ast$frequencies, int length, double $\ast$waveform\+\_\+plus\+\_\+real, double $\ast$waveform\+\_\+plus\+\_\+imag, double $\ast$waveform\+\_\+cross\+\_\+real, double $\ast$waveform\+\_\+cross\+\_\+imag, string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters)
+\item 
+int \mbox{\hyperlink{waveform__generator_8cpp_a290382872adb5860aa7ba5f2c90a14af}{fourier\+\_\+waveform}} (double $\ast$frequencies, int length, std\+::complex$<$ double $>$ $\ast$waveform, string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the (2,2) mode of an quasi-\/circular binary. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{waveform__generator_8cpp_a0784e75fc03593f717553a5983aca394}{fourier\+\_\+waveform}} (double $\ast$frequencies, int length, double $\ast$waveform\+\_\+real, double $\ast$waveform\+\_\+imag, string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__generator_8cpp_acbc169a17e10956bcc7e1e47fc3c0310}{fourier\+\_\+amplitude}} (T $\ast$frequencies, int length, T $\ast$amplitude, string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the amplitude of the (2,2) mode of an quasi-\/circular binary. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_aacebe5c329697d0c9f8ef3a0dbf351b4}\label{waveform__generator_8cpp_aacebe5c329697d0c9f8ef3a0dbf351b4}} 
+template int {\bfseries fourier\+\_\+amplitude$<$ double $>$} (double $\ast$, int, double $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_ad5faa8c46ea3876ad16b5c80d8b8ae53}\label{waveform__generator_8cpp_ad5faa8c46ea3876ad16b5c80d8b8ae53}} 
+template int {\bfseries fourier\+\_\+amplitude$<$ adouble $>$} (adouble $\ast$, int, adouble $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__generator_8cpp_a12a44f307fdb1bc05115b84c52f2e88c}{fourier\+\_\+phase}} (T $\ast$frequencies, int length, T $\ast$phase, string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the phase of the (2,2) mode of an quasi-\/circular binary. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_a53c29cfd7c4887ca3de425149eb38aa1}\label{waveform__generator_8cpp_a53c29cfd7c4887ca3de425149eb38aa1}} 
+template int {\bfseries fourier\+\_\+phase$<$ double $>$} (double $\ast$, int, double $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_abd8a9e9f681e02dbc3b8042401de2c4b}\label{waveform__generator_8cpp_abd8a9e9f681e02dbc3b8042401de2c4b}} 
+template int {\bfseries fourier\+\_\+phase$<$ adouble $>$} (adouble $\ast$, int, adouble $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__generator_8cpp_a5c1e4c24cb332e1a692502e4f3004eb5}{fourier\+\_\+phase}} (T $\ast$frequencies, int length, T $\ast$phase\+\_\+plus, T $\ast$phase\+\_\+cross, string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the phase of the plus and cross mode of a quasi-\/circular binary. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_ae6eee2f88bd28d69d60714919e9e40e3}\label{waveform__generator_8cpp_ae6eee2f88bd28d69d60714919e9e40e3}} 
+template int {\bfseries fourier\+\_\+waveform$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_afd8d50ad1b6bb0e3d371debf50877f94}\label{waveform__generator_8cpp_afd8d50ad1b6bb0e3d371debf50877f94}} 
+template int {\bfseries fourier\+\_\+waveform$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_a1f97fafbad6ad4527ae1447a19746bdf}\label{waveform__generator_8cpp_a1f97fafbad6ad4527ae1447a19746bdf}} 
+template int {\bfseries fourier\+\_\+phase$<$ double $>$} (double $\ast$, int, double $\ast$, double $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__generator_8cpp_a0c9227be02abd9079abb29bb86076d0b}\label{waveform__generator_8cpp_a0c9227be02abd9079abb29bb86076d0b}} 
+template int {\bfseries fourier\+\_\+phase$<$ adouble $>$} (adouble $\ast$, int, adouble $\ast$, adouble $\ast$, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+File that handles the construction of the (2,2) waveform as described by \mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} by Khan et. al.
+
+Builds a waveform for given D\+E\+T\+E\+C\+T\+OR F\+R\+A\+ME parameters 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{waveform__generator_8cpp_acbc169a17e10956bcc7e1e47fc3c0310}\label{waveform__generator_8cpp_acbc169a17e10956bcc7e1e47fc3c0310}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_amplitude@{fourier\_amplitude}}
+\index{fourier\_amplitude@{fourier\_amplitude}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_amplitude()}{fourier\_amplitude()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+amplitude (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{T $\ast$}]{amplitude,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the amplitude of the (2,2) mode of an quasi-\/circular binary. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+{\em length} & integer length of all the arrays \\
+\hline
+{\em amplitude} & output array for the amplitude \\
+\hline
+{\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__generator_8cpp_a12a44f307fdb1bc05115b84c52f2e88c}\label{waveform__generator_8cpp_a12a44f307fdb1bc05115b84c52f2e88c}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_phase@{fourier\_phase}}
+\index{fourier\_phase@{fourier\_phase}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_phase()}{fourier\_phase()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+phase (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{T $\ast$}]{phase,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the phase of the (2,2) mode of an quasi-\/circular binary. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+{\em length} & integer length of all the arrays \\
+\hline
+{\em phase} & output array for the phase \\
+\hline
+{\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__generator_8cpp_a5c1e4c24cb332e1a692502e4f3004eb5}\label{waveform__generator_8cpp_a5c1e4c24cb332e1a692502e4f3004eb5}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_phase@{fourier\_phase}}
+\index{fourier\_phase@{fourier\_phase}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_phase()}{fourier\_phase()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+phase (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{T $\ast$}]{phase\+\_\+plus,  }\item[{T $\ast$}]{phase\+\_\+cross,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the phase of the plus and cross mode of a quasi-\/circular binary. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+{\em length} & integer length of all the arrays \\
+\hline
+{\em phase\+\_\+plus} & output array for the phase \\
+\hline
+{\em phase\+\_\+cross} & output array for the phase \\
+\hline
+{\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__generator_8cpp_ae1722eb2df95b1de6495650b9e5ff630}\label{waveform__generator_8cpp_ae1722eb2df95b1de6495650b9e5ff630}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_waveform@{fourier\_waveform}}
+\index{fourier\_waveform@{fourier\_waveform}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_waveform()}{fourier\_waveform()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily int fourier\+\_\+waveform (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{double $\ast$}]{waveform\+\_\+plus\+\_\+real,  }\item[{double $\ast$}]{waveform\+\_\+plus\+\_\+imag,  }\item[{double $\ast$}]{waveform\+\_\+cross\+\_\+real,  }\item[{double $\ast$}]{waveform\+\_\+cross\+\_\+imag,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+{\em length} & integer length of all the arrays \\
+\hline
+{\em waveform\+\_\+plus\+\_\+real} & complex array for the output waveform \\
+\hline
+{\em waveform\+\_\+plus\+\_\+imag} & complex array for the output waveform \\
+\hline
+{\em waveform\+\_\+cross\+\_\+real} & complex array for the output waveform \\
+\hline
+{\em waveform\+\_\+cross\+\_\+imag} & complex array for the output waveform \\
+\hline
+{\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+{\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__generator_8cpp_a0784e75fc03593f717553a5983aca394}\label{waveform__generator_8cpp_a0784e75fc03593f717553a5983aca394}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_waveform@{fourier\_waveform}}
+\index{fourier\_waveform@{fourier\_waveform}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_waveform()}{fourier\_waveform()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily int fourier\+\_\+waveform (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{double $\ast$}]{waveform\+\_\+real,  }\item[{double $\ast$}]{waveform\+\_\+imag,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+{\em length} & integer length of all the arrays \\
+\hline
+{\em waveform\+\_\+real} & complex array for the output waveform \\
+\hline
+{\em waveform\+\_\+imag} & complex array for the output waveform \\
+\hline
+{\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+{\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__generator_8cpp_a290382872adb5860aa7ba5f2c90a14af}\label{waveform__generator_8cpp_a290382872adb5860aa7ba5f2c90a14af}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_waveform@{fourier\_waveform}}
+\index{fourier\_waveform@{fourier\_waveform}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_waveform()}{fourier\_waveform()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily int fourier\+\_\+waveform (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{waveform,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the (2,2) mode of an quasi-\/circular binary. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+{\em length} & integer length of all the arrays \\
+\hline
+{\em waveform} & complex array for the output waveform \\
+\hline
+{\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+{\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__generator_8cpp_a8591c44df6b24c56f9cf6778eaaff211}\label{waveform__generator_8cpp_a8591c44df6b24c56f9cf6778eaaff211}} 
+\index{waveform\_generator.cpp@{waveform\_generator.cpp}!fourier\_waveform@{fourier\_waveform}}
+\index{fourier\_waveform@{fourier\_waveform}!waveform\_generator.cpp@{waveform\_generator.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_waveform()}{fourier\_waveform()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+waveform (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{waveform\+\_\+plus,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{waveform\+\_\+cross,  }\item[{string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the plus/cross polarizations of an quasi-\/circular binary. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters
+
+This puts the responsibility on the user to pass the necessary parameters
+
+{\itshape N\+E\+ED TO O\+U\+T\+L\+I\+NE O\+P\+T\+I\+O\+NS F\+OR E\+A\+CH M\+E\+T\+H\+OD IN D\+E\+P\+TH}
+
+N\+EW P\+H\+A\+SE O\+P\+T\+I\+O\+NS for
+
+P\+H\+E\+N\+O\+MD O\+N\+LY\+:
+
+If phic is assigned, the reference frequency and reference phase are I\+G\+N\+O\+R\+ED.
+
+If Phic is unassigned, a reference phase A\+ND a reference frequency are looked for.\+If no options are found, both are set to 0.
+
+If tc is assigned, it is used.
+
+If tc is unassigned, the waveform is shifted so the merger happens at 0.
+
+Phenom\+Pv2\+:
+
+Phi\+Ref and f\+\_\+ref are required, phic is not an option.
+
+tc, if specified, is used with the use of interpolation. If not, tc is set such that coalescence happens at t=0 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+ & {\em length} & integer length of all the arrays \\
+\hline
+\mbox{\texttt{ out}}  & {\em waveform\+\_\+plus} & complex array for the output plus polarization waveform \\
+\hline
+\mbox{\texttt{ out}}  & {\em waveform\+\_\+cross} & complex array for the output cross polarization waveform \\
+\hline
+ & {\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+ & {\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}

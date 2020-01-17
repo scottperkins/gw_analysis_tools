@@ -1,0 +1,66 @@
+\hypertarget{IMRPhenomP_8cpp}{}\doxysection{src/\+I\+M\+R\+PhenomP.cpp File Reference}
+\label{IMRPhenomP_8cpp}\index{src/IMRPhenomP.cpp@{src/IMRPhenomP.cpp}}
+{\ttfamily \#include \char`\"{}I\+M\+R\+Phenom\+P.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$fstream$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include \char`\"{}I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$type\+\_\+traits$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+interp.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+spline.\+h$>$}\newline
+Include dependency graph for I\+M\+R\+Phenom\+P.\+cpp\+:
+% FIG 0
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries R\+O\+T\+A\+T\+EZ}(angle,  vx,  vy,  vz)
+\item 
+\#define {\bfseries R\+O\+T\+A\+T\+EY}(angle,  vx,  vy,  vz)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{IMRPhenomP_8cpp_a7398490e588495f0087616921a791ede}\label{IMRPhenomP_8cpp_a7398490e588495f0087616921a791ede}} 
+const double {\bfseries sqrt\+\_\+6} = 2.\+44948974278317788
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Source code for I\+M\+R\+PhenomP
+
+Verified against L\+A\+Lsuite 2019\+\_\+09\+\_\+25 
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{IMRPhenomP_8cpp_ac7b1a6a2bcd511c88405f0d1c53d6f9a}\label{IMRPhenomP_8cpp_ac7b1a6a2bcd511c88405f0d1c53d6f9a}} 
+\index{IMRPhenomP.cpp@{IMRPhenomP.cpp}!ROTATEY@{ROTATEY}}
+\index{ROTATEY@{ROTATEY}!IMRPhenomP.cpp@{IMRPhenomP.cpp}}
+\doxysubsubsection{\texorpdfstring{ROTATEY}{ROTATEY}}
+{\footnotesize\ttfamily \#define R\+O\+T\+A\+T\+EY(\begin{DoxyParamCaption}\item[{}]{angle,  }\item[{}]{vx,  }\item[{}]{vy,  }\item[{}]{vz }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{tmp1 = vx*cos(angle) + vz*sin(angle);\(\backslash\)}
+\DoxyCodeLine{tmp2 = -\/ vx*sin(angle) + vz*cos(angle);\(\backslash\)}
+\DoxyCodeLine{vx = tmp1;\(\backslash\)}
+\DoxyCodeLine{vz = tmp2}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{IMRPhenomP_8cpp_a31ac217bed1daa05f93845a6f9a6a211}\label{IMRPhenomP_8cpp_a31ac217bed1daa05f93845a6f9a6a211}} 
+\index{IMRPhenomP.cpp@{IMRPhenomP.cpp}!ROTATEZ@{ROTATEZ}}
+\index{ROTATEZ@{ROTATEZ}!IMRPhenomP.cpp@{IMRPhenomP.cpp}}
+\doxysubsubsection{\texorpdfstring{ROTATEZ}{ROTATEZ}}
+{\footnotesize\ttfamily \#define R\+O\+T\+A\+T\+EZ(\begin{DoxyParamCaption}\item[{}]{angle,  }\item[{}]{vx,  }\item[{}]{vy,  }\item[{}]{vz }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{tmp1 = vx*cos(angle) -\/ vy*sin(angle);\(\backslash\)}
+\DoxyCodeLine{tmp2 = vx*sin(angle) + vy*cos(angle);\(\backslash\)}
+\DoxyCodeLine{vx = tmp1;\(\backslash\)}
+\DoxyCodeLine{vy = tmp2}
+
+\end{DoxyCode}

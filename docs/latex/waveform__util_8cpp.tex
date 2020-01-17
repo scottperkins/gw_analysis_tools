@@ -1,0 +1,811 @@
+\hypertarget{waveform__util_8cpp}{}\doxysection{src/waveform\+\_\+util.cpp File Reference}
+\label{waveform__util_8cpp}\index{src/waveform\_util.cpp@{src/waveform\_util.cpp}}
+{\ttfamily \#include \char`\"{}waveform\+\_\+util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}G\+W\+A\+T\+Config.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}waveform\+\_\+generator.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}I\+M\+R\+Phenom\+P.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pp\+E\+\_\+\+I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}detector\+\_\+util.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}pn\+\_\+waveform\+\_\+util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$fftw3.\+h$>$}\newline
+{\ttfamily \#include $<$algorithm$>$}\newline
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$adolc/taping.\+h$>$}\newline
+{\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
+{\ttfamily \#include $<$adolc/drivers/drivers.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+integration.\+h$>$}\newline
+Include dependency graph for waveform\+\_\+util.\+cpp\+:
+% FIG 0
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structgsl__snr__struct}{gsl\+\_\+snr\+\_\+struct}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{waveform__util_8cpp_a0a5e9bfac97929ed68c247c3ff90fca2}{data\+\_\+snr\+\_\+maximized\+\_\+extrinsic}} (double $\ast$frequencies, int length, std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$param)
+\begin{DoxyCompactList}\small\item\em Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{waveform__util_8cpp_a85abee44a54e906762d980f56b76bc46}{data\+\_\+snr\+\_\+maximized\+\_\+extrinsic}} (double $\ast$frequencies, int length, double $\ast$data\+\_\+real, double $\ast$data\+\_\+imag, double $\ast$psd, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$param)
+\begin{DoxyCompactList}\small\item\em Light wrapper for the data\+\_\+snr\+\_\+maximized\+\_\+extrinsic method. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{waveform__util_8cpp_a24123fc7426785f73e4b393af556e3b2}{calculate\+\_\+snr}} (std\+::string sensitivity\+\_\+curve, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double $\ast$frequencies, int length)
+\begin{DoxyCompactList}\small\item\em Routine to calculate the S\+NR of a template with G\+SL quadrature integration. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{waveform__util_8cpp_ae457f376ac6868d88fa7c428a1cc0798}{calculate\+\_\+snr\+\_\+gsl}} (double $\ast$snr, std\+::string sensitivity\+\_\+curve, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double f\+\_\+min, double f\+\_\+max, double relative\+\_\+error)
+\begin{DoxyCompactList}\small\item\em Routine to calculate the S\+NR of a template with G\+SL quadrature integration. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{waveform__util_8cpp_a7a6b3d3d9c2f2fee67faef89f435f780}{calculate\+\_\+snr\+\_\+gsl}} (double $\ast$snr, std\+::string sensitivity\+\_\+curve, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double f\+\_\+min, double f\+\_\+max, double relative\+\_\+error, gsl\+\_\+integration\+\_\+workspace $\ast$w, int np)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_aac4a9bc1f23ef60f44b6497cbc0a1c62}\label{waveform__util_8cpp_aac4a9bc1f23ef60f44b6497cbc0a1c62}} 
+double \mbox{\hyperlink{waveform__util_8cpp_aac4a9bc1f23ef60f44b6497cbc0a1c62}{integrand\+\_\+snr\+\_\+\+S\+A\+\_\+subroutine}} (double f, void $\ast$subroutine\+\_\+params)
+\begin{DoxyCompactList}\small\item\em Internal function to calculate the S\+NR integrand for sky-\/averaged waveforms. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a61996edcf8006475f688ef5ab6a22be8}\label{waveform__util_8cpp_a61996edcf8006475f688ef5ab6a22be8}} 
+double \mbox{\hyperlink{waveform__util_8cpp_a61996edcf8006475f688ef5ab6a22be8}{integrand\+\_\+snr\+\_\+subroutine}} (double f, void $\ast$subroutine\+\_\+params)
+\begin{DoxyCompactList}\small\item\em Internal function to calculate the S\+NR integrand for full waveforms. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{waveform__util_8cpp_a65e74aae0c49a3854f81e349413b20e5}{calculate\+\_\+snr}} (std\+::string sensitivity\+\_\+curve, std\+::complex$<$ double $>$ $\ast$waveform, double $\ast$frequencies, int length)
+\begin{DoxyCompactList}\small\item\em Caclulates the snr given a detector and waveform (complex) and frequencies. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a6e923c1ceedf04aab52a9635a67e2aa2}\label{waveform__util_8cpp_a6e923c1ceedf04aab52a9635a67e2aa2}} 
+double {\bfseries calculate\+\_\+snr\+\_\+internal} (double $\ast$psd, std\+::complex$<$ double $>$ $\ast$waveform, double $\ast$frequencies, int length)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_acfc4f9ff901f2b97fe3c90464eaf6ddd}{fourier\+\_\+detector\+\_\+response\+\_\+horizon}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$hplus, std\+::complex$<$ T $>$ $\ast$hcross, std\+::complex$<$ T $>$ $\ast$detector\+\_\+response, T theta, T phi, std\+::string detector)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_a46e4717d9625b9ab1f288934628a152f}{fourier\+\_\+detector\+\_\+response\+\_\+horizon}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$hplus, std\+::complex$<$ T $>$ $\ast$hcross, std\+::complex$<$ T $>$ $\ast$detector\+\_\+response, T theta, T phi, T psi, std\+::string detector)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_ada5544fbdbe68fb348d59fa7714fa35e}{fourier\+\_\+detector\+\_\+response\+\_\+horizon}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$response, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the detector response caused by impinging gravitational waves from a quasi-\/circular binary. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_ad3e4a354390ac1f31d58d4cbd1090e25}{fourier\+\_\+detector\+\_\+response\+\_\+equatorial}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$hplus, std\+::complex$<$ T $>$ $\ast$hcross, std\+::complex$<$ T $>$ $\ast$detector\+\_\+response, T ra, T dec, T psi, double gmst, T $\ast$times, T L\+I\+S\+A\+\_\+alpha0, T L\+I\+S\+A\+\_\+phi0, T theta\+\_\+j\+\_\+ecl, T phi\+\_\+j\+\_\+ecl, std\+::string detector)
+\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_a234c1a71c579c913e0c1033d951dbbe5}{fourier\+\_\+detector\+\_\+response\+\_\+equatorial}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$response, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Function to produce the detector response caused by impinging gravitational waves from a quasi-\/circular binary for equatorial coordinates for T\+E\+R\+R\+E\+S\+T\+I\+AL detectors, where the earth\textquotesingle{}s rotation during the signal is minor. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_a6f2665d6e33ace647dc022cdbdc66045}{fourier\+\_\+detector\+\_\+response\+\_\+equatorial}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$response, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters, T $\ast$times)
+\begin{DoxyCompactList}\small\item\em Function to produce the detector response caused by impinging gravitational waves from a quasi-\/circular binary for equatorial coordinates. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{waveform__util_8cpp_a6ae5262e3a7ee2c676e8fe426f113368}{fourier\+\_\+detector\+\_\+response}} (T $\ast$frequencies, int length, std\+::complex$<$ T $>$ $\ast$response, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters, T $\ast$times)
+\begin{DoxyCompactList}\small\item\em Wrapper to handle all detector\+\_\+response calls -- horizon and equatorial. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a88ac9554c7e1fc70d5ce5bc9925853ff}\label{waveform__util_8cpp_a88ac9554c7e1fc70d5ce5bc9925853ff}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$, double $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a8a43be423902973710a251fc0747228d}\label{waveform__util_8cpp_a8a43be423902973710a251fc0747228d}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$, adouble $\ast$)
+\item 
+int \mbox{\hyperlink{waveform__util_8cpp_a505fe9689f0a2c8484fd2edb087d7f37}{fourier\+\_\+detector\+\_\+amplitude\+\_\+phase}} (double $\ast$frequencies, int length, double $\ast$amplitude, double $\ast$phase, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters)
+\begin{DoxyCompactList}\small\item\em Calculates the amplitude (magnitude) and phase (argument) of the response of a given detector. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{waveform__util_8cpp_a42f5568f9a2714a8cb64ac8367cece02}{time\+\_\+phase\+\_\+corrected\+\_\+autodiff}} (double $\ast$times, int length, double $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, bool correct\+\_\+time, int $\ast$tapes\+\_\+in)
+\begin{DoxyCompactList}\small\item\em Mapping from phase to time A\+U\+T\+O\+D\+I\+F\+F\+E\+R\+E\+N\+T\+I\+A\+T\+I\+ON using A\+D\+O\+L-\/C. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{waveform__util_8cpp_a806f40462cbcdff3d062ac7fa1275915}{boundary\+\_\+number}} (std\+::string method)
+\begin{DoxyCompactList}\small\item\em Utility to inform the fisher routine how many logical boundaries should be expected. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{waveform__util_8cpp_a6c78a73b052376ec0c8acddcedb202bd}{time\+\_\+phase\+\_\+corrected}} (T $\ast$times, int length, T $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$params, std\+::string generation\+\_\+method, bool correct\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Mapping from phase to time N\+U\+M\+E\+R\+I\+C\+AL. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a1f454b07417d139266fd494ddfab1dcc}\label{waveform__util_8cpp_a1f454b07417d139266fd494ddfab1dcc}} 
+{\footnotesize template$<$class T $>$ }\\void {\bfseries transform\+\_\+orientation\+\_\+coords} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$parameters, std\+::string generation\+\_\+method, std\+::string detector)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_ac59323f74b4fc2a64d60adf4c6cefb90}\label{waveform__util_8cpp_ac59323f74b4fc2a64d60adf4c6cefb90}} 
+template void {\bfseries transform\+\_\+orientation\+\_\+coords$<$ double $>$} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$, std\+::string, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_adf6cdf827c7876e7f9247ba92beec852}\label{waveform__util_8cpp_adf6cdf827c7876e7f9247ba92beec852}} 
+template void {\bfseries transform\+\_\+orientation\+\_\+coords$<$ adouble $>$} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$, std\+::string, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_ad01ae1e6e5b37e27d28975374d504d75}\label{waveform__util_8cpp_ad01ae1e6e5b37e27d28975374d504d75}} 
+void {\bfseries assign\+\_\+freq\+\_\+boundaries} (double $\ast$freq\+\_\+boundaries, double $\ast$intermediate\+\_\+freqs, int boundary\+\_\+num, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method)
+\item 
+void \mbox{\hyperlink{waveform__util_8cpp_ad8f19ab5b9b95d8e31d0cca87a4f560c}{integration\+\_\+bounds}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, std\+::string detector, std\+::string sensitivity\+\_\+curve, double fmin, double fmax, double signal\+\_\+to\+\_\+noise, double tol, double $\ast$integration\+\_\+bounds)
+\begin{DoxyCompactList}\small\item\em Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{waveform__util_8cpp_a7dcc233b0537530ae4a5062d5dd93777}{integration\+\_\+interval}} (double sampling\+\_\+freq, double integration\+\_\+time, std\+::string detector, std\+::string sensitivity\+\_\+curve, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double $\ast$freq\+\_\+bounds)
+\begin{DoxyCompactList}\small\item\em Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{waveform__util_8cpp_ae3ab5cade299ee4fd0ab019d4f63042c}{integration\+\_\+interval\+\_\+discrete}} (double sampling\+\_\+freq, double integration\+\_\+time, std\+::string detector, std\+::string sensitivity\+\_\+curve, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double $\ast$freq\+\_\+bounds)
+\begin{DoxyCompactList}\small\item\em Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a8ee807356a4303fb65463fde5286ea28}\label{waveform__util_8cpp_a8ee807356a4303fb65463fde5286ea28}} 
+{\footnotesize template$<$class T $>$ }\\void {\bfseries postmerger\+\_\+params} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$params, std\+::string generation\+\_\+method, T $\ast$fpeak, T $\ast$fdamp, T $\ast$f\+RD)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_acfbfa7a6f00e70cb658c34fabc1a3b6b}\label{waveform__util_8cpp_acfbfa7a6f00e70cb658c34fabc1a3b6b}} 
+template void {\bfseries postmerger\+\_\+params$<$ double $>$} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$, std\+::string, double $\ast$, double $\ast$, double $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a30cab76614a6152996df1e71871337db}\label{waveform__util_8cpp_a30cab76614a6152996df1e71871337db}} 
+template void {\bfseries postmerger\+\_\+params$<$ adouble $>$} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$, std\+::string, adouble $\ast$, adouble $\ast$, adouble $\ast$)
+\item 
+void \mbox{\hyperlink{waveform__util_8cpp_a3400a327a02e56c1b8defbd342d0cfee}{Tbm\+\_\+to\+\_\+freq}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, double Tbm, double $\ast$freq, double tol)
+\begin{DoxyCompactList}\small\item\em Convenience function to Calculate the time before merger using numerical methods. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{waveform__util_8cpp_a8404fb320da8cbbf323284e98c915b1a}{threshold\+\_\+times}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, double T\+\_\+obs, double T\+\_\+wait, double f\+\_\+lower, double f\+\_\+upper, std\+::string SN, double S\+N\+R\+\_\+thresh, double $\ast$threshold\+\_\+times\+\_\+out, double tolerance)
+\begin{DoxyCompactList}\small\item\em Utility for calculating the threshold times before merger that result in an S\+NR$>$S\+N\+R\+\_\+thresh. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{waveform__util_8cpp_ab50c071471073e81a08351efb9594313}{threshold\+\_\+times}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, double T\+\_\+obs, double T\+\_\+wait, double $\ast$freqs, double $\ast$SN, int length, double S\+N\+R\+\_\+thresh, double $\ast$threshold\+\_\+times\+\_\+out, double tolerance)
+\begin{DoxyCompactList}\small\item\em Utility for calculating the threshold times before merger that result in an S\+NR$>$S\+N\+R\+\_\+thresh. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{waveform__util_8cpp_a61791d5e6231ea72ce813aa3501a8ee4}{threshold\+\_\+times\+\_\+gsl}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, double T\+\_\+obs, double T\+\_\+wait, double fmin, double fmax, std\+::string SN, double S\+N\+R\+\_\+thresh, double $\ast$threshold\+\_\+times\+\_\+out, double tolerance, gsl\+\_\+integration\+\_\+workspace $\ast$w, int np)
+\begin{DoxyCompactList}\small\item\em Utility for calculating the threshold times before merger that result in an S\+NR$>$S\+N\+R\+\_\+thresh --G\+SL quad integration implementation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a048dd8b6f27c6641faef923970bb0126}\label{waveform__util_8cpp_a048dd8b6f27c6641faef923970bb0126}} 
+double {\bfseries snr\+\_\+threshold\+\_\+subroutine} (double fmin, double fmax, double rel\+\_\+err, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, std\+::string SN, gsl\+\_\+integration\+\_\+workspace $\ast$w, int np)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_aa82853e1c993ecbc59eea2dd1595ba6f}\label{waveform__util_8cpp_aa82853e1c993ecbc59eea2dd1595ba6f}} 
+template void {\bfseries time\+\_\+phase\+\_\+corrected$<$ double $>$} (double $\ast$, int, double $\ast$, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$, std\+::string, bool)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a336667e1ea86e5bd4c68b12c4a898ac5}\label{waveform__util_8cpp_a336667e1ea86e5bd4c68b12c4a898ac5}} 
+template void {\bfseries time\+\_\+phase\+\_\+corrected$<$ adouble $>$} (adouble $\ast$, int, adouble $\ast$, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$, std\+::string, bool)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_ac1d2716d6c8533d947731a69846747e7}\label{waveform__util_8cpp_ac1d2716d6c8533d947731a69846747e7}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+horizon$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, double, double, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_ab4409c36986fafe9015d32743f022bd2}\label{waveform__util_8cpp_ab4409c36986fafe9015d32743f022bd2}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+horizon$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, adouble, adouble, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a43d346b501bda3bc510bf68a8715a87e}\label{waveform__util_8cpp_a43d346b501bda3bc510bf68a8715a87e}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+horizon$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, double, double, double, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_af66784825ac7e684a29200b37781b005}\label{waveform__util_8cpp_af66784825ac7e684a29200b37781b005}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+horizon$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, adouble, adouble, adouble, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a96e092a44046a7db0b8b148351db66de}\label{waveform__util_8cpp_a96e092a44046a7db0b8b148351db66de}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+equatorial$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a1faab1c5d5f4241de880ab858b05ee81}\label{waveform__util_8cpp_a1faab1c5d5f4241de880ab858b05ee81}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+equatorial$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_aaf0b7ea8cfa7ea5b708bbd06ad7225a7}\label{waveform__util_8cpp_aaf0b7ea8cfa7ea5b708bbd06ad7225a7}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+equatorial$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$, double $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a71b91c8d2033985e5794567e289f36ba}\label{waveform__util_8cpp_a71b91c8d2033985e5794567e289f36ba}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+equatorial$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$, adouble $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a130bbffc150ff0db8593398cf3cd4990}\label{waveform__util_8cpp_a130bbffc150ff0db8593398cf3cd4990}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+horizon$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a59d08bb07507baf28e371705d6c045a7}\label{waveform__util_8cpp_a59d08bb07507baf28e371705d6c045a7}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+horizon$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::string, std\+::string, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_ae819928fbc6426334f162b5ec5f2fdeb}\label{waveform__util_8cpp_ae819928fbc6426334f162b5ec5f2fdeb}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+equatorial$<$ double $>$} (double $\ast$, int, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, std\+::complex$<$ double $>$ $\ast$, double, double, double, double, double $\ast$, double, double, double, double, std\+::string)
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a68d493835ab0b457550d8b80d823f756}\label{waveform__util_8cpp_a68d493835ab0b457550d8b80d823f756}} 
+template int {\bfseries fourier\+\_\+detector\+\_\+response\+\_\+equatorial$<$ adouble $>$} (adouble $\ast$, int, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, std\+::complex$<$ adouble $>$ $\ast$, adouble, adouble, adouble, double, adouble $\ast$, adouble, adouble, adouble, adouble, std\+::string)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utilities for waveforms -\/ S\+NR calculation and detector response
+
+includes snr and detector response
+
+Includes some utilities useful for M\+C\+MC and fisher calculations, as well as time-\/frequency methods for detectors like L\+I\+SA 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{waveform__util_8cpp_a806f40462cbcdff3d062ac7fa1275915}\label{waveform__util_8cpp_a806f40462cbcdff3d062ac7fa1275915}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!boundary\_number@{boundary\_number}}
+\index{boundary\_number@{boundary\_number}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{boundary\_number()}{boundary\_number()}}
+{\footnotesize\ttfamily int boundary\+\_\+number (\begin{DoxyParamCaption}\item[{std\+::string}]{method }\end{DoxyParamCaption})}
+
+
+
+Utility to inform the fisher routine how many logical boundaries should be expected. 
+
+The automatic derivative code requires a new tape for each logical branch of the program, so each waveform\+\_\+generation method needs to add the number of branches here \mbox{\Hypertarget{waveform__util_8cpp_a65e74aae0c49a3854f81e349413b20e5}\label{waveform__util_8cpp_a65e74aae0c49a3854f81e349413b20e5}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!calculate\_snr@{calculate\_snr}}
+\index{calculate\_snr@{calculate\_snr}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{calculate\_snr()}{calculate\_snr()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily double calculate\+\_\+snr (\begin{DoxyParamCaption}\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{waveform,  }\item[{double $\ast$}]{frequencies,  }\item[{int}]{length }\end{DoxyParamCaption})}
+
+
+
+Caclulates the snr given a detector and waveform (complex) and frequencies. 
+
+This function computes the un-\/normalized snr\+: \textbackslash{}sqrt( ( H $\vert$ H ) ) 
+\begin{DoxyParams}{Parameters}
+{\em sensitivity\+\_\+curve} & detector name -\/ must match the string of populate\+\_\+noise precisely \\
+\hline
+{\em waveform} & complex waveform \\
+\hline
+{\em frequencies} & double array of frequencies that the waveform is evaluated at \\
+\hline
+{\em length} & length of the above two arrays \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a24123fc7426785f73e4b393af556e3b2}\label{waveform__util_8cpp_a24123fc7426785f73e4b393af556e3b2}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!calculate\_snr@{calculate\_snr}}
+\index{calculate\_snr@{calculate\_snr}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{calculate\_snr()}{calculate\_snr()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily double calculate\+\_\+snr (\begin{DoxyParamCaption}\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double $\ast$}]{frequencies,  }\item[{int}]{length }\end{DoxyParamCaption})}
+
+
+
+Routine to calculate the S\+NR of a template with G\+SL quadrature integration. 
+
+Sometimes, this is faster than the \`{}`grid'\textquotesingle{} style integration
+
+Supports sky-\/averaged templates, but this should only be used with non-\/precessing waveforms \mbox{\Hypertarget{waveform__util_8cpp_ae457f376ac6868d88fa7c428a1cc0798}\label{waveform__util_8cpp_ae457f376ac6868d88fa7c428a1cc0798}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!calculate\_snr\_gsl@{calculate\_snr\_gsl}}
+\index{calculate\_snr\_gsl@{calculate\_snr\_gsl}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{calculate\_snr\_gsl()}{calculate\_snr\_gsl()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily int calculate\+\_\+snr\+\_\+gsl (\begin{DoxyParamCaption}\item[{double $\ast$}]{snr,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double}]{f\+\_\+min,  }\item[{double}]{f\+\_\+max,  }\item[{double}]{relative\+\_\+error }\end{DoxyParamCaption})}
+
+
+
+Routine to calculate the S\+NR of a template with G\+SL quadrature integration. 
+
+Sometimes, this is faster than the \`{}`grid'\textquotesingle{} style integration
+
+Supports sky-\/averaged templates, but this should only be used with non-\/precessing waveforms 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em snr} & S\+NR \\
+\hline
+ & {\em sensitivity\+\_\+curve} & Noise curve \\
+\hline
+ & {\em detector} & Detector to compute response -\/-\/ can be empty is SA \\
+\hline
+ & {\em generation\+\_\+method} & Generation method \\
+\hline
+ & {\em params} & Source Parameters \\
+\hline
+ & {\em f\+\_\+min} & Lower frequency bound \\
+\hline
+ & {\em f\+\_\+max} & Upper frequency bound \\
+\hline
+ & {\em relative\+\_\+error} & Relative error threshold \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a7a6b3d3d9c2f2fee67faef89f435f780}\label{waveform__util_8cpp_a7a6b3d3d9c2f2fee67faef89f435f780}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!calculate\_snr\_gsl@{calculate\_snr\_gsl}}
+\index{calculate\_snr\_gsl@{calculate\_snr\_gsl}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{calculate\_snr\_gsl()}{calculate\_snr\_gsl()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily int calculate\+\_\+snr\+\_\+gsl (\begin{DoxyParamCaption}\item[{double $\ast$}]{snr,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double}]{f\+\_\+min,  }\item[{double}]{f\+\_\+max,  }\item[{double}]{relative\+\_\+error,  }\item[{gsl\+\_\+integration\+\_\+workspace $\ast$}]{w,  }\item[{int}]{np }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em sensitivity\+\_\+curve} & Noise curve \\
+\hline
+{\em detector} & Detector to compute response -\/-\/ can be empty is SA \\
+\hline
+{\em generation\+\_\+method} & Generation method \\
+\hline
+{\em params} & Source Parameters \\
+\hline
+{\em f\+\_\+min} & Lower frequency bound \\
+\hline
+{\em f\+\_\+max} & Upper frequency bound \\
+\hline
+{\em relative\+\_\+error} & Relative error threshold \\
+\hline
+{\em w} & User-\/allocated gsl\+\_\+integration\+\_\+workspace \\
+\hline
+{\em np} & Size of gsl\+\_\+integration\+\_\+workspace allocation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a85abee44a54e906762d980f56b76bc46}\label{waveform__util_8cpp_a85abee44a54e906762d980f56b76bc46}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!data\_snr\_maximized\_extrinsic@{data\_snr\_maximized\_extrinsic}}
+\index{data\_snr\_maximized\_extrinsic@{data\_snr\_maximized\_extrinsic}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{data\_snr\_maximized\_extrinsic()}{data\_snr\_maximized\_extrinsic()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily double data\+\_\+snr\+\_\+maximized\+\_\+extrinsic (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{double $\ast$}]{data\+\_\+real,  }\item[{double $\ast$}]{data\+\_\+imag,  }\item[{double $\ast$}]{psd,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{param }\end{DoxyParamCaption})}
+
+
+
+Light wrapper for the data\+\_\+snr\+\_\+maximized\+\_\+extrinsic method. 
+
+Splits the data into real and imaginary, so all the arguments are C-\/safe 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & Frequencies used by data \\
+\hline
+{\em length} & length of the data \\
+\hline
+{\em data\+\_\+real} & input data in the fourier domain -\/-\/ real part \\
+\hline
+{\em data\+\_\+imag} & input data in the fourier domain -\/-\/ imaginary part \\
+\hline
+{\em psd} & P\+SD for the detector that created the data \\
+\hline
+{\em detector} & Name of the detector -\/-\/See noise\+\_\+util for options \\
+\hline
+{\em generation\+\_\+method} & Generation method for the template -\/-\/ See waveform\+\_\+generation.\+cpp for options \\
+\hline
+{\em param} & \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} structure for the template \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a0a5e9bfac97929ed68c247c3ff90fca2}\label{waveform__util_8cpp_a0a5e9bfac97929ed68c247c3ff90fca2}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!data\_snr\_maximized\_extrinsic@{data\_snr\_maximized\_extrinsic}}
+\index{data\_snr\_maximized\_extrinsic@{data\_snr\_maximized\_extrinsic}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{data\_snr\_maximized\_extrinsic()}{data\_snr\_maximized\_extrinsic()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily double data\+\_\+snr\+\_\+maximized\+\_\+extrinsic (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{param }\end{DoxyParamCaption})}
+
+
+
+Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc. 
+
+The \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} structure holds the parameters for the template to be used (the maximimum likelihood parameters) 
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & Frequencies used by data \\
+\hline
+{\em length} & length of the data \\
+\hline
+{\em data} & input data in the fourier domain \\
+\hline
+{\em psd} & P\+SD for the detector that created the data \\
+\hline
+{\em detector} & Name of the detector -\/-\/See noise\+\_\+util for options \\
+\hline
+{\em generation\+\_\+method} & Generation method for the template -\/-\/ See waveform\+\_\+generation.\+cpp for options \\
+\hline
+{\em param} & \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} structure for the template \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a505fe9689f0a2c8484fd2edb087d7f37}\label{waveform__util_8cpp_a505fe9689f0a2c8484fd2edb087d7f37}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_amplitude\_phase@{fourier\_detector\_amplitude\_phase}}
+\index{fourier\_detector\_amplitude\_phase@{fourier\_detector\_amplitude\_phase}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_amplitude\_phase()}{fourier\_detector\_amplitude\_phase()}}
+{\footnotesize\ttfamily int fourier\+\_\+detector\+\_\+amplitude\+\_\+phase (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{double $\ast$}]{amplitude,  }\item[{double $\ast$}]{phase,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Calculates the amplitude (magnitude) and phase (argument) of the response of a given detector. 
+
+This is for general waveforms, and will work for precessing waveforms
+
+Not as fast as non-\/precessing, but that can\textquotesingle{}t be helped. M\+U\+ST include plus/cross polarizations \mbox{\Hypertarget{waveform__util_8cpp_a6ae5262e3a7ee2c676e8fe426f113368}\label{waveform__util_8cpp_a6ae5262e3a7ee2c676e8fe426f113368}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response@{fourier\_detector\_response}}
+\index{fourier\_detector\_response@{fourier\_detector\_response}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response()}{fourier\_detector\_response()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{response,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters,  }\item[{T $\ast$}]{times }\end{DoxyParamCaption})}
+
+
+
+Wrapper to handle all detector\+\_\+response calls -- horizon and equatorial. 
+
+\mbox{\Hypertarget{waveform__util_8cpp_ad3e4a354390ac1f31d58d4cbd1090e25}\label{waveform__util_8cpp_ad3e4a354390ac1f31d58d4cbd1090e25}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response\_equatorial@{fourier\_detector\_response\_equatorial}}
+\index{fourier\_detector\_response\_equatorial@{fourier\_detector\_response\_equatorial}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response\_equatorial()}{fourier\_detector\_response\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response\+\_\+equatorial (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{hplus,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{hcross,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{detector\+\_\+response,  }\item[{T}]{ra,  }\item[{T}]{dec,  }\item[{T}]{psi,  }\item[{double}]{gmst,  }\item[{T $\ast$}]{times,  }\item[{T}]{L\+I\+S\+A\+\_\+alpha0,  }\item[{T}]{L\+I\+S\+A\+\_\+phi0,  }\item[{T}]{theta\+\_\+j\+\_\+ecl,  }\item[{T}]{phi\+\_\+j\+\_\+ecl,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & array of frequencies corresponding to waveform \\
+\hline
+ & {\em length} & length of frequency/waveform arrays \\
+\hline
+ & {\em hcross} & precomputed cross polarization of the waveform \\
+\hline
+\mbox{\texttt{ out}}  & {\em detector\+\_\+response} & detector response \\
+\hline
+ & {\em ra} & Right Ascension in rad \\
+\hline
+ & {\em dec} & Declination in rad \\
+\hline
+ & {\em psi} & polarization angle (rad) \\
+\hline
+ & {\em gmst} & greenwich mean sidereal time \\
+\hline
+ & {\em detector} & detector -\/ list of supported detectors in noise\+\_\+util \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a234c1a71c579c913e0c1033d951dbbe5}\label{waveform__util_8cpp_a234c1a71c579c913e0c1033d951dbbe5}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response\_equatorial@{fourier\_detector\_response\_equatorial}}
+\index{fourier\_detector\_response\_equatorial@{fourier\_detector\_response\_equatorial}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response\_equatorial()}{fourier\_detector\_response\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response\+\_\+equatorial (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{response,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the detector response caused by impinging gravitational waves from a quasi-\/circular binary for equatorial coordinates for T\+E\+R\+R\+E\+S\+T\+I\+AL detectors, where the earth\textquotesingle{}s rotation during the signal is minor. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters
+
+This puts the responsibility on the user to pass the necessary parameters
+
+Detector options include classic interferometers like L\+I\+G\+O/\+V\+I\+R\+GO (coming soon\+: ET and L\+I\+SA)
+
+This is a wrapper that combines generation with response functions\+: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and V\+I\+R\+GO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+ & {\em length} & integer length of all the arrays \\
+\hline
+\mbox{\texttt{ out}}  & {\em response} & complex array for the output plus polarization waveform \\
+\hline
+ & {\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+ & {\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a6f2665d6e33ace647dc022cdbdc66045}\label{waveform__util_8cpp_a6f2665d6e33ace647dc022cdbdc66045}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response\_equatorial@{fourier\_detector\_response\_equatorial}}
+\index{fourier\_detector\_response\_equatorial@{fourier\_detector\_response\_equatorial}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response\_equatorial()}{fourier\_detector\_response\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response\+\_\+equatorial (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{response,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters,  }\item[{T $\ast$}]{times }\end{DoxyParamCaption})}
+
+
+
+Function to produce the detector response caused by impinging gravitational waves from a quasi-\/circular binary for equatorial coordinates. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters
+
+This puts the responsibility on the user to pass the necessary parameters
+
+Detector options include classic interferometers like L\+I\+G\+O/\+V\+I\+R\+GO (coming soon\+: ET and L\+I\+SA)
+
+This is a wrapper that combines generation with response functions\+: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and V\+I\+R\+GO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+ & {\em length} & integer length of all the arrays \\
+\hline
+\mbox{\texttt{ out}}  & {\em response} & complex array for the output plus polarization waveform \\
+\hline
+ & {\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+ & {\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_acfc4f9ff901f2b97fe3c90464eaf6ddd}\label{waveform__util_8cpp_acfc4f9ff901f2b97fe3c90464eaf6ddd}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response\_horizon@{fourier\_detector\_response\_horizon}}
+\index{fourier\_detector\_response\_horizon@{fourier\_detector\_response\_horizon}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response\_horizon()}{fourier\_detector\_response\_horizon()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response\+\_\+horizon (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{hplus,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{hcross,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{detector\+\_\+response,  }\item[{T}]{theta,  }\item[{T}]{phi,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & array of frequencies corresponding to waveform \\
+\hline
+ & {\em length} & length of frequency/waveform arrays \\
+\hline
+ & {\em hcross} & precomputed cross polarization of the waveform \\
+\hline
+\mbox{\texttt{ out}}  & {\em detector\+\_\+response} & detector response \\
+\hline
+ & {\em theta} & polar angle (rad) theta in detector frame \\
+\hline
+ & {\em phi} & azimuthal angle (rad) phi in detector frame \\
+\hline
+ & {\em detector} & detector -\/ list of supported detectors in noise\+\_\+util \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a46e4717d9625b9ab1f288934628a152f}\label{waveform__util_8cpp_a46e4717d9625b9ab1f288934628a152f}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response\_horizon@{fourier\_detector\_response\_horizon}}
+\index{fourier\_detector\_response\_horizon@{fourier\_detector\_response\_horizon}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response\_horizon()}{fourier\_detector\_response\_horizon()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response\+\_\+horizon (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{hplus,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{hcross,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{detector\+\_\+response,  }\item[{T}]{theta,  }\item[{T}]{phi,  }\item[{T}]{psi,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & array of frequencies corresponding to waveform \\
+\hline
+ & {\em length} & length of frequency/waveform arrays \\
+\hline
+ & {\em hcross} & precomputed cross polarization of the waveform \\
+\hline
+\mbox{\texttt{ out}}  & {\em detector\+\_\+response} & detector response \\
+\hline
+ & {\em theta} & polar angle (rad) theta in detector frame \\
+\hline
+ & {\em phi} & azimuthal angle (rad) phi in detector frame \\
+\hline
+ & {\em psi} & polarization angle (rad) phi in detector frame \\
+\hline
+ & {\em detector} & detector -\/ list of supported detectors in noise\+\_\+util \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_ada5544fbdbe68fb348d59fa7714fa35e}\label{waveform__util_8cpp_ada5544fbdbe68fb348d59fa7714fa35e}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!fourier\_detector\_response\_horizon@{fourier\_detector\_response\_horizon}}
+\index{fourier\_detector\_response\_horizon@{fourier\_detector\_response\_horizon}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{fourier\_detector\_response\_horizon()}{fourier\_detector\_response\_horizon()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+int fourier\+\_\+detector\+\_\+response\+\_\+horizon (\begin{DoxyParamCaption}\item[{T $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ T $>$ $\ast$}]{response,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{parameters }\end{DoxyParamCaption})}
+
+
+
+Function to produce the detector response caused by impinging gravitational waves from a quasi-\/circular binary. 
+
+By using the structure parameter, the function is allowed to be more flexible in using different method of waveform generation -\/ not all methods use the same parameters
+
+This puts the responsibility on the user to pass the necessary parameters
+
+Detector options include classic interferometers like L\+I\+G\+O/\+V\+I\+R\+GO (coming soon\+: ET and L\+I\+SA)
+
+This is a wrapper that combines generation with response functions\+: if producing mulitple responses for one waveform (ie stacking Hanford, Livingston, and V\+I\+R\+GO), it will be considerably more efficient to calculate the waveform once, then combine each response manually 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em frequencies} & double array of frequencies for the waveform to be evaluated at \\
+\hline
+ & {\em length} & integer length of all the arrays \\
+\hline
+\mbox{\texttt{ out}}  & {\em response} & complex array for the output plus polarization waveform \\
+\hline
+ & {\em generation\+\_\+method} & String that corresponds to the generation method -\/ M\+U\+ST BE S\+P\+E\+L\+L\+ED E\+X\+A\+C\+T\+LY \\
+\hline
+ & {\em parameters} & structure containing all the source parameters \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_ad8f19ab5b9b95d8e31d0cca87a4f560c}\label{waveform__util_8cpp_ad8f19ab5b9b95d8e31d0cca87a4f560c}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!integration\_bounds@{integration\_bounds}}
+\index{integration\_bounds@{integration\_bounds}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{integration\_bounds()}{integration\_bounds()}}
+{\footnotesize\ttfamily void integration\+\_\+bounds (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{double}]{fmin,  }\item[{double}]{fmax,  }\item[{double}]{signal\+\_\+to\+\_\+noise,  }\item[{double}]{tol,  }\item[{double $\ast$}]{integration\+\_\+bounds }\end{DoxyParamCaption})}
+
+
+
+Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation. 
+
+Numerically finds the frequencies at which the Fisher should be evaluated at.
+
+Uses the bisection search algorithm for the cases where the waveform enters/leaves the band at S\+NR$>$1
+
+Uses a 100 pt grid search (logarithmically spaced) if the signal has S\+NR$<$1 when entering and leaving
+
+integrand\+\_\+bounds\mbox{[}0\mbox{]} $\sim$ frequency at which $\vert$h$\vert$/(sqrt S) $\sim$signal\+\_\+to\+\_\+noise +/-\/ tol
+
+integrand\+\_\+bounds\mbox{[}1\mbox{]} $\sim$ frequency at which $\vert$h$\vert$/(sqrt S) $\sim$signal\+\_\+to\+\_\+noise +/-\/ tol 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em params} & Parameters of the waveform \\
+\hline
+ & {\em detector} & Detector to use for the response function \\
+\hline
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to use (must be one of the analytic curves in the detector\+\_\+utilitiy file \\
+\hline
+ & {\em fmin} & minimum frequency to use (specific to the detector) \\
+\hline
+ & {\em fmax} & max frequency to use (specific to the detector) \\
+\hline
+ & {\em signal\+\_\+to\+\_\+noise} & Target ratio of $\vert$h$\vert$/ sqrt(\+S) (typically $\sim$0.1) \\
+\hline
+ & {\em tol} & This is a numerical algorithm, so the tolerance must be specified \\
+\hline
+\mbox{\texttt{ out}}  & {\em integration\+\_\+bounds} & bounds fo the integral shape -\/-\/ \mbox{[}2\mbox{]} -\/-\/ (fmin,fmax) \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a7dcc233b0537530ae4a5062d5dd93777}\label{waveform__util_8cpp_a7dcc233b0537530ae4a5062d5dd93777}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!integration\_interval@{integration\_interval}}
+\index{integration\_interval@{integration\_interval}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{integration\_interval()}{integration\_interval()}}
+{\footnotesize\ttfamily void integration\+\_\+interval (\begin{DoxyParamCaption}\item[{double}]{sampling\+\_\+freq,  }\item[{double}]{integration\+\_\+time,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double $\ast$}]{freq\+\_\+bounds }\end{DoxyParamCaption})}
+
+
+
+Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. 
+
+Sensitivity curve has to be one of the options in detector\+\_\+util analytic options
+
+The current scheme is to use the frequency bounds determined by the S\+NR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f\+\_\+integration\+\_\+time, f\+\_\+high\+\_\+band) 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em sampling\+\_\+freq} & Frequency at which the detector operates \\
+\hline
+ & {\em integration\+\_\+time} & Time of observation in seconds \\
+\hline
+ & {\em detector} & Detector to use for the response function \\
+\hline
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to use -\/-\/ must match analytic choices in detector\+\_\+util \\
+\hline
+ & {\em generation\+\_\+method} & method to use for the waveform generation \\
+\hline
+ & {\em params} & parameters of the source \\
+\hline
+\mbox{\texttt{ out}}  & {\em freq\+\_\+bounds} & Output bounds \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_ae3ab5cade299ee4fd0ab019d4f63042c}\label{waveform__util_8cpp_ae3ab5cade299ee4fd0ab019d4f63042c}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!integration\_interval\_discrete@{integration\_interval\_discrete}}
+\index{integration\_interval\_discrete@{integration\_interval\_discrete}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{integration\_interval\_discrete()}{integration\_interval\_discrete()}}
+{\footnotesize\ttfamily void integration\+\_\+interval\+\_\+discrete (\begin{DoxyParamCaption}\item[{double}]{sampling\+\_\+freq,  }\item[{double}]{integration\+\_\+time,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double $\ast$}]{freq\+\_\+bounds }\end{DoxyParamCaption})}
+
+
+
+Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. 
+
+Sensitivity curve has to be one of the options in detector\+\_\+util analytic options
+
+The current scheme is to use the frequency bounds determined by the S\+NR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f\+\_\+integration\+\_\+time, f\+\_\+high\+\_\+band) 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em sampling\+\_\+freq} & Frequency at which the detector operates \\
+\hline
+ & {\em integration\+\_\+time} & Time of observation in seconds \\
+\hline
+ & {\em detector} & Detector to use for the response function \\
+\hline
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to use -\/-\/ must match analytic choices in detector\+\_\+util \\
+\hline
+ & {\em generation\+\_\+method} & method to use for the waveform generation \\
+\hline
+ & {\em params} & parameters of the source \\
+\hline
+\mbox{\texttt{ out}}  & {\em freq\+\_\+bounds} & Output bounds \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a3400a327a02e56c1b8defbd342d0cfee}\label{waveform__util_8cpp_a3400a327a02e56c1b8defbd342d0cfee}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!Tbm\_to\_freq@{Tbm\_to\_freq}}
+\index{Tbm\_to\_freq@{Tbm\_to\_freq}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{Tbm\_to\_freq()}{Tbm\_to\_freq()}}
+{\footnotesize\ttfamily void Tbm\+\_\+to\+\_\+freq (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{double}]{Tbm,  }\item[{double $\ast$}]{freq,  }\item[{double}]{tol }\end{DoxyParamCaption})}
+
+
+
+Convenience function to Calculate the time before merger using numerical methods. 
+
+Uses autodiff -- omp safe but not thread safe 
+\begin{DoxyParams}{Parameters}
+{\em params} & Generation parameters of the source \\
+\hline
+{\em generation\+\_\+method} & Generation method for the waveform \\
+\hline
+{\em Tbm} & target time before merger \\
+\hline
+{\em freq} & Frequency at the input time before merger \\
+\hline
+{\em tol} & Tolerance for the scheme \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_ab50c071471073e81a08351efb9594313}\label{waveform__util_8cpp_ab50c071471073e81a08351efb9594313}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!threshold\_times@{threshold\_times}}
+\index{threshold\_times@{threshold\_times}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{threshold\_times()}{threshold\_times()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void threshold\+\_\+times (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{double}]{T\+\_\+obs,  }\item[{double}]{T\+\_\+wait,  }\item[{double $\ast$}]{freqs,  }\item[{double $\ast$}]{SN,  }\item[{int}]{length,  }\item[{double}]{S\+N\+R\+\_\+thresh,  }\item[{double $\ast$}]{threshold\+\_\+times\+\_\+out,  }\item[{double}]{tolerance }\end{DoxyParamCaption})}
+
+
+
+Utility for calculating the threshold times before merger that result in an S\+NR$>$S\+N\+R\+\_\+thresh. 
+
+See ar\+Xiv 1902.\+00021
+
+Binary must merge within time T\+\_\+wait
+
+S\+NR is calculated with frequencies \mbox{[}f(t\+\_\+mer),f(t\+\_\+mer-\/\+T\+\_\+obs)\mbox{]} or \mbox{[}f(t\+\_\+mer),0\mbox{]} depending on whether the binary has merged or not
+
+Assumes sky average -- Only supports PhenomD for now -- No angular dependence used ( only uses plus polarization -- assumes iota = psi = 0 )
+
+Assumes this is for multiband -- ie stellar mass B\+Hs -- Only uses pn approximation of time frequency relation
+
+If no time before merger satisfies the requirements, both are set to -\/1 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em generation\+\_\+method} & Generation method to use for the waveform \\
+\hline
+ & {\em T\+\_\+obs} & Observation time -\/-\/ also specifies the frequency spacing (\textbackslash{}delta f = 1./\+T\+\_\+obs) \\
+\hline
+ & {\em T\+\_\+wait} & Wait time -\/-\/ Maximum time for binaries to coalesce \\
+\hline
+ & {\em freqs} & Maximum frequency array \\
+\hline
+ & {\em SN} & Noise curve array, should be prepopulated from f\+\_\+lower to f\+\_\+upper with spacing 1./\+T\+\_\+obs \\
+\hline
+ & {\em length} & Length of maximum frequency array \\
+\hline
+ & {\em S\+N\+R\+\_\+thresh} & Threshold S\+NR \\
+\hline
+\mbox{\texttt{ out}}  & {\em threshold\+\_\+times\+\_\+out} & Output frequencies \\
+\hline
+ & {\em tolerance} & Percent tolerance on S\+NR search \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a8404fb320da8cbbf323284e98c915b1a}\label{waveform__util_8cpp_a8404fb320da8cbbf323284e98c915b1a}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!threshold\_times@{threshold\_times}}
+\index{threshold\_times@{threshold\_times}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{threshold\_times()}{threshold\_times()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void threshold\+\_\+times (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{double}]{T\+\_\+obs,  }\item[{double}]{T\+\_\+wait,  }\item[{double}]{f\+\_\+lower,  }\item[{double}]{f\+\_\+upper,  }\item[{std\+::string}]{SN,  }\item[{double}]{S\+N\+R\+\_\+thresh,  }\item[{double $\ast$}]{threshold\+\_\+times\+\_\+out,  }\item[{double}]{tolerance }\end{DoxyParamCaption})}
+
+
+
+Utility for calculating the threshold times before merger that result in an S\+NR$>$S\+N\+R\+\_\+thresh. 
+
+See ar\+Xiv 1902.\+00021
+
+Binary must merge within time T\+\_\+wait
+
+S\+NR is calculated with frequencies \mbox{[}f(t\+\_\+mer),f(t\+\_\+mer-\/\+T\+\_\+obs)\mbox{]} or \mbox{[}f(t\+\_\+mer),0\mbox{]} depending on whether the binary has merged or not
+
+Assumes sky average -- Only supports PhenomD for now
+
+If no time before merger satisfies the requirements, both are set to -\/1 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em generation\+\_\+method} & Generation method to use for the waveform \\
+\hline
+ & {\em T\+\_\+obs} & Observation time -\/-\/ also specifies the frequency spacing (\textbackslash{}delta f = 1./\+T\+\_\+obs) \\
+\hline
+ & {\em T\+\_\+wait} & Wait time -\/-\/ Maximum time for binaries to coalesce \\
+\hline
+ & {\em f\+\_\+lower} & Lower bound of search \\
+\hline
+ & {\em f\+\_\+upper} & upper bound of search \\
+\hline
+ & {\em SN} & Noise curve name \\
+\hline
+ & {\em S\+N\+R\+\_\+thresh} & Threshold S\+NR \\
+\hline
+\mbox{\texttt{ out}}  & {\em threshold\+\_\+times\+\_\+out} & Output frequencies \\
+\hline
+ & {\em tolerance} & Percent tolerance on S\+NR search \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a61791d5e6231ea72ce813aa3501a8ee4}\label{waveform__util_8cpp_a61791d5e6231ea72ce813aa3501a8ee4}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!threshold\_times\_gsl@{threshold\_times\_gsl}}
+\index{threshold\_times\_gsl@{threshold\_times\_gsl}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{threshold\_times\_gsl()}{threshold\_times\_gsl()}}
+{\footnotesize\ttfamily int threshold\+\_\+times\+\_\+gsl (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{double}]{T\+\_\+obs,  }\item[{double}]{T\+\_\+wait,  }\item[{double}]{fmin,  }\item[{double}]{fmax,  }\item[{std\+::string}]{SN,  }\item[{double}]{S\+N\+R\+\_\+thresh,  }\item[{double $\ast$}]{threshold\+\_\+times\+\_\+out,  }\item[{double}]{tolerance,  }\item[{gsl\+\_\+integration\+\_\+workspace $\ast$}]{w,  }\item[{int}]{np }\end{DoxyParamCaption})}
+
+
+
+Utility for calculating the threshold times before merger that result in an S\+NR$>$S\+N\+R\+\_\+thresh --G\+SL quad integration implementation. 
+
+See ar\+Xiv 1902.\+00021
+
+Binary must merge within time T\+\_\+wait
+
+S\+NR is calculated with frequencies \mbox{[}f(t\+\_\+mer),f(t\+\_\+mer-\/\+T\+\_\+obs)\mbox{]} or \mbox{[}f(t\+\_\+mer),0\mbox{]} depending on whether the binary has merged or not
+
+Assumes sky average -- Only supports PhenomD for now -- No angular dependence used ( only uses plus polarization -- assumes iota = psi = 0 )
+
+Assumes this is for multiband -- ie stellar mass B\+Hs -- Only uses pn approximation of time frequency relation
+
+If no time before merger satisfies the requirements, both are set to -\/1
+
+A\+LL temporal quantities in seconds or Hz
+
+Return values\+: \begin{DoxyVerb}0 -- success
+
+11-- Failure: SNR was 0 in lower bound
+
+12-- Failure: SNR was 0 in upper bound
+
+13 -- partial success: Closest values output, but roundoff error prevented the routine from reaching the desired accuracy
+\end{DoxyVerb}
+ 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em generation\+\_\+method} & Generation method to use for the waveform \\
+\hline
+ & {\em T\+\_\+obs} & Observation time -\/-\/ also specifies the frequency spacing (\textbackslash{}delta f = 1./\+T\+\_\+obs) \\
+\hline
+ & {\em T\+\_\+wait} & Wait time -\/-\/ Maximum time for binaries to coalesce \\
+\hline
+ & {\em fmin} & Maximum frequency array \\
+\hline
+ & {\em fmax} & Maximum frequency array \\
+\hline
+ & {\em SN} & Noise curve array, should be prepopulated from f\+\_\+lower to f\+\_\+upper with spacing 1./\+T\+\_\+obs \\
+\hline
+ & {\em S\+N\+R\+\_\+thresh} & Threshold S\+NR \\
+\hline
+\mbox{\texttt{ out}}  & {\em threshold\+\_\+times\+\_\+out} & Output times \\
+\hline
+ & {\em tolerance} & Percent tolerance on S\+NR search \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{waveform__util_8cpp_a6c78a73b052376ec0c8acddcedb202bd}\label{waveform__util_8cpp_a6c78a73b052376ec0c8acddcedb202bd}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!time\_phase\_corrected@{time\_phase\_corrected}}
+\index{time\_phase\_corrected@{time\_phase\_corrected}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{time\_phase\_corrected()}{time\_phase\_corrected()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void time\+\_\+phase\+\_\+corrected (\begin{DoxyParamCaption}\item[{T $\ast$}]{times,  }\item[{int}]{length,  }\item[{T $\ast$}]{frequencies,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
+
+
+
+Mapping from phase to time N\+U\+M\+E\+R\+I\+C\+AL. 
+
+Made for use with detectors like L\+I\+SA
+
+Using \href{https://arxiv.org/abs/1809.04799}{\texttt{ https\+://arxiv.\+org/abs/1809.\+04799}} t = (1/2\+PI) d phi/ d f
+
+This breaks down near merger,so at f\+RD, the relationship between frequency and time is extrapolated as a line
+
+Currently, just uses \mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} as a proxy regardless of what method is being used, as this is the analytically known function
+
+For \mbox{\hyperlink{classIMRPhenomPv2}{I\+M\+R\+Phenom\+Pv2}}, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
+
+Just uses a second order numerical derivative for now \mbox{\Hypertarget{waveform__util_8cpp_a42f5568f9a2714a8cb64ac8367cece02}\label{waveform__util_8cpp_a42f5568f9a2714a8cb64ac8367cece02}} 
+\index{waveform\_util.cpp@{waveform\_util.cpp}!time\_phase\_corrected\_autodiff@{time\_phase\_corrected\_autodiff}}
+\index{time\_phase\_corrected\_autodiff@{time\_phase\_corrected\_autodiff}!waveform\_util.cpp@{waveform\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{time\_phase\_corrected\_autodiff()}{time\_phase\_corrected\_autodiff()}}
+{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{times,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{bool}]{correct\+\_\+time,  }\item[{int $\ast$}]{tapes\+\_\+in }\end{DoxyParamCaption})}
+
+
+
+Mapping from phase to time A\+U\+T\+O\+D\+I\+F\+F\+E\+R\+E\+N\+T\+I\+A\+T\+I\+ON using A\+D\+O\+L-\/C. 
+
+This is N\+OT autodiff safe. A\+D\+O\+L-\/C does not support wrapping a section of code as active twice. To find the derivative of this function, you must use the hessian function of A\+D\+O\+L-\/C
+
+Made for use with detectors like L\+I\+SA
+
+Using \href{https://arxiv.org/abs/1809.04799}{\texttt{ https\+://arxiv.\+org/abs/1809.\+04799}} t = (1/2\+PI) d phi/ d f
+
+This breaks down near merger,so at f\+RD, the relationship between frequency and time is extrapolated as a line
+
+Currently, just uses \mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} as a proxy regardless of what method is being used, as this is the analytically known function
+
+For \mbox{\hyperlink{classIMRPhenomPv2}{I\+M\+R\+Phenom\+Pv2}}, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable 

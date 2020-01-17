@@ -1,0 +1,367 @@
+\hypertarget{mcmc__gw_8h}{}\doxysection{include/gwat/mcmc\+\_\+gw.h File Reference}
+\label{mcmc__gw_8h}\index{include/gwat/mcmc\_gw.h@{include/gwat/mcmc\_gw.h}}
+{\ttfamily \#include $<$complex$>$}\newline
+{\ttfamily \#include $<$fftw3.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+interp.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+randist.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+rng.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+spline.\+h$>$}\newline
+{\ttfamily \#include $<$gsl/gsl\+\_\+errno.\+h$>$}\newline
+Include dependency graph for mcmc\+\_\+gw.\+h\+:
+% FIG 0
+This graph shows which files directly or indirectly include this file\+:
+% FIG 1
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_abd627450e43bf7ef683d875d804b7503}{maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+PhenomD}} (double $\ast$frequencies, int length, std\+::complex$<$ double $>$ $\ast$data, double $\ast$noise, double S\+NR, double chirpmass, double symmetric\+\_\+mass\+\_\+ratio, double spin1, double spin2, bool N\+Sflag, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\begin{DoxyCompactList}\small\item\em Function to calculate the log Likelihood as defined by -\/1/2 (d-\/h$\vert$d-\/h) maximized over the extrinsic parameters phic and tc. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{mcmc__gw_8h_ae78896f8e8acd8dfaff6ff33a732284a}{maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+PhenomD}} (double $\ast$frequencies, size\+\_\+t length, double $\ast$real\+\_\+data, double $\ast$imag\+\_\+data, double $\ast$noise, double S\+NR, double chirpmass, double symmetric\+\_\+mass\+\_\+ratio, double spin1, double spin2, bool N\+Sflag)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_a2635acb06ca0e448854aaab3fd7037c3}{maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+PhenomD}} (double $\ast$frequencies, size\+\_\+t length, double $\ast$real\+\_\+data, double $\ast$imag\+\_\+data, double $\ast$noise, double S\+NR, double chirpmass, double symmetric\+\_\+mass\+\_\+ratio, double spin1, double spin2, bool N\+Sflag, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_ac66db6fc5c75ee33b84a48724b4738ef}{maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Full\+\_\+\+Param}} (double $\ast$frequencies, int length, std\+::complex$<$ double $>$ $\ast$data, double $\ast$noise, double chirpmass, double symmetric\+\_\+mass\+\_\+ratio, double spin1, double spin2, double Luminosity\+\_\+\+Distance, double theta, double phi, double iota, bool N\+Sflag, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_a2322ab4b42380145e742ad564c643874}{maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Full\+\_\+\+Param}} (double $\ast$frequencies, size\+\_\+t length, double $\ast$real\+\_\+data, double $\ast$imag\+\_\+data, double $\ast$noise, double chirpmass, double symmetric\+\_\+mass\+\_\+ratio, double spin1, double spin2, double Luminosity\+\_\+\+Distance, double theta, double phi, double iota, bool N\+Sflag)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_a3fbdbcf0651bad5541eb6e366c62de23}{maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Full\+\_\+\+Param}} (double $\ast$frequencies, size\+\_\+t length, double $\ast$real\+\_\+data, double $\ast$imag\+\_\+data, double $\ast$noise, double chirpmass, double symmetric\+\_\+mass\+\_\+ratio, double spin1, double spin2, double Luminosity\+\_\+\+Distance, double theta, double phi, double iota, bool N\+Sflag, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_aecba6e7ba4f5a7463c95e0d65cfb3145}{maximized\+\_\+\+Log\+\_\+\+Likelihood\+\_\+aligned\+\_\+spin\+\_\+internal}} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, std\+::complex$<$ double $>$ $\ast$detector\+\_\+response, size\+\_\+t length, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\begin{DoxyCompactList}\small\item\em Maximized match over coalescence variables -\/ returns log likelihood N\+OT N\+O\+R\+M\+A\+L\+I\+Z\+ED for aligned spins. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{mcmc__gw_8h_ac631d3718500bb00b10e14e4d5e62adf}{Log\+\_\+\+Likelihood}} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, size\+\_\+t length, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\begin{DoxyCompactList}\small\item\em Unmarginalized log of the likelihood. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{mcmc__gw_8h_a2c44e4b3acd713ae4ad07b92b96ac017}{maximized\+\_\+\+Log\+\_\+\+Likelihood\+\_\+unaligned\+\_\+spin\+\_\+internal}} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, std\+::complex$<$ double $>$ $\ast$hplus, std\+::complex$<$ double $>$ $\ast$hcross, size\+\_\+t length, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\begin{DoxyCompactList}\small\item\em log likelihood function that maximizes over extrinsic parameters tc, phic, D, and phi\+Ref, the reference frequency -\/ for unaligned spins \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{mcmc__gw_8h_a0ae3ffbe1994b8a368c130b7f552ea28}{maximized\+\_\+\+Log\+\_\+\+Likelihood}} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, size\+\_\+t length, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\begin{DoxyCompactList}\small\item\em routine to maximize over all extrinsic quantities and return the log likelihood \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{mcmc__gw_8h_ad7c52a57384919260f854ee553dfe554}\label{mcmc__gw_8h_ad7c52a57384919260f854ee553dfe554}} 
+double {\bfseries maximized\+\_\+\+Log\+\_\+\+Likelihood} (double $\ast$data\+\_\+real, double $\ast$data\+\_\+imag, double $\ast$psd, double $\ast$frequencies, size\+\_\+t length, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_ae6cc4bb69ba72e0e49a53042cfecaffe}{maximized\+\_\+coal\+\_\+\+Log\+\_\+\+Likelihood}} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, size\+\_\+t length, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan, double $\ast$tc, double $\ast$phic)
+\begin{DoxyCompactList}\small\item\em Function to maximize only over coalescence variables tc and phic, returns the maximum values used. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{mcmc__gw_8h_a5ad93847e3371aebb5ec16cdc98e2e4a}\label{mcmc__gw_8h_a5ad93847e3371aebb5ec16cdc98e2e4a}} 
+double {\bfseries maximized\+\_\+coal\+\_\+\+Log\+\_\+\+Likelihood\+\_\+internal} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, std\+::complex$<$ double $>$ $\ast$detector\+\_\+response, size\+\_\+t length, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan, double $\ast$tc, double $\ast$phic)
+\item 
+double \mbox{\hyperlink{mcmc__gw_8h_a5590d975e10f08888ae8b35340443b65}{Log\+\_\+\+Likelihood\+\_\+internal}} (std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, double $\ast$frequencies, std\+::complex$<$ double $>$ $\ast$detector\+\_\+response, int length, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+\begin{DoxyCompactList}\small\item\em Internal function for the unmarginalized log of the likelihood. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_a79282d2ebb680bf028fcfc2a2e75b539}{continue\+\_\+\+R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW}} (std\+::string start\+\_\+checkpoint\+\_\+file, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$status, int max\+\_\+dim, int min\+\_\+dim, int N\+\_\+steps, int swp\+\_\+freq, double($\ast$log\+\_\+prior)(double $\ast$param, int $\ast$status, int dimension, int chain\+\_\+id, void $\ast$parameters), void($\ast$R\+J\+\_\+proposal)(double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int max\+\_\+dim, int chain\+\_\+id, double step\+\_\+width, void $\ast$parameters), int num\+Threads, bool pool, bool show\+\_\+prog, int num\+\_\+detectors, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$noise\+\_\+psd, double $\ast$$\ast$frequencies, int $\ast$data\+\_\+length, double gps\+\_\+time, std\+::string $\ast$detectors, int Nmod, int $\ast$bppe, std\+::string generation\+\_\+method, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string final\+\_\+checkpoint\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em Takes in an M\+C\+MC checkpoint file and continues the chain. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_a5afb8944ee754bfb6894a8c5f274553f}{R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW}} (double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$status, int max\+\_\+dim, int min\+\_\+dim, int N\+\_\+steps, int chain\+\_\+N, double $\ast$initial\+\_\+pos, int $\ast$initial\+\_\+status, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, double($\ast$log\+\_\+prior)(double $\ast$param, int $\ast$status, int dimension, int chain\+\_\+id, void $\ast$parameters), void($\ast$R\+J\+\_\+proposal)(double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int max\+\_\+dim, int chain\+\_\+id, double step\+\_\+width, void $\ast$parameters), int num\+Threads, bool pool, bool show\+\_\+prog, int num\+\_\+detectors, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$noise\+\_\+psd, double $\ast$$\ast$frequencies, int $\ast$data\+\_\+length, double gps\+\_\+time, std\+::string $\ast$detectors, int Nmod\+\_\+max, int $\ast$bppe, std\+::string generation\+\_\+method, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Wrapper for the R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+MH function, specifically for GW analysis. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_acd2a3db010fe47534467fc7a3eefca53}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW}} (double $\ast$$\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), int num\+Threads, bool pool, bool show\+\_\+prog, int num\+\_\+detectors, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$noise\+\_\+psd, double $\ast$$\ast$frequencies, int $\ast$data\+\_\+length, double gps\+\_\+time, std\+::string $\ast$detector, int Nmod, int $\ast$bppe, std\+::string generation\+\_\+method, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em Wrapper for the M\+C\+M\+C\+\_\+\+MH function, specifically for GW analysis. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_a810de43cfcb8a71ee343bfea775d59b0}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+\+GW}} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), int num\+Threads, bool pool, bool show\+\_\+prog, int num\+\_\+detectors, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$noise\+\_\+psd, double $\ast$$\ast$frequencies, int $\ast$data\+\_\+length, double gps\+\_\+time, std\+::string $\ast$detectors, int Nmod, int $\ast$bppe, std\+::string generation\+\_\+method, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em Takes in an M\+C\+MC checkpoint file and continues the chain. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_a70290cf146e82c84ba0b7966db67f4c2}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+\+GW}} (double $\ast$$\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), int num\+Threads, bool pool, bool show\+\_\+prog, int num\+\_\+detectors, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$noise\+\_\+psd, double $\ast$$\ast$frequencies, int $\ast$data\+\_\+length, double gps\+\_\+time, std\+::string $\ast$detectors, int Nmod, int $\ast$bppe, std\+::string generation\+\_\+method, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em Takes in an M\+C\+MC checkpoint file and continues the chain. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_adce91c5bc6db381f1bc40d31b41d4211}{continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW}} (std\+::string start\+\_\+checkpoint\+\_\+file, double $\ast$$\ast$$\ast$output, int dimension, int N\+\_\+steps, int swp\+\_\+freq, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), int num\+Threads, bool pool, bool show\+\_\+prog, int num\+\_\+detectors, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$noise\+\_\+psd, double $\ast$$\ast$frequencies, int $\ast$data\+\_\+length, double gps\+\_\+time, std\+::string $\ast$detector, int Nmod, int $\ast$bppe, std\+::string generation\+\_\+method, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string final\+\_\+checkpoint\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em Takes in an M\+C\+MC checkpoint file and continues the chain. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_a419df9528f286aba805c9dfa66118441}{P\+T\+M\+C\+M\+C\+\_\+method\+\_\+specific\+\_\+prep}} (std\+::string generation\+\_\+method, int dimension, double $\ast$seeding\+\_\+var, bool local\+\_\+seeding)
+\begin{DoxyCompactList}\small\item\em Unpacks M\+C\+MC parameters for method specific initiation. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__gw_8h_a2e8407e705ac51ccc0e1685858ff946f}{R\+J\+P\+T\+M\+C\+M\+C\+\_\+method\+\_\+specific\+\_\+prep}} (std\+::string generation\+\_\+method, int max\+\_\+dim, int min\+\_\+dim, double $\ast$seeding\+\_\+var, bool local\+\_\+seeding)
+\begin{DoxyCompactList}\small\item\em Unpacks M\+C\+MC parameters for method specific initiation (RJ version) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{mcmc__gw_8h_af1f118a2aaed0150a5ccf964506420f0}\label{mcmc__gw_8h_af1f118a2aaed0150a5ccf964506420f0}} 
+double {\bfseries M\+C\+M\+C\+\_\+likelihood\+\_\+extrinsic} (bool save\+\_\+waveform, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$parameters, std\+::string generation\+\_\+method, int $\ast$data\+\_\+length, double $\ast$$\ast$frequencies, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psd, std\+::string $\ast$detectors, \mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$fftw\+\_\+plans, int num\+\_\+detectors, double RA, double D\+EC, double gps\+\_\+time)
+\item 
+\mbox{\Hypertarget{mcmc__gw_8h_a769426335cdac23f4fbfe4fdd0338eed}\label{mcmc__gw_8h_a769426335cdac23f4fbfe4fdd0338eed}} 
+void {\bfseries M\+C\+M\+C\+\_\+fisher\+\_\+wrapper} (double $\ast$param, int dimension, double $\ast$$\ast$output, int chain\+\_\+id, void $\ast$parameters)
+\item 
+std\+::string \mbox{\hyperlink{mcmc__gw_8h_a3d25fe8ffdebc05616f1e003485770ba}{M\+C\+M\+C\+\_\+prep\+\_\+params}} (double $\ast$param, double $\ast$temp\+\_\+params, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$\mbox{\hyperlink{classgen__params}{gen\+\_\+params}}, int dimension, std\+::string generation\+\_\+method)
+\begin{DoxyCompactList}\small\item\em utility to do M\+C\+MC specific transformations on the input param vector before passing to the repacking utillity \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{mcmc__gw_8h_a1ec03e5500b9746713dc9d089b16d2d1}\label{mcmc__gw_8h_a1ec03e5500b9746713dc9d089b16d2d1}} 
+double {\bfseries M\+C\+M\+C\+\_\+likelihood\+\_\+wrapper} (double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)
+\item 
+\mbox{\Hypertarget{mcmc__gw_8h_a14ac0cc31592ca22d05f04c76b040235}\label{mcmc__gw_8h_a14ac0cc31592ca22d05f04c76b040235}} 
+double {\bfseries R\+J\+P\+T\+M\+C\+M\+C\+\_\+likelihood\+\_\+wrapper} (double $\ast$param, int $\ast$status, int max\+\_\+dim, int chain\+\_\+id, void $\ast$parameters)
+\item 
+\mbox{\Hypertarget{mcmc__gw_8h_a614277e4ec92ebaaf440efaad25426d3}\label{mcmc__gw_8h_a614277e4ec92ebaaf440efaad25426d3}} 
+void {\bfseries R\+J\+P\+T\+M\+C\+M\+C\+\_\+fisher\+\_\+wrapper} (double $\ast$param, int $\ast$status, int min\+\_\+dim, double $\ast$$\ast$output, int chain\+\_\+id, void $\ast$parameters)
+\item 
+\mbox{\Hypertarget{mcmc__gw_8h_a960d37de54013d294a0976ee1140393b}\label{mcmc__gw_8h_a960d37de54013d294a0976ee1140393b}} 
+void {\bfseries R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+R\+J\+\_\+proposal} (double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+params, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int max\+\_\+dim, int chain\+\_\+id, double step\+\_\+width, void $\ast$parameters)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Header file for the Graviational Wave specific M\+C\+MC routines 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{mcmc__gw_8h_adce91c5bc6db381f1bc40d31b41d4211}\label{mcmc__gw_8h_adce91c5bc6db381f1bc40d31b41d4211}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!continue\_PTMCMC\_MH\_GW@{continue\_PTMCMC\_MH\_GW}}
+\index{continue\_PTMCMC\_MH\_GW@{continue\_PTMCMC\_MH\_GW}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{continue\_PTMCMC\_MH\_GW()}{continue\_PTMCMC\_MH\_GW()}}
+{\footnotesize\ttfamily void continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW (\begin{DoxyParamCaption}\item[{std\+::string}]{start\+\_\+checkpoint\+\_\+file,  }\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{swp\+\_\+freq,  }\item[{double($\ast$)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{int}]{num\+\_\+detectors,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{noise\+\_\+psd,  }\item[{double $\ast$$\ast$}]{frequencies,  }\item[{int $\ast$}]{data\+\_\+length,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{Nmod,  }\item[{int $\ast$}]{bppe,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{auto\+\_\+corr\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{final\+\_\+checkpoint\+\_\+filename }\end{DoxyParamCaption})}
+
+
+
+Takes in an M\+C\+MC checkpoint file and continues the chain. 
+
+Obviously, the user must be sure to correctly match the dimension, number of chains, the generation\+\_\+method, the prior function, the data, psds, freqs, and the detectors (number and name), and the gps\+\_\+time to the previous run, otherwise the behavior of the sampler is undefined.
+
+num\+Threads and pool do not necessarily have to be the same \mbox{\Hypertarget{mcmc__gw_8h_a79282d2ebb680bf028fcfc2a2e75b539}\label{mcmc__gw_8h_a79282d2ebb680bf028fcfc2a2e75b539}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!continue\_RJPTMCMC\_MH\_GW@{continue\_RJPTMCMC\_MH\_GW}}
+\index{continue\_RJPTMCMC\_MH\_GW@{continue\_RJPTMCMC\_MH\_GW}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{continue\_RJPTMCMC\_MH\_GW()}{continue\_RJPTMCMC\_MH\_GW()}}
+{\footnotesize\ttfamily void continue\+\_\+\+R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW (\begin{DoxyParamCaption}\item[{std\+::string}]{start\+\_\+checkpoint\+\_\+file,  }\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int $\ast$$\ast$$\ast$}]{status,  }\item[{int}]{max\+\_\+dim,  }\item[{int}]{min\+\_\+dim,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{swp\+\_\+freq,  }\item[{double($\ast$)(double $\ast$param, int $\ast$status, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{void($\ast$)(double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int max\+\_\+dim, int chain\+\_\+id, double step\+\_\+width, void $\ast$parameters)}]{R\+J\+\_\+proposal,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{int}]{num\+\_\+detectors,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{noise\+\_\+psd,  }\item[{double $\ast$$\ast$}]{frequencies,  }\item[{int $\ast$}]{data\+\_\+length,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{Nmod,  }\item[{int $\ast$}]{bppe,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{auto\+\_\+corr\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{final\+\_\+checkpoint\+\_\+filename }\end{DoxyParamCaption})}
+
+
+
+Takes in an M\+C\+MC checkpoint file and continues the chain. 
+
+Obviously, the user must be sure to correctly match the dimension, number of chains, the generation\+\_\+method, the prior function, the data, psds, freqs, and the detectors (number and name), and the gps\+\_\+time to the previous run, otherwise the behavior of the sampler is undefined.
+
+num\+Threads and pool do not necessarily have to be the same \mbox{\Hypertarget{mcmc__gw_8h_ac631d3718500bb00b10e14e4d5e62adf}\label{mcmc__gw_8h_ac631d3718500bb00b10e14e4d5e62adf}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!Log\_Likelihood@{Log\_Likelihood}}
+\index{Log\_Likelihood@{Log\_Likelihood}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{Log\_Likelihood()}{Log\_Likelihood()}}
+{\footnotesize\ttfamily double Log\+\_\+\+Likelihood (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+
+Unmarginalized log of the likelihood. 
+
+\mbox{\Hypertarget{mcmc__gw_8h_a5590d975e10f08888ae8b35340443b65}\label{mcmc__gw_8h_a5590d975e10f08888ae8b35340443b65}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!Log\_Likelihood\_internal@{Log\_Likelihood\_internal}}
+\index{Log\_Likelihood\_internal@{Log\_Likelihood\_internal}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{Log\_Likelihood\_internal()}{Log\_Likelihood\_internal()}}
+{\footnotesize\ttfamily double Log\+\_\+\+Likelihood\+\_\+internal (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{double $\ast$}]{frequencies,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{detector\+\_\+response,  }\item[{int}]{length,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+
+Internal function for the unmarginalized log of the likelihood. 
+
+.5 $\ast$ ( ( h $\vert$ h ) -\/ 2 ( D $\vert$ h ) ) \mbox{\Hypertarget{mcmc__gw_8h_ae6cc4bb69ba72e0e49a53042cfecaffe}\label{mcmc__gw_8h_ae6cc4bb69ba72e0e49a53042cfecaffe}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_Log\_Likelihood@{maximized\_coal\_Log\_Likelihood}}
+\index{maximized\_coal\_Log\_Likelihood@{maximized\_coal\_Log\_Likelihood}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_Log\_Likelihood()}{maximized\_coal\_Log\_Likelihood()}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+\+Log\+\_\+\+Likelihood (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan,  }\item[{double $\ast$}]{tc,  }\item[{double $\ast$}]{phic }\end{DoxyParamCaption})}
+
+
+
+Function to maximize only over coalescence variables tc and phic, returns the maximum values used. 
+
+\mbox{\Hypertarget{mcmc__gw_8h_abd627450e43bf7ef683d875d804b7503}\label{mcmc__gw_8h_abd627450e43bf7ef683d875d804b7503}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_log\_likelihood\_IMRPhenomD@{maximized\_coal\_log\_likelihood\_IMRPhenomD}}
+\index{maximized\_coal\_log\_likelihood\_IMRPhenomD@{maximized\_coal\_log\_likelihood\_IMRPhenomD}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_log\_likelihood\_IMRPhenomD()}{maximized\_coal\_log\_likelihood\_IMRPhenomD()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+PhenomD (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{noise,  }\item[{double}]{S\+NR,  }\item[{double}]{chirpmass,  }\item[{double}]{symmetric\+\_\+mass\+\_\+ratio,  }\item[{double}]{spin1,  }\item[{double}]{spin2,  }\item[{bool}]{N\+Sflag,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+
+Function to calculate the log Likelihood as defined by -\/1/2 (d-\/h$\vert$d-\/h) maximized over the extrinsic parameters phic and tc. 
+
+frequency array must be uniform spacing -\/ this shouldn\textquotesingle{}t be a problem when working with real data as D\+FT return uniform spacing 
+\begin{DoxyParams}{Parameters}
+{\em chirpmass} & in solar masses \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_ae78896f8e8acd8dfaff6ff33a732284a}\label{mcmc__gw_8h_ae78896f8e8acd8dfaff6ff33a732284a}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_log\_likelihood\_IMRPhenomD@{maximized\_coal\_log\_likelihood\_IMRPhenomD}}
+\index{maximized\_coal\_log\_likelihood\_IMRPhenomD@{maximized\_coal\_log\_likelihood\_IMRPhenomD}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_log\_likelihood\_IMRPhenomD()}{maximized\_coal\_log\_likelihood\_IMRPhenomD()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+PhenomD (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{double $\ast$}]{real\+\_\+data,  }\item[{double $\ast$}]{imag\+\_\+data,  }\item[{double $\ast$}]{noise,  }\item[{double}]{S\+NR,  }\item[{double}]{chirpmass,  }\item[{double}]{symmetric\+\_\+mass\+\_\+ratio,  }\item[{double}]{spin1,  }\item[{double}]{spin2,  }\item[{bool}]{N\+Sflag }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em chirpmass} & in solar masses \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_a2635acb06ca0e448854aaab3fd7037c3}\label{mcmc__gw_8h_a2635acb06ca0e448854aaab3fd7037c3}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_log\_likelihood\_IMRPhenomD@{maximized\_coal\_log\_likelihood\_IMRPhenomD}}
+\index{maximized\_coal\_log\_likelihood\_IMRPhenomD@{maximized\_coal\_log\_likelihood\_IMRPhenomD}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_log\_likelihood\_IMRPhenomD()}{maximized\_coal\_log\_likelihood\_IMRPhenomD()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+PhenomD (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{double $\ast$}]{real\+\_\+data,  }\item[{double $\ast$}]{imag\+\_\+data,  }\item[{double $\ast$}]{noise,  }\item[{double}]{S\+NR,  }\item[{double}]{chirpmass,  }\item[{double}]{symmetric\+\_\+mass\+\_\+ratio,  }\item[{double}]{spin1,  }\item[{double}]{spin2,  }\item[{bool}]{N\+Sflag,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em chirpmass} & in solar masses \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_ac66db6fc5c75ee33b84a48724b4738ef}\label{mcmc__gw_8h_ac66db6fc5c75ee33b84a48724b4738ef}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param@{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param}}
+\index{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param@{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param()}{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Full\+\_\+\+Param (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{int}]{length,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{noise,  }\item[{double}]{chirpmass,  }\item[{double}]{symmetric\+\_\+mass\+\_\+ratio,  }\item[{double}]{spin1,  }\item[{double}]{spin2,  }\item[{double}]{Luminosity\+\_\+\+Distance,  }\item[{double}]{theta,  }\item[{double}]{phi,  }\item[{double}]{iota,  }\item[{bool}]{N\+Sflag,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em chirpmass} & in solar masses \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_a2322ab4b42380145e742ad564c643874}\label{mcmc__gw_8h_a2322ab4b42380145e742ad564c643874}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param@{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param}}
+\index{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param@{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param()}{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Full\+\_\+\+Param (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{double $\ast$}]{real\+\_\+data,  }\item[{double $\ast$}]{imag\+\_\+data,  }\item[{double $\ast$}]{noise,  }\item[{double}]{chirpmass,  }\item[{double}]{symmetric\+\_\+mass\+\_\+ratio,  }\item[{double}]{spin1,  }\item[{double}]{spin2,  }\item[{double}]{Luminosity\+\_\+\+Distance,  }\item[{double}]{theta,  }\item[{double}]{phi,  }\item[{double}]{iota,  }\item[{bool}]{N\+Sflag }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em chirpmass} & in solar masses \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_a3fbdbcf0651bad5541eb6e366c62de23}\label{mcmc__gw_8h_a3fbdbcf0651bad5541eb6e366c62de23}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param@{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param}}
+\index{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param@{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param()}{maximized\_coal\_log\_likelihood\_IMRPhenomD\_Full\_Param()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily double maximized\+\_\+coal\+\_\+log\+\_\+likelihood\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+\+Full\+\_\+\+Param (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{double $\ast$}]{real\+\_\+data,  }\item[{double $\ast$}]{imag\+\_\+data,  }\item[{double $\ast$}]{noise,  }\item[{double}]{chirpmass,  }\item[{double}]{symmetric\+\_\+mass\+\_\+ratio,  }\item[{double}]{spin1,  }\item[{double}]{spin2,  }\item[{double}]{Luminosity\+\_\+\+Distance,  }\item[{double}]{theta,  }\item[{double}]{phi,  }\item[{double}]{iota,  }\item[{bool}]{N\+Sflag,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em chirpmass} & in solar masses \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_a0ae3ffbe1994b8a368c130b7f552ea28}\label{mcmc__gw_8h_a0ae3ffbe1994b8a368c130b7f552ea28}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_Log\_Likelihood@{maximized\_Log\_Likelihood}}
+\index{maximized\_Log\_Likelihood@{maximized\_Log\_Likelihood}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_Log\_Likelihood()}{maximized\_Log\_Likelihood()}}
+{\footnotesize\ttfamily double maximized\+\_\+\+Log\+\_\+\+Likelihood (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{double $\ast$}]{frequencies,  }\item[{size\+\_\+t}]{length,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+
+routine to maximize over all extrinsic quantities and return the log likelihood 
+
+\mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} -- maximizes over DL, phic, tc, \textbackslash{}iota, \textbackslash{}phi, \textbackslash{}theta I\+M\+R\+PhenomP -- maximizes over DL, phic,tc, \textbackslash{}psi, \textbackslash{}phi , \textbackslash{}theta \mbox{\Hypertarget{mcmc__gw_8h_aecba6e7ba4f5a7463c95e0d65cfb3145}\label{mcmc__gw_8h_aecba6e7ba4f5a7463c95e0d65cfb3145}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_Log\_Likelihood\_aligned\_spin\_internal@{maximized\_Log\_Likelihood\_aligned\_spin\_internal}}
+\index{maximized\_Log\_Likelihood\_aligned\_spin\_internal@{maximized\_Log\_Likelihood\_aligned\_spin\_internal}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_Log\_Likelihood\_aligned\_spin\_internal()}{maximized\_Log\_Likelihood\_aligned\_spin\_internal()}}
+{\footnotesize\ttfamily double maximized\+\_\+\+Log\+\_\+\+Likelihood\+\_\+aligned\+\_\+spin\+\_\+internal (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{double $\ast$}]{frequencies,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{detector\+\_\+response,  }\item[{size\+\_\+t}]{length,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+
+Maximized match over coalescence variables -\/ returns log likelihood N\+OT N\+O\+R\+M\+A\+L\+I\+Z\+ED for aligned spins. 
+
+Note\+: this function is not properly normalized for an absolute comparison. This is made for M\+C\+MC sampling, so to minimize time, constant terms like (Data$\vert$\+Data), which would cancel in the Metropolis-\/\+Hasting ratio, are left out for efficiency \mbox{\Hypertarget{mcmc__gw_8h_a2c44e4b3acd713ae4ad07b92b96ac017}\label{mcmc__gw_8h_a2c44e4b3acd713ae4ad07b92b96ac017}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!maximized\_Log\_Likelihood\_unaligned\_spin\_internal@{maximized\_Log\_Likelihood\_unaligned\_spin\_internal}}
+\index{maximized\_Log\_Likelihood\_unaligned\_spin\_internal@{maximized\_Log\_Likelihood\_unaligned\_spin\_internal}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{maximized\_Log\_Likelihood\_unaligned\_spin\_internal()}{maximized\_Log\_Likelihood\_unaligned\_spin\_internal()}}
+{\footnotesize\ttfamily double maximized\+\_\+\+Log\+\_\+\+Likelihood\+\_\+unaligned\+\_\+spin\+\_\+internal (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$}]{data,  }\item[{double $\ast$}]{psd,  }\item[{double $\ast$}]{frequencies,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{hplus,  }\item[{std\+::complex$<$ double $>$ $\ast$}]{hcross,  }\item[{size\+\_\+t}]{length,  }\item[{\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$}]{plan }\end{DoxyParamCaption})}
+
+
+
+log likelihood function that maximizes over extrinsic parameters tc, phic, D, and phi\+Ref, the reference frequency -\/ for unaligned spins 
+
+Ref\+: ar\+Xiv 1603.\+02444v2 \mbox{\Hypertarget{mcmc__gw_8h_a3d25fe8ffdebc05616f1e003485770ba}\label{mcmc__gw_8h_a3d25fe8ffdebc05616f1e003485770ba}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!MCMC\_prep\_params@{MCMC\_prep\_params}}
+\index{MCMC\_prep\_params@{MCMC\_prep\_params}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{MCMC\_prep\_params()}{MCMC\_prep\_params()}}
+{\footnotesize\ttfamily std\+::string M\+C\+M\+C\+\_\+prep\+\_\+params (\begin{DoxyParamCaption}\item[{double $\ast$}]{param,  }\item[{double $\ast$}]{temp\+\_\+params,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{gen\+\_\+params,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method }\end{DoxyParamCaption})}
+
+
+
+utility to do M\+C\+MC specific transformations on the input param vector before passing to the repacking utillity 
+
+Returns the local generation method to be used in the LL functions \mbox{\Hypertarget{mcmc__gw_8h_a419df9528f286aba805c9dfa66118441}\label{mcmc__gw_8h_a419df9528f286aba805c9dfa66118441}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!PTMCMC\_method\_specific\_prep@{PTMCMC\_method\_specific\_prep}}
+\index{PTMCMC\_method\_specific\_prep@{PTMCMC\_method\_specific\_prep}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{PTMCMC\_method\_specific\_prep()}{PTMCMC\_method\_specific\_prep()}}
+{\footnotesize\ttfamily void P\+T\+M\+C\+M\+C\+\_\+method\+\_\+specific\+\_\+prep (\begin{DoxyParamCaption}\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{double $\ast$}]{seeding\+\_\+var,  }\item[{bool}]{local\+\_\+seeding }\end{DoxyParamCaption})}
+
+
+
+Unpacks M\+C\+MC parameters for method specific initiation. 
+
+Populates seeding vector if non supplied, populates mcmc\+\_\+\+Nmod, populates mcmc\+\_\+log\+\_\+beta, populates mcmc\+\_\+intrinsic \mbox{\Hypertarget{mcmc__gw_8h_a70290cf146e82c84ba0b7966db67f4c2}\label{mcmc__gw_8h_a70290cf146e82c84ba0b7966db67f4c2}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!PTMCMC\_MH\_dynamic\_PT\_alloc\_GW@{PTMCMC\_MH\_dynamic\_PT\_alloc\_GW}}
+\index{PTMCMC\_MH\_dynamic\_PT\_alloc\_GW@{PTMCMC\_MH\_dynamic\_PT\_alloc\_GW}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{PTMCMC\_MH\_dynamic\_PT\_alloc\_GW()}{PTMCMC\_MH\_dynamic\_PT\_alloc\_GW()}}
+{\footnotesize\ttfamily void P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+\+GW (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{chain\+\_\+N,  }\item[{int}]{max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{double $\ast$}]{initial\+\_\+pos,  }\item[{double $\ast$}]{seeding\+\_\+var,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{std\+::string}]{chain\+\_\+distribution\+\_\+scheme,  }\item[{double($\ast$)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{int}]{num\+\_\+detectors,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{noise\+\_\+psd,  }\item[{double $\ast$$\ast$}]{frequencies,  }\item[{int $\ast$}]{data\+\_\+length,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{Nmod,  }\item[{int $\ast$}]{bppe,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+filename }\end{DoxyParamCaption})}
+
+
+
+Takes in an M\+C\+MC checkpoint file and continues the chain. 
+
+Obviously, the user must be sure to correctly match the dimension, number of chains, the generation\+\_\+method, the prior function, the data, psds, freqs, and the detectors (number and name), and the gps\+\_\+time to the previous run, otherwise the behavior of the sampler is undefined.
+
+num\+Threads and pool do not necessarily have to be the same \mbox{\Hypertarget{mcmc__gw_8h_a810de43cfcb8a71ee343bfea775d59b0}\label{mcmc__gw_8h_a810de43cfcb8a71ee343bfea775d59b0}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_GW@{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_GW}}
+\index{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_GW@{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_GW}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_GW()}{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_GW()}}
+{\footnotesize\ttfamily void P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+\+GW (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{chain\+\_\+N,  }\item[{int}]{max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{double $\ast$}]{initial\+\_\+pos,  }\item[{double $\ast$}]{seeding\+\_\+var,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{corr\+\_\+threshold,  }\item[{int}]{corr\+\_\+segments,  }\item[{double}]{corr\+\_\+converge\+\_\+thresh,  }\item[{double}]{corr\+\_\+target\+\_\+ac,  }\item[{std\+::string}]{chain\+\_\+distribution\+\_\+scheme,  }\item[{double($\ast$)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{int}]{num\+\_\+detectors,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{noise\+\_\+psd,  }\item[{double $\ast$$\ast$}]{frequencies,  }\item[{int $\ast$}]{data\+\_\+length,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{Nmod,  }\item[{int $\ast$}]{bppe,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+filename }\end{DoxyParamCaption})}
+
+
+
+Takes in an M\+C\+MC checkpoint file and continues the chain. 
+
+Obviously, the user must be sure to correctly match the dimension, number of chains, the generation\+\_\+method, the prior function, the data, psds, freqs, and the detectors (number and name), and the gps\+\_\+time to the previous run, otherwise the behavior of the sampler is undefined.
+
+num\+Threads and pool do not necessarily have to be the same \mbox{\Hypertarget{mcmc__gw_8h_acd2a3db010fe47534467fc7a3eefca53}\label{mcmc__gw_8h_acd2a3db010fe47534467fc7a3eefca53}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!PTMCMC\_MH\_GW@{PTMCMC\_MH\_GW}}
+\index{PTMCMC\_MH\_GW@{PTMCMC\_MH\_GW}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{PTMCMC\_MH\_GW()}{PTMCMC\_MH\_GW()}}
+{\footnotesize\ttfamily void P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{chain\+\_\+N,  }\item[{double $\ast$}]{initial\+\_\+pos,  }\item[{double $\ast$}]{seeding\+\_\+var,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{double($\ast$)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{int}]{num\+\_\+detectors,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{noise\+\_\+psd,  }\item[{double $\ast$$\ast$}]{frequencies,  }\item[{int $\ast$}]{data\+\_\+length,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{Nmod,  }\item[{int $\ast$}]{bppe,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{auto\+\_\+corr\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+file }\end{DoxyParamCaption})}
+
+
+
+Wrapper for the M\+C\+M\+C\+\_\+\+MH function, specifically for GW analysis. 
+
+Handles the details of setting up the M\+C\+MC sampler and wraps the fisher and log likelihood to conform to the format of the sampler
+
+{\itshape N\+O\+TE} -- This sampler is N\+OT thread safe. There is global memory declared for each call to M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW, so separate samplers should not be run in the same process space
+
+Supported parameter combinations\+:
+
+\mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} -\/ 4 dimensions -- ln chirpmass, eta, chi1, chi2
+
+\mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} -\/ 7 dimensions -- ln D\+\_\+L, tc, phic, ln chirpmass, eta, chi1, chi2
+
+\mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} -\/ 9 dimensions -- cos inclination, RA, D\+EC, ln D\+\_\+L, ln chirpmass, eta, chi1, chi2, psi
+
+\mbox{\hyperlink{classdCS__IMRPhenomD__log}{d\+C\+S\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+log}} -\/ 8 dimensions -- cos inclination, RA, D\+EC, ln D\+\_\+L, ln chirpmass, eta, chi1, chi2, ln \textbackslash{}alpha$^\wedge$2 (the coupling parameter)
+
+d\+C\+S\+\_\+\+I\+M\+R\+Phenom\+D-\/ 8 dimensions -- cos inclination, RA, D\+EC, ln D\+\_\+L, ln chirpmass, eta, chi1, chi2, \textbackslash{}alpha$^\wedge$2 (the coupling parameter)
+
+d\+C\+S\+\_\+\+I\+M\+R\+Phenom\+D\+\_\+root\+\_\+alpha-\/ 8 dimensions -- cos inclination, RA, D\+EC, ln D\+\_\+L, ln chirpmass, eta, chi1, chi2, \textbackslash{}sqrt \textbackslash{}alpha (in km) (the coupling parameter)
+
+\mbox{\hyperlink{classIMRPhenomPv2}{I\+M\+R\+Phenom\+Pv2}} -\/ 9 dimensions -- cos J\+\_\+N, ln chirpmass, eta, $\vert$chi1$\vert$, $\vert$chi1$\vert$, theta\+\_\+1, theta\+\_\+2, phi\+\_\+1, phi\+\_\+2 
+\begin{DoxyParams}{Parameters}
+{\em statistics\+\_\+filename} & Filename to output sampling statistics, if empty string, not output \\
+\hline
+{\em chain\+\_\+filename} & Filename to output data (chain 0 only), if empty string, not output \\
+\hline
+{\em auto\+\_\+corr\+\_\+filename} & Filename to output auto correlation in some interval, if empty string, not output \\
+\hline
+{\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__gw_8h_a2e8407e705ac51ccc0e1685858ff946f}\label{mcmc__gw_8h_a2e8407e705ac51ccc0e1685858ff946f}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!RJPTMCMC\_method\_specific\_prep@{RJPTMCMC\_method\_specific\_prep}}
+\index{RJPTMCMC\_method\_specific\_prep@{RJPTMCMC\_method\_specific\_prep}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{RJPTMCMC\_method\_specific\_prep()}{RJPTMCMC\_method\_specific\_prep()}}
+{\footnotesize\ttfamily void R\+J\+P\+T\+M\+C\+M\+C\+\_\+method\+\_\+specific\+\_\+prep (\begin{DoxyParamCaption}\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{max\+\_\+dim,  }\item[{int}]{min\+\_\+dim,  }\item[{double $\ast$}]{seeding\+\_\+var,  }\item[{bool}]{local\+\_\+seeding }\end{DoxyParamCaption})}
+
+
+
+Unpacks M\+C\+MC parameters for method specific initiation (RJ version) 
+
+Populates seeding vector if non supplied, populates mcmc\+\_\+\+Nmod, populates mcmc\+\_\+log\+\_\+beta, populates mcmc\+\_\+intrinsic \mbox{\Hypertarget{mcmc__gw_8h_a5afb8944ee754bfb6894a8c5f274553f}\label{mcmc__gw_8h_a5afb8944ee754bfb6894a8c5f274553f}} 
+\index{mcmc\_gw.h@{mcmc\_gw.h}!RJPTMCMC\_MH\_GW@{RJPTMCMC\_MH\_GW}}
+\index{RJPTMCMC\_MH\_GW@{RJPTMCMC\_MH\_GW}!mcmc\_gw.h@{mcmc\_gw.h}}
+\doxysubsubsection{\texorpdfstring{RJPTMCMC\_MH\_GW()}{RJPTMCMC\_MH\_GW()}}
+{\footnotesize\ttfamily void R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int $\ast$$\ast$$\ast$}]{status,  }\item[{int}]{max\+\_\+dim,  }\item[{int}]{min\+\_\+dim,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{chain\+\_\+N,  }\item[{double $\ast$}]{initial\+\_\+pos,  }\item[{int $\ast$}]{initial\+\_\+status,  }\item[{double $\ast$}]{seeding\+\_\+var,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{double($\ast$)(double $\ast$param, int $\ast$status, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{void($\ast$)(double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int max\+\_\+dim, int chain\+\_\+id, double step\+\_\+width, void $\ast$parameters)}]{R\+J\+\_\+proposal,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{int}]{num\+\_\+detectors,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{noise\+\_\+psd,  }\item[{double $\ast$$\ast$}]{frequencies,  }\item[{int $\ast$}]{data\+\_\+length,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{Nmod\+\_\+max,  }\item[{int $\ast$}]{bppe,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{auto\+\_\+corr\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+file }\end{DoxyParamCaption})}
+
+
+
+Wrapper for the R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+MH function, specifically for GW analysis. 
+
+Handles the details of setting up the M\+C\+MC sampler and wraps the fisher and log likelihood to conform to the format of the sampler
+
+{\itshape N\+O\+TE} -- This sampler as a whole is N\+OT thread safe. There is global memory declared for each call to M\+C\+M\+C\+\_\+\+M\+H\+\_\+\+GW, so separate samplers should not be run in the same process space.
+
+Supported parameter combinations\+:
+
+\mbox{\hyperlink{classIMRPhenomD}{I\+M\+R\+PhenomD}} -\/ 8 dimensions -- ~\newline
+ M\+IN D\+I\+M\+E\+N\+S\+I\+O\+NS -- cos inclination, RA, D\+EC, ln D\+\_\+L, ln chirpmass, eta, chi1, chi2, T\+R\+A\+N\+S\+D\+I\+M\+E\+N\+S\+I\+O\+N\+AL D\+I\+M\+E\+N\+S\+I\+O\+NS -- ppE parameters for the bppe array specified
+
+If R\+J\+\_\+proposal is N\+U\+LL, a default proposal is used. 
+\begin{DoxyParams}{Parameters}
+{\em statistics\+\_\+filename} & Filename to output sampling statistics, if empty string, not output \\
+\hline
+{\em chain\+\_\+filename} & Filename to output data (chain 0 only), if empty string, not output \\
+\hline
+{\em auto\+\_\+corr\+\_\+filename} & Filename to output auto correlation in some interval, if empty string, not output \\
+\hline
+{\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
+\hline
+\end{DoxyParams}

@@ -1,0 +1,44 @@
+\hypertarget{namespacewaveform__generator__ext}{}\doxysection{waveform\+\_\+generator\+\_\+ext Namespace Reference}
+\label{namespacewaveform__generator__ext}\index{waveform\_generator\_ext@{waveform\_generator\_ext}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}}
+\begin{DoxyCompactList}\small\item\em Python wrapper for the generation parameters structure, as defined in util.\+cpp. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespacewaveform__generator__ext_af1fbfd7a51eeb5a85a2b25350586923e}{double}} (\+:1\mbox{]} frequencies, string generation\+\_\+method, \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}} parameters)\+:cdef double\mbox{[}\+::1\mbox{]} waveform\+\_\+real=np.\+ascontiguousarray(np.\+zeros((frequencies.\+size) double, dtype=np.\+float64)
+\begin{DoxyCompactList}\small\item\em Computes the waveform in Fourier space. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{namespacewaveform__generator__ext_a059b065820e34bb003b03711b8411295}\label{namespacewaveform__generator__ext_a059b065820e34bb003b03711b8411295}} 
+def {\bfseries double} (\+:1\mbox{]} frequencies, string generation\+\_\+method, \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}} parameters)\+:cdef double\mbox{[}\+::1\mbox{]} amplitude=np.\+ascontiguousarray(np.\+zeros((frequencies.\+size) double, dtype=np.\+float64, frequencies, frequencies, size, amplitude, generation\+\_\+method, parameters, params, \+:1\mbox{]} frequencies, string generation\+\_\+method, \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}} parameters)\+:cdef double\mbox{[}\+::1\mbox{]} phase=np.\+ascontiguousarray(np.\+zeros((frequencies.\+size) double, dtype=np.\+float64, frequencies, frequencies, size, phase, generation\+\_\+method, parameters, params, \+:1\mbox{]} frequencies, string generation\+\_\+method, \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}} parameters)\+:cdef double\mbox{[}\+::1\mbox{]} waveform\+\_\+plus\+\_\+real=np.\+ascontiguousarray(np.\+zeros((frequencies.\+size) double, dtype=np.\+float64)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Python wrapper for the waveform generation in \mbox{\hyperlink{waveform__generator_8cpp}{waveform\+\_\+generator.\+cpp}} 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespacewaveform__generator__ext_af1fbfd7a51eeb5a85a2b25350586923e}\label{namespacewaveform__generator__ext_af1fbfd7a51eeb5a85a2b25350586923e}} 
+\index{waveform\_generator\_ext@{waveform\_generator\_ext}!double@{double}}
+\index{double@{double}!waveform\_generator\_ext@{waveform\_generator\_ext}}
+\doxysubsubsection{\texorpdfstring{double()}{double()}}
+{\footnotesize\ttfamily def waveform\+\_\+generator\+\_\+ext.\+double (\begin{DoxyParamCaption}\item[{\+:1\mbox{]} frequencies ,
+                                string generation\+\_\+method,
+                                \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}} parameters
+                                )\+:
+    cdef double\mbox{[}\+::1\mbox{]} waveform\+\_\+real = np.\+ascontiguousarray(np.\+zeros((frequencies.\+size)}]{double,  }\item[{}]{dtype = {\ttfamily np.float64} }\end{DoxyParamCaption})}
+
+
+
+Computes the waveform in Fourier space. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & The array of frequencies to use \\
+\hline
+{\em generation\+\_\+method} & Method to use for the waveform generation \\
+\hline
+{\em \mbox{\hyperlink{classwaveform__generator__ext_1_1gen__params__py}{gen\+\_\+params\+\_\+py}}} & Parameters of the binary \\
+\hline
+\end{DoxyParams}
