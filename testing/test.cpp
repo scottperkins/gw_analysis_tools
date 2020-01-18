@@ -127,7 +127,7 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test54();	
+	test56();	
 	//test6();	
 	//test45();	
 	return 0;
@@ -141,7 +141,7 @@ void test56()
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
-	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
@@ -171,8 +171,8 @@ void test56()
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
@@ -195,6 +195,7 @@ void test56()
 	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
 
 
+	//psd_length = 100;
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
@@ -202,12 +203,12 @@ void test56()
 
 	//#########################################################
 	//mcmc options
-	int dimension = 13;
+	int dimension = 11;
 	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
-	double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.001),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
-	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1};
+	//double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.001),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
+	double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1};
 	double *seeding_var = NULL;
-	int n_steps = 1500;
+	int n_steps = 5000;
 	int chain_N=8 ;
 	int max_thermo=8 ;
 	int t0 = 10000;
@@ -230,7 +231,7 @@ void test56()
 	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
 	//std::string generation_method = "IMRPhenomD";
-	std::string generation_method = "IMRPhenomPv2";
+	std::string generation_method = "IMRPhenomD";
 	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
@@ -238,13 +239,13 @@ void test56()
 	std::string statfilename = "testing/data/mcmc_statistics_uncorr_P.txt";
 	std::string checkfile = "testing/data/mcmc_checkpoint_uncorr_P.csv";
 
-	int corr_threshold = 50;
+	int corr_threshold = 1000;
 	int corr_segments = 10;
 	double corr_converge_thresh = 0.50;
 	double corr_target_ac = .01;
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
-			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_Pv2,numThreads, pool,show_progress,
+			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,chainfile, "",checkfile);	
@@ -252,6 +253,7 @@ void test56()
 
 	//write_file(chainfile, output[0], n_steps, dimension);
 
+	psd_length = 8032;
 	deallocate_2D_array(output, n_steps, dimension);
 	delete [] detectors;
 	free(data_length);
@@ -318,11 +320,11 @@ void test54()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 5000;
+	int N_steps = 50000;
 	int chain_N= 8;
 	int max_chain_N_thermo= 8;
-	int t0= 10000;
-	int nu= 50;
+	int t0= 100000;
+	int nu= 5;
 	//std::string chain_dist_method = "half_ensemble";
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
@@ -351,7 +353,7 @@ void test54()
 	std::function<double(double* , int *,int, int,void *)> lp = [](double *param, int * status,int dim, int chain_id,void *parameters){ return test_lp_nts(param,dim,chain_id,parameters);};
 	std::function<double(double* , int*,int, int,void *)> ll = [](double *param, int *status,int dim, int chain_id,void *parameters){ return log_neil_proj3_nts(param,dim,chain_id,parameters);};
 	std::function<void(double* , int*,int, double**,int,void *)> f = [](double *param, int *status,int dim, double **fish,int chain_id,void *parameters){ fisher_neil_proj3(param,dim,fish,chain_id,parameters);};
-	f=NULL;
+	//f=NULL;
 	
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, "",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	

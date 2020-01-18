@@ -100,7 +100,7 @@ public:
 	std::function<double(double*,int *,int, int, void *)> ll;
 	std::function<void(double*,int *,int,double**,int, void *)> fish;
 	
-	void ** user_parameters;
+	void ** user_parameters=NULL;
 	bool local_param_allocation=false;
  
 	gsl_rng ** rvec;

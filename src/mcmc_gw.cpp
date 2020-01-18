@@ -1870,6 +1870,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		delete [] gen_params.betappe;
 	}
 
+
 }
 
 

@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
-#data = np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
-data = np.loadtxt("data/test.csv",delimiter=',')
+data = np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
+#data = np.loadtxt("data/test.csv",delimiter=',')
 #data = data[2000:]
 data_thinned = []
 for x in np.arange(len(data)):
@@ -18,6 +18,7 @@ for x in np.arange(len(data)):
 #    plt.show()
 #    plt.close()
 ndim, nsamples = 11, len(data) 
+print(data)
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\chi_p$",r"$\phi_p$"]
 labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 for x in data:
@@ -26,8 +27,8 @@ for x in data:
 
 figure = corner.corner(data_thinned, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 #plt.savefig("mcmc_testing_D_uncorr.pdf")
-#plt.savefig("mcmc_testing_P_uncorr.pdf")
-plt.savefig("mcmc_testing_uncorr.pdf")
+plt.savefig("mcmc_testing_P_uncorr.pdf")
+#plt.savefig("mcmc_testing_uncorr.pdf")
 plt.close()
 ##############################################################
 #data = np.loadtxt("data/mcmc_output_DFull_hot.csv",delimiter=',')

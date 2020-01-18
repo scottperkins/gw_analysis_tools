@@ -1258,8 +1258,8 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int *prev_reject_ct = new int[max_chain_N_thermo_ensemble];
 	int *prev_accept_ct = new int[max_chain_N_thermo_ensemble];
 	double *running_ratio = new double[max_chain_N_thermo_ensemble];
-	//bool dynamic_chain_num = true;
-	bool dynamic_chain_num = false;
+	bool dynamic_chain_num = true;
+	//bool dynamic_chain_num = false;
 
 	bool chain_pop_target_reached = false;
 	for(int i =0; i<samplerptr->chain_N; i++){
@@ -1276,8 +1276,11 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	
 	int t = 0;
 	samplerptr->show_progress = false;
+	bool testing=false;
+	int test_ct=0;
 	while( t <= (N_steps-equilibrium_check_freq))
 	{
+		chain_pop_target_reached = false;
 		if(ave_dynamics<tolerance && chain_pop_target_reached){
 			if(stability_ct > stability_tol)
 				break;
@@ -1316,13 +1319,22 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 					}
 					else {
 						chain_pop_target_reached = false;
-						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+						//if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+						if(testing && samplerptr->chain_N<max_chain_N_thermo_ensemble){
+							if(test_ct!=0){
+								test_ct--;	
+							}
+							else{
+								testing = false;
+								test_ct = 0;
+							}
 							std::cout<<"add"<<std::endl;
 							//add chain
 							int min_id =0;
-							int min_val =1;
+							int min_val =10;
 							//Don't add chain 0 and chain chain_N-1
 							for (int j =1 ;j <samplerptr->chain_N-1; j++){
+								std::cout<<running_ratio[j]<<std::endl;
 								if(running_ratio[j]<min_val){
 									min_id = j;
 									min_val = running_ratio[j];
@@ -1338,6 +1350,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 								old_temps[i+1] = old_temps[i];
 							}
 							//Add new chain between two other chains, geometrically
+							std::cout<<samplerptr->chain_N<<" "<<min_id<<std::endl;
 							samplerptr->chain_temps[min_id] = std::sqrt(samplerptr->chain_temps[min_id-1]*samplerptr->chain_temps[min_id+1]);
 							old_temps[min_id] = samplerptr->chain_temps[min_id];
 							//populate all the necessary chain-specific parameters
@@ -1394,7 +1407,14 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 							}
 						
 						}
-						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
+						//else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
+						else if(!testing){
+							if(test_ct<3){
+								test_ct++;
+							}
+							else{
+								testing = true;
+							}
 							std::cout<<"rm"<<std::endl;
 							//remove chain
 							int max_id =0;

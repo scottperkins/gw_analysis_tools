@@ -166,6 +166,8 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 
 		scaling = 0.0;
 		//ensure the steps aren't ridiculous
+		//std::cout<<sampler->fisher_vals[chain_index][beta]<<std::endl;
+		//exit(1);
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
 		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
@@ -1944,7 +1946,15 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
 		for(int i=0 ; i<samplerptr->chain_N; i++){
+			//std::cout<<"BEFORE : "<<samplerptr->nan_counter[i]<<std::endl;
+			//for(int j = 0 ; j<samplerptr->max_dim; j++){
+			//	std::cout<<samplerptr->output[i][0][j]<<std::endl;	
+			//}
 			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
+			//std::cout<<"AFTER: "<<samplerptr->nan_counter[i]<<std::endl;
+			//for(int j = 0 ; j<samplerptr->max_dim; j++){
+			//	std::cout<<samplerptr->fisher_vals[i][j]<<std::endl;
+			//}
 		}
 	}
 }
