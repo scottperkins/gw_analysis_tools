@@ -1253,13 +1253,13 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	double chain_pop_low = .2;
 
 	//Keep track of acceptance ratio in chuncks
-	int *running_accept_ct = new int[samplerptr->chain_N];
-	int *running_reject_ct = new int[samplerptr->chain_N];
-	int *prev_reject_ct = new int[samplerptr->chain_N];
-	int *prev_accept_ct = new int[samplerptr->chain_N];
-	double *running_ratio = new double[samplerptr->chain_N];
-	bool dynamic_chain_num = true;
-	//bool dynamic_chain_num = false;
+	int *running_accept_ct = new int[max_chain_N_thermo_ensemble];
+	int *running_reject_ct = new int[max_chain_N_thermo_ensemble];
+	int *prev_reject_ct = new int[max_chain_N_thermo_ensemble];
+	int *prev_accept_ct = new int[max_chain_N_thermo_ensemble];
+	double *running_ratio = new double[max_chain_N_thermo_ensemble];
+	//bool dynamic_chain_num = true;
+	bool dynamic_chain_num = false;
 
 	bool chain_pop_target_reached = false;
 	for(int i =0; i<samplerptr->chain_N; i++){
@@ -1317,7 +1317,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 					else {
 						chain_pop_target_reached = false;
 						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
-							//std::cout<<"add"<<std::endl;
+							std::cout<<"add"<<std::endl;
 							//add chain
 							int min_id =0;
 							int min_val =1;
@@ -1335,9 +1335,11 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 								running_reject_ct[i+1] = running_reject_ct[i];
 								prev_accept_ct[i+1] = prev_accept_ct[i];
 								prev_reject_ct[i+1] = prev_reject_ct[i];
+								old_temps[i+1] = old_temps[i];
 							}
 							//Add new chain between two other chains, geometrically
 							samplerptr->chain_temps[min_id] = std::sqrt(samplerptr->chain_temps[min_id-1]*samplerptr->chain_temps[min_id+1]);
+							old_temps[min_id] = samplerptr->chain_temps[min_id];
 							//populate all the necessary chain-specific parameters
 							for(int i =0 ;i<samplerptr->max_dim; i++){
 								//Just use the chain's last 
@@ -1393,7 +1395,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 						
 						}
 						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
-							//std::cout<<"rm"<<std::endl;
+							std::cout<<"rm"<<std::endl;
 							//remove chain
 							int max_id =0;
 							int max_val =0;
@@ -1404,8 +1406,13 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 									max_val = running_ratio[j];
 								}
 							}	
-							for(int i = max_id; i<samplerptr->chain_N-1; i++){
+							for(int i = max_id; i<samplerptr->chain_N-2; i++){
 								transfer_chain(samplerptr,samplerptr, i, i+1, true);	
+								running_accept_ct[i] = running_accept_ct[i+1];
+								running_reject_ct[i] = running_reject_ct[i+1];
+								prev_accept_ct[i] = prev_accept_ct[i];
+								prev_reject_ct[i] = prev_reject_ct[i+1];
+								old_temps[i] = old_temps[i+1];
 							}
 							samplerptr->chain_N-=1;
 						}

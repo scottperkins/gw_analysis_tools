@@ -1,22 +1,27 @@
-\hypertarget{pn__waveform__util_8cpp}{}\doxysection{src/pn\+\_\+waveform\+\_\+util.cpp File Reference}
-\label{pn__waveform__util_8cpp}\index{src/pn\_waveform\_util.cpp@{src/pn\_waveform\_util.cpp}}
+\hypertarget{pn__waveform__util_8cpp}{}\section{src/pn\+\_\+waveform\+\_\+util.cpp File Reference}
+\label{pn__waveform__util_8cpp}\index{src/pn\+\_\+waveform\+\_\+util.\+cpp@{src/pn\+\_\+waveform\+\_\+util.\+cpp}}
 {\ttfamily \#include \char`\"{}pn\+\_\+waveform\+\_\+util.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$math.\+h$>$}\newline
 {\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
-Include dependency graph for pn\+\_\+waveform\+\_\+util.\+cpp\+:
-% FIG 0
-\doxysubsection*{Functions}
+Include dependency graph for pn\+\_\+waveform\+\_\+util.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{pn__waveform__util_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{pn__waveform__util_8cpp_a6ddff16ae8f9cd4b5be6d4a5d4f29c22}{t\+\_\+2\+PN}} (T f, T eta, T chirpmass, T chi1, T chi2, T tc)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{pn__waveform__util_8cpp_a6ddff16ae8f9cd4b5be6d4a5d4f29c22}{t\+\_\+2\+PN} (T f, T eta, T chirpmass, T chi1, T chi2, T tc)
 \begin{DoxyCompactList}\small\item\em Time t as a function of f up to 2nd PN order. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{pn__waveform__util_8cpp_af5b4f8b6607df1da69fd5cfc2edad586}{f\+\_\+0\+PN}} (T t, T chirpmass)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{pn__waveform__util_8cpp_af5b4f8b6607df1da69fd5cfc2edad586}{f\+\_\+0\+PN} (T t, T chirpmass)
 \begin{DoxyCompactList}\small\item\em utility to get frequency from time before merger \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{pn__waveform__util_8cpp_ae592c99f579202c084ebb17e159733db}\label{pn__waveform__util_8cpp_ae592c99f579202c084ebb17e159733db}} 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{pn__waveform__util_8cpp_ae592c99f579202c084ebb17e159733db}{t\+\_\+0\+PN}} (T f, T chirpmass)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{pn__waveform__util_8cpp_ae592c99f579202c084ebb17e159733db}{t\+\_\+0\+PN} (T f, T chirpmass)
 \begin{DoxyCompactList}\small\item\em Inverse of f\+\_\+0\+PN. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{pn__waveform__util_8cpp_a21c903bf96c1808515ab21865be1a082}{F\+I\+S\+CO}} (T mass)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{pn__waveform__util_8cpp_a21c903bf96c1808515ab21865be1a082}{F\+I\+S\+CO} (T mass)
 \begin{DoxyCompactList}\small\item\em Utility function for the frequency at the innermost stable circular orbit (I\+S\+CO) \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{pn__waveform__util_8cpp_a1d655edb64b3e2f4613a763e00cc15b3}\label{pn__waveform__util_8cpp_a1d655edb64b3e2f4613a763e00cc15b3}} 
 template double {\bfseries t\+\_\+2\+P\+N$<$ double $>$} (double, double, double, double, double, double)
@@ -44,14 +49,14 @@ template double {\bfseries F\+I\+S\+CO} (double mass)
 \end{DoxyCompactItemize}
 
 
-\doxysubsection{Detailed Description}
+\subsection{Detailed Description}
 PN waveform utilities 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{pn__waveform__util_8cpp_af5b4f8b6607df1da69fd5cfc2edad586}\label{pn__waveform__util_8cpp_af5b4f8b6607df1da69fd5cfc2edad586}} 
-\index{pn\_waveform\_util.cpp@{pn\_waveform\_util.cpp}!f\_0PN@{f\_0PN}}
-\index{f\_0PN@{f\_0PN}!pn\_waveform\_util.cpp@{pn\_waveform\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{f\_0PN()}{f\_0PN()}}
+\index{pn\+\_\+waveform\+\_\+util.\+cpp@{pn\+\_\+waveform\+\_\+util.\+cpp}!f\+\_\+0\+PN@{f\+\_\+0\+PN}}
+\index{f\+\_\+0\+PN@{f\+\_\+0\+PN}!pn\+\_\+waveform\+\_\+util.\+cpp@{pn\+\_\+waveform\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{f\+\_\+0\+P\+N()}{f\_0PN()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T f\+\_\+0\+PN (\begin{DoxyParamCaption}\item[{T}]{t,  }\item[{T}]{chirpmass }\end{DoxyParamCaption})}
 
@@ -59,10 +64,10 @@ T f\+\_\+0\+PN (\begin{DoxyParamCaption}\item[{T}]{t,  }\item[{T}]{chirpmass }\e
 
 utility to get frequency from time before merger 
 
-See \href{https://arxiv.org/pdf/1902.00021.pdf}{\texttt{ https\+://arxiv.\+org/pdf/1902.\+00021.\+pdf}} \mbox{\Hypertarget{pn__waveform__util_8cpp_a21c903bf96c1808515ab21865be1a082}\label{pn__waveform__util_8cpp_a21c903bf96c1808515ab21865be1a082}} 
-\index{pn\_waveform\_util.cpp@{pn\_waveform\_util.cpp}!FISCO@{FISCO}}
-\index{FISCO@{FISCO}!pn\_waveform\_util.cpp@{pn\_waveform\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{FISCO()}{FISCO()}}
+See \href{https://arxiv.org/pdf/1902.00021.pdf}{\tt https\+://arxiv.\+org/pdf/1902.\+00021.\+pdf} \mbox{\Hypertarget{pn__waveform__util_8cpp_a21c903bf96c1808515ab21865be1a082}\label{pn__waveform__util_8cpp_a21c903bf96c1808515ab21865be1a082}} 
+\index{pn\+\_\+waveform\+\_\+util.\+cpp@{pn\+\_\+waveform\+\_\+util.\+cpp}!F\+I\+S\+CO@{F\+I\+S\+CO}}
+\index{F\+I\+S\+CO@{F\+I\+S\+CO}!pn\+\_\+waveform\+\_\+util.\+cpp@{pn\+\_\+waveform\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{F\+I\+S\+C\+O()}{FISCO()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T F\+I\+S\+CO (\begin{DoxyParamCaption}\item[{T}]{mass }\end{DoxyParamCaption})}
 
@@ -71,9 +76,9 @@ T F\+I\+S\+CO (\begin{DoxyParamCaption}\item[{T}]{mass }\end{DoxyParamCaption})}
 Utility function for the frequency at the innermost stable circular orbit (I\+S\+CO) 
 
 \mbox{\Hypertarget{pn__waveform__util_8cpp_a6ddff16ae8f9cd4b5be6d4a5d4f29c22}\label{pn__waveform__util_8cpp_a6ddff16ae8f9cd4b5be6d4a5d4f29c22}} 
-\index{pn\_waveform\_util.cpp@{pn\_waveform\_util.cpp}!t\_2PN@{t\_2PN}}
-\index{t\_2PN@{t\_2PN}!pn\_waveform\_util.cpp@{pn\_waveform\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{t\_2PN()}{t\_2PN()}}
+\index{pn\+\_\+waveform\+\_\+util.\+cpp@{pn\+\_\+waveform\+\_\+util.\+cpp}!t\+\_\+2\+PN@{t\+\_\+2\+PN}}
+\index{t\+\_\+2\+PN@{t\+\_\+2\+PN}!pn\+\_\+waveform\+\_\+util.\+cpp@{pn\+\_\+waveform\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{t\+\_\+2\+P\+N()}{t\_2PN()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T t\+\_\+2\+PN (\begin{DoxyParamCaption}\item[{T}]{f,  }\item[{T}]{eta,  }\item[{T}]{chirpmass,  }\item[{T}]{chi1,  }\item[{T}]{chi2,  }\item[{T}]{tc }\end{DoxyParamCaption})}
 
@@ -81,6 +86,6 @@ T t\+\_\+2\+PN (\begin{DoxyParamCaption}\item[{T}]{f,  }\item[{T}]{eta,  }\item[
 
 Time t as a function of f up to 2nd PN order. 
 
-Taken from \href{https://arxiv.org/pdf/gr-qc/0411129.pdf}{\texttt{ https\+://arxiv.\+org/pdf/gr-\/qc/0411129.\+pdf}}
+Taken from \href{https://arxiv.org/pdf/gr-qc/0411129.pdf}{\tt https\+://arxiv.\+org/pdf/gr-\/qc/0411129.\+pdf}
 
 Non-\/precessing for now 

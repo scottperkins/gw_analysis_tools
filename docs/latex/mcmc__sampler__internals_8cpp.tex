@@ -1,5 +1,5 @@
-\hypertarget{mcmc__sampler__internals_8cpp}{}\doxysection{src/mcmc\+\_\+sampler\+\_\+internals.cpp File Reference}
-\label{mcmc__sampler__internals_8cpp}\index{src/mcmc\_sampler\_internals.cpp@{src/mcmc\_sampler\_internals.cpp}}
+\hypertarget{mcmc__sampler__internals_8cpp}{}\section{src/mcmc\+\_\+sampler\+\_\+internals.cpp File Reference}
+\label{mcmc__sampler__internals_8cpp}\index{src/mcmc\+\_\+sampler\+\_\+internals.\+cpp@{src/mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
 {\ttfamily \#include \char`\"{}mcmc\+\_\+sampler\+\_\+internals.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}autocorrelation.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
@@ -14,95 +14,100 @@
 {\ttfamily \#include $<$iomanip$>$}\newline
 {\ttfamily \#include $<$fftw3.\+h$>$}\newline
 {\ttfamily \#include $<$stdio.\+h$>$}\newline
-Include dependency graph for mcmc\+\_\+sampler\+\_\+internals.\+cpp\+:
-% FIG 0
-\doxysubsection*{Functions}
+Include dependency graph for mcmc\+\_\+sampler\+\_\+internals.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{mcmc__sampler__internals_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a980887f02fa645f29724117539565a91}\label{mcmc__sampler__internals_8cpp_a980887f02fa645f29724117539565a91}} 
-int \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a980887f02fa645f29724117539565a91}{mcmc\+\_\+step}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, double $\ast$next\+\_\+param, int $\ast$current\+\_\+status, int $\ast$next\+\_\+status, int chain\+\_\+number)
+int \hyperlink{mcmc__sampler__internals_8cpp_a980887f02fa645f29724117539565a91}{mcmc\+\_\+step} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, double $\ast$next\+\_\+param, int $\ast$current\+\_\+status, int $\ast$next\+\_\+status, int chain\+\_\+number)
 \begin{DoxyCompactList}\small\item\em interface function between the sampler and the internal step functions \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_aea58d270c94a74ca9c716fae47cbd24d}{gaussian\+\_\+step}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+id)
+void \hyperlink{mcmc__sampler__internals_8cpp_aea58d270c94a74ca9c716fae47cbd24d}{gaussian\+\_\+step} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Straight gaussian step. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a4f2eee3801304ac71a4f4dc03a7783a4}{fisher\+\_\+step}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+index)
+void \hyperlink{mcmc__sampler__internals_8cpp_a4f2eee3801304ac71a4f4dc03a7783a4}{fisher\+\_\+step} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+index)
 \begin{DoxyCompactList}\small\item\em Fisher informed gaussian step. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ab09bae393b353856815acf208ad3cb04}\label{mcmc__sampler__internals_8cpp_ab09bae393b353856815acf208ad3cb04}} 
-void {\bfseries update\+\_\+fisher} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, int $\ast$param\+\_\+status, int chain\+\_\+index)
+void {\bfseries update\+\_\+fisher} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, int $\ast$param\+\_\+status, int chain\+\_\+index)
 \item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a251e0a0b4059499d25f6d3c9957ceb1d}{mmala\+\_\+step}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status)
+void \hyperlink{mcmc__sampler__internals_8cpp_a251e0a0b4059499d25f6d3c9957ceb1d}{mmala\+\_\+step} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status)
 \begin{DoxyCompactList}\small\item\em M\+M\+A\+LA informed step -- Currently not supported. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_ab2a990fd673ce479819a75cf5617c6b3}{diff\+\_\+ev\+\_\+step}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+id)
+void \hyperlink{mcmc__sampler__internals_8cpp_ab2a990fd673ce479819a75cf5617c6b3}{diff\+\_\+ev\+\_\+step} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+id)
 \begin{DoxyCompactList}\small\item\em differential evolution informed step \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a1b5c301686c971e3f9359cdd661529b3}{R\+J\+\_\+smooth\+\_\+history}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, int $\ast$current\+\_\+param\+\_\+status, int base\+\_\+history\+\_\+id, double $\ast$eff\+\_\+history\+\_\+coord, int $\ast$eff\+\_\+history\+\_\+status, int chain\+\_\+id)
+void \hyperlink{mcmc__sampler__internals_8cpp_a1b5c301686c971e3f9359cdd661529b3}{R\+J\+\_\+smooth\+\_\+history} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, int $\ast$current\+\_\+param\+\_\+status, int base\+\_\+history\+\_\+id, double $\ast$eff\+\_\+history\+\_\+coord, int $\ast$eff\+\_\+history\+\_\+status, int chain\+\_\+id)
 \item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a048b4bd95b3bac1d355d5c5897c29ece}{R\+J\+\_\+step}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+number)
+void \hyperlink{mcmc__sampler__internals_8cpp_a048b4bd95b3bac1d355d5c5897c29ece}{R\+J\+\_\+step} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$current\+\_\+param, double $\ast$proposed\+\_\+param, int $\ast$current\+\_\+status, int $\ast$proposed\+\_\+status, int chain\+\_\+number)
 \begin{DoxyCompactList}\small\item\em R\+J-\/proposal step for trans-\/dimensional M\+C\+M\+Cs. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_ae328d199338081b9affb09d1f8e71351}{chain\+\_\+swap}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$param\+\_\+status, int step\+\_\+num, int $\ast$swp\+\_\+accepted, int $\ast$swp\+\_\+rejected)
+void \hyperlink{mcmc__sampler__internals_8cpp_ae328d199338081b9affb09d1f8e71351}{chain\+\_\+swap} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$param\+\_\+status, int step\+\_\+num, int $\ast$swp\+\_\+accepted, int $\ast$swp\+\_\+rejected)
 \begin{DoxyCompactList}\small\item\em subroutine to perform chain comparison for parallel tempering \end{DoxyCompactList}\item 
-int \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a21d8297d53aac4b86b446a6bdb3894d9}{single\+\_\+chain\+\_\+swap}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$chain1, double $\ast$chain2, int $\ast$chain1\+\_\+status, int $\ast$chain2\+\_\+status, int T1\+\_\+index, int T2\+\_\+index)
+int \hyperlink{mcmc__sampler__internals_8cpp_a21d8297d53aac4b86b446a6bdb3894d9}{single\+\_\+chain\+\_\+swap} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$chain1, double $\ast$chain2, int $\ast$chain1\+\_\+status, int $\ast$chain2\+\_\+status, int T1\+\_\+index, int T2\+\_\+index)
 \begin{DoxyCompactList}\small\item\em subroutine to actually swap two chains \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a01af82303a695ddfd66c3d493b8da408}{assign\+\_\+probabilities}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, int chain\+\_\+index)
+void \hyperlink{mcmc__sampler__internals_8cpp_a01af82303a695ddfd66c3d493b8da408}{assign\+\_\+probabilities} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, int chain\+\_\+index)
 \begin{DoxyCompactList}\small\item\em update and initiate probabilities for each variety of step \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_ae363e3b27d7254afd01c6285a63af4bd}{transfer\+\_\+chain}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr\+\_\+dest, \mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr\+\_\+source, int id\+\_\+dest, int id\+\_\+source, bool transfer\+\_\+output)
+void \hyperlink{mcmc__sampler__internals_8cpp_ae363e3b27d7254afd01c6285a63af4bd}{transfer\+\_\+chain} (\hyperlink{classsampler}{sampler} $\ast$samplerptr\+\_\+dest, \hyperlink{classsampler}{sampler} $\ast$samplerptr\+\_\+source, int id\+\_\+dest, int id\+\_\+source, bool transfer\+\_\+output)
 \begin{DoxyCompactList}\small\item\em Copies contents of one chain to another. \end{DoxyCompactList}\item 
-bool \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a00a4c2a3dcd245bd563ec73963553421}{check\+\_\+sampler\+\_\+status}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr)
+bool \hyperlink{mcmc__sampler__internals_8cpp_a00a4c2a3dcd245bd563ec73963553421}{check\+\_\+sampler\+\_\+status} (\hyperlink{classsampler}{sampler} $\ast$samplerptr)
 \begin{DoxyCompactList}\small\item\em Checks the status of a sampler for the stochastic sampling. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a9d87fd050fbed74c4b5deabbc806f9ed}\label{mcmc__sampler__internals_8cpp_a9d87fd050fbed74c4b5deabbc806f9ed}} 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a9d87fd050fbed74c4b5deabbc806f9ed}{update\+\_\+step\+\_\+widths}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr, int chain\+\_\+id)
+void \hyperlink{mcmc__sampler__internals_8cpp_a9d87fd050fbed74c4b5deabbc806f9ed}{update\+\_\+step\+\_\+widths} (\hyperlink{classsampler}{sampler} $\ast$samplerptr, int chain\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Updates the step widths, shooting for 20\% acceptance ratios for each type of step. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ac525f259fecd81816775f4c84324d17f}\label{mcmc__sampler__internals_8cpp_ac525f259fecd81816775f4c84324d17f}} 
-void {\bfseries allocate\+\_\+sampler\+\_\+mem} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}})
+void {\bfseries allocate\+\_\+sampler\+\_\+mem} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler})
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a1a0ed700073b1c7b0011627dddbd9d57}\label{mcmc__sampler__internals_8cpp_a1a0ed700073b1c7b0011627dddbd9d57}} 
-void {\bfseries deallocate\+\_\+sampler\+\_\+mem} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}})
+void {\bfseries deallocate\+\_\+sampler\+\_\+mem} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler})
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a97ce7a1836e918fc9fefcb99b4fba2f8}\label{mcmc__sampler__internals_8cpp_a97ce7a1836e918fc9fefcb99b4fba2f8}} 
-void {\bfseries update\+\_\+history} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, double $\ast$new\+\_\+params, int $\ast$new\+\_\+param\+\_\+status, int chain\+\_\+index)
+void {\bfseries update\+\_\+history} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, double $\ast$new\+\_\+params, int $\ast$new\+\_\+param\+\_\+status, int chain\+\_\+index)
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a510b0594a7fe5a05eed0df6100ffd62b}\label{mcmc__sampler__internals_8cpp_a510b0594a7fe5a05eed0df6100ffd62b}} 
-void {\bfseries write\+\_\+stat\+\_\+file} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, std\+::string filename)
+void {\bfseries write\+\_\+stat\+\_\+file} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, std\+::string filename)
 \item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a2207c4aeab89b5b985ac2fb297426ba5}{write\+\_\+checkpoint\+\_\+file}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, std\+::string filename)
+void \hyperlink{mcmc__sampler__internals_8cpp_a2207c4aeab89b5b985ac2fb297426ba5}{write\+\_\+checkpoint\+\_\+file} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, std\+::string filename)
 \begin{DoxyCompactList}\small\item\em Routine that writes metadata and final positions of a sampler to a checkpoint file. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a6df174eb68b851e0ccd3b966e65f3a77}{load\+\_\+temps\+\_\+checkpoint\+\_\+file}} (std\+::string check\+\_\+file, double $\ast$temps, int chain\+\_\+N)
+void \hyperlink{mcmc__sampler__internals_8cpp_a6df174eb68b851e0ccd3b966e65f3a77}{load\+\_\+temps\+\_\+checkpoint\+\_\+file} (std\+::string check\+\_\+file, double $\ast$temps, int chain\+\_\+N)
 \begin{DoxyCompactList}\small\item\em load temperatures from checkpoint file \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_ae9c3718752690cce3b37f41da7b2b938}{load\+\_\+checkpoint\+\_\+file}} (std\+::string check\+\_\+file, \mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}})
+void \hyperlink{mcmc__sampler__internals_8cpp_ae9c3718752690cce3b37f41da7b2b938}{load\+\_\+checkpoint\+\_\+file} (std\+::string check\+\_\+file, \hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler})
 \begin{DoxyCompactList}\small\item\em load checkpoint file into sampler struct \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a0b54bc1d977c55f0c9702246ad8a4092}\label{mcmc__sampler__internals_8cpp_a0b54bc1d977c55f0c9702246ad8a4092}} 
-void {\bfseries assign\+\_\+ct\+\_\+p} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, int step, int chain\+\_\+index)
+void {\bfseries assign\+\_\+ct\+\_\+p} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, int step, int chain\+\_\+index)
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_aa5da7a24bdc8e600616c2ea21dc44cae}\label{mcmc__sampler__internals_8cpp_aa5da7a24bdc8e600616c2ea21dc44cae}} 
-void {\bfseries assign\+\_\+ct\+\_\+m} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, int step, int chain\+\_\+index)
+void {\bfseries assign\+\_\+ct\+\_\+m} (\hyperlink{classsampler}{sampler} $\ast$\hyperlink{classsampler}{sampler}, int step, int chain\+\_\+index)
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a7425d70b7a09bfaf24371292791115c0}\label{mcmc__sampler__internals_8cpp_a7425d70b7a09bfaf24371292791115c0}} 
-void {\bfseries assign\+\_\+initial\+\_\+pos} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr, double $\ast$initial\+\_\+pos, int $\ast$initial\+\_\+status, double $\ast$seeding\+\_\+var)
+void {\bfseries assign\+\_\+initial\+\_\+pos} (\hyperlink{classsampler}{sampler} $\ast$samplerptr, double $\ast$initial\+\_\+pos, int $\ast$initial\+\_\+status, double $\ast$seeding\+\_\+var)
 \item 
-double \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a1f07e7540a20f438aad42f569c2e22d2}{P\+T\+\_\+dynamical\+\_\+timescale}} (int t0, int nu, int t)
+double \hyperlink{mcmc__sampler__internals_8cpp_a1f07e7540a20f438aad42f569c2e22d2}{P\+T\+\_\+dynamical\+\_\+timescale} (int t0, int nu, int t)
 \begin{DoxyCompactList}\small\item\em Timescale of the PT dynamics. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_ae0ec0745c85caad31c473a608aef5782}{update\+\_\+temperatures}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr, int t0, int nu, int t)
+void \hyperlink{mcmc__sampler__internals_8cpp_ae0ec0745c85caad31c473a608aef5782}{update\+\_\+temperatures} (\hyperlink{classsampler}{sampler} $\ast$samplerptr, int t0, int nu, int t)
 \begin{DoxyCompactList}\small\item\em updates the temperatures for a sampler such that all acceptance rates are equal \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a9d0fba3cec02c00fb85b04d5e987f01b}{initiate\+\_\+full\+\_\+sampler}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$sampler\+\_\+new, \mbox{\hyperlink{classsampler}{sampler}} $\ast$sampler\+\_\+old, int chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, int chain\+\_\+N, std\+::string chain\+\_\+allocation\+\_\+scheme)
+void \hyperlink{mcmc__sampler__internals_8cpp_a9d0fba3cec02c00fb85b04d5e987f01b}{initiate\+\_\+full\+\_\+sampler} (\hyperlink{classsampler}{sampler} $\ast$sampler\+\_\+new, \hyperlink{classsampler}{sampler} $\ast$sampler\+\_\+old, int chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, int chain\+\_\+N, std\+::string chain\+\_\+allocation\+\_\+scheme)
 \begin{DoxyCompactList}\small\item\em For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a7dbf96828add5b7383e340160a5d006a}\label{mcmc__sampler__internals_8cpp_a7dbf96828add5b7383e340160a5d006a}} 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a7dbf96828add5b7383e340160a5d006a}{write\+\_\+output\+\_\+file}} (std\+::string file, int step\+\_\+num, int max\+\_\+dimension, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$status, int chain\+\_\+N, double $\ast$temps, bool RJ)
+void \hyperlink{mcmc__sampler__internals_8cpp_a7dbf96828add5b7383e340160a5d006a}{write\+\_\+output\+\_\+file} (std\+::string file, int step\+\_\+num, int max\+\_\+dimension, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$status, int chain\+\_\+N, double $\ast$temps, bool RJ)
 \begin{DoxyCompactList}\small\item\em Utility to write out the parameters and status of a sampler to a file. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a38318ba0da66b6bb3e316b3e541a86aa}\label{mcmc__sampler__internals_8cpp_a38318ba0da66b6bb3e316b3e541a86aa}} 
 int {\bfseries count\+\_\+cold\+\_\+chains} (double $\ast$temps, int chain\+\_\+N)
 \item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a7915ea20bbd2c5a82548a6bbf490783f}\label{mcmc__sampler__internals_8cpp_a7915ea20bbd2c5a82548a6bbf490783f}} 
-void \mbox{\hyperlink{mcmc__sampler__internals_8cpp_a7915ea20bbd2c5a82548a6bbf490783f}{reduce\+\_\+output}} (int step\+\_\+num, int max\+\_\+dimension, double $\ast$$\ast$$\ast$output\+\_\+old, int $\ast$$\ast$$\ast$status\+\_\+old, double $\ast$$\ast$output\+\_\+new, int $\ast$$\ast$status\+\_\+new, int chain\+\_\+N, double $\ast$temps, bool RJ)
+void \hyperlink{mcmc__sampler__internals_8cpp_a7915ea20bbd2c5a82548a6bbf490783f}{reduce\+\_\+output} (int step\+\_\+num, int max\+\_\+dimension, double $\ast$$\ast$$\ast$output\+\_\+old, int $\ast$$\ast$$\ast$status\+\_\+old, double $\ast$$\ast$output\+\_\+new, int $\ast$$\ast$status\+\_\+new, int chain\+\_\+N, double $\ast$temps, bool RJ)
 \begin{DoxyCompactList}\small\item\em Utility to write out the parameters and status of a sampler to a file. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
-\doxysubsection{Detailed Description}
+\subsection{Detailed Description}
 File containing definitions for all the internal, generic mcmc subroutines 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a01af82303a695ddfd66c3d493b8da408}\label{mcmc__sampler__internals_8cpp_a01af82303a695ddfd66c3d493b8da408}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!assign\_probabilities@{assign\_probabilities}}
-\index{assign\_probabilities@{assign\_probabilities}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{assign\_probabilities()}{assign\_probabilities()}}
-{\footnotesize\ttfamily void assign\+\_\+probabilities (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{int}]{chain\+\_\+index }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!assign\+\_\+probabilities@{assign\+\_\+probabilities}}
+\index{assign\+\_\+probabilities@{assign\+\_\+probabilities}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{assign\+\_\+probabilities()}{assign\_probabilities()}}
+{\footnotesize\ttfamily void assign\+\_\+probabilities (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{int}]{chain\+\_\+index }\end{DoxyParamCaption})}
 
 
 
@@ -115,10 +120,10 @@ Type 1\+: Differential Evolution step
 Type 2\+: M\+M\+A\+LA step (currently not supported)
 
 Type 3\+: Fisher step \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ae328d199338081b9affb09d1f8e71351}\label{mcmc__sampler__internals_8cpp_ae328d199338081b9affb09d1f8e71351}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!chain\_swap@{chain\_swap}}
-\index{chain\_swap@{chain\_swap}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{chain\_swap()}{chain\_swap()}}
-{\footnotesize\ttfamily void chain\+\_\+swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int $\ast$$\ast$$\ast$}]{param\+\_\+status,  }\item[{int}]{step\+\_\+num,  }\item[{int $\ast$}]{swp\+\_\+accepted,  }\item[{int $\ast$}]{swp\+\_\+rejected }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!chain\+\_\+swap@{chain\+\_\+swap}}
+\index{chain\+\_\+swap@{chain\+\_\+swap}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{chain\+\_\+swap()}{chain\_swap()}}
+{\footnotesize\ttfamily void chain\+\_\+swap (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int $\ast$$\ast$$\ast$}]{param\+\_\+status,  }\item[{int}]{step\+\_\+num,  }\item[{int $\ast$}]{swp\+\_\+accepted,  }\item[{int $\ast$}]{swp\+\_\+rejected }\end{DoxyParamCaption})}
 
 
 
@@ -126,7 +131,7 @@ subroutine to perform chain comparison for parallel tempering
 
 The total output file is passed, and the chains are swapped sequentially
 
-This is the routine for \`{}`Deterministic'\textquotesingle{} sampling (parallel or sequential, but not pooled) 
+This is the routine for ``\+Deterministic\textquotesingle{}\textquotesingle{} sampling (parallel or sequential, but not pooled) 
 \begin{DoxyParams}{Parameters}
 {\em sampler} & sampler struct \\
 \hline
@@ -138,20 +143,20 @@ This is the routine for \`{}`Deterministic'\textquotesingle{} sampling (parallel
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a00a4c2a3dcd245bd563ec73963553421}\label{mcmc__sampler__internals_8cpp_a00a4c2a3dcd245bd563ec73963553421}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!check\_sampler\_status@{check\_sampler\_status}}
-\index{check\_sampler\_status@{check\_sampler\_status}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{check\_sampler\_status()}{check\_sampler\_status()}}
-{\footnotesize\ttfamily bool check\+\_\+sampler\+\_\+status (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{samplerptr }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!check\+\_\+sampler\+\_\+status@{check\+\_\+sampler\+\_\+status}}
+\index{check\+\_\+sampler\+\_\+status@{check\+\_\+sampler\+\_\+status}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{check\+\_\+sampler\+\_\+status()}{check\_sampler\_status()}}
+{\footnotesize\ttfamily bool check\+\_\+sampler\+\_\+status (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{samplerptr }\end{DoxyParamCaption})}
 
 
 
 Checks the status of a sampler for the stochastic sampling. 
 
 Just loops through the ref\+\_\+chain\+\_\+status variables \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ab2a990fd673ce479819a75cf5617c6b3}\label{mcmc__sampler__internals_8cpp_ab2a990fd673ce479819a75cf5617c6b3}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!diff\_ev\_step@{diff\_ev\_step}}
-\index{diff\_ev\_step@{diff\_ev\_step}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{diff\_ev\_step()}{diff\_ev\_step()}}
-{\footnotesize\ttfamily void diff\+\_\+ev\+\_\+step (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+id }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!diff\+\_\+ev\+\_\+step@{diff\+\_\+ev\+\_\+step}}
+\index{diff\+\_\+ev\+\_\+step@{diff\+\_\+ev\+\_\+step}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{diff\+\_\+ev\+\_\+step()}{diff\_ev\_step()}}
+{\footnotesize\ttfamily void diff\+\_\+ev\+\_\+step (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+id }\end{DoxyParamCaption})}
 
 
 
@@ -165,14 +170,14 @@ Take the difference of two random, accepted previous steps and step along that w
 \hline
  & {\em current\+\_\+param} & current position in parameter space \\
 \hline
-\mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
+\mbox{\tt out}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a4f2eee3801304ac71a4f4dc03a7783a4}\label{mcmc__sampler__internals_8cpp_a4f2eee3801304ac71a4f4dc03a7783a4}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!fisher\_step@{fisher\_step}}
-\index{fisher\_step@{fisher\_step}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{fisher\_step()}{fisher\_step()}}
-{\footnotesize\ttfamily void fisher\+\_\+step (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+index }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!fisher\+\_\+step@{fisher\+\_\+step}}
+\index{fisher\+\_\+step@{fisher\+\_\+step}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{fisher\+\_\+step()}{fisher\_step()}}
+{\footnotesize\ttfamily void fisher\+\_\+step (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+index }\end{DoxyParamCaption})}
 
 
 
@@ -184,14 +189,14 @@ Fisher informed gaussian step.
 \hline
  & {\em current\+\_\+param} & current position in parameter space \\
 \hline
-\mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
+\mbox{\tt out}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_aea58d270c94a74ca9c716fae47cbd24d}\label{mcmc__sampler__internals_8cpp_aea58d270c94a74ca9c716fae47cbd24d}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!gaussian\_step@{gaussian\_step}}
-\index{gaussian\_step@{gaussian\_step}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{gaussian\_step()}{gaussian\_step()}}
-{\footnotesize\ttfamily void gaussian\+\_\+step (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+id }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!gaussian\+\_\+step@{gaussian\+\_\+step}}
+\index{gaussian\+\_\+step@{gaussian\+\_\+step}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{gaussian\+\_\+step()}{gaussian\_step()}}
+{\footnotesize\ttfamily void gaussian\+\_\+step (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+id }\end{DoxyParamCaption})}
 
 
 
@@ -203,14 +208,14 @@ Straight gaussian step.
 \hline
  & {\em current\+\_\+param} & current position in parameter space \\
 \hline
-\mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
+\mbox{\tt out}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a9d0fba3cec02c00fb85b04d5e987f01b}\label{mcmc__sampler__internals_8cpp_a9d0fba3cec02c00fb85b04d5e987f01b}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!initiate\_full\_sampler@{initiate\_full\_sampler}}
-\index{initiate\_full\_sampler@{initiate\_full\_sampler}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{initiate\_full\_sampler()}{initiate\_full\_sampler()}}
-{\footnotesize\ttfamily void initiate\+\_\+full\+\_\+sampler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler\+\_\+new,  }\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler\+\_\+old,  }\item[{int}]{chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{int}]{chain\+\_\+N,  }\item[{std\+::string}]{chain\+\_\+allocation\+\_\+scheme }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!initiate\+\_\+full\+\_\+sampler@{initiate\+\_\+full\+\_\+sampler}}
+\index{initiate\+\_\+full\+\_\+sampler@{initiate\+\_\+full\+\_\+sampler}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{initiate\+\_\+full\+\_\+sampler()}{initiate\_full\_sampler()}}
+{\footnotesize\ttfamily void initiate\+\_\+full\+\_\+sampler (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler\+\_\+new,  }\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler\+\_\+old,  }\item[{int}]{chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{int}]{chain\+\_\+N,  }\item[{std\+::string}]{chain\+\_\+allocation\+\_\+scheme }\end{DoxyParamCaption})}
 
 
 
@@ -232,10 +237,10 @@ Allocates memory for the new sampler sampler\+\_\+new -\/$>$ it\textquotesingle{
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ae9c3718752690cce3b37f41da7b2b938}\label{mcmc__sampler__internals_8cpp_ae9c3718752690cce3b37f41da7b2b938}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!load\_checkpoint\_file@{load\_checkpoint\_file}}
-\index{load\_checkpoint\_file@{load\_checkpoint\_file}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{load\_checkpoint\_file()}{load\_checkpoint\_file()}}
-{\footnotesize\ttfamily void load\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{check\+\_\+file,  }\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!load\+\_\+checkpoint\+\_\+file@{load\+\_\+checkpoint\+\_\+file}}
+\index{load\+\_\+checkpoint\+\_\+file@{load\+\_\+checkpoint\+\_\+file}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{load\+\_\+checkpoint\+\_\+file()}{load\_checkpoint\_file()}}
+{\footnotesize\ttfamily void load\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{check\+\_\+file,  }\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler }\end{DoxyParamCaption})}
 
 
 
@@ -244,9 +249,9 @@ load checkpoint file into sampler struct
 {\itshape N\+O\+TE} -- allocate\+\_\+sampler called in function -- M\+U\+ST deallocate manually
 
 {\itshape N\+O\+TE} -- sampler-\/$>$chain\+\_\+temps allocated internally -- M\+U\+ST free manually \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a6df174eb68b851e0ccd3b966e65f3a77}\label{mcmc__sampler__internals_8cpp_a6df174eb68b851e0ccd3b966e65f3a77}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!load\_temps\_checkpoint\_file@{load\_temps\_checkpoint\_file}}
-\index{load\_temps\_checkpoint\_file@{load\_temps\_checkpoint\_file}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{load\_temps\_checkpoint\_file()}{load\_temps\_checkpoint\_file()}}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!load\+\_\+temps\+\_\+checkpoint\+\_\+file@{load\+\_\+temps\+\_\+checkpoint\+\_\+file}}
+\index{load\+\_\+temps\+\_\+checkpoint\+\_\+file@{load\+\_\+temps\+\_\+checkpoint\+\_\+file}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{load\+\_\+temps\+\_\+checkpoint\+\_\+file()}{load\_temps\_checkpoint\_file()}}
 {\footnotesize\ttfamily void load\+\_\+temps\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{check\+\_\+file,  }\item[{double $\ast$}]{temps,  }\item[{int}]{chain\+\_\+N }\end{DoxyParamCaption})}
 
 
@@ -258,10 +263,10 @@ Assumed the temps array is already allocated in memory for the correct number of
 Just a utility routine to read temperatures from checkpoint file
 
 It would be easy to read in the chain number and allocate memory in the function, but I prefer to leave allocation/deallocation up to the client \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a251e0a0b4059499d25f6d3c9957ceb1d}\label{mcmc__sampler__internals_8cpp_a251e0a0b4059499d25f6d3c9957ceb1d}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!mmala\_step@{mmala\_step}}
-\index{mmala\_step@{mmala\_step}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{mmala\_step()}{mmala\_step()}}
-{\footnotesize\ttfamily void mmala\+\_\+step (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!mmala\+\_\+step@{mmala\+\_\+step}}
+\index{mmala\+\_\+step@{mmala\+\_\+step}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{mmala\+\_\+step()}{mmala\_step()}}
+{\footnotesize\ttfamily void mmala\+\_\+step (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status }\end{DoxyParamCaption})}
 
 
 
@@ -273,13 +278,13 @@ M\+M\+A\+LA informed step -- Currently not supported.
 \hline
  & {\em current\+\_\+param} & current position in parameter space \\
 \hline
-\mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
+\mbox{\tt out}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a1f07e7540a20f438aad42f569c2e22d2}\label{mcmc__sampler__internals_8cpp_a1f07e7540a20f438aad42f569c2e22d2}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!PT\_dynamical\_timescale@{PT\_dynamical\_timescale}}
-\index{PT\_dynamical\_timescale@{PT\_dynamical\_timescale}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{PT\_dynamical\_timescale()}{PT\_dynamical\_timescale()}}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!P\+T\+\_\+dynamical\+\_\+timescale@{P\+T\+\_\+dynamical\+\_\+timescale}}
+\index{P\+T\+\_\+dynamical\+\_\+timescale@{P\+T\+\_\+dynamical\+\_\+timescale}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{P\+T\+\_\+dynamical\+\_\+timescale()}{PT\_dynamical\_timescale()}}
 {\footnotesize\ttfamily double P\+T\+\_\+dynamical\+\_\+timescale (\begin{DoxyParamCaption}\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{t }\end{DoxyParamCaption})}
 
 
@@ -296,10 +301,10 @@ kappa in the the language of ar\+Xiv\+:1501.\+05823v3
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a1b5c301686c971e3f9359cdd661529b3}\label{mcmc__sampler__internals_8cpp_a1b5c301686c971e3f9359cdd661529b3}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!RJ\_smooth\_history@{RJ\_smooth\_history}}
-\index{RJ\_smooth\_history@{RJ\_smooth\_history}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{RJ\_smooth\_history()}{RJ\_smooth\_history()}}
-{\footnotesize\ttfamily void R\+J\+\_\+smooth\+\_\+history (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+param\+\_\+status,  }\item[{int}]{base\+\_\+history\+\_\+id,  }\item[{double $\ast$}]{eff\+\_\+history\+\_\+coord,  }\item[{int $\ast$}]{eff\+\_\+history\+\_\+status,  }\item[{int}]{chain\+\_\+id }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!R\+J\+\_\+smooth\+\_\+history@{R\+J\+\_\+smooth\+\_\+history}}
+\index{R\+J\+\_\+smooth\+\_\+history@{R\+J\+\_\+smooth\+\_\+history}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{R\+J\+\_\+smooth\+\_\+history()}{RJ\_smooth\_history()}}
+{\footnotesize\ttfamily void R\+J\+\_\+smooth\+\_\+history (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+param\+\_\+status,  }\item[{int}]{base\+\_\+history\+\_\+id,  }\item[{double $\ast$}]{eff\+\_\+history\+\_\+coord,  }\item[{int $\ast$}]{eff\+\_\+history\+\_\+status,  }\item[{int}]{chain\+\_\+id }\end{DoxyParamCaption})}
 
 
 \begin{DoxyParams}[1]{Parameters}
@@ -311,18 +316,18 @@ kappa in the the language of ar\+Xiv\+:1501.\+05823v3
 \hline
  & {\em base\+\_\+history\+\_\+id} & Original history element \\
 \hline
-\mbox{\texttt{ out}}  & {\em eff\+\_\+history\+\_\+coord} & Modified history coord \\
+\mbox{\tt out}  & {\em eff\+\_\+history\+\_\+coord} & Modified history coord \\
 \hline
-\mbox{\texttt{ out}}  & {\em eff\+\_\+history\+\_\+status} & Modified History status \\
+\mbox{\tt out}  & {\em eff\+\_\+history\+\_\+status} & Modified History status \\
 \hline
  & {\em chain\+\_\+id} & Chain ID of the current chain \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a048b4bd95b3bac1d355d5c5897c29ece}\label{mcmc__sampler__internals_8cpp_a048b4bd95b3bac1d355d5c5897c29ece}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!RJ\_step@{RJ\_step}}
-\index{RJ\_step@{RJ\_step}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{RJ\_step()}{RJ\_step()}}
-{\footnotesize\ttfamily void R\+J\+\_\+step (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+number }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!R\+J\+\_\+step@{R\+J\+\_\+step}}
+\index{R\+J\+\_\+step@{R\+J\+\_\+step}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{R\+J\+\_\+step()}{RJ\_step()}}
+{\footnotesize\ttfamily void R\+J\+\_\+step (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{current\+\_\+param,  }\item[{double $\ast$}]{proposed\+\_\+param,  }\item[{int $\ast$}]{current\+\_\+status,  }\item[{int $\ast$}]{proposed\+\_\+status,  }\item[{int}]{chain\+\_\+number }\end{DoxyParamCaption})}
 
 
 
@@ -334,20 +339,20 @@ This extra step may seem unnecessary, I\textquotesingle{}m just adding it in in 
 \hline
  & {\em current\+\_\+param} & current coordinates in parameter space \\
 \hline
-\mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed coordinates in parameter space \\
+\mbox{\tt out}  & {\em proposed\+\_\+param} & Proposed coordinates in parameter space \\
 \hline
  & {\em current\+\_\+status} & Current status of parameters \\
 \hline
-\mbox{\texttt{ out}}  & {\em proposed\+\_\+status} & Proposed status of parameters \\
+\mbox{\tt out}  & {\em proposed\+\_\+status} & Proposed status of parameters \\
 \hline
  & {\em chain\+\_\+number} & chain mumber \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a21d8297d53aac4b86b446a6bdb3894d9}\label{mcmc__sampler__internals_8cpp_a21d8297d53aac4b86b446a6bdb3894d9}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!single\_chain\_swap@{single\_chain\_swap}}
-\index{single\_chain\_swap@{single\_chain\_swap}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{single\_chain\_swap()}{single\_chain\_swap()}}
-{\footnotesize\ttfamily int single\+\_\+chain\+\_\+swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{double $\ast$}]{chain1,  }\item[{double $\ast$}]{chain2,  }\item[{int $\ast$}]{chain1\+\_\+status,  }\item[{int $\ast$}]{chain2\+\_\+status,  }\item[{int}]{T1\+\_\+index,  }\item[{int}]{T2\+\_\+index }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!single\+\_\+chain\+\_\+swap@{single\+\_\+chain\+\_\+swap}}
+\index{single\+\_\+chain\+\_\+swap@{single\+\_\+chain\+\_\+swap}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{single\+\_\+chain\+\_\+swap()}{single\_chain\_swap()}}
+{\footnotesize\ttfamily int single\+\_\+chain\+\_\+swap (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{double $\ast$}]{chain1,  }\item[{double $\ast$}]{chain2,  }\item[{int $\ast$}]{chain1\+\_\+status,  }\item[{int $\ast$}]{chain2\+\_\+status,  }\item[{int}]{T1\+\_\+index,  }\item[{int}]{T2\+\_\+index }\end{DoxyParamCaption})}
 
 
 
@@ -371,10 +376,10 @@ This is the more general subroutine, which just swaps the two chains passed to t
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ae363e3b27d7254afd01c6285a63af4bd}\label{mcmc__sampler__internals_8cpp_ae363e3b27d7254afd01c6285a63af4bd}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!transfer\_chain@{transfer\_chain}}
-\index{transfer\_chain@{transfer\_chain}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{transfer\_chain()}{transfer\_chain()}}
-{\footnotesize\ttfamily void transfer\+\_\+chain (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{samplerptr\+\_\+dest,  }\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{samplerptr\+\_\+source,  }\item[{int}]{id\+\_\+dest,  }\item[{int}]{id\+\_\+source,  }\item[{bool}]{transfer\+\_\+output }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!transfer\+\_\+chain@{transfer\+\_\+chain}}
+\index{transfer\+\_\+chain@{transfer\+\_\+chain}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{transfer\+\_\+chain()}{transfer\_chain()}}
+{\footnotesize\ttfamily void transfer\+\_\+chain (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{samplerptr\+\_\+dest,  }\item[{\hyperlink{classsampler}{sampler} $\ast$}]{samplerptr\+\_\+source,  }\item[{int}]{id\+\_\+dest,  }\item[{int}]{id\+\_\+source,  }\item[{bool}]{transfer\+\_\+output }\end{DoxyParamCaption})}
 
 
 
@@ -391,10 +396,10 @@ samplerptr\+\_\+dest and samplerptr\+\_\+source M\+U\+ST have the same dimension
 samplerptr\+\_\+dest must be previously allocated properly
 
 As output is the largest transfer by far, the transfer\+\_\+output flag can be used to allow the user to handle that manually. \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_ae0ec0745c85caad31c473a608aef5782}\label{mcmc__sampler__internals_8cpp_ae0ec0745c85caad31c473a608aef5782}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!update\_temperatures@{update\_temperatures}}
-\index{update\_temperatures@{update\_temperatures}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{update\_temperatures()}{update\_temperatures()}}
-{\footnotesize\ttfamily void update\+\_\+temperatures (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{samplerptr,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{t }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!update\+\_\+temperatures@{update\+\_\+temperatures}}
+\index{update\+\_\+temperatures@{update\+\_\+temperatures}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{update\+\_\+temperatures()}{update\_temperatures()}}
+{\footnotesize\ttfamily void update\+\_\+temperatures (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{samplerptr,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{t }\end{DoxyParamCaption})}
 
 
 
@@ -407,10 +412,10 @@ Fixed temperatures for the first and last chain
 used in M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+internal
 
 For defined results, this should be used while the sampler is using non-\/pooling methods \mbox{\Hypertarget{mcmc__sampler__internals_8cpp_a2207c4aeab89b5b985ac2fb297426ba5}\label{mcmc__sampler__internals_8cpp_a2207c4aeab89b5b985ac2fb297426ba5}} 
-\index{mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}!write\_checkpoint\_file@{write\_checkpoint\_file}}
-\index{write\_checkpoint\_file@{write\_checkpoint\_file}!mcmc\_sampler\_internals.cpp@{mcmc\_sampler\_internals.cpp}}
-\doxysubsubsection{\texorpdfstring{write\_checkpoint\_file()}{write\_checkpoint\_file()}}
-{\footnotesize\ttfamily void write\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{std\+::string}]{filename }\end{DoxyParamCaption})}
+\index{mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}!write\+\_\+checkpoint\+\_\+file@{write\+\_\+checkpoint\+\_\+file}}
+\index{write\+\_\+checkpoint\+\_\+file@{write\+\_\+checkpoint\+\_\+file}!mcmc\+\_\+sampler\+\_\+internals.\+cpp@{mcmc\+\_\+sampler\+\_\+internals.\+cpp}}
+\subsubsection{\texorpdfstring{write\+\_\+checkpoint\+\_\+file()}{write\_checkpoint\_file()}}
+{\footnotesize\ttfamily void write\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{\hyperlink{classsampler}{sampler} $\ast$}]{sampler,  }\item[{std\+::string}]{filename }\end{DoxyParamCaption})}
 
 
 

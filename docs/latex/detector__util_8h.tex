@@ -1,84 +1,94 @@
-\hypertarget{detector__util_8h}{}\doxysection{include/gwat/detector\+\_\+util.h File Reference}
-\label{detector__util_8h}\index{include/gwat/detector\_util.h@{include/gwat/detector\_util.h}}
+\hypertarget{detector__util_8h}{}\section{include/gwat/detector\+\_\+util.h File Reference}
+\label{detector__util_8h}\index{include/gwat/detector\+\_\+util.\+h@{include/gwat/detector\+\_\+util.\+h}}
 {\ttfamily \#include $<$string$>$}\newline
 {\ttfamily \#include $<$complex$>$}\newline
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
-Include dependency graph for detector\+\_\+util.\+h\+:
-% FIG 0
-This graph shows which files directly or indirectly include this file\+:
-% FIG 1
-\doxysubsection*{Functions}
+Include dependency graph for detector\+\_\+util.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{detector__util_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{detector__util_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \mbox{\hyperlink{detector__util_8h_a551c603f441283ca3fe5d415d47bdc4d}{populate\+\_\+noise}} (double $\ast$frequencies, std\+::string detector, double $\ast$noise\+\_\+root, int length=0)
+void \hyperlink{detector__util_8h_a551c603f441283ca3fe5d415d47bdc4d}{populate\+\_\+noise} (double $\ast$frequencies, std\+::string detector, double $\ast$noise\+\_\+root, int length=0)
 \item 
-void \mbox{\hyperlink{detector__util_8h_a96e8f667b0106557c0c285dc658b8ac3}{populate\+\_\+noise}} (double $\ast$frequencies, std\+::string detector, double $\ast$noise\+\_\+root, int length, double integration\+\_\+time)
+void \hyperlink{detector__util_8h_a96e8f667b0106557c0c285dc658b8ac3}{populate\+\_\+noise} (double $\ast$frequencies, std\+::string detector, double $\ast$noise\+\_\+root, int length, double integration\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Function to populate the squareroot of the noise curve for various detectors. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a6e657285283899f91aa3b7ec7963c120}{a\+L\+I\+G\+O\+\_\+analytic}} (double f)
+double \hyperlink{detector__util_8h_a6e657285283899f91aa3b7ec7963c120}{a\+L\+I\+G\+O\+\_\+analytic} (double f)
 \begin{DoxyCompactList}\small\item\em Analytic function approximating the P\+SD for a\+L\+I\+GO. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a46dad75264f15f490b473cc94ee9b17a}{L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC}} (double f)
+double \hyperlink{detector__util_8h_a46dad75264f15f490b473cc94ee9b17a}{L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC} (double f)
 \begin{DoxyCompactList}\small\item\em Analytic function approximating the P\+SD for L\+I\+SA sensitivity curve -- this is S, not root S. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a6343e73e97f8181b6cfd699c3e92a179}{L\+I\+S\+A\+\_\+analytic}} (double f)
-\begin{DoxyCompactList}\small\item\em Analytic function approximating the P\+SD for L\+I\+SA sensitivity curve -- this is S, not root S and does not sky average, treats the 2 channels separately, and the geometrical factor of \textbackslash{}sqrt\{3\}/2 is included in the waveform. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a0c4205a31d277abfd7af6ccb1e6c0ed9}{L\+I\+S\+A\+\_\+\+P\+O\+MS}} (double f)
+double \hyperlink{detector__util_8h_a6343e73e97f8181b6cfd699c3e92a179}{L\+I\+S\+A\+\_\+analytic} (double f)
+\begin{DoxyCompactList}\small\item\em Analytic function approximating the P\+SD for L\+I\+SA sensitivity curve -- this is S, not root S and does not sky average, treats the 2 channels separately, and the geometrical factor of \{3\}/2 is included in the waveform. \end{DoxyCompactList}\item 
+double \hyperlink{detector__util_8h_a0c4205a31d277abfd7af6ccb1e6c0ed9}{L\+I\+S\+A\+\_\+\+P\+O\+MS} (double f)
 \item 
-double \mbox{\hyperlink{detector__util_8h_a506f9c3f31dd28ea338306b37433fe75}{L\+I\+S\+A\+\_\+\+P\+A\+CC}} (double f)
+double \hyperlink{detector__util_8h_a506f9c3f31dd28ea338306b37433fe75}{L\+I\+S\+A\+\_\+\+P\+A\+CC} (double f)
 \item 
-double \mbox{\hyperlink{detector__util_8h_abf69df0d2ad243b2ec8fd022164d7d5b}{L\+I\+S\+A\+\_\+\+SC}} (double f, double alpha, double beta, double kappa, double gamma, double fk)
+double \hyperlink{detector__util_8h_abf69df0d2ad243b2ec8fd022164d7d5b}{L\+I\+S\+A\+\_\+\+SC} (double f, double alpha, double beta, double kappa, double gamma, double fk)
 \item 
-void \mbox{\hyperlink{detector__util_8h_a47b20a157d8337d411c0d02d0a638168}{sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs}} (double $\ast$alpha, double $\ast$beta, double $\ast$kappa, double $\ast$gamma, double $\ast$fk, double integration\+\_\+time)
+void \hyperlink{detector__util_8h_a47b20a157d8337d411c0d02d0a638168}{sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs} (double $\ast$alpha, double $\ast$beta, double $\ast$kappa, double $\ast$gamma, double $\ast$fk, double integration\+\_\+time)
 \item 
-std\+::complex$<$ double $>$ \mbox{\hyperlink{detector__util_8h_a58352b030b231c0a272ad41506a549c5}{Q}} (double theta, double phi, double iota)
+std\+::complex$<$ double $>$ \hyperlink{detector__util_8h_a58352b030b231c0a272ad41506a549c5}{Q} (double theta, double phi, double iota)
 \begin{DoxyCompactList}\small\item\em Utility for the overall amplitude and phase shift for spin-\/aligned systems. \end{DoxyCompactList}\item 
-std\+::complex$<$ double $>$ \mbox{\hyperlink{detector__util_8h_a9f4ebc828f7a5fdf89f3c3f4243f9288}{Q}} (double theta, double phi, double iota, double psi)
+std\+::complex$<$ double $>$ \hyperlink{detector__util_8h_a9f4ebc828f7a5fdf89f3c3f4243f9288}{Q} (double theta, double phi, double iota, double psi)
 \begin{DoxyCompactList}\small\item\em Utility for the overall amplitude and phase shift for spin-\/aligned systems. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{detector__util_8h_a3d3d83c7a398244da315cc9a6f0b15df}{right\+\_\+interferometer\+\_\+cross}} (T theta, T phi)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{detector__util_8h_a3d3d83c7a398244da315cc9a6f0b15df}{right\+\_\+interferometer\+\_\+cross} (T theta, T phi)
 \begin{DoxyCompactList}\small\item\em Response function of a 90 deg interferometer for cross polarization. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{detector__util_8h_aa60bf261e973bd490d1c83015af22aad}{right\+\_\+interferometer\+\_\+plus}} (T theta, T phi)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{detector__util_8h_aa60bf261e973bd490d1c83015af22aad}{right\+\_\+interferometer\+\_\+plus} (T theta, T phi)
 \begin{DoxyCompactList}\small\item\em Response function of a 90 deg interferometer for plus polarization. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{detector__util_8h_a581689a9536c0b115efe2b763e41af17}{right\+\_\+interferometer}} (T $\ast$fplus, T $\ast$fcross, T theta, T phi, T psi)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{detector__util_8h_a581689a9536c0b115efe2b763e41af17}{right\+\_\+interferometer} (T $\ast$fplus, T $\ast$fcross, T theta, T phi, T psi)
 \begin{DoxyCompactList}\small\item\em Response function of a 90 deg interferometer. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a2e29bfa3018d037af4d1b52cabe47d39}{Hanford\+\_\+\+O1\+\_\+fitted}} (double f)
+double \hyperlink{detector__util_8h_a2e29bfa3018d037af4d1b52cabe47d39}{Hanford\+\_\+\+O1\+\_\+fitted} (double f)
 \begin{DoxyCompactList}\small\item\em Numerically fit P\+SD to the Hanford Detector\textquotesingle{}s O1. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{detector__util_8h_af252cb74fb621c53ebe8db50f58841d2}{celestial\+\_\+horizon\+\_\+transform}} (T RA, T D\+EC, double gps\+\_\+time, std\+::string detector, T $\ast$phi, T $\ast$theta)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{detector__util_8h_af252cb74fb621c53ebe8db50f58841d2}{celestial\+\_\+horizon\+\_\+transform} (T RA, T D\+EC, double gps\+\_\+time, std\+::string detector, T $\ast$phi, T $\ast$theta)
 \begin{DoxyCompactList}\small\item\em Transform from celestial coordinates to local horizontal coords. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{detector__util_8h_a038c7aed643958fb110d2ffa790a854a}{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform}} (double RA, double D\+EC, double gps\+\_\+time, std\+::string detector, double $\ast$dphi\+\_\+d\+RA, double $\ast$dtheta\+\_\+d\+RA, double $\ast$dphi\+\_\+d\+D\+EC, double $\ast$dtheta\+\_\+d\+D\+EC)
+void \hyperlink{detector__util_8h_a038c7aed643958fb110d2ffa790a854a}{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform} (double RA, double D\+EC, double gps\+\_\+time, std\+::string detector, double $\ast$dphi\+\_\+d\+RA, double $\ast$dtheta\+\_\+d\+RA, double $\ast$dphi\+\_\+d\+D\+EC, double $\ast$dtheta\+\_\+d\+D\+EC)
 \begin{DoxyCompactList}\small\item\em Numerical derivative of the transformation. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a8f5874fbc260906fa9ea664debbe86d4}{D\+T\+OA}} (double theta1, double theta2, std\+::string detector1, std\+::string detector2)
+double \hyperlink{detector__util_8h_a8f5874fbc260906fa9ea664debbe86d4}{D\+T\+OA} (double theta1, double theta2, std\+::string detector1, std\+::string detector2)
 \begin{DoxyCompactList}\small\item\em calculate difference in time of arrival (D\+T\+OA) for a given source location and 2 different detectors \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_adcb816dfe662ececa657888ff18132bd}{radius\+\_\+at\+\_\+lat}} (double latitude, double elevation)
+double \hyperlink{detector__util_8h_adcb816dfe662ececa657888ff18132bd}{radius\+\_\+at\+\_\+lat} (double latitude, double elevation)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{detector__util_8h_a321057e1d21ddaf59a77614ec2896a4d}{detector\+\_\+response\+\_\+functions\+\_\+equatorial}} (double D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}, T ra, T dec, T psi, double gmst, T $\ast$Fplus, T $\ast$Fcross)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{detector__util_8h_a321057e1d21ddaf59a77614ec2896a4d}{detector\+\_\+response\+\_\+functions\+\_\+equatorial} (double D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}, T ra, T dec, T psi, double gmst, T $\ast$Fplus, T $\ast$Fcross)
 \begin{DoxyCompactList}\small\item\em Calculates the response coefficients for a detector with response tensor D for a source at RA, Dec, and psi. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{detector__util_8h_a60beec5a8011ff54bb15d8a8c4b0e19f}{detector\+\_\+response\+\_\+functions\+\_\+equatorial}} (std\+::string detector, T ra, T dec, T psi, double gmst, T $\ast$Fplus, T $\ast$Fcross)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{detector__util_8h_a60beec5a8011ff54bb15d8a8c4b0e19f}{detector\+\_\+response\+\_\+functions\+\_\+equatorial} (std\+::string detector, T ra, T dec, T psi, double gmst, T $\ast$Fplus, T $\ast$Fcross)
 \begin{DoxyCompactList}\small\item\em Wrapping of the equatorial detector response for terrestial based detectors. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{detector__util_8h_a98735bbb64b36d79ce16b7dfcae9a9aa}{detector\+\_\+response\+\_\+functions\+\_\+equatorial}} (std\+::string detector, T ra, T dec, T psi, double gmst, T $\ast$times, int length, T L\+I\+S\+A\+\_\+alpha0, T L\+I\+S\+A\+\_\+phi0, T theta\+\_\+j\+\_\+ecl, T phi\+\_\+j\+\_\+ecl, T $\ast$Fplus, T $\ast$Fcross)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{detector__util_8h_a98735bbb64b36d79ce16b7dfcae9a9aa}{detector\+\_\+response\+\_\+functions\+\_\+equatorial} (std\+::string detector, T ra, T dec, T psi, double gmst, T $\ast$times, int length, T L\+I\+S\+A\+\_\+alpha0, T L\+I\+S\+A\+\_\+phi0, T theta\+\_\+j\+\_\+ecl, T phi\+\_\+j\+\_\+ecl, T $\ast$Fplus, T $\ast$Fcross)
 \begin{DoxyCompactList}\small\item\em Same as the other function, but for active and future detectors. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{detector__util_8h_a7de625eb431fcebc15bbdb5469363392}{L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time}} (T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T t)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{detector__util_8h_a7de625eb431fcebc15bbdb5469363392}{L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time} (T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T t)
 \begin{DoxyCompactList}\small\item\em Time dependent detector response of L\+I\+SA for non-\/precessing waveforms. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{detector__util_8h_a6fbce1e228adb08be4be970f3ce0afd2}\label{detector__util_8h_a6fbce1e228adb08be4be970f3ce0afd2}} 
 {\footnotesize template$<$class T $>$ }\\T {\bfseries L\+I\+S\+A\+\_\+response\+\_\+cross\+\_\+time} (T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T t)
 \item 
 \mbox{\Hypertarget{detector__util_8h_aa1d967791d721cd8bd22be0c34066267}\label{detector__util_8h_aa1d967791d721cd8bd22be0c34066267}} 
-{\footnotesize template$<$class T $>$ }\\T {\bfseries L\+I\+S\+A\+\_\+response\+\_\+plus} (\mbox{\hyperlink{structsource__parameters}{source\+\_\+parameters}}$<$ T $>$ $\ast$params, T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T f)
+{\footnotesize template$<$class T $>$ }\\T {\bfseries L\+I\+S\+A\+\_\+response\+\_\+plus} (\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ T $>$ $\ast$params, T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T f)
 \item 
 \mbox{\Hypertarget{detector__util_8h_a8518f8bcc6de5339871bbd4881579654}\label{detector__util_8h_a8518f8bcc6de5339871bbd4881579654}} 
-{\footnotesize template$<$class T $>$ }\\T {\bfseries L\+I\+S\+A\+\_\+response\+\_\+cross} (\mbox{\hyperlink{structsource__parameters}{source\+\_\+parameters}}$<$ T $>$ $\ast$params, T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T f)
+{\footnotesize template$<$class T $>$ }\\T {\bfseries L\+I\+S\+A\+\_\+response\+\_\+cross} (\hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ T $>$ $\ast$params, T theta\+\_\+s, T phi\+\_\+s, T theta\+\_\+j, T phi\+\_\+j, T alpha\+\_\+0, T phi\+\_\+0, T f)
 \item 
-double \mbox{\hyperlink{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}{p\+\_\+single\+\_\+detector}} (double omega, int samples)
+double \hyperlink{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}{p\+\_\+single\+\_\+detector} (double omega, int samples)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for a single detector. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a0af90e8d6505794a792d2b35bf583bef}{p\+\_\+single\+\_\+detector\+\_\+fit}} (double omega)
+double \hyperlink{detector__util_8h_a0af90e8d6505794a792d2b35bf583bef}{p\+\_\+single\+\_\+detector\+\_\+fit} (double omega)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a8470b24a84da4e746ee95ff9bb87bbbc}{p\+\_\+triple\+\_\+detector\+\_\+fit}} (double omega)
+double \hyperlink{detector__util_8h_a8470b24a84da4e746ee95ff9bb87bbbc}{p\+\_\+triple\+\_\+detector\+\_\+fit} (double omega)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for triple detector network -- Numerical Fit. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{detector__util_8h_a844b28c8dcc0fcbb014b38c1ba013811}\label{detector__util_8h_a844b28c8dcc0fcbb014b38c1ba013811}} 
 double {\bfseries pdet\+\_\+triple\+\_\+detector\+\_\+fit} (double rho\+\_\+thresh, double rho\+\_\+opt)
 \item 
-double \mbox{\hyperlink{detector__util_8h_a2806107bf836833162b1f7e2b78b14d5}{p\+\_\+triple\+\_\+detector\+\_\+interp}} (double omega)
-\begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\texttt{ https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}}. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{detector__util_8h_a38cf74dd41080e18fc64000605019c50}{p\+\_\+single\+\_\+detector\+\_\+interp}} (double omega)
-\begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\texttt{ https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}}. \end{DoxyCompactList}\end{DoxyCompactItemize}
-\doxysubsection*{Variables}
+double \hyperlink{detector__util_8h_a2806107bf836833162b1f7e2b78b14d5}{p\+\_\+triple\+\_\+detector\+\_\+interp} (double omega)
+\begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\tt https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}. \end{DoxyCompactList}\item 
+double \hyperlink{detector__util_8h_a38cf74dd41080e18fc64000605019c50}{p\+\_\+single\+\_\+detector\+\_\+interp} (double omega)
+\begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\tt https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{detector__util_8h_a1cd39022a1e102835a1ac1b513b61426}\label{detector__util_8h_a1cd39022a1e102835a1ac1b513b61426}} 
@@ -132,22 +142,22 @@ const double {\bfseries R\+E\+\_\+polar} =6357e3
 \mbox{\Hypertarget{detector__util_8h_a2e6b415e67d67ab0ef09f0f8fec532ad}\label{detector__util_8h_a2e6b415e67d67ab0ef09f0f8fec532ad}} 
 const double {\bfseries R\+E\+\_\+equatorial} = 6378e3
 \item 
-const double \mbox{\hyperlink{detector__util_8h_a14eced5d747f703b86f021cfc242536e}{Hanford\+\_\+D}} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+const double \hyperlink{detector__util_8h_a14eced5d747f703b86f021cfc242536e}{Hanford\+\_\+D} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
 \item 
-const double \mbox{\hyperlink{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}{Livingston\+\_\+D}} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+const double \hyperlink{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}{Livingston\+\_\+D} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
 \item 
-const double \mbox{\hyperlink{detector__util_8h_ab3f9eb7bf2b7778fd56ed0a48ddaf423}{Virgo\+\_\+D}} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+const double \hyperlink{detector__util_8h_ab3f9eb7bf2b7778fd56ed0a48ddaf423}{Virgo\+\_\+D} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
 \end{DoxyCompactItemize}
 
 
-\doxysubsection{Detailed Description}
+\subsection{Detailed Description}
 Header file for all detector-\/specific utilities 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{detector__util_8h_a6e657285283899f91aa3b7ec7963c120}\label{detector__util_8h_a6e657285283899f91aa3b7ec7963c120}} 
-\index{detector\_util.h@{detector\_util.h}!aLIGO\_analytic@{aLIGO\_analytic}}
-\index{aLIGO\_analytic@{aLIGO\_analytic}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{aLIGO\_analytic()}{aLIGO\_analytic()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!a\+L\+I\+G\+O\+\_\+analytic@{a\+L\+I\+G\+O\+\_\+analytic}}
+\index{a\+L\+I\+G\+O\+\_\+analytic@{a\+L\+I\+G\+O\+\_\+analytic}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{a\+L\+I\+G\+O\+\_\+analytic()}{aLIGO\_analytic()}}
 {\footnotesize\ttfamily double a\+L\+I\+G\+O\+\_\+analytic (\begin{DoxyParamCaption}\item[{double}]{f }\end{DoxyParamCaption})}
 
 
@@ -155,9 +165,9 @@ Header file for all detector-\/specific utilities
 Analytic function approximating the P\+SD for a\+L\+I\+GO. 
 
 C\+I\+TE (Will?) \mbox{\Hypertarget{detector__util_8h_af252cb74fb621c53ebe8db50f58841d2}\label{detector__util_8h_af252cb74fb621c53ebe8db50f58841d2}} 
-\index{detector\_util.h@{detector\_util.h}!celestial\_horizon\_transform@{celestial\_horizon\_transform}}
-\index{celestial\_horizon\_transform@{celestial\_horizon\_transform}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{celestial\_horizon\_transform()}{celestial\_horizon\_transform()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!celestial\+\_\+horizon\+\_\+transform@{celestial\+\_\+horizon\+\_\+transform}}
+\index{celestial\+\_\+horizon\+\_\+transform@{celestial\+\_\+horizon\+\_\+transform}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{celestial\+\_\+horizon\+\_\+transform()}{celestial\_horizon\_transform()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void celestial\+\_\+horizon\+\_\+transform (\begin{DoxyParamCaption}\item[{T}]{RA,  }\item[{T}]{D\+EC,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string}]{detector,  }\item[{T $\ast$}]{phi,  }\item[{T $\ast$}]{theta }\end{DoxyParamCaption})}
 
@@ -181,9 +191,9 @@ detector is used to specify the lat and long of the local frame
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a038c7aed643958fb110d2ffa790a854a}\label{detector__util_8h_a038c7aed643958fb110d2ffa790a854a}} 
-\index{detector\_util.h@{detector\_util.h}!derivative\_celestial\_horizon\_transform@{derivative\_celestial\_horizon\_transform}}
-\index{derivative\_celestial\_horizon\_transform@{derivative\_celestial\_horizon\_transform}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{derivative\_celestial\_horizon\_transform()}{derivative\_celestial\_horizon\_transform()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!derivative\+\_\+celestial\+\_\+horizon\+\_\+transform@{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform}}
+\index{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform@{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform()}{derivative\_celestial\_horizon\_transform()}}
 {\footnotesize\ttfamily void derivative\+\_\+celestial\+\_\+horizon\+\_\+transform (\begin{DoxyParamCaption}\item[{double}]{RA,  }\item[{double}]{D\+EC,  }\item[{double}]{gps\+\_\+time,  }\item[{std\+::string}]{detector,  }\item[{double $\ast$}]{dphi\+\_\+d\+RA,  }\item[{double $\ast$}]{dtheta\+\_\+d\+RA,  }\item[{double $\ast$}]{dphi\+\_\+d\+D\+EC,  }\item[{double $\ast$}]{dtheta\+\_\+d\+D\+EC }\end{DoxyParamCaption})}
 
 
@@ -198,9 +208,9 @@ Planned for use in Fisher calculations, but not currently implemented anywhere
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a321057e1d21ddaf59a77614ec2896a4d}\label{detector__util_8h_a321057e1d21ddaf59a77614ec2896a4d}} 
-\index{detector\_util.h@{detector\_util.h}!detector\_response\_functions\_equatorial@{detector\_response\_functions\_equatorial}}
-\index{detector\_response\_functions\_equatorial@{detector\_response\_functions\_equatorial}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{detector\_response\_functions\_equatorial()}{detector\_response\_functions\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!detector\+\_\+response\+\_\+functions\+\_\+equatorial@{detector\+\_\+response\+\_\+functions\+\_\+equatorial}}
+\index{detector\+\_\+response\+\_\+functions\+\_\+equatorial@{detector\+\_\+response\+\_\+functions\+\_\+equatorial}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{detector\+\_\+response\+\_\+functions\+\_\+equatorial()}{detector\_response\_functions\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void detector\+\_\+response\+\_\+functions\+\_\+equatorial (\begin{DoxyParamCaption}\item[{double}]{D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]},  }\item[{T}]{ra,  }\item[{T}]{dec,  }\item[{T}]{psi,  }\item[{double}]{gmst,  }\item[{T $\ast$}]{Fplus,  }\item[{T $\ast$}]{Fcross }\end{DoxyParamCaption})}
 
@@ -210,7 +220,7 @@ Calculates the response coefficients for a detector with response tensor D for a
 
 Taken from L\+A\+L\+Suite
 
-The response tensor for each of the operational detectors is precomputed in \mbox{\hyperlink{detector__util_8h}{detector\+\_\+util.\+h}}, but to create a new tensor, follow the outline in Anderson et al 36 P\+RD 63 042003 (2001) Appendix B
+The response tensor for each of the operational detectors is precomputed in \hyperlink{detector__util_8h}{detector\+\_\+util.\+h}, but to create a new tensor, follow the outline in Anderson et al 36 P\+RD 63 042003 (2001) Appendix B
 
 For terrestial detectors -- psi is the polarization angle from a detector at earth\textquotesingle{}s center, aligned with equatorial coordinates 
 \begin{DoxyParams}[1]{Parameters}
@@ -224,15 +234,15 @@ For terrestial detectors -- psi is the polarization angle from a detector at ear
 \hline
  & {\em gmst} & Greenwich mean sidereal time (rad) \\
 \hline
-\mbox{\texttt{ out}}  & {\em Fplus} & Fplus response coefficient \\
+\mbox{\tt out}  & {\em Fplus} & Fplus response coefficient \\
 \hline
-\mbox{\texttt{ out}}  & {\em Fcross} & Fcross response coefficient \\
+\mbox{\tt out}  & {\em Fcross} & Fcross response coefficient \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a60beec5a8011ff54bb15d8a8c4b0e19f}\label{detector__util_8h_a60beec5a8011ff54bb15d8a8c4b0e19f}} 
-\index{detector\_util.h@{detector\_util.h}!detector\_response\_functions\_equatorial@{detector\_response\_functions\_equatorial}}
-\index{detector\_response\_functions\_equatorial@{detector\_response\_functions\_equatorial}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{detector\_response\_functions\_equatorial()}{detector\_response\_functions\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!detector\+\_\+response\+\_\+functions\+\_\+equatorial@{detector\+\_\+response\+\_\+functions\+\_\+equatorial}}
+\index{detector\+\_\+response\+\_\+functions\+\_\+equatorial@{detector\+\_\+response\+\_\+functions\+\_\+equatorial}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{detector\+\_\+response\+\_\+functions\+\_\+equatorial()}{detector\_response\_functions\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void detector\+\_\+response\+\_\+functions\+\_\+equatorial (\begin{DoxyParamCaption}\item[{std\+::string}]{detector,  }\item[{T}]{ra,  }\item[{T}]{dec,  }\item[{T}]{psi,  }\item[{double}]{gmst,  }\item[{T $\ast$}]{Fplus,  }\item[{T $\ast$}]{Fcross }\end{DoxyParamCaption})}
 
@@ -252,15 +262,15 @@ For ground based detectors, the antenna pattern functions are not functions of t
 \hline
  & {\em gmst} & Greenwich mean sidereal time (rad) \\
 \hline
-\mbox{\texttt{ out}}  & {\em Fplus} & Fplus response coefficient \\
+\mbox{\tt out}  & {\em Fplus} & Fplus response coefficient \\
 \hline
-\mbox{\texttt{ out}}  & {\em Fcross} & Fcross response coefficient \\
+\mbox{\tt out}  & {\em Fcross} & Fcross response coefficient \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a98735bbb64b36d79ce16b7dfcae9a9aa}\label{detector__util_8h_a98735bbb64b36d79ce16b7dfcae9a9aa}} 
-\index{detector\_util.h@{detector\_util.h}!detector\_response\_functions\_equatorial@{detector\_response\_functions\_equatorial}}
-\index{detector\_response\_functions\_equatorial@{detector\_response\_functions\_equatorial}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{detector\_response\_functions\_equatorial()}{detector\_response\_functions\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!detector\+\_\+response\+\_\+functions\+\_\+equatorial@{detector\+\_\+response\+\_\+functions\+\_\+equatorial}}
+\index{detector\+\_\+response\+\_\+functions\+\_\+equatorial@{detector\+\_\+response\+\_\+functions\+\_\+equatorial}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{detector\+\_\+response\+\_\+functions\+\_\+equatorial()}{detector\_response\_functions\_equatorial()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void detector\+\_\+response\+\_\+functions\+\_\+equatorial (\begin{DoxyParamCaption}\item[{std\+::string}]{detector,  }\item[{T}]{ra,  }\item[{T}]{dec,  }\item[{T}]{psi,  }\item[{double}]{gmst,  }\item[{T $\ast$}]{times,  }\item[{int}]{length,  }\item[{T}]{L\+I\+S\+A\+\_\+alpha0,  }\item[{T}]{L\+I\+S\+A\+\_\+phi0,  }\item[{T}]{theta\+\_\+j\+\_\+ecl,  }\item[{T}]{phi\+\_\+j\+\_\+ecl,  }\item[{T $\ast$}]{Fplus,  }\item[{T $\ast$}]{Fcross }\end{DoxyParamCaption})}
 
@@ -294,15 +304,15 @@ If space detector, it will use ra, dec transformed to ecliptic coord, and L\+I\+
 \hline
  & {\em phi\+\_\+j\+\_\+ecl} & Ecliptic sherical azimuthal angle (Jhat for precessing systems) \\
 \hline
-\mbox{\texttt{ out}}  & {\em Fplus} & Fplus response coefficient \\
+\mbox{\tt out}  & {\em Fplus} & Fplus response coefficient \\
 \hline
-\mbox{\texttt{ out}}  & {\em Fcross} & Fcross response coefficient \\
+\mbox{\tt out}  & {\em Fcross} & Fcross response coefficient \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a8f5874fbc260906fa9ea664debbe86d4}\label{detector__util_8h_a8f5874fbc260906fa9ea664debbe86d4}} 
-\index{detector\_util.h@{detector\_util.h}!DTOA@{DTOA}}
-\index{DTOA@{DTOA}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{DTOA()}{DTOA()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!D\+T\+OA@{D\+T\+OA}}
+\index{D\+T\+OA@{D\+T\+OA}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{D\+T\+O\+A()}{DTOA()}}
 {\footnotesize\ttfamily double D\+T\+OA (\begin{DoxyParamCaption}\item[{double}]{theta1,  }\item[{double}]{theta2,  }\item[{std\+::string}]{detector1,  }\item[{std\+::string}]{detector2 }\end{DoxyParamCaption})}
 
 
@@ -321,9 +331,9 @@ calculate difference in time of arrival (D\+T\+OA) for a given source location a
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a2e29bfa3018d037af4d1b52cabe47d39}\label{detector__util_8h_a2e29bfa3018d037af4d1b52cabe47d39}} 
-\index{detector\_util.h@{detector\_util.h}!Hanford\_O1\_fitted@{Hanford\_O1\_fitted}}
-\index{Hanford\_O1\_fitted@{Hanford\_O1\_fitted}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{Hanford\_O1\_fitted()}{Hanford\_O1\_fitted()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!Hanford\+\_\+\+O1\+\_\+fitted@{Hanford\+\_\+\+O1\+\_\+fitted}}
+\index{Hanford\+\_\+\+O1\+\_\+fitted@{Hanford\+\_\+\+O1\+\_\+fitted}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{Hanford\+\_\+\+O1\+\_\+fitted()}{Hanford\_O1\_fitted()}}
 {\footnotesize\ttfamily double Hanford\+\_\+\+O1\+\_\+fitted (\begin{DoxyParamCaption}\item[{double}]{f }\end{DoxyParamCaption})}
 
 
@@ -331,21 +341,21 @@ calculate difference in time of arrival (D\+T\+OA) for a given source location a
 Numerically fit P\+SD to the Hanford Detector\textquotesingle{}s O1. 
 
 C\+I\+TE (Yunes?) \mbox{\Hypertarget{detector__util_8h_a6343e73e97f8181b6cfd699c3e92a179}\label{detector__util_8h_a6343e73e97f8181b6cfd699c3e92a179}} 
-\index{detector\_util.h@{detector\_util.h}!LISA\_analytic@{LISA\_analytic}}
-\index{LISA\_analytic@{LISA\_analytic}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{LISA\_analytic()}{LISA\_analytic()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!L\+I\+S\+A\+\_\+analytic@{L\+I\+S\+A\+\_\+analytic}}
+\index{L\+I\+S\+A\+\_\+analytic@{L\+I\+S\+A\+\_\+analytic}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{L\+I\+S\+A\+\_\+analytic()}{LISA\_analytic()}}
 {\footnotesize\ttfamily double L\+I\+S\+A\+\_\+analytic (\begin{DoxyParamCaption}\item[{double}]{f }\end{DoxyParamCaption})}
 
 
 
-Analytic function approximating the P\+SD for L\+I\+SA sensitivity curve -- this is S, not root S and does not sky average, treats the 2 channels separately, and the geometrical factor of \textbackslash{}sqrt\{3\}/2 is included in the waveform. 
+Analytic function approximating the P\+SD for L\+I\+SA sensitivity curve -- this is S, not root S and does not sky average, treats the 2 channels separately, and the geometrical factor of \{3\}/2 is included in the waveform. 
 
 N\+ON Sky averaged -\/ single channel
 
 ar\+Xiv\+:1905.\+08811 -- equation 14-\/17 \mbox{\Hypertarget{detector__util_8h_a46dad75264f15f490b473cc94ee9b17a}\label{detector__util_8h_a46dad75264f15f490b473cc94ee9b17a}} 
-\index{detector\_util.h@{detector\_util.h}!LISA\_analytic\_SADC@{LISA\_analytic\_SADC}}
-\index{LISA\_analytic\_SADC@{LISA\_analytic\_SADC}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{LISA\_analytic\_SADC()}{LISA\_analytic\_SADC()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC@{L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC}}
+\index{L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC@{L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+D\+C()}{LISA\_analytic\_SADC()}}
 {\footnotesize\ttfamily double L\+I\+S\+A\+\_\+analytic\+\_\+\+S\+A\+DC (\begin{DoxyParamCaption}\item[{double}]{f }\end{DoxyParamCaption})}
 
 
@@ -356,28 +366,28 @@ Sky averaged -\/ dual channel
 
 ar\+Xiv\+:1803.\+01944 -- equation 13
 
-N\+O\+TE\+: may need to divide by \textbackslash{}sqrt\{3\}/2.. My L\+I\+SA response functions already include this factor -- factor 0f 3./4. (sqrt(3)/2)$\ast$$\ast$2
+N\+O\+TE\+: may need to divide by \{3\}/2.. My L\+I\+SA response functions already include this factor -- factor 0f 3./4. (sqrt(3)/2)$\ast$$\ast$2
 
 Keeping the factor of sqrt(3)/2, since this will probably be used without the beam patter functions (that\textquotesingle{}s where the factor of sqrt(3)/2 usually appears) \mbox{\Hypertarget{detector__util_8h_a506f9c3f31dd28ea338306b37433fe75}\label{detector__util_8h_a506f9c3f31dd28ea338306b37433fe75}} 
-\index{detector\_util.h@{detector\_util.h}!LISA\_PACC@{LISA\_PACC}}
-\index{LISA\_PACC@{LISA\_PACC}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{LISA\_PACC()}{LISA\_PACC()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!L\+I\+S\+A\+\_\+\+P\+A\+CC@{L\+I\+S\+A\+\_\+\+P\+A\+CC}}
+\index{L\+I\+S\+A\+\_\+\+P\+A\+CC@{L\+I\+S\+A\+\_\+\+P\+A\+CC}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{L\+I\+S\+A\+\_\+\+P\+A\+C\+C()}{LISA\_PACC()}}
 {\footnotesize\ttfamily double L\+I\+S\+A\+\_\+\+P\+A\+CC (\begin{DoxyParamCaption}\item[{double}]{f }\end{DoxyParamCaption})}
 
-\textbackslash{}breif Single test mass accelartion noise
+Single test mass accelartion noise
 
 ar\+Xiv\+:1803.\+01944 -- equation 11 \mbox{\Hypertarget{detector__util_8h_a0c4205a31d277abfd7af6ccb1e6c0ed9}\label{detector__util_8h_a0c4205a31d277abfd7af6ccb1e6c0ed9}} 
-\index{detector\_util.h@{detector\_util.h}!LISA\_POMS@{LISA\_POMS}}
-\index{LISA\_POMS@{LISA\_POMS}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{LISA\_POMS()}{LISA\_POMS()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!L\+I\+S\+A\+\_\+\+P\+O\+MS@{L\+I\+S\+A\+\_\+\+P\+O\+MS}}
+\index{L\+I\+S\+A\+\_\+\+P\+O\+MS@{L\+I\+S\+A\+\_\+\+P\+O\+MS}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{L\+I\+S\+A\+\_\+\+P\+O\+M\+S()}{LISA\_POMS()}}
 {\footnotesize\ttfamily double L\+I\+S\+A\+\_\+\+P\+O\+MS (\begin{DoxyParamCaption}\item[{double}]{f }\end{DoxyParamCaption})}
 
-\textbackslash{}breif Optical metrology noise function
+Optical metrology noise function
 
 ar\+Xiv\+:1803.\+01944 -- equation 10 \mbox{\Hypertarget{detector__util_8h_a7de625eb431fcebc15bbdb5469363392}\label{detector__util_8h_a7de625eb431fcebc15bbdb5469363392}} 
-\index{detector\_util.h@{detector\_util.h}!LISA\_response\_plus\_time@{LISA\_response\_plus\_time}}
-\index{LISA\_response\_plus\_time@{LISA\_response\_plus\_time}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{LISA\_response\_plus\_time()}{LISA\_response\_plus\_time()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time@{L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time}}
+\index{L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time@{L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time()}{LISA\_response\_plus\_time()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time (\begin{DoxyParamCaption}\item[{T}]{theta\+\_\+s,  }\item[{T}]{phi\+\_\+s,  }\item[{T}]{theta\+\_\+j,  }\item[{T}]{phi\+\_\+j,  }\item[{T}]{alpha\+\_\+0,  }\item[{T}]{phi\+\_\+0,  }\item[{T}]{t }\end{DoxyParamCaption})}
 
@@ -385,127 +395,144 @@ T L\+I\+S\+A\+\_\+response\+\_\+plus\+\_\+time (\begin{DoxyParamCaption}\item[{T
 
 Time dependent detector response of L\+I\+SA for non-\/precessing waveforms. 
 
-See \href{https://arxiv.org/abs/gr-qc/0411129}{\texttt{ https\+://arxiv.\+org/abs/gr-\/qc/0411129}} or \href{https://arxiv.org/abs/gr-qc/9703068}{\texttt{ https\+://arxiv.\+org/abs/gr-\/qc/9703068}}
+See \href{https://arxiv.org/abs/gr-qc/0411129}{\tt https\+://arxiv.\+org/abs/gr-\/qc/0411129} or \href{https://arxiv.org/abs/gr-qc/9703068}{\tt https\+://arxiv.\+org/abs/gr-\/qc/9703068}
 
-All the arguments are \`{}`barred'\textquotesingle{}, using the notation in these two works. That is, they are relative to the solar system barycenter.
+All the arguments are ``barred\textquotesingle{}\textquotesingle{}, using the notation in these two works. That is, they are relative to the solar system barycenter.
 
 To get the second interferometer\textquotesingle{}s response, evaluate with phi\+\_\+j -\/ pi/4.
 
 All the coordinates are in the ecliptic coordinate system \mbox{\Hypertarget{detector__util_8h_abf69df0d2ad243b2ec8fd022164d7d5b}\label{detector__util_8h_abf69df0d2ad243b2ec8fd022164d7d5b}} 
-\index{detector\_util.h@{detector\_util.h}!LISA\_SC@{LISA\_SC}}
-\index{LISA\_SC@{LISA\_SC}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{LISA\_SC()}{LISA\_SC()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!L\+I\+S\+A\+\_\+\+SC@{L\+I\+S\+A\+\_\+\+SC}}
+\index{L\+I\+S\+A\+\_\+\+SC@{L\+I\+S\+A\+\_\+\+SC}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{L\+I\+S\+A\+\_\+\+S\+C()}{LISA\_SC()}}
 {\footnotesize\ttfamily double L\+I\+S\+A\+\_\+\+SC (\begin{DoxyParamCaption}\item[{double}]{f,  }\item[{double}]{alpha,  }\item[{double}]{beta,  }\item[{double}]{kappa,  }\item[{double}]{gamma,  }\item[{double}]{fk }\end{DoxyParamCaption})}
 
-\textbackslash{}breif Confusion noise -- this is S, not root S
+Confusion noise -- this is S, not root S
 
 ar\+Xiv\+:1803.\+01944 -- 14
 
 integration\+\_\+time is the observation time in months -- options are 6, 12, 24, and 48 \mbox{\Hypertarget{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}\label{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}} 
-\index{detector\_util.h@{detector\_util.h}!p\_single\_detector@{p\_single\_detector}}
-\index{p\_single\_detector@{p\_single\_detector}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{p\_single\_detector()}{p\_single\_detector()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!p\+\_\+single\+\_\+detector@{p\+\_\+single\+\_\+detector}}
+\index{p\+\_\+single\+\_\+detector@{p\+\_\+single\+\_\+detector}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{p\+\_\+single\+\_\+detector()}{p\_single\_detector()}}
 {\footnotesize\ttfamily double p\+\_\+single\+\_\+detector (\begin{DoxyParamCaption}\item[{double}]{omega,  }\item[{int}]{samples }\end{DoxyParamCaption})}
 
 
 
 Utility to calculate the cumulative amplitude distribution for a single detector. 
 
-P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+P() =  (\textquotesingle{}(, , )-\/) d d dcos
 
-Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+Integrated over the volume which \textquotesingle{} is larger than 
 
 Integrates using Monte Carlo integration
 
-Uniform sampling in \textbackslash{}psi, cos(\textbackslash{}iota), cos(\textbackslash{}theta) , and \textbackslash{}phi 
+Uniform sampling in , cos(), cos() , and  
 \begin{DoxyParams}{Parameters}
-{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+{\em omega} & = /$\ast$ \\
 \hline
 {\em samples} & number of monte carlo samples to use$\ast$ \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a0af90e8d6505794a792d2b35bf583bef}\label{detector__util_8h_a0af90e8d6505794a792d2b35bf583bef}} 
-\index{detector\_util.h@{detector\_util.h}!p\_single\_detector\_fit@{p\_single\_detector\_fit}}
-\index{p\_single\_detector\_fit@{p\_single\_detector\_fit}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{p\_single\_detector\_fit()}{p\_single\_detector\_fit()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!p\+\_\+single\+\_\+detector\+\_\+fit@{p\+\_\+single\+\_\+detector\+\_\+fit}}
+\index{p\+\_\+single\+\_\+detector\+\_\+fit@{p\+\_\+single\+\_\+detector\+\_\+fit}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{p\+\_\+single\+\_\+detector\+\_\+fit()}{p\_single\_detector\_fit()}}
 {\footnotesize\ttfamily double p\+\_\+single\+\_\+detector\+\_\+fit (\begin{DoxyParamCaption}\item[{double}]{omega }\end{DoxyParamCaption})}
 
 
 
 Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit. 
 
-P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+P() =  (\textquotesingle{}(, , )-\/) d d dcos
 
-Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+Integrated over the volume which \textquotesingle{} is larger than 
 
 see ar\+Xiv\+:1405.\+7016 
 \begin{DoxyParams}{Parameters}
-{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+{\em omega} & = /$\ast$ \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a38cf74dd41080e18fc64000605019c50}\label{detector__util_8h_a38cf74dd41080e18fc64000605019c50}} 
-\index{detector\_util.h@{detector\_util.h}!p\_single\_detector\_interp@{p\_single\_detector\_interp}}
-\index{p\_single\_detector\_interp@{p\_single\_detector\_interp}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{p\_single\_detector\_interp()}{p\_single\_detector\_interp()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!p\+\_\+single\+\_\+detector\+\_\+interp@{p\+\_\+single\+\_\+detector\+\_\+interp}}
+\index{p\+\_\+single\+\_\+detector\+\_\+interp@{p\+\_\+single\+\_\+detector\+\_\+interp}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{p\+\_\+single\+\_\+detector\+\_\+interp()}{p\_single\_detector\_interp()}}
 {\footnotesize\ttfamily double p\+\_\+single\+\_\+detector\+\_\+interp (\begin{DoxyParamCaption}\item[{double}]{omega }\end{DoxyParamCaption})}
 
 
 
-Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\texttt{ https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}}. 
+Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\tt https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}. 
 
-P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+P() =  (\textquotesingle{}(, , )-\/) d d dcos
 
-Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+Integrated over the volume which \textquotesingle{} is larger than 
 
 see ar\+Xiv\+:1405.\+7016 
 \begin{DoxyParams}{Parameters}
-{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+{\em omega} & = /$\ast$ \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a8470b24a84da4e746ee95ff9bb87bbbc}\label{detector__util_8h_a8470b24a84da4e746ee95ff9bb87bbbc}} 
-\index{detector\_util.h@{detector\_util.h}!p\_triple\_detector\_fit@{p\_triple\_detector\_fit}}
-\index{p\_triple\_detector\_fit@{p\_triple\_detector\_fit}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{p\_triple\_detector\_fit()}{p\_triple\_detector\_fit()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!p\+\_\+triple\+\_\+detector\+\_\+fit@{p\+\_\+triple\+\_\+detector\+\_\+fit}}
+\index{p\+\_\+triple\+\_\+detector\+\_\+fit@{p\+\_\+triple\+\_\+detector\+\_\+fit}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{p\+\_\+triple\+\_\+detector\+\_\+fit()}{p\_triple\_detector\_fit()}}
 {\footnotesize\ttfamily double p\+\_\+triple\+\_\+detector\+\_\+fit (\begin{DoxyParamCaption}\item[{double}]{omega }\end{DoxyParamCaption})}
 
 
 
 Utility to calculate the cumulative amplitude distribution for triple detector network -- Numerical Fit. 
 
-P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+P() =  (\textquotesingle{}(, , )-\/) d d dcos
 
-Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+Integrated over the volume which \textquotesingle{} is larger than 
 
 see ar\+Xiv\+:1405.\+7016
 
 Not accurate, apparently. Just use interpolation 
 \begin{DoxyParams}{Parameters}
-{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+{\em omega} & = /$\ast$ \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a2806107bf836833162b1f7e2b78b14d5}\label{detector__util_8h_a2806107bf836833162b1f7e2b78b14d5}} 
-\index{detector\_util.h@{detector\_util.h}!p\_triple\_detector\_interp@{p\_triple\_detector\_interp}}
-\index{p\_triple\_detector\_interp@{p\_triple\_detector\_interp}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{p\_triple\_detector\_interp()}{p\_triple\_detector\_interp()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!p\+\_\+triple\+\_\+detector\+\_\+interp@{p\+\_\+triple\+\_\+detector\+\_\+interp}}
+\index{p\+\_\+triple\+\_\+detector\+\_\+interp@{p\+\_\+triple\+\_\+detector\+\_\+interp}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{p\+\_\+triple\+\_\+detector\+\_\+interp()}{p\_triple\_detector\_interp()}}
 {\footnotesize\ttfamily double p\+\_\+triple\+\_\+detector\+\_\+interp (\begin{DoxyParamCaption}\item[{double}]{omega }\end{DoxyParamCaption})}
 
 
 
-Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\texttt{ https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}}. 
+Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from \href{https://pages.jh.edu/~eberti2/research/}{\tt https\+://pages.\+jh.\+edu/$\sim$eberti2/research/}. 
 
-P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+P() =  (\textquotesingle{}(, , )-\/) d d dcos
 
-Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+Integrated over the volume which \textquotesingle{} is larger than 
 
 see ar\+Xiv\+:1405.\+7016 
 \begin{DoxyParams}{Parameters}
-{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+{\em omega} & = /$\ast$ \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{detector__util_8h_a551c603f441283ca3fe5d415d47bdc4d}\label{detector__util_8h_a551c603f441283ca3fe5d415d47bdc4d}} 
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!populate\+\_\+noise@{populate\+\_\+noise}}
+\index{populate\+\_\+noise@{populate\+\_\+noise}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{populate\+\_\+noise()}{populate\_noise()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void populate\+\_\+noise (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{std\+::string}]{detector,  }\item[{double $\ast$}]{noise\+\_\+root,  }\item[{int}]{length = {\ttfamily 0} }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}{Parameters}
+{\em frequencies} & double array of frquencies (N\+U\+LL) \\
+\hline
+{\em detector} & String to designate the detector noise curve to be used \\
+\hline
+{\em noise\+\_\+root} & ouptput double array for the square root of the P\+SD of the noise of the specified detector \\
+\hline
+{\em length} & integer length of the output and input arrays \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a96e8f667b0106557c0c285dc658b8ac3}\label{detector__util_8h_a96e8f667b0106557c0c285dc658b8ac3}} 
-\index{detector\_util.h@{detector\_util.h}!populate\_noise@{populate\_noise}}
-\index{populate\_noise@{populate\_noise}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{populate\_noise()}{populate\_noise()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!populate\+\_\+noise@{populate\+\_\+noise}}
+\index{populate\+\_\+noise@{populate\+\_\+noise}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{populate\+\_\+noise()}{populate\_noise()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily void populate\+\_\+noise (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{std\+::string}]{detector,  }\item[{double $\ast$}]{noise\+\_\+root,  }\item[{int}]{length,  }\item[{double}]{integration\+\_\+time }\end{DoxyParamCaption})}
 
 
@@ -540,8 +567,7 @@ LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel i
 
     -- does include the factor of sqrt(3)/2
 
-    -- This DOES include the sky averaged pattern functions -- i.e. sky_average flag should NOT be used when making the waveform
-\end{DoxyVerb}
+    -- This DOES include the sky averaged pattern functions -- i.e. sky_average flag should NOT be used when making the waveform\end{DoxyVerb}
  
 \begin{DoxyParams}{Parameters}
 {\em frequencies} & double array of frquencies (N\+U\+LL) \\
@@ -555,27 +581,10 @@ LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel i
 {\em integration\+\_\+time} & Integration time in months (only important for L\+I\+S\+A\+\_\+conf \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{detector__util_8h_a551c603f441283ca3fe5d415d47bdc4d}\label{detector__util_8h_a551c603f441283ca3fe5d415d47bdc4d}} 
-\index{detector\_util.h@{detector\_util.h}!populate\_noise@{populate\_noise}}
-\index{populate\_noise@{populate\_noise}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{populate\_noise()}{populate\_noise()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily void populate\+\_\+noise (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequencies,  }\item[{std\+::string}]{detector,  }\item[{double $\ast$}]{noise\+\_\+root,  }\item[{int}]{length = {\ttfamily 0} }\end{DoxyParamCaption})}
-
-
-\begin{DoxyParams}{Parameters}
-{\em frequencies} & double array of frquencies (N\+U\+LL) \\
-\hline
-{\em detector} & String to designate the detector noise curve to be used \\
-\hline
-{\em noise\+\_\+root} & ouptput double array for the square root of the P\+SD of the noise of the specified detector \\
-\hline
-{\em length} & integer length of the output and input arrays \\
-\hline
-\end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a58352b030b231c0a272ad41506a549c5}\label{detector__util_8h_a58352b030b231c0a272ad41506a549c5}} 
-\index{detector\_util.h@{detector\_util.h}!Q@{Q}}
-\index{Q@{Q}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{Q()}{Q()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!Q@{Q}}
+\index{Q@{Q}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{Q()}{Q()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily std\+::complex$<$double$>$ Q (\begin{DoxyParamCaption}\item[{double}]{theta,  }\item[{double}]{phi,  }\item[{double}]{iota }\end{DoxyParamCaption})}
 
 
@@ -583,9 +592,9 @@ LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel i
 Utility for the overall amplitude and phase shift for spin-\/aligned systems. 
 
 For spin aligned, all the extrinsic parameters have the effect of an overall amplitude modulation and phase shift \mbox{\Hypertarget{detector__util_8h_a9f4ebc828f7a5fdf89f3c3f4243f9288}\label{detector__util_8h_a9f4ebc828f7a5fdf89f3c3f4243f9288}} 
-\index{detector\_util.h@{detector\_util.h}!Q@{Q}}
-\index{Q@{Q}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{Q()}{Q()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!Q@{Q}}
+\index{Q@{Q}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{Q()}{Q()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily std\+::complex$<$double$>$ Q (\begin{DoxyParamCaption}\item[{double}]{theta,  }\item[{double}]{phi,  }\item[{double}]{iota,  }\item[{double}]{psi }\end{DoxyParamCaption})}
 
 
@@ -593,9 +602,9 @@ For spin aligned, all the extrinsic parameters have the effect of an overall amp
 Utility for the overall amplitude and phase shift for spin-\/aligned systems. 
 
 For spin aligned, all the extrinsic parameters have the effect of an overall amplitude modulation and phase shift \mbox{\Hypertarget{detector__util_8h_adcb816dfe662ececa657888ff18132bd}\label{detector__util_8h_adcb816dfe662ececa657888ff18132bd}} 
-\index{detector\_util.h@{detector\_util.h}!radius\_at\_lat@{radius\_at\_lat}}
-\index{radius\_at\_lat@{radius\_at\_lat}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{radius\_at\_lat()}{radius\_at\_lat()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!radius\+\_\+at\+\_\+lat@{radius\+\_\+at\+\_\+lat}}
+\index{radius\+\_\+at\+\_\+lat@{radius\+\_\+at\+\_\+lat}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{radius\+\_\+at\+\_\+lat()}{radius\_at\_lat()}}
 {\footnotesize\ttfamily double radius\+\_\+at\+\_\+lat (\begin{DoxyParamCaption}\item[{double}]{latitude,  }\item[{double}]{elevation }\end{DoxyParamCaption})}
 
 /brief Analytic approximation of the radius from the center of earth to a given location
@@ -608,9 +617,9 @@ Just the raidus as a function of angles, modelling an oblate spheroid
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8h_a581689a9536c0b115efe2b763e41af17}\label{detector__util_8h_a581689a9536c0b115efe2b763e41af17}} 
-\index{detector\_util.h@{detector\_util.h}!right\_interferometer@{right\_interferometer}}
-\index{right\_interferometer@{right\_interferometer}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{right\_interferometer()}{right\_interferometer()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!right\+\_\+interferometer@{right\+\_\+interferometer}}
+\index{right\+\_\+interferometer@{right\+\_\+interferometer}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{right\+\_\+interferometer()}{right\_interferometer()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void right\+\_\+interferometer (\begin{DoxyParamCaption}\item[{T $\ast$}]{fplus,  }\item[{T $\ast$}]{fcross,  }\item[{T}]{theta,  }\item[{T}]{phi,  }\item[{T}]{psi }\end{DoxyParamCaption})}
 
@@ -621,9 +630,9 @@ Response function of a 90 deg interferometer.
 Theta and phi are local, horizontal coordinates relative to the detector
 
 With general psi \mbox{\Hypertarget{detector__util_8h_a3d3d83c7a398244da315cc9a6f0b15df}\label{detector__util_8h_a3d3d83c7a398244da315cc9a6f0b15df}} 
-\index{detector\_util.h@{detector\_util.h}!right\_interferometer\_cross@{right\_interferometer\_cross}}
-\index{right\_interferometer\_cross@{right\_interferometer\_cross}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{right\_interferometer\_cross()}{right\_interferometer\_cross()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!right\+\_\+interferometer\+\_\+cross@{right\+\_\+interferometer\+\_\+cross}}
+\index{right\+\_\+interferometer\+\_\+cross@{right\+\_\+interferometer\+\_\+cross}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{right\+\_\+interferometer\+\_\+cross()}{right\_interferometer\_cross()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T right\+\_\+interferometer\+\_\+cross (\begin{DoxyParamCaption}\item[{T}]{theta,  }\item[{T}]{phi }\end{DoxyParamCaption})}
 
@@ -632,9 +641,9 @@ T right\+\_\+interferometer\+\_\+cross (\begin{DoxyParamCaption}\item[{T}]{theta
 Response function of a 90 deg interferometer for cross polarization. 
 
 Theta and phi are local, horizontal coordinates relative to the detector \mbox{\Hypertarget{detector__util_8h_aa60bf261e973bd490d1c83015af22aad}\label{detector__util_8h_aa60bf261e973bd490d1c83015af22aad}} 
-\index{detector\_util.h@{detector\_util.h}!right\_interferometer\_plus@{right\_interferometer\_plus}}
-\index{right\_interferometer\_plus@{right\_interferometer\_plus}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{right\_interferometer\_plus()}{right\_interferometer\_plus()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!right\+\_\+interferometer\+\_\+plus@{right\+\_\+interferometer\+\_\+plus}}
+\index{right\+\_\+interferometer\+\_\+plus@{right\+\_\+interferometer\+\_\+plus}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{right\+\_\+interferometer\+\_\+plus()}{right\_interferometer\_plus()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T right\+\_\+interferometer\+\_\+plus (\begin{DoxyParamCaption}\item[{T}]{theta,  }\item[{T}]{phi }\end{DoxyParamCaption})}
 
@@ -643,58 +652,55 @@ T right\+\_\+interferometer\+\_\+plus (\begin{DoxyParamCaption}\item[{T}]{theta,
 Response function of a 90 deg interferometer for plus polarization. 
 
 Theta and phi are local, horizontal coordinates relative to the detector \mbox{\Hypertarget{detector__util_8h_a47b20a157d8337d411c0d02d0a638168}\label{detector__util_8h_a47b20a157d8337d411c0d02d0a638168}} 
-\index{detector\_util.h@{detector\_util.h}!sort\_LISA\_SC\_coeffs@{sort\_LISA\_SC\_coeffs}}
-\index{sort\_LISA\_SC\_coeffs@{sort\_LISA\_SC\_coeffs}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{sort\_LISA\_SC\_coeffs()}{sort\_LISA\_SC\_coeffs()}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs@{sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs}}
+\index{sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs@{sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs()}{sort\_LISA\_SC\_coeffs()}}
 {\footnotesize\ttfamily void sort\+\_\+\+L\+I\+S\+A\+\_\+\+S\+C\+\_\+coeffs (\begin{DoxyParamCaption}\item[{double $\ast$}]{alpha,  }\item[{double $\ast$}]{beta,  }\item[{double $\ast$}]{kappa,  }\item[{double $\ast$}]{gamma,  }\item[{double $\ast$}]{fk,  }\item[{double}]{integration\+\_\+time }\end{DoxyParamCaption})}
 
-\textbackslash{}breif L\+I\+SA confusion noise coefficients
+L\+I\+SA confusion noise coefficients
 
 ar\+Xiv\+:1803.\+01944 -- Table 1
 
 integration\+\_\+time is the observation time in months -- options are 6, 12, 24, and 48 
 
-\doxysubsection{Variable Documentation}
+\subsection{Variable Documentation}
 \mbox{\Hypertarget{detector__util_8h_a14eced5d747f703b86f021cfc242536e}\label{detector__util_8h_a14eced5d747f703b86f021cfc242536e}} 
-\index{detector\_util.h@{detector\_util.h}!Hanford\_D@{Hanford\_D}}
-\index{Hanford\_D@{Hanford\_D}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{Hanford\_D}{Hanford\_D}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!Hanford\+\_\+D@{Hanford\+\_\+D}}
+\index{Hanford\+\_\+D@{Hanford\+\_\+D}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{Hanford\+\_\+D}{Hanford\_D}}
 {\footnotesize\ttfamily const double Hanford\+\_\+D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}
 
 {\bfseries Initial value\+:}
-\begin{DoxyCode}{0}
-\DoxyCodeLine{= \{\{-\/0.392632, -\/0.0776099, -\/0.247384\}, \{-\/0.0776099, 0.319499, }
-\DoxyCodeLine{  0.227988\}, \{-\/0.247384, 0.227988, 0.0730968\}\}}
-
+\begin{DoxyCode}
+= \{\{-0.392632, -0.0776099, -0.247384\}, \{-0.0776099, 0.319499, 
+  0.227988\}, \{-0.247384, 0.227988, 0.0730968\}\}
 \end{DoxyCode}
 Response Tensor for Hanford
 
 Calculated using ar\+Xiv\+:gr-\/qc/0008066, equation B6 with the table at the end -- see mathematica script \mbox{\Hypertarget{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}\label{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}} 
-\index{detector\_util.h@{detector\_util.h}!Livingston\_D@{Livingston\_D}}
-\index{Livingston\_D@{Livingston\_D}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{Livingston\_D}{Livingston\_D}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!Livingston\+\_\+D@{Livingston\+\_\+D}}
+\index{Livingston\+\_\+D@{Livingston\+\_\+D}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{Livingston\+\_\+D}{Livingston\_D}}
 {\footnotesize\ttfamily const double Livingston\+\_\+D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}
 
 {\bfseries Initial value\+:}
-\begin{DoxyCode}{0}
-\DoxyCodeLine{= \{\{0.411318, 0.14021, }
-\DoxyCodeLine{  0.247279\}, \{0.14021, -\/0.108998, -\/0.181597\}, \{0.247279, -\/0.181597, }
-\DoxyCodeLine{-\/0.302236\}\}}
-
+\begin{DoxyCode}
+= \{\{0.411318, 0.14021, 
+  0.247279\}, \{0.14021, -0.108998, -0.181597\}, \{0.247279, -0.181597, 
+-0.302236\}\}
 \end{DoxyCode}
 Response Tensor for Livingston
 
 Calculated using ar\+Xiv\+:gr-\/qc/0008066, equation B6 with the table at the end -- see mathematica script \mbox{\Hypertarget{detector__util_8h_ab3f9eb7bf2b7778fd56ed0a48ddaf423}\label{detector__util_8h_ab3f9eb7bf2b7778fd56ed0a48ddaf423}} 
-\index{detector\_util.h@{detector\_util.h}!Virgo\_D@{Virgo\_D}}
-\index{Virgo\_D@{Virgo\_D}!detector\_util.h@{detector\_util.h}}
-\doxysubsubsection{\texorpdfstring{Virgo\_D}{Virgo\_D}}
+\index{detector\+\_\+util.\+h@{detector\+\_\+util.\+h}!Virgo\+\_\+D@{Virgo\+\_\+D}}
+\index{Virgo\+\_\+D@{Virgo\+\_\+D}!detector\+\_\+util.\+h@{detector\+\_\+util.\+h}}
+\subsubsection{\texorpdfstring{Virgo\+\_\+D}{Virgo\_D}}
 {\footnotesize\ttfamily const double Virgo\+\_\+D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}
 
 {\bfseries Initial value\+:}
-\begin{DoxyCode}{0}
-\DoxyCodeLine{= \{\{0.243903, -\/0.0990959, -\/0.232603\}, \{-\/0.0990959, -\/0.447841, }
-\DoxyCodeLine{  0.187841\}, \{-\/0.232603, 0.187841, 0.203979\}\}}
-
+\begin{DoxyCode}
+= \{\{0.243903, -0.0990959, -0.232603\}, \{-0.0990959, -0.447841, 
+  0.187841\}, \{-0.232603, 0.187841, 0.203979\}\}
 \end{DoxyCode}
 Response Tensor for Virgo
 

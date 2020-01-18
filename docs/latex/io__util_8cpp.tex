@@ -1,5 +1,5 @@
-\hypertarget{io__util_8cpp}{}\doxysection{src/io\+\_\+util.cpp File Reference}
-\label{io__util_8cpp}\index{src/io\_util.cpp@{src/io\_util.cpp}}
+\hypertarget{io__util_8cpp}{}\section{src/io\+\_\+util.cpp File Reference}
+\label{io__util_8cpp}\index{src/io\+\_\+util.\+cpp@{src/io\+\_\+util.\+cpp}}
 {\ttfamily \#include \char`\"{}io\+\_\+util.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$unordered\+\_\+map$>$}\newline
@@ -10,38 +10,43 @@
 {\ttfamily \#include $<$algorithm$>$}\newline
 {\ttfamily \#include $<$cctype$>$}\newline
 {\ttfamily \#include $<$complex$>$}\newline
-Include dependency graph for io\+\_\+util.\+cpp\+:
-% FIG 0
-\doxysubsection*{Functions}
+Include dependency graph for io\+\_\+util.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{io__util_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{io__util_8cpp_ae64c41a8d5a46054427d281f7febf234}\label{io__util_8cpp_ae64c41a8d5a46054427d281f7febf234}} 
 int {\bfseries unpack\+\_\+input\+\_\+io\+\_\+file} (std\+::string input\+\_\+param\+\_\+file, std\+::unordered\+\_\+map$<$ std\+::string, int $>$ $\ast$input\+\_\+param\+\_\+dict\+\_\+int, std\+::unordered\+\_\+map$<$ std\+::string, std\+::string $>$ $\ast$input\+\_\+param\+\_\+dict\+\_\+str, std\+::unordered\+\_\+map$<$ std\+::string, double $>$ $\ast$input\+\_\+param\+\_\+dict\+\_\+dbl, std\+::unordered\+\_\+map$<$ std\+::string, float $>$ $\ast$input\+\_\+param\+\_\+dict\+\_\+flt, std\+::unordered\+\_\+map$<$ std\+::string, bool $>$ $\ast$input\+\_\+param\+\_\+dict\+\_\+bool)
 \item 
-int \mbox{\hyperlink{io__util_8cpp_a627ac895351aa8f4c26a2565cf1769d0}{find\+\_\+datatype}} (std\+::string type)
+int \hyperlink{io__util_8cpp_a627ac895351aa8f4c26a2565cf1769d0}{find\+\_\+datatype} (std\+::string type)
 \begin{DoxyCompactList}\small\item\em Takes in the shorthand for primitive datatypes in c++ and returns code based on type. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{io__util_8cpp_a9b855aac79a01bc69b093a4ee12bb688}\label{io__util_8cpp_a9b855aac79a01bc69b093a4ee12bb688}} 
 std\+::string {\bfseries trim} (std\+::string str)
 \item 
-void \mbox{\hyperlink{io__util_8cpp_aad742282a09bb261d21080e8874578ba}{read\+\_\+file}} (std\+::string filename, double $\ast$$\ast$output, int rows, int cols)
+void \hyperlink{io__util_8cpp_aad742282a09bb261d21080e8874578ba}{read\+\_\+file} (std\+::string filename, double $\ast$$\ast$output, int rows, int cols)
 \begin{DoxyCompactList}\small\item\em Utility to read in data. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_a788a44b839a09910024159d9d10764d0}{read\+\_\+file}} (std\+::string filename, double $\ast$output)
+void \hyperlink{io__util_8cpp_a788a44b839a09910024159d9d10764d0}{read\+\_\+file} (std\+::string filename, double $\ast$output)
 \begin{DoxyCompactList}\small\item\em Utility to read in data (single dimension vector) \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_a8cb10f1eb5598be2a3aa53dcc2ebe844}{write\+\_\+file}} (std\+::string filename, double $\ast$$\ast$input, int rows, int cols)
+void \hyperlink{io__util_8cpp_a8cb10f1eb5598be2a3aa53dcc2ebe844}{write\+\_\+file} (std\+::string filename, double $\ast$$\ast$input, int rows, int cols)
 \begin{DoxyCompactList}\small\item\em Utility to write 2D array to file. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_a2364e735eddfa67c1317f6ebc64565f3}{write\+\_\+file}} (std\+::string filename, double $\ast$input, int length)
+void \hyperlink{io__util_8cpp_a2364e735eddfa67c1317f6ebc64565f3}{write\+\_\+file} (std\+::string filename, double $\ast$input, int length)
 \begin{DoxyCompactList}\small\item\em Utility to write 1D array to file. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_abbb4e70ddc93c8995739b3a481bbf3a6}{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file}} (std\+::string filename, double $\ast$output, double $\ast$data\+\_\+start\+\_\+time, double $\ast$duration, double $\ast$fs)
+void \hyperlink{io__util_8cpp_abbb4e70ddc93c8995739b3a481bbf3a6}{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file} (std\+::string filename, double $\ast$output, double $\ast$data\+\_\+start\+\_\+time, double $\ast$duration, double $\ast$fs)
 \begin{DoxyCompactList}\small\item\em Read data file from L\+I\+GO Open Science Center. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_a089aa96b136d368b0c740c416811c39d}{read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file}} (std\+::string filename, double $\ast$$\ast$output, int rows, int cols)
+void \hyperlink{io__util_8cpp_a089aa96b136d368b0c740c416811c39d}{read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file} (std\+::string filename, double $\ast$$\ast$output, int rows, int cols)
 \begin{DoxyCompactList}\small\item\em Read P\+SD file from L\+I\+GO Open Science Center. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_aa73bbfc171abf859eff4c14e07ed1e0a}{allocate\+\_\+\+L\+O\+S\+C\+\_\+data}} (std\+::string $\ast$data\+\_\+files, std\+::string psd\+\_\+file, int num\+\_\+detectors, int psd\+\_\+length, int data\+\_\+file\+\_\+length, double trigger\+\_\+time, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psds, double $\ast$$\ast$freqs)
+void \hyperlink{io__util_8cpp_aa73bbfc171abf859eff4c14e07ed1e0a}{allocate\+\_\+\+L\+O\+S\+C\+\_\+data} (std\+::string $\ast$data\+\_\+files, std\+::string psd\+\_\+file, int num\+\_\+detectors, int psd\+\_\+length, int data\+\_\+file\+\_\+length, double trigger\+\_\+time, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psds, double $\ast$$\ast$freqs)
 \begin{DoxyCompactList}\small\item\em Prepare data for M\+C\+MC directly from L\+I\+GO Open Science Center. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{io__util_8cpp_a3196bd767443186731edcfc84e43ac93}{free\+\_\+\+L\+O\+S\+C\+\_\+data}} (std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psds, double $\ast$$\ast$freqs, int num\+\_\+detectors, int length)
+void \hyperlink{io__util_8cpp_a3196bd767443186731edcfc84e43ac93}{free\+\_\+\+L\+O\+S\+C\+\_\+data} (std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psds, double $\ast$$\ast$freqs, int num\+\_\+detectors, int length)
 \end{DoxyCompactItemize}
 
 
-\doxysubsection{Detailed Description}
+\subsection{Detailed Description}
 unpacks standard parameter file for input for runtime parameters
 
 Returns the number of parameters unpacked, (-\/1 if error) The format M\+U\+ST be exact\+: \begin{DoxyVerb}[type] Parameter name = val
@@ -64,11 +69,11 @@ Trims white space on ends
 
 Handles empty lines 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{io__util_8cpp_aa73bbfc171abf859eff4c14e07ed1e0a}\label{io__util_8cpp_aa73bbfc171abf859eff4c14e07ed1e0a}} 
-\index{io\_util.cpp@{io\_util.cpp}!allocate\_LOSC\_data@{allocate\_LOSC\_data}}
-\index{allocate\_LOSC\_data@{allocate\_LOSC\_data}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{allocate\_LOSC\_data()}{allocate\_LOSC\_data()}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!allocate\+\_\+\+L\+O\+S\+C\+\_\+data@{allocate\+\_\+\+L\+O\+S\+C\+\_\+data}}
+\index{allocate\+\_\+\+L\+O\+S\+C\+\_\+data@{allocate\+\_\+\+L\+O\+S\+C\+\_\+data}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{allocate\+\_\+\+L\+O\+S\+C\+\_\+data()}{allocate\_LOSC\_data()}}
 {\footnotesize\ttfamily void allocate\+\_\+\+L\+O\+S\+C\+\_\+data (\begin{DoxyParamCaption}\item[{std\+::string $\ast$}]{data\+\_\+files,  }\item[{std\+::string}]{psd\+\_\+file,  }\item[{int}]{num\+\_\+detectors,  }\item[{int}]{psd\+\_\+length,  }\item[{int}]{data\+\_\+file\+\_\+length,  }\item[{double}]{trigger\+\_\+time,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{psds,  }\item[{double $\ast$$\ast$}]{freqs }\end{DoxyParamCaption})}
 
 
@@ -107,17 +112,17 @@ A\+L\+L\+O\+C\+A\+T\+ES M\+E\+M\+O\+RY -- must be freed to prevent memory leak
 \hline
  & {\em trigger\+\_\+time} & Time for the signal trigger (G\+PS) \\
 \hline
-\mbox{\texttt{ out}}  & {\em data} & Output array of data for each detector \\
+\mbox{\tt out}  & {\em data} & Output array of data for each detector \\
 \hline
-\mbox{\texttt{ out}}  & {\em psds} & Output array of psds for each detector \\
+\mbox{\tt out}  & {\em psds} & Output array of psds for each detector \\
 \hline
-\mbox{\texttt{ out}}  & {\em freqs} & Output array of freqs for each detector \\
+\mbox{\tt out}  & {\em freqs} & Output array of freqs for each detector \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{io__util_8cpp_a627ac895351aa8f4c26a2565cf1769d0}\label{io__util_8cpp_a627ac895351aa8f4c26a2565cf1769d0}} 
-\index{io\_util.cpp@{io\_util.cpp}!find\_datatype@{find\_datatype}}
-\index{find\_datatype@{find\_datatype}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{find\_datatype()}{find\_datatype()}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!find\+\_\+datatype@{find\+\_\+datatype}}
+\index{find\+\_\+datatype@{find\+\_\+datatype}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{find\+\_\+datatype()}{find\_datatype()}}
 {\footnotesize\ttfamily int find\+\_\+datatype (\begin{DoxyParamCaption}\item[{std\+::string}]{type }\end{DoxyParamCaption})}
 
 
@@ -134,18 +139,17 @@ Returns\+: \begin{DoxyVerb}0 -- Not found
 
 4 -- float
 
-5 -- bool
-\end{DoxyVerb}
+5 -- bool\end{DoxyVerb}
  \mbox{\Hypertarget{io__util_8cpp_a3196bd767443186731edcfc84e43ac93}\label{io__util_8cpp_a3196bd767443186731edcfc84e43ac93}} 
-\index{io\_util.cpp@{io\_util.cpp}!free\_LOSC\_data@{free\_LOSC\_data}}
-\index{free\_LOSC\_data@{free\_LOSC\_data}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{free\_LOSC\_data()}{free\_LOSC\_data()}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!free\+\_\+\+L\+O\+S\+C\+\_\+data@{free\+\_\+\+L\+O\+S\+C\+\_\+data}}
+\index{free\+\_\+\+L\+O\+S\+C\+\_\+data@{free\+\_\+\+L\+O\+S\+C\+\_\+data}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{free\+\_\+\+L\+O\+S\+C\+\_\+data()}{free\_LOSC\_data()}}
 {\footnotesize\ttfamily void free\+\_\+\+L\+O\+S\+C\+\_\+data (\begin{DoxyParamCaption}\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{data,  }\item[{double $\ast$$\ast$}]{psds,  }\item[{double $\ast$$\ast$}]{freqs,  }\item[{int}]{num\+\_\+detectors,  }\item[{int}]{length }\end{DoxyParamCaption})}
 
 /brief Free data allocated by prep\+\_\+\+L\+O\+S\+C\+\_\+data function \mbox{\Hypertarget{io__util_8cpp_aad742282a09bb261d21080e8874578ba}\label{io__util_8cpp_aad742282a09bb261d21080e8874578ba}} 
-\index{io\_util.cpp@{io\_util.cpp}!read\_file@{read\_file}}
-\index{read\_file@{read\_file}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!read\+\_\+file@{read\+\_\+file}}
+\index{read\+\_\+file@{read\+\_\+file}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{read\+\_\+file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily void read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
 
 
@@ -158,7 +162,7 @@ File must be comma separated doubles
 \begin{DoxyParams}[1]{Parameters}
  & {\em filename} & input filename, relative to execution directory \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & array to store output, dimensions rows\+Xcols \\
+\mbox{\tt out}  & {\em output} & array to store output, dimensions rows\+Xcols \\
 \hline
  & {\em rows} & first dimension \\
 \hline
@@ -166,9 +170,9 @@ File must be comma separated doubles
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{io__util_8cpp_a788a44b839a09910024159d9d10764d0}\label{io__util_8cpp_a788a44b839a09910024159d9d10764d0}} 
-\index{io\_util.cpp@{io\_util.cpp}!read\_file@{read\_file}}
-\index{read\_file@{read\_file}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!read\+\_\+file@{read\+\_\+file}}
+\index{read\+\_\+file@{read\+\_\+file}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{read\+\_\+file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily void read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$}]{output }\end{DoxyParamCaption})}
 
 
@@ -183,13 +187,13 @@ File must be comma separated doubles
 \begin{DoxyParams}[1]{Parameters}
  & {\em filename} & input filename, relative to execution directory \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & output array, assumed to have the proper length of total items \\
+\mbox{\tt out}  & {\em output} & output array, assumed to have the proper length of total items \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{io__util_8cpp_abbb4e70ddc93c8995739b3a481bbf3a6}\label{io__util_8cpp_abbb4e70ddc93c8995739b3a481bbf3a6}} 
-\index{io\_util.cpp@{io\_util.cpp}!read\_LOSC\_data\_file@{read\_LOSC\_data\_file}}
-\index{read\_LOSC\_data\_file@{read\_LOSC\_data\_file}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{read\_LOSC\_data\_file()}{read\_LOSC\_data\_file()}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file@{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file}}
+\index{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file@{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file()}{read\_LOSC\_data\_file()}}
 {\footnotesize\ttfamily void read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$}]{output,  }\item[{double $\ast$}]{data\+\_\+start\+\_\+time,  }\item[{double $\ast$}]{duration,  }\item[{double $\ast$}]{fs }\end{DoxyParamCaption})}
 
 
@@ -200,19 +204,19 @@ Convenience function for cutting off the first few lines of text
 \begin{DoxyParams}[1]{Parameters}
  & {\em filename} & input filename \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & Output data \\
+\mbox{\tt out}  & {\em output} & Output data \\
 \hline
-\mbox{\texttt{ out}}  & {\em data\+\_\+start\+\_\+time} & G\+PS start time of the data in file \\
+\mbox{\tt out}  & {\em data\+\_\+start\+\_\+time} & G\+PS start time of the data in file \\
 \hline
-\mbox{\texttt{ out}}  & {\em duration} & Duration of the signal \\
+\mbox{\tt out}  & {\em duration} & Duration of the signal \\
 \hline
-\mbox{\texttt{ out}}  & {\em fs} & Sampling frequency of the data \\
+\mbox{\tt out}  & {\em fs} & Sampling frequency of the data \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{io__util_8cpp_a089aa96b136d368b0c740c416811c39d}\label{io__util_8cpp_a089aa96b136d368b0c740c416811c39d}} 
-\index{io\_util.cpp@{io\_util.cpp}!read\_LOSC\_PSD\_file@{read\_LOSC\_PSD\_file}}
-\index{read\_LOSC\_PSD\_file@{read\_LOSC\_PSD\_file}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{read\_LOSC\_PSD\_file()}{read\_LOSC\_PSD\_file()}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file@{read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file}}
+\index{read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file@{read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file()}{read\_LOSC\_PSD\_file()}}
 {\footnotesize\ttfamily void read\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
 
 
@@ -220,9 +224,9 @@ Convenience function for cutting off the first few lines of text
 Read P\+SD file from L\+I\+GO Open Science Center. 
 
 Convenience function for cutting off the first few lines of text \mbox{\Hypertarget{io__util_8cpp_a8cb10f1eb5598be2a3aa53dcc2ebe844}\label{io__util_8cpp_a8cb10f1eb5598be2a3aa53dcc2ebe844}} 
-\index{io\_util.cpp@{io\_util.cpp}!write\_file@{write\_file}}
-\index{write\_file@{write\_file}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!write\+\_\+file@{write\+\_\+file}}
+\index{write\+\_\+file@{write\+\_\+file}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{write\+\_\+file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily void write\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$$\ast$}]{input,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
 
 
@@ -243,9 +247,9 @@ Grid has rows rows and cols columns
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{io__util_8cpp_a2364e735eddfa67c1317f6ebc64565f3}\label{io__util_8cpp_a2364e735eddfa67c1317f6ebc64565f3}} 
-\index{io\_util.cpp@{io\_util.cpp}!write\_file@{write\_file}}
-\index{write\_file@{write\_file}!io\_util.cpp@{io\_util.cpp}}
-\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\index{io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}!write\+\_\+file@{write\+\_\+file}}
+\index{write\+\_\+file@{write\+\_\+file}!io\+\_\+util.\+cpp@{io\+\_\+util.\+cpp}}
+\subsubsection{\texorpdfstring{write\+\_\+file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily void write\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$}]{input,  }\item[{int}]{length }\end{DoxyParamCaption})}
 
 

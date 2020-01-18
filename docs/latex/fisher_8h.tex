@@ -1,101 +1,111 @@
-\hypertarget{fisher_8h}{}\doxysection{include/gwat/fisher.h File Reference}
-\label{fisher_8h}\index{include/gwat/fisher.h@{include/gwat/fisher.h}}
+\hypertarget{fisher_8h}{}\section{include/gwat/fisher.h File Reference}
+\label{fisher_8h}\index{include/gwat/fisher.\+h@{include/gwat/fisher.\+h}}
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$string$>$}\newline
-Include dependency graph for fisher.\+h\+:
-% FIG 0
-This graph shows which files directly or indirectly include this file\+:
-% FIG 1
-\doxysubsection*{Classes}
+Include dependency graph for fisher.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{fisher_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=272pt]{fisher_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
-struct \mbox{\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine}}
+struct \hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine}
 \end{DoxyCompactItemize}
-\doxysubsection*{Functions}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{fisher_8h_ad76283082e8f4a45365dda6c58f25e3f}\label{fisher_8h_ad76283082e8f4a45365dda6c58f25e3f}} 
-void {\bfseries tape\+\_\+waveform\+\_\+gsl\+\_\+subroutine} (\mbox{\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine}} $\ast$params\+\_\+packed)
+void {\bfseries tape\+\_\+waveform\+\_\+gsl\+\_\+subroutine} (\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine} $\ast$params\+\_\+packed)
 \item 
 \mbox{\Hypertarget{fisher_8h_a447ef9a0bb4954bab835f418932ce61d}\label{fisher_8h_a447ef9a0bb4954bab835f418932ce61d}} 
-void {\bfseries tape\+\_\+time\+\_\+gsl\+\_\+subroutine} (\mbox{\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine}} $\ast$params\+\_\+packed)
+void {\bfseries tape\+\_\+time\+\_\+gsl\+\_\+subroutine} (\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine} $\ast$params\+\_\+packed)
 \item 
 \mbox{\Hypertarget{fisher_8h_ae8560e6f0a861ee30845613592e70b7c}\label{fisher_8h_ae8560e6f0a861ee30845613592e70b7c}} 
-void {\bfseries tape\+\_\+phase\+\_\+gsl\+\_\+subroutine} (\mbox{\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine}} $\ast$params\+\_\+packed)
+void {\bfseries tape\+\_\+phase\+\_\+gsl\+\_\+subroutine} (\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine} $\ast$params\+\_\+packed)
 \item 
 \mbox{\Hypertarget{fisher_8h_a06005d743a31e704ea51c2e1b2f7d69b}\label{fisher_8h_a06005d743a31e704ea51c2e1b2f7d69b}} 
-void {\bfseries prep\+\_\+gsl\+\_\+subroutine} (\mbox{\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine}} $\ast$params\+\_\+packed)
+void {\bfseries prep\+\_\+gsl\+\_\+subroutine} (\hyperlink{structgsl__subroutine}{gsl\+\_\+subroutine} $\ast$params\+\_\+packed)
 \item 
-void \mbox{\hyperlink{fisher_8h_aa09e52ceab4e19f05f4aa0bc17d01235}{fisher\+\_\+numerical}} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$parameters, int order, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
+void \hyperlink{fisher_8h_aa09e52ceab4e19f05f4aa0bc17d01235}{fisher\+\_\+numerical} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$parameters, int order, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
 \begin{DoxyCompactList}\small\item\em Calculates the fisher matrix for the given arguments. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8h_a8da03c0eee5317e59d67f85dd6358494}\label{fisher_8h_a8da03c0eee5317e59d67f85dd6358494}} 
 void {\bfseries calculate\+\_\+fisher\+\_\+elements} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
 \item 
-void \mbox{\hyperlink{fisher_8h_acae7abfd22bc80580996b8f677be9156}{calculate\+\_\+fisher\+\_\+elements\+\_\+batch}} (double $\ast$frequency, int length, int base\+\_\+dimension, int full\+\_\+dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
+void \hyperlink{fisher_8h_acae7abfd22bc80580996b8f677be9156}{calculate\+\_\+fisher\+\_\+elements\+\_\+batch} (double $\ast$frequency, int length, int base\+\_\+dimension, int full\+\_\+dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
 \begin{DoxyCompactList}\small\item\em Subroutine to calculate fisher elements for a subset of the fisher. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8h_a0e8bac46d59b2f9e40c199557b57ebd6}\label{fisher_8h_a0e8bac46d59b2f9e40c199557b57ebd6}} 
-void {\bfseries calculate\+\_\+derivatives} (std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$frequencies, int length, int dimension, string detector, string gen\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$parameters, int order)
+void {\bfseries calculate\+\_\+derivatives} (std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$frequencies, int length, int dimension, string detector, string gen\+\_\+method, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$parameters, int order)
 \item 
 \mbox{\Hypertarget{fisher_8h_a56b731662e3cdac4246a6dd3218ae8ff}\label{fisher_8h_a56b731662e3cdac4246a6dd3218ae8ff}} 
-void {\bfseries fisher\+\_\+autodiff} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
+void {\bfseries fisher\+\_\+autodiff} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
 \item 
 \mbox{\Hypertarget{fisher_8h_a53c2f9a5f9e04790377ecaee23f56d47}\label{fisher_8h_a53c2f9a5f9e04790377ecaee23f56d47}} 
-void {\bfseries fisher\+\_\+autodiff\+\_\+interp} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int downsampling\+\_\+factor, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
+void {\bfseries fisher\+\_\+autodiff\+\_\+interp} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, int downsampling\+\_\+factor, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
 \item 
 \mbox{\Hypertarget{fisher_8h_a010726afe37626d2c678c76d841a906c}\label{fisher_8h_a010726afe37626d2c678c76d841a906c}} 
-void {\bfseries fisher\+\_\+autodiff\+\_\+batch\+\_\+mod} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int base\+\_\+dimension, int full\+\_\+dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
+void {\bfseries fisher\+\_\+autodiff\+\_\+batch\+\_\+mod} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int base\+\_\+dimension, int full\+\_\+dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
 \item 
 \mbox{\Hypertarget{fisher_8h_ac16fd5c6296dd496e81c51ab67fcc983}\label{fisher_8h_ac16fd5c6296dd496e81c51ab67fcc983}} 
-void {\bfseries Phenom\+P\+\_\+fisher} (double $\ast$frequency, int length, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+derivative, int $\ast$amp\+\_\+tapes, int $\ast$phase\+\_\+tapes, std\+::string detector)
+void {\bfseries Phenom\+P\+\_\+fisher} (double $\ast$frequency, int length, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+derivative, int $\ast$amp\+\_\+tapes, int $\ast$phase\+\_\+tapes, std\+::string detector)
 \item 
 \mbox{\Hypertarget{fisher_8h_a15b0abe98fd48389109099d6ac58c9a6}\label{fisher_8h_a15b0abe98fd48389109099d6ac58c9a6}} 
-void {\bfseries construct\+\_\+waveform\+\_\+derivative} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, \mbox{\hyperlink{structsource__parameters}{source\+\_\+parameters}}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$waveform\+\_\+tapes)
+void {\bfseries construct\+\_\+waveform\+\_\+derivative} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, \hyperlink{structsource__parameters}{source\+\_\+parameters}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$waveform\+\_\+tapes)
 \item 
-void \mbox{\hyperlink{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}{calculate\+\_\+derivatives\+\_\+autodiff}} (double $\ast$frequency, int length, int dimension, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, int $\ast$waveform\+\_\+tapes, std\+::string detector)
+void \hyperlink{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}{calculate\+\_\+derivatives\+\_\+autodiff} (double $\ast$frequency, int length, int dimension, std\+::string generation\+\_\+method, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, int $\ast$waveform\+\_\+tapes, std\+::string detector)
 \begin{DoxyCompactList}\small\item\em Calculates the derivatives of the detector response using automatic differentiation. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_ab3566a9d2c5776b7769f1452bf3f80f3}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess}} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
+void \hyperlink{fisher_8h_ab3566a9d2c5776b7769f1452bf3f80f3}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\+N\+ED BY F\+I\+S\+H\+ER F\+I\+LE -- hessian of the phase. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_ae6b5ad58c5308a1311a93a58f2169e40}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff}} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
+void \hyperlink{fisher_8h_ae6b5ad58c5308a1311a93a58f2169e40}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\+N\+ED BY F\+I\+S\+H\+ER F\+I\+LE -- hessian of the phase. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{fisher_8h_a430217adb3e9baf50041ab7fbbd9b2b9}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical}} (T $\ast$$\ast$dt, int length, T $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{fisher_8h_a430217adb3e9baf50041ab7fbbd9b2b9}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical} (T $\ast$$\ast$dt, int length, T $\ast$frequencies, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\+N\+ED BY F\+I\+S\+H\+ER F\+I\+LE -- hessian of the phase -- numerical. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_a98ccb5fbfa7dde9dc8d7fb1f38ef5e16}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical}} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
+void \hyperlink{fisher_8h_a98ccb5fbfa7dde9dc8d7fb1f38ef5e16}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\+N\+ED BY F\+I\+S\+H\+ER F\+I\+LE -- hessian of the phase. \end{DoxyCompactList}\item 
-std\+::string \mbox{\hyperlink{fisher_8h_ad64b3163d121d715a0eaa22a039ffbe1}{local\+\_\+generation\+\_\+method}} (std\+::string generation\+\_\+method)
+std\+::string \hyperlink{fisher_8h_ad64b3163d121d715a0eaa22a039ffbe1}{local\+\_\+generation\+\_\+method} (std\+::string generation\+\_\+method)
 \begin{DoxyCompactList}\small\item\em Utility for mapping generation method string to one accepted by the waveform\+\_\+generation routines. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8h_a889b2789fdd2c018b72544a3ad05c921}\label{fisher_8h_a889b2789fdd2c018b72544a3ad05c921}} 
-void {\bfseries prep\+\_\+fisher\+\_\+calculation} (double $\ast$parameters, bool $\ast$, double $\ast$, double $\ast$, int, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method, int dim)
+void {\bfseries prep\+\_\+fisher\+\_\+calculation} (double $\ast$parameters, bool $\ast$, double $\ast$, double $\ast$, int, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method, int dim)
 \item 
-void \mbox{\hyperlink{fisher_8h_af071af4a0f6f8ab05c1cdc76a275cd49}{detect\+\_\+adjust\+\_\+parameters}} (double $\ast$freq\+\_\+boundaries, double $\ast$grad\+\_\+freqs, int $\ast$boundary\+\_\+num, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method, std\+::string detector, int dim)
+void \hyperlink{fisher_8h_af071af4a0f6f8ab05c1cdc76a275cd49}{detect\+\_\+adjust\+\_\+parameters} (double $\ast$freq\+\_\+boundaries, double $\ast$grad\+\_\+freqs, int $\ast$boundary\+\_\+num, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method, std\+::string detector, int dim)
 \begin{DoxyCompactList}\small\item\em Adjust parameters for detector specific configurations (namely, L\+I\+SA introduces extra transitions that needs to be accounted for) \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8h_abc06575e6f7b404a56d9c5fa8041ddf5}\label{fisher_8h_abc06575e6f7b404a56d9c5fa8041ddf5}} 
-void \mbox{\hyperlink{fisher_8h_abc06575e6f7b404a56d9c5fa8041ddf5}{unpack\+\_\+parameters}} (double $\ast$parameters, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method, int dimension, bool $\ast$log\+\_\+factors)
-\begin{DoxyCompactList}\small\item\em Unpacks the input \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} object into a double array for use with the fisher routines. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{fisher_8h_ae9abf5e34ebefb45c534eacd8c6d408b}{repack\+\_\+parameters}} (T $\ast$avec\+\_\+parameters, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$a\+\_\+params, std\+::string generation\+\_\+method, int dim, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$original\+\_\+params)
+void \hyperlink{fisher_8h_abc06575e6f7b404a56d9c5fa8041ddf5}{unpack\+\_\+parameters} (double $\ast$parameters, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$input\+\_\+params, std\+::string generation\+\_\+method, int dimension, bool $\ast$log\+\_\+factors)
+\begin{DoxyCompactList}\small\item\em Unpacks the input \hyperlink{classgen__params}{gen\+\_\+params} object into a double array for use with the fisher routines. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{fisher_8h_ae9abf5e34ebefb45c534eacd8c6d408b}{repack\+\_\+parameters} (T $\ast$avec\+\_\+parameters, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$a\+\_\+params, std\+::string generation\+\_\+method, int dim, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$original\+\_\+params)
 \begin{DoxyCompactList}\small\item\em Repack the parameters from an adouble vector to a gen\+\_\+params\+\_\+base$<$adouble$>$ object and freqeuncy. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{fisher_8h_a92eebd80a98aa7fb1872bb8700702f77}{repack\+\_\+non\+\_\+parameter\+\_\+options}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$waveform\+\_\+params, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$input\+\_\+params, std\+::string gen\+\_\+method)
-\begin{DoxyCompactList}\small\item\em Utilitiy to transfer non-\/parameter options from one \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} structure to another. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{fisher_8h_a92eebd80a98aa7fb1872bb8700702f77}{repack\+\_\+non\+\_\+parameter\+\_\+options} (\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$waveform\+\_\+params, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$input\+\_\+params, std\+::string gen\+\_\+method)
+\begin{DoxyCompactList}\small\item\em Utilitiy to transfer non-\/parameter options from one \hyperlink{classgen__params}{gen\+\_\+params} structure to another. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8h_aaf636e94d93a8afa6e1849af23147f11}\label{fisher_8h_aaf636e94d93a8afa6e1849af23147f11}} 
-{\footnotesize template$<$class T $>$ }\\void {\bfseries deallocate\+\_\+non\+\_\+param\+\_\+options} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$waveform\+\_\+params, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$input\+\_\+params, std\+::string gen\+\_\+method)
+{\footnotesize template$<$class T $>$ }\\void {\bfseries deallocate\+\_\+non\+\_\+param\+\_\+options} (\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$waveform\+\_\+params, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$input\+\_\+params, std\+::string gen\+\_\+method)
 \item 
-double \mbox{\hyperlink{fisher_8h_a0483f09b0c7a53ae7b65d3dff7385697}{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine}} (double frequency, void $\ast$params\+\_\+in)
+double \hyperlink{fisher_8h_a0483f09b0c7a53ae7b65d3dff7385697}{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine} (double frequency, void $\ast$params\+\_\+in)
 \begin{DoxyCompactList}\small\item\em Calculates the derivatives of the detector response using automatic differentiation -- one frequency for gsl\+\_\+integration. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_a0c6379dc95a9280ff960f5ebd8eacba0}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration}} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, double abserr, double relerr)
+void \hyperlink{fisher_8h_a0c6379dc95a9280ff960f5ebd8eacba0}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, double abserr, double relerr)
 \begin{DoxyCompactList}\small\item\em Routine that implements G\+SL numerical integration to calculate the Fishers. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_af62f3397f996f468b5d78780df8a3167}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration}} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, double abserr, double relerr, std\+::string error\+\_\+log, bool logerr)
+void \hyperlink{fisher_8h_af62f3397f996f468b5d78780df8a3167}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, double abserr, double relerr, std\+::string error\+\_\+log, bool logerr)
 \begin{DoxyCompactList}\small\item\em Routine that implements G\+SL numerical integration to calculate the Fishers. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_a51ec10cb30ab1ca997e3c501d9927c1a}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod}} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int base\+\_\+dimension, int full\+\_\+dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, double abserr, double relerr)
+void \hyperlink{fisher_8h_a51ec10cb30ab1ca997e3c501d9927c1a}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int base\+\_\+dimension, int full\+\_\+dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, double abserr, double relerr)
 \begin{DoxyCompactList}\small\item\em Routine that implements G\+SL numerical integration to calculate the Fishers -- batch modifications version. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8h_a00c44f9e3bf774c7230d972c64b81326}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod}} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int base\+\_\+dimension, int full\+\_\+dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, double abserr, double relerr, std\+::string error\+\_\+log, bool logerr)
+void \hyperlink{fisher_8h_a00c44f9e3bf774c7230d972c64b81326}{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod} (double $\ast$frequency\+\_\+bounds, string generation\+\_\+method, string sensitivity\+\_\+curve, string detector, double $\ast$$\ast$output, double $\ast$$\ast$error, int base\+\_\+dimension, int full\+\_\+dimension, \hyperlink{classgen__params}{gen\+\_\+params} $\ast$parameters, double abserr, double relerr, std\+::string error\+\_\+log, bool logerr)
 \begin{DoxyCompactList}\small\item\em Routine that implements G\+SL numerical integration to calculate the Fishers -- batch modifications version. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}\label{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}} 
-\index{fisher.h@{fisher.h}!calculate\_derivatives\_autodiff@{calculate\_derivatives\_autodiff}}
-\index{calculate\_derivatives\_autodiff@{calculate\_derivatives\_autodiff}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{calculate\_derivatives\_autodiff()}{calculate\_derivatives\_autodiff()}}
-{\footnotesize\ttfamily void calculate\+\_\+derivatives\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{waveform\+\_\+deriv,  }\item[{int $\ast$}]{waveform\+\_\+tapes,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!calculate\+\_\+derivatives\+\_\+autodiff@{calculate\+\_\+derivatives\+\_\+autodiff}}
+\index{calculate\+\_\+derivatives\+\_\+autodiff@{calculate\+\_\+derivatives\+\_\+autodiff}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{calculate\+\_\+derivatives\+\_\+autodiff()}{calculate\_derivatives\_autodiff()}}
+{\footnotesize\ttfamily void calculate\+\_\+derivatives\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\hyperlink{classgen__params}{gen\+\_\+params} $\ast$}]{parameters,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{waveform\+\_\+deriv,  }\item[{int $\ast$}]{waveform\+\_\+tapes,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
 
 
 
@@ -106,9 +116,9 @@ Possibly slower than the numerical derivative, but not susceptible to truncation
 Higher dimensional fishers actually could be faster
 
 N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv) \mbox{\Hypertarget{fisher_8h_acae7abfd22bc80580996b8f677be9156}\label{fisher_8h_acae7abfd22bc80580996b8f677be9156}} 
-\index{fisher.h@{fisher.h}!calculate\_fisher\_elements\_batch@{calculate\_fisher\_elements\_batch}}
-\index{calculate\_fisher\_elements\_batch@{calculate\_fisher\_elements\_batch}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{calculate\_fisher\_elements\_batch()}{calculate\_fisher\_elements\_batch()}}
+\index{fisher.\+h@{fisher.\+h}!calculate\+\_\+fisher\+\_\+elements\+\_\+batch@{calculate\+\_\+fisher\+\_\+elements\+\_\+batch}}
+\index{calculate\+\_\+fisher\+\_\+elements\+\_\+batch@{calculate\+\_\+fisher\+\_\+elements\+\_\+batch}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{calculate\+\_\+fisher\+\_\+elements\+\_\+batch()}{calculate\_fisher\_elements\_batch()}}
 {\footnotesize\ttfamily void calculate\+\_\+fisher\+\_\+elements\+\_\+batch (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{base\+\_\+dimension,  }\item[{int}]{full\+\_\+dimension,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{response\+\_\+deriv,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$}]{psd }\end{DoxyParamCaption})}
 
 
@@ -118,9 +128,9 @@ Subroutine to calculate fisher elements for a subset of the fisher.
 Skips elements that have dimensions (i,j) for i!=j \&\& i$>$base\+\_\+dim \&\& j$>$base\+\_\+dim
 
 Sets non-\/computed elements to zero \mbox{\Hypertarget{fisher_8h_a0483f09b0c7a53ae7b65d3dff7385697}\label{fisher_8h_a0483f09b0c7a53ae7b65d3dff7385697}} 
-\index{fisher.h@{fisher.h}!calculate\_integrand\_autodiff\_gsl\_subroutine@{calculate\_integrand\_autodiff\_gsl\_subroutine}}
-\index{calculate\_integrand\_autodiff\_gsl\_subroutine@{calculate\_integrand\_autodiff\_gsl\_subroutine}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{calculate\_integrand\_autodiff\_gsl\_subroutine()}{calculate\_integrand\_autodiff\_gsl\_subroutine()}}
+\index{fisher.\+h@{fisher.\+h}!calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine@{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine}}
+\index{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine@{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine()}{calculate\_integrand\_autodiff\_gsl\_subroutine()}}
 {\footnotesize\ttfamily double calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine (\begin{DoxyParamCaption}\item[{double}]{frequency,  }\item[{void $\ast$}]{params\+\_\+in }\end{DoxyParamCaption})}
 
 
@@ -132,20 +142,20 @@ Possibly slower than the numerical derivative, but not susceptible to truncation
 Higher dimensional fishers actually could be faster
 
 N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv) \mbox{\Hypertarget{fisher_8h_af071af4a0f6f8ab05c1cdc76a275cd49}\label{fisher_8h_af071af4a0f6f8ab05c1cdc76a275cd49}} 
-\index{fisher.h@{fisher.h}!detect\_adjust\_parameters@{detect\_adjust\_parameters}}
-\index{detect\_adjust\_parameters@{detect\_adjust\_parameters}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{detect\_adjust\_parameters()}{detect\_adjust\_parameters()}}
-{\footnotesize\ttfamily void detect\+\_\+adjust\+\_\+parameters (\begin{DoxyParamCaption}\item[{double $\ast$}]{freq\+\_\+boundaries,  }\item[{double $\ast$}]{grad\+\_\+freqs,  }\item[{int $\ast$}]{boundary\+\_\+num,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{detector,  }\item[{int}]{dim }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!detect\+\_\+adjust\+\_\+parameters@{detect\+\_\+adjust\+\_\+parameters}}
+\index{detect\+\_\+adjust\+\_\+parameters@{detect\+\_\+adjust\+\_\+parameters}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{detect\+\_\+adjust\+\_\+parameters()}{detect\_adjust\_parameters()}}
+{\footnotesize\ttfamily void detect\+\_\+adjust\+\_\+parameters (\begin{DoxyParamCaption}\item[{double $\ast$}]{freq\+\_\+boundaries,  }\item[{double $\ast$}]{grad\+\_\+freqs,  }\item[{int $\ast$}]{boundary\+\_\+num,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{detector,  }\item[{int}]{dim }\end{DoxyParamCaption})}
 
 
 
 Adjust parameters for detector specific configurations (namely, L\+I\+SA introduces extra transitions that needs to be accounted for) 
 
 This is kept separate to improve the modularity of the code. Waveform specific parameters are taken care of in prep\+\_\+fisher\+\_\+calculation and detector specific parameters are taken care of here. \mbox{\Hypertarget{fisher_8h_a0c6379dc95a9280ff960f5ebd8eacba0}\label{fisher_8h_a0c6379dc95a9280ff960f5ebd8eacba0}} 
-\index{fisher.h@{fisher.h}!fisher\_autodiff\_gsl\_integration@{fisher\_autodiff\_gsl\_integration}}
-\index{fisher\_autodiff\_gsl\_integration@{fisher\_autodiff\_gsl\_integration}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{fisher\_autodiff\_gsl\_integration()}{fisher\_autodiff\_gsl\_integration()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
-{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{dimension,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration}}
+\index{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration()}{fisher\_autodiff\_gsl\_integration()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{dimension,  }\item[{\hyperlink{classgen__params}{gen\+\_\+params} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr }\end{DoxyParamCaption})}
 
 
 
@@ -159,7 +169,7 @@ Every element is calculated independently, so no information is retained between
 
 However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
 
-Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are \`{}`as good as they need to be'\textquotesingle{} to calculate the fisher
+Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be\textquotesingle{}\textquotesingle{} to calculate the fisher
 
 Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15) 
 \begin{DoxyParams}[1]{Parameters}
@@ -167,28 +177,28 @@ Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15)
 \hline
  & {\em generation\+\_\+method} & Method of waveform generation \\
 \hline
- & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -\/-\/ M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -- M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
 \hline
  & {\em detector} & Detector to use for the response function \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & Output Fisher -\/-\/ must be preallocated -\/-\/ shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
+\mbox{\tt out}  & {\em output} & Output Fisher -- must be preallocated -- shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
 \hline
-\mbox{\texttt{ out}}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -\/-\/ must be preallocated -\/-\/ shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
+\mbox{\tt out}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -- must be preallocated -- shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
 \hline
  & {\em dimension} & Dimension of the Fisher \\
 \hline
  & {\em parameters} & Generation parameters specifying source parameters and waveform options \\
 \hline
- & {\em abserr} & Target absolute error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em abserr} & Target absolute error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
- & {\em relerr} & Target relative error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em relerr} & Target relative error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{fisher_8h_af62f3397f996f468b5d78780df8a3167}\label{fisher_8h_af62f3397f996f468b5d78780df8a3167}} 
-\index{fisher.h@{fisher.h}!fisher\_autodiff\_gsl\_integration@{fisher\_autodiff\_gsl\_integration}}
-\index{fisher\_autodiff\_gsl\_integration@{fisher\_autodiff\_gsl\_integration}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{fisher\_autodiff\_gsl\_integration()}{fisher\_autodiff\_gsl\_integration()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{dimension,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr,  }\item[{std\+::string}]{error\+\_\+log,  }\item[{bool}]{logerr }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration}}
+\index{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration()}{fisher\_autodiff\_gsl\_integration()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{dimension,  }\item[{\hyperlink{classgen__params}{gen\+\_\+params} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr,  }\item[{std\+::string}]{error\+\_\+log,  }\item[{bool}]{logerr }\end{DoxyParamCaption})}
 
 
 
@@ -202,7 +212,7 @@ Every element is calculated independently, so no information is retained between
 
 However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
 
-Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are \`{}`as good as they need to be'\textquotesingle{} to calculate the fisher
+Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be\textquotesingle{}\textquotesingle{} to calculate the fisher
 
 Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15)
 
@@ -212,21 +222,21 @@ Now includes option to log error instead of ending program for certain types of 
 \hline
  & {\em generation\+\_\+method} & Method of waveform generation \\
 \hline
- & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -\/-\/ M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -- M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
 \hline
  & {\em detector} & Detector to use for the response function \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & Output Fisher -\/-\/ must be preallocated -\/-\/ shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
+\mbox{\tt out}  & {\em output} & Output Fisher -- must be preallocated -- shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
 \hline
-\mbox{\texttt{ out}}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -\/-\/ must be preallocated -\/-\/ shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
+\mbox{\tt out}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -- must be preallocated -- shape \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
 \hline
  & {\em dimension} & Dimension of the Fisher \\
 \hline
  & {\em parameters} & Generation parameters specifying source parameters and waveform options \\
 \hline
- & {\em abserr} & Target absolute error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em abserr} & Target absolute error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
- & {\em relerr} & Target relative error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em relerr} & Target relative error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
  & {\em error\+\_\+log} & File to write non-\/critical error codes to (roundoff error) \\
 \hline
@@ -234,10 +244,10 @@ Now includes option to log error instead of ending program for certain types of 
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{fisher_8h_a51ec10cb30ab1ca997e3c501d9927c1a}\label{fisher_8h_a51ec10cb30ab1ca997e3c501d9927c1a}} 
-\index{fisher.h@{fisher.h}!fisher\_autodiff\_gsl\_integration\_batch\_mod@{fisher\_autodiff\_gsl\_integration\_batch\_mod}}
-\index{fisher\_autodiff\_gsl\_integration\_batch\_mod@{fisher\_autodiff\_gsl\_integration\_batch\_mod}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{fisher\_autodiff\_gsl\_integration\_batch\_mod()}{fisher\_autodiff\_gsl\_integration\_batch\_mod()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
-{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{base\+\_\+dimension,  }\item[{int}]{full\+\_\+dimension,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod}}
+\index{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod()}{fisher\_autodiff\_gsl\_integration\_batch\_mod()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{base\+\_\+dimension,  }\item[{int}]{full\+\_\+dimension,  }\item[{\hyperlink{classgen__params}{gen\+\_\+params} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr }\end{DoxyParamCaption})}
 
 
 
@@ -255,7 +265,7 @@ Every element is calculated independently, so no information is retained between
 
 However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
 
-Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are \`{}`as good as they need to be'\textquotesingle{} to calculate the fisher
+Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be\textquotesingle{}\textquotesingle{} to calculate the fisher
 
 Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15) 
 \begin{DoxyParams}[1]{Parameters}
@@ -263,13 +273,13 @@ Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15)
 \hline
  & {\em generation\+\_\+method} & Method of waveform generation \\
 \hline
- & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -\/-\/ M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -- M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
 \hline
  & {\em detector} & Detector to use for the response function \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & Output Fisher -\/-\/ must be preallocated -\/-\/ shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
+\mbox{\tt out}  & {\em output} & Output Fisher -- must be preallocated -- shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
 \hline
-\mbox{\texttt{ out}}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -\/-\/ must be preallocated -\/-\/ shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
+\mbox{\tt out}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -- must be preallocated -- shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
 \hline
  & {\em base\+\_\+dimension} & Dimension of base model (ie GR dimension) \\
 \hline
@@ -277,16 +287,16 @@ Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15)
 \hline
  & {\em parameters} & Generation parameters specifying source parameters and waveform options \\
 \hline
- & {\em abserr} & Target absolute error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em abserr} & Target absolute error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
- & {\em relerr} & Target relative error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em relerr} & Target relative error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{fisher_8h_a00c44f9e3bf774c7230d972c64b81326}\label{fisher_8h_a00c44f9e3bf774c7230d972c64b81326}} 
-\index{fisher.h@{fisher.h}!fisher\_autodiff\_gsl\_integration\_batch\_mod@{fisher\_autodiff\_gsl\_integration\_batch\_mod}}
-\index{fisher\_autodiff\_gsl\_integration\_batch\_mod@{fisher\_autodiff\_gsl\_integration\_batch\_mod}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{fisher\_autodiff\_gsl\_integration\_batch\_mod()}{fisher\_autodiff\_gsl\_integration\_batch\_mod()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
-{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{base\+\_\+dimension,  }\item[{int}]{full\+\_\+dimension,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr,  }\item[{std\+::string}]{error\+\_\+log,  }\item[{bool}]{logerr }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod}}
+\index{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod@{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod()}{fisher\_autodiff\_gsl\_integration\_batch\_mod()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void fisher\+\_\+autodiff\+\_\+gsl\+\_\+integration\+\_\+batch\+\_\+mod (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency\+\_\+bounds,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{sensitivity\+\_\+curve,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{double $\ast$$\ast$}]{error,  }\item[{int}]{base\+\_\+dimension,  }\item[{int}]{full\+\_\+dimension,  }\item[{\hyperlink{classgen__params}{gen\+\_\+params} $\ast$}]{parameters,  }\item[{double}]{abserr,  }\item[{double}]{relerr,  }\item[{std\+::string}]{error\+\_\+log,  }\item[{bool}]{logerr }\end{DoxyParamCaption})}
 
 
 
@@ -304,7 +314,7 @@ Every element is calculated independently, so no information is retained between
 
 However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements
 
-Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are \`{}`as good as they need to be'\textquotesingle{} to calculate the fisher
+Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are ``as good as they need to be\textquotesingle{}\textquotesingle{} to calculate the fisher
 
 Implements (G\+S\+L\+\_\+\+I\+N\+T\+E\+G\+\_\+\+G\+A\+U\+S\+S15)
 
@@ -314,13 +324,13 @@ Now includes option to log error instead of ending program for certain types of 
 \hline
  & {\em generation\+\_\+method} & Method of waveform generation \\
 \hline
- & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -\/-\/ M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
+ & {\em sensitivity\+\_\+curve} & Sensitivity curve to be used for the P\+SD -- M\+U\+ST BE A\+N\+A\+L\+Y\+T\+IC \\
 \hline
  & {\em detector} & Detector to use for the response function \\
 \hline
-\mbox{\texttt{ out}}  & {\em output} & Output Fisher -\/-\/ must be preallocated -\/-\/ shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
+\mbox{\tt out}  & {\em output} & Output Fisher -- must be preallocated -- shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
 \hline
-\mbox{\texttt{ out}}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -\/-\/ must be preallocated -\/-\/ shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
+\mbox{\tt out}  & {\em error} & Estimated error, as specified by G\+SL\textquotesingle{}s integration -- must be preallocated -- shape \mbox{[}full\+\_\+dimension\mbox{]}\mbox{[}full\+\_\+dimension\mbox{]} \\
 \hline
  & {\em base\+\_\+dimension} & Dimension of base model (ie GR dimension) \\
 \hline
@@ -328,9 +338,9 @@ Now includes option to log error instead of ending program for certain types of 
 \hline
  & {\em parameters} & Generation parameters specifying source parameters and waveform options \\
 \hline
- & {\em abserr} & Target absolute error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em abserr} & Target absolute error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
- & {\em relerr} & Target relative error (0 if this should be ignored -\/-\/ O\+NE type of error must be specified) \\
+ & {\em relerr} & Target relative error (0 if this should be ignored -- O\+NE type of error must be specified) \\
 \hline
  & {\em error\+\_\+log} & File to write non-\/critical error codes to (roundoff error) \\
 \hline
@@ -338,10 +348,10 @@ Now includes option to log error instead of ending program for certain types of 
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{fisher_8h_aa09e52ceab4e19f05f4aa0bc17d01235}\label{fisher_8h_aa09e52ceab4e19f05f4aa0bc17d01235}} 
-\index{fisher.h@{fisher.h}!fisher\_numerical@{fisher\_numerical}}
-\index{fisher\_numerical@{fisher\_numerical}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{fisher\_numerical()}{fisher\_numerical()}}
-{\footnotesize\ttfamily void fisher\+\_\+numerical (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{parameters,  }\item[{int}]{order,  }\item[{int $\ast$}]{amp\+\_\+tapes,  }\item[{int $\ast$}]{phase\+\_\+tapes,  }\item[{double $\ast$}]{noise }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!fisher\+\_\+numerical@{fisher\+\_\+numerical}}
+\index{fisher\+\_\+numerical@{fisher\+\_\+numerical}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{fisher\+\_\+numerical()}{fisher\_numerical()}}
+{\footnotesize\ttfamily void fisher\+\_\+numerical (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{string}]{generation\+\_\+method,  }\item[{string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{parameters,  }\item[{int}]{order,  }\item[{int $\ast$}]{amp\+\_\+tapes,  }\item[{int $\ast$}]{phase\+\_\+tapes,  }\item[{double $\ast$}]{noise }\end{DoxyParamCaption})}
 
 
 
@@ -355,15 +365,15 @@ Utilizes numerical derivatives -- non-\/skyaveraged supports up to 4th order fin
 \hline
 {\em order} & Order of the numerical derivative (2 or 4)$\ast$ \\
 \hline
-{\em amp\+\_\+tapes} & if speed is required, precomputed tapes can be used -\/ assumed the user knows what they\textquotesingle{}re doing, no checks done here to make sure that the number of tapes matches the requirement by the generation\+\_\+method -\/-\/ if using numerical derivatives or speed isn\textquotesingle{}t that important, just set to N\+U\+LL \\
+{\em amp\+\_\+tapes} & if speed is required, precomputed tapes can be used -\/ assumed the user knows what they\textquotesingle{}re doing, no checks done here to make sure that the number of tapes matches the requirement by the generation\+\_\+method -- if using numerical derivatives or speed isn\textquotesingle{}t that important, just set to N\+U\+LL \\
 \hline
 {\em phase\+\_\+tapes} & if speed is required, precomputed tapes can be used -\/ assumed the user knows what they\textquotesingle{}re doing, no checks done here to make sure that the number of tapes matches the requirement by the generation\+\_\+method \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{fisher_8h_ad64b3163d121d715a0eaa22a039ffbe1}\label{fisher_8h_ad64b3163d121d715a0eaa22a039ffbe1}} 
-\index{fisher.h@{fisher.h}!local\_generation\_method@{local\_generation\_method}}
-\index{local\_generation\_method@{local\_generation\_method}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{local\_generation\_method()}{local\_generation\_method()}}
+\index{fisher.\+h@{fisher.\+h}!local\+\_\+generation\+\_\+method@{local\+\_\+generation\+\_\+method}}
+\index{local\+\_\+generation\+\_\+method@{local\+\_\+generation\+\_\+method}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{local\+\_\+generation\+\_\+method()}{local\_generation\_method()}}
 {\footnotesize\ttfamily std\+::string local\+\_\+generation\+\_\+method (\begin{DoxyParamCaption}\item[{std\+::string}]{generation\+\_\+method }\end{DoxyParamCaption})}
 
 
@@ -371,32 +381,32 @@ Utilizes numerical derivatives -- non-\/skyaveraged supports up to 4th order fin
 Utility for mapping generation method string to one accepted by the waveform\+\_\+generation routines. 
 
 Certain combinations of parameters are labeled by generation method strings not under the waveform\+\_\+generation routines, so a transformation is needed \mbox{\Hypertarget{fisher_8h_a92eebd80a98aa7fb1872bb8700702f77}\label{fisher_8h_a92eebd80a98aa7fb1872bb8700702f77}} 
-\index{fisher.h@{fisher.h}!repack\_non\_parameter\_options@{repack\_non\_parameter\_options}}
-\index{repack\_non\_parameter\_options@{repack\_non\_parameter\_options}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{repack\_non\_parameter\_options()}{repack\_non\_parameter\_options()}}
+\index{fisher.\+h@{fisher.\+h}!repack\+\_\+non\+\_\+parameter\+\_\+options@{repack\+\_\+non\+\_\+parameter\+\_\+options}}
+\index{repack\+\_\+non\+\_\+parameter\+\_\+options@{repack\+\_\+non\+\_\+parameter\+\_\+options}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{repack\+\_\+non\+\_\+parameter\+\_\+options()}{repack\_non\_parameter\_options()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
-void repack\+\_\+non\+\_\+parameter\+\_\+options (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{waveform\+\_\+params,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{std\+::string}]{gen\+\_\+method }\end{DoxyParamCaption})}
+void repack\+\_\+non\+\_\+parameter\+\_\+options (\begin{DoxyParamCaption}\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$}]{waveform\+\_\+params,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{input\+\_\+params,  }\item[{std\+::string}]{gen\+\_\+method }\end{DoxyParamCaption})}
 
 
 
-Utilitiy to transfer non-\/parameter options from one \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} structure to another. 
+Utilitiy to transfer non-\/parameter options from one \hyperlink{classgen__params}{gen\+\_\+params} structure to another. 
 
 If ppE waveform A\+L\+L\+O\+C\+A\+T\+ES M\+E\+M\+O\+RY -- M\+U\+ST be deallocated \mbox{\Hypertarget{fisher_8h_ae9abf5e34ebefb45c534eacd8c6d408b}\label{fisher_8h_ae9abf5e34ebefb45c534eacd8c6d408b}} 
-\index{fisher.h@{fisher.h}!repack\_parameters@{repack\_parameters}}
-\index{repack\_parameters@{repack\_parameters}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{repack\_parameters()}{repack\_parameters()}}
+\index{fisher.\+h@{fisher.\+h}!repack\+\_\+parameters@{repack\+\_\+parameters}}
+\index{repack\+\_\+parameters@{repack\+\_\+parameters}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{repack\+\_\+parameters()}{repack\_parameters()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
-void repack\+\_\+parameters (\begin{DoxyParamCaption}\item[{T $\ast$}]{avec\+\_\+parameters,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{a\+\_\+params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dim,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{original\+\_\+params }\end{DoxyParamCaption})}
+void repack\+\_\+parameters (\begin{DoxyParamCaption}\item[{T $\ast$}]{avec\+\_\+parameters,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$}]{a\+\_\+params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dim,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{original\+\_\+params }\end{DoxyParamCaption})}
 
 
 
 Repack the parameters from an adouble vector to a gen\+\_\+params\+\_\+base$<$adouble$>$ object and freqeuncy. 
 
 This is one of the places where the generation-\/method/dimension/sky\+\_\+average specific modifications should go \mbox{\Hypertarget{fisher_8h_ae6b5ad58c5308a1311a93a58f2169e40}\label{fisher_8h_ae6b5ad58c5308a1311a93a58f2169e40}} 
-\index{fisher.h@{fisher.h}!time\_phase\_corrected\_derivative\_autodiff@{time\_phase\_corrected\_derivative\_autodiff}}
-\index{time\_phase\_corrected\_derivative\_autodiff@{time\_phase\_corrected\_derivative\_autodiff}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{time\_phase\_corrected\_derivative\_autodiff()}{time\_phase\_corrected\_derivative\_autodiff()}}
-{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff}}
+\index{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff()}{time\_phase\_corrected\_derivative\_autodiff()}}
+{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
 
 
 
@@ -405,10 +415,10 @@ Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\
 If specific derivatives need to taken, take this routine as a template and write it yourself.
 
 The dt array has shape \mbox{[}dimension+1\mbox{]}\mbox{[}length\mbox{]} (dimension + 1 for the frequency derivative, so dimension should only include the source parameters) \mbox{\Hypertarget{fisher_8h_ab3566a9d2c5776b7769f1452bf3f80f3}\label{fisher_8h_ab3566a9d2c5776b7769f1452bf3f80f3}} 
-\index{fisher.h@{fisher.h}!time\_phase\_corrected\_derivative\_autodiff\_full\_hess@{time\_phase\_corrected\_derivative\_autodiff\_full\_hess}}
-\index{time\_phase\_corrected\_derivative\_autodiff\_full\_hess@{time\_phase\_corrected\_derivative\_autodiff\_full\_hess}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{time\_phase\_corrected\_derivative\_autodiff\_full\_hess()}{time\_phase\_corrected\_derivative\_autodiff\_full\_hess()}}
-{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess}}
+\index{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess()}{time\_phase\_corrected\_derivative\_autodiff\_full\_hess()}}
+{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
 
 
 
@@ -417,10 +427,10 @@ Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\
 If specific derivatives need to taken, take this routine as a template and write it yourself.
 
 The dt array has shape \mbox{[}dimension+1\mbox{]}\mbox{[}length\mbox{]} (dimension + 1 for the frequency derivative, so dimension should only include the source parameters) \mbox{\Hypertarget{fisher_8h_a98ccb5fbfa7dde9dc8d7fb1f38ef5e16}\label{fisher_8h_a98ccb5fbfa7dde9dc8d7fb1f38ef5e16}} 
-\index{fisher.h@{fisher.h}!time\_phase\_corrected\_derivative\_autodiff\_numerical@{time\_phase\_corrected\_derivative\_autodiff\_numerical}}
-\index{time\_phase\_corrected\_derivative\_autodiff\_numerical@{time\_phase\_corrected\_derivative\_autodiff\_numerical}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{time\_phase\_corrected\_derivative\_autodiff\_numerical()}{time\_phase\_corrected\_derivative\_autodiff\_numerical()}}
-{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
+\index{fisher.\+h@{fisher.\+h}!time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical}}
+\index{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical()}{time\_phase\_corrected\_derivative\_autodiff\_numerical()}}
+{\footnotesize\ttfamily void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+numerical (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{double $\ast$}]{frequencies,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
 
 
 
@@ -431,11 +441,11 @@ If specific derivatives need to taken, take this routine as a template and write
 The dt array has shape \mbox{[}dimension+1\mbox{]}\mbox{[}length\mbox{]} (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
 
 This takes the autodiff derivative wrt source parameters, and a numerical derivative for the frequency \mbox{\Hypertarget{fisher_8h_a430217adb3e9baf50041ab7fbbd9b2b9}\label{fisher_8h_a430217adb3e9baf50041ab7fbbd9b2b9}} 
-\index{fisher.h@{fisher.h}!time\_phase\_corrected\_derivative\_numerical@{time\_phase\_corrected\_derivative\_numerical}}
-\index{time\_phase\_corrected\_derivative\_numerical@{time\_phase\_corrected\_derivative\_numerical}!fisher.h@{fisher.h}}
-\doxysubsubsection{\texorpdfstring{time\_phase\_corrected\_derivative\_numerical()}{time\_phase\_corrected\_derivative\_numerical()}}
+\index{fisher.\+h@{fisher.\+h}!time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical}}
+\index{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical@{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical}!fisher.\+h@{fisher.\+h}}
+\subsubsection{\texorpdfstring{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical()}{time\_phase\_corrected\_derivative\_numerical()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
-void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical (\begin{DoxyParamCaption}\item[{T $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{T $\ast$}]{frequencies,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
+void time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+numerical (\begin{DoxyParamCaption}\item[{T $\ast$$\ast$}]{dt,  }\item[{int}]{length,  }\item[{T $\ast$}]{frequencies,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$}]{params,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{int}]{dimension,  }\item[{bool}]{correct\+\_\+time }\end{DoxyParamCaption})}
 
 
 

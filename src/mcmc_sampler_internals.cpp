@@ -847,10 +847,15 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 				for (int j =0 ; j<samplerptr_source->max_dim; j++){
 					samplerptr_dest->fisher_vecs[id_dest][i][j] = 
 						samplerptr_source->fisher_vecs[id_source][i][j];
+					samplerptr_dest->fisher_vecs_prev[id_dest][i][j] = 
+						samplerptr_source->fisher_vecs_prev[id_source][i][j];
 					samplerptr_dest->fisher_matrix[id_dest][i][j]=samplerptr_source->fisher_matrix[id_source][i][j];
+					samplerptr_dest->fisher_matrix_prev[id_dest][i][j]=samplerptr_source->fisher_matrix_prev[id_source][i][j];
 				}
 				samplerptr_dest->fisher_vals[id_dest][i] = 
 					samplerptr_source->fisher_vals[id_source][i];
+				samplerptr_dest->fisher_vals_prev[id_dest][i] = 
+					samplerptr_source->fisher_vals_prev[id_source][i];
 			}
 			samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_source->fisher_update_ct[id_source];
 		}

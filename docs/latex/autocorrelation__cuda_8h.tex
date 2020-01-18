@@ -1,45 +1,55 @@
-\hypertarget{autocorrelation__cuda_8h}{}\doxysection{include/gwat/autocorrelation\+\_\+cuda.h File Reference}
-\label{autocorrelation__cuda_8h}\index{include/gwat/autocorrelation\_cuda.h@{include/gwat/autocorrelation\_cuda.h}}
+\hypertarget{autocorrelation__cuda_8h}{}\section{include/gwat/autocorrelation\+\_\+cuda.h File Reference}
+\label{autocorrelation__cuda_8h}\index{include/gwat/autocorrelation\+\_\+cuda.\+h@{include/gwat/autocorrelation\+\_\+cuda.\+h}}
 {\ttfamily \#include $<$string$>$}\newline
-Include dependency graph for autocorrelation\+\_\+cuda.\+h\+:
-% FIG 0
-This graph shows which files directly or indirectly include this file\+:
-% FIG 1
-\doxysubsection*{Macros}
+Include dependency graph for autocorrelation\+\_\+cuda.\+h\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=218pt]{autocorrelation__cuda_8h__incl}
+\end{center}
+\end{figure}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=218pt]{autocorrelation__cuda_8h__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a869bf6501bf4809f3de1db59ef2dd914}\label{autocorrelation__cuda_8h_a869bf6501bf4809f3de1db59ef2dd914}} 
 \#define {\bfseries T\+H\+R\+E\+A\+D\+S\+\_\+\+P\+E\+R\+\_\+\+B\+L\+O\+CK}~512
 \end{DoxyCompactItemize}
-\doxysubsection*{Functions}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \mbox{\hyperlink{autocorrelation__cuda_8h_a4b4ed2b89a95a13abf59d6e373316770}{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel}} (std\+::string acfile, std\+::string chains\+\_\+file, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr)
+void \hyperlink{autocorrelation__cuda_8h_a4b4ed2b89a95a13abf59d6e373316770}{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel} (std\+::string acfile, std\+::string chains\+\_\+file, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr)
 \begin{DoxyCompactList}\small\item\em Write data file for autocorrelation lengths of the data given a data file name, as written by the mcmc\+\_\+sampler. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{autocorrelation__cuda_8h_a4e58f577dbd00180667c1a6452f4cd71}{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}} (std\+::string acfile, double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr)
+void \hyperlink{autocorrelation__cuda_8h_a4e58f577dbd00180667c1a6452f4cd71}{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel} (std\+::string acfile, double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr)
 \begin{DoxyCompactList}\small\item\em Write data file given output chains, as formatted by the mcmc\+\_\+sampler. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{autocorrelation__cuda_8h_a32229785a7faa2b81d4894aafc640ed5}{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr, double $\ast$$\ast$autocorr)
+void \hyperlink{autocorrelation__cuda_8h_a32229785a7faa2b81d4894aafc640ed5}{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int num\+\_\+segments, double target\+\_\+corr, double $\ast$$\ast$autocorr)
 \begin{DoxyCompactList}\small\item\em Find autocorrelation of data at different points in the chain length and output to autocorr. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a3cf30342474041a00ac261eb5e7afed3}\label{autocorrelation__cuda_8h_a3cf30342474041a00ac261eb5e7afed3}} 
-void \mbox{\hyperlink{autocorrelation__cuda_8h_a3cf30342474041a00ac261eb5e7afed3}{launch\+\_\+ac\+\_\+gpu}} (int device, int element, double $\ast$$\ast$data, int length, int dimension, double target\+\_\+corr, int num\+\_\+segments)
+void \hyperlink{autocorrelation__cuda_8h_a3cf30342474041a00ac261eb5e7afed3}{launch\+\_\+ac\+\_\+gpu} (int device, int element, double $\ast$$\ast$data, int length, int dimension, double target\+\_\+corr, int num\+\_\+segments)
 \begin{DoxyCompactList}\small\item\em Launch the G\+PU kernel, formatted for the thread pool. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{autocorrelation__cuda_8h_a51bcc72596ce81494ca39a8aa7a74c53}{ac\+\_\+gpu\+\_\+wrapper}} (int thread, int job\+\_\+id)
+void \hyperlink{autocorrelation__cuda_8h_a51bcc72596ce81494ca39a8aa7a74c53}{ac\+\_\+gpu\+\_\+wrapper} (int thread, int job\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Wrapper function for the thread pool. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a0128283c572fef800902137f1fc763e6}\label{autocorrelation__cuda_8h_a0128283c572fef800902137f1fc763e6}} 
 void {\bfseries auto\+\_\+correlation\+\_\+spectral\+\_\+accel} (double $\ast$chains, int length, double $\ast$autocorr)
 \end{DoxyCompactItemize}
 
 
-\doxysubsection{Detailed Description}
+\subsection{Detailed Description}
 Header file for C\+U\+DA accelerated algorithms
 
 Currently, no algorithms are used in any other parts of the project, so if C\+U\+DA or C\+U\+D\+A-\/enabled devices are not available, this file can be skipped in compilation by commenting out the O\+B\+J\+E\+C\+T\+S\+C\+U\+DA line in the makefile 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a51bcc72596ce81494ca39a8aa7a74c53}\label{autocorrelation__cuda_8h_a51bcc72596ce81494ca39a8aa7a74c53}} 
-\index{autocorrelation\_cuda.h@{autocorrelation\_cuda.h}!ac\_gpu\_wrapper@{ac\_gpu\_wrapper}}
-\index{ac\_gpu\_wrapper@{ac\_gpu\_wrapper}!autocorrelation\_cuda.h@{autocorrelation\_cuda.h}}
-\doxysubsubsection{\texorpdfstring{ac\_gpu\_wrapper()}{ac\_gpu\_wrapper()}}
+\index{autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}!ac\+\_\+gpu\+\_\+wrapper@{ac\+\_\+gpu\+\_\+wrapper}}
+\index{ac\+\_\+gpu\+\_\+wrapper@{ac\+\_\+gpu\+\_\+wrapper}!autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}}
+\subsubsection{\texorpdfstring{ac\+\_\+gpu\+\_\+wrapper()}{ac\_gpu\_wrapper()}}
 {\footnotesize\ttfamily void ac\+\_\+gpu\+\_\+wrapper (\begin{DoxyParamCaption}\item[{int}]{thread,  }\item[{int}]{job\+\_\+id }\end{DoxyParamCaption})}
 
 
@@ -54,9 +64,9 @@ Wrapper function for the thread pool.
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a32229785a7faa2b81d4894aafc640ed5}\label{autocorrelation__cuda_8h_a32229785a7faa2b81d4894aafc640ed5}} 
-\index{autocorrelation\_cuda.h@{autocorrelation\_cuda.h}!auto\_corr\_from\_data\_accel@{auto\_corr\_from\_data\_accel}}
-\index{auto\_corr\_from\_data\_accel@{auto\_corr\_from\_data\_accel}!autocorrelation\_cuda.h@{autocorrelation\_cuda.h}}
-\doxysubsubsection{\texorpdfstring{auto\_corr\_from\_data\_accel()}{auto\_corr\_from\_data\_accel()}}
+\index{autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}!auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel@{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}}
+\index{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel@{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}!autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}}
+\subsubsection{\texorpdfstring{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel()}{auto\_corr\_from\_data\_accel()}}
 {\footnotesize\ttfamily void auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr,  }\item[{double $\ast$$\ast$}]{autocorr }\end{DoxyParamCaption})}
 
 
@@ -75,13 +85,13 @@ Find autocorrelation of data at different points in the chain length and output 
 \hline
  & {\em target\+\_\+corr} & Target correlation ratio \\
 \hline
-\mbox{\texttt{ out}}  & {\em autocorr} & Autocorrelation lengths for the different segments \\
+\mbox{\tt out}  & {\em autocorr} & Autocorrelation lengths for the different segments \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a4e58f577dbd00180667c1a6452f4cd71}\label{autocorrelation__cuda_8h_a4e58f577dbd00180667c1a6452f4cd71}} 
-\index{autocorrelation\_cuda.h@{autocorrelation\_cuda.h}!write\_file\_auto\_corr\_from\_data\_accel@{write\_file\_auto\_corr\_from\_data\_accel}}
-\index{write\_file\_auto\_corr\_from\_data\_accel@{write\_file\_auto\_corr\_from\_data\_accel}!autocorrelation\_cuda.h@{autocorrelation\_cuda.h}}
-\doxysubsubsection{\texorpdfstring{write\_file\_auto\_corr\_from\_data\_accel()}{write\_file\_auto\_corr\_from\_data\_accel()}}
+\index{autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}!write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel@{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}}
+\index{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel@{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel}!autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}}
+\subsubsection{\texorpdfstring{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel()}{write\_file\_auto\_corr\_from\_data\_accel()}}
 {\footnotesize\ttfamily void write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+accel (\begin{DoxyParamCaption}\item[{std\+::string}]{acfile,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr }\end{DoxyParamCaption})}
 
 
@@ -104,9 +114,9 @@ Write data file given output chains, as formatted by the mcmc\+\_\+sampler.
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8h_a4b4ed2b89a95a13abf59d6e373316770}\label{autocorrelation__cuda_8h_a4b4ed2b89a95a13abf59d6e373316770}} 
-\index{autocorrelation\_cuda.h@{autocorrelation\_cuda.h}!write\_file\_auto\_corr\_from\_data\_file\_accel@{write\_file\_auto\_corr\_from\_data\_file\_accel}}
-\index{write\_file\_auto\_corr\_from\_data\_file\_accel@{write\_file\_auto\_corr\_from\_data\_file\_accel}!autocorrelation\_cuda.h@{autocorrelation\_cuda.h}}
-\doxysubsubsection{\texorpdfstring{write\_file\_auto\_corr\_from\_data\_file\_accel()}{write\_file\_auto\_corr\_from\_data\_file\_accel()}}
+\index{autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}!write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel@{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel}}
+\index{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel@{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel}!autocorrelation\+\_\+cuda.\+h@{autocorrelation\+\_\+cuda.\+h}}
+\subsubsection{\texorpdfstring{write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel()}{write\_file\_auto\_corr\_from\_data\_file\_accel()}}
 {\footnotesize\ttfamily void write\+\_\+file\+\_\+auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+file\+\_\+accel (\begin{DoxyParamCaption}\item[{std\+::string}]{acfile,  }\item[{std\+::string}]{chains\+\_\+file,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr }\end{DoxyParamCaption})}
 
 

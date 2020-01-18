@@ -1,5 +1,5 @@
-\hypertarget{util_8cpp}{}\doxysection{src/util.cpp File Reference}
-\label{util_8cpp}\index{src/util.cpp@{src/util.cpp}}
+\hypertarget{util_8cpp}{}\section{src/util.cpp File Reference}
+\label{util_8cpp}\index{src/util.\+cpp@{src/util.\+cpp}}
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}G\+W\+A\+T\+Config.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}D\+\_\+\+Z\+\_\+\+Config.\+h\char`\"{}}\newline
@@ -18,39 +18,44 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+linalg.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+rng.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+randist.\+h$>$}\newline
-Include dependency graph for util.\+cpp\+:
-% FIG 0
-\doxysubsection*{Functions}
+Include dependency graph for util.\+cpp\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{util_8cpp__incl}
+\end{center}
+\end{figure}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \mbox{\hyperlink{util_8cpp_abd99f3492eda3805283a6a6c1161f61f}{initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp}} (gsl\+\_\+interp\+\_\+accel $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
+void \hyperlink{util_8cpp_abd99f3492eda3805283a6a6c1161f61f}{initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp} (gsl\+\_\+interp\+\_\+accel $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
 \begin{DoxyCompactList}\small\item\em Function that uses the G\+SL libraries to interpolate pre-\/calculated Z-\/\+D\+\_\+L data. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a9ec71fbb0a133a3099b570e6cfe4c116}\label{util_8cpp_a9ec71fbb0a133a3099b570e6cfe4c116}} 
-void \mbox{\hyperlink{util_8cpp_a9ec71fbb0a133a3099b570e6cfe4c116}{free\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp}} (gsl\+\_\+interp\+\_\+accel $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
+void \hyperlink{util_8cpp_a9ec71fbb0a133a3099b570e6cfe4c116}{free\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp} (gsl\+\_\+interp\+\_\+accel $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$$\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
 \begin{DoxyCompactList}\small\item\em Frees the allocated interpolation function. \end{DoxyCompactList}\item 
-adouble \mbox{\hyperlink{util_8cpp_aec48ba6d02ebe433a684e09884e6a31b}{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp}} (adouble DL, gsl\+\_\+interp\+\_\+accel $\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
+adouble \hyperlink{util_8cpp_aec48ba6d02ebe433a684e09884e6a31b}{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp} (adouble DL, gsl\+\_\+interp\+\_\+accel $\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
 \item 
-double \mbox{\hyperlink{util_8cpp_a8d080a588955cc9cb0a4efc831187936}{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp}} (double DL, gsl\+\_\+interp\+\_\+accel $\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
+double \hyperlink{util_8cpp_a8d080a588955cc9cb0a4efc831187936}{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp} (double DL, gsl\+\_\+interp\+\_\+accel $\ast$Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr, gsl\+\_\+spline $\ast$Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr)
 \item 
-double \mbox{\hyperlink{util_8cpp_a415ef00e103efe73c8eabc235b202b12}{Z\+\_\+from\+\_\+\+DL}} (double DL, std\+::string cosmology)
+double \hyperlink{util_8cpp_a415ef00e103efe73c8eabc235b202b12}{Z\+\_\+from\+\_\+\+DL} (double DL, std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Calculates the redshift given the luminosity distance. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a15f9dbddbe35da0c1b39ea0f7ce6870e}\label{util_8cpp_a15f9dbddbe35da0c1b39ea0f7ce6870e}} 
-adouble \mbox{\hyperlink{util_8cpp_a15f9dbddbe35da0c1b39ea0f7ce6870e}{Z\+\_\+from\+\_\+\+DL}} (adouble DL, std\+::string cosmology)
+adouble \hyperlink{util_8cpp_a15f9dbddbe35da0c1b39ea0f7ce6870e}{Z\+\_\+from\+\_\+\+DL} (adouble DL, std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Calculates the redshift given the luminosity distance adouble version for A\+D\+O\+L-\/C implementation. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{util_8cpp_a88960e6947432b203d2c7ebb436e1984}{D\+L\+\_\+from\+\_\+Z}} (double Z, std\+::string cosmology)
+double \hyperlink{util_8cpp_a88960e6947432b203d2c7ebb436e1984}{D\+L\+\_\+from\+\_\+Z} (double Z, std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Calculates the luminosity distance given the redshift. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}\label{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}} 
-adouble \mbox{\hyperlink{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}{D\+L\+\_\+from\+\_\+Z}} (adouble Z, std\+::string cosmology)
+adouble \hyperlink{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}{D\+L\+\_\+from\+\_\+Z} (adouble Z, std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Calculates the luminosity distance given the redshift adouble version for A\+D\+O\+L-\/C implementation. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{util_8cpp_afc70040a4b2855ffc42c1f8b91e87fc2}{cosmology\+\_\+interpolation\+\_\+function}} (double x, double $\ast$coeffs, int interp\+\_\+degree)
+double \hyperlink{util_8cpp_afc70040a4b2855ffc42c1f8b91e87fc2}{cosmology\+\_\+interpolation\+\_\+function} (double x, double $\ast$coeffs, int interp\+\_\+degree)
 \begin{DoxyCompactList}\small\item\em Custom interpolation function used in the cosmology calculations. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a89c3042d0c813fd58dcb6a433d26eaa4}\label{util_8cpp_a89c3042d0c813fd58dcb6a433d26eaa4}} 
-adouble \mbox{\hyperlink{util_8cpp_a89c3042d0c813fd58dcb6a433d26eaa4}{cosmology\+\_\+interpolation\+\_\+function}} (adouble x, double $\ast$coeffs, int interp\+\_\+degree)
+adouble \hyperlink{util_8cpp_a89c3042d0c813fd58dcb6a433d26eaa4}{cosmology\+\_\+interpolation\+\_\+function} (adouble x, double $\ast$coeffs, int interp\+\_\+degree)
 \begin{DoxyCompactList}\small\item\em Custom interpolation function used in the cosmology calculations adouble version for A\+D\+O\+L-\/C. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_afda1342d7215e52bcbb8f483ca576524}\label{util_8cpp_afda1342d7215e52bcbb8f483ca576524}} 
-double \mbox{\hyperlink{util_8cpp_afda1342d7215e52bcbb8f483ca576524}{cosmology\+\_\+lookup}} (std\+::string cosmology)
+double \hyperlink{util_8cpp_afda1342d7215e52bcbb8f483ca576524}{cosmology\+\_\+lookup} (std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Helper function for mapping cosmology name to an internal index. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{util_8cpp_aa82ab145d4f623214c1492589e4327bf}{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution}} (double sigma, gsl\+\_\+rng $\ast$r)
+double \hyperlink{util_8cpp_aa82ab145d4f623214c1492589e4327bf}{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution} (double sigma, gsl\+\_\+rng $\ast$r)
 \begin{DoxyCompactList}\small\item\em Calculates a random number from the Maxwell-\/\+Boltzmann distribution using 3 gaussian random numbers. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a588d05c5e239cff9b87a31d20bb6aa78}\label{util_8cpp_a588d05c5e239cff9b87a31d20bb6aa78}} 
 {\footnotesize template$<$class T $>$ }\\T {\bfseries copysign\+\_\+internal} (T val, T sign)
@@ -61,9 +66,9 @@ template double {\bfseries copysign\+\_\+internal$<$ double $>$} (double, double
 \mbox{\Hypertarget{util_8cpp_a14378a26cefa05a8e718ee0c11b35189}\label{util_8cpp_a14378a26cefa05a8e718ee0c11b35189}} 
 template adouble {\bfseries copysign\+\_\+internal$<$ adouble $>$} (adouble, adouble)
 \item 
-void \mbox{\hyperlink{util_8cpp_aa3b3e1ddc0801e2dcfa09d5683936817}{rm\+\_\+fisher\+\_\+dim}} (double $\ast$$\ast$input, int full\+\_\+dim, double $\ast$$\ast$output, int reduced\+\_\+dim, int $\ast$removed\+\_\+dims)
+void \hyperlink{util_8cpp_aa3b3e1ddc0801e2dcfa09d5683936817}{rm\+\_\+fisher\+\_\+dim} (double $\ast$$\ast$input, int full\+\_\+dim, double $\ast$$\ast$output, int reduced\+\_\+dim, int $\ast$removed\+\_\+dims)
 \begin{DoxyCompactList}\small\item\em Removes a dimension from a matrix (made with fishers in mind, but this is general) \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a9d0768e0355feef9d4d9681e6eed27b4}{list\+\_\+intersect\+\_\+ptrs}} (T $\ast$$\ast$A, int lenA, T $\ast$$\ast$B, int lenB, T $\ast$$\ast$C, int $\ast$lenC)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a9d0768e0355feef9d4d9681e6eed27b4}{list\+\_\+intersect\+\_\+ptrs} (T $\ast$$\ast$A, int lenA, T $\ast$$\ast$B, int lenB, T $\ast$$\ast$C, int $\ast$lenC)
 \begin{DoxyCompactList}\small\item\em Custom list-\/interesction implementation for sorted lists. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a27374164e2005c1ca170f7586817e66a}\label{util_8cpp_a27374164e2005c1ca170f7586817e66a}} 
 template void {\bfseries list\+\_\+intersect\+\_\+ptrs$<$ double $>$} (double $\ast$$\ast$, int, double $\ast$$\ast$, int, double $\ast$$\ast$, int $\ast$)
@@ -74,7 +79,7 @@ template void {\bfseries list\+\_\+intersect\+\_\+ptrs$<$ adouble $>$} (adouble 
 \mbox{\Hypertarget{util_8cpp_a456f6392ae12f52dcf78b4fea952940a}\label{util_8cpp_a456f6392ae12f52dcf78b4fea952940a}} 
 template void {\bfseries list\+\_\+intersect\+\_\+ptrs$<$ int $>$} (int $\ast$$\ast$, int, int $\ast$$\ast$, int, int $\ast$$\ast$, int $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a6a20a9cb79b3c847fc75f3e3eb45f933}{list\+\_\+intersect}} (T $\ast$A, int lenA, T $\ast$B, int lenB, T $\ast$$\ast$C, int $\ast$lenC)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a6a20a9cb79b3c847fc75f3e3eb45f933}{list\+\_\+intersect} (T $\ast$A, int lenA, T $\ast$B, int lenB, T $\ast$$\ast$C, int $\ast$lenC)
 \begin{DoxyCompactList}\small\item\em Custom list-\/interesction implementation for sorted lists. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a599977e7f7dc2531edd0c6685926e4b8}\label{util_8cpp_a599977e7f7dc2531edd0c6685926e4b8}} 
 template void {\bfseries list\+\_\+intersect$<$ double $>$} (double $\ast$, int, double $\ast$, int, double $\ast$$\ast$, int $\ast$)
@@ -85,7 +90,7 @@ template void {\bfseries list\+\_\+intersect$<$ adouble $>$} (adouble $\ast$, in
 \mbox{\Hypertarget{util_8cpp_a79c2688dc6d09b4aee47618cd5340819}\label{util_8cpp_a79c2688dc6d09b4aee47618cd5340819}} 
 template void {\bfseries list\+\_\+intersect$<$ int $>$} (int $\ast$, int, int $\ast$, int, int $\ast$$\ast$, int $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\bool \mbox{\hyperlink{util_8cpp_a9631c2bd8b5493af4df2528a44886fc6}{check\+\_\+list}} (T j, T $\ast$list, int length)
+{\footnotesize template$<$class T $>$ }\\bool \hyperlink{util_8cpp_a9631c2bd8b5493af4df2528a44886fc6}{check\+\_\+list} (T j, T $\ast$list, int length)
 \begin{DoxyCompactList}\small\item\em Just a quick utility to see if an item is in a list. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a7a29532c684375047abca8ad29d2290c}\label{util_8cpp_a7a29532c684375047abca8ad29d2290c}} 
 template bool {\bfseries check\+\_\+list$<$ int $>$} (int, int $\ast$, int)
@@ -93,7 +98,7 @@ template bool {\bfseries check\+\_\+list$<$ int $>$} (int, int $\ast$, int)
 \mbox{\Hypertarget{util_8cpp_abcd981405b40454bda795d30ce1fc180}\label{util_8cpp_abcd981405b40454bda795d30ce1fc180}} 
 template bool {\bfseries check\+\_\+list$<$ double $>$} (double, double $\ast$, int)
 \item 
-{\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{util_8cpp_af81850392cb5ff136ea8d334952844e0}{check\+\_\+list\+\_\+id}} (T j, T $\ast$list, int length)
+{\footnotesize template$<$class T $>$ }\\int \hyperlink{util_8cpp_af81850392cb5ff136ea8d334952844e0}{check\+\_\+list\+\_\+id} (T j, T $\ast$list, int length)
 \begin{DoxyCompactList}\small\item\em Just a quick utility to see if an item is in a list. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a81db2a61b2881d4fe2b7fd12800e077e}\label{util_8cpp_a81db2a61b2881d4fe2b7fd12800e077e}} 
 template int {\bfseries check\+\_\+list\+\_\+id$<$ int $>$} (int, int $\ast$, int)
@@ -110,30 +115,30 @@ template void {\bfseries gsl\+\_\+\+L\+U\+\_\+matrix\+\_\+invert$<$ double $>$} 
 \mbox{\Hypertarget{util_8cpp_aba892910f0cef251be3ba7c561290761}\label{util_8cpp_aba892910f0cef251be3ba7c561290761}} 
 int {\bfseries gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert} (double $\ast$$\ast$input, double $\ast$$\ast$inverse, int dim)
 \item 
-int \mbox{\hyperlink{util_8cpp_a8289e1ab34de59220846f1114dd9f667}{normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert}} (double $\ast$$\ast$input, double $\ast$$\ast$inverse, int dim)
+int \hyperlink{util_8cpp_a8289e1ab34de59220846f1114dd9f667}{normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert} (double $\ast$$\ast$input, double $\ast$$\ast$inverse, int dim)
 \begin{DoxyCompactList}\small\item\em Normalize the Fisher matrix before inversion to try and tame singularity issues\+: \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{util_8cpp_a132fb8304c25ab9a2e18327cfc65b013}{std\+\_\+omega}} (double RA, double std\+\_\+\+RA, double std\+\_\+\+D\+EC, double cov\+\_\+\+R\+A\+\_\+\+D\+EC)
-\begin{DoxyCompactList}\small\item\em map the error on RA and D\+EC to error on solid angle \textbackslash{}\+Omega \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{util_8cpp_a9d3b483a858efb84ce776bed255b6dd6}{print\+Progress}} (double percentage)
+double \hyperlink{util_8cpp_a132fb8304c25ab9a2e18327cfc65b013}{std\+\_\+omega} (double RA, double std\+\_\+\+RA, double std\+\_\+\+D\+EC, double cov\+\_\+\+R\+A\+\_\+\+D\+EC)
+\begin{DoxyCompactList}\small\item\em map the error on RA and D\+EC to error on solid angle  \end{DoxyCompactList}\item 
+void \hyperlink{util_8cpp_a9d3b483a858efb84ce776bed255b6dd6}{print\+Progress} (double percentage)
 \begin{DoxyCompactList}\small\item\em routine to print the progress of a process to the terminal as a progress bar \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a9d87eefd2881f9d512458bdcb05c9480}\label{util_8cpp_a9d87eefd2881f9d512458bdcb05c9480}} 
-void \mbox{\hyperlink{util_8cpp_a9d87eefd2881f9d512458bdcb05c9480}{allocate\+\_\+\+F\+F\+T\+W\+\_\+mem\+\_\+forward}} (\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan, int length)
+void \hyperlink{util_8cpp_a9d87eefd2881f9d512458bdcb05c9480}{allocate\+\_\+\+F\+F\+T\+W\+\_\+mem\+\_\+forward} (\hyperlink{structfftw__outline}{fftw\+\_\+outline} $\ast$plan, int length)
 \begin{DoxyCompactList}\small\item\em Allocate memory for F\+F\+T\+W3 methods used in a lot of inner products input is a locally defined structure that houses all the pertinent data. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_abfb132a88c05af083194d8ee163c6dcd}\label{util_8cpp_abfb132a88c05af083194d8ee163c6dcd}} 
-void \mbox{\hyperlink{util_8cpp_abfb132a88c05af083194d8ee163c6dcd}{allocate\+\_\+\+F\+F\+T\+W\+\_\+mem\+\_\+reverse}} (\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan, int length)
+void \hyperlink{util_8cpp_abfb132a88c05af083194d8ee163c6dcd}{allocate\+\_\+\+F\+F\+T\+W\+\_\+mem\+\_\+reverse} (\hyperlink{structfftw__outline}{fftw\+\_\+outline} $\ast$plan, int length)
 \begin{DoxyCompactList}\small\item\em Allocate memory for F\+F\+T\+W3 methods used in a lot of inner products --I\+N\+V\+E\+R\+SE input is a locally defined structure that houses all the pertinent data. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a564ceafac6d45bfc46b9960ff363be94}\label{util_8cpp_a564ceafac6d45bfc46b9960ff363be94}} 
-void \mbox{\hyperlink{util_8cpp_a564ceafac6d45bfc46b9960ff363be94}{deallocate\+\_\+\+F\+F\+T\+W\+\_\+mem}} (\mbox{\hyperlink{structfftw__outline}{fftw\+\_\+outline}} $\ast$plan)
+void \hyperlink{util_8cpp_a564ceafac6d45bfc46b9960ff363be94}{deallocate\+\_\+\+F\+F\+T\+W\+\_\+mem} (\hyperlink{structfftw__outline}{fftw\+\_\+outline} $\ast$plan)
 \begin{DoxyCompactList}\small\item\em deallocates the memory used for F\+F\+TW routines \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T , class U $>$ }\\void \mbox{\hyperlink{util_8cpp_a168fd7e5d1d20a344c7bc5e6ced76763}{transform\+\_\+parameters}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$param\+\_\+in, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ U $>$ $\ast$param\+\_\+out)
+{\footnotesize template$<$class T , class U $>$ }\\void \hyperlink{util_8cpp_a168fd7e5d1d20a344c7bc5e6ced76763}{transform\+\_\+parameters} (\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$param\+\_\+in, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ U $>$ $\ast$param\+\_\+out)
 \begin{DoxyCompactList}\small\item\em Simple utility to copy the members of param\+\_\+in to param\+\_\+out, for whatever types those are. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a44e97e344b2c1bce3ec660f34eef801d}\label{util_8cpp_a44e97e344b2c1bce3ec660f34eef801d}} 
 bool {\bfseries check\+\_\+mod} (std\+::string generation\+\_\+method)
 \item 
 \mbox{\Hypertarget{util_8cpp_ac198de6bb481026200d3e7905c6c9e94}\label{util_8cpp_ac198de6bb481026200d3e7905c6c9e94}} 
-template void {\bfseries transform\+\_\+parameters$<$ double, adouble $>$} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$)
+template void {\bfseries transform\+\_\+parameters$<$ double, adouble $>$} (\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ double $>$ $\ast$, \hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ adouble $>$ $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8cpp_a178bf529eadac2d4e27e6919f322734a}{A0\+\_\+from\+\_\+\+DL}} (T chirpmass, T DL, bool sky\+\_\+average)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8cpp_a178bf529eadac2d4e27e6919f322734a}{A0\+\_\+from\+\_\+\+DL} (T chirpmass, T DL, bool sky\+\_\+average)
 \begin{DoxyCompactList}\small\item\em Transforms between chirpmass and DL to overall amplitude factor A0. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_aa5fc941f2fac67667eabac3b18a0fc1d}\label{util_8cpp_aa5fc941f2fac67667eabac3b18a0fc1d}} 
 template double {\bfseries A0\+\_\+from\+\_\+\+D\+L$<$ double $>$} (double, double, bool)
@@ -141,7 +146,7 @@ template double {\bfseries A0\+\_\+from\+\_\+\+D\+L$<$ double $>$} (double, doub
 \mbox{\Hypertarget{util_8cpp_ad2aeb1394d2a4ed95a67b25c45675412}\label{util_8cpp_ad2aeb1394d2a4ed95a67b25c45675412}} 
 template adouble {\bfseries A0\+\_\+from\+\_\+\+D\+L$<$ adouble $>$} (adouble, adouble, bool)
 \item 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}{D\+L\+\_\+from\+\_\+\+A0}} (T chirpmass, T A0, bool sky\+\_\+average)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}{D\+L\+\_\+from\+\_\+\+A0} (T chirpmass, T A0, bool sky\+\_\+average)
 \begin{DoxyCompactList}\small\item\em Transforms between amplitude factor A0 and chirpmass to DL. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_aad613c8a47427621db992b314cc2c718}\label{util_8cpp_aad613c8a47427621db992b314cc2c718}} 
 template double {\bfseries D\+L\+\_\+from\+\_\+\+A0$<$ double $>$} (double, double, bool)
@@ -149,7 +154,7 @@ template double {\bfseries D\+L\+\_\+from\+\_\+\+A0$<$ double $>$} (double, doub
 \mbox{\Hypertarget{util_8cpp_ac98e9aeb37a666bf12e2690faa79c2d9}\label{util_8cpp_ac98e9aeb37a666bf12e2690faa79c2d9}} 
 template adouble {\bfseries D\+L\+\_\+from\+\_\+\+A0$<$ adouble $>$} (adouble, adouble, bool)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a969645fb30ec69bccd7848afe7ecef1f}{terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph}} (T RA, T D\+EC, T thetaj, T phij, T $\ast$pol, T $\ast$iota)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a969645fb30ec69bccd7848afe7ecef1f}{terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph} (T RA, T D\+EC, T thetaj, T phij, T $\ast$pol, T $\ast$iota)
 \begin{DoxyCompactList}\small\item\em Routine to transform from the equatorial coordinate system spherical polar description of the total angular momentum to the detector specific polarization angle and inclination angle (of the total angular momentum) \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a749fbf318dbfe6bc620068ae49916525}\label{util_8cpp_a749fbf318dbfe6bc620068ae49916525}} 
 template void {\bfseries terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph$<$ double $>$} (double, double, double, double, double $\ast$, double $\ast$)
@@ -157,7 +162,7 @@ template void {\bfseries terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph$<
 \mbox{\Hypertarget{util_8cpp_a316e44f1267a5ed8d3d73b8d6f6aac18}\label{util_8cpp_a316e44f1267a5ed8d3d73b8d6f6aac18}} 
 template void {\bfseries terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph$<$ adouble $>$} (adouble, adouble, adouble, adouble, adouble $\ast$, adouble $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_afdfcd17d8243226898e2fbaa72f8112c}{ecl\+\_\+from\+\_\+eq}} (T theta\+\_\+eq, T phi\+\_\+eq, T $\ast$theta\+\_\+ecl, T $\ast$phi\+\_\+ecl)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_afdfcd17d8243226898e2fbaa72f8112c}{ecl\+\_\+from\+\_\+eq} (T theta\+\_\+eq, T phi\+\_\+eq, T $\ast$theta\+\_\+ecl, T $\ast$phi\+\_\+ecl)
 \begin{DoxyCompactList}\small\item\em transform spherical angles from equatorial to ecliptic \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a0a2c463be7dd25e38f7e96eb8f9203d9}\label{util_8cpp_a0a2c463be7dd25e38f7e96eb8f9203d9}} 
 template void {\bfseries ecl\+\_\+from\+\_\+eq$<$ double $>$} (double, double, double $\ast$, double $\ast$)
@@ -165,7 +170,7 @@ template void {\bfseries ecl\+\_\+from\+\_\+eq$<$ double $>$} (double, double, d
 \mbox{\Hypertarget{util_8cpp_acd7a1bca789f41c107b49dc5fcae7940}\label{util_8cpp_acd7a1bca789f41c107b49dc5fcae7940}} 
 template void {\bfseries ecl\+\_\+from\+\_\+eq$<$ adouble $>$} (adouble, adouble, adouble $\ast$, adouble $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a63dca51c4dc6a81a582bb5ae69cb325d}{equatorial\+\_\+from\+\_\+\+SF}} (T $\ast$S\+Fvec, T thetal, T phil, T thetas, T phis, T iota, T phi\+\_\+ref, T $\ast$E\+Qvec)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a63dca51c4dc6a81a582bb5ae69cb325d}{equatorial\+\_\+from\+\_\+\+SF} (T $\ast$S\+Fvec, T thetal, T phil, T thetas, T phis, T iota, T phi\+\_\+ref, T $\ast$E\+Qvec)
 \begin{DoxyCompactList}\small\item\em Utility to map source frame vectors to equatorial frame vectors. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a9eeef7ea247181a5395068513e93d33c}\label{util_8cpp_a9eeef7ea247181a5395068513e93d33c}} 
 template void {\bfseries equatorial\+\_\+from\+\_\+\+S\+F$<$ double $>$} (double $\ast$, double, double, double, double, double, double, double $\ast$)
@@ -173,63 +178,63 @@ template void {\bfseries equatorial\+\_\+from\+\_\+\+S\+F$<$ double $>$} (double
 \mbox{\Hypertarget{util_8cpp_aa177abba1d7afd534af6bf5aa129285d}\label{util_8cpp_aa177abba1d7afd534af6bf5aa129285d}} 
 template void {\bfseries equatorial\+\_\+from\+\_\+\+S\+F$<$ adouble $>$} (adouble $\ast$, adouble, adouble, adouble, adouble, adouble, adouble, adouble $\ast$)
 \item 
-double \mbox{\hyperlink{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}{calculate\+\_\+chirpmass}} (double mass1, double mass2)
+double \hyperlink{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}{calculate\+\_\+chirpmass} (double mass1, double mass2)
 \begin{DoxyCompactList}\small\item\em Calculates the chirp mass from the two component masses. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a0a7a0da86013d639bf8689c9a01d8583}\label{util_8cpp_a0a7a0da86013d639bf8689c9a01d8583}} 
 adouble {\bfseries calculate\+\_\+chirpmass} (adouble mass1, adouble mass2)
 \item 
 \mbox{\Hypertarget{util_8cpp_a06ffbad5fe4daa3872db626f90556202}\label{util_8cpp_a06ffbad5fe4daa3872db626f90556202}} 
-double \mbox{\hyperlink{util_8cpp_a06ffbad5fe4daa3872db626f90556202}{calculate\+\_\+eta}} (double mass1, double mass2)
+double \hyperlink{util_8cpp_a06ffbad5fe4daa3872db626f90556202}{calculate\+\_\+eta} (double mass1, double mass2)
 \begin{DoxyCompactList}\small\item\em Calculates the symmetric mass ration from the two component masses. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_adc4391c722f94cb17f0e0275a0930fa9}\label{util_8cpp_adc4391c722f94cb17f0e0275a0930fa9}} 
 adouble {\bfseries calculate\+\_\+eta} (adouble mass1, adouble mass2)
 \item 
-double \mbox{\hyperlink{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}{calculate\+\_\+mass1}} (double chirpmass, double eta)
+double \hyperlink{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}{calculate\+\_\+mass1} (double chirpmass, double eta)
 \begin{DoxyCompactList}\small\item\em Calculates the larger mass given a chirp mass and symmetric mass ratio. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a663f11702648d9a84c9b573e9ab76f09}\label{util_8cpp_a663f11702648d9a84c9b573e9ab76f09}} 
 adouble {\bfseries calculate\+\_\+mass1} (adouble chirpmass, adouble eta)
 \item 
-double \mbox{\hyperlink{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}{calculate\+\_\+mass2}} (double chirpmass, double eta)
+double \hyperlink{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}{calculate\+\_\+mass2} (double chirpmass, double eta)
 \begin{DoxyCompactList}\small\item\em Calculates the smaller mass given a chirp mass and symmetric mass ratio. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_adb85ce9fbb2e3a438dd41a35c38a3237}\label{util_8cpp_adb85ce9fbb2e3a438dd41a35c38a3237}} 
 adouble {\bfseries calculate\+\_\+mass2} (adouble chirpmass, adouble eta)
 \item 
 \mbox{\Hypertarget{util_8cpp_ae40cc3f267c33745a8a2485638d5db55}\label{util_8cpp_ae40cc3f267c33745a8a2485638d5db55}} 
-long \mbox{\hyperlink{util_8cpp_ae40cc3f267c33745a8a2485638d5db55}{factorial}} (long num)
+long \hyperlink{util_8cpp_ae40cc3f267c33745a8a2485638d5db55}{factorial} (long num)
 \begin{DoxyCompactList}\small\item\em Local function to calculate a factorial. \end{DoxyCompactList}\item 
-double \mbox{\hyperlink{util_8cpp_a362581f25c83753aefac698e977cb73e}{pow\+\_\+int}} (double base, int power)
+double \hyperlink{util_8cpp_a362581f25c83753aefac698e977cb73e}{pow\+\_\+int} (double base, int power)
 \begin{DoxyCompactList}\small\item\em Local power function, specifically for integer powers. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a2777502ea85828774e2a331576db996d}\label{util_8cpp_a2777502ea85828774e2a331576db996d}} 
 adouble {\bfseries pow\+\_\+int} (adouble base, int power)
 \item 
 \mbox{\Hypertarget{util_8cpp_a9e568dd0950bb2aa1ae125c8153b8f4e}\label{util_8cpp_a9e568dd0950bb2aa1ae125c8153b8f4e}} 
-double \mbox{\hyperlink{util_8cpp_a9e568dd0950bb2aa1ae125c8153b8f4e}{cbrt\+\_\+internal}} (double base)
+double \hyperlink{util_8cpp_a9e568dd0950bb2aa1ae125c8153b8f4e}{cbrt\+\_\+internal} (double base)
 \begin{DoxyCompactList}\small\item\em Fucntion that just returns the cuberoot. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a8dfef0b07ebb62c8d9f1f70624fa3e00}\label{util_8cpp_a8dfef0b07ebb62c8d9f1f70624fa3e00}} 
-adouble \mbox{\hyperlink{util_8cpp_a8dfef0b07ebb62c8d9f1f70624fa3e00}{cbrt\+\_\+internal}} (adouble base)
+adouble \hyperlink{util_8cpp_a8dfef0b07ebb62c8d9f1f70624fa3e00}{cbrt\+\_\+internal} (adouble base)
 \begin{DoxyCompactList}\small\item\em Fucntion that just returns the cuberoot A\+D\+O\+L-\/C doesn\textquotesingle{}t have the cbrt function (which is faster), so have to use the power function. \end{DoxyCompactList}\item 
-double $\ast$$\ast$ \mbox{\hyperlink{util_8cpp_a8a13434c3294f699e10cefca9c9c1844}{allocate\+\_\+2\+D\+\_\+array}} (int dim1, int dim2)
+double $\ast$$\ast$ \hyperlink{util_8cpp_a8a13434c3294f699e10cefca9c9c1844}{allocate\+\_\+2\+D\+\_\+array} (int dim1, int dim2)
 \begin{DoxyCompactList}\small\item\em Utility to malloc 2D array. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_afdec1403ea2ff9eef323cdc5387d16d2}\label{util_8cpp_afdec1403ea2ff9eef323cdc5387d16d2}} 
 int $\ast$$\ast$ {\bfseries allocate\+\_\+2\+D\+\_\+array\+\_\+int} (int dim1, int dim2)
 \item 
-void \mbox{\hyperlink{util_8cpp_aea1f110a690843c990c37728a928c61e}{deallocate\+\_\+2\+D\+\_\+array}} (double $\ast$$\ast$array, int dim1, int dim2)
+void \hyperlink{util_8cpp_aea1f110a690843c990c37728a928c61e}{deallocate\+\_\+2\+D\+\_\+array} (double $\ast$$\ast$array, int dim1, int dim2)
 \begin{DoxyCompactList}\small\item\em Utility to free malloc\textquotesingle{}d 2D array. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a6782402902d03d306b27b5ed748ff81d}\label{util_8cpp_a6782402902d03d306b27b5ed748ff81d}} 
 void {\bfseries deallocate\+\_\+2\+D\+\_\+array} (int $\ast$$\ast$array, int dim1, int dim2)
 \item 
-double $\ast$$\ast$$\ast$ \mbox{\hyperlink{util_8cpp_ae68c88f497a666122282b9b0f960936a}{allocate\+\_\+3\+D\+\_\+array}} (int dim1, int dim2, int dim3)
+double $\ast$$\ast$$\ast$ \hyperlink{util_8cpp_ae68c88f497a666122282b9b0f960936a}{allocate\+\_\+3\+D\+\_\+array} (int dim1, int dim2, int dim3)
 \begin{DoxyCompactList}\small\item\em Utility to malloc 3D array. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a2735c4767bb31ba9dc947c2efedf29a4}\label{util_8cpp_a2735c4767bb31ba9dc947c2efedf29a4}} 
 int $\ast$$\ast$$\ast$ {\bfseries allocate\+\_\+3\+D\+\_\+array\+\_\+int} (int dim1, int dim2, int dim3)
 \item 
-void \mbox{\hyperlink{util_8cpp_ad8ff675e46f7acf42d7763cc6a10d665}{deallocate\+\_\+3\+D\+\_\+array}} (double $\ast$$\ast$$\ast$array, int dim1, int dim2, int dim3)
+void \hyperlink{util_8cpp_ad8ff675e46f7acf42d7763cc6a10d665}{deallocate\+\_\+3\+D\+\_\+array} (double $\ast$$\ast$$\ast$array, int dim1, int dim2, int dim3)
 \begin{DoxyCompactList}\small\item\em Utility to free malloc\textquotesingle{}d 2D array. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{util_8cpp_a002ad8ebbc188a3131bdc4ae82ac99ca}{deallocate\+\_\+3\+D\+\_\+array}} (int $\ast$$\ast$$\ast$array, int dim1, int dim2, int dim3)
+void \hyperlink{util_8cpp_a002ad8ebbc188a3131bdc4ae82ac99ca}{deallocate\+\_\+3\+D\+\_\+array} (int $\ast$$\ast$$\ast$array, int dim1, int dim2, int dim3)
 \begin{DoxyCompactList}\small\item\em Utility to free malloc\textquotesingle{}d 2D array. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{util_8cpp_adcfd6e3f070e3c9bdae4a7cd03570f67}{tukey\+\_\+window}} (double $\ast$window, int length, double alpha)
+void \hyperlink{util_8cpp_adcfd6e3f070e3c9bdae4a7cd03570f67}{tukey\+\_\+window} (double $\ast$window, int length, double alpha)
 \begin{DoxyCompactList}\small\item\em Tukey window function for F\+F\+Ts. \end{DoxyCompactList}\item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a55f693ec3edcca174373eb928d513dbc}{celestial\+\_\+horizon\+\_\+transform}} (T RA, T D\+EC, double gps\+\_\+time, T L\+O\+NG, T L\+AT, T $\ast$phi, T $\ast$theta)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a55f693ec3edcca174373eb928d513dbc}{celestial\+\_\+horizon\+\_\+transform} (T RA, T D\+EC, double gps\+\_\+time, T L\+O\+NG, T L\+AT, T $\ast$phi, T $\ast$theta)
 \begin{DoxyCompactList}\small\item\em Utility to transform from celestial coord RA and D\+EC to local horizon coord for detector response functions. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a30b977ce58c9bc3db6e8f40b38f4441d}\label{util_8cpp_a30b977ce58c9bc3db6e8f40b38f4441d}} 
 template void {\bfseries celestial\+\_\+horizon\+\_\+transform$<$ double $>$} (double, double, double, double, double, double $\ast$, double $\ast$)
@@ -238,13 +243,13 @@ template void {\bfseries celestial\+\_\+horizon\+\_\+transform$<$ double $>$} (d
 template void {\bfseries celestial\+\_\+horizon\+\_\+transform$<$ adouble $>$} (adouble, adouble, double, adouble, adouble, adouble $\ast$, adouble $\ast$)
 \item 
 \mbox{\Hypertarget{util_8cpp_afd6029a6f28651af9d71382a4b4e0efb}\label{util_8cpp_afd6029a6f28651af9d71382a4b4e0efb}} 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8cpp_afd6029a6f28651af9d71382a4b4e0efb}{gps\+\_\+to\+\_\+\+G\+M\+ST}} (T gps\+\_\+time)
-\begin{DoxyCompactList}\small\item\em Utility to transform from gps time to G\+M\+ST \href{https://aa.usno.navy.mil/faq/docs/GAST.php}{\texttt{ https\+://aa.\+usno.\+navy.\+mil/faq/docs/\+G\+A\+S\+T.\+php}}. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8cpp_afd6029a6f28651af9d71382a4b4e0efb}{gps\+\_\+to\+\_\+\+G\+M\+ST} (T gps\+\_\+time)
+\begin{DoxyCompactList}\small\item\em Utility to transform from gps time to G\+M\+ST \href{https://aa.usno.navy.mil/faq/docs/GAST.php}{\tt https\+://aa.\+usno.\+navy.\+mil/faq/docs/\+G\+A\+S\+T.\+php}. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_ac83d7055b92c719a52435536df7b51d8}\label{util_8cpp_ac83d7055b92c719a52435536df7b51d8}} 
 template double {\bfseries gps\+\_\+to\+\_\+\+G\+M\+S\+T$<$ double $>$} (double)
 \item 
 \mbox{\Hypertarget{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}\label{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}} 
-{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}{gps\+\_\+to\+\_\+\+JD}} (T gps\+\_\+time)
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}{gps\+\_\+to\+\_\+\+JD} (T gps\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Utility to transform from gps to JD. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a4fb3a2c7d89ffce9b067e982b5008493}\label{util_8cpp_a4fb3a2c7d89ffce9b067e982b5008493}} 
 template double {\bfseries gps\+\_\+to\+\_\+\+J\+D$<$ double $>$} (double)
@@ -252,7 +257,7 @@ template double {\bfseries gps\+\_\+to\+\_\+\+J\+D$<$ double $>$} (double)
 \mbox{\Hypertarget{util_8cpp_a7c409fb90ac34597ff4d5150faa7b62a}\label{util_8cpp_a7c409fb90ac34597ff4d5150faa7b62a}} 
 template adouble {\bfseries gps\+\_\+to\+\_\+\+J\+D$<$ adouble $>$} (adouble)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a817fd4d7413b4a2bfe05bfbc454766b2}{transform\+\_\+cart\+\_\+sph}} (T $\ast$cartvec, T $\ast$sphvec)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a817fd4d7413b4a2bfe05bfbc454766b2}{transform\+\_\+cart\+\_\+sph} (T $\ast$cartvec, T $\ast$sphvec)
 \begin{DoxyCompactList}\small\item\em utility to transform a vector from cartesian to spherical (radian) \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a7a0736962ec16d2d848dead170e268c8}\label{util_8cpp_a7a0736962ec16d2d848dead170e268c8}} 
 template void {\bfseries transform\+\_\+cart\+\_\+sph$<$ double $>$} (double $\ast$, double $\ast$)
@@ -260,7 +265,7 @@ template void {\bfseries transform\+\_\+cart\+\_\+sph$<$ double $>$} (double $\a
 \mbox{\Hypertarget{util_8cpp_ac561419504a50c2cd9bb1eb242c15899}\label{util_8cpp_ac561419504a50c2cd9bb1eb242c15899}} 
 template void {\bfseries transform\+\_\+cart\+\_\+sph$<$ adouble $>$} (adouble $\ast$, adouble $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a3c767ffbc1073a544ae1630ffdea917e}{transform\+\_\+sph\+\_\+cart}} (T $\ast$sphvec, T $\ast$cartvec)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a3c767ffbc1073a544ae1630ffdea917e}{transform\+\_\+sph\+\_\+cart} (T $\ast$sphvec, T $\ast$cartvec)
 \begin{DoxyCompactList}\small\item\em utility to transform a vector from spherical (radian) to cartesian \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_ad90bcd279d5f04a97516846d9405bc90}\label{util_8cpp_ad90bcd279d5f04a97516846d9405bc90}} 
 template void {\bfseries transform\+\_\+sph\+\_\+cart$<$ double $>$} (double $\ast$, double $\ast$)
@@ -268,7 +273,7 @@ template void {\bfseries transform\+\_\+sph\+\_\+cart$<$ double $>$} (double $\a
 \mbox{\Hypertarget{util_8cpp_a2bb2597f8f011903d72a4b21546be79d}\label{util_8cpp_a2bb2597f8f011903d72a4b21546be79d}} 
 template void {\bfseries transform\+\_\+sph\+\_\+cart$<$ adouble $>$} (adouble $\ast$, adouble $\ast$)
 \item 
-{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a036fae37c6732da48e01ccc1331542d4}{unwrap\+\_\+array}} (T $\ast$in, T $\ast$out, int len)
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{util_8cpp_a036fae37c6732da48e01ccc1331542d4}{unwrap\+\_\+array} (T $\ast$in, T $\ast$out, int len)
 \begin{DoxyCompactList}\small\item\em Unwrap angles from arctan. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a822d904dc18ef07239cedfc5b296e9a7}\label{util_8cpp_a822d904dc18ef07239cedfc5b296e9a7}} 
 template void {\bfseries unwrap\+\_\+array$<$ double $>$} (double $\ast$, double $\ast$, int)
@@ -279,7 +284,7 @@ template void {\bfseries unwrap\+\_\+array$<$ adouble $>$} (adouble $\ast$, adou
 \mbox{\Hypertarget{util_8cpp_aa08b09388ea27effbf92d3cc4f15fb47}\label{util_8cpp_aa08b09388ea27effbf92d3cc4f15fb47}} 
 {\footnotesize template$<$class T $>$ }\\std\+::complex$<$ T $>$ {\bfseries cpolar} (T mag, T phase)
 \item 
-{\footnotesize template$<$class T $>$ }\\std\+::complex$<$ T $>$ \mbox{\hyperlink{util_8cpp_af9aa77c0f12435f4c7e9f13dba8ca1f8}{X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic}} (T theta, T phi, int s, int l, int m)
+{\footnotesize template$<$class T $>$ }\\std\+::complex$<$ T $>$ \hyperlink{util_8cpp_af9aa77c0f12435f4c7e9f13dba8ca1f8}{X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic} (T theta, T phi, int s, int l, int m)
 \item 
 \mbox{\Hypertarget{util_8cpp_a2fe50c6db0eaeca6414b19cc41094d99}\label{util_8cpp_a2fe50c6db0eaeca6414b19cc41094d99}} 
 template std\+::complex$<$ double $>$ {\bfseries X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic$<$ double $>$} (double, double, int, int, int)
@@ -295,14 +300,14 @@ template std\+::complex$<$ adouble $>$ {\bfseries cpolar$<$ adouble $>$} (adoubl
 \end{DoxyCompactItemize}
 
 
-\doxysubsection{Detailed Description}
+\subsection{Detailed Description}
 General utilities that are not necessarily specific to any part of the project at large 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{util_8cpp_a178bf529eadac2d4e27e6919f322734a}\label{util_8cpp_a178bf529eadac2d4e27e6919f322734a}} 
-\index{util.cpp@{util.cpp}!A0\_from\_DL@{A0\_from\_DL}}
-\index{A0\_from\_DL@{A0\_from\_DL}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{A0\_from\_DL()}{A0\_from\_DL()}}
+\index{util.\+cpp@{util.\+cpp}!A0\+\_\+from\+\_\+\+DL@{A0\+\_\+from\+\_\+\+DL}}
+\index{A0\+\_\+from\+\_\+\+DL@{A0\+\_\+from\+\_\+\+DL}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{A0\+\_\+from\+\_\+\+D\+L()}{A0\_from\_DL()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T A0\+\_\+from\+\_\+\+DL (\begin{DoxyParamCaption}\item[{T}]{chirpmass,  }\item[{T}]{DL,  }\item[{bool}]{sky\+\_\+average }\end{DoxyParamCaption})}
 
@@ -311,9 +316,9 @@ T A0\+\_\+from\+\_\+\+DL (\begin{DoxyParamCaption}\item[{T}]{chirpmass,  }\item[
 Transforms between chirpmass and DL to overall amplitude factor A0. 
 
 All quantities in seconds \mbox{\Hypertarget{util_8cpp_a8a13434c3294f699e10cefca9c9c1844}\label{util_8cpp_a8a13434c3294f699e10cefca9c9c1844}} 
-\index{util.cpp@{util.cpp}!allocate\_2D\_array@{allocate\_2D\_array}}
-\index{allocate\_2D\_array@{allocate\_2D\_array}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{allocate\_2D\_array()}{allocate\_2D\_array()}}
+\index{util.\+cpp@{util.\+cpp}!allocate\+\_\+2\+D\+\_\+array@{allocate\+\_\+2\+D\+\_\+array}}
+\index{allocate\+\_\+2\+D\+\_\+array@{allocate\+\_\+2\+D\+\_\+array}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{allocate\+\_\+2\+D\+\_\+array()}{allocate\_2D\_array()}}
 {\footnotesize\ttfamily double$\ast$$\ast$ allocate\+\_\+2\+D\+\_\+array (\begin{DoxyParamCaption}\item[{int}]{dim1,  }\item[{int}]{dim2 }\end{DoxyParamCaption})}
 
 
@@ -321,9 +326,9 @@ All quantities in seconds \mbox{\Hypertarget{util_8cpp_a8a13434c3294f699e10cefca
 Utility to malloc 2D array. 
 
 \mbox{\Hypertarget{util_8cpp_ae68c88f497a666122282b9b0f960936a}\label{util_8cpp_ae68c88f497a666122282b9b0f960936a}} 
-\index{util.cpp@{util.cpp}!allocate\_3D\_array@{allocate\_3D\_array}}
-\index{allocate\_3D\_array@{allocate\_3D\_array}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{allocate\_3D\_array()}{allocate\_3D\_array()}}
+\index{util.\+cpp@{util.\+cpp}!allocate\+\_\+3\+D\+\_\+array@{allocate\+\_\+3\+D\+\_\+array}}
+\index{allocate\+\_\+3\+D\+\_\+array@{allocate\+\_\+3\+D\+\_\+array}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{allocate\+\_\+3\+D\+\_\+array()}{allocate\_3D\_array()}}
 {\footnotesize\ttfamily double$\ast$$\ast$$\ast$ allocate\+\_\+3\+D\+\_\+array (\begin{DoxyParamCaption}\item[{int}]{dim1,  }\item[{int}]{dim2,  }\item[{int}]{dim3 }\end{DoxyParamCaption})}
 
 
@@ -331,9 +336,9 @@ Utility to malloc 2D array.
 Utility to malloc 3D array. 
 
 \mbox{\Hypertarget{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}\label{util_8cpp_af7aeeebcf190ab70c667a478a51ce435}} 
-\index{util.cpp@{util.cpp}!calculate\_chirpmass@{calculate\_chirpmass}}
-\index{calculate\_chirpmass@{calculate\_chirpmass}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{calculate\_chirpmass()}{calculate\_chirpmass()}}
+\index{util.\+cpp@{util.\+cpp}!calculate\+\_\+chirpmass@{calculate\+\_\+chirpmass}}
+\index{calculate\+\_\+chirpmass@{calculate\+\_\+chirpmass}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{calculate\+\_\+chirpmass()}{calculate\_chirpmass()}}
 {\footnotesize\ttfamily double calculate\+\_\+chirpmass (\begin{DoxyParamCaption}\item[{double}]{mass1,  }\item[{double}]{mass2 }\end{DoxyParamCaption})}
 
 
@@ -341,9 +346,9 @@ Utility to malloc 3D array.
 Calculates the chirp mass from the two component masses. 
 
 The output units are whatever units the input masses are \mbox{\Hypertarget{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}\label{util_8cpp_a85a0fc50a6f06dd519a18a6d273a0b4a}} 
-\index{util.cpp@{util.cpp}!calculate\_mass1@{calculate\_mass1}}
-\index{calculate\_mass1@{calculate\_mass1}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{calculate\_mass1()}{calculate\_mass1()}}
+\index{util.\+cpp@{util.\+cpp}!calculate\+\_\+mass1@{calculate\+\_\+mass1}}
+\index{calculate\+\_\+mass1@{calculate\+\_\+mass1}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{calculate\+\_\+mass1()}{calculate\_mass1()}}
 {\footnotesize\ttfamily double calculate\+\_\+mass1 (\begin{DoxyParamCaption}\item[{double}]{chirpmass,  }\item[{double}]{eta }\end{DoxyParamCaption})}
 
 
@@ -351,9 +356,9 @@ The output units are whatever units the input masses are \mbox{\Hypertarget{util
 Calculates the larger mass given a chirp mass and symmetric mass ratio. 
 
 Units of the output match the units of the input chirp mass \mbox{\Hypertarget{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}\label{util_8cpp_a5f62f4a7c1011180080d72e0032cef1b}} 
-\index{util.cpp@{util.cpp}!calculate\_mass2@{calculate\_mass2}}
-\index{calculate\_mass2@{calculate\_mass2}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{calculate\_mass2()}{calculate\_mass2()}}
+\index{util.\+cpp@{util.\+cpp}!calculate\+\_\+mass2@{calculate\+\_\+mass2}}
+\index{calculate\+\_\+mass2@{calculate\+\_\+mass2}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{calculate\+\_\+mass2()}{calculate\_mass2()}}
 {\footnotesize\ttfamily double calculate\+\_\+mass2 (\begin{DoxyParamCaption}\item[{double}]{chirpmass,  }\item[{double}]{eta }\end{DoxyParamCaption})}
 
 
@@ -361,9 +366,9 @@ Units of the output match the units of the input chirp mass \mbox{\Hypertarget{u
 Calculates the smaller mass given a chirp mass and symmetric mass ratio. 
 
 Units of the output match the units of the input chirp mass \mbox{\Hypertarget{util_8cpp_a55f693ec3edcca174373eb928d513dbc}\label{util_8cpp_a55f693ec3edcca174373eb928d513dbc}} 
-\index{util.cpp@{util.cpp}!celestial\_horizon\_transform@{celestial\_horizon\_transform}}
-\index{celestial\_horizon\_transform@{celestial\_horizon\_transform}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{celestial\_horizon\_transform()}{celestial\_horizon\_transform()}}
+\index{util.\+cpp@{util.\+cpp}!celestial\+\_\+horizon\+\_\+transform@{celestial\+\_\+horizon\+\_\+transform}}
+\index{celestial\+\_\+horizon\+\_\+transform@{celestial\+\_\+horizon\+\_\+transform}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{celestial\+\_\+horizon\+\_\+transform()}{celestial\_horizon\_transform()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void celestial\+\_\+horizon\+\_\+transform (\begin{DoxyParamCaption}\item[{T}]{RA,  }\item[{T}]{D\+EC,  }\item[{double}]{gps\+\_\+time,  }\item[{T}]{L\+O\+NG,  }\item[{T}]{L\+AT,  }\item[{T $\ast$}]{phi,  }\item[{T $\ast$}]{theta }\end{DoxyParamCaption})}
 
@@ -383,15 +388,15 @@ Outputs are the spherical polar angles defined by North as 0 degrees azimuth and
 \hline
  & {\em L\+AT} & Latitude (rad) \\
 \hline
-\mbox{\texttt{ out}}  & {\em phi} & horizon azimuthal angle (rad) \\
+\mbox{\tt out}  & {\em phi} & horizon azimuthal angle (rad) \\
 \hline
-\mbox{\texttt{ out}}  & {\em theta} & horizon polar angle (rad) \\
+\mbox{\tt out}  & {\em theta} & horizon polar angle (rad) \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8cpp_a9631c2bd8b5493af4df2528a44886fc6}\label{util_8cpp_a9631c2bd8b5493af4df2528a44886fc6}} 
-\index{util.cpp@{util.cpp}!check\_list@{check\_list}}
-\index{check\_list@{check\_list}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{check\_list()}{check\_list()}}
+\index{util.\+cpp@{util.\+cpp}!check\+\_\+list@{check\+\_\+list}}
+\index{check\+\_\+list@{check\+\_\+list}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{check\+\_\+list()}{check\_list()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 bool check\+\_\+list (\begin{DoxyParamCaption}\item[{T}]{j,  }\item[{T $\ast$}]{list,  }\item[{int}]{length }\end{DoxyParamCaption})}
 
@@ -400,9 +405,9 @@ bool check\+\_\+list (\begin{DoxyParamCaption}\item[{T}]{j,  }\item[{T $\ast$}]{
 Just a quick utility to see if an item is in a list. 
 
 Didn\textquotesingle{}t want to keep rewriting this loop \mbox{\Hypertarget{util_8cpp_af81850392cb5ff136ea8d334952844e0}\label{util_8cpp_af81850392cb5ff136ea8d334952844e0}} 
-\index{util.cpp@{util.cpp}!check\_list\_id@{check\_list\_id}}
-\index{check\_list\_id@{check\_list\_id}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{check\_list\_id()}{check\_list\_id()}}
+\index{util.\+cpp@{util.\+cpp}!check\+\_\+list\+\_\+id@{check\+\_\+list\+\_\+id}}
+\index{check\+\_\+list\+\_\+id@{check\+\_\+list\+\_\+id}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{check\+\_\+list\+\_\+id()}{check\_list\_id()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 int check\+\_\+list\+\_\+id (\begin{DoxyParamCaption}\item[{T}]{j,  }\item[{T $\ast$}]{list,  }\item[{int}]{length }\end{DoxyParamCaption})}
 
@@ -415,9 +420,9 @@ Didn\textquotesingle{}t want to keep rewriting this loop
 Now returns the id of the element
 
 Returns -\/1 if not found \mbox{\Hypertarget{util_8cpp_afc70040a4b2855ffc42c1f8b91e87fc2}\label{util_8cpp_afc70040a4b2855ffc42c1f8b91e87fc2}} 
-\index{util.cpp@{util.cpp}!cosmology\_interpolation\_function@{cosmology\_interpolation\_function}}
-\index{cosmology\_interpolation\_function@{cosmology\_interpolation\_function}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{cosmology\_interpolation\_function()}{cosmology\_interpolation\_function()}}
+\index{util.\+cpp@{util.\+cpp}!cosmology\+\_\+interpolation\+\_\+function@{cosmology\+\_\+interpolation\+\_\+function}}
+\index{cosmology\+\_\+interpolation\+\_\+function@{cosmology\+\_\+interpolation\+\_\+function}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{cosmology\+\_\+interpolation\+\_\+function()}{cosmology\_interpolation\_function()}}
 {\footnotesize\ttfamily double cosmology\+\_\+interpolation\+\_\+function (\begin{DoxyParamCaption}\item[{double}]{x,  }\item[{double $\ast$}]{coeffs,  }\item[{int}]{interp\+\_\+degree }\end{DoxyParamCaption})}
 
 
@@ -425,9 +430,9 @@ Returns -\/1 if not found \mbox{\Hypertarget{util_8cpp_afc70040a4b2855ffc42c1f8b
 Custom interpolation function used in the cosmology calculations. 
 
 Power series in half power increments of x, up to 11/2. powers of x \mbox{\Hypertarget{util_8cpp_aea1f110a690843c990c37728a928c61e}\label{util_8cpp_aea1f110a690843c990c37728a928c61e}} 
-\index{util.cpp@{util.cpp}!deallocate\_2D\_array@{deallocate\_2D\_array}}
-\index{deallocate\_2D\_array@{deallocate\_2D\_array}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{deallocate\_2D\_array()}{deallocate\_2D\_array()}}
+\index{util.\+cpp@{util.\+cpp}!deallocate\+\_\+2\+D\+\_\+array@{deallocate\+\_\+2\+D\+\_\+array}}
+\index{deallocate\+\_\+2\+D\+\_\+array@{deallocate\+\_\+2\+D\+\_\+array}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{deallocate\+\_\+2\+D\+\_\+array()}{deallocate\_2D\_array()}}
 {\footnotesize\ttfamily void deallocate\+\_\+2\+D\+\_\+array (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{array,  }\item[{int}]{dim1,  }\item[{int}]{dim2 }\end{DoxyParamCaption})}
 
 
@@ -435,9 +440,9 @@ Power series in half power increments of x, up to 11/2. powers of x \mbox{\Hyper
 Utility to free malloc\textquotesingle{}d 2D array. 
 
 \mbox{\Hypertarget{util_8cpp_ad8ff675e46f7acf42d7763cc6a10d665}\label{util_8cpp_ad8ff675e46f7acf42d7763cc6a10d665}} 
-\index{util.cpp@{util.cpp}!deallocate\_3D\_array@{deallocate\_3D\_array}}
-\index{deallocate\_3D\_array@{deallocate\_3D\_array}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{deallocate\_3D\_array()}{deallocate\_3D\_array()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\index{util.\+cpp@{util.\+cpp}!deallocate\+\_\+3\+D\+\_\+array@{deallocate\+\_\+3\+D\+\_\+array}}
+\index{deallocate\+\_\+3\+D\+\_\+array@{deallocate\+\_\+3\+D\+\_\+array}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{deallocate\+\_\+3\+D\+\_\+array()}{deallocate\_3D\_array()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily void deallocate\+\_\+3\+D\+\_\+array (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$$\ast$}]{array,  }\item[{int}]{dim1,  }\item[{int}]{dim2,  }\item[{int}]{dim3 }\end{DoxyParamCaption})}
 
 
@@ -445,9 +450,9 @@ Utility to free malloc\textquotesingle{}d 2D array.
 Utility to free malloc\textquotesingle{}d 2D array. 
 
 \mbox{\Hypertarget{util_8cpp_a002ad8ebbc188a3131bdc4ae82ac99ca}\label{util_8cpp_a002ad8ebbc188a3131bdc4ae82ac99ca}} 
-\index{util.cpp@{util.cpp}!deallocate\_3D\_array@{deallocate\_3D\_array}}
-\index{deallocate\_3D\_array@{deallocate\_3D\_array}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{deallocate\_3D\_array()}{deallocate\_3D\_array()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\index{util.\+cpp@{util.\+cpp}!deallocate\+\_\+3\+D\+\_\+array@{deallocate\+\_\+3\+D\+\_\+array}}
+\index{deallocate\+\_\+3\+D\+\_\+array@{deallocate\+\_\+3\+D\+\_\+array}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{deallocate\+\_\+3\+D\+\_\+array()}{deallocate\_3D\_array()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily void deallocate\+\_\+3\+D\+\_\+array (\begin{DoxyParamCaption}\item[{int $\ast$$\ast$$\ast$}]{array,  }\item[{int}]{dim1,  }\item[{int}]{dim2,  }\item[{int}]{dim3 }\end{DoxyParamCaption})}
 
 
@@ -455,9 +460,9 @@ Utility to free malloc\textquotesingle{}d 2D array.
 Utility to free malloc\textquotesingle{}d 2D array. 
 
 \mbox{\Hypertarget{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}\label{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}} 
-\index{util.cpp@{util.cpp}!DL\_from\_A0@{DL\_from\_A0}}
-\index{DL\_from\_A0@{DL\_from\_A0}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{DL\_from\_A0()}{DL\_from\_A0()}}
+\index{util.\+cpp@{util.\+cpp}!D\+L\+\_\+from\+\_\+\+A0@{D\+L\+\_\+from\+\_\+\+A0}}
+\index{D\+L\+\_\+from\+\_\+\+A0@{D\+L\+\_\+from\+\_\+\+A0}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{D\+L\+\_\+from\+\_\+\+A0()}{DL\_from\_A0()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 T D\+L\+\_\+from\+\_\+\+A0 (\begin{DoxyParamCaption}\item[{T}]{chirpmass,  }\item[{T}]{A0,  }\item[{bool}]{sky\+\_\+average }\end{DoxyParamCaption})}
 
@@ -466,23 +471,23 @@ T D\+L\+\_\+from\+\_\+\+A0 (\begin{DoxyParamCaption}\item[{T}]{chirpmass,  }\ite
 Transforms between amplitude factor A0 and chirpmass to DL. 
 
 All quantities in seconds \mbox{\Hypertarget{util_8cpp_a88960e6947432b203d2c7ebb436e1984}\label{util_8cpp_a88960e6947432b203d2c7ebb436e1984}} 
-\index{util.cpp@{util.cpp}!DL\_from\_Z@{DL\_from\_Z}}
-\index{DL\_from\_Z@{DL\_from\_Z}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{DL\_from\_Z()}{DL\_from\_Z()}}
+\index{util.\+cpp@{util.\+cpp}!D\+L\+\_\+from\+\_\+Z@{D\+L\+\_\+from\+\_\+Z}}
+\index{D\+L\+\_\+from\+\_\+Z@{D\+L\+\_\+from\+\_\+Z}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{D\+L\+\_\+from\+\_\+\+Z()}{DL\_from\_Z()}}
 {\footnotesize\ttfamily double D\+L\+\_\+from\+\_\+Z (\begin{DoxyParamCaption}\item[{double}]{Z,  }\item[{std\+::string}]{cosmology }\end{DoxyParamCaption})}
 
 
 
 Calculates the luminosity distance given the redshift. 
 
-Based on Astropy.\+cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.\+cosmology\textquotesingle{}s definitions (\href{http://docs.astropy.org/en/stable/cosmology/}{\texttt{ http\+://docs.\+astropy.\+org/en/stable/cosmology/}}) and used scipy.\+optimize to fit to a power series, stepping in half powers of Z. These coefficients are then output to a header file (D\+\_\+\+Z\+\_\+config.\+h) which are used here to calculate distance. Custom cosmologies etc can easily be acheived by editing the python script D\+\_\+\+Z\+\_\+config.\+py, the c++ functions do not need modification. They use whatever data is available in the header file. If the functional form of the fitting function changes, these functions DO need to change.
+Based on Astropy.\+cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.\+cosmology\textquotesingle{}s definitions (\href{http://docs.astropy.org/en/stable/cosmology/}{\tt http\+://docs.\+astropy.\+org/en/stable/cosmology/}) and used scipy.\+optimize to fit to a power series, stepping in half powers of Z. These coefficients are then output to a header file (D\+\_\+\+Z\+\_\+config.\+h) which are used here to calculate distance. Custom cosmologies etc can easily be acheived by editing the python script D\+\_\+\+Z\+\_\+config.\+py, the c++ functions do not need modification. They use whatever data is available in the header file. If the functional form of the fitting function changes, these functions DO need to change.
 
 5 cosmological models are available (this argument must be spelled exactly)\+:
 
 P\+L\+A\+N\+C\+K15, P\+L\+A\+N\+C\+K13, W\+M\+A\+P9, W\+M\+A\+P7, W\+M\+A\+P5 \mbox{\Hypertarget{util_8cpp_afdfcd17d8243226898e2fbaa72f8112c}\label{util_8cpp_afdfcd17d8243226898e2fbaa72f8112c}} 
-\index{util.cpp@{util.cpp}!ecl\_from\_eq@{ecl\_from\_eq}}
-\index{ecl\_from\_eq@{ecl\_from\_eq}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{ecl\_from\_eq()}{ecl\_from\_eq()}}
+\index{util.\+cpp@{util.\+cpp}!ecl\+\_\+from\+\_\+eq@{ecl\+\_\+from\+\_\+eq}}
+\index{ecl\+\_\+from\+\_\+eq@{ecl\+\_\+from\+\_\+eq}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{ecl\+\_\+from\+\_\+eq()}{ecl\_from\_eq()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void ecl\+\_\+from\+\_\+eq (\begin{DoxyParamCaption}\item[{T}]{theta\+\_\+eq,  }\item[{T}]{phi\+\_\+eq,  }\item[{T $\ast$}]{theta\+\_\+ecl,  }\item[{T $\ast$}]{phi\+\_\+ecl }\end{DoxyParamCaption})}
 
@@ -506,9 +511,9 @@ Compared against astropy and agrees
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8cpp_a63dca51c4dc6a81a582bb5ae69cb325d}\label{util_8cpp_a63dca51c4dc6a81a582bb5ae69cb325d}} 
-\index{util.cpp@{util.cpp}!equatorial\_from\_SF@{equatorial\_from\_SF}}
-\index{equatorial\_from\_SF@{equatorial\_from\_SF}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{equatorial\_from\_SF()}{equatorial\_from\_SF()}}
+\index{util.\+cpp@{util.\+cpp}!equatorial\+\_\+from\+\_\+\+SF@{equatorial\+\_\+from\+\_\+\+SF}}
+\index{equatorial\+\_\+from\+\_\+\+SF@{equatorial\+\_\+from\+\_\+\+SF}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{equatorial\+\_\+from\+\_\+\+S\+F()}{equatorial\_from\_SF()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void equatorial\+\_\+from\+\_\+\+SF (\begin{DoxyParamCaption}\item[{T $\ast$}]{S\+Fvec,  }\item[{T}]{thetal,  }\item[{T}]{phil,  }\item[{T}]{thetas,  }\item[{T}]{phis,  }\item[{T}]{iota,  }\item[{T}]{phi\+\_\+ref,  }\item[{T $\ast$}]{E\+Qvec }\end{DoxyParamCaption})}
 
@@ -548,13 +553,13 @@ Verified with specific cases and with dot products with vectors before and after
 \hline
  & {\em phi\+\_\+ref} & Reference frequency for the waveform (defines the L\+AL frame ) ( orbital phase) at the reference frequency \\
 \hline
-\mbox{\texttt{ out}}  & {\em E\+Qvec} & Out vector in equatorial coordinates in cartesian \\
+\mbox{\tt out}  & {\em E\+Qvec} & Out vector in equatorial coordinates in cartesian \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8cpp_aa82ab145d4f623214c1492589e4327bf}\label{util_8cpp_aa82ab145d4f623214c1492589e4327bf}} 
-\index{util.cpp@{util.cpp}!gsl\_maxwell\_boltzmann\_distribution@{gsl\_maxwell\_boltzmann\_distribution}}
-\index{gsl\_maxwell\_boltzmann\_distribution@{gsl\_maxwell\_boltzmann\_distribution}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{gsl\_maxwell\_boltzmann\_distribution()}{gsl\_maxwell\_boltzmann\_distribution()}}
+\index{util.\+cpp@{util.\+cpp}!gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution@{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution}}
+\index{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution@{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution()}{gsl\_maxwell\_boltzmann\_distribution()}}
 {\footnotesize\ttfamily double gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution (\begin{DoxyParamCaption}\item[{double}]{sigma,  }\item[{gsl\+\_\+rng $\ast$}]{r }\end{DoxyParamCaption})}
 
 
@@ -566,9 +571,9 @@ Maxwell-\/\+Boltzmann describes a gaussian distributed vector in 3 space, so the
 Assumed mean is at 0
 
 Sigma would be equivalent to sqrt(k\+T/m) in the real maxwell boltzmann distribution \mbox{\Hypertarget{util_8cpp_abd99f3492eda3805283a6a6c1161f61f}\label{util_8cpp_abd99f3492eda3805283a6a6c1161f61f}} 
-\index{util.cpp@{util.cpp}!initiate\_LumD\_Z\_interp@{initiate\_LumD\_Z\_interp}}
-\index{initiate\_LumD\_Z\_interp@{initiate\_LumD\_Z\_interp}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{initiate\_LumD\_Z\_interp()}{initiate\_LumD\_Z\_interp()}}
+\index{util.\+cpp@{util.\+cpp}!initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp@{initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp}}
+\index{initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp@{initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp()}{initiate\_LumD\_Z\_interp()}}
 {\footnotesize\ttfamily void initiate\+\_\+\+Lum\+D\+\_\+\+Z\+\_\+interp (\begin{DoxyParamCaption}\item[{gsl\+\_\+interp\+\_\+accel $\ast$$\ast$}]{Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr,  }\item[{gsl\+\_\+spline $\ast$$\ast$}]{Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr }\end{DoxyParamCaption})}
 
 
@@ -576,9 +581,9 @@ Sigma would be equivalent to sqrt(k\+T/m) in the real maxwell boltzmann distribu
 Function that uses the G\+SL libraries to interpolate pre-\/calculated Z-\/\+D\+\_\+L data. 
 
 Initiates the requried functions -- G\+SL interpolation requires allocating memory before hand \mbox{\Hypertarget{util_8cpp_a6a20a9cb79b3c847fc75f3e3eb45f933}\label{util_8cpp_a6a20a9cb79b3c847fc75f3e3eb45f933}} 
-\index{util.cpp@{util.cpp}!list\_intersect@{list\_intersect}}
-\index{list\_intersect@{list\_intersect}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{list\_intersect()}{list\_intersect()}}
+\index{util.\+cpp@{util.\+cpp}!list\+\_\+intersect@{list\+\_\+intersect}}
+\index{list\+\_\+intersect@{list\+\_\+intersect}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{list\+\_\+intersect()}{list\_intersect()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void list\+\_\+intersect (\begin{DoxyParamCaption}\item[{T $\ast$}]{A,  }\item[{int}]{lenA,  }\item[{T $\ast$}]{B,  }\item[{int}]{lenB,  }\item[{T $\ast$$\ast$}]{C,  }\item[{int $\ast$}]{lenC }\end{DoxyParamCaption})}
 
@@ -595,9 +600,9 @@ Takes the length of C and puts it in lenC
 C should have allocated memory for at least as large as the smallest list
 
 W\+I\+LL N\+OT work in-\/place, A, B, and C must be separate \mbox{\Hypertarget{util_8cpp_a9d0768e0355feef9d4d9681e6eed27b4}\label{util_8cpp_a9d0768e0355feef9d4d9681e6eed27b4}} 
-\index{util.cpp@{util.cpp}!list\_intersect\_ptrs@{list\_intersect\_ptrs}}
-\index{list\_intersect\_ptrs@{list\_intersect\_ptrs}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{list\_intersect\_ptrs()}{list\_intersect\_ptrs()}}
+\index{util.\+cpp@{util.\+cpp}!list\+\_\+intersect\+\_\+ptrs@{list\+\_\+intersect\+\_\+ptrs}}
+\index{list\+\_\+intersect\+\_\+ptrs@{list\+\_\+intersect\+\_\+ptrs}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{list\+\_\+intersect\+\_\+ptrs()}{list\_intersect\_ptrs()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void list\+\_\+intersect\+\_\+ptrs (\begin{DoxyParamCaption}\item[{T $\ast$$\ast$}]{A,  }\item[{int}]{lenA,  }\item[{T $\ast$$\ast$}]{B,  }\item[{int}]{lenB,  }\item[{T $\ast$$\ast$}]{C,  }\item[{int $\ast$}]{lenC }\end{DoxyParamCaption})}
 
@@ -614,9 +619,9 @@ Takes the length of C and puts it in lenC
 C should have allocated memory for at least as large as the smallest list
 
 W\+I\+LL N\+OT work in-\/place, A, B, and C must be separate \mbox{\Hypertarget{util_8cpp_a8289e1ab34de59220846f1114dd9f667}\label{util_8cpp_a8289e1ab34de59220846f1114dd9f667}} 
-\index{util.cpp@{util.cpp}!normalized\_gsl\_cholesky\_matrix\_invert@{normalized\_gsl\_cholesky\_matrix\_invert}}
-\index{normalized\_gsl\_cholesky\_matrix\_invert@{normalized\_gsl\_cholesky\_matrix\_invert}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{normalized\_gsl\_cholesky\_matrix\_invert()}{normalized\_gsl\_cholesky\_matrix\_invert()}}
+\index{util.\+cpp@{util.\+cpp}!normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert@{normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert}}
+\index{normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert@{normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert()}{normalized\_gsl\_cholesky\_matrix\_invert()}}
 {\footnotesize\ttfamily int normalized\+\_\+gsl\+\_\+cholesky\+\_\+matrix\+\_\+invert (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{input,  }\item[{double $\ast$$\ast$}]{inverse,  }\item[{int}]{dim }\end{DoxyParamCaption})}
 
 
@@ -624,9 +629,9 @@ W\+I\+LL N\+OT work in-\/place, A, B, and C must be separate \mbox{\Hypertarget{
 Normalize the Fisher matrix before inversion to try and tame singularity issues\+: 
 
 ar\+Xiv\+:1108.\+1826v2 Equation 60-\/61 \mbox{\Hypertarget{util_8cpp_a362581f25c83753aefac698e977cb73e}\label{util_8cpp_a362581f25c83753aefac698e977cb73e}} 
-\index{util.cpp@{util.cpp}!pow\_int@{pow\_int}}
-\index{pow\_int@{pow\_int}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{pow\_int()}{pow\_int()}}
+\index{util.\+cpp@{util.\+cpp}!pow\+\_\+int@{pow\+\_\+int}}
+\index{pow\+\_\+int@{pow\+\_\+int}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{pow\+\_\+int()}{pow\_int()}}
 {\footnotesize\ttfamily double pow\+\_\+int (\begin{DoxyParamCaption}\item[{double}]{base,  }\item[{int}]{power }\end{DoxyParamCaption})}
 
 
@@ -634,9 +639,9 @@ ar\+Xiv\+:1108.\+1826v2 Equation 60-\/61 \mbox{\Hypertarget{util_8cpp_a362581f25
 Local power function, specifically for integer powers. 
 
 Much faster than the std version, because this is only for integer powers \mbox{\Hypertarget{util_8cpp_a9d3b483a858efb84ce776bed255b6dd6}\label{util_8cpp_a9d3b483a858efb84ce776bed255b6dd6}} 
-\index{util.cpp@{util.cpp}!printProgress@{printProgress}}
-\index{printProgress@{printProgress}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{printProgress()}{printProgress()}}
+\index{util.\+cpp@{util.\+cpp}!print\+Progress@{print\+Progress}}
+\index{print\+Progress@{print\+Progress}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{print\+Progress()}{printProgress()}}
 {\footnotesize\ttfamily void print\+Progress (\begin{DoxyParamCaption}\item[{double}]{percentage }\end{DoxyParamCaption})}
 
 
@@ -644,9 +649,9 @@ Much faster than the std version, because this is only for integer powers \mbox{
 routine to print the progress of a process to the terminal as a progress bar 
 
 Call everytime you want the progress printed \mbox{\Hypertarget{util_8cpp_aa3b3e1ddc0801e2dcfa09d5683936817}\label{util_8cpp_aa3b3e1ddc0801e2dcfa09d5683936817}} 
-\index{util.cpp@{util.cpp}!rm\_fisher\_dim@{rm\_fisher\_dim}}
-\index{rm\_fisher\_dim@{rm\_fisher\_dim}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{rm\_fisher\_dim()}{rm\_fisher\_dim()}}
+\index{util.\+cpp@{util.\+cpp}!rm\+\_\+fisher\+\_\+dim@{rm\+\_\+fisher\+\_\+dim}}
+\index{rm\+\_\+fisher\+\_\+dim@{rm\+\_\+fisher\+\_\+dim}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{rm\+\_\+fisher\+\_\+dim()}{rm\_fisher\_dim()}}
 {\footnotesize\ttfamily void rm\+\_\+fisher\+\_\+dim (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{input,  }\item[{int}]{full\+\_\+dim,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{reduced\+\_\+dim,  }\item[{int $\ast$}]{removed\+\_\+dims }\end{DoxyParamCaption})}
 
 
@@ -654,21 +659,21 @@ Call everytime you want the progress printed \mbox{\Hypertarget{util_8cpp_aa3b3e
 Removes a dimension from a matrix (made with fishers in mind, but this is general) 
 
 Note\+: the removed\+\_\+dims list is indexed from 0 \mbox{\Hypertarget{util_8cpp_a132fb8304c25ab9a2e18327cfc65b013}\label{util_8cpp_a132fb8304c25ab9a2e18327cfc65b013}} 
-\index{util.cpp@{util.cpp}!std\_omega@{std\_omega}}
-\index{std\_omega@{std\_omega}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{std\_omega()}{std\_omega()}}
+\index{util.\+cpp@{util.\+cpp}!std\+\_\+omega@{std\+\_\+omega}}
+\index{std\+\_\+omega@{std\+\_\+omega}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{std\+\_\+omega()}{std\_omega()}}
 {\footnotesize\ttfamily double std\+\_\+omega (\begin{DoxyParamCaption}\item[{double}]{RA,  }\item[{double}]{std\+\_\+\+RA,  }\item[{double}]{std\+\_\+\+D\+EC,  }\item[{double}]{cov\+\_\+\+R\+A\+\_\+\+D\+EC }\end{DoxyParamCaption})}
 
 
 
-map the error on RA and D\+EC to error on solid angle \textbackslash{}\+Omega 
+map the error on RA and D\+EC to error on solid angle  
 
 All quantities in rad
 
 From ar\+Xiv\+:0906.\+4269 \mbox{\Hypertarget{util_8cpp_a969645fb30ec69bccd7848afe7ecef1f}\label{util_8cpp_a969645fb30ec69bccd7848afe7ecef1f}} 
-\index{util.cpp@{util.cpp}!terr\_pol\_iota\_from\_equat\_sph@{terr\_pol\_iota\_from\_equat\_sph}}
-\index{terr\_pol\_iota\_from\_equat\_sph@{terr\_pol\_iota\_from\_equat\_sph}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{terr\_pol\_iota\_from\_equat\_sph()}{terr\_pol\_iota\_from\_equat\_sph()}}
+\index{util.\+cpp@{util.\+cpp}!terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph@{terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph}}
+\index{terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph@{terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph()}{terr\_pol\_iota\_from\_equat\_sph()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void terr\+\_\+pol\+\_\+iota\+\_\+from\+\_\+equat\+\_\+sph (\begin{DoxyParamCaption}\item[{T}]{RA,  }\item[{T}]{D\+EC,  }\item[{T}]{thetaj,  }\item[{T}]{phij,  }\item[{T $\ast$}]{pol,  }\item[{T $\ast$}]{iota }\end{DoxyParamCaption})}
 
@@ -680,7 +685,7 @@ For the terrestrial network, this calculates the polarization angle for a detect
 
 Polarization angle is defined as\+:
 
-tan \textbackslash{}psi = ( J.\+z -\/ (J.\+N)(z.\+N) ) / (N.(Jxz))
+tan  = ( J.\+z -\/ (J.\+N)(z.\+N) ) / (N.(Jxz))
 
 Where z is the axis of rotation of earth (equatorial z), and N is the line of sight to the source (direction of propagation is -\/N)
 
@@ -694,15 +699,15 @@ The inclination angle is between the direction of propagation and the total angu
 \hline
 {\em phij} & spherical azimuthal angle of the total angular momentum in equatorial coordinates \\
 \hline
-{\em pol} & polarization defined by tan \textbackslash{}psi = ( J.\+z -\/ (J.\+N)(z.\+N) ) / (N.(Jxz)) \\
+{\em pol} & polarization defined by tan  = ( J.\+z -\/ (J.\+N)(z.\+N) ) / (N.(Jxz)) \\
 \hline
 {\em iota} & Inclination angle of the T\+O\+T\+AL angular momentum and the direction of propagation -\/N \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8cpp_a817fd4d7413b4a2bfe05bfbc454766b2}\label{util_8cpp_a817fd4d7413b4a2bfe05bfbc454766b2}} 
-\index{util.cpp@{util.cpp}!transform\_cart\_sph@{transform\_cart\_sph}}
-\index{transform\_cart\_sph@{transform\_cart\_sph}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{transform\_cart\_sph()}{transform\_cart\_sph()}}
+\index{util.\+cpp@{util.\+cpp}!transform\+\_\+cart\+\_\+sph@{transform\+\_\+cart\+\_\+sph}}
+\index{transform\+\_\+cart\+\_\+sph@{transform\+\_\+cart\+\_\+sph}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{transform\+\_\+cart\+\_\+sph()}{transform\_cart\_sph()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void transform\+\_\+cart\+\_\+sph (\begin{DoxyParamCaption}\item[{T $\ast$}]{cartvec,  }\item[{T $\ast$}]{sphvec }\end{DoxyParamCaption})}
 
@@ -717,11 +722,11 @@ cart\+: x, y, z
 spherical\+: r, polar, azimuthal
 
 Tested in all octants \mbox{\Hypertarget{util_8cpp_a168fd7e5d1d20a344c7bc5e6ced76763}\label{util_8cpp_a168fd7e5d1d20a344c7bc5e6ced76763}} 
-\index{util.cpp@{util.cpp}!transform\_parameters@{transform\_parameters}}
-\index{transform\_parameters@{transform\_parameters}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{transform\_parameters()}{transform\_parameters()}}
+\index{util.\+cpp@{util.\+cpp}!transform\+\_\+parameters@{transform\+\_\+parameters}}
+\index{transform\+\_\+parameters@{transform\+\_\+parameters}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{transform\+\_\+parameters()}{transform\_parameters()}}
 {\footnotesize\ttfamily template$<$class T , class U $>$ \\
-void transform\+\_\+parameters (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ T $>$ $\ast$}]{param\+\_\+in,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ U $>$ $\ast$}]{param\+\_\+out }\end{DoxyParamCaption})}
+void transform\+\_\+parameters (\begin{DoxyParamCaption}\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ T $>$ $\ast$}]{param\+\_\+in,  }\item[{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}$<$ U $>$ $\ast$}]{param\+\_\+out }\end{DoxyParamCaption})}
 
 
 
@@ -730,9 +735,9 @@ Simple utility to copy the members of param\+\_\+in to param\+\_\+out, for whate
 This is sometimes required to jump from double params to adouble params
 
 Memory M\+U\+ST be allocated for betappe and bppe (if present), and this needs to be deallocated \mbox{\Hypertarget{util_8cpp_a3c767ffbc1073a544ae1630ffdea917e}\label{util_8cpp_a3c767ffbc1073a544ae1630ffdea917e}} 
-\index{util.cpp@{util.cpp}!transform\_sph\_cart@{transform\_sph\_cart}}
-\index{transform\_sph\_cart@{transform\_sph\_cart}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{transform\_sph\_cart()}{transform\_sph\_cart()}}
+\index{util.\+cpp@{util.\+cpp}!transform\+\_\+sph\+\_\+cart@{transform\+\_\+sph\+\_\+cart}}
+\index{transform\+\_\+sph\+\_\+cart@{transform\+\_\+sph\+\_\+cart}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{transform\+\_\+sph\+\_\+cart()}{transform\_sph\_cart()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void transform\+\_\+sph\+\_\+cart (\begin{DoxyParamCaption}\item[{T $\ast$}]{sphvec,  }\item[{T $\ast$}]{cartvec }\end{DoxyParamCaption})}
 
@@ -740,9 +745,9 @@ void transform\+\_\+sph\+\_\+cart (\begin{DoxyParamCaption}\item[{T $\ast$}]{sph
 
 utility to transform a vector from spherical (radian) to cartesian 
 
-Range\+: \textbackslash{}theta \textbackslash{}el \mbox{[}0,\textbackslash{}pi\mbox{]}
+Range\+:   \mbox{[}0,\mbox{]}
 
-\textbackslash{}phi \textbackslash{}el \mbox{[}0,2 \textbackslash{}pi\mbox{]}
+\mbox{[}0,2 \mbox{]}
 
 order\+:
 
@@ -751,19 +756,19 @@ cart\+: x, y, z
 spherical\+: r, polar, azimuthal
 
 Tested in all octants \mbox{\Hypertarget{util_8cpp_adcfd6e3f070e3c9bdae4a7cd03570f67}\label{util_8cpp_adcfd6e3f070e3c9bdae4a7cd03570f67}} 
-\index{util.cpp@{util.cpp}!tukey\_window@{tukey\_window}}
-\index{tukey\_window@{tukey\_window}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{tukey\_window()}{tukey\_window()}}
+\index{util.\+cpp@{util.\+cpp}!tukey\+\_\+window@{tukey\+\_\+window}}
+\index{tukey\+\_\+window@{tukey\+\_\+window}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{tukey\+\_\+window()}{tukey\_window()}}
 {\footnotesize\ttfamily void tukey\+\_\+window (\begin{DoxyParamCaption}\item[{double $\ast$}]{window,  }\item[{int}]{length,  }\item[{double}]{alpha }\end{DoxyParamCaption})}
 
 
 
 Tukey window function for F\+F\+Ts. 
 
-As defined by \href{https://en.wikipedia.org/wiki/Window_function}{\texttt{ https\+://en.\+wikipedia.\+org/wiki/\+Window\+\_\+function}} \mbox{\Hypertarget{util_8cpp_a036fae37c6732da48e01ccc1331542d4}\label{util_8cpp_a036fae37c6732da48e01ccc1331542d4}} 
-\index{util.cpp@{util.cpp}!unwrap\_array@{unwrap\_array}}
-\index{unwrap\_array@{unwrap\_array}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{unwrap\_array()}{unwrap\_array()}}
+As defined by \href{https://en.wikipedia.org/wiki/Window_function}{\tt https\+://en.\+wikipedia.\+org/wiki/\+Window\+\_\+function} \mbox{\Hypertarget{util_8cpp_a036fae37c6732da48e01ccc1331542d4}\label{util_8cpp_a036fae37c6732da48e01ccc1331542d4}} 
+\index{util.\+cpp@{util.\+cpp}!unwrap\+\_\+array@{unwrap\+\_\+array}}
+\index{unwrap\+\_\+array@{unwrap\+\_\+array}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{unwrap\+\_\+array()}{unwrap\_array()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void unwrap\+\_\+array (\begin{DoxyParamCaption}\item[{T $\ast$}]{in,  }\item[{T $\ast$}]{out,  }\item[{int}]{len }\end{DoxyParamCaption})}
 
@@ -771,12 +776,12 @@ void unwrap\+\_\+array (\begin{DoxyParamCaption}\item[{T $\ast$}]{in,  }\item[{T
 
 Unwrap angles from arctan. 
 
-Stolen from stack exchange.. \href{https://stackoverflow.com/questions/15634400/continous-angles-in-c-eq-unwrap-function-in-matlab}{\texttt{ https\+://stackoverflow.\+com/questions/15634400/continous-\/angles-\/in-\/c-\/eq-\/unwrap-\/function-\/in-\/matlab}}
+Stolen from stack exchange.. \href{https://stackoverflow.com/questions/15634400/continous-angles-in-c-eq-unwrap-function-in-matlab}{\tt https\+://stackoverflow.\+com/questions/15634400/continous-\/angles-\/in-\/c-\/eq-\/unwrap-\/function-\/in-\/matlab}
 
 Modified \mbox{\Hypertarget{util_8cpp_af9aa77c0f12435f4c7e9f13dba8ca1f8}\label{util_8cpp_af9aa77c0f12435f4c7e9f13dba8ca1f8}} 
-\index{util.cpp@{util.cpp}!XLALSpinWeightedSphericalHarmonic@{XLALSpinWeightedSphericalHarmonic}}
-\index{XLALSpinWeightedSphericalHarmonic@{XLALSpinWeightedSphericalHarmonic}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{XLALSpinWeightedSphericalHarmonic()}{XLALSpinWeightedSphericalHarmonic()}}
+\index{util.\+cpp@{util.\+cpp}!X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic@{X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic}}
+\index{X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic@{X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic()}{XLALSpinWeightedSphericalHarmonic()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 std\+::complex$<$T$>$ X\+L\+A\+L\+Spin\+Weighted\+Spherical\+Harmonic (\begin{DoxyParamCaption}\item[{T}]{theta,  }\item[{T}]{phi,  }\item[{int}]{s,  }\item[{int}]{l,  }\item[{int}]{m }\end{DoxyParamCaption})}
 
@@ -794,31 +799,31 @@ Shamelessly stolen from L\+A\+Lsuite
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8cpp_a415ef00e103efe73c8eabc235b202b12}\label{util_8cpp_a415ef00e103efe73c8eabc235b202b12}} 
-\index{util.cpp@{util.cpp}!Z\_from\_DL@{Z\_from\_DL}}
-\index{Z\_from\_DL@{Z\_from\_DL}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{Z\_from\_DL()}{Z\_from\_DL()}}
+\index{util.\+cpp@{util.\+cpp}!Z\+\_\+from\+\_\+\+DL@{Z\+\_\+from\+\_\+\+DL}}
+\index{Z\+\_\+from\+\_\+\+DL@{Z\+\_\+from\+\_\+\+DL}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{Z\+\_\+from\+\_\+\+D\+L()}{Z\_from\_DL()}}
 {\footnotesize\ttfamily double Z\+\_\+from\+\_\+\+DL (\begin{DoxyParamCaption}\item[{double}]{DL,  }\item[{std\+::string}]{cosmology }\end{DoxyParamCaption})}
 
 
 
 Calculates the redshift given the luminosity distance. 
 
-Based on Astropy.\+cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.\+cosmology\textquotesingle{}s definitions (\href{http://docs.astropy.org/en/stable/cosmology/}{\texttt{ http\+://docs.\+astropy.\+org/en/stable/cosmology/}}) and used scipy.\+optimize to fit to a power series, stepping in half powers of DL. These coefficients are then output to a header file (D\+\_\+\+Z\+\_\+config.\+h) which are used here to calculate redshift. Custom cosmologies etc can easily be acheived by editing the python script D\+\_\+\+Z\+\_\+config.\+py, the c++ functions do not need modification. They use whatever data is available in the header file.
+Based on Astropy.\+cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.\+cosmology\textquotesingle{}s definitions (\href{http://docs.astropy.org/en/stable/cosmology/}{\tt http\+://docs.\+astropy.\+org/en/stable/cosmology/}) and used scipy.\+optimize to fit to a power series, stepping in half powers of DL. These coefficients are then output to a header file (D\+\_\+\+Z\+\_\+config.\+h) which are used here to calculate redshift. Custom cosmologies etc can easily be acheived by editing the python script D\+\_\+\+Z\+\_\+config.\+py, the c++ functions do not need modification. They use whatever data is available in the header file.
 
 5 cosmological models are available (this argument must be spelled exactly, although case insensitive)\+:
 
 P\+L\+A\+N\+C\+K15, P\+L\+A\+N\+C\+K13, W\+M\+A\+P9, W\+M\+A\+P7, W\+M\+A\+P5 \mbox{\Hypertarget{util_8cpp_aec48ba6d02ebe433a684e09884e6a31b}\label{util_8cpp_aec48ba6d02ebe433a684e09884e6a31b}} 
-\index{util.cpp@{util.cpp}!Z\_from\_DL\_interp@{Z\_from\_DL\_interp}}
-\index{Z\_from\_DL\_interp@{Z\_from\_DL\_interp}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{Z\_from\_DL\_interp()}{Z\_from\_DL\_interp()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\index{util.\+cpp@{util.\+cpp}!Z\+\_\+from\+\_\+\+D\+L\+\_\+interp@{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp}}
+\index{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp@{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp()}{Z\_from\_DL\_interp()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily adouble Z\+\_\+from\+\_\+\+D\+L\+\_\+interp (\begin{DoxyParamCaption}\item[{adouble}]{DL,  }\item[{gsl\+\_\+interp\+\_\+accel $\ast$}]{Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr,  }\item[{gsl\+\_\+spline $\ast$}]{Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr }\end{DoxyParamCaption})}
 
 Function that returns Z from a given luminosity Distance -- only Planck15
 
 adouble version for A\+D\+O\+L-\/C calculations \mbox{\Hypertarget{util_8cpp_a8d080a588955cc9cb0a4efc831187936}\label{util_8cpp_a8d080a588955cc9cb0a4efc831187936}} 
-\index{util.cpp@{util.cpp}!Z\_from\_DL\_interp@{Z\_from\_DL\_interp}}
-\index{Z\_from\_DL\_interp@{Z\_from\_DL\_interp}!util.cpp@{util.cpp}}
-\doxysubsubsection{\texorpdfstring{Z\_from\_DL\_interp()}{Z\_from\_DL\_interp()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\index{util.\+cpp@{util.\+cpp}!Z\+\_\+from\+\_\+\+D\+L\+\_\+interp@{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp}}
+\index{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp@{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp}!util.\+cpp@{util.\+cpp}}
+\subsubsection{\texorpdfstring{Z\+\_\+from\+\_\+\+D\+L\+\_\+interp()}{Z\_from\_DL\_interp()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily double Z\+\_\+from\+\_\+\+D\+L\+\_\+interp (\begin{DoxyParamCaption}\item[{double}]{DL,  }\item[{gsl\+\_\+interp\+\_\+accel $\ast$}]{Z\+\_\+\+D\+L\+\_\+accel\+\_\+ptr,  }\item[{gsl\+\_\+spline $\ast$}]{Z\+\_\+\+D\+L\+\_\+spline\+\_\+ptr }\end{DoxyParamCaption})}
 
 Function that returns Z from a given luminosity Distance -- only Planck15 

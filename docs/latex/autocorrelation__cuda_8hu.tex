@@ -1,33 +1,38 @@
-\hypertarget{autocorrelation__cuda_8hu}{}\doxysection{include/gwat/autocorrelation\+\_\+cuda.hu File Reference}
-\label{autocorrelation__cuda_8hu}\index{include/gwat/autocorrelation\_cuda.hu@{include/gwat/autocorrelation\_cuda.hu}}
-This graph shows which files directly or indirectly include this file\+:
-% FIG 0
-\doxysubsection*{Classes}
+\hypertarget{autocorrelation__cuda_8hu}{}\section{include/gwat/autocorrelation\+\_\+cuda.hu File Reference}
+\label{autocorrelation__cuda_8hu}\index{include/gwat/autocorrelation\+\_\+cuda.\+hu@{include/gwat/autocorrelation\+\_\+cuda.\+hu}}
+This graph shows which files directly or indirectly include this file\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=218pt]{autocorrelation__cuda_8hu__dep__incl}
+\end{center}
+\end{figure}
+\subsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
-struct \mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}}
+struct \hyperlink{structGPUplan}{G\+P\+Uplan}
 \end{DoxyCompactItemize}
-\doxysubsection*{Functions}
+\subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-\+\_\+\+\_\+device\+\_\+\+\_\+ \+\_\+\+\_\+host\+\_\+\+\_\+ void \mbox{\hyperlink{autocorrelation__cuda_8hu_a366f884938ea0477409e8d52f0309a44}{auto\+\_\+corr\+\_\+internal}} (double $\ast$arr, int length, int lag, double average, double $\ast$corr, int start\+\_\+id)
+\+\_\+\+\_\+device\+\_\+\+\_\+ \+\_\+\+\_\+host\+\_\+\+\_\+ void \hyperlink{autocorrelation__cuda_8hu_a366f884938ea0477409e8d52f0309a44}{auto\+\_\+corr\+\_\+internal} (double $\ast$arr, int length, int lag, double average, double $\ast$corr, int start\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Internal function to calculate the autocorrelation for a given lag Customized for the thread pool architecture, with extra arguments because of the way the memory is allocated. \end{DoxyCompactList}\item 
-\+\_\+\+\_\+global\+\_\+\+\_\+ void \mbox{\hyperlink{autocorrelation__cuda_8hu_ad8cff0e627281b397e017fec619b38a5}{auto\+\_\+corr\+\_\+internal\+\_\+kernal}} (double $\ast$arr, int length, double average, int $\ast$rho\+\_\+index, double target\+\_\+corr, double var, int start\+\_\+id)
+\+\_\+\+\_\+global\+\_\+\+\_\+ void \hyperlink{autocorrelation__cuda_8hu_ad8cff0e627281b397e017fec619b38a5}{auto\+\_\+corr\+\_\+internal\+\_\+kernal} (double $\ast$arr, int length, double average, int $\ast$rho\+\_\+index, double target\+\_\+corr, double var, int start\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Internal function to launch the C\+U\+DA kernel for a range of autocorrelations. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{autocorrelation__cuda_8hu_a0516461a0e02bf12da6c199061247a77}{allocate\+\_\+gpu\+\_\+plan}} (\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$plan, int data\+\_\+length, int dimension, int num\+\_\+segments)
+void \hyperlink{autocorrelation__cuda_8hu_a0516461a0e02bf12da6c199061247a77}{allocate\+\_\+gpu\+\_\+plan} (\hyperlink{structGPUplan}{G\+P\+Uplan} $\ast$plan, int data\+\_\+length, int dimension, int num\+\_\+segments)
 \begin{DoxyCompactList}\small\item\em Allocates memory for autocorrelation--G\+PU structure. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{autocorrelation__cuda_8hu_a131867ca45185be0af927a5ec7d7645d}{deallocate\+\_\+gpu\+\_\+plan}} (\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$plan, int data\+\_\+length, int dimension, int num\+\_\+segments)
+void \hyperlink{autocorrelation__cuda_8hu_a131867ca45185be0af927a5ec7d7645d}{deallocate\+\_\+gpu\+\_\+plan} (\hyperlink{structGPUplan}{G\+P\+Uplan} $\ast$plan, int data\+\_\+length, int dimension, int num\+\_\+segments)
 \begin{DoxyCompactList}\small\item\em Deallocates memory for the autocorrelation--G\+PU structure. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{autocorrelation__cuda_8hu_a00159a0e9eb7e40725a034becb3110c0}{copy\+\_\+data\+\_\+to\+\_\+device}} (\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$plan, double $\ast$$\ast$input\+\_\+data, int data\+\_\+length, int dimension, int num\+\_\+segments)
+void \hyperlink{autocorrelation__cuda_8hu_a00159a0e9eb7e40725a034becb3110c0}{copy\+\_\+data\+\_\+to\+\_\+device} (\hyperlink{structGPUplan}{G\+P\+Uplan} $\ast$plan, double $\ast$$\ast$input\+\_\+data, int data\+\_\+length, int dimension, int num\+\_\+segments)
 \begin{DoxyCompactList}\small\item\em Copy data to device before starting kernels. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
-\doxysubsection{Function Documentation}
+\subsection{Function Documentation}
 \mbox{\Hypertarget{autocorrelation__cuda_8hu_a0516461a0e02bf12da6c199061247a77}\label{autocorrelation__cuda_8hu_a0516461a0e02bf12da6c199061247a77}} 
-\index{autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}!allocate\_gpu\_plan@{allocate\_gpu\_plan}}
-\index{allocate\_gpu\_plan@{allocate\_gpu\_plan}!autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}}
-\doxysubsubsection{\texorpdfstring{allocate\_gpu\_plan()}{allocate\_gpu\_plan()}}
-{\footnotesize\ttfamily void allocate\+\_\+gpu\+\_\+plan (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$}]{plan,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
+\index{autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}!allocate\+\_\+gpu\+\_\+plan@{allocate\+\_\+gpu\+\_\+plan}}
+\index{allocate\+\_\+gpu\+\_\+plan@{allocate\+\_\+gpu\+\_\+plan}!autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}}
+\subsubsection{\texorpdfstring{allocate\+\_\+gpu\+\_\+plan()}{allocate\_gpu\_plan()}}
+{\footnotesize\ttfamily void allocate\+\_\+gpu\+\_\+plan (\begin{DoxyParamCaption}\item[{\hyperlink{structGPUplan}{G\+P\+Uplan} $\ast$}]{plan,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
 
 
 
@@ -45,9 +50,9 @@ Allocates memory for autocorrelation--G\+PU structure.
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8hu_a366f884938ea0477409e8d52f0309a44}\label{autocorrelation__cuda_8hu_a366f884938ea0477409e8d52f0309a44}} 
-\index{autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}!auto\_corr\_internal@{auto\_corr\_internal}}
-\index{auto\_corr\_internal@{auto\_corr\_internal}!autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}}
-\doxysubsubsection{\texorpdfstring{auto\_corr\_internal()}{auto\_corr\_internal()}}
+\index{autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}!auto\+\_\+corr\+\_\+internal@{auto\+\_\+corr\+\_\+internal}}
+\index{auto\+\_\+corr\+\_\+internal@{auto\+\_\+corr\+\_\+internal}!autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}}
+\subsubsection{\texorpdfstring{auto\+\_\+corr\+\_\+internal()}{auto\_corr\_internal()}}
 {\footnotesize\ttfamily \+\_\+\+\_\+device\+\_\+\+\_\+ \+\_\+\+\_\+host\+\_\+\+\_\+ void auto\+\_\+corr\+\_\+internal (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{int}]{lag,  }\item[{double}]{average,  }\item[{double $\ast$}]{corr,  }\item[{int}]{start\+\_\+id }\end{DoxyParamCaption})}
 
 
@@ -64,15 +69,15 @@ Internal function to calculate the autocorrelation for a given lag Customized fo
 \hline
  & {\em average} & Average of the array arr \\
 \hline
-\mbox{\texttt{ out}}  & {\em corr} & output correlation \\
+\mbox{\tt out}  & {\em corr} & output correlation \\
 \hline
- & {\em start\+\_\+id} & ID of location to start calculation -\/-\/ input arrary arr is assumed to be contiguous for multiple dimensions \\
+ & {\em start\+\_\+id} & ID of location to start calculation -- input arrary arr is assumed to be contiguous for multiple dimensions \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8hu_ad8cff0e627281b397e017fec619b38a5}\label{autocorrelation__cuda_8hu_ad8cff0e627281b397e017fec619b38a5}} 
-\index{autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}!auto\_corr\_internal\_kernal@{auto\_corr\_internal\_kernal}}
-\index{auto\_corr\_internal\_kernal@{auto\_corr\_internal\_kernal}!autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}}
-\doxysubsubsection{\texorpdfstring{auto\_corr\_internal\_kernal()}{auto\_corr\_internal\_kernal()}}
+\index{autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}!auto\+\_\+corr\+\_\+internal\+\_\+kernal@{auto\+\_\+corr\+\_\+internal\+\_\+kernal}}
+\index{auto\+\_\+corr\+\_\+internal\+\_\+kernal@{auto\+\_\+corr\+\_\+internal\+\_\+kernal}!autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}}
+\subsubsection{\texorpdfstring{auto\+\_\+corr\+\_\+internal\+\_\+kernal()}{auto\_corr\_internal\_kernal()}}
 {\footnotesize\ttfamily \+\_\+\+\_\+global\+\_\+\+\_\+ void auto\+\_\+corr\+\_\+internal\+\_\+kernal (\begin{DoxyParamCaption}\item[{double $\ast$}]{arr,  }\item[{int}]{length,  }\item[{double}]{average,  }\item[{int $\ast$}]{rho\+\_\+index,  }\item[{double}]{target\+\_\+corr,  }\item[{double}]{var,  }\item[{int}]{start\+\_\+id }\end{DoxyParamCaption})}
 
 
@@ -81,7 +86,7 @@ Internal function to launch the C\+U\+DA kernel for a range of autocorrelations.
 
 Correlation function used\+:
 
-rho(lag) = 1 / (length -\/ lag) \textbackslash{}sum (arr\mbox{[}i+lag\mbox{]}-\/average) ( arr\mbox{[}i\mbox{]}-\/ average)
+rho(lag) = 1 / (length -\/ lag)  (arr\mbox{[}i+lag\mbox{]}-\/average) ( arr\mbox{[}i\mbox{]}-\/ average)
 
 target\+\_\+corr = rho(rho\+\_\+index)/rho(0) = rho(rho\+\_\+index)/var 
 \begin{DoxyParams}[1]{Parameters}
@@ -91,7 +96,7 @@ target\+\_\+corr = rho(rho\+\_\+index)/rho(0) = rho(rho\+\_\+index)/var
 \hline
  & {\em average} & Average of input data \\
 \hline
-\mbox{\texttt{ out}}  & {\em rho\+\_\+index} & Index of the lag that results ina correlation ratio target\+\_\+corr \\
+\mbox{\tt out}  & {\em rho\+\_\+index} & Index of the lag that results ina correlation ratio target\+\_\+corr \\
 \hline
  & {\em target\+\_\+corr} & Target correlation ratio rho(lag)/rho(0) = target\+\_\+corr \\
 \hline
@@ -101,10 +106,10 @@ target\+\_\+corr = rho(rho\+\_\+index)/rho(0) = rho(rho\+\_\+index)/var
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8hu_a00159a0e9eb7e40725a034becb3110c0}\label{autocorrelation__cuda_8hu_a00159a0e9eb7e40725a034becb3110c0}} 
-\index{autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}!copy\_data\_to\_device@{copy\_data\_to\_device}}
-\index{copy\_data\_to\_device@{copy\_data\_to\_device}!autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}}
-\doxysubsubsection{\texorpdfstring{copy\_data\_to\_device()}{copy\_data\_to\_device()}}
-{\footnotesize\ttfamily void copy\+\_\+data\+\_\+to\+\_\+device (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$}]{plan,  }\item[{double $\ast$$\ast$}]{input\+\_\+data,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
+\index{autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}!copy\+\_\+data\+\_\+to\+\_\+device@{copy\+\_\+data\+\_\+to\+\_\+device}}
+\index{copy\+\_\+data\+\_\+to\+\_\+device@{copy\+\_\+data\+\_\+to\+\_\+device}!autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}}
+\subsubsection{\texorpdfstring{copy\+\_\+data\+\_\+to\+\_\+device()}{copy\_data\_to\_device()}}
+{\footnotesize\ttfamily void copy\+\_\+data\+\_\+to\+\_\+device (\begin{DoxyParamCaption}\item[{\hyperlink{structGPUplan}{G\+P\+Uplan} $\ast$}]{plan,  }\item[{double $\ast$$\ast$}]{input\+\_\+data,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
 
 
 
@@ -124,10 +129,10 @@ Copy data to device before starting kernels.
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{autocorrelation__cuda_8hu_a131867ca45185be0af927a5ec7d7645d}\label{autocorrelation__cuda_8hu_a131867ca45185be0af927a5ec7d7645d}} 
-\index{autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}!deallocate\_gpu\_plan@{deallocate\_gpu\_plan}}
-\index{deallocate\_gpu\_plan@{deallocate\_gpu\_plan}!autocorrelation\_cuda.hu@{autocorrelation\_cuda.hu}}
-\doxysubsubsection{\texorpdfstring{deallocate\_gpu\_plan()}{deallocate\_gpu\_plan()}}
-{\footnotesize\ttfamily void deallocate\+\_\+gpu\+\_\+plan (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structGPUplan}{G\+P\+Uplan}} $\ast$}]{plan,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
+\index{autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}!deallocate\+\_\+gpu\+\_\+plan@{deallocate\+\_\+gpu\+\_\+plan}}
+\index{deallocate\+\_\+gpu\+\_\+plan@{deallocate\+\_\+gpu\+\_\+plan}!autocorrelation\+\_\+cuda.\+hu@{autocorrelation\+\_\+cuda.\+hu}}
+\subsubsection{\texorpdfstring{deallocate\+\_\+gpu\+\_\+plan()}{deallocate\_gpu\_plan()}}
+{\footnotesize\ttfamily void deallocate\+\_\+gpu\+\_\+plan (\begin{DoxyParamCaption}\item[{\hyperlink{structGPUplan}{G\+P\+Uplan} $\ast$}]{plan,  }\item[{int}]{data\+\_\+length,  }\item[{int}]{dimension,  }\item[{int}]{num\+\_\+segments }\end{DoxyParamCaption})}
 
 
 
