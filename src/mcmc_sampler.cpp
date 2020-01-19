@@ -1334,7 +1334,6 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 							int min_val =10;
 							//Don't add chain 0 and chain chain_N-1
 							for (int j =1 ;j <samplerptr->chain_N-1; j++){
-								std::cout<<running_ratio[j]<<std::endl;
 								if(running_ratio[j]<min_val){
 									min_id = j;
 									min_val = running_ratio[j];
@@ -1350,7 +1349,6 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 								old_temps[i+1] = old_temps[i];
 							}
 							//Add new chain between two other chains, geometrically
-							std::cout<<samplerptr->chain_N<<" "<<min_id<<std::endl;
 							samplerptr->chain_temps[min_id] = std::sqrt(samplerptr->chain_temps[min_id-1]*samplerptr->chain_temps[min_id+1]);
 							old_temps[min_id] = samplerptr->chain_temps[min_id];
 							//populate all the necessary chain-specific parameters
@@ -1409,7 +1407,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 						}
 						//else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
 						else if(!testing){
-							if(test_ct<3){
+							if(test_ct<10){
 								test_ct++;
 							}
 							else{

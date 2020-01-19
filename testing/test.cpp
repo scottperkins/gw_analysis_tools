@@ -195,7 +195,7 @@ void test56()
 	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
 
 
-	//psd_length = 100;
+	psd_length = 100;
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
@@ -208,9 +208,9 @@ void test56()
 	//double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.001),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
 	double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1};
 	double *seeding_var = NULL;
-	int n_steps = 5000;
-	int chain_N=8 ;
-	int max_thermo=8 ;
+	int n_steps = 15000;
+	int chain_N=20 ;
+	int max_thermo=20 ;
 	int t0 = 10000;
 	int nu = 100;
 	std::string chain_alloc = "double";
