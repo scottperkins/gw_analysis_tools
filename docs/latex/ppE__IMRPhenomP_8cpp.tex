@@ -1,24 +1,25 @@
-\hypertarget{ppE__IMRPhenomP_8cpp}{}\section{src/pp\+E\+\_\+\+I\+M\+R\+PhenomP.cpp File Reference}
-\label{ppE__IMRPhenomP_8cpp}\index{src/pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp@{src/pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp}}
+\hypertarget{ppE__IMRPhenomP_8cpp}{}\doxysection{src/pp\+E\+\_\+\+I\+M\+R\+PhenomP.cpp File Reference}
+\label{ppE__IMRPhenomP_8cpp}\index{src/ppE\_IMRPhenomP.cpp@{src/ppE\_IMRPhenomP.cpp}}
 {\ttfamily \#include \char`\"{}pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}pp\+E\+\_\+\+I\+M\+R\+Phenom\+D.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$adolc/adouble.\+h$>$}\newline
-Include dependency graph for pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp\+:\nopagebreak
+Include dependency graph for pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp\+:
+\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
 \includegraphics[width=350pt]{ppE__IMRPhenomP_8cpp__incl}
 \end{center}
 \end{figure}
-\subsection*{Macros}
+\doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
 \#define {\bfseries R\+O\+T\+A\+T\+EZ}(angle,  vx,  vy,  vz)
 \item 
 \#define {\bfseries R\+O\+T\+A\+T\+EY}(angle,  vx,  vy,  vz)
 \end{DoxyCompactItemize}
-\subsection*{Variables}
+\doxysubsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{ppE__IMRPhenomP_8cpp_a7398490e588495f0087616921a791ede}\label{ppE__IMRPhenomP_8cpp_a7398490e588495f0087616921a791ede}} 
@@ -26,33 +27,35 @@ const double {\bfseries sqrt\+\_\+6} = 2.\+44948974278317788
 \end{DoxyCompactItemize}
 
 
-\subsection{Detailed Description}
+\doxysubsection{Detailed Description}
 Source code file for parameterized post Einsteinian Modifications to the precessing waveform model I\+M\+R\+PhenomP 
 
-\subsection{Macro Definition Documentation}
+\doxysubsection{Macro Definition Documentation}
 \mbox{\Hypertarget{ppE__IMRPhenomP_8cpp_ac7b1a6a2bcd511c88405f0d1c53d6f9a}\label{ppE__IMRPhenomP_8cpp_ac7b1a6a2bcd511c88405f0d1c53d6f9a}} 
-\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp}!R\+O\+T\+A\+T\+EY@{R\+O\+T\+A\+T\+EY}}
-\index{R\+O\+T\+A\+T\+EY@{R\+O\+T\+A\+T\+EY}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp}}
-\subsubsection{\texorpdfstring{R\+O\+T\+A\+T\+EY}{ROTATEY}}
+\index{ppE\_IMRPhenomP.cpp@{ppE\_IMRPhenomP.cpp}!ROTATEY@{ROTATEY}}
+\index{ROTATEY@{ROTATEY}!ppE\_IMRPhenomP.cpp@{ppE\_IMRPhenomP.cpp}}
+\doxysubsubsection{\texorpdfstring{ROTATEY}{ROTATEY}}
 {\footnotesize\ttfamily \#define R\+O\+T\+A\+T\+EY(\begin{DoxyParamCaption}\item[{}]{angle,  }\item[{}]{vx,  }\item[{}]{vy,  }\item[{}]{vz }\end{DoxyParamCaption})}
 
 {\bfseries Value\+:}
-\begin{DoxyCode}
-tmp1 = vx*cos(angle) + vz*sin(angle);\(\backslash\)
-tmp2 = - vx*sin(angle) + vz*cos(angle);\(\backslash\)
-vx = tmp1;\(\backslash\)
-vz = tmp2
+\begin{DoxyCode}{0}
+\DoxyCodeLine{tmp1 = vx*cos(angle) + vz*sin(angle);\(\backslash\)}
+\DoxyCodeLine{tmp2 = -\/ vx*sin(angle) + vz*cos(angle);\(\backslash\)}
+\DoxyCodeLine{vx = tmp1;\(\backslash\)}
+\DoxyCodeLine{vz = tmp2}
+
 \end{DoxyCode}
 \mbox{\Hypertarget{ppE__IMRPhenomP_8cpp_a31ac217bed1daa05f93845a6f9a6a211}\label{ppE__IMRPhenomP_8cpp_a31ac217bed1daa05f93845a6f9a6a211}} 
-\index{pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp}!R\+O\+T\+A\+T\+EZ@{R\+O\+T\+A\+T\+EZ}}
-\index{R\+O\+T\+A\+T\+EZ@{R\+O\+T\+A\+T\+EZ}!pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp@{pp\+E\+\_\+\+I\+M\+R\+Phenom\+P.\+cpp}}
-\subsubsection{\texorpdfstring{R\+O\+T\+A\+T\+EZ}{ROTATEZ}}
+\index{ppE\_IMRPhenomP.cpp@{ppE\_IMRPhenomP.cpp}!ROTATEZ@{ROTATEZ}}
+\index{ROTATEZ@{ROTATEZ}!ppE\_IMRPhenomP.cpp@{ppE\_IMRPhenomP.cpp}}
+\doxysubsubsection{\texorpdfstring{ROTATEZ}{ROTATEZ}}
 {\footnotesize\ttfamily \#define R\+O\+T\+A\+T\+EZ(\begin{DoxyParamCaption}\item[{}]{angle,  }\item[{}]{vx,  }\item[{}]{vy,  }\item[{}]{vz }\end{DoxyParamCaption})}
 
 {\bfseries Value\+:}
-\begin{DoxyCode}
-tmp1 = vx*cos(angle) - vy*sin(angle);\(\backslash\)
-tmp2 = vx*sin(angle) + vy*cos(angle);\(\backslash\)
-vx = tmp1;\(\backslash\)
-vy = tmp2
+\begin{DoxyCode}{0}
+\DoxyCodeLine{tmp1 = vx*cos(angle) -\/ vy*sin(angle);\(\backslash\)}
+\DoxyCodeLine{tmp2 = vx*sin(angle) + vy*cos(angle);\(\backslash\)}
+\DoxyCodeLine{vx = tmp1;\(\backslash\)}
+\DoxyCodeLine{vy = tmp2}
+
 \end{DoxyCode}

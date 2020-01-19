@@ -228,7 +228,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double ***output,
 	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
-void dyanmic_temperature_internal(sampler *samplerptr, 
+void dynamic_temperature_internal(sampler *samplerptr, 
 	int N_steps, 
 	double nu, 
 	int t0,

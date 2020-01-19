@@ -141,7 +141,7 @@ void test56()
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
-	std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
 	//int rows = 8032;
@@ -171,8 +171,8 @@ void test56()
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt";
 	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt";
-	detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[1] =  "/home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
 	//detector_files[0] =  "/home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
@@ -195,7 +195,6 @@ void test56()
 	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
 
 
-	psd_length = 100;
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
@@ -203,20 +202,21 @@ void test56()
 
 	//#########################################################
 	//mcmc options
-	int dimension = 11;
+	int dimension = 13;
 	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
-	//double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.001),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
-	double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1};
+	double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.301),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
+	//double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(.01),.6,6,std::log(500),std::log(30), .24,.1,.1};
 	double *seeding_var = NULL;
 	int n_steps = 15000;
-	int chain_N=20 ;
-	int max_thermo=20 ;
+	//int chain_N=20 ;
+	//int max_thermo=20 ;
+	int chain_N=8 ;
+	int max_thermo=8 ;
 	int t0 = 10000;
 	int nu = 100;
 	std::string chain_alloc = "double";
 	//std::string chain_alloc = "cold";
-	double **output;
-	output = allocate_2D_array(n_steps, dimension );
+	//int swp_freq = 5;
 	int swp_freq = 5;
 	double chain_temps[chain_N];
 	double c = 1.3;
@@ -231,30 +231,35 @@ void test56()
 	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
 	//std::string generation_method = "IMRPhenomD";
-	std::string generation_method = "IMRPhenomD";
+	std::string generation_method = "IMRPhenomPv2";
 	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
-	std::string chainfile = "testing/data/mcmc_output_uncorr_P.csv";
-	std::string statfilename = "testing/data/mcmc_statistics_uncorr_P.txt";
-	std::string checkfile = "testing/data/mcmc_checkpoint_uncorr_P.csv";
+	std::string chainfile = "testing/data/mcmc_output_uncorr_D.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_uncorr_D.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_uncorr_D.csv";
 
-	int corr_threshold = 1000;
+	int corr_threshold = 10;
 	int corr_segments = 10;
 	double corr_converge_thresh = 0.50;
 	double corr_target_ac = .01;
 
+	double **output;
+	output = allocate_2D_array(n_steps, dimension );
+	//double ***output;
+	//output = allocate_3D_array(chain_N,n_steps, dimension );
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
-			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
+			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_Pv2,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
 			generation_method,statfilename,chainfile, "",checkfile);	
+	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dimension, n_steps,chain_N,max_thermo, initial_pos, seeding_var, chain_temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,numThreads, pool, show_progress, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, generation_method, statfilename, chainfile,  "",checkfile);
 
 
 	//write_file(chainfile, output[0], n_steps, dimension);
 
-	psd_length = 8032;
 	deallocate_2D_array(output, n_steps, dimension);
+	//deallocate_3D_array(output, chain_N,n_steps, dimension);
 	delete [] detectors;
 	free(data_length);
 	//free_LOSC_data(data, psd,freqs, num_detectors, length);
@@ -320,11 +325,11 @@ void test54()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 50000;
-	int chain_N= 8;
-	int max_chain_N_thermo= 8;
+	int N_steps = 1500000;
+	int chain_N= 200;
+	int max_chain_N_thermo= 200;
 	int t0= 100000;
-	int nu= 5;
+	int nu= 500;
 	//std::string chain_dist_method = "half_ensemble";
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
@@ -333,7 +338,7 @@ void test54()
 	double **output;
 	output = allocate_2D_array(N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 3;
+	int swp_freq = 50;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//double chain_temps[chain_N] ={1};
@@ -342,7 +347,7 @@ void test54()
 	std::string statfilename = "testing/data/neil_mcmc_statistics_uncorr.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint_uncorr.csv";
 	
-	int numThreads = 1;
+	int numThreads = 20;
 	bool pool = false;
 
 	int corr_threshold = 50;

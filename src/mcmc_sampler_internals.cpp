@@ -336,6 +336,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		sampler->fisher_update_ct[chain_index]=0;
 	}
 	else{ 
+		std::cout<<"Fisher nans"<<std::endl;
 		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
 		sampler->nan_counter[chain_index]+=1;
 	}
@@ -863,7 +864,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 		}
 		else{
 			samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_dest->fisher_update_number;
-			update_fisher(samplerptr_dest, samplerptr_dest->output[id_dest][0], samplerptr_dest->param_status[id_dest][0],id_dest);	
+			update_fisher(samplerptr_dest, samplerptr_dest->output[id_dest][samplerptr_dest->chain_pos[id_dest]], samplerptr_dest->param_status[id_dest][samplerptr_dest->chain_pos[id_dest]],id_dest);	
 		}
 	}
 
@@ -892,6 +893,16 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	}
 	if(samplerptr_source->PT_alloc)
 		samplerptr_dest->A[id_dest] = samplerptr_source->A[id_source];
+
+	samplerptr_dest->prop_MH_factor[id_dest] = samplerptr_source->prop_MH_factor[id_source];
+	samplerptr_dest->max_target_accept_ratio[id_dest] = samplerptr_source->max_target_accept_ratio[id_source];
+	samplerptr_dest->min_target_accept_ratio[id_dest] = samplerptr_source->min_target_accept_ratio[id_source];
+	samplerptr_dest->min_target_accept_ratio[id_dest] = samplerptr_source->min_target_accept_ratio[id_source];
+	if(samplerptr_source->update_RJ_width){
+		samplerptr_dest->RJstep_accept_ct[id_dest] = samplerptr_source->RJstep_accept_ct[id_source];
+		samplerptr_dest->RJstep_reject_ct[id_dest] = samplerptr_source->RJstep_reject_ct[id_source];
+	}
+
 }
 
 /*! \brief Checks the status of a sampler for the stochastic sampling

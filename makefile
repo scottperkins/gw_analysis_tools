@@ -43,10 +43,10 @@ SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 
 ############################################################################
 #CUDA OPTIONS
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
-OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
-#LIBS=-ladolc -lgsl -lgslcblas -lfftw3
-#OBJECTSCUDA := 
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
+#OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3
+OBJECTSCUDA := 
 ########################################################################
 
 IEXT := h

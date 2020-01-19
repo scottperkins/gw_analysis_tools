@@ -1,61 +1,22 @@
-\hypertarget{classthreadPool}{}\section{thread\+Pool$<$ jobtype, comparator $>$ Class Template Reference}
-\label{classthreadPool}\index{thread\+Pool$<$ jobtype, comparator $>$@{thread\+Pool$<$ jobtype, comparator $>$}}
-
-
-Class for creating a pool of threads to asynchronously distribute work.  
-
-
-
-
-{\ttfamily \#include $<$thread\+Pool.\+h$>$}
-
-\subsection*{Public Member Functions}
+\hypertarget{classThreadPool}{}\doxysection{Thread\+Pool Class Reference}
+\label{classThreadPool}\index{ThreadPool@{ThreadPool}}
+\doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{classthreadPool_a9dec84c42aa3c3beee252f338ddc2d39}\label{classthreadPool_a9dec84c42aa3c3beee252f338ddc2d39}} 
-\hyperlink{classthreadPool_a9dec84c42aa3c3beee252f338ddc2d39}{thread\+Pool} (std\+::size\+\_\+t num\+Threads, std\+::function$<$ void(int, jobtype)$>$ work\+\_\+fn)
-\begin{DoxyCompactList}\small\item\em Constructor -- starts thread pool running. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{classthreadPool_abf95d0e451e758582920dc8ddf8a0602}\label{classthreadPool_abf95d0e451e758582920dc8ddf8a0602}} 
-\hyperlink{classthreadPool_abf95d0e451e758582920dc8ddf8a0602}{$\sim$thread\+Pool} ()
-\begin{DoxyCompactList}\small\item\em Destructor -- stops threads. \end{DoxyCompactList}\item 
-void \hyperlink{classthreadPool_a8032717dcc11834427f874bc1efd6376}{enqueue} (jobtype job\+\_\+id)
-\begin{DoxyCompactList}\small\item\em Places jobs in queue to wait for scheduling. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{classthreadPool_acbbf74c33481a258439be4d305f5f429}\label{classthreadPool_acbbf74c33481a258439be4d305f5f429}} 
-int \hyperlink{classthreadPool_acbbf74c33481a258439be4d305f5f429}{get\+\_\+num\+\_\+threads} ()
-\begin{DoxyCompactList}\small\item\em Get the number of threads being used by the thread pool. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{classthreadPool_a12646e379d9eef439e3a779eda483a4a}\label{classthreadPool_a12646e379d9eef439e3a779eda483a4a}} 
-int \hyperlink{classthreadPool_a12646e379d9eef439e3a779eda483a4a}{get\+\_\+queue\+\_\+length} ()
-\begin{DoxyCompactList}\small\item\em Get the current length of the job queue. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\mbox{\Hypertarget{classThreadPool_a9db95eb853b96e4fc832514226b4ada3}\label{classThreadPool_a9db95eb853b96e4fc832514226b4ada3}} 
+{\bfseries Thread\+Pool} (std\+::size\+\_\+t num\+Threads)
+\item 
+\mbox{\Hypertarget{classThreadPool_adbf85eec6d088b068301338e470a9723}\label{classThreadPool_adbf85eec6d088b068301338e470a9723}} 
+void {\bfseries enqueue} (int i)
+\item 
+\mbox{\Hypertarget{classThreadPool_acd64225bd86aa5cf7a7889c75413167e}\label{classThreadPool_acd64225bd86aa5cf7a7889c75413167e}} 
+void {\bfseries enqueue\+\_\+swap} (int i)
+\item 
+\mbox{\Hypertarget{classThreadPool_ab85f3bf5998e7bd213326dab9895504d}\label{classThreadPool_ab85f3bf5998e7bd213326dab9895504d}} 
+void {\bfseries public\+\_\+stop} ()
+\end{DoxyCompactItemize}
 
-
-\subsection{Detailed Description}
-\subsubsection*{template$<$class jobtype = int, class comparator = default\+\_\+comp$<$jobtype$>$$>$\newline
-class thread\+Pool$<$ jobtype, comparator $>$}
-
-Class for creating a pool of threads to asynchronously distribute work. 
-
-Template parameters\+:
-
-jobtype defines a structure or class that represents a job or task
-
-comparator defines how to compare jobs for sorting the list
-
-Default options correspond to jobs being defined by an integer job\+\_\+id, and no sorting of the list (first in first out) 
-
-\subsection{Member Function Documentation}
-\mbox{\Hypertarget{classthreadPool_a8032717dcc11834427f874bc1efd6376}\label{classthreadPool_a8032717dcc11834427f874bc1efd6376}} 
-\index{thread\+Pool@{thread\+Pool}!enqueue@{enqueue}}
-\index{enqueue@{enqueue}!thread\+Pool@{thread\+Pool}}
-\subsubsection{\texorpdfstring{enqueue()}{enqueue()}}
-{\footnotesize\ttfamily template$<$class jobtype  = int, class comparator  = default\+\_\+comp$<$jobtype$>$$>$ \\
-void \hyperlink{classthreadPool}{thread\+Pool}$<$ jobtype, comparator $>$\+::enqueue (\begin{DoxyParamCaption}\item[{jobtype}]{job\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
-
-
-
-Places jobs in queue to wait for scheduling. 
-
-job\+\_\+id is sorted if a comparator is provided 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-include/gwat/\hyperlink{threadPool_8h}{thread\+Pool.\+h}\end{DoxyCompactItemize}
+src/\mbox{\hyperlink{mcmc__sampler_8cpp}{mcmc\+\_\+sampler.\+cpp}}\end{DoxyCompactItemize}

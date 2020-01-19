@@ -1,36 +1,37 @@
-\hypertarget{mc__reject_8cpp}{}\section{src/mc\+\_\+reject.cpp File Reference}
-\label{mc__reject_8cpp}\index{src/mc\+\_\+reject.\+cpp@{src/mc\+\_\+reject.\+cpp}}
+\hypertarget{mc__reject_8cpp}{}\doxysection{src/mc\+\_\+reject.cpp File Reference}
+\label{mc__reject_8cpp}\index{src/mc\_reject.cpp@{src/mc\_reject.cpp}}
 {\ttfamily \#include \char`\"{}mc\+\_\+reject.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}util.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}thread\+Pool.\+h\char`\"{}}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+rng.\+h$>$}\newline
 {\ttfamily \#include $<$functional$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+randist.\+h$>$}\newline
-Include dependency graph for mc\+\_\+reject.\+cpp\+:\nopagebreak
+Include dependency graph for mc\+\_\+reject.\+cpp\+:
+\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
 \includegraphics[width=350pt]{mc__reject_8cpp__incl}
 \end{center}
 \end{figure}
-\subsection*{Functions}
+\doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-void \hyperlink{mc__reject_8cpp_a8e7fcdc575532164d9f76f27102b4c9a}{parallel\+\_\+sample} (int threadid, \hyperlink{structmcr__job}{mcr\+\_\+job} job)
+void \mbox{\hyperlink{mc__reject_8cpp_a8e7fcdc575532164d9f76f27102b4c9a}{parallel\+\_\+sample}} (int threadid, \mbox{\hyperlink{structmcr__job}{mcr\+\_\+job}} job)
 \begin{DoxyCompactList}\small\item\em internal routine to draw N samples \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
-\subsection{Detailed Description}
+\doxysubsection{Detailed Description}
 Monte Carlo Rejection sampling
 
 Distribution should be normalized to 1 
 
-\subsection{Function Documentation}
+\doxysubsection{Function Documentation}
 \mbox{\Hypertarget{mc__reject_8cpp_a8e7fcdc575532164d9f76f27102b4c9a}\label{mc__reject_8cpp_a8e7fcdc575532164d9f76f27102b4c9a}} 
-\index{mc\+\_\+reject.\+cpp@{mc\+\_\+reject.\+cpp}!parallel\+\_\+sample@{parallel\+\_\+sample}}
-\index{parallel\+\_\+sample@{parallel\+\_\+sample}!mc\+\_\+reject.\+cpp@{mc\+\_\+reject.\+cpp}}
-\subsubsection{\texorpdfstring{parallel\+\_\+sample()}{parallel\_sample()}}
-{\footnotesize\ttfamily void parallel\+\_\+sample (\begin{DoxyParamCaption}\item[{int}]{threadid,  }\item[{\hyperlink{structmcr__job}{mcr\+\_\+job}}]{job }\end{DoxyParamCaption})}
+\index{mc\_reject.cpp@{mc\_reject.cpp}!parallel\_sample@{parallel\_sample}}
+\index{parallel\_sample@{parallel\_sample}!mc\_reject.cpp@{mc\_reject.cpp}}
+\doxysubsubsection{\texorpdfstring{parallel\_sample()}{parallel\_sample()}}
+{\footnotesize\ttfamily void parallel\+\_\+sample (\begin{DoxyParamCaption}\item[{int}]{threadid,  }\item[{\mbox{\hyperlink{structmcr__job}{mcr\+\_\+job}}}]{job }\end{DoxyParamCaption})}
 
 
 
@@ -40,6 +41,6 @@ Should not be called by the user
 
 Just made this separate from the class for now for convenience 
 \begin{DoxyParams}{Parameters}
-{\em job} & mcr job -- see \hyperlink{mc__reject_8h}{mc\+\_\+reject.\+h} \\
+{\em job} & mcr job -\/-\/ see \mbox{\hyperlink{mc__reject_8h}{mc\+\_\+reject.\+h}} \\
 \hline
 \end{DoxyParams}

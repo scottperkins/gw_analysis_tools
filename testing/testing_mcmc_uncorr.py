@@ -18,7 +18,6 @@ for x in np.arange(len(data)):
 #    plt.show()
 #    plt.close()
 ndim, nsamples = 11, len(data) 
-print(data)
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\chi_p$",r"$\phi_p$"]
 labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 for x in data:

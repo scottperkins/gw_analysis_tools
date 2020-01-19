@@ -1,5 +1,5 @@
-\hypertarget{threadPool_8h}{}\section{include/gwat/thread\+Pool.h File Reference}
-\label{threadPool_8h}\index{include/gwat/thread\+Pool.\+h@{include/gwat/thread\+Pool.\+h}}
+\hypertarget{threadPool_8h}{}\doxysection{include/gwat/thread\+Pool.h File Reference}
+\label{threadPool_8h}\index{include/gwat/threadPool.h@{include/gwat/threadPool.h}}
 {\ttfamily \#include $<$iostream$>$}\newline
 {\ttfamily \#include $<$functional$>$}\newline
 {\ttfamily \#include $<$vector$>$}\newline
@@ -7,28 +7,30 @@
 {\ttfamily \#include $<$thread$>$}\newline
 {\ttfamily \#include $<$mutex$>$}\newline
 {\ttfamily \#include $<$condition\+\_\+variable$>$}\newline
-Include dependency graph for thread\+Pool.\+h\+:\nopagebreak
+Include dependency graph for thread\+Pool.\+h\+:
+\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
 \includegraphics[width=350pt]{threadPool_8h__incl}
 \end{center}
 \end{figure}
-This graph shows which files directly or indirectly include this file\+:\nopagebreak
+This graph shows which files directly or indirectly include this file\+:
+\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
 \includegraphics[width=350pt]{threadPool_8h__dep__incl}
 \end{center}
 \end{figure}
-\subsection*{Classes}
+\doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
-class \hyperlink{classdefault__comp}{default\+\_\+comp$<$ jobtype $>$}
-\begin{DoxyCompactList}\small\item\em Default comparator for priority\+\_\+queue in \hyperlink{classthreadPool}{thread\+Pool} -- no comparison. \end{DoxyCompactList}\item 
-class \hyperlink{classthreadPool}{thread\+Pool$<$ jobtype, comparator $>$}
+class \mbox{\hyperlink{classdefault__comp}{default\+\_\+comp$<$ jobtype $>$}}
+\begin{DoxyCompactList}\small\item\em Default comparator for priority\+\_\+queue in \mbox{\hyperlink{classthreadPool}{thread\+Pool}} -- no comparison. \end{DoxyCompactList}\item 
+class \mbox{\hyperlink{classthreadPool}{thread\+Pool$<$ jobtype, comparator $>$}}
 \begin{DoxyCompactList}\small\item\em Class for creating a pool of threads to asynchronously distribute work. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
-\subsection{Detailed Description}
+\doxysubsection{Detailed Description}
 Header file (declarations and definitions because of template functions) for the implementation of a generic thread pool 

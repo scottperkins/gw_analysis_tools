@@ -10,14 +10,14 @@ import matplotlib.pyplot as plt
 #    print(emcee.autocorr.integrated_time(x=data[i],c=5,tol=50,quiet=False))
 
 dim = 11
-#data =np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
+data =np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
 #data =np.loadtxt("data/mcmc_output_uncorr_D.csv",delimiter=',')
-data =np.loadtxt("data/test.csv",delimiter=',')
+#data =np.loadtxt("data/test.csv",delimiter=',')
 #data=data[2000:]
 
-#dataT =np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',', unpack=True)
+dataT =np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',', unpack=True)
 #dataT =np.loadtxt("data/mcmc_output_uncorr_D.csv",delimiter=',', unpack=True)
-dataT =np.loadtxt("data/test.csv",delimiter=',', unpack=True)
+#dataT =np.loadtxt("data/test.csv",delimiter=',', unpack=True)
 i = 0 
 for x in dataT:
     #plt.plot(x[2000:])

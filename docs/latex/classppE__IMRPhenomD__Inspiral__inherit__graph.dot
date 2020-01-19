@@ -1,0 +1,20 @@
+digraph "ppE_IMRPhenomD_Inspiral&lt; T &gt;"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node1 [label="ppE_IMRPhenomD_Inspiral\< T \>",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node2 -> Node1 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node2 [label="IMRPhenomD\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classIMRPhenomD.html",tooltip=" "];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node3 [label="dCS_IMRPhenomD\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdCS__IMRPhenomD.html",tooltip=" "];
+  Node1 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node4 [label="dCS_IMRPhenomD_log\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classdCS__IMRPhenomD__log.html",tooltip=" "];
+  Node1 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node5 [label="EdGB_IMRPhenomD\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classEdGB__IMRPhenomD.html",tooltip=" "];
+  Node1 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node6 [label="EdGB_IMRPhenomD_log\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classEdGB__IMRPhenomD__log.html",tooltip=" "];
+  Node1 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid"];
+  Node7 [label="ppE_IMRPhenomD_IMR\< T \>",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$classppE__IMRPhenomD__IMR.html",tooltip=" "];
+}

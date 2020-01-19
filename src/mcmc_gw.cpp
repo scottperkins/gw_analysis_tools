@@ -1841,6 +1841,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	//std::cout<<gen_params.mass1<<" "<<gen_params.mass2<<" "<<gen_params.Luminosity_Distance<<" "<<gen_params.spin1[2]<<" "<<gen_params.spin2[2]<<" "<<gen_params.sky_average<<" "<<gen_params.NSflag<<" "<<gen_params.<<std::endl;
 	//#########################################################################
 	//#########################################################################
+	//std::cout<<"INCL angle fisher: "<<gen_params.incl_angle<<std::endl;
 	for(int j =0; j<dimension; j++){
 		for(int k =0; k<dimension; k++)
 		{
@@ -1862,6 +1863,14 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			}
 		} 
 	}
+	//for(int k =0  ; k<dimension; k++){
+	//	for(int j =0 ;j<dimension; j++){
+	//		std::cout<<output[k][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+
+	//}
+	//	std::cout<<std::endl;
 	deallocate_2D_array(temp_out, dimension,dimension);
 
 	//Cleanup

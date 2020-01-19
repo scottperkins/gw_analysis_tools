@@ -28,6 +28,7 @@
 #include <omp.h>
 #endif
 
+
 /*!\file 
  * Source file for the sampler foundation
  *
@@ -286,7 +287,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	
 	//Dynamic chain allocation will only have one cold chain at index 0
 	//auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
-	continue_dynamic_search=false;
+	//continue_dynamic_search=false;
 	int coldchains = count_cold_chains(chain_temps, chain_N);
 	double **reduced_temp_output, **reduced_temp_output_thinned ;
 	//#####################################################################
@@ -974,7 +975,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	//#########################################################################
 	//#########################################################################
 	
-	dyanmic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
+	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
 
 	//#######################################################################
 	//#######################################################################
@@ -1163,7 +1164,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//#########################################################################
 	//#########################################################################
 	
-	dyanmic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
+	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
 
 	//#######################################################################
 	//#######################################################################
@@ -1224,7 +1225,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	delete [] static_sampler.chain_temps;
 }
 
-void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, int t0,int swp_freq, int max_chain_N_thermo_ensemble, bool show_prog)
+void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, int t0,int swp_freq, int max_chain_N_thermo_ensemble, bool show_prog)
 {
 	
 	//NOTE: instead of dynamics, use variance over accept ratios over \nu steps
@@ -1319,16 +1320,16 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 					}
 					else {
 						chain_pop_target_reached = false;
-						//if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
-						if(testing && samplerptr->chain_N<max_chain_N_thermo_ensemble){
-							if(test_ct!=0){
-								test_ct--;	
-							}
-							else{
-								testing = false;
-								test_ct = 0;
-							}
-							std::cout<<"add"<<std::endl;
+						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
+						//if(testing && samplerptr->chain_N<max_chain_N_thermo_ensemble){
+							//if(test_ct!=0){
+							//	test_ct--;	
+							//}
+							//else{
+							//	testing = false;
+							//	test_ct = 0;
+							//}
+							//std::cout<<"add "<<samplerptr->chain_N+1<<std::endl;
 							//add chain
 							int min_id =0;
 							int min_val =10;
@@ -1392,6 +1393,7 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 							samplerptr->swap_reject_ct[min_id] = 0;
 							samplerptr->step_accept_ct[min_id] = 0;
 							samplerptr->step_reject_ct[min_id] = 0;
+							samplerptr->prop_MH_factor[min_id]=0;
 							if(samplerptr->log_ll){
 								samplerptr->ll_lp_output[min_id][0][0] = samplerptr->current_likelihoods[min_id];
 							}
@@ -1405,15 +1407,15 @@ void dyanmic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 							}
 						
 						}
-						//else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
-						else if(!testing){
-							if(test_ct<10){
-								test_ct++;
-							}
-							else{
-								testing = true;
-							}
-							std::cout<<"rm"<<std::endl;
+						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
+						//else if(!testing){
+						//	if(test_ct<10){
+						//		test_ct++;
+						//	}
+						//	else{
+						//		testing = true;
+						//	}
+						//	std::cout<<"rm "<<samplerptr->chain_N-1<<std::endl;
 							//remove chain
 							int max_id =0;
 							int max_val =0;
@@ -1854,7 +1856,6 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 	if (!sampler->pool)
 	{
 		int k =0;
-		int cutoff ;
 		int step_log;
 		omp_set_num_threads(sampler->num_threads);
 		#pragma omp parallel ADOLC_OPENMP
@@ -1864,6 +1865,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 			#pragma omp for 
 			for (int j=0; j<sampler->chain_N; j++)
 			{
+				int cutoff ;
 				if( sampler->N_steps-sampler->chain_pos[j] <= sampler->swp_freq) 
 					cutoff = sampler->N_steps-sampler->chain_pos[j]-1;	
 				else cutoff = sampler->swp_freq;	
