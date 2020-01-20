@@ -62,7 +62,7 @@ CCCUDA=nvcc
 #CC=nvcc
 
 .PHONY: all 
-all:  Doxyfile $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
+all:  $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(CONFIGFILE)
 	$(CC) $(CFLAGS) -c -o $@ $<

@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
-data = np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
-#data = np.loadtxt("data/test.csv",delimiter=',')
-#data = data[2000:]
+#data = np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
+data = np.loadtxt("data/test.csv",delimiter=',')
+data = data[10000:]
 data_thinned = []
 for x in np.arange(len(data)):
     if x%1 ==0:
@@ -26,8 +26,8 @@ for x in data:
 
 figure = corner.corner(data_thinned, labels=labels,quantiles=[.16,.5,.84], show_titles=True)
 #plt.savefig("mcmc_testing_D_uncorr.pdf")
-plt.savefig("mcmc_testing_P_uncorr.pdf")
-#plt.savefig("mcmc_testing_uncorr.pdf")
+#plt.savefig("mcmc_testing_P_uncorr.pdf")
+plt.savefig("mcmc_testing_uncorr.pdf")
 plt.close()
 ##############################################################
 #data = np.loadtxt("data/mcmc_output_DFull_hot.csv",delimiter=',')

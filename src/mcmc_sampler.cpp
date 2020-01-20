@@ -1418,7 +1418,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 						//	std::cout<<"rm "<<samplerptr->chain_N-1<<std::endl;
 							//remove chain
 							int max_id =0;
-							int max_val =0;
+							int max_val =-1;
 							//Don't remove chain 0 and chain chain_N-1
 							for (int j =1 ;j <samplerptr->chain_N-1; j++){
 								if(running_ratio[j]>max_val){
@@ -1426,7 +1426,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 									max_val = running_ratio[j];
 								}
 							}	
-							for(int i = max_id; i<samplerptr->chain_N-2; i++){
+							for(int i = max_id; i<samplerptr->chain_N-1; i++){
 								transfer_chain(samplerptr,samplerptr, i, i+1, true);	
 								running_accept_ct[i] = running_accept_ct[i+1];
 								running_reject_ct[i] = running_reject_ct[i+1];
