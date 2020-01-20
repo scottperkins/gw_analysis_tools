@@ -1,23 +1,27 @@
 #Number of detectors
-[int] detector number = 2
+[int] detector number = 3
 #Name of the detectors
 [str] detector name 0 = Hanford
 [str] detector name 1 = Livingston
+[str] detector name 2 = Virgo
 #GPS time of the trigger
-[dbl] gps = 1126259462.4
+#[dbl] gps = 1126259462.4
+[dbl] gps = 1185389807.3
 #File path to the PSD file
-[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
+#[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
+[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt
 #File path to each data file
-[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
-[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
+#[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
+#[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
+[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt
+[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt
+[str] data file 2 = /Users/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt
 #Length of data in seconds
 [dbl] data length = 32
 #Generation method 
 [str] generation method = IMRPhenomD
 #Number of ~uncorrelated samples to take
 [int] samples = 15000
-#Number of chains
-[int] chain number = 8
 #Maximum number of chains per thermodynamic ensemble
 [int] max thermo chain number = 8
 #Dynamic chain allocation parameter t0 -- approximately how many steps chains are allowed to move
@@ -39,10 +43,20 @@
 #Target correlation for calculating autocorrelation length
 [dbl] autocorrelation target = 0.01
 #Output data file -- will be csv
-[str] output data file = /home/sperkins/git-repos/gw_analysis_tools/testing/data/test.csv
+[str] output data file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test.csv
 #Output statistics file -- will be txt
-[str] output stat file = /home/sperkins/git-repos/gw_analysis_tools/testing/data/test_stat.txt
-#Checkpoint file -- csv file
-[str] checkpoint file = /home/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv
+[str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_stat.txt
+#############################################################
+#Dimension of the parameter space
+[int] dimension = 11
+#Number of chains
+[int] chain number = 8
 #Initial position file
-[str] initial position file = /home/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos.csv
+[str] initial position file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos.csv
+#Checkpoint file -- csv file
+[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv
+#############################################################
+##Initial checkpoint  file
+#[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv
+#Checkpoint file -- csv file
+##[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv

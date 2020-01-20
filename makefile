@@ -128,13 +128,13 @@ Doxyfile: $(OBJECTS) $(OBJECTSCUDA) $(PROJ_PYLIB)
 c: $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
 
 .PHONY: test
-test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) 
+test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) $(MCMC_TOOL)
 
 .PHONY: testfisher
 testfisher: $(TESTFISHER) $(PROJ_LIB) $(PROJ_SHARED_LIB)
 
 .PHONY: testc
-testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB)
+testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
 
 .PHONY: clean
 clean:

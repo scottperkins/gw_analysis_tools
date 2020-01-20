@@ -43,12 +43,11 @@ int main(int argc, char *argv[])
 	std::string input_param_file(argv[1]);
 	int status = unpack_input_io_file(input_param_file, &int_dict, &str_dict, &dbl_dict, &flt_dict, &bool_dict);
 
+	//Global
 	int detector_N = int_dict["detector number"];
 	std::cout<<"DETECTOR NUMBER: "<<detector_N<<std::endl;
 	int samples = int_dict["samples"];
 	std::cout<<"Samples: "<<samples<<std::endl;
-	int chain_N = int_dict["chain number"];
-	std::cout<<"Chain number: "<<chain_N<<std::endl;
 	int max_thermo_chain_N = int_dict["max thermo chain number"];
 	std::cout<<"Max thermo ensemble chain number: "<<max_thermo_chain_N<<std::endl;
 	int t0 = int_dict["t0"];
@@ -69,9 +68,11 @@ int main(int argc, char *argv[])
 	double data_time_length = dbl_dict["data length"];
 	std::cout<<"data length: "<<data_time_length<<std::endl;
 	int data_length=131075;
-	if((int)data_time_length == 32){
-		data_length = 131075;
-	}	
+	//if((int)data_time_length == 32){
+	//	data_length = 131072;
+	//}	
+	count_lines_LOSC_data_file(detector_files[0], &data_length);
+	std::cout<<"data length (lines): "<<data_length<<std::endl;
 	double gps_time = dbl_dict["gps"];
 	std::cout<<"GPS time : "<<gps_time<<std::endl;
 	std::string allocation_scheme = str_dict["allocation scheme"];
@@ -87,10 +88,28 @@ int main(int argc, char *argv[])
 	std::string output_file = str_dict["output data file"];
 	std::string stat_file = str_dict["output stat file"];
 	std::string check_file = str_dict["checkpoint file"];
-	std::string initial_position_file = str_dict["initial position file"];
 	
+	std::string initial_position_file, initial_checkpoint_file;
+	int chain_N;
+	bool continue_from_checkpoint=false;
+	if(str_dict.find("initial checkpoint file") == str_dict.end()){
+		//Original
+		initial_position_file = str_dict["initial position file"];
+		chain_N = int_dict["chain number"];
+		std::cout<<"Chain number: "<<chain_N<<std::endl;
+	}
+	else{
+		//Continue	
+		continue_from_checkpoint=true;
+		initial_checkpoint_file = str_dict["initial checkpoint file"];
+		std::cout<<"INITIAL checkpoint file: "<<initial_checkpoint_file<<std::endl;
+		
+	}
 	
-	int psd_length = 8032;
+
+	
+	int psd_length ;
+	count_lines_LOSC_PSD_file(psd_file, &psd_length);
 	//########################################################################
 
 	double **psd = allocate_2D_array(detector_N,psd_length);
@@ -101,18 +120,15 @@ int main(int argc, char *argv[])
 	}
 
 	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time, data, psd, freqs);
+	std::cout<<"DATA loaded"<<std::endl;
 
 
 	int *data_lengths= (int*)malloc(sizeof(int)*detector_N);
-	data_lengths[0] =psd_length;
-	data_lengths[1] =psd_length;
+	for(int i = 0 ; i<detector_N; i++){
+		data_lengths[i] =psd_length;
+	}
 	//########################################################################
 	int dimension = 11;
-	double **initial_position = new double*[1];
-	initial_position[0] = new double[dimension];
-	read_file(initial_position_file, initial_position,1,dimension);
-	double *init_pos = initial_position[0];
-	double *seeding_var = NULL;
 	double **output;
 	output = allocate_2D_array(samples, dimension );
 	double chain_temps[chain_N];
@@ -123,13 +139,31 @@ int main(int argc, char *argv[])
 	bool show_progress = true;
 	//#########################################################
 
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-			max_thermo_chain_N, init_pos,seeding_var,chain_temps, 
-			swap_freq, t0, nu, correlation_thresh, correlation_segs,
-			correlation_convergence_thresh , ac_target,allocation_scheme, 
-			standard_log_prior_D,threads, pool,show_progress,detector_N, 
-			data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-			generation_method,stat_file,output_file, "",check_file);	
+	if(continue_from_checkpoint){
+		continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,output, samples,  
+				max_thermo_chain_N, chain_temps, 
+				swap_freq, t0, nu, correlation_thresh, correlation_segs,
+				correlation_convergence_thresh , ac_target,allocation_scheme, 
+				standard_log_prior_D,threads, pool,show_progress,detector_N, 
+				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+				generation_method,stat_file,output_file, "",check_file);	
+
+	}
+	else{
+		double **initial_position = new double*[1];
+		initial_position[0] = new double[dimension];
+		read_file(initial_position_file, initial_position,1,dimension);
+		double *init_pos = initial_position[0];
+		double *seeding_var = NULL;
+		PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+				max_thermo_chain_N, init_pos,seeding_var,chain_temps, 
+				swap_freq, t0, nu, correlation_thresh, correlation_segs,
+				correlation_convergence_thresh , ac_target,allocation_scheme, 
+				standard_log_prior_D,threads, pool,show_progress,detector_N, 
+				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+				generation_method,stat_file,output_file, "",check_file);	
+		delete [] initial_position[0]; delete [] initial_position;
+	}
 
 
 	//write_file(chainfile, output[0], n_steps, dimension);
@@ -143,7 +177,6 @@ int main(int argc, char *argv[])
 		free(data[i]);
 	free(data);
 
-	delete [] initial_position[0]; delete [] initial_position;
 	
 	return 0;
 

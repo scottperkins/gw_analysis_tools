@@ -26,7 +26,7 @@ for x in dataT:
     plt.close()
     i+=1
 
-data = data[10000:]
+#data = data[10000:]
 data_thinned = []
 for x in np.arange(len(data)):
         if x%1 == 0:

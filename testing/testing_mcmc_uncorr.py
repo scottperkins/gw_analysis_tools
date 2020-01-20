@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phenompy.utilities import calculate_mass1, calculate_mass2
 
-#data = np.loadtxt("data/mcmc_output_uncorr_P.csv",delimiter=',')
+#data = np.loadtxt("data/mcmc_output_uncorr_D.csv",delimiter=',')
 data = np.loadtxt("data/test.csv",delimiter=',')
-data = data[10000:]
+#data = data[10000:]
 data_thinned = []
 for x in np.arange(len(data)):
     if x%1 ==0:

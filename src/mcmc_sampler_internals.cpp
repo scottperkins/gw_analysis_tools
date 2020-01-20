@@ -1737,6 +1737,65 @@ void load_temps_checkpoint_file(std::string check_file, double *temps, int chain
 	}
 	file_in.close();
 }
+/*! \brief Load dimension from checkpoint file
+ *
+ * If RJ -- returns min_dimension and max_dimension
+ *
+ * If not RJ -- returns dimension in min_dimension and max_dimension
+ */
+int dimension_from_checkpoint_file(std::string check_file, int *min_dimension, int *max_dimension)
+{
+	std::fstream file_in;
+	file_in.open(check_file, std::ios::in);
+	std::string line;
+	std::string item;
+	int i;
+	if(file_in){
+		//First row -- dim, chain_N
+		std::getline(file_in,line);
+		std::stringstream lineStream(line);
+		std::getline(lineStream, item, ',');
+		*min_dimension= std::stod(item);
+		std::getline(lineStream, item, ',');
+		*max_dimension = std::stod(item);
+	}
+	else{
+		std::cout<<"ERROR -- checkpoint file not found"<<std::endl;	
+		return 1;
+	}
+	file_in.close();
+	return 0;
+	
+	
+}
+/*! \brief Load chain number from checkpoint file
+ *
+ */
+int chain_number_from_checkpoint_file(std::string check_file, int *chain_N)
+{
+	std::fstream file_in;
+	file_in.open(check_file, std::ios::in);
+	std::string line;
+	std::string item;
+	int i;
+	if(file_in){
+		//First row -- dim, chain_N
+		std::getline(file_in,line);
+		std::stringstream lineStream(line);
+		std::getline(lineStream, item, ',');//Min dim
+		std::getline(lineStream, item, ',');//Max dim
+		std::getline(lineStream, item, ',');//Chain_number
+		*chain_N = std::stod(item);
+	}
+	else{
+		std::cout<<"ERROR -- checkpoint file not found"<<std::endl;	
+		return 1;
+	}
+	file_in.close();
+	return 0;
+	
+	
+}
 
 /*! \brief load checkpoint file into sampler struct
  *

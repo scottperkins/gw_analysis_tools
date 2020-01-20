@@ -202,12 +202,12 @@ void test56()
 
 	//#########################################################
 	//mcmc options
-	int dimension = 13;
+	int dimension = 11;
 	//double initial_pos[dimension]={2.5, sin(-.9),5.78,cos(3.1),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
-	double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.301),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
-	//double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(.01),.6,6,std::log(500),std::log(30), .24,.1,.1};
+	//double initial_pos[dimension]={2.5, sin(-.9),.1,cos(.301),.6,6,std::log(500),std::log(30), .24,.1,.1,.1,.1};
+	double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(.01),.6,6,std::log(500),std::log(30), .24,.1,.1};
 	double *seeding_var = NULL;
-	int n_steps = 15000;
+	int n_steps = 5000;
 	//int chain_N=20 ;
 	//int max_thermo=20 ;
 	int chain_N=8 ;
@@ -231,7 +231,7 @@ void test56()
 	//std::string generation_method = "EdGB_IMRPhenomD_log";
 	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
 	//std::string generation_method = "IMRPhenomD";
-	std::string generation_method = "IMRPhenomPv2";
+	std::string generation_method = "IMRPhenomD";
 	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
 	
 	
@@ -248,11 +248,17 @@ void test56()
 	output = allocate_2D_array(n_steps, dimension );
 	//double ***output;
 	//output = allocate_3D_array(chain_N,n_steps, dimension );
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
-			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_Pv2,numThreads, pool,show_progress,
+	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
+	//		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
+	//		num_detectors, 
+	//		data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+	//		generation_method,statfilename,chainfile, "",checkfile);	
+	std::string checkfile2="testing/data/mcmc_checkpoint_uncorr_D2.csv";
+	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(checkfile,output,  n_steps,  max_thermo, chain_temps, 
+			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,chainfile, "",checkfile);	
+			generation_method,statfilename,chainfile, "",checkfile2);	
 	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dimension, n_steps,chain_N,max_thermo, initial_pos, seeding_var, chain_temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,numThreads, pool, show_progress, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, generation_method, statfilename, chainfile,  "",checkfile);
 
 

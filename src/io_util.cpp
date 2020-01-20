@@ -523,3 +523,39 @@ void free_LOSC_data(std::complex<double> **data,
 		free(data[i]);
 	free(data);
 }
+
+/*! \brief Takes in data file and returns the number of data elements in file
+ */
+int count_lines_data_file(std::string file, int *count)
+{
+	std::ifstream file_input(file);
+	std::string line;
+	*count=0;
+	if(file_input){
+		while(std::getline(file_input,line)){
+			*count+=1;
+		}	
+	}
+	else{ 
+		std::cout<<"ERROR -- could not open file"<<std::endl;
+		return 1;	
+	}
+	
+	return 0;
+}
+/*! \brief Takes in LOSC PSD file and returns the number of data elements in file
+ */
+int count_lines_LOSC_PSD_file(std::string file, int *count)
+{
+	count_lines_data_file(file,count);
+	*count-=1;//Adjust for header
+	return 0;
+}
+/*! \brief Takes in LOSC data file and returns the number of data elements in file
+ */
+int count_lines_LOSC_data_file(std::string file, int *count)
+{
+	count_lines_data_file(file,count);
+	*count-=3;//Adjust for header
+	return 0;
+}

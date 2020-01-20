@@ -216,6 +216,9 @@ void write_stat_file(sampler *sampler, std::string filename);
 
 void write_checkpoint_file(sampler *sampler, std::string filename);
 
+int chain_number_from_checkpoint_file(std::string check_file, int *chain_N);
+int dimension_from_checkpoint_file(std::string check_file, int *min_dimension, int *max_dimension);
+
 void load_checkpoint_file(std::string check_file, sampler *sampler);
 
 void load_temps_checkpoint_file(std::string check_file, double *temps, int chain_N);

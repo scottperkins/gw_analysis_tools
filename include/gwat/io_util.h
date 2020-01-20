@@ -48,4 +48,7 @@ void free_LOSC_data(std::complex<double> **data,
 		int num_detectors,
 		int length
 		);
+int count_lines_data_file(std::string file, int *count);
+int count_lines_LOSC_PSD_file(std::string file, int *count);
+int count_lines_LOSC_data_file(std::string file, int *count);
 #endif

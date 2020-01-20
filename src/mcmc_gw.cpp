@@ -1145,6 +1145,101 @@ void PTMCMC_MH_GW(double ***output,
  *
  * numThreads and pool do not necessarily have to be the same
  */
+void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_file_start,
+			double **output,
+			int N_steps,
+			int max_chain_N_thermo_ensemble,
+			double *chain_temps,
+			int swp_freq,
+			int t0,
+			int nu,
+			int corr_threshold,
+			int corr_segments,
+			double corr_converge_thresh,
+			double corr_target_ac,
+			std::string chain_distribution_scheme,
+			double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+			int numThreads,
+			bool pool,
+			bool show_prog,
+			int num_detectors,
+			std::complex<double> **data,
+			double **noise_psd,
+			double **frequencies,
+			int *data_length,
+			double gps_time,
+			std::string *detectors,
+			int Nmod,
+			int *bppe,
+			std::string generation_method,
+			std::string statistics_filename,
+			std::string chain_filename,
+			std::string likelihood_log_filename,
+			std::string checkpoint_filename
+			)
+{
+	int dimension;
+	dimension_from_checkpoint_file(checkpoint_file_start,&dimension, &dimension);
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
+	}
+	void **user_parameters=NULL;
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_generation_method = generation_method;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_Nmod = Nmod;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
+	bool local_seeding=false;
+	double *seeding_var=NULL;
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+
+	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(checkpoint_file_start,output,  N_steps,  
+		max_chain_N_thermo_ensemble, chain_temps, 
+		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_distribution_scheme,
+		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, 
+		show_prog,statistics_filename,
+		chain_filename, likelihood_log_filename,checkpoint_filename);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deallocate_FFTW_mem(&plans[i]);
+	free(plans);
+}
+/*! \brief Takes in an MCMC checkpoint file and continues the chain
+ *
+ * Obviously, the user must be sure to correctly match the dimension, number of chains, the generation_method, 
+ * the prior function, the data, psds, freqs, and the detectors (number and name), and the gps_time to the 
+ * previous run, otherwise the behavior of the sampler is undefined.
+ *
+ * numThreads and pool do not necessarily have to be the same
+ */
 void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 			int dimension,
 			int N_steps,
