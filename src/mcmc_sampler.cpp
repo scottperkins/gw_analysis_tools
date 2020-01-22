@@ -287,29 +287,29 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 	
  	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(output,
-	dimension, 	/**< dimension of the parameter space being explored*/
-	N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
-	chain_N,/**< Maximum number of chains to use */
-	max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
-	swp_freq,	/**< the frequency with which chains are swapped*/
-	t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
-	nu,/**< Initial amplitude of the dynamics (~100)*/
-	corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
-	corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
-	corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
-	corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
-	chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
-	log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
-	log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
-	fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
-	user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
-	numThreads, /**< Number of threads to use (=1 is single threaded)*/
-	pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-	show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-	statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-	chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
-	checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+		dimension, 	/**< dimension of the parameter space being explored*/
+		N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+		chain_N,/**< Maximum number of chains to use */
+		max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+		swp_freq,	/**< the frequency with which chains are swapped*/
+		t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+		nu,/**< Initial amplitude of the dynamics (~100)*/
+		corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
+		corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
+		corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
+		corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+		chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+		log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+		log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+		fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+		user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
+		numThreads, /**< Number of threads to use (=1 is single threaded)*/
+		pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+		show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+		statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+		chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+		likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+		checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	);
 	//Dynamic chain allocation will only have one cold chain at index 0
 	//auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
@@ -626,30 +626,30 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
  	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(output,
-	dimension, 	/**< dimension of the parameter space being explored*/
-	N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
-	chain_N,/**< Maximum number of chains to use */
-	max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
-	swp_freq,	/**< the frequency with which chains are swapped*/
-	t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
-	nu,/**< Initial amplitude of the dynamics (~100)*/
-	corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
-	corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
-	corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
-	corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
-	chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
-	log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
-	log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
-	fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
-	user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
-	numThreads, /**< Number of threads to use (=1 is single threaded)*/
-	pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-	show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-	statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-	chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
-	checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
-	);
+		dimension, 	/**< dimension of the parameter space being explored*/
+		N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+		chain_N,/**< Maximum number of chains to use */
+		max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+		swp_freq,	/**< the frequency with which chains are swapped*/
+		t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+		nu,/**< Initial amplitude of the dynamics (~100)*/
+		corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
+		corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
+		corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
+		corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+		chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
+		log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+		log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+		fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+		user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
+		numThreads, /**< Number of threads to use (=1 is single threaded)*/
+		pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+		show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+		statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+		chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+		likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+		checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+		);
 	//Dynamic chain allocation will only have one cold chain at index 0
 	//auto_corr_from_data(temp_output[0], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
 	//continue_dynamic_search=false;
@@ -962,7 +962,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			chain_filename, "",likelihood_log_filename, checkpoint_file);
+			"", "","", checkpoint_file);
 			
 		//####################################################################################
 		/* Save -- version that combines before calculating AC*/
@@ -1056,7 +1056,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	int realloc_temps_length = 0.2 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = 0.1 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	while(status<N_steps){
 		if(status>realloc_temps_thresh){
@@ -1071,7 +1071,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			chain_filename,"",likelihood_log_filename, checkpoint_file);
+			"","","", checkpoint_file);
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 			
 		/* SAVE -- version that combines, then computes AC*/
