@@ -142,7 +142,7 @@ clean:
 	-rm build_cuda/*.o 
 .PHONY: remove
 remove:
-	-rm build/*.o build_cuda/* $(TEST) lib/*.a lib/*.so
+	-rm build/*.o build_cuda/* bin/* lib/*.a lib/*.so
 	-rm include/gwat/GWATConfig.h
 	-make -C $(PYDIR) remove
 

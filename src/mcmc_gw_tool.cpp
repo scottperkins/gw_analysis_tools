@@ -6,6 +6,7 @@
 #include <string>
 #include <limits>
 
+double T_mcmc_gw_tool;
 /*! \file 
  *
  * Command line tool for analyzing LOSC GW data
@@ -122,7 +123,8 @@ int main(int argc, char *argv[])
 	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time, data, psd, freqs);
 	std::cout<<"DATA loaded"<<std::endl;
 
-
+	T_mcmc_gw_tool = 1./(freqs[0][1]-freqs[0][0]);
+	std::cout<<"Total time: "<<T_mcmc_gw_tool<<std::endl;
 	int *data_lengths= (int*)malloc(sizeof(int)*detector_N);
 	for(int i = 0 ; i<detector_N; i++){
 		data_lengths[i] =psd_length;
@@ -190,7 +192,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
-	if ((pos[5])<0 || (pos[5])>10){return a;}//tc
+	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta

@@ -605,6 +605,10 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	//Unpack parameters
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
+	//Don't swap same temperature chains
+	if(T1==T2){
+		return -1;
+	}
 	double ll1 =  T1*sampler->current_likelihoods[T1_index];
 	double ll2 =  T2*sampler->current_likelihoods[T2_index];
 	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1;

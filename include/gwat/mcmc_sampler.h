@@ -47,6 +47,31 @@ void continue_RJPTMCMC_MH(std::string start_checkpoint_file,
 	std::string likelihood_log_filename,
 	std::string end_checkpoint_file
 	);
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
+	int dimension, 	
+	int N_steps,	
+	int chain_N,
+	int max_chain_N_thermo_ensemble,
+	int swp_freq,	
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	int corr_threshold,
+	int corr_segments,
+	double corr_converge_thresh,
+	double corr_target_ac,
+	std::string chain_distribution_scheme, 
+	std::function<double(double*,int* ,int,int,void *)> log_prior,
+	std::function<double(double*,int*,int,int,void *)> log_likelihood,
+	std::function<void(double*,int*,int,double**,int,void *)>fisher,
+	void **user_parameters,
+	int numThreads, 
+	bool pool, 
+	bool show_prog, 
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_file
+	);
 void continue_RJPTMCMC_MH_internal(std::string start_checkpoint_file,
 	double ***output,
 	int ***status,

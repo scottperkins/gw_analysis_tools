@@ -194,6 +194,16 @@ void test56()
 
 	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
 
+	//double **temp = allocate_2D_array(psd_length,3);
+	//
+	//for(int i=0 ; i<psd_length; i++){
+	//	std::cout<<psd[0][i]<<data[0][i]<<std::endl;
+	//	temp[i][0]=freqs[0][i];	
+	//	temp[i][1]=std::real( data[0][i]/sqrt(psd[0][i]));
+	//	temp[i][2]=std::imag( data[0][i]/sqrt(psd[0][i]));
+	//}
+	//write_file("whitened_GW150914_Hanford.csv",temp,psd_length,3);
+	//deallocate_2D_array(temp,psd_length,3);
 
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
@@ -248,17 +258,17 @@ void test56()
 	output = allocate_2D_array(n_steps, dimension );
 	//double ***output;
 	//output = allocate_3D_array(chain_N,n_steps, dimension );
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
-	//		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
-	//		num_detectors, 
-	//		data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-	//		generation_method,statfilename,chainfile, "",checkfile);	
-	std::string checkfile2="testing/data/mcmc_checkpoint_uncorr_D2.csv";
-	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(checkfile,output,  n_steps,  max_thermo, chain_temps, 
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
 			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,chainfile, "",checkfile2);	
+			generation_method,statfilename,chainfile, "",checkfile);	
+	//std::string checkfile2="testing/data/mcmc_checkpoint_uncorr_D2.csv";
+	//continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(checkfile,output,  n_steps,  max_thermo, chain_temps, 
+	//		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
+	//		num_detectors, 
+	//		data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+	//		generation_method,statfilename,chainfile, "",checkfile2);	
 	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dimension, n_steps,chain_N,max_thermo, initial_pos, seeding_var, chain_temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,numThreads, pool, show_progress, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, generation_method, statfilename, chainfile,  "",checkfile);
 
 
@@ -331,11 +341,11 @@ void test54()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 1500000;
-	int chain_N= 200;
-	int max_chain_N_thermo= 200;
-	int t0= 100000;
-	int nu= 500;
+	int N_steps = 15000;
+	int chain_N= 10;
+	int max_chain_N_thermo= 10;
+	int t0= 1000;
+	int nu= 50;
 	//std::string chain_dist_method = "half_ensemble";
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
@@ -344,7 +354,7 @@ void test54()
 	double **output;
 	output = allocate_2D_array(N_steps, dimension );
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 50;
+	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//double chain_temps[chain_N] ={1};
@@ -353,20 +363,20 @@ void test54()
 	std::string statfilename = "testing/data/neil_mcmc_statistics_uncorr.txt";
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint_uncorr.csv";
 	
-	int numThreads = 20;
-	bool pool = false;
+	int numThreads = 10;
+	bool pool = true;
 
-	int corr_threshold = 50;
-	int corr_segments = 50;
-	double corr_converge_thresh = 0.1;
+	int corr_threshold = 5;
+	int corr_segments = 10;
+	double corr_converge_thresh = 0.5;
 	double corr_target_ac = .01;
 
 	std::function<double(double* , int *,int, int,void *)> lp = [](double *param, int * status,int dim, int chain_id,void *parameters){ return test_lp_nts(param,dim,chain_id,parameters);};
 	std::function<double(double* , int*,int, int,void *)> ll = [](double *param, int *status,int dim, int chain_id,void *parameters){ return log_neil_proj3_nts(param,dim,chain_id,parameters);};
 	std::function<void(double* , int*,int, double**,int,void *)> f = [](double *param, int *status,int dim, double **fish,int chain_id,void *parameters){ fisher_neil_proj3(param,dim,fish,chain_id,parameters);};
-	//f=NULL;
+	f=NULL;
 	
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, "",checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,NULL ,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, "",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,test_lp_nts, log_neil_proj3_nts,fisher_neil_proj3 ,(void **)NULL,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	
 	std::cout<<"ENDED"<<std::endl;
