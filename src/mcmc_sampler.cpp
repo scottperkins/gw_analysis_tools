@@ -944,13 +944,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	int dynamic_search_length = 1.*N_steps;
 	int temp_length = 1*N_steps;
 	double ***temp_output = allocate_3D_array(chain_N,temp_length, dimension);
-	int dynamic_ct = 1 ;
-	int dynamic_temp_freq = 3;
+	int dynamic_ct = 0 ;
+	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
 	while(continue_dynamic_search && dynamic_ct<10){
 
-		std::cout<<"Searching"<<std::endl;
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
@@ -1056,7 +1055,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	int realloc_temps_length = 0.1 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = 0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	while(status<N_steps){
 		if(status>realloc_temps_thresh){
