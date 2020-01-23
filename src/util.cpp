@@ -1241,6 +1241,16 @@ T gps_to_GMST(T gps_time)
 template double gps_to_GMST<double>(double);
 //template adouble gps_to_GMST<adouble>(adouble);
 
+
+template<class T>
+T gps_to_GMST_radian(T gps_time)
+{
+	T hours = gps_to_GMST(gps_time);
+	//TO RAD
+	return hours*M_PI/12.;
+}
+template double gps_to_GMST_radian<double>(double);
+
 /*! \brief Utility to transform from gps to JD
  */
 template<class T>
@@ -1252,6 +1262,17 @@ T gps_to_JD(T gps_time)
 }
 template double gps_to_JD<double>(double);
 template adouble gps_to_JD<adouble>(adouble);
+
+/*! \brief Converts decimal into hours, minutes and seconds
+ *
+ * I just got tired of keeping all these steps straight..
+ */
+void decimal_to_HMS(double decimal, int *hour, int *min, double *second)
+{
+ 	*hour = (int)floor(decimal);	
+  	*min = (int)floor((decimal-*hour)*60);
+ 	*second = ((decimal-*hour)*60 - *min)*60;
+}
 
 /*! \brief utility to transform a vector from cartesian to spherical (radian)
  * 	

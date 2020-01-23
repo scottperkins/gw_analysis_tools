@@ -118,7 +118,7 @@ public:
 	T RA;
 	/*! Equatorial coordinates of source DEC*/
 	T DEC;
-	/*! Greenwich Mean Sidereal time (for detector orientation - start of data*/
+	/*! Greenwich Mean Sidereal time (for detector orientation - start of data -- IN RADIANS NOT HOURS*/
 	double gmst;
 	/*! BOOL flag for early termination of NS binaries*/
 	//bool NSflag;
@@ -490,8 +490,11 @@ void celestial_horizon_transform(T RA, T DEC, double gps_time, T LONG, T LAT,
 template<class T>
 T gps_to_GMST(T gps_time);
 template<class T>
+T gps_to_GMST_radian(T gps_time);
+template<class T>
 T gps_to_JD(T gps_time);
 
+void decimal_to_HMS(double decimal, int *hour, int *min, double *second);
 
 template<class T>
 void transform_cart_sph(T *cartvec, T *sphvec);

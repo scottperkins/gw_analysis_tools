@@ -853,7 +853,7 @@ void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -971,7 +971,7 @@ void RJPTMCMC_MH_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod_max = Nmod_max;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -1100,7 +1100,7 @@ void PTMCMC_MH_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -1196,7 +1196,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -1292,7 +1292,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -1390,7 +1390,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
@@ -1484,7 +1484,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	mcmc_fftw_plans = plans;
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
-	mcmc_gmst = gps_to_GMST(mcmc_gps_time);
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;

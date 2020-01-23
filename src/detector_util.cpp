@@ -525,7 +525,6 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	
 	/* Greenwich hour angle of source (radians). */
 	T gha = gmst - ra;
-	
 	/* pre-compute trig functions */
 	T cosgha = cos(gha);
 	T singha = sin(gha);

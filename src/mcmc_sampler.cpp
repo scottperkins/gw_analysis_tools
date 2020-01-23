@@ -941,8 +941,14 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//while loop
 	//Dynamic pt allocation
 	//	check autocorrelation for convergence -- 10 chuncks, with the last three ac's within 5%
-	int dynamic_search_length = 1.*N_steps;
+	int dynamic_search_length;
 	int temp_length = 1*N_steps;
+	if( 5*t0<temp_length){
+		dynamic_search_length = 5*t0;
+	}
+	else{
+		dynamic_search_length = temp_length;
+	}
 	double ***temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 	int dynamic_ct = 0 ;
 	int dynamic_temp_freq = 1;
@@ -1055,7 +1061,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	int realloc_temps_length = 0.01 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = .05*N_steps;;//0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	while(status<N_steps){
 		if(status>realloc_temps_thresh){
@@ -1633,6 +1639,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
+	//std::cout<<"MEM CHECK : start continue"<<std::endl;
 	clock_t start, end, acend;
 	double wstart, wend, wacend;
 	start = clock();
@@ -1716,8 +1723,10 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	//#########################################################################
 	//#########################################################################
 	
+	//std::cout<<"MEM CHECK : start loop allocation"<<std::endl;
 	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
 
+	//std::cout<<"MEM CHECK : start memory allocation"<<std::endl;
 	//#######################################################################
 	//#######################################################################
 	//#######################################################################
@@ -1776,6 +1785,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	delete [] static_sampler.A;
 	deallocate_sampler_mem(&static_sampler);
 	delete [] static_sampler.chain_temps;
+	//std::cout<<"MEM CHECK : end continue"<<std::endl;
 }
 /*! \brief Dyanmically tunes an MCMC for optimal spacing. step width, and chain number
  *
@@ -1979,7 +1989,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	//Frequency to check for equilibrium
 	int equilibrium_check_freq=2*nu;
 	
-	double *old_temps = new double[samplerptr->chain_N];
+	double *old_temps = new double[max_chain_N_thermo_ensemble];
 	for(int i =0; i<samplerptr->chain_N; i++){
 		std::cout<<samplerptr->chain_temps[i]<<std::endl;
 		old_temps[i]=samplerptr->chain_temps[i];
@@ -2004,7 +2014,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	//bool dynamic_chain_num = false;
 
 	bool chain_pop_target_reached = false;
-	for(int i =0; i<samplerptr->chain_N; i++){
+	for(int i =0; i<max_chain_N_thermo_ensemble; i++){
 		running_accept_ct[i] = 0;
 		running_reject_ct[i] = 0;
 		prev_accept_ct[i] = 0;
@@ -2019,7 +2029,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int t = 0;
 	samplerptr->show_progress = false;
 	bool testing=false;
-	int test_ct=0;
+	int test_ct=max_chain_N_thermo_ensemble - samplerptr->chain_N;
 	while( t <= (N_steps-equilibrium_check_freq))
 	{
 		chain_pop_target_reached = false;
@@ -2032,8 +2042,10 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 		else stability_ct = 0;
 		//step equilibrium_check_freq
 		for(int i =0; i<equilibrium_check_freq/swp_freq; i++){
+			//std::cout<<"MEM CHECK : entering MCMC steps"<<std::endl;
 			PTMCMC_MH_step_incremental(samplerptr, samplerptr->swp_freq);	
 			t+= samplerptr->swp_freq;
+			//std::cout<<"MEM CHECK : leaving MCMC steps"<<std::endl;
 			//Move temperatures
 			update_temperatures(samplerptr, t0, nu, t);
 
@@ -2063,17 +2075,17 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 						chain_pop_target_reached = false;
 						if(ave_accept<chain_pop_low && samplerptr->chain_N < max_chain_N_thermo_ensemble){
 						//if(testing && samplerptr->chain_N<max_chain_N_thermo_ensemble){
-							//if(test_ct!=0){
-							//	test_ct--;	
-							//}
-							//else{
-							//	testing = false;
-							//	test_ct = 0;
-							//}
-							//std::cout<<"add "<<samplerptr->chain_N+1<<std::endl;
+						//	if(test_ct!=0){
+						//		test_ct--;	
+						//	}
+						//	else{
+						//		testing = false;
+						//		test_ct = 0;
+						//	}
 							//add chain
-							int min_id =0;
-							int min_val =10;
+							//std::cout<<"MEM CHECK : entering add chain"<<std::endl;
+							int min_id =1;
+							int min_val =running_ratio[1];
 							//Don't add chain 0 and chain chain_N-1
 							for (int j =1 ;j <samplerptr->chain_N-1; j++){
 								if(running_ratio[j]<min_val){
@@ -2081,6 +2093,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 									min_val = running_ratio[j];
 								}
 							}	
+							//std::cout<<"MEM CHECK : add chain "<<min_id<<std::endl;
 							samplerptr->chain_N++;	
 							for(int i = samplerptr->chain_N-2; i>=min_id; i--){
 								transfer_chain(samplerptr,samplerptr, i+1, i, true);	
@@ -2146,6 +2159,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 							if(samplerptr->fisher_exist){
 								update_fisher(samplerptr, samplerptr->output[min_id][0], samplerptr->param_status[min_id][0],min_id);	
 							}
+							//std::cout<<"MEM CHECK : leaving add chain"<<std::endl;
 						
 						}
 						else if (ave_accept>chain_pop_high && samplerptr->chain_N>3){
@@ -2157,6 +2171,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 						//		testing = true;
 						//	}
 						//	std::cout<<"rm "<<samplerptr->chain_N-1<<std::endl;
+						//	std::cout<<"MEM CHECK : entering rm chain"<<std::endl;
 							//remove chain
 							int max_id =0;
 							int max_val =-1;
@@ -2176,6 +2191,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 								old_temps[i] = old_temps[i+1];
 							}
 							samplerptr->chain_N-=1;
+							//std::cout<<"MEM CHECK : leaving rm chain"<<std::endl;
 						}
 						else{
 							chain_pop_target_reached = true;
@@ -2187,6 +2203,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 
 			}
 		}
+		//std::cout<<"MEM CHECK : updating averages"<<std::endl;
 		//Calculate average percent change in temperature
 		double sum = 0;
 		for (int j =0; j<samplerptr->chain_N; j++){
@@ -2198,6 +2215,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 			printProgress(  abs(ave_dynamics - tolerance)/(tolerance+ave_dynamics));
 		}
 	}
+	//std::cout<<"MEM CHECK : loop finished"<<std::endl;
 	int acc, rej;
 	for (int j =0; j<samplerptr->chain_N; j++){
 		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
