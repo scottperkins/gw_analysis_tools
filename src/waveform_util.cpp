@@ -1848,6 +1848,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	int np
 	)
 {
+	int fail_ct=0;
+	int fail_THRESH = 10; //Attempts to fix an error due to roundoff
+	double SHIFT_UP=1.0 + 1e-2;
+	double SHIFT_DOWN=1.0 - 1e-2;
+
 	//std::cout.precision(15);	
 	bool round_off_error=false;	
 	
@@ -1907,11 +1912,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			else{
 				if(t1_moved){
 					if(snr>snr_prev){t1=t_mer;t1_moved=true; t2_moved=false;}
-					else{t2=t_mer;t2_moved=true; t1_moved=false;;}
+					else{t2=t_mer;t2_moved=true; t1_moved=false;}
 				}
 				if(t2_moved){
 					if(snr>snr_prev){t2=t_mer;t2_moved=true; t1_moved=false;}
-					else{t1=t_mer;t1_moved=true; t2_moved=false;;}
+					else{t1=t_mer;t1_moved=true; t2_moved=false;}
 
 				}
 			}
@@ -1929,6 +1934,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		double t_save = t_mer;
 		bool found_lower_root=false;	
 		bool found_upper_root=false;	
+		double t1_prev=t_save, t2_prev=t_save;
 		t1=t_save, t2=t_save;//We know t_mer is over the threshold
 		//Find a lower bound for bisection search
 		while(snr>SNR_thresh){
@@ -1945,7 +1951,6 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
 		}
 		while(!found_lower_root){
-			
 			t_mer = (t1+t2)/2.;
 			//Find new frequency bound ids
 			f_lower =  f_0PN(t_mer ,chirpmass) ;
@@ -1956,9 +1961,8 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				f_upper = fmax;
 
 			}
-			f_lower_prev= f_lower;
-			f_upper_prev= f_upper;
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			//std::cout<<snr<<std::endl;
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
 			else if( (fabs(t1-t2)*2/fabs(t1+t2)<1e-14) ){
 				found_lower_root=true;
@@ -1968,9 +1972,25 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			else{
 				//Sometimes, integration messes up
 				if(snr==0){
-					threshold_times_out[0] = -1;
-					threshold_times_out[1] = -1;
-					return 11;
+					//If the SNR hits 0 for the lower root, its typically because the 
+					//Waveform is sharply dropping off post merger, and this algorithm can't work
+					//with such a steep function. But if this is the case, the error is on the order of 
+					//seconds, which is completely negligible for most things this routine is used for
+					found_lower_root=true; threshold_times_out[0]=(t1+t2 )/2.;
+					//if(fail_ct>fail_THRESH){
+					//	threshold_times_out[0] = -1;
+					//	threshold_times_out[1] = -1;
+					//	return 11;
+					//}
+					//else{
+					//	if(f_lower_prev == f_lower){
+					//		t2 = t2_prev*SHIFT_UP;
+					//	}
+					//	else{
+					//		t1 = t1_prev*SHIFT_DOWN;
+					//	}
+					//	fail_ct++;
+					//}
 					
 				}
 				else{
@@ -1978,9 +1998,14 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					else{ t1=t_mer;}
 				}
 			}
+			f_lower_prev= f_lower;
+			f_upper_prev= f_upper;
+			t1_prev= t1;
+			t2_prev= t2;
 			snr_prev=snr;
 			//std::cout<<"LOWER: "<<f_lower<<" "<<f_upper<<" "<<t1<<" "<<t2<<" "<<snr<<std::endl;
 		}
+		fail_ct =0;
 		t1=t_save; t2=t_save;
 		do{
 			t2*=2.;
@@ -2024,6 +2049,20 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					threshold_times_out[0] = -1;
 					threshold_times_out[1] = -1;
 					return 12;
+					//if(fail_ct>fail_THRESH){
+					//	threshold_times_out[0] = -1;
+					//	threshold_times_out[1] = -1;
+					//	return 12;
+					//}
+					//else{
+					//	if(f_lower_prev == f_lower){
+					//		t2 = t2_prev*SHIFT_UP;
+					//	}
+					//	else{
+					//		t1 = t1_prev*SHIFT_DOWN;
+					//	}
+					//	fail_ct++;
+					//}
 					
 				}
 				else{
@@ -2039,6 +2078,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	if(round_off_error){
 		return 13;
 	}
+	//std::cout<<std::endl;
 	return 0;
 }
 double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np)

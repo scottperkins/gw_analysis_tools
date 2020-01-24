@@ -17,6 +17,7 @@ PROJ_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_LIB))
 PROJ_SHARED_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_SHARED_LIB))
 EXEDIR:=bin
 MCMC_TOOL:=$(EXEDIR)/mcmc_gw_tool
+WAVEFORM_TOOL:=$(EXEDIR)/waveform_tool
 
 TESTSRC=testing/test.cpp
 TESTOBJ=testing/test.o
@@ -37,13 +38,16 @@ CFLAGSCUDA=-I$(IDIR) -shared -Xcompiler -fpic -O2 -std=c++11
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+OBJECTS_NONEXE:= $(OBJECTS)
+OBJECTS_NONEXE:=$(filter-out $(ODIR)/mcmc_gw_tool.o, $(OBJECTS_NONEXE))
+OBJECTS_NONEXE:=$(filter-out $(ODIR)/waveform_tool.o, $(OBJECTS_NONEXE))
 
 SRCEXTCUDA := cu
 SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 
 ############################################################################
 #CUDA OPTIONS
-#LIBS=-ladolc -lgsl -lgslcblas -lfftw3 -llal  -lcudart 
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3  -lcudart 
 #OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
 LIBS=-ladolc -lgsl -lgslcblas -lfftw3
 OBJECTSCUDA := 
@@ -62,7 +66,7 @@ CCCUDA=nvcc
 #CC=nvcc
 
 .PHONY: all 
-all:  $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
+all:  $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(CONFIGFILE)
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -93,11 +97,11 @@ $(TESTOBJ): $(TESTSRC)
 $(TESTFISHEROBJ): $(TESTFISHERSRC)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(PROJ_LIB) : $(OBJECTS) $(OBJECTSCUDA) | $(LDIR_LOCAL)
-	ar rcs $(LDIR_LOCAL)/$(LOCAL_LIB) $(OBJECTS) $(OBJECTSCUDA)
+$(PROJ_LIB) : $(OBJECTS_NONEXE) $(OBJECTSCUDA) | $(LDIR_LOCAL)
+	ar rcs $(LDIR_LOCAL)/$(LOCAL_LIB) $^ $(OBJECTSCUDA)
 
-$(PROJ_SHARED_LIB) : $(OBJECTS) $(OBJECTSCUDA) | $(LDIR_LOCAL)
-	$(CC) -shared -fopenmp $(OBJECTS) $(OBJECTSCUDA) -o $(LDIR_LOCAL)/$(LOCAL_SHARED_LIB) $(LIBS)
+$(PROJ_SHARED_LIB) : $(OBJECTS_NONEXE) $(OBJECTSCUDA) | $(LDIR_LOCAL)
+	$(CC) -shared -fopenmp $^ -o $(LDIR_LOCAL)/$(LOCAL_SHARED_LIB) $(LIBS)
 
 $(LDIR_LOCAL):
 	mkdir -p $(LDIR_LOCAL)
@@ -108,8 +112,7 @@ $(PROJ_PYLIB): $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYSRC)
 $(TESTFISHER) : $(OBJECTS) $(TESTFISHEROBJ) | $(TESTDIR)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
-OBJECTS_TEST:=$(filter-out build/mcmc_gw_tool.o, $(OBJECTS))
-$(TEST) : $(OBJECTS_TEST) $(OBJECTSCUDA) $(TESTOBJ) | $(TESTDIR)
+$(TEST) : $(OBJECTS_NONEXE) $(OBJECTSCUDA) $(TESTOBJ) | $(TESTDIR)
 	@echo $(OBJECTS_TEST)
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
 
@@ -125,7 +128,7 @@ Doxyfile: $(OBJECTS) $(OBJECTSCUDA) $(PROJ_PYLIB)
 	
  
 .PHONY: c
-c: $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
+c: $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
 
 .PHONY: test
 test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) $(MCMC_TOOL)
@@ -134,7 +137,7 @@ test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) $(MCMC_TOOL)
 testfisher: $(TESTFISHER) $(PROJ_LIB) $(PROJ_SHARED_LIB)
 
 .PHONY: testc
-testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL)
+testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
 
 .PHONY: clean
 clean:
@@ -146,5 +149,7 @@ remove:
 	-rm include/gwat/GWATConfig.h
 	-make -C $(PYDIR) remove
 
-$(MCMC_TOOL): $(OBJECTS)
+$(MCMC_TOOL): $(OBJECTS_NONEXE) $(ODIR)/mcmc_gw_tool.o
+	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
+$(WAVEFORM_TOOL): $(OBJECTS_NONEXE) $(ODIR)/waveform_tool.o
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)
