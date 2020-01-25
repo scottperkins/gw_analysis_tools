@@ -1759,7 +1759,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	sampler static_sampler;
 	static_sampler.A = new int[chain_N_max];
 	static_sampler.chain_temps = new double[chain_N_max];
-	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N_max, chain_distribution_scheme);
+	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N_max, chain_distribution_scheme,checkpoint_file_start);
 
 	if(statistics_filename != "")
 		write_stat_file(samplerptr, statistics_filename);
@@ -1950,7 +1950,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	sampler static_sampler;
 	static_sampler.A = new int[chain_N];
 	static_sampler.chain_temps = new double[chain_N];
-	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N, chain_distribution_scheme);
+	initiate_full_sampler(&static_sampler, samplerptr, max_chain_N_thermo_ensemble,chain_N, chain_distribution_scheme,"");
 
 	if(statistics_filename != "")
 		write_stat_file(samplerptr, statistics_filename);

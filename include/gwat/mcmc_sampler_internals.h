@@ -56,6 +56,7 @@ public:
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
 	int history_length=500;
+	//int history_length=5;
 	int history_update=5;
 	int *current_hist_pos;
 	double ***history;
@@ -238,8 +239,10 @@ void update_temperatures(sampler *samplerptr,
 void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, 
 	int chain_N_thermo_ensemble, 
 	int chain_N,
-	std::string chain_allocation_scheme
+	std::string chain_allocation_scheme,
+	std::string checkpoint_file_start
 	);
+void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr);
 void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status, int chain_N,double *temps,bool RJ);
 
 void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,double **output_new, int **status_new,int chain_N,double *temps,bool RJ);

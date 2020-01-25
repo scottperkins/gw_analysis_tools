@@ -93,6 +93,7 @@ void test53();
 void test54();
 void test55();
 void test56();
+void test57();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -127,10 +128,78 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test56();	
+	test57();	
 	//test6();	
 	//test45();	
 	return 0;
+}
+void test57()
+{
+	sampler sampler;
+	sampler.max_dim = 2;
+	sampler.min_dim = sampler.max_dim;
+	sampler.chain_N = 30;
+	sampler.chain_temps= new double[sampler.chain_N];
+	sampler.N_steps= 100;
+	sampler.fisher_exist=false;
+	sampler.dimension=sampler.max_dim;
+	sampler.num_threads=10;
+	sampler.output = allocate_3D_array(sampler.chain_N, sampler.N_steps, sampler.dimension);
+	sampler.param_status = allocate_3D_array_int(sampler.chain_N, sampler.N_steps, sampler.dimension);
+	int ensemble_number = 10;
+	for(int i = 0 ; i<sampler.chain_N; i++){
+		sampler.chain_temps[i] = 1 + i%ensemble_number *2;
+	}
+	allocate_sampler_mem(&sampler);
+	for(int i = 0 ; i<sampler.chain_N; i++){
+		for(int j =0; j<sampler.dimension; j++){
+			sampler.output[i][0][j]=sampler.chain_temps[i];
+			sampler.param_status[i][0][j]=1;
+		}
+		sampler.chain_pos[i] = 0;
+		sampler.current_hist_pos[i] = 0;
+		for(int j =0 ; j<sampler.history_length ;j++){
+			for(int k = 0 ; k<sampler.dimension; k++){
+
+				sampler.history[i][j][k] = j;
+			}
+		}
+		sampler.de_primed[i]=true;
+	}
+	write_checkpoint_file(&sampler, "testing/data/trial_checkpoint_file.csv");
+
+
+	//Change Data
+	ensemble_number = 13;
+	for(int i = 0 ; i<sampler.chain_N; i++){
+		sampler.chain_temps[i] = 1 + i%ensemble_number *3;
+	}
+	allocate_sampler_mem(&sampler);
+	for(int i = 0 ; i<sampler.chain_N; i++){
+		for(int j =0; j<sampler.dimension; j++){
+			sampler.output[i][0][j]=sampler.chain_temps[i]+1;
+			sampler.param_status[i][0][j]=1;
+		}
+		sampler.chain_pos[i] = 0;
+		sampler.current_hist_pos[i] = 0;
+		for(int j =0 ; j<sampler.history_length ;j++){
+			for(int k = 0 ; k<sampler.dimension; k++){
+
+				sampler.history[i][j][k] = i+1;
+			}
+		}
+		sampler.de_primed[i]=true;
+	}
+	write_checkpoint_file(&sampler, "testing/data/trial_checkpoint_file_changed_data.csv");
+	
+	copy_base_checkpoint_properties("testing/data/trial_checkpoint_file.csv",&sampler);	
+	write_checkpoint_file(&sampler, "testing/data/trial_checkpoint_file_changed_data_back.csv");
+
+	deallocate_sampler_mem(&sampler);
+
+	delete [] sampler.chain_temps;
+	deallocate_3D_array(sampler.output, sampler.chain_N, sampler.N_steps, sampler.dimension);
+	//deallocate_3D_array(sampler.param_status, sampler.chain_N, sampler.N_steps, sampler.dimension);
 }
 void test56()
 {

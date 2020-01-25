@@ -13,6 +13,7 @@
 #include <fftw3.h>
 #include <stdio.h>
 
+const double DOUBLE_COMP_THRESH= 1e-10;
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
  */
@@ -1706,7 +1707,7 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 		}
 	}
 	else{
-		//std::cout<<"false"<<std::endl;
+		checkfile<<"false"<<std::endl;
 	}
 	checkfile.close();
 }
@@ -2089,16 +2090,21 @@ void update_temperatures(sampler *samplerptr,
  * Assumes the output, chain_temps have been allocated in memory for the final number of chains chain_N and steps N_steps
  *
  * Allocates memory for the new sampler sampler_new -> it's the user's responsibility to deallocate with deallocate_sampler_mem
+ *
+ * checkpoint_file_start is the file used for continue_PTMCMC like functions, and can be used if the user wants to maintain the approximate positions and histories of the ensemble of chains after the dynamic temperature allocation. If the rest of the chains should just be copies of the base ensemble, pass an empty string (""). Since the chain distribution can change the number and distribution of chain temperatures (that's kinda the point..), the transfer is not perfect. Cold chains are prioritized, then the rest of the chains are filled in as close as possible.
  */
 void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynamic sampler*/
 	int chain_N_thermo_ensemble, /**< Number of chains used in the thermodynamic ensemble*/
 	int chain_N,/**< Number of chains to use in the static sampler*/
-	std::string chain_allocation_scheme /**< Scheme to use to allocate any remaining chains*/
+	std::string chain_allocation_scheme, /**< Scheme to use to allocate any remaining chains*/
+	std::string checkpoint_file_start /**< Base checkpoint file*/
 	)
 {
 	//Check to see if more chains need to be allocated
 	bool allocate_chains = true;
+	bool use_checkpoint_file=false;
 	if(sampler_old->chain_N == chain_N){	allocate_chains = false;}
+	if(checkpoint_file_start !=""){ use_checkpoint_file = true;}
 	
 	//Allocate new sampler 
 	sampler_new->chain_N = chain_N;
@@ -2203,8 +2209,229 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 				}
 			}
 		}
+		//Replaces the copied positions and histories with the old positions and histories
+		if(use_checkpoint_file){
+			copy_base_checkpoint_properties(checkpoint_file_start, sampler_new);
+		}
 	}
 
+
+}
+/*! \brief Copies positions and histories into chain ensemble, skipping the first set of temperatures
+ *
+ * *NOTE* -- allocate_sampler called in function -- MUST deallocate manually
+ *
+ * *NOTE* -- sampler->chain_temps allocated internally -- MUST free manually
+ *
+ * !ASSUMPTIONS! -- 
+ *
+ * 	The checkpoint file and new sampler must have the same total number of chains, dimension, and the histories are the same length
+ *
+ * 	The temperatures are in ascending order, as output in write_checkpoint
+ */
+void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
+{
+	std::fstream file_in;
+	file_in.open(check_file, std::ios::in);
+	std::string line;
+	std::string item;
+	int i;
+	double temps_old[samplerptr->chain_N];
+	double ***history_old_pos=allocate_3D_array(samplerptr->chain_N, samplerptr->history_length, samplerptr->max_dim);
+	int ***history_old_status=allocate_3D_array_int(samplerptr->chain_N, samplerptr->history_length, samplerptr->max_dim);
+	double **old_gauss_width=allocate_2D_array(samplerptr->chain_N,samplerptr->types_of_steps);
+	double **old_initial_pos = allocate_2D_array(samplerptr->chain_N,samplerptr->max_dim);
+	int **old_initial_status = allocate_2D_array_int(samplerptr->chain_N,samplerptr->max_dim);
+	bool no_history=false;
+	if(file_in){
+		//First row -- dim, chain_N
+		std::getline(file_in,line);
+		std::stringstream lineStream(line);
+		std::getline(lineStream, item, ',');
+		std::getline(lineStream, item, ',');
+		std::getline(lineStream, item, ',');
+		//Second Row -- temps
+		std::getline(file_in,line);
+		std::stringstream lineStreamtemps(line);
+		i=0;
+		while(std::getline(lineStreamtemps, item, ',')){
+			temps_old[i] = std::stod(item);
+			i++;
+		}
+
+		//third row+chain_N -- step widths
+		for(int j =0 ;j<samplerptr->chain_N; j++){
+			i=0;
+			std::getline(file_in,line);
+			std::stringstream lineStreamwidths(line);
+			while(std::getline(lineStreamwidths, item, ',')){
+				old_gauss_width[j][i] = std::stod(item);
+				i++;
+			}
+		}
+
+		//row 3 +chain_N  to 3+2 chain_N-- initial positions
+		for(int j =0 ;j<samplerptr->chain_N; j++){
+			i=0;
+			std::getline(file_in,line);
+			std::stringstream lineStreampos(line);
+			while(i<samplerptr->max_dim  ){
+				std::getline(lineStreampos, item, ',');
+				old_initial_pos[j][i] = std::stod(item);
+				i++;
+			}
+			i=0;
+			while(std::getline(lineStreampos, item, ',')){
+				old_initial_status[j][i] = std::stod(item);
+				i++;
+			}
+		}
+		std::getline(file_in,line);
+		std::stringstream lineStreamprimed(line);
+		std::getline(lineStreamprimed, item, ',');
+		if(item =="true"){
+			for(int j =0 ;j<samplerptr->chain_N; j++){
+				std::getline(file_in,line);
+				std::stringstream lineStreamhist(line);
+				i=0;
+				while(std::getline(lineStreamhist,item,',')){	
+					int step = i/samplerptr->max_dim ;
+					int pos = i%samplerptr->max_dim;
+					history_old_pos[j][step][pos] = std::stod(item);	
+					i++;
+				}
+			}
+		}
+		else{
+			no_history=true;
+		}
+	
+		//exit(1);
+		
+	}
+	else{std::cout<<"ERROR -- File "<<check_file<<" not found"<<std::endl; exit(1);}
+	file_in.close();
+	
+	int old_ensemble_chain_num = 1 ;
+	for(int i = 1 ; i<samplerptr->chain_N; i++){
+		if(fabs(temps_old[i] -1) > DOUBLE_COMP_THRESH){
+			old_ensemble_chain_num++;	
+		}
+		else{
+			break;
+		}
+	}
+	int new_ensemble_chain_num = 1 ;
+	for(int i = 1 ; i<samplerptr->chain_N; i++){
+		if(fabs(samplerptr->chain_temps[i] -1) > DOUBLE_COMP_THRESH){
+			new_ensemble_chain_num++;	
+		}
+		else{
+			break;
+		}
+	}
+	int wrap_number = new_ensemble_chain_num - old_ensemble_chain_num;
+	int new_index = new_ensemble_chain_num,old_index=old_ensemble_chain_num,cp_index=old_ensemble_chain_num ;
+
+	bool utility_bool=true;
+	if(new_ensemble_chain_num != samplerptr->chain_N 
+		&& old_ensemble_chain_num != samplerptr->chain_N){
+
+		for(int i = new_ensemble_chain_num ; i<samplerptr->chain_N; i++){
+			//More chains in old ensemble
+			if(wrap_number < 0){
+				if(old_index%old_ensemble_chain_num==0){
+					cp_index = old_index;
+				}
+				else if(old_index%old_ensemble_chain_num 
+					>= new_ensemble_chain_num + wrap_number ){
+					if(utility_bool){
+						cp_index = old_index;
+					}
+					else{
+						std::cout<<"TEST"<<std::endl;
+						if(old_index-wrap_number<samplerptr->chain_N){
+							cp_index = old_index-wrap_number;
+						}
+						else{
+							cp_index = old_index- old_ensemble_chain_num-wrap_number;
+						}
+					}	
+				}
+				else{
+					cp_index = old_index;
+				}
+				old_index++;	
+		
+			}
+			//More chains in new ensemble
+			else if(wrap_number > 0){
+				if(old_index%old_ensemble_chain_num 
+					>= old_ensemble_chain_num - wrap_number ){
+					if(utility_bool){
+						cp_index = old_index;
+						utility_bool=false;
+					}
+					else{
+						cp_index = old_index;
+						utility_bool=true;
+						old_index++;
+					}
+				}
+				else{
+					utility_bool=true;
+					cp_index = old_index;
+					old_index++;	
+				}
+			}	
+			//Chain number didn't change, straight copy
+			else{
+				cp_index = old_index;
+				old_index++;	
+			}
+			std::cout<<i<<" "<<cp_index<<" "<<samplerptr->chain_temps[i]<<std::endl;
+			//###########################################################
+			//copy old values at cp_index into chain i of new ensemble
+			for(int j = 0 ; j<samplerptr->max_dim; j++){
+				samplerptr->output[i][0][j]=old_initial_pos[cp_index][j];
+				samplerptr->param_status[i][0][j]=old_initial_status[cp_index][j];
+			}
+			for(int j = 0 ; j<samplerptr->types_of_steps ; j++){
+				samplerptr->randgauss_width[i][j] = old_gauss_width[cp_index][j];
+			}
+			if(!no_history){
+				for(int j =0  ;j<samplerptr->history_length; j++){
+					for(int k = 0 ; k<samplerptr->max_dim; k++){
+						samplerptr->history[i][j][k]=history_old_pos[cp_index][j][k];
+					}
+				}
+			}
+			//###########################################################
+			
+			
+			new_index++;	
+			//If new_index is back at T==0, bump old_index to nearest T==0
+			if(new_index%new_ensemble_chain_num ==0){ 
+				if(old_index%old_ensemble_chain_num !=0){
+					old_index += 
+						(old_ensemble_chain_num - old_index%old_ensemble_chain_num );
+				}
+				if(utility_bool)utility_bool = false;
+				else utility_bool = false;
+			}
+			//If we hit the end, restart old_index
+			if(old_index>=samplerptr->chain_N-1){
+				old_index=old_index%old_ensemble_chain_num;
+			}
+		}
+	}
+
+	//Cleanup
+	deallocate_3D_array(history_old_pos,samplerptr->chain_N,samplerptr->history_length,samplerptr->max_dim);
+	deallocate_3D_array(history_old_status,samplerptr->chain_N,samplerptr->history_length,samplerptr->max_dim);
+	deallocate_2D_array(old_gauss_width, samplerptr->chain_N,samplerptr->types_of_steps);
+	deallocate_2D_array(old_initial_pos,samplerptr->chain_N, samplerptr->max_dim);
+	deallocate_2D_array(old_initial_status,samplerptr->chain_N, samplerptr->max_dim);
 
 }
 /*! \brief Utility to write out the parameters and status of a sampler to a file
