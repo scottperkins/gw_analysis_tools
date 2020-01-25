@@ -128,7 +128,7 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test57();	
+	test54();	
 	//test6();	
 	//test45();	
 	return 0;
@@ -287,12 +287,12 @@ void test56()
 	double initial_pos[dimension]={2.5, sin(-.9),1.78,cos(.01),.6,6,std::log(500),std::log(30), .24,.1,.1};
 	//double initial_pos[dimension]={2.5, 0.05,.8,.8,.6,3,3,2, .24,.1,.1};
 	double *seeding_var = NULL;
-	int n_steps = 1000;
+	int n_steps = 10000;
 	//int chain_N=20 ;
 	//int max_thermo=20 ;
 	int chain_N=12 ;
 	int max_thermo=12 ;
-	int t0 = 10000;
+	int t0 = 1000;
 	int nu = 100;
 	std::string chain_alloc = "double";
 	//std::string chain_alloc = "cold";
@@ -364,11 +364,11 @@ void test55()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 1000000;
+	int N_steps = 10000;
 	int chain_N= 8;
 	int max_chain_N_thermo= 8;
-	int t0= 10000;
-	int nu= 50;
+	int t0= 1000;
+	int nu= 100;
 	//std::string chain_dist_method = "half_ensemble";
 	std::string chain_dist_method = "double";
 	//std::string chain_dist_method = "cold";
@@ -386,11 +386,11 @@ void test55()
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint_uncorr2.csv";
 	std::string checkpointfile_start = "testing/data/neil_mcmc_checkpoint_uncorr.csv";
 	
-	int numThreads = 1;
-	bool pool = false;
+	int numThreads = 10;
+	bool pool = true;
 
-	int corr_threshold = 50;
-	int corr_segments = 50;
+	int corr_threshold = 10;
+	int corr_segments = 10;
 	double corr_converge_thresh = 0.5;
 	double corr_target_ac = .01;
 
@@ -411,9 +411,9 @@ void test54()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 1500000;
-	int chain_N= 15;
-	int max_chain_N_thermo= 15;
+	int N_steps = 15000;
+	int chain_N= 10;
+	int max_chain_N_thermo= 10;
 	int t0= 1000;
 	int nu= 50;
 	//std::string chain_dist_method = "half_ensemble";

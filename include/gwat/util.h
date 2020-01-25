@@ -42,6 +42,8 @@ const double ROOT_THREE = std::sqrt(3.);
 
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
+
+const double DOUBLE_COMP_THRESH = 1e-10;
 //GSL versions of the constants, but G seems off..
 //const double gamma_E = M_EULER;
 //const double c = GSL_CONST_MKSA_SPEED_OF_LIGHT;

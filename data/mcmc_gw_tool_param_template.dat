@@ -9,13 +9,13 @@
 [dbl] gps = 1185389807.3
 #File path to the PSD file
 #[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
-[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt
+[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt
 #File path to each data file
 #[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
 #[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
-[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt
-[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt
-[str] data file 2 = /Users/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt
+[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt
+[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt
+[str] data file 2 = /home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt
 #Length of data in seconds
 [dbl] data length = 32
 #Generation method 
@@ -43,18 +43,18 @@
 #Target correlation for calculating autocorrelation length
 [dbl] autocorrelation target = 0.01
 #Output data file -- will be csv
-[str] output data file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test2.csv
+[str] output data file = /home/sperkins/git-repos/gw_analysis_tools/testing/data/test2.csv
 #Output statistics file -- will be txt
-[str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_stat2.txt
+[str] output stat file = /home/sperkins/git-repos/gw_analysis_tools/testing/data/test_stat2.txt
 #############################################################
 #Dimension of the parameter space
 [int] dimension = 11
 #Number of chains
 [int] chain number = 8
 #Initial position file
-[str] initial position file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos.csv
+[str] initial position file = /home/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos.csv
 #Checkpoint file -- csv file
-[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
+[str] checkpoint file = /home/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
 #############################################################
 ##Initial checkpoint  file
 #[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv

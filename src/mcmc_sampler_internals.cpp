@@ -13,7 +13,6 @@
 #include <fftw3.h>
 #include <stdio.h>
 
-const double DOUBLE_COMP_THRESH= 1e-10;
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
  */
@@ -1070,7 +1069,7 @@ void allocate_sampler_mem(sampler *sampler)
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		//designate T=1 chains as reference chains
-		if(sampler->chain_temps[i] == 1){
+		if(fabs(sampler->chain_temps[i] - 1)<DOUBLE_COMP_THRESH){
 			sampler->ref_chain_status[i] = false;
 		}
 		else{
@@ -2349,7 +2348,6 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 						cp_index = old_index;
 					}
 					else{
-						std::cout<<"TEST"<<std::endl;
 						if(old_index-wrap_number<samplerptr->chain_N){
 							cp_index = old_index-wrap_number;
 						}
@@ -2389,7 +2387,6 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 				cp_index = old_index;
 				old_index++;	
 			}
-			std::cout<<i<<" "<<cp_index<<" "<<samplerptr->chain_temps[i]<<std::endl;
 			//###########################################################
 			//copy old values at cp_index into chain i of new ensemble
 			for(int j = 0 ; j<samplerptr->max_dim; j++){

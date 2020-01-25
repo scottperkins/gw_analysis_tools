@@ -1006,7 +1006,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		coldchains = count_cold_chains(chain_temps, chain_N);
 		continue_dynamic_search=false;
 		for(int i = 0 ; i<chain_N;i++){
-			if(chain_temps[i]==1){
+			if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
 				auto_corr_from_data(temp_output[i], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
 				for(int k =0 ; k<dimension; k++){
 					if(temp_ac[k][corr_segments-1] >max_ac_realloc){
@@ -1133,23 +1133,33 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			dimension);
 		status += ct;
 		*/
+		coldchains = count_cold_chains(chain_temps, chain_N);
+		int ac_vals[chain_N];
+		#pragma omp parallel for
 		for(int k =0 ; k<chain_N; k++){
-			if(chain_temps[k]==1){
+			if( fabs(chain_temps[k]-1) < DOUBLE_COMP_THRESH ){
 				double max_ac=1;
+				int **temp_ac_per_chain = allocate_2D_array_int(dimension, 2);
+				
 				auto_corr_from_data(temp_output[k], temp_length, 
-					dimension, temp_ac, corr_segments, corr_target_ac, 
+					dimension, temp_ac_per_chain, 2, corr_target_ac, 
 					numThreads, cumulative);
 				int subsample_length=1;
 				for(int i = 0 ; i<dimension; i++){
-					if(temp_ac[i][corr_segments-1]>subsample_length){
-						subsample_length=temp_ac[i][corr_segments-1];
+					if(temp_ac_per_chain[i][1]>subsample_length){
+						subsample_length=temp_ac_per_chain[i][1];
 					}
 				}
-				if(subsample_length > max_ac_realloc){
-					max_ac_realloc=subsample_length;
-				}
+				ac_vals[k]=subsample_length;
+				deallocate_2D_array(temp_ac_per_chain, dimension, corr_segments);
+				
+			}
+
+		}
+		for(int k =0 ; k<chain_N; k++){
+			if( fabs(chain_temps[k]-1) < DOUBLE_COMP_THRESH ){
 				for(int i =0 ; i<temp_length; i++){
-					if( (status) <N_steps &&  (i %subsample_length==0) ){
+					if( (status) <N_steps &&  (i %ac_vals[k]==0) ){
 						for(int j = 0 ; j<dimension; j++){
 							output[status][j] = 
 								temp_output[k][i][j];
@@ -1158,10 +1168,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 					}
 					
 				}
-				
+				if(ac_vals[k] > max_ac_realloc){
+					max_ac_realloc=ac_vals[k];
+				}
 			}
 
 		}
+
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		if(temp_length < 10*max_ac_realloc){
 			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
@@ -1280,7 +1293,7 @@ void continue_RJPTMCMC_MH_internal(std::string start_checkpoint_file,/**< File f
 	//Set chains with temp 1 to highest priority
 	if(samplerptr->prioritize_cold_chains){
 		for(int i =0 ;i<samplerptr->chain_N; i++){
-			if(samplerptr->chain_temps[i]==1)
+			if(fabs(samplerptr->chain_temps[i]-1)<DOUBLE_COMP_THRESH)
 				samplerptr->priority[i] = 0;
 		}
 	}
@@ -1496,7 +1509,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	//Set chains with temp 1 to highest priority
 	if(samplerptr->prioritize_cold_chains){
 		for(int i =0 ;i<samplerptr->chain_N; i++){
-			if(samplerptr->chain_temps[i]==1)
+			if(fabs(samplerptr->chain_temps[i]-1)<DOUBLE_COMP_THRESH)
 				samplerptr->priority[i] = 0;
 		}
 	}
@@ -1700,7 +1713,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	//Set chains with temp 1 to highest priority
 	if(samplerptr->prioritize_cold_chains){
 		for(int i =0 ;i<samplerptr->chain_N; i++){
-			if(samplerptr->chain_temps[i]==1)
+			if(fabs(samplerptr->chain_temps[i]-1)<DOUBLE_COMP_THRESH)
 				samplerptr->priority[i] = 0;
 		}
 	}
@@ -2532,7 +2545,7 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	//Set chains with temp 1 to highest priority
 	if(samplerptr->prioritize_cold_chains){
 		for(int i =0 ;i<samplerptr->chain_N; i++){
-			if(samplerptr->chain_temps[i]==1)
+			if(fabs(samplerptr->chain_temps[i]-1)<DOUBLE_COMP_THRESH)
 				samplerptr->priority[i] = 0;
 		}
 	}
@@ -2736,7 +2749,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 					//and allowed to keep stepping at low priority-- 
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
-					else if(sampler->chain_temps[i] !=1){
+					else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
 
 						sampler->waiting[i]=false;
 						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
@@ -2872,7 +2885,7 @@ void PTMCMC_MH_loop(sampler *sampler)
 					//and allowed to keep stepping at low priority-- 
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
-					else if(sampler->chain_temps[i] !=1){
+					else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
 
 						sampler->waiting[i]=false;
 						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
