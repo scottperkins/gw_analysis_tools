@@ -128,7 +128,7 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test57();	
+	test54();	
 	//test6();	
 	//test45();	
 	return 0;
@@ -407,12 +407,12 @@ void test55()
 void test54()
 {
 	int dimension = 2;
-	double initial_pos[2]={1,-2.};
+	double initial_pos[2]={5,-4.};
 	double seeding_var[2] ={2,2} ;
 
 	
 	int N_steps = 5000;
-	int chain_N= 10;
+	int chain_N= 30;
 	int max_chain_N_thermo= 10;
 	int t0= 1000;
 	int nu= 50;

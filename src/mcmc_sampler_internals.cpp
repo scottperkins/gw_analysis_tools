@@ -2333,6 +2333,7 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 	int new_index = new_ensemble_chain_num,old_index=old_ensemble_chain_num,cp_index=old_ensemble_chain_num ;
 
 	bool utility_bool=true;
+	//std::cout<<new_ensemble_chain_num<<" "<<old_ensemble_chain_num<<std::endl;
 	if(new_ensemble_chain_num != samplerptr->chain_N 
 		&& old_ensemble_chain_num != samplerptr->chain_N){
 
@@ -2387,6 +2388,7 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 				cp_index = old_index;
 				old_index++;	
 			}
+			//std::cout<<i<<" "<<cp_index<<" "<<samplerptr->chain_temps[i]<<" "<<temps_old[cp_index]<<std::endl;
 			//###########################################################
 			//copy old values at cp_index into chain i of new ensemble
 			for(int j = 0 ; j<samplerptr->max_dim; j++){
@@ -2414,10 +2416,10 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 						(old_ensemble_chain_num - old_index%old_ensemble_chain_num );
 				}
 				if(utility_bool)utility_bool = false;
-				else utility_bool = false;
+				else utility_bool = true;
 			}
 			//If we hit the end, restart old_index
-			if(old_index>=samplerptr->chain_N-1){
+			if(old_index>samplerptr->chain_N-1){
 				old_index=old_index%old_ensemble_chain_num;
 			}
 		}
