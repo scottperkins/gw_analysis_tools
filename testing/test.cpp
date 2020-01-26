@@ -128,7 +128,7 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test54();	
+	test57();	
 	//test6();	
 	//test45();	
 	return 0;
@@ -138,7 +138,7 @@ void test57()
 	sampler sampler;
 	sampler.max_dim = 2;
 	sampler.min_dim = sampler.max_dim;
-	sampler.chain_N = 30;
+	sampler.chain_N = 128;
 	sampler.chain_temps= new double[sampler.chain_N];
 	sampler.N_steps= 100;
 	sampler.fisher_exist=false;
@@ -146,7 +146,7 @@ void test57()
 	sampler.num_threads=10;
 	sampler.output = allocate_3D_array(sampler.chain_N, sampler.N_steps, sampler.dimension);
 	sampler.param_status = allocate_3D_array_int(sampler.chain_N, sampler.N_steps, sampler.dimension);
-	int ensemble_number = 10;
+	int ensemble_number = 15;
 	for(int i = 0 ; i<sampler.chain_N; i++){
 		sampler.chain_temps[i] = 1 + i%ensemble_number *2;
 	}
@@ -411,7 +411,7 @@ void test54()
 	double seeding_var[2] ={2,2} ;
 
 	
-	int N_steps = 15000;
+	int N_steps = 5000;
 	int chain_N= 10;
 	int max_chain_N_thermo= 10;
 	int t0= 1000;

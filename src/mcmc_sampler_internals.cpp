@@ -2390,8 +2390,8 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 			//###########################################################
 			//copy old values at cp_index into chain i of new ensemble
 			for(int j = 0 ; j<samplerptr->max_dim; j++){
-				samplerptr->output[i][0][j]=old_initial_pos[cp_index][j];
-				samplerptr->param_status[i][0][j]=old_initial_status[cp_index][j];
+				samplerptr->output[i][samplerptr->chain_pos[i]][j]=old_initial_pos[cp_index][j];
+				samplerptr->param_status[i][samplerptr->chain_pos[i]][j]=old_initial_status[cp_index][j];
 			}
 			for(int j = 0 ; j<samplerptr->types_of_steps ; j++){
 				samplerptr->randgauss_width[i][j] = old_gauss_width[cp_index][j];
