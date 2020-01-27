@@ -1212,14 +1212,20 @@ T gps_to_GMST(T gps_time)
 	T JD = gps_to_JD(gps_time);
 	T JD0;
 	T H;
-	if((JD - floor(JD)) >.5){ 
+	//if((JD - floor(JD)) >.5){ 
+	//	JD0 = floor(JD)+.5;//Julian date of the previous midnight
+	//	H = (JD - JD0)*24;//Hours past midnight (in hours)
+	//}
+	//else{
+	//	JD0 = floor(JD) -1. ;
+	//	H = (JD - JD0)*24;
+	//}
 		JD0 = floor(JD)+.5;//Julian date of the previous midnight
 		H = (JD - JD0)*24;//Hours past midnight (in hours)
-	}
-	else{
-		JD0 = floor(JD) -1. ;
-		H = (JD - JD0)*24;
-	}
+	//else{
+	//	JD0 = floor(JD) -1. ;
+	//	H = (JD - JD0)*24;
+	//}
 	T D0 = JD0 -J2000;
 	T D = JD -J2000;
 	T tau = D/ 36525.; //Centuries since J2000

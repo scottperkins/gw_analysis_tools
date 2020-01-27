@@ -30,6 +30,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
 int main(int argc, char *argv[])
 {
+	std::cout.precision(15);
 	if(argc !=2){
 		std::cout<<"ERROR -- A parameter file is required"<<std::endl;
 		return 1;
@@ -68,7 +69,7 @@ int main(int argc, char *argv[])
 	
 	double data_time_length = dbl_dict["data length"];
 	std::cout<<"data length: "<<data_time_length<<std::endl;
-	int data_length=131075;
+	int data_length=131072;
 	//if((int)data_time_length == 32){
 	//	data_length = 131072;
 	//}	

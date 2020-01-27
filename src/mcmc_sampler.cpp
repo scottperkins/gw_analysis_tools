@@ -1136,7 +1136,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		*/
 		coldchains = count_cold_chains(chain_temps, chain_N);
 		int ac_vals[chain_N];
-		#pragma omp parallel for
+		//#pragma omp parallel for
 		for(int k =0 ; k<chain_N; k++){
 			if( fabs(chain_temps[k]-1) < DOUBLE_COMP_THRESH ){
 				double max_ac=1;
