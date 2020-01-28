@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
 	std::string output_file = str_dict["output data file"];
 	std::string stat_file = str_dict["output stat file"];
 	std::string check_file = str_dict["checkpoint file"];
+	int dimension = int_dict["dimension"];
 	
 	std::string initial_position_file, initial_checkpoint_file;
 	int chain_N;
@@ -131,7 +132,6 @@ int main(int argc, char *argv[])
 		data_lengths[i] =psd_length;
 	}
 	//########################################################################
-	int dimension = 11;
 	double **output;
 	output = allocate_2D_array(samples, dimension );
 	double chain_temps[chain_N];
@@ -140,14 +140,23 @@ int main(int argc, char *argv[])
 	int *bppe = NULL;
 	bool pool = true;
 	bool show_progress = true;
+
 	//#########################################################
+	
+	double(*lp)(double *param, int dimension, int chain_id, void *parameters);
+	if(generation_method.find("IMRPhenomD") != std::string::npos){
+		lp = &standard_log_prior_D;
+	}
+	else if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+		lp = &standard_log_prior_Pv2;
+	}
 
 	if(continue_from_checkpoint){
 		continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,output, samples,  
 				max_thermo_chain_N, chain_temps, 
 				swap_freq, t0, nu, correlation_thresh, correlation_segs,
 				correlation_convergence_thresh , ac_target,allocation_scheme, 
-				standard_log_prior_D,threads, pool,show_progress,detector_N, 
+				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 				generation_method,stat_file,output_file, "",check_file);	
 
@@ -162,7 +171,7 @@ int main(int argc, char *argv[])
 				max_thermo_chain_N, init_pos,seeding_var,chain_temps, 
 				swap_freq, t0, nu, correlation_thresh, correlation_segs,
 				correlation_convergence_thresh , ac_target,allocation_scheme, 
-				standard_log_prior_D,threads, pool,show_progress,detector_N, 
+				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 				generation_method,stat_file,output_file, "",check_file);	
 		delete [] initial_position[0]; delete [] initial_position;
@@ -228,7 +237,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
-	if ((pos[5])<0 || (pos[5])>10){return a;}//PhiRef
+	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 || std::isnan(pos[4])){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta

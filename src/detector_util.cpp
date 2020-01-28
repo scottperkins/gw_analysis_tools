@@ -56,6 +56,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
  * 		-- does include the factor of sqrt(3)/2
  *
  * 		-- This DOES include the sky averaged pattern functions -- i.e. sky_average flag should NOT be used when making the waveform
+ *
+ *
  */
 void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
 		std::string detector, /**< String to designate the detector noise curve to be used */

@@ -1061,8 +1061,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	//int realloc_temps_length = .05*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
-	int realloc_temps_length = 1;//0.01 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = .05*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
+	//int realloc_temps_length = 1;//0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	while(status<N_steps){
 		if(status>realloc_temps_thresh){

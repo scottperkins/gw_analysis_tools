@@ -19,7 +19,7 @@
 #Length of data in seconds
 [dbl] data length = 32
 #Generation method 
-[str] generation method = IMRPhenomD
+[str] generation method = IMRPhenomPv2
 #Number of ~uncorrelated samples to take
 [int] samples = 1000
 #Maximum number of chains per thermodynamic ensemble
@@ -48,9 +48,9 @@
 [str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_stat2.txt
 #############################################################
 #Dimension of the parameter space
-[int] dimension = 11
+[int] dimension = 13
 #Number of chains
-[int] chain number = 30
+[int] chain number = 10
 #Initial position file
 [str] initial position file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos.csv
 #Checkpoint file -- csv file
