@@ -123,6 +123,72 @@ void write_auto_corr_file_from_data(std::string autocorr_filename,/**<Name of th
 }
 				
 
+/*! \brief Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes FFTW3 for longer chuncks of the chains -- Batch version for multiple chains at a time
+ *
+ * Takes in the data from a sampler, shape data[chain_N][N_steps][dimension]
+ *
+ * Outputs lags that correspond to the target_corr -- shape output[chain_N][dimension][num_segments]
+ *
+ * If cumulative, the ac is calculated in the following format:
+ *
+ * |-------|
+ * 
+ * |--------------|
+ * 
+ * |-------------------------|
+ *
+ * ...
+ *
+ * Else, the ac is calculated as :
+ *
+ * |-------|
+ * 
+ *         |------|
+ * 
+ *                 |--------|
+ *
+ * ...
+ */
+void auto_corr_from_data_batch(double ***data, /**<Input data */
+			int length, /**< length of input data*/
+			int dimension, /**< dimension of data*/
+			int chain_N,
+			int ***output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
+			int num_segments, /**< number of segements to compute the auto-corr length*/
+			double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
+			int num_threads, /**< Total number of threads to use*/
+			bool cumulative /**< Boolean to calculate the autocorrelation cumulatively*/
+			)
+{
+	int temp_dim = dimension*chain_N;
+	int **temp_output = allocate_2D_array_int(temp_dim, num_segments);
+	double **temp_data = new double*[length];
+	for(int i = 0 ; i<length; i++){
+		temp_data[i] = new double[temp_dim];
+		for(int j = 0 ; j<temp_dim; j++){
+			int chain_number = j/dimension;
+			int step_number = j%dimension;
+			temp_data[i][j] = data[chain_number][i][step_number];
+		}
+	}
+	
+	auto_corr_from_data(temp_data,length,temp_dim, temp_output, num_segments, target_corr, num_threads, cumulative);
+	
+	for(int i = 0 ; i<temp_dim; i++){
+		int chain_number = i/dimension;
+		int dim_number = i%dimension;
+		for(int j = 0 ; j<num_segments; j++){
+			output[chain_number][dim_number][j]=temp_output[i][j];
+		}
+	}
+	//Clean up	
+	for(int i = 0 ; i<length; i++){
+		delete [] temp_data[i];	
+	}
+	delete [] temp_data;	
+	deallocate_2D_array(temp_output,temp_dim,num_segments);
+
+}
 /*! \brief Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes FFTW3 for longer chuncks of the chains
  *
  * Takes in the data from a sampler, shape data[N_steps][dimension]

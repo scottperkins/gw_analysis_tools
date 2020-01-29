@@ -403,6 +403,38 @@ template void list_intersect<double>(double*,int,double*,int,double**,int *);
 template void list_intersect<adouble>(adouble*,int,adouble*,int,adouble**,int *);
 template void list_intersect<int>(int*,int,int*,int,int**,int *);
 
+template<class T, class U>
+void mean_list(T *list, int length, U *result)
+{
+	U m = 0;
+	for(int i = 0 ; i<length; i++){
+		m +=list[i];
+	}
+	m/=length;
+	*result=m;
+}
+template void mean_list<double,double>(double *,int,double*);
+template void mean_list<adouble,adouble>(adouble *,int,adouble*);
+template void mean_list<int,double>(int *,int,double*);
+template void mean_list<int,adouble>(int *,int,adouble*);
+
+template<class T, class U>
+void variance_list(T *list, int length,U *result)
+{
+	U m;
+	mean_list(list,length,&m);
+	U variance=0;
+	for(int i = 0; i<length ;i++){
+		variance += pow_int(list[i] - m, 2);
+	}
+	variance/=length;
+	*result=m;
+}
+template void variance_list<double,double>(double *,int,double*);
+template void variance_list<adouble,adouble>(adouble *,int,adouble*);
+template void variance_list<int,double>(int *,int,double*);
+template void variance_list<int,adouble>(int *,int,adouble*);
+
 /*! \brief Just a quick utility to see if an item is in a list
  *
  * Didn't want to keep rewriting this loop

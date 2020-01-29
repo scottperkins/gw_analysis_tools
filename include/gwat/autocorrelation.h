@@ -71,6 +71,16 @@ public:
 };
 void write_auto_corr_file_from_data_file(std::string autocorr_filename,std::string datafile,int length, int dimension, int num_segments,double target_corr, int num_threads,bool cumulative);
 void write_auto_corr_file_from_data(std::string autocorr_filename,double **data,int length, int dimension, int num_segments,double target_corr, int num_threads,bool cumulative);
+void auto_corr_from_data_batch(double ***data, /**<Input data */
+			int length, /**< length of input data*/
+			int dimension, /**< dimension of data*/
+			int chain_N,
+			int ***output, /**<[out] array that stores the auto-corr lengths -- array[num_segments]*/
+			int num_segments, /**< number of segements to compute the auto-corr length*/
+			double target_corr, /**< Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr)*/
+			int num_threads, /**< Total number of threads to use*/
+			bool cumulative /**< Boolean to calculate the autocorrelation cumulatively*/
+			);
 void auto_corr_from_data(double **data, int length, int dimension, int **output, int num_segments,  double target_corr, int num_threads,bool cumulative);
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job);
 void threaded_ac_serial(int thread, threaded_ac_jobs_serial job);

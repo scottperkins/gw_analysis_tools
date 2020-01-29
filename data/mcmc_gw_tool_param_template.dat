@@ -39,7 +39,7 @@
 #Segments over which to split the data to calculate convergence in correlation
 [int] correlation segments = 10
 #Threshold to determine convergence 
-[dbl] correlation convergence threshold = 0.5
+[dbl] correlation convergence threshold = 0.1
 #Target correlation for calculating autocorrelation length
 [dbl] autocorrelation target = 0.01
 #Output data file -- will be csv
