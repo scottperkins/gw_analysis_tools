@@ -210,6 +210,10 @@ int calculate_snr_gsl(double *snr,
 	int np/**<Size of gsl_integration_workspace allocation*/
 	)
 {
+	bool SA_save=params->sky_average;
+	if(SN.find("SADC") != std::string::npos && params->sky_average){
+		params->sky_average=false;	
+	}
 	gsl_snr_struct helper_params;
 	helper_params.params = params;
 	helper_params.generation_method = generation_method;
@@ -231,6 +235,7 @@ int calculate_snr_gsl(double *snr,
 	//if(detector=="LISA"){
 	//	*snr *=sqrt(2.);	
 	//}
+	params.sky_average = SA_save;
 	return errcode;
 }
 
@@ -1856,6 +1861,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	//std::cout.precision(15);	
 	bool round_off_error=false;	
 	
+	bool save_SA = params->sky_average;
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	params->sky_average = false;
 	double bounds[2];
@@ -2048,6 +2054,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				if(snr==0){
 					threshold_times_out[0] = -1;
 					threshold_times_out[1] = -1;
+					params->sky_average = SA_save;
 					return 12;
 					//if(fail_ct>fail_THRESH){
 					//	threshold_times_out[0] = -1;
@@ -2076,8 +2083,10 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		}
 	}
 	if(round_off_error){
+		params->sky_average = SA_save;
 		return 13;
 	}
+	params->sky_average = SA_save;
 	//std::cout<<std::endl;
 	return 0;
 }
