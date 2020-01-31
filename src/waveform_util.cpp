@@ -1932,6 +1932,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	}	
 	//If no SNR is larger than threshold, return 
 	if(not_found){
+		std::cout<<"not found"<<std::endl;
 		threshold_times_out[0] = -1;
 		threshold_times_out[1] = -1;
 	}
