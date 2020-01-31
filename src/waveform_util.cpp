@@ -211,7 +211,7 @@ int calculate_snr_gsl(double *snr,
 	)
 {
 	bool SA_save=params->sky_average;
-	if(SN.find("SADC") != std::string::npos && params->sky_average){
+	if(sensitivity_curve.find("SADC") != std::string::npos && params->sky_average){
 		params->sky_average=false;	
 	}
 	gsl_snr_struct helper_params;
@@ -220,7 +220,7 @@ int calculate_snr_gsl(double *snr,
 	helper_params.SN = sensitivity_curve;
 	helper_params.detector = detector;
 	gsl_function F;
-	if(params->sky_average){
+	if(SA_save){
 		F.function = [](double f, void *param){return integrand_snr_SA_subroutine(f,param);};
 	}
 	else{
@@ -235,7 +235,7 @@ int calculate_snr_gsl(double *snr,
 	//if(detector=="LISA"){
 	//	*snr *=sqrt(2.);	
 	//}
-	params.sky_average = SA_save;
+	params->sky_average = SA_save;
 	return errcode;
 }
 
@@ -2054,7 +2054,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				if(snr==0){
 					threshold_times_out[0] = -1;
 					threshold_times_out[1] = -1;
-					params->sky_average = SA_save;
+					params->sky_average = save_SA;
 					return 12;
 					//if(fail_ct>fail_THRESH){
 					//	threshold_times_out[0] = -1;
@@ -2083,10 +2083,10 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		}
 	}
 	if(round_off_error){
-		params->sky_average = SA_save;
+		params->sky_average = save_SA;
 		return 13;
 	}
-	params->sky_average = SA_save;
+	params->sky_average = save_SA;
 	//std::cout<<std::endl;
 	return 0;
 }
