@@ -1484,7 +1484,7 @@ template void postmerger_params<adouble>(gen_params_base<adouble> *,std::string,
 
 /*! \brief Convenience function to Calculate the time before merger using numerical methods
  *
- * Uses autodiff -- omp safe but not thread safe
+ * Uses numerical -- omp safe and thread safe
  */
 void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of the source*/
 	std::string generation_method,/**< Generation method for the waveform*/
@@ -1864,8 +1864,13 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	params->sky_average = false;
 
-	bool stellar_mass = false;	
-	//if(
+	bool stellar_mass = true;	
+	double fpeak, fdamp,fRD;
+	postmerger_params(params,generation_method,&fpeak,&fdamp, &fRD);
+	
+	if(fpeak < fmax){
+		stellar_mass=false;
+	}
 
 	double bounds[2];
 	
@@ -1882,8 +1887,14 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	//Frequency T_obs before it leaves band
 	//Using PN f(t) instead of local, because its faster and simpler -- maybe upgrade later
 	//Shouldn't matter this far from merger
-	t_mer= t_0PN(f_upper, chirpmass)+T_obs;
-	f_lower = f_0PN(t_mer,chirpmass);	
+	if(stellar_mass){
+		t_mer= t_0PN(f_upper, chirpmass)+T_obs;
+		f_lower = f_0PN(t_mer,chirpmass);	
+	}
+	else{
+		f_upper = fpeak*1.1;	
+		f_lower = f_0PN(T_obs,chirpmass);	
+	}
 
 	snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 	snr_prev=snr;
@@ -1893,8 +1904,15 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		bool bound_search=true, t1_moved=true,t2_moved=true;
 		while(bound_search){
 			t_mer *=2.;
-			f_lower = (f_0PN(t_mer, chirpmass));
-			f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+			if(stellar_mass){
+				f_lower = (f_0PN(t_mer, chirpmass));
+				f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+			}
+			else{
+				//Much much slower
+				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance);
+				Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance);
+			}
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			if(snr<snr_prev){bound_search=false;}	
 			else if(f_lower < fmin){ 
@@ -1906,12 +1924,25 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		t2 = t_mer;
 		while(not_found && t_mer < T_wait && (t2-t1)>T_day){
 			t_mer = (t1+t2)/2.;
-			f_lower =  f_0PN(t_mer ,chirpmass) ;
-			if(t_mer-T_obs > 0){
-				f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+			if(stellar_mass){
+				f_lower =  f_0PN(t_mer ,chirpmass) ;
+				if(t_mer-T_obs > 0){
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+				}
+				else{
+					f_upper =   fmax;
+
+				}
 			}
 			else{
-				f_upper =   fmax;
+				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance);
+				if(t_mer-T_obs > 0){
+					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance);
+				}
+				else{
+					f_upper =   fpeak*1.1;
+
+				}
 
 			}
 			f_lower_prev= f_lower;
@@ -1948,13 +1979,25 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		//Find a lower bound for bisection search
 		while(snr>SNR_thresh){
 			t1/=2.;
-			f_lower =  f_0PN(t1 ,chirpmass) ;
-			if(t1-T_obs > 0){
-				f_upper =  std::min( f_0PN(  t1 - T_obs,chirpmass) , fmax ) ;
+			if(stellar_mass){
+				f_lower =  f_0PN(t1 ,chirpmass) ;
+				if(t1-T_obs > 0){
+					f_upper =  std::min( f_0PN(  t1 - T_obs,chirpmass) , fmax ) ;
+				}
+				else{
+					f_upper =   fmax;
+
+				}
 			}
 			else{
-				f_upper =   fmax;
+				Tbm_to_freq(params, generation_method, t1, &f_lower,tolerance);
+				if(t1-T_obs > 0){
+					Tbm_to_freq(params, generation_method, t1-T_obs, &f_upper,tolerance);
+				}
+				else{
+					f_upper =   1.1*fpeak;
 
+				}
 			}
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			//std::cout<<f_lower<<" "<<f_upper<<std::endl;
@@ -1962,12 +2005,25 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		while(!found_lower_root){
 			t_mer = (t1+t2)/2.;
 			//Find new frequency bound ids
-			f_lower =  f_0PN(t_mer ,chirpmass) ;
-			if(t_mer-T_obs > 0){
-				f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax);
+			if(stellar_mass){
+				f_lower =  f_0PN(t_mer ,chirpmass) ;
+				if(t_mer-T_obs > 0){
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax);
+				}
+				else{
+					f_upper = fmax;
+
+				}
 			}
 			else{
-				f_upper = fmax;
+				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance);
+				if(t_mer-T_obs > 0){
+					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance);
+				}
+				else{
+					f_upper =   1.1*fpeak;
+
+				}
 
 			}
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
@@ -2018,14 +2074,26 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		t1=t_save; t2=t_save;
 		do{
 			t2*=2.;
-			if(t2>T_wait){t2=T_wait;}	
-			f_lower =  f_0PN(t2 ,chirpmass) ;
-			if(t2-T_obs > 0){
-				f_upper =  std::min( f_0PN(  t2 - T_obs,chirpmass) , fmax ) ;
+			if(stellar_mass){
+				if(t2>T_wait){t2=T_wait;}	
+				f_lower =  f_0PN(t2 ,chirpmass) ;
+				if(t2-T_obs > 0){
+					f_upper =  std::min( f_0PN(  t2 - T_obs,chirpmass) , fmax ) ;
+				}
+				else{
+					f_upper =fmax;
+
+				}
 			}
 			else{
-				f_upper =fmax;
+				Tbm_to_freq(params, generation_method, t2, &f_lower,tolerance);
+				if(t2-T_obs > 0){
+					Tbm_to_freq(params, generation_method, t2-T_obs, &f_upper,tolerance);
+				}
+				else{
+					f_upper =   1.1*fpeak;
 
+				}
 			}
 			//std::cout<<"UPPER SEARCH: "<<f_upper<<" "<<f_lower<<" "<<t1<<" "<<t2<<T_wait<<std::endl;
 			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
@@ -2036,13 +2104,25 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			
 			t_mer = (t1+t2)/2.;
 			//Find new frequency bound ids
-			f_lower =  f_0PN(t_mer ,chirpmass) ;
-			if(t_mer-T_obs > 0){
-				f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+			if(stellar_mass){
+				f_lower =  f_0PN(t_mer ,chirpmass) ;
+				if(t_mer-T_obs > 0){
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+				}
+				else{
+					f_upper = fmax;
+
+				}
 			}
 			else{
-				f_upper = fmax;
+				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance);
+				if(t_mer-T_obs > 0){
+					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance);
+				}
+				else{
+					f_upper =   1.1*fpeak;
 
+				}
 			}
 			f_lower_prev= f_lower;
 			f_upper_prev= f_upper;
