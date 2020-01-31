@@ -1858,12 +1858,15 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	double SHIFT_UP=1.0 + 1e-2;
 	double SHIFT_DOWN=1.0 - 1e-2;
 
-	//std::cout.precision(15);	
 	bool round_off_error=false;	
 	
 	bool save_SA = params->sky_average;
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	params->sky_average = false;
+
+	bool stellar_mass = false;	
+	//if(
+
 	double bounds[2];
 	
 	//Max number of iterations -- safety net
@@ -1932,7 +1935,6 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	}	
 	//If no SNR is larger than threshold, return 
 	if(not_found){
-		std::cout<<"not found"<<std::endl;
 		threshold_times_out[0] = -1;
 		threshold_times_out[1] = -1;
 	}
