@@ -92,7 +92,7 @@ public:
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
 	int fisher_update_number=200;
-	//int fisher_update_number=50;
+	//int fisher_update_number=500000;
 
 	//log_prior lp;
 	//log_likelihood ll;

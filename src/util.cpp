@@ -229,6 +229,23 @@ adouble DL_from_Z(adouble Z, std::string cosmology)
 	}
 	return -1;
 }
+
+/*! \brief Rough threshold for when to truncate waveforms for neutron stars 
+ *
+ * 24 km separation
+ */
+template <class T>
+T fcontact(T M_detector, /**< Detector frame total mass in seconds*/
+	T DL, /**< Luminsosity distance in seconds*/
+	std::string cosmology/**< Cosmology to use for getting the redshift from dl*/
+	)
+{
+	T z = Z_from_DL(DL/MPC_SEC,cosmology);	
+	T Rcontact = 24./3.e5;
+	return (1./M_PI)*(sqrt(M_detector/(1.+z)/pow_int(Rcontact,3)));
+}
+template double fcontact<double>(double , double , std::string);
+template adouble fcontact<adouble>(adouble , adouble , std::string);
 /*! \brief Custom interpolation function used in the cosmology calculations
  *
  * Power series in half power increments of x, up to 11/2. powers of x

@@ -1871,6 +1871,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	if(fpeak < fmax){
 		stellar_mass=false;
 	}
+	stellar_mass=true;
 
 	double bounds[2];
 	
@@ -1897,6 +1898,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	}
 
 	snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+	std::cout<<snr<<std::endl;
 	snr_prev=snr;
 	double t1 = t_mer, t2=t_mer;
 	if(snr>SNR_thresh){not_found= false;}

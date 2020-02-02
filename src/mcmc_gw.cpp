@@ -1699,7 +1699,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[8]=10;
 		}
 	}
-	else if(dimension==13 && generation_method =="IMRPhenomPv2"){
+	else if(dimension==14 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=false;
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
 		if(local_seeding){
@@ -1717,6 +1717,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[10]=.1;
 			seeding_var[11]=.1;
 			seeding_var[12]=.1;
+			seeding_var[13]=.1;
 		}
 	}
 	else if(dimension==14 && generation_method =="IMRPhenomPv2"){
@@ -2319,10 +2320,12 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 		double DEC = gen_params.DEC;
 		double PSI = gen_params.psi;
 		//if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
+		
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
 			&gen_params,local_gen, mcmc_data_length, 
 			mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, 
 			mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+
 		//ll = Log_Likelihood(mcmc_data[0], 
 		//		mcmc_noise[0],
 		//		mcmc_frequencies[0],

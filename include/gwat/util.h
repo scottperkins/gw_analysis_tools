@@ -416,6 +416,9 @@ double DL_from_Z(double Z, std::string cosmology);
 double cosmology_interpolation_function(double x, double *coeffs, int interp_degree);
 double cosmology_lookup(std::string cosmology);
 
+template <class T>
+T fcontact(T M_detector, T DL, std::string cosmology);
+
 double gsl_maxwell_boltzmann_distribution(double sigma, gsl_rng *r);
 template<class T>
 void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC);

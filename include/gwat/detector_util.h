@@ -37,6 +37,19 @@ const double V_radius = 6368051.92301;//in meters
 //const double V_elevation = 8;//in meters
 const double V_elevation = 51.884;//in meters
 
+
+const double K_LAT =0.6355068497 ;//in rad
+const double K_LONG =2.396441015 ;//in rad
+const double K_radius =6371060 ;//in meters
+//const double K_azimuth_offset = ;//in rad
+const double K_elevation = 414.181;//in meters
+
+const double I_LAT =0.2484185302005262;//in rad
+const double I_LONG =1.3340133249409993 ;//in rad
+const double I_radius =6376850 ;//in meters
+//const double I_azimuth_offset = ;//in rad
+const double I_elevation = 0.0;//in meters
+
 //Earth radii at the poles and the equator (Earth is an ellispoid)
 const double RE_polar =6357e3 ;//in meters
 const double RE_equatorial = 6378e3 ;//in meters
@@ -63,7 +76,12 @@ const double Livingston_D[3][3] = {{0.411318, 0.14021,
 const double Virgo_D[3][3] = {{0.243903, -0.0990959, -0.232603}, {-0.0990959, -0.447841, 
   0.187841}, {-0.232603, 0.187841, 0.203979}};
 
+const double Kagra_D[3][3]={{-0.18599, 0.153167, -0.324951}, {0.153167, 
+  0.349518, -0.170874}, {-0.324951, -0.170874, -0.163529}};
 
+const double Indigo_D[3][3] ={{0.470823664959826499, -0.120908243530907122, 
+  0.0279526040438164719}, {-0.120908243530907122, -0.001050025852002534, 0.115836952558600455}, {0.0279526040438164719, 
+  0.115836952558600455, -0.469773644459096742}};
 
 
 void populate_noise(double *frequencies,std::string detector,double *noise_root,  int length=0);
@@ -154,6 +172,7 @@ template<class T>
 T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f);
 
 double p_single_detector(double omega, int samples);
+double p_N_detector(double omega, int samples,int N_detectors,std::string *detectors,int rand_seed);
 double p_single_detector_fit(double omega);
 double p_triple_detector_fit(double omega);
 double pdet_triple_detector_fit(double rho_thresh,double rho_opt);

@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
 	
 	int psd_length ;
 	count_lines_LOSC_PSD_file(psd_file, &psd_length);
+	std::cout<<"Length of PSD: "<<psd_length<<std::endl;
 	//########################################################################
 
 	double **psd = allocate_2D_array(detector_N,psd_length);
@@ -165,10 +166,9 @@ int main(int argc, char *argv[])
 		double **initial_position = new double*[1];
 		initial_position[0] = new double[dimension];
 		read_file(initial_position_file, initial_position,1,dimension);
-		double *init_pos = initial_position[0];
 		double *seeding_var = NULL;
 		PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-				max_thermo_chain_N, init_pos,seeding_var,chain_temps, 
+				max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 				swap_freq, t0, nu, correlation_thresh, correlation_segs,
 				correlation_convergence_thresh , ac_target,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
@@ -214,20 +214,20 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
-	double chirp = std::exp(pos[7]);
-	double eta = pos[8];
-	double m1 = calculate_mass1(chirp,eta );
-	double m2 = calculate_mass2(chirp,eta );
-	double q =m1/m2;
-	double W = (3*q +4)/ ( 4*q*q +3*q);
-	//Max values
-	double chi1l = pos[9];
-	double chi2l = pos[10];
-	double chi1p = std::sqrt(1- chi1l*chi1l);
-	double chi2p = std::sqrt(1- chi2l*chi2l);
-	double chi_thresh=W*chi2p ;
-	if(chi1p > W*chi2p){ chi_thresh =chi1p;}
-	if(pos[11] > chi_thresh){ return a;}
+	//double chirp = std::exp(pos[7]);
+	//double eta = pos[8];
+	//double m1 = calculate_mass1(chirp,eta );
+	//double m2 = calculate_mass2(chirp,eta );
+	//double q =m1/m2;
+	//double W = (3*q +4)/ ( 4*q*q +3*q);
+	////Max values
+	//double chi1l = pos[9];
+	//double chi2l = pos[10];
+	//double chi1p = std::sqrt(1- chi1l*chi1l);
+	//double chi2p = std::sqrt(1- chi2l*chi2l);
+	//double chi_thresh=W*chi2p ;
+	//if(chi1p > W*chi2p){ chi_thresh =chi1p;}
+	//if(pos[11] > chi_thresh){ return a;}
 
 	//Flat priors across physical regions
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
@@ -241,9 +241,10 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 || std::isnan(pos[4])){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
-	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//chi1 
-	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//chi2
-	if ((pos[11])<0 || (pos[11])>.9){return a;}//chip
-	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phip
+	if ((pos[9])<0 || (pos[9])>.9){return a;}//a1 
+	if ((pos[10])<0 || (pos[10])>.9){return a;}//a2
+	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
+	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
+	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
 	else {return pos[7]+3*pos[6];}
 }

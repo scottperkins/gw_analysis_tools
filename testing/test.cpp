@@ -94,6 +94,7 @@ void test54();
 void test55();
 void test56();
 void test57();
+void test58();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -128,10 +129,31 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test54();	
+	test58();	
 	//test6();	
 	//test45();	
 	return 0;
+}
+
+void test58()
+{
+	std::cout.precision(15);
+	int length = 141;
+	double **output = allocate_2D_array(length, 2);
+	int N_detectors = 5;
+	std::string detectors[N_detectors] = {"Hanford","Livingston","Virgo","Kagra","Indigo"};
+	#pragma omp parallel for
+	for(int i = 0 ; i < length; i++){
+		double omega = .0+.01*i;
+		int samples = 5e5;
+		double P=p_N_detector(omega,samples,N_detectors,detectors, i*2);
+		std::cout<<"Omega: "<<omega<<"  Detection Probability: "<<P<<std::endl;
+		output[i][0] = omega;
+		output[i][1] = P;
+	}
+	write_file("testing/data/p_triple.csv",output,length,2);
+	deallocate_2D_array(output,length,2);
+
 }
 void test57()
 {
@@ -467,13 +489,13 @@ void test53()
 	double SNR_thresh = 8;
 
 	gen_params params;
-	params.mass1 = 36.;
-	params.mass2 = 29.;
+	params.mass1 = 36.e1;
+	params.mass2 = 29.e1;
 	//params.spin1[2] =-0.3;
 	//params.spin2[2] = 0.8;
 	params.spin1[2] = 0.0;
 	params.spin2[2] = 0.0;
-	params.Luminosity_Distance=200;
+	params.Luminosity_Distance=4000;
 	params.sky_average=true;
 	params.incl_angle = 0;
 	params.phi=0;params.theta=0;params.psi=0;
@@ -489,34 +511,36 @@ void test53()
 
 	double f_lower = 1e-4;
 	double f_upper = 1;
-	int length = (f_upper-f_lower)*T_obs;
-	double *freqs = new double[length];
-	double *SN = new double[length];
-	for(int i = 0 ; i<length; i++){
-		freqs[i] = f_lower + i / T_obs;
-	}
-	populate_noise(freqs, "LISA_SADC_CONF", SN, length,4*12);
-	for(int i = 0 ; i<length; i++){
-		SN[i]=SN[i]*SN[i];	
-	}
+	//int length = (f_upper-f_lower)*T_obs;
+	//double *freqs = new double[length];
+	//double *SN = new double[length];
+	//for(int i = 0 ; i<length; i++){
+	//	freqs[i] = f_lower + i / T_obs;
+	//}
+	//populate_noise(freqs, "LISA_SADC_CONF", SN, length,4*12);
+	//for(int i = 0 ; i<length; i++){
+	//	SN[i]=SN[i]*SN[i];	
+	//}
 
-	clock_t start;
-	std::cout<<"Calculating Threshold times: "<<std::endl;
-	start = clock();
-	threshold_times(&params, "IMRPhenomD", T_obs, T_wait, freqs, SN, length, SNR_thresh, times, tolerance);
-	std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
-	std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
+	//clock_t start;
+	//std::cout<<"Calculating Threshold times: "<<std::endl;
+	//start = clock();
+	//threshold_times(&params, "IMRPhenomD", T_obs, T_wait, freqs, SN, length, SNR_thresh, times, tolerance);
+	//std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
+	//std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
 
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
 	params.sky_average=true;	
 
-	start = clock();
+	std::cout<<"STARTING CALC"<<std::endl;
+	clock_t start = clock();
+	
 	threshold_times_gsl(&params, "IMRPhenomD", T_obs, T_wait, f_lower,f_upper,"LISA_SADC_CONF",  SNR_thresh, times, tolerance,w,1000);
 	std::cout<<"TIME: "<<(double)(clock() - start)/CLOCKS_PER_SEC<<std::endl;
 	std::cout<<"TIMES: "<<times[0]/T_year<<" "<<times[1]/T_year<<std::endl;
 
-	delete [] freqs;
-	delete [] SN;
+	//delete [] freqs;
+	//delete [] SN;
 	gsl_integration_workspace_free(w);
 }
 void test52()

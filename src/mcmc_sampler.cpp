@@ -709,9 +709,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				
 				ccct++;
 			}
+			else{
+				ac_vals[k]=0;	
+			}
 
 		}
 		for(int k =0 ; k<chain_N; k++){
+			std::cout<<ac_vals[k]<<std::endl;
 			if( fabs(chain_temps[k]-1) < DOUBLE_COMP_THRESH ){
 				max_ac_realloc=0;
 				for(int i =0 ; i<temp_length; i++){
@@ -728,7 +732,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 					max_ac_realloc=ac_vals[k];
 				}
 			}
-			ave_max_ac +=max_ac_realloc;
+			ave_max_ac +=ac_vals[k];
 
 		}
 		max_ac_realloc = ave_max_ac/coldchains;

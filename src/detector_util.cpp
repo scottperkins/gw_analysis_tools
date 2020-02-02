@@ -472,6 +472,14 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	{
 		R1 = V_radius;	
 	}
+	else if(detector1 == "Kagra" || detector1 == "kagra")
+	{
+		R1 = K_radius;	
+	}
+	else if(detector1 == "Indigo" || detector1 == "indigo")
+	{
+		R1 = I_radius;	
+	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
@@ -484,6 +492,14 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	else if(detector2 == "Virgo" || detector2 == "virgo")
 	{
 		R2 = V_radius;	
+	}
+	else if(detector2 == "Kagra" || detector2 == "kagra")
+	{
+		R1 = K_radius;	
+	}
+	else if(detector2 == "Indigo" || detector2 == "indigo")
+	{
+		R1 = I_radius;	
 	}
 	return (cos(theta1)*R1 - cos(theta2)*R2)/c;
 }
@@ -639,6 +655,20 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 				}
 			}
 		}
+		else if(detector =="Kagra" || detector=="kagra"){
+			for(int i =0; i<3; i++){
+				for(int j =0 ;j<3; j++){
+					responseM[i][j] = Kagra_D[i][j];
+				}
+			}
+		}
+		else if(detector =="Indigo" || detector=="indigo"){
+			for(int i =0; i<3; i++){
+				for(int j =0 ;j<3; j++){
+					responseM[i][j] = Indigo_D[i][j];
+				}
+			}
+		}
 		else{
 			std::cout<<"ERROR -- unsupported detector"<<std::endl;
 			exit(1);
@@ -723,6 +753,55 @@ double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
 		right_interferometer(&Fplus, &Fcross, theta, phi, psi);
 		//Do squared to avoid the expensive sqrt function
 		omega_prime_squared =(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
+		if(omega_prime_squared>omega_squared){sum++;}
+		
+	}	
+	gsl_rng_free(r);
+	return sum/=samples;
+}
+/*! \brief Utility to calculate the cumulative amplitude distribution for three detectors
+ *
+ * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
+ * 
+ * Integrated over the volume which \omega' is larger than \omega
+ *
+ * Integrates using Monte Carlo integration
+ *
+ * Uniform sampling in \psi, cos(\iota), cos(DEC) , and RA
+ *
+ * Sampled using any supported detectors. See documentation for supported detectors
+ */
+double p_N_detector(double omega, /**< \omega = \rho/\rho_opt**/
+	int samples,/**< number of monte carlo samples to use**/
+	int N_detectors, /**< Number of detectors*/
+	std::string *detectors,/**<String name of detectors to use -- MUST BE SUPPORTED DETECTORS*/
+	int rand_seed /**< Seed for random number generator*/
+	)
+{
+	double gmst = 1;//Doesn't matter -- RA is uniform random anyway
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	gsl_rng *r = gsl_rng_alloc(T);
+	gsl_rng_set(r, rand_seed);
+	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota, 
+		sinDEC, RA,DEC,iota;
+	double twopi = 2.*M_PI;
+	double omega_squared = omega*omega;
+	double sum = 0;
+	for(int i= 0 ; i<samples ; i++){
+		psi = gsl_rng_uniform(r)*twopi;	
+		cosiota = gsl_rng_uniform(r)*2.-1.;	
+		sinDEC = gsl_rng_uniform(r)*2.-1.;	
+		RA = gsl_rng_uniform(r)*twopi;	
+		iota = acos(cosiota);
+		DEC = asin(sinDEC);
+		omega_prime_squared=0;
+		for(int j = 0 ; j<N_detectors; j++){	
+			detector_response_functions_equatorial(detectors[j],RA,DEC,psi,gmst, &Fplus,&Fcross);	
+			//right_interferometer(&Fplus, &Fcross, theta, phi, psi);
+			//Do squared to avoid the expensive sqrt function
+			omega_prime_squared +=(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
+		}
 		if(omega_prime_squared>omega_squared){sum++;}
 		
 	}	

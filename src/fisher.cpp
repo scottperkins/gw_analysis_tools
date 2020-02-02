@@ -1630,10 +1630,19 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					input_params->mass2));
 				parameters[8]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[9]=input_params->spin1[2];
-				parameters[10]=input_params->spin2[2];
-				parameters[11]=input_params->chip;
-				parameters[12]=input_params->phip;
+				//parameters[9]=input_params->spin1[2];
+				//parameters[10]=input_params->spin2[2];
+				//parameters[11]=input_params->chip;
+				//parameters[12]=input_params->phip;
+				double spin1sph[3];
+				double spin2sph[3];
+				transform_cart_sph(input_params->spin1,spin1sph);
+				transform_cart_sph(input_params->spin2,spin2sph);
+				parameters[9]=spin1sph[0];
+				parameters[10]=spin2sph[0];
+				parameters[11]=cos(spin1sph[1]);
+				parameters[12]=cos(spin2sph[1]);
+				parameters[12]=input_params->spin1[2]-input_params->spin2[2];
 
 			}
 			else{
@@ -1831,10 +1840,52 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->phiRef = avec_parameters[4];
 				//a_params->chi1_l = avec_parameters[8];
 				//a_params->chi2_l = avec_parameters[9];
-				a_params->spin1[2] = avec_parameters[9];
-				a_params->spin2[2] = avec_parameters[10];
-				a_params->chip = avec_parameters[11];
-				a_params->phip = avec_parameters[12];
+				//a_params->spin1[2] = avec_parameters[9];
+				//a_params->spin2[2] = avec_parameters[10];
+				//a_params->chip = avec_parameters[11];
+				//a_params->phip = avec_parameters[12];
+
+				T spin1cart[3];
+				//###################################
+				//Fishers don't necessarily respect the bounds of 
+				//acos, so bump it back into range if we're on the edge
+				//##################################
+				T local_theta1;
+				if(avec_parameters[11] > 1){
+					local_theta1 = 0;
+				}
+				else if(avec_parameters[11]<-1){
+					local_theta1 = M_PI;
+				}
+				else{
+					local_theta1=acos(avec_parameters[11]);
+				}
+				T local_theta2;
+				if(avec_parameters[12] > 1){
+					local_theta2 = 0;
+				}
+				else if(avec_parameters[12]<-1){
+					local_theta2 = M_PI;
+				}
+				else{
+					local_theta2=acos(avec_parameters[12]);
+				}
+				//##################################
+				//##################################
+				T spin1sph[3] = {avec_parameters[9],local_theta1,
+					avec_parameters[13]};
+				T spin2cart[3];
+				T spin2sph[3] = {avec_parameters[10],local_theta2,0};
+				transform_sph_cart(spin1sph,spin1cart);
+				transform_sph_cart(spin2sph,spin2cart);
+				a_params->spin1[0] = spin1cart[0];
+				a_params->spin1[1] = spin1cart[1];
+				a_params->spin1[2] = spin1cart[2];
+				a_params->spin2[0] = spin2cart[0];
+				a_params->spin2[1] = spin2cart[1];
+				a_params->spin2[2] = spin2cart[2];
+				
+
 				a_params->tc=avec_parameters[5];
 
 			}
