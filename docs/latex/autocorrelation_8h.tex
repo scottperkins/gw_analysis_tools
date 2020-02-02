@@ -36,6 +36,8 @@ void \mbox{\hyperlink{autocorrelation_8h_ad6715011761c1397d215f817654c96b3}{writ
 \item 
 void \mbox{\hyperlink{autocorrelation_8h_ae925ee63b98024b9832ef2a72c6bca2d}{write\+\_\+auto\+\_\+corr\+\_\+file\+\_\+from\+\_\+data}} (std\+::string autocorr\+\_\+filename, double $\ast$$\ast$data, int length, int dimension, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads, bool cumulative)
 \begin{DoxyCompactList}\small\item\em Writes the autocorrelation file from a data array. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{autocorrelation_8h_ab9812ba50775fc8453e7b4df14cafca0}{auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+batch}} (double $\ast$$\ast$$\ast$data, int length, int dimension, int chain\+\_\+N, int $\ast$$\ast$$\ast$output, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads, bool cumulative)
+\begin{DoxyCompactList}\small\item\em Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes F\+F\+T\+W3 for longer chuncks of the chains -- Batch version for multiple chains at a time. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{autocorrelation_8h_a393fd6777961493a09c5c0923b185d3d}{auto\+\_\+corr\+\_\+from\+\_\+data}} (double $\ast$$\ast$data, int length, int dimension, int $\ast$$\ast$output, int num\+\_\+segments, double target\+\_\+corr, int num\+\_\+threads, bool cumulative)
 \begin{DoxyCompactList}\small\item\em Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes F\+F\+T\+W3 for longer chuncks of the chains. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{autocorrelation_8h_a94af5456a8ff9599890ad79deb2101e1}{threaded\+\_\+ac\+\_\+spectral}} (int thread, \mbox{\hyperlink{classthreaded__ac__jobs__fft}{threaded\+\_\+ac\+\_\+jobs\+\_\+fft}} job)
@@ -88,6 +90,57 @@ Calculates the autocorrelation length for a set of data for a number of segments
 Takes in the data from a sampler, shape data\mbox{[}N\+\_\+steps\mbox{]}\mbox{[}dimension\mbox{]}
 
 Outputs lags that correspond to the target\+\_\+corr -- shape output\mbox{[}dimension\mbox{]}\mbox{[}num\+\_\+segments\mbox{]}
+
+If cumulative, the ac is calculated in the following format\+:
+
+$\vert$-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+$\vert$-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/-\/---$\vert$
+
+...
+
+Else, the ac is calculated as \+:
+
+$\vert$-\/-\/-\/-\/---$\vert$ \begin{DoxyVerb}    |------|
+
+            |--------|
+\end{DoxyVerb}
+
+
+... 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em data} & Input data \\
+\hline
+ & {\em length} & length of input data \\
+\hline
+ & {\em dimension} & dimension of data \\
+\hline
+\mbox{\texttt{ out}}  & {\em output} & array that stores the auto-\/corr lengths -\/-\/ array\mbox{[}num\+\_\+segments\mbox{]} \\
+\hline
+ & {\em num\+\_\+segments} & number of segements to compute the auto-\/corr length \\
+\hline
+ & {\em target\+\_\+corr} & Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target\+\_\+corr) \\
+\hline
+ & {\em num\+\_\+threads} & Total number of threads to use \\
+\hline
+ & {\em cumulative} & Boolean to calculate the autocorrelation cumulatively \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{autocorrelation_8h_ab9812ba50775fc8453e7b4df14cafca0}\label{autocorrelation_8h_ab9812ba50775fc8453e7b4df14cafca0}} 
+\index{autocorrelation.h@{autocorrelation.h}!auto\_corr\_from\_data\_batch@{auto\_corr\_from\_data\_batch}}
+\index{auto\_corr\_from\_data\_batch@{auto\_corr\_from\_data\_batch}!autocorrelation.h@{autocorrelation.h}}
+\doxysubsubsection{\texorpdfstring{auto\_corr\_from\_data\_batch()}{auto\_corr\_from\_data\_batch()}}
+{\footnotesize\ttfamily void auto\+\_\+corr\+\_\+from\+\_\+data\+\_\+batch (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$$\ast$}]{data,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{int}]{chain\+\_\+N,  }\item[{int $\ast$$\ast$$\ast$}]{output,  }\item[{int}]{num\+\_\+segments,  }\item[{double}]{target\+\_\+corr,  }\item[{int}]{num\+\_\+threads,  }\item[{bool}]{cumulative }\end{DoxyParamCaption})}
+
+
+
+Calculates the autocorrelation length for a set of data for a number of segments for each dimension -- completely host code, utilitizes F\+F\+T\+W3 for longer chuncks of the chains -- Batch version for multiple chains at a time. 
+
+Takes in the data from a sampler, shape data\mbox{[}chain\+\_\+N\mbox{]}\mbox{[}N\+\_\+steps\mbox{]}\mbox{[}dimension\mbox{]}
+
+Outputs lags that correspond to the target\+\_\+corr -- shape output\mbox{[}chain\+\_\+N\mbox{]}\mbox{[}dimension\mbox{]}\mbox{[}num\+\_\+segments\mbox{]}
 
 If cumulative, the ac is calculated in the following format\+:
 

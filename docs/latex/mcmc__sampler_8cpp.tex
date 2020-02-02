@@ -45,8 +45,12 @@ class \mbox{\hyperlink{classThreadPool}{Thread\+Pool}}
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
+void \mbox{\hyperlink{mcmc__sampler_8cpp_a5d33cf90836be53bbedcc7d09f62911b}{continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+internal}} (std\+::string checkpoint\+\_\+file\+\_\+start, double $\ast$$\ast$output, int N\+\_\+steps, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Parallel tempered, dynamic chain allocation M\+C\+MC with output samples with specified maximum autocorrelation. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a084c31ec2e87873946a4866b104fd733}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+internal}} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
 \begin{DoxyCompactList}\small\item\em Parallel tempered, dynamic chain allocation M\+C\+MC with output samples with specified maximum autocorrelation. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__sampler_8cpp_afa5117c4dfe1ac8bd457fb7bee622c6f}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+internal\+\_\+driver}} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
+\begin{DoxyCompactList}\small\item\em Driver routine for the uncorrelated sampler -- trying not to repeat code. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a54bc1026eeef7c887e42d892af5acb1b}{continue\+\_\+\+R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal}} (std\+::string start\+\_\+checkpoint\+\_\+file, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$status, int N\+\_\+steps, int swp\+\_\+freq, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, std\+::function$<$ void(double $\ast$, double $\ast$, int $\ast$, int $\ast$, int, int, int, void $\ast$)$>$ R\+J\+\_\+proposal, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, bool update\+\_\+\+R\+J\+\_\+width, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string end\+\_\+checkpoint\+\_\+file)
 \begin{DoxyCompactList}\small\item\em Routine to take a checkpoint file and begin a new chain at said checkpoint. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a40dcca4742325ca439a175415cf87750}{R\+J\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal}} (double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$parameter\+\_\+status, int max\+\_\+dimension, int min\+\_\+dimension, int N\+\_\+steps, int chain\+\_\+N, double $\ast$initial\+\_\+pos, int $\ast$initial\+\_\+status, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, std\+::function$<$ void(double $\ast$, double $\ast$, int $\ast$, int $\ast$, int, int, int, void $\ast$)$>$ R\+J\+\_\+proposal, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, bool update\+\_\+\+R\+J\+\_\+width, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
@@ -87,6 +91,10 @@ void \mbox{\hyperlink{mcmc__sampler_8cpp_a2624b845ec2f8a11949347fd3c52b435}{cont
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a6c63ce25491ebdf9b2aa6dd4651c0790}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc}} (double $\ast$$\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, void $\ast$parameters), double($\ast$log\+\_\+likelihood)(double $\ast$param, int dimension, void $\ast$parameters), void($\ast$fisher)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, void $\ast$parameters), void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
 \item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a7fd6c85a11abf530541c10cbaf99f30f}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc}} (double $\ast$$\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), double($\ast$log\+\_\+likelihood)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), void($\ast$fisher)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, int chain\+\_\+id, void $\ast$parameters), void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
+\item 
+void \mbox{\hyperlink{mcmc__sampler_8cpp_aca0ec45aeec4fbd2af0a0b222eefe53a}{continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated}} (std\+::string checkpoint\+\_\+file\+\_\+start, double $\ast$$\ast$output, int N\+\_\+steps, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, void $\ast$parameters), double($\ast$log\+\_\+likelihood)(double $\ast$param, int dimension, void $\ast$parameters), void($\ast$fisher)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, void $\ast$parameters), void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
+\item 
+void \mbox{\hyperlink{mcmc__sampler_8cpp_a74c970893516b24e60511fc41ad93708}{continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated}} (std\+::string checkpoint\+\_\+file\+\_\+start, double $\ast$$\ast$output, int N\+\_\+steps, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), double($\ast$log\+\_\+likelihood)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters), void($\ast$fisher)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, int chain\+\_\+id, void $\ast$parameters), void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
 \item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a33783ee80c1f93b43d1e9bca0dc55907}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated}} (double $\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, int max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, int t0, int nu, int corr\+\_\+threshold, int corr\+\_\+segments, double corr\+\_\+converge\+\_\+thresh, double corr\+\_\+target\+\_\+ac, std\+::string chain\+\_\+distribution\+\_\+scheme, double($\ast$log\+\_\+prior)(double $\ast$param, int dimension, void $\ast$parameters), double($\ast$log\+\_\+likelihood)(double $\ast$param, int dimension, void $\ast$parameters), void($\ast$fisher)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, void $\ast$parameters), void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
 \item 
@@ -340,6 +348,201 @@ chain\+\_\+distribution\+\_\+scheme\+:
  & {\em t0} & Time constant of the decay of the chain dynamics ($\sim$1000) \\
 \hline
  & {\em nu} & Initial amplitude of the dynamics ($\sim$100) \\
+\hline
+ & {\em log\+\_\+prior} & std\+::function for the log\+\_\+prior function -\/-\/ takes double $\ast$position, int dimension, int chain\+\_\+id \\
+\hline
+ & {\em log\+\_\+likelihood} & std\+::function for the log\+\_\+likelihood function -\/-\/ takes double $\ast$position, int dimension, int chain\+\_\+id \\
+\hline
+ & {\em fisher} & std\+::function for the fisher function -\/-\/ takes double $\ast$position, int dimension, double $\ast$$\ast$output\+\_\+fisher, int chain\+\_\+id \\
+\hline
+ & {\em user\+\_\+parameters} & Void pointer to any parameters the user may need inside log\+\_\+prior, log\+\_\+likelihood, or fisher. Should have one pointer for each chain. If this isn\textquotesingle{}t needed, use (void$\ast$$\ast$) N\+U\+L\+L$\ast$ \\
+\hline
+ & {\em num\+Threads} & Number of threads to use (=1 is single threaded) \\
+\hline
+ & {\em pool} & boolean to use stochastic chain swapping (M\+U\+ST have $>$2 threads) \\
+\hline
+ & {\em show\+\_\+prog} & boolean whether to print out progress (for example, should be set to \`{}\`{}false\textquotesingle{}\textquotesingle{} if submitting to a cluster) \\
+\hline
+ & {\em statistics\+\_\+filename} & Filename to output sampling statistics, if empty string, not output \\
+\hline
+ & {\em chain\+\_\+filename} & Filename to output data (chain 0 only), if empty string, not output \\
+\hline
+ & {\em likelihood\+\_\+log\+\_\+filename} & Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -\/-\/ use empty string to skip \\
+\hline
+ & {\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__sampler_8cpp_a74c970893516b24e60511fc41ad93708}\label{mcmc__sampler_8cpp_a74c970893516b24e60511fc41ad93708}} 
+\index{mcmc\_sampler.cpp@{mcmc\_sampler.cpp}!continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated@{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated}}
+\index{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated@{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated}!mcmc\_sampler.cpp@{mcmc\_sampler.cpp}}
+\doxysubsubsection{\texorpdfstring{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated()}{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily void continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated (\begin{DoxyParamCaption}\item[{std\+::string}]{checkpoint\+\_\+file\+\_\+start,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{corr\+\_\+threshold,  }\item[{int}]{corr\+\_\+segments,  }\item[{double}]{corr\+\_\+converge\+\_\+thresh,  }\item[{double}]{corr\+\_\+target\+\_\+ac,  }\item[{std\+::string}]{chain\+\_\+distribution\+\_\+scheme,  }\item[{double($\ast$)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{double($\ast$)(double $\ast$param, int dimension, int chain\+\_\+id, void $\ast$parameters)}]{log\+\_\+likelihood,  }\item[{void($\ast$)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, int chain\+\_\+id, void $\ast$parameters)}]{fisher,  }\item[{void $\ast$$\ast$}]{user\+\_\+parameters,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+file }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em output} & Output, shape is double\mbox{[}N\+\_\+steps,dimension\mbox{]} \\
+\hline
+ & {\em N\+\_\+steps} & Number of total steps to be taken, per chain A\+F\+T\+ER chain allocation \\
+\hline
+ & {\em max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble} & Maximum number of chains to use in the thermodynamic ensemble (may use less) \\
+\hline
+ & {\em chain\+\_\+temps} & Final chain temperatures used -\/-\/ should be shape double\mbox{[}chain\+\_\+N\mbox{]} \\
+\hline
+ & {\em swp\+\_\+freq} & the frequency with which chains are swapped \\
+\hline
+ & {\em t0} & Time constant of the decay of the chain dynamics ($\sim$1000) \\
+\hline
+ & {\em nu} & Initial amplitude of the dynamics ($\sim$100) \\
+\hline
+ & {\em log\+\_\+prior} & Funcion pointer for the log\+\_\+prior \\
+\hline
+ & {\em log\+\_\+likelihood} & Function pointer for the log\+\_\+likelihood \\
+\hline
+ & {\em fisher} & Function pointer for the fisher -\/ if N\+U\+LL, fisher steps are not used \\
+\hline
+ & {\em user\+\_\+parameters} & Void pointer to any parameters the user may need inside log\+\_\+prior, log\+\_\+likelihood, or fisher. Should have one pointer for each chain. If this isn\textquotesingle{}t needed, use (void$\ast$$\ast$) N\+U\+L\+L$\ast$ \\
+\hline
+ & {\em num\+Threads} & Number of threads to use (=1 is single threaded) \\
+\hline
+ & {\em pool} & boolean to use stochastic chain swapping (M\+U\+ST have $>$2 threads) \\
+\hline
+ & {\em show\+\_\+prog} & boolean whether to print out progress (for example, should be set to \`{}\`{}false\textquotesingle{}\textquotesingle{} if submitting to a cluster) \\
+\hline
+ & {\em statistics\+\_\+filename} & Filename to output sampling statistics, if empty string, not output \\
+\hline
+ & {\em chain\+\_\+filename} & Filename to output data (chain 0 only), if empty string, not output \\
+\hline
+ & {\em likelihood\+\_\+log\+\_\+filename} & Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -\/-\/ use empty string to skip \\
+\hline
+ & {\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__sampler_8cpp_aca0ec45aeec4fbd2af0a0b222eefe53a}\label{mcmc__sampler_8cpp_aca0ec45aeec4fbd2af0a0b222eefe53a}} 
+\index{mcmc\_sampler.cpp@{mcmc\_sampler.cpp}!continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated@{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated}}
+\index{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated@{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated}!mcmc\_sampler.cpp@{mcmc\_sampler.cpp}}
+\doxysubsubsection{\texorpdfstring{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated()}{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily void continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated (\begin{DoxyParamCaption}\item[{std\+::string}]{checkpoint\+\_\+file\+\_\+start,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{corr\+\_\+threshold,  }\item[{int}]{corr\+\_\+segments,  }\item[{double}]{corr\+\_\+converge\+\_\+thresh,  }\item[{double}]{corr\+\_\+target\+\_\+ac,  }\item[{std\+::string}]{chain\+\_\+distribution\+\_\+scheme,  }\item[{double($\ast$)(double $\ast$param, int dimension, void $\ast$parameters)}]{log\+\_\+prior,  }\item[{double($\ast$)(double $\ast$param, int dimension, void $\ast$parameters)}]{log\+\_\+likelihood,  }\item[{void($\ast$)(double $\ast$param, int dimension, double $\ast$$\ast$fisher, void $\ast$parameters)}]{fisher,  }\item[{void $\ast$$\ast$}]{user\+\_\+parameters,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+file }\end{DoxyParamCaption})}
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em output} & Output , shape is double\mbox{[}N\+\_\+steps,dimension\mbox{]} \\
+\hline
+ & {\em N\+\_\+steps} & Number of total steps to be taken, per chain A\+F\+T\+ER chain allocation \\
+\hline
+ & {\em max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble} & Maximum number of chains to use in the thermodynamic ensemble (may use less) \\
+\hline
+ & {\em chain\+\_\+temps} & Final chain temperatures used -\/-\/ should be shape double\mbox{[}chain\+\_\+N\mbox{]} \\
+\hline
+ & {\em swp\+\_\+freq} & the frequency with which chains are swapped \\
+\hline
+ & {\em t0} & Time constant of the decay of the chain dynamics ($\sim$1000) \\
+\hline
+ & {\em nu} & Initial amplitude of the dynamics ($\sim$100) \\
+\hline
+ & {\em log\+\_\+prior} & Funcion pointer for the log\+\_\+prior \\
+\hline
+ & {\em log\+\_\+likelihood} & Function pointer for the log\+\_\+likelihood \\
+\hline
+ & {\em fisher} & Function pointer for the fisher -\/ if N\+U\+LL, fisher steps are not used \\
+\hline
+ & {\em user\+\_\+parameters} & Void pointer to any parameters the user may need inside log\+\_\+prior, log\+\_\+likelihood, or fisher. Should have one pointer for each chain. If this isn\textquotesingle{}t needed, use (void$\ast$$\ast$) N\+U\+L\+L$\ast$ \\
+\hline
+ & {\em num\+Threads} & Number of threads to use (=1 is single threaded) \\
+\hline
+ & {\em pool} & boolean to use stochastic chain swapping (M\+U\+ST have $>$2 threads) \\
+\hline
+ & {\em show\+\_\+prog} & boolean whether to print out progress (for example, should be set to \`{}\`{}false\textquotesingle{}\textquotesingle{} if submitting to a cluster) \\
+\hline
+ & {\em statistics\+\_\+filename} & Filename to output sampling statistics, if empty string, not output \\
+\hline
+ & {\em chain\+\_\+filename} & Filename to output data (chain 0 only), if empty string, not output \\
+\hline
+ & {\em likelihood\+\_\+log\+\_\+filename} & Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -\/-\/ use empty string to skip \\
+\hline
+ & {\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__sampler_8cpp_a5d33cf90836be53bbedcc7d09f62911b}\label{mcmc__sampler_8cpp_a5d33cf90836be53bbedcc7d09f62911b}} 
+\index{mcmc\_sampler.cpp@{mcmc\_sampler.cpp}!continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal@{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal}}
+\index{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal@{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal}!mcmc\_sampler.cpp@{mcmc\_sampler.cpp}}
+\doxysubsubsection{\texorpdfstring{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal()}{continue\_PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal()}}
+{\footnotesize\ttfamily void continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+internal (\begin{DoxyParamCaption}\item[{std\+::string}]{checkpoint\+\_\+file\+\_\+start,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{double $\ast$}]{chain\+\_\+temps,  }\item[{int}]{swp\+\_\+freq,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{corr\+\_\+threshold,  }\item[{int}]{corr\+\_\+segments,  }\item[{double}]{corr\+\_\+converge\+\_\+thresh,  }\item[{double}]{corr\+\_\+target\+\_\+ac,  }\item[{std\+::string}]{chain\+\_\+distribution\+\_\+scheme,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+prior,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+likelihood,  }\item[{std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$}]{fisher,  }\item[{void $\ast$$\ast$}]{user\+\_\+parameters,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+file }\end{DoxyParamCaption})}
+
+
+
+Parallel tempered, dynamic chain allocation M\+C\+MC with output samples with specified maximum autocorrelation. 
+
+Runs dynamic chain allocation until the autocorrelation lengths stabilize, then it will run the P\+T\+M\+C\+MC routine repeatedly, periodically thinning the chain to ensure the auto-\/correlation length is below the threshold
+
+Note\+: smallest batch size is .5$\ast$\+N\+\_\+steps, so the target correlation length should be $<$$<$ less than this number
+
+Note\+: This routine only works if the requested number of samples is larger than the typical correlation length of the unthinned chains. This is because the chains are run and tested in batches the size of the requested sample number.
+
+Note\+: This method does N\+OT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end. $<$ dimension of the parameter space being explored
+
+$<$ Number of total steps to be taken, per chain A\+F\+T\+ER chain allocation
+
+$<$ Maximum number of chains to use
+
+$<$ Maximum number of chains to use in the thermodynamic ensemble (may use less)
+
+$<$ the frequency with which chains are swapped
+
+$<$ Time constant of the decay of the chain dynamics ($\sim$1000)
+
+$<$ Initial amplitude of the dynamics ($\sim$100)
+
+$<$ Maxmimum allowed autocorrelation of the samples -- suggested is 50
+
+$<$Number of segments to calculate autocorrelation on for diagnostics
+
+$<$ Fractional threshold for convergence of autocorrelation
+
+$<$Target correlation for calculating autocorrelation length
+
+$<$ std\+::function for the log\+\_\+prior function -- takes double $\ast$position, int dimension, int chain\+\_\+id
+
+$<$ std\+::function for the log\+\_\+likelihood function -- takes double $\ast$position, int dimension, int chain\+\_\+id
+
+$<$ std\+::function for the fisher function -- takes double $\ast$position, int dimension, double $\ast$$\ast$output\+\_\+fisher, int chain\+\_\+id
+
+$<$ Void pointer to any parameters the user may need inside log\+\_\+prior, log\+\_\+likelihood, or fisher. Should have one pointer for each chain. If this isn\textquotesingle{}t needed, use (void$\ast$$\ast$) N\+U\+LL
+
+$<$ Number of threads to use (=1 is single threaded)
+
+$<$ boolean to use stochastic chain swapping (M\+U\+ST have $>$2 threads)
+
+$<$ boolean whether to print out progress (for example, should be set to \`{}`false'\textquotesingle{} if submitting to a cluster)
+
+$<$ Filename to output sampling statistics, if empty string, not output
+
+$<$ Filename to output data (chain 0 only), if empty string, not output
+
+$<$ Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -- use empty string to skip
+
+$<$ Filename to output data for checkpoint, if empty string, not saved
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em output} & Output shape is double\mbox{[}N\+\_\+steps,dimension\mbox{]} \\
+\hline
+ & {\em N\+\_\+steps} & Number of total steps to be taken, per chain A\+F\+T\+ER chain allocation \\
+\hline
+ & {\em max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble} & Maximum number of chains to use in the thermodynamic ensemble (may use less) \\
+\hline
+\mbox{\texttt{ out}}  & {\em chain\+\_\+temps} & Final chain temperatures used -\/-\/ should be shape double\mbox{[}chain\+\_\+N\mbox{]} \\
+\hline
+ & {\em swp\+\_\+freq} & the frequency with which chains are swapped \\
+\hline
+ & {\em t0} & Time constant of the decay of the chain dynamics ($\sim$1000) \\
+\hline
+ & {\em nu} & Initial amplitude of the dynamics ($\sim$100) \\
+\hline
+ & {\em corr\+\_\+threshold} & Maxmimum allowed autocorrelation of the samples -\/-\/ suggested is 50 \\
+\hline
+ & {\em corr\+\_\+segments} & Number of segments to calculate autocorrelation on for diagnostics \\
+\hline
+ & {\em corr\+\_\+converge\+\_\+thresh} & Fractional threshold for convergence of autocorrelation \\
+\hline
+ & {\em corr\+\_\+target\+\_\+ac} & Target correlation for calculating autocorrelation length \\
 \hline
  & {\em log\+\_\+prior} & std\+::function for the log\+\_\+prior function -\/-\/ takes double $\ast$position, int dimension, int chain\+\_\+id \\
 \hline
@@ -939,7 +1142,49 @@ Note\+: smallest batch size is .5$\ast$\+N\+\_\+steps, so the target correlation
 
 Note\+: This routine only works if the requested number of samples is larger than the typical correlation length of the unthinned chains. This is because the chains are run and tested in batches the size of the requested sample number.
 
-Note\+: This method does N\+OT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end. 
+Note\+: This method does N\+OT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end. $<$ dimension of the parameter space being explored
+
+$<$ Number of total steps to be taken, per chain A\+F\+T\+ER chain allocation
+
+$<$ Maximum number of chains to use
+
+$<$ Maximum number of chains to use in the thermodynamic ensemble (may use less)
+
+$<$ the frequency with which chains are swapped
+
+$<$ Time constant of the decay of the chain dynamics ($\sim$1000)
+
+$<$ Initial amplitude of the dynamics ($\sim$100)
+
+$<$ Maxmimum allowed autocorrelation of the samples -- suggested is 50
+
+$<$Number of segments to calculate autocorrelation on for diagnostics
+
+$<$ Fractional threshold for convergence of autocorrelation
+
+$<$Target correlation for calculating autocorrelation length
+
+$<$ std\+::function for the log\+\_\+prior function -- takes double $\ast$position, int dimension, int chain\+\_\+id
+
+$<$ std\+::function for the log\+\_\+likelihood function -- takes double $\ast$position, int dimension, int chain\+\_\+id
+
+$<$ std\+::function for the fisher function -- takes double $\ast$position, int dimension, double $\ast$$\ast$output\+\_\+fisher, int chain\+\_\+id
+
+$<$ Void pointer to any parameters the user may need inside log\+\_\+prior, log\+\_\+likelihood, or fisher. Should have one pointer for each chain. If this isn\textquotesingle{}t needed, use (void$\ast$$\ast$) N\+U\+LL
+
+$<$ Number of threads to use (=1 is single threaded)
+
+$<$ boolean to use stochastic chain swapping (M\+U\+ST have $>$2 threads)
+
+$<$ boolean whether to print out progress (for example, should be set to \`{}`false'\textquotesingle{} if submitting to a cluster)
+
+$<$ Filename to output sampling statistics, if empty string, not output
+
+$<$ Filename to output data (chain 0 only), if empty string, not output
+
+$<$ Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -- use empty string to skip
+
+$<$ Filename to output data for checkpoint, if empty string, not saved
 \begin{DoxyParams}[1]{Parameters}
 \mbox{\texttt{ out}}  & {\em output} & Output shape is double\mbox{[}N\+\_\+steps,dimension\mbox{]} \\
 \hline
@@ -992,6 +1237,65 @@ Note\+: This method does N\+OT guarantee the final autocorrelation length of the
  & {\em likelihood\+\_\+log\+\_\+filename} & Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -\/-\/ use empty string to skip \\
 \hline
  & {\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{mcmc__sampler_8cpp_afa5117c4dfe1ac8bd457fb7bee622c6f}\label{mcmc__sampler_8cpp_afa5117c4dfe1ac8bd457fb7bee622c6f}} 
+\index{mcmc\_sampler.cpp@{mcmc\_sampler.cpp}!PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal\_driver@{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal\_driver}}
+\index{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal\_driver@{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal\_driver}!mcmc\_sampler.cpp@{mcmc\_sampler.cpp}}
+\doxysubsubsection{\texorpdfstring{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal\_driver()}{PTMCMC\_MH\_dynamic\_PT\_alloc\_uncorrelated\_internal\_driver()}}
+{\footnotesize\ttfamily void P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+dynamic\+\_\+\+P\+T\+\_\+alloc\+\_\+uncorrelated\+\_\+internal\+\_\+driver (\begin{DoxyParamCaption}\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{chain\+\_\+N,  }\item[{int}]{max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{int}]{swp\+\_\+freq,  }\item[{int}]{t0,  }\item[{int}]{nu,  }\item[{int}]{corr\+\_\+threshold,  }\item[{int}]{corr\+\_\+segments,  }\item[{double}]{corr\+\_\+converge\+\_\+thresh,  }\item[{double}]{corr\+\_\+target\+\_\+ac,  }\item[{std\+::string}]{chain\+\_\+distribution\+\_\+scheme,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+prior,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+likelihood,  }\item[{std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$}]{fisher,  }\item[{void $\ast$$\ast$}]{user\+\_\+parameters,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{checkpoint\+\_\+file }\end{DoxyParamCaption})}
+
+
+
+Driver routine for the uncorrelated sampler -- trying not to repeat code. 
+
+Assumed that the checkpoint\+\_\+file has already been populated --
+
+It will overwrite all the file paths 
+\begin{DoxyParams}{Parameters}
+{\em dimension} & dimension of the parameter space being explored \\
+\hline
+{\em N\+\_\+steps} & Number of total steps to be taken, per chain A\+F\+T\+ER chain allocation \\
+\hline
+{\em chain\+\_\+N} & Maximum number of chains to use \\
+\hline
+{\em max\+\_\+chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble} & Maximum number of chains to use in the thermodynamic ensemble (may use less) \\
+\hline
+{\em swp\+\_\+freq} & the frequency with which chains are swapped \\
+\hline
+{\em t0} & Time constant of the decay of the chain dynamics ($\sim$1000) \\
+\hline
+{\em nu} & Initial amplitude of the dynamics ($\sim$100) \\
+\hline
+{\em corr\+\_\+threshold} & Maxmimum allowed autocorrelation of the samples -\/-\/ suggested is 50 \\
+\hline
+{\em corr\+\_\+segments} & Number of segments to calculate autocorrelation on for diagnostics \\
+\hline
+{\em corr\+\_\+converge\+\_\+thresh} & Fractional threshold for convergence of autocorrelation \\
+\hline
+{\em corr\+\_\+target\+\_\+ac} & Target correlation for calculating autocorrelation length \\
+\hline
+{\em log\+\_\+prior} & std\+::function for the log\+\_\+prior function -\/-\/ takes double $\ast$position, int dimension, int chain\+\_\+id \\
+\hline
+{\em log\+\_\+likelihood} & std\+::function for the log\+\_\+likelihood function -\/-\/ takes double $\ast$position, int dimension, int chain\+\_\+id \\
+\hline
+{\em fisher} & std\+::function for the fisher function -\/-\/ takes double $\ast$position, int dimension, double $\ast$$\ast$output\+\_\+fisher, int chain\+\_\+id \\
+\hline
+{\em user\+\_\+parameters} & Void pointer to any parameters the user may need inside log\+\_\+prior, log\+\_\+likelihood, or fisher. Should have one pointer for each chain. If this isn\textquotesingle{}t needed, use (void$\ast$$\ast$) N\+U\+L\+L$\ast$ \\
+\hline
+{\em num\+Threads} & Number of threads to use (=1 is single threaded) \\
+\hline
+{\em pool} & boolean to use stochastic chain swapping (M\+U\+ST have $>$2 threads) \\
+\hline
+{\em show\+\_\+prog} & boolean whether to print out progress (for example, should be set to \`{}\`{}false\textquotesingle{}\textquotesingle{} if submitting to a cluster) \\
+\hline
+{\em statistics\+\_\+filename} & Filename to output sampling statistics, if empty string, not output \\
+\hline
+{\em chain\+\_\+filename} & Filename to output data (chain 0 only), if empty string, not output \\
+\hline
+{\em likelihood\+\_\+log\+\_\+filename} & Filename to write the log\+\_\+likelihood and log\+\_\+prior at each step -\/-\/ use empty string to skip \\
+\hline
+{\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler_8cpp_a5c94625e7e33e0d077ebb9ea7501fbe6}\label{mcmc__sampler_8cpp_a5c94625e7e33e0d077ebb9ea7501fbe6}} 

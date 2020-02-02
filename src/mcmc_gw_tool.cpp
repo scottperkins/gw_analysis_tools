@@ -28,6 +28,7 @@ double T_mcmc_gw_tool;
 
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
+double chirpmass_eta_jac(double m1,double m2);
 int main(int argc, char *argv[])
 {
 	std::cout.precision(15);
@@ -214,8 +215,8 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
-	//double chirp = std::exp(pos[7]);
-	//double eta = pos[8];
+	double chirp = std::exp(pos[7]);
+	double eta = pos[8];
 	//double m1 = calculate_mass1(chirp,eta );
 	//double m2 = calculate_mass2(chirp,eta );
 	//double q =m1/m2;
@@ -246,5 +247,18 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
-	else {return pos[7]+3*pos[6];}
+	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];}
 }
+
+//Uniform in m1 and m2, transformed to lnM and eta
+double chirpmass_eta_jac(double chirpmass, double eta){
+	return 1./(sqrt(1. - 4.*eta)*pow(eta,1.2));
+}
+
+//Uniform in m1 and m2, transformed to lnM and eta
+//double chirpmass_eta_jac(double m1,double m2)
+//{
+//	//return ((m1 - m2)*pow(m1*m2,0.6))/pow(m1 + m2,3.2);
+//	return ((m1 - m2)*(5*m2*(m1 + m2)*log(m2) + (2*m1 + 3*m2)*log(pow(m1*m2,0.6)/pow(m1 + m2,0.2))))/(pow(m1 + m2,4)*(3*log(m1*m2) - log(m1 + m2)));
+//
+//}

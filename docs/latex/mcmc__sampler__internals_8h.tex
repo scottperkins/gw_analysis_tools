@@ -75,6 +75,10 @@ void {\bfseries write\+\_\+stat\+\_\+file} (\mbox{\hyperlink{classsampler}{sampl
 \item 
 void \mbox{\hyperlink{mcmc__sampler__internals_8h_a2207c4aeab89b5b985ac2fb297426ba5}{write\+\_\+checkpoint\+\_\+file}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, std\+::string filename)
 \begin{DoxyCompactList}\small\item\em Routine that writes metadata and final positions of a sampler to a checkpoint file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{mcmc__sampler__internals_8h_aecfd6c1ef213a233c95a98ae87897123}{chain\+\_\+number\+\_\+from\+\_\+checkpoint\+\_\+file}} (std\+::string check\+\_\+file, int $\ast$chain\+\_\+N)
+\begin{DoxyCompactList}\small\item\em Load chain number from checkpoint file. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{mcmc__sampler__internals_8h_ac2b9f96c0359f9653c6b063b2f356b92}{dimension\+\_\+from\+\_\+checkpoint\+\_\+file}} (std\+::string check\+\_\+file, int $\ast$min\+\_\+dimension, int $\ast$max\+\_\+dimension)
+\begin{DoxyCompactList}\small\item\em Load dimension from checkpoint file. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler__internals_8h_ae9c3718752690cce3b37f41da7b2b938}{load\+\_\+checkpoint\+\_\+file}} (std\+::string check\+\_\+file, \mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}})
 \begin{DoxyCompactList}\small\item\em load checkpoint file into sampler struct \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler__internals_8h_a6df174eb68b851e0ccd3b966e65f3a77}{load\+\_\+temps\+\_\+checkpoint\+\_\+file}} (std\+::string check\+\_\+file, double $\ast$temps, int chain\+\_\+N)
@@ -92,8 +96,10 @@ double \mbox{\hyperlink{mcmc__sampler__internals_8h_a1f07e7540a20f438aad42f569c2
 \begin{DoxyCompactList}\small\item\em Timescale of the PT dynamics. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler__internals_8h_ae0ec0745c85caad31c473a608aef5782}{update\+\_\+temperatures}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr, int t0, int nu, int t)
 \begin{DoxyCompactList}\small\item\em updates the temperatures for a sampler such that all acceptance rates are equal \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler__internals_8h_a9d0fba3cec02c00fb85b04d5e987f01b}{initiate\+\_\+full\+\_\+sampler}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$sampler\+\_\+new, \mbox{\hyperlink{classsampler}{sampler}} $\ast$sampler\+\_\+old, int chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, int chain\+\_\+N, std\+::string chain\+\_\+allocation\+\_\+scheme)
+void \mbox{\hyperlink{mcmc__sampler__internals_8h_af7d9266e3f9b69568a983b29e629ca98}{initiate\+\_\+full\+\_\+sampler}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$sampler\+\_\+new, \mbox{\hyperlink{classsampler}{sampler}} $\ast$sampler\+\_\+old, int chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble, int chain\+\_\+N, std\+::string chain\+\_\+allocation\+\_\+scheme, std\+::string checkpoint\+\_\+file\+\_\+start)
 \begin{DoxyCompactList}\small\item\em For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{mcmc__sampler__internals_8h_a036d12e6378958e6b373866894a1081d}{copy\+\_\+base\+\_\+checkpoint\+\_\+properties}} (std\+::string check\+\_\+file, \mbox{\hyperlink{classsampler}{sampler}} $\ast$samplerptr)
+\begin{DoxyCompactList}\small\item\em Copies positions and histories into chain ensemble, skipping the first set of temperatures. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{mcmc__sampler__internals_8h_a7dbf96828add5b7383e340160a5d006a}\label{mcmc__sampler__internals_8h_a7dbf96828add5b7383e340160a5d006a}} 
 void \mbox{\hyperlink{mcmc__sampler__internals_8h_a7dbf96828add5b7383e340160a5d006a}{write\+\_\+output\+\_\+file}} (std\+::string file, int step\+\_\+num, int max\+\_\+dimension, double $\ast$$\ast$$\ast$output, int $\ast$$\ast$$\ast$status, int chain\+\_\+N, double $\ast$temps, bool RJ)
 \begin{DoxyCompactList}\small\item\em Utility to write out the parameters and status of a sampler to a file. \end{DoxyCompactList}\item 
@@ -131,7 +137,17 @@ Type 1\+: Differential Evolution step
 
 Type 2\+: M\+M\+A\+LA step (currently not supported)
 
-Type 3\+: Fisher step \mbox{\Hypertarget{mcmc__sampler__internals_8h_ae328d199338081b9affb09d1f8e71351}\label{mcmc__sampler__internals_8h_ae328d199338081b9affb09d1f8e71351}} 
+Type 3\+: Fisher step \mbox{\Hypertarget{mcmc__sampler__internals_8h_aecfd6c1ef213a233c95a98ae87897123}\label{mcmc__sampler__internals_8h_aecfd6c1ef213a233c95a98ae87897123}} 
+\index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!chain\_number\_from\_checkpoint\_file@{chain\_number\_from\_checkpoint\_file}}
+\index{chain\_number\_from\_checkpoint\_file@{chain\_number\_from\_checkpoint\_file}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
+\doxysubsubsection{\texorpdfstring{chain\_number\_from\_checkpoint\_file()}{chain\_number\_from\_checkpoint\_file()}}
+{\footnotesize\ttfamily int chain\+\_\+number\+\_\+from\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{check\+\_\+file,  }\item[{int $\ast$}]{chain\+\_\+N }\end{DoxyParamCaption})}
+
+
+
+Load chain number from checkpoint file. 
+
+\mbox{\Hypertarget{mcmc__sampler__internals_8h_ae328d199338081b9affb09d1f8e71351}\label{mcmc__sampler__internals_8h_ae328d199338081b9affb09d1f8e71351}} 
 \index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!chain\_swap@{chain\_swap}}
 \index{chain\_swap@{chain\_swap}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
 \doxysubsubsection{\texorpdfstring{chain\_swap()}{chain\_swap()}}
@@ -164,7 +180,25 @@ This is the routine for \`{}`Deterministic'\textquotesingle{} sampling (parallel
 
 Checks the status of a sampler for the stochastic sampling. 
 
-Just loops through the ref\+\_\+chain\+\_\+status variables \mbox{\Hypertarget{mcmc__sampler__internals_8h_ab2a990fd673ce479819a75cf5617c6b3}\label{mcmc__sampler__internals_8h_ab2a990fd673ce479819a75cf5617c6b3}} 
+Just loops through the ref\+\_\+chain\+\_\+status variables \mbox{\Hypertarget{mcmc__sampler__internals_8h_a036d12e6378958e6b373866894a1081d}\label{mcmc__sampler__internals_8h_a036d12e6378958e6b373866894a1081d}} 
+\index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!copy\_base\_checkpoint\_properties@{copy\_base\_checkpoint\_properties}}
+\index{copy\_base\_checkpoint\_properties@{copy\_base\_checkpoint\_properties}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
+\doxysubsubsection{\texorpdfstring{copy\_base\_checkpoint\_properties()}{copy\_base\_checkpoint\_properties()}}
+{\footnotesize\ttfamily void copy\+\_\+base\+\_\+checkpoint\+\_\+properties (\begin{DoxyParamCaption}\item[{std\+::string}]{check\+\_\+file,  }\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{samplerptr }\end{DoxyParamCaption})}
+
+
+
+Copies positions and histories into chain ensemble, skipping the first set of temperatures. 
+
+{\itshape N\+O\+TE} -- allocate\+\_\+sampler called in function -- M\+U\+ST deallocate manually
+
+{\itshape N\+O\+TE} -- sampler-\/$>$chain\+\_\+temps allocated internally -- M\+U\+ST free manually
+
+!\+A\+S\+S\+U\+M\+P\+T\+I\+O\+N\+S! -- \begin{DoxyVerb}The checkpoint file and new sampler must have the same total number of chains, dimension, and the histories are the same length
+
+The temperatures are in ascending order, as output in write_checkpoint
+\end{DoxyVerb}
+ \mbox{\Hypertarget{mcmc__sampler__internals_8h_ab2a990fd673ce479819a75cf5617c6b3}\label{mcmc__sampler__internals_8h_ab2a990fd673ce479819a75cf5617c6b3}} 
 \index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!diff\_ev\_step@{diff\_ev\_step}}
 \index{diff\_ev\_step@{diff\_ev\_step}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
 \doxysubsubsection{\texorpdfstring{diff\_ev\_step()}{diff\_ev\_step()}}
@@ -185,7 +219,19 @@ Take the difference of two random, accepted previous steps and step along that w
 \mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{mcmc__sampler__internals_8h_a4f2eee3801304ac71a4f4dc03a7783a4}\label{mcmc__sampler__internals_8h_a4f2eee3801304ac71a4f4dc03a7783a4}} 
+\mbox{\Hypertarget{mcmc__sampler__internals_8h_ac2b9f96c0359f9653c6b063b2f356b92}\label{mcmc__sampler__internals_8h_ac2b9f96c0359f9653c6b063b2f356b92}} 
+\index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!dimension\_from\_checkpoint\_file@{dimension\_from\_checkpoint\_file}}
+\index{dimension\_from\_checkpoint\_file@{dimension\_from\_checkpoint\_file}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
+\doxysubsubsection{\texorpdfstring{dimension\_from\_checkpoint\_file()}{dimension\_from\_checkpoint\_file()}}
+{\footnotesize\ttfamily int dimension\+\_\+from\+\_\+checkpoint\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{check\+\_\+file,  }\item[{int $\ast$}]{min\+\_\+dimension,  }\item[{int $\ast$}]{max\+\_\+dimension }\end{DoxyParamCaption})}
+
+
+
+Load dimension from checkpoint file. 
+
+If RJ -- returns min\+\_\+dimension and max\+\_\+dimension
+
+If not RJ -- returns dimension in min\+\_\+dimension and max\+\_\+dimension \mbox{\Hypertarget{mcmc__sampler__internals_8h_a4f2eee3801304ac71a4f4dc03a7783a4}\label{mcmc__sampler__internals_8h_a4f2eee3801304ac71a4f4dc03a7783a4}} 
 \index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!fisher\_step@{fisher\_step}}
 \index{fisher\_step@{fisher\_step}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
 \doxysubsubsection{\texorpdfstring{fisher\_step()}{fisher\_step()}}
@@ -223,11 +269,11 @@ Straight gaussian step.
 \mbox{\texttt{ out}}  & {\em proposed\+\_\+param} & Proposed position in parameter space \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{mcmc__sampler__internals_8h_a9d0fba3cec02c00fb85b04d5e987f01b}\label{mcmc__sampler__internals_8h_a9d0fba3cec02c00fb85b04d5e987f01b}} 
+\mbox{\Hypertarget{mcmc__sampler__internals_8h_af7d9266e3f9b69568a983b29e629ca98}\label{mcmc__sampler__internals_8h_af7d9266e3f9b69568a983b29e629ca98}} 
 \index{mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}!initiate\_full\_sampler@{initiate\_full\_sampler}}
 \index{initiate\_full\_sampler@{initiate\_full\_sampler}!mcmc\_sampler\_internals.h@{mcmc\_sampler\_internals.h}}
 \doxysubsubsection{\texorpdfstring{initiate\_full\_sampler()}{initiate\_full\_sampler()}}
-{\footnotesize\ttfamily void initiate\+\_\+full\+\_\+sampler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler\+\_\+new,  }\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler\+\_\+old,  }\item[{int}]{chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{int}]{chain\+\_\+N,  }\item[{std\+::string}]{chain\+\_\+allocation\+\_\+scheme }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void initiate\+\_\+full\+\_\+sampler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler\+\_\+new,  }\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler\+\_\+old,  }\item[{int}]{chain\+\_\+\+N\+\_\+thermo\+\_\+ensemble,  }\item[{int}]{chain\+\_\+N,  }\item[{std\+::string}]{chain\+\_\+allocation\+\_\+scheme,  }\item[{std\+::string}]{checkpoint\+\_\+file\+\_\+start }\end{DoxyParamCaption})}
 
 
 
@@ -237,7 +283,9 @@ The output file will be reused, but the positions are set back to zero (copying 
 
 Assumes the output, chain\+\_\+temps have been allocated in memory for the final number of chains chain\+\_\+N and steps N\+\_\+steps
 
-Allocates memory for the new sampler sampler\+\_\+new -\/$>$ it\textquotesingle{}s the user\textquotesingle{}s responsibility to deallocate with deallocate\+\_\+sampler\+\_\+mem 
+Allocates memory for the new sampler sampler\+\_\+new -\/$>$ it\textquotesingle{}s the user\textquotesingle{}s responsibility to deallocate with deallocate\+\_\+sampler\+\_\+mem
+
+checkpoint\+\_\+file\+\_\+start is the file used for continue\+\_\+\+P\+T\+M\+C\+MC like functions, and can be used if the user wants to maintain the approximate positions and histories of the ensemble of chains after the dynamic temperature allocation. If the rest of the chains should just be copies of the base ensemble, pass an empty string (\char`\"{}\char`\"{}). Since the chain distribution can change the number and distribution of chain temperatures (that\textquotesingle{}s kinda the point..), the transfer is not perfect. Cold chains are prioritized, then the rest of the chains are filled in as close as possible. 
 \begin{DoxyParams}{Parameters}
 {\em sampler\+\_\+old} & Dynamic sampler \\
 \hline
@@ -246,6 +294,8 @@ Allocates memory for the new sampler sampler\+\_\+new -\/$>$ it\textquotesingle{
 {\em chain\+\_\+N} & Number of chains to use in the static sampler \\
 \hline
 {\em chain\+\_\+allocation\+\_\+scheme} & Scheme to use to allocate any remaining chains \\
+\hline
+{\em checkpoint\+\_\+file\+\_\+start} & Base checkpoint file \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{mcmc__sampler__internals_8h_ae9c3718752690cce3b37f41da7b2b938}\label{mcmc__sampler__internals_8h_ae9c3718752690cce3b37f41da7b2b938}} 

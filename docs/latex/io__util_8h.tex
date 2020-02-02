@@ -45,7 +45,16 @@ void \mbox{\hyperlink{io__util_8h_a089aa96b136d368b0c740c416811c39d}{read\+\_\+\
 void \mbox{\hyperlink{io__util_8h_aa73bbfc171abf859eff4c14e07ed1e0a}{allocate\+\_\+\+L\+O\+S\+C\+\_\+data}} (std\+::string $\ast$data\+\_\+files, std\+::string psd\+\_\+file, int num\+\_\+detectors, int psd\+\_\+length, int data\+\_\+file\+\_\+length, double trigger\+\_\+time, std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psds, double $\ast$$\ast$freqs)
 \begin{DoxyCompactList}\small\item\em Prepare data for M\+C\+MC directly from L\+I\+GO Open Science Center. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{io__util_8h_a3196bd767443186731edcfc84e43ac93}{free\+\_\+\+L\+O\+S\+C\+\_\+data}} (std\+::complex$<$ double $>$ $\ast$$\ast$data, double $\ast$$\ast$psds, double $\ast$$\ast$freqs, int num\+\_\+detectors, int length)
-\end{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{io__util_8h_aabb38ec649dc87bca9ddd9ddd1baea78}\label{io__util_8h_aabb38ec649dc87bca9ddd9ddd1baea78}} 
+int \mbox{\hyperlink{io__util_8h_aabb38ec649dc87bca9ddd9ddd1baea78}{count\+\_\+lines\+\_\+data\+\_\+file}} (std\+::string file, int $\ast$count)
+\begin{DoxyCompactList}\small\item\em Takes in data file and returns the number of data elements in file. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{io__util_8h_aaf15f8db5f36caf636d88f41e29b17be}\label{io__util_8h_aaf15f8db5f36caf636d88f41e29b17be}} 
+int \mbox{\hyperlink{io__util_8h_aaf15f8db5f36caf636d88f41e29b17be}{count\+\_\+lines\+\_\+\+L\+O\+S\+C\+\_\+\+P\+S\+D\+\_\+file}} (std\+::string file, int $\ast$count)
+\begin{DoxyCompactList}\small\item\em Takes in L\+O\+SC P\+SD file and returns the number of data elements in file. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{io__util_8h_a2d2ec12ff7cb75ea68ec4139513bab4c}\label{io__util_8h_a2d2ec12ff7cb75ea68ec4139513bab4c}} 
+int \mbox{\hyperlink{io__util_8h_a2d2ec12ff7cb75ea68ec4139513bab4c}{count\+\_\+lines\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file}} (std\+::string file, int $\ast$count)
+\begin{DoxyCompactList}\small\item\em Takes in L\+O\+SC data file and returns the number of data elements in file. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Function Documentation}

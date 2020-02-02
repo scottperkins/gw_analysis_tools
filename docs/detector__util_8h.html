@@ -185,6 +185,9 @@ template&lt;class T &gt; </td></tr>
 <tr class="memitem:a742264b5eeff1d244e299d47cb7fa084"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8h.html#a742264b5eeff1d244e299d47cb7fa084">p_single_detector</a> (double omega, int samples)</td></tr>
 <tr class="memdesc:a742264b5eeff1d244e299d47cb7fa084"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the cumulative amplitude distribution for a single detector.  <a href="detector__util_8h.html#a742264b5eeff1d244e299d47cb7fa084">More...</a><br /></td></tr>
 <tr class="separator:a742264b5eeff1d244e299d47cb7fa084"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad9c958bcdfcfc478c0f3bcc2f8017d5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8h.html#aad9c958bcdfcfc478c0f3bcc2f8017d5">p_N_detector</a> (double omega, int samples, int N_detectors, std::string *detectors, int rand_seed)</td></tr>
+<tr class="memdesc:aad9c958bcdfcfc478c0f3bcc2f8017d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the cumulative amplitude distribution for three detectors.  <a href="detector__util_8h.html#aad9c958bcdfcfc478c0f3bcc2f8017d5">More...</a><br /></td></tr>
+<tr class="separator:aad9c958bcdfcfc478c0f3bcc2f8017d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0af90e8d6505794a792d2b35bf583bef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8h.html#a0af90e8d6505794a792d2b35bf583bef">p_single_detector_fit</a> (double omega)</td></tr>
 <tr class="memdesc:a0af90e8d6505794a792d2b35bf583bef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the cumulative amplitude distribution for a single detector &ndash; Numerical Fit.  <a href="detector__util_8h.html#a0af90e8d6505794a792d2b35bf583bef">More...</a><br /></td></tr>
 <tr class="separator:a0af90e8d6505794a792d2b35bf583bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -248,6 +251,30 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>V_radius</b> 
 <tr class="memitem:a5644ef4e7c76e45807a0b6219b7f6037"><td class="memItemLeft" align="right" valign="top"><a id="a5644ef4e7c76e45807a0b6219b7f6037"></a>
 const double&#160;</td><td class="memItemRight" valign="bottom"><b>V_elevation</b> = 51.884</td></tr>
 <tr class="separator:a5644ef4e7c76e45807a0b6219b7f6037"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed69a3a6cd4350d4e0e742d2d9299c18"><td class="memItemLeft" align="right" valign="top"><a id="aed69a3a6cd4350d4e0e742d2d9299c18"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>K_LAT</b> =0.6355068497</td></tr>
+<tr class="separator:aed69a3a6cd4350d4e0e742d2d9299c18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5e86d1fc63bae9c3b7ab96606f259af"><td class="memItemLeft" align="right" valign="top"><a id="ac5e86d1fc63bae9c3b7ab96606f259af"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>K_LONG</b> =2.396441015</td></tr>
+<tr class="separator:ac5e86d1fc63bae9c3b7ab96606f259af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a77338fe62f0ab4ff7db9228fb6b694db"><td class="memItemLeft" align="right" valign="top"><a id="a77338fe62f0ab4ff7db9228fb6b694db"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>K_radius</b> =6371060</td></tr>
+<tr class="separator:a77338fe62f0ab4ff7db9228fb6b694db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6e632455567f70e1369626495dd4b35"><td class="memItemLeft" align="right" valign="top"><a id="ad6e632455567f70e1369626495dd4b35"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>K_elevation</b> = 414.181</td></tr>
+<tr class="separator:ad6e632455567f70e1369626495dd4b35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c4e3a7d4d8ee14af88397ea2f71b4a0"><td class="memItemLeft" align="right" valign="top"><a id="a5c4e3a7d4d8ee14af88397ea2f71b4a0"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>I_LAT</b> =0.2484185302005262</td></tr>
+<tr class="separator:a5c4e3a7d4d8ee14af88397ea2f71b4a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5d3236490e8952eec1a1be124404ba8"><td class="memItemLeft" align="right" valign="top"><a id="ad5d3236490e8952eec1a1be124404ba8"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>I_LONG</b> =1.3340133249409993</td></tr>
+<tr class="separator:ad5d3236490e8952eec1a1be124404ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f668a27f011b2b8ad733b7f8e40876d"><td class="memItemLeft" align="right" valign="top"><a id="a0f668a27f011b2b8ad733b7f8e40876d"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>I_radius</b> =6376850</td></tr>
+<tr class="separator:a0f668a27f011b2b8ad733b7f8e40876d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a934c5751ef088a06529cbe15fd59967d"><td class="memItemLeft" align="right" valign="top"><a id="a934c5751ef088a06529cbe15fd59967d"></a>
+const double&#160;</td><td class="memItemRight" valign="bottom"><b>I_elevation</b> = 0.0</td></tr>
+<tr class="separator:a934c5751ef088a06529cbe15fd59967d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2cd979387f9d48def1737eb3af260e89"><td class="memItemLeft" align="right" valign="top"><a id="a2cd979387f9d48def1737eb3af260e89"></a>
 const double&#160;</td><td class="memItemRight" valign="bottom"><b>RE_polar</b> =6357e3</td></tr>
 <tr class="separator:a2cd979387f9d48def1737eb3af260e89"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -260,6 +287,10 @@ const double&#160;</td><td class="memItemRight" valign="bottom"><b>RE_equatorial
 <tr class="separator:ac5616b73b3ed3913e803bc76573677aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3f9eb7bf2b7778fd56ed0a48ddaf423"><td class="memItemLeft" align="right" valign="top">const double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8h.html#ab3f9eb7bf2b7778fd56ed0a48ddaf423">Virgo_D</a> [3][3]</td></tr>
 <tr class="separator:ab3f9eb7bf2b7778fd56ed0a48ddaf423"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2a8314cac0e5306142c966fbd8805d8"><td class="memItemLeft" align="right" valign="top">const double&#160;</td><td class="memItemRight" valign="bottom"><b>Kagra_D</b> [3][3]</td></tr>
+<tr class="separator:aa2a8314cac0e5306142c966fbd8805d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab733e7382f02279e9d1e8cf8da517f64"><td class="memItemLeft" align="right" valign="top">const double&#160;</td><td class="memItemRight" valign="bottom"><b>Indigo_D</b> [3][3]</td></tr>
+<tr class="separator:ab733e7382f02279e9d1e8cf8da517f64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Header file for all detector-specific utilities </p>
@@ -976,6 +1007,69 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="aad9c958bcdfcfc478c0f3bcc2f8017d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad9c958bcdfcfc478c0f3bcc2f8017d5">&#9670;&nbsp;</a></span>p_N_detector()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double p_N_detector </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>omega</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>N_detectors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string *&#160;</td>
+          <td class="paramname"><em>detectors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>rand_seed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Utility to calculate the cumulative amplitude distribution for three detectors. </p>
+<p>P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota</p>
+<p>Integrated over the volume which \omega' is larger than \omega</p>
+<p>Integrates using Monte Carlo integration</p>
+<p>Uniform sampling in \psi, cos(\iota), cos(DEC) , and RA</p>
+<p>Sampled using any supported detectors. See documentation for supported detectors </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">omega</td><td>\omega = \rho/\rho_opt* </td></tr>
+    <tr><td class="paramname">samples</td><td>number of monte carlo samples to use* </td></tr>
+    <tr><td class="paramname">N_detectors</td><td>Number of detectors </td></tr>
+    <tr><td class="paramname">detectors</td><td>String name of detectors to use -- MUST BE SUPPORTED DETECTORS </td></tr>
+    <tr><td class="paramname">rand_seed</td><td>Seed for random number generator </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a742264b5eeff1d244e299d47cb7fa084"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a742264b5eeff1d244e299d47cb7fa084">&#9670;&nbsp;</a></span>p_single_detector()</h2>
 
@@ -1575,6 +1669,39 @@ template&lt;class T &gt; </div>
 </div><!-- fragment --><p>Response Tensor for Hanford</p>
 <p>Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end &ndash; see mathematica script </p>
 
+</div>
+</div>
+<a id="ab733e7382f02279e9d1e8cf8da517f64"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab733e7382f02279e9d1e8cf8da517f64">&#9670;&nbsp;</a></span>Indigo_D</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const double Indigo_D[3][3]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">={{0.470823664959826499, -0.120908243530907122, </div>
+<div class="line">  0.0279526040438164719}, {-0.120908243530907122, -0.001050025852002534, 0.115836952558600455}, {0.0279526040438164719, </div>
+<div class="line">  0.115836952558600455, -0.469773644459096742}}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="aa2a8314cac0e5306142c966fbd8805d8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2a8314cac0e5306142c966fbd8805d8">&#9670;&nbsp;</a></span>Kagra_D</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const double Kagra_D[3][3]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">={{-0.18599, 0.153167, -0.324951}, {0.153167, </div>
+<div class="line">  0.349518, -0.170874}, {-0.324951, -0.170874, -0.163529}}</div>
+</div><!-- fragment -->
 </div>
 </div>
 <a id="ac5616b73b3ed3913e803bc76573677aa"></a>

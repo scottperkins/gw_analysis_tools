@@ -184,6 +184,9 @@ template&lt;class T &gt; </td></tr>
 <tr class="memitem:a742264b5eeff1d244e299d47cb7fa084"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8cpp.html#a742264b5eeff1d244e299d47cb7fa084">p_single_detector</a> (double omega, int samples)</td></tr>
 <tr class="memdesc:a742264b5eeff1d244e299d47cb7fa084"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the cumulative amplitude distribution for a single detector.  <a href="detector__util_8cpp.html#a742264b5eeff1d244e299d47cb7fa084">More...</a><br /></td></tr>
 <tr class="separator:a742264b5eeff1d244e299d47cb7fa084"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad9c958bcdfcfc478c0f3bcc2f8017d5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8cpp.html#aad9c958bcdfcfc478c0f3bcc2f8017d5">p_N_detector</a> (double omega, int samples, int N_detectors, std::string *detectors, int rand_seed)</td></tr>
+<tr class="memdesc:aad9c958bcdfcfc478c0f3bcc2f8017d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the cumulative amplitude distribution for three detectors.  <a href="detector__util_8cpp.html#aad9c958bcdfcfc478c0f3bcc2f8017d5">More...</a><br /></td></tr>
+<tr class="separator:aad9c958bcdfcfc478c0f3bcc2f8017d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0af90e8d6505794a792d2b35bf583bef"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="detector__util_8cpp.html#a0af90e8d6505794a792d2b35bf583bef">p_single_detector_fit</a> (double omega)</td></tr>
 <tr class="memdesc:a0af90e8d6505794a792d2b35bf583bef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the cumulative amplitude distribution for a single detector &ndash; Numerical Fit.  <a href="detector__util_8cpp.html#a0af90e8d6505794a792d2b35bf583bef">More...</a><br /></td></tr>
 <tr class="separator:a0af90e8d6505794a792d2b35bf583bef"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -978,6 +981,69 @@ template&lt;class T &gt; </div>
 <p>\breif Confusion noise &ndash; this is S, not root S</p>
 <p>arXiv:1803.01944 &ndash; 14</p>
 <p>integration_time is the observation time in months &ndash; options are 6, 12, 24, and 48 </p>
+
+</div>
+</div>
+<a id="aad9c958bcdfcfc478c0f3bcc2f8017d5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aad9c958bcdfcfc478c0f3bcc2f8017d5">&#9670;&nbsp;</a></span>p_N_detector()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double p_N_detector </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>omega</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>N_detectors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string *&#160;</td>
+          <td class="paramname"><em>detectors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>rand_seed</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Utility to calculate the cumulative amplitude distribution for three detectors. </p>
+<p>P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota</p>
+<p>Integrated over the volume which \omega' is larger than \omega</p>
+<p>Integrates using Monte Carlo integration</p>
+<p>Uniform sampling in \psi, cos(\iota), cos(DEC) , and RA</p>
+<p>Sampled using any supported detectors. See documentation for supported detectors </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">omega</td><td>\omega = \rho/\rho_opt* </td></tr>
+    <tr><td class="paramname">samples</td><td>number of monte carlo samples to use* </td></tr>
+    <tr><td class="paramname">N_detectors</td><td>Number of detectors </td></tr>
+    <tr><td class="paramname">detectors</td><td>String name of detectors to use -- MUST BE SUPPORTED DETECTORS </td></tr>
+    <tr><td class="paramname">rand_seed</td><td>Seed for random number generator </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

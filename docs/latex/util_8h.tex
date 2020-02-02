@@ -75,12 +75,20 @@ double \mbox{\hyperlink{util_8h_afc70040a4b2855ffc42c1f8b91e87fc2}{cosmology\+\_
 \mbox{\Hypertarget{util_8h_afda1342d7215e52bcbb8f483ca576524}\label{util_8h_afda1342d7215e52bcbb8f483ca576524}} 
 double \mbox{\hyperlink{util_8h_afda1342d7215e52bcbb8f483ca576524}{cosmology\+\_\+lookup}} (std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Helper function for mapping cosmology name to an internal index. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8h_ab4e6e8330f62c234ad74029f6d87fb08}{fcontact}} (T M\+\_\+detector, T DL, std\+::string cosmology)
+\begin{DoxyCompactList}\small\item\em Rough threshold for when to truncate waveforms for neutron stars. \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{util_8h_aa82ab145d4f623214c1492589e4327bf}{gsl\+\_\+maxwell\+\_\+boltzmann\+\_\+distribution}} (double sigma, gsl\+\_\+rng $\ast$r)
 \begin{DoxyCompactList}\small\item\em Calculates a random number from the Maxwell-\/\+Boltzmann distribution using 3 gaussian random numbers. \end{DoxyCompactList}\item 
 {\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8h_a9d0768e0355feef9d4d9681e6eed27b4}{list\+\_\+intersect\+\_\+ptrs}} (T $\ast$$\ast$A, int lenA, T $\ast$$\ast$B, int lenB, T $\ast$$\ast$C, int $\ast$lenC)
 \begin{DoxyCompactList}\small\item\em Custom list-\/interesction implementation for sorted lists. \end{DoxyCompactList}\item 
 {\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8h_a6a20a9cb79b3c847fc75f3e3eb45f933}{list\+\_\+intersect}} (T $\ast$A, int lenA, T $\ast$B, int lenB, T $\ast$$\ast$C, int $\ast$lenC)
 \begin{DoxyCompactList}\small\item\em Custom list-\/interesction implementation for sorted lists. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_a99af76e92067fd1c15173a95bcf8fd67}\label{util_8h_a99af76e92067fd1c15173a95bcf8fd67}} 
+{\footnotesize template$<$class T , class U $>$ }\\void {\bfseries variance\+\_\+list} (T $\ast$list, int length, U $\ast$result)
+\item 
+\mbox{\Hypertarget{util_8h_a4f15abfb33a16347c3a5075ecc538f90}\label{util_8h_a4f15abfb33a16347c3a5075ecc538f90}} 
+{\footnotesize template$<$class T , class U $>$ }\\void {\bfseries mean\+\_\+list} (T $\ast$list, int length, U $\ast$result)
+\item 
 {\footnotesize template$<$class T $>$ }\\bool \mbox{\hyperlink{util_8h_a9631c2bd8b5493af4df2528a44886fc6}{check\+\_\+list}} (T j, T $\ast$list, int length)
 \begin{DoxyCompactList}\small\item\em Just a quick utility to see if an item is in a list. \end{DoxyCompactList}\item 
 {\footnotesize template$<$class T $>$ }\\int \mbox{\hyperlink{util_8h_af81850392cb5ff136ea8d334952844e0}{check\+\_\+list\+\_\+id}} (T j, T $\ast$list, int length)
@@ -176,9 +184,14 @@ adouble {\bfseries calculate\+\_\+mass2} (adouble chirpmass, adouble eta)
 \mbox{\Hypertarget{util_8h_afd6029a6f28651af9d71382a4b4e0efb}\label{util_8h_afd6029a6f28651af9d71382a4b4e0efb}} 
 {\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8h_afd6029a6f28651af9d71382a4b4e0efb}{gps\+\_\+to\+\_\+\+G\+M\+ST}} (T gps\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Utility to transform from gps time to G\+M\+ST \href{https://aa.usno.navy.mil/faq/docs/GAST.php}{\texttt{ https\+://aa.\+usno.\+navy.\+mil/faq/docs/\+G\+A\+S\+T.\+php}}. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8h_a5649be3fe6432b46c1fb0041f4a56eb7}\label{util_8h_a5649be3fe6432b46c1fb0041f4a56eb7}} 
+{\footnotesize template$<$class T $>$ }\\T {\bfseries gps\+\_\+to\+\_\+\+G\+M\+S\+T\+\_\+radian} (T gps\+\_\+time)
+\item 
 \mbox{\Hypertarget{util_8h_ab2a5f9f42b470f4d11945aad2835f99f}\label{util_8h_ab2a5f9f42b470f4d11945aad2835f99f}} 
 {\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8h_ab2a5f9f42b470f4d11945aad2835f99f}{gps\+\_\+to\+\_\+\+JD}} (T gps\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Utility to transform from gps to JD. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{util_8h_afe7aa670256d4d44a05227b56b48601e}{decimal\+\_\+to\+\_\+\+H\+MS}} (double decimal, int $\ast$hour, int $\ast$min, double $\ast$second)
+\begin{DoxyCompactList}\small\item\em Converts decimal into hours, minutes and seconds. \end{DoxyCompactList}\item 
 {\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8h_a817fd4d7413b4a2bfe05bfbc454766b2}{transform\+\_\+cart\+\_\+sph}} (T $\ast$cartvec, T $\ast$sphvec)
 \begin{DoxyCompactList}\small\item\em utility to transform a vector from cartesian to spherical (radian) \end{DoxyCompactList}\item 
 {\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8h_a3c767ffbc1073a544ae1630ffdea917e}{transform\+\_\+sph\+\_\+cart}} (T $\ast$sphvec, T $\ast$cartvec)
@@ -232,6 +245,9 @@ const double \mbox{\hyperlink{util_8h_a19ace59856e55cca68458867a62d0bc4}{A\+X\+I
 const double \mbox{\hyperlink{util_8h_abcfdf85edc41c59ae55c3c45dc9c506a}{A\+U\+\_\+\+S\+EC}} = 499.\+005
 \item 
 const double \mbox{\hyperlink{util_8h_aeef10f63f0d33b2b400ac1948439ccfc}{R\+O\+O\+T\+\_\+\+T\+H\+R\+EE}} = std\+::sqrt(3.)
+\item 
+\mbox{\Hypertarget{util_8h_a44616d1e8d795d9169691152fb8425df}\label{util_8h_a44616d1e8d795d9169691152fb8425df}} 
+const double {\bfseries D\+O\+U\+B\+L\+E\+\_\+\+C\+O\+M\+P\+\_\+\+T\+H\+R\+E\+SH} = 1e-\/10
 \end{DoxyCompactItemize}
 
 
@@ -394,7 +410,17 @@ Utility to free malloc\textquotesingle{}d 2D array.
 
 Utility to free malloc\textquotesingle{}d 2D array. 
 
-\mbox{\Hypertarget{util_8h_aa66116cc2ddd8ba609a68a4c0cdca635}\label{util_8h_aa66116cc2ddd8ba609a68a4c0cdca635}} 
+\mbox{\Hypertarget{util_8h_afe7aa670256d4d44a05227b56b48601e}\label{util_8h_afe7aa670256d4d44a05227b56b48601e}} 
+\index{util.h@{util.h}!decimal\_to\_HMS@{decimal\_to\_HMS}}
+\index{decimal\_to\_HMS@{decimal\_to\_HMS}!util.h@{util.h}}
+\doxysubsubsection{\texorpdfstring{decimal\_to\_HMS()}{decimal\_to\_HMS()}}
+{\footnotesize\ttfamily void decimal\+\_\+to\+\_\+\+H\+MS (\begin{DoxyParamCaption}\item[{double}]{decimal,  }\item[{int $\ast$}]{hour,  }\item[{int $\ast$}]{min,  }\item[{double $\ast$}]{second }\end{DoxyParamCaption})}
+
+
+
+Converts decimal into hours, minutes and seconds. 
+
+I just got tired of keeping all these steps straight.. \mbox{\Hypertarget{util_8h_aa66116cc2ddd8ba609a68a4c0cdca635}\label{util_8h_aa66116cc2ddd8ba609a68a4c0cdca635}} 
 \index{util.h@{util.h}!DL\_from\_A0@{DL\_from\_A0}}
 \index{DL\_from\_A0@{DL\_from\_A0}!util.h@{util.h}}
 \doxysubsubsection{\texorpdfstring{DL\_from\_A0()}{DL\_from\_A0()}}
@@ -489,6 +515,26 @@ Verified with specific cases and with dot products with vectors before and after
  & {\em phi\+\_\+ref} & Reference frequency for the waveform (defines the L\+AL frame ) ( orbital phase) at the reference frequency \\
 \hline
 \mbox{\texttt{ out}}  & {\em E\+Qvec} & Out vector in equatorial coordinates in cartesian \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{util_8h_ab4e6e8330f62c234ad74029f6d87fb08}\label{util_8h_ab4e6e8330f62c234ad74029f6d87fb08}} 
+\index{util.h@{util.h}!fcontact@{fcontact}}
+\index{fcontact@{fcontact}!util.h@{util.h}}
+\doxysubsubsection{\texorpdfstring{fcontact()}{fcontact()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+T fcontact (\begin{DoxyParamCaption}\item[{T}]{M\+\_\+detector,  }\item[{T}]{DL,  }\item[{std\+::string}]{cosmology }\end{DoxyParamCaption})}
+
+
+
+Rough threshold for when to truncate waveforms for neutron stars. 
+
+24 km separation 
+\begin{DoxyParams}{Parameters}
+{\em M\+\_\+detector} & Detector frame total mass in seconds \\
+\hline
+{\em DL} & Luminsosity distance in seconds \\
+\hline
+{\em cosmology} & Cosmology to use for getting the redshift from dl \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8h_aa82ab145d4f623214c1492589e4327bf}\label{util_8h_aa82ab145d4f623214c1492589e4327bf}} 

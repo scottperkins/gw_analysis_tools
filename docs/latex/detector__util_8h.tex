@@ -79,6 +79,8 @@ double \mbox{\hyperlink{detector__util_8h_adcb816dfe662ececa657888ff18132bd}{rad
 \item 
 double \mbox{\hyperlink{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}{p\+\_\+single\+\_\+detector}} (double omega, int samples)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for a single detector. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{detector__util_8h_aad9c958bcdfcfc478c0f3bcc2f8017d5}{p\+\_\+\+N\+\_\+detector}} (double omega, int samples, int N\+\_\+detectors, std\+::string $\ast$detectors, int rand\+\_\+seed)
+\begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for three detectors. \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{detector__util_8h_a0af90e8d6505794a792d2b35bf583bef}{p\+\_\+single\+\_\+detector\+\_\+fit}} (double omega)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit. \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{detector__util_8h_a8470b24a84da4e746ee95ff9bb87bbbc}{p\+\_\+triple\+\_\+detector\+\_\+fit}} (double omega)
@@ -138,6 +140,30 @@ const double {\bfseries V\+\_\+radius} = 6368051.\+92301
 \mbox{\Hypertarget{detector__util_8h_a5644ef4e7c76e45807a0b6219b7f6037}\label{detector__util_8h_a5644ef4e7c76e45807a0b6219b7f6037}} 
 const double {\bfseries V\+\_\+elevation} = 51.\+884
 \item 
+\mbox{\Hypertarget{detector__util_8h_aed69a3a6cd4350d4e0e742d2d9299c18}\label{detector__util_8h_aed69a3a6cd4350d4e0e742d2d9299c18}} 
+const double {\bfseries K\+\_\+\+L\+AT} =0.\+6355068497
+\item 
+\mbox{\Hypertarget{detector__util_8h_ac5e86d1fc63bae9c3b7ab96606f259af}\label{detector__util_8h_ac5e86d1fc63bae9c3b7ab96606f259af}} 
+const double {\bfseries K\+\_\+\+L\+O\+NG} =2.\+396441015
+\item 
+\mbox{\Hypertarget{detector__util_8h_a77338fe62f0ab4ff7db9228fb6b694db}\label{detector__util_8h_a77338fe62f0ab4ff7db9228fb6b694db}} 
+const double {\bfseries K\+\_\+radius} =6371060
+\item 
+\mbox{\Hypertarget{detector__util_8h_ad6e632455567f70e1369626495dd4b35}\label{detector__util_8h_ad6e632455567f70e1369626495dd4b35}} 
+const double {\bfseries K\+\_\+elevation} = 414.\+181
+\item 
+\mbox{\Hypertarget{detector__util_8h_a5c4e3a7d4d8ee14af88397ea2f71b4a0}\label{detector__util_8h_a5c4e3a7d4d8ee14af88397ea2f71b4a0}} 
+const double {\bfseries I\+\_\+\+L\+AT} =0.\+2484185302005262
+\item 
+\mbox{\Hypertarget{detector__util_8h_ad5d3236490e8952eec1a1be124404ba8}\label{detector__util_8h_ad5d3236490e8952eec1a1be124404ba8}} 
+const double {\bfseries I\+\_\+\+L\+O\+NG} =1.\+3340133249409993
+\item 
+\mbox{\Hypertarget{detector__util_8h_a0f668a27f011b2b8ad733b7f8e40876d}\label{detector__util_8h_a0f668a27f011b2b8ad733b7f8e40876d}} 
+const double {\bfseries I\+\_\+radius} =6376850
+\item 
+\mbox{\Hypertarget{detector__util_8h_a934c5751ef088a06529cbe15fd59967d}\label{detector__util_8h_a934c5751ef088a06529cbe15fd59967d}} 
+const double {\bfseries I\+\_\+elevation} = 0.\+0
+\item 
 \mbox{\Hypertarget{detector__util_8h_a2cd979387f9d48def1737eb3af260e89}\label{detector__util_8h_a2cd979387f9d48def1737eb3af260e89}} 
 const double {\bfseries R\+E\+\_\+polar} =6357e3
 \item 
@@ -149,6 +175,10 @@ const double \mbox{\hyperlink{detector__util_8h_a14eced5d747f703b86f021cfc242536
 const double \mbox{\hyperlink{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}{Livingston\+\_\+D}} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
 \item 
 const double \mbox{\hyperlink{detector__util_8h_ab3f9eb7bf2b7778fd56ed0a48ddaf423}{Virgo\+\_\+D}} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+const double {\bfseries Kagra\+\_\+D} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
+\item 
+const double {\bfseries Indigo\+\_\+D} \mbox{[}3\mbox{]}\mbox{[}3\mbox{]}
 \end{DoxyCompactItemize}
 
 
@@ -413,7 +443,38 @@ All the coordinates are in the ecliptic coordinate system \mbox{\Hypertarget{det
 
 ar\+Xiv\+:1803.\+01944 -- 14
 
-integration\+\_\+time is the observation time in months -- options are 6, 12, 24, and 48 \mbox{\Hypertarget{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}\label{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}} 
+integration\+\_\+time is the observation time in months -- options are 6, 12, 24, and 48 \mbox{\Hypertarget{detector__util_8h_aad9c958bcdfcfc478c0f3bcc2f8017d5}\label{detector__util_8h_aad9c958bcdfcfc478c0f3bcc2f8017d5}} 
+\index{detector\_util.h@{detector\_util.h}!p\_N\_detector@{p\_N\_detector}}
+\index{p\_N\_detector@{p\_N\_detector}!detector\_util.h@{detector\_util.h}}
+\doxysubsubsection{\texorpdfstring{p\_N\_detector()}{p\_N\_detector()}}
+{\footnotesize\ttfamily double p\+\_\+\+N\+\_\+detector (\begin{DoxyParamCaption}\item[{double}]{omega,  }\item[{int}]{samples,  }\item[{int}]{N\+\_\+detectors,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{rand\+\_\+seed }\end{DoxyParamCaption})}
+
+
+
+Utility to calculate the cumulative amplitude distribution for three detectors. 
+
+P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+
+Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+
+Integrates using Monte Carlo integration
+
+Uniform sampling in \textbackslash{}psi, cos(\textbackslash{}iota), cos(\+D\+E\+C) , and RA
+
+Sampled using any supported detectors. See documentation for supported detectors 
+\begin{DoxyParams}{Parameters}
+{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+\hline
+{\em samples} & number of monte carlo samples to use$\ast$ \\
+\hline
+{\em N\+\_\+detectors} & Number of detectors \\
+\hline
+{\em detectors} & String name of detectors to use -\/-\/ M\+U\+ST BE S\+U\+P\+P\+O\+R\+T\+ED D\+E\+T\+E\+C\+T\+O\+RS \\
+\hline
+{\em rand\+\_\+seed} & Seed for random number generator \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}\label{detector__util_8h_a742264b5eeff1d244e299d47cb7fa084}} 
 \index{detector\_util.h@{detector\_util.h}!p\_single\_detector@{p\_single\_detector}}
 \index{p\_single\_detector@{p\_single\_detector}!detector\_util.h@{detector\_util.h}}
 \doxysubsubsection{\texorpdfstring{p\_single\_detector()}{p\_single\_detector()}}
@@ -681,7 +742,32 @@ integration\+\_\+time is the observation time in months -- options are 6, 12, 24
 \end{DoxyCode}
 Response Tensor for Hanford
 
-Calculated using ar\+Xiv\+:gr-\/qc/0008066, equation B6 with the table at the end -- see mathematica script \mbox{\Hypertarget{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}\label{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}} 
+Calculated using ar\+Xiv\+:gr-\/qc/0008066, equation B6 with the table at the end -- see mathematica script \mbox{\Hypertarget{detector__util_8h_ab733e7382f02279e9d1e8cf8da517f64}\label{detector__util_8h_ab733e7382f02279e9d1e8cf8da517f64}} 
+\index{detector\_util.h@{detector\_util.h}!Indigo\_D@{Indigo\_D}}
+\index{Indigo\_D@{Indigo\_D}!detector\_util.h@{detector\_util.h}}
+\doxysubsubsection{\texorpdfstring{Indigo\_D}{Indigo\_D}}
+{\footnotesize\ttfamily const double Indigo\+\_\+D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\{\{0.470823664959826499, -\/0.120908243530907122, }
+\DoxyCodeLine{  0.0279526040438164719\}, \{-\/0.120908243530907122, -\/0.001050025852002534, 0.115836952558600455\}, \{0.0279526040438164719, }
+\DoxyCodeLine{  0.115836952558600455, -\/0.469773644459096742\}\}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{detector__util_8h_aa2a8314cac0e5306142c966fbd8805d8}\label{detector__util_8h_aa2a8314cac0e5306142c966fbd8805d8}} 
+\index{detector\_util.h@{detector\_util.h}!Kagra\_D@{Kagra\_D}}
+\index{Kagra\_D@{Kagra\_D}!detector\_util.h@{detector\_util.h}}
+\doxysubsubsection{\texorpdfstring{Kagra\_D}{Kagra\_D}}
+{\footnotesize\ttfamily const double Kagra\+\_\+D\mbox{[}3\mbox{]}\mbox{[}3\mbox{]}}
+
+{\bfseries Initial value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{=\{\{-\/0.18599, 0.153167, -\/0.324951\}, \{0.153167, }
+\DoxyCodeLine{  0.349518, -\/0.170874\}, \{-\/0.324951, -\/0.170874, -\/0.163529\}\}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}\label{detector__util_8h_ac5616b73b3ed3913e803bc76573677aa}} 
 \index{detector\_util.h@{detector\_util.h}!Livingston\_D@{Livingston\_D}}
 \index{Livingston\_D@{Livingston\_D}!detector\_util.h@{detector\_util.h}}
 \doxysubsubsection{\texorpdfstring{Livingston\_D}{Livingston\_D}}

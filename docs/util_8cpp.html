@@ -127,6 +127,16 @@ adouble&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="u
 adouble&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8cpp.html#ac5495a177f2316ca6dc0904f3643b7f1">DL_from_Z</a> (adouble Z, std::string cosmology)</td></tr>
 <tr class="memdesc:ac5495a177f2316ca6dc0904f3643b7f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the luminosity distance given the redshift adouble version for ADOL-C implementation. <br /></td></tr>
 <tr class="separator:ac5495a177f2316ca6dc0904f3643b7f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4e6e8330f62c234ad74029f6d87fb08"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ab4e6e8330f62c234ad74029f6d87fb08"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="util_8cpp.html#ab4e6e8330f62c234ad74029f6d87fb08">fcontact</a> (T M_detector, T DL, std::string cosmology)</td></tr>
+<tr class="memdesc:ab4e6e8330f62c234ad74029f6d87fb08"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rough threshold for when to truncate waveforms for neutron stars.  <a href="util_8cpp.html#ab4e6e8330f62c234ad74029f6d87fb08">More...</a><br /></td></tr>
+<tr class="separator:ab4e6e8330f62c234ad74029f6d87fb08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b3080dc69b13d1535febd3bbe29a1d3"><td class="memItemLeft" align="right" valign="top"><a id="a5b3080dc69b13d1535febd3bbe29a1d3"></a>
+template double&#160;</td><td class="memItemRight" valign="bottom"><b>fcontact&lt; double &gt;</b> (double, double, std::string)</td></tr>
+<tr class="separator:a5b3080dc69b13d1535febd3bbe29a1d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5df57487782c1fe95a23e814f532101"><td class="memItemLeft" align="right" valign="top"><a id="af5df57487782c1fe95a23e814f532101"></a>
+template adouble&#160;</td><td class="memItemRight" valign="bottom"><b>fcontact&lt; adouble &gt;</b> (adouble, adouble, std::string)</td></tr>
+<tr class="separator:af5df57487782c1fe95a23e814f532101"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afc70040a4b2855ffc42c1f8b91e87fc2"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8cpp.html#afc70040a4b2855ffc42c1f8b91e87fc2">cosmology_interpolation_function</a> (double x, double *coeffs, int interp_degree)</td></tr>
 <tr class="memdesc:afc70040a4b2855ffc42c1f8b91e87fc2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Custom interpolation function used in the cosmology calculations.  <a href="util_8cpp.html#afc70040a4b2855ffc42c1f8b91e87fc2">More...</a><br /></td></tr>
 <tr class="separator:afc70040a4b2855ffc42c1f8b91e87fc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -180,6 +190,38 @@ template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_interse
 <tr class="memitem:a79c2688dc6d09b4aee47618cd5340819"><td class="memItemLeft" align="right" valign="top"><a id="a79c2688dc6d09b4aee47618cd5340819"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect&lt; int &gt;</b> (int *, int, int *, int, int **, int *)</td></tr>
 <tr class="separator:a79c2688dc6d09b4aee47618cd5340819"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f15abfb33a16347c3a5075ecc538f90"><td class="memTemplParams" colspan="2"><a id="a4f15abfb33a16347c3a5075ecc538f90"></a>
+template&lt;class T , class U &gt; </td></tr>
+<tr class="memitem:a4f15abfb33a16347c3a5075ecc538f90"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mean_list</b> (T *list, int length, U *result)</td></tr>
+<tr class="separator:a4f15abfb33a16347c3a5075ecc538f90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9fe524b141394cf45ba47e6361691ef"><td class="memItemLeft" align="right" valign="top"><a id="af9fe524b141394cf45ba47e6361691ef"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>mean_list&lt; double, double &gt;</b> (double *, int, double *)</td></tr>
+<tr class="separator:af9fe524b141394cf45ba47e6361691ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3218486cca25a57adb345d3000ca16d9"><td class="memItemLeft" align="right" valign="top"><a id="a3218486cca25a57adb345d3000ca16d9"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>mean_list&lt; adouble, adouble &gt;</b> (adouble *, int, adouble *)</td></tr>
+<tr class="separator:a3218486cca25a57adb345d3000ca16d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc4518e207d862135630fc2e8f71dc4c"><td class="memItemLeft" align="right" valign="top"><a id="afc4518e207d862135630fc2e8f71dc4c"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>mean_list&lt; int, double &gt;</b> (int *, int, double *)</td></tr>
+<tr class="separator:afc4518e207d862135630fc2e8f71dc4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a780768aff48b34c18fe5f7df34925683"><td class="memItemLeft" align="right" valign="top"><a id="a780768aff48b34c18fe5f7df34925683"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>mean_list&lt; int, adouble &gt;</b> (int *, int, adouble *)</td></tr>
+<tr class="separator:a780768aff48b34c18fe5f7df34925683"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99af76e92067fd1c15173a95bcf8fd67"><td class="memTemplParams" colspan="2"><a id="a99af76e92067fd1c15173a95bcf8fd67"></a>
+template&lt;class T , class U &gt; </td></tr>
+<tr class="memitem:a99af76e92067fd1c15173a95bcf8fd67"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>variance_list</b> (T *list, int length, U *result)</td></tr>
+<tr class="separator:a99af76e92067fd1c15173a95bcf8fd67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a811b5a8cf814f4664f2a0ec7d63faef2"><td class="memItemLeft" align="right" valign="top"><a id="a811b5a8cf814f4664f2a0ec7d63faef2"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>variance_list&lt; double, double &gt;</b> (double *, int, double *)</td></tr>
+<tr class="separator:a811b5a8cf814f4664f2a0ec7d63faef2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba869001fc8e14ba718e128fdb20f175"><td class="memItemLeft" align="right" valign="top"><a id="aba869001fc8e14ba718e128fdb20f175"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>variance_list&lt; adouble, adouble &gt;</b> (adouble *, int, adouble *)</td></tr>
+<tr class="separator:aba869001fc8e14ba718e128fdb20f175"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acbbe721697035cb7198079343678dfdd"><td class="memItemLeft" align="right" valign="top"><a id="acbbe721697035cb7198079343678dfdd"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>variance_list&lt; int, double &gt;</b> (int *, int, double *)</td></tr>
+<tr class="separator:acbbe721697035cb7198079343678dfdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb4fa13bbdfa288408f0f146a6614f44"><td class="memItemLeft" align="right" valign="top"><a id="aeb4fa13bbdfa288408f0f146a6614f44"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>variance_list&lt; int, adouble &gt;</b> (int *, int, adouble *)</td></tr>
+<tr class="separator:aeb4fa13bbdfa288408f0f146a6614f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9631c2bd8b5493af4df2528a44886fc6"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a9631c2bd8b5493af4df2528a44886fc6"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="util_8cpp.html#a9631c2bd8b5493af4df2528a44886fc6">check_list</a> (T j, T *list, int length)</td></tr>
 <tr class="memdesc:a9631c2bd8b5493af4df2528a44886fc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Just a quick utility to see if an item is in a list.  <a href="util_8cpp.html#a9631c2bd8b5493af4df2528a44886fc6">More...</a><br /></td></tr>
@@ -379,6 +421,13 @@ template&lt;class T &gt; </td></tr>
 <tr class="memitem:ac83d7055b92c719a52435536df7b51d8"><td class="memItemLeft" align="right" valign="top"><a id="ac83d7055b92c719a52435536df7b51d8"></a>
 template double&#160;</td><td class="memItemRight" valign="bottom"><b>gps_to_GMST&lt; double &gt;</b> (double)</td></tr>
 <tr class="separator:ac83d7055b92c719a52435536df7b51d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5649be3fe6432b46c1fb0041f4a56eb7"><td class="memTemplParams" colspan="2"><a id="a5649be3fe6432b46c1fb0041f4a56eb7"></a>
+template&lt;class T &gt; </td></tr>
+<tr class="memitem:a5649be3fe6432b46c1fb0041f4a56eb7"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gps_to_GMST_radian</b> (T gps_time)</td></tr>
+<tr class="separator:a5649be3fe6432b46c1fb0041f4a56eb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab41d8e6721c9d4df174abadd959d16fa"><td class="memItemLeft" align="right" valign="top"><a id="ab41d8e6721c9d4df174abadd959d16fa"></a>
+template double&#160;</td><td class="memItemRight" valign="bottom"><b>gps_to_GMST_radian&lt; double &gt;</b> (double)</td></tr>
+<tr class="separator:ab41d8e6721c9d4df174abadd959d16fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab2a5f9f42b470f4d11945aad2835f99f"><td class="memTemplParams" colspan="2"><a id="ab2a5f9f42b470f4d11945aad2835f99f"></a>
 template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab2a5f9f42b470f4d11945aad2835f99f"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="util_8cpp.html#ab2a5f9f42b470f4d11945aad2835f99f">gps_to_JD</a> (T gps_time)</td></tr>
@@ -390,6 +439,9 @@ template double&#160;</td><td class="memItemRight" valign="bottom"><b>gps_to_JD&
 <tr class="memitem:a7c409fb90ac34597ff4d5150faa7b62a"><td class="memItemLeft" align="right" valign="top"><a id="a7c409fb90ac34597ff4d5150faa7b62a"></a>
 template adouble&#160;</td><td class="memItemRight" valign="bottom"><b>gps_to_JD&lt; adouble &gt;</b> (adouble)</td></tr>
 <tr class="separator:a7c409fb90ac34597ff4d5150faa7b62a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe7aa670256d4d44a05227b56b48601e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8cpp.html#afe7aa670256d4d44a05227b56b48601e">decimal_to_HMS</a> (double decimal, int *hour, int *min, double *second)</td></tr>
+<tr class="memdesc:afe7aa670256d4d44a05227b56b48601e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts decimal into hours, minutes and seconds.  <a href="util_8cpp.html#afe7aa670256d4d44a05227b56b48601e">More...</a><br /></td></tr>
+<tr class="separator:afe7aa670256d4d44a05227b56b48601e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a817fd4d7413b4a2bfe05bfbc454766b2"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a817fd4d7413b4a2bfe05bfbc454766b2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="util_8cpp.html#a817fd4d7413b4a2bfe05bfbc454766b2">transform_cart_sph</a> (T *cartvec, T *sphvec)</td></tr>
 <tr class="memdesc:a817fd4d7413b4a2bfe05bfbc454766b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">utility to transform a vector from cartesian to spherical (radian)  <a href="util_8cpp.html#a817fd4d7413b4a2bfe05bfbc454766b2">More...</a><br /></td></tr>
@@ -953,6 +1005,49 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="afe7aa670256d4d44a05227b56b48601e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe7aa670256d4d44a05227b56b48601e">&#9670;&nbsp;</a></span>decimal_to_HMS()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void decimal_to_HMS </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>decimal</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>hour</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>second</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts decimal into hours, minutes and seconds. </p>
+<p>I just got tired of keeping all these steps straight.. </p>
+
+</div>
+</div>
 <a id="aa66116cc2ddd8ba609a68a4c0cdca635"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa66116cc2ddd8ba609a68a4c0cdca635">&#9670;&nbsp;</a></span>DL_from_A0()</h2>
 
@@ -1165,6 +1260,53 @@ template&lt;class T &gt; </div>
     <tr><td class="paramdir"></td><td class="paramname">iota</td><td>Inclination angle between the orbiatl angular momentum and the direction of propagation at the reference frequency </td></tr>
     <tr><td class="paramdir"></td><td class="paramname">phi_ref</td><td>Reference frequency for the waveform (defines the LAL frame ) ( orbital phase) at the reference frequency </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">EQvec</td><td>Out vector in equatorial coordinates in cartesian </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ab4e6e8330f62c234ad74029f6d87fb08"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4e6e8330f62c234ad74029f6d87fb08">&#9670;&nbsp;</a></span>fcontact()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">T fcontact </td>
+          <td>(</td>
+          <td class="paramtype">T&#160;</td>
+          <td class="paramname"><em>M_detector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T&#160;</td>
+          <td class="paramname"><em>DL</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>cosmology</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Rough threshold for when to truncate waveforms for neutron stars. </p>
+<p>24 km separation </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">M_detector</td><td>Detector frame total mass in seconds </td></tr>
+    <tr><td class="paramname">DL</td><td>Luminsosity distance in seconds </td></tr>
+    <tr><td class="paramname">cosmology</td><td>Cosmology to use for getting the redshift from dl </td></tr>
   </table>
   </dd>
 </dl>

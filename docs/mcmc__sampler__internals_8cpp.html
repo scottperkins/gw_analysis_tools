@@ -159,6 +159,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>write_stat_file</b> (
 <tr class="memitem:a6df174eb68b851e0ccd3b966e65f3a77"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#a6df174eb68b851e0ccd3b966e65f3a77">load_temps_checkpoint_file</a> (std::string check_file, double *temps, int chain_N)</td></tr>
 <tr class="memdesc:a6df174eb68b851e0ccd3b966e65f3a77"><td class="mdescLeft">&#160;</td><td class="mdescRight">load temperatures from checkpoint file  <a href="mcmc__sampler__internals_8cpp.html#a6df174eb68b851e0ccd3b966e65f3a77">More...</a><br /></td></tr>
 <tr class="separator:a6df174eb68b851e0ccd3b966e65f3a77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2b9f96c0359f9653c6b063b2f356b92"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#ac2b9f96c0359f9653c6b063b2f356b92">dimension_from_checkpoint_file</a> (std::string check_file, int *min_dimension, int *max_dimension)</td></tr>
+<tr class="memdesc:ac2b9f96c0359f9653c6b063b2f356b92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load dimension from checkpoint file.  <a href="mcmc__sampler__internals_8cpp.html#ac2b9f96c0359f9653c6b063b2f356b92">More...</a><br /></td></tr>
+<tr class="separator:ac2b9f96c0359f9653c6b063b2f356b92"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aecfd6c1ef213a233c95a98ae87897123"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#aecfd6c1ef213a233c95a98ae87897123">chain_number_from_checkpoint_file</a> (std::string check_file, int *chain_N)</td></tr>
+<tr class="memdesc:aecfd6c1ef213a233c95a98ae87897123"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load chain number from checkpoint file.  <a href="mcmc__sampler__internals_8cpp.html#aecfd6c1ef213a233c95a98ae87897123">More...</a><br /></td></tr>
+<tr class="separator:aecfd6c1ef213a233c95a98ae87897123"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9c3718752690cce3b37f41da7b2b938"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#ae9c3718752690cce3b37f41da7b2b938">load_checkpoint_file</a> (std::string check_file, <a class="el" href="classsampler.html">sampler</a> *<a class="el" href="classsampler.html">sampler</a>)</td></tr>
 <tr class="memdesc:ae9c3718752690cce3b37f41da7b2b938"><td class="mdescLeft">&#160;</td><td class="mdescRight">load checkpoint file into sampler struct  <a href="mcmc__sampler__internals_8cpp.html#ae9c3718752690cce3b37f41da7b2b938">More...</a><br /></td></tr>
 <tr class="separator:ae9c3718752690cce3b37f41da7b2b938"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,9 +183,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assign_initial_pos</b
 <tr class="memitem:ae0ec0745c85caad31c473a608aef5782"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#ae0ec0745c85caad31c473a608aef5782">update_temperatures</a> (<a class="el" href="classsampler.html">sampler</a> *samplerptr, int t0, int nu, int t)</td></tr>
 <tr class="memdesc:ae0ec0745c85caad31c473a608aef5782"><td class="mdescLeft">&#160;</td><td class="mdescRight">updates the temperatures for a sampler such that all acceptance rates are equal  <a href="mcmc__sampler__internals_8cpp.html#ae0ec0745c85caad31c473a608aef5782">More...</a><br /></td></tr>
 <tr class="separator:ae0ec0745c85caad31c473a608aef5782"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d0fba3cec02c00fb85b04d5e987f01b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#a9d0fba3cec02c00fb85b04d5e987f01b">initiate_full_sampler</a> (<a class="el" href="classsampler.html">sampler</a> *sampler_new, <a class="el" href="classsampler.html">sampler</a> *sampler_old, int chain_N_thermo_ensemble, int chain_N, std::string chain_allocation_scheme)</td></tr>
-<tr class="memdesc:a9d0fba3cec02c00fb85b04d5e987f01b"><td class="mdescLeft">&#160;</td><td class="mdescRight">For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains.  <a href="mcmc__sampler__internals_8cpp.html#a9d0fba3cec02c00fb85b04d5e987f01b">More...</a><br /></td></tr>
-<tr class="separator:a9d0fba3cec02c00fb85b04d5e987f01b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7d9266e3f9b69568a983b29e629ca98"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#af7d9266e3f9b69568a983b29e629ca98">initiate_full_sampler</a> (<a class="el" href="classsampler.html">sampler</a> *sampler_new, <a class="el" href="classsampler.html">sampler</a> *sampler_old, int chain_N_thermo_ensemble, int chain_N, std::string chain_allocation_scheme, std::string checkpoint_file_start)</td></tr>
+<tr class="memdesc:af7d9266e3f9b69568a983b29e629ca98"><td class="mdescLeft">&#160;</td><td class="mdescRight">For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains.  <a href="mcmc__sampler__internals_8cpp.html#af7d9266e3f9b69568a983b29e629ca98">More...</a><br /></td></tr>
+<tr class="separator:af7d9266e3f9b69568a983b29e629ca98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a036d12e6378958e6b373866894a1081d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#a036d12e6378958e6b373866894a1081d">copy_base_checkpoint_properties</a> (std::string check_file, <a class="el" href="classsampler.html">sampler</a> *samplerptr)</td></tr>
+<tr class="memdesc:a036d12e6378958e6b373866894a1081d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies positions and histories into chain ensemble, skipping the first set of temperatures.  <a href="mcmc__sampler__internals_8cpp.html#a036d12e6378958e6b373866894a1081d">More...</a><br /></td></tr>
+<tr class="separator:a036d12e6378958e6b373866894a1081d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7dbf96828add5b7383e340160a5d006a"><td class="memItemLeft" align="right" valign="top"><a id="a7dbf96828add5b7383e340160a5d006a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler__internals_8cpp.html#a7dbf96828add5b7383e340160a5d006a">write_output_file</a> (std::string file, int step_num, int max_dimension, double ***output, int ***status, int chain_N, double *temps, bool RJ)</td></tr>
 <tr class="memdesc:a7dbf96828add5b7383e340160a5d006a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to write out the parameters and status of a sampler to a file. <br /></td></tr>
@@ -226,6 +235,36 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc
 <p>Type 1: Differential Evolution step</p>
 <p>Type 2: MMALA step (currently not supported)</p>
 <p>Type 3: Fisher step </p>
+
+</div>
+</div>
+<a id="aecfd6c1ef213a233c95a98ae87897123"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aecfd6c1ef213a233c95a98ae87897123">&#9670;&nbsp;</a></span>chain_number_from_checkpoint_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chain_number_from_checkpoint_file </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>check_file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>chain_N</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Load chain number from checkpoint file. </p>
 
 </div>
 </div>
@@ -315,6 +354,41 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc
 
 </div>
 </div>
+<a id="a036d12e6378958e6b373866894a1081d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a036d12e6378958e6b373866894a1081d">&#9670;&nbsp;</a></span>copy_base_checkpoint_properties()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void copy_base_checkpoint_properties </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>check_file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classsampler.html">sampler</a> *&#160;</td>
+          <td class="paramname"><em>samplerptr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies positions and histories into chain ensemble, skipping the first set of temperatures. </p>
+<p><em>NOTE</em> &ndash; allocate_sampler called in function &ndash; MUST deallocate manually</p>
+<p><em>NOTE</em> &ndash; sampler-&gt;chain_temps allocated internally &ndash; MUST free manually</p>
+<p>!ASSUMPTIONS! &ndash; </p><pre class="fragment">The checkpoint file and new sampler must have the same total number of chains, dimension, and the histories are the same length
+
+The temperatures are in ascending order, as output in write_checkpoint
+</pre> 
+</div>
+</div>
 <a id="ab2a990fd673ce479819a75cf5617c6b3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab2a990fd673ce479819a75cf5617c6b3">&#9670;&nbsp;</a></span>diff_ev_step()</h2>
 
@@ -376,6 +450,44 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ac2b9f96c0359f9653c6b063b2f356b92"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac2b9f96c0359f9653c6b063b2f356b92">&#9670;&nbsp;</a></span>dimension_from_checkpoint_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int dimension_from_checkpoint_file </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>check_file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>min_dimension</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>max_dimension</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Load dimension from checkpoint file. </p>
+<p>If RJ &ndash; returns min_dimension and max_dimension</p>
+<p>If not RJ &ndash; returns dimension in min_dimension and max_dimension </p>
 
 </div>
 </div>
@@ -503,8 +615,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc
 
 </div>
 </div>
-<a id="a9d0fba3cec02c00fb85b04d5e987f01b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9d0fba3cec02c00fb85b04d5e987f01b">&#9670;&nbsp;</a></span>initiate_full_sampler()</h2>
+<a id="af7d9266e3f9b69568a983b29e629ca98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7d9266e3f9b69568a983b29e629ca98">&#9670;&nbsp;</a></span>initiate_full_sampler()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -537,7 +649,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::string&#160;</td>
-          <td class="paramname"><em>chain_allocation_scheme</em>&#160;</td>
+          <td class="paramname"><em>chain_allocation_scheme</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>checkpoint_file_start</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -550,13 +668,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc
 <p>For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains. </p>
 <p>The output file will be reused, but the positions are set back to zero (copying the current position to position zero)</p>
 <p>Assumes the output, chain_temps have been allocated in memory for the final number of chains chain_N and steps N_steps</p>
-<p>Allocates memory for the new sampler sampler_new -&gt; it's the user's responsibility to deallocate with deallocate_sampler_mem </p>
+<p>Allocates memory for the new sampler sampler_new -&gt; it's the user's responsibility to deallocate with deallocate_sampler_mem</p>
+<p>checkpoint_file_start is the file used for continue_PTMCMC like functions, and can be used if the user wants to maintain the approximate positions and histories of the ensemble of chains after the dynamic temperature allocation. If the rest of the chains should just be copies of the base ensemble, pass an empty string (""). Since the chain distribution can change the number and distribution of chain temperatures (that's kinda the point..), the transfer is not perfect. Cold chains are prioritized, then the rest of the chains are filled in as close as possible. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sampler_old</td><td>Dynamic sampler </td></tr>
     <tr><td class="paramname">chain_N_thermo_ensemble</td><td>Number of chains used in the thermodynamic ensemble </td></tr>
     <tr><td class="paramname">chain_N</td><td>Number of chains to use in the static sampler </td></tr>
     <tr><td class="paramname">chain_allocation_scheme</td><td>Scheme to use to allocate any remaining chains </td></tr>
+    <tr><td class="paramname">checkpoint_file_start</td><td>Base checkpoint file </td></tr>
   </table>
   </dd>
 </dl>

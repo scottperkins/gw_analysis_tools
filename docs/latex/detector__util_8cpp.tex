@@ -80,6 +80,8 @@ double \mbox{\hyperlink{detector__util_8cpp_adcb816dfe662ececa657888ff18132bd}{r
 \item 
 double \mbox{\hyperlink{detector__util_8cpp_a742264b5eeff1d244e299d47cb7fa084}{p\+\_\+single\+\_\+detector}} (double omega, int samples)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for a single detector. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{detector__util_8cpp_aad9c958bcdfcfc478c0f3bcc2f8017d5}{p\+\_\+\+N\+\_\+detector}} (double omega, int samples, int N\+\_\+detectors, std\+::string $\ast$detectors, int rand\+\_\+seed)
+\begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for three detectors. \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{detector__util_8cpp_a0af90e8d6505794a792d2b35bf583bef}{p\+\_\+single\+\_\+detector\+\_\+fit}} (double omega)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit. \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{detector__util_8cpp_a8470b24a84da4e746ee95ff9bb87bbbc}{p\+\_\+triple\+\_\+detector\+\_\+fit}} (double omega)
@@ -420,7 +422,38 @@ All the coordinates are in the ecliptic coordinate system \mbox{\Hypertarget{det
 
 ar\+Xiv\+:1803.\+01944 -- 14
 
-integration\+\_\+time is the observation time in months -- options are 6, 12, 24, and 48 \mbox{\Hypertarget{detector__util_8cpp_a742264b5eeff1d244e299d47cb7fa084}\label{detector__util_8cpp_a742264b5eeff1d244e299d47cb7fa084}} 
+integration\+\_\+time is the observation time in months -- options are 6, 12, 24, and 48 \mbox{\Hypertarget{detector__util_8cpp_aad9c958bcdfcfc478c0f3bcc2f8017d5}\label{detector__util_8cpp_aad9c958bcdfcfc478c0f3bcc2f8017d5}} 
+\index{detector\_util.cpp@{detector\_util.cpp}!p\_N\_detector@{p\_N\_detector}}
+\index{p\_N\_detector@{p\_N\_detector}!detector\_util.cpp@{detector\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{p\_N\_detector()}{p\_N\_detector()}}
+{\footnotesize\ttfamily double p\+\_\+\+N\+\_\+detector (\begin{DoxyParamCaption}\item[{double}]{omega,  }\item[{int}]{samples,  }\item[{int}]{N\+\_\+detectors,  }\item[{std\+::string $\ast$}]{detectors,  }\item[{int}]{rand\+\_\+seed }\end{DoxyParamCaption})}
+
+
+
+Utility to calculate the cumulative amplitude distribution for three detectors. 
+
+P(\textbackslash{}omega) = \textbackslash{}int\+\_\+V \textbackslash{}\+Theta(\textbackslash{}omega\textquotesingle{}(\textbackslash{}\+Omega, \textbackslash{}psi, \textbackslash{}iota)-\/\textbackslash{}omega) d\textbackslash{}\+Omega d\textbackslash{}psi dcos\textbackslash{}iota
+
+Integrated over the volume which \textbackslash{}omega\textquotesingle{} is larger than \textbackslash{}omega
+
+Integrates using Monte Carlo integration
+
+Uniform sampling in \textbackslash{}psi, cos(\textbackslash{}iota), cos(\+D\+E\+C) , and RA
+
+Sampled using any supported detectors. See documentation for supported detectors 
+\begin{DoxyParams}{Parameters}
+{\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
+\hline
+{\em samples} & number of monte carlo samples to use$\ast$ \\
+\hline
+{\em N\+\_\+detectors} & Number of detectors \\
+\hline
+{\em detectors} & String name of detectors to use -\/-\/ M\+U\+ST BE S\+U\+P\+P\+O\+R\+T\+ED D\+E\+T\+E\+C\+T\+O\+RS \\
+\hline
+{\em rand\+\_\+seed} & Seed for random number generator \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{detector__util_8cpp_a742264b5eeff1d244e299d47cb7fa084}\label{detector__util_8cpp_a742264b5eeff1d244e299d47cb7fa084}} 
 \index{detector\_util.cpp@{detector\_util.cpp}!p\_single\_detector@{p\_single\_detector}}
 \index{p\_single\_detector@{p\_single\_detector}!detector\_util.cpp@{detector\_util.cpp}}
 \doxysubsubsection{\texorpdfstring{p\_single\_detector()}{p\_single\_detector()}}

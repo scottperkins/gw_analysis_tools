@@ -48,6 +48,14 @@ double \mbox{\hyperlink{util_8cpp_a88960e6947432b203d2c7ebb436e1984}{D\+L\+\_\+f
 \mbox{\Hypertarget{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}\label{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}} 
 adouble \mbox{\hyperlink{util_8cpp_ac5495a177f2316ca6dc0904f3643b7f1}{D\+L\+\_\+from\+\_\+Z}} (adouble Z, std\+::string cosmology)
 \begin{DoxyCompactList}\small\item\em Calculates the luminosity distance given the redshift adouble version for A\+D\+O\+L-\/C implementation. \end{DoxyCompactList}\item 
+{\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8cpp_ab4e6e8330f62c234ad74029f6d87fb08}{fcontact}} (T M\+\_\+detector, T DL, std\+::string cosmology)
+\begin{DoxyCompactList}\small\item\em Rough threshold for when to truncate waveforms for neutron stars. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8cpp_a5b3080dc69b13d1535febd3bbe29a1d3}\label{util_8cpp_a5b3080dc69b13d1535febd3bbe29a1d3}} 
+template double {\bfseries fcontact$<$ double $>$} (double, double, std\+::string)
+\item 
+\mbox{\Hypertarget{util_8cpp_af5df57487782c1fe95a23e814f532101}\label{util_8cpp_af5df57487782c1fe95a23e814f532101}} 
+template adouble {\bfseries fcontact$<$ adouble $>$} (adouble, adouble, std\+::string)
+\item 
 double \mbox{\hyperlink{util_8cpp_afc70040a4b2855ffc42c1f8b91e87fc2}{cosmology\+\_\+interpolation\+\_\+function}} (double x, double $\ast$coeffs, int interp\+\_\+degree)
 \begin{DoxyCompactList}\small\item\em Custom interpolation function used in the cosmology calculations. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a89c3042d0c813fd58dcb6a433d26eaa4}\label{util_8cpp_a89c3042d0c813fd58dcb6a433d26eaa4}} 
@@ -90,6 +98,36 @@ template void {\bfseries list\+\_\+intersect$<$ adouble $>$} (adouble $\ast$, in
 \item 
 \mbox{\Hypertarget{util_8cpp_a79c2688dc6d09b4aee47618cd5340819}\label{util_8cpp_a79c2688dc6d09b4aee47618cd5340819}} 
 template void {\bfseries list\+\_\+intersect$<$ int $>$} (int $\ast$, int, int $\ast$, int, int $\ast$$\ast$, int $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_a4f15abfb33a16347c3a5075ecc538f90}\label{util_8cpp_a4f15abfb33a16347c3a5075ecc538f90}} 
+{\footnotesize template$<$class T , class U $>$ }\\void {\bfseries mean\+\_\+list} (T $\ast$list, int length, U $\ast$result)
+\item 
+\mbox{\Hypertarget{util_8cpp_af9fe524b141394cf45ba47e6361691ef}\label{util_8cpp_af9fe524b141394cf45ba47e6361691ef}} 
+template void {\bfseries mean\+\_\+list$<$ double, double $>$} (double $\ast$, int, double $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_a3218486cca25a57adb345d3000ca16d9}\label{util_8cpp_a3218486cca25a57adb345d3000ca16d9}} 
+template void {\bfseries mean\+\_\+list$<$ adouble, adouble $>$} (adouble $\ast$, int, adouble $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_afc4518e207d862135630fc2e8f71dc4c}\label{util_8cpp_afc4518e207d862135630fc2e8f71dc4c}} 
+template void {\bfseries mean\+\_\+list$<$ int, double $>$} (int $\ast$, int, double $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_a780768aff48b34c18fe5f7df34925683}\label{util_8cpp_a780768aff48b34c18fe5f7df34925683}} 
+template void {\bfseries mean\+\_\+list$<$ int, adouble $>$} (int $\ast$, int, adouble $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_a99af76e92067fd1c15173a95bcf8fd67}\label{util_8cpp_a99af76e92067fd1c15173a95bcf8fd67}} 
+{\footnotesize template$<$class T , class U $>$ }\\void {\bfseries variance\+\_\+list} (T $\ast$list, int length, U $\ast$result)
+\item 
+\mbox{\Hypertarget{util_8cpp_a811b5a8cf814f4664f2a0ec7d63faef2}\label{util_8cpp_a811b5a8cf814f4664f2a0ec7d63faef2}} 
+template void {\bfseries variance\+\_\+list$<$ double, double $>$} (double $\ast$, int, double $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_aba869001fc8e14ba718e128fdb20f175}\label{util_8cpp_aba869001fc8e14ba718e128fdb20f175}} 
+template void {\bfseries variance\+\_\+list$<$ adouble, adouble $>$} (adouble $\ast$, int, adouble $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_acbbe721697035cb7198079343678dfdd}\label{util_8cpp_acbbe721697035cb7198079343678dfdd}} 
+template void {\bfseries variance\+\_\+list$<$ int, double $>$} (int $\ast$, int, double $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_aeb4fa13bbdfa288408f0f146a6614f44}\label{util_8cpp_aeb4fa13bbdfa288408f0f146a6614f44}} 
+template void {\bfseries variance\+\_\+list$<$ int, adouble $>$} (int $\ast$, int, adouble $\ast$)
 \item 
 {\footnotesize template$<$class T $>$ }\\bool \mbox{\hyperlink{util_8cpp_a9631c2bd8b5493af4df2528a44886fc6}{check\+\_\+list}} (T j, T $\ast$list, int length)
 \begin{DoxyCompactList}\small\item\em Just a quick utility to see if an item is in a list. \end{DoxyCompactList}\item 
@@ -249,6 +287,12 @@ template void {\bfseries celestial\+\_\+horizon\+\_\+transform$<$ adouble $>$} (
 \mbox{\Hypertarget{util_8cpp_ac83d7055b92c719a52435536df7b51d8}\label{util_8cpp_ac83d7055b92c719a52435536df7b51d8}} 
 template double {\bfseries gps\+\_\+to\+\_\+\+G\+M\+S\+T$<$ double $>$} (double)
 \item 
+\mbox{\Hypertarget{util_8cpp_a5649be3fe6432b46c1fb0041f4a56eb7}\label{util_8cpp_a5649be3fe6432b46c1fb0041f4a56eb7}} 
+{\footnotesize template$<$class T $>$ }\\T {\bfseries gps\+\_\+to\+\_\+\+G\+M\+S\+T\+\_\+radian} (T gps\+\_\+time)
+\item 
+\mbox{\Hypertarget{util_8cpp_ab41d8e6721c9d4df174abadd959d16fa}\label{util_8cpp_ab41d8e6721c9d4df174abadd959d16fa}} 
+template double {\bfseries gps\+\_\+to\+\_\+\+G\+M\+S\+T\+\_\+radian$<$ double $>$} (double)
+\item 
 \mbox{\Hypertarget{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}\label{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}} 
 {\footnotesize template$<$class T $>$ }\\T \mbox{\hyperlink{util_8cpp_ab2a5f9f42b470f4d11945aad2835f99f}{gps\+\_\+to\+\_\+\+JD}} (T gps\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Utility to transform from gps to JD. \end{DoxyCompactList}\item 
@@ -258,6 +302,8 @@ template double {\bfseries gps\+\_\+to\+\_\+\+J\+D$<$ double $>$} (double)
 \mbox{\Hypertarget{util_8cpp_a7c409fb90ac34597ff4d5150faa7b62a}\label{util_8cpp_a7c409fb90ac34597ff4d5150faa7b62a}} 
 template adouble {\bfseries gps\+\_\+to\+\_\+\+J\+D$<$ adouble $>$} (adouble)
 \item 
+void \mbox{\hyperlink{util_8cpp_afe7aa670256d4d44a05227b56b48601e}{decimal\+\_\+to\+\_\+\+H\+MS}} (double decimal, int $\ast$hour, int $\ast$min, double $\ast$second)
+\begin{DoxyCompactList}\small\item\em Converts decimal into hours, minutes and seconds. \end{DoxyCompactList}\item 
 {\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a817fd4d7413b4a2bfe05bfbc454766b2}{transform\+\_\+cart\+\_\+sph}} (T $\ast$cartvec, T $\ast$sphvec)
 \begin{DoxyCompactList}\small\item\em utility to transform a vector from cartesian to spherical (radian) \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{util_8cpp_a7a0736962ec16d2d848dead170e268c8}\label{util_8cpp_a7a0736962ec16d2d848dead170e268c8}} 
@@ -460,7 +506,17 @@ Utility to free malloc\textquotesingle{}d 2D array.
 
 Utility to free malloc\textquotesingle{}d 2D array. 
 
-\mbox{\Hypertarget{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}\label{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}} 
+\mbox{\Hypertarget{util_8cpp_afe7aa670256d4d44a05227b56b48601e}\label{util_8cpp_afe7aa670256d4d44a05227b56b48601e}} 
+\index{util.cpp@{util.cpp}!decimal\_to\_HMS@{decimal\_to\_HMS}}
+\index{decimal\_to\_HMS@{decimal\_to\_HMS}!util.cpp@{util.cpp}}
+\doxysubsubsection{\texorpdfstring{decimal\_to\_HMS()}{decimal\_to\_HMS()}}
+{\footnotesize\ttfamily void decimal\+\_\+to\+\_\+\+H\+MS (\begin{DoxyParamCaption}\item[{double}]{decimal,  }\item[{int $\ast$}]{hour,  }\item[{int $\ast$}]{min,  }\item[{double $\ast$}]{second }\end{DoxyParamCaption})}
+
+
+
+Converts decimal into hours, minutes and seconds. 
+
+I just got tired of keeping all these steps straight.. \mbox{\Hypertarget{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}\label{util_8cpp_aa66116cc2ddd8ba609a68a4c0cdca635}} 
 \index{util.cpp@{util.cpp}!DL\_from\_A0@{DL\_from\_A0}}
 \index{DL\_from\_A0@{DL\_from\_A0}!util.cpp@{util.cpp}}
 \doxysubsubsection{\texorpdfstring{DL\_from\_A0()}{DL\_from\_A0()}}
@@ -555,6 +611,26 @@ Verified with specific cases and with dot products with vectors before and after
  & {\em phi\+\_\+ref} & Reference frequency for the waveform (defines the L\+AL frame ) ( orbital phase) at the reference frequency \\
 \hline
 \mbox{\texttt{ out}}  & {\em E\+Qvec} & Out vector in equatorial coordinates in cartesian \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{util_8cpp_ab4e6e8330f62c234ad74029f6d87fb08}\label{util_8cpp_ab4e6e8330f62c234ad74029f6d87fb08}} 
+\index{util.cpp@{util.cpp}!fcontact@{fcontact}}
+\index{fcontact@{fcontact}!util.cpp@{util.cpp}}
+\doxysubsubsection{\texorpdfstring{fcontact()}{fcontact()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+T fcontact (\begin{DoxyParamCaption}\item[{T}]{M\+\_\+detector,  }\item[{T}]{DL,  }\item[{std\+::string}]{cosmology }\end{DoxyParamCaption})}
+
+
+
+Rough threshold for when to truncate waveforms for neutron stars. 
+
+24 km separation 
+\begin{DoxyParams}{Parameters}
+{\em M\+\_\+detector} & Detector frame total mass in seconds \\
+\hline
+{\em DL} & Luminsosity distance in seconds \\
+\hline
+{\em cosmology} & Cosmology to use for getting the redshift from dl \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{util_8cpp_aa82ab145d4f623214c1492589e4327bf}\label{util_8cpp_aa82ab145d4f623214c1492589e4327bf}} 
