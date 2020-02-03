@@ -21,7 +21,7 @@
 #Generation method 
 [str] generation method = IMRPhenomPv2
 #Number of ~uncorrelated samples to take
-[int] samples = 10000
+[int] samples = 5000
 #Maximum number of chains per thermodynamic ensemble
 [int] max thermo chain number = 8
 #Dynamic chain allocation parameter t0 -- approximately how many steps chains are allowed to move

@@ -93,6 +93,7 @@ public:
 	//kept without calculating second fisher
 	int fisher_update_number=200;
 	//int fisher_update_number=500000;
+	//int fisher_update_number=2;
 
 	//log_prior lp;
 	//log_likelihood ll;

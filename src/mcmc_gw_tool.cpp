@@ -240,7 +240,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
-	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 || std::isnan(pos[4])){return a;}//chirpmass
+	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.9){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.9){return a;}//a2
@@ -252,7 +252,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 
 //Uniform in m1 and m2, transformed to lnM and eta
 double chirpmass_eta_jac(double chirpmass, double eta){
-	return 1./(sqrt(1. - 4.*eta)*pow(eta,1.2));
+	return chirpmass*chirpmass/(sqrt(1. - 4.*eta)*pow(eta,1.2));
 }
 
 //Uniform in m1 and m2, transformed to lnM and eta
