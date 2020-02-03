@@ -1642,7 +1642,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[10]=spin2sph[0];
 				parameters[11]=cos(spin1sph[1]);
 				parameters[12]=cos(spin2sph[1]);
-				parameters[12]=input_params->spin1[2]-input_params->spin2[2];
+				parameters[13]=spin1sph[2]-spin2sph[2];
 
 			}
 			else{
@@ -1870,6 +1870,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				else{
 					local_theta2=acos(avec_parameters[12]);
 				}
+				a_params->tc=avec_parameters[5];
 				//##################################
 				//##################################
 				T spin1sph[3] = {avec_parameters[9],local_theta1,
@@ -1886,7 +1887,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->spin2[2] = spin2cart[2];
 				
 
-				a_params->tc=avec_parameters[5];
 
 			}
 			else{
