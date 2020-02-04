@@ -58,23 +58,20 @@ const double RE_equatorial = 6378e3 ;//in meters
  *
  * Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end -- see mathematica script
  * */
-const double Hanford_D[3][3] = {{-0.392632, -0.0776099, -0.247384}, {-0.0776099, 0.319499, 
-  0.227988}, {-0.247384, 0.227988, 0.0730968}};
+const double Hanford_D[3][3] = {{-0.392614, -0.0776134, -0.247389}, {-0.0776134, 0.319524, 0.227998}, {-0.247389, 0.227998, 0.07309}};
 
 /*! Response Tensor for Livingston
  *
  * Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end -- see mathematica script
  */
-const double Livingston_D[3][3] = {{0.411318, 0.14021, 
-  0.247279}, {0.14021, -0.108998, -0.181597}, {0.247279, -0.181597, 
--0.302236}};
+const double Livingston_D[3][3] = {{0.411281, 0.14021, 0.247295}, {0.14021, -0.109006, -0.181616}, {0.247295, -0.181616, -0.302275}};
 
 /*! Response Tensor for Virgo
  *
  * Calculated using arXiv:gr-qc/0008066, equation B6 with the table at the end -- see mathematica script
  */
-const double Virgo_D[3][3] = {{0.243903, -0.0990959, -0.232603}, {-0.0990959, -0.447841, 
-  0.187841}, {-0.232603, 0.187841, 0.203979}};
+const double Virgo_D[3][3] = {{0.243874, -0.0990838, -0.232576}, {-0.0990838, -0.447826, 
+  0.187833}, {-0.232576, 0.187833, 0.203952}};
 
 const double Kagra_D[3][3]={{-0.18599, 0.153167, -0.324951}, {0.153167, 
   0.349518, -0.170874}, {-0.324951, -0.170874, -0.163529}};
