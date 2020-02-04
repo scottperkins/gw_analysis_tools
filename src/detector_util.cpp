@@ -451,6 +451,87 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 }
 
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
+ *
+ * Full version, from LAL
+ */
+double DTOA_DETECTOR(double RA, /**< spherical polar angle for detector 1 in RAD*/
+	double DEC, /**<spherical polar angle for detector 2 in RAD*/ 
+	double GMST_rad,/**< Greenwich mean sidereal time of detection*/
+	std::string detector1, /**< name of detector one*/
+	std::string detector2 /**<name of detector two*/
+	)
+{
+	const double *earth_centered_location1;
+	const double *earth_centered_location2;
+	//detector one
+	if(detector1 == "Hanford" || detector1 == "hanford")
+	{
+		earth_centered_location1 =H_location ;	
+	}
+	else if(detector1 == "Livingston" || detector1 == "livingston")
+	{
+		earth_centered_location1 =L_location ;	
+	}
+	else if(detector1 == "Virgo" || detector1 == "virgo")
+	{
+		earth_centered_location1 =V_location ;	
+	}
+	else if(detector1 == "Kagra" || detector1 == "kagra")
+	{
+		earth_centered_location1 =K_location ;	
+	}
+	else if(detector1 == "Indigo" || detector1 == "indigo")
+	{
+		earth_centered_location1 =I_location ;	
+	}
+	//detector 2
+	if(detector2 == "Hanford" || detector2 == "hanford")
+	{
+		earth_centered_location2 =H_location ;	
+	}
+	else if(detector2 == "Livingston" || detector2 == "livingston")
+	{
+		earth_centered_location2 =L_location ;	
+	}
+	else if(detector2 == "Virgo" || detector2 == "virgo")
+	{
+		earth_centered_location2 =V_location ;	
+	}
+	else if(detector2 == "Kagra" || detector2 == "kagra")
+	{
+		earth_centered_location2 =K_location ;	
+	}
+	else if(detector2 == "Indigo" || detector2 == "indigo")
+	{
+		earth_centered_location2 =I_location ;	
+	}
+	return DTOA_earth_centered_coord(RA,DEC,GMST_rad,earth_centered_location1,earth_centered_location2);
+}
+/*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
+ */
+double DTOA_earth_centered_coord(double RA, /**< spherical polar angle for detector 1 in RAD*/
+	double DEC, /**<spherical polar angle for detector 2 in RAD*/ 
+	double GMST_rad,/**< Greenwich mean sidereal time of detection*/
+	const double *loc1, /**< Location of the first detector in Earth centered coordinates in meters*/
+	const double *loc2 /**<Location of the second detector in Earth centered coordinates in meters*/
+	)
+{
+	double dx[3];
+	dx[0] = loc1[0]-loc2[0];
+	dx[1] = loc1[1]-loc2[1];
+	dx[2] = loc1[2]-loc2[2];
+	
+	//Direction to source
+	double hour_angle = GMST_rad - RA;
+	double ehat[3];
+	ehat[0] = cos(DEC) * cos(hour_angle);
+	ehat[1] = cos(DEC) * -sin(hour_angle);
+	ehat[2] = sin(DEC) ;
+		
+	return (dx[0]*ehat[0] + dx[1]*ehat[1] + dx[2]*ehat[2])/c;
+
+}
+/*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  */
 double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	double theta2, /**<spherical polar angle for detector 2 in RAD*/ 

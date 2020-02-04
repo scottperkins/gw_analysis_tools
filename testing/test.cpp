@@ -95,6 +95,7 @@ void test55();
 void test56();
 void test57();
 void test58();
+void test59();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -129,19 +130,37 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test54();	
+	test59();	
 	//test6();	
 	//test45();	
 	return 0;
 }
 
+void test59()
+{
+	std::string detector1("Hanford");
+	std::string detector2("Livingston");
+	double gps_time = 100000;
+	double gmst_rad = gps_to_GMST_radian(gps_time);
+	double RA = 2.8;
+	double DEC = 0.8;
+	double phi1,theta1,phi2,theta2;
+	celestial_horizon_transform(RA,DEC,gps_time,detector1,&phi1,&theta1);	
+	celestial_horizon_transform(RA,DEC,gps_time,detector2,&phi2,&theta2);	
+
+	std::cout<<DTOA_DETECTOR(RA,DEC,gmst_rad,detector1,detector2)<<std::endl;;
+	std::cout<<DTOA(theta1,theta2,detector1,detector2)<<std::endl;;
+}
+
 void test58()
 {
 	std::cout.precision(15);
-	int length = 141;
+	int length = 200;
 	double **output = allocate_2D_array(length, 2);
-	int N_detectors = 5;
-	std::string detectors[N_detectors] = {"Hanford","Livingston","Virgo","Kagra","Indigo"};
+	int N_detectors = 4;
+	//std::string detectors[N_detectors] = {"Hanford","Livingston","Virgo","Kagra","Indigo"};
+	std::string detectors[N_detectors] = {"Hanford","Livingston","Virgo","Indigo"};
+	//std::string detectors[N_detectors] = {"Hanford","Hanford","Hanford"};
 	#pragma omp parallel for
 	for(int i = 0 ; i < length; i++){
 		double omega = .0+.01*i;
@@ -151,7 +170,7 @@ void test58()
 		output[i][0] = omega;
 		output[i][1] = P;
 	}
-	write_file("testing/data/p_triple.csv",output,length,2);
+	write_file("testing/data/p_test.csv",output,length,2);
 	deallocate_2D_array(output,length,2);
 
 }

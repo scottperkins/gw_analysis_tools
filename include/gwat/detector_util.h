@@ -17,6 +17,7 @@ const double H_azimuth_offset = 2.199;//in rad
 const double H_radius = 6367299.93401105;
 //const double H_elevation = 123.139;//in meters
 const double H_elevation = 142.554;//in meters
+const double H_location[3] = {-2.16141492636e+06,-3.83469517889e+06,4.60035022664e+06};
 
 const double L_LAT =0.53342313506 ;//in rad
 const double L_LONG =-1.58430937078 ;//in rad
@@ -26,6 +27,7 @@ const double L_azimuth_offset = 3.4557;//in rad
 const double L_radius = 6372795.50144497;
 //const double L_elevation = 13.1064;//in meters
 const double L_elevation = -6.574;//in meters
+const double L_location[3] = {-7.42760447238e+04,-5.49628371971e+06,3.22425701744e+06};
 
 const double V_LAT =0.76151183984 ;//in rad
 const double V_LONG =0.18333805213 ;//in rad
@@ -36,6 +38,7 @@ const double V_azimuth_offset = 1.239;//in rad
 const double V_radius = 6368051.92301;//in meters
 //const double V_elevation = 8;//in meters
 const double V_elevation = 51.884;//in meters
+const double V_location[3] = {1,1,1};
 
 
 const double K_LAT =0.6355068497 ;//in rad
@@ -43,12 +46,14 @@ const double K_LONG =2.396441015 ;//in rad
 const double K_radius =6371060 ;//in meters
 //const double K_azimuth_offset = ;//in rad
 const double K_elevation = 414.181;//in meters
+const double K_location[3] = {1,1,1};
 
 const double I_LAT =0.2484185302005262;//in rad
 const double I_LONG =1.3340133249409993 ;//in rad
 const double I_radius =6376850 ;//in meters
 //const double I_azimuth_offset = ;//in rad
 const double I_elevation = 0.0;//in meters
+const double I_location[3] = {1,1,1};
 
 //Earth radii at the poles and the equator (Earth is an ellispoid)
 const double RE_polar =6357e3 ;//in meters
@@ -159,6 +164,16 @@ void detector_response_functions_equatorial(std::string detector,
 	T *Fcross
 	);
 
+double DTOA_DETECTOR(double RA, 
+	double DEC, 
+	double GMST_rad,
+	std::string detector1, 
+	std::string detector2 );
+double DTOA_earth_centered_coord(double RA, 
+	double DEC, 
+	double GMST_rad,
+	const double *loc1, 
+	const double *loc2 );
 template<class T>
 T LISA_response_plus_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T t);
 template<class T>

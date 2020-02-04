@@ -2030,11 +2030,12 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		//	parameters->phiRef=phic_ref;
 		//}
 		for(int i=1; i < num_detectors; i++){
-			celestial_horizon_transform(RA,DEC, gps_time, 
-					mcmc_detectors[i], &phi[i], &theta[i]);
-			parameters->phi=phi[i];
-			parameters->theta=theta[i];
-			delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+			//celestial_horizon_transform(RA,DEC, gps_time, 
+			//		mcmc_detectors[i], &phi[i], &theta[i]);
+			//parameters->phi=phi[i];
+			//parameters->theta=theta[i];
+			//delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
+			delta_t = DTOA_DETECTOR(parameters->RA, parameters->DEC,mcmc_gmst, detectors[0], detectors[i]);
 			parameters->tc = tc_ref + delta_t;
 			
 			//fourier_detector_response(frequencies[i], 
