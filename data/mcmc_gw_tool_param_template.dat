@@ -19,11 +19,11 @@
 #Length of data in seconds
 [dbl] data length = 32
 #Generation method 
-[str] generation method = IMRPhenomPv2
+[str] generation method = IMRPhenomD
 #Number of ~uncorrelated samples to take
 [int] samples = 5000
 #Maximum number of chains per thermodynamic ensemble
-[int] max thermo chain number = 8
+[int] max thermo chain number = 10
 #Dynamic chain allocation parameter t0 -- approximately how many steps chains are allowed to move
 [int] t0=1000
 #Dynamic chain allocation parameter nu -- approximately how many steps swapping effects are averaged over
@@ -48,7 +48,7 @@
 [str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_stat2.txt
 #############################################################
 #Dimension of the parameter space
-[int] dimension = 14
+[int] dimension = 11
 #Number of chains
 [int] chain number = 10
 #Initial position file
@@ -57,6 +57,6 @@
 [str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
 #############################################################
 ##Initial checkpoint  file
-#[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv
+#[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
 #Checkpoint file -- csv file
-##[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint.csv
+#[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv

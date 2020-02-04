@@ -1954,7 +1954,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			{
 				output[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k])){
-				//	std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
+					//std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
 				//}
 			}
 		} 
@@ -2321,11 +2321,11 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 		double PSI = gen_params.psi;
 		//if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
 		
-		//ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
-		//	&gen_params,local_gen, mcmc_data_length, 
-		//	mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, 
-		//	mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
-		ll=2;
+		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
+			&gen_params,local_gen, mcmc_data_length, 
+			mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, 
+			mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+		//ll=2;
 
 		//ll = Log_Likelihood(mcmc_data[0], 
 		//		mcmc_noise[0],

@@ -196,6 +196,8 @@ int main(int argc, char *argv[])
 }
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 {
+	double chirp = std::exp(pos[7]);
+	double eta = pos[8];
 	double a = -std::numeric_limits<double>::infinity();
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
@@ -209,7 +211,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
 	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//chi1 
 	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//chi2
-	else {return pos[7]+3*pos[6] ;}
+	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
 
 }
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters)
