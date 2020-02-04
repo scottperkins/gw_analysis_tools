@@ -1578,8 +1578,8 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int pop_check_var=chain_pop_update_freq;
 	//Boundaries that mark acceptable average acceptance ratios 
 	//for chain swapping in a chain population
-	double chain_pop_high = .5;
-	double chain_pop_low = .2;
+	double chain_pop_high = .7;
+	double chain_pop_low = .4;
 
 	//Keep track of acceptance ratio in chuncks
 	int *running_accept_ct = new int[max_chain_N_thermo_ensemble];
