@@ -37,6 +37,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
  * 		
  * 	AdLIGOMidHigh -- from Emanuele Berti
  *
+ * 	AdLIGODesign -- Advanced LIGO sensitivity curve
+ *
  * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel 
  * 		
  * 		-- does NOT include the factor of sqrt(3)/2, which is taken care of in the response function for LISA
@@ -139,6 +141,32 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 			data[i] = new double[2];
 		}
 		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdLIGOMidHigh.csv",data, dat_length, 2);
+		double psd[dat_length];
+		double f[dat_length];
+		for(int i = 0 ;i<dat_length; i++){
+			psd[i]=data[i][1];	
+			f[i]=data[i][0];	
+		}
+		gsl_spline_init(spline, f, psd, dat_length);
+		for(int i = 0 ; i<length; i++){
+			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
+		}	
+		gsl_spline_free(spline);
+		gsl_interp_accel_free(accel);
+		for(int i = 0 ; i<dat_length; i++){
+			delete [] data[i];
+		}
+		delete [] data;
+	}
+	else if(detector=="AdLIGODesign"){
+		int dat_length = 3000;
+		gsl_interp_accel *accel = gsl_interp_accel_alloc();
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		double **data = new double*[dat_length];
+		for(int i = 0 ;i<dat_length; i++){
+			data[i] = new double[2];
+		}
+		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdLIGODesign.csv",data, dat_length, 2);
 		double psd[dat_length];
 		double f[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
