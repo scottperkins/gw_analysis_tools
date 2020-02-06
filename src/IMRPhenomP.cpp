@@ -740,6 +740,40 @@ void IMRPhenomPv2<T>::calculate_euler_angles(T *alpha, T *epsilon, useful_powers
 
 }
 
+template<class T>
+T IMRPhenomPv2<T>::PhenomPv2_inplane_spin(gen_params_base<T> *params)
+{
+	//Calculate spin parameters chil and chip
+	T chi1_l = params->spin1[2];
+	T chi2_l = params->spin2[2];
+
+	T q = params->mass1/params->mass2;
+	T chi_eff = (params->mass1*chi1_l + params->mass2*chi2_l) / (params->mass1 + params->mass2); /* Effective aligned spin */
+  	T chil = (1.0+q)/q * chi_eff; /* dimensionless aligned spin of the largest BH */
+	//params->chil = chil;
+
+	T eta = calculate_eta(params->mass1, params->mass2);
+	
+	T m1_2 = params->mass1 * params->mass1;
+	T m2_2 = params->mass2 * params->mass2;
+
+	T m1 = q/(1+q);
+	T m2 = 1./(1+q);
+
+	T S1_perp = m1_2 * sqrt( params->spin1[1]* params->spin1[1] +
+				params->spin1[0] * params->spin1[0]);
+	T S2_perp = m2_2 * sqrt( params->spin2[1]* params->spin2[1] +
+				params->spin2[0] * params->spin2[0]);
+
+	T A1 = 2 + (3*params->mass2)/ ( 2 * params->mass1);
+	T A2 = 2 + (3*params->mass1)/ ( 2 * params->mass2);
+	T ASp1 = A1*S1_perp;
+	T ASp2 = A2*S2_perp;
+	T num = (ASp2>ASp1) ? ASp2 : ASp1;
+	T denom = (params->mass2 > params->mass1)? A2*m2_2 : A1*m1_2;
+	return num/denom;
+}
+
 /*!\brief Calculate the unit vector in the direction of the total angular momentum
  * 
  * 

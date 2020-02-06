@@ -851,6 +851,12 @@ double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
  * Uniform sampling in \psi, cos(\iota), cos(DEC) , and RA
  *
  * Sampled using any supported detectors. See documentation for supported detectors
+ *
+ * Rough upper limit:
+ * 	HLV: 1.4
+ * 	HLVK: 1.5
+ * 	HLVI: 1.65
+ * 	HLVKI: 1.7
  */
 double p_N_detector(double omega, /**< \omega = \rho/\rho_opt**/
 	int samples,/**< number of monte carlo samples to use**/

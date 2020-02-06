@@ -66,6 +66,7 @@ virtual void calculate_twistup( T alpha, std::complex<T> *hp_factor, std::comple
 
 virtual void calculate_euler_angles(T *alpha, T *epsilon, useful_powers<T> *pows, alpha_coeffs<T> *acoeffs, epsilon_coeffs<T> *ecoeffs);
 
+virtual T PhenomPv2_inplane_spin(gen_params_base<T> *params);
 virtual void PhenomPv2_Param_Transform(source_parameters<T> *params);
 
 virtual void PhenomPv2_Param_Transform_J(source_parameters<T> *params);
