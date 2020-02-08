@@ -76,9 +76,9 @@
 #### LINES
 ## See http://matplotlib.org/api/artist_api.html#module-matplotlib.lines for more
 ## information on line properties.
-#lines.linewidth   : 1.5     ## line width in points
-#lines.linestyle   : -       ## solid line
-#lines.color       : C0      ## has no affect on plot(); see axes.prop_cycle
+lines.linewidth   : 1.0     ## line width in points
+lines.linestyle   : -       ## solid line
+#lines.color       : black      ## has no affect on plot(); see axes.prop_cycle
 #lines.marker      : None    ## the default marker
 #lines.markerfacecolor  : auto    ## the default markerfacecolor
 #lines.markeredgecolor  : auto    ## the default markeredgecolor
@@ -195,11 +195,16 @@
 ## The font.size property is the default font size for text, given in pts.
 ## 10 pt is the standard value.
 
-#font.family         : sans-serif
-#font.style          : normal
-#font.variant        : normal
-#font.weight         : normal
-#font.stretch        : normal
+#font.family         : monospace
+#font.monospace	    : Andale Mono
+font.family         : sans-serif
+#font.sans-serif     : Microsoft Sans Serif 
+font.sans-serif     : Apple Symbols
+#font.monospace	    : AppleGothic
+font.style          : normal
+font.variant        : normal
+font.weight         : normal
+font.stretch        : normal
 ## note that font.size controls default text sizes.  To configure
 ## special text sizes tick labels, axes, labels, title, etc, see the rc
 ## settings for axes and ticks. Special text sizes can be defined
@@ -287,13 +292,13 @@
 ## default face and edge color, default tick sizes,
 ## default fontsizes for ticklabels, and so on.  See
 ## http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
-#axes.facecolor      : white   ## axes background color
-#axes.edgecolor      : black   ## axes edge color
-#axes.linewidth      : 0.8     ## edge linewidth
-#axes.grid           : False   ## display grid or not
-#axes.grid.axis      : both    ## which axis the grid should apply to
-#axes.grid.which     : major   ## gridlines at major, minor or both ticks
-#axes.titlesize      : large   ## fontsize of the axes title
+axes.facecolor      : white   ## axes background color
+axes.edgecolor      : black   ## axes edge color
+axes.linewidth      : 0.8     ## edge linewidth
+axes.grid           : True   ## display grid or not
+axes.grid.axis      : both    ## which axis the grid should apply to
+axes.grid.which     : major   ## gridlines at major, minor or both ticks
+axes.titlesize      : large   ## fontsize of the axes title
 #axes.titleweight    : normal  ## font weight of title
 #axes.titlepad       : 6.0     ## pad between axes and title in points
 #axes.labelsize      : medium  ## fontsize of the x any y labels
@@ -329,7 +334,9 @@
 #axes.unicode_minus  : True    ## use unicode for the minus symbol
                                ## rather than hyphen.  See
                                ## http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
-#axes.prop_cycle    : cycler('color', ['1f77b4', 'ff7f0e', '2ca02c', 'd62728', '9467bd', '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])
+#axes.prop_cycle    : cycler('color', ['000000', 'ff7f0e', '2ca02c', 'd62728', '9467bd', '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])
+#axes.prop_cycle    : cycler('color', ['000000', '8EA8BF','2F5973','D9CBBF','593825','A67C63'])
+axes.prop_cycle    : ( cycler("ls",['-','--','-.']) * cycler('color', ['000000', 'C2C5CC','78698C','293C73','389BA6','F2CEA2','592A19']) )
                       ## color cycle for plot lines  as list of string
                       ## colorspecs: single letter, long name, or web-style hex
 					  ## Note the use of string escapes here ('1f77b4', instead of 1f77b4)
@@ -361,40 +368,40 @@
 
 #### TICKS
 ## see http://matplotlib.org/api/axis_api.html#matplotlib.axis.Tick
-#xtick.top            : False  ## draw ticks on the top side
-#xtick.bottom         : True   ## draw ticks on the bottom side
+xtick.top            : True  ## draw ticks on the top side
+xtick.bottom         : True   ## draw ticks on the bottom side
 #xtick.labeltop       : False  ## draw label on the top
 #xtick.labelbottom    : True   ## draw label on the bottom
-#xtick.major.size     : 3.5    ## major tick size in points
-#xtick.minor.size     : 2      ## minor tick size in points
+xtick.major.size     : 3.5    ## major tick size in points
+xtick.minor.size     : 2      ## minor tick size in points
 #xtick.major.width    : 0.8    ## major tick width in points
-#xtick.minor.width    : 0.6    ## minor tick width in points
+xtick.minor.width    : 0.6    ## minor tick width in points
 #xtick.major.pad      : 3.5    ## distance to major tick label in points
 #xtick.minor.pad      : 3.4    ## distance to the minor tick label in points
 #xtick.color          : black  ## color of the tick labels
 #xtick.labelsize      : medium ## fontsize of the tick labels
-#xtick.direction      : out    ## direction: in, out, or inout
-#xtick.minor.visible  : False  ## visibility of minor ticks on x-axis
+xtick.direction      : in    ## direction: in, out, or inout
+xtick.minor.visible  : True  ## visibility of minor ticks on x-axis
 #xtick.major.top      : True   ## draw x axis top major ticks
 #xtick.major.bottom   : True   ## draw x axis bottom major ticks
 #xtick.minor.top      : True   ## draw x axis top minor ticks
 #xtick.minor.bottom   : True   ## draw x axis bottom minor ticks
 #xtick.alignment      : center ## alignment of xticks
 
-#ytick.left           : True   ## draw ticks on the left side
-#ytick.right          : False  ## draw ticks on the right side
+ytick.left           : True   ## draw ticks on the left side
+ytick.right          : True  ## draw ticks on the right side
 #ytick.labelleft      : True   ## draw tick labels on the left side
 #ytick.labelright     : False  ## draw tick labels on the right side
 #ytick.major.size     : 3.5    ## major tick size in points
-#ytick.minor.size     : 2      ## minor tick size in points
+ytick.minor.size     : 2      ## minor tick size in points
 #ytick.major.width    : 0.8    ## major tick width in points
-#ytick.minor.width    : 0.6    ## minor tick width in points
+ytick.minor.width    : 0.6    ## minor tick width in points
 #ytick.major.pad      : 3.5    ## distance to major tick label in points
 #ytick.minor.pad      : 3.4    ## distance to the minor tick label in points
 #ytick.color          : black  ## color of the tick labels
 #ytick.labelsize      : medium ## fontsize of the tick labels
-#ytick.direction      : out    ## direction: in, out, or inout
-#ytick.minor.visible  : False  ## visibility of minor ticks on y-axis
+ytick.direction      : in    ## direction: in, out, or inout
+ytick.minor.visible  : True  ## visibility of minor ticks on y-axis
 #ytick.major.left     : True   ## draw y axis left major ticks
 #ytick.major.right    : True   ## draw y axis right major ticks
 #ytick.minor.left     : True   ## draw y axis left minor ticks
@@ -402,10 +409,10 @@
 #ytick.alignment      : center_baseline ## alignment of yticks
 
 #### GRIDS
-#grid.color       :   b0b0b0    ## grid color
-#grid.linestyle   :   -         ## solid
-#grid.linewidth   :   0.8       ## in points
-#grid.alpha       :   1.0       ## transparency, between 0.0 and 1.0
+grid.color       :   b0b0b0    ## grid color
+grid.linestyle   :   --         ## solid
+grid.linewidth   :   0.5       ## in points
+grid.alpha       :   0.5       ## transparency, between 0.0 and 1.0
 
 #### Legend
 #legend.loc           : best
@@ -432,10 +439,10 @@
 
 #### FIGURE
 ## See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
-#figure.titlesize : large      ## size of the figure title (Figure.suptitle())
-#figure.titleweight : normal   ## weight of the figure title
+figure.titlesize : large      ## size of the figure title (Figure.suptitle())
+figure.titleweight : normal   ## weight of the figure title
 #figure.figsize   : 6.4, 4.8   ## figure size in inches
-#figure.dpi       : 100        ## figure dots per inch
+figure.dpi       : 300        ## figure dots per inch
 #figure.facecolor : white      ## figure facecolor
 #figure.edgecolor : white      ## figure edgecolor
 #figure.frameon : True         ## enable figure frame
@@ -484,7 +491,7 @@
 #errorbar.capsize : 0             ## length of end cap on error bars in pixels
 
 #### HISTOGRAM PLOTS
-#hist.bins : 10                   ## The default number of histogram bins.
+hist.bins : 100                   ## The default number of histogram bins.
                                   ## If Numpy 1.11 or later is
                                   ## installed, may also be `auto`
 
