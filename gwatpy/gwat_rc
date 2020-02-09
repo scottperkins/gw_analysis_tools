@@ -70,7 +70,7 @@
 
 ## Where your matplotlib data lives if you installed to a non-default
 ## location.  This is where the matplotlib fonts, bitmaps, etc reside
-#datapath : /home/jdhunter/mpldata
+#datapath : /Users/sperkins/git-repos/gw_analysis_tools/gwatpy/fonts/static
 
 
 #### LINES

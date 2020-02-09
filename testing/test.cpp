@@ -96,6 +96,7 @@ void test56();
 void test57();
 void test58();
 void test59();
+void test60();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -130,12 +131,36 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test59();	
+	test60();	
 	//test6();	
 	//test45();	
 	return 0;
 }
 
+void test60()
+{
+	int psd_num = 5;
+	std::string psds[psd_num]={"AdLIGODesign","AdLIGOAPlus","KAGRA","CE1","CE2"};
+	int length = 20000;
+	double **output = new double*[psd_num+1];
+	output[0]=new double[length];
+	double fmin = 10;
+	double fmax = 5000;
+	double deltaf = (fmax-fmin)/length;
+	for(int i = 0 ; i<length; i++){
+		output[0][i] = fmin+i*deltaf;
+	}
+	for(int i = 0 ; i<psd_num; i++){
+		output[i+1] = new double[length];
+		populate_noise(output[0],psds[i],output[i+1],length);
+
+	}
+	write_file("testing/data/terr_psds.csv",output,  psd_num+1,length);
+	for(int i = 0 ; i<psd_num+1; i++){
+		delete [] output[i];
+	}
+	delete [] output;
+}
 void test59()
 {
 	std::string detector1("Hanford");

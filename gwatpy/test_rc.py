@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
-import gwatpy.gwatpy_plot as gp
+import gwatpy.gwatpy_plot as gp; gp.set()
+#fpath = "/Users/sperkins/git-repos/gw_analysis_tools/gwatpy/fonts/static/EBGaramond-Medium.ttf"
+#prop = matplotlib.font_manager.FontProperties(fname=fpath)
 
 x = np.linspace(0,1)
 y = np.sin(x)
@@ -25,6 +27,7 @@ plt.plot(x,y9,label="root")
 plt.legend()
 plt.xlabel("X")
 plt.ylabel("Y")
+#plt.title("Title",fontproperties=prop)
 plt.title("Title")
 plt.savefig("sample.pdf")
 plt.close()
