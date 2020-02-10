@@ -684,8 +684,10 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
 			
-			sampler->step_prob[chain_index][0]=.2;
-			sampler->step_prob[chain_index][1]=.8;
+			//sampler->step_prob[chain_index][0]=.2;
+			//sampler->step_prob[chain_index][1]=.8;
+			sampler->step_prob[chain_index][0]=.3;
+			sampler->step_prob[chain_index][1]=.7;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
 
@@ -925,6 +927,7 @@ bool check_sampler_status(sampler *samplerptr)
  */
 void update_step_widths(sampler *samplerptr, int chain_id)
 {
+	return;
 	int j = chain_id;
 	//update stepsize to maximize step efficiency
 	//increases in stepsizes of 10%
@@ -1155,8 +1158,10 @@ void allocate_sampler_mem(sampler *sampler)
 		}
 
 		//Initial width size for all chains, all steps is 1.
-		sampler->randgauss_width[i][0]=.01;
-		sampler->randgauss_width[i][1]=.05;
+		//sampler->randgauss_width[i][0]=.01;
+		sampler->randgauss_width[i][0]=.1;
+		//sampler->randgauss_width[i][1]=.05;
+		sampler->randgauss_width[i][1]=1;
 		sampler->randgauss_width[i][2]=.05;
 		sampler->randgauss_width[i][3]=.5;
 		//For RJPTMCMC, this may not be used, but it'll be available
