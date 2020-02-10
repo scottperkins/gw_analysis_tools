@@ -1159,7 +1159,7 @@ void allocate_sampler_mem(sampler *sampler)
 
 		//Initial width size for all chains, all steps is 1.
 		//sampler->randgauss_width[i][0]=.01;
-		sampler->randgauss_width[i][0]=.1;
+		sampler->randgauss_width[i][0]=.05;
 		//sampler->randgauss_width[i][1]=.05;
 		sampler->randgauss_width[i][1]=1;
 		sampler->randgauss_width[i][2]=.05;
