@@ -185,7 +185,7 @@ int calculate_snr_gsl(double *snr,/**< [out] SNR*/
 	if(params->equatorial_orientation){
 		transform_orientation_coords(params, generation_method,detector);
 	}
-	int np=10000;
+	int np=100;
 	gsl_integration_workspace *w=gsl_integration_workspace_alloc(np) ;
 	int err =  calculate_snr_gsl(snr,sensitivity_curve, detector, generation_method, params, f_min, f_max,relative_error,w,np);
 	gsl_integration_workspace_free(w);
@@ -1269,8 +1269,12 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
  * Sensitivity curve has to be one of the options in detector_util analytic options
  *
  * The current scheme is to use the frequency bounds determined by the SNR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f_integration_time, f_high_band)
+ *
+ * Accounts for the integration time, unlike the integration_bounds routine
+ *
+ * returns 0 if successful, returns 1 if bounds could not be found due to roundoff, and returns 2 if entirely unsuccessful
  */
-void integration_interval(double sampling_freq, /**< Frequency at which the detector operates*/
+int integration_interval(double sampling_freq, /**< Frequency at which the detector operates*/
 	double integration_time, /**< Time of observation in seconds*/
 	std::string detector, /**< Detector to use for the response function*/
 	std::string sensitivity_curve, /**< Sensitivity curve to use -- must match analytic choices in detector_util*/
@@ -1303,6 +1307,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 	if(T_band < integration_time){
 		freq_bounds[0]=bounds_from_band[0];	
 		freq_bounds[1]=bounds_from_band[1];	
+		return 0;
 	}
 	else{
 		freq_bounds[1] = bounds_from_band[1];
@@ -1319,12 +1324,20 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 			//	generation_method, true);
 			time_phase_corrected(&time, 1, &eval_freq, params, 
 				generation_method, false);
+			//std::cout<<(-times[1]+time)/T_year<<std::endl;
 			if( 	( ( (-times[1] + time) > integration_time-tolerance )  && 
 				( (-times[1] + time) < integration_time+tolerance) ) ) 
 			{
 				continue_search = false;
 				freq_bounds[0]=eval_freq;
-				//std::cout<<(times[1]-time)/T_year<<std::endl;
+				return 0;
+				//std::cout<<(-times[1]+time)/T_year<<std::endl;
+			}
+			else if( fabs(max_search-min_search)<DOUBLE_COMP_THRESH){
+				continue_search = false;
+				freq_bounds[0] = eval_freq;
+				return 1;
+
 			}
 			else if(( (-times[1] + time) < (integration_time-tolerance) )){
 				max_search = eval_freq;
@@ -1335,6 +1348,7 @@ void integration_interval(double sampling_freq, /**< Frequency at which the dete
 
 		}
 	}
+	return 2;
 	
 }
 

@@ -1,4 +1,4 @@
 import numpy as np
 
-data = np.loadtxt("CE2narrow.dat")
-np.savetxt("CE2narrow.csv",data, delimiter=',')
+data = np.loadtxt("hn_AdvLIGO.txt",skiprows=1)
+np.savetxt("hn_AdvLIGO.csv",data, delimiter=',')

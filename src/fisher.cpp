@@ -2514,7 +2514,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			F.function = &calculate_integrand_autodiff_gsl_subroutine;
 			F.params = &params_packed;
 
-			std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+			//std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
 			if(logerr){
 				gsl_set_error_handler_off();
 			}
@@ -2545,9 +2545,9 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 			delete [] params_packed.grad_freqs ;
 			delete [] params_packed.log_factors ;
 
-			std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-			std::cout<<"Error "<<err<<std::endl;
-			std::cout<<"intervals "<<w->size<<std::endl;
+			//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+			//std::cout<<"Error "<<err<<std::endl;
+			//std::cout<<"intervals "<<w->size<<std::endl;
 		}
 	}
 	if(logerr){
@@ -2683,7 +2683,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				F.function = &calculate_integrand_autodiff_gsl_subroutine;
 				F.params = &params_packed;
 
-				std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
+				//std::cout<<"Integrating "<<i<<" "<<j<<std::endl;
 				if(logerr){
 					gsl_set_error_handler_off();
 				}
@@ -2711,9 +2711,9 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				delete [] params_packed.freq_boundaries ;
 				delete [] params_packed.grad_freqs ;
 				delete [] params_packed.log_factors ;
-				std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-				std::cout<<"Error "<<err<<std::endl;
-				std::cout<<"intervals "<<w->size<<std::endl;
+				//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
+				//std::cout<<"Error "<<err<<std::endl;
+				//std::cout<<"intervals "<<w->size<<std::endl;
 
 			}
 		}
@@ -2728,7 +2728,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	gsl_integration_workspace_free (w);
 
 	if(detector == "LISA"){
-		std::cout<<"Doubling"<<std::endl;
+		//std::cout<<"Doubling"<<std::endl;
 		for(int i = 0 ; i<full_dimension;i++){
 			for(int j = 0  ;j<full_dimension; j++){
 				output[i][j]*=2;

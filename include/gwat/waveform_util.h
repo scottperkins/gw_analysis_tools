@@ -183,7 +183,7 @@ void integration_bounds(gen_params_base<double> *params,
 	double tol,
 	double *integration_bounds
 	) ;
-void integration_interval(double sampling_freq, 
+int integration_interval(double sampling_freq, 
 	double integration_time, 
 	std::string detector, 
 	std::string sensitivity_curve, 
