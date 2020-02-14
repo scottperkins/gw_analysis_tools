@@ -424,6 +424,8 @@ template<class T>
 void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC);
 template<class T>
 void list_intersect(T *A, int lenA,T *B,int lenB, T **C,int *lenC);
+template<class T>
+void list_intersect_value(T *A, int lenA,T *B,int lenB, T *C,int *lenC);
 template<class T, class U>
 void variance_list(T *list, int length,U *result);
 template<class T,class U>

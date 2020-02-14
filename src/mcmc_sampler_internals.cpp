@@ -927,7 +927,7 @@ bool check_sampler_status(sampler *samplerptr)
  */
 void update_step_widths(sampler *samplerptr, int chain_id)
 {
-	return;
+	//return;
 	int j = chain_id;
 	//update stepsize to maximize step efficiency
 	//increases in stepsizes of 10%

@@ -38,7 +38,7 @@ const double V_azimuth_offset = 1.239;//in rad
 const double V_radius = 6368051.92301;//in meters
 //const double V_elevation = 8;//in meters
 const double V_elevation = 51.884;//in meters
-const double V_location[3] = {1,1,1};
+const double V_location[3] = {4.54637409900e+06,8.42989697626e+05,4.37857696241e+06 };
 
 
 const double K_LAT =0.6355068497 ;//in rad
@@ -46,14 +46,21 @@ const double K_LONG =2.396441015 ;//in rad
 const double K_radius =6371060 ;//in meters
 //const double K_azimuth_offset = ;//in rad
 const double K_elevation = 414.181;//in meters
-const double K_location[3] = {1,1,1};
+const double K_location[3] = {-3777336.024,3484898.411, 3765313.697};
 
 const double I_LAT =0.2484185302005262;//in rad
 const double I_LONG =1.3340133249409993 ;//in rad
 const double I_radius =6376850 ;//in meters
 //const double I_azimuth_offset = ;//in rad
-const double I_elevation = 0.0;//in meters
-const double I_location[3] = {1,1,1};
+const double I_elevation = 3.9624;//in meters
+const double I_location[3] = {1450526.82294155,6011058.39047265,1558018.27884102 };
+
+const double CE_LAT = 0.706553;//in rad
+const double CE_LONG = -1.99869;//in rad
+const double CE_radius =6370201 ;//in meters
+//const doublCE I_azimuth_offset = ;//in rad
+const double CE_elevation = 1190.854;//in meters
+const double CE_location[3] = {-2.01262e6,-4.41298e6,4.13995e6};
 
 //Earth radii at the poles and the equator (Earth is an ellispoid)
 const double RE_polar =6357e3 ;//in meters
@@ -84,6 +91,10 @@ const double Kagra_D[3][3]={{-0.18599, 0.153167, -0.324951}, {0.153167,
 const double Indigo_D[3][3] ={{0.470823664959826499, -0.120908243530907122, 
   0.0279526040438164719}, {-0.120908243530907122, -0.001050025852002534, 0.115836952558600455}, {0.0279526040438164719, 
   0.115836952558600455, -0.469773644459096742}};
+
+/*! Response Tensor for CE placed at Great Basin desert with the yarm pointing north and the x arm pointing east
+ */
+const double CE_D[3][3] = {{0.377622, -0.268333, -0.102451}, {-0.268333, -0.0883621, -0.224639}, {-0.102451, -0.224639, -0.289259}};
 
 
 void populate_noise(double *frequencies,std::string detector,double *noise_root,  int length=0);

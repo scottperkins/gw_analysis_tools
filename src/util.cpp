@@ -357,6 +357,7 @@ void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC)
 	int i_C = 0;
 	while(i_A<lenA && i_B < lenB){
 		if(*(A[i_A]) == *(B[i_B])){
+			//std::cout<<*(A[i_A])<<std::endl;;
 			C[i_C] = (A[i_A]);
 			i_C++;
 			i_A++;
@@ -397,7 +398,7 @@ void list_intersect(T *A, int lenA,T *B, int lenB, T **C, int *lenC)
 	int i_C = 0;
 	while(i_A<lenA && i_B < lenB){
 		if(A[i_A] == B[i_B]){
-			std::cout<<A[i_A]<<" "<<B[i_B]<<std::endl;
+			//std::cout<<A[i_A]<<" "<<B[i_B]<<std::endl;
 			C[i_C] = &(A[i_A]);
 			i_C++;
 			i_A++;
@@ -405,11 +406,11 @@ void list_intersect(T *A, int lenA,T *B, int lenB, T **C, int *lenC)
 		}
 		else{
 			if(A[i_A]>B[i_B]){
-				std::cout<<"B "<<B[i_B]<<std::endl;
+				//std::cout<<"B "<<B[i_B]<<std::endl;
 				i_B++;
 			}
 			else{
-				std::cout<<"A "<<A[i_A]<<std::endl;
+				//std::cout<<"A "<<A[i_A]<<std::endl;
 				i_A++;
 			}
 		}
@@ -419,6 +420,49 @@ void list_intersect(T *A, int lenA,T *B, int lenB, T **C, int *lenC)
 template void list_intersect<double>(double*,int,double*,int,double**,int *);
 template void list_intersect<adouble>(adouble*,int,adouble*,int,adouble**,int *);
 template void list_intersect<int>(int*,int,int*,int,int**,int *);
+/*! \brief Custom list-interesction implementation for sorted lists 
+ *
+ * Uses pointers for efficiency -- NOT COPIED -- used std library for that
+ *
+ * Takes A and B and puts the intersection in C -- C = A /\ B
+ *
+ * Takes the length of C and puts it in lenC
+ *
+ * C should have allocated memory for at least as large as the smallest list
+ * 	
+ * WILL NOT work in-place, A, B, and C must be separate
+ */
+template<class T>
+void list_intersect_value(T *A, int lenA,T *B, int lenB, T *C, int *lenC)
+{
+	int max_length = (lenA>lenB) ? lenA : lenB;
+	int i_A = 0;
+	int i_B = 0;
+	int i_C = 0;
+	while(i_A<lenA && i_B < lenB){
+		if(A[i_A] == B[i_B]){
+			//std::cout<<A[i_A]<<" "<<B[i_B]<<std::endl;
+			C[i_C] = (A[i_A]);
+			i_C++;
+			i_A++;
+			i_B++;
+		}
+		else{
+			if(A[i_A]>B[i_B]){
+				//std::cout<<"B "<<B[i_B]<<std::endl;
+				i_B++;
+			}
+			else{
+				//std::cout<<"A "<<A[i_A]<<std::endl;
+				i_A++;
+			}
+		}
+	}
+	*lenC = i_C;
+}
+template void list_intersect_value<double>(double*,int,double*,int,double*,int *);
+template void list_intersect_value<adouble>(adouble*,int,adouble*,int,adouble*,int *);
+template void list_intersect_value<int>(int*,int,int*,int,int*,int *);
 
 template<class T, class U>
 void mean_list(T *list, int length, U *result)
