@@ -17,9 +17,13 @@ int unpack_input_io_file(std::string input_param_file,
 int find_datatype(std::string type);
 std::string trim(std::string str);
 void read_file(std::string filename,double **output, int rows, int cols );
+void read_file(std::string filename,int **output, int rows, int cols );
 void read_file(std::string filename, double *output );
+void read_file(std::string filename, int *output );
 void write_file(std::string filename, double **input, int rows, int cols);
+void write_file(std::string filename, int **input, int rows, int cols);
 void write_file(std::string filename, double *input, int length);
+void write_file(std::string filename, int *input, int length);
 void read_LOSC_data_file(std::string filename, 
 			double *output,
 			double *data_start_time,

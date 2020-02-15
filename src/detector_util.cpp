@@ -635,6 +635,27 @@ void celestial_horizon_transform(T RA, /**< in RAD*/
 		azimuth_offset = V_azimuth_offset;
 
 	}
+	else if (detector =="Kagra" || detector == "kagra")
+	{
+		LAT =  K_LAT;		
+		LONG =  K_LONG;		
+		azimuth_offset = K_azimuth_offset;
+
+	}
+	else if (detector =="Indigo" || detector == "indigo")
+	{
+		LAT =  I_LAT;		
+		LONG =  I_LONG;		
+		azimuth_offset = I_azimuth_offset;
+
+	}
+	else if (detector =="Cosmic Explorer" || detector == "cosmic explorer" || detector=="CE")
+	{
+		LAT =  CE_LAT;		
+		LONG =  CE_LONG;		
+		azimuth_offset = CE_azimuth_offset;
+
+	}
 	else {
 		std::cout<<"Invalid detector"<<std::endl;
 		exit(1);
@@ -707,6 +728,10 @@ double DTOA_DETECTOR(double RA, /**< spherical polar angle for detector 1 in RAD
 	{
 		earth_centered_location1 =I_location ;	
 	}
+	else if(detector1 == "Cosmic Explorer" || detector1 == "cosmic explorer" || detector1=="CE")
+	{
+		earth_centered_location1 =CE_location ;	
+	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
@@ -727,6 +752,10 @@ double DTOA_DETECTOR(double RA, /**< spherical polar angle for detector 1 in RAD
 	else if(detector2 == "Indigo" || detector2 == "indigo")
 	{
 		earth_centered_location2 =I_location ;	
+	}
+	else if(detector2 == "Cosmic Explorer" || detector2 == "cosmic explorer" || detector2=="CE")
+	{
+		earth_centered_location2 =CE_location ;	
 	}
 	return DTOA_earth_centered_coord(RA,DEC,GMST_rad,earth_centered_location1,earth_centered_location2);
 }
@@ -784,6 +813,10 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	{
 		R1 = I_radius;	
 	}
+	else if(detector1 == "Cosmic Explorer" || detector1 == "cosmic explorer" || detector1=="CE")
+	{
+		R1 = CE_radius;	
+	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
@@ -799,11 +832,15 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	}
 	else if(detector2 == "Kagra" || detector2 == "kagra")
 	{
-		R1 = K_radius;	
+		R2 = K_radius;	
 	}
 	else if(detector2 == "Indigo" || detector2 == "indigo")
 	{
-		R1 = I_radius;	
+		R2 = I_radius;	
+	}
+	else if(detector2 == "Cosmic Explorer" || detector2 == "cosmic explorer" || detector2=="CE")
+	{
+		R2 = CE_radius;	
 	}
 	return (cos(theta1)*R1 - cos(theta2)*R2)/c;
 }
@@ -970,6 +1007,13 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = Indigo_D[i][j];
+				}
+			}
+		}
+		else if(detector =="Cosmic Explorer" || detector=="cosmic explorer" || detector=="CE"){
+			for(int i =0; i<3; i++){
+				for(int j =0 ;j<3; j++){
+					responseM[i][j] = CE_D[i][j];
 				}
 			}
 		}

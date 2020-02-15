@@ -182,7 +182,7 @@ void test58()
 	std::cout.precision(15);
 	int length = 200;
 	double **output = allocate_2D_array(length, 2);
-	int N_detectors = 4;
+	int N_detectors = 5;
 	//std::string detectors[N_detectors] = {"Hanford","Livingston","Virgo","Kagra","Indigo"};
 	std::string detectors[N_detectors] = {"Hanford","Livingston","Virgo","Indigo"};
 	//std::string detectors[N_detectors] = {"Hanford","Hanford","Hanford"};

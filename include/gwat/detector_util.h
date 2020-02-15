@@ -45,12 +45,20 @@ const double K_LAT =0.6355068497 ;//in rad
 const double K_LONG =2.396441015 ;//in rad
 const double K_radius =6371060 ;//in meters
 //const double K_azimuth_offset = ;//in rad
+//######################################
+//WRONG
+const double K_azimuth_offset = 1.239;//in rad
+//######################################
 const double K_elevation = 414.181;//in meters
 const double K_location[3] = {-3777336.024,3484898.411, 3765313.697};
 
 const double I_LAT =0.2484185302005262;//in rad
 const double I_LONG =1.3340133249409993 ;//in rad
 const double I_radius =6376850 ;//in meters
+//######################################
+//WRONG
+const double I_azimuth_offset = 1.239;//in rad
+//######################################
 //const double I_azimuth_offset = ;//in rad
 const double I_elevation = 3.9624;//in meters
 const double I_location[3] = {1450526.82294155,6011058.39047265,1558018.27884102 };
@@ -58,6 +66,7 @@ const double I_location[3] = {1450526.82294155,6011058.39047265,1558018.27884102
 const double CE_LAT = 0.706553;//in rad
 const double CE_LONG = -1.99869;//in rad
 const double CE_radius =6370201 ;//in meters
+const double CE_azimuth_offset = 0;//in rad
 //const doublCE I_azimuth_offset = ;//in rad
 const double CE_elevation = 1190.854;//in meters
 const double CE_location[3] = {-2.01262e6,-4.41298e6,4.13995e6};
