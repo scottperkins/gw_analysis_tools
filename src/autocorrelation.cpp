@@ -322,6 +322,8 @@ void auto_corr_from_data(double **data, /**<Input data */
 			deallocate_FFTW_mem(&plans_reverse[i]);
 		}
 	}	
+	free(plans_forward);
+	free(plans_reverse);
 	deallocate_2D_array(data_transpose,dimension, length);
 }
 

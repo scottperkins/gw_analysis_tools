@@ -332,7 +332,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = N_steps;
+	int dynamic_search_length = 5*t0;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
@@ -447,12 +447,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	while(continue_dynamic_search && dynamic_ct<10){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
-			if( 5*t0<temp_length){
-				dynamic_search_length = 5*t0;
-			}
-			else{
-				dynamic_search_length = temp_length;
-			}
+			//if( 5*t0<temp_length){
+			//	dynamic_search_length = 5*t0;
+			//}
+			//else{
+			//	dynamic_search_length = temp_length;
+			//}
 			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
@@ -516,6 +516,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		auto_corr_from_data_batch(full_temp_output, dynamic_search_length, dimension, coldchains,full_temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
 		continue_dynamic_search=false;
 		double ave_max_ac=0;
+		max_ac_realloc=0;
 		ccct=0;
 		for(int i = 0 ; i<chain_N;i++){
 			if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
@@ -560,18 +561,17 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		max_ac_realloc = ave_max_ac/coldchains;
 	
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
-		if(temp_length < 10*max_ac_realloc){
-			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-			temp_length = 10*max_ac_realloc;
-			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
-		}
-		else if(temp_length>1000*max_ac_realloc){
-			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-			temp_length = 1000*max_ac_realloc;
-			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+		//if(temp_length < 10*max_ac_realloc){
+		//	//deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+		//	temp_length = 10*max_ac_realloc;
+		//	//temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+		//}
+		//else if(temp_length>1000*max_ac_realloc){
+		//	//deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+		//	temp_length = 1000*max_ac_realloc;
+		//	//temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
 
-		}
-		max_ac_realloc=0;
+		//}
 
 		deallocate_3D_array(full_temp_ac,coldchains,dimension, corr_segments);
 		deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
@@ -579,6 +579,17 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		//continue_dynamic_search=false;
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
+	if(temp_length < 10*max_ac_realloc){
+		deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+		temp_length = 10*max_ac_realloc;
+		temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+	}
+	else if(temp_length>1000*max_ac_realloc){
+		deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+		temp_length = 1000*max_ac_realloc;
+		temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+
+	}
 
 	//for loop 
 	//continue_ptmcmc
@@ -736,6 +747,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 
 		}
 		max_ac_realloc = ave_max_ac/coldchains;
+		deallocate_3D_array(full_temp_output,coldchains, temp_length,dimension);
 
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		if(temp_length < 10*max_ac_realloc){
@@ -750,7 +762,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 
 		}
 		deallocate_3D_array(full_temp_ac,coldchains,dimension, local_corr_segments);
-		deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
+		//deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
 		max_ac_realloc=0;
 		//std::cout<<"status: "<<status<<" temp-length: "<<temp_length<<std::endl;
 		//Write file out as checkpoint

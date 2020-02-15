@@ -31,10 +31,10 @@ TESTFISHER=$(addprefix $(TESTDIR)/,exefisher.a)
 CONFIGFILE:=include/gwat/GWATConfig.h
 
 #CFLAGS=-I$(IDIR) -I/opt/lalsuite/lalsimulation/src -I/opt/lalsuite/include -Wall -fPIC -g -O3 -std=c++11
-CFLAGS=-I$(IDIR) -fopenmp -fPIC -O3 -std=c++11
+CFLAGS=-I$(IDIR) -fopenmp -fPIC -O2 -std=c++11 -g
 #LFLAGS= -L/usr/local/cuda/lib64 -fopenmp 
 LFLAGS= -fopenmp 
-CFLAGSCUDA=-I$(IDIR) -shared -Xcompiler -fpic -O3 -std=c++11 
+CFLAGSCUDA=-I$(IDIR) -shared -Xcompiler -fpic -O2 -std=c++11 
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(ODIR)/%,$(SOURCES:.$(SRCEXT)=.o))
@@ -47,10 +47,10 @@ SOURCESCUDA := $(shell find $(SRCDIR) -type f -name *.$(SRCEXTCUDA))
 
 ############################################################################
 #CUDA OPTIONS
-#LIBS=-ladolc -lgsl -lgslcblas -lfftw3  -lcudart 
-#OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
-LIBS=-ladolc -lgsl -lgslcblas -lfftw3
-OBJECTSCUDA := 
+LIBS=-ladolc -lgsl -lgslcblas -lfftw3  -lcudart 
+OBJECTSCUDA := $(patsubst $(SRCDIR)/%,$(ODIRCUDA)/%,$(SOURCESCUDA:.$(SRCEXTCUDA)=.o))
+#LIBS=-ladolc -lgsl -lgslcblas -lfftw3
+#OBJECTSCUDA := 
 ########################################################################
 
 IEXT := h
