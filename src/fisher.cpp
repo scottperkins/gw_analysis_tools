@@ -646,6 +646,8 @@ void fisher_autodiff_interp(double *frequency,
 /*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
  * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
+ *
+ * Note: If trying to run large number of Fishers concurrently with openmp, you may need to change some ADOL-C parameters. Copy the example .adolcrc file in data/ to the working directory and adjust as needed
  */
 void fisher_autodiff(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
