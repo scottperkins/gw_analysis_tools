@@ -380,7 +380,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		delete [] data;
 	}
 	else{
-		std::cout<<"Detector not supported"<<std::endl;
+		std::cout<<"Detector "<<detector<<" not supported"<<std::endl;
 	}
 			
 		
