@@ -780,7 +780,7 @@ double DTOA_earth_centered_coord(double RA, /**< spherical polar angle for detec
 	ehat[1] = cos(DEC) * -sin(hour_angle);
 	ehat[2] = sin(DEC) ;
 		
-	return (dx[0]*ehat[0] + dx[1]*ehat[1] + dx[2]*ehat[2])/c;
+	return -(dx[0]*ehat[0] + dx[1]*ehat[1] + dx[2]*ehat[2])/c;
 
 }
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
