@@ -1847,7 +1847,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				//a_params->chip = avec_parameters[11];
 				//a_params->phip = avec_parameters[12];
 
-				T spin1cart[3];
 				//###################################
 				//Fishers don't necessarily respect the bounds of 
 				//acos, so bump it back into range if we're on the edge
@@ -1875,6 +1874,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->tc=avec_parameters[5];
 				//##################################
 				//##################################
+				T spin1cart[3];
 				T spin1sph[3] = {avec_parameters[9],local_theta1,
 					avec_parameters[13]};
 				T spin2cart[3];
