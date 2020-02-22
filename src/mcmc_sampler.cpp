@@ -715,7 +715,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 						subsample_length=full_temp_ac[ccct][i][1];
 					}
 				}
+				//#############################
+				//TESTING 
+				//#############################
 				ac_vals[k]=subsample_length;
+				//ac_vals[k]=1;
+				//#############################
 				//deallocate_2D_array(temp_ac_per_chain, dimension, corr_segments);
 				
 				ccct++;
