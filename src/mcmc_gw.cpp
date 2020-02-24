@@ -1322,8 +1322,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_distribution_scheme,
-		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
-		//log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
+		log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
@@ -1718,6 +1718,20 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[11]=.1;
 			seeding_var[12]=.1;
 			seeding_var[13]=.1;
+		}
+	}
+	else if(dimension==7 && generation_method =="IMRPhenomPv2"){
+		mcmc_intrinsic=true;
+		std::cout<<"Sampling in parameters: chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi"<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
+			seeding_var[0]=.1;
+			seeding_var[1]=.1;
+			seeding_var[2]=.1;
+			seeding_var[3]=.1;
+			seeding_var[4]=.1;
+			seeding_var[5]=.1;
+			seeding_var[6]=.1;
 		}
 	}
 	else if(dimension==14 && generation_method =="IMRPhenomPv2"){
@@ -2314,6 +2328,36 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 
 		}
 		else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+			//if(!mcmc_save_waveform){
+			if(false){
+			}
+			else{
+				gen_params.theta=0;	
+				gen_params.phi=0;	
+				gen_params.psi=0;	
+				gen_params.phiRef = 1;
+				gen_params.f_ref = 20;
+				gen_params.incl_angle=0;	
+				gen_params.tc =1;
+				std::complex<double> *hc =
+					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+				std::complex<double> *hp =
+					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+				fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
+				for(int i=0; i < mcmc_num_detectors; i++){
+					ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
+							mcmc_noise[i],
+							mcmc_frequencies[i],
+							hp,
+							hc,
+							(size_t) mcmc_data_length[i],
+							&mcmc_fftw_plans[i]
+							);
+				}
+				free(hp);
+				free(hc);
+				//std::cout<<ll<<std::endl;
+			}
 
 		}
 	}

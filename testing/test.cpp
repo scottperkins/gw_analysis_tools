@@ -97,6 +97,7 @@ void test57();
 void test58();
 void test59();
 void test60();
+void test61();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -104,6 +105,7 @@ double test_lp_nts(double *pos, int dim, int chain_id,void *parameters);
 double test_lp_GW(double *pos, int dim, int chain_id,void *parameters);
 double test_lp_GW_Pv2(double *pos, int dim, int chain_id,void *parameters);
 double test_lp_GW_D(double *pos, int dim, int chain_id,void *parameters);
+double test_lp_GW_Pv2_in(double *pos, int dim, int chain_id,void *parameters);
 double test_lp_GW_Pv2_ppE(double *pos, int dim, int chain_id,void *parameters);
 double test_lp_GW_Pv2_dCS_root_alpha(double *pos, int dim, int chain_id,void *parameters);
 double test_lp_GW_7dim(double *pos, int dim, int chain_id,void *parameters);
@@ -131,12 +133,120 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test54();	
+	test61();	
 	//test6();	
 	//test45();	
 	return 0;
 }
 
+void test61()
+{
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
+	int datalength = 131075;
+	int num_detectors = 2, psd_length = 8032, length;
+	double gps_time = 1126259462.4;//TESTING -- gw150914
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+	std::string *detector_files = new std::string[num_detectors];
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+ 	double trigger_time = gps_time;
+	double **psd = allocate_2D_array(num_detectors,psd_length);
+	double **freqs = allocate_2D_array(num_detectors,psd_length);
+	std::complex<double> **data = (std::complex<double> **)malloc(sizeof(std::complex<double> *)*num_detectors);
+	for(int i =0; i<num_detectors; i++)
+		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
+
+	allocate_LOSC_data(detector_files, psd_file, num_detectors, psd_length, datalength, trigger_time, data, psd, freqs);
+
+	//double **temp = allocate_2D_array(psd_length,3);
+	//
+	//for(int i=0 ; i<psd_length; i++){
+	//	std::cout<<psd[0][i]<<data[0][i]<<std::endl;
+	//	temp[i][0]=freqs[0][i];	
+	//	temp[i][1]=std::real( data[0][i]/sqrt(psd[0][i]));
+	//	temp[i][2]=std::imag( data[0][i]/sqrt(psd[0][i]));
+	//}
+	//write_file("whitened_GW150914_Hanford.csv",temp,psd_length,3);
+	//deallocate_2D_array(temp,psd_length,3);
+
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =psd_length;
+	data_length[1] =psd_length;
+	//data_length[2] =psd_length;
+
+	//#########################################################
+	//mcmc options
+	int dimension = 7;
+	double initial_pos[dimension]={std::log(30), .24,.1,.1,.9,.9,.1};
+	double *seeding_var = NULL;
+	int n_steps = 10000;
+	int chain_N=12 ;
+	int max_thermo=12 ;
+	int t0 = 1000;
+	int nu = 100;
+	std::string chain_alloc = "double";
+	int swp_freq = 5;
+	double chain_temps[chain_N];
+	double c = 1.3;
+	
+	int Nmod = 0;
+	int *bppe = NULL;
+	int numThreads = 10;
+	bool pool = true;
+	//#########################################################
+	//gw options
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "EdGB_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
+	//std::string generation_method = "IMRPhenomD";
+	std::string generation_method = "IMRPhenomPv2";
+	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
+	
+	
+	std::string chainfile = "testing/data/mcmc_output_uncorr_Pv2_in.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_uncorr_Pv2_in.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_uncorr_Pv2_in.csv";
+
+	int corr_threshold = 10;
+	int corr_segments = 10;
+	double corr_converge_thresh = 0.50;
+	double corr_target_ac = .01;
+
+	double **output;
+	output = allocate_2D_array(n_steps, dimension );
+	//double ***output;
+	//output = allocate_3D_array(chain_N,n_steps, dimension );
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
+			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_Pv2_in,numThreads, pool,show_progress,
+			num_detectors, 
+			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+			generation_method,statfilename,chainfile, "",checkfile);	
+	//std::string checkfile2="testing/data/mcmc_checkpoint_uncorr_D2.csv";
+	//continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(checkfile,output,  n_steps,  max_thermo, chain_temps, 
+	//		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
+	//		num_detectors, 
+	//		data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+	//		generation_method,statfilename,chainfile, "",checkfile2);	
+	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dimension, n_steps,chain_N,max_thermo, initial_pos, seeding_var, chain_temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,numThreads, pool, show_progress, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, generation_method, statfilename, chainfile,  "",checkfile);
+
+
+	//write_file(chainfile, output[0], n_steps, dimension);
+
+	deallocate_2D_array(output, n_steps, dimension);
+	//deallocate_3D_array(output, chain_N,n_steps, dimension);
+	delete [] detectors;
+	free(data_length);
+	//free_LOSC_data(data, psd,freqs, num_detectors, length);
+	deallocate_2D_array(psd,num_detectors, psd_length);
+	deallocate_2D_array(freqs,num_detectors, psd_length);
+	for(int i =0; i<num_detectors; i++)
+		free(data[i]);
+	free(data);
+	delete [] detector_files;
+
+}
 void test60()
 {
 	int psd_num = 5;
@@ -6538,4 +6648,16 @@ double test_lp_reduceddim(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[3])<-.9 || (pos[3])>.9){return a;}//chi2
 	else {return pos[0];}
 	//else {return pos[4]+1*pos[3];}
+}
+double test_lp_GW_Pv2_in(double *pos, int dim, int chain_id,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	if (std::exp(pos[0])<2 || std::exp(pos[0])>100){return a;}//chirpmass
+	if ((pos[1])<.1 || (pos[1])>.249999){return a;}//eta
+	if ((pos[2])<0 || (pos[2])>.99){return a;}//chi1 
+	if ((pos[3])<0 || (pos[3])>.99){return a;}//chi2
+	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
+	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
+	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
+	else {return pos[0];}
 }

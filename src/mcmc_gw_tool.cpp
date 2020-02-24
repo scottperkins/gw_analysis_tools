@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 				correlation_convergence_thresh , ac_target,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-				generation_method,stat_file,output_file, "testing/ll_out.csv",check_file);	
+				generation_method,stat_file,output_file, "testing/data/test_ll.csv",check_file);	
 		delete [] initial_position[0]; delete [] initial_position;
 	}
 

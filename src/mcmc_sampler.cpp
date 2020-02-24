@@ -457,13 +457,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,"","",likelihood_log_filename,checkpoint_file);
 		}
 		
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			"", "","", checkpoint_file);
+			"", "",likelihood_log_filename, checkpoint_file);
 			
 		//####################################################################################
 		/* Save -- version that combines before calculating AC*/
@@ -617,14 +617,14 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,"","",likelihood_log_filename,checkpoint_file);
 
 				realloc_temps_thresh+=realloc_temps_length;
 		}
 		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			"","","", checkpoint_file);
+			"","",likelihood_log_filename, checkpoint_file);
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 			
 		/* SAVE -- version that combines, then computes AC*/
@@ -715,12 +715,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 						subsample_length=full_temp_ac[ccct][i][1];
 					}
 				}
-				//#############################
-				//TESTING 
-				//#############################
 				ac_vals[k]=subsample_length;
-				//ac_vals[k]=1;
-				//#############################
 				//deallocate_2D_array(temp_ac_per_chain, dimension, corr_segments);
 				
 				ccct++;
