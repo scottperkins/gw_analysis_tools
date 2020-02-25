@@ -606,11 +606,13 @@ double maximized_Log_Likelihood_aligned_spin_internal(std::complex<double> *data
 	}
 
 	double max = *std::max_element(g, g+length)*delta_f*delta_f; 
+	//double max = *std::max_element(g, g+length)*length; 
 
 	free(integrand);
 	free(g);
 	fftw_free(in);
 	fftw_free(out);
+	//std::cout<<.5*(max)/HH<<" "<<1./length<<" "<<delta_f*delta_f<<" "<<delta_f/length<<" "<<length<<" "<<1./(delta_f*length)<<std::endl;
 	return .5*(max)/HH;
 }
 
@@ -647,8 +649,9 @@ double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *da
 	//double HH = integral;
 
 	//Calculate template snr for plus polarization sqrt(<H+|H+>)
-	for (int i =0;i< length;i++)
+	for (int i =0;i< length;i++){
 		integrand[i] = real(hplus[i]*std::conj(hplus[i]))/psd[i];
+	}
 	integral = 4.*simpsons_sum(delta_f, length, integrand);
 	double HpHproot = sqrt(integral);
 
@@ -696,9 +699,9 @@ double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *da
 	fftw_execute_dft(plan->p, in, out);
 	for (int i=0;i<length; i++)
 	{
-		rhoplus[i] = std::complex<double>(plan->out[i][0],plan->out[i][1]);
+		rhoplus[i] = delta_f*(std::complex<double>(out[i][0],out[i][1]));
 		//Norm of the output, squared (Re{g}^2 + Im{g}^2)
-		rhoplus2[i] = out[i][0]* out[i][0]+ out[i][1]* out[i][1];
+		rhoplus2[i] = delta_f*delta_f*(out[i][0]* out[i][0]+ out[i][1]* out[i][1]);
 		
 	}
 	for (int i=0;i<length; i++)
@@ -711,9 +714,9 @@ double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *da
 	fftw_execute_dft(plan->p, in, out);
 	for (int i=0;i<length; i++)
 	{
-		rhocross[i] = std::complex<double>(plan->out[i][0],plan->out[i][1]);
+		rhocross[i] = delta_f*(std::complex<double>(out[i][0],out[i][1]));
 		//Norm of the output, squared (Re{g}^2 + Im{g}^2)
-		rhocross2[i] = out[i][0]* out[i][0]+ out[i][1]* out[i][1];
+		rhocross2[i] = delta_f*delta_f*(out[i][0]* out[i][0]+ out[i][1]* out[i][1]);
 	}
 	
 	for (int i = 0; i <length;i++)
@@ -732,7 +735,10 @@ double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *da
 			4. * (Ipc*rhoplus2[i] - gammahat[i] ) * (Ipc*rhocross2[i] - gammahat[i])))
 			/(1. - Ipc*Ipc);
 	}
-	double max = .25 * (*std::max_element(lambda, lambda+length))*delta_f; 
+	double max = .25 * (*std::max_element(lambda, lambda+length)); 
+	//double maxrhoplus2 =  (*std::max_element(rhoplus2, rhoplus2+length)); 
+	//double maxrhocross2 =  (*std::max_element(rhocross2, rhocross2+length)); 
+	//double maxgammahat =  (*std::max_element(gammahat, gammahat+length)); 
 
 	free(integrand);
 	free(hpnorm);
@@ -746,6 +752,7 @@ double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *da
 	fftw_free(in);
 	fftw_free(out);
 
+	//std::cout<<max<<" "<<maxrhoplus2 <<" "<<maxrhocross2 <<" "<<maxgammahat << " "<<Ipc<<std::endl;
 	//return -0.5*(HH- 2*max);
 	return max;
 }
@@ -1322,8 +1329,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_distribution_scheme,
-		//log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
-		log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, 
+		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
@@ -1734,27 +1741,6 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[6]=.1;
 		}
 	}
-	else if(dimension==14 && generation_method =="IMRPhenomPv2"){
-		mcmc_intrinsic=false;
-		std::cout<<"Sampling in parameters: cos inclination, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2, phiRef, psi (all at reference frequency)"<<std::endl;
-		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.5;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
-			seeding_var[4]=.1;
-			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.1;
-			seeding_var[11]=.1;
-			seeding_var[12]=.1;
-			seeding_var[13]=.1;
-		}
-	}
 	else if(dimension==15 && generation_method =="dCS_IMRPhenomPv2_root_alpha"){
 		mcmc_intrinsic=false;
 		mcmc_Nmod = 1;
@@ -2079,6 +2065,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//Generally, the data lengths don't have to be the same
 	//if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
 	//if(false)
+	//double snr = 0;
 	{
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
@@ -2109,6 +2096,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 				(size_t) data_length[0],
 				&fftw_plans[0]
 				);
+		//snr+=pow_int(data_snr(frequencies[0],data_length[0],data[0],response,psd[0]),2);
 		for(int i=1; i < num_detectors; i++){
 			//celestial_horizon_transform(RA,DEC, gps_time, 
 			//		detectors[i], &phi[i], &theta[i]);
@@ -2127,6 +2115,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 					0,tc*(frequencies[i][j]-parameters->f_ref)
 					));
 			}	
+			//snr+=pow_int(data_snr(frequencies[i],data_length[i],data[i],response,psd[i]),2);
 		
 			ll += Log_Likelihood_internal(data[i], 
 				psd[i],
@@ -2208,6 +2197,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//				);
 	//	}
 	//}
+	//
+	//std::cout<<ll<<" "<<sqrt(snr)<<" "<<parameters->mass1<<" "<<parameters->mass2<<" "<<parameters->spin1[0]<<" "<<parameters->spin1[0]<<" "<<parameters->spin1[1]<<" "<<parameters->spin2[1]<<" "<<parameters->spin1[2]<<" "<<parameters->spin2[2]<<" "<<std::endl;
 	delete [] phi;
 	delete [] theta;
 	return ll;
@@ -2304,6 +2295,11 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 				std::complex<double> *response =
 					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
 				fourier_detector_response_horizon(mcmc_frequencies[0], mcmc_data_length[0], response, mcmc_detectors[0], local_gen, &gen_params);
+				//std::complex<double> *hc =
+				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+				//std::complex<double> *hp =
+				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+				//fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
 				for(int i=0; i < mcmc_num_detectors; i++){
 					ll += maximized_Log_Likelihood_aligned_spin_internal(mcmc_data[i], 
 							mcmc_noise[i],
@@ -2321,8 +2317,18 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 					//		local_gen,
 					//		&mcmc_fftw_plans[i]
 					//		);
+					//ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
+					//		mcmc_noise[i],
+					//		mcmc_frequencies[i],
+					//		hp,
+					//		hc,
+					//		(size_t) mcmc_data_length[i],
+					//		&mcmc_fftw_plans[i]
+					//		);
 				}
 				free(response);
+				//free(hp);
+				//free(hc);
 
 			}
 

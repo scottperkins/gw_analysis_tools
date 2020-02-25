@@ -2083,6 +2083,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->spin1[2] = avec_parameters[2];
 				a_params->spin2[2] = avec_parameters[3];
 				a_params->phic=0;
+				a_params->phiRef=0;
 				a_params->tc=0;
 				//a_params->incl_angle=0;
 				//a_params->RA=1.;

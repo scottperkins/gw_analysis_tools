@@ -1389,6 +1389,7 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 	T sigma3 = lambda->sigma[3];
 	T sigma4 = lambda->sigma[4];
 
+	//std::cout<<pn_coeff[0]<<" "<<pn_coeff[1]<<" "<<pn_coeff[2]<<" "<<pn_coeff[3]<<" "<<pn_coeff[4]<<" "<<pn_coeff[5]<<" "<<pn_coeff[6]<<" "<<pn_coeff[7]<<" "<<lambda->sigma[1]<<" "<<lambda->sigma[2]<<" "<<lambda->sigma[3]<<" "<<lambda->sigma[4]<<" "<<std::endl;
         return phase_TF2 + (1./eta)*(sigma0 + sigma1*M*f + 
         (3./4.)*sigma2* pow->MF4third + (3./5)*sigma3* pow->MF5third + 
         (1./2.)*sigma4* pow->MFsquare);
@@ -1493,7 +1494,7 @@ T IMRPhenomD<T>::phase_mr(T f, source_parameters<T> *param, lambda_parameters<T>
         T Mf = M*f;
 	T Mfcube = Mf*Mf*Mf;
 	T Mf3fourths = sqrt(sqrt(Mfcube));
-        return (1/eta)*(alpha0 +alpha1*(Mf) -alpha2*(1./(Mf)) + (4./3)*alpha3*Mf3fourths + 
+        return (1./eta)*(alpha0 +alpha1*(Mf) -alpha2*(1./(Mf)) + (4./3)*alpha3*Mf3fourths + 
         alpha4*atan((f-alpha5*fRD)/fdamp));
 
 }

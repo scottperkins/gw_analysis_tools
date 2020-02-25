@@ -28,6 +28,8 @@ double T_mcmc_gw_tool;
 
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
 int main(int argc, char *argv[])
 {
@@ -146,11 +148,21 @@ int main(int argc, char *argv[])
 	//#########################################################
 	
 	double(*lp)(double *param, int dimension, int chain_id, void *parameters);
-	if(generation_method.find("IMRPhenomD") != std::string::npos){
+	if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
 		lp = &standard_log_prior_D;
 	}
-	else if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+	else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 14){
 		lp = &standard_log_prior_Pv2;
+	}
+	else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 7){
+		lp = &standard_log_prior_Pv2_intrinsic;
+	}
+	else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
+		lp = &standard_log_prior_D_intrinsic;
+	}
+	else{
+		std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
+		return 1;
 	}
 
 	if(continue_from_checkpoint){
@@ -174,7 +186,7 @@ int main(int argc, char *argv[])
 				correlation_convergence_thresh , ac_target,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-				generation_method,stat_file,output_file, "testing/data/test_ll.csv",check_file);	
+				generation_method,stat_file,output_file, "",check_file);	
 		delete [] initial_position[0]; delete [] initial_position;
 	}
 
@@ -209,8 +221,8 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
-	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//chi1 
-	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//chi2
+	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
+	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
 
 }
@@ -244,12 +256,42 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
-	if ((pos[9])<0 || (pos[9])>.9){return a;}//a1 
-	if ((pos[10])<0 || (pos[10])>.9){return a;}//a2
+	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
+	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];}
+}
+double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	double eta = pos[1];
+	//Flat priors across physical regions
+	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+
+
+}
+double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	double eta = pos[1];
+	//Flat priors across physical regions
+	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
+	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
+	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
+	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
+	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
+	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+
 }
 
 //Uniform in m1 and m2, transformed to lnM and eta

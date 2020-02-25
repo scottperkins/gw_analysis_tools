@@ -33,6 +33,34 @@ struct gsl_snr_struct
 	std::string detector;
 };
 
+double data_snr(double *frequencies, 
+	int length,
+	std::complex<double> *data,
+	std::complex<double> *response,
+	double *psd
+	)	
+{
+	double *integrand
+			 = (double *)malloc(sizeof(double)*length);
+
+	double delta_f = frequencies[1]-frequencies[0];
+	//for (int i = 0; i<length;i++)
+	//	integrand[i] = 4.*real(conj(response[i])*response[i])/psd[i]; 
+	//double snr_template;
+	//snr_template = sqrt(simpsons_sum(delta_f,length, integrand));
+
+	
+	for (int i = 0; i<length;i++)
+		integrand[i] = 4.*real(conj(data[i])*response[i])/psd[i]; 
+	//double inner_prod = sqrt(simpsons_sum(delta_f,length, integrand));
+	double inner_prod = (simpsons_sum(delta_f,length, integrand));
+	//std::cout<<"WU: "<<inner_prod<<std::endl;
+	free(integrand);
+	//return inner_prod/(snr_template);
+	return sqrt(inner_prod);
+
+}
+
 /*! \brief Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc
  *
  * The gen_params structure holds the parameters for the template to be used (the maximimum likelihood parameters)

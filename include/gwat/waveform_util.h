@@ -9,6 +9,12 @@
  * Header file for waveform specific utilites
  */
 
+double data_snr(double *frequencies, 
+	int length,
+	std::complex<double> *data,
+	std::complex<double> *response,
+	double *psd
+	);
 double data_snr_maximized_extrinsic(double *frequencies,
 	int length,
 	std::complex<double> *data,

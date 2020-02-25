@@ -248,7 +248,8 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
 	T deltas[6];
 	T pn_amp_coeffs[7];
-	T pn_phase_coeffs[10];
+	//T pn_phase_coeffs[10];
+	T pn_phase_coeffs[12];
 	
 
 	this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
@@ -429,7 +430,8 @@ int IMRPhenomPv2<T>::construct_phase(T *frequencies, /**< T array of frequencies
 
 	T deltas[6];
 	T pn_amp_coeffs[7];
-	T pn_phase_coeffs[10];
+	//T pn_phase_coeffs[10];
+	T pn_phase_coeffs[12];
 	
 
 	this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);

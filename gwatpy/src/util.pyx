@@ -26,3 +26,7 @@ MSOL_SECpy = MSOL_SEC
 T_yearpy = T_year
 def DL_from_Z_py(double Z, string cosmology):
     return DL_from_Z(Z,cosmology)
+def calculate_mass1_py(double chirpmass, double eta):
+    return calculate_mass1(chirpmass,eta)
+def calculate_mass2_py(double chirpmass, double eta):
+    return calculate_mass2(chirpmass,eta)

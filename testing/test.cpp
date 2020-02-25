@@ -121,6 +121,8 @@ double log_neil_proj3 (double *x,int dim,void *parameters);
 double log_neil_proj3_nts (double *x,int dim, int chain_id,void *parameters);
 double log_neil_proj32 (double *c,int dim,void *parameters);
 void fisher_neil_proj3 (double *x,int dim, double **fish, int chain_id,void *parameters);
+double chirpmass_eta_jac(double chirpmass, double eta);
+double test_lp_GW_D_in(double *pos, int dim, int chain_id,void *parameters);
 adouble dist(adouble *pos, int dimension);
 
 const gsl_rng_type* Y;
@@ -141,16 +143,29 @@ int main(){
 
 void test61()
 {
-	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt";
 	int datalength = 131075;
-	int num_detectors = 2, psd_length = 8032, length;
-	double gps_time = 1126259462.4;//TESTING -- gw150914
+
+	std::string psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
+	int num_detectors = 3, psd_length = 4016, length;
+	double gps_time = 1185389807.3;//TESTING -- gw170729
 	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
 	detectors[0] = "Hanford";
 	detectors[1] = "Livingston";
+	detectors[2] = "Virgo";
 	std::string *detector_files = new std::string[num_detectors];
-	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
-	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	detector_files[2] =  "/Users/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt";
+	//
+	//std::string psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt";
+	//int num_detectors = 2, psd_length = 8032, length;
+	//double gps_time = 1126259462.4;//TESTING -- gw150914
+	//std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	//detectors[0] = "Hanford";
+	//detectors[1] = "Livingston";
+	//std::string *detector_files = new std::string[num_detectors];
+	//detector_files[0] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt";
+	//detector_files[1] =  "/Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt";
  	double trigger_time = gps_time;
 	double **psd = allocate_2D_array(num_detectors,psd_length);
 	double **freqs = allocate_2D_array(num_detectors,psd_length);
@@ -174,12 +189,14 @@ void test61()
 	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
 	data_length[0] =psd_length;
 	data_length[1] =psd_length;
-	//data_length[2] =psd_length;
+	data_length[2] =psd_length;
 
 	//#########################################################
 	//mcmc options
 	int dimension = 7;
 	double initial_pos[dimension]={std::log(30), .24,.1,.1,.9,.9,.1};
+	//int dimension = 4;
+	//double initial_pos[dimension]={std::log(30), .24,.1,.1};
 	double *seeding_var = NULL;
 	int n_steps = 10000;
 	int chain_N=12 ;
@@ -211,7 +228,7 @@ void test61()
 
 	int corr_threshold = 10;
 	int corr_segments = 10;
-	double corr_converge_thresh = 0.50;
+	double corr_converge_thresh = 0.05;
 	double corr_target_ac = .01;
 
 	double **output;
@@ -6649,9 +6666,22 @@ double test_lp_reduceddim(double *pos, int dim, int chain_id,void *parameters)
 	else {return pos[0];}
 	//else {return pos[4]+1*pos[3];}
 }
+double test_lp_GW_D_in(double *pos, int dim, int chain_id,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	double eta = pos[1];
+	if (std::exp(pos[0])<2 || std::exp(pos[0])>100){return a;}//chirpmass
+	if ((pos[1])<.1 || (pos[1])>.249999){return a;}//eta
+	if ((pos[2])<-.99 || (pos[2])>.99){return a;}//chi1 
+	if ((pos[3])<-.99 || (pos[3])>.99){return a;}//chi2
+	else {return log(chirpmass_eta_jac(chirp,eta));}
+}
 double test_lp_GW_Pv2_in(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	double eta = pos[1];
 	if (std::exp(pos[0])<2 || std::exp(pos[0])>100){return a;}//chirpmass
 	if ((pos[1])<.1 || (pos[1])>.249999){return a;}//eta
 	if ((pos[2])<0 || (pos[2])>.99){return a;}//chi1 
@@ -6659,5 +6689,9 @@ double test_lp_GW_Pv2_in(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
-	else {return pos[0];}
+	else {return log(chirpmass_eta_jac(chirp,eta));}
+}
+//Uniform in m1 and m2, transformed to lnM and eta
+double chirpmass_eta_jac(double chirpmass, double eta){
+	return chirpmass*chirpmass/(sqrt(1. - 4.*eta)*pow(eta,1.2));
 }
