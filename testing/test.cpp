@@ -135,7 +135,7 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test61();	
+	test54();	
 	//test6();	
 	//test45();	
 	return 0;
@@ -627,7 +627,7 @@ void test54()
 	std::string checkpointfile = "testing/data/neil_mcmc_checkpoint_uncorr.csv";
 	
 	int numThreads = 10;
-	bool pool = true;
+	bool pool = false;
 
 	int corr_threshold = 5;
 	int corr_segments = 20;
@@ -637,7 +637,7 @@ void test54()
 	std::function<double(double* , int *,int, int,void *)> lp = [](double *param, int * status,int dim, int chain_id,void *parameters){ return test_lp_nts(param,dim,chain_id,parameters);};
 	std::function<double(double* , int*,int, int,void *)> ll = [](double *param, int *status,int dim, int chain_id,void *parameters){ return log_neil_proj3_nts(param,dim,chain_id,parameters);};
 	std::function<void(double* , int*,int, double**,int,void *)> f = [](double *param, int *status,int dim, double **fish,int chain_id,void *parameters){ fisher_neil_proj3(param,dim,fish,chain_id,parameters);};
-	f=NULL;
+	//f=NULL;
 	
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_dist_method,test_lp_nts, log_neil_proj3_nts,NULL ,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, "",checkpointfile );	
 	//PTMCMC_MH_dynamic_PT_alloc_internal(output, dimension, N_steps, chain_N,max_chain_N_thermo, initial_pos,seeding_var,chain_temps, swp_freq, t0, nu,chain_dist_method,lp, ll,f,numThreads, pool,show_progress, statfilename,"", "",checkpointfile );	

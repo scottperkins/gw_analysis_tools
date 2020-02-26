@@ -269,8 +269,8 @@ double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *p
 	double chirp = std::exp(pos[0]);
 	double eta = pos[1];
 	//Flat priors across physical regions
-	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if (exp(pos[0])<2 || exp(pos[0])>100){return a;}//RA
+	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
 	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
@@ -283,8 +283,8 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 	double chirp = std::exp(pos[0]);
 	double eta = pos[1];
 	//Flat priors across physical regions
-	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((exp(pos[0]))<2 || exp(pos[0])>100){return a;}//RA
+	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 

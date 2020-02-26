@@ -571,7 +571,8 @@ void PTMCMC_MH_internal(	double ***output,
 	std::string likelihood_log_filename,
 	std::string checkpoint_filename
 	);
-void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,
+void continue_PTMCMC_MH_internal(sampler *samplerptr, 
+	std::string start_checkpoint_file,
 	double ***output,
 	int N_steps,
 	int swp_freq,

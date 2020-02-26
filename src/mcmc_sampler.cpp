@@ -460,10 +460,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				user_parameters,numThreads, pool,internal_prog,"","",likelihood_log_filename,checkpoint_file);
 		}
 		
-		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, dynamic_search_length, 
+		sampler sampler;
+		continue_PTMCMC_MH_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"", "",likelihood_log_filename, checkpoint_file);
+		deallocate_sampler_mem(&sampler);
 			
 		//####################################################################################
 		/* Save -- version that combines before calculating AC*/
@@ -602,11 +604,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	int realloc_temps_length = .05*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = .1*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
 	//int realloc_temps_length = 1;//0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
+	bool realloc = false;
 	while(status<N_steps){
-		if(status>realloc_temps_thresh){
+		//if(status>realloc_temps_thresh){
+		if(realloc || status>realloc_temps_thresh){
 			if( 5*t0<temp_length){
 				dynamic_search_length = 5*t0;
 			}
@@ -620,11 +624,26 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				user_parameters,numThreads, pool,internal_prog,"","",likelihood_log_filename,checkpoint_file);
 
 				realloc_temps_thresh+=realloc_temps_length;
+				realloc=false;
 		}
-		continue_PTMCMC_MH_internal(checkpoint_file,temp_output, temp_length, 
+		sampler sampler;
+		continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"","",likelihood_log_filename, checkpoint_file);
+		double ave_accept = 0;
+		int cold_chains = 0;
+		for (int i = 0 ; i< chain_N; i ++){
+			if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
+				cold_chains++;
+				ave_accept+= (double)sampler.swap_accept_ct[i] / 
+					(sampler.swap_accept_ct[i] + sampler.swap_reject_ct[i]);
+			}
+		}
+		ave_accept /=cold_chains;
+		std::cout<<"AVE ACCEPT: "<<ave_accept<<std::endl;
+		if(ave_accept <0.1 || ave_accept>.4){ realloc=true;}
+		deallocate_sampler_mem(&sampler);
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 			
 		/* SAVE -- version that combines, then computes AC*/
@@ -2049,7 +2068,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
  *
  * See MCMC_MH_internal for more details of parameters (pretty much all the same)
  */
-void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for starting checkpoint*/
+void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
@@ -2072,8 +2091,8 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	start = clock();
 	wstart = omp_get_wtime();
 
-	sampler sampler;
-	samplerptr = &sampler;
+	//sampler sampler;
+	samplerptr = sampler;
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
@@ -2087,7 +2106,6 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 		samplerptr->log_ll = true;
 		samplerptr->log_lp = true;
 	}
-	
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -2189,7 +2207,7 @@ void continue_PTMCMC_MH_internal(std::string start_checkpoint_file,/**< File for
 	//free(step_rejected);
 	//temps usually allocated by user, but for continued chains, this is done internally
 	free(samplerptr->chain_temps);
-	deallocate_sampler_mem(samplerptr);
+	//deallocate_sampler_mem(samplerptr);
 }
 					
 //######################################################################################
@@ -2696,7 +2714,9 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 		f = [&fisher](double *param, int * param_status,int dim, double **fisherm, int chain_id,void *parameters){
 			fisher(param, dim, fisherm,chain_id,parameters);};
 	}
-	continue_PTMCMC_MH_internal(start_checkpoint_file,
+	sampler sampler;
+	continue_PTMCMC_MH_internal(&sampler, 
+			start_checkpoint_file,
 			output,
 			N_steps,
 			swp_freq,
@@ -2712,6 +2732,7 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			auto_corr_filename,
 			likelihood_log_filename,
 			end_checkpoint_file);
+	deallocate_sampler_mem(&sampler);
 }
 void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
@@ -2753,7 +2774,8 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id,void *parameters){
 			fisher(param, dim, fisherm,parameters);};
 	}
-	continue_PTMCMC_MH_internal(start_checkpoint_file,
+	sampler sampler;
+	continue_PTMCMC_MH_internal(&sampler,start_checkpoint_file,
 			output,
 			N_steps,
 			swp_freq,
@@ -2769,6 +2791,7 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			auto_corr_filename,
 			likelihood_log_filename,
 			end_checkpoint_file);
+	deallocate_sampler_mem(&sampler);
 }
 //######################################################################################
 //######################################################################################
