@@ -45,6 +45,7 @@ void fisher_numerical(double *frequency,
 	double *noise = NULL
 	);
 void calculate_fisher_elements(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd);
+void calculate_fisher_elements_gq(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd,double *weights, bool log_freq);
 
 void calculate_fisher_elements_batch(double *frequency, 
 	int length, 
@@ -53,6 +54,14 @@ void calculate_fisher_elements_batch(double *frequency,
 	std::complex<double> **response_deriv, 
 	double **output,
 	double *psd);
+void calculate_fisher_elements_gq_batch(double *frequency, 
+	int length, 
+	int base_dimension, 
+	int full_dimension, 
+	std::complex<double> **response_deriv, 
+	double **output,
+	double *psd,
+	double *weights);
 
 //void calculate_derivatives_old(double  **amplitude_deriv, 
 //       	double **phase_deriv,
@@ -80,6 +89,20 @@ void fisher_autodiff(double *frequency,
 	int dimension, 
 	//double *parameters,
 	gen_params *parameters,
+	int *amp_tapes = NULL,
+	int *phase_tapes = NULL,
+	double *noise = NULL
+	);
+void fisher_autodiff_gq_internal(double *frequency, 
+	int length,
+	string generation_method, 
+	string detector, 
+	double **output,
+	int dimension, 
+	//double *parameters,
+	gen_params *parameters,
+	double *weights,
+	bool log_freq,
 	int *amp_tapes = NULL,
 	int *phase_tapes = NULL,
 	double *noise = NULL

@@ -642,6 +642,72 @@ void fisher_autodiff_interp(double *frequency,
 	delete [] temp_deriv_phase;
 	delete [] freqs_ds;
 }
+/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
+ *
+ * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
+ *
+ * Note: If trying to run large number of Fishers concurrently with openmp, you may need to change some ADOL-C parameters. Copy the example .adolcrc file in data/ to the working directory and adjust as needed
+ *
+ * Based on general gaussian quadrature 
+ *
+ */
+void fisher_autodiff_gq_internal(
+	double *frequency, /**< Frequencies at which the weights are computed*/
+	int length,/**< if 0, standard frequency range for the detector is used*/ 
+	std::string generation_method, 
+	std::string detector, 
+	double **output,/**< double [dimension][dimension]*/
+	int dimension, 
+	gen_params *parameters,
+	double *weights,/**< Weights to use in the gaussian quadrature*/
+	bool log_freq,
+	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
+	double *noise
+	)
+{
+	//populate noise and frequency
+	double *internal_noise;
+	bool local_noise=false;
+	if (noise)
+	{
+		internal_noise = noise;
+	}
+	else{
+		internal_noise = new double[length];
+		populate_noise(frequency,detector, internal_noise,length);
+		for (int i =0; i<length;i++)
+		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
+		local_noise=true;
+	}
+		
+	//populate derivatives
+
+	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
+	for(int i =0 ;i<dimension; i++){
+		response_deriv[i] = new std::complex<double>[length];
+	}
+	calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
+	//##########################################################
+	
+	//calulate fisher elements
+	calculate_fisher_elements_gq(frequency, length,dimension, response_deriv, output,  internal_noise,weights, log_freq);
+
+	//Factor of 2 for LISA's second arm
+	if(detector == "LISA"){
+		for(int i = 0 ; i<dimension;i++){
+			for(int j = 0  ;j<dimension; j++){
+				output[i][j]*=2;
+			}	
+		}
+	}
+
+	if(local_noise){delete [] internal_noise;}
+	for(int i =0 ;i<dimension; i++){
+		delete [] response_deriv[i];
+	}
+	delete [] response_deriv;
+}
 
 /*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
@@ -2166,6 +2232,80 @@ void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_param
 template void deallocate_non_param_options<double>(gen_params_base<double> *, gen_params_base<double> *, std::string);
 template void deallocate_non_param_options<adouble>(gen_params_base<adouble> *, gen_params_base<double> *, std::string);
 
+/*! \brief Subroutine to calculate fisher elements for a subset of the fisher -- based on gaussian quadrature
+ *
+ * Skips elements that have dimensions (i,j) for i!=j && i>base_dim && j>base_dim
+ *
+ * Sets non-computed elements to zero
+ *
+ */
+void calculate_fisher_elements_gq_batch(double *frequency, 
+	int length, 
+	int base_dimension, 
+	int full_dimension, 
+	std::complex<double> **response_deriv, 
+	double **output,
+	double *psd,
+	double *weights)
+{
+	//list of modifications
+	int mod_list[full_dimension-base_dimension];
+	for(int i = base_dimension; i<full_dimension; i++){
+		mod_list[i-base_dimension]=i;
+	}
+
+	double *integrand=new double[length];
+	for (int j=0;j<full_dimension; j++)
+	{
+		
+		for (int k = 0; k<j; k++)
+		{
+			//Mod mod element of fisher, set to zero
+			if(check_list(k, mod_list, full_dimension-base_dimension) &&check_list(k, mod_list, full_dimension-base_dimension)){
+				output[j][k] = 0;	
+			}
+			//GR GR or GR mod element of the fisher
+			else{
+				for (int i =0;i<length;i++)
+				{
+					integrand[i] = 
+						real( 
+						(response_deriv[j][i]*
+						std::conj(response_deriv[k][i]))
+						/psd[i]);
+				}
+				
+				double sum = 0;
+				for(int i = 0 ; i<length; i++){
+					sum+= ( weights[i] * integrand[i]);
+	
+				}
+				output[j][k] = 4*sum;	
+			}
+			output[k][j] = output[j][k];
+		}
+
+	}
+
+	//All diagonal terms are calculated
+	for (int j = 0; j<full_dimension; j ++)
+	{
+
+		for (int i =0;i<length;i++){
+				integrand[i] = 
+					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
+					/psd[i]);
+		}
+		double sum = 0;
+		for(int i = 0 ; i<length; i++){
+			sum+= ( weights[i] * integrand[i]);
+	
+		}
+		output[j][j] = 4*sum;	
+	}
+	delete [] integrand;	
+
+}
 
 /*! \brief Subroutine to calculate fisher elements for a subset of the fisher
  *
@@ -2233,6 +2373,65 @@ void calculate_fisher_elements_batch(double *frequency,
 	delete [] integrand;	
 
 }
+void calculate_fisher_elements_gq(double *frequency, 
+	int length, 
+	int dimension, 
+	std::complex<double> **response_deriv, 
+	double **output,
+	double *psd,
+	double *weights,
+	bool log_freq
+	)
+{
+	double *integrand=new double[length];
+	for (int j=0;j<dimension; j++)
+	{
+		for (int k = 0; k<j; k++)
+		{
+			for (int i =0;i<length;i++)
+			{
+				integrand[i] = 
+					real( 
+					(response_deriv[j][i]*
+					std::conj(response_deriv[k][i]))
+					/psd[i]);
+				if(log_freq){
+					integrand[i]*=(frequency[i]);
+				}
+			}
+			
+			double sum = 0;
+			for(int i = 0 ; i<length; i++){
+				sum+= ( weights[i] * integrand[i]);
+	
+			}
+			output[j][k] = 4*sum;	
+			output[k][j] = output[j][k];
+		}
+
+	}
+
+	for (int j = 0; j<dimension; j ++)
+	{
+
+		for (int i =0;i<length;i++){
+				integrand[i] = 
+					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
+					/psd[i]);
+				if(log_freq){
+					integrand[i]*=(frequency[i]);
+				}
+		}
+		double sum = 0;
+		for(int i = 0 ; i<length; i++){
+			sum+= ( weights[i] * integrand[i]);
+	
+		}
+		output[j][j] = 4*sum;	
+	}
+	delete [] integrand;	
+
+}
 void calculate_fisher_elements(double *frequency, 
 	int length, 
 	int dimension, 
@@ -2253,8 +2452,6 @@ void calculate_fisher_elements(double *frequency,
 					std::conj(response_deriv[k][i]))
 					/psd[i]);
 			}
-			//write_file("data/int_testing/full_int_"+to_string(j)+"_"+to_string(k)+".csv",integrand, length);
-			//write_file("data/int_testing/full_int_f.csv",frequency, length);
 			
 			output[j][k] = 4*simpsons_sum(
 						frequency[1]-frequency[0], length, integrand);	
