@@ -135,6 +135,26 @@ int main(int argc, char *argv[])
 	for(int i = 0 ; i<detector_N; i++){
 		data_lengths[i] =psd_length;
 	}
+
+	//#############################################################
+	//#############################################################
+	
+	double **whitened = allocate_2D_array(data_lengths[0],7);
+	for(int i = 0 ; i<data_lengths[0]; i++){
+		whitened[i][0]= freqs[0][i];
+		whitened[i][1]=psd[0][i];
+		whitened[i][2]=psd[1][i];
+		whitened[i][3]=real(data[0][i]);
+		whitened[i][4]=imag(data[0][i]);
+		whitened[i][5]=real(data[1][i]);
+		whitened[i][6]=imag(data[1][i]);
+	}	
+	write_file("testing/data/whitened_data.csv",whitened,data_lengths[0],7);
+	deallocate_2D_array(whitened, data_lengths[0],7);
+	
+	//#############################################################
+	//#############################################################
+
 	//########################################################################
 	double **output;
 	output = allocate_2D_array(samples, dimension );

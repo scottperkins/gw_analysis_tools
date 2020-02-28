@@ -37,7 +37,7 @@ for x in np.arange(len(data)):
         if x%1 == 0:
             data_thinned.append(data[x])
 data_thinned = np.ascontiguousarray(data_thinned)
-#data_thinned = data_thinned[100:]
+data_thinned = data_thinned[100:]
 mcmc.write_auto_corr_file_from_data_py(b'data/ac.csv',data_thinned,len(data_thinned),dim,10,0.01,10,True)
 #mcmc.write_auto_corr_file_from_data_file_py(b'data/ac.csv',b'data/mcmc_pv2_chain.csv',200000,12,10,0.01,10,True)
 
