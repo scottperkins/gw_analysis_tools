@@ -135,9 +135,9 @@ int main(){
 
 	//test38();	
 	//test54();	
-	test54();	
+	//test54();	
 	//test6();	
-	//test45();	
+	test45();	
 	return 0;
 }
 
@@ -1164,7 +1164,7 @@ void test45()
 	std::string checkf2 = "testing/data/mcmc_pv2_check2.csv";
 	int chain_n=8;
 	int max_thermo=8;
-	int steps =3e5;
+	int steps =1e3;
 	int stepsalloc =1e4;
 	double temps[chain_n];
 	int t0 = 1e3;
@@ -1176,10 +1176,11 @@ void test45()
 	}
 	double ***output=allocate_3D_array(chain_n, steps, dim);
 	load_temps_checkpoint_file(checkf,temps, chain_n);
+	std::string log_file = "testing/data/test_log.csv";
 	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
 	//continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_D,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf2);
-	PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_D,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "",checkf);
+	PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_D,threads, pool, show_prog, n_detect, data, psds, freqs, lengths, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", log_file,checkf);
 	
 	deallocate_3D_array(output,chain_n, steps,dim);
 	for(int i = 0 ; i<n_detect; i++){

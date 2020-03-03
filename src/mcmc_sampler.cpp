@@ -457,7 +457,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","",likelihood_log_filename,checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
 		}
 		
 		sampler sampler;
@@ -621,7 +621,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","",likelihood_log_filename,checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
 
 				realloc_temps_thresh+=realloc_temps_length;
 				realloc=false;
@@ -631,6 +631,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"","",likelihood_log_filename, checkpoint_file);
+		write_file("testing/data/test_output.csv",temp_output[0],temp_length,dimension);
 		double ave_accept = 0;
 		int cold_chains = 0;
 		for (int i = 0 ; i< chain_N; i ++){
