@@ -66,7 +66,8 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle">
 <div class="title">fisher.cpp File Reference</div>  </div>
 </div><!--header-->
@@ -96,16 +97,7 @@ $(function() {
 Include dependency graph for fisher.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="fisher_8cpp__incl.png" border="0" usemap="#src_2fisher_8cpp" alt=""/></div>
-<map name="src_2fisher_8cpp" id="src_2fisher_8cpp">
-<area shape="rect" href="fisher_8h.html" title="fisher.h" alt="" coords="211,155,276,181"/>
-<area shape="rect" href="util_8h.html" title="util.h" alt="" coords="629,229,680,256"/>
-<area shape="rect" href="detector__util_8h.html" title="detector_util.h" alt="" coords="352,155,456,181"/>
-<area shape="rect" href="IMRPhenomD_8h.html" title="IMRPhenomD.h" alt="" coords="694,155,810,181"/>
-<area shape="rect" href="IMRPhenomP_8h.html" title="IMRPhenomP.h" alt="" coords="626,80,741,107"/>
-<area shape="rect" href="ppE__IMRPhenomD_8h.html" title="ppE_IMRPhenomD.h" alt="" coords="765,80,912,107"/>
-<area shape="rect" href="waveform__generator_8h.html" title="waveform_generator.h" alt="" coords="36,155,187,181"/>
-<area shape="rect" href="waveform__util_8h.html" title="waveform_util.h" alt="" coords="336,80,450,107"/>
-</map>
+<!-- MAP 0 -->
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -122,12 +114,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_derivatives
 <tr class="memitem:a3d084e6f4a371edfc51b6e2a1324d970"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#a3d084e6f4a371edfc51b6e2a1324d970">fisher_autodiff_interp</a> (double *frequency, int length, std::string generation_method, std::string detector, double **output, int dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, int downsampling_factor, int *amp_tapes, int *phase_tapes, double *noise)</td></tr>
 <tr class="memdesc:a3d084e6f4a371edfc51b6e2a1324d970"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version.  <a href="fisher_8cpp.html#a3d084e6f4a371edfc51b6e2a1324d970">More...</a><br /></td></tr>
 <tr class="separator:a3d084e6f4a371edfc51b6e2a1324d970"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32601e9b8b1e1e36905da85a4acc5d43"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#a32601e9b8b1e1e36905da85a4acc5d43">fisher_autodiff</a> (double *frequency, int length, std::string generation_method, std::string detector, double **output, int dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, int *amp_tapes, int *phase_tapes, double *noise)</td></tr>
-<tr class="memdesc:a32601e9b8b1e1e36905da85a4acc5d43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version.  <a href="fisher_8cpp.html#a32601e9b8b1e1e36905da85a4acc5d43">More...</a><br /></td></tr>
-<tr class="separator:a32601e9b8b1e1e36905da85a4acc5d43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab8feb32ace0a3f96caa05a3ebe36741c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#ab8feb32ace0a3f96caa05a3ebe36741c">calculate_derivatives_autodiff</a> (double *frequency, int length, int dimension, std::string generation_method, <a class="el" href="classgen__params.html">gen_params</a> *parameters, std::complex&lt; double &gt; **waveform_deriv, int *waveform_tapes, std::string detector)</td></tr>
-<tr class="memdesc:ab8feb32ace0a3f96caa05a3ebe36741c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the derivatives of the detector response using automatic differentiation.  <a href="fisher_8cpp.html#ab8feb32ace0a3f96caa05a3ebe36741c">More...</a><br /></td></tr>
-<tr class="separator:ab8feb32ace0a3f96caa05a3ebe36741c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef9f0047c95d3eb691242b60df9a5d4f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#aef9f0047c95d3eb691242b60df9a5d4f">fisher_autodiff</a> (double *frequency, int length, std::string generation_method, std::string detector, double **output, int dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, std::string integration_method, double *weights, bool log10_f, double *noise, int *amp_tapes, int *phase_tapes)</td></tr>
+<tr class="memdesc:aef9f0047c95d3eb691242b60df9a5d4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version.  <a href="fisher_8cpp.html#aef9f0047c95d3eb691242b60df9a5d4f">More...</a><br /></td></tr>
+<tr class="separator:aef9f0047c95d3eb691242b60df9a5d4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a22d78a622d1a942e6e93c91fbb0999"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#a4a22d78a622d1a942e6e93c91fbb0999">calculate_derivatives_autodiff</a> (double *frequency, int length, int dimension, std::string generation_method, <a class="el" href="classgen__params.html">gen_params</a> *parameters, std::complex&lt; double &gt; **waveform_deriv, int *waveform_tapes, std::string detector, bool autodiff_time_deriv)</td></tr>
+<tr class="memdesc:a4a22d78a622d1a942e6e93c91fbb0999"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the derivatives of the detector response using automatic differentiation.  <a href="fisher_8cpp.html#a4a22d78a622d1a942e6e93c91fbb0999">More...</a><br /></td></tr>
+<tr class="separator:a4a22d78a622d1a942e6e93c91fbb0999"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad08ddae761a3005399569df9dd80d261"><td class="memItemLeft" align="right" valign="top"><a id="ad08ddae761a3005399569df9dd80d261"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>num_src_params</b> (int *N_src_params, std::string generation_method, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params)</td></tr>
 <tr class="separator:ad08ddae761a3005399569df9dd80d261"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -190,9 +182,9 @@ template void&#160;</td><td class="memItemRight" valign="bottom"><b>deallocate_n
 <tr class="memitem:acae7abfd22bc80580996b8f677be9156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#acae7abfd22bc80580996b8f677be9156">calculate_fisher_elements_batch</a> (double *frequency, int length, int base_dimension, int full_dimension, std::complex&lt; double &gt; **response_deriv, double **output, double *psd)</td></tr>
 <tr class="memdesc:acae7abfd22bc80580996b8f677be9156"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subroutine to calculate fisher elements for a subset of the fisher.  <a href="fisher_8cpp.html#acae7abfd22bc80580996b8f677be9156">More...</a><br /></td></tr>
 <tr class="separator:acae7abfd22bc80580996b8f677be9156"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8da03c0eee5317e59d67f85dd6358494"><td class="memItemLeft" align="right" valign="top"><a id="a8da03c0eee5317e59d67f85dd6358494"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_fisher_elements</b> (double *frequency, int length, int dimension, std::complex&lt; double &gt; **response_deriv, double **output, double *psd)</td></tr>
-<tr class="separator:a8da03c0eee5317e59d67f85dd6358494"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1e1f85b3af98f868772ea95d47d33c0"><td class="memItemLeft" align="right" valign="top"><a id="ad1e1f85b3af98f868772ea95d47d33c0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_fisher_elements</b> (double *frequency, int length, int dimension, std::complex&lt; double &gt; **response_deriv, double **output, double *psd, std::string integration_method, double *weights, bool log10_f)</td></tr>
+<tr class="separator:ad1e1f85b3af98f868772ea95d47d33c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a35526714c92028b3083eee115558984a"><td class="memItemLeft" align="right" valign="top"><a id="a35526714c92028b3083eee115558984a"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>repack_parameters&lt; adouble &gt;</b> (adouble *, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; adouble &gt; *, std::string, int, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *)</td></tr>
 <tr class="separator:a35526714c92028b3083eee115558984a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,10 +218,16 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
 <tr class="memitem:a0483f09b0c7a53ae7b65d3dff7385697"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8cpp.html#a0483f09b0c7a53ae7b65d3dff7385697">calculate_integrand_autodiff_gsl_subroutine</a> (double frequency, void *params_in)</td></tr>
 <tr class="memdesc:a0483f09b0c7a53ae7b65d3dff7385697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the derivatives of the detector response using automatic differentiation &ndash; one frequency for gsl_integration.  <a href="fisher_8cpp.html#a0483f09b0c7a53ae7b65d3dff7385697">More...</a><br /></td></tr>
 <tr class="separator:a0483f09b0c7a53ae7b65d3dff7385697"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a0f05f1cfa99eff9341f401063e3e551c"><td class="memItemLeft" align="right" valign="top"><a id="a0f05f1cfa99eff9341f401063e3e551c"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>LOG10</b> =log(10.)</td></tr>
+<tr class="separator:a0f05f1cfa99eff9341f401063e3e551c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ab8feb32ace0a3f96caa05a3ebe36741c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab8feb32ace0a3f96caa05a3ebe36741c">&#9670;&nbsp;</a></span>calculate_derivatives_autodiff()</h2>
+<a id="a4a22d78a622d1a942e6e93c91fbb0999"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a22d78a622d1a942e6e93c91fbb0999">&#9670;&nbsp;</a></span>calculate_derivatives_autodiff()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -280,7 +278,13 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">std::string&#160;</td>
-          <td class="paramname"><em>detector</em>&#160;</td>
+          <td class="paramname"><em>detector</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>autodiff_time_deriv</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -293,7 +297,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
 <p>Calculates the derivatives of the detector response using automatic differentiation. </p>
 <p>Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference</p>
 <p>Higher dimensional fishers actually could be faster</p>
-<p>NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 &ndash; the +1(+2) are for the frequency deriv(time deriv) </p>
+<p>NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 &ndash; the +1(+2) are for the frequency deriv(time deriv)</p>
+<p>autodiff_time_deriv indicates if the time derivatives for space detectors should be done, either with the full autodiff hessian (slow) or with the numerical approximation (autodiff then numerical) </p>
 
 </div>
 </div>
@@ -453,8 +458,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
 
 </div>
 </div>
-<a id="a32601e9b8b1e1e36905da85a4acc5d43"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a32601e9b8b1e1e36905da85a4acc5d43">&#9670;&nbsp;</a></span>fisher_autodiff()</h2>
+<a id="aef9f0047c95d3eb691242b60df9a5d4f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aef9f0047c95d3eb691242b60df9a5d4f">&#9670;&nbsp;</a></span>fisher_autodiff()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -504,6 +509,30 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>integration_method</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>log10_f</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>noise</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>amp_tapes</em>, </td>
         </tr>
@@ -511,13 +540,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>phase_tapes</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double *&#160;</td>
-          <td class="paramname"><em>noise</em>&#160;</td>
+          <td class="paramname"><em>phase_tapes</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -528,11 +551,24 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>tape_waveform_gsl_sub
 </div><div class="memdoc">
 
 <p>Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version. </p>
-<p>Build around ADOL-C &ndash; A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012). </p>
+<p>Build around ADOL-C &ndash; A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).</p>
+<p>Note: If trying to run large number of Fishers concurrently with openmp, you may need to change some ADOL-C parameters. Copy the example .adolcrc file in data/ to the working directory and adjust as needed</p>
+<p>If integration method is gaussian quadrature and the frequencies are !NULL, the weights must be pre-allocated.</p>
+<p>If the integration method is Newton-Cotes, the weights are not used.</p>
+<p>Integration schemes:</p>
+<p>Newton-Cotes methods: </p><pre class="fragment">SIMPSONS
+</pre><p>Gaussian Quadrature </p><pre class="fragment">GAUSSLEG
+</pre><p>log10_f used if frequencies are logarithmically (base 10) spaced. NOTE: not sure if this would work for SIMPSONS &ndash; this hasn't been tested. For now, only gaussian quadrature routines are supported. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">length</td><td>if 0, standard frequency range for the detector is used </td></tr>
     <tr><td class="paramname">output</td><td>double [dimension][dimension] </td></tr>
+    <tr><td class="paramname">dimension</td><td>dimension of the fisher </td></tr>
+    <tr><td class="paramname">parameters</td><td>Injection parameters </td></tr>
+    <tr><td class="paramname">integration_method</td><td>Method of integration to use </td></tr>
+    <tr><td class="paramname">weights</td><td>If using a gaussian quadrature method and the weights have been precomputed, the weights can be supplied here </td></tr>
+    <tr><td class="paramname">log10_f</td><td>Boolean for logarithmically (base 10) spaced frequencies </td></tr>
+    <tr><td class="paramname">noise</td><td>Precomputed PSD array </td></tr>
     <tr><td class="paramname">amp_tapes</td><td>if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method </td></tr>
     <tr><td class="paramname">phase_tapes</td><td>if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method </td></tr>
   </table>

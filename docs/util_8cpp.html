@@ -93,11 +93,7 @@ $(function() {
 Include dependency graph for util.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="util_8cpp__incl.png" border="0" usemap="#src_2util_8cpp" alt=""/></div>
-<map name="src_2util_8cpp" id="src_2util_8cpp">
-<area shape="rect" href="util_8h.html" title="util.h" alt="" coords="370,80,421,107"/>
-<area shape="rect" href="GWATConfig_8h.html" title="GWATConfig.h" alt="" coords="648,80,759,107"/>
-<area shape="rect" href="D__Z__Config_8h.html" title="D_Z_Config.h" alt="" coords="783,80,885,107"/>
-</map>
+<!-- MAP 0 -->
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
@@ -190,6 +186,19 @@ template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_interse
 <tr class="memitem:a79c2688dc6d09b4aee47618cd5340819"><td class="memItemLeft" align="right" valign="top"><a id="a79c2688dc6d09b4aee47618cd5340819"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect&lt; int &gt;</b> (int *, int, int *, int, int **, int *)</td></tr>
 <tr class="separator:a79c2688dc6d09b4aee47618cd5340819"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a52ba97982df939cea3191098152fbbb2"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a52ba97982df939cea3191098152fbbb2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="util_8cpp.html#a52ba97982df939cea3191098152fbbb2">list_intersect_value</a> (T *A, int lenA, T *B, int lenB, T *C, int *lenC)</td></tr>
+<tr class="memdesc:a52ba97982df939cea3191098152fbbb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Custom list-interesction implementation for sorted lists.  <a href="util_8cpp.html#a52ba97982df939cea3191098152fbbb2">More...</a><br /></td></tr>
+<tr class="separator:a52ba97982df939cea3191098152fbbb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6595995bb36502886b5790314ab1c855"><td class="memItemLeft" align="right" valign="top"><a id="a6595995bb36502886b5790314ab1c855"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_value&lt; double &gt;</b> (double *, int, double *, int, double *, int *)</td></tr>
+<tr class="separator:a6595995bb36502886b5790314ab1c855"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adac1189401a0dbb723d0e2aac2316bc7"><td class="memItemLeft" align="right" valign="top"><a id="adac1189401a0dbb723d0e2aac2316bc7"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_value&lt; adouble &gt;</b> (adouble *, int, adouble *, int, adouble *, int *)</td></tr>
+<tr class="separator:adac1189401a0dbb723d0e2aac2316bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56ca227b8f67a76bb2d163d7367e1b46"><td class="memItemLeft" align="right" valign="top"><a id="a56ca227b8f67a76bb2d163d7367e1b46"></a>
+template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_value&lt; int &gt;</b> (int *, int, int *, int, int *, int *)</td></tr>
+<tr class="separator:a56ca227b8f67a76bb2d163d7367e1b46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f15abfb33a16347c3a5075ecc538f90"><td class="memTemplParams" colspan="2"><a id="a4f15abfb33a16347c3a5075ecc538f90"></a>
 template&lt;class T , class U &gt; </td></tr>
 <tr class="memitem:a4f15abfb33a16347c3a5075ecc538f90"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mean_list</b> (T *list, int length, U *result)</td></tr>
@@ -1474,6 +1483,67 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">T **&#160;</td>
+          <td class="paramname"><em>C</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *&#160;</td>
+          <td class="paramname"><em>lenC</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Custom list-interesction implementation for sorted lists. </p>
+<p>Uses pointers for efficiency &ndash; NOT COPIED &ndash; used std library for that</p>
+<p>Takes A and B and puts the intersection in C &ndash; C = A /\ B</p>
+<p>Takes the length of C and puts it in lenC</p>
+<p>C should have allocated memory for at least as large as the smallest list</p>
+<p>WILL NOT work in-place, A, B, and C must be separate </p>
+
+</div>
+</div>
+<a id="a52ba97982df939cea3191098152fbbb2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a52ba97982df939cea3191098152fbbb2">&#9670;&nbsp;</a></span>list_intersect_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void list_intersect_value </td>
+          <td>(</td>
+          <td class="paramtype">T *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>lenA</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T *&#160;</td>
+          <td class="paramname"><em>B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>lenB</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T *&#160;</td>
           <td class="paramname"><em>C</em>, </td>
         </tr>
         <tr>

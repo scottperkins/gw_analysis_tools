@@ -32,11 +32,19 @@ std\+::string {\bfseries trim} (std\+::string str)
 \item 
 void \mbox{\hyperlink{io__util_8h_aad742282a09bb261d21080e8874578ba}{read\+\_\+file}} (std\+::string filename, double $\ast$$\ast$output, int rows, int cols)
 \begin{DoxyCompactList}\small\item\em Utility to read in data. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{io__util_8h_abed5d6708a7adc8cd37ca0d578730b17}{read\+\_\+file}} (std\+::string filename, int $\ast$$\ast$output, int rows, int cols)
+\begin{DoxyCompactList}\small\item\em Utility to read in data. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{io__util_8h_a788a44b839a09910024159d9d10764d0}{read\+\_\+file}} (std\+::string filename, double $\ast$output)
+\begin{DoxyCompactList}\small\item\em Utility to read in data (single dimension vector) \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{io__util_8h_a6add7454e404e8305cd6695b0cff428e}{read\+\_\+file}} (std\+::string filename, int $\ast$output)
 \begin{DoxyCompactList}\small\item\em Utility to read in data (single dimension vector) \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{io__util_8h_a8cb10f1eb5598be2a3aa53dcc2ebe844}{write\+\_\+file}} (std\+::string filename, double $\ast$$\ast$input, int rows, int cols)
 \begin{DoxyCompactList}\small\item\em Utility to write 2D array to file. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{io__util_8h_a4b7b68907ec287799769dd0a1ff0b427}{write\+\_\+file}} (std\+::string filename, int $\ast$$\ast$input, int rows, int cols)
+\begin{DoxyCompactList}\small\item\em Utility to write 2D array to file. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{io__util_8h_a2364e735eddfa67c1317f6ebc64565f3}{write\+\_\+file}} (std\+::string filename, double $\ast$input, int length)
+\begin{DoxyCompactList}\small\item\em Utility to write 1D array to file. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{io__util_8h_ab6683e37f11111fe729fe0fd304c5651}{write\+\_\+file}} (std\+::string filename, int $\ast$input, int length)
 \begin{DoxyCompactList}\small\item\em Utility to write 1D array to file. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{io__util_8h_abbb4e70ddc93c8995739b3a481bbf3a6}{read\+\_\+\+L\+O\+S\+C\+\_\+data\+\_\+file}} (std\+::string filename, double $\ast$output, double $\ast$data\+\_\+start\+\_\+time, double $\ast$duration, double $\ast$fs)
 \begin{DoxyCompactList}\small\item\em Read data file from L\+I\+GO Open Science Center. \end{DoxyCompactList}\item 
@@ -138,7 +146,7 @@ Returns\+: \begin{DoxyVerb}0 -- Not found
 /brief Free data allocated by prep\+\_\+\+L\+O\+S\+C\+\_\+data function \mbox{\Hypertarget{io__util_8h_aad742282a09bb261d21080e8874578ba}\label{io__util_8h_aad742282a09bb261d21080e8874578ba}} 
 \index{io\_util.h@{io\_util.h}!read\_file@{read\_file}}
 \index{read\_file@{read\_file}!io\_util.h@{io\_util.h}}
-\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
 {\footnotesize\ttfamily void read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
 
 
@@ -161,7 +169,7 @@ File must be comma separated doubles
 \mbox{\Hypertarget{io__util_8h_a788a44b839a09910024159d9d10764d0}\label{io__util_8h_a788a44b839a09910024159d9d10764d0}} 
 \index{io\_util.h@{io\_util.h}!read\_file@{read\_file}}
 \index{read\_file@{read\_file}!io\_util.h@{io\_util.h}}
-\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
 {\footnotesize\ttfamily void read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$}]{output }\end{DoxyParamCaption})}
 
 
@@ -173,6 +181,54 @@ Takes filename, and assigns to output\mbox{[}i$\ast$rows + cols\mbox{]}
 Output vector must be long enough, no check is done for the length
 
 File must be comma separated doubles 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em filename} & input filename, relative to execution directory \\
+\hline
+\mbox{\texttt{ out}}  & {\em output} & output array, assumed to have the proper length of total items \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{io__util_8h_abed5d6708a7adc8cd37ca0d578730b17}\label{io__util_8h_abed5d6708a7adc8cd37ca0d578730b17}} 
+\index{io\_util.h@{io\_util.h}!read\_file@{read\_file}}
+\index{read\_file@{read\_file}!io\_util.h@{io\_util.h}}
+\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily void read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{int $\ast$$\ast$}]{output,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
+
+
+
+Utility to read in data. 
+
+Takes filename, and assigns to output\mbox{[}rows\mbox{]}\mbox{[}cols\mbox{]}
+
+File must be comma separated doubles
+
+integer version 
+\begin{DoxyParams}[1]{Parameters}
+ & {\em filename} & input filename, relative to execution directory \\
+\hline
+\mbox{\texttt{ out}}  & {\em output} & array to store output, dimensions rows\+Xcols \\
+\hline
+ & {\em rows} & first dimension \\
+\hline
+ & {\em cols} & second dimension \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{io__util_8h_a6add7454e404e8305cd6695b0cff428e}\label{io__util_8h_a6add7454e404e8305cd6695b0cff428e}} 
+\index{io\_util.h@{io\_util.h}!read\_file@{read\_file}}
+\index{read\_file@{read\_file}!io\_util.h@{io\_util.h}}
+\doxysubsubsection{\texorpdfstring{read\_file()}{read\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily void read\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{int $\ast$}]{output }\end{DoxyParamCaption})}
+
+
+
+Utility to read in data (single dimension vector) 
+
+Takes filename, and assigns to output\mbox{[}i$\ast$rows + cols\mbox{]}
+
+Output vector must be long enough, no check is done for the length
+
+File must be comma separated doubles
+
+Int version 
 \begin{DoxyParams}[1]{Parameters}
  & {\em filename} & input filename, relative to execution directory \\
 \hline
@@ -215,7 +271,7 @@ Read P\+SD file from L\+I\+GO Open Science Center.
 Convenience function for cutting off the first few lines of text \mbox{\Hypertarget{io__util_8h_a8cb10f1eb5598be2a3aa53dcc2ebe844}\label{io__util_8h_a8cb10f1eb5598be2a3aa53dcc2ebe844}} 
 \index{io\_util.h@{io\_util.h}!write\_file@{write\_file}}
 \index{write\_file@{write\_file}!io\_util.h@{io\_util.h}}
-\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
 {\footnotesize\ttfamily void write\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$$\ast$}]{input,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
 
 
@@ -238,7 +294,7 @@ Grid has rows rows and cols columns
 \mbox{\Hypertarget{io__util_8h_a2364e735eddfa67c1317f6ebc64565f3}\label{io__util_8h_a2364e735eddfa67c1317f6ebc64565f3}} 
 \index{io\_util.h@{io\_util.h}!write\_file@{write\_file}}
 \index{write\_file@{write\_file}!io\_util.h@{io\_util.h}}
-\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
 {\footnotesize\ttfamily void write\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{double $\ast$}]{input,  }\item[{int}]{length }\end{DoxyParamCaption})}
 
 
@@ -246,6 +302,52 @@ Grid has rows rows and cols columns
 Utility to write 1D array to file. 
 
 Single column of data 
+\begin{DoxyParams}{Parameters}
+{\em filename} & Filename of output file, relative to execution directory \\
+\hline
+{\em input} & input 1D array pointer array\mbox{[}length\mbox{]} \\
+\hline
+{\em length} & length of array \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{io__util_8h_a4b7b68907ec287799769dd0a1ff0b427}\label{io__util_8h_a4b7b68907ec287799769dd0a1ff0b427}} 
+\index{io\_util.h@{io\_util.h}!write\_file@{write\_file}}
+\index{write\_file@{write\_file}!io\_util.h@{io\_util.h}}
+\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily void write\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{int $\ast$$\ast$}]{input,  }\item[{int}]{rows,  }\item[{int}]{cols }\end{DoxyParamCaption})}
+
+
+
+Utility to write 2D array to file. 
+
+Grid of data, comma separated
+
+Grid has rows rows and cols columns
+
+integer version 
+\begin{DoxyParams}{Parameters}
+{\em filename} & Filename of output file, relative to execution directory \\
+\hline
+{\em input} & Input 2D array pointer array\mbox{[}rows\mbox{]}\mbox{[}cols\mbox{]} \\
+\hline
+{\em rows} & First dimension of array \\
+\hline
+{\em cols} & second dimension of array \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{io__util_8h_ab6683e37f11111fe729fe0fd304c5651}\label{io__util_8h_ab6683e37f11111fe729fe0fd304c5651}} 
+\index{io\_util.h@{io\_util.h}!write\_file@{write\_file}}
+\index{write\_file@{write\_file}!io\_util.h@{io\_util.h}}
+\doxysubsubsection{\texorpdfstring{write\_file()}{write\_file()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily void write\+\_\+file (\begin{DoxyParamCaption}\item[{std\+::string}]{filename,  }\item[{int $\ast$}]{input,  }\item[{int}]{length }\end{DoxyParamCaption})}
+
+
+
+Utility to write 1D array to file. 
+
+Single column of data
+
+integer version 
 \begin{DoxyParams}{Parameters}
 {\em filename} & Filename of output file, relative to execution directory \\
 \hline

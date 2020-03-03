@@ -40,16 +40,19 @@ void {\bfseries prep\+\_\+gsl\+\_\+subroutine} (\mbox{\hyperlink{structgsl__subr
 \item 
 void \mbox{\hyperlink{fisher_8h_aa09e52ceab4e19f05f4aa0bc17d01235}{fisher\+\_\+numerical}} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$parameters, int order, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
 \begin{DoxyCompactList}\small\item\em Calculates the fisher matrix for the given arguments. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{fisher_8h_a8da03c0eee5317e59d67f85dd6358494}\label{fisher_8h_a8da03c0eee5317e59d67f85dd6358494}} 
-void {\bfseries calculate\+\_\+fisher\+\_\+elements} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
+\mbox{\Hypertarget{fisher_8h_ad1e1f85b3af98f868772ea95d47d33c0}\label{fisher_8h_ad1e1f85b3af98f868772ea95d47d33c0}} 
+void {\bfseries calculate\+\_\+fisher\+\_\+elements} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd, std\+::string integration\+\_\+method, double $\ast$weights, bool log10\+\_\+f)
 \item 
 void \mbox{\hyperlink{fisher_8h_acae7abfd22bc80580996b8f677be9156}{calculate\+\_\+fisher\+\_\+elements\+\_\+batch}} (double $\ast$frequency, int length, int base\+\_\+dimension, int full\+\_\+dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
 \begin{DoxyCompactList}\small\item\em Subroutine to calculate fisher elements for a subset of the fisher. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8h_a0e8bac46d59b2f9e40c199557b57ebd6}\label{fisher_8h_a0e8bac46d59b2f9e40c199557b57ebd6}} 
 void {\bfseries calculate\+\_\+derivatives} (std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$frequencies, int length, int dimension, string detector, string gen\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$parameters, int order)
 \item 
-\mbox{\Hypertarget{fisher_8h_a56b731662e3cdac4246a6dd3218ae8ff}\label{fisher_8h_a56b731662e3cdac4246a6dd3218ae8ff}} 
-void {\bfseries fisher\+\_\+autodiff} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
+\mbox{\Hypertarget{fisher_8h_aa4e85ac4d859ef4c66f05ea3a44433d4}\label{fisher_8h_aa4e85ac4d859ef4c66f05ea3a44433d4}} 
+void {\bfseries fisher\+\_\+autodiff} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::string integration\+\_\+method=\char`\"{}S\+I\+M\+P\+S\+O\+NS\char`\"{}, double $\ast$weights=N\+U\+LL, bool log10\+\_\+f=false, double $\ast$noise=N\+U\+LL, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL)
+\item 
+\mbox{\Hypertarget{fisher_8h_a8be528e95a8ca2fd0d786d6c0a99a66c}\label{fisher_8h_a8be528e95a8ca2fd0d786d6c0a99a66c}} 
+void {\bfseries fisher\+\_\+autodiff\+\_\+gq\+\_\+internal} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, double $\ast$weights, bool log\+\_\+freq, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
 \item 
 \mbox{\Hypertarget{fisher_8h_a53c2f9a5f9e04790377ecaee23f56d47}\label{fisher_8h_a53c2f9a5f9e04790377ecaee23f56d47}} 
 void {\bfseries fisher\+\_\+autodiff\+\_\+interp} (double $\ast$frequency, int length, string generation\+\_\+method, string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int downsampling\+\_\+factor, int $\ast$amp\+\_\+tapes=N\+U\+LL, int $\ast$phase\+\_\+tapes=N\+U\+LL, double $\ast$noise=N\+U\+LL)
@@ -63,7 +66,7 @@ void {\bfseries Phenom\+P\+\_\+fisher} (double $\ast$frequency, int length, \mbo
 \mbox{\Hypertarget{fisher_8h_a15b0abe98fd48389109099d6ac58c9a6}\label{fisher_8h_a15b0abe98fd48389109099d6ac58c9a6}} 
 void {\bfseries construct\+\_\+waveform\+\_\+derivative} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, \mbox{\hyperlink{structsource__parameters}{source\+\_\+parameters}}$<$ double $>$ $\ast$input\+\_\+params, int $\ast$waveform\+\_\+tapes)
 \item 
-void \mbox{\hyperlink{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}{calculate\+\_\+derivatives\+\_\+autodiff}} (double $\ast$frequency, int length, int dimension, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, int $\ast$waveform\+\_\+tapes, std\+::string detector)
+void \mbox{\hyperlink{fisher_8h_a4a22d78a622d1a942e6e93c91fbb0999}{calculate\+\_\+derivatives\+\_\+autodiff}} (double $\ast$frequency, int length, int dimension, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, int $\ast$waveform\+\_\+tapes, std\+::string detector, bool autodiff\+\_\+time\+\_\+deriv)
 \begin{DoxyCompactList}\small\item\em Calculates the derivatives of the detector response using automatic differentiation. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{fisher_8h_ab3566a9d2c5776b7769f1452bf3f80f3}{time\+\_\+phase\+\_\+corrected\+\_\+derivative\+\_\+autodiff\+\_\+full\+\_\+hess}} (double $\ast$$\ast$dt, int length, double $\ast$frequencies, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, int dimension, bool correct\+\_\+time)
 \begin{DoxyCompactList}\small\item\em Computes the derivative of the phase w.\+r.\+t. source parameters AS D\+E\+F\+I\+N\+ED BY F\+I\+S\+H\+ER F\+I\+LE -- hessian of the phase. \end{DoxyCompactList}\item 
@@ -103,11 +106,11 @@ void \mbox{\hyperlink{fisher_8h_a00c44f9e3bf774c7230d972c64b81326}{fisher\+\_\+a
 
 
 \doxysubsection{Function Documentation}
-\mbox{\Hypertarget{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}\label{fisher_8h_ab8feb32ace0a3f96caa05a3ebe36741c}} 
+\mbox{\Hypertarget{fisher_8h_a4a22d78a622d1a942e6e93c91fbb0999}\label{fisher_8h_a4a22d78a622d1a942e6e93c91fbb0999}} 
 \index{fisher.h@{fisher.h}!calculate\_derivatives\_autodiff@{calculate\_derivatives\_autodiff}}
 \index{calculate\_derivatives\_autodiff@{calculate\_derivatives\_autodiff}!fisher.h@{fisher.h}}
 \doxysubsubsection{\texorpdfstring{calculate\_derivatives\_autodiff()}{calculate\_derivatives\_autodiff()}}
-{\footnotesize\ttfamily void calculate\+\_\+derivatives\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{waveform\+\_\+deriv,  }\item[{int $\ast$}]{waveform\+\_\+tapes,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void calculate\+\_\+derivatives\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{waveform\+\_\+deriv,  }\item[{int $\ast$}]{waveform\+\_\+tapes,  }\item[{std\+::string}]{detector,  }\item[{bool}]{autodiff\+\_\+time\+\_\+deriv }\end{DoxyParamCaption})}
 
 
 
@@ -117,7 +120,9 @@ Possibly slower than the numerical derivative, but not susceptible to truncation
 
 Higher dimensional fishers actually could be faster
 
-N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv) \mbox{\Hypertarget{fisher_8h_acae7abfd22bc80580996b8f677be9156}\label{fisher_8h_acae7abfd22bc80580996b8f677be9156}} 
+N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv)
+
+autodiff\+\_\+time\+\_\+deriv indicates if the time derivatives for space detectors should be done, either with the full autodiff hessian (slow) or with the numerical approximation (autodiff then numerical) \mbox{\Hypertarget{fisher_8h_acae7abfd22bc80580996b8f677be9156}\label{fisher_8h_acae7abfd22bc80580996b8f677be9156}} 
 \index{fisher.h@{fisher.h}!calculate\_fisher\_elements\_batch@{calculate\_fisher\_elements\_batch}}
 \index{calculate\_fisher\_elements\_batch@{calculate\_fisher\_elements\_batch}!fisher.h@{fisher.h}}
 \doxysubsubsection{\texorpdfstring{calculate\_fisher\_elements\_batch()}{calculate\_fisher\_elements\_batch()}}

@@ -146,7 +146,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="AdLIGOMidHigh"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -173,7 +174,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="AdLIGODesign"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -200,7 +202,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="AdLIGODesign_"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -226,7 +229,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="AdLIGOAPlus"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -252,7 +256,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="CE1"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -278,7 +283,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="CE2"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -304,7 +310,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="AdVIRGOPlus2"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
@@ -330,12 +337,14 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(detector=="AdVIRGOPlus1"){
 		int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
 		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdV_refsens_090427.csv",data, dat_length, 2);
+		//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdV_refsens_090427.csv",data, dat_length, 2);
+		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/official_noise_curves/avirgo_O4high_NEW.csv",data, dat_length, 2);
 		double psd[dat_length];
 		double f[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
@@ -344,6 +353,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		}
 		gsl_spline_init(spline, f, psd, dat_length);
 		for(int i = 0 ; i<length; i++){
+			//noise_root[i]=1.71034*gsl_spline_eval(spline, frequencies[i],accel);
 			noise_root[i]=1.71034*gsl_spline_eval(spline, frequencies[i],accel);
 		}	
 		gsl_spline_free(spline);
@@ -355,13 +365,16 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	}
 	else if(detector=="KAGRA"){
 		int dat_length = 1000;
+		//int dat_length = 3000;
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
+		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
 		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/kagra_DRSE.csv",data, dat_length, 2);
+		//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/kagra_DRSE.csv",data, dat_length, 2);
+		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/official_noise_curves/kagra_128Mpc.csv",data, dat_length, 2);
 		double psd[dat_length];
 		double f[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
@@ -500,7 +513,7 @@ void sort_LISA_SC_coeffs(double *alpha, double *beta, double *kappa, double *gam
 		*gamma = 1340.;
 		*fk = .00173;
 	}
-	else if(integration_time ==48){
+	else if(integration_time >=48){
 		*alpha = 0.138;
 		*beta = -221.;
 		*kappa = 521.;

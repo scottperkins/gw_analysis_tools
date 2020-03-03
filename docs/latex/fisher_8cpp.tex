@@ -22,13 +22,7 @@
 {\ttfamily \#include $<$time.\+h$>$}\newline
 {\ttfamily \#include $<$fstream$>$}\newline
 Include dependency graph for fisher.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{fisher_8cpp__incl}
-\end{center}
-\end{figure}
+% FIG 0
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -41,9 +35,9 @@ void \mbox{\hyperlink{fisher_8cpp_a91ee1eb7de2af646ec16426c9660f7e9}{fisher\+\_\
 \begin{DoxyCompactList}\small\item\em Calculates the fisher matrix for the given arguments to within numerical error using automatic differention in \`{}`batch'\textquotesingle{} mode for modifications to GR. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{fisher_8cpp_a3d084e6f4a371edfc51b6e2a1324d970}{fisher\+\_\+autodiff\+\_\+interp}} (double $\ast$frequency, int length, std\+::string generation\+\_\+method, std\+::string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int downsampling\+\_\+factor, int $\ast$amp\+\_\+tapes, int $\ast$phase\+\_\+tapes, double $\ast$noise)
 \begin{DoxyCompactList}\small\item\em Calculates the fisher matrix for the given arguments to within numerical error using automatic differention -\/ slower than the numerical version. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8cpp_a32601e9b8b1e1e36905da85a4acc5d43}{fisher\+\_\+autodiff}} (double $\ast$frequency, int length, std\+::string generation\+\_\+method, std\+::string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, int $\ast$amp\+\_\+tapes, int $\ast$phase\+\_\+tapes, double $\ast$noise)
+void \mbox{\hyperlink{fisher_8cpp_aef9f0047c95d3eb691242b60df9a5d4f}{fisher\+\_\+autodiff}} (double $\ast$frequency, int length, std\+::string generation\+\_\+method, std\+::string detector, double $\ast$$\ast$output, int dimension, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::string integration\+\_\+method, double $\ast$weights, bool log10\+\_\+f, double $\ast$noise, int $\ast$amp\+\_\+tapes, int $\ast$phase\+\_\+tapes)
 \begin{DoxyCompactList}\small\item\em Calculates the fisher matrix for the given arguments to within numerical error using automatic differention -\/ slower than the numerical version. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{fisher_8cpp_ab8feb32ace0a3f96caa05a3ebe36741c}{calculate\+\_\+derivatives\+\_\+autodiff}} (double $\ast$frequency, int length, int dimension, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, int $\ast$waveform\+\_\+tapes, std\+::string detector)
+void \mbox{\hyperlink{fisher_8cpp_a4a22d78a622d1a942e6e93c91fbb0999}{calculate\+\_\+derivatives\+\_\+autodiff}} (double $\ast$frequency, int length, int dimension, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$parameters, std\+::complex$<$ double $>$ $\ast$$\ast$waveform\+\_\+deriv, int $\ast$waveform\+\_\+tapes, std\+::string detector, bool autodiff\+\_\+time\+\_\+deriv)
 \begin{DoxyCompactList}\small\item\em Calculates the derivatives of the detector response using automatic differentiation. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{fisher_8cpp_ad08ddae761a3005399569df9dd80d261}\label{fisher_8cpp_ad08ddae761a3005399569df9dd80d261}} 
 void {\bfseries num\+\_\+src\+\_\+params} (int $\ast$N\+\_\+src\+\_\+params, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params)
@@ -92,8 +86,8 @@ template void {\bfseries deallocate\+\_\+non\+\_\+param\+\_\+options$<$ adouble 
 \item 
 void \mbox{\hyperlink{fisher_8cpp_acae7abfd22bc80580996b8f677be9156}{calculate\+\_\+fisher\+\_\+elements\+\_\+batch}} (double $\ast$frequency, int length, int base\+\_\+dimension, int full\+\_\+dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
 \begin{DoxyCompactList}\small\item\em Subroutine to calculate fisher elements for a subset of the fisher. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{fisher_8cpp_a8da03c0eee5317e59d67f85dd6358494}\label{fisher_8cpp_a8da03c0eee5317e59d67f85dd6358494}} 
-void {\bfseries calculate\+\_\+fisher\+\_\+elements} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd)
+\mbox{\Hypertarget{fisher_8cpp_ad1e1f85b3af98f868772ea95d47d33c0}\label{fisher_8cpp_ad1e1f85b3af98f868772ea95d47d33c0}} 
+void {\bfseries calculate\+\_\+fisher\+\_\+elements} (double $\ast$frequency, int length, int dimension, std\+::complex$<$ double $>$ $\ast$$\ast$response\+\_\+deriv, double $\ast$$\ast$output, double $\ast$psd, std\+::string integration\+\_\+method, double $\ast$weights, bool log10\+\_\+f)
 \item 
 \mbox{\Hypertarget{fisher_8cpp_a35526714c92028b3083eee115558984a}\label{fisher_8cpp_a35526714c92028b3083eee115558984a}} 
 template void {\bfseries repack\+\_\+parameters$<$ adouble $>$} (adouble $\ast$, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ adouble $>$ $\ast$, std\+::string, int, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$)
@@ -123,14 +117,20 @@ void \mbox{\hyperlink{fisher_8cpp_a00c44f9e3bf774c7230d972c64b81326}{fisher\+\_\
 \begin{DoxyCompactList}\small\item\em Routine that implements G\+SL numerical integration to calculate the Fishers -- batch modifications version. \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{fisher_8cpp_a0483f09b0c7a53ae7b65d3dff7385697}{calculate\+\_\+integrand\+\_\+autodiff\+\_\+gsl\+\_\+subroutine}} (double frequency, void $\ast$params\+\_\+in)
 \begin{DoxyCompactList}\small\item\em Calculates the derivatives of the detector response using automatic differentiation -- one frequency for gsl\+\_\+integration. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{fisher_8cpp_a0f05f1cfa99eff9341f401063e3e551c}\label{fisher_8cpp_a0f05f1cfa99eff9341f401063e3e551c}} 
+double {\bfseries L\+O\+G10} =log(10.)
+\end{DoxyCompactItemize}
 
 
 \doxysubsection{Function Documentation}
-\mbox{\Hypertarget{fisher_8cpp_ab8feb32ace0a3f96caa05a3ebe36741c}\label{fisher_8cpp_ab8feb32ace0a3f96caa05a3ebe36741c}} 
+\mbox{\Hypertarget{fisher_8cpp_a4a22d78a622d1a942e6e93c91fbb0999}\label{fisher_8cpp_a4a22d78a622d1a942e6e93c91fbb0999}} 
 \index{fisher.cpp@{fisher.cpp}!calculate\_derivatives\_autodiff@{calculate\_derivatives\_autodiff}}
 \index{calculate\_derivatives\_autodiff@{calculate\_derivatives\_autodiff}!fisher.cpp@{fisher.cpp}}
 \doxysubsubsection{\texorpdfstring{calculate\_derivatives\_autodiff()}{calculate\_derivatives\_autodiff()}}
-{\footnotesize\ttfamily void calculate\+\_\+derivatives\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{waveform\+\_\+deriv,  }\item[{int $\ast$}]{waveform\+\_\+tapes,  }\item[{std\+::string}]{detector }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void calculate\+\_\+derivatives\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{int}]{dimension,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{std\+::complex$<$ double $>$ $\ast$$\ast$}]{waveform\+\_\+deriv,  }\item[{int $\ast$}]{waveform\+\_\+tapes,  }\item[{std\+::string}]{detector,  }\item[{bool}]{autodiff\+\_\+time\+\_\+deriv }\end{DoxyParamCaption})}
 
 
 
@@ -140,7 +140,9 @@ Possibly slower than the numerical derivative, but not susceptible to truncation
 
 Higher dimensional fishers actually could be faster
 
-N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv) \mbox{\Hypertarget{fisher_8cpp_acae7abfd22bc80580996b8f677be9156}\label{fisher_8cpp_acae7abfd22bc80580996b8f677be9156}} 
+N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv)
+
+autodiff\+\_\+time\+\_\+deriv indicates if the time derivatives for space detectors should be done, either with the full autodiff hessian (slow) or with the numerical approximation (autodiff then numerical) \mbox{\Hypertarget{fisher_8cpp_acae7abfd22bc80580996b8f677be9156}\label{fisher_8cpp_acae7abfd22bc80580996b8f677be9156}} 
 \index{fisher.cpp@{fisher.cpp}!calculate\_fisher\_elements\_batch@{calculate\_fisher\_elements\_batch}}
 \index{calculate\_fisher\_elements\_batch@{calculate\_fisher\_elements\_batch}!fisher.cpp@{fisher.cpp}}
 \doxysubsubsection{\texorpdfstring{calculate\_fisher\_elements\_batch()}{calculate\_fisher\_elements\_batch()}}
@@ -176,21 +178,51 @@ N\+O\+TE\+: dimension parameter A\+L\+W\+A\+YS refers to the dimension of the fi
 
 Adjust parameters for detector specific configurations (namely, L\+I\+SA introduces extra transitions that needs to be accounted for) 
 
-This is kept separate to improve the modularity of the code. Waveform specific parameters are taken care of in prep\+\_\+fisher\+\_\+calculation and detector specific parameters are taken care of here. \mbox{\Hypertarget{fisher_8cpp_a32601e9b8b1e1e36905da85a4acc5d43}\label{fisher_8cpp_a32601e9b8b1e1e36905da85a4acc5d43}} 
+This is kept separate to improve the modularity of the code. Waveform specific parameters are taken care of in prep\+\_\+fisher\+\_\+calculation and detector specific parameters are taken care of here. \mbox{\Hypertarget{fisher_8cpp_aef9f0047c95d3eb691242b60df9a5d4f}\label{fisher_8cpp_aef9f0047c95d3eb691242b60df9a5d4f}} 
 \index{fisher.cpp@{fisher.cpp}!fisher\_autodiff@{fisher\_autodiff}}
 \index{fisher\_autodiff@{fisher\_autodiff}!fisher.cpp@{fisher.cpp}}
 \doxysubsubsection{\texorpdfstring{fisher\_autodiff()}{fisher\_autodiff()}}
-{\footnotesize\ttfamily void fisher\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{int $\ast$}]{amp\+\_\+tapes,  }\item[{int $\ast$}]{phase\+\_\+tapes,  }\item[{double $\ast$}]{noise }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void fisher\+\_\+autodiff (\begin{DoxyParamCaption}\item[{double $\ast$}]{frequency,  }\item[{int}]{length,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{std\+::string}]{detector,  }\item[{double $\ast$$\ast$}]{output,  }\item[{int}]{dimension,  }\item[{\mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$}]{parameters,  }\item[{std\+::string}]{integration\+\_\+method,  }\item[{double $\ast$}]{weights,  }\item[{bool}]{log10\+\_\+f,  }\item[{double $\ast$}]{noise,  }\item[{int $\ast$}]{amp\+\_\+tapes,  }\item[{int $\ast$}]{phase\+\_\+tapes }\end{DoxyParamCaption})}
 
 
 
 Calculates the fisher matrix for the given arguments to within numerical error using automatic differention -\/ slower than the numerical version. 
 
-Build around A\+D\+O\+L-\/C -- A. Walther und A. Griewank\+: Getting started with A\+D\+O\+L-\/C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-\/\+Hall C\+RC Computational Science, pp. 181-\/202 (2012). 
+Build around A\+D\+O\+L-\/C -- A. Walther und A. Griewank\+: Getting started with A\+D\+O\+L-\/C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-\/\+Hall C\+RC Computational Science, pp. 181-\/202 (2012).
+
+Note\+: If trying to run large number of Fishers concurrently with openmp, you may need to change some A\+D\+O\+L-\/C parameters. Copy the example .adolcrc file in data/ to the working directory and adjust as needed
+
+If integration method is gaussian quadrature and the frequencies are !\+N\+U\+LL, the weights must be pre-\/allocated.
+
+If the integration method is Newton-\/\+Cotes, the weights are not used.
+
+Integration schemes\+:
+
+Newton-\/\+Cotes methods\+: \begin{DoxyVerb}SIMPSONS
+\end{DoxyVerb}
+
+
+Gaussian Quadrature \begin{DoxyVerb}GAUSSLEG
+\end{DoxyVerb}
+
+
+log10\+\_\+f used if frequencies are logarithmically (base 10) spaced. N\+O\+TE\+: not sure if this would work for S\+I\+M\+P\+S\+O\+NS -- this hasn\textquotesingle{}t been tested. For now, only gaussian quadrature routines are supported. 
 \begin{DoxyParams}{Parameters}
 {\em length} & if 0, standard frequency range for the detector is used \\
 \hline
 {\em output} & double \mbox{[}dimension\mbox{]}\mbox{[}dimension\mbox{]} \\
+\hline
+{\em dimension} & dimension of the fisher \\
+\hline
+{\em parameters} & Injection parameters \\
+\hline
+{\em integration\+\_\+method} & Method of integration to use \\
+\hline
+{\em weights} & If using a gaussian quadrature method and the weights have been precomputed, the weights can be supplied here \\
+\hline
+{\em log10\+\_\+f} & Boolean for logarithmically (base 10) spaced frequencies \\
+\hline
+{\em noise} & Precomputed P\+SD array \\
 \hline
 {\em amp\+\_\+tapes} & if speed is required, precomputed tapes can be used -\/ assumed the user knows what they\textquotesingle{}re doing, no checks done here to make sure that the number of tapes matches the requirement by the generation\+\_\+method \\
 \hline

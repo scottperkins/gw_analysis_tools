@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['useful_5fpowers_457',['useful_powers',['../structuseful__powers.html',1,'']]]
+  ['useful_5fpowers_464',['useful_powers',['../structuseful__powers.html',1,'']]]
 ];

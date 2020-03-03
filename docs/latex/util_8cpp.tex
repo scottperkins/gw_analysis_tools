@@ -19,13 +19,7 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+rng.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+randist.\+h$>$}\newline
 Include dependency graph for util.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{util_8cpp__incl}
-\end{center}
-\end{figure}
+% FIG 0
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -98,6 +92,17 @@ template void {\bfseries list\+\_\+intersect$<$ adouble $>$} (adouble $\ast$, in
 \item 
 \mbox{\Hypertarget{util_8cpp_a79c2688dc6d09b4aee47618cd5340819}\label{util_8cpp_a79c2688dc6d09b4aee47618cd5340819}} 
 template void {\bfseries list\+\_\+intersect$<$ int $>$} (int $\ast$, int, int $\ast$, int, int $\ast$$\ast$, int $\ast$)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \mbox{\hyperlink{util_8cpp_a52ba97982df939cea3191098152fbbb2}{list\+\_\+intersect\+\_\+value}} (T $\ast$A, int lenA, T $\ast$B, int lenB, T $\ast$C, int $\ast$lenC)
+\begin{DoxyCompactList}\small\item\em Custom list-\/interesction implementation for sorted lists. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{util_8cpp_a6595995bb36502886b5790314ab1c855}\label{util_8cpp_a6595995bb36502886b5790314ab1c855}} 
+template void {\bfseries list\+\_\+intersect\+\_\+value$<$ double $>$} (double $\ast$, int, double $\ast$, int, double $\ast$, int $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_adac1189401a0dbb723d0e2aac2316bc7}\label{util_8cpp_adac1189401a0dbb723d0e2aac2316bc7}} 
+template void {\bfseries list\+\_\+intersect\+\_\+value$<$ adouble $>$} (adouble $\ast$, int, adouble $\ast$, int, adouble $\ast$, int $\ast$)
+\item 
+\mbox{\Hypertarget{util_8cpp_a56ca227b8f67a76bb2d163d7367e1b46}\label{util_8cpp_a56ca227b8f67a76bb2d163d7367e1b46}} 
+template void {\bfseries list\+\_\+intersect\+\_\+value$<$ int $>$} (int $\ast$, int, int $\ast$, int, int $\ast$, int $\ast$)
 \item 
 \mbox{\Hypertarget{util_8cpp_a4f15abfb33a16347c3a5075ecc538f90}\label{util_8cpp_a4f15abfb33a16347c3a5075ecc538f90}} 
 {\footnotesize template$<$class T , class U $>$ }\\void {\bfseries mean\+\_\+list} (T $\ast$list, int length, U $\ast$result)
@@ -682,6 +687,25 @@ W\+I\+LL N\+OT work in-\/place, A, B, and C must be separate \mbox{\Hypertarget{
 \doxysubsubsection{\texorpdfstring{list\_intersect\_ptrs()}{list\_intersect\_ptrs()}}
 {\footnotesize\ttfamily template$<$class T $>$ \\
 void list\+\_\+intersect\+\_\+ptrs (\begin{DoxyParamCaption}\item[{T $\ast$$\ast$}]{A,  }\item[{int}]{lenA,  }\item[{T $\ast$$\ast$}]{B,  }\item[{int}]{lenB,  }\item[{T $\ast$$\ast$}]{C,  }\item[{int $\ast$}]{lenC }\end{DoxyParamCaption})}
+
+
+
+Custom list-\/interesction implementation for sorted lists. 
+
+Uses pointers for efficiency -- N\+OT C\+O\+P\+I\+ED -- used std library for that
+
+Takes A and B and puts the intersection in C -- C = A /\textbackslash{} B
+
+Takes the length of C and puts it in lenC
+
+C should have allocated memory for at least as large as the smallest list
+
+W\+I\+LL N\+OT work in-\/place, A, B, and C must be separate \mbox{\Hypertarget{util_8cpp_a52ba97982df939cea3191098152fbbb2}\label{util_8cpp_a52ba97982df939cea3191098152fbbb2}} 
+\index{util.cpp@{util.cpp}!list\_intersect\_value@{list\_intersect\_value}}
+\index{list\_intersect\_value@{list\_intersect\_value}!util.cpp@{util.cpp}}
+\doxysubsubsection{\texorpdfstring{list\_intersect\_value()}{list\_intersect\_value()}}
+{\footnotesize\ttfamily template$<$class T $>$ \\
+void list\+\_\+intersect\+\_\+value (\begin{DoxyParamCaption}\item[{T $\ast$}]{A,  }\item[{int}]{lenA,  }\item[{T $\ast$}]{B,  }\item[{int}]{lenB,  }\item[{T $\ast$}]{C,  }\item[{int $\ast$}]{lenC }\end{DoxyParamCaption})}
 
 
 

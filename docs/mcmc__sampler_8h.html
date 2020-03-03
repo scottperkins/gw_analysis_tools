@@ -168,9 +168,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dynamic_temperature_i
 <tr class="memitem:aab024a0142f4a4227385763c498dbe28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler_8h.html#aab024a0142f4a4227385763c498dbe28">PTMCMC_MH_internal</a> (double ***output, int dimension, int N_steps, int chain_N, double *initial_pos, double *seeding_var, double *chain_temps, int swp_freq, std::function&lt; double(double *, int *, int, int, void *)&gt; log_prior, std::function&lt; double(double *, int *, int, int, void *)&gt; log_likelihood, std::function&lt; void(double *, int *, int, double **, int, void *)&gt;fisher, void **user_parameters, int numThreads, bool pool, bool show_prog, std::string statistics_filename, std::string chain_filename, std::string auto_corr_filename, std::string likelihood_log_filename, std::string checkpoint_filename)</td></tr>
 <tr class="memdesc:aab024a0142f4a4227385763c498dbe28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generic sampler, where the likelihood, prior are parameters supplied by the user.  <a href="mcmc__sampler_8h.html#aab024a0142f4a4227385763c498dbe28">More...</a><br /></td></tr>
 <tr class="separator:aab024a0142f4a4227385763c498dbe28"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad476eae645c920872fdd77100dfd0121"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler_8h.html#ad476eae645c920872fdd77100dfd0121">continue_PTMCMC_MH_internal</a> (std::string start_checkpoint_file, double ***output, int N_steps, int swp_freq, std::function&lt; double(double *, int *, int, int, void *)&gt; log_prior, std::function&lt; double(double *, int *, int, int, void *)&gt; log_likelihood, std::function&lt; void(double *, int *, int, double **, int, void *)&gt;fisher, void **user_parameters, int numThreads, bool pool, bool show_prog, std::string statistics_filename, std::string chain_filename, std::string auto_corr_filename, std::string likelihood_log_filename, std::string end_checkpoint_file)</td></tr>
-<tr class="memdesc:ad476eae645c920872fdd77100dfd0121"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine to take a checkpoint file and begin a new chain at said checkpoint.  <a href="mcmc__sampler_8h.html#ad476eae645c920872fdd77100dfd0121">More...</a><br /></td></tr>
-<tr class="separator:ad476eae645c920872fdd77100dfd0121"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4fc446d8f455eb4d4a7bfbf24dd1560"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="mcmc__sampler_8h.html#ab4fc446d8f455eb4d4a7bfbf24dd1560">continue_PTMCMC_MH_internal</a> (<a class="el" href="classsampler.html">sampler</a> *samplerptr, std::string start_checkpoint_file, double ***output, int N_steps, int swp_freq, std::function&lt; double(double *, int *, int, int, void *)&gt; log_prior, std::function&lt; double(double *, int *, int, int, void *)&gt; log_likelihood, std::function&lt; void(double *, int *, int, double **, int, void *)&gt;fisher, void **user_parameters, int numThreads, bool pool, bool show_prog, std::string statistics_filename, std::string chain_filename, std::string auto_corr_filename, std::string likelihood_log_filename, std::string end_checkpoint_file)</td></tr>
+<tr class="memdesc:ab4fc446d8f455eb4d4a7bfbf24dd1560"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine to take a checkpoint file and begin a new chain at said checkpoint.  <a href="mcmc__sampler_8h.html#ab4fc446d8f455eb4d4a7bfbf24dd1560">More...</a><br /></td></tr>
+<tr class="separator:ab4fc446d8f455eb4d4a7bfbf24dd1560"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Header file for mcmc_sampler </p>
@@ -1512,8 +1512,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dynamic_temperature_i
 
 </div>
 </div>
-<a id="ad476eae645c920872fdd77100dfd0121"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad476eae645c920872fdd77100dfd0121">&#9670;&nbsp;</a></span>continue_PTMCMC_MH_internal()</h2>
+<a id="ab4fc446d8f455eb4d4a7bfbf24dd1560"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab4fc446d8f455eb4d4a7bfbf24dd1560">&#9670;&nbsp;</a></span>continue_PTMCMC_MH_internal()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1521,6 +1521,12 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dynamic_temperature_i
         <tr>
           <td class="memname">void continue_PTMCMC_MH_internal </td>
           <td>(</td>
+          <td class="paramtype"><a class="el" href="classsampler.html">sampler</a> *&#160;</td>
+          <td class="paramname"><em>sampler</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">std::string&#160;</td>
           <td class="paramname"><em>start_checkpoint_file</em>, </td>
         </tr>

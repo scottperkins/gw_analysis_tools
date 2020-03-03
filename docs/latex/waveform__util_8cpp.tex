@@ -20,13 +20,7 @@
 {\ttfamily \#include $<$adolc/drivers/drivers.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+integration.\+h$>$}\newline
 Include dependency graph for waveform\+\_\+util.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{waveform__util_8cpp__incl}
-\end{center}
-\end{figure}
+% FIG 0
 \doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -34,6 +28,9 @@ struct \mbox{\hyperlink{structgsl__snr__struct}{gsl\+\_\+snr\+\_\+struct}}
 \end{DoxyCompactItemize}
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{waveform__util_8cpp_a92474a9479a801dcbb9a6d50aa8d3670}\label{waveform__util_8cpp_a92474a9479a801dcbb9a6d50aa8d3670}} 
+double {\bfseries data\+\_\+snr} (double $\ast$frequencies, int length, std\+::complex$<$ double $>$ $\ast$data, std\+::complex$<$ double $>$ $\ast$response, double $\ast$psd)
 \item 
 double \mbox{\hyperlink{waveform__util_8cpp_a0a5e9bfac97929ed68c247c3ff90fca2}{data\+\_\+snr\+\_\+maximized\+\_\+extrinsic}} (double $\ast$frequencies, int length, std\+::complex$<$ double $>$ $\ast$data, double $\ast$psd, std\+::string detector, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params}{gen\+\_\+params}} $\ast$param)
 \begin{DoxyCompactList}\small\item\em Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc. \end{DoxyCompactList}\item 
@@ -98,7 +95,7 @@ void {\bfseries assign\+\_\+freq\+\_\+boundaries} (double $\ast$freq\+\_\+bounda
 \item 
 void \mbox{\hyperlink{waveform__util_8cpp_ad8f19ab5b9b95d8e31d0cca87a4f560c}{integration\+\_\+bounds}} (\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, std\+::string generation\+\_\+method, std\+::string detector, std\+::string sensitivity\+\_\+curve, double fmin, double fmax, double signal\+\_\+to\+\_\+noise, double tol, double $\ast$integration\+\_\+bounds)
 \begin{DoxyCompactList}\small\item\em Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{waveform__util_8cpp_a7dcc233b0537530ae4a5062d5dd93777}{integration\+\_\+interval}} (double sampling\+\_\+freq, double integration\+\_\+time, std\+::string detector, std\+::string sensitivity\+\_\+curve, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double $\ast$freq\+\_\+bounds)
+int \mbox{\hyperlink{waveform__util_8cpp_a1d7ec6fc6fb00649edbba1122b64db1b}{integration\+\_\+interval}} (double sampling\+\_\+freq, double integration\+\_\+time, std\+::string detector, std\+::string sensitivity\+\_\+curve, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double $\ast$freq\+\_\+bounds)
 \begin{DoxyCompactList}\small\item\em Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{waveform__util_8cpp_ae3ab5cade299ee4fd0ab019d4f63042c}{integration\+\_\+interval\+\_\+discrete}} (double sampling\+\_\+freq, double integration\+\_\+time, std\+::string detector, std\+::string sensitivity\+\_\+curve, std\+::string generation\+\_\+method, \mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$params, double $\ast$freq\+\_\+bounds)
 \begin{DoxyCompactList}\small\item\em Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. \end{DoxyCompactList}\item 
@@ -559,11 +556,11 @@ integrand\+\_\+bounds\mbox{[}1\mbox{]} $\sim$ frequency at which $\vert$h$\vert$
 \mbox{\texttt{ out}}  & {\em integration\+\_\+bounds} & bounds fo the integral shape -\/-\/ \mbox{[}2\mbox{]} -\/-\/ (fmin,fmax) \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{waveform__util_8cpp_a7dcc233b0537530ae4a5062d5dd93777}\label{waveform__util_8cpp_a7dcc233b0537530ae4a5062d5dd93777}} 
+\mbox{\Hypertarget{waveform__util_8cpp_a1d7ec6fc6fb00649edbba1122b64db1b}\label{waveform__util_8cpp_a1d7ec6fc6fb00649edbba1122b64db1b}} 
 \index{waveform\_util.cpp@{waveform\_util.cpp}!integration\_interval@{integration\_interval}}
 \index{integration\_interval@{integration\_interval}!waveform\_util.cpp@{waveform\_util.cpp}}
 \doxysubsubsection{\texorpdfstring{integration\_interval()}{integration\_interval()}}
-{\footnotesize\ttfamily void integration\+\_\+interval (\begin{DoxyParamCaption}\item[{double}]{sampling\+\_\+freq,  }\item[{double}]{integration\+\_\+time,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double $\ast$}]{freq\+\_\+bounds }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily int integration\+\_\+interval (\begin{DoxyParamCaption}\item[{double}]{sampling\+\_\+freq,  }\item[{double}]{integration\+\_\+time,  }\item[{std\+::string}]{detector,  }\item[{std\+::string}]{sensitivity\+\_\+curve,  }\item[{std\+::string}]{generation\+\_\+method,  }\item[{\mbox{\hyperlink{classgen__params__base}{gen\+\_\+params\+\_\+base}}$<$ double $>$ $\ast$}]{params,  }\item[{double $\ast$}]{freq\+\_\+bounds }\end{DoxyParamCaption})}
 
 
 
@@ -571,7 +568,11 @@ Determines the integration bounds for the log likelihood or fisher given some ob
 
 Sensitivity curve has to be one of the options in detector\+\_\+util analytic options
 
-The current scheme is to use the frequency bounds determined by the S\+NR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f\+\_\+integration\+\_\+time, f\+\_\+high\+\_\+band) 
+The current scheme is to use the frequency bounds determined by the S\+NR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f\+\_\+integration\+\_\+time, f\+\_\+high\+\_\+band)
+
+Accounts for the integration time, unlike the integration\+\_\+bounds routine
+
+returns 0 if successful, returns 1 if bounds could not be found due to roundoff, and returns 2 if entirely unsuccessful 
 \begin{DoxyParams}[1]{Parameters}
  & {\em sampling\+\_\+freq} & Frequency at which the detector operates \\
 \hline

@@ -23,7 +23,7 @@
 
 using namespace std;
 
-
+double LOG10=log(10.);
 
 
 /*! \file 
@@ -118,7 +118,10 @@ void fisher_numerical(double *frequency,
 
 
 	//calulate fisher elements
-	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
+	bool log10_f=false;
+	std::string integration_method="SIMPSONS";
+	double *weights=NULL;
+	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise,integration_method,weights,log10_f);
 	//Factor of 2 for LISA's second arm
 	if(detector == "LISA"){
 		for(int i = 0 ; i<dimension;i++){
@@ -509,7 +512,8 @@ void fisher_autodiff_batch_mod(double *frequency,
 	for(int i =0 ;i<full_dimension; i++){
 		response_deriv[i] = new std::complex<double>[length];
 	}
-	calculate_derivatives_autodiff(frequency,length, full_dimension,generation_method, parameters, response_deriv, NULL, detector);
+	bool autodiff_time_deriv=false;
+	calculate_derivatives_autodiff(frequency,length, full_dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv);
 	//##########################################################
 	
 	//calulate fisher elements
@@ -590,7 +594,8 @@ void fisher_autodiff_interp(double *frequency,
 	}
 	freqs_ds[length_ds-1] = frequency[length-1];
 	//calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
-	calculate_derivatives_autodiff(freqs_ds,length_ds, dimension,generation_method, parameters, temp_deriv, NULL, detector);
+	bool autodiff_time_deriv=false;
+	calculate_derivatives_autodiff(freqs_ds,length_ds, dimension,generation_method, parameters, temp_deriv, NULL, detector,autodiff_time_deriv);
 	//Interpolate derivatives here to get back to full length
 	gsl_interp_accel *my_accel_ptr= gsl_interp_accel_alloc ();
 	gsl_spline *my_spline_ptr= gsl_spline_alloc (gsl_interp_linear, length_ds);
@@ -620,7 +625,10 @@ void fisher_autodiff_interp(double *frequency,
 	//##########################################################
 	
 	//calulate fisher elements
-	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
+	std::string integration_method = "SIMPSONS";
+	bool log10_f = false;
+	double *weights = NULL;
+	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise,   integration_method,weights,log10_f  );
 
 	//Factor of 2 for LISA's second arm
 	if(detector == "LISA"){
@@ -642,90 +650,43 @@ void fisher_autodiff_interp(double *frequency,
 	delete [] temp_deriv_phase;
 	delete [] freqs_ds;
 }
-/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
+
+/*! \brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
  * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
  *
  * Note: If trying to run large number of Fishers concurrently with openmp, you may need to change some ADOL-C parameters. Copy the example .adolcrc file in data/ to the working directory and adjust as needed
  *
- * Based on general gaussian quadrature 
+ * If integration method is gaussian quadrature and the frequencies are !NULL, the weights must be pre-allocated. 
  *
- */
-void fisher_autodiff_gq_internal(
-	double *frequency, /**< Frequencies at which the weights are computed*/
-	int length,/**< if 0, standard frequency range for the detector is used*/ 
-	std::string generation_method, 
-	std::string detector, 
-	double **output,/**< double [dimension][dimension]*/
-	int dimension, 
-	gen_params *parameters,
-	double *weights,/**< Weights to use in the gaussian quadrature*/
-	bool log_freq,
-	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	double *noise
-	)
-{
-	//populate noise and frequency
-	double *internal_noise;
-	bool local_noise=false;
-	if (noise)
-	{
-		internal_noise = noise;
-	}
-	else{
-		internal_noise = new double[length];
-		populate_noise(frequency,detector, internal_noise,length);
-		for (int i =0; i<length;i++)
-		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
-		local_noise=true;
-	}
-		
-	//populate derivatives
-
-	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
-	for(int i =0 ;i<dimension; i++){
-		response_deriv[i] = new std::complex<double>[length];
-	}
-	calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
-	//##########################################################
-	
-	//calulate fisher elements
-	calculate_fisher_elements_gq(frequency, length,dimension, response_deriv, output,  internal_noise,weights, log_freq);
-
-	//Factor of 2 for LISA's second arm
-	if(detector == "LISA"){
-		for(int i = 0 ; i<dimension;i++){
-			for(int j = 0  ;j<dimension; j++){
-				output[i][j]*=2;
-			}	
-		}
-	}
-
-	if(local_noise){delete [] internal_noise;}
-	for(int i =0 ;i<dimension; i++){
-		delete [] response_deriv[i];
-	}
-	delete [] response_deriv;
-}
-
-/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
+ * If the integration method is Newton-Cotes, the weights are not used.
  *
- * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
+ * Integration schemes:
  *
- * Note: If trying to run large number of Fishers concurrently with openmp, you may need to change some ADOL-C parameters. Copy the example .adolcrc file in data/ to the working directory and adjust as needed
+ * Newton-Cotes methods:
+ *
+ * 	SIMPSONS
+ * 	
+ * Gaussian Quadrature
+ *
+ * 	GAUSSLEG
+ *
+ * log10_f used if frequencies are logarithmically (base 10) spaced. NOTE: not sure if this would work for SIMPSONS -- this hasn't been tested. For now, only gaussian quadrature routines are supported.
  */
 void fisher_autodiff(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	std::string generation_method, 
 	std::string detector, 
 	double **output,/**< double [dimension][dimension]*/
-	int dimension, 
-	gen_params *parameters,
+	int dimension,/**<dimension of the fisher*/ 
+	gen_params *parameters,/**< Injection parameters*/
+	std::string integration_method,/**< Method of integration to use*/
+	double * weights,/**< If using a gaussian quadrature method and the weights have been precomputed, the weights can be supplied here*/
+	bool log10_f,/**< Boolean for logarithmically (base 10) spaced frequencies*/
+	double *noise,/**<Precomputed PSD array*/
 	//double *parameters,
 	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	double *noise
+	int *phase_tapes/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
 	)
 {
 	//populate noise and frequency
@@ -749,11 +710,16 @@ void fisher_autodiff(double *frequency,
 	for(int i =0 ;i<dimension; i++){
 		response_deriv[i] = new std::complex<double>[length];
 	}
-	calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
+	bool autodiff_time_deriv=false;
+	//Gauss quad is unequal spacing, doesn't work with numerical derivatives
+	if(integration_method == "GAUSSLEG"){
+		autodiff_time_deriv = true;
+	}
+	calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv);
 	//##########################################################
 	
 	//calulate fisher elements
-	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise);
+	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise, integration_method,weights,log10_f  );
 
 	//Factor of 2 for LISA's second arm
 	if(detector == "LISA"){
@@ -778,6 +744,8 @@ void fisher_autodiff(double *frequency,
  * Higher dimensional fishers actually could be faster
  *
  * NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 -- the +1(+2) are for the frequency deriv(time deriv)
+ *
+ * autodiff_time_deriv indicates if the time derivatives for space detectors should be done, either with the full autodiff hessian (slow) or with the numerical approximation (autodiff then numerical)
  */
 void calculate_derivatives_autodiff(double *frequency,
 	int length,
@@ -786,7 +754,8 @@ void calculate_derivatives_autodiff(double *frequency,
 	gen_params *parameters,
 	std::complex<double> **waveform_deriv,
 	int *waveform_tapes,
-	std::string detector
+	std::string detector,
+	bool autodiff_time_deriv
 	)
 {
 	//Transform gen_params to double vectors
@@ -820,8 +789,12 @@ void calculate_derivatives_autodiff(double *frequency,
 		//	grad_times[i] =  1;
 		//}
 		dt = allocate_2D_array(dimension+1, length);	
-		//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
-		time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
+		if(autodiff_time_deriv){
+			time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
+		}
+		else{
+			time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
+		}
 		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
@@ -2232,80 +2205,6 @@ void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_param
 template void deallocate_non_param_options<double>(gen_params_base<double> *, gen_params_base<double> *, std::string);
 template void deallocate_non_param_options<adouble>(gen_params_base<adouble> *, gen_params_base<double> *, std::string);
 
-/*! \brief Subroutine to calculate fisher elements for a subset of the fisher -- based on gaussian quadrature
- *
- * Skips elements that have dimensions (i,j) for i!=j && i>base_dim && j>base_dim
- *
- * Sets non-computed elements to zero
- *
- */
-void calculate_fisher_elements_gq_batch(double *frequency, 
-	int length, 
-	int base_dimension, 
-	int full_dimension, 
-	std::complex<double> **response_deriv, 
-	double **output,
-	double *psd,
-	double *weights)
-{
-	//list of modifications
-	int mod_list[full_dimension-base_dimension];
-	for(int i = base_dimension; i<full_dimension; i++){
-		mod_list[i-base_dimension]=i;
-	}
-
-	double *integrand=new double[length];
-	for (int j=0;j<full_dimension; j++)
-	{
-		
-		for (int k = 0; k<j; k++)
-		{
-			//Mod mod element of fisher, set to zero
-			if(check_list(k, mod_list, full_dimension-base_dimension) &&check_list(k, mod_list, full_dimension-base_dimension)){
-				output[j][k] = 0;	
-			}
-			//GR GR or GR mod element of the fisher
-			else{
-				for (int i =0;i<length;i++)
-				{
-					integrand[i] = 
-						real( 
-						(response_deriv[j][i]*
-						std::conj(response_deriv[k][i]))
-						/psd[i]);
-				}
-				
-				double sum = 0;
-				for(int i = 0 ; i<length; i++){
-					sum+= ( weights[i] * integrand[i]);
-	
-				}
-				output[j][k] = 4*sum;	
-			}
-			output[k][j] = output[j][k];
-		}
-
-	}
-
-	//All diagonal terms are calculated
-	for (int j = 0; j<full_dimension; j ++)
-	{
-
-		for (int i =0;i<length;i++){
-				integrand[i] = 
-					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
-					/psd[i]);
-		}
-		double sum = 0;
-		for(int i = 0 ; i<length; i++){
-			sum+= ( weights[i] * integrand[i]);
-	
-		}
-		output[j][j] = 4*sum;	
-	}
-	delete [] integrand;	
-
-}
 
 /*! \brief Subroutine to calculate fisher elements for a subset of the fisher
  *
@@ -2373,71 +2272,15 @@ void calculate_fisher_elements_batch(double *frequency,
 	delete [] integrand;	
 
 }
-void calculate_fisher_elements_gq(double *frequency, 
-	int length, 
-	int dimension, 
-	std::complex<double> **response_deriv, 
-	double **output,
-	double *psd,
-	double *weights,
-	bool log_freq
-	)
-{
-	double *integrand=new double[length];
-	for (int j=0;j<dimension; j++)
-	{
-		for (int k = 0; k<j; k++)
-		{
-			for (int i =0;i<length;i++)
-			{
-				integrand[i] = 
-					real( 
-					(response_deriv[j][i]*
-					std::conj(response_deriv[k][i]))
-					/psd[i]);
-				if(log_freq){
-					integrand[i]*=(frequency[i]);
-				}
-			}
-			
-			double sum = 0;
-			for(int i = 0 ; i<length; i++){
-				sum+= ( weights[i] * integrand[i]);
-	
-			}
-			output[j][k] = 4*sum;	
-			output[k][j] = output[j][k];
-		}
-
-	}
-
-	for (int j = 0; j<dimension; j ++)
-	{
-
-		for (int i =0;i<length;i++){
-				integrand[i] = 
-					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
-					/psd[i]);
-				if(log_freq){
-					integrand[i]*=(frequency[i]);
-				}
-		}
-		double sum = 0;
-		for(int i = 0 ; i<length; i++){
-			sum+= ( weights[i] * integrand[i]);
-	
-		}
-		output[j][j] = 4*sum;	
-	}
-	delete [] integrand;	
-
-}
 void calculate_fisher_elements(double *frequency, 
 	int length, 
 	int dimension, 
 	std::complex<double> **response_deriv, 
 	double **output,
-	double *psd)
+	double *psd,
+	std::string integration_method, 
+	double *weights, 
+	bool log10_f)
 {
 	double *integrand=new double[length];
 	for (int j=0;j<dimension; j++)
@@ -2451,10 +2294,24 @@ void calculate_fisher_elements(double *frequency,
 					(response_deriv[j][i]*
 					std::conj(response_deriv[k][i]))
 					/psd[i]);
+				//Jacobian for integrating in logspace
+				if(log10_f){
+					integrand[i]*=(frequency[i])*LOG10;
+				}
 			}
+			if(integration_method =="GAUSSLEG"){
+				double sum = 0;
+				for(int i = 0 ; i<length; i++){
+					sum+= ( weights[i] * integrand[i]);
+	
+				}
+				output[j][k] = 4*sum;	
+			}
+			else if(integration_method =="SIMPSONS"){
 			
-			output[j][k] = 4*simpsons_sum(
-						frequency[1]-frequency[0], length, integrand);	
+				output[j][k] = 4*simpsons_sum(
+							frequency[1]-frequency[0], length, integrand);	
+			}
 			output[k][j] = output[j][k];
 		}
 
@@ -2467,9 +2324,23 @@ void calculate_fisher_elements(double *frequency,
 				integrand[i] = 
 					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
 					/psd[i]);
+				//Jacobian for integrating in logspace
+				if(log10_f){
+					integrand[i]*=(frequency[i])*LOG10;
+				}
 		}
-		output[j][j] = 4*simpsons_sum(
+			if(integration_method =="GAUSSLEG"){
+				double sum = 0;
+				for(int i = 0 ; i<length; i++){
+					sum+= ( weights[i] * integrand[i]);
+	
+				}
+				output[j][j] = 4*sum;	
+			}
+			else if(integration_method =="SIMPSONS"){
+				output[j][j] = 4*simpsons_sum(
 					frequency[1]-frequency[0], length, integrand);	
+			}
 	}
 	delete [] integrand;	
 

@@ -95,18 +95,7 @@ $(function() {
 Include dependency graph for waveform_util.cpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="waveform__util_8cpp__incl.png" border="0" usemap="#src_2waveform__util_8cpp" alt=""/></div>
-<map name="src_2waveform__util_8cpp" id="src_2waveform__util_8cpp">
-<area shape="rect" href="waveform__util_8h.html" title="waveform_util.h" alt="" coords="266,155,381,181"/>
-<area shape="rect" href="waveform__generator_8h.html" title="waveform_generator.h" alt="" coords="736,229,887,256"/>
-<area shape="rect" href="util_8h.html" title="util.h" alt="" coords="530,304,581,331"/>
-<area shape="rect" href="GWATConfig_8h.html" title="GWATConfig.h" alt="" coords="727,80,837,107"/>
-<area shape="rect" href="IMRPhenomP_8h.html" title="IMRPhenomP.h" alt="" coords="651,155,766,181"/>
-<area shape="rect" href="IMRPhenomD_8h.html" title="IMRPhenomD.h" alt="" coords="963,229,1079,256"/>
-<area shape="rect" href="ppE__IMRPhenomD_8h.html" title="ppE_IMRPhenomD.h" alt="" coords="859,155,1006,181"/>
-<area shape="rect" href="ppE__IMRPhenomP_8h.html" title="ppE_IMRPhenomP.h" alt="" coords="557,80,703,107"/>
-<area shape="rect" href="detector__util_8h.html" title="detector_util.h" alt="" coords="557,229,661,256"/>
-<area shape="rect" href="pn__waveform__util_8h.html" title="pn_waveform_util.h" alt="" coords="1132,80,1267,107"/>
-</map>
+<!-- MAP 0 -->
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
@@ -116,6 +105,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a92474a9479a801dcbb9a6d50aa8d3670"><td class="memItemLeft" align="right" valign="top"><a id="a92474a9479a801dcbb9a6d50aa8d3670"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>data_snr</b> (double *frequencies, int length, std::complex&lt; double &gt; *data, std::complex&lt; double &gt; *response, double *psd)</td></tr>
+<tr class="separator:a92474a9479a801dcbb9a6d50aa8d3670"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a5e9bfac97929ed68c247c3ff90fca2"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="waveform__util_8cpp.html#a0a5e9bfac97929ed68c247c3ff90fca2">data_snr_maximized_extrinsic</a> (double *frequencies, int length, std::complex&lt; double &gt; *data, double *psd, std::string detector, std::string generation_method, <a class="el" href="classgen__params.html">gen_params</a> *param)</td></tr>
 <tr class="memdesc:a0a5e9bfac97929ed68c247c3ff90fca2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc.  <a href="waveform__util_8cpp.html#a0a5e9bfac97929ed68c247c3ff90fca2">More...</a><br /></td></tr>
 <tr class="separator:a0a5e9bfac97929ed68c247c3ff90fca2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -204,9 +196,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>assign_freq_boundarie
 <tr class="memitem:ad8f19ab5b9b95d8e31d0cca87a4f560c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="waveform__util_8cpp.html#ad8f19ab5b9b95d8e31d0cca87a4f560c">integration_bounds</a> (<a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, std::string generation_method, std::string detector, std::string sensitivity_curve, double fmin, double fmax, double signal_to_noise, double tol, double *integration_bounds)</td></tr>
 <tr class="memdesc:ad8f19ab5b9b95d8e31d0cca87a4f560c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to find the integration bounds for Fisher matrices for increasing speed of Fisher evaluation.  <a href="waveform__util_8cpp.html#ad8f19ab5b9b95d8e31d0cca87a4f560c">More...</a><br /></td></tr>
 <tr class="separator:ad8f19ab5b9b95d8e31d0cca87a4f560c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7dcc233b0537530ae4a5062d5dd93777"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="waveform__util_8cpp.html#a7dcc233b0537530ae4a5062d5dd93777">integration_interval</a> (double sampling_freq, double integration_time, std::string detector, std::string sensitivity_curve, std::string generation_method, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, double *freq_bounds)</td></tr>
-<tr class="memdesc:a7dcc233b0537530ae4a5062d5dd93777"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve.  <a href="waveform__util_8cpp.html#a7dcc233b0537530ae4a5062d5dd93777">More...</a><br /></td></tr>
-<tr class="separator:a7dcc233b0537530ae4a5062d5dd93777"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d7ec6fc6fb00649edbba1122b64db1b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="waveform__util_8cpp.html#a1d7ec6fc6fb00649edbba1122b64db1b">integration_interval</a> (double sampling_freq, double integration_time, std::string detector, std::string sensitivity_curve, std::string generation_method, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, double *freq_bounds)</td></tr>
+<tr class="memdesc:a1d7ec6fc6fb00649edbba1122b64db1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve.  <a href="waveform__util_8cpp.html#a1d7ec6fc6fb00649edbba1122b64db1b">More...</a><br /></td></tr>
+<tr class="separator:a1d7ec6fc6fb00649edbba1122b64db1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae3ab5cade299ee4fd0ab019d4f63042c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="waveform__util_8cpp.html#ae3ab5cade299ee4fd0ab019d4f63042c">integration_interval_discrete</a> (double sampling_freq, double integration_time, std::string detector, std::string sensitivity_curve, std::string generation_method, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, double *freq_bounds)</td></tr>
 <tr class="memdesc:ae3ab5cade299ee4fd0ab019d4f63042c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve.  <a href="waveform__util_8cpp.html#ae3ab5cade299ee4fd0ab019d4f63042c">More...</a><br /></td></tr>
 <tr class="separator:ae3ab5cade299ee4fd0ab019d4f63042c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1451,14 +1443,14 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="a7dcc233b0537530ae4a5062d5dd93777"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7dcc233b0537530ae4a5062d5dd93777">&#9670;&nbsp;</a></span>integration_interval()</h2>
+<a id="a1d7ec6fc6fb00649edbba1122b64db1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d7ec6fc6fb00649edbba1122b64db1b">&#9670;&nbsp;</a></span>integration_interval()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void integration_interval </td>
+          <td class="memname">int integration_interval </td>
           <td>(</td>
           <td class="paramtype">double&#160;</td>
           <td class="paramname"><em>sampling_freq</em>, </td>
@@ -1509,7 +1501,9 @@ template&lt;class T &gt; </div>
 
 <p>Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve. </p>
 <p>Sensitivity curve has to be one of the options in detector_util analytic options</p>
-<p>The current scheme is to use the frequency bounds determined by the SNR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f_integration_time, f_high_band) </p>
+<p>The current scheme is to use the frequency bounds determined by the SNR if the binary spends less than the integration time in band. If the merger spends more time in band than the integration time, the frequencies are determined to be (f_integration_time, f_high_band)</p>
+<p>Accounts for the integration time, unlike the integration_bounds routine</p>
+<p>returns 0 if successful, returns 1 if bounds could not be found due to roundoff, and returns 2 if entirely unsuccessful </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir"></td><td class="paramname">sampling_freq</td><td>Frequency at which the detector operates </td></tr>

@@ -20,13 +20,7 @@
 {\ttfamily \#include $<$fstream$>$}\newline
 {\ttfamily \#include \char`\"{}adolc/adolc.\+h\char`\"{}}\newline
 Include dependency graph for mcmc\+\_\+sampler.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{mcmc__sampler_8cpp__incl}
-\end{center}
-\end{figure}
+% FIG 0
 \doxysubsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -64,7 +58,7 @@ void {\bfseries dynamic\+\_\+temperature\+\_\+internal} (\mbox{\hyperlink{classs
 \item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a5c94625e7e33e0d077ebb9ea7501fbe6}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal}} (double $\ast$$\ast$$\ast$output, int dimension, int N\+\_\+steps, int chain\+\_\+N, double $\ast$initial\+\_\+pos, double $\ast$seeding\+\_\+var, double $\ast$chain\+\_\+temps, int swp\+\_\+freq, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string checkpoint\+\_\+file)
 \begin{DoxyCompactList}\small\item\em Generic sampler, where the likelihood, prior are parameters supplied by the user. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{mcmc__sampler_8cpp_ad476eae645c920872fdd77100dfd0121}{continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal}} (std\+::string start\+\_\+checkpoint\+\_\+file, double $\ast$$\ast$$\ast$output, int N\+\_\+steps, int swp\+\_\+freq, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string end\+\_\+checkpoint\+\_\+file)
+void \mbox{\hyperlink{mcmc__sampler_8cpp_ae7668cb8a4889e7d97254ee794898b20}{continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, std\+::string start\+\_\+checkpoint\+\_\+file, double $\ast$$\ast$$\ast$output, int N\+\_\+steps, int swp\+\_\+freq, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+prior, std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$ log\+\_\+likelihood, std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$fisher, void $\ast$$\ast$user\+\_\+parameters, int num\+Threads, bool pool, bool show\+\_\+prog, std\+::string statistics\+\_\+filename, std\+::string chain\+\_\+filename, std\+::string auto\+\_\+corr\+\_\+filename, std\+::string likelihood\+\_\+log\+\_\+filename, std\+::string end\+\_\+checkpoint\+\_\+file)
 \begin{DoxyCompactList}\small\item\em Routine to take a checkpoint file and begin a new chain at said checkpoint. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{mcmc__sampler_8cpp_a772e17f2034573d79c02bfa0ecd8c990}{P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+step\+\_\+incremental}} (\mbox{\hyperlink{classsampler}{sampler}} $\ast$\mbox{\hyperlink{classsampler}{sampler}}, int increment)
 \begin{DoxyCompactList}\small\item\em Internal function that runs the actual loop for the sampler -- increment version. \end{DoxyCompactList}\item 
@@ -567,11 +561,11 @@ $<$ Filename to output data for checkpoint, if empty string, not saved
  & {\em checkpoint\+\_\+file} & Filename to output data for checkpoint, if empty string, not saved \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{mcmc__sampler_8cpp_ad476eae645c920872fdd77100dfd0121}\label{mcmc__sampler_8cpp_ad476eae645c920872fdd77100dfd0121}} 
+\mbox{\Hypertarget{mcmc__sampler_8cpp_ae7668cb8a4889e7d97254ee794898b20}\label{mcmc__sampler_8cpp_ae7668cb8a4889e7d97254ee794898b20}} 
 \index{mcmc\_sampler.cpp@{mcmc\_sampler.cpp}!continue\_PTMCMC\_MH\_internal@{continue\_PTMCMC\_MH\_internal}}
 \index{continue\_PTMCMC\_MH\_internal@{continue\_PTMCMC\_MH\_internal}!mcmc\_sampler.cpp@{mcmc\_sampler.cpp}}
 \doxysubsubsection{\texorpdfstring{continue\_PTMCMC\_MH\_internal()}{continue\_PTMCMC\_MH\_internal()}}
-{\footnotesize\ttfamily void continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal (\begin{DoxyParamCaption}\item[{std\+::string}]{start\+\_\+checkpoint\+\_\+file,  }\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{swp\+\_\+freq,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+prior,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+likelihood,  }\item[{std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$}]{fisher,  }\item[{void $\ast$$\ast$}]{user\+\_\+parameters,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{auto\+\_\+corr\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{end\+\_\+checkpoint\+\_\+file }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void continue\+\_\+\+P\+T\+M\+C\+M\+C\+\_\+\+M\+H\+\_\+internal (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classsampler}{sampler}} $\ast$}]{sampler,  }\item[{std\+::string}]{start\+\_\+checkpoint\+\_\+file,  }\item[{double $\ast$$\ast$$\ast$}]{output,  }\item[{int}]{N\+\_\+steps,  }\item[{int}]{swp\+\_\+freq,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+prior,  }\item[{std\+::function$<$ double(double $\ast$, int $\ast$, int, int, void $\ast$)$>$}]{log\+\_\+likelihood,  }\item[{std\+::function$<$ void(double $\ast$, int $\ast$, int, double $\ast$$\ast$, int, void $\ast$)$>$}]{fisher,  }\item[{void $\ast$$\ast$}]{user\+\_\+parameters,  }\item[{int}]{num\+Threads,  }\item[{bool}]{pool,  }\item[{bool}]{show\+\_\+prog,  }\item[{std\+::string}]{statistics\+\_\+filename,  }\item[{std\+::string}]{chain\+\_\+filename,  }\item[{std\+::string}]{auto\+\_\+corr\+\_\+filename,  }\item[{std\+::string}]{likelihood\+\_\+log\+\_\+filename,  }\item[{std\+::string}]{end\+\_\+checkpoint\+\_\+file }\end{DoxyParamCaption})}
 
 
 

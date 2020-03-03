@@ -13,13 +13,7 @@
 {\ttfamily \#include $<$gsl/gsl\+\_\+randist.\+h$>$}\newline
 {\ttfamily \#include $<$gsl/gsl\+\_\+integration.\+h$>$}\newline
 Include dependency graph for detector\+\_\+util.\+cpp\+:
-\nopagebreak
-\begin{figure}[H]
-\begin{center}
-\leavevmode
-\includegraphics[width=350pt]{detector__util_8cpp__incl}
-\end{center}
-\end{figure}
+% FIG 0
 \doxysubsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -57,6 +51,10 @@ std\+::complex$<$ double $>$ \mbox{\hyperlink{detector__util_8cpp_a58352b030b231
 \begin{DoxyCompactList}\small\item\em Transform from celestial coordinates to local horizontal coords. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{detector__util_8cpp_a038c7aed643958fb110d2ffa790a854a}{derivative\+\_\+celestial\+\_\+horizon\+\_\+transform}} (double RA, double D\+EC, double gps\+\_\+time, std\+::string detector, double $\ast$dphi\+\_\+d\+RA, double $\ast$dtheta\+\_\+d\+RA, double $\ast$dphi\+\_\+d\+D\+EC, double $\ast$dtheta\+\_\+d\+D\+EC)
 \begin{DoxyCompactList}\small\item\em Numerical derivative of the transformation. \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{detector__util_8cpp_a12e934d5a518cc1901ec301380a6ef71}{D\+T\+O\+A\+\_\+\+D\+E\+T\+E\+C\+T\+OR}} (double RA, double D\+EC, double G\+M\+S\+T\+\_\+rad, std\+::string detector1, std\+::string detector2)
+\begin{DoxyCompactList}\small\item\em calculate difference in time of arrival (D\+T\+OA) for a given source location and 2 different detectors \end{DoxyCompactList}\item 
+double \mbox{\hyperlink{detector__util_8cpp_a1df707347cf3382b694173925c0c8096}{D\+T\+O\+A\+\_\+earth\+\_\+centered\+\_\+coord}} (double RA, double D\+EC, double G\+M\+S\+T\+\_\+rad, const double $\ast$loc1, const double $\ast$loc2)
+\begin{DoxyCompactList}\small\item\em calculate difference in time of arrival (D\+T\+OA) for a given source location and 2 different detectors \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{detector__util_8cpp_a8f5874fbc260906fa9ea664debbe86d4}{D\+T\+OA}} (double theta1, double theta2, std\+::string detector1, std\+::string detector2)
 \begin{DoxyCompactList}\small\item\em calculate difference in time of arrival (D\+T\+OA) for a given source location and 2 different detectors \end{DoxyCompactList}\item 
 double \mbox{\hyperlink{detector__util_8cpp_adcb816dfe662ececa657888ff18132bd}{radius\+\_\+at\+\_\+lat}} (double latitude, double elevation)
@@ -341,6 +339,52 @@ calculate difference in time of arrival (D\+T\+OA) for a given source location a
 {\em detector2} & name of detector two \\
 \hline
 \end{DoxyParams}
+\mbox{\Hypertarget{detector__util_8cpp_a12e934d5a518cc1901ec301380a6ef71}\label{detector__util_8cpp_a12e934d5a518cc1901ec301380a6ef71}} 
+\index{detector\_util.cpp@{detector\_util.cpp}!DTOA\_DETECTOR@{DTOA\_DETECTOR}}
+\index{DTOA\_DETECTOR@{DTOA\_DETECTOR}!detector\_util.cpp@{detector\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{DTOA\_DETECTOR()}{DTOA\_DETECTOR()}}
+{\footnotesize\ttfamily double D\+T\+O\+A\+\_\+\+D\+E\+T\+E\+C\+T\+OR (\begin{DoxyParamCaption}\item[{double}]{RA,  }\item[{double}]{D\+EC,  }\item[{double}]{G\+M\+S\+T\+\_\+rad,  }\item[{std\+::string}]{detector1,  }\item[{std\+::string}]{detector2 }\end{DoxyParamCaption})}
+
+
+
+calculate difference in time of arrival (D\+T\+OA) for a given source location and 2 different detectors 
+
+Full version, from L\+AL 
+\begin{DoxyParams}{Parameters}
+{\em RA} & spherical polar angle for detector 1 in R\+AD \\
+\hline
+{\em D\+EC} & spherical polar angle for detector 2 in R\+AD \\
+\hline
+{\em G\+M\+S\+T\+\_\+rad} & Greenwich mean sidereal time of detection \\
+\hline
+{\em detector1} & name of detector one \\
+\hline
+{\em detector2} & name of detector two \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{detector__util_8cpp_a1df707347cf3382b694173925c0c8096}\label{detector__util_8cpp_a1df707347cf3382b694173925c0c8096}} 
+\index{detector\_util.cpp@{detector\_util.cpp}!DTOA\_earth\_centered\_coord@{DTOA\_earth\_centered\_coord}}
+\index{DTOA\_earth\_centered\_coord@{DTOA\_earth\_centered\_coord}!detector\_util.cpp@{detector\_util.cpp}}
+\doxysubsubsection{\texorpdfstring{DTOA\_earth\_centered\_coord()}{DTOA\_earth\_centered\_coord()}}
+{\footnotesize\ttfamily double D\+T\+O\+A\+\_\+earth\+\_\+centered\+\_\+coord (\begin{DoxyParamCaption}\item[{double}]{RA,  }\item[{double}]{D\+EC,  }\item[{double}]{G\+M\+S\+T\+\_\+rad,  }\item[{const double $\ast$}]{loc1,  }\item[{const double $\ast$}]{loc2 }\end{DoxyParamCaption})}
+
+
+
+calculate difference in time of arrival (D\+T\+OA) for a given source location and 2 different detectors 
+
+
+\begin{DoxyParams}{Parameters}
+{\em RA} & spherical polar angle for detector 1 in R\+AD \\
+\hline
+{\em D\+EC} & spherical polar angle for detector 2 in R\+AD \\
+\hline
+{\em G\+M\+S\+T\+\_\+rad} & Greenwich mean sidereal time of detection \\
+\hline
+{\em loc1} & Location of the first detector in Earth centered coordinates in meters \\
+\hline
+{\em loc2} & Location of the second detector in Earth centered coordinates in meters \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{detector__util_8cpp_a2e29bfa3018d037af4d1b52cabe47d39}\label{detector__util_8cpp_a2e29bfa3018d037af4d1b52cabe47d39}} 
 \index{detector\_util.cpp@{detector\_util.cpp}!Hanford\_O1\_fitted@{Hanford\_O1\_fitted}}
 \index{Hanford\_O1\_fitted@{Hanford\_O1\_fitted}!detector\_util.cpp@{detector\_util.cpp}}
@@ -440,7 +484,9 @@ Integrates using Monte Carlo integration
 
 Uniform sampling in \textbackslash{}psi, cos(\textbackslash{}iota), cos(\+D\+E\+C) , and RA
 
-Sampled using any supported detectors. See documentation for supported detectors 
+Sampled using any supported detectors. See documentation for supported detectors
+
+Rough upper limit\+: H\+LV\+: 1.\+4 H\+L\+VK\+: 1.\+5 H\+L\+VI\+: 1.\+65 H\+L\+V\+KI\+: 1.\+7 
 \begin{DoxyParams}{Parameters}
 {\em omega} & \textbackslash{}omega = \textbackslash{}rho/\textbackslash{}rho\+\_\+opt$\ast$ \\
 \hline
@@ -610,6 +656,20 @@ LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel i
     -- does include the factor of sqrt(3)/2
 
     -- This DOES include the sky averaged pattern functions -- i.e. sky_average flag should NOT be used when making the waveform
+
+AdLIGOAPlus -- AdLIGO A+ O5
+
+AdLIGODesign -- Design sensitivity for LIGO O4
+
+CE1 -- Cosmic Explorer phase 1 -- circa 2035
+
+CE2 -- Cosmic Explorer phase 2 -- circa 2045
+
+KAGRA -- KAGRA O5 05 DRSE
+
+AdVIRGOPlus2 -- phase 2, O5
+
+AdVIRGOPlus1 -- phase 1, O4 analog ( rescaled O5 curve according to BBH distance estimates in https://dcc.ligo.org/public/0161/P1900218/002/SummaryForObservers.pdf)
 \end{DoxyVerb}
  
 \begin{DoxyParams}{Parameters}

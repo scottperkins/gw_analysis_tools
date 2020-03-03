@@ -8,10 +8,12 @@
  */
 
 /*! \brief Routine from Numerical Recipes that computes the abscissas and weights for Gauss-Legendre polynomials
+ *
+ * Modified version of Numerical Recipes in C: changed from fortran style indexing to c style starting at index 0 and going till index N-1 for length N
  */
 void gauleg(double x1, double x2, double x[], double w[], int n)
 //Given the lower and upper limits of integration x1 and x2, and given n, this routine returns
-//arrays x[1..n] and w[1..n] of length n, containing the abscissas and weights of the GaussLegendre n-point quadrature formula.
+//arrays x[0..n-1] and w[0..n-1] of length n, containing the abscissas and weights of the GaussLegendre n-point quadrature formula.
 {
 	int m,j,i;
 	double z1,z,xm,xl,pp,p3,p2,p1; //High precision is a good idea for this routine.
@@ -36,10 +38,10 @@ void gauleg(double x1, double x2, double x[], double w[], int n)
 			z1=z;
 			z=z1-p1/pp; //Newton’s method.
 		} while (fabs(z-z1) > DOUBLE_COMP_THRESH);
-		x[i]=xm-xl*z; //Scale the root to the desired interval,
-		x[n+1-i]=xm+xl*z; //and put in its symmetric counterpart.
-		w[i]=2.0*xl/((1.0-z*z)*pp*pp); //Compute the weight
-		w[n+1-i]=w[i]; //and its symmetric counterpart.
+		x[i-1]=xm-xl*z; //Scale the root to the desired interval,
+		x[n-i]=xm+xl*z; //and put in its symmetric counterpart.
+		w[i-1]=2.0*xl/((1.0-z*z)*pp*pp); //Compute the weight
+		w[n-i]=w[i-1]; //and its symmetric counterpart.
 	}
 }
 

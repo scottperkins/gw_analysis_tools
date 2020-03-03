@@ -44,8 +44,7 @@ void fisher_numerical(double *frequency,
 	int *phase_tapes = NULL,
 	double *noise = NULL
 	);
-void calculate_fisher_elements(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd);
-void calculate_fisher_elements_gq(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd,double *weights, bool log_freq);
+void calculate_fisher_elements(double *frequency, int length, int dimension, std::complex<double> **response_deriv, double **output, double *psd, std::string integration_method, double *weights, bool log10_f);
 
 void calculate_fisher_elements_batch(double *frequency, 
 	int length, 
@@ -54,23 +53,7 @@ void calculate_fisher_elements_batch(double *frequency,
 	std::complex<double> **response_deriv, 
 	double **output,
 	double *psd);
-void calculate_fisher_elements_gq_batch(double *frequency, 
-	int length, 
-	int base_dimension, 
-	int full_dimension, 
-	std::complex<double> **response_deriv, 
-	double **output,
-	double *psd,
-	double *weights);
 
-//void calculate_derivatives_old(double  **amplitude_deriv, 
-//       	double **phase_deriv,
-//       	double *amplitude,
-//       	double *frequencies,
-//       	int length, 
-//       	string detector, 
-//       	string  gen_method,
-//       	gen_params *parameters);
 
 void calculate_derivatives(std::complex<double>  **response_deriv, 
        	double *frequencies,
@@ -89,9 +72,12 @@ void fisher_autodiff(double *frequency,
 	int dimension, 
 	//double *parameters,
 	gen_params *parameters,
+	std::string integration_method="SIMPSONS",
+	double *weights = NULL,
+	bool log10_f=false,
+	double *noise = NULL,
 	int *amp_tapes = NULL,
-	int *phase_tapes = NULL,
-	double *noise = NULL
+	int *phase_tapes = NULL
 	);
 void fisher_autodiff_gq_internal(double *frequency, 
 	int length,
@@ -159,7 +145,8 @@ void calculate_derivatives_autodiff(double *frequency,
 	gen_params *parameters,
 	std::complex<double> **waveform_deriv,
 	int *waveform_tapes,/*<< Waveform tapes -- length=6*/
-	std::string detector
+	std::string detector,
+	bool autodiff_time_deriv
 	);
 void time_phase_corrected_derivative_autodiff_full_hess(double **dt, 
 	int length, 
