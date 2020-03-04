@@ -24,6 +24,7 @@ Gpy = G
 MPC_SECpy = MPC_SEC
 MSOL_SECpy = MSOL_SEC
 T_yearpy = T_year
+GWAT_ROOT_DIRECTORY_PY = GWAT_ROOT_DIRECTORY 
 def DL_from_Z_py(double Z, string cosmology):
     return DL_from_Z(Z,cosmology)
 def calculate_mass1_py(double chirpmass, double eta):

@@ -17,5 +17,7 @@ cdef extern from "util.h" :
     double DL_from_Z(double Z, string cosmology)
     double calculate_mass1(double chirpmass, double eta)
     double calculate_mass2(double chirpmass, double eta)
+cdef extern from "GWATConfig.h" :
+    cdef string GWAT_ROOT_DIRECTORY
 
 

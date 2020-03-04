@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 import matplotlib
+from gwatpy.util import GWAT_ROOT_DIRECTORY_PY
 
 def set():
     #fpath = "/Users/sperkins/git-repos/gw_analysis_tools/gwatpy/fonts/static/EBGaramond-Regular.ttf"
     #prop = matplotlib.font_manager.FontProperties(fname=fpath)
     
-    matplotlib.style.use("/Users/sperkins/git-repos/gw_analysis_tools/gwatpy/gwat_rc")
+    matplotlib.style.use(GWAT_ROOT_DIRECTORY_PY.decode('utf-8')+"gwatpy/gwat_rc")
     #matplotlib.rcParams["font.sans-serif"] = ["Apple Symbols","Microsoft Sans Serif","Tahoma"]
     matplotlib.rcParams["font.family"]="serif"
     #matplotlib.rcParams['font.family'] = prop.get_name()
