@@ -83,6 +83,14 @@ cdef extern from "mcmc_gw.h" :
 #				string generation_method,
 #				fftw_outline *plan
 #				)
+    double maximized_coal_Log_Likelihood(double *data_real,
+        double *data_imag,
+        double *psd,
+        double *frequencies,
+        size_t length,
+        double *template_real,
+        double *template_imag,
+        fftw_outline *plan)
     void allocate_FFTW_mem_forward(fftw_outline *plan,int length)
     void deallocate_FFTW_mem(fftw_outline *plan) 
     

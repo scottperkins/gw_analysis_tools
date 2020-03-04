@@ -133,6 +133,21 @@ def write_auto_corr_file_from_data_py(
 #                                detector,
 #                                generation_method,
 #                                &plan.plan)
+def maximized_coal_Log_Likelihood_py(double[::1] data_real, 
+				double[::1] data_imag,
+				double[::1] psd,
+				double[::1] frequencies,
+				double[::1] template_real,
+				double[::1] template_imag,
+				fftw_outline_py plan):
+    return mcmc_routines_ext.maximized_coal_Log_Likelihood(&data_real[0],
+                                &data_imag[0],
+                                &psd[0],
+                                &frequencies[0],
+                                frequencies.size,
+                                &template_real[0],
+                                &template_imag[0],
+                                &plan.plan)
 def allocate_FFTW_mem_forward_py(fftw_outline_py plan,int length):
     mcmc_routines_ext.allocate_FFTW_mem_forward(&plan.plan,length)
 def deallocate_FFTW_mem_py(fftw_outline_py plan):

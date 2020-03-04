@@ -1,4 +1,5 @@
 #include "mcmc_gw.h"
+#include "waveform_generator.h"
 #include "io_util.h"
 #include "util.h"
 #include <iostream>
@@ -30,6 +31,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
 int main(int argc, char *argv[])
 {
@@ -139,18 +141,18 @@ int main(int argc, char *argv[])
 	//#############################################################
 	//#############################################################
 	
-	double **whitened = allocate_2D_array(data_lengths[0],7);
-	for(int i = 0 ; i<data_lengths[0]; i++){
-		whitened[i][0]= freqs[0][i];
-		whitened[i][1]=psd[0][i];
-		whitened[i][2]=psd[1][i];
-		whitened[i][3]=real(data[0][i]);
-		whitened[i][4]=imag(data[0][i]);
-		whitened[i][5]=real(data[1][i]);
-		whitened[i][6]=imag(data[1][i]);
-	}	
-	write_file("testing/data/whitened_data.csv",whitened,data_lengths[0],7);
-	deallocate_2D_array(whitened, data_lengths[0],7);
+	//double **whitened = allocate_2D_array(data_lengths[0],7);
+	//for(int i = 0 ; i<data_lengths[0]; i++){
+	//	whitened[i][0]= freqs[0][i];
+	//	whitened[i][1]=psd[0][i];
+	//	whitened[i][2]=psd[1][i];
+	//	whitened[i][3]=real(data[0][i]);
+	//	whitened[i][4]=imag(data[0][i]);
+	//	whitened[i][5]=real(data[1][i]);
+	//	whitened[i][6]=imag(data[1][i]);
+	//}	
+	//write_file("testing/data/whitened_data.csv",whitened,data_lengths[0],7);
+	//deallocate_2D_array(whitened, data_lengths[0],7);
 	
 	//#############################################################
 	//#############################################################
@@ -166,48 +168,95 @@ int main(int argc, char *argv[])
 	bool show_progress = true;
 
 	//#########################################################
-	
-	double(*lp)(double *param, int dimension, int chain_id, void *parameters);
-	if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
-		lp = &standard_log_prior_D;
-	}
-	else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 14){
-		lp = &standard_log_prior_Pv2;
-	}
-	else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 7){
-		lp = &standard_log_prior_Pv2_intrinsic;
-	}
-	else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
-		lp = &standard_log_prior_D_intrinsic;
-	}
-	else{
-		std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
-		return 1;
-	}
+	if(generation_method.find("SkySearch") != std::string::npos){
+		std::complex<double> *hplus=new std::complex<double>[data_lengths[0]];
+		std::complex<double> *hcross=new std::complex<double>[data_lengths[0]];
 
-	if(continue_from_checkpoint){
-		continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,output, samples,  
-				max_thermo_chain_N, chain_temps, 
-				swap_freq, t0, nu, correlation_thresh, correlation_segs,
-				correlation_convergence_thresh , ac_target,allocation_scheme, 
-				lp,threads, pool,show_progress,detector_N, 
-				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-				generation_method,stat_file,output_file, "",check_file);	
-
-	}
-	else{
 		double **initial_position = new double*[1];
-		initial_position[0] = new double[dimension];
-		read_file(initial_position_file, initial_position,1,dimension);
+		initial_position[0] = new double[11];
+		read_file(initial_position_file, initial_position,1,11);
+
+		gen_params params ;
+		for(int i = 0 ; i<11; i++){
+			std::cout<<initial_position[0][i]<<std::endl;
+		}
+		params.mass1 = calculate_mass1(exp(initial_position[0][7]),initial_position[0][8]);
+		params.mass2 = calculate_mass2(exp(initial_position[0][7]),initial_position[0][8]);
+		params.spin1[2]=initial_position[0][9];
+		params.spin2[2]=initial_position[0][10];
+		params.phiRef = 0;
+		params.phic = 0;
+		params.tc = 0;
+		params.f_ref =20;
+		params.NSflag1=false;
+		params.NSflag2=false;
+		params.shift_phase=true;
+		params.shift_time=true;
+		params.equatorial_orientation=false;
+		params.sky_average=false;
+		params.Luminosity_Distance = exp(initial_position[0][6]);
+		params.incl_angle = acos(initial_position[0][3]);
+
+		fourier_waveform(freqs[0],data_lengths[0],hplus, hcross, "IMRPhenomD",&params);
+	
+	
 		double *seeding_var = NULL;
-		PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+		SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
 				max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 				swap_freq, t0, nu, correlation_thresh, correlation_segs,
 				correlation_convergence_thresh , ac_target,allocation_scheme, 
-				lp,threads, pool,show_progress,detector_N, 
+				standard_log_prior_skysearch,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-				generation_method,stat_file,output_file, "testing/data/test2_log.csv",check_file);	
+				hplus,hcross,stat_file,output_file, "",check_file);	
+		delete []  hplus;
+		delete []  hcross;
 		delete [] initial_position[0]; delete [] initial_position;
+	}
+	else{
+	
+		double(*lp)(double *param, int dimension, int chain_id, void *parameters);
+		if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
+			lp = &standard_log_prior_D;
+		}
+		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 14){
+			lp = &standard_log_prior_Pv2;
+		}
+		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 7){
+			lp = &standard_log_prior_Pv2_intrinsic;
+		}
+		else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
+			lp = &standard_log_prior_D_intrinsic;
+		}
+		else{
+			std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
+			return 1;
+		}
+
+		if(continue_from_checkpoint){
+			continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,output, samples,  
+					max_thermo_chain_N, chain_temps, 
+					swap_freq, t0, nu, correlation_thresh, correlation_segs,
+					correlation_convergence_thresh , ac_target,allocation_scheme, 
+					lp,threads, pool,show_progress,detector_N, 
+					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					generation_method,stat_file,output_file, "",check_file);	
+
+		}
+		else{
+			double **initial_position = new double*[1];
+			initial_position[0] = new double[dimension];
+			read_file(initial_position_file, initial_position,1,dimension);
+			double *seeding_var = NULL;
+			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
+					swap_freq, t0, nu, correlation_thresh, correlation_segs,
+					correlation_convergence_thresh , ac_target,allocation_scheme, 
+					lp,threads, pool,show_progress,detector_N, 
+					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					generation_method,stat_file,output_file, "testing/data/test2_log.csv",check_file);	
+			delete [] initial_position[0]; delete [] initial_position;
+		}
+
 	}
 
 
@@ -312,6 +361,21 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
 
+}
+
+double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters){
+
+	double a = -std::numeric_limits<double>::infinity();
+	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+
+	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
+	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
+	else {return 3*pos[6];}
 }
 
 //Uniform in m1 and m2, transformed to lnM and eta

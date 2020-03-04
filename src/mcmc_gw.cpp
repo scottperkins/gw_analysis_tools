@@ -1,6 +1,7 @@
 #include "mcmc_gw.h"
 #include "waveform_generator.h"
 #include "util.h"
+#include "io_util.h"
 #include "detector_util.h"
 #include "waveform_util.h"
 #include "fisher.h"
@@ -400,6 +401,39 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 }
 
 					
+double maximized_coal_Log_Likelihood(double *data_real, 
+				double *data_imag,
+				double *psd,
+				double *frequencies,
+				size_t length,
+				double *template_real,
+				double *template_imag,
+				fftw_outline *plan
+				)
+{
+	
+	std::complex<double> *data = 
+			(std::complex<double> *) malloc(sizeof(std::complex<double>)*length);
+	std::complex<double> *h = 
+			(std::complex<double> *) malloc(sizeof(std::complex<double>)*length);
+	for(int i =0; i<length; i ++){
+		data[i] = std::complex<double>(data_real[i],data_imag[i]);
+		h[i] = std::complex<double>(template_real[i],template_imag[i]);
+	}
+	double tc,phic,ll=0;
+	ll = maximized_coal_Log_Likelihood_internal(data,
+				psd,
+				frequencies,
+				h,
+				length,
+				plan,
+				&tc,
+				&phic);
+	
+	free(data);
+	free(h);
+	return ll;
+}
 double maximized_Log_Likelihood(double *data_real, 
 				double *data_imag,
 				double *psd,
@@ -792,6 +826,174 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	
 	return -0.5*(HH- 2*DH);
 }
+
+
+struct skysearch_params{
+	std::complex<double> *hplus;
+	std::complex<double> *hcross;
+};
+
+/*! \brief Takes in intrinsic parameters and conducts a sky search using uncorrelated MCMC
+ *
+ * Searches over RA, sin(DEC), PSI, INCLINATION, phiREF, tc,ln(DL)
+ *
+ * Only works with PhenomD
+ *
+ * hplus and hcross should be constructed with the value for inclination in initial_pos -- its scaled out internally
+ *
+ */
+void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
+	int dimension,
+	int N_steps,
+	int chain_N,
+	int max_chain_N_thermo_ensemble,
+	double *initial_pos,
+	double *seeding_var,
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	int corr_threshold,
+	int corr_segments,
+	double corr_converge_thresh,
+	double corr_target_ac,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	int Nmod,
+	int *bppe,
+	std::complex<double> *hplus,
+	std::complex<double> *hcross,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	)
+{
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
+	}
+	void **user_parameters=NULL;
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
+	//std::cout<<"MCMC GMST: "<<mcmc_gmst<<std::endl;
+	mcmc_Nmod = Nmod;
+	mcmc_bppe = bppe;
+	mcmc_log_beta = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	//mcmc_save_waveform = true;
+	//for(int i =1 ;i<mcmc_num_detectors; i++){
+	//	if( mcmc_data_length[i] != mcmc_data_length[0] ||
+	//		mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+	//		mcmc_frequencies[i][mcmc_data_length[i]-1] 
+	//			!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+	//		mcmc_save_waveform= false;
+	//	}
+	//		
+	//}
+
+	bool local_seeding ;
+	if(!seeding_var)
+		local_seeding = true;
+	else
+		local_seeding = false;
+
+	//PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+
+	skysearch_params p;
+	p.hplus = hplus;
+	p.hcross = hcross;
+
+	double cos_i_initial = (initial_pos[3]);
+	double p_fac = 0.5*(1+cos_i_initial*cos_i_initial)/(exp(initial_pos[6])*MPC_SEC);
+	double c_fac = (cos_i_initial)/(exp(initial_pos[6])*MPC_SEC);
+	for(int i = 0 ; i<data_length[0]; i ++){
+		p.hplus[i] /= p_fac;
+		p.hcross[i] /= c_fac;
+	}
+	
+	skysearch_params **P = new skysearch_params*[chain_N];
+	for(int i = 0 ; i<chain_N; i ++){
+		P[i]= &p;
+	}
+	
+
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, 
+		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
+		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_distribution_scheme,
+		//log_prior,MCMC_likelihood_wrapper_SKYSEARCH, MCMC_fisher_wrapper_SKYSEARCH,(void **)P,numThreads, pool, 
+		log_prior,MCMC_likelihood_wrapper_SKYSEARCH, NULL,(void **)P,numThreads, pool, 
+		show_prog,statistics_filename,
+		chain_filename, likelihood_log_filename,checkpoint_filename);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deallocate_FFTW_mem(&plans[i]);
+	free(plans);
+	if(local_seeding){ delete [] seeding_var;}
+}
+
+double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain_id,void *parameters)
+{
+	double ll = 0 ; 
+	skysearch_params *p = (skysearch_params *) parameters;
+	std::complex<double> *hplus = new std::complex<double>[mcmc_data_length[0]];	
+	std::complex<double> *hcross = new std::complex<double>[mcmc_data_length[0]];	
+	double p_fac = 0.5*(1+param[3]*param[3])/(exp(param[6])*MPC_SEC);
+	double c_fac = (param[3])/(exp(param[6])*MPC_SEC);
+	for(int i = 0 ; i<mcmc_data_length[0]; i ++){
+		hplus[i] = p->hplus[i]*p_fac;
+		hcross[i] = p->hcross[i]*c_fac;
+	}
+	std::complex<double> *response = new std::complex<double>[mcmc_data_length[0]];	
+	double delta_t;
+	double tc_ref = param[5],tc;
+	for(int i = 0 ; i<mcmc_num_detectors; i++){
+		delta_t = DTOA_DETECTOR(param[0],asin(param[1]),mcmc_gmst, mcmc_detectors[0],mcmc_detectors[i]);
+		tc = tc_ref + delta_t;
+		tc*=2.*M_PI;
+		fourier_detector_response_equatorial(mcmc_frequencies[i],mcmc_data_length[i],hplus,hcross, response,param[0],asin(param[1]),param[2],mcmc_gmst, (double *)NULL,0.,0.,0.,0.,mcmc_detectors[i]);
+		for(int j = 0 ; j<mcmc_data_length[i];j++){
+			response[j]*=exp(-std::complex<double>(
+				0,tc*(mcmc_frequencies[i][j]-20.) - param[4] ));
+		}	
+		ll += Log_Likelihood_internal(mcmc_data[i], 
+			mcmc_noise[i],
+			mcmc_frequencies[i],
+			response,
+			(size_t) mcmc_data_length[i],
+			&mcmc_fftw_plans[i]
+			);
+		
+	}
+	delete [] response;
+	delete [] hplus;
+	delete [] hcross;
+	return ll;
+}
+
+
 /*! \brief Takes in an MCMC checkpoint file and continues the chain
  *
  * Obviously, the user must be sure to correctly match the dimension, number of chains, the generation_method, 
@@ -1248,40 +1450,40 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
  * numThreads and pool do not necessarily have to be the same
  */
 void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
-			int dimension,
-			int N_steps,
-			int chain_N,
-			int max_chain_N_thermo_ensemble,
-			double *initial_pos,
-			double *seeding_var,
-			double *chain_temps,
-			int swp_freq,
-			int t0,
-			int nu,
-			int corr_threshold,
-			int corr_segments,
-			double corr_converge_thresh,
-			double corr_target_ac,
-			std::string chain_distribution_scheme,
-			double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
-			int numThreads,
-			bool pool,
-			bool show_prog,
-			int num_detectors,
-			std::complex<double> **data,
-			double **noise_psd,
-			double **frequencies,
-			int *data_length,
-			double gps_time,
-			std::string *detectors,
-			int Nmod,
-			int *bppe,
-			std::string generation_method,
-			std::string statistics_filename,
-			std::string chain_filename,
-			std::string likelihood_log_filename,
-			std::string checkpoint_filename
-			)
+	int dimension,
+	int N_steps,
+	int chain_N,
+	int max_chain_N_thermo_ensemble,
+	double *initial_pos,
+	double *seeding_var,
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	int corr_threshold,
+	int corr_segments,
+	double corr_converge_thresh,
+	double corr_target_ac,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	int Nmod,
+	int *bppe,
+	std::string generation_method,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	)
 {
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
@@ -1325,6 +1527,39 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 		local_seeding = false;
 
 	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+
+
+	//#################################################################################33
+	//TESTING
+	//double param[11] = {0.75,sin(-.8),2.5,.99,.75,3.03,log(587),log(27),.2499,.09,.01};
+	//double param[11] = {1.,-.2,2.59,.99,.05,3.03,log(600),log(27),.2499,.0,.0};
+
+	//double param[11] = { 1.13563473,-0.02061934,2.66447931,0.49694809,3.1010462,3.03288297,6.18601602,3.26479489,0.24844973,-0.53301645,0.60966511};
+	//double param[11] = { 0.81,-0.79,2.66447931,0.49694809,3.1010462,3.03288297,6.18601602,3.26479489,0.24844973,-0.53301645,0.60966511};
+	
+	//param[2] = M_PI*.82;
+	//param[4] = M_PI*1.02;
+	//std::cout<<MCMC_likelihood_wrapper(param,dimension, 1,(void *)NULL)<<std::endl;
+	//double deltapsi = 2*M_PI/100;
+	//double deltaphi = 2*M_PI/100;
+	//double deltaiota = 2./100;
+	//double deltaDL = 1./100;
+	//double **testing_output= allocate_2D_array(100,100);
+	//for(int j = 0 ; j<100; j++){
+	//	for(int i = 0 ; i<100; i ++){
+	//		param[2] =i*deltapsi;
+	//		//param[6] =6+j*deltaDL;
+	//		param[4] = j*deltaphi;
+	//		//param[3] =-1+ j*deltaiota;
+	//		//std::cout<<MCMC_likelihood_wrapper(param,dimension, 1,(void *)NULL)<<std::endl;
+	//		testing_output[j][i] = MCMC_likelihood_wrapper(param,dimension, 1,(void *)NULL);
+	//	}
+	//}
+	//write_file("testing/data/grid_search.csv",testing_output,100,100);
+	//deallocate_2D_array(testing_output,100,100);
+	//#################################################################################33
+
+
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
