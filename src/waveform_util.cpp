@@ -168,7 +168,10 @@ double calculate_snr(std::string sensitivity_curve,
 	std::string generation_method,
 	gen_params_base<double> *params,
 	double *frequencies,
-	int length)
+	int length,
+	std::string integration_method,
+	double *weights,
+	bool log10_freq)
 {
 	double *times;
 	if(params->equatorial_orientation){
@@ -331,12 +334,30 @@ double calculate_snr(std::string sensitivity_curve, /**< detector name - must ma
 double calculate_snr_internal(double *psd, 
 	std::complex<double>*waveform,
 	double *frequencies, 
-	int length)
+	int length,
+	std::string integration_method,
+	double *weights,
+	bool log10_freq)
 {
         double *integrand = (double *) malloc(sizeof(double)*length);
-        for (int i = 0; i<length; i++)
+        for (int i = 0; i<length; i++){
                 integrand[i] = 4.* real(conj(waveform[i])*waveform[i]/psd[i]);
-        double integral = trapezoidal_sum(frequencies, length, integrand);
+		if(log10_freq){
+			integrand[i]*= (frequencies[i]*LOG10);	
+		}
+	}
+        double integral=0;
+	if(integration_method == "SIMPSONS"){
+		//integral = trapezoidal_sum(frequencies, length, integrand);
+		integral = simpsons_sum(1./(frequencies[1]-frequencies[0]), length, integrand);
+	}
+	else if(integration_method == "GAUSSLEG"){
+        	for (int i = 0; i<length; i++){
+			integral+= weights[i]*integrand[i];
+		
+		}
+	
+	}
 	free(integrand);
         return sqrt(integral);
 }

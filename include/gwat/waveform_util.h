@@ -39,13 +39,20 @@ double calculate_snr(std::string sensitivity_curve,
 double calculate_snr_internal(double *psd,
         std::complex<double> *waveform,
         double *frequencies,
-        int length);
+        int length,
+	std::string integration_method="SIMPSONS",
+	double *weights=NULL,
+	bool log10_freq=false);
 double calculate_snr(std::string sensitivity_curve,
 	std::string detector,
 	std::string generation_method,
         gen_params_base<double> *params,
         double *frequencies,
-        int length);
+        int length,
+	std::string integration_method="SIMPSONS",
+	double *weights=NULL,
+	bool log10_freq=false
+	);
 int calculate_snr_gsl(double *snr,
 	std::string sensitivity_curve,
 	std::string detector,

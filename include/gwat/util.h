@@ -40,6 +40,8 @@ const double AU_SEC = 499.005;
 /*! Sqrt(3) comes up often, precompute it*/
 const double ROOT_THREE = std::sqrt(3.);
 
+const double LOG10=std::log(10.);
+
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
 

@@ -23,7 +23,6 @@
 
 using namespace std;
 
-double LOG10=log(10.);
 
 
 /*! \file 
