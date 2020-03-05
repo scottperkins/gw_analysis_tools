@@ -100,6 +100,7 @@ void test59();
 void test60();
 void test61();
 void test62();
+void test63();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -140,8 +141,55 @@ int main(){
 	//test54();	
 	//test6();	
 	//test45();	
-	test62();	
+	//test62();	
+	test63();	
 	return 0;
+}
+
+void test63()
+{
+	//Terr
+	int length = 10000;
+	int curves = 14;
+	double *f = new double[length];
+	double **psd = new double*[curves+1];
+	std::string psds[curves] = {"aLIGO_analytic","Hanford_O1_fitted","AdLIGOMidHigh","AdLIGOAPlus","AdLIGODesign","CE1","CE2","KAGRA_opt","KAGRA_pess","AdVIRGOPlus1","AdVIRGOPlus2_opt","AdVIRGOPlus2_pess","AdLIGODesign_smoothed","CE1_smoothed"};
+	psd[0]=new double[length];
+	for(int i = 0 ; i<length; i++){
+		f[i]=15. + 3000./length * i;
+		psd[0][i] = f[i];
+		
+	}
+	for(int i = 0 ; i<curves; i++){
+		psd[i+1] = new double[length];
+		populate_noise(f, psds[i], psd[i+1], length);
+	}
+	write_file("testing/data/noise_curves_terr.csv",psd,curves+1,length);
+	delete [] f;
+	for(int i = 0 ; i<curves+1; i++){
+		delete [] psd[i];	
+	}
+	delete [] psd;
+	//Space
+	std::string psds_space[curves] = {"LISA","LISA_CONF","LISA_SADC","LISA_SADC_CONF"};
+	curves = 4;
+	f = new double[length];
+	psd = new double*[curves+1];
+	psd[0]=new double[length];
+	for(int i = 0 ; i<length; i++){
+		f[i]=1e-5 + 1./length * i;
+		psd[0][i] = f[i];
+	}
+	for(int i = 0 ; i<curves; i++){
+		psd[i+1] = new double[length];
+		populate_noise(f, psds_space[i], psd[i+1], length);
+	}
+	write_file("testing/data/noise_curves_space.csv",psd,curves+1,length);
+	delete [] f;
+	for(int i = 0 ; i<curves; i++){
+		delete [] psd[i];	
+	}
+	delete [] psd;
 }
 
 void test62()
@@ -180,8 +228,8 @@ void test62()
 		freqs[i] = 20. + i*deltaf;
 	}
 	
-	int lengthgl1 = 500;
-	int lengthgl2 = 500;
+	int lengthgl1 = 2000;
+	int lengthgl2 = 2000;
 	double *freqsgl1 = new double[lengthgl1];
 	double *freqsgl2 = new double[lengthgl2];
 	double *w1 = new double[lengthgl1];
@@ -202,7 +250,7 @@ void test62()
 	double snr_gsl, snr_simps, snr_gl1,snr_gl2;
 	std::string noise_curve="aLIGO_analytic"	;
 	std::string method= "IMRPhenomPv2";
-	std::string detector="Virgo";
+	std::string detector="Hanford";
 	int iterations = 1000;
 	double **output = new double*[iterations];
 	for(int i = 0 ; i<iterations; i++){

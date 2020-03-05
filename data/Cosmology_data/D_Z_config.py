@@ -38,7 +38,8 @@ def func(x, l,a, b ,c, d, e, f, g, h, i, j ,k):
 if __name__=="__main__":
     testing_cosmo = cosmos.FlatLambdaCDM(H0=70,Om0=0.3)
     data_filetree = os.path.dirname(os.path.realpath(__file__))
-    include_filetree = data_filetree[:-4] + "include"
+    #include_filetree = data_filetree[:-4] + "include"
+    include_filetree = data_filetree[:-19] + "include"
     #config_header = open(include_filetree+'/D_Z_Config.h','w')
     with open(include_filetree+'/gwat/D_Z_Config.h','w') as config_header:
         cosmologies = [cosmos.Planck15, cosmos.Planck13, cosmos.WMAP9,cosmos.WMAP7, cosmos.WMAP5,testing_cosmo]

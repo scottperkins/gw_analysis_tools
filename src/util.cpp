@@ -36,7 +36,7 @@ void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL
 	*Z_DL_accel_ptr = gsl_interp_accel_alloc();
 	*Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
 	std::fstream data_table;
-	data_table.open(std::string(GWAT_ROOT_DIRECTORY)+"/data/tabulated_LumD_Z.csv",std::ios::in);
+	data_table.open(std::string(GWAT_ROOT_DIRECTORY)+"/data/Cosmology_data/tabulated_LumD_Z.csv",std::ios::in);
 	std::vector<std::string> row;
 	std::string line, word, temp;
 	int i =0,j=0;
@@ -510,6 +510,7 @@ bool check_list(T j, T *list, int length)
 }
 template bool check_list<int>(int, int*, int);
 template bool check_list<double>(double ,double*, int);
+template bool check_list<std::string>(std::string ,std::string*, int);
 /*! \brief Just a quick utility to see if an item is in a list
  *
  * Didn't want to keep rewriting this loop

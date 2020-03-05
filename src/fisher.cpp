@@ -474,20 +474,23 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
  *
  * To find the fisher for one of the modifications, simply remove all the other  dimensions associated with the extra modifications using rm_fisher_dim in util.h
  *
- * !NOTE!:This routine only works as intended when GR is the injected value, that is all the  betas are evaluated at 0. And since the covariances between modifications are not computed, this should only be used to look at one modification at a time.
+ * !NOTE!:This routine only works as intended when GR is the injected value, ie, all the  betas are evaluated at 0. And since the covariances between modifications are not computed, this should only be used to look at one modification at a time.
  */
 void fisher_autodiff_batch_mod(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
-	std::string generation_method, 
+	std::string generation_method,
 	std::string detector, 
 	double **output,/**< double [dimension][dimension]*/
 	int base_dimension, /**< GR dimensionality*/
 	int full_dimension, /**< Total dimension of the output fisher (ie GR_dimension + Nmod)*/
 	gen_params *parameters,
+	std::string integration_method,/**< Method of integration to use*/
+	double * weights,/**< If using a gaussian quadrature method and the weights have been precomputed, the weights can be supplied here*/
+	bool log10_f,/**< Boolean for logarithmically (base 10) spaced frequencies*/
+	double *noise,/**<Precomputed PSD array*/
 	//double *parameters,
 	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	double *noise
+	int *phase_tapes/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
 	)
 {
 	//populate noise and frequency
@@ -512,11 +515,16 @@ void fisher_autodiff_batch_mod(double *frequency,
 		response_deriv[i] = new std::complex<double>[length];
 	}
 	bool autodiff_time_deriv=false;
+	//Gauss quad is unequal spacing, doesn't work with numerical derivatives
+	if(integration_method == "GAUSSLEG"){
+		autodiff_time_deriv = true;
+	}
 	calculate_derivatives_autodiff(frequency,length, full_dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv);
 	//##########################################################
 	
 	//calulate fisher elements
-	calculate_fisher_elements_batch(frequency, length,base_dimension, full_dimension, response_deriv, output,  internal_noise);
+	calculate_fisher_elements_batch(frequency, length,base_dimension, full_dimension, 
+		response_deriv, output,  internal_noise, integration_method,weights,log10_f  );
 	//Factor of 2 for LISA's second arm
 	if(detector == "LISA"){
 		for(int i = 0 ; i<full_dimension;i++){
@@ -2218,7 +2226,10 @@ void calculate_fisher_elements_batch(double *frequency,
 	int full_dimension, 
 	std::complex<double> **response_deriv, 
 	double **output,
-	double *psd)
+	double *psd,
+	std::string integration_method, 
+	double *weights, 
+	bool log10_f)
 {
 	//list of modifications
 	int mod_list[full_dimension-base_dimension];
@@ -2245,10 +2256,24 @@ void calculate_fisher_elements_batch(double *frequency,
 						(response_deriv[j][i]*
 						std::conj(response_deriv[k][i]))
 						/psd[i]);
+					if(log10_f){
+						integrand[i]*=(frequency[i])*LOG10;
+					}
 				}
 				
-				output[j][k] = 4*simpsons_sum(
-							frequency[1]-frequency[0], length, integrand);	
+				if(integration_method =="GAUSSLEG"){
+					double sum = 0;
+					for(int i = 0 ; i<length; i++){
+						sum+= ( weights[i] * integrand[i]);
+	
+					}
+					output[j][k] = 4*sum;	
+				}
+				else if(integration_method =="SIMPSONS"){
+				
+					output[j][k] = 4*simpsons_sum(
+								frequency[1]-frequency[0], length, integrand);	
+				}
 			}
 			output[k][j] = output[j][k];
 		}
@@ -2260,13 +2285,26 @@ void calculate_fisher_elements_batch(double *frequency,
 	{
 
 		for (int i =0;i<length;i++){
-				integrand[i] = 
-					real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
-					/psd[i]);
+			integrand[i] = 
+				real( (response_deriv[j][i]*std::conj(response_deriv[j][i]))
+				/psd[i]);
+			if(log10_f){
+				integrand[i]*=(frequency[i])*LOG10;
+			}
 		}
 		
-		output[j][j] = 4*simpsons_sum(
-					frequency[1]-frequency[0], length, integrand);	
+		if(integration_method =="GAUSSLEG"){
+			double sum = 0;
+			for(int i = 0 ; i<length; i++){
+				sum+= ( weights[i] * integrand[i]);
+	
+			}
+			output[j][j] = 4*sum;	
+		}
+		else if(integration_method =="SIMPSONS"){
+			output[j][j] = 4*simpsons_sum(
+				frequency[1]-frequency[0], length, integrand);	
+		}
 	}
 	delete [] integrand;	
 

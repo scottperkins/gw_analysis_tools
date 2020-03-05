@@ -358,6 +358,9 @@ double calculate_snr_internal(double *psd,
 		}
 	
 	}
+	else{
+		std::cout<<"UNSUPPORTED INTEGRATION METHOD"<<std::endl;	
+	}
 	free(integrand);
         return sqrt(integral);
 }

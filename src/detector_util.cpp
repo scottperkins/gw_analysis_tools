@@ -14,14 +14,6 @@
 /*! \file
  * Routines to construct noise curves for various detectors and for detector specific utilities for response functions and coordinate transformations
  */
-void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
-		std::string detector, /**< String to designate the detector noise curve to be used */
-		double *noise_root, /**< ouptput double array for the square root of the PSD of the noise of the specified detector*/
-		int length/**< integer length of the output and input arrays*/
-		)
-{
-	populate_noise(frequencies, detector, noise_root, length, 12);
-}
 
 /*! \brief Function to populate the squareroot of the noise curve for various detectors
  *
@@ -59,17 +51,31 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
  *
  * 	AdLIGOAPlus -- AdLIGO A+ O5
  *
+ * 	AdLIGOAPlus_smoothed -- AdLIGO A+ O5 -- without spectral lines
+ *
  * 	AdLIGODesign -- Design sensitivity for LIGO O4
+ *
+ * 	AdLIGODesign_smoothed -- Design sensitivity for LIGO O4 -- without spectral lines
  *
  * 	CE1 -- Cosmic Explorer phase 1 -- circa 2035
  *
  * 	CE2 -- Cosmic Explorer phase 2 -- circa 2045
  *
- * 	KAGRA -- KAGRA O5 05 DRSE
+ * 	KAGRA_opt -- KAGRA O5 05 optimistic
  *
- * 	AdVIRGOPlus2 -- phase 2, O5
+ * 	KAGRA_pess -- KAGRA O5 05 pessimistic
+ *
+ * 	AdVIRGOPlus2_opt -- phase 2, O5, optimistic
+ *
+ * 	AdVIRGOPlus2_opt_smoothed -- phase 2, O5, optimistic -- without spectral lines
+ *
+ * 	AdVIRGOPlus2_pess -- phase 2, O5, pessimistic
+ *
+ * 	AdVIRGOPlus2_pess_smoothed -- phase 2, O5, pessimistic -- without spectral lines
  *
  * 	AdVIRGOPlus1 -- phase 1, O4 analog ( rescaled O5 curve according to BBH distance estimates in https://dcc.ligo.org/public/0161/P1900218/002/SummaryForObservers.pdf)
+ *
+ * 	AdVIRGOPlus1_smoothed -- phase 1, O4 analog ( rescaled O5 curve according to BBH distance estimates in https://dcc.ligo.org/public/0161/P1900218/002/SummaryForObservers.pdf) -- without spectral lines
  *
  */
 void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
@@ -79,302 +85,151 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		double integration_time /**< Integration time in months (only important for LISA_conf*/
 		)
 {
-	if(detector == "aLIGO_analytic")
-	{
-		if(!frequencies )
+	std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported/";
+	if(check_list(detector, (std::string *)analytic_PSD_models,analytic_PSD_models_N)){
+		if(detector == "aLIGO_analytic")
 		{
-			int len = 1000;
-			for (int i =0; i<len;i++)
+			if(!frequencies )
 			{
-				frequencies[i] = 10.+ i;
-				noise_root[i] = aLIGO_analytic(frequencies[i]);
+				int len = 1000;
+				for (int i =0; i<len;i++)
+				{
+					frequencies[i] = 10.+ i;
+					noise_root[i] = aLIGO_analytic(frequencies[i]);
+				}
+			}
+			
+			else
+			{
+				for (int i =0; i<length;i++)
+				{
+					noise_root[i] = aLIGO_analytic(frequencies[i]);
+				}
 			}
 		}
-		
-		else
+		else if(detector == "Hanford_O1_fitted")
 		{
-			for (int i =0; i<length;i++)
+			if(!frequencies)
 			{
-				noise_root[i] = aLIGO_analytic(frequencies[i]);
+				int len = 1000;
+				for (int i =0; i<len;i++)
+				{
+					frequencies[i] = 10.+ i;
+					noise_root[i] = Hanford_O1_fitted(frequencies[i]);
+				}
+			}
+			
+			else
+			{
+				for (int i =0; i<length;i++)
+				{
+					noise_root[i] = Hanford_O1_fitted(frequencies[i]);
+				}
+			}
+		}
+		else if(detector =="LISA_SADC" ){
+			for(int i = 0 ; i<length; i++){
+				noise_root[i] = sqrt(LISA_analytic_SADC(frequencies[i]));
+			}
+		}
+		else if(detector == "LISA_SADC_CONF"){
+			double alpha, beta, kappa, gamma, fk;
+			sort_LISA_SC_coeffs(&alpha, &beta, &kappa,  &gamma, &fk, integration_time);
+			for(int i = 0 ; i<length; i++){
+				noise_root[i] = sqrt(LISA_analytic_SADC(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
+			}
+		}
+		else if(detector =="LISA" ){
+			for(int i = 0 ; i<length; i++){
+				noise_root[i] = sqrt(LISA_analytic(frequencies[i]));
+			}
+		}
+		else if(detector == "LISA_CONF"){
+			double alpha, beta, kappa, gamma, fk;
+			sort_LISA_SC_coeffs(&alpha, &beta, &kappa,  &gamma, &fk, integration_time);
+			for(int i = 0 ; i<length; i++){
+				noise_root[i] = sqrt(LISA_analytic(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
 			}
 		}
 	}
-	else if(detector == "Hanford_O1_fitted")
-	{
-		if(!frequencies)
-		{
-			int len = 1000;
-			for (int i =0; i<len;i++)
-			{
-				frequencies[i] = 10.+ i;
-				noise_root[i] = Hanford_O1_fitted(frequencies[i]);
-			}
+	else if(check_list(detector, (std::string *)interp_PSD_models,interp_PSD_models_N)){
+		int dat_length=0;
+		std::string file;
+		if(detector=="AdLIGOMidHigh"){
+			dat_length = 3000;
+			file = "AdLIGOMidHigh.csv";
 		}
-		
-		else
-		{
-			for (int i =0; i<length;i++)
-			{
-				noise_root[i] = Hanford_O1_fitted(frequencies[i]);
-			}
+		else if(detector=="AdLIGODesign"){
+			dat_length = 2736;
+			file = "aligo_O4high.csv";
 		}
-	}
-	else if(detector =="LISA_SADC" ){
-		for(int i = 0 ; i<length; i++){
-			noise_root[i] = sqrt(LISA_analytic_SADC(frequencies[i]));
+		else if(detector=="AdLIGODesign_smoothed"){
+			dat_length = 2736;
+			file = "aligo_O4high_smoothed.csv";
 		}
-	}
-	else if(detector == "LISA_SADC_CONF"){
-		double alpha, beta, kappa, gamma, fk;
-		sort_LISA_SC_coeffs(&alpha, &beta, &kappa,  &gamma, &fk, integration_time);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i] = sqrt(LISA_analytic_SADC(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
+		else if(detector=="AdLIGOAPlus"){
+			dat_length = 3000;
+			file = "AplusDesign.csv";
 		}
-	}
-	else if(detector =="LISA" ){
-		for(int i = 0 ; i<length; i++){
-			noise_root[i] = sqrt(LISA_analytic(frequencies[i]));
+		else if(detector=="AdLIGOAPlus_smoothed"){
+			dat_length = 3000;
+			file = "AplusDesign_smoothed.csv";
 		}
-	}
-	else if(detector == "LISA_CONF"){
-		double alpha, beta, kappa, gamma, fk;
-		sort_LISA_SC_coeffs(&alpha, &beta, &kappa,  &gamma, &fk, integration_time);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i] = sqrt(LISA_analytic(frequencies[i]) +  LISA_SC(frequencies[i], alpha, beta, kappa,gamma, fk));
+		else if(detector=="CE1"){
+			dat_length = 3000;
+			file = "CE1_strain.csv";
 		}
-	}
-	else if(detector=="AdLIGOMidHigh"){
-		int dat_length = 3000;
+		else if(detector=="CE1_smoothed"){
+			dat_length = 3000;
+			file = "CE1_strain_smoothed.csv";
+		}
+		else if(detector=="CE2"){
+			dat_length = 3000;
+			file = "CE2_strain.csv";
+		}
+		else if(detector=="CE2_smoothed"){
+			dat_length = 3000;
+			file = "CE2_strain_smoothed.csv";
+		}
+		else if(detector=="AdVIRGOPlus2_opt"){
+			dat_length = 3000;
+			file = "avirgo_O5high_NEW.csv";
+		}
+		else if(detector=="AdVIRGOPlus2_opt_smoothed"){
+			dat_length = 3000;
+			file = "avirgo_O5high_NEW_smoothed.csv";
+		}
+		else if(detector=="AdVIRGOPlus2_pess"){
+			dat_length = 3000;
+			file = "avirgo_O5low_NEW.csv";
+		}
+		else if(detector=="AdVIRGOPlus2_pess_smoothed"){
+			dat_length = 3000;
+			file = "avirgo_O5low_NEW_smoothed.csv";
+		}
+		else if(detector=="AdVIRGOPlus1"){
+			dat_length = 3000;
+			file = "avirgo_O4high_NEW.csv";
+		}
+		else if(detector=="AdVIRGOPlus1_smoothed"){
+			dat_length = 3000;
+			file = "avirgo_O4high_NEW_smoothed.csv";
+		}
+		else if(detector=="KAGRA_opt"){
+			dat_length = 1000;
+			file = "kagra_128Mpc.csv";
+		}
+		else if(detector=="KAGRA_pess"){
+			dat_length = 1000;
+			file = "kagra_80Mpc.csv";
+		}
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
 		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
 			data[i] = new double[2];
 		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdLIGOMidHigh.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	//Curve from Emanuele
-	else if(detector=="AdLIGODesign"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdLIGODesign.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	//Old
-	else if(detector=="AdLIGODesign_"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/aLIGODesign.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	else if(detector=="AdLIGOAPlus"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/AplusDesign.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	else if(detector=="CE1"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/CE1_strain.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	else if(detector=="CE2"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/CE2_strain.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	else if(detector=="AdVIRGOPlus2"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdV_refsens_090427.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	else if(detector=="AdVIRGOPlus1"){
-		int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/noisecurves/AdV_refsens_090427.csv",data, dat_length, 2);
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/official_noise_curves/avirgo_O4high_NEW.csv",data, dat_length, 2);
-		double psd[dat_length];
-		double f[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
-		}
-		gsl_spline_init(spline, f, psd, dat_length);
-		for(int i = 0 ; i<length; i++){
-			//noise_root[i]=1.71034*gsl_spline_eval(spline, frequencies[i],accel);
-			noise_root[i]=1.71034*gsl_spline_eval(spline, frequencies[i],accel);
-		}	
-		gsl_spline_free(spline);
-		gsl_interp_accel_free(accel);
-		for(int i = 0 ; i<dat_length; i++){
-			delete [] data[i];
-		}
-		delete [] data;
-	}
-	else if(detector=="KAGRA"){
-		int dat_length = 1000;
-		//int dat_length = 3000;
-		gsl_interp_accel *accel = gsl_interp_accel_alloc();
-		//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, dat_length);
-		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
-		double **data = new double*[dat_length];
-		for(int i = 0 ;i<dat_length; i++){
-			data[i] = new double[2];
-		}
-		//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/local_noise_curves/kagra_DRSE.csv",data, dat_length, 2);
-		read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/official_noise_curves/kagra_128Mpc.csv",data, dat_length, 2);
+		read_file(currently_supported_dir + file,data, dat_length, 2);
 		double psd[dat_length];
 		double f[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
@@ -396,7 +251,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		std::cout<<"Detector "<<detector<<" not supported"<<std::endl;
 	}
 			
-		
+	return;	
 }
 
 /*! \brief Analytic function approximating the PSD for aLIGO 
@@ -1235,7 +1090,7 @@ double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	for(int i=0 ; i<data_length; i ++){
 		temp[i]=new double[2];
 	}
-	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/Pw_three.csv", temp, data_length,2);
+	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_three.csv", temp, data_length,2);
 	for(int i=0 ; i<data_length; i ++){
 		omegas[i] = temp[i][0];	
 		pomega_numerical[i] = temp[i][1];	
@@ -1274,7 +1129,7 @@ double p_single_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	for(int i=0 ; i<data_length; i ++){
 		temp[i]=new double[2];
 	}
-	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/Pw_single.csv", temp, data_length,2);
+	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_single.csv", temp, data_length,2);
 	for(int i=0 ; i<data_length; i ++){
 		omegas[i] = temp[i][0];	
 		pomega_numerical[i] = temp[i][1];	

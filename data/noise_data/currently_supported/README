@@ -1,0 +1,16 @@
+#These are the curves currently supported by default in GWAT
+#Data is copied, so these should NOT be the only copy. 
+#Curves can be deleted without losing the original
+
+AplusDesign.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020
+aligo_O4high.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020
+avirgo_O4high_NEW.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020
+avirgo_O5high_NEW.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020
+kagra_25Mpc.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020 -- O3 proxy
+kagra_80Mpc.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020 -- O4+ proxy
+kagra_128Mpc.csv -- Taken from https://dcc.ligo.org/LIGO-T2000012/public  -- Accessed 3/1/2020 -- O4+ proxy
+Hanford_O2_Strain.csv -- 
+CE1_strain.csv -- Taken from official CE website -- Accessed 2/1/2020
+CE2_strain.csv -- Taken from official CE website -- Accessed 2/1/2020
+
+AdLIGOMidHigh -- from Emanuele, for comparisons
