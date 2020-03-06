@@ -25,6 +25,9 @@ double T_mcmc_gw_tool;
  * See data/mcmc_gw_tool_param_template.dat for an example parameter file
  *
  * See data/sample_init_pos.csv for an example initial position file
+ *
+ * NOTE: SkySearch generation method requires an initialization file with 11 dimensions. 
+ * The extra parameters correspond to the injected intrinsic parameters -- exactly the format of PhenomD
  */
 
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
@@ -366,6 +369,7 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters){
 
 	double a = -std::numeric_limits<double>::infinity();
+	double DEC = asin(pos[1]);
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
 

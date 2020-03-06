@@ -278,7 +278,7 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 	std::complex<double> wfp, wfc;
 	fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
 	double SN;
-	populate_noise(&f, cast_params.SN, &SN, 1);
+	populate_noise(&f, cast_params.SN, &SN,1);
 	SN*=SN;
 	//std::cout<<f<<" "<<wfp<<" "<<SN<<std::endl;
 	return 4*std::real(std::conj(wfp)*wfp)/SN;
@@ -301,7 +301,7 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
 	std::complex<double> response;
 	fourier_detector_response(&f, 1,&response, cast_params.detector,cast_params.generation_method, cast_params.params, &time);
 	double SN;
-	populate_noise(&f, cast_params.SN, &SN, 1);
+	populate_noise(&f, cast_params.SN, &SN,1);
 	SN*=SN;
 	//std::cout<<4*std::real(std::conj(response)*response)/SN<<std::endl;
 	//std::cout<<SN<<" "<<std::real(std::conj(response)*response)<<std::endl;
@@ -1127,7 +1127,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	if(params->equatorial_orientation){
 		transform_orientation_coords(params,generation_method,"");
 	}
-	double integration_time = 12;//Just for sensitivity curve
+	double integration_time = 48;//Just for sensitivity curve
 	bool lower=false, upper=false;
 	std::complex<double> response;
 	double eval_freq;
