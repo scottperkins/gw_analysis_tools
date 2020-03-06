@@ -8,13 +8,14 @@ import gwatpy.util as gpu
 #from phenompy.utilities import calculate_mass1, calculate_mass2
 
 #data = np.loadtxt("data/mcmc_output_uncorr_D.csv",delimiter=',')
-data = np.loadtxt("data/test2.csv",delimiter=',')
-#data = np.loadtxt("data/mcmc_output_uncorr_Pv2_in.csv",delimiter=',')
+#data = np.loadtxt("data/test2.csv",delimiter=',')
+#data = data[1000:]
+data = np.loadtxt("data/mcmc_output_uncorr_Pv2_in.csv",delimiter=',')
 #data = np.loadtxt("data/test.csv",delimiter=',')
 #data = data[100:]
 for x in data:
     x[6] = np.exp(x[6])
-    #x[7] = np.exp(x[7])
+    x[7] = np.exp(x[7])
     #x[0] = np.exp(x[0])
 data_thinned = []
 for x in np.arange(len(data)):
@@ -26,17 +27,17 @@ for x in np.arange(len(data)):
 #    plt.show()
 #    plt.close()
 ndim, nsamples = 11, len(data) 
-#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_p$"]
+labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_p$"]
 #labels = [r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_p$",r"$\chi_{eff}$"]
 #labels = [r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\chi_{eff}$"]
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\chi_{eff}$"]
-labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$"]
+#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$"]
 data_plot=[]
 for x in data_thinned:
     #chi1 = x[2]*(x[4])
     #chi2 = x[3]*(x[5])
-    ##chi1 = x[2]
-    ##chi2 = x[3]
+    #chi1 = x[2]
+    #chi2 = x[3]
     #m1 = gpu.calculate_mass1_py(x[0],x[1])
     #m2 = gpu.calculate_mass2_py(x[0],x[1])
     ##chi1 = x[9]*(x[11])

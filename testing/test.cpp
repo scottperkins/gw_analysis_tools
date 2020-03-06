@@ -101,6 +101,7 @@ void test60();
 void test61();
 void test62();
 void test63();
+void test64();
 void test_prob(double *prob, void *param, int d, int threadid);
 double test_ll(double *pos, int dim,void *parameters);
 double test_lp(double *pos, int dim,void *parameters);
@@ -142,10 +143,175 @@ int main(){
 	//test6();	
 	//test45();	
 	//test62();	
-	test63();	
+	test64();	
 	return 0;
 }
 
+void test64()
+{
+	int length = 4000;
+	int num_detectors =3;
+	//int num_detectors =2;
+	std::string *detectors = new std::string[num_detectors];//(std::string*)malloc(sizeof(std::string)*50*num_detectors);
+	detectors[0] = "Hanford";
+	detectors[1] = "Livingston";
+	detectors[2] = "Virgo";
+
+	double gps_time = 1135136350.6;//TESTING -- gw151226
+
+	std::complex<double> **data= (std::complex<double>**)malloc(
+			sizeof(std::complex<double>*)*num_detectors);
+	double **psd = (double **)malloc(sizeof(double *)*num_detectors);
+	double **frequencies = (double **)malloc(sizeof(double *)*num_detectors);
+	int *data_length= (int*)malloc(sizeof(int)*num_detectors);
+	data_length[0] =length;
+	data_length[1] =length;
+	data_length[2] =length;
+
+	for (int i =0; i<num_detectors; i++){
+		data[i] = (std::complex<double> *)malloc(
+			sizeof(std::complex<double>)*data_length[i]);
+		
+		psd[i] = (double *)malloc(sizeof(double)*data_length[i]);
+		frequencies[i] = (double *)malloc(sizeof(double)*data_length[i]);
+	}
+	//#########################################################
+	//Make trial data
+	gen_params params;
+	//double RA = 5.;
+	//double DEC = 1.;
+	double RA = 2;
+	double DEC = .4;
+	double chirpm = 9.71;
+	double eta =.23;
+	params.mass1 = calculate_mass1(chirpm,eta);
+	params.mass2 = calculate_mass2(chirpm,eta);
+	complex<double> waveformout[length];
+	params.spin1[0] = 0;
+	params.spin1[1] = .2;
+	params.spin1[2] = .43;
+	params.spin2[0] = .1;
+	params.spin2[1] = 0;
+	params.spin2[2] = .2;
+	params.phiRef = 1.0;
+	double tc = 3;
+	params.Luminosity_Distance = 125.;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.shift_time = true;
+	params.shift_phase = true;
+	params.incl_angle = .2;//M_PI/3.;
+	params.sky_average=false;
+	std::string injection_method = "IMRPhenomPv2";
+	params.f_ref=20;
+	params.RA = RA;
+	params.gmst = gps_to_GMST_radian(gps_time);
+	//params.f_ref = 30.5011;
+	//params.phiRef =58.944425/2.;
+	
+	//############################################################
+	double fhigh =2048;
+	double flow =20;
+	double df = (fhigh-flow)/(length-1);
+	//double *freq = (double *)malloc(sizeof(double) * length);
+	double freq[length];
+
+	cout<<"Freq spacing "<<df<<endl;
+
+	for(int i=0;i<length;i++)
+		freq[i]=flow+i*df;
+	//############################################################
+	double noise[length];
+	populate_noise(freq,"AdLIGODesign", noise,length);
+	for (int i =0; i<length;i++){
+		noise[i] = noise[i]*noise[i];
+	}
+	//############################################################
+
+	for(int i = 0 ; i<num_detectors; i++){
+		double dt = DTOA_DETECTOR(params.RA,params.DEC,params.gmst,"Hanford",detectors[i]);
+		params.tc = dt+tc; 
+		fourier_detector_response(freq,length, data[i],detectors[i],injection_method, &params);
+
+		for(int j = 0; j<data_length[i]; j++){
+			frequencies[i][j] = freq[j];	
+			psd[i][j] = (noise[j]);	
+		}
+	}
+
+	//#########################################################
+	//mcmc options
+	int dimension = 14;
+	double initial_pos[dimension]={params.RA,sin(params.DEC),params.psi,cos(params.incl_angle),params.phiRef,params.tc,std::log(params.Luminosity_Distance),std::log(chirpm), eta,.1,.1,.9,.9,.1};
+	//int dimension = 4;
+	//double initial_pos[dimension]={std::log(30), .24,.1,.1};
+	double *seeding_var = NULL;
+	int n_steps = 5000;
+	int chain_N=24 ;
+	int max_thermo=24 ;
+	int t0 = 1000;
+	int nu = 100;
+	std::string chain_alloc = "double";
+	int swp_freq = 3;
+	double chain_temps[chain_N];
+	double c = 1.3;
+	
+	int Nmod = 0;
+	int *bppe = NULL;
+	int numThreads = 10;
+	bool pool = true;
+	//#########################################################
+	//gw options
+	//std::string generation_method = "dCS_IMRPhenomD_log";
+	//std::string generation_method = "EdGB_IMRPhenomD_log";
+	//std::string generation_method = "dCS_IMRPhenomD_root_alpha";
+	//std::string generation_method = "IMRPhenomD";
+	std::string generation_method = "IMRPhenomPv2";
+	//std::string generation_method = "EdGB_IMRPhenomD_root_alpha";
+	
+	
+	std::string chainfile = "testing/data/mcmc_output_uncorr_Pv2_in.csv";
+	std::string statfilename = "testing/data/mcmc_statistics_uncorr_Pv2_in.txt";
+	std::string checkfile = "testing/data/mcmc_checkpoint_uncorr_Pv2_in.csv";
+
+	int corr_threshold = 10;
+	int corr_segments = 10;
+	double corr_converge_thresh = 0.1;
+	double corr_target_ac = .01;
+
+	double **output;
+	output = allocate_2D_array(n_steps, dimension );
+	//double ***output;
+	//output = allocate_3D_array(chain_N,n_steps, dimension );
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, n_steps, chain_N, max_thermo, initial_pos,seeding_var,chain_temps, 
+			swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_Pv2,numThreads, pool,show_progress,
+			num_detectors, 
+			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
+			generation_method,statfilename,chainfile, "",checkfile);	
+	//std::string checkfile2="testing/data/mcmc_checkpoint_uncorr_D2.csv";
+	//continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(checkfile,output,  n_steps,  max_thermo, chain_temps, 
+	//		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,chain_alloc, test_lp_GW_D,numThreads, pool,show_progress,
+	//		num_detectors, 
+	//		data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
+	//		generation_method,statfilename,chainfile, "",checkfile2);	
+	//PTMCMC_MH_dynamic_PT_alloc_GW(output, dimension, n_steps,chain_N,max_thermo, initial_pos, seeding_var, chain_temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,numThreads, pool, show_progress, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, generation_method, statfilename, chainfile,  "",checkfile);
+
+
+	//write_file(chainfile, output[0], n_steps, dimension);
+
+	deallocate_2D_array(output, n_steps, dimension);
+	//deallocate_3D_array(output, chain_N,n_steps, dimension);
+	delete [] detectors;
+	free(data_length);
+	//free_LOSC_data(data, psd,freqs, num_detectors, length);
+	//deallocate_2D_array(psd,num_detectors, data_length[0]);
+	//deallocate_2D_array(freq,num_detectors, data_length[0]);
+	for(int i =0; i<num_detectors; i++)
+		free(data[i]);
+	free(data);
+	//delete [] detector_files;
+
+}
 void test63()
 {
 	//Terr
@@ -6664,19 +6830,19 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id,void *parameters)
 	double a = -std::numeric_limits<double>::infinity();
 	//if(sqrt(pos[9]*pos[9] + pos[10]*pos[10]+pos[11]*pos[11]) >0.95) {return a;}
 	double chirp = std::exp(pos[7]);
-	double eta = pos[8];
-	double m1 = calculate_mass1(chirp,eta );
-	double m2 = calculate_mass2(chirp,eta );
-	double q =m1/m2;
-	double W = (3*q +4)/ ( 4*q*q +3*q);
-	//Max values
-	double chi1l = pos[9];
-	double chi2l = pos[10];
-	double chi1p = std::sqrt(1- chi1l*chi1l);
-	double chi2p = std::sqrt(1- chi2l*chi2l);
-	double chi_thresh=chi2p ;
-	if(chi1p > W*chi2p){ chi_thresh =chi1p;}
-	if(pos[11] > chi_thresh){ return a;}
+	//double eta = pos[8];
+	//double m1 = calculate_mass1(chirp,eta );
+	//double m2 = calculate_mass2(chirp,eta );
+	//double q =m1/m2;
+	//double W = (3*q +4)/ ( 4*q*q +3*q);
+	////Max values
+	//double chi1l = pos[9];
+	//double chi2l = pos[10];
+	//double chi1p = std::sqrt(1- chi1l*chi1l);
+	//double chi2p = std::sqrt(1- chi2l*chi2l);
+	//double chi_thresh=chi2p ;
+	//if(chi1p > W*chi2p){ chi_thresh =chi1p;}
+	//if(pos[11] > chi_thresh){ return a;}
 
 	//Flat priors across physical regions
 	//if ((pos[0])<0 || (pos[0])>M_PI){return a;}
@@ -6693,12 +6859,13 @@ double test_lp_GW_Pv2(double *pos, int dim, int chain_id,void *parameters)
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 || std::isnan(pos[4])){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
-	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//chi1 
-	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//chi2
-	if ((pos[11])<0 || (pos[11])>.9){return a;}//chip
-	if ((pos[12])<0 || (pos[12])>2*M_PI){return a;}//phip
+	if ((pos[9])<.0 || (pos[9])>.9){return a;}//chi1 
+	if ((pos[10])<.0 || (pos[10])>.9){return a;}//chi2
+	if ((pos[11])<-1 || (pos[11])>1){return a;}//chip
+	if ((pos[12])<-1 || (pos[12])>1){return a;}//phip
+	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
 	//else {return log(-sin(pos[0]))+pos[4]+pos[3];}
-	else {return pos[7]+3*pos[6];}
+	else {return 3*pos[6]+log(chirpmass_eta_jac(chirp,pos[8]));}
 	//else {return pos[7]+3*pos[6] ;}
 	//else {return pos[4]+3*pos[3] +std::log(std::abs(std::cos(pos[2])))
 	//	+std::log(std::abs(std::cos(pos[10])))+std::log(std::abs(std::cos(pos[11])));}
