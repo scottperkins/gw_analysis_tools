@@ -143,7 +143,7 @@ int main(){
 	//test6();	
 	//test45();	
 	//test62();	
-	test64();	
+	test62();	
 	return 0;
 }
 
@@ -202,7 +202,7 @@ void test64()
 	params.shift_phase = true;
 	params.incl_angle = .2;//M_PI/3.;
 	params.sky_average=false;
-	std::string injection_method = "IMRPhenomPv2";
+	std::string injection_method = "IMRPhenomD";
 	params.f_ref=20;
 	params.RA = RA;
 	params.gmst = gps_to_GMST_radian(gps_time);
@@ -362,8 +362,8 @@ void test62()
 {
 	std::cout.precision(15);
 	gen_params params;
-	params.mass1 = 10;
-	params.mass2 = 5;
+	params.mass1 = 10e5;
+	params.mass2 = 5e5;
 	params.spin1[2] = .2;
 	params.spin2[2] = .1;
 	params.spin1[1] = .2;
@@ -371,38 +371,42 @@ void test62()
 	params.spin1[0] = .2;
 	params.spin2[0] = .1;
 	params.phiRef = 2.;
-	params.tc = 2.;
-	params.f_ref = 20.;
+	params.tc = T_year/12.;
+	params.f_ref = 1e-5;
 	params.NSflag1=false;
 	params.NSflag2=false;
 	params.shift_phase=true;
 	params.shift_time=true;
-	params.equatorial_orientation=false;
+	params.equatorial_orientation=true;
 	params.horizon_coord=false;
 	params.Luminosity_Distance  = 400;
 	params.RA =1.;
 	params.DEC =-1.;
-	params.psi =2.;
-	params.incl_angle =2.;
+	//params.psi =2.;
+	//params.incl_angle =2.;
+	params.phi_l =2.;
+	params.theta_l =2.;
 	params.gmst=1.;
+	params.LISA_phi0=0;
+	params.LISA_alpha0=0;
 	
 	
-	int length = 2028.*32.;
-	double deltaf = 1./32.;
+	int length = T_year/12.;
+	double deltaf = 1./(T_year/12.);
 	double *freqs = new double[length];
-	for(int i = 0 ; i<length; i++){
-		freqs[i] = 20. + i*deltaf;
-	}
+	//for(int i = 0 ; i<length; i++){
+	//	freqs[i] = 1e-5 + i*deltaf;
+	//}
 	
-	int lengthgl1 = 2000;
-	int lengthgl2 = 2000;
+	int lengthgl1 = 500;
+	int lengthgl2 = 500;
 	double *freqsgl1 = new double[lengthgl1];
 	double *freqsgl2 = new double[lengthgl2];
 	double *w1 = new double[lengthgl1];
 	double *w2 = new double[lengthgl2];
 
-	gauleg(20., 2048., freqsgl1, w1, lengthgl1);
-	gauleg(log10(20.), log10(2048.), freqsgl2, w2, lengthgl2);
+	gauleg(1e-5, 1, freqsgl1, w1, lengthgl1);
+	gauleg(log10(1e-5), log10(1), freqsgl2, w2, lengthgl2);
 	for(int i =0; i<lengthgl2; i++){
 		freqsgl2[i] = pow(10.,freqsgl2[i]);
 	}
@@ -414,15 +418,16 @@ void test62()
 
 
 	double snr_gsl, snr_simps, snr_gl1,snr_gl2;
-	std::string noise_curve="aLIGO_analytic"	;
+	std::string noise_curve="LISA_CONF"	;
 	std::string method= "IMRPhenomPv2";
-	std::string detector="Hanford";
-	int iterations = 1000;
+	std::string detector="LISA";
+	int iterations = 500;
 	double **output = new double*[iterations];
+	std::cout<<"Starting loop -- finished prep"<<std::endl;
 	for(int i = 0 ; i<iterations; i++){
 		output[i]=new double[8];
-		double m1 = 10+100*gsl_rng_uniform(r);
-		double m2 = 10+100*gsl_rng_uniform(r);
+		double m1 = 10e4+1e4*gsl_rng_uniform(r);
+		double m2 = 10e4+1e4*gsl_rng_uniform(r);
 		if(m1>m2){
 			params.mass1 = m1;
 			params.mass2 = m2;
@@ -431,32 +436,51 @@ void test62()
 			params.mass1 = m1;
 			params.mass2 = m2;
 		}
-		params.spin1[2] = -.9+gsl_rng_uniform(r)*2.;
-		params.spin2[2] = -.9+gsl_rng_uniform(r)*2.;
+		params.spin1[2] = -.3+gsl_rng_uniform(r)*.5;
+		params.spin2[2] = -.3+gsl_rng_uniform(r)*.5;
 		params.spin1[1] = -.4 + gsl_rng_uniform(r)*1.;
 		params.spin2[1] = .1;
 		params.spin1[0] = .2;
-		params.spin2[1] = -.4 + gsl_rng_uniform(r)*1.;
+		params.spin2[1] = 0;//-.4 + gsl_rng_uniform(r)*1.;
 		params.Luminosity_Distance  = 50 + gsl_rng_uniform(r)*1000;
 		params.RA =gsl_rng_uniform(r)*2*M_PI;
 		params.DEC =-1.5 + gsl_rng_uniform(r) * M_PI;
-		params.psi =gsl_rng_uniform(r)*2*M_PI;
-		params.incl_angle =gsl_rng_uniform(r)*M_PI;
+		//params.psi =gsl_rng_uniform(r)*2*M_PI;
+		//params.incl_angle =gsl_rng_uniform(r)*M_PI;
+		params.phi_l =gsl_rng_uniform(r)*2*M_PI;
+		params.theta_l =gsl_rng_uniform(r)*M_PI;
 		params.gmst=gsl_rng_uniform(r)*2*M_PI;
+		transform_orientation_coords(&params,method, detector);
+
+		double bounds[2];
+		integration_interval(1, 4*T_year, detector,noise_curve, method, &params, bounds);
+		//std::cout<<bounds[0]<<" "<<bounds[1]<<std::endl;
+
+		//for(int i = 0 ; i<length; i++){
+		//	freqs[i] = bounds[0] + i*deltaf;
+		//}
+
 
 		clock_t start = clock();
-		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, 20., 2048., 1.e-12);
+		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, bounds[0], bounds[1], 1.e-12);
+		//snr_gsl*=sqrt(2.);
 		double gsl_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
-		snr_simps = calculate_snr(noise_curve, detector,method, &params,freqs,length,"SIMPSONS",(double *)NULL,false);
+		//snr_simps = calculate_snr(noise_curve, detector,method, &params,freqs,length,"SIMPSONS",(double *)NULL,false);
 		double simps_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
+		gauleg(bounds[0], bounds[1], freqsgl1, w1, lengthgl1);
 		snr_gl1 = calculate_snr(noise_curve, detector,method, &params,freqsgl1,lengthgl1,"GAUSSLEG",w1,false);
 		double gl1_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
+		gauleg(log10(bounds[0]), log10(bounds[1]), freqsgl2, w2, lengthgl2);
+		for(int i =0; i<lengthgl2; i++){
+			freqsgl2[i] = pow(10.,freqsgl2[i]);
+		}
 		snr_gl2 = calculate_snr(noise_curve, detector,method, &params,freqsgl2,lengthgl2,"GAUSSLEG",w2,true);
 		double gl2_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		//std::cout<<snr_gsl<<" "<<snr_simps<<" "<<snr_gl1<<" "<<snr_gl2<<std::endl;
+		//std::cout<<params.mass1<<" "<<params.mass2<<" "<<params.spin1[0]<<" "<<params.spin1[1]<<" "<<params.spin1[2]<<" "<<params.spin2[0]<<" "<<params.spin2[1]<<" "<<params.spin2[2]<<std::endl;
 		//std::cout<<" "<<(snr_gsl-snr_simps)/snr_gsl<<" "<<(snr_gsl-snr_gl1)/snr_gsl<<" "<<(snr_gsl-snr_gl2)/snr_gsl<<std::endl;
 		//std::cout<<gsl_t<<" "<<simps_t<<" "<<gl1_t<<" "<<gl2_t<<std::endl;
 		output[i][0]=snr_gsl;
@@ -469,6 +493,7 @@ void test62()
 		output[i][7]=gl2_t;
 		printProgress((double)i/iterations);
 	}
+	std::cout<<std::endl;
 	
 	write_file("testing/data/snr_comp.csv",output,iterations, 8);
 	delete [] freqsgl1;

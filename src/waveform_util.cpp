@@ -179,8 +179,12 @@ double calculate_snr(std::string sensitivity_curve,
 	}
 	if(detector == "LISA" && !params->sky_average){
 		times = new double[length];
-		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
-		time_phase_corrected(times, length, frequencies, params, generation_method, false);
+		if(integration_method == "GAUSSLEG"){
+			time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
+		}
+		else{
+			time_phase_corrected(times, length, frequencies, params, generation_method, false);
+		}
 	}
 	std::complex<double> *response = new std::complex<double>[length];
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);
@@ -190,7 +194,7 @@ double calculate_snr(std::string sensitivity_curve,
 		if(!params->sky_average){
 			delete [] times;
 		}
-		snr*=sqrt(2); //Two detectors
+		//snr*=sqrt(2); //Two detectors
 	}
 	delete [] response;	
 	return snr;
@@ -293,7 +297,7 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
 		//PROBLEM
 		double temp_f[2] = {f, f+1.e-5};
 		//times = new double[length];
-		//time_phase_corrected_autodiff(times, length, frequencies, params, generation_method, false, NULL);
+		//time_phase_corrected_autodiff(&times[0], 1, &f, cast_params.params, cast_params.generation_method, false, NULL);
 		time_phase_corrected(times, 2, temp_f, cast_params.params, cast_params.generation_method, false);
 	}
 	double time = times[0];
@@ -697,6 +701,16 @@ int fourier_detector_amplitude_phase(double *frequencies,
  */
 void time_phase_corrected_autodiff(double *times, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, bool correct_time, int *tapes_in)
 {
+	bool save_dep = params->dep_postmerger;
+	params->dep_postmerger=true;
+	bool save_shift_time = params->shift_time;
+	params->shift_time=false;
+	//if(generation_method.find("Pv2") != std::string::npos && params->chip == -1){
+	//	IMRPhenomPv2<double> model;
+	//	params->chip = model.PhenomPv2_inplane_spin(params);
+	//	params->phip = 2*M_PI;
+	//}
+
 	int boundary_num = boundary_number(generation_method);
 	double freq_boundaries[boundary_num];
 	double grad_freqs[boundary_num];
@@ -730,6 +744,8 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 		freq = frequencies[k];
 		for(int n = 0; n<boundary_num ; n++){
 			if(freq < freq_boundaries[n]){
+				//std::cout<<freq<<std::endl;
+				//std::cout<<n<<std::endl;
 				gradient(tapes[n], 1, &freq, &times[k]);
 				//Mark successful derivative
 				eval = true;
@@ -754,6 +770,8 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 			delete [] aparams.bppe;
 		}
 	}
+	params->dep_postmerger=save_dep;
+	params->shift_time=save_shift_time;
 	
 }
 /*! \brief Utility to inform the fisher routine how many logical boundaries should be expected
@@ -1030,6 +1048,8 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.cosmology=internal_params.cosmology;
 	s_param.incl_angle=internal_params.incl_angle;
 	lambda_parameters<adouble> lambda;
+	//IMRPhenomPv2<double> model;
+	//model.PhenomPv2_inplane_spin(input_params);
 	if(	(
 		generation_method.find("IMRPhenomPv2") != std::string::npos
 		)
@@ -1038,9 +1058,21 @@ void assign_freq_boundaries(double *freq_boundaries,
 		IMRPhenomPv2<adouble> modelp;
 		s_param.spin1z = internal_params.spin1[2];
 		s_param.spin2z = internal_params.spin2[2];
-		s_param.chip = internal_params.chip;
-		s_param.phip = internal_params.phip;
-		modelp.PhenomPv2_Param_Transform_reduced(&s_param);
+		if((internal_params.chip + 1)>DOUBLE_COMP_THRESH){
+			s_param.chip = internal_params.chip;
+			s_param.phip = internal_params.phip;
+			modelp.PhenomPv2_Param_Transform_reduced(&s_param);
+		}
+		else{
+			s_param.spin1x = internal_params.spin1[0];
+			s_param.spin1y = internal_params.spin1[1];
+			s_param.spin1z = internal_params.spin1[2];
+			s_param.spin2x = internal_params.spin2[0];
+			s_param.spin2y = internal_params.spin2[1];
+			s_param.spin2z = internal_params.spin2[2];
+			modelp.PhenomPv2_Param_Transform(&s_param);
+
+		}
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);
 		double M = s_param.M.value();

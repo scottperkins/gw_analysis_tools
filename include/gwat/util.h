@@ -129,6 +129,9 @@ public:
 	bool NSflag1=false;
 	bool NSflag2=false;
 
+	
+	/*! Flag to force the use of deprecated postmerger calculations -- ADOLC friendly*/
+	bool dep_postmerger = false;
 	/*! Reference frequency for PhenomPv2*/
 	T f_ref=0;
 	
@@ -149,7 +152,7 @@ public:
 
 	T alpha0 = 0;
 
-	T chip = 0;
+	T chip = -1;
 
 	//Azimuthal angle of chip in plane
 	T phip = -1;
@@ -311,6 +314,8 @@ struct source_parameters
 	T A0;
 	/*! Shift time detemines if phic or phiRef is used*/
 	bool shift_phase = true;
+	/*! Flag to force the use of deprecated postmerger calculations -- ADOLC friendly*/
+	bool dep_postmerger = false;
 	
 	bool NSflag1;
 	bool NSflag2;

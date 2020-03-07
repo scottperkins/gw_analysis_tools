@@ -87,6 +87,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	params.shift_phase = parameters->shift_phase;
 	params.NSflag1 = parameters->NSflag1;
 	params.NSflag2 = parameters->NSflag2;
+	params.dep_postmerger = parameters->dep_postmerger;
 	if(generation_method == "IMRPhenomD")
 	{
 		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
@@ -233,7 +234,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
-		if(parameters->phip != -1){
+		//if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+		if(parameters->chip != -1){
 			params.chip = parameters->chip;
 			//params.chi1_l = parameters->chi1_l;
 			//params.chi2_l = parameters->chi2_l;
@@ -456,6 +458,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	params.shift_phase = parameters->shift_phase;
 	params.NSflag1 = parameters->NSflag1;
 	params.NSflag2 = parameters->NSflag2;
+	params.dep_postmerger = parameters->dep_postmerger;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
@@ -597,6 +600,7 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	params.shift_phase = parameters->shift_phase;
 	params.NSflag1 = parameters->NSflag1;
 	params.NSflag2 = parameters->NSflag2;
+	params.dep_postmerger = parameters->dep_postmerger;
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<T> modeld;
@@ -831,6 +835,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	params.NSflag1 = parameters->NSflag1;
 	params.NSflag2 = parameters->NSflag2;
 	params.sky_average = parameters->sky_average;
+	params.dep_postmerger = parameters->dep_postmerger;
 
 	if(generation_method == "IMRPhenomD")
 	{

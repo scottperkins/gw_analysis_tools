@@ -108,8 +108,8 @@ const double CE_D[3][3] = {{0.377622, -0.268333, -0.102451}, {-0.268333, -0.0883
 
 const int analytic_PSD_models_N = 6;
 const std::string analytic_PSD_models[6] = {"aLIGO_analytic","Hanford_O1_fitted","LISA_SADC","LISA_SADC_CONF","LISA_CONF","LISA"};
-const int interp_PSD_models_N = 19;
-const std::string interp_PSD_models[19] = {"AdLIGOMidHigh","AdLIGODesign","AdLIGODesign_smoothed","AdLIGOAPlus","AdLIGOAPlus_smoothed","CE1","CE1_smoothed","CE2","CE2_smoothed","AdVIRGOPlus2_opt","AdVIRGOPlus2_opt_smoothed","AdVIRGOPlus2_pess","AdVIRGOPlus2_pess_smoothed","AdVIRGOPlus1","AdVIRGOPlus1_smoothed","KAGRA_opt","KAGRA_opt_smoothed","KAGRA_pess","KAGRA_pess_smoothed"};
+const int interp_PSD_models_N = 20;
+const std::string interp_PSD_models[20] = {"AdLIGOMidHigh","_AdLIGODesign","AdLIGODesign","AdLIGODesign_smoothed","AdLIGOAPlus","AdLIGOAPlus_smoothed","CE1","CE1_smoothed","CE2","CE2_smoothed","AdVIRGOPlus2_opt","AdVIRGOPlus2_opt_smoothed","AdVIRGOPlus2_pess","AdVIRGOPlus2_pess_smoothed","AdVIRGOPlus1","AdVIRGOPlus1_smoothed","KAGRA_opt","KAGRA_opt_smoothed","KAGRA_pess","KAGRA_pess_smoothed"};
 void populate_noise(double *frequencies,std::string detector,double *noise_root,  int length, double integration_time=48);
 
 double aLIGO_analytic(double f);

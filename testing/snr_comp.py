@@ -4,10 +4,11 @@ import gwatpy.gwatpy_plot as gp; gp.set()
 import gwatpy.waveform_generator_ext as wf
 
 data = np.loadtxt("data/snr_comp.csv",delimiter=',',unpack=True)
-labels = ["SIMPS","GL_NONLOG","GL_LOG"]
+#labels = ["SIMPS","GL_NONLOG","GL_LOG"]
+labels = ["GL_NONLOG","GL_LOG"]
 
 temp= []
-temp.append(np.abs((data[0]-data[1])/data[0]))
+#temp.append(np.abs((data[0]-data[1])/data[0]))
 temp.append(np.abs((data[0]-data[2])/data[0]))
 temp.append(np.abs((data[0]-data[3])/data[0]))
 resids = []
@@ -22,7 +23,8 @@ ax[0].legend()
 ax[0].set_xscale('log')
 #plt.show()
 
-times = [data[4],data[5],data[6],data[7]];
+#times = [data[4],data[5],data[6],data[7]];
+times = [data[4],data[6],data[7]];
 bins = np.logspace(np.log10(np.amin(times)), np.log10(np.amax(times)),100)
 labels = ["GSL"] + labels
 for x in np.arange(len(times)):

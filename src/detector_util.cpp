@@ -159,6 +159,10 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 			dat_length = 3000;
 			file = "AdLIGOMidHigh.csv";
 		}
+		if(detector=="_AdLIGODesign"){
+			dat_length = 3000;
+			file = "AdLIGODesign.csv";
+		}
 		else if(detector=="AdLIGODesign"){
 			dat_length = 2736;
 			file = "aligo_O4high.csv";

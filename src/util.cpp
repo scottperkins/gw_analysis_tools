@@ -789,6 +789,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->theta_j_ecl = param_in->theta_j_ecl;
 	param_out->phi_j_ecl = param_in->phi_j_ecl;
 	param_out->precess_reduced_flag = param_in->precess_reduced_flag;
+	param_out->dep_postmerger = param_in->dep_postmerger;
 	
 }
 bool check_mod(std::string generation_method)

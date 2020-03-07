@@ -115,6 +115,8 @@ virtual void post_merger_variables(source_parameters<T> *source_param);
 
 virtual void calc_fring( source_parameters<T> *source_params);
 virtual void calc_fdamp( source_parameters<T> *source_params);
+virtual void _calc_fring( source_parameters<T> *source_params);
+virtual void _calc_fdamp( source_parameters<T> *source_params);
 virtual T final_spin(source_parameters<T> *params);
 virtual T FinalSpin0815_s(T eta, T s);
 virtual T FinalSpin0815(T eta, T chi1,T chi2);
