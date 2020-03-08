@@ -234,8 +234,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
-		//if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-		if(parameters->chip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+		//if(parameters->chip != -1){
 			params.chip = parameters->chip;
 			//params.chi1_l = parameters->chi1_l;
 			//params.chi2_l = parameters->chi2_l;

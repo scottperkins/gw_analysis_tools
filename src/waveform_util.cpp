@@ -1066,12 +1066,9 @@ void assign_freq_boundaries(double *freq_boundaries,
 		else{
 			s_param.spin1x = internal_params.spin1[0];
 			s_param.spin1y = internal_params.spin1[1];
-			s_param.spin1z = internal_params.spin1[2];
 			s_param.spin2x = internal_params.spin2[0];
 			s_param.spin2y = internal_params.spin2[1];
-			s_param.spin2z = internal_params.spin2[2];
 			modelp.PhenomPv2_Param_Transform(&s_param);
-
 		}
 		modelp.assign_lambda_param(&s_param, &lambda);
 		modelp.post_merger_variables(&s_param);

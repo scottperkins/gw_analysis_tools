@@ -375,8 +375,8 @@ void test62()
 	params.f_ref = 1e-5;
 	params.NSflag1=false;
 	params.NSflag2=false;
-	params.shift_phase=true;
-	params.shift_time=true;
+	params.shift_phase=false;
+	params.shift_time=false;
 	params.equatorial_orientation=true;
 	params.horizon_coord=false;
 	params.Luminosity_Distance  = 400;
@@ -398,8 +398,8 @@ void test62()
 	//	freqs[i] = 1e-5 + i*deltaf;
 	//}
 	
-	int lengthgl1 = 500;
-	int lengthgl2 = 500;
+	int lengthgl1 = 1000;
+	int lengthgl2 = 1000;
 	double *freqsgl1 = new double[lengthgl1];
 	double *freqsgl2 = new double[lengthgl2];
 	double *w1 = new double[lengthgl1];
@@ -421,7 +421,7 @@ void test62()
 	std::string noise_curve="LISA_CONF"	;
 	std::string method= "IMRPhenomPv2";
 	std::string detector="LISA";
-	int iterations = 500;
+	int iterations = 10;
 	double **output = new double*[iterations];
 	std::cout<<"Starting loop -- finished prep"<<std::endl;
 	for(int i = 0 ; i<iterations; i++){
@@ -438,7 +438,7 @@ void test62()
 		}
 		params.spin1[2] = -.3+gsl_rng_uniform(r)*.5;
 		params.spin2[2] = -.3+gsl_rng_uniform(r)*.5;
-		params.spin1[1] = -.4 + gsl_rng_uniform(r)*1.;
+		params.spin1[1] = -.4 + gsl_rng_uniform(r)*.8;
 		params.spin2[1] = .1;
 		params.spin1[0] = .2;
 		params.spin2[1] = 0;//-.4 + gsl_rng_uniform(r)*1.;
@@ -450,6 +450,7 @@ void test62()
 		params.phi_l =gsl_rng_uniform(r)*2*M_PI;
 		params.theta_l =gsl_rng_uniform(r)*M_PI;
 		params.gmst=gsl_rng_uniform(r)*2*M_PI;
+		//params.chip = -1;
 		transform_orientation_coords(&params,method, detector);
 
 		double bounds[2];
@@ -479,7 +480,7 @@ void test62()
 		}
 		snr_gl2 = calculate_snr(noise_curve, detector,method, &params,freqsgl2,lengthgl2,"GAUSSLEG",w2,true);
 		double gl2_t = (double)(clock()-start)/CLOCKS_PER_SEC;
-		//std::cout<<snr_gsl<<" "<<snr_simps<<" "<<snr_gl1<<" "<<snr_gl2<<std::endl;
+		std::cout<<snr_gsl<<" "<<snr_simps<<" "<<snr_gl1<<" "<<snr_gl2<<std::endl;
 		//std::cout<<params.mass1<<" "<<params.mass2<<" "<<params.spin1[0]<<" "<<params.spin1[1]<<" "<<params.spin1[2]<<" "<<params.spin2[0]<<" "<<params.spin2[1]<<" "<<params.spin2[2]<<std::endl;
 		//std::cout<<" "<<(snr_gsl-snr_simps)/snr_gsl<<" "<<(snr_gsl-snr_gl1)/snr_gsl<<" "<<(snr_gsl-snr_gl2)/snr_gsl<<std::endl;
 		//std::cout<<gsl_t<<" "<<simps_t<<" "<<gl1_t<<" "<<gl2_t<<std::endl;
