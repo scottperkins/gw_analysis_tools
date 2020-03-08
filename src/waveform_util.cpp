@@ -44,19 +44,12 @@ double data_snr(double *frequencies,
 			 = (double *)malloc(sizeof(double)*length);
 
 	double delta_f = frequencies[1]-frequencies[0];
-	//for (int i = 0; i<length;i++)
-	//	integrand[i] = 4.*real(conj(response[i])*response[i])/psd[i]; 
-	//double snr_template;
-	//snr_template = sqrt(simpsons_sum(delta_f,length, integrand));
 
 	
 	for (int i = 0; i<length;i++)
 		integrand[i] = 4.*real(conj(data[i])*response[i])/psd[i]; 
-	//double inner_prod = sqrt(simpsons_sum(delta_f,length, integrand));
 	double inner_prod = (simpsons_sum(delta_f,length, integrand));
-	//std::cout<<"WU: "<<inner_prod<<std::endl;
 	free(integrand);
-	//return inner_prod/(snr_template);
 	return sqrt(inner_prod);
 
 }
@@ -188,13 +181,11 @@ double calculate_snr(std::string sensitivity_curve,
 	}
 	std::complex<double> *response = new std::complex<double>[length];
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params,times);
-	double snr = calculate_snr(sensitivity_curve, response, frequencies, length);
+	double snr = calculate_snr(sensitivity_curve, response, frequencies, length,integration_method, weights, log10_freq);
 	if(detector == "LISA"){
-		//snr+=calculate_snr(sensitivity_curve, response, frequencies, length);
 		if(!params->sky_average){
 			delete [] times;
 		}
-		//snr*=sqrt(2); //Two detectors
 	}
 	delete [] response;	
 	return snr;
@@ -266,10 +257,6 @@ int calculate_snr_gsl(double *snr,
 	gsl_set_error_handler_off();
 	int errcode = gsl_integration_qag(&F,f_min, f_max, 0,relative_error, np, GSL_INTEG_GAUSS15,w, &result, &err);
 	*snr = sqrt(result);
-	//sqrt 2 for second LISA detector
-	//if(detector=="LISA"){
-	//	*snr *=sqrt(2.);	
-	//}
 	params->sky_average = SA_save;
 	return errcode;
 }
@@ -284,7 +271,6 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 	double SN;
 	populate_noise(&f, cast_params.SN, &SN,1);
 	SN*=SN;
-	//std::cout<<f<<" "<<wfp<<" "<<SN<<std::endl;
 	return 4*std::real(std::conj(wfp)*wfp)/SN;
 }
 /*! \brief Internal function to calculate the SNR integrand for full waveforms
@@ -294,21 +280,17 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
 	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
 	double times[2];
 	if(cast_params.detector == "LISA" ){
-		//PROBLEM
-		double temp_f[2] = {f, f+1.e-5};
-		//times = new double[length];
-		//time_phase_corrected_autodiff(&times[0], 1, &f, cast_params.params, cast_params.generation_method, false, NULL);
-		time_phase_corrected(times, 2, temp_f, cast_params.params, cast_params.generation_method, false);
+		//double temp_f[2] = {f, f+1.e-4};
+		//time_phase_corrected(times, 2, temp_f, cast_params.params, cast_params.generation_method, false);
+		time_phase_corrected_autodiff(&times[0], 1, &f, cast_params.params, cast_params.generation_method, false, NULL);
 	}
 	double time = times[0];
 
 	std::complex<double> response;
 	fourier_detector_response(&f, 1,&response, cast_params.detector,cast_params.generation_method, cast_params.params, &time);
 	double SN;
-	populate_noise(&f, cast_params.SN, &SN,1);
+	populate_noise(&f, cast_params.SN, &SN,1,48);
 	SN*=SN;
-	//std::cout<<4*std::real(std::conj(response)*response)/SN<<std::endl;
-	//std::cout<<SN<<" "<<std::real(std::conj(response)*response)<<std::endl;
 	return 4*std::real(std::conj(response)*response)/SN;
 }
 /*! \brief Caclulates the snr given a detector and waveform (complex) and frequencies
@@ -318,21 +300,20 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
 double calculate_snr(std::string sensitivity_curve, /**< detector name - must match the string of populate_noise precisely*/
                         std::complex<double> *waveform,/**< complex waveform */
                         double *frequencies,/**< double array of frequencies that the waveform is evaluated at*/
-                        int length/**< length of the above two arrays*/
-                        )
+                        int length,/**< length of the above two arrays*/
+			std::string integration_method,
+			double *weights,
+			bool log10_freq)
 {
         double *noise = (double *)malloc(sizeof(double)*length);
         populate_noise(frequencies,sensitivity_curve, noise,  length);
         for (int i = 0; i< length; i++){
                 noise[i] = noise[i]*noise[i];
 	}
-        double *integrand = (double *) malloc(sizeof(double)*length);
-        for (int i = 0; i<length; i++)
-                integrand[i] = 4.* real(conj(waveform[i])*waveform[i]/noise[i]);
-        double integral = trapezoidal_sum(frequencies, length, integrand);
-	free(integrand);
+	double snr  = calculate_snr_internal(noise,waveform, frequencies,length, integration_method, weights, log10_freq);
+
 	free(noise);
-        return sqrt(integral);
+        return snr;
 }
 
 double calculate_snr_internal(double *psd, 
@@ -352,7 +333,6 @@ double calculate_snr_internal(double *psd,
 	}
         double integral=0;
 	if(integration_method == "SIMPSONS"){
-		//integral = trapezoidal_sum(frequencies, length, integrand);
 		integral = simpsons_sum(1./(frequencies[1]-frequencies[0]), length, integrand);
 	}
 	else if(integration_method == "GAUSSLEG"){
@@ -705,11 +685,6 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 	params->dep_postmerger=true;
 	bool save_shift_time = params->shift_time;
 	params->shift_time=false;
-	//if(generation_method.find("Pv2") != std::string::npos && params->chip == -1){
-	//	IMRPhenomPv2<double> model;
-	//	params->chip = model.PhenomPv2_inplane_spin(params);
-	//	params->phip = 2*M_PI;
-	//}
 
 	int boundary_num = boundary_number(generation_method);
 	double freq_boundaries[boundary_num];
@@ -744,8 +719,6 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 		freq = frequencies[k];
 		for(int n = 0; n<boundary_num ; n++){
 			if(freq < freq_boundaries[n]){
-				//std::cout<<freq<<std::endl;
-				//std::cout<<n<<std::endl;
 				gradient(tapes[n], 1, &freq, &times[k]);
 				//Mark successful derivative
 				eval = true;
@@ -855,9 +828,19 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		s_param.phiRef = params->phiRef;
 		s_param.cosmology=params->cosmology;
 		s_param.incl_angle=params->incl_angle;
-		s_param.chip = params->chip;
-		s_param.phip = params->phip;
 		IMRPhenomPv2<T> model;
+		if( ( params->chip + 1) > DOUBLE_COMP_THRESH){
+			s_param.chip = params->chip;
+			s_param.phip = params->phip;
+		}
+		else{
+			s_param.spin1y = params->spin1[1];
+			s_param.spin2y = params->spin2[1];
+			s_param.spin1x = params->spin1[0];
+			s_param.spin2x = params->spin2[0];
+			model.PhenomPv2_Param_Transform(&s_param);
+			
+		}
 		lambda_parameters<T> lambda;
 		model.assign_lambda_param(&s_param,&lambda);	
 		model.post_merger_variables(&s_param);
@@ -1290,7 +1273,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 		//time_phase_corrected_autodiff(time_vec, vec_length, freq_vec, params, 
 		//	generation_method, true);
 		time_phase_corrected(time_vec, vec_length, freq_vec, params, 
-			generation_method, true);
+			generation_method, false);
 		fourier_detector_response_equatorial(freq_vec, vec_length, response_vec, detector, 
 			generation_method, params, time_vec);
 		populate_noise(freq_vec, sensitivity_curve, psd_vec, vec_length,integration_time);

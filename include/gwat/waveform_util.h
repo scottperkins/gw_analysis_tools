@@ -35,7 +35,11 @@ double data_snr_maximized_extrinsic(double *frequencies,
 double calculate_snr(std::string sensitivity_curve,
         std::complex<double> *waveform,
         double *frequencies,
-        int length);
+        int length,
+	std::string integration_method="SIMPSONS",
+	double *weights=NULL,
+	bool log10_freq=false
+	);
 double calculate_snr_internal(double *psd,
         std::complex<double> *waveform,
         double *frequencies,

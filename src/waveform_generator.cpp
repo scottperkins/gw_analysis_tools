@@ -235,10 +235,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
 		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-		//if(parameters->chip != -1){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
@@ -270,10 +267,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		//########################################
 		//Check to see if thetaJN was used
 		//If not, its calculated
-		if(parameters->phip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
@@ -303,10 +298,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		//########################################
-		if(parameters->phip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
@@ -346,10 +339,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		//Initialize Pv2 specific params	
 
 		//########################################
-		if(parameters->phip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
@@ -974,10 +965,8 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 
 		IMRPhenomPv2<T> modeld;
 		//Calculate Waveform
-		if(parameters->phip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
@@ -1007,10 +996,8 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 
 		ppE_IMRPhenomPv2_Inspiral<T> modeld;
 		//Calculate Waveform
-		if(parameters->phip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;
@@ -1040,10 +1027,8 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 
 		ppE_IMRPhenomPv2_IMR<T> modeld;
 		//Calculate Waveform
-		if(parameters->phip != -1){
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
 			params.chip = parameters->chip;
-			//params.chi1_l = parameters->chi1_l;
-			//params.chi2_l = parameters->chi2_l;
 			params.spin1z = parameters->spin1[2];
 			params.spin2z = parameters->spin2[2];
 			params.phip = parameters->phip;

@@ -70,6 +70,8 @@ using namespace std;
 /*!\brief Calculates the fisher matrix for the given arguments
  *
  * Utilizes numerical derivatives -- non-skyaveraged supports up to 4th order finite difference (sky averaged supports second order only)
+ *
+ * NOT SAFE FOR LISA YET -- see hessian of phase for time derivative
  */
 void fisher_numerical(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
@@ -540,9 +542,11 @@ void fisher_autodiff_batch_mod(double *frequency,
 	}
 	delete [] response_deriv;
 }
-/*!\brief Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
+/*!\brief **DEPRECATED** Calculates the fisher matrix for the given arguments to within numerical error using automatic differention - slower than the numerical version
  *
  * Build  around  ADOL-C -- A. Walther und A. Griewank: Getting started with ADOL-C. In U. Naumann und O. Schenk, Combinatorial Scientific Computing, Chapman-Hall CRC Computational Science, pp. 181-202 (2012).
+ *
+ * Not sure what the accuracy was. Probably shouldn't be trusted
  */
 void fisher_autodiff_interp(double *frequency, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
@@ -782,7 +786,6 @@ void calculate_derivatives_autodiff(double *frequency,
 	double *freq_boundaries=new double[boundary_num];
 	double *grad_freqs=new double[boundary_num];
 	std::string local_gen_method = local_generation_method(generation_method);
-	//prep_fisher_calculation(vec_parameters,log_factors, freq_boundaries,grad_freqs,boundary_num,parameters, generation_method, dimension);
 	assign_freq_boundaries(freq_boundaries, grad_freqs,boundary_num, parameters, generation_method);
 	vec_parameters[0]=grad_freqs[0];
 	unpack_parameters(&vec_parameters[1], parameters, generation_method,dimension, log_factors);
@@ -792,9 +795,6 @@ void calculate_derivatives_autodiff(double *frequency,
 	if(detector == "LISA"){
 		grad_times = new double[boundary_num];
 		time_phase_corrected_autodiff(grad_times, boundary_num, grad_freqs, parameters, generation_method, false);
-		//for(int  i  = 0 ;  i<boundary_num;  i++){
-		//	grad_times[i] =  1;
-		//}
 		dt = allocate_2D_array(dimension+1, length);	
 		if(autodiff_time_deriv){
 			time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequency, parameters, generation_method, dimension, false);
@@ -802,12 +802,8 @@ void calculate_derivatives_autodiff(double *frequency,
 		else{
 			time_phase_corrected_derivative_autodiff_numerical(dt, length, frequency, parameters, generation_method, dimension, false);
 		}
-		//time_phase_corrected_derivative_autodiff(dt, length, frequency, parameters, generation_method, dimension, false);
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
-		//for(int  i  = 0 ;  i<length;  i++){
-		//	eval_times[i] =  1;
-		//}
 			
 	}
 	//calculate_derivative tapes
@@ -833,11 +829,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		adouble time;
 		if(detector == "LISA"){
 			time <<= grad_times[i];
-			//map_extrinsic_angles(&a_parameters);
 		}
 		std::complex<adouble> a_response;
 		if(!a_parameters.sky_average){
-			//int status  = fourier_detector_response_equatorial(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, times);
 			int status  = fourier_detector_response(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
 
 		}
@@ -856,9 +850,6 @@ void calculate_derivatives_autodiff(double *frequency,
 		imag(a_response) >>=  response[1];	
 
 		trace_off();
-		//if(times){
-		//	delete  [] times;
-		//}
 		deallocate_non_param_options(&a_parameters, parameters, generation_method);
 	}
 	//Evaluate derivative tapes
@@ -929,6 +920,8 @@ void calculate_derivatives_autodiff(double *frequency,
 
 }
 
+/*! \brief **DEPRECATED**
+ */
 void num_src_params(int *N_src_params, std::string generation_method, gen_params_base<double> *params)
 {
 	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
@@ -942,6 +935,8 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 		*N_src_params += params->Nmod;
 	}
 }
+/*! \brief **DEPRECATED**
+ */
 void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_method, gen_params_base<double>*params)
 {
 	int gr_dim, gr_param_dim;
@@ -2882,9 +2877,6 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 				delete [] params_packed.freq_boundaries ;
 				delete [] params_packed.grad_freqs ;
 				delete [] params_packed.log_factors ;
-				//std::cout<<"2*Result "<<2*output[i][j]<<std::endl;
-				//std::cout<<"Error "<<err<<std::endl;
-				//std::cout<<"intervals "<<w->size<<std::endl;
 
 			}
 		}
@@ -2899,7 +2891,6 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	gsl_integration_workspace_free (w);
 
 	if(detector == "LISA"){
-		//std::cout<<"Doubling"<<std::endl;
 		for(int i = 0 ; i<full_dimension;i++){
 			for(int j = 0  ;j<full_dimension; j++){
 				output[i][j]*=2;
@@ -2953,13 +2944,9 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	double vec_parameters[vec_param_length];
 	unpack_parameters(&vec_parameters[1], parameters, generation_method,dimension, log_factors);
 	double eval_time;
-	//std::cout<<"Prep time: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
-	//start = clock();
 	if(detector == "LISA"){
 		time_phase_corrected_autodiff(&eval_time, 1, &frequency, parameters, generation_method, false, params_packed.phase_tapes);
 	}
-	//std::cout<<"Time calc time: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
-	//start = clock();
 	//Evaluate derivative tapes
 	int dep = 2;//Output is complex
 	bool eval = false;//Keep track of when a boundary is hit
@@ -2975,14 +2962,12 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	if(detector == "LISA"){
 		indep_vec[indep -1] = eval_time;
 	}
-	//std::cout<<indep_vec[0]<<" "<<indep_vec[1]<<" "<<indep_vec[2]<<" "<<indep_vec[3]<<" "<<std::endl;
 	double **dt_hess;
 	for(int n = 0 ; n<boundary_num; n++){
 		if(indep_vec[0]<freq_boundaries[n]){
 			jacobian(wf_tapes[n], dep, indep, indep_vec, jacob);
 			
 			if(detector=="LISA"){
-			//if(false){
 				dt_hess = new double*[indep-1];
 				for(int j = 0 ; j<indep-1; j++){
 					dt_hess[j]=new double[indep-1];
@@ -2994,10 +2979,6 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 					time_eval[2]=indep_vec[2];
 				}
 				hessian(time_tapes[n], indep-1, time_eval, dt_hess);
-				//if(id1!=id2)	
-				//std::cout<<dt_hess[1][0]<<" "<<dt_hess[2][0]<<std::endl;
-				//else
-				//std::cout<<dt_hess[1][0]<<std::endl;
 			}
 			int derivs;
 			if(id1!=id2){derivs =2;}
@@ -3014,7 +2995,6 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 				}
 			}
 			if(detector=="LISA"){
-			//if(false){
 				for(int j = 0 ; j<indep-1; j++){
 					delete [] dt_hess[j];
 				}
@@ -3027,8 +3007,6 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 			break;
 		}
 	}
-	//std::cout<<"Eval calc time: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
-	//start = clock();
 	//If freq didn't fall in any boundary, set to 0
 	if(!eval){
 		for(int i =0; i<indep; i++){
@@ -3039,7 +3017,6 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	if(log_factors[id1]){
 		waveform_deriv[0] *= vec_parameters[id1+1];
 	}
-	//if(id1!=id2){
 	//This needs to be here even if id1==id2
 	if(log_factors[id2]){
 		waveform_deriv[1] *= vec_parameters[id2+1];
@@ -3047,6 +3024,5 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	deallocate_2D_array(jacob,dep,indep);
 	double psdroot;
 	populate_noise(&frequency,sensitivity_curve, &psdroot, 1);
-	//std::cout<<std::real((waveform_deriv[0]*conj(waveform_deriv[1])))/(psdroot*psdroot)<<std::endl;
 	return std::real((waveform_deriv[0]*conj(waveform_deriv[1])))/(psdroot*psdroot);
 }

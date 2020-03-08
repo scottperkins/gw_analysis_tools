@@ -371,7 +371,7 @@ void test62()
 	params.spin1[0] = .2;
 	params.spin2[0] = .1;
 	params.phiRef = 2.;
-	params.tc = T_year/12.;
+	params.tc = T_year;
 	params.f_ref = 1e-5;
 	params.NSflag1=false;
 	params.NSflag2=false;
@@ -391,15 +391,15 @@ void test62()
 	params.LISA_alpha0=0;
 	
 	
-	int length = T_year/12.;
-	double deltaf = 1./(T_year/12.);
+	int length = T_year;
+	double deltaf = 1./(T_year);
 	double *freqs = new double[length];
 	//for(int i = 0 ; i<length; i++){
 	//	freqs[i] = 1e-5 + i*deltaf;
 	//}
 	
-	int lengthgl1 = 1000;
-	int lengthgl2 = 1000;
+	int lengthgl1 = 5000;
+	int lengthgl2 = 5000;
 	double *freqsgl1 = new double[lengthgl1];
 	double *freqsgl2 = new double[lengthgl2];
 	double *w1 = new double[lengthgl1];
@@ -454,12 +454,12 @@ void test62()
 		transform_orientation_coords(&params,method, detector);
 
 		double bounds[2];
-		integration_interval(1, 4*T_year, detector,noise_curve, method, &params, bounds);
+		integration_interval(1, T_year, detector,noise_curve, method, &params, bounds);
 		//std::cout<<bounds[0]<<" "<<bounds[1]<<std::endl;
 
-		//for(int i = 0 ; i<length; i++){
-		//	freqs[i] = bounds[0] + i*deltaf;
-		//}
+		for(int i = 0 ; i<length; i++){
+			freqs[i] = bounds[0] + i*deltaf;
+		}
 
 
 		clock_t start = clock();
@@ -5725,7 +5725,7 @@ void test8()
 		psd[0][j] = noise[j];	
 		data[0][j] = waveformout[j];	
 	}
-	double snr2 = pow(calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	//double snr2 = pow(calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
 
 	celestial_horizon_transform(RA, DEC, gps_time, "Livingston", &params.phi, &params.theta);
 	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Livingston"); 
@@ -5735,7 +5735,7 @@ void test8()
 		psd[1][j] = (noise[j]);	
 		data[1][j] = waveformout[j];	
 	}
-	snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
 	celestial_horizon_transform(RA, DEC, gps_time, "Virgo", &params.phi, &params.theta);
 	params.tc = tc+ DTOA(temptheta, params.theta, "Hanford","Virgo"); 
 	fourier_detector_response(freq,length, waveformout,"Virgo","IMRPhenomD", &params);
@@ -5745,8 +5745,8 @@ void test8()
 		data[2][j] = waveformout[j];	
 	}
 	//#########################################################
-	snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
-	std::cout<<"SNR of injection: "<<sqrt(snr2)<<std::endl;
+	//snr2+=pow( calculate_snr("Hanford_O1_fitted",waveformout, freq, length),2);
+	//std::cout<<"SNR of injection: "<<sqrt(snr2)<<std::endl;
 	
 	//#########################################################
 	//MCMC options
