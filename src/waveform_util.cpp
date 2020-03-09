@@ -789,7 +789,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		T temp_phase_plus[2];
 		T temp_phase_cross[2];
 		fourier_phase(temp_f, 2, temp_phase_plus, temp_phase_cross, local_gen, params);
-		times[0] = (temp_phase_plus[1]-temp_phase_plus[0])/(4*M_PI*temp_deltaf);
+		times[0] = (temp_phase_plus[1]-temp_phase_plus[0])/(2*M_PI*temp_deltaf);
 		return ;
 	}
 	//bool save_shift_time = params->shift_time;
@@ -1152,7 +1152,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 	//	generation_method, true);
 	time_phase_corrected(&time, 1, &eval_freq, params, 
-		generation_method, true);
+		generation_method, false);
 	fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 		generation_method, params, &time);
 	populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
@@ -1168,7 +1168,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 	//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 	//	generation_method, true);
 	time_phase_corrected(&time, 1, &eval_freq, params, 
-		generation_method, true);
+		generation_method, false);
 	fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 		generation_method, params, &time);
 	populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
@@ -1192,7 +1192,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 			//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 			//	generation_method, true);
 			time_phase_corrected(&time, 1, &eval_freq, params, 
-				generation_method, true);
+				generation_method, false);
 			fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 				generation_method, params, &time);
 			populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
@@ -1226,7 +1226,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 			//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 			//	generation_method, true);
 			time_phase_corrected(&time, 1, &eval_freq, params, 
-				generation_method, true);
+				generation_method, false);
 			fourier_detector_response_equatorial(&eval_freq, 1, &response, detector, 
 				generation_method, params, &time);
 			populate_noise(&eval_freq, sensitivity_curve, &psd, 1,integration_time);
@@ -1363,7 +1363,7 @@ int integration_interval(double sampling_freq, /**< Frequency at which the detec
 	time_phase_corrected(&times[0], 1, &bounds_from_band[0], params, generation_method, false);
 	time_phase_corrected(&times[1], 1, &bounds_from_band[1], params, generation_method, false);
 	double T_band = -times[1]+times[0];
-	//std::cout<<T_band<<std::endl;
+	//std::cout<<"GW INTERNAL : "<<T_band/T_year<<std::endl;
 
 	//Conform the output of the band calculation to the pre-set frequency grid
 	bool max_found=false, min_found=false;
@@ -1578,7 +1578,9 @@ void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of t
 	postmerger_params(params, generation_method, &fpeak, &fdamp, &fRD);
 	//std::cout<<"f fpeak "<<fpeak<<std::endl;	
 	double time_peak=1, time_Tbm;
-	time_phase_corrected_autodiff(&time_peak, 1, &fpeak, params, 
+	//time_phase_corrected_autodiff(&time_peak, 1, &fpeak, params, 
+	//	generation_method, false);
+	time_phase_corrected(&time_peak, 1, &fpeak, params, 
 		generation_method, false);
 	//std::cout<<"Time fpeak "<<time_peak<<std::endl;	
 	bool continue_search = true;
@@ -1606,7 +1608,7 @@ void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of t
 		//time_phase_corrected_autodiff(&time, 1, &eval_freq, params, 
 		//	generation_method, true);
 		time_phase_corrected(&time, 1, &eval_freq, params, 
-			generation_method, true);
+			generation_method, false);
 		//T = time_peak-time;	
 		T = -time_peak+time;	
 		//The function can be so steep the algorithm cannot determine a valid 
@@ -1617,7 +1619,7 @@ void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of t
 			*freq=eval_freq;
 
 		}
-		if(T > (Tbmp )){
+		else if(T > (Tbmp )){
 			fmin_search = eval_freq;
 		}
 		else if(T< (Tbmm)){
