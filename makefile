@@ -18,6 +18,7 @@ PROJ_SHARED_LIB=$(addprefix $(LDIR_LOCAL)/,$(LOCAL_SHARED_LIB))
 EXEDIR:=bin
 MCMC_TOOL:=$(EXEDIR)/mcmc_gw_tool
 WAVEFORM_TOOL:=$(EXEDIR)/waveform_tool
+TEST_CODE_DIR:=tests
 
 TESTSRC=testing/test.cpp
 TESTOBJ=testing/test.o
@@ -66,7 +67,7 @@ CCCUDA=nvcc
 #CC=nvcc
 
 .PHONY: all 
-all:  $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
+all:  $(PROJ_LIB) $(PROJ_PYLIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL) 
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(CONFIGFILE)
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -131,7 +132,8 @@ Doxyfile: $(OBJECTS) $(OBJECTSCUDA) $(PROJ_PYLIB)
 c: $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
 
 .PHONY: test
-test: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) $(MCMC_TOOL)
+test:$(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(PROJ_PYLIB) $(MCMC_TOOL)
+
 
 .PHONY: testfisher
 testfisher: $(TESTFISHER) $(PROJ_LIB) $(PROJ_SHARED_LIB)
@@ -139,15 +141,21 @@ testfisher: $(TESTFISHER) $(PROJ_LIB) $(PROJ_SHARED_LIB)
 .PHONY: testc
 testc: $(TEST) $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
 
+.PHONY: tests
+tests: $(PROJ_LIB) $(PROJ_SHARED_LIB) $(MCMC_TOOL) $(WAVEFORM_TOOL)
+	make -C $(TEST_CODE_DIR)
+
 .PHONY: clean
 clean:
 	-rm build/*.o 
 	-rm build_cuda/*.o 
+	-make -C $(TEST_CODE_DIR) clean
 .PHONY: remove
 remove:
 	-rm build/*.o build_cuda/* bin/* lib/*.a lib/*.so
 	-rm include/gwat/GWATConfig.h
 	-make -C $(PYDIR) remove
+	-make -C $(TEST_CODE_DIR) remove
 
 $(MCMC_TOOL): $(OBJECTS_NONEXE) $(ODIR)/mcmc_gw_tool.o
 	$(CC) $(LFLAGS) -o $@ $^ $(LIBS)

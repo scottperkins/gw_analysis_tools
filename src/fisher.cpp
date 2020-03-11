@@ -8,6 +8,7 @@
 #include <string>
 #include "util.h"
 #include "detector_util.h"
+#include "io_util.h"
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
@@ -315,10 +316,16 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		int local_dimension=dimension;
 		if(detector=="LISA"){
 			times = new double[length];
+			corr_time = false;
 			time_phase_corrected(times, length, frequencies,parameters, gen_method, false);
 			dt = allocate_2D_array(dimension, length);
-			corr_time = false;
 			time_phase_corrected_derivative_numerical(dt, length, frequencies,parameters, gen_method, dimension, corr_time);
+			//TESTING
+			//write_file("data/times.csv",times,length);
+			//time_phase_corrected_autodiff(times, length, frequencies, parameters, gen_method, false);
+			//dt = allocate_2D_array(dimension+1, length);
+			//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequencies, parameters, gen_method, dimension, false);
+			//time_phase_corrected_derivative_autodiff_numerical(dt, length, frequencies, parameters, gen_method, dimension, false);
 			//local_dimension++;
 		}
 		if(order >=4){
@@ -428,14 +435,23 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			//in time is not constant 
 			//(central difference depends on symmetric spacing?
 			for(int i = 0 ; i<length-1; i++){
-				deriv_t[i] = 
-					(response_plus[i+1]-response_plus[i])/(times[i+1]-times[i]);
+				double dt = times[i+1]-times[i];
+				if(dt >0){
+					deriv_t[i] = 
+						(response_plus[i+1]-response_plus[i])/(times[i+1]-times[i]);
+				}
+				else{
+					deriv_t[i]=0;
+				}
+				
+				//std::cout<<deriv_t[i]<<std::endl;
 			}
 			deriv_t[length-1] = 
 				(response_plus[length-1]-response_plus[length-2])/(times[length-1]-times[length-2]);
 			for(int i = 0 ; i<dimension; i++){
 				for(int j = 0 ; j<length; j++){
 					response_deriv[i][j]+=deriv_t[j] * dt[i][j];
+					//response_deriv[i][j]+=deriv_t[j] * dt[i+1][j];
 				}
 			}
 			//do chain rule with dt above
@@ -804,6 +820,9 @@ void calculate_derivatives_autodiff(double *frequency,
 		}
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
+		
+		//TESTING
+		//write_file("data/times_ad.csv",eval_times, length);
 			
 	}
 	//calculate_derivative tapes

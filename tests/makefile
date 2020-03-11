@@ -1,0 +1,79 @@
+####################################################
+EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe
+####################################################
+# Use the default CXX compiler and linker
+#
+CCLOCAL:=$(CXX)
+LINKERLOCAL:=$(CXX)
+CFLAGS:=-fopenmp -O2  -Wall -I../include
+LFLAGS:= -fopenmp -L../lib
+LIBS:=-lm -lgsl -lgwat
+
+SRCDIR:=src
+ODIR:=build
+EXEDIR:=bin
+LIBDIR:=lib
+IDIR:=include
+
+SRCEXT:=cpp
+IEXT:=h
+EXEEXT:=exe
+
+SRCTOT:=$(wildcard $(SRCDIR)/*.$(SRCEXT))
+DEPS:=$(patsubst $(SRCDIR)/%.$(SRCEXT), $(IDIR)/%.$(IEXT), $(SRC))
+OBJ:=$(patsubst $(SRCDIR)/%.$(SRCEXT), $(ODIR)/%.o,$(SRCTOT))
+
+.PHONY: all
+
+all: $(EXE) 
+
+$(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(ODIR)
+	@echo COMPILING
+	$(CCLOCAL) $(CFLAGS) -I$(IDIR)/ -c -o $@ $<
+
+$(ODIR):
+	@echo "Making build directory"
+	mkdir ./build
+$(EXEDIR):
+	@echo "Making bin directory"
+	mkdir ./bin
+
+.PHONY: clean
+
+clean: 
+	rm $(ODIR)/*.o 
+	rmdir $(ODIR)
+.PHONY: remove
+remove: 
+	rm $(ODIR)/*.o 
+	rmdir $(ODIR)
+	rm $(EXE) 
+	rmdir $(EXEDIR) 
+#########################################
+# Executable number dependent parameters
+#########################################
+EXE0:=bin/test_fishers.exe
+EXE1:=bin/test_SNR.exe
+EXE2:=bin/test_util.exe
+EXE3:=bin/test_waveform.exe
+OBJEXE0:=build/test_fishers.o
+OBJEXE1:=build/test_SNR.o
+OBJEXE2:=build/test_util.o
+OBJEXE3:=build/test_waveform.o
+OBJDEP:=$(OBJ)
+OBJDEP:=$(filter-out $(OBJEXE0), $(OBJDEP))
+OBJDEP:=$(filter-out $(OBJEXE1), $(OBJDEP))
+OBJDEP:=$(filter-out $(OBJEXE2), $(OBJDEP))
+OBJDEP:=$(filter-out $(OBJEXE3), $(OBJDEP))
+$(EXE0): $(OBJDEP) $(OBJEXE0) | $(EXEDIR)
+	@echo LINKING
+	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
+$(EXE1): $(OBJDEP) $(OBJEXE1) | $(EXEDIR)
+	@echo LINKING
+	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
+$(EXE2): $(OBJDEP) $(OBJEXE2) | $(EXEDIR)
+	@echo LINKING
+	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
+$(EXE3): $(OBJDEP) $(OBJEXE3) | $(EXEDIR)
+	@echo LINKING
+	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
