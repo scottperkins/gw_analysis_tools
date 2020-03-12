@@ -11,6 +11,8 @@ LIBS:=-lm -lgsl -lgwat
 
 SRCDIR:=src
 ODIR:=build
+DATA_DIR:=data
+PLOTS_DIR:=plots
 EXEDIR:=bin
 LIBDIR:=lib
 IDIR:=include
@@ -25,7 +27,7 @@ OBJ:=$(patsubst $(SRCDIR)/%.$(SRCEXT), $(ODIR)/%.o,$(SRCTOT))
 
 .PHONY: all
 
-all: $(EXE) 
+all: $(EXE) $(DATA_DIR) $(PLOTS_DIR)
 
 $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(ODIR)
 	@echo COMPILING
@@ -33,7 +35,13 @@ $(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(ODIR)
 
 $(ODIR):
 	@echo "Making build directory"
-	mkdir ./build
+	mkdir $(ODIR)
+$(DATA_DIR):
+	@echo "Making data directory"
+	mkdir $(DATA_DIR)
+$(PLOTS_DIR):
+	@echo "Making plots directory"
+	mkdir $(PLOTS_DIR)
 $(EXEDIR):
 	@echo "Making bin directory"
 	mkdir ./bin
