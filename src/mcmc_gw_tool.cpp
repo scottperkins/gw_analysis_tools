@@ -141,6 +141,23 @@ int main(int argc, char *argv[])
 		data_lengths[i] =psd_length;
 	}
 
+
+	double **output_test = allocate_2D_array(psd_length, 7 );
+	
+	for(int i = 0 ; i<psd_length; i++)
+	{
+		output_test[i][0] = freqs[0][i];	
+		output_test[i][1] = psd[0][i];	
+		output_test[i][2] = psd[1][i];	
+		output_test[i][3] =real( data[0][i]);	
+		output_test[i][4] =imag( data[0][i]);	
+		output_test[i][5] =real( data[1][i]);	
+		output_test[i][6] =imag( data[1][i]);	
+	}
+	write_file("testing/data/data_output.csv",output_test,psd_length,7);
+	deallocate_2D_array(output_test,psd_length,7);
+	
+
 	//#############################################################
 	//#############################################################
 	

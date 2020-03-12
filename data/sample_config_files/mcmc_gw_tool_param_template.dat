@@ -6,25 +6,29 @@
 #[str] detector name 2 = Virgo
 #GPS time of the trigger
 #[dbl] gps = 1126259462.4
-[dbl] gps = 1180922494.5
+#[dbl] gps = 1180922494.5
 #[dbl] gps = 1185389807.3
+[dbl] gps = 1135136350.6
 #[dbl] gps = 1186741861.5
 #File path to the PSD file
-#[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
+#[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
 #[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt
+[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt
 #[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW170814/GWTC1_GW170814_PSDs.dat
-[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW170608/GWTC1_GW170608_PSDs.dat.txt  
+#[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW170608/GWTC1_GW170608_PSDs.dat.txt  
 #File path to each data file
-#[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
-#[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
+#[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
+#[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
 #[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt
 #[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt
 #[str] data file 2 = /home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt
 #[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW170814/H-H1_GWOSC_4KHZ_R1-1186741846-32.txt
 #[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW170814/L-L1_GWOSC_4KHZ_R1-1186741846-32.txt
 #[str] data file 2 = /Users/sperkins/Downloads/LOSC_data/GW170814/V-V1_GWOSC_4KHZ_R1-1186741846-32.txt
-[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW170608/H-H1_GWOSC_4KHZ_R1-1180922479-32.txt
-[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW170608/L-L1_GWOSC_4KHZ_R1-1180922479-32.txt
+#[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW170608/H-H1_GWOSC_4KHZ_R1-1180922479-32.txt
+#[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW170608/L-L1_GWOSC_4KHZ_R1-1180922479-32.txt
+[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt
+[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt
 #Length of data in seconds
 [dbl] data length = 32
 #Generation method 

@@ -547,7 +547,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 		}	
 	}
 		
-	double Tobs = 1./(freqs[0][psd_length/2] - freqs[0][psd_length/2 - 1]);
+	double Tobs = 1./(freqs[0][1] - freqs[0][0]);
 	double df = 1./Tobs;
 	int N = fs*duration;
 	int N_trimmed = Tobs*fs;
