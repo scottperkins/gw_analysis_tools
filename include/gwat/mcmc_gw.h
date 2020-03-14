@@ -452,7 +452,8 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	std::string chain_filename,
 	std::string auto_corr_filename,
 	std::string likelihood_log_filename,
-	std::string final_checkpoint_filename
+	std::string final_checkpoint_filename,
+	bool tune
 	);
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
 

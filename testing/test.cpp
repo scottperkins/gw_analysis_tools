@@ -1207,7 +1207,7 @@ void test49()
 	double ***output=allocate_3D_array(chain_n, steps, dim);
 	PTMCMC_MH_dynamic_PT_alloc_GW(output, dim, stepsalloc,chain_n,max_thermo, init_pos, seeding_var, temps, swp_freq, t0,nu,"half_ensemble",test_lp_GW_D,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf,  "",checkf);
 
-	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_D,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "testing/data/ll.csv",checkf2);
+	continue_PTMCMC_MH_GW(checkf,output, dim, steps,  swp_freq, test_lp_GW_D,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "testing/data/ll.csv",checkf2,true);
 	//PTMCMC_MH_GW(output, dim, steps,chain_n, init_pos, seeding_var, temps, swp_freq, test_lp_GW_D,threads, pool, show_prog, num_detectors, data, psd, freqs, data_length, gps_time, detectors, Nmod, bppe, gen_meth, statf, chainf, "", "testing/data/ll.csv",checkf);
 	
 	deallocate_3D_array(output,chain_n, steps,dim);
@@ -2137,7 +2137,7 @@ void test35()
 			swp_freq,  test_lp_GW_Pv2,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"","", "",checkfile);	
+			generation_method,statfilename,"","", "",checkfile,true);	
 
 
 	std::string ind_chain_file;
@@ -2317,7 +2317,7 @@ void test33()
 	double ***output;
 	output = allocate_3D_array( chain_N, N_steps, dimension );
 
-	continue_PTMCMC_MH(start_check, output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL, (void **)NULL,threads, pool, show_prog, stats, "", "", "",check);	
+	continue_PTMCMC_MH(start_check, output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL, (void **)NULL,threads, pool, show_prog, stats, "", "", "",check,true);	
 	int filecount = 1;
 	std::string chainfilebase = "testing/data/neil_mcmc_output";
 	for(int i =0; i<chain_N; i++){
@@ -2508,7 +2508,7 @@ void test31()
 			swp_freq, test_lp_GW_Pv2_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"",autocorrfile, "",checkfile);	
+			generation_method,statfilename,"",autocorrfile, "",checkfile,true);	
 
 	std::string ind_chain_file;
 	int criteria = 0 ;
@@ -3051,7 +3051,7 @@ void test28()
 			swp_freq, test_lp_GW_dCS_root_alpha,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,frequencies, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"","","",checkfile);	
+			generation_method,statfilename,"","","",checkfile,true);	
 	
 	std::cout<<"ended"<<std::endl;
 	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
@@ -3199,7 +3199,7 @@ void test27()
 			swp_freq, test_lp_GW_DFull,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"","","",checkfile);	
+			generation_method,statfilename,"","","",checkfile,true);	
 	std::cout<<"ended"<<std::endl;
 
 	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
@@ -3353,7 +3353,7 @@ void test26()
 			swp_freq, test_lp_GW_dCS_log,numThreads, pool,show_progress,
 			num_detectors, 
 			data, psd,freqs, data_length,gps_time, detectors,Nmod, bppe,
-			generation_method,statfilename,"","","",checkfile);	
+			generation_method,statfilename,"","","",checkfile,true);	
 
 	double **output_transform=(double **)malloc(sizeof(double*)*n_steps);
 	for (int j =0; j<n_steps; j++)
@@ -3453,7 +3453,7 @@ void test25()
 	int numThreads = 10;
 	bool pool = true;
 	
-	continue_PTMCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	continue_PTMCMC_MH(start_checkfile,output, N_steps, swp_freq, test_lp, log_neil_proj3,NULL,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile ,true);	
 	std::cout<<"ENDED"<<std::endl;
 }
 void test24()

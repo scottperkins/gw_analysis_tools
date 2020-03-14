@@ -22,6 +22,7 @@ const double limit_inf = -std::numeric_limits<double>::infinity();
 class sampler
 {
 public:
+	bool tune=true;
 	int types_of_steps = 5;
 	double **step_prob;
 	double **prob_boundaries;

@@ -6,8 +6,9 @@ EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.e
 CCLOCAL:=$(CXX)
 LINKERLOCAL:=$(CXX)
 CFLAGS:=-fopenmp -O2  -Wall -I../include
-LFLAGS:= -fopenmp -L../lib
-LIBS:=-lm -lgsl -lgwat
+LFLAGS:= -fopenmp -L../lib -L/usr/local/opt/hdf5/lib
+#LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
+LIBS:=-lm -lgsl -lgwat 
 
 SRCDIR:=src
 ODIR:=build

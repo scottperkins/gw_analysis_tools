@@ -485,7 +485,8 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	std::string chain_filename,
 	std::string auto_corr_filename,
 	std::string likelihood_log_filename,
-	std::string end_checkpoint_file
+	std::string end_checkpoint_file,
+	bool tune
 	);
 void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	double ***output,
@@ -502,7 +503,8 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	std::string chain_filename,
 	std::string auto_corr_filename,
 	std::string likelihood_log_filename,
-	std::string end_checkpoint_file
+	std::string end_checkpoint_file,
+	bool tune
 	);
 void PTMCMC_MH_loop(sampler *sampler);
 
@@ -587,6 +589,7 @@ void continue_PTMCMC_MH_internal(sampler *samplerptr,
 	std::string chain_filename,
 	std::string auto_corr_filename,
 	std::string likelihood_log_filename,
-	std::string end_checkpoint_file
+	std::string end_checkpoint_file,
+	bool tune
 	);
 #endif

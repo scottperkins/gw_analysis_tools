@@ -3,6 +3,8 @@
 #include "gwat/detector_util.h"
 #include <iostream>
 
+
+
 int AD_v_N(int argc, char *argv[]);
 void RT_ERROR_MSG();
 
@@ -153,3 +155,5 @@ void RT_ERROR_MSG()
 	std::cout<<"Please supply function option:"<<std::endl;
 	std::cout<<"0 --- Compare AD to Numerical"<<std::endl;
 }
+
+

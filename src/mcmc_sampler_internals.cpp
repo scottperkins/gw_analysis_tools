@@ -1139,7 +1139,12 @@ void allocate_sampler_mem(sampler *sampler)
 		//Seed differently
 		gsl_rng_set(sampler->rvec[i] , i+1);
 	
-		sampler->check_stepsize_freq[i] = 500;
+		if(sampler->tune){
+			sampler->check_stepsize_freq[i] = 500;
+		}
+		else{
+			sampler->check_stepsize_freq[i] = sampler->N_steps;
+		}
 		//max probability is a function of the temperature -- higher temp 
 		//are allowed to step more
 		//sampler->max_target_accept_ratio[i] = .90-.15/sampler->chain_temps[i];
@@ -1169,6 +1174,12 @@ void allocate_sampler_mem(sampler *sampler)
 
 		sampler->prop_MH_factor[i]=0;
 	}		
+	if(sampler->tune){
+		sampler->fisher_update_number = 200;
+	}
+	else{
+		sampler->fisher_update_number = sampler->N_steps;
+	}
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->max_dim);
 	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 

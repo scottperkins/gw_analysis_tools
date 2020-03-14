@@ -1707,7 +1707,8 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			std::string chain_filename,
 			std::string auto_corr_filename,
 			std::string likelihood_log_filename,
-			std::string final_checkpoint_filename
+			std::string final_checkpoint_filename,
+			bool tune
 			)
 {
 	//Create fftw plan for each detector (length of data stream may be different)
@@ -1753,7 +1754,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
 			//MCMC_likelihood_wrapper, NULL,numThreads, pool, 
 			show_prog,statistics_filename,chain_filename,
-			auto_corr_filename, likelihood_log_filename,final_checkpoint_filename);
+			auto_corr_filename, likelihood_log_filename,final_checkpoint_filename,tune);
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
 		deallocate_FFTW_mem(&plans[i]);
