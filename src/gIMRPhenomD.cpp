@@ -123,6 +123,7 @@ T gIMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambd
 			}
 		}
 	}
+	return phase;
 
 }
 template<class T>
@@ -142,6 +143,7 @@ T gIMRPhenomD<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lamb
 			}
 		}
 	}
+	return Dphase;
 
 }
 
