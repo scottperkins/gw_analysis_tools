@@ -23,9 +23,10 @@ IF( FFTW3_FOUND )
   ENDIF()
 ELSE( FFTW3_FOUND )
   string(REPLACE ":" ";" INC_SEARCH_LIST $ENV{CPATH})
-  FIND_PATH(FFTW3_INCLUDE_DIRS NAMES fftw3
+  FIND_PATH(FFTW3_INCLUDE_DIRS NAMES fftw3.h
             HINTS  
                    "/usr/include" 
+                   "/usr/local/include" 
 		   ${INC_SEARCH_LIST}
 		   )
            
@@ -33,6 +34,7 @@ ELSE( FFTW3_FOUND )
   FIND_LIBRARY(FFTW3_LIBRARY fftw3
                 HINTS 
                       "/usr/lib" 
+                      "/usr/local/lib" 
 		      ${LIB_SEARCH_LIST})
   #CHECK_SYMBOL_EXISTS(function ADOLC_LIBRARY FUNCTION_FOUND)
    

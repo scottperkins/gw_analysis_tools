@@ -14,10 +14,10 @@ add_library(gwat_static STATIC $<TARGET_OBJECTS:OBJS> ${HEADER_LIST})
 
 #add_library(gwat SHARED ${SRC_LIST} ${HEADER_LIST})
 #add_library(gwat_static STATIC ${SRC_LIST} ${HEADER_LIST})
-#target_include_directories( gwat PUBLIC "${PROJECT_SOURCE_DIR}/include/gwat")
-#target_include_directories( gwat PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}")
-#target_link_libraries( gwat PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADOLC_LIBRARIES}" "${FFTW3_LIBRARIES}" )
-#
+target_include_directories( gwat PUBLIC "${PROJECT_SOURCE_DIR}/include/gwat")
+target_include_directories( gwat PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}")
+target_link_libraries( gwat PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADOLC_LIBRARIES}" "${FFTW3_LIBRARIES}" "${GSL_LIBRARIES}" )
+
 #target_link_libraries( gwat_static PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADOLC_LIBRARIES}" "${FFTW3_LIBRARIES}" )
 #target_include_directories( gwat_static PUBLIC "${PROJECT_SOURCE_DIR}/include/gwat")
 #target_include_directories( gwat_static PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}")
