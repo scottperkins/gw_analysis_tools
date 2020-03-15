@@ -7,8 +7,8 @@ CCLOCAL:=$(CXX)
 LINKERLOCAL:=$(CXX)
 CFLAGS:=-fopenmp -O2  -Wall -I../include
 LFLAGS:= -fopenmp -L../lib -L/usr/local/opt/hdf5/lib
-#LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
-LIBS:=-lm -lgsl -lgwat 
+LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
+#LIBS:=-lm -lgsl -lgwat 
 
 SRCDIR:=src
 ODIR:=build
