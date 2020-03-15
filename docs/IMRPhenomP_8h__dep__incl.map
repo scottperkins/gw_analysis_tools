@@ -1,8 +1,0 @@
-<map id="include/gwat/IMRPhenomP.h" name="include/gwat/IMRPhenomP.h">
-<area shape="rect" id="node2" href="$fisher_8cpp.html" title="src/fisher.cpp" alt="" coords="5,80,107,107"/>
-<area shape="rect" id="node3" href="$IMRPhenomP_8cpp.html" title="src/IMRPhenomP.cpp" alt="" coords="131,80,282,107"/>
-<area shape="rect" id="node4" href="$waveform__generator_8cpp.html" title="src/waveform_generator.cpp" alt="" coords="167,155,353,181"/>
-<area shape="rect" id="node5" href="$waveform__util_8cpp.html" title="src/waveform_util.cpp" alt="" coords="583,155,734,181"/>
-<area shape="rect" id="node6" href="$ppE__IMRPhenomP_8h.html" title="include/gwat/ppE_IMRPhenomP.h" alt="" coords="357,80,579,107"/>
-<area shape="rect" id="node7" href="$ppE__IMRPhenomP_8cpp.html" title="src/ppE_IMRPhenomP.cpp" alt="" coords="377,155,559,181"/>
-</map>

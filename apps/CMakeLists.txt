@@ -1,0 +1,13 @@
+add_executable(waveform_tool "waveform_tool.cpp")
+set_target_properties(waveform_tool PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+target_link_libraries(waveform_tool PUBLIC gwat)
+target_link_libraries( waveform_tool PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADOLC_LIBRARIES}" "${FFTW3_LIBRARIES}" "${GSL_LIBRARIES}")
+target_include_directories( waveform_tool PUBLIC "${PROJECT_SOURCE_DIR}/include/gwat")
+target_include_directories( waveform_tool PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}" "${GSL_INCLUDE_DIR}")
+
+add_executable(mcmc_gw_tool "mcmc_gw_tool.cpp")
+set_target_properties(mcmc_gw_tool PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+target_link_libraries(mcmc_gw_tool PUBLIC gwat)
+target_link_libraries( mcmc_gw_tool PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADOLC_LIBRARIES}" "${FFTW3_LIBRARIES}" "${GSL_LIBRARIES}")
+target_include_directories( mcmc_gw_tool PUBLIC "${PROJECT_SOURCE_DIR}/include/gwat")
+target_include_directories( mcmc_gw_tool PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}" "${GSL_INCLUDE_DIR}")

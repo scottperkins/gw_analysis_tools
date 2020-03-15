@@ -514,6 +514,8 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 	else{
 		for (int i =0; i <length; i++)
 		{
+			//detector_response[i] = fplus * hplus[i] 
+			//			+ (fcross )*hcross[i];
 			detector_response[i] = fplus * hplus[i] 
 						+ (fcross )*hcross[i];
 		}	
