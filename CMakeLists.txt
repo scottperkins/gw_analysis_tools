@@ -4,6 +4,8 @@ project(gw_analysis_tools
 	DESCRIPTION "Tools to help with gravitational wave analysis and prediction"
 	LANGUAGES CXX C)
 
+SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libstdc++")
+
 # The version number.
 set (GWAT_VERSION_MAJOR 1)
 set (GWAT_VERSION_MINOR 0)
