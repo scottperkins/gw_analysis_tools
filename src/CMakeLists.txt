@@ -27,7 +27,11 @@ target_link_libraries( gwat PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADO
 
 
 
+#Build and name
 set_target_properties(gwat_static PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set_target_properties(gwat PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set_target_properties(gwat_static PROPERTIES OUTPUT_NAME "gwat")
 
+#Install
+install(TARGETS gwat DESTINATION lib)
+install(TARGETS gwat_static DESTINATION lib)

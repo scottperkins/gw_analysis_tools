@@ -11,3 +11,6 @@ target_link_libraries(mcmc_gw_tool PUBLIC gwat)
 target_link_libraries( mcmc_gw_tool PUBLIC "${HDF5_LIBRARIES}" OpenMP::OpenMP_CXX "${ADOLC_LIBRARIES}" "${FFTW3_LIBRARIES}" "${GSL_LIBRARIES}")
 target_include_directories( mcmc_gw_tool PUBLIC "${PROJECT_SOURCE_DIR}/include")
 target_include_directories( mcmc_gw_tool PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}" "${GSL_INCLUDE_DIR}")
+
+install(TARGETS waveform_tool DESTINATION bin)
+install(TARGETS mcmc_gw_tool DESTINATION bin)

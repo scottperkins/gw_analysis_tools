@@ -29,12 +29,14 @@ endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
+include_directories("${PROJECT_BINARY_DIR}/include/gwat")
 #Required packages
 find_package(HDF5 REQUIRED)
 find_package(ADOLC REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
 find_package(GSL REQUIRED)
+
 
 #Library
 add_subdirectory("${CMAKE_SOURCE_DIR}/src")
@@ -55,3 +57,5 @@ endif()
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 #include_directories("${PROJECT_BINARY_DIR}")
+
+install(FILES ${HEADER_LIST} DESTINATION include)
