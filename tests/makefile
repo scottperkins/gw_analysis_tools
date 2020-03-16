@@ -1,5 +1,6 @@
 ####################################################
-EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe
+#EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe
+EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe
 ####################################################
 # Use the default CXX compiler and linker
 #
@@ -65,16 +66,16 @@ remove:
 EXE0:=bin/test_fishers.exe
 EXE1:=bin/test_SNR.exe
 EXE2:=bin/test_util.exe
-EXE3:=bin/test_waveform.exe
+#EXE3:=bin/test_waveform.exe
 OBJEXE0:=build/test_fishers.o
 OBJEXE1:=build/test_SNR.o
 OBJEXE2:=build/test_util.o
-OBJEXE3:=build/test_waveform.o
+#OBJEXE3:=build/test_waveform.o
 OBJDEP:=$(OBJ)
 OBJDEP:=$(filter-out $(OBJEXE0), $(OBJDEP))
 OBJDEP:=$(filter-out $(OBJEXE1), $(OBJDEP))
 OBJDEP:=$(filter-out $(OBJEXE2), $(OBJDEP))
-OBJDEP:=$(filter-out $(OBJEXE3), $(OBJDEP))
+#OBJDEP:=$(filter-out $(OBJEXE3), $(OBJDEP))
 $(EXE0): $(OBJDEP) $(OBJEXE0) | $(EXEDIR)
 	@echo LINKING
 	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
@@ -84,6 +85,6 @@ $(EXE1): $(OBJDEP) $(OBJEXE1) | $(EXEDIR)
 $(EXE2): $(OBJDEP) $(OBJEXE2) | $(EXEDIR)
 	@echo LINKING
 	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
-$(EXE3): $(OBJDEP) $(OBJEXE3) | $(EXEDIR)
-	@echo LINKING
-	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
+#$(EXE3): $(OBJDEP) $(OBJEXE3) | $(EXEDIR)
+#	@echo LINKING
+#	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)

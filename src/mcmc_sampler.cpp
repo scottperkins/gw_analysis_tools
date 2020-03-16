@@ -444,7 +444,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<10){
+	while(continue_dynamic_search && dynamic_ct<3){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){

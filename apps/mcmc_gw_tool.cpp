@@ -142,37 +142,37 @@ int main(int argc, char *argv[])
 	}
 
 
-	double **output_test = allocate_2D_array(psd_length, 7 );
-	
-	for(int i = 0 ; i<psd_length; i++)
-	{
-		output_test[i][0] = freqs[0][i];	
-		output_test[i][1] = psd[0][i];	
-		output_test[i][2] = psd[1][i];	
-		output_test[i][3] =real( data[0][i]);	
-		output_test[i][4] =imag( data[0][i]);	
-		output_test[i][5] =real( data[1][i]);	
-		output_test[i][6] =imag( data[1][i]);	
-	}
-	write_file("testing/data/data_output.csv",output_test,psd_length,7);
-	deallocate_2D_array(output_test,psd_length,7);
+	//double **output_test = allocate_2D_array(psd_length, 7 );
+	//
+	//for(int i = 0 ; i<psd_length; i++)
+	//{
+	//	output_test[i][0] = freqs[0][i];	
+	//	output_test[i][1] = psd[0][i];	
+	//	output_test[i][2] = psd[1][i];	
+	//	output_test[i][3] =real( data[0][i]);	
+	//	output_test[i][4] =imag( data[0][i]);	
+	//	output_test[i][5] =real( data[1][i]);	
+	//	output_test[i][6] =imag( data[1][i]);	
+	//}
+	//write_file("testing/data/data_output.csv",output_test,psd_length,7);
+	//deallocate_2D_array(output_test,psd_length,7);
 	
 
 	//#############################################################
 	//#############################################################
 	
-	//double **whitened = allocate_2D_array(data_lengths[0],7);
-	//for(int i = 0 ; i<data_lengths[0]; i++){
-	//	whitened[i][0]= freqs[0][i];
-	//	whitened[i][1]=psd[0][i];
-	//	whitened[i][2]=psd[1][i];
-	//	whitened[i][3]=real(data[0][i]);
-	//	whitened[i][4]=imag(data[0][i]);
-	//	whitened[i][5]=real(data[1][i]);
-	//	whitened[i][6]=imag(data[1][i]);
-	//}	
-	//write_file("testing/data/whitened_data.csv",whitened,data_lengths[0],7);
-	//deallocate_2D_array(whitened, data_lengths[0],7);
+	double **whitened = allocate_2D_array(data_lengths[0],7);
+	for(int i = 0 ; i<data_lengths[0]; i++){
+		whitened[i][0]= freqs[0][i];
+		whitened[i][1]=psd[0][i];
+		whitened[i][2]=psd[1][i];
+		whitened[i][3]=real(data[0][i]);
+		whitened[i][4]=imag(data[0][i]);
+		whitened[i][5]=real(data[1][i]);
+		whitened[i][6]=imag(data[1][i]);
+	}	
+	write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
+	deallocate_2D_array(whitened, data_lengths[0],7);
 	
 	//#############################################################
 	//#############################################################
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
 					correlation_convergence_thresh , ac_target,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
 					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-					generation_method,stat_file,output_file, "testing/data/test2_log.csv",check_file);	
+					generation_method,stat_file,output_file, "",check_file);	
 			delete [] initial_position[0]; delete [] initial_position;
 		}
 
@@ -396,7 +396,7 @@ double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *pa
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
-	else {return 3*pos[6];}
+	else { return 3*pos[6];}
 }
 
 //Uniform in m1 and m2, transformed to lnM and eta

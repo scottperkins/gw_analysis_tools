@@ -540,15 +540,19 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	//Read in frequencies and PSDs from files
 	double **temp_psds = allocate_2D_array( psd_length,num_detectors+1);
 	read_LOSC_PSD_file(psd_file,temp_psds,  psd_length,num_detectors+1);
+	double Tobs = 1./(temp_psds[1][0] - temp_psds[0][0]);
+	double df = 1./Tobs;
 	for (int j = 0; j< psd_length; j++){
 		for(int i =0; i< num_detectors ; i++){
+			//psds[i][j] = temp_psds[j][i+1]*df*df;
 			psds[i][j] = temp_psds[j][i+1];
+			//psds[i][j] = temp_psds[j][i+1]*2;
 			freqs[i][j] = temp_psds[j][0];
 		}	
 	}
 		
-	double Tobs = 1./(freqs[0][1] - freqs[0][0]);
-	double df = 1./Tobs;
+	//double Tobs = 1./(freqs[0][1] - freqs[0][0]);
+	//double df = 1./Tobs;
 	int N = fs*duration;
 	int N_trimmed = Tobs*fs;
 	double *times_untrimmed = (double *)malloc(sizeof(double)*N);
@@ -564,7 +568,9 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double **data_trimmed = allocate_2D_array(num_detectors, N_trimmed);
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double *window = (double *)malloc(sizeof(double)*N_trimmed);
-	double alpha = .4; //Standard alpha choice
+	//double alpha = .4; //Standard alpha choice
+	double alpha = .1; //Standard alpha choice
+	//double alpha = 0.5/32.; //Standard alpha choice
 	tukey_window(window,N_trimmed, alpha);
 	//Trim data to Tobs, and apply tukey windowing for fft
 	int l=0 ;
@@ -606,7 +612,11 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	for (int i =0 ; i<N_trimmed; i++){
 		if(freq_untrimmed[i]>=fmin && freq_untrimmed[i]<=fmax){
 			for(int j =0; j<num_detectors;j++){
-				data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
+				//data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
+	//#################################################
+				//data[j][l] = fft_data[j][i]/(double )N_trimmed;
+				data[j][l] = fft_data[j][i]/df/(double )N_trimmed/2.;
+				//data[j][l] = fft_data[j][i]/sqrt((double)N_trimmed);
 	//#################################################
 				//data[j][l] = fft_data[j][i]/((double)N_trimmed);
 				//data[j][l] = fft_data[j][i];

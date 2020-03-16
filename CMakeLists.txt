@@ -4,7 +4,9 @@ project(gw_analysis_tools
 	DESCRIPTION "Tools to help with gravitational wave analysis and prediction"
 	LANGUAGES CXX C)
 
-SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libstdc++")
+#SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
+#SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libstdc++")
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++ -lc++abi")
 
 # The version number.
 set (GWAT_VERSION_MAJOR 1)
@@ -14,6 +16,7 @@ set (GWAT_ROOT_DIRECTORY "${PROJECT_SOURCE_DIR}/")
 
 option(TEST_PROGRAMS "test-programs" ON)
 option(DOCS "DOCS" OFF)
+
  
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -26,6 +29,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	#Only compile if this project is the main project
 	#Just leave empty for now
 endif()
+file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/gwat/*.h")
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
@@ -58,4 +62,4 @@ endif()
 # so that we will find TutorialConfig.h
 #include_directories("${PROJECT_BINARY_DIR}")
 
-install(FILES ${HEADER_LIST} DESTINATION include)
+install(FILES ${HEADER_LIST} DESTINATION "include/gwat")
