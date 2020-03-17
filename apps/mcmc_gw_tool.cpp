@@ -123,6 +123,13 @@ int main(int argc, char *argv[])
 	count_lines_LOSC_PSD_file(psd_file, &psd_length);
 	std::cout<<"Length of PSD: "<<psd_length<<std::endl;
 	//########################################################################
+	//########################################################################
+	//TESTING
+	//psd_length = 4096;
+	//double **unpack1 = new double*[
+	//########################################################################
+	//########################################################################
+
 
 	double **psd = allocate_2D_array(detector_N,psd_length);
 	double **freqs = allocate_2D_array(detector_N,psd_length);
@@ -133,6 +140,7 @@ int main(int argc, char *argv[])
 
 	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time, data, psd, freqs);
 	std::cout<<"DATA loaded"<<std::endl;
+
 
 	T_mcmc_gw_tool = 1./(freqs[0][1]-freqs[0][0]);
 	std::cout<<"Total time: "<<T_mcmc_gw_tool<<std::endl;

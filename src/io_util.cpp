@@ -544,8 +544,8 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double df = 1./Tobs;
 	for (int j = 0; j< psd_length; j++){
 		for(int i =0; i< num_detectors ; i++){
-			//psds[i][j] = temp_psds[j][i+1]*df*df;
-			psds[i][j] = temp_psds[j][i+1];
+			psds[i][j] = temp_psds[j][i+1]*df;
+			//psds[i][j] = temp_psds[j][i+1];
 			//psds[i][j] = temp_psds[j][i+1]*2;
 			freqs[i][j] = temp_psds[j][0];
 		}	
@@ -616,7 +616,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	//#################################################
 				//data[j][l] = fft_data[j][i]/(double )N_trimmed;
 				//data[j][l] = fft_data[j][i]/df/(double )N_trimmed/2.;
-				data[j][l] = fft_data[j][i]/df/(double )N_trimmed/2.;
+				data[j][l] = fft_data[j][i]*sqrt(Tobs)/(double )N_trimmed;
 				//data[j][l] = fft_data[j][i]/sqrt((double)N_trimmed);
 	//#################################################
 				//data[j][l] = fft_data[j][i]/((double)N_trimmed);
