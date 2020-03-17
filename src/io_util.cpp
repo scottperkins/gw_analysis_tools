@@ -569,7 +569,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double *window = (double *)malloc(sizeof(double)*N_trimmed);
 	//double alpha = .4; //Standard alpha choice
-	double alpha = .1; //Standard alpha choice
+	double alpha = 2*0.4/Tobs; //Standard alpha choice
 	//double alpha = 0.5/32.; //Standard alpha choice
 	tukey_window(window,N_trimmed, alpha);
 	//Trim data to Tobs, and apply tukey windowing for fft
@@ -615,6 +615,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 				//data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
 	//#################################################
 				//data[j][l] = fft_data[j][i]/(double )N_trimmed;
+				//data[j][l] = fft_data[j][i]/df/(double )N_trimmed/2.;
 				data[j][l] = fft_data[j][i]/df/(double )N_trimmed/2.;
 				//data[j][l] = fft_data[j][i]/sqrt((double)N_trimmed);
 	//#################################################

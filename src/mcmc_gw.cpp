@@ -1839,7 +1839,6 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[8]=.1;
 			seeding_var[9]=.1;
 			seeding_var[10]=.1;
-			seeding_var[11]=.1;
 		}
 	}
 	else if(dimension==9 && generation_method =="dCS_IMRPhenomD_log"){

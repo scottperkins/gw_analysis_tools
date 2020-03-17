@@ -267,6 +267,7 @@ int main(int argc, char *argv[])
 			initial_position[0] = new double[dimension];
 			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
+			std::cout<<"Running uncorrelated sampler "<<std::endl;
 			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
 					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,

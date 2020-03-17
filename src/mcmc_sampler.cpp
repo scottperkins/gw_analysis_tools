@@ -444,7 +444,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<3){
+	while(continue_dynamic_search && dynamic_ct<10){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -638,7 +638,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"","",likelihood_log_filename, checkpoint_file,false);
-		//write_file("testing/data/test_output.csv",temp_output[0],temp_length,dimension);
+		write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
 		double ave_accept = 0;
 		int cold_chains = 0;
 		for (int i = 0 ; i< chain_N; i ++){
