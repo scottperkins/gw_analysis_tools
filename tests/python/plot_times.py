@@ -12,3 +12,10 @@ plt.plot(data3[0],data3[1]/T,label="0PN")
 plt.legend()
 plt.savefig("plots/times.pdf")
 plt.close()
+
+
+plt.plot(data1[0],(data3[1]-data2[1])*2/(abs(data3[1])+abs(data2[1])),label="0pnAD")
+plt.plot(data1[0],(data3[1]-data1[1])*2/(abs(data3[1])+abs(data1[1])),label="0pnN")
+plt.legend()
+plt.savefig("plots/times_fractional_diff.pdf")
+plt.close()

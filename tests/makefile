@@ -1,13 +1,13 @@
 ####################################################
-#EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe
-EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe
+EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe bin/test_waveform_util.exe
+#EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe
 ####################################################
 # Use the default CXX compiler and linker
 #
 CCLOCAL:=$(CXX)
 LINKERLOCAL:=$(CXX)
 CFLAGS:=-fopenmp -O2  -Wall -I../include
-LFLAGS:= -fopenmp -L../lib -L/usr/local/opt/hdf5/lib
+LFLAGS:= -fopenmp -L../lib -L/usr/local/opt/hdf5/lib -L/home/sperkins/git-repos/gw_analysis_tools/build/lib
 LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
 #LIBS:=-lm -lgwat -llal -llalsimulation
 #LIBS:=-lm -lgsl -lgwat 
@@ -66,16 +66,19 @@ remove:
 EXE0:=bin/test_fishers.exe
 EXE1:=bin/test_SNR.exe
 EXE2:=bin/test_util.exe
-#EXE3:=bin/test_waveform.exe
+EXE3:=bin/test_waveform.exe
+EXE4:=bin/test_waveform_util.exe
 OBJEXE0:=build/test_fishers.o
 OBJEXE1:=build/test_SNR.o
 OBJEXE2:=build/test_util.o
-#OBJEXE3:=build/test_waveform.o
+OBJEXE3:=build/test_waveform.o
+OBJEXE4:=build/test_waveform_util.o
 OBJDEP:=$(OBJ)
 OBJDEP:=$(filter-out $(OBJEXE0), $(OBJDEP))
 OBJDEP:=$(filter-out $(OBJEXE1), $(OBJDEP))
 OBJDEP:=$(filter-out $(OBJEXE2), $(OBJDEP))
-#OBJDEP:=$(filter-out $(OBJEXE3), $(OBJDEP))
+OBJDEP:=$(filter-out $(OBJEXE3), $(OBJDEP))
+OBJDEP:=$(filter-out $(OBJEXE4), $(OBJDEP))
 $(EXE0): $(OBJDEP) $(OBJEXE0) | $(EXEDIR)
 	@echo LINKING
 	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
@@ -85,6 +88,9 @@ $(EXE1): $(OBJDEP) $(OBJEXE1) | $(EXEDIR)
 $(EXE2): $(OBJDEP) $(OBJEXE2) | $(EXEDIR)
 	@echo LINKING
 	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
-#$(EXE3): $(OBJDEP) $(OBJEXE3) | $(EXEDIR)
-#	@echo LINKING
-#	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
+$(EXE3): $(OBJDEP) $(OBJEXE3) | $(EXEDIR)
+	@echo LINKING
+	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)
+$(EXE4): $(OBJDEP) $(OBJEXE4) | $(EXEDIR)
+	@echo LINKING
+	$(LINKERLOCAL) $(LFLAGS) -o $@ $< $(LIBS)

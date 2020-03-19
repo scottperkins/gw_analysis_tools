@@ -125,8 +125,15 @@ int main(int argc, char *argv[])
 	//########################################################################
 	//########################################################################
 	//TESTING
-	//psd_length = 4096;
-	//double **unpack1 = new double*[
+	psd_length = 4096;
+	double **unpack1 = new double*[psd_length];
+	double **unpack2 = new double*[psd_length];
+	for(int i =0 ; i<psd_length; i++){
+		unpack1[i]=new double[1+detector_N];
+		unpack2[i]=new double[1+2*detector_N];
+	}
+	read_file("data/testing_PSDs.dat",unpack1,psd_length, 1+detector_N);
+	read_file("data/testing_data.dat",unpack2, psd_length,1+2*detector_N);
 	//########################################################################
 	//########################################################################
 
@@ -138,11 +145,33 @@ int main(int argc, char *argv[])
 		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
 	}
 
-	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time, data, psd, freqs);
+	//allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time, data, psd, freqs);
+	//########################################################################
+	//TEST
+	for(int i = 0 ; i<detector_N; i++){
+		for(int j =0 ; j<psd_length; j++){
+			psd[i][j]=unpack1[j][i+1];
+			data[i][j]=std::complex<double>(unpack2[j][2*i+1],unpack2[j][2*i+2]);
+			freqs[i][j]= unpack1[j][0];
+			//std::cout<<unpack1[j][1]<<std::endl;
+			//std::cout<<unpack2[j][4]<<std::endl;
+			//std::cout<<unpack1[1][j]<<std::endl;
+		}	
+	}
+	freqs[0][0]=.0001;
+	freqs[1][0]=.0001;
+	//########################################################################
 	std::cout<<"DATA loaded"<<std::endl;
 
+	T_mcmc_gw_tool = 1./(freqs[0][2]-freqs[0][1]);
+	double df = 1./T_mcmc_gw_tool;
+	std::cout<<df<<std::endl;
+	for(int i = 0 ; i<detector_N; i++){
+		for(int j =0 ; j<psd_length; j++){
+			psd[i][j]*=df;
+		}	
+	}
 
-	T_mcmc_gw_tool = 1./(freqs[0][1]-freqs[0][0]);
 	std::cout<<"Total time: "<<T_mcmc_gw_tool<<std::endl;
 	int *data_lengths= (int*)malloc(sizeof(int)*detector_N);
 	for(int i = 0 ; i<detector_N; i++){
@@ -276,13 +305,25 @@ int main(int argc, char *argv[])
 			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
 			std::cout<<"Running uncorrelated sampler "<<std::endl;
-			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
-					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,allocation_scheme, 
-					lp,threads, pool,show_progress,detector_N, 
+			//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+			//		max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
+			//		swap_freq, t0, nu, correlation_thresh, correlation_segs,
+			//		correlation_convergence_thresh , ac_target,allocation_scheme, 
+			//		lp,threads, pool,show_progress,detector_N, 
+			//		data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+			//		generation_method,stat_file,output_file, "",check_file);	
+			double ***output2 = allocate_3D_array(chain_N,samples, dimension );
+			double c = 1.1;
+			chain_temps[0]=1;
+			for(int i = 1 ; i<chain_N; i++){
+				chain_temps[i]=chain_temps[i-1]*c;
+			}
+			PTMCMC_MH_GW(output2, dimension, samples, chain_N, 
+					initial_position[0],seeding_var,chain_temps, 
+					swap_freq, lp,threads, pool,show_progress,detector_N, 
 					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-					generation_method,stat_file,output_file, "",check_file);	
+					generation_method,stat_file,output_file, "","",check_file);	
+			deallocate_3D_array(output2,chain_N,samples,dimension);
 			delete [] initial_position[0]; delete [] initial_position;
 		}
 

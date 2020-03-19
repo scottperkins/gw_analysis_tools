@@ -444,7 +444,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<1){
+	while(continue_dynamic_search && dynamic_ct<5){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -777,6 +777,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		deallocate_3D_array(full_temp_output,coldchains, temp_length,dimension);
 
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
+		//TESTING
+		//if(false){
 		if(temp_length < 50*max_ac_realloc){
 			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
 			temp_length = 50*max_ac_realloc;
@@ -788,6 +790,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
 
 		}
+		//}
 		deallocate_3D_array(full_temp_ac,coldchains,dimension, local_corr_segments);
 		//deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
 		max_ac_realloc=0;

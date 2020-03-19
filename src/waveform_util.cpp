@@ -1325,7 +1325,7 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 			integration_bounds[1]=fmax_search;
 		}
 		else{
-			integration_bounds[0]=fmin;
+			integration_bounds[0]=fmax;
 			integration_bounds[1]=fmax;
 		}
 	}

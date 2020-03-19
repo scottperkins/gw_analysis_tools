@@ -823,7 +823,7 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	//double DD = integral;
 
 	free(integrand);
-	
+	//std::cout<<HH<<" "<<DH<<" "<<-0.5*(HH- 2*DH)<<std::endl;
 	return -0.5*(HH- 2*DH);
 }
 

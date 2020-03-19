@@ -8,7 +8,10 @@ project(gw_analysis_tools
 #SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libstdc++")
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++ -lc++abi")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
-
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  #set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/gwat_base/" CACHE PATH "..." FORCE)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/" CACHE PATH "..." FORCE)
+endif()
 # The version number.
 set (GWAT_VERSION_MAJOR 1)
 set (GWAT_VERSION_MINOR 0)
@@ -64,3 +67,4 @@ endif()
 #include_directories("${PROJECT_BINARY_DIR}")
 
 install(FILES ${HEADER_LIST} DESTINATION "include/gwat")
+install(FILES "${CMAKE_BINARY_DIR}/include/gwat/GWATConfig.h" DESTINATION "include/gwat")
