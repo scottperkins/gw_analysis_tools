@@ -1337,7 +1337,7 @@ void PTMCMC_MH_GW(double ***output,
 
 	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, show_prog,statistics_filename,
-		 //log_prior,MCMC_likelihood_wrapper, NULL,numThreads, pool, show_prog,statistics_filename,
+		 //log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, show_prog,statistics_filename,
 		chain_filename,auto_corr_filename,likelihood_log_filename, checkpoint_file);
 	
 	//Deallocate fftw plans

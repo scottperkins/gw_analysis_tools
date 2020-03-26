@@ -32,7 +32,7 @@ OBJ:=$(patsubst $(SRCDIR)/%.$(SRCEXT), $(ODIR)/%.o,$(SRCTOT))
 
 all: $(EXE) $(DATA_DIR) $(PLOTS_DIR)
 
-$(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS) $(ODIR)
+$(ODIR)/%.o : $(SRCDIR)/%.$(SRCEXT) $(DEPS)| $(ODIR)
 	@echo COMPILING
 	$(CCLOCAL) $(CFLAGS) -I$(IDIR)/ -c -o $@ $<
 

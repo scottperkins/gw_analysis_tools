@@ -21,6 +21,48 @@
  * General utilities that are not necessarily specific to any part of the project at large
  */
 
+
+/*! \brief Newton Raphson method for a function of one dimension
+ *
+ * f_on_fprime is a function pointer that should assign the value result = f(x) / f'(x) 
+ * 
+ * param are just an extra needed parameters
+ * 	
+ * return values:
+ *
+ * 	0 -- success
+ *
+ * 	1 -- Bad value for derivative
+ * 	
+ * 	2 -- max iterations reached
+ */
+int newton_raphson_method_1d(void(*f_on_fprime)(double x, double *func, double *func_prime,void *param),double initial_guess,double tolerance ,int max_iterations,void *parameters, double *solution)
+{
+	double resid ,x1=initial_guess,x0=initial_guess,func, func_prime;
+	int i = 0 ;
+	do
+	{
+		x0=x1;
+		f_on_fprime(x0,&func,&func_prime,parameters);
+		if(fabs(func_prime)>1e-12  && 
+			!isnan(func) && 
+			!isnan(func_prime))
+		{
+			x1 = x0 - func/func_prime;
+			i++;
+		}
+		else{
+			//std::cout<<"UTIL "<<x0<<" "<<func_prime<<" "<<func<<std::endl;
+			*solution= x1;
+			return 1;
+		}
+	}while( fabs(x1 - x0) >tolerance && i<max_iterations);
+
+	if(i==max_iterations){ *solution=x0; return 2;}
+	*solution = x1;	
+	return 0;
+}
+
 //#######################################################################################
 //Interpolate Z to DL once per import
 /*! \brief Function that uses the GSL libraries to interpolate pre-calculated Z-D_L data

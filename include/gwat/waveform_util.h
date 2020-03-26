@@ -160,7 +160,8 @@ void time_phase_corrected_autodiff(double *times,
 	gen_params_base<double> *params, 
 	std::string generation_method, 
 	bool correct_time,
-	int *tapes_in = NULL);
+	int *tapes_in = NULL,
+	int order=1);
 
 template<class T>
 void time_phase_corrected(T *times, 
@@ -168,7 +169,8 @@ void time_phase_corrected(T *times,
 	T *frequencies, 
 	gen_params_base<T> *params,
 	std::string generation_method,
-	bool correct_time
+	bool correct_time,
+	int order=1
 	);
 int fourier_detector_amplitude_phase(double *frequencies, 
 	int length,
@@ -198,21 +200,27 @@ void integration_bounds(gen_params_base<double> *params,
 	double fmax, 
 	double signal_to_noise,
 	double tol,
-	double *integration_bounds
+	double *integration_bounds,
+	bool autodiff
 	) ;
-int integration_interval(double sampling_freq, 
+int observation_bounds(double sampling_freq, 
 	double integration_time, 
 	std::string detector, 
 	std::string sensitivity_curve, 
 	std::string generation_method,
 	gen_params_base<double> *params,
-	double *freq_bounds);
+	double *freq_bounds,
+	bool autodiff);
 void Tbm_to_freq(gen_params_base<double> *params,
 	std::string generation_method,
 	double Tbm,
 	double *freq,
-	double tol 
+	double tol ,
+	bool autodiff,
+	int max_iteration,
+	bool relative_time
 	);
+void Tbm_subroutine( double f, double *t,double *tp, void *param);
 template<class T>
 void postmerger_params(gen_params_base<T>*params,
 	std::string generation_method,

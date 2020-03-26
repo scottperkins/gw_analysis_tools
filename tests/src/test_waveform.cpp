@@ -23,6 +23,7 @@
 
 
 int LALSuite_vs_GWAT_WF(int argc, char *argv[]);
+int tc_comparison(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
 
@@ -39,10 +40,112 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 0){
 		return LALSuite_vs_GWAT_WF(argc,argv);
 	}
+	if(runtime_opt == 1){
+		return tc_comparison(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int tc_comparison(int argc, char *argv[])
+{
+	std::cout.precision(5);
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.chip = .7;
+	params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phic = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 1e-5;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	//params.mass1 = 5e6;
+	//params.mass2 = 5e6;
+	//params.f_ref = 20;
+	//params.psi = .1;
+	//double fmin = 20;
+	//double fmax = 2048;
+	//params.incl_angle = .1;
+	//params.tc = 10;
+	//params.equatorial_orientation = false;
+	//double T = 32;
+	params.mass1 = 9e6;
+	params.mass2 = 4e5;
+	params.theta_l = 1;
+	params.phi_l = 2;
+	params.tc = 0;
+	params.equatorial_orientation = true;
+	double fmin = 3e-5;
+	double fmax = 2e-3;
+	double T = T_year;
+	//double T = 4*T_year;
+
+	int length = T*(fmax-fmin);
+	double *frequency = new double[length];
+	
+	for(int i = 0 ; i<length; i++){
+		frequency[i]=fmin + (double)i /T;
+	}
+
+	double fpeak,frd,fdamp;
+	std::string method = "IMRPhenomD";
+
+	postmerger_params(&params,method, &fpeak,&fdamp,&frd);
+	std::cout<<"Peak frequency: "<<fpeak<<std::endl;
+
+	double *times_AD = new double[length];
+	std::complex<double> *response = new std::complex<double>[length];
+	double **output = allocate_2D_array(length,4);
+
+	time_phase_corrected_autodiff(times_AD, length, frequency, &params, method, false,NULL);
+	fourier_detector_response(frequency, length,response, "LISA",method, &params, times_AD);
+	for(int i = 0 ; i<length; i++){
+		output[i][0] = frequency[i];
+		output[i][1] = real(response[i]);
+		output[i][2] = imag(response[i]);
+		output[i][3] = times_AD[i];
+	}
+	write_file("data/response_0tc.csv",output,length,4);
+
+	params.tc = T*3./4.;
+	//params.tc = T;
+	//params.tc = T_year;
+	time_phase_corrected_autodiff(times_AD, length, frequency, &params, method, false,NULL);
+	fourier_detector_response(frequency, length,response, "LISA",method, &params, times_AD);
+	for(int i = 0 ; i<length; i++){
+		output[i][0] = frequency[i];
+		output[i][1] = real(response[i]);
+		output[i][2] = imag(response[i]);
+		output[i][3] = times_AD[i];
+	}
+	write_file("data/response_nonzero_tc.csv",output,length,4);
+
+	
+	params.tc = T;
+	time_phase_corrected_autodiff(times_AD, length, frequency, &params, method, false,NULL);
+	fourier_detector_response(frequency, length,response, "LISA",method, &params, times_AD);
+	for(int i = 0 ; i<length; i++){
+		output[i][0] = frequency[i];
+		output[i][1] = real(response[i]);
+		output[i][2] = imag(response[i]);
+		output[i][3] = times_AD[i];
+	}
+	write_file("data/response_cyclic_tc.csv",output,length,4);
+	deallocate_2D_array(output,length,4);
+
+	delete [] times_AD;
+	delete [] response;
+	
+	delete [] frequency;
+	return 0;
 }
 int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 {
@@ -245,4 +348,5 @@ void RT_ERROR_MSG()
 	std::cout<<"ERROR -- incorrect arguments"<<std::endl;
 	std::cout<<"Please supply function option:"<<std::endl;
 	std::cout<<"0 --- Compare LALSuite vs GWAT"<<std::endl;
+	std::cout<<"1 --- Compare the effect of tc on LISA"<<std::endl;
 }

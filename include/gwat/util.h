@@ -407,6 +407,7 @@ static source_parameters<T> populate_source_parameters_old(
 template<class T, class U>
 void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *param_out);
 
+int newton_raphson_method_1d(void(*f_on_fprime)(double x, double *func, double *func_prime,void *param),double initial_guess,double tolerance ,int max_iterations,void *parameters,double *solution);
 template<class T>
 T A0_from_DL(T chirpmass, T DL, bool sky_average);
 
