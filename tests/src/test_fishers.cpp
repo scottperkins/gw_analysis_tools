@@ -28,7 +28,10 @@ int main(int argc, char *argv[])
 }
 int AD_v_N(int argc, char *argv[])
 {
+	#pragma ADOLC_OpenMP
+	{
 	std::cout.precision(5);
+	}
 	gen_params params;	
 	params.spin1[2] = .3;
 	params.spin2[2] = .3;

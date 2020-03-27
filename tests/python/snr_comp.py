@@ -8,7 +8,7 @@ labels = ["SIMPS","GL_NONLOG","GL_LOG"]
 #labels = ["GL_NONLOG","GL_LOG"]
 
 temp= []
-#temp.append(np.abs((data[0]-data[1])/data[0]))
+temp.append(np.abs((data[0]-data[1])/data[0]))
 temp.append(np.abs((data[0]-data[2])/data[0]))
 temp.append(np.abs((data[0]-data[3])/data[0]))
 resids = []

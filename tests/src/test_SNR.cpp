@@ -61,8 +61,6 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 	params.Luminosity_Distance  = 400;
 	params.RA =1.;
 	params.DEC =-1.;
-	//params.psi =2.;
-	//params.incl_angle =2.;
 	params.phi_l =2.;
 	params.theta_l =2.;
 	params.gmst=1.;
@@ -73,9 +71,6 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 	int length = T_year;
 	double deltaf = 1./(T_year);
 	double *freqs = new double[length];
-	//for(int i = 0 ; i<length; i++){
-	//	freqs[i] = 1e-5 + i*deltaf;
-	//}
 	
 	int lengthgl1 = 500;
 	int lengthgl2 = 500;
@@ -105,7 +100,7 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 	std::cout<<"Starting loop -- finished prep"<<std::endl;
 	for(int i = 0 ; i<iterations; i++){
 		output[i]=new double[10];
-		double m1 = 10e4+1e4*gsl_rng_uniform(r);
+		double m1 = 10e4+1e5*gsl_rng_uniform(r);
 		double m2 = 10e4+1e4*gsl_rng_uniform(r);
 		if(m1>m2){
 			params.mass1 = m1;
@@ -124,12 +119,9 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 		params.Luminosity_Distance  = 50 + gsl_rng_uniform(r)*1000;
 		params.RA =gsl_rng_uniform(r)*2*M_PI;
 		params.DEC =-1.5 + gsl_rng_uniform(r) * M_PI;
-		//params.psi =gsl_rng_uniform(r)*2*M_PI;
-		//params.incl_angle =gsl_rng_uniform(r)*M_PI;
 		params.phi_l =gsl_rng_uniform(r)*2*M_PI;
 		params.theta_l =gsl_rng_uniform(r)*M_PI;
 		params.gmst=gsl_rng_uniform(r)*2*M_PI;
-		//params.chip = -1;
 		transform_orientation_coords(&params,method, detector);
 
 		double bounds[2];
@@ -137,7 +129,6 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 		clock_t start = clock();
 		observation_bounds(1, T_year, detector,noise_curve, method, &params, bounds,autodiff);
 		std::cout<<"Observation bounds ad: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;	
-		//std::cout<<bounds[0]<<" "<<bounds[1]<<std::endl;
 
 		for(int i = 0 ; i<length; i++){
 			freqs[i] = bounds[0] + i*deltaf;
@@ -146,11 +137,10 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 
 		start = clock();
 		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, bounds[0], bounds[1], 1.e-12);
-		//snr_gsl*=sqrt(2.);
 		double gsl_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
 		snr_simps=0;
-		//snr_simps = calculate_snr(noise_curve, detector,method, &params,freqs,length,"SIMPSONS",(double *)NULL,false);
+		snr_simps = calculate_snr(noise_curve, detector,method, &params,freqs,length,"SIMPSONS",(double *)NULL,false);
 		double simps_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
 		gauleg(bounds[0], bounds[1], freqsgl1, w1, lengthgl1);
@@ -163,10 +153,6 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 		}
 		snr_gl2 = calculate_snr(noise_curve, detector,method, &params,freqsgl2,lengthgl2,"GAUSSLEG",w2,true);
 		double gl2_t = (double)(clock()-start)/CLOCKS_PER_SEC;
-		//std::cout<<snr_gsl<<" "<<snr_simps<<" "<<snr_gl1<<" "<<snr_gl2<<std::endl;
-		//std::cout<<params.mass1<<" "<<params.mass2<<" "<<params.spin1[0]<<" "<<params.spin1[1]<<" "<<params.spin1[2]<<" "<<params.spin2[0]<<" "<<params.spin2[1]<<" "<<params.spin2[2]<<std::endl;
-		//std::cout<<" "<<(snr_gsl-snr_simps)/snr_gsl<<" "<<(snr_gsl-snr_gl1)/snr_gsl<<" "<<(snr_gsl-snr_gl2)/snr_gsl<<std::endl;
-		//std::cout<<gsl_t<<" "<<simps_t<<" "<<gl1_t<<" "<<gl2_t<<std::endl;
 
 		output[i][0]=snr_gsl;
 		output[i][1]=snr_simps;
@@ -230,17 +216,13 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 	params.Luminosity_Distance  = 400;
 	params.RA =1.;
 	params.DEC =-1.;
-	//params.psi =2.;
-	//params.incl_angle =2.;
-	params.phi_l =2.;
-	params.theta_l =2.;
+	params.psi =2.;
+	params.incl_angle =2.;
 	params.gmst=1.;
-	params.LISA_phi0=0;
-	params.LISA_alpha0=0;
 	
-	
-	int length = 32;
-	double deltaf = 1./(32.);
+	double Tobs = 4;
+	int length =(2048 - 10)*Tobs ;
+	double deltaf = 1./(Tobs);
 	double *freqs = new double[length];
 	for(int i = 0 ; i<length; i++){
 		freqs[i] = 10 + i*deltaf;
@@ -297,7 +279,7 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 		params.psi =gsl_rng_uniform(r)*2*M_PI;
 		params.incl_angle =gsl_rng_uniform(r)*M_PI;
 		params.gmst=gsl_rng_uniform(r)*2*M_PI;
-		transform_orientation_coords(&params,method, detector);
+		//transform_orientation_coords(&params,method, detector);
 
 		clock_t start = clock();
 		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, 10, 2048, 1.e-12);

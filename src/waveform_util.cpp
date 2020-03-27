@@ -1,6 +1,7 @@
 #include "waveform_util.h"
 #include "util.h"
 #include "GWATConfig.h"
+#include "ortho_basis.h"
 #include "waveform_generator.h"
 #include "IMRPhenomP.h"
 #include "IMRPhenomD.h"
@@ -311,6 +312,7 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
 	SN*=SN;
 	return 4*std::real(std::conj(response)*response)/SN;
 }
+
 /*! \brief Caclulates the snr given a detector and waveform (complex) and frequencies
  *      
  * This function computes the un-normalized snr: \sqrt( ( H | H ) )
@@ -351,7 +353,7 @@ double calculate_snr_internal(double *psd,
 	}
         double integral=0;
 	if(integration_method == "SIMPSONS"){
-		integral = simpsons_sum(1./(frequencies[1]-frequencies[0]), length, integrand);
+		integral = simpsons_sum((frequencies[1]-frequencies[0]), length, integrand);
 	}
 	else if(integration_method == "GAUSSLEG"){
         	for (int i = 0; i<length; i++){
@@ -697,9 +699,11 @@ int fourier_detector_amplitude_phase(double *frequencies,
  *
  * Using https://arxiv.org/abs/1809.04799 t = (1/2PI) d phi/ d f
  *
+ * correct_time is currently not supported
+ *
  * For IMRPhenomPv2, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
  *
- * if hess is set to true, returns (1/2PI) d^2 phi / d f^2
+ * if the order is set to 2, returns (1/2PI) d^2 phi / d f^2
  *
  */
 void time_phase_corrected_autodiff(double *times, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, bool correct_time, int *tapes_in,int order)
@@ -707,8 +711,6 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 	std::string local_method = "IMRPhenomD";
 	bool save_dep = params->dep_postmerger;
 	params->dep_postmerger=true;
-	//bool save_shift_time = params->shift_time;
-	//params->shift_time=true;
 
 	int boundary_num = boundary_number(generation_method);
 	double freq_boundaries[boundary_num];
@@ -806,9 +808,7 @@ int boundary_number(std::string method)
  *
  * Using https://arxiv.org/abs/1809.04799 t = (1/2PI) d phi/ d f
  *
- * This breaks down near merger,so at fRD, the relationship between frequency and time is extrapolated as a line
- *
- * Currently, just uses IMRPhenomD as a proxy regardless of what method is being used, as this is the analytically known function
+ * correct_time is currently not supported
  *
  * For IMRPhenomPv2, the phase has to be wrapped, because arctan is taken of the waveform because of the euler rotations. This might make the numerical derivative unpredictable
  *
@@ -1071,6 +1071,10 @@ void transform_orientation_coords(gen_params_base<T> *parameters,std::string gen
 template void transform_orientation_coords<double>(gen_params_base<double> *, std::string,std::string);
 template void transform_orientation_coords<adouble>(gen_params_base<adouble> *, std::string,std::string);
 
+/*! \brief For ADOL-C, assigns the frequencies at which logical breaks occur in the waveform
+ *
+ * ADOL-C cannot handle logically branches, so a tape must be made for each branch separately. This function returns the locations of these branches
+ */
 void assign_freq_boundaries(double *freq_boundaries, 
 	double *intermediate_freqs, 
 	int boundary_num, 
@@ -1087,9 +1091,9 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.sky_average = internal_params.sky_average;
 	s_param.f_ref = internal_params.f_ref;
 	s_param.phiRef = internal_params.phiRef;
-	s_param.shift_time = false;
 	s_param.cosmology=internal_params.cosmology;
 	s_param.incl_angle=internal_params.incl_angle;
+	s_param.shift_time = input_params->shift_time;
 	lambda_parameters<adouble> lambda;
 	//IMRPhenomPv2<double> model;
 	//model.PhenomPv2_inplane_spin(input_params);
@@ -1098,6 +1102,7 @@ void assign_freq_boundaries(double *freq_boundaries,
 		)
 		&& !input_params->sky_average){
 
+		s_param.shift_time = false;
 		IMRPhenomPv2<adouble> modelp;
 		s_param.spin1z = internal_params.spin1[2];
 		s_param.spin2z = internal_params.spin2[2];
@@ -1184,6 +1189,8 @@ void assign_freq_boundaries(double *freq_boundaries,
  * integrand_bounds[0] ~ frequency at which |h|/(sqrt S) ~signal_to_noise +/- tol
  *
  * integrand_bounds[1] ~ frequency at which |h|/(sqrt S) ~signal_to_noise +/- tol
+ *
+ * If autodiff set to true, ADOL-C routines are used. This is openmp safe, not necessarily thread safe.
  */
 void integration_bounds(gen_params_base<double> *params, /**< Parameters of the waveform*/
 	std::string generation_method, /*<< Generation method to use for the waveform*/
@@ -1380,25 +1387,6 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
 			}		
 
 		}
-		//for(int i = 0 ; i<vec_length; i++){
-		//	std::cout<<i<<" "<<ratio_vec[i]<<" "<<freq_vec[i]<<std::endl;
-		//	if(search_lower)
-		//	{
-		//		if(ratio_vec[i] >(signal_to_noise -tol) )
-		//		{
-		//			fmin_search = freq_vec[i];
-		//			search_lower=false;
-		//		}		
-		//	}
-		//	else if(search_upper){
-		//		if(ratio_vec[i] <(signal_to_noise -tol) )
-		//		{
-		//			fmax_search = freq_vec[i];
-		//			search_upper=false;
-		//			break;
-		//		}
-		//	}
-		//}
 		if(!search_lower && !search_upper){
 			integration_bounds[0]=fmin_search;
 			integration_bounds[1]=fmax_search;
@@ -1418,6 +1406,8 @@ void integration_bounds(gen_params_base<double> *params, /**< Parameters of the 
  * Accounts for the integration time, unlike the integration_bounds routine
  *
  * returns 0 if successful, returns 1 if bounds could not be found due to roundoff, and returns 2 if entirely unsuccessful
+ *
+ * autodiff set to true will use ADOL-C for time-phase relationships. This is more accurate, but slower and only threadsafe with OpenMP
  */
 int observation_bounds(double sampling_freq, /**< Frequency at which the detector operates*/
 	double integration_time, /**< Time of observation in seconds*/
@@ -1433,13 +1423,11 @@ int observation_bounds(double sampling_freq, /**< Frequency at which the detecto
 		transform_orientation_coords(params,generation_method,detector);
 	}
 	double fmax = sampling_freq /2.; //Nyquist limit
-	//double fmin= 0; //DC component
 	double fmin= 1e-6; //DC component
 	double delta_f =  1./integration_time;
 	
 	double bounds_from_band[2];
 	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band,autodiff);
-	//std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
 	double times[2];
 	if(autodiff){
 		time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, false, (int *)NULL, 1);
@@ -1449,7 +1437,6 @@ int observation_bounds(double sampling_freq, /**< Frequency at which the detecto
 		time_phase_corrected(&times[1], 1, &bounds_from_band[1], params, generation_method, false,1);
 	}
 	double T_band = -times[1]+times[0];
-	//std::cout<<"GW INTERNAL : "<<T_band/T_year<<std::endl;
 
 	//Conform the output of the band calculation to the pre-set frequency grid
 	bool max_found=false, min_found=false;
@@ -1504,7 +1491,7 @@ int observation_bounds(double sampling_freq, /**< Frequency at which the detecto
 	
 }
 
-/*! \brief Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve
+/*! \brief ***DEPRECATED*** Determines the integration bounds for the log likelihood or fisher given some observation time, sampling frequency, detector, and sensitivity curve
  *
  * Sensitivity curve has to be one of the options in detector_util analytic options
  *
@@ -1535,7 +1522,6 @@ void observation_bounds_discrete(double sampling_freq, /**< Frequency at which t
 	bool autodiff=false;
 	double bounds_from_band[2];
 	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band,autodiff);
-	//std::cout<<"Integration bounds from band "<<bounds_from_band[0]<<" "<<bounds_from_band[1]<<std::endl;
 	double times[2];
 	//time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, true);
 	time_phase_corrected(times, 2, bounds_from_band, params, generation_method, true);
@@ -1602,6 +1588,10 @@ void observation_bounds_discrete(double sampling_freq, /**< Frequency at which t
 	
 	delete [] frequencies;
 }
+/*! \brief Calculates the postmerger parameters for a parameter set
+ *
+ * calculates fpeak, fdamp, and fRD
+ */
 template<class T>
 void postmerger_params(gen_params_base<T>*params,
 	std::string generation_method,
@@ -1672,8 +1662,10 @@ struct Tbm_struct
  * 	true -- Tbm is interpreted as the time before tc, and is shifted accordingly
  *
  * 	false -- Tbm is interpreted as some absolute time, and is not shifted. Assumed to be in the same time coordinates as tc. ie, if Tbm set to 0, freq will be the frequency at a time tc before tc
+ *
+ * Return values -- See util.cpp, newton_raphson_method_1d
  */
-void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of the source*/
+int Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of the source*/
 	std::string generation_method,/**< Generation method for the waveform*/
 	double Tbm,/**< target time before merger -- in seconds or years (years if YEARS==true)*/
 	double *freq,/**< Frequency at the input time before merger*/
@@ -1711,7 +1703,7 @@ void Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of t
 	}
 	
 	int status = newton_raphson_method_1d(&Tbm_subroutine, f0, tol, max_iterations, (void *)(&helper_struct), freq);
-	//if(status != 0){std::cout<<status<<std::endl;}
+	return status;
 }
 
 void Tbm_subroutine( double f, double *t, double *tp, void *param)
@@ -1835,7 +1827,7 @@ void _Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of 
 		}
 	}
 }
-/*! \brief Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh
+/*! \brief ***DEPRECATED*** Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh
  *
  * See arXiv 1902.00021
  *
@@ -2106,8 +2098,6 @@ void threshold_times(gen_params_base<double> *params,
  *
  * Assumes sky average -- Only supports PhenomD for now -- No angular dependence used ( only uses plus polarization -- assumes iota = psi = 0 )
  *
- * Assumes this is for multiband -- ie stellar mass BHs -- Only uses pn approximation of time frequency relation
- *
  * If no time before merger satisfies the requirements, both are set to -1
  *
  * ALL temporal quantities in seconds or Hz
@@ -2121,6 +2111,10 @@ void threshold_times(gen_params_base<double> *params,
  * 	12-- Failure: SNR was 0 in upper bound
  *
  * 	13 -- partial success: Closest values output, but roundoff error prevented the routine from reaching the desired accuracy
+ * 	
+ * 	14 -- partial success: numerical inversion for time -> frequency had errors 
+ *
+ * 	15 -- partial success: numerical inversion for time -> frequency had failed, and a PN approximate had to be used
  */
 int threshold_times_gsl(gen_params_base<double> *params,
 	std::string generation_method, /**<Generation method to use for the waveform*/
@@ -2136,32 +2130,41 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	int np
 	)
 {
+	int status1=0, status2=0;
+	bool forced_PN_approx = false;
+	bool bad_time_freq_inversion = false;
+	bool round_off_error=false;	
+
 	threshold_times_out[0]=-1;
 	threshold_times_out[1]=-1;
 	if(params->equatorial_orientation){
 		transform_orientation_coords(params,generation_method,"");
 	}
-	int fail_ct=0;
-	int fail_THRESH = 10; //Attempts to fix an error due to roundoff
-	double SHIFT_UP=1.0 + 1e-2;
-	double SHIFT_DOWN=1.0 - 1e-2;
-
-	bool round_off_error=false;	
-	
-	bool relative_time = true;
 	bool save_SA = params->sky_average;
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	params->sky_average = false;
+	
+	bool relative_time = true;
+	bool autodiff = true;	
+	bool gsl_integration=false;
+
+	int GL_length = 500;
+	double *GL_freqs;
+	double *GL_w;
+	if(!gsl_integration){
+		GL_freqs = new double[GL_length];
+		GL_w = new double[GL_length];
+		params->sky_average=save_SA;
+	}
+
 
 	bool stellar_mass = true;	
-	bool autodiff = true;	
 	int max_iter = 20;	
 	double fpeak, fdamp,fRD;
 	postmerger_params(params,generation_method,&fpeak,&fdamp, &fRD);
 	
 	if(fpeak < fmax){
 		stellar_mass=false;
-		//autodiff=true;
 	}
 	//stellar_mass=true;
 
@@ -2188,7 +2191,16 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		f_lower = f_0PN(t_mer,chirpmass);	
 	}
 
-	snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+	if(gsl_integration){
+		snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+	}
+	else{
+		gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+		for(int k =0; k<GL_length; k++){
+			GL_freqs[k] = pow(10.,GL_freqs[k]);
+		}
+		snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+	}
 	snr_prev=snr;
 	double t1 = t_mer, t2=t_mer;
 	if(snr>SNR_thresh){not_found= false;}
@@ -2208,16 +2220,40 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			else{
 				//Much much slower
-				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				status1 =Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
 				if(t_mer - T_obs > 0){
-					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					status2= Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
 				}
 				else{
 					f_upper = 2.*fpeak;	
 				}
+				if(f_lower<0)
+				{
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+				}
+				if(f_upper<0)
+				{
+					std::cout<<"FAILURE"<<std::endl;
+					forced_PN_approx = true;
+					f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+				}
+				if(status1 !=0 || status2 != 0){
+					bad_time_freq_inversion = true;
+				}
+				status1=0;
+				status2=0;
 			}
-			//std::cout<<"FREQS : initial search: "<<t_mer/T_year<<" "<<f_lower<<" "<<f_upper<<std::endl;
-			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(gsl_integration){
+				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			}
+			else{
+				gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+				for(int k =0; k<GL_length; k++){
+					GL_freqs[k] = pow(10.,GL_freqs[k]);
+				}
+				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+			}
 			if(snr<snr_prev){bound_search=false;}	
 			else if(f_lower < fmin){ 
 				t_mer = t_0PN(fmin, chirpmass); 
@@ -2250,19 +2286,42 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			else{
-				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				status1 = Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
 				if(t_mer-T_obs > 0){
-					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					status2=Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
 				}
 				else{
 					f_upper =   fpeak*2;
 
 				}
+				if(f_lower<0)
+				{
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+				}
+				if(f_upper<0){
+					forced_PN_approx = true;
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+				}
+				if(status1 !=0 || status2 != 0){
+					bad_time_freq_inversion = true;
+				}
+				status1=0;
+				status2=0;
 
 			}
 			f_lower_prev= f_lower;
 			f_upper_prev= f_upper;
-			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(gsl_integration){
+				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			}
+			else{
+				gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+				for(int k =0; k<GL_length; k++){
+					GL_freqs[k] = pow(10.,GL_freqs[k]);
+				}
+				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+			}
 			//SNR found
 			if(snr>SNR_thresh){not_found=false;}
 			//Squeeze boundary
@@ -2318,17 +2377,39 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			else{
-				Tbm_to_freq(params, generation_method, t1, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				status1=Tbm_to_freq(params, generation_method, t1, &f_lower,tolerance,autodiff,max_iter,relative_time);
 				if(t1-T_obs > 0){
-					Tbm_to_freq(params, generation_method, t1-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					status2=Tbm_to_freq(params, generation_method, t1-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
 				}
 				else{
 					f_upper =   2*fpeak;
 
 				}
+				if(f_lower<0)
+				{
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t1, chirpmass));
+				}
+				if(f_upper<0){
+					forced_PN_approx = true;
+					f_upper =  std::min( f_0PN(  t1 - T_obs,chirpmass) , fmax );
+				}
+				if(status1 !=0 || status2 != 0){
+					bad_time_freq_inversion = true;
+				}
+				status1=0;
+				status2=0;
 			}
-			//std::cout<<"FREQS : initial search: "<<t1/T_year<<" "<<f_lower<<" "<<f_upper<<std::endl;
-			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(gsl_integration){
+				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			}
+			else{
+				gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+				for(int k =0; k<GL_length; k++){
+					GL_freqs[k] = pow(10.,GL_freqs[k]);
+				}
+				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+			}
 			//If hit 5 day limit, exit loop with snr less than threshold, 
 			//set lower bound to this time, and skip the rest of the search
 			if(t1<5*T_day && snr>SNR_thresh){
@@ -2344,7 +2425,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			if(stellar_mass){
 				f_lower =  f_0PN(t_mer ,chirpmass) ;
 				if(t_mer-T_obs > 0){
-					f_upper =  std::min( f_0PN(  t_mer + T_obs,chirpmass) , fmax);
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax);
 				}
 				else{
 					f_upper = fmax;
@@ -2360,9 +2441,32 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					f_upper =   2*fpeak;
 
 				}
+				if(f_lower<0)
+				{
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+				}
+				if(f_upper<0){
+					forced_PN_approx = true;
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+				}
+				if(status1 !=0 || status2 != 0){
+					bad_time_freq_inversion = true;
+				}
+				status1=0;
+				status2=0;
 
 			}
-			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(gsl_integration){
+				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			}
+			else{
+				gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+				for(int k =0; k<GL_length; k++){
+					GL_freqs[k] = pow(10.,GL_freqs[k]);
+				}
+				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+			}
 			//SNR reached threshold
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
 			//If the bounds are too close, exit to stop rounding error
@@ -2394,7 +2498,6 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			t2_prev= t2;
 			snr_prev=snr;
 		}
-		fail_ct =0;
 		//Do it again for lower bound
 		t1=t_save; t2=t_save;
 		//Initial bracketing
@@ -2412,16 +2515,39 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			else{
-				Tbm_to_freq(params, generation_method, t2, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				status1=Tbm_to_freq(params, generation_method, t2, &f_lower,tolerance,autodiff,max_iter,relative_time);
 				if(t2-T_obs > 0){
-					Tbm_to_freq(params, generation_method, t2-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					status2=Tbm_to_freq(params, generation_method, t2-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
 				}
 				else{
 					f_upper =   2*fpeak;
 
 				}
+				if(f_lower<0)
+				{
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t2, chirpmass));
+				}
+				if(f_upper<0){
+					forced_PN_approx = true;
+					f_upper =  std::min( f_0PN(  t2 - T_obs,chirpmass) , fmax );
+				}
+				if(status1 !=0 || status2 != 0){
+					bad_time_freq_inversion = true;
+				}
+				status1=0;
+				status2=0;
 			}
-			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(gsl_integration){
+				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			}
+			else{
+				gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+				for(int k =0; k<GL_length; k++){
+					GL_freqs[k] = pow(10.,GL_freqs[k]);
+				}
+				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+			}
 			if( (fabs(t2-T_wait)/T_wait < DOUBLE_COMP_THRESH) && snr>SNR_thresh){ found_upper_root=true; threshold_times_out[1]=T_wait;break;}
 		}while(snr>SNR_thresh  );
 		while(!found_upper_root){
@@ -2439,18 +2565,41 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			else{
-				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				status1=Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
 				if(t_mer-T_obs > 0){
-					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					status2=Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
 				}
 				else{
 					f_upper =   2*fpeak;
 
 				}
+				if(f_lower<0)
+				{
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+				}
+				if(f_upper<0){
+					forced_PN_approx = true;
+					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+				}
+				if(status1 !=0 || status2 != 0){
+					bad_time_freq_inversion = true;
+				}
+				status1=0;
+				status2=0;
 			}
 			f_lower_prev= f_lower;
 			f_upper_prev= f_upper;
-			snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			if(gsl_integration){
+				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
+			}
+			else{
+				gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
+				for(int k =0; k<GL_length; k++){
+					GL_freqs[k] = pow(10.,GL_freqs[k]);
+				}
+				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+			}
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
 			else if( (fabs(t1-t2)*2/fabs(t1+t2)<1e-14) ){
 				found_upper_root=true;
@@ -2478,7 +2627,18 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		params->sky_average = save_SA;
 		return 13;
 	}
+	if(bad_time_freq_inversion){
+		return 14;
+	}
+	if(forced_PN_approx){
+		return 15;
+	}
 	params->sky_average = save_SA;
+
+	if(!gsl_integration){
+		delete [] GL_freqs ;
+		delete [] GL_w ;
+	}
 	return 0;
 }
 double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np)

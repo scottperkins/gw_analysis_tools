@@ -67,16 +67,6 @@ int tc_comparison(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
 	params.mass1 = 9e6;
 	params.mass2 = 4e5;
 	params.theta_l = 1;
@@ -86,7 +76,6 @@ int tc_comparison(int argc, char *argv[])
 	double fmin = 3e-5;
 	double fmax = 2e-3;
 	double T = T_year;
-	//double T = 4*T_year;
 
 	int length = T*(fmax-fmin);
 	double *frequency = new double[length];
@@ -151,20 +140,15 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 {
 	LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;	
 	std::cout.precision(15);
-	//REAL4 D[3][3];
-	//for(int i = 0 ; i<3 ; i++){
-	//	for(int j = 0 ; j<3; j++){
-	//		D[i][j] = S.response[i][j];
-	//		std::cout<<D[i][j]<<std::endl;
-	//	}
-	//}
 	bool P = true;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
+	int iterations = 100;
+	double times[iterations][2];
 	//###############################################################################
-	for(int k = 0 ; k<50 ; k++){
+	for(int k = 0 ; k<iterations ; k++){
 		int d  ;
 		if(k%3 == 0 ) {d = 2;}
 		else if(k%3 == 1 ) {d = 5;}
@@ -209,10 +193,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 phiRef = 2*M_PI * alpha[13];
 		double gmst = 2*M_PI*alpha[14];
 		REAL8 phi_aligned;
-		//double deltaf = .1;
-		//const REAL8 f_min = 1e1;
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		//const REAL8 f_max = 7e2;
 		const REAL8 f_max = .2*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		int length = 4016;
 		double deltaf = (f_max-f_min)/(length-1);
@@ -271,7 +252,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			gsl_complex_mul(gsl_complex_rect(fcross,0.0) , (hctilde->data->data)[i]));
 		}
 		end = clock();
-		std::cout<<"LAL timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
+		times[k][0] = (double)(end-start)/(CLOCKS_PER_SEC);
+		//std::cout<<"LAL timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
 		//###############################################################################
 		gen_params param;
 		param.mass1 = m1_SI/LAL_MSUN_SI;	
@@ -297,7 +279,6 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.DEC = DEC;
 		param.psi = psi;
 		param.gmst = gmst;
-		//param.tc = -13 ;
 		param.tc = .0 ;
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
@@ -309,8 +290,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 
 		fourier_detector_response(frequencies, length, response,DETECTOR, method,&param,(double*)NULL);
 		end =clock();
-		//fourier_phase(frequencies, length, pplus,pcross, method,&param);
-		std::cout<<"GWAT timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
+		times[k][1] = (double)(end-start)/(CLOCKS_PER_SEC);
+		//std::cout<<"GWAT timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
 		//########################################################################
 		double **output = allocate_2D_array(length,5);
 		for(int i = 0 ; i<length; i++){
@@ -319,26 +300,25 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			output[i][2] = GSL_IMAG((det->data->data)[i]);
 			output[i][3] = std::real(response[i]);
 			output[i][4] = std::imag(response[i]);
-			//shplus[i][0] = sreal;
-			//shplus[i][1] = simag;
-			//LALhplus[i][0] = LALreal;
-			//LALhplus[i][1] = LALimag;
-			//if(P){
-			//	LALreal = GSL_REAL((hctilde->data->data)[i]);
-			//	LALimag = GSL_IMAG((hctilde->data->data)[i]);
-			//	sreal = std::real(hcross[i]);
-			//	simag = std::imag(hcross[i]);
-			//	shcross[i][0] = sreal;
-			//	shcross[i][1] = simag;
-			//	LALhcross[i][0] = LALreal;
-			//	LALhcross[i][1] = LALimag;
-			//}
 		}
 		write_file("data/response_"+std::to_string(k)+".csv",output,length,5);
 		deallocate_2D_array(output,length,2);
 		delete [] response;
+		delete [] frequencies;
 		XLALDestroyREAL8Sequence(freqs);
+		XLALDestroyCOMPLEX16FrequencySeries(hptilde);
+		XLALDestroyCOMPLEX16FrequencySeries(hctilde);
+		XLALDestroyCOMPLEX16FrequencySeries(det);
 	}
+	double lal_sum = 0 ;
+	double gwat_sum = 0 ;
+	for(int i = 0 ; i<iterations; i++){
+		lal_sum +=times[i][0];
+		gwat_sum +=times[i][1];
+
+	}
+	std::cout<<"Average LAL time: "<<lal_sum / iterations<<std::endl;
+	std::cout<<"Average GWAT time: "<<gwat_sum / iterations<<std::endl;
 	gsl_rng_free(r);
 	return 1; 
 }

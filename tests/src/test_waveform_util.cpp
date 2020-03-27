@@ -60,11 +60,11 @@ int main(int argc, char *argv[])
 int tbm_testing(int argc, char *argv[])
 {
 	gen_params params;	
-	//params.spin1[2] = .3;
-	//params.spin2[2] = -.3;
+	params.spin1[2] = .3;
+	params.spin2[2] = -.3;
 	params.chip = .7;
 	params.phip = 0.1;
-	//params.Luminosity_Distance = 54000;
+	params.Luminosity_Distance = 100;
 	params.phic = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
@@ -74,45 +74,28 @@ int tbm_testing(int argc, char *argv[])
 	params.horizon_coord = false;
 	params.shift_time=true;
 	params.shift_phase=true;
+	params.sky_average=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
-	//params.mass1 = 18000;
-	//params.mass2 = 7000;
+	params.mass1 = 36;
+	params.mass2 = 29;
 	params.theta_l = 1;
 	params.phi_l = 1;
 	params.phiRef= 10;
-	params.equatorial_orientation = true;
+	params.equatorial_orientation = false;
+	params.psi = 0;
+	params.incl_angle = 0;
+	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
 
-
-	params.Luminosity_Distance = 4608.28;
-	params.spin1[2] = 0.7022*cos( 2.572);
-	params.spin2[2] = 0.7873*cos(1.6073);
-	params.mass1 =5.3357e+08*(1+0.44288);
-	params.mass2 =932820*(1+0.44288);
-
-
-	std::string method = "IMRPhenomPv2";
+	std::string method = "IMRPhenomD";
 
 
 	double fpeak, frd, fdamp;
 	postmerger_params(&params, method, &fpeak,&fdamp, &frd);
 	std::cout<<fpeak<<std::endl;
 
-	double fmin= 1e-7;
-	//double fmax= 1.9*fpeak;
-	double fmax= 1e-4;
-	//double fmin= 10;
-	//double fmax= 400;
-	int length = 1e1;
+	double fmin= 1e-2;
+	double fmax= 1;
+	int length = 1e3;
 	double *freqs = new double[length];
 	double *times = new double[length];
 	double deltaf = (fmax-fmin)/length;
@@ -122,7 +105,7 @@ int tbm_testing(int argc, char *argv[])
 	
 	params.tc = 0.;
 	//params.tc = 3./(deltaf*4);
-	std::cout<<1./deltaf<<" "<<params.tc<<std::endl;
+
 	time_phase_corrected_autodiff(times, length, freqs, &params, method, false, (int *)NULL);
 	
 	double **output = allocate_2D_array(length, 2);
@@ -133,13 +116,8 @@ int tbm_testing(int argc, char *argv[])
 	}
 	write_file("data/Tbm_times_base.csv",output, length, 2);
 
-	//params.tc = 3./(deltaf*4);
+	params.tc = 3./(deltaf*4);
 	
-	//int tbm_length = 1000;
-	//double t_start = times[0];
-	//double t_end = times[length-1];
-	//double delta_t = (-t_end + t_start)/(tbm_length);
-	//double **output2=allocate_2D_array(tbm_length,2);
 	double **output2=allocate_2D_array(length,2);
 	bool autodiff=false;
 	double tol = 1e-10;
@@ -150,28 +128,35 @@ int tbm_testing(int argc, char *argv[])
 	double ave=0;
 	bool relative_time =true;
 	for(int i =0 ; i<length; i++){
-		//std::cout<<output[i][0]<<std::endl;
 		output2[i][1]=output[i][1];
-		std::cout<<output2[i][1]<<std::endl;
 		start = clock();	
 		Tbm_to_freq(&params, method,output2[i][1], &(output2[i][0]) ,tol,autodiff,max_iteration,relative_time);
 		end = clock();
 		ave += (double)(end - start)/CLOCKS_PER_SEC;
-		//std::cout<<(double)(end - start)/CLOCKS_PER_SEC<<std::endl;
 	}
 	std::cout<<"Average time for AD: "<<ave/length<<std::endl;
 	ave=0;
 	write_file("data/Tbm_times_inv_AD.csv",output2, length, 2);
+
 	autodiff=false;
 	for(int i =0 ; i<length; i++){
 		start = clock();	
 		Tbm_to_freq(&params, method,output2[i][1], &(output2[i][0]) ,tol,autodiff,max_iteration,relative_time);
 		end = clock();
 		ave += (double)(end - start)/CLOCKS_PER_SEC;
-		//std::cout<<(double)(end - start)/CLOCKS_PER_SEC<<std::endl;
 	}
 	std::cout<<"Average time for N: "<<ave/length<<std::endl;
 	write_file("data/Tbm_times_inv_N.csv",output2, length, 2);
+
+	for(int i =0 ; i<length; i++){
+		start = clock();	
+		output2[i][0] = f_0PN(output2[i][1],chirpmass);
+		end = clock();
+		ave += (double)(end - start)/CLOCKS_PER_SEC;
+	}
+	std::cout<<"Average time for PN: "<<ave/length<<std::endl;
+	write_file("data/Tbm_times_inv_PN.csv",output2, length, 2);
+
 	deallocate_2D_array(output2,length,2);
 	deallocate_2D_array(output, length, 2);
 	delete [] freqs;
@@ -197,16 +182,6 @@ int threshold_times_SM(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
 	params.mass1 = 36;
 	params.mass2 = 29;
 	params.theta_l = 1;
@@ -214,22 +189,25 @@ int threshold_times_SM(int argc, char *argv[])
 	params.tc = 0;
 	params.equatorial_orientation = false;
 	params.incl_angle = 0;
+	params.sky_average=true;
 
 	std::string method = "IMRPhenomD";
 
 	double bounds[2];
 	double fmin= 1e-5;
 	double fmax= 1;
-	double Tobs = 10*T_year;
-	double Twait = 50*T_year;
+	double Tobs = 4*T_year;
+	double Twait = 20*T_year;
 	
 	std::cout<<"BOUNDS CALC"<<std::endl;
 	bool autodiff = false;
 	int np = 1000;
-	double tol = .01;
-	params.sky_average=true;
+	double tol = 1e-6;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
-	threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+
+	clock_t start = clock();
+	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+	std::cout<<"TIME: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
 	std::cout<<bounds[0]/T_year<<" "<<bounds[1]/T_year<<std::endl;
 	gsl_integration_workspace_free(w);
 
@@ -238,7 +216,7 @@ int threshold_times_SM(int argc, char *argv[])
 	double freqs[snr_pts];
 	double weights[snr_pts];
 	int iterations = 1000;
-	double delta_t = (200*T_year)/iterations;
+	double delta_t = pow(200./.1,1./iterations);
 	double **snr_out = new double*[iterations];
 	double fbounds[2];
 	autodiff = true;
@@ -248,7 +226,7 @@ int threshold_times_SM(int argc, char *argv[])
 	bool relative_time = true;
 	for(int i = 0 ; i<iterations; i++){
 		snr_out[i]=new double[2];
-		snr_out[i][0]= .1*T_year+i*delta_t;	
+		snr_out[i][0]= .1*T_year*pow_int(delta_t,i);	
 		Tbm_to_freq(&params, method,snr_out[i][0], &(fbounds[0]) ,tol,autodiff,max_iterations,relative_time);
 		if(snr_out[i][0]-Tobs >0){
 			Tbm_to_freq(&params, method,(snr_out[i][0]-Tobs), &(fbounds[1]) ,tol,autodiff,max_iterations,relative_time);
@@ -262,7 +240,6 @@ int threshold_times_SM(int argc, char *argv[])
 			}
 			
 		}
-		//std::cout<<fbounds[0]<<" "<<fbounds[1]<<std::endl;
 		gauleg(log10(fbounds[0]), log10(fbounds[1]), freqs, weights, snr_pts);
 		for(int i  = 0 ; i<snr_pts; i++){
 			freqs[i]  = pow(10.,freqs[i]);
@@ -289,18 +266,11 @@ int threshold_times_MBH(int argc, char *argv[])
 {
 	std::cout.precision(15);
 	gen_params params;	
-	//params.spin1[2] = 0.2037*cos( 2.3547);
-	//params.spin2[2] = 0.2041*cos(3.0578);
 	params.chip = .5;
 	params.phip = 0.1;
-	params.Luminosity_Distance = 4608.28;
 	params.spin1[2] = 0.7022*cos( 2.572);
 	params.spin2[2] = 0.7873*cos(1.6073);
-	params.mass1 =5.3357e+08*(1+0.44288);
-	params.mass2 =932820*(1+0.44288);
-	//params.Luminosity_Distance = 100.;
-	//params.Luminosity_Distance = DL_from_Z(0.44288,"Planck15");
-	//params.Luminosity_Distance = 100;
+	params.Luminosity_Distance = DL_from_Z(0.54288,"Planck15");
 	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
@@ -308,30 +278,17 @@ int threshold_times_MBH(int argc, char *argv[])
 	params.NSflag1 = false;
 	params.NSflag2 = false;
 	params.horizon_coord = false;
-	params.shift_time=false;
-	params.shift_phase=false;
+	params.shift_time=true;
+	params.shift_phase=true;
 	params.sky_average=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
-	//params.mass1 =5.0142e+07*(1+0.72917);
-	//params.mass2 = 4.3773e+07*(1+0.72917);
-	//params.mass1 =36;
-	//params.mass2 =29;
+	params.mass1 =1.0142e+03;
+	params.mass2 = 0.3773e+03;
 	params.theta_l = 1;
 	params.phi_l = 2;
-	//params.tc = 3*T_year;
-	//params.tc = 0;
 	params.equatorial_orientation = false;
 	params.incl_angle = 0;
+	params.psi = 0;
 
 	std::string method = "IMRPhenomD";
 
@@ -341,15 +298,16 @@ int threshold_times_MBH(int argc, char *argv[])
 	double Tobs = 4*T_year;
 	double Twait = 20*T_year;
 	params.tc = 3.*Tobs/4.;
-	//params.tc = Tobs;
-	//params.tc = 0;
+	std::cout<<"tc in years: "<<params.tc/T_year<<std::endl;
 	
 	std::cout<<"BOUNDS CALC"<<std::endl;
 	bool autodiff = false;
 	int np = 1000;
-	double tol = .01;
+	double tol = 1e-8;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
-	threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+	clock_t start = clock();
+	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+	std::cout<<"TIME: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
 	std::cout<<bounds[0]/T_year<<" "<<bounds[1]/T_year<<std::endl;
 	gsl_integration_workspace_free(w);
 
@@ -358,20 +316,23 @@ int threshold_times_MBH(int argc, char *argv[])
 	double freqs[snr_pts];
 	double weights[snr_pts];
 	int iterations = 1000;
-	double delta_t = (200*T_year)/iterations;
+	double delta_t = pow(200./.1,1./iterations);
 	double **snr_out = new double*[iterations];
 	double fbounds[2];
 	autodiff = true;
 	int max_iterations = 50;
 	double fpeak, frd, fdamp;
 	postmerger_params(&params, method, &fpeak,&fdamp, &frd);
+	std::cout<<"Fpeak: "<<fpeak<<std::endl;
 	bool relative_time=true;
+	double chirpmass=calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
+	tol = 1e-8;
 	for(int i = 0 ; i<iterations; i++){
 		snr_out[i]=new double[2];
-		snr_out[i][0]= .1*T_year+i*delta_t;	
-		Tbm_to_freq(&params, method,snr_out[i][0], &(fbounds[0]) ,tol,autodiff,max_iterations,relative_time);
+		snr_out[i][0]= .1*T_year*pow_int(delta_t,i);	
+		int status = Tbm_to_freq(&params, method,snr_out[i][0], &(fbounds[0]) ,tol,autodiff,max_iterations,relative_time);
 		if(snr_out[i][0]-Tobs >0){
-			Tbm_to_freq(&params, method,(snr_out[i][0]-Tobs), &(fbounds[1]) ,tol,autodiff,max_iterations,relative_time);
+			status = Tbm_to_freq(&params, method,(snr_out[i][0]-Tobs), &(fbounds[1]) ,tol,autodiff,max_iterations,relative_time);
 		}
 		else{
 			if(fpeak<fmax){
@@ -382,7 +343,6 @@ int threshold_times_MBH(int argc, char *argv[])
 			}
 			
 		}
-		//std::cout<<fbounds[0]<<" "<<fbounds[1]<<" "<<fpeak<<" "<<(snr_out[i][0]/T_year)<<std::endl;
 		gauleg(log10(fbounds[0]), log10(fbounds[1]), freqs, weights, snr_pts);
 		for(int i  = 0 ; i<snr_pts; i++){
 			freqs[i]  = pow(10.,freqs[i]);
@@ -398,11 +358,6 @@ int threshold_times_MBH(int argc, char *argv[])
 	}
 	delete [] snr_out;
 	
-	//delete [] freqs;
-	//delete [] psd;
-	//delete [] integrand;
-	//delete [] response;
-	//delete [] times;
 	return 0;
 }
 int integration_interval_SM(int argc, char *argv[])
@@ -424,17 +379,7 @@ int integration_interval_SM(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
-	params.mass1 = 9e2;
+	params.mass1 = 9e1;
 	params.mass2 = 4e1;
 	params.theta_l = 1;
 	params.phi_l = 2;
@@ -508,16 +453,6 @@ int integration_interval_MBH(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
 	params.mass1 = 9e6;
 	params.mass2 = 4e5;
 	params.theta_l = 1;
@@ -579,11 +514,8 @@ int time_comparison_NADPN_MBH(int argc, char *argv[])
 	gen_params params;	
 	params.spin1[2] = .3;
 	params.spin2[2] = .3;
-	//params.spin1[2] = 0.7022*cos( 2.572);
-	//params.spin2[2] = 0.7873*cos(1.6073);
 	params.chip = .7;
 	params.phip = 0.1;
-	//params.Luminosity_Distance = 100;
 	params.Luminosity_Distance = 4608.28;
 	params.phic = 1;
 	params.RA = 2.;
@@ -595,18 +527,6 @@ int time_comparison_NADPN_MBH(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
-	//params.mass1 = 36e6;
-	//params.mass2 = 29e6;
 	params.mass1 =5.3357e+08*(1+0.44288);
 	params.mass2 =932820*(1+0.44288);
 	params.theta_l = 1;
@@ -680,21 +600,11 @@ int time_comparison_NADPN(int argc, char *argv[])
 	params.NSflag1 = false;
 	params.NSflag2 = false;
 	params.horizon_coord = false;
-	params.shift_time=false;
+	params.shift_time=true;
 	params.shift_phase=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
-	params.mass1 = 9e1;
-	params.mass2 = 4e1;
+	params.mass1 = 3.6e1;
+	params.mass2 = 2.9e1;
 	params.theta_l = 1;
 	params.phi_l = 2;
 	params.tc = 0;

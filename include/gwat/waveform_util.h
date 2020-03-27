@@ -211,7 +211,7 @@ int observation_bounds(double sampling_freq,
 	gen_params_base<double> *params,
 	double *freq_bounds,
 	bool autodiff);
-void Tbm_to_freq(gen_params_base<double> *params,
+int Tbm_to_freq(gen_params_base<double> *params,
 	std::string generation_method,
 	double Tbm,
 	double *freq,
