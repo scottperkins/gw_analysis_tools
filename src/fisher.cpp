@@ -149,7 +149,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-	double epsilon = 1e-7;
+	double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
@@ -168,6 +168,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	gen_params waveform_params;
 	repack_non_parameter_options(&waveform_params,parameters, gen_method);
 	//##########################################################
+	
 	if(parameters->sky_average)
 	{
 		double *amplitude_plus = new double[length];
@@ -320,13 +321,6 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			time_phase_corrected(times, length, frequencies,parameters, gen_method, false);
 			dt = allocate_2D_array(dimension, length);
 			time_phase_corrected_derivative_numerical(dt, length, frequencies,parameters, gen_method, dimension, corr_time);
-			//TESTING
-			//write_file("data/times.csv",times,length);
-			//time_phase_corrected_autodiff(times, length, frequencies, parameters, gen_method, false);
-			//dt = allocate_2D_array(dimension+1, length);
-			//time_phase_corrected_derivative_autodiff_full_hess(dt, length, frequencies, parameters, gen_method, dimension, false);
-			//time_phase_corrected_derivative_autodiff_numerical(dt, length, frequencies, parameters, gen_method, dimension, false);
-			//local_dimension++;
 		}
 		if(order >=4){
 			response_plus_plus= new std::complex<double>[length];
@@ -821,8 +815,6 @@ void calculate_derivatives_autodiff(double *frequency,
 		eval_times = new double[length];
 		time_phase_corrected_autodiff(eval_times, length, frequency, parameters, generation_method, false);
 		
-		//TESTING
-		//write_file("data/times_ad.csv",eval_times, length);
 			
 	}
 	//calculate_derivative tapes
@@ -858,7 +850,6 @@ void calculate_derivatives_autodiff(double *frequency,
 			adouble a_amp;
 			adouble a_phasep;
 			adouble a_phasec;
-		
 			int status  = fourier_amplitude(&afreq, 1, &a_amp, local_gen_method, &a_parameters);
 			status  = fourier_phase(&afreq, 1, &a_phasep,  &a_phasec,local_gen_method, &a_parameters);
 			a_response = a_amp * exp(std::complex<adouble>(0,a_phasep));
@@ -2209,6 +2200,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->shift_phase = input_params->shift_phase;
 	waveform_params->LISA_alpha0 = input_params->LISA_alpha0;
 	waveform_params->LISA_phi0 = input_params->LISA_phi0;
+	waveform_params->dep_postmerger = input_params->dep_postmerger;
 	if( check_mod(gen_method)){
 		waveform_params->bppe = input_params->bppe;
 		waveform_params->Nmod = input_params->Nmod;

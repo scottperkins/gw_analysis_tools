@@ -49,10 +49,10 @@ int AD_v_N(int argc, char *argv[])
 	params.shift_phase=false;
 	params.dep_postmerger=true;
 	params.equatorial_orientation = false;
-	params.sky_average=true;
+	params.sky_average=false;
 	
-	params.mass1 = 9e1;
-	params.mass2 = 4e1;
+	params.mass1 = 3e1;
+	params.mass2 = 2e1;
 	//params.theta_l = 1.1;
 	//params.phi_l = 2.1;
 	params.psi = 0;
@@ -85,12 +85,12 @@ int AD_v_N(int argc, char *argv[])
 
 	//std::string detector = "LISA";
 	std::string detector = "Hanford";
-	std::string method = "IMRPhenomD";
-	//std::string method = "IMRPhenomPv2";
+	//std::string method = "IMRPhenomD";
+	std::string method = "IMRPhenomPv2";
 	//transform_orientation_coords(&params, method, detector);
 	std::cout<<params.psi<<" "<<params.incl_angle<<std::endl;
 		
-	int dim = 7;
+	int dim = 12;
 	double **output_N = allocate_2D_array(dim,dim);
 	double **output_AD = allocate_2D_array(dim,dim);
 	double **COV_AD = allocate_2D_array(dim,dim);

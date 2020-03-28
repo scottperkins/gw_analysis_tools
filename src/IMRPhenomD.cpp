@@ -1174,70 +1174,12 @@ void IMRPhenomD<double>::calc_fdamp(source_parameters<double> *source_param)
 template <>
 void IMRPhenomD<adouble>::calc_fring( source_parameters<adouble> *source_param)
 {
-	adouble chi1 = source_param->spin1z;
-	adouble chi2 = source_param->spin2z;
-	adouble eta = source_param->eta;
-	adouble M = source_param->M;
-	adouble m1 = source_param->mass1;
-	adouble m2 = source_param->mass2;
-	adouble eta2 = eta*eta;
-	adouble eta3 = eta2*eta;
-	adouble eta4 = eta3*eta;
-	adouble m12 = m1*m1;
-	adouble m22 = m2*m2;
-	adouble M2 = M*M;
- 	adouble S = (chi1*m12 + chi2*m22)/M2 ;
-	adouble S2 = S*S;
-	adouble S3 = S2*S;
-	adouble S4 = S3*S;
-
-    	adouble S_red = S/(1.-2.*eta);
-
-    	adouble a = final_spin(source_param);
-
-    	adouble E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
-    	       0.960673*eta3 + 3.35241*eta4 ;
-
-	adouble E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
-		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
-	adouble MWRD = (1.5251-1.1568*pow(1-a,0.1292));
-	adouble MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
-	source_param->fRD =  (1./(2*M_PI))*(MWRD)/(M*(1. - E_rad));
+	_calc_fring(source_param);
 }
 template <>
 void IMRPhenomD<adouble>::calc_fdamp(source_parameters<adouble> *source_param)
 {
-	adouble chi1 = source_param->spin1z;
-	adouble chi2 = source_param->spin2z;
-	adouble eta = source_param->eta;
-	adouble M = source_param->M;
-	adouble m1 = source_param->mass1;
-	adouble m2 = source_param->mass2;
-	adouble eta2 = eta*eta;
-	adouble eta3 = eta2*eta;
-	adouble eta4 = eta3*eta;
-	adouble m12 = m1*m1;
-	adouble m22 = m2*m2;
-	adouble M2 = M*M;
- 	adouble S = (chi1*m12 + chi2*m22)/M2 ;
-	adouble S2 = S*S;
-	adouble S3 = S2*S;
-	adouble S4 = S3*S;
-
-    	adouble S_red = S/(1.-2.*eta);
-    	//adouble a = S + 2.*sqrt(3.)*eta - 4.399*eta2 + 9.397*eta3 - 
-    	//       13.181*eta4 +(-0.085*S +.102*S2 -1.355*S3 - 0.868*S4)*eta + 
-    	//       (-5.837*S -2.097*S2 +4.109*S3 +2.064*S4)*eta2;
-    	adouble a = final_spin(source_param);
-
-    	adouble E_rad_ns = 0.0559745*eta +0.580951*eta2 - 
-    	       0.960673*eta3 + 3.35241*eta4 ;
-
-	adouble E_rad = E_rad_ns*(1.+S_red*(-0.00303023 - 2.00661*eta +7.70506*eta2)) / 
-		(1+ S_red*(-0.67144 - 1.47569*eta +7.30468*eta2));
-	adouble MWRD = (1.5251-1.1568*pow(1-a,0.1292));
-	adouble MWdamp = ((1.5251-1.1568*pow(1.-a,0.1292))/(2.*(0.700 + 1.4187*pow(1.-a,-.4990))));
-	source_param->fdamp = (1./(2*M_PI))*(MWdamp)/(M*(1. - E_rad));
+	_calc_fdamp(source_param);
 
 }
 

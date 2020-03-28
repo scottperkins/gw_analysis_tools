@@ -270,7 +270,7 @@ int threshold_times_MBH(int argc, char *argv[])
 	params.phip = 0.1;
 	params.spin1[2] = 0.7022*cos( 2.572);
 	params.spin2[2] = 0.7873*cos(1.6073);
-	params.Luminosity_Distance = DL_from_Z(0.54288,"Planck15");
+	params.Luminosity_Distance = DL_from_Z(0.14288,"Planck15");
 	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
@@ -282,8 +282,8 @@ int threshold_times_MBH(int argc, char *argv[])
 	params.shift_phase=true;
 	params.sky_average=true;
 	
-	params.mass1 =1.0142e+03;
-	params.mass2 = 0.3773e+03;
+	params.mass1 =1.0142e+04;
+	params.mass2 = 0.3773e+04;
 	params.theta_l = 1;
 	params.phi_l = 2;
 	params.equatorial_orientation = false;
@@ -298,6 +298,7 @@ int threshold_times_MBH(int argc, char *argv[])
 	double Tobs = 4*T_year;
 	double Twait = 20*T_year;
 	params.tc = 3.*Tobs/4.;
+	//params.tc = 0.*Tobs/4.;
 	std::cout<<"tc in years: "<<params.tc/T_year<<std::endl;
 	
 	std::cout<<"BOUNDS CALC"<<std::endl;
