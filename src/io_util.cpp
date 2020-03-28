@@ -626,6 +626,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 				//data[j][l] = fft_data[j][i]*sqrt(Tobs)/(double )N_trimmed;
 	//#################################################
 				data[j][l] = fft_data[j][i]*(Tobs)/(double )N_trimmed;
+
 				//data[j][l] = fft_data[j][i]*sqrt(Tobs)/(double )N_trimmed;
 				//data[j][l] = fft_data[j][i]/(double )N_trimmed;
 	//#################################################
