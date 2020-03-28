@@ -662,23 +662,17 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		return 0;
 	}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
-	//double mass1 = parameters->mass1;
-	//double mass2 = parameters->mass2;
-	//double Luminosity_Distance = parameters->Luminosity_Distance;
-	//double *spin1 = parameters->spin1;
-	//double *spin2 = parameters->spin2;
-	//double phi_c = parameters->phic;
-	//double t_c = parameters->tc;
 	source_parameters<T> params;
-	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
 	params = params.populate_source_parameters(parameters);
 	params.f_ref = parameters->f_ref;
 	params.phiRef = parameters->phiRef;
+	params.phic = parameters->phic;
 	params.cosmology = parameters->cosmology;
 	params.shift_time = parameters->shift_time;
 	params.shift_phase = parameters->shift_phase;
 	params.NSflag1 = parameters->NSflag1;
 	params.NSflag2 = parameters->NSflag2;
+	params.dep_postmerger = parameters->dep_postmerger;
 
 	if(generation_method == "IMRPhenomD")
 	{

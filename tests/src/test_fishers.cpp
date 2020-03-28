@@ -1,6 +1,7 @@
 #include "gwat/util.h"
 #include "gwat/fisher.h"
 #include "gwat/detector_util.h"
+#include "gwat/waveform_util.h"
 #include <iostream>
 
 
@@ -28,45 +29,46 @@ int main(int argc, char *argv[])
 }
 int AD_v_N(int argc, char *argv[])
 {
-	#pragma ADOLC_OpenMP
-	{
 	std::cout.precision(5);
-	}
 	gen_params params;	
 	params.spin1[2] = .3;
 	params.spin2[2] = .3;
 	params.chip = .7;
-	params.phip = 0.1;
+	params.phip = 0.0;
 	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
 	params.phic = 1;
 	params.RA = 2.;
-	params.DEC = -1.1;
-	params.f_ref = 1e-5;
+	params.DEC = -0.1;
+	params.f_ref = 20;
+
 	params.NSflag1 = false;
 	params.NSflag2 = false;
 	params.horizon_coord = false;
 	params.shift_time=false;
 	params.shift_phase=false;
+	params.dep_postmerger=true;
+	params.equatorial_orientation = false;
+	params.sky_average=true;
 	
-	//params.mass1 = 5e6;
-	//params.mass2 = 5e6;
-	//params.f_ref = 20;
-	//params.psi = .1;
-	//double fmin = 20;
-	//double fmax = 2048;
-	//params.incl_angle = .1;
-	//params.tc = 10;
-	//params.equatorial_orientation = false;
-	//double T = 32;
 	params.mass1 = 9e1;
 	params.mass2 = 4e1;
-	params.theta_l = 1;
-	params.phi_l = 2;
-	params.tc = T_year;
-	params.equatorial_orientation = true;
-	double fmin = 3e-2;
-	double fmax = 1e-1;
-	double T = T_year/2;
+	//params.theta_l = 1.1;
+	//params.phi_l = 2.1;
+	params.psi = 0;
+	params.incl_angle = 0;
+	params.gmst = 2.;
+
+	//double fmin = 3e-2;
+	//double fmax = 1e-1;
+	//double T = T_year/2;
+
+	double fmin = 20;
+	double fmax = 2048;
+	double T = 32;
+
+	params.tc = 3.*T/4.;
+	//params.tc = 0;
 
 	int length = T*(fmax-fmin);
 	double *frequency = new double[length];
@@ -75,16 +77,20 @@ int AD_v_N(int argc, char *argv[])
 	for(int i = 0 ; i<length; i++){
 		frequency[i]=fmin + (double)i /T;
 	}
-	//populate_noise(frequency, "aLIGO_analytic",psd, length, 48);
-	populate_noise(frequency, "LISA_CONF",psd, length, 12);
+	populate_noise(frequency, "aLIGO_analytic",psd, length, 48);
+	//populate_noise(frequency, "LISA_CONF",psd, length, 12);
 	for(int i = 0 ; i<length; i++){
 		psd[i]*=psd[i];	
 	}
 
-	std::string detector = "LISA";
-	std::string method = "IMRPhenomPv2";
+	//std::string detector = "LISA";
+	std::string detector = "Hanford";
+	std::string method = "IMRPhenomD";
+	//std::string method = "IMRPhenomPv2";
+	//transform_orientation_coords(&params, method, detector);
+	std::cout<<params.psi<<" "<<params.incl_angle<<std::endl;
 		
-	int dim = 13;
+	int dim = 7;
 	double **output_N = allocate_2D_array(dim,dim);
 	double **output_AD = allocate_2D_array(dim,dim);
 	double **COV_AD = allocate_2D_array(dim,dim);
@@ -103,7 +109,6 @@ int AD_v_N(int argc, char *argv[])
 
 	fisher_autodiff(frequency, length, method, detector, output_AD, dim, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
 	
-	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	
 	std::cout<<"AD:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
@@ -113,6 +118,7 @@ int AD_v_N(int argc, char *argv[])
 		}
 		std::cout<<std::endl;
 	}
+	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	std::cout<<"COV AD:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
@@ -136,9 +142,18 @@ int AD_v_N(int argc, char *argv[])
 	//}
 	std::cout<<"FRACTIONAL DIFF (N-AD)*2/(N+AD):"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
-
+		std::cout<<i<<" ";
 		for(int j = 0 ; j<dim; j++){
-			std::cout<<(output_N[i][j] - output_AD[i][j])*2./(output_N[i][j] + output_AD[i][j])<<" ";
+			std::cout<<(output_N[i][j] - output_AD[i][j])*2./(fabs(output_N[i][j]) + fabs(output_AD[i][j]))<<" ";
+		}
+		std::cout<<std::endl;
+	}
+
+	std::cout<<"DIFF (N-AD):"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<(output_N[i][j] - output_AD[i][j])<<" ";
 		}
 		std::cout<<std::endl;
 	}

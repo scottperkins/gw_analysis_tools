@@ -149,7 +149,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-	double epsilon = 1e-6;
+	double epsilon = 1e-7;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
@@ -1732,7 +1732,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[9]=input_params->spin1[2];
 				parameters[10]=input_params->spin2[2];
 				parameters[11]=input_params->chip;
-				parameters[12]=input_params->phip;
+				//parameters[12]=input_params->phip;
 
 			}
 
@@ -1841,6 +1841,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 
 			}
 			else{
+		
+				std::cout<<"Sky averaged IMRPhenomPv2 is not supported for regular fishers."<<std::endl;
 
 			}
 	
@@ -1991,7 +1993,8 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->spin1[2] = avec_parameters[9];
 				a_params->spin2[2] = avec_parameters[10];
 				a_params->chip = avec_parameters[11];
-				a_params->phip = avec_parameters[12];
+				//a_params->phip = avec_parameters[12];
+				a_params->phip = 0;
 
 			}	
 		}	
@@ -2286,7 +2289,7 @@ void calculate_fisher_elements_batch(double *frequency,
 				else if(integration_method =="SIMPSONS"){
 				
 					output[j][k] = 4*simpsons_sum(
-								frequency[1]-frequency[0], length, integrand);	
+						frequency[1]-frequency[0], length, integrand);	
 				}
 			}
 			output[k][j] = output[j][k];
