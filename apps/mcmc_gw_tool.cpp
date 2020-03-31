@@ -242,7 +242,6 @@ int main(int argc, char *argv[])
 		params.spin1[2]=initial_position[0][9];
 		params.spin2[2]=initial_position[0][10];
 		params.phiRef = 0;
-		params.phic = 0;
 		params.tc = 0;
 		params.f_ref =20;
 		params.NSflag1=false;

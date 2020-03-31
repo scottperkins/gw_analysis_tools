@@ -7,7 +7,7 @@ project(gw_analysis_tools
 #SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 #SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libstdc++")
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++ -lc++abi")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -ffast-math")
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   #set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/gwat_base/" CACHE PATH "..." FORCE)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/" CACHE PATH "..." FORCE)
@@ -51,6 +51,9 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/src")
 
 #Executables
 add_subdirectory("${CMAKE_SOURCE_DIR}/apps")
+
+#Python
+#add_subdirectory("${CMAKE_SOURCE_DIR}/gwatpy")
 
 if(TEST_PROGRAMS)
 	add_subdirectory("${CMAKE_SOURCE_DIR}/tests")

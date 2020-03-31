@@ -53,7 +53,7 @@ double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 	params.spin2[0]= 0;
 	params.spin2[1]= 0;
 	params.spin2[2]= spin2;
-	params.phic=0;
+	params.phiRef=0;
 	params.tc=0;
 	params.NSflag1=NSflag;
 	params.NSflag2=NSflag;
@@ -192,7 +192,7 @@ double maximized_coal_log_likelihood_IMRPhenomD_Full_Param(double *frequencies,
 	params.spin2[0]= 0;
 	params.spin2[1]= 0;
 	params.spin2[2]= spin2;
-	params.phic=0.;
+	params.phiRef=0.;
 	params.tc=0.0;
 	params.NSflag1=NSflag;
 	params.NSflag2=NSflag;
@@ -476,14 +476,14 @@ double maximized_coal_Log_Likelihood(std::complex<double> *data,
 				std::string generation_method,
 				fftw_outline *plan,
 				double *tc,
-				double *phic
+				double *phiRef
 				)
 {
 	std::complex<double> *response =
 		(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 	fourier_detector_response(frequencies, length, response, detector, generation_method, params);
 	double ll = maximized_coal_Log_Likelihood_internal(data, psd, frequencies,
-				response, length, plan, tc, phic);
+				response, length, plan, tc, phiRef);
 	free(response);
 	return ll;
 }
@@ -495,7 +495,7 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 				size_t length,
 				fftw_outline *plan,
 				double *tc,
-				double *phic
+				double *phiRef
 				)
 {
 
@@ -548,7 +548,7 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 	int max_index = std::distance(g,max);
 	double Tau = 1./delta_f;
 	*tc = (double)(max_index)/length * ( Tau );
-	*phic = std::arg(gc[max_index]);
+	*phiRef = std::arg(gc[max_index]);
 	//double max = *std::max_element(g, g+length)*delta_f; 
 
 	free(integrand);
@@ -3925,7 +3925,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.Luminosity_Distance = DL;
 		//The rest is maximized over for this option
 		parameters.tc = 0;
-		parameters.phic = 0;
+		parameters.phiRef = 0;
 		parameters.incl_angle = incl;
 		//parameters.phi=phi[0];
 		//parameters.theta=theta[0];
@@ -4016,7 +4016,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		parameters.Luminosity_Distance = DL;
 		//The rest is maximized over for this option
 		parameters.tc = 0;
-		//parameters.phic = 0;
+		//parameters.phiRef = 0;
 		parameters.phiRef=phiref;
 		parameters.f_ref=fref;
 		parameters.incl_angle = incl;
@@ -4175,7 +4175,7 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 		parameters.Luminosity_Distance = DL;
 		//The rest is maximized over for this option
 		parameters.tc = 0;
-		parameters.phic = 0;
+		parameters.phiRef = 0;
 		parameters.incl_angle = incl;
 		parameters.phi=0;
 		parameters.theta=0;
@@ -4257,7 +4257,7 @@ void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **o
 		parameters.Luminosity_Distance = DL;
 		//The rest is maximized over for this option
 		parameters.tc = 0;
-		//parameters.phic = 0;
+		//parameters.phiRef = 0;
 		parameters.phiRef=phiref;
 		parameters.f_ref=fref;
 		parameters.incl_angle = incl;

@@ -12,6 +12,8 @@ int time_comparison_NADPN(int argc, char *argv[]);
 int time_comparison_NADPN_MBH(int argc, char *argv[]);
 int integration_interval_SM(int argc, char *argv[]);
 int integration_interval_MBH(int argc, char *argv[]);
+int observation_interval_SM(int argc, char *argv[]);
+int observation_interval_MBH(int argc, char *argv[]);
 int threshold_times_MBH(int argc, char *argv[]);
 int threshold_times_SM(int argc, char *argv[]);
 int tbm_testing(int argc, char *argv[]);
@@ -48,6 +50,12 @@ int main(int argc, char *argv[])
 	else if(runtime_opt == 6){
 		return threshold_times_MBH(argc,argv);
 	}
+	else if(runtime_opt == 7){
+		return observation_interval_SM(argc,argv);
+	}
+	else if(runtime_opt == 8){
+		return observation_interval_MBH(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
@@ -65,7 +73,7 @@ int tbm_testing(int argc, char *argv[])
 	params.chip = .7;
 	params.phip = 0.1;
 	params.Luminosity_Distance = 100;
-	params.phic = 1;
+	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 1e-5;
@@ -76,8 +84,10 @@ int tbm_testing(int argc, char *argv[])
 	params.shift_phase=true;
 	params.sky_average=true;
 	
-	params.mass1 = 36;
-	params.mass2 = 29;
+	//params.mass1 = 36;
+	//params.mass2 = 29;
+	params.mass1 = 36e5;
+	params.mass2 = 29e4;
 	params.theta_l = 1;
 	params.phi_l = 1;
 	params.phiRef= 10;
@@ -87,14 +97,22 @@ int tbm_testing(int argc, char *argv[])
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
 
 	std::string method = "IMRPhenomD";
+	//std::string method = "ppE_IMRPhenomPv2_IMR";
+	//params.Nmod = 1;
+	//params.betappe = new double[params.Nmod];
+	//params.betappe[0]=100;
+	//params.bppe = new int[params.Nmod];
+	//params.bppe[0]=-1;
 
 
 	double fpeak, frd, fdamp;
 	postmerger_params(&params, method, &fpeak,&fdamp, &frd);
 	std::cout<<fpeak<<std::endl;
 
-	double fmin= 1e-2;
-	double fmax= 1;
+	double fmin= 1e-6;
+	double fmax= 5e-3;
+	//double fmin= 1e-2;
+	//double fmax= 1;
 	int length = 1e3;
 	double *freqs = new double[length];
 	double *times = new double[length];
@@ -161,6 +179,8 @@ int tbm_testing(int argc, char *argv[])
 	deallocate_2D_array(output, length, 2);
 	delete [] freqs;
 	delete [] times;
+	//delete [] params.betappe;
+	//delete [] params.bppe;
 	return 0;
 }
 int threshold_times_SM(int argc, char *argv[])
@@ -270,7 +290,7 @@ int threshold_times_MBH(int argc, char *argv[])
 	params.phip = 0.1;
 	params.spin1[2] = 0.7022*cos( 2.572);
 	params.spin2[2] = 0.7873*cos(1.6073);
-	params.Luminosity_Distance = DL_from_Z(0.14288,"Planck15");
+	params.Luminosity_Distance = DL_from_Z(0.04288,"Planck15");
 	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
@@ -283,7 +303,7 @@ int threshold_times_MBH(int argc, char *argv[])
 	params.sky_average=true;
 	
 	params.mass1 =1.0142e+04;
-	params.mass2 = 0.3773e+04;
+	params.mass2 = 0.3773e+03;
 	params.theta_l = 1;
 	params.phi_l = 2;
 	params.equatorial_orientation = false;
@@ -296,7 +316,7 @@ int threshold_times_MBH(int argc, char *argv[])
 	double fmin= 1e-6;
 	double fmax= 1;
 	double Tobs = 4*T_year;
-	double Twait = 20*T_year;
+	double Twait = 200000000*T_year;
 	params.tc = 3.*Tobs/4.;
 	//params.tc = 0.*Tobs/4.;
 	std::cout<<"tc in years: "<<params.tc/T_year<<std::endl;
@@ -361,8 +381,9 @@ int threshold_times_MBH(int argc, char *argv[])
 	
 	return 0;
 }
-int integration_interval_SM(int argc, char *argv[])
+int observation_interval_SM(int argc, char *argv[])
 {
+	std::cout<<" TESTING stellar mass observation interval"<<std::endl;
 	std::cout.precision(5);
 	gen_params params;	
 	params.spin1[2] = .3;
@@ -370,7 +391,7 @@ int integration_interval_SM(int argc, char *argv[])
 	params.chip = .7;
 	params.phip = 0.1;
 	params.Luminosity_Distance = 1000;
-	params.phic = 1;
+	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 1e-5;
@@ -382,6 +403,159 @@ int integration_interval_SM(int argc, char *argv[])
 	
 	params.mass1 = 9e1;
 	params.mass2 = 4e1;
+	params.theta_l = 1;
+	params.phi_l = 2;
+	//params.tc = T_year;
+	params.tc = 0;
+	params.equatorial_orientation = true;
+
+	std::string method = "IMRPhenomPv2";
+
+	double bounds[2];
+	double fmin= 1e-5;
+	double fmax= 1;
+	int length = 1e5;
+	double *freqs = new double[length];
+	double *psd = new double[length];
+	double *integrand = new double[length];
+	std::complex<double> *response = new std::complex<double>[length];
+	double *times = new double[length];
+	double deltaf = (fmax-fmin)/length;
+	for (int i =0 ; i<length ; i++){
+		freqs[i]=fmin + i*deltaf;
+	}
+	populate_noise(freqs, "LISA_CONF",psd, length, 48);
+	for(int i =0 ; i<length ; i++){
+		psd[i]*=psd[i];
+	}
+	
+	time_phase_corrected_autodiff(times, length, freqs, &params, method, false, (int *)NULL);
+	fourier_detector_response(freqs,length, response, "LISA", method,&params, times);
+	
+	std::cout<<"OUTPUTTING"<<std::endl;
+	for(int i = 0 ; i<length ; i++){
+		integrand[i]=std::real( response[i] * std::conj(response[i]) ) /psd[i];
+	}
+	double **output = allocate_2D_array(length, 4);
+	
+	for(int i =0 ; i<length ; i++){
+		output[i][0]=freqs[i];
+		output[i][1]=integrand[i];
+		output[i][2]=psd[i];
+		output[i][3]=times[i];
+	}
+	write_file("data/observation_bounds.csv",output, length, 4);
+	deallocate_2D_array(output, length, 4);
+	
+	std::cout<<"BOUNDS CALC"<<std::endl;
+	bool autodiff = true;
+	observation_bounds(2.,4*T_year, "LISA","LISA_CONF",method,&params,bounds,autodiff);
+	std::cout<<bounds[0]<<" "<<bounds[1]<<std::endl;
+	delete [] freqs;
+	delete [] psd;
+	delete [] integrand;
+	delete [] response;
+	delete [] times;
+	return 0;
+}
+int observation_interval_MBH(int argc, char *argv[])
+{
+	std::cout<<" TESTING massive mass observation interval"<<std::endl;
+	std::cout.precision(5);
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = -.3;
+	params.chip = .7;
+	params.phip = 0.1;
+	params.Luminosity_Distance = 6600;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 1e-5;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 4.6e7;
+	params.mass2 = 4.5e7;
+	params.theta_l = 1;
+	params.phi_l = 2;
+	params.tc = T_year;
+	//params.tc = 0;
+	params.equatorial_orientation = true;
+
+	std::string method = "IMRPhenomPv2";
+
+	double bounds[2];
+	double fmin= 1e-5;
+	double fmax= 1;
+	int length = 1e5;
+	double *freqs = new double[length];
+	double *psd = new double[length];
+	double *integrand = new double[length];
+	std::complex<double> *response = new std::complex<double>[length];
+	double *times = new double[length];
+	double deltaf = (fmax-fmin)/length;
+	for (int i =0 ; i<length ; i++){
+		freqs[i]=fmin + i*deltaf;
+	}
+	populate_noise(freqs, "LISA_CONF",psd, length, 48);
+	for(int i =0 ; i<length ; i++){
+		psd[i]*=psd[i];
+	}
+	
+	time_phase_corrected_autodiff(times, length, freqs, &params, method, false, (int *)NULL);
+	fourier_detector_response(freqs,length, response, "LISA", method,&params, times);
+	
+	std::cout<<"OUTPUTTING"<<std::endl;
+	for(int i = 0 ; i<length ; i++){
+		integrand[i]=std::real( response[i] * std::conj(response[i]) ) /psd[i];
+	}
+	double **output = allocate_2D_array(length, 4);
+	
+	for(int i =0 ; i<length ; i++){
+		output[i][0]=freqs[i];
+		output[i][1]=integrand[i];
+		output[i][2]=psd[i];
+		output[i][3]=times[i];
+	}
+	write_file("data/observation_bounds.csv",output, length, 4);
+	deallocate_2D_array(output, length, 4);
+	
+	std::cout<<"BOUNDS CALC"<<std::endl;
+	bool autodiff = true;
+	observation_bounds(2.,4*T_year, "LISA","LISA_CONF",method,&params,bounds,autodiff);
+	std::cout<<bounds[0]<<" "<<bounds[1]<<std::endl;
+	delete [] freqs;
+	delete [] psd;
+	delete [] integrand;
+	delete [] response;
+	delete [] times;
+	return 0;
+}
+int integration_interval_SM(int argc, char *argv[])
+{
+	std::cout.precision(5);
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = -.3;
+	params.chip = .7;
+	params.phip = 0.1;
+	params.Luminosity_Distance = 1000;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 1e-5;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 4e1;
+	params.mass2 = 2e1;
 	params.theta_l = 1;
 	params.phi_l = 2;
 	params.tc = T_year;
@@ -444,7 +618,7 @@ int integration_interval_MBH(int argc, char *argv[])
 	params.chip = .5;
 	params.phip = 0.1;
 	params.Luminosity_Distance = 5000;
-	params.phic = 1;
+	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 1e-5;
@@ -518,7 +692,7 @@ int time_comparison_NADPN_MBH(int argc, char *argv[])
 	params.chip = .7;
 	params.phip = 0.1;
 	params.Luminosity_Distance = 4608.28;
-	params.phic = 1;
+	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 1e-5;
@@ -537,7 +711,7 @@ int time_comparison_NADPN_MBH(int argc, char *argv[])
 	params.equatorial_orientation = true;
 	double fmin = 3e-7;
 	double fmax = 5e-4;
-	double T = 1*T_year;
+	double T = 4*T_year;
 
 	int length = T*(fmax-fmin);
 	double *frequency = new double[length];
@@ -594,7 +768,7 @@ int time_comparison_NADPN(int argc, char *argv[])
 	params.chip = .7;
 	params.phip = 0.1;
 	params.Luminosity_Distance = 100;
-	params.phic = 1;
+	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 1e-5;
@@ -667,6 +841,8 @@ void RT_ERROR_MSG()
 	std::cout<<"4 --- Tbm (time before merger) testing"<<std::endl;
 	std::cout<<"5 --- threhold times for LISA detection Stellar Mass"<<std::endl;
 	std::cout<<"6 --- threhold times for LISA detection MBH"<<std::endl;
+	std::cout<<"7 --- observation bounds for LISA detection Stellar Mass"<<std::endl;
+	std::cout<<"8 --- observation bounds for LISA detection MBH"<<std::endl;
 }
 
 

@@ -118,7 +118,7 @@ void IMRPhenomD<T>::construct_amplitude_derivative(double *frequencies, /**< inp
 	double evaluate_params[dimension +1] ;
 	double grad[dimension+1];
 	evaluate_params[1] = input_params-> A0;
-	evaluate_params[2] = input_params-> phic;
+	evaluate_params[2] = input_params-> phiRef;
 	evaluate_params[3] = input_params-> tc;
 	evaluate_params[4] = input_params-> chirpmass;
 	evaluate_params[5] = input_params-> eta;
@@ -191,7 +191,7 @@ void IMRPhenomD<T>::construct_phase_derivative(double *frequencies, /**< input a
 	double evaluate_params[dimension +1] ;
 	double grad[dimension+1];
 	evaluate_params[1] = input_params-> A0;
-	evaluate_params[2] = input_params-> phic;
+	evaluate_params[2] = input_params-> phiRef;
 	evaluate_params[3] = input_params-> tc;
 	evaluate_params[4] = input_params-> chirpmass;
 	evaluate_params[5] = input_params-> eta;
@@ -268,7 +268,7 @@ void IMRPhenomD<T>::amplitude_tape(source_parameters<double> *input_params, /**<
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
-		parameters[1] <<= input_params-> phic;
+		parameters[1] <<= input_params-> phiRef;
 		parameters[2] <<= input_params-> tc;
 		parameters[3] <<= input_params-> chirpmass;
 		parameters[4] <<= input_params-> eta;
@@ -325,7 +325,7 @@ void IMRPhenomD<T>::phase_tape(source_parameters<double> *input_params, /**< sou
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
-		parameters[1] <<= input_params-> phic;
+		parameters[1] <<= input_params-> phiRef;
 		parameters[2] <<= input_params-> tc;
 		parameters[3] <<= input_params-> chirpmass;
 		parameters[4] <<= input_params-> eta;
@@ -444,7 +444,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	//If phic is specified, ignore f_ref phiRef and use phic
 	else{
 		f_ref = 0;
-		phic = params->phic;
+		phic = params->phiRef;
 	}
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
@@ -457,7 +457,6 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		tc_shift=0;
 	}
 	tc = 2*M_PI*params->tc - tc_shift;
-	//std::cout<<f_ref<<" "<<tc<<" "<<phic<<std::endl;
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);
@@ -543,7 +542,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	//If phic is specified, ignore f_ref phiRef and use phic
 	else{
 		f_ref = 0;
-		phic = params->phic;
+		phic = params->phiRef;
 	}
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
@@ -691,7 +690,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 	//If phic is specified, ignore f_ref phiRef and use phic
 	else{
 		f_ref = 0;
-		phic = params->phic;
+		phic = params->phiRef;
 	}
 	
 	//Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc

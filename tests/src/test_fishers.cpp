@@ -37,7 +37,6 @@ int AD_v_N(int argc, char *argv[])
 	params.phip = 0.0;
 	params.Luminosity_Distance = 100;
 	params.phiRef = 1;
-	params.phic = 1;
 	params.RA = 2.;
 	params.DEC = -0.1;
 	params.f_ref = 20;
@@ -65,7 +64,7 @@ int AD_v_N(int argc, char *argv[])
 
 	double fmin = 20;
 	double fmax = 2048;
-	double T = 32;
+	double T = 10;
 
 	params.tc = 3.*T/4.;
 	//params.tc = 0;
@@ -118,15 +117,15 @@ int AD_v_N(int argc, char *argv[])
 		}
 		std::cout<<std::endl;
 	}
-	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
-	std::cout<<"COV AD:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<COV_AD[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//gsl_LU_matrix_invert(output_AD,COV_AD,dim);
+	//std::cout<<"COV AD:"<<std::endl;
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<COV_AD[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	//params.phiRef-=1;
 	//params.phip+=1;

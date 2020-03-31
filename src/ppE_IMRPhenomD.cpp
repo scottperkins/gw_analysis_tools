@@ -367,7 +367,7 @@ void ppE_IMRPhenomD_Inspiral<T>::amplitude_tape(source_parameters<double> *input
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
-		parameters[1] <<= input_params-> phic;
+		parameters[1] <<= input_params-> phiRef;
 		parameters[2] <<= input_params-> tc;
 		parameters[3] <<= input_params-> chirpmass;
 		parameters[4] <<= input_params-> eta;
@@ -434,7 +434,7 @@ void ppE_IMRPhenomD_Inspiral<T>::phase_tape(source_parameters<double> *input_par
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
-		parameters[1] <<= input_params-> phic;
+		parameters[1] <<= input_params-> phiRef;
 		parameters[2] <<= input_params-> tc;
 		parameters[3] <<= input_params-> chirpmass;
 		parameters[4] <<= input_params-> eta;
@@ -495,7 +495,7 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_amplitude_derivative(double *frequenc
 	double evaluate_params[dimension +1] ;
 	double grad[dimension+1];
 	evaluate_params[1] = input_params-> A0;
-	evaluate_params[2] = input_params-> phic;
+	evaluate_params[2] = input_params-> phiRef;
 	evaluate_params[3] = input_params-> tc;
 	evaluate_params[4] = input_params-> chirpmass;
 	evaluate_params[5] = input_params-> eta;
@@ -571,7 +571,7 @@ void ppE_IMRPhenomD_Inspiral<T>::construct_phase_derivative(double *frequencies,
 	double evaluate_params[dimension +1] ;
 	double grad[dimension+1];
 	evaluate_params[1] = input_params-> A0;
-	evaluate_params[2] = input_params-> phic;
+	evaluate_params[2] = input_params-> phiRef;
 	evaluate_params[3] = input_params-> tc;
 	evaluate_params[4] = input_params-> chirpmass;
 	evaluate_params[5] = input_params-> eta;
@@ -686,7 +686,7 @@ void ppE_IMRPhenomD_IMR<T>::fisher_calculation_sky_averaged(double *frequency,
 		source_parameters<double> input_params;
 		input_params = source_parameters<double>::populate_source_parameters_old(parameters->mass1,
 			parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
-			parameters->spin2,parameters->phic,parameters->tc,parameters->sky_average);
+			parameters->spin2,parameters->phiRef,parameters->tc,parameters->sky_average);
 		input_params.shift_time = parameters->shift_time;
 		//Need the splitting frequency	
 		lambda_parameters<double> lambda, *lambda_ptr;
@@ -764,7 +764,7 @@ void ppE_IMRPhenomD_IMR<T>::amplitude_tape(source_parameters<double> *input_para
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
-		parameters[1] <<= input_params-> phic;
+		parameters[1] <<= input_params-> phiRef;
 		parameters[2] <<= input_params-> tc;
 		parameters[3] <<= input_params-> chirpmass;
 		parameters[4] <<= input_params-> eta;
@@ -831,7 +831,7 @@ void ppE_IMRPhenomD_IMR<T>::phase_tape(source_parameters<double> *input_params, 
 
 		freq <<= freqs[i];
 		parameters[0] <<= input_params-> A0;
-		parameters[1] <<= input_params-> phic;
+		parameters[1] <<= input_params-> phiRef;
 		parameters[2] <<= input_params-> tc;
 		parameters[3] <<= input_params-> chirpmass;
 		parameters[4] <<= input_params-> eta;
@@ -892,7 +892,7 @@ void ppE_IMRPhenomD_IMR<T>::construct_amplitude_derivative(double *frequencies, 
 	double evaluate_params[dimension +1] ;
 	double grad[dimension+1];
 	evaluate_params[1] = input_params-> A0;
-	evaluate_params[2] = input_params-> phic;
+	evaluate_params[2] = input_params-> phiRef;
 	evaluate_params[3] = input_params-> tc;
 	evaluate_params[4] = input_params-> chirpmass;
 	evaluate_params[5] = input_params-> eta;
@@ -967,7 +967,7 @@ void ppE_IMRPhenomD_IMR<T>::construct_phase_derivative(double *frequencies, /**<
 	double evaluate_params[dimension +1] ;
 	double grad[dimension+1];
 	evaluate_params[1] = input_params-> A0;
-	evaluate_params[2] = input_params-> phic;
+	evaluate_params[2] = input_params-> phiRef;
 	evaluate_params[3] = input_params-> tc;
 	evaluate_params[4] = input_params-> chirpmass;
 	evaluate_params[5] = input_params-> eta;

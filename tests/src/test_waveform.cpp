@@ -57,7 +57,7 @@ int tc_comparison(int argc, char *argv[])
 	params.chip = .7;
 	params.phip = 0.1;
 	params.Luminosity_Distance = 100;
-	params.phic = 1;
+	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 1e-5;

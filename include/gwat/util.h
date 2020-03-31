@@ -140,8 +140,6 @@ public:
 	/*! Shift time detemines if phic or phiRef is used*/
 	bool shift_phase = true;
 	T phiRef=0;
-	/*!coalescence phase of the binary*/
-	T phic=0;
 
 	bool sky_average=false;
 	//###################################################
@@ -306,8 +304,6 @@ struct source_parameters
 	T f1_phase;
 	/*! Transition frequency 2 for the phase*/
 	T f2_phase;
-	/*! Coalescence phase*/
-	T phic;
 	/*! Coalescence time*/
 	T tc;
 	/*overall amplitude factor*/	
@@ -406,6 +402,8 @@ static source_parameters<T> populate_source_parameters_old(
 };
 template<class T, class U>
 void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *param_out);
+template<class T, class U>
+void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> **param_out);
 
 int newton_raphson_method_1d(void(*f_on_fprime)(double x, double *func, double *func_prime,void *param),double initial_guess,double tolerance ,int max_iterations,void *parameters,double *solution);
 template<class T>

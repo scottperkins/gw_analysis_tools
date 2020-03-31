@@ -21,10 +21,9 @@ int fourier_waveformC(double *frequencies,
 		double spin2x,
 		double spin2y,
 		double spin2z,
-		double phic,
+		double phiRef,
 		double tc,
 		double f_ref,
-		double phiRef,
 		double *ppE_beta,
 		int *ppE_b,
 		int Nmod,
@@ -45,7 +44,6 @@ int fourier_waveformC(double *frequencies,
 	params.spin2[1] = spin2y;
 	params.spin2[2] = spin2z;
 	params.tc = tc;
-	params.phic = phic;
 	params.bppe = ppE_b;
 	params.Nmod = Nmod;
 	params.betappe = ppE_beta;
@@ -133,7 +131,6 @@ int fourier_phaseC(double *frequencies,
 		double spin2x,
 		double spin2y,
 		double spin2z,
-		double phic,
 		double tc,
 		double f_ref,
 		double phiRef,
@@ -157,14 +154,13 @@ int fourier_phaseC(double *frequencies,
 	params.spin2[2] = spin2z;
 	params.tc = tc;
 	params.Luminosity_Distance = DL;
-	params.phic = phic;
+	params.phiRef = phiRef;
 	params.bppe = ppE_b;
 	params.betappe = ppE_beta;
 	params.Nmod = Nmod;
 	params.incl_angle = incl_angle;
 	params.theta = theta;
 	params.phi = phi;
-	params.phiRef = phiRef;
 	params.f_ref = f_ref;
 	params.NSflag1=false;
 	params.NSflag2=false;

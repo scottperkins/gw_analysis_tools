@@ -709,6 +709,14 @@ int fourier_detector_amplitude_phase(double *frequencies,
 void time_phase_corrected_autodiff(double *times, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, bool correct_time, int *tapes_in,int order)
 {
 	std::string local_method = "IMRPhenomD";
+	if(generation_method.find("ppE") != std::string::npos){
+		if(generation_method.find("Inspiral") != std::string::npos){
+			local_method = "ppE_IMRPhenomD_Inspiral";
+		}
+		else if(generation_method.find("IMR") != std::string::npos){
+			local_method = "ppE_IMRPhenomD_IMR";
+		}
+	}
 	bool save_dep = params->dep_postmerger;
 	params->dep_postmerger=true;
 
@@ -819,10 +827,18 @@ int boundary_number(std::string method)
 template<class T>
 void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T> *params, std::string generation_method, bool correct_time, int order)
 {
-	//std::string local_gen = generation_method;
-	std::string local_gen = "IMRPhenomD";
+	std::string local_method="IMRPhenomD";
+	if(generation_method.find("ppE") != std::string::npos){
+		if(generation_method.find("Inspiral") != std::string::npos){
+			local_method = "ppE_IMRPhenomD_Inspiral";
+		}
+		else if(generation_method.find("IMR") != std::string::npos){
+			local_method = "ppE_IMRPhenomD_IMR";
+		}
+	}
+
 	if(params->equatorial_orientation){
-		transform_orientation_coords(params,local_gen,"");
+		transform_orientation_coords(params,local_method,"");
 	}
 	if(length ==1){
 		T epsilon =1e-5;
@@ -834,9 +850,8 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 			//T temp_deltaf = temp_f[1]-temp_f[0];
 			T temp_phase_plus[2];
 			T temp_phase_cross[2];
-			fourier_phase(temp_f, 2, temp_phase_plus, temp_phase_cross, local_gen, params);
+			fourier_phase(temp_f, 2, temp_phase_plus, temp_phase_cross, local_method, params);
 			times[0] = (temp_phase_plus[1]-temp_phase_plus[0])/(2*M_PI*temp_deltaf);
-			//std::cout<<"ORDER 1"<<" "<<temp_phase_plus[1]<<" "<<temp_phase_plus[0]<<" "<<times[0]<<std::endl;
 		}
 		else if(order == 2){
 			T temp_f[3];
@@ -844,9 +859,9 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 			temp_f[2] = frequencies[0]+epsilon;
 			temp_f[1] = frequencies[0];
 			//T temp_deltaf = epsilon;
-			T temp_phase_plus[2];
-			T temp_phase_cross[2];
-			fourier_phase(temp_f, 3, temp_phase_plus, temp_phase_cross, local_gen, params);
+			T temp_phase_plus[3];
+			T temp_phase_cross[3];
+			fourier_phase(temp_f, 3, temp_phase_plus, temp_phase_cross, local_method, params);
 			times[0] = (temp_phase_plus[2]-2*temp_phase_plus[1] + temp_phase_plus[0])/(2*M_PI*epsilon*epsilon);
 
 		}
@@ -854,16 +869,15 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	}
 	//bool save_shift_time = params->shift_time;
 	//params->shift_time = false;
-	//std::string local_gen = "IMRPhenomD";
 	//################################################
 	T *phase_plus = new T[length];
 	T *phase_cross = new T[length];
 	//################################################
 	//################################################
-	fourier_phase(frequencies, length, phase_plus, phase_cross, local_gen, params);
+	fourier_phase(frequencies, length, phase_plus, phase_cross, local_method, params);
 	//################################################
 	T fdamp, fRD, fpeak, deltaf;
-	if(local_gen.find("IMRPhenomD")!=std::string::npos){
+	if(local_method.find("IMRPhenomD")!=std::string::npos){
 		source_parameters<T> s_param;
 		s_param = source_parameters<T>::populate_source_parameters(params);
 		s_param.sky_average = params->sky_average;
@@ -871,6 +885,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		s_param.phiRef = params->phiRef;
 		s_param.cosmology=params->cosmology;
 		s_param.incl_angle=params->incl_angle;
+		s_param.dep_postmerger=params->dep_postmerger;
 		IMRPhenomD<T> model;
 		lambda_parameters<T> lambda;
 		model.assign_lambda_param(&s_param,&lambda);	
@@ -880,7 +895,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		fpeak = model.fpeak(&s_param , &lambda);
 		deltaf = frequencies[1]-frequencies[0];
 	}
-	else if(local_gen.find("IMRPhenomPv2")!=std::string::npos){
+	else if(local_method.find("IMRPhenomPv2")!=std::string::npos){
 		source_parameters<T> s_param;
 		s_param = source_parameters<T>::populate_source_parameters(params);
 		s_param.sky_average = params->sky_average;
@@ -888,6 +903,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		s_param.phiRef = params->phiRef;
 		s_param.cosmology=params->cosmology;
 		s_param.incl_angle=params->incl_angle;
+		s_param.dep_postmerger=params->dep_postmerger;
 		IMRPhenomPv2<T> model;
 		if( ( params->chip + 1) > DOUBLE_COMP_THRESH){
 			s_param.chip = params->chip;
@@ -912,7 +928,7 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	//################################################
 	//Factor of 2 pi for the definition of time from frequency
 	//IMRPhenomD returns (-) phase
-	if(local_gen.find("IMRPhenom") !=std::string::npos){
+	if(local_method.find("IMRPhenom") !=std::string::npos){
 		//Currently using Nico's fix
 		if(correct_time){
 			T f = frequencies[0];
@@ -1085,7 +1101,8 @@ void assign_freq_boundaries(double *freq_boundaries,
 		transform_orientation_coords(input_params,generation_method,"");
 	}
 	gen_params_base<adouble> internal_params;
-	transform_parameters(input_params, &internal_params);
+	gen_params_base<adouble> *internal_params_ptr = &internal_params;
+	transform_parameters(input_params, &internal_params_ptr);
 	source_parameters<adouble> s_param;
 	s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
 	s_param.sky_average = internal_params.sky_average;
@@ -1656,6 +1673,8 @@ struct Tbm_struct
  * Also, tolerance is associated with Tbm. Closer to merger, this can correspond to much larger errors on frequency because the relationship is so steep between time and frequency near merger.
  *
  * Uses numerical if autodiff set to false-- omp safe and thread safe
+ *
+ * Numerical accuracy is spotty. The second derivative isn't always reliable
  *
  * Relative time: 
  *

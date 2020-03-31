@@ -1793,7 +1793,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					parameters[2]=input_params->psi;
 					parameters[3]=input_params->incl_angle;
 				}
-				parameters[4]=input_params->phic;
+				parameters[4]=input_params->phiRef;
 				parameters[5]=input_params->tc;
 				parameters[6]=input_params->Luminosity_Distance;
 				parameters[7]=calculate_chirpmass(input_params->mass1, 
@@ -1865,7 +1865,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[0] = A0_from_DL(parameters[3]*MSOL_SEC,
 					input_params->Luminosity_Distance*MPC_SEC,
 					input_params->sky_average);
-				parameters[1] = input_params->phic;
+				parameters[1] = input_params->phiRef;
 				parameters[2] = input_params->tc;
 				parameters[4] = calculate_eta(input_params->mass1, 
 					input_params->mass2);
@@ -2014,7 +2014,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				//transform_sph_cart(spin2sph,a_params->spin2);
 				//maximized out
 				a_params->phiRef = avec_parameters[4];
-				a_params->phic = 0;
 				a_params->tc = avec_parameters[5];
 
 				//a_params->mass1 = calculate_mass1(exp(avec_parameters[5]),
@@ -2056,7 +2055,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					a_params->psi = avec_parameters[2];
 					a_params->incl_angle=avec_parameters[3];
 				}
-				a_params->phic = avec_parameters[4];
+				a_params->phiRef = avec_parameters[4];
 				a_params->tc = avec_parameters[5];
 				//T spin1sph[3] = {avec_parameters[9],0,0};
 				//T spin2sph[3] = {avec_parameters[10],0,0};
@@ -2136,7 +2135,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				//transform_sph_cart(spin2sph,a_params->spin2);
 				a_params->spin1[2] = avec_parameters[2];
 				a_params->spin2[2] = avec_parameters[3];
-				a_params->phic=0;
 				a_params->phiRef=0;
 				a_params->tc=0;
 				//a_params->incl_angle=0;
@@ -2155,7 +2153,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					DL_from_A0((T)(avec_parameters[3]*MSOL_SEC),
 					avec_parameters[0],a_params->sky_average)/MPC_SEC;
 				a_params->tc = avec_parameters[2];
-				a_params->phic = avec_parameters[1];
+				a_params->phiRef = avec_parameters[1];
 				T chi1 = avec_parameters[5] + avec_parameters[6];
 				T chi2 = avec_parameters[5] - avec_parameters[6];
 				//T spin1sph[3] = {chi1,0,0};
