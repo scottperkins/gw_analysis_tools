@@ -34,7 +34,7 @@ int AD_v_N(int argc, char *argv[])
 	params.spin1[2] = .3;
 	params.spin2[2] = .3;
 	params.chip = .7;
-	params.phip = 0.0;
+	params.phip = 1.0;
 	params.Luminosity_Distance = 100;
 	params.phiRef = 1;
 	params.RA = 2.;
@@ -54,8 +54,8 @@ int AD_v_N(int argc, char *argv[])
 	params.mass2 = 2e1;
 	//params.theta_l = 1.1;
 	//params.phi_l = 2.1;
-	params.psi = 0;
-	params.incl_angle = 0;
+	params.psi = 1.;
+	params.incl_angle = 1./5;
 	params.gmst = 2.;
 
 	//double fmin = 3e-2;
@@ -127,18 +127,27 @@ int AD_v_N(int argc, char *argv[])
 	//	std::cout<<std::endl;
 	//}
 
-	//params.phiRef-=1;
-	//params.phip+=1;
-	//fisher_autodiff(frequency, length, method, detector, output_AD2, dim, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
-	//
-	//std::cout<<"FD AD / AD2:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<(output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j])<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+
+
+	//##########################################################################
+	//TESTING
+	//If you use 13 parameters (phip and phiRef), these two parameters are exactly,
+	//linearly correlated. Simply use one. 
+	//##########################################################################
+	params.phiRef-=1;
+	params.phip+=1;
+	fisher_autodiff(frequency, length, method, detector, output_AD2, dim, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
+	
+	std::cout<<"FD AD / AD2:"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<(output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j])<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	//##########################################################################
+	//##########################################################################
 	std::cout<<"FRACTIONAL DIFF (N-AD)*2/(N+AD):"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
@@ -148,14 +157,14 @@ int AD_v_N(int argc, char *argv[])
 		std::cout<<std::endl;
 	}
 
-	std::cout<<"DIFF (N-AD):"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<(output_N[i][j] - output_AD[i][j])<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//std::cout<<"DIFF (N-AD):"<<std::endl;
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<(output_N[i][j] - output_AD[i][j])<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	deallocate_2D_array(output_AD,dim,dim);
 	deallocate_2D_array(COV_AD,dim,dim);

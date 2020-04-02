@@ -303,26 +303,26 @@ int main(int argc, char *argv[])
 			initial_position[0] = new double[dimension];
 			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
-			std::cout<<"Running uncorrelated sampler "<<std::endl;
-			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
-					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,allocation_scheme, 
-					lp,threads, pool,show_progress,detector_N, 
-					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-					generation_method,stat_file,output_file, "",check_file);	
-			//double ***output2 = allocate_3D_array(chain_N,samples, dimension );
-			//double c = 1.1;
-			//chain_temps[0]=1;
-			//for(int i = 1 ; i<chain_N; i++){
-			//	chain_temps[i]=chain_temps[i-1]*c;
-			//}
-			//PTMCMC_MH_GW(output2, dimension, samples, chain_N, 
-			//		initial_position[0],seeding_var,chain_temps, 
-			//		swap_freq, lp,threads, pool,show_progress,detector_N, 
+			//std::cout<<"Running uncorrelated sampler "<<std::endl;
+			//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+			//		max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
+			//		swap_freq, t0, nu, correlation_thresh, correlation_segs,
+			//		correlation_convergence_thresh , ac_target,allocation_scheme, 
+			//		lp,threads, pool,show_progress,detector_N, 
 			//		data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-			//		generation_method,stat_file,output_file, "","",check_file);	
-			//deallocate_3D_array(output2,chain_N,samples,dimension);
+			//		generation_method,stat_file,output_file, "",check_file);	
+			double ***output2 = allocate_3D_array(chain_N,samples, dimension );
+			double c = 1.1;
+			chain_temps[0]=1;
+			for(int i = 1 ; i<chain_N; i++){
+				chain_temps[i]=chain_temps[i-1]*c;
+			}
+			PTMCMC_MH_GW(output2, dimension, samples, chain_N, 
+					initial_position[0],seeding_var,chain_temps, 
+					swap_freq, lp,threads, pool,show_progress,detector_N, 
+					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					generation_method,stat_file,output_file, "","data/LL.csv",check_file);	
+			deallocate_3D_array(output2,chain_N,samples,dimension);
 			delete [] initial_position[0]; delete [] initial_position;
 		}
 
@@ -352,7 +352,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
 
-	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
@@ -386,7 +386,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
 
-	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef

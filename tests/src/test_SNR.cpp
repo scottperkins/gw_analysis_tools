@@ -216,8 +216,10 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 	params.Luminosity_Distance  = 400;
 	params.RA =1.;
 	params.DEC =-1.;
-	params.psi =2.;
-	params.incl_angle =2.;
+	//params.psi =2.;
+	//params.incl_angle =2.;
+	params.theta_l =2.;
+	params.phi_l =2.;
 	params.gmst=1.;
 	
 	double Tobs = 4;
@@ -276,10 +278,10 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 		params.Luminosity_Distance  = 50 + gsl_rng_uniform(r)*1000;
 		params.RA =gsl_rng_uniform(r)*2*M_PI;
 		params.DEC =-1.5 + gsl_rng_uniform(r) * M_PI;
-		params.psi =gsl_rng_uniform(r)*2*M_PI;
-		params.incl_angle =gsl_rng_uniform(r)*M_PI;
+		params.phi_l =gsl_rng_uniform(r)*2*M_PI;
+		params.theta_l =gsl_rng_uniform(r)*M_PI;
 		params.gmst=gsl_rng_uniform(r)*2*M_PI;
-		//transform_orientation_coords(&params,method, detector);
+		transform_orientation_coords(&params,method, "");
 
 		clock_t start = clock();
 		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, 10, 2048, 1.e-12);

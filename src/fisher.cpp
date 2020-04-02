@@ -1985,7 +1985,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->spin2[2] = avec_parameters[10];
 				a_params->chip = avec_parameters[11];
 				//a_params->phip = avec_parameters[12];
-				a_params->phip = 0;
+				//a_params->phip = 0;
 
 			}	
 		}	
@@ -2199,6 +2199,11 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->LISA_alpha0 = input_params->LISA_alpha0;
 	waveform_params->LISA_phi0 = input_params->LISA_phi0;
 	waveform_params->dep_postmerger = input_params->dep_postmerger;
+	//Phi_p and phiRef are exactly degenerate 
+	//Chose phiRef to be the parameter in the fisher, phip is set
+	//to the input value
+	waveform_params->phip = input_params->phip;
+	
 	if( check_mod(gen_method)){
 		waveform_params->bppe = input_params->bppe;
 		waveform_params->Nmod = input_params->Nmod;

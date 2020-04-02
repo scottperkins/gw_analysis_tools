@@ -1310,6 +1310,7 @@ void PTMCMC_MH_GW(double ***output,
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
+	//mcmc_gmst = 2.456551496456678;
 	mcmc_Nmod = Nmod;
 	mcmc_bppe = bppe;
 	mcmc_log_beta = false;
