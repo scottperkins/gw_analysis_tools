@@ -2155,7 +2155,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	bool forced_PN_approx = false;
 	bool bad_time_freq_inversion = false;
 	bool round_off_error=false;	
-	bool max_iterations_reached=true;	
+	bool max_iterations_reached=false;	
 
 	threshold_times_out[0]=-1;
 	threshold_times_out[1]=-1;
