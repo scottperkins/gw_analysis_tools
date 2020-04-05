@@ -2549,7 +2549,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			t2_prev= t2;
 			snr_prev=snr;
 		}
-		if(search_ct == max_iter_search -1){
+		if(search_ct == max_iter_search ){
 			max_iterations_reached = true;
 		}
 		//Do it again for lower bound
@@ -2689,7 +2689,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			snr_prev=snr;
 			
 		}
-		if(search_ct == max_iter_search -1){
+		if(search_ct == max_iter_search ){
 			max_iterations_reached = true;
 		}
 	}
