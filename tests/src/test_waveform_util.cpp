@@ -193,8 +193,8 @@ int threshold_times_SM(int argc, char *argv[])
 	params.phip = 0.1;
 	params.Luminosity_Distance = 100;
 	params.phiRef = 1;
-	params.RA = 2.;
-	params.DEC = -1.1;
+	params.RA = 0.;
+	params.DEC = -0.1;
 	params.f_ref = 1e0;
 	params.NSflag1 = false;
 	params.NSflag2 = false;
@@ -206,7 +206,7 @@ int threshold_times_SM(int argc, char *argv[])
 	params.mass2 = 29;
 	params.theta_l = 1;
 	params.phi_l = 2;
-	params.tc = 0;
+	params.tc = 10*T_year;
 	params.equatorial_orientation = false;
 	params.incl_angle = 0;
 	params.sky_average=true;
@@ -222,7 +222,7 @@ int threshold_times_SM(int argc, char *argv[])
 	std::cout<<"BOUNDS CALC"<<std::endl;
 	bool autodiff = false;
 	int np = 1000;
-	double tol = 1e-6;
+	double tol = 1e-10;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 
 	clock_t start = clock();
@@ -288,9 +288,11 @@ int threshold_times_MBH(int argc, char *argv[])
 	gen_params params;	
 	params.chip = .5;
 	params.phip = 0.1;
-	params.spin1[2] = 0.7022*cos( 2.572);
-	params.spin2[2] = 0.7873*cos(1.6073);
-	params.Luminosity_Distance = DL_from_Z(0.04288,"Planck15");
+	//params.spin1[2] = 0.7022*cos( 2.572);
+	//params.spin2[2] = 0.7873*cos(1.6073);
+	params.spin1[2] = 0.407*cos( 2.9);
+	params.spin2[2] = 0.998*cos(2.17);
+	params.Luminosity_Distance = DL_from_Z(3.704,"Planck15");
 	params.phiRef = 1;
 	params.RA = 2.;
 	params.DEC = -1.1;
@@ -298,12 +300,14 @@ int threshold_times_MBH(int argc, char *argv[])
 	params.NSflag1 = false;
 	params.NSflag2 = false;
 	params.horizon_coord = false;
-	params.shift_time=true;
+	params.shift_time=false;
 	params.shift_phase=true;
 	params.sky_average=true;
 	
-	params.mass1 =1.0142e+04;
-	params.mass2 = 0.3773e+03;
+	//params.mass1 =1.0142e+04;
+	//params.mass2 = 0.3773e+03;
+	params.mass1 = 5.1277e7;
+	params.mass2 = 7.117e5;
 	params.theta_l = 1;
 	params.phi_l = 2;
 	params.equatorial_orientation = false;
@@ -313,21 +317,22 @@ int threshold_times_MBH(int argc, char *argv[])
 	std::string method = "IMRPhenomD";
 
 	double bounds[2];
-	double fmin= 1e-6;
+	double fmin= 1e-5;
 	double fmax= 1;
-	double Tobs = 4*T_year;
+	double Tobs = 10*T_year;
 	double Twait = 200000000*T_year;
-	params.tc = 3.*Tobs/4.;
-	//params.tc = 0.*Tobs/4.;
+	//params.tc = 3.*Tobs/4.;
+	params.tc = 0.*Tobs/4.;
 	std::cout<<"tc in years: "<<params.tc/T_year<<std::endl;
 	
 	std::cout<<"BOUNDS CALC"<<std::endl;
 	bool autodiff = false;
 	int np = 1000;
-	double tol = 1e-8;
+	double tol = 1e-10;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 	clock_t start = clock();
 	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+	std::cout<<"STATUS: "<<status<<std::endl;
 	std::cout<<"TIME: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
 	std::cout<<bounds[0]/T_year<<" "<<bounds[1]/T_year<<std::endl;
 	gsl_integration_workspace_free(w);
@@ -336,8 +341,8 @@ int threshold_times_MBH(int argc, char *argv[])
 	int snr_pts = 500;
 	double freqs[snr_pts];
 	double weights[snr_pts];
-	int iterations = 1000;
-	double delta_t = pow(200./.1,1./iterations);
+	int iterations = 100;
+	double delta_t = pow(20./.1,1./iterations);
 	double **snr_out = new double*[iterations];
 	double fbounds[2];
 	autodiff = true;
@@ -356,14 +361,18 @@ int threshold_times_MBH(int argc, char *argv[])
 			status = Tbm_to_freq(&params, method,(snr_out[i][0]-Tobs), &(fbounds[1]) ,tol,autodiff,max_iterations,relative_time);
 		}
 		else{
-			if(fpeak<fmax){
-				fbounds[1] = fpeak;
+			if(2*fpeak<fmax){
+				fbounds[1] = fpeak*2.;
 			}
 			else{
 				fbounds[1] = fmax;
 			}
 			
 		}
+		//double time[2];
+		//time_phase_corrected_autodiff(time,2,fbounds, &params,"IMRPhenomD",false);
+		//std::cout<<fbounds[0]<<" "<<fbounds[1]<<" "<<(-time[1]+time[0])/T_year<<std::endl;
+		
 		gauleg(log10(fbounds[0]), log10(fbounds[1]), freqs, weights, snr_pts);
 		for(int i  = 0 ; i<snr_pts; i++){
 			freqs[i]  = pow(10.,freqs[i]);

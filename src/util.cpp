@@ -22,6 +22,22 @@
  */
 
 
+void debugger_print(const char *file, const int line,std::string message)
+{
+	std::cout.precision(15);
+	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
+	std::cout<<message<<std::endl;
+}
+std::string strip_path(std::string input)
+{
+	char sep = '/';
+	size_t i = input.rfind(sep,input.length());
+	if(i != std::string::npos){
+		return input.substr(i+1, input.length() -1);
+	}
+	return "";
+}
+
 /*! \brief Newton Raphson method for a function of one dimension
  *
  * f_on_fprime is a function pointer that should assign the value result = f(x) / f'(x) 
