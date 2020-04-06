@@ -717,6 +717,8 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 			local_method = "ppE_IMRPhenomD_IMR";
 		}
 	}
+	//std::string local_method = generation_method;
+
 	bool save_dep = params->dep_postmerger;
 	params->dep_postmerger=true;
 

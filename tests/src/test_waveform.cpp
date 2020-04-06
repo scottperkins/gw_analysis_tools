@@ -220,10 +220,12 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 				gsl_complex tempPlus = (hptilde->data->data)[i];	
 				gsl_complex tempCross = (hctilde->data->data)[i];	
 				gsl_complex f1 = gsl_complex_rect(cos(2.*zeta_polariz),0.);
+				gsl_complex f2 = gsl_complex_rect(sin(2.*zeta_polariz),0.);
+				gsl_complex f3 = gsl_complex_rect(-sin(2.*zeta_polariz),0.);
 				(hptilde->data->data)[i] = gsl_complex_add(gsl_complex_mul(f1,tempPlus)
-						,gsl_complex_mul(gsl_complex_rect(sin(2.*zeta_polariz),0),tempCross));
+						,gsl_complex_mul(f2,tempCross));
 				(hctilde->data->data)[i] = gsl_complex_add(gsl_complex_mul(gsl_complex_rect(cos(2.*zeta_polariz),0.),tempCross)
-						,gsl_complex_mul(gsl_complex_rect(-sin(2.*zeta_polariz),0.0),tempPlus));
+						,gsl_complex_mul(f3,tempPlus));
 
 			}
 		}
@@ -232,7 +234,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams);
 			hctilde = XLALCreateCOMPLEX16FrequencySeries("hctilde: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
 			for(int i = 0 ; i<length; i++){
-				gsl_complex f2 = gsl_complex_rect(0.,cos(incl));
+				gsl_complex f2 = gsl_complex_rect(0.,-cos(incl));
 				(hctilde->data->data)[i] = gsl_complex_mul(f2,(hptilde->data->data)[i]);
 				gsl_complex f1 = gsl_complex_rect(0.5*(1. + cos(incl)*cos(incl)),0);
 				(hptilde->data->data)[i] = gsl_complex_mul(f1,(hptilde->data->data)[i]);
@@ -244,8 +246,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		double fplusG,fcrossG;
 		XLALComputeDetAMResponse(&fplus,&fcross, LALD.response, RA,DEC,psi,gmst);
 		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &fplusG,&fcrossG);
-		std::cout<<(fplus-fplusG)/fplus<<std::endl;
-		std::cout<<(fcross-fcrossG)/fcross<<std::endl;
+		std::cout<<"Fractional error on F+/Fx: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<std::endl;
 		for(int i = 0 ; i<length ; i++){
 			(det->data->data)[i]=gsl_complex_add(
 			gsl_complex_mul(gsl_complex_rect(fplus,0.),(hptilde->data->data)[i]),

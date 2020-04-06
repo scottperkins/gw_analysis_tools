@@ -805,6 +805,7 @@ int time_comparison_NADPN(int argc, char *argv[])
 	}
 
 	std::string method = "IMRPhenomD";
+	//std::string method = "IMRPhenomPv2";
 
 	double *times_N = new double[length];
 	double *times_AD = new double[length];
