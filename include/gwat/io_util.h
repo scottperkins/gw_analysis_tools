@@ -55,4 +55,26 @@ void free_LOSC_data(std::complex<double> **data,
 int count_lines_data_file(std::string file, int *count);
 int count_lines_LOSC_PSD_file(std::string file, int *count);
 int count_lines_LOSC_data_file(std::string file, int *count);
+
+
+
+//###########################################################################
+//HDF5
+//###########################################################################
+//class HDF5wrapper_ptr;
+//class HDF5wrapper
+//{
+//	public:
+// 		HDF5wrapper(int dims_outer,	
+//			int *dims_inner,
+//			int chunkdims_outer, 
+//			int *chunkdims,
+//			std::string DFILE_NAME,
+//			std::string DSET_NAME,
+//			bool deflate);
+//		~HDF5wrapper();
+//		
+//	private:
+//		HDF5wrapper_ptr *pimpl;
+//};
 #endif

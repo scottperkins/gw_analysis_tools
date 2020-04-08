@@ -6,10 +6,12 @@ EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.e
 #
 CCLOCAL:=$(CXX)
 LINKERLOCAL:=$(CXX)
-CFLAGS:=-fopenmp -O3  -Wall -I../include
+#CFLAGS:=-fopenmp -O3  -Wall -I../include -I/usr/include/hdf5/serial
+CFLAGS:=-fopenmp -O3  -Wall -I../include 
 LFLAGS:= -fopenmp -L../lib -L/usr/local/opt/hdf5/lib -L/home/sperkins/git-repos/gw_analysis_tools/build/lib
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
-LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
+#LIBS:=-lm -lgsl -lgwat -llal -llalsimulation -lhdf5 -lhdf5_cpp
+LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
 #LIBS:=-lm -lgwat -llal -llalsimulation
 #LIBS:=-lm -lgsl -lgwat 
 

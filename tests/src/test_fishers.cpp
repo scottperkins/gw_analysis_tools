@@ -90,8 +90,10 @@ int AD_v_N(int argc, char *argv[])
 	std::cout<<params.psi<<" "<<params.incl_angle<<std::endl;
 		
 	int dim = 12;
+	int dimD = 11;
 	double **output_N = allocate_2D_array(dim,dim);
 	double **output_AD = allocate_2D_array(dim,dim);
+	double **output_AD3 = allocate_2D_array(dimD,dimD);
 	double **COV_AD = allocate_2D_array(dim,dim);
 	double **output_AD2 = allocate_2D_array(dim,dim);
 
@@ -126,6 +128,18 @@ int AD_v_N(int argc, char *argv[])
 	//	}
 	//	std::cout<<std::endl;
 	//}
+	method = "IMRPhenomD";
+	fisher_autodiff(frequency, length, method, detector, output_AD3, dimD, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
+	
+	
+	std::cout<<"AD-D:"<<std::endl;
+	for(int i = 0 ; i<dimD; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dimD; j++){
+			std::cout<<output_AD3[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 
 
 
@@ -134,18 +148,18 @@ int AD_v_N(int argc, char *argv[])
 	//If you use 13 parameters (phip and phiRef), these two parameters are exactly,
 	//linearly correlated. Simply use one. 
 	//##########################################################################
-	params.phiRef-=1;
-	params.phip+=1;
-	fisher_autodiff(frequency, length, method, detector, output_AD2, dim, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
-	
-	std::cout<<"FD AD / AD2:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<(output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j])<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//params.phiRef-=1;
+	//params.phip+=1;
+	//fisher_autodiff(frequency, length, method, detector, output_AD2, dim, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
+	//
+	//std::cout<<"FD AD / AD2:"<<std::endl;
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<(output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j])<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	//##########################################################################
 	//##########################################################################
 	std::cout<<"FRACTIONAL DIFF (N-AD)*2/(N+AD):"<<std::endl;
@@ -169,6 +183,7 @@ int AD_v_N(int argc, char *argv[])
 	deallocate_2D_array(output_AD,dim,dim);
 	deallocate_2D_array(COV_AD,dim,dim);
 	deallocate_2D_array(output_AD2,dim,dim);
+	deallocate_2D_array(output_AD3,dimD,dimD);
 	deallocate_2D_array(output_N,dim,dim);
 	
 	delete [] frequency;

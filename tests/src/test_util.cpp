@@ -1,9 +1,11 @@
 #include <iostream>
 #include <math.h>
 #include <gwat/util.h>
+#include <gwat/io_util.h>
 
 int test_newton_raphson(int argc, char *argv[]);
 void cos_sin(double x, double *func, double *func_prime, void *param);
+int HDF5_testing_write(int argc,char *argv[]);
 void RT_ERROR_MSG();
 int main(int argc, char *argv[])
 {
@@ -17,10 +19,18 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 0){
 		return test_newton_raphson(argc,argv);	
 	}
+	else if(runtime_opt == 1){
+		return HDF5_testing_write(argc,argv);	
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int HDF5_testing_write(int argc,char *argv[])
+{
+	//HDF5wrapper io();
+	return 0;
 }
 int test_newton_raphson(int argc, char *argv[])
 {
@@ -45,4 +55,5 @@ void RT_ERROR_MSG()
 	std::cout<<"ERROR -- incorrect arguments"<<std::endl;
 	std::cout<<"Please supply function option:"<<std::endl;
 	std::cout<<"0 --- Test newton raphson"<<std::endl;
+	std::cout<<"1 --- Test HDF5 file write"<<std::endl;
 }

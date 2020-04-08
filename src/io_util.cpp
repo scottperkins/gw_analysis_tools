@@ -9,6 +9,7 @@
 #include <cctype>
 #include <complex>
 
+
 /*! \file 
  *
  * unpacks standard parameter file for input for runtime parameters
@@ -717,3 +718,103 @@ int count_lines_LOSC_data_file(std::string file, int *count)
 	*count-=3;//Adjust for header
 	return 0;
 }
+
+
+//###########################################################################
+//HDF5
+//###########################################################################
+//#include <H5Cpp.h>
+
+//class HDF5wrapper_ptr
+//{
+//public:
+//	H5std_string DFILE_NAME="";
+//	H5std_string DSET_NAME="";
+//	H5::DataSet *DSET;
+//	H5::H5File DFILE;
+//	H5::DataSpace DSPACE;
+//	int dims_outer;
+//	int chunkdims_outer;
+//	hsize_t *dims_inner=NULL;
+//	H5::DSetCreatPropList *plist=NULL;
+//	hsize_t *chunkdims=NULL;
+//	bool deflate;
+//	~HDF5wrapper_ptr()
+//	{
+//		if(!this->dims_inner){
+//			delete [] this->dims_inner;
+//		}
+//		if(!this->chunkdims){
+//			delete [] this->chunkdims;
+//		}
+//		if(!this->plist){
+//			delete this->plist;
+//		}
+//		this->DFILE.close();
+//
+//	}
+//	HDF5wrapper_ptr();
+//	int allocate(int dims_outer,	
+//		int *dims_inner,
+//		int chunkdims_outer, 
+//		int *chunkdims,
+//		std::string DFILE_NAME,
+//		std::string DSET_NAME,
+//		bool deflate)
+//	{
+//		this->dims_outer = dims_outer;
+//		this->dims_inner = new hsize_t[dims_outer];
+//		this->chunkdims = new hsize_t[chunkdims_outer];
+//		for(int i = 0 ; i<dims_outer; i++){
+//			this->chunkdims[i]=chunkdims[i];
+//		}
+//		for(int i = 0 ; i<chunkdims_outer; i++){
+//			this->dims_inner[i]=dims_inner[i];
+//			this->chunkdims[i]=chunkdims[i];
+//		}
+//		this->deflate = deflate;
+//		this->plist = new H5::DSetCreatPropList;
+//		this->plist->setChunk((hsize_t)chunkdims_outer,(hsize_t *)chunkdims);
+//		if(this->deflate){
+//			this->plist->setDeflate(6);
+//		}
+//		this->DFILE_NAME = DFILE_NAME;
+//		this->DFILE = H5::H5File(this->DFILE_NAME, H5F_ACC_TRUNC);
+//		this->DSPACE = H5::DataSpace(dims_outer, this->dims_inner);
+//		this->DSET = new H5::DataSet(this->DFILE.createDataSet(DSET_NAME, H5::PredType::NATIVE_DOUBLE,this->DSPACE, *(this->plist)));
+//	}
+//	int write_file(double *data)
+//	{
+//		this->DSET->write(data, H5::PredType::NATIVE_DOUBLE);
+//		return 0;
+//	}
+//	int _index(int *location, int outerdim, int *dims)
+//	{
+//		int index = 0;
+//		for(int i = 0 ; i<outerdim-1; i++){
+//			index+= location[i]*dims[i+1];
+//		}
+//		index+=location[outerdim-1];
+//		return index;
+//	}
+//	
+//};
+//
+// HDF5wrapper::HDF5wrapper(int dims_outer,	
+//			int *dims_inner,
+//			int chunkdims_outer, 
+//			int *chunkdims,
+//			std::string DFILE_NAME,
+//			std::string DSET_NAME,
+//			bool deflate)
+//{
+//			this->pimpl=new HDF5wrapper_ptr();
+//			//this->pimpl->allocate(dims_outer, dims_inner, chunkdims, DFILE_NAME,DSET_NAME,deflate);	
+//}
+//HDF5wrapper::~HDF5wrapper()
+//{
+//	this->pimpl->~HDF5wrapper_ptr();
+//	delete this->pimpl;
+//}
+
+
