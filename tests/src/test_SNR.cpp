@@ -223,24 +223,34 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 	params.gmst=1.;
 	
 	double Tobs = 4;
-	int length =(2048 - 10)*Tobs ;
+	int length =(10000 - 1)*Tobs ;
 	double deltaf = 1./(Tobs);
 	double *freqs = new double[length];
 	for(int i = 0 ; i<length; i++){
-		freqs[i] = 10 + i*deltaf;
+		freqs[i] = 1 + i*deltaf;
 	}
 	
 	int lengthgl1 = 500;
-	int lengthgl2 = 500;
+	int lengthgl2 = 1000;
+	int lengthgl3 = 5000;
 	double *freqsgl1 = new double[lengthgl1];
 	double *freqsgl2 = new double[lengthgl2];
+	double *freqsgl3 = new double[lengthgl3];
 	double *w1 = new double[lengthgl1];
 	double *w2 = new double[lengthgl2];
+	double *w3 = new double[lengthgl3];
 
-	gauleg(10, 2048, freqsgl1, w1, lengthgl1);
-	gauleg(log10(10), log10(2048), freqsgl2, w2, lengthgl2);
+	gauleg(log10(1), log10(10000), freqsgl1, w1, lengthgl1);
+	gauleg(log10(1), log10(10000), freqsgl2, w2, lengthgl2);
+	gauleg(log10(1), log10(10000), freqsgl3, w3, lengthgl3);
 	for(int i =0; i<lengthgl2; i++){
 		freqsgl2[i] = pow(10.,freqsgl2[i]);
+	}
+	for(int i =0; i<lengthgl1; i++){
+		freqsgl1[i] = pow(10.,freqsgl1[i]);
+	}
+	for(int i =0; i<lengthgl3; i++){
+		freqsgl3[i] = pow(10.,freqsgl3[i]);
 	}
 	
 
@@ -250,15 +260,15 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 	gsl_rng_set(r, 1);
 
 
-	double snr_gsl, snr_simps, snr_gl1,snr_gl2;
+	double snr_gsl, snr_simps, snr_gl1,snr_gl2,snr_gl3;
 	std::string noise_curve="aLIGO_analytic"	;
 	std::string method= "IMRPhenomPv2";
 	std::string detector="Hanford";
-	int iterations = 100;
+	int iterations = 200;
 	double **output = new double*[iterations];
 	std::cout<<"Starting loop -- finished prep"<<std::endl;
 	for(int i = 0 ; i<iterations; i++){
-		output[i]=new double[8];
+		output[i]=new double[10];
 		double m1 = 10+1e2*gsl_rng_uniform(r);
 		double m2 = 10+1e2*gsl_rng_uniform(r);
 		if(m1>m2){
@@ -284,34 +294,41 @@ int compare_GSL_simps_gl_stellar(int argc, char *argv[])
 		transform_orientation_coords(&params,method, "");
 
 		clock_t start = clock();
-		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, 10, 2048, 1.e-12);
+		calculate_snr_gsl(&snr_gsl, noise_curve,detector,method, &params, 1, 10000, 1.e-12);
 		double gsl_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
 		snr_simps = calculate_snr(noise_curve, detector,method, &params,freqs,length,"SIMPSONS",(double *)NULL,false);
 		double simps_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
-		snr_gl1 = calculate_snr(noise_curve, detector,method, &params,freqsgl1,lengthgl1,"GAUSSLEG",w1,false);
+		snr_gl1 = calculate_snr(noise_curve, detector,method, &params,freqsgl1,lengthgl1,"GAUSSLEG",w1,true);
 		double gl1_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		start = clock();
 		snr_gl2 = calculate_snr(noise_curve, detector,method, &params,freqsgl2,lengthgl2,"GAUSSLEG",w2,true);
 		double gl2_t = (double)(clock()-start)/CLOCKS_PER_SEC;
+		start = clock();
+		snr_gl3 = calculate_snr(noise_curve, detector,method, &params,freqsgl3,lengthgl3,"GAUSSLEG",w3,true);
+		double gl3_t = (double)(clock()-start)/CLOCKS_PER_SEC;
 		output[i][0]=snr_gsl;
 		output[i][1]=snr_simps;
 		output[i][2]=snr_gl1;
 		output[i][3]=snr_gl2;
-		output[i][4]=gsl_t;
-		output[i][5]=simps_t;
-		output[i][6]=gl1_t;
-		output[i][7]=gl2_t;
+		output[i][4]=snr_gl3;
+		output[i][5]=gsl_t;
+		output[i][6]=simps_t;
+		output[i][7]=gl1_t;
+		output[i][8]=gl2_t;
+		output[i][9]=gl3_t;
 		printProgress((double)i/iterations);
 	}
 	std::cout<<std::endl;
 	
-	write_file("data/snr_comp_stellar.csv",output,iterations, 8);
+	write_file("data/snr_comp_stellar.csv",output,iterations, 10);
 	delete [] freqsgl1;
 	delete [] freqsgl2;
+	delete [] freqsgl3;
 	delete [] w1;
 	delete [] w2;
+	delete [] w3;
 	for(int i = 0 ; i<iterations; i++){
 		delete [] output[i];	
 	}

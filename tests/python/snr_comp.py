@@ -4,13 +4,14 @@ import matplotlib.pyplot as plt
 #import gwatpy.waveform_generator_ext as wf
 
 data = np.loadtxt("data/snr_comp_stellar.csv",delimiter=',',unpack=True)
-labels = ["SIMPS","GL_NONLOG","GL_LOG"]
+labels = ["SIMPS","GL 500","GL 1000","GL_5000"]
 #labels = ["GL_NONLOG","GL_LOG"]
 
 temp= []
 temp.append(np.abs((data[0]-data[1])/data[0]))
 temp.append(np.abs((data[0]-data[2])/data[0]))
 temp.append(np.abs((data[0]-data[3])/data[0]))
+temp.append(np.abs((data[0]-data[4])/data[0]))
 resids = []
 fig,ax = plt.subplots(nrows=2,ncols=1)
 for x in temp:
@@ -23,7 +24,7 @@ ax[0].legend()
 ax[0].set_xscale('log')
 #plt.show()
 
-times = [data[4],data[5],data[6],data[7]];
+times = [data[5],data[6],data[7],data[8],data[9]];
 #times = [data[4],data[6],data[7]];
 bins = np.logspace(np.log10(np.amin(times)), np.log10(np.amax(times)),100)
 labels = ["GSL"] + labels

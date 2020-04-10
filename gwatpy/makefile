@@ -6,7 +6,7 @@ PROJ_LIB=../lib/libgwat.so
 .PHONY: all
 all: $(PYLIB) $(SETUPSCRIPT)
 
-$(PYLIB) : $(PYSRC) $(PROJ_LIB) $(SETUPSCRIPT)
+$(PYLIB) : $(PYSRC) $(SETUPSCRIPT)
 	python3 $(SETUPSCRIPT) build_ext -i
 .PHONY: remove
 remove:

@@ -587,7 +587,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	//Trim data to Tobs, and apply tukey windowing for fft
 	int l=0 ;
 	for (int i =0; i<N; i ++){
-		if(times_untrimmed[i]>time_start && times_untrimmed[i]<time_end){
+		if(times_untrimmed[i]>time_start && times_untrimmed[i]<=time_end){
 			times_trimmed[l] = times_untrimmed[i];
 			for (int j =0; j<num_detectors; j++){
 				data_trimmed[j][l] = temp_data[j][i]*window[l];
@@ -595,6 +595,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			l++;
 		}
 	}
+	std::cout<<l<<" "<<N_trimmed<<std::endl;
 	
 	fftw_outline plan;
 	allocate_FFTW_mem_forward(&plan, N_trimmed);

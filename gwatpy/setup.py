@@ -12,8 +12,8 @@ compile_args = ['-fopenmp','-fPIC','-O3']
 
 exts = [Extension("gwatpy.*",['src/*.pyx'],
                 extra_compile_args=compile_args,
-                include_dirs=[numpy.get_include(),scriptdir+"/../include/gwat","src"],
-                extra_objects = [scriptdir+"/../lib/libgwat.so"],
+                include_dirs=[numpy.get_include(),scriptdir+"/../build/install/include/gwat","src"],
+                extra_objects = [scriptdir+"/../build/install/lib/libgwat.so"],
                 libraries = ['adolc','fftw3','gsl','gslcblas','gwat'],
                 extra_link_args=['-fopenmp'],
                 language='c++'

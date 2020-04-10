@@ -18,7 +18,6 @@ cdef extern from "util.h" :
         double Luminosity_Distance
         double spin1[3]
         double spin2[3]
-        double phic
         double tc
         int *bppe
         double *betappe

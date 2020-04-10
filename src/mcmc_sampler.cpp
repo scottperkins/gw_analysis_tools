@@ -2034,9 +2034,9 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	//Auto-correlation
 	if(auto_corr_filename != ""){
 		std::cout<<"Calculating Autocorrelation: "<<std::endl;
-		int segments = 50;
+		int segments = 20;
 		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, true);
 	}
 	//###########################################################
 	acend =clock();

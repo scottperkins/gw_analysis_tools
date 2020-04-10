@@ -49,7 +49,6 @@ cdef class gen_params_py:
         self.params.Luminosity_Distance = DL
         self.params.spin1 = spin1
         self.params.spin2 = spin2
-        self.params.phic = phic
         self.params.tc = tc
         self.params.bppe = &bppe[0]
         self.params.betappe = &betappe[0]

@@ -1753,10 +1753,12 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				//parameters[7]=input_params->spin1[2];
 				//parameters[8]=input_params->spin2[2];
 				
-				double spin1spher[3];
-				double spin2spher[3];
+				//double spin1spher[3];
+				//double spin2spher[3];
 				parameters[0]=input_params->RA;
 				parameters[1]=sin(input_params->DEC);
+				//parameters[1]=(input_params->DEC);
+
 				if(input_params->equatorial_orientation){
 					parameters[2]=input_params->theta_l;
 					parameters[3]=input_params->phi_l;
@@ -1774,6 +1776,27 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					input_params->mass2);
 				parameters[9]=input_params->spin1[2];
 				parameters[10]=input_params->spin2[2];
+				//parameters[0]=input_params->RA;
+				//parameters[1]=sin(input_params->DEC);
+				////parameters[1]=(input_params->DEC);
+
+				////if(input_params->equatorial_orientation){
+				////	parameters[2]=input_params->theta_l;
+				////	parameters[3]=input_params->phi_l;
+				////}
+				////else{
+				//{
+				//	parameters[2]=cos(input_params->incl_angle);
+				//}
+				//parameters[3] = input_params->phiRef;
+				//parameters[4] = input_params->tc;
+				//parameters[5]=log(input_params->Luminosity_Distance);
+				//parameters[6]=log(calculate_chirpmass(input_params->mass1, 
+				//	input_params->mass2));
+				//parameters[7]=calculate_eta(input_params->mass1, 
+				//	input_params->mass2);
+				//parameters[8]=input_params->spin1[2];
+				//parameters[9]=input_params->spin2[2];
 
 			}
 			else{
@@ -1998,6 +2021,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = asin(avec_parameters[1]);
+				//a_params->DEC = (avec_parameters[1]);
 				if(a_params->equatorial_orientation){
 					a_params->theta_l = avec_parameters[2];
 					a_params->phi_l=avec_parameters[3];
@@ -2015,6 +2039,33 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				//maximized out
 				a_params->phiRef = avec_parameters[4];
 				a_params->tc = avec_parameters[5];
+
+				//a_params->mass1 = calculate_mass1(exp(avec_parameters[6]),
+				//	avec_parameters[7]);
+				//a_params->mass2 = calculate_mass2(exp(avec_parameters[6]),
+				//	avec_parameters[7]);
+				//a_params->Luminosity_Distance = exp(avec_parameters[5]);
+				//a_params->RA = avec_parameters[0];
+				//a_params->DEC = asin(avec_parameters[1]);
+				////a_params->DEC = (avec_parameters[1]);
+				////if(a_params->equatorial_orientation){
+				////	a_params->theta_l = avec_parameters[2];
+				////	a_params->phi_l=avec_parameters[3];
+				////}
+				////else{
+				//{
+				//	a_params->psi = 0;//avec_parameters[2];
+				//	a_params->incl_angle=acos(avec_parameters[2]);
+				//}
+				////T spin1sph[3] = {avec_parameters[9],0,0};
+				////T spin2sph[3] = {avec_parameters[10],0,0};
+				//a_params->spin1[2] = avec_parameters[8];
+				//a_params->spin2[2] = avec_parameters[9];
+				////transform_sph_cart(spin1sph,a_params->spin1);
+				////transform_sph_cart(spin2sph,a_params->spin2);
+				////maximized out
+				//a_params->phiRef = avec_parameters[3];
+				//a_params->tc = avec_parameters[4];
 
 				//a_params->mass1 = calculate_mass1(exp(avec_parameters[5]),
 				//	avec_parameters[6]);

@@ -8,10 +8,11 @@ compS = np.loadtxt("../data/noise_data/NewLISATable.dat",unpack=True)
 names = ["aLIGO_analytic","Hanford_O1_fitted","AdLIGOMidHigh","AdLIGOAPlus","AdLIGODesign","CE1","CE2","KAGRA_opt","KAGRA_pess","AdVIRGOPlus1","AdVIRGOPlus2_opt","AdVIRGOPlus2_pess","AdLIGODesign_smoothed","CE1_smoothed"]
 #for x in np.arange(len(data)-1):
 #    plt.loglog(data[0],data[x+1],label=names[x])
-#plt.loglog(data[0],data[5],label=names[4])
-#plt.loglog(data[0],data[-1],label=names[-1])
-plt.loglog(data[0],data[11],label=names[10])
-plt.loglog(data[0],data[12],label=names[11])
+plt.loglog(data[0],data[5],label=names[4])
+plt.loglog(data[0],data[2],label=names[1])
+plt.loglog(data[0],data[-1],label=names[-1])
+#plt.loglog(data[0],data[11],label=names[10])
+#plt.loglog(data[0],data[12],label=names[11])
 
 
 plt.legend()

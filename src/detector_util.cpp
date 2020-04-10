@@ -86,6 +86,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		)
 {
 	std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported/";
+	//std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported_raw/";
 	if(check_list(detector, (std::string *)analytic_PSD_models,analytic_PSD_models_N)){
 		if(detector == "aLIGO_analytic")
 		{
@@ -156,7 +157,8 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		int dat_length=0;
 		std::string file;
 		if(detector=="AdLIGOMidHigh"){
-			dat_length = 3000;
+			//dat_length = 3000;
+			dat_length = 3453;
 			file = "AdLIGOMidHigh.csv";
 		}
 		if(detector=="_AdLIGODesign"){
@@ -227,6 +229,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 			dat_length = 1000;
 			file = "kagra_80Mpc.csv";
 		}
+		count_lines_data_file(currently_supported_dir+file, &dat_length);
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
 		gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, dat_length);
 		double **data = new double*[dat_length];
