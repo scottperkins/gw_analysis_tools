@@ -1,0 +1,62 @@
+#Number of dimensions of the Fisher
+[int] Dimension = 14
+#Waveform to use
+[str] Generation Method = ppE_IMRPhenomPv2_Inspiral
+#Number of detectors
+[int] Number of Detectors = 3
+#Names of detectors
+[str] Detector Name 0 = Hanford
+[str] Detector Name 1 = Livingston
+[str] Detector Name 2 = Virgo
+#Names of Noise Curves
+[str] PSD 0 = AdLIGOAPlus_smoothed
+[str] PSD 1 = AdLIGOAPlus_smoothed
+[str] PSD 2 = AdVIRGOPlus1_smoothed
+#Output file
+[str] Output File Path = fisher.csv
+
+#INJECTED VALUES
+#GMST time in radian (0, 2PI)
+[dbl] GMST = 2.9
+#Right ascension in radian (0, 2PI)
+[dbl] RA = 2.9
+#Declination in radian (-PI/2, PI/2)
+[dbl] DEC = .1
+#Polarization angle in radian (0, 2PI)
+[dbl] PSI = .1
+#Inclination angle in radian (0, PI)
+[dbl] IOTA = .1
+#Coalescence time  
+[dbl] t = 6
+#Coalescence phase  
+[dbl] reference phase = 2.
+#Larger mass   
+[dbl] Mass 1 = 8.
+#smaller mass   
+[dbl] Mass 2 = 5.
+#Spin 1 X    
+[dbl] SPIN1X = .1
+#Spin 1 Y   
+[dbl] SPIN1Y = .5
+#Spin 1 Z   
+[dbl] SPIN1Z = .1
+#Spin 2 X    
+[dbl] SPIN2X = .3
+#Spin 2 Y   
+[dbl] SPIN2Y = .2
+#Spin 2 Z   
+[dbl] SPIN2Z = .2
+#Luminosity Distance (MPC)
+[dbl] Distance = 100
+
+
+
+#Optional -- Only use if using ppE
+#Number of modifications
+[int] Number of Modifications = 2
+# b ppE parameters
+[int] b ppE 0 = -1
+[int] b ppE 1 = -2
+# injected beta parameters
+[dbl] beta ppE 0 = 0
+[dbl] beta ppE 1 = 0
