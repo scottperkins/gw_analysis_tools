@@ -3,7 +3,7 @@
 #include <adolc/adolc.h>
 #include <adolc/drivers/drivers.h>
 #include <adolc/taping.h>
-#include <adolc/adolc_sparse.h>
+//#include <adolc/adolc_sparse.h>
 #include <math.h>
 #include <string>
 #include "util.h"
@@ -1226,103 +1226,103 @@ void time_phase_corrected_derivative_autodiff(double **dt, int length, double *f
  * The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)
  *
  */
-void time_phase_corrected_derivative_autodiff_sparse(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time)
-{
-	//calculate hessian of phase, take [0][j] components to get the derivative of time
-	int vec_param_length = dimension +1 ;//+1 for frequency 
-	int boundary_num = boundary_number(generation_method);
-	double freq_boundaries[boundary_num];
-	double grad_freqs[boundary_num];
-	std::string local_gen_method = local_generation_method(generation_method);
-	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);
-	double vec_parameters[vec_param_length];
-	bool log_factors[dimension];
-	unpack_parameters(&vec_parameters[1], params, generation_method, dimension, log_factors);
-	
-	for(int i = 0 ; i<vec_param_length; i++){
-		for(int j = 0 ; j<length; j++){
-			dt[i][j] = 0;
-		}
-	}
-	//calculate derivative of phase
-	int tapes[boundary_num];
-	for(int i = 0 ; i < boundary_num ; i++){
-		tapes[i] = i*12; //Random tape id 
-		trace_on(tapes[i]);
-		adouble avec_parameters[vec_param_length];
-		avec_parameters[0] <<=grad_freqs[i];
-		for(int j = 1; j <= dimension; j++){
-			avec_parameters[j]<<=vec_parameters[j];	
-		}
-		//Repack parameters
-		gen_params_base<adouble> a_parameters;
-		adouble afreq;
-		afreq = avec_parameters[0];
-		//############################################
-		//Non variable parameters
-		repack_non_parameter_options(&a_parameters,params,generation_method);
-		//############################################
-		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
-		if(params->equatorial_orientation){
-			transform_orientation_coords(&a_parameters, generation_method, "");
-		}
-		adouble time;
-		adouble phasep, phasec;
-		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
-		double phase;
-		phasep >>= phase;
-
-		trace_off();
-		deallocate_non_param_options(&a_parameters, params, generation_method);
-	}
-	int indep = vec_param_length;//First element is for frequency
-	bool eval = false;//Keep track of when a boundary is hit
-	//double **hess = allocate_2D_array(indep,indep);
-	unsigned int *rind=NULL;
-	unsigned int *cind=NULL;
-	double *values=NULL;
-	int options[2]; options[0]=0; options[1]=0;
-	int nnz;
-	vec_parameters[0]=frequencies[0];
-	sparse_hess(tapes[0], indep, 0,vec_parameters,&nnz, &rind, &cind, &values,options );
-	for(int k = 0 ;k <length; k++){
-		vec_parameters[0]=frequencies[k];
-		for(int n = 0 ; n<boundary_num; n++){
-			if(vec_parameters[0]<freq_boundaries[n]){
-				sparse_hess(tapes[n], indep, 1,vec_parameters,&nnz, &rind, &cind, &values,options );
-				for(int i =0; i<nnz; i++){
-					if(rind[i]==0){
-						dt[cind[i]][k] = values[i] ;
-					}
-					//for(int j = 0 ; j<nnz; j++){
-					//	std::cout<<rind[j]<<" "<<cind[j]<<" "<<values[j]<<std::endl;
-					//}
-					//std::cout<<std::endl;
-				}
-				//Mark successful derivative
-				eval = true;
-				//Skip the rest of the bins
-				break;
-			}
-		}
-		//If freq didn't fall in any boundary, set to 0
-		if(!eval){
-			for(int i =0; i<vec_param_length; i++){
-				dt[i][k] = 0.;
-			}	
-		}
-		eval = false;
-	}
-	//deallocate_2D_array(hess,indep,indep);
-	//divide by 2 PI
-	for(int j = 0 ; j < vec_param_length; j++){
-		for(int i = 0 ; i<length; i++){
-			dt[j][i]/=(2.*M_PI);
-		}
-	}
-	free(rind);free(cind);free(values);
-
-}
+//void time_phase_corrected_derivative_autodiff_sparse(double **dt, int length, double *frequencies,gen_params_base<double> *params, std::string generation_method, int dimension, bool correct_time)
+//{
+//	//calculate hessian of phase, take [0][j] components to get the derivative of time
+//	int vec_param_length = dimension +1 ;//+1 for frequency 
+//	int boundary_num = boundary_number(generation_method);
+//	double freq_boundaries[boundary_num];
+//	double grad_freqs[boundary_num];
+//	std::string local_gen_method = local_generation_method(generation_method);
+//	assign_freq_boundaries(freq_boundaries, grad_freqs, boundary_num, params, generation_method);
+//	double vec_parameters[vec_param_length];
+//	bool log_factors[dimension];
+//	unpack_parameters(&vec_parameters[1], params, generation_method, dimension, log_factors);
+//	
+//	for(int i = 0 ; i<vec_param_length; i++){
+//		for(int j = 0 ; j<length; j++){
+//			dt[i][j] = 0;
+//		}
+//	}
+//	//calculate derivative of phase
+//	int tapes[boundary_num];
+//	for(int i = 0 ; i < boundary_num ; i++){
+//		tapes[i] = i*12; //Random tape id 
+//		trace_on(tapes[i]);
+//		adouble avec_parameters[vec_param_length];
+//		avec_parameters[0] <<=grad_freqs[i];
+//		for(int j = 1; j <= dimension; j++){
+//			avec_parameters[j]<<=vec_parameters[j];	
+//		}
+//		//Repack parameters
+//		gen_params_base<adouble> a_parameters;
+//		adouble afreq;
+//		afreq = avec_parameters[0];
+//		//############################################
+//		//Non variable parameters
+//		repack_non_parameter_options(&a_parameters,params,generation_method);
+//		//############################################
+//		repack_parameters(&avec_parameters[1],&a_parameters,generation_method, dimension,params);
+//		if(params->equatorial_orientation){
+//			transform_orientation_coords(&a_parameters, generation_method, "");
+//		}
+//		adouble time;
+//		adouble phasep, phasec;
+//		int status  = fourier_phase(&afreq, 1, &phasep,&phasec, local_gen_method, &a_parameters);
+//		double phase;
+//		phasep >>= phase;
+//
+//		trace_off();
+//		deallocate_non_param_options(&a_parameters, params, generation_method);
+//	}
+//	int indep = vec_param_length;//First element is for frequency
+//	bool eval = false;//Keep track of when a boundary is hit
+//	//double **hess = allocate_2D_array(indep,indep);
+//	unsigned int *rind=NULL;
+//	unsigned int *cind=NULL;
+//	double *values=NULL;
+//	int options[2]; options[0]=0; options[1]=0;
+//	int nnz;
+//	vec_parameters[0]=frequencies[0];
+//	sparse_hess(tapes[0], indep, 0,vec_parameters,&nnz, &rind, &cind, &values,options );
+//	for(int k = 0 ;k <length; k++){
+//		vec_parameters[0]=frequencies[k];
+//		for(int n = 0 ; n<boundary_num; n++){
+//			if(vec_parameters[0]<freq_boundaries[n]){
+//				sparse_hess(tapes[n], indep, 1,vec_parameters,&nnz, &rind, &cind, &values,options );
+//				for(int i =0; i<nnz; i++){
+//					if(rind[i]==0){
+//						dt[cind[i]][k] = values[i] ;
+//					}
+//					//for(int j = 0 ; j<nnz; j++){
+//					//	std::cout<<rind[j]<<" "<<cind[j]<<" "<<values[j]<<std::endl;
+//					//}
+//					//std::cout<<std::endl;
+//				}
+//				//Mark successful derivative
+//				eval = true;
+//				//Skip the rest of the bins
+//				break;
+//			}
+//		}
+//		//If freq didn't fall in any boundary, set to 0
+//		if(!eval){
+//			for(int i =0; i<vec_param_length; i++){
+//				dt[i][k] = 0.;
+//			}	
+//		}
+//		eval = false;
+//	}
+//	//deallocate_2D_array(hess,indep,indep);
+//	//divide by 2 PI
+//	for(int j = 0 ; j < vec_param_length; j++){
+//		for(int i = 0 ; i<length; i++){
+//			dt[j][i]/=(2.*M_PI);
+//		}
+//	}
+//	free(rind);free(cind);free(values);
+//
+//}
 /*! \brief Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE -- hessian of the phase
  *
  * If specific derivatives need to taken, take this routine as a template and write it yourself.
