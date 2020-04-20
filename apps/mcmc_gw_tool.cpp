@@ -22,7 +22,7 @@ double T_mcmc_gw_tool;
  * 	
  * 	mcmc_gw_tool /PATH/TO/PARAM/FILE
  *
- * See data/mcmc_gw_tool_param_template.dat for an example parameter file
+ * See data/sample_config_files/mcmc_gw_tool_param_template.dat for an example parameter file
  *
  * See data/sample_init_pos.csv for an example initial position file
  *
