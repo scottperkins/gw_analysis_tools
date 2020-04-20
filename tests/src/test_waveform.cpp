@@ -145,7 +145,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 100;
+	int iterations = 50;
 	double times[iterations][2];
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
@@ -194,7 +194,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		double gmst = 2*M_PI*alpha[14];
 		REAL8 phi_aligned;
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		const REAL8 f_max = .2*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		const REAL8 f_max = .19*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		int length = 4016;
 		double deltaf = (f_max-f_min)/(length-1);
 		const REAL8 f_ref = (f_max-f_min)/2.;
@@ -294,17 +294,33 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		times[k][1] = (double)(end-start)/(CLOCKS_PER_SEC);
 		//std::cout<<"GWAT timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
 		//########################################################################
-		double **output = allocate_2D_array(length,5);
+		double *phaseLALprep = new double[length];
+		double *phaseGWATprep = new double[length];
+		double *phaseLAL = new double[length];
+		double *phaseGWAT = new double[length];
+		for(int i = 0 ; i<length ; i++){
+			phaseLALprep[i]= std::atan2(GSL_IMAG((det->data->data)[i]),GSL_REAL((det->data->data)[i]));
+			phaseGWATprep[i]= std::atan2(std::imag(response[i]),std::real(response[i]));
+		}
+		unwrap_array(phaseLALprep, phaseLAL,length);
+		unwrap_array(phaseGWATprep, phaseGWAT,length);
+		double **output = allocate_2D_array(length,7);
 		for(int i = 0 ; i<length; i++){
 			output[i][0] = frequencies[i];
 			output[i][1] = GSL_REAL((det->data->data)[i]);
 			output[i][2] = GSL_IMAG((det->data->data)[i]);
 			output[i][3] = std::real(response[i]);
 			output[i][4] = std::imag(response[i]);
+			output[i][5] = phaseLAL[i];
+			output[i][6] = phaseGWAT[i];
 		}
-		write_file("data/response_"+std::to_string(k)+".csv",output,length,5);
-		deallocate_2D_array(output,length,2);
+		write_file("data/response_"+std::to_string(k)+".csv",output,length,7);
+		deallocate_2D_array(output,length,7);
 		delete [] response;
+		delete [] phaseLALprep;
+		delete [] phaseGWATprep;
+		delete [] phaseLAL;
+		delete [] phaseGWAT;
 		delete [] frequencies;
 		XLALDestroyREAL8Sequence(freqs);
 		XLALDestroyCOMPLEX16FrequencySeries(hptilde);

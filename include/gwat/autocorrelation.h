@@ -86,6 +86,12 @@ void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job);
 void threaded_ac_serial(int thread, threaded_ac_jobs_serial job);
 double auto_correlation_serial(double *arr, int length, int start, double target);
 
+
+void auto_correlation_spectral_windowed(double *chain, int length, int start,double *autocorr,fftw_outline *plan_forw, fftw_outline *plan_rev);
+int autocorrelation_window(double *tau, int c, int length);
+
+
+
 void auto_correlation_spectral(double *chain, int length, double *autocorr, fftw_outline *plan_forw, fftw_outline *plan_rev);
 void auto_correlation_spectral(double *chain, int length, int start, double *autocorr, fftw_outline *plan_forw, fftw_outline *plan_rev);
 void auto_correlation_spectral(double *chain, int length, double *autocorr);

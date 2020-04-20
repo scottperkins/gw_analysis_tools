@@ -14,16 +14,17 @@ data =np.loadtxt("data/injection_output.csv",delimiter=',')
 #data = data[int(len(data)/2):]
 dim = len(data[0])
 
-#dataT =np.loadtxt("data/injection_output.csv",delimiter=',', unpack=True)
-dataT =np.loadtxt("data/mcmc_output.csv",delimiter=',', unpack=True)
+dataT =np.loadtxt("data/injection_output.csv",delimiter=',', unpack=True)
+#dataT =np.loadtxt("data/mcmc_output.csv",delimiter=',', unpack=True)
 #dataT =np.loadtxt("data/test_output.csv",delimiter=',', unpack=True)
 i = 0 
-#for x in dataT:
-#    #plt.plot(x[2000:])
-#    plt.plot(x)
-#    plt.savefig("plots/temp{}".format(i))
-#    plt.close()
-#    i+=1
+for x in dataT:
+    #plt.plot(x[2000:])
+    plt.plot(x)
+    plt.title(str(i))
+    plt.savefig("plots/temp{}.pdf".format(i))
+    plt.close()
+    i+=1
 
 for x in range(dim):
     data_thinned = []
@@ -33,7 +34,7 @@ for x in range(dim):
     #plt.plot(data_thinned)
     #plt.show()
     #plt.close()
-    print(emcee.autocorr.integrated_time(data_thinned, tol=50))
+    print(emcee.autocorr.integrated_time(data_thinned, tol=10))
 #for x in range(dim):
 #    data_thinned = []
 #    for y in np.arange(len(data2)):
@@ -43,7 +44,7 @@ for x in range(dim):
 #    #plt.show()
 #    #plt.close()
 #    print(emcee.autocorr.integrated_time(data_thinned, tol=1000))
-
+exit()
 data_thinned = []
 for x in np.arange(len(data)):
         if x%1 == 0:

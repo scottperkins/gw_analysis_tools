@@ -124,6 +124,8 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	
 
 /*! \brief Straight gaussian step
+ *
+ * Change this to pick one direction 
  */
 void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/

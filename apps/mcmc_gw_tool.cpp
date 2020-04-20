@@ -198,18 +198,18 @@ int main(int argc, char *argv[])
 	//#############################################################
 	//#############################################################
 	
-	double **whitened = allocate_2D_array(data_lengths[0],7);
-	for(int i = 0 ; i<data_lengths[0]; i++){
-		whitened[i][0]= freqs[0][i];
-		whitened[i][1]=psd[0][i];
-		whitened[i][2]=psd[1][i];
-		whitened[i][3]=real(data[0][i]);
-		whitened[i][4]=imag(data[0][i]);
-		whitened[i][5]=real(data[1][i]);
-		whitened[i][6]=imag(data[1][i]);
-	}	
-	write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
-	deallocate_2D_array(whitened, data_lengths[0],7);
+	//double **whitened = allocate_2D_array(data_lengths[0],7);
+	//for(int i = 0 ; i<data_lengths[0]; i++){
+	//	whitened[i][0]= freqs[0][i];
+	//	whitened[i][1]=psd[0][i];
+	//	whitened[i][2]=psd[1][i];
+	//	whitened[i][3]=real(data[0][i]);
+	//	whitened[i][4]=imag(data[0][i]);
+	//	whitened[i][5]=real(data[1][i]);
+	//	whitened[i][6]=imag(data[1][i]);
+	//}	
+	//write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
+	//deallocate_2D_array(whitened, data_lengths[0],7);
 	
 	//#############################################################
 	//#############################################################
@@ -303,26 +303,26 @@ int main(int argc, char *argv[])
 			initial_position[0] = new double[dimension];
 			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
-			//std::cout<<"Running uncorrelated sampler "<<std::endl;
-			//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-			//		max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
-			//		swap_freq, t0, nu, correlation_thresh, correlation_segs,
-			//		correlation_convergence_thresh , ac_target,allocation_scheme, 
-			//		lp,threads, pool,show_progress,detector_N, 
-			//		data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-			//		generation_method,stat_file,output_file, "",check_file);	
-			double ***output2 = allocate_3D_array(chain_N,samples, dimension );
-			double c = 1.1;
-			chain_temps[0]=1;
-			for(int i = 1 ; i<chain_N; i++){
-				chain_temps[i]=chain_temps[i-1]*c;
-			}
-			PTMCMC_MH_GW(output2, dimension, samples, chain_N, 
-					initial_position[0],seeding_var,chain_temps, 
-					swap_freq, lp,threads, pool,show_progress,detector_N, 
+			std::cout<<"Running uncorrelated sampler "<<std::endl;
+			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
+					swap_freq, t0, nu, correlation_thresh, correlation_segs,
+					correlation_convergence_thresh , ac_target,allocation_scheme, 
+					lp,threads, pool,show_progress,detector_N, 
 					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-					generation_method,stat_file,output_file, "","data/LL.csv",check_file);	
-			deallocate_3D_array(output2,chain_N,samples,dimension);
+					generation_method,stat_file,output_file, "",check_file);	
+			//double ***output2 = allocate_3D_array(chain_N,samples, dimension );
+			//double c = 1.1;
+			//chain_temps[0]=1;
+			//for(int i = 1 ; i<chain_N; i++){
+			//	chain_temps[i]=chain_temps[i-1]*c;
+			//}
+			//PTMCMC_MH_GW(output2, dimension, samples, chain_N, 
+			//		initial_position[0],seeding_var,chain_temps, 
+			//		swap_freq, lp,threads, pool,show_progress,detector_N, 
+			//		data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+			//		generation_method,stat_file,output_file, "","data/LL.csv",check_file);	
+			//deallocate_3D_array(output2,chain_N,samples,dimension);
 			delete [] initial_position[0]; delete [] initial_position;
 		}
 
@@ -358,11 +358,18 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
-	if (std::exp(pos[7])<2 || std::exp(pos[7])>100 ){return a;}//chirpmass
+	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
+	if (std::exp(pos[7])<2 || std::exp(pos[7])>80 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
-	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
-	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+
+	//if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
+	//if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	double chi1 = pos[9]+pos[10];	
+	double chi2 = pos[9]-pos[10];	
+	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 

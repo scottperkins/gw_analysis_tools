@@ -5,7 +5,7 @@
 #include <iostream>
 
 /*! Max length of array to use serial calculation*/
-#define MAX_SERIAL 20000
+#define MAX_SERIAL 2
 
 /*! \file 
  *
@@ -290,7 +290,7 @@ void auto_corr_from_data(double **data, /**<Input data */
 			}
 			for(int i =0 ; i<num_segments; i++){
 				if(lengths[i]>MAX_SERIAL){
-					fftw_lengths[i] = pow(2, std::ceil(std::log2(lengths[i])));	
+					fftw_lengths[i] = 2*pow(2, std::ceil(std::log2(lengths[i])));	
 					allocate_FFTW_mem_forward(&plans_forward[i],fftw_lengths[i]);
 					allocate_FFTW_mem_reverse(&plans_reverse[i],fftw_lengths[i]);
 				}
@@ -333,15 +333,18 @@ void auto_corr_from_data(double **data, /**<Input data */
  */
 void threaded_ac_spectral(int thread, threaded_ac_jobs_fft job)
 {
-	double *ac = (double *)malloc(sizeof(double)*(*job.length));	
-	auto_correlation_spectral(job.data[job.dimension], *job.length, *job.start,ac, job.planforward, job.planreverse);
-	for(int i =0; i<*job.length; i++){
-		if(ac[i]<*job.target){
-			*job.lag = i;
-			break;
-		}	
-	}
-	free(ac);
+	//double *ac = (double *)malloc(sizeof(double)*(*job.length));	
+	//auto_correlation_spectral(job.data[job.dimension], *job.length, *job.start,ac, job.planforward, job.planreverse);
+	//for(int i =0; i<*job.length; i++){
+	//	if(ac[i]<*job.target){
+	//		*job.lag = i;
+	//		break;
+	//	}	
+	//}
+	//free(ac);
+	double ac;
+	auto_correlation_spectral_windowed(job.data[job.dimension], *job.length, *job.start,&ac, job.planforward, job.planreverse);
+	*job.lag =int(ac);
 }
 /*! \brief Internal routine to calculate a serial autocorrelation job
  *
@@ -390,6 +393,83 @@ double auto_correlation_serial(double *arr, /**< input array*/
 	}	
 	return h;
 
+}
+/*! \brief Autocorrelation calculation following EMCEE's implementation
+ *
+ * Incorporates a windowing function to reduce noise in the estimate of Tau
+ */
+void auto_correlation_spectral_windowed(double *chain, int length,int start, double *autocorr,fftw_outline *plan_forw, fftw_outline *plan_rev)
+{
+		
+	int c = 5;
+	//Length after padding
+	int L = 2*pow(2, std::ceil( std::log2(length) ) );	
+	double *chain_padded = new double[L];
+	for(int i =0 ; i<L; i++){
+		if(i < length){
+			chain_padded[i]= chain[i];
+		}
+		else{
+			chain_padded[i]= 0;
+		}
+	}
+	fftw_complex *in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+	fftw_complex *out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)*L);
+	double mean;
+	mean_list(chain, length, &mean);
+	for(int i =0 ; i<L; i++){
+		if(i < length){
+			in[i][0] = chain[i] - mean;
+		}
+		else{
+			in[i][0] = 0;
+		}
+		in[i][1] = 0;
+	}
+	fftw_execute_dft(plan_forw->p, in, out);
+	for(int i=0 ; i<L ; i++){
+		in[i][0] = out[i][0]*out[i][0]+out[i][1]*out[i][1];
+		in[i][1]=0;
+	}
+	fftw_execute_dft(plan_rev->p, in, out);
+	double norm_factor = 4*L * L;
+	//double norm_factor = 4*L ;
+	//chain_padded[0] = out[0][0]/norm_factor;
+	//chain_padded[0] = out[0][0];
+	//chain_padded[0] = 1;
+	norm_factor = out[0][0];
+	//bool norm = true;	
+	//if(norm) {norm_factor = norm_factor*chain_padded[0];}
+	
+	for(int i = 0 ; i<length; i++){
+		chain_padded[i] = out[i][0] / norm_factor;
+	}
+	fftw_free(in);
+	fftw_free(out);
+	double *taus = new double[length];
+	double sum = chain_padded[0];
+	taus[0]= 2.0*sum -1.0;
+	for(int i  = 1 ; i<length; i++){
+		sum += chain_padded[i];
+		taus[i]=2.0 * sum - 1.0;
+		
+	}
+	int window = autocorrelation_window(taus, c, length);
+	*autocorr = taus[window];
+	delete [] chain_padded;
+	delete [] taus;
+	return;
+}
+
+int autocorrelation_window(double *tau, int c, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if ( i > c*tau[i]){
+			return i;
+		}
+	}
+	return length-1;
+	
 }
 
 /*! \brief Wrapper function for convience -- assumes the data array starts at 0

@@ -16,11 +16,31 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+
+
 /*! \file
  *
  * General utilities that are not necessarily specific to any part of the project at large
  */
 
+/*! \brief Matrix multiplication
+ *
+ * Takes A -- [dim1,dim2], B -- [dim2,dim3], and produces C -- [dim1,dim3]
+ *
+ * Arrays should be pre-allocated
+ */
+void matrix_multiply(double **A, double **B, double **C,int dim1, int dim2,int dim3)
+{
+	for(int i = 0 ; i<dim1; i++){
+		for(int j = 0 ; j<dim3; j++){
+			C[i][j] = 0;
+			for(int k = 0; k<dim2; k++){
+				C[i][j]+= A[i][k]*B[k][j];
+			}
+		}
+	}
+	return;
+}
 
 void debugger_print(const char *file, const int line,std::string message)
 {
@@ -1372,15 +1392,20 @@ void tukey_window(double *window,
 		int length,
 		double alpha)
 {
+	double imin = (int)(alpha*(double)(length-1)/2.0);
+	double imax = (int)((double)(length-1)*(1.-alpha/2.));
 	for (int i =0; i<length; i++){
-		if(i<(double)(alpha * length)/2.){
-			window[i] = 0.5*(1 + cos(M_PI * ( (2. * i)/(alpha * length) -1) ) );
+		if(i<imin){
+			window[i] = 0.5*(1 + cos(M_PI * ( ( (double) i)/((double)(imin)) -1) ) );
+			//window[i] = 0.5*(1 - cos(M_PI * ( (2. * i)/(alpha * length) ) ) );
 		}
-		else if(i<length*(1.-alpha/2)){
+		else if(i<imax){
 			window[i] = 1;
 		}
 		else{
-			window[i] = 0.5*(1 + cos(M_PI * ( (2. * i)/(alpha * length) - 2./alpha + 1) ) );
+			window[i] = 0.5*(1 + cos(M_PI * ( ( (double) i)/((double)(imin)) -2./alpha + 1.) ) );
+			//window[i] = 0.5*(1 + cos(M_PI * ( (2. * i)/(alpha * length) - 2./alpha + 1) ) );
+			//window[i] = 0.5*(1 - cos(M_PI * ( (2. * i)/(alpha * length) ) ) );
 		}
 	}	
 

@@ -31,11 +31,12 @@ int main(int argc, char *argv[])
 }
 int AD_v_N(int argc, char *argv[])
 {
+	
 	std::cout.precision(5);
 	gen_params params;	
 	params.spin1[2] = .1;
 	params.spin2[2] = -.1;
-	params.chip = .7;
+	params.chip = .3;
 	params.phip = 1.0;
 	params.Luminosity_Distance = 400;
 	params.phiRef = .0;
@@ -121,6 +122,31 @@ int AD_v_N(int argc, char *argv[])
 	int dim = 13;
 	int dimD = 12;
 	int dimDSA = 8;
+
+	double **jac_spins = allocate_2D_array(dim,dim);
+	for (int i = 0 ;i<dim; i++){
+		for(int j =0 ;j<dim; j++){
+			if(i == 9 and j ==10){
+				jac_spins[i][j] = .5;
+			}
+			else if(i == 10 and j ==9){
+				jac_spins[i][j] = .5;
+			}
+			else if(i == 10 and j ==10){
+				jac_spins[i][j] = -.5;
+			}
+			else if(i == 9 and j ==9){
+				jac_spins[i][j] =.5;
+			}
+			else if(i != j ){
+				jac_spins[i][j] =0;
+			}
+			else {
+				jac_spins[i][j] =1;
+			}
+		}
+	}
+
 	double **output_N = allocate_2D_array(dim,dim);
 	double **output_N_temp = allocate_2D_array(dim,dim);
 	double **output_AD = allocate_2D_array(dim,dim);
@@ -136,17 +162,20 @@ int AD_v_N(int argc, char *argv[])
 	for(int i = 0 ; i<dim; i++){
 		for(int j = 0 ; j<dim; j++){
 			output_AD[i][j]= 0;
+			output_AD_temp[i][j]= 0;
 			output_N[i][j]= 0;
 		}
 	}
 	for(int i = 0 ; i<dimD; i++){
 		for(int j = 0 ; j<dimD; j++){
 			output_AD3[i][j]= 0;
+			output_AD3_temp[i][j]= 0;
 		}
 	}
 	for(int i = 0 ; i<dimDSA; i++){
 		for(int j = 0 ; j<dimDSA; j++){
 			output_ADSA[i][j]= 0;
+			output_ADSA_temp[i][j]= 0;
 		}
 	}
 
@@ -158,7 +187,7 @@ int AD_v_N(int argc, char *argv[])
 	params.incl_angle  = 0;
 	double snr = calculate_snr(SN[0],"LISA",method, &params, frequency, length, "GAUSSLEG",weights,true);
 	std::cout<<snr<<std::endl;
-	double SNR_TARGET = 10;
+	double SNR_TARGET = 100;
 	params.Luminosity_Distance = snr/SNR_TARGET*params.Luminosity_Distance;
 	params.sky_average = false;
 	params.incl_angle = M_PI-.01;
@@ -191,6 +220,8 @@ int AD_v_N(int argc, char *argv[])
 			}
 		}
 	}
+	matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
+	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
 	snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSLEG",weights,true);
 	std::cout<<"SNR: "<<snr<<std::endl;
@@ -209,16 +240,16 @@ int AD_v_N(int argc, char *argv[])
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	std::cout<<"COV AD:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<COV_AD[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<COV_AD[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	std::cout<<"Variances:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
-		std::cout<<1.64*sqrt(COV_AD[i][i])<<" ";
+		std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
 	}
 	std::cout<<std::endl;
 
@@ -231,6 +262,8 @@ int AD_v_N(int argc, char *argv[])
 			}
 		}
 	}
+	matrix_multiply(output_AD3, jac_spins,output_AD3_temp,dimD,dimD,dimD);
+	matrix_multiply(jac_spins,output_AD3_temp, output_AD3,dimD,dimD,dimD);
 	
 	
 	//std::cout<<"AD-D:"<<std::endl;
@@ -243,16 +276,16 @@ int AD_v_N(int argc, char *argv[])
 	//}
 	gsl_LU_matrix_invert(output_AD3,COV_AD3,dimD);
 	std::cout<<"COV AD - D:"<<std::endl;
-	for(int i = 0 ; i<dimD; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dimD; j++){
-			std::cout<<COV_AD3[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dimD; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dimD; j++){
+	//		std::cout<<COV_AD3[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	std::cout<<"Variances:"<<std::endl;
 	for(int i = 0 ; i<dimD; i++){
-		std::cout<<1.64*sqrt(COV_AD3[i][i])<<" ";
+		std::cout<<i<<" "<<1.64*sqrt(COV_AD3[i][i])<<std::endl;
 	}
 	std::cout<<std::endl;
 
@@ -279,16 +312,16 @@ int AD_v_N(int argc, char *argv[])
 	//}
 	gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
 	std::cout<<"COV AD - DSA:"<<std::endl;
-	for(int i = 0 ; i<dimDSA; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dimDSA; j++){
-			std::cout<<COV_ADSA[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dimDSA; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dimDSA; j++){
+	//		std::cout<<COV_ADSA[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	std::cout<<"Variances:"<<std::endl;
 	for(int i = 0 ; i<dimDSA; i++){
-		std::cout<<1.64*sqrt(COV_ADSA[i][i])<<" ";
+		std::cout<<i<<" "<<1.64*sqrt(COV_ADSA[i][i])<<std::endl;
 	}
 	std::cout<<std::endl;
 	std::cout<<"SNR (SA): "<<sqrt(output_ADSA[0][0])<<std::endl;
@@ -348,6 +381,7 @@ int AD_v_N(int argc, char *argv[])
 	deallocate_2D_array(output_AD3_temp,dimD,dimD);
 	deallocate_2D_array(output_N,dim,dim);
 	deallocate_2D_array(output_N_temp,dim,dim);
+	deallocate_2D_array(jac_spins,dim,dim);
 	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){

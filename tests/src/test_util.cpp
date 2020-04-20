@@ -11,6 +11,7 @@ int test_newton_raphson(int argc, char *argv[]);
 void cos_sin(double x, double *func, double *func_prime, void *param);
 int HDF5_testing_write(int argc,char *argv[]);
 int time_delay_testing(int argc,char *argv[]);
+int matrix_multiplication(int argc,char *argv[]);
 void RT_ERROR_MSG();
 int main(int argc, char *argv[])
 {
@@ -30,10 +31,59 @@ int main(int argc, char *argv[])
 	else if(runtime_opt == 2){
 		return time_delay_testing(argc,argv);	
 	}
+	else if(runtime_opt == 3){
+		return matrix_multiplication(argc,argv);	
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int matrix_multiplication(int argc,char *argv[])
+{
+	int dim1=4;
+	int dim2=3;
+	int dim3=5;
+	double **A =allocate_2D_array(dim1,dim2);
+	double **B =allocate_2D_array(dim2,dim3);
+	double **C =allocate_2D_array(dim1,dim3);
+	for(int i =0 ; i<dim1; i++){
+		for(int j = 0 ; j<dim2; j++){
+			A[i][j] = (i+1)*(j+2);	
+		}
+	}
+	for(int i =0 ; i<dim2; i++){
+		for(int j = 0 ; j<dim3; j++){
+			B[i][j] = (i+1)*(j+2);	
+		}
+	}
+	matrix_multiply(A,B,C,dim1,dim2,dim3);
+	std::cout<<"A: "<<std::endl;
+	for(int i =0 ; i<dim1; i++){
+		for(int j = 0 ; j<dim2; j++){
+			std::cout<<A[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<"B: "<<std::endl;
+	for(int i =0 ; i<dim2; i++){
+		for(int j = 0 ; j<dim3; j++){
+			std::cout<<B[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<"C: "<<std::endl;
+	for(int i =0 ; i<dim1; i++){
+		for(int j = 0 ; j<dim3; j++){
+			std::cout<<C[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	
+	deallocate_2D_array(A,dim1,dim2);	
+	deallocate_2D_array(B,dim2,dim3);	
+	deallocate_2D_array(C,dim1,dim3);	
+	return 0 ;
 }
 int HDF5_testing_write(int argc,char *argv[])
 {
@@ -90,4 +140,5 @@ void RT_ERROR_MSG()
 	std::cout<<"0 --- Test newton raphson"<<std::endl;
 	std::cout<<"1 --- Test HDF5 file write"<<std::endl;
 	std::cout<<"2 --- Test Time Delay "<<std::endl;
+	std::cout<<"3 --- Matrix Multiplication "<<std::endl;
 }

@@ -457,6 +457,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		tc_shift=0;
 	}
 	tc = 2*M_PI*params->tc - tc_shift;
+	//tc = 2*M_PI*params->tc + tc_shift;
 
 	//T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
 	T A0 = params->A0* pow(M,7./6.);
@@ -485,7 +486,8 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			}
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-			phase +=   (T)(tc*(f-f_ref) - phic);
+			//phase +=   (T)(tc*(f-f_ref) - phic);
+			phase -=   (T)(tc*(f-f_ref) + phic);
 			waveform[j] = amp * std::exp(-i * phase);
 		}
 

@@ -1774,8 +1774,10 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					input_params->mass2));
 				parameters[8]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[9]=input_params->spin1[2];
-				parameters[10]=input_params->spin2[2];
+				//parameters[9]=input_params->spin1[2];
+				//parameters[10]=input_params->spin2[2];
+				parameters[9]=.5*(input_params->spin1[2]+input_params->spin2[2]);
+				parameters[10]=.5*(input_params->spin1[2]-input_params->spin2[2]);
 				//parameters[0]=input_params->RA;
 				//parameters[1]=sin(input_params->DEC);
 				////parameters[1]=(input_params->DEC);
@@ -2032,8 +2034,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				}
 				//T spin1sph[3] = {avec_parameters[9],0,0};
 				//T spin2sph[3] = {avec_parameters[10],0,0};
-				a_params->spin1[2] = avec_parameters[9];
-				a_params->spin2[2] = avec_parameters[10];
+				//a_params->spin1[2] = avec_parameters[9];
+				//a_params->spin2[2] = avec_parameters[10];
+				a_params->spin1[2]=(avec_parameters[9]+avec_parameters[10]);
+				a_params->spin2[2]=(avec_parameters[9]-avec_parameters[10]);
+
+
 				//transform_sph_cart(spin1sph,a_params->spin1);
 				//transform_sph_cart(spin2sph,a_params->spin2);
 				//maximized out

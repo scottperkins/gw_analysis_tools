@@ -971,7 +971,8 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain
 	double tc_ref = param[5],tc;
 	for(int i = 0 ; i<mcmc_num_detectors; i++){
 		delta_t = DTOA_DETECTOR(param[0],asin(param[1]),mcmc_gmst, mcmc_detectors[0],mcmc_detectors[i]);
-		tc = tc_ref + delta_t;
+		//tc = tc_ref + delta_t;
+		tc = tc_ref - delta_t;
 		tc*=2.*M_PI;
 		fourier_detector_response_equatorial(mcmc_frequencies[i],mcmc_data_length[i],hplus,hcross, response,param[0],asin(param[1]),param[2],mcmc_gmst, (double *)NULL,0.,0.,0.,0.,mcmc_detectors[i]);
 		for(int j = 0 ; j<mcmc_data_length[i];j++){
@@ -2220,7 +2221,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 {
 	double *phi = new double[num_detectors];
 	double *theta = new double[num_detectors];
-	celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
+	//celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
 	double tc_ref, phic_ref, ll=0, delta_t;
 	double LISA_alpha0,LISA_phi0, LISA_thetal, LISA_phil;
 	double *times=NULL;
@@ -2272,7 +2273,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			//parameters->theta=theta[i];
 			//delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
 			delta_t = DTOA_DETECTOR(parameters->RA, parameters->DEC,mcmc_gmst, detectors[0], detectors[i]);
-			parameters->tc = tc_ref + delta_t;
+			//parameters->tc = tc_ref + delta_t;
+			parameters->tc = tc_ref - delta_t;
 			
 			//fourier_detector_response(frequencies[i], 
 			//	data_length[i], hplus, hcross, response, 
@@ -2312,7 +2314,9 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		std::complex<double> *response = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
-		tc_ref = parameters->tc;
+		//tc_ref = parameters->tc;
+		double T = 1./( frequencies[1]-frequencies[0]);
+		tc_ref = T-parameters->tc;
 		double tc = tc_ref;
 		tc*=2.*M_PI;
 		parameters->tc=0;
@@ -2322,7 +2326,9 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
 			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
 		for(int i = 0 ; i<data_length[0];i++){
-			response[i]*=exp(-std::complex<double>(0,tc*(frequencies[0][i]-parameters->f_ref)));
+			//response[i]*=exp(-std::complex<double>(0,tc*(frequencies[0][i]-parameters->f_ref)));
+			//response[i]*=exp(std::complex<double>(0,tc*(frequencies[0][i]-parameters->f_ref)));
+			response[i]*=exp(std::complex<double>(0,tc*(frequencies[0][i])));
 		}	
 		//Referecne detector first
 		ll += Log_Likelihood_internal(data[0], 
@@ -2340,15 +2346,22 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			//parameters->theta=theta[i];
 			//delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
 			delta_t = DTOA_DETECTOR(parameters->RA, parameters->DEC,mcmc_gmst, detectors[0], detectors[i]);
-			tc = tc_ref + delta_t;
+			//tc = tc_ref + delta_t;
+			tc = tc_ref - delta_t;
 			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
 				hplus, hcross, response, parameters->RA, parameters->DEC, 
 				parameters->psi,parameters->gmst,times, LISA_alpha0, 
 				LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
 			tc*=2.*M_PI;
 			for(int j = 0 ; j<data_length[i];j++){
-				response[j]*=exp(-std::complex<double>(
-					0,tc*(frequencies[i][j]-parameters->f_ref)
+				//response[j]*=exp(-std::complex<double>(
+				//	0,tc*(frequencies[i][j]-parameters->f_ref)
+				//	));
+				//response[j]*=exp(std::complex<double>(
+				//	0,tc*(frequencies[i][j]-parameters->f_ref)
+				//	));
+				response[j]*=exp(std::complex<double>(
+					0,tc*(frequencies[i][j])
 					));
 			}	
 			//snr+=pow_int(data_snr(frequencies[i],data_length[i],data[i],response,psd[i]),2);

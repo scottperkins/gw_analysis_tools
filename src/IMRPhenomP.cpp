@@ -368,10 +368,10 @@ int IMRPhenomPv2<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	for (int j = 0; j<length;j++){
 		waveform_plus[j] = 
 			amp_vec[j] * hpfac_vec[j]*std::exp(
-			-i * (phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
+			-i * (phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) + phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed*frequencies[j])));
 		waveform_cross[j] = 
 			amp_vec[j] * hcfac_vec[j]*std::exp(
-			-i *(phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) - phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
+			-i *(phase_vec[j]+std::complex<T>(tc*(frequencies[j]-f_ref) + phic,0)+(std::complex<T>)(2*M_PI*t_corr_fixed)*frequencies[j]));
 		
 	}
 	delete [] amp_vec;

@@ -550,7 +550,14 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 		for(int i =0; i< num_detectors ; i++){
 			//psds[i][j] = temp_psds[j][i+1]/(df);
 			//###########################################
+			//psds[i][j] = temp_psds[j][i+1]/Tobs;
 			psds[i][j] = temp_psds[j][i+1];
+			//psds[i][j] = temp_psds[j][i+1]*df;
+			//psds[i][j] = temp_psds[j][i+1]/dt;
+
+
+
+			//psds[i][j] = temp_psds[j][i+1]/dt/dt;
 
 			//psds[i][j] = temp_psds[j][i+1]/dt/2.;
 			//psds[i][j] = temp_psds[j][i+1]/Tobs*2.*N_trimmed;
@@ -562,6 +569,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			//psds[i][j] = temp_psds[j][i+1]*Tobs;
 			//psds[i][j] = temp_psds[j][i+1]*2;
 			freqs[i][j] = temp_psds[j][0];
+			//freqs[i][j] = temp_psds[j][0]/dt;
 		}	
 	}
 		
@@ -581,7 +589,8 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double *window = (double *)malloc(sizeof(double)*N_trimmed);
 	//double alpha = .4; //Standard alpha choice
-	double alpha = 2*0.4/Tobs; //Standard alpha choice
+	double alpha = 2*0.5/Tobs; //Standard alpha choice
+	//double alpha = 0.5; //Standard alpha choice
 	//double alpha = 0.5/32.; //Standard alpha choice
 	tukey_window(window,N_trimmed, alpha);
 	//Trim data to Tobs, and apply tukey windowing for fft
@@ -625,33 +634,15 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	for (int i =0 ; i<N_trimmed; i++){
 		if(freq_untrimmed[i]>=fmin && freq_untrimmed[i]<=fmax){
 			for(int j =0; j<num_detectors;j++){
-				//data[j][l] = fft_data[j][i]/df/((double)N_trimmed);
 	//#################################################
-				//data[j][l] = fft_data[j][i]/(double )sqrt(N_trimmed);
-				//data[j][l] = fft_data[j][i]/df/(double )N_trimmed/2.;
-				//
-				//data[j][l] = fft_data[j][i]*sqrt(Tobs)/(double )N_trimmed;
-	//#################################################
-				//data[j][l] = fft_data[j][i]*(Tobs)/sqrt((double )N_trimmed)/2.;
-				//data[j][l] = fft_data[j][i]*(fs)/(double )N_trimmed/2.;
-				//data[j][l] = fft_data[j][i]*(fs)/sqrt((double )N_trimmed)/2.;
-
-				//data[j][l] = fft_data[j][i]*sqrt(Tobs)/(double )N_trimmed;
-				//data[j][l] = fft_data[j][i]*(dt*2.)/((double )N_trimmed);
-	//#################################################
-				//data[j][l] = fft_data[j][i]/(double )N_trimmed;
-				//
-				//data[j][l] = fft_data[j][i]/sqrt((double)N_trimmed);
-				//data[j][l] = fft_data[j][i]/sqrt((double)N_trimmed) *dt;
-				data[j][l] = fft_data[j][i]*dt;
-	//#################################################
-				//data[j][l] = fft_data[j][i]/((double)N_trimmed);
 				//data[j][l] = fft_data[j][i];
+				data[j][l] = fft_data[j][i]*dt;
 	//#################################################
 			}
 			l++;
 		}
 	}
+	debugger_print(__FILE__,__LINE__,std::to_string(l)+" "+std::to_string(psd_length));
 
 	//Deallocate temporary arrays
 	free(times_trimmed);

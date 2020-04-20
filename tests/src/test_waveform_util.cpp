@@ -715,8 +715,8 @@ int time_comparison_NADPN_MBH(int argc, char *argv[])
 	params.mass2 =932820*(1+0.44288);
 	params.theta_l = 1;
 	params.phi_l = 2;
-	//params.tc = T_year*3./4.;
-	params.tc = 0;
+	params.tc = T_year*3./4.;
+	//params.tc = 0;
 	params.equatorial_orientation = true;
 	double fmin = 3e-7;
 	double fmax = 5e-4;
@@ -791,11 +791,12 @@ int time_comparison_NADPN(int argc, char *argv[])
 	params.mass2 = 2.9e1;
 	params.theta_l = 1;
 	params.phi_l = 2;
-	params.tc = 0;
+	//params.tc = 0;
 	params.equatorial_orientation = true;
-	double fmin = 3e-3;
-	double fmax = 1e-2;
+	double fmin = 8e-2;
+	double fmax = 1e-1;
 	double T = T_year/2;
+	params.tc =T*(1-3./4.) ;
 
 	int length = T*(fmax-fmin);
 	double *frequency = new double[length];

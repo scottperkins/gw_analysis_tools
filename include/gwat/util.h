@@ -400,6 +400,7 @@ static source_parameters<T> populate_source_parameters_old(
 			T t_c, 
 			bool sky_average) ;
 };
+void matrix_multiply(double **A, double **B, double **C,int dim1, int dim2,int dim3);
 void debugger_print(const char *file, const int line, std::string message);
 std::string strip_path(std::string input);
 template<class T, class U>
