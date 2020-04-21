@@ -7,8 +7,8 @@ import numpy as np
 #import gwatpy.gwatpy_plot as gp; gp.set()
 #from phenompy.utilities import calculate_mass1, calculate_mass2
 
-#data = np.loadtxt("data/injection_output.csv",delimiter=',')
-data = np.loadtxt("data/experiment_output.csv",delimiter=',')
+data = np.loadtxt("data/injection_output.csv",delimiter=',')
+#data = np.loadtxt("data/experiment_output.csv",delimiter=',')
 #data = np.loadtxt("data/test_output.csv",delimiter=',')
 #injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)
 injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)

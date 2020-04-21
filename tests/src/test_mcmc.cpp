@@ -190,6 +190,13 @@ int mcmc_injection(int argc, char *argv[])
 	injection.horizon_coord = false;
 	injection.shift_time = true;
 	injection.shift_phase = true;
+
+
+	//injection.Nmod_phi = 1;
+	//injection.delta_phi = new double[1];
+	//injection.delta_phi[0] = 1;
+	//injection.phii = new int[1];
+	//injection.phii[0] = 5;
 	
 	int detect_number = 2;
 	std::string detectors[4] = {"Hanford","Livingston","Virgo","Kagra"};
@@ -274,6 +281,11 @@ int mcmc_injection(int argc, char *argv[])
 	}
 	matrix_multiply(fisher, jac_spins,temp_fisher,fisher_dim,fisher_dim,fisher_dim);
 	matrix_multiply( jac_spins,temp_fisher,fisher,fisher_dim,fisher_dim,fisher_dim);
+	for(int k = 0 ; k<fisher_dim; k++){
+		for(int j = 0 ; j<fisher_dim; j++){
+			std::cout<<fisher[k][j]<<std::endl;	
+		}
+	}
 	gsl_LU_matrix_invert(fisher, cov, fisher_dim);
 	std::cout<<"Fisher estimates of covariances: "<<std::endl;
 	for(int i = 0  ;i<fisher_dim; i++){
@@ -475,8 +487,10 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>60 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
-	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
-	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	double chi1 = pos[9]+pos[10];
+	double chi2 = pos[9]-pos[10];
+	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 

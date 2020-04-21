@@ -862,13 +862,13 @@ void calculate_derivatives_autodiff(double *frequency,
 		}
 		std::complex<adouble> a_response;
 		if(!a_parameters.sky_average){
+			if(detector != "LISA" && detector != reference_detector){
+				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
+			}
 			int status  = fourier_detector_response(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
 
 		}
 		else{
-			if(detector != "LISA" && detector != reference_detector){
-				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
-			}
 			adouble a_amp;
 			adouble a_phasep;
 			adouble a_phasec;
@@ -1924,9 +1924,45 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		}
 	}
 	if( check_mod(generation_method)){
-		int base = dimension-input_params->Nmod;
-		for(int i = 0 ;i<input_params->Nmod; i++){
-			parameters[base+i] = input_params->betappe[i];
+		if(generation_method.find("ppE") != std::string::npos || 
+			generation_method.find("dCS") !=std::string::npos ||
+			generation_method.find("EdGB") != std::string::npos){
+			int base = dimension-input_params->Nmod;
+			for(int i = 0 ;i<input_params->Nmod; i++){
+				parameters[base+i] = input_params->betappe[i];
+			}
+		}
+		else if(generation_method.find("gIMR") != std::string::npos ){
+			int mods = input_params->Nmod_phi + 
+				input_params->Nmod_sigma +
+				input_params->Nmod_beta +
+				input_params->Nmod_alpha ;
+			int base = dimension-mods;
+			int ct = 0;
+			int ct_total = 0;
+			while(ct < input_params->Nmod_phi){
+				parameters[base+ct_total] = input_params->delta_phi[ct];
+				ct++;
+				ct_total++;
+			}
+			ct = 0;
+			while(ct < input_params->Nmod_sigma){
+				parameters[base+ct_total] = input_params->delta_sigma[ct];
+				ct++;
+				ct_total++;
+			}
+			ct = 0;
+			while(ct < input_params->Nmod_beta){
+				parameters[base+ct_total] = input_params->delta_beta[ct];
+				ct++;
+				ct_total++;
+			}
+			ct = 0;
+			while(ct < input_params->Nmod_alpha){
+				parameters[base+ct_total] = input_params->delta_alpha[ct];
+				ct++;
+				ct_total++;
+			}
 		}
 	}
 
@@ -2251,9 +2287,45 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 
 	}
 	if( check_mod(generation_method)){
-		int base = dim - a_params->Nmod;
-		for(int i = 0 ;i<a_params->Nmod; i++){
-			a_params->betappe[i] = avec_parameters[base+i];
+		if(generation_method.find("ppE") != std::string::npos || 
+			generation_method.find("dCS") !=std::string::npos ||
+			generation_method.find("EdGB") != std::string::npos){
+			int base = dim - a_params->Nmod;
+			for(int i = 0 ;i<a_params->Nmod; i++){
+				a_params->betappe[i] = avec_parameters[base+i];
+			}
+		}
+		else if(generation_method.find("gIMR") != std::string::npos ){
+			int mods = a_params->Nmod_phi + 
+				a_params->Nmod_sigma +
+				a_params->Nmod_beta +
+				a_params->Nmod_alpha ;
+			int base = dim-mods;
+			int ct = 0;
+			int ct_total = 0;
+			while(ct < a_params->Nmod_phi){
+				a_params->delta_phi[ct] = avec_parameters[base+ct_total];
+				ct++;
+				ct_total++;
+			}
+			ct = 0;
+			while(ct < a_params->Nmod_sigma){
+				a_params->delta_sigma[ct] = avec_parameters[base+ct_total];
+				ct++;
+				ct_total++;
+			}
+			ct = 0;
+			while(ct < a_params->Nmod_beta){
+				a_params->delta_beta[ct] = avec_parameters[base+ct_total];
+				ct++;
+				ct_total++;
+			}
+			ct = 0;
+			while(ct < a_params->Nmod_alpha){
+				a_params->delta_alpha[ct] = avec_parameters[base+ct_total];
+				ct++;
+				ct_total++;
+			}
 		}
 	}
 
@@ -2284,9 +2356,36 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->phip = input_params->phip;
 	
 	if( check_mod(gen_method)){
-		waveform_params->bppe = input_params->bppe;
-		waveform_params->Nmod = input_params->Nmod;
-		waveform_params->betappe = new T[waveform_params->Nmod];
+		if(gen_method.find("ppE") != std::string::npos || 
+			gen_method.find("dCS") !=std::string::npos ||
+			gen_method.find("EdGB") != std::string::npos){
+			waveform_params->bppe = input_params->bppe;
+			waveform_params->Nmod = input_params->Nmod;
+			waveform_params->betappe = new T[waveform_params->Nmod];
+		}
+		else if(gen_method.find("gIMR") != std::string::npos){
+			waveform_params->phii = input_params->phii;
+			waveform_params->sigmai = input_params->sigmai;
+			waveform_params->betai = input_params->betai;
+			waveform_params->alphai = input_params->alphai;
+			waveform_params->Nmod_phi = input_params->Nmod_phi;
+			waveform_params->Nmod_sigma = input_params->Nmod_sigma;
+			waveform_params->Nmod_beta = input_params->Nmod_beta;
+			waveform_params->Nmod_alpha = input_params->Nmod_alpha;
+			if(waveform_params->Nmod_phi != 0){
+				waveform_params->delta_phi = new T[waveform_params->Nmod_phi];
+			}
+			if(waveform_params->Nmod_sigma != 0){
+				waveform_params->delta_sigma = new T[waveform_params->Nmod_sigma];
+			}
+			if(waveform_params->Nmod_beta != 0){
+				waveform_params->delta_beta = new T[waveform_params->Nmod_beta];
+			}
+			if(waveform_params->Nmod_alpha != 0){
+				waveform_params->delta_alpha = new T[waveform_params->Nmod_alpha];
+			}
+
+		}
 	}
 
 }
@@ -2297,7 +2396,26 @@ template<class T>
 void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
 {
 	if( check_mod(gen_method)){
-		delete [] waveform_params->betappe	;
+		if(gen_method.find("ppE") != std::string::npos || 
+			gen_method.find("dCS") !=std::string::npos ||
+			gen_method.find("EdGB") != std::string::npos){
+			delete [] waveform_params->betappe	;
+		}
+		else if (gen_method.find("gIMR") != std::string::npos){
+			if(waveform_params->Nmod_phi != 0 ){
+				delete [] waveform_params->delta_phi	;
+			}
+			if(waveform_params->Nmod_sigma != 0 ){
+				delete [] waveform_params->delta_sigma	;
+			}
+			if(waveform_params->Nmod_beta != 0 ){
+				delete [] waveform_params->delta_beta	;
+			}
+			if(waveform_params->Nmod_alpha != 0 ){
+				delete [] waveform_params->delta_alpha	;
+			}
+
+		}
 	}
 }
 template void deallocate_non_param_options<double>(gen_params_base<double> *, gen_params_base<double> *, std::string);
@@ -2535,8 +2653,31 @@ void tape_phase_gsl_subroutine(gsl_subroutine * params_packed)
 		trace_off();
 	}
 	if(check_mod(generation_method)){
-		delete [] aparams.betappe;
-		delete [] aparams.bppe;
+		if(generation_method.find("ppE") != std::string::npos || 
+			generation_method.find("dCS") !=std::string::npos ||
+			generation_method.find("EdGB") != std::string::npos){
+			delete [] aparams.betappe;
+			delete [] aparams.bppe;
+		}
+		else if (generation_method.find("gIMR") != std::string::npos){
+			if(aparams.Nmod_phi != 0 ){
+				delete [] aparams.delta_phi	;
+				delete [] aparams.phii;
+			}
+			if(aparams.Nmod_sigma != 0 ){
+				delete [] aparams.delta_sigma	;
+				delete [] aparams.sigmai;
+			}
+			if(aparams.Nmod_beta != 0 ){
+				delete [] aparams.delta_beta	;
+				delete [] aparams.betai;
+			}
+			if(aparams.Nmod_alpha != 0 ){
+				delete [] aparams.delta_alpha	;
+				delete [] aparams.alphai;
+			}
+
+		}
 	}
 
 }
@@ -2654,13 +2795,13 @@ void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed)
 		}
 		std::complex<adouble> a_response;
 		if(!a_parameters.sky_average){
+			if(detector != "LISA" && detector != reference_detector){
+				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
+			}
 			int status  = fourier_detector_response(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
 
 		}
 		else{
-			if(detector != "LISA" && detector != reference_detector){
-				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
-			}
 			adouble a_amp;
 			adouble a_phasep;
 			adouble a_phasec;

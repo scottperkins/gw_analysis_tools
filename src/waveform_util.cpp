@@ -790,8 +790,30 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 	if(!tapes_in){
 		delete [] tapes;
 		if(check_mod(generation_method)){
-			delete [] aparams.betappe;
-			delete [] aparams.bppe;
+			if(generation_method.find("ppE")!= std::string::npos ||
+			generation_method.find("dCS")!= std::string::npos ||
+			generation_method.find("EdGB")!= std::string::npos){
+				delete [] aparams.betappe;
+				delete [] aparams.bppe;
+			}
+			else if(generation_method.find("gIMR")!= std::string::npos){
+				if(aparams.Nmod_phi !=0){
+					delete [] aparams.phii;
+					delete [] aparams.delta_phi;
+				}
+				if(aparams.Nmod_sigma !=0){
+					delete [] aparams.sigmai;
+					delete [] aparams.delta_sigma;
+				}
+				if(aparams.Nmod_beta !=0){
+					delete [] aparams.betai;
+					delete [] aparams.delta_beta;
+				}
+				if(aparams.Nmod_alpha !=0){
+					delete [] aparams.alphai;
+					delete [] aparams.delta_alpha;
+				}
+			}
 		}
 	}
 	params->dep_postmerger=save_dep;
@@ -1189,8 +1211,30 @@ void assign_freq_boundaries(double *freq_boundaries,
 		}
 	}
 	if(check_mod(generation_method)){
-		delete [] internal_params.betappe;
-		delete [] internal_params.bppe;
+		if(generation_method.find("ppE")!= std::string::npos ||
+		generation_method.find("dCS")!= std::string::npos ||
+		generation_method.find("EdGB")!= std::string::npos){
+			delete [] internal_params.betappe;
+			delete [] internal_params.bppe;
+		}
+		else if(generation_method.find("gIMR")!= std::string::npos){
+			if(internal_params.Nmod_phi !=0){
+				delete [] internal_params.phii;
+				delete [] internal_params.delta_phi;
+			}
+			if(internal_params.Nmod_sigma !=0){
+				delete [] internal_params.sigmai;
+				delete [] internal_params.delta_sigma;
+			}
+			if(internal_params.Nmod_beta !=0){
+				delete [] internal_params.betai;
+				delete [] internal_params.delta_beta;
+			}
+			if(internal_params.Nmod_alpha !=0){
+				delete [] internal_params.alphai;
+				delete [] internal_params.delta_alpha;
+			}
+		}
 	}
 	
 	
