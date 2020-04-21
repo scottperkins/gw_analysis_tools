@@ -78,6 +78,7 @@ void fisher_numerical(double *frequency,
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	string generation_method, 
 	string detector, 
+	string reference_detector, 
 	double **output,/**< double [dimension][dimension]*/
 	int dimension, 
 	gen_params_base<double> *parameters,
@@ -114,6 +115,7 @@ void fisher_numerical(double *frequency,
 			length, 
 			dimension, 
 			detector, 
+			reference_detector, 
 			generation_method,
 			parameters,
 			order);
@@ -145,6 +147,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	int length, 
        	int dimension, 
        	string detector, 
+       	string reference_detector, 
        	string  gen_method,
        	gen_params_base<double> *parameters,
 	int order)
@@ -347,6 +350,9 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				//time_phase_corrected(times, length,frequencies,  &waveform_params, local_gen_method, corr_time);
 				//map_extrinsic_angles(&waveform_params);
 			}
+			else if(reference_detector != detector){
+				waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			}
 			fourier_detector_response(frequencies, 
 				length,
 				response_plus,
@@ -358,6 +364,9 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			repack_parameters(param_m, &waveform_params, gen_method, dimension, parameters);
 			if(detector=="LISA"){
 				//map_extrinsic_angles(&waveform_params);
+			}
+			else if(reference_detector != detector){
+				waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
 			}
 			fourier_detector_response(frequencies, 
 				length,
@@ -371,6 +380,9 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				if(detector=="LISA"){
 					//map_extrinsic_angles(&waveform_params);
 				}
+				else if(reference_detector != detector){
+					waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+				}
 				fourier_detector_response(frequencies, 
 					length,
 					response_plus_plus,
@@ -382,6 +394,9 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				repack_parameters(param_mm, &waveform_params, gen_method, dimension, parameters);
 				if(detector=="LISA"){
 					//map_extrinsic_angles(&waveform_params);
+				}
+				else if(reference_detector != detector){
+					waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
 				}
 				fourier_detector_response(frequencies, 
 					length,
@@ -492,6 +507,7 @@ void fisher_autodiff_batch_mod(double *frequency,
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	std::string generation_method,
 	std::string detector, 
+	std::string reference_detector,
 	double **output,/**< double [dimension][dimension]*/
 	int base_dimension, /**< GR dimensionality*/
 	int full_dimension, /**< Total dimension of the output fisher (ie GR_dimension + Nmod)*/
@@ -531,7 +547,7 @@ void fisher_autodiff_batch_mod(double *frequency,
 	if(integration_method == "GAUSSLEG"){
 		autodiff_time_deriv = true;
 	}
-	calculate_derivatives_autodiff(frequency,length, full_dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv);
+	calculate_derivatives_autodiff(frequency,length, full_dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv,reference_detector);
 	//##########################################################
 	
 	//calulate fisher elements
@@ -562,6 +578,7 @@ void fisher_autodiff_interp(double *frequency,
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	std::string generation_method, 
 	std::string detector, 
+	std::string reference_detector, 
 	double **output,/**< double [dimension][dimension]*/
 	int dimension, 
 	gen_params *parameters,
@@ -616,7 +633,7 @@ void fisher_autodiff_interp(double *frequency,
 	freqs_ds[length_ds-1] = frequency[length-1];
 	//calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector);
 	bool autodiff_time_deriv=false;
-	calculate_derivatives_autodiff(freqs_ds,length_ds, dimension,generation_method, parameters, temp_deriv, NULL, detector,autodiff_time_deriv);
+	calculate_derivatives_autodiff(freqs_ds,length_ds, dimension,generation_method, parameters, temp_deriv, NULL, detector,autodiff_time_deriv,reference_detector);
 	//Interpolate derivatives here to get back to full length
 	gsl_interp_accel *my_accel_ptr= gsl_interp_accel_alloc ();
 	gsl_spline *my_spline_ptr= gsl_spline_alloc (gsl_interp_linear, length_ds);
@@ -698,6 +715,7 @@ void fisher_autodiff(double *frequency,
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	std::string generation_method, 
 	std::string detector, 
+	std::string reference_detector,
 	double **output,/**< double [dimension][dimension]*/
 	int dimension,/**<dimension of the fisher*/ 
 	gen_params *parameters,/**< Injection parameters*/
@@ -736,7 +754,7 @@ void fisher_autodiff(double *frequency,
 	if(integration_method == "GAUSSLEG"){
 		autodiff_time_deriv = true;
 	}
-	calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv);
+	calculate_derivatives_autodiff(frequency,length, dimension,generation_method, parameters, response_deriv, NULL, detector,autodiff_time_deriv,reference_detector);
 	//##########################################################
 	
 	//calulate fisher elements
@@ -776,7 +794,8 @@ void calculate_derivatives_autodiff(double *frequency,
 	std::complex<double> **waveform_deriv,
 	int *waveform_tapes,
 	std::string detector,
-	bool autodiff_time_deriv
+	bool autodiff_time_deriv,
+	std::string reference_detector
 	)
 {
 	//Transform gen_params to double vectors
@@ -847,6 +866,9 @@ void calculate_derivatives_autodiff(double *frequency,
 
 		}
 		else{
+			if(detector != "LISA" && detector != reference_detector){
+				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
+			}
 			adouble a_amp;
 			adouble a_phasep;
 			adouble a_phasec;
@@ -2460,6 +2482,7 @@ void prep_gsl_subroutine(gsl_subroutine *params_packed)
 	int dimension = params_packed->dim;
 	std::string generation_method = params_packed->generation_method;
 	std::string detector = params_packed->detector;
+	std::string reference_detector = params_packed->reference_detector;
 
 	params_packed->boundary_num = boundary_number(generation_method);
 
@@ -2580,6 +2603,7 @@ void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed)
 	bool *log_factors = params_packed->log_factors;
 	std::string generation_method = params_packed->generation_method;
 	std::string detector = params_packed->detector;
+	std::string reference_detector = params_packed->reference_detector;
 	gen_params *parameters = params_packed->gen_params_in;
 
 	int vec_param_length= dimension +1;
@@ -2634,6 +2658,9 @@ void tape_waveform_gsl_subroutine(gsl_subroutine * params_packed)
 
 		}
 		else{
+			if(detector != "LISA" && detector != reference_detector){
+				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
+			}
 			adouble a_amp;
 			adouble a_phasep;
 			adouble a_phasec;
@@ -2672,6 +2699,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 	string generation_method, /**<Method of waveform generation*/
 	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
 	string detector, /**< Detector to use for the response function*/
+	string reference_detector, /**< Detector to use for the response function*/
 	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [dimension][dimension]*/
 	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [dimension][dimension]*/
 	int dimension, /**<Dimension of the Fisher */
@@ -2680,7 +2708,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 	double relerr/**<Target relative error (0 if this should be ignored -- ONE type of error must be specified)*/
 	)
 {
-	fisher_autodiff_gsl_integration(frequency_bounds, generation_method, sensitivity_curve, detector, output,error, dimension, parameters, abserr, relerr, "", false);
+	fisher_autodiff_gsl_integration(frequency_bounds, generation_method, sensitivity_curve, detector,reference_detector, output,error, dimension, parameters, abserr, relerr, "", false);
 }
 
 /*! \brief Routine that implements GSL numerical integration to calculate the Fishers
@@ -2703,6 +2731,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 	string generation_method, /**<Method of waveform generation*/
 	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
 	string detector, /**< Detector to use for the response function*/
+	string reference_detector, /**< Detector to use for the response function*/
 	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [dimension][dimension]*/
 	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [dimension][dimension]*/
 	int dimension, /**<Dimension of the Fisher */
@@ -2715,6 +2744,7 @@ void fisher_autodiff_gsl_integration(double *frequency_bounds, /**<Bounds of int
 {
 	gsl_subroutine params_packed ;
 	params_packed.detector = detector;
+	params_packed.reference_detector = reference_detector;
 	params_packed.sensitivity_curve = sensitivity_curve;
 	params_packed.generation_method = generation_method;
 	params_packed.gen_params_in = parameters;
@@ -2829,6 +2859,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	string generation_method, /**<Method of waveform generation*/
 	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
 	string detector, /**< Detector to use for the response function*/
+	string reference_detector, /**< Detector to use for the response function*/
 	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [full_dimension][full_dimension]*/
 	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [full_dimension][full_dimension]*/
 	int base_dimension, /**< Dimension of base model (ie GR dimension)*/
@@ -2839,7 +2870,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	)
 {
 	fisher_autodiff_gsl_integration_batch_mod(frequency_bounds, generation_method,
-		sensitivity_curve, detector, output, error, base_dimension, full_dimension, parameters, abserr, relerr, "",false);
+		sensitivity_curve, detector,reference_detector, output, error, base_dimension, full_dimension, parameters, abserr, relerr, "",false);
 }
 /*! \brief Routine that implements GSL numerical integration to calculate the Fishers -- batch modifications version
  *
@@ -2865,6 +2896,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	string generation_method, /**<Method of waveform generation*/
 	string sensitivity_curve, /**<Sensitivity curve to be used for the PSD -- MUST BE ANALYTIC*/
 	string detector, /**< Detector to use for the response function*/
+	string reference_detector, /**< Detector to use for the response function*/
 	double **output,/**<[out] Output Fisher -- must be preallocated -- shape [full_dimension][full_dimension]*/
 	double **error,/**<[out] Estimated error, as specified by GSL's integration -- must be preallocated -- shape [full_dimension][full_dimension]*/
 	int base_dimension, /**< Dimension of base model (ie GR dimension)*/
@@ -2882,6 +2914,7 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds, /**<Bou
 	}
 	gsl_subroutine params_packed ;
 	params_packed.detector = detector;
+	params_packed.reference_detector = detector;
 	params_packed.sensitivity_curve = sensitivity_curve;
 	params_packed.generation_method = generation_method;
 	params_packed.gen_params_in = parameters;
@@ -2987,6 +3020,7 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	//double start = clock();
 	gsl_subroutine params_packed = *(gsl_subroutine *)params_in;
 	std::string detector=  params_packed.detector;
+	std::string reference_detector=  params_packed.detector;
 	std::string generation_method=  params_packed.generation_method;
 	gen_params *parameters = params_packed.gen_params_in;
 	std::string sensitivity_curve = params_packed.sensitivity_curve;

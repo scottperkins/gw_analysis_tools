@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	for(int i = 0 ; i<N_d ; i++){
-		fisher_autodiff(freqs, length, gen_method, detectors[i],fisher_temp, dim, &params, "GAUSSLEG",weights,true, psds[i],NULL,NULL);
+		fisher_autodiff(freqs, length, gen_method, detectors[i],detectors[0],fisher_temp, dim, &params, "GAUSSLEG",weights,true, psds[i],NULL,NULL);
 		for(int j = 0 ; j<dim; j++){
 			for(int k = 0 ; k<dim; k++){
 				fisher[j][k] += fisher_temp[j][k];

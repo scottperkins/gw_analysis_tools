@@ -187,13 +187,15 @@ void detector_response_functions_equatorial(std::string detector,
 	T *Fcross
 	);
 
-double DTOA_DETECTOR(double RA, 
-	double DEC, 
+template<class T>
+T DTOA_DETECTOR(T RA, 
+	T DEC, 
 	double GMST_rad,
 	std::string detector1, 
 	std::string detector2 );
-double DTOA_earth_centered_coord(double RA, 
-	double DEC, 
+template<class T>
+T DTOA_earth_centered_coord(T RA, 
+	T DEC, 
 	double GMST_rad,
 	const double *loc1, 
 	const double *loc2 );

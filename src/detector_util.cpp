@@ -573,8 +573,9 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
  *
  * Full version, from LAL
  */
-double DTOA_DETECTOR(double RA, /**< spherical polar angle for detector 1 in RAD*/
-	double DEC, /**<spherical polar angle for detector 2 in RAD*/ 
+template <class T>
+T DTOA_DETECTOR(T RA, /**< spherical polar angle for detector 1 in RAD*/
+	T DEC, /**<spherical polar angle for detector 2 in RAD*/ 
 	double GMST_rad,/**< Greenwich mean sidereal time of detection*/
 	std::string detector1, /**< name of detector one*/
 	std::string detector2 /**<name of detector two*/
@@ -634,23 +635,26 @@ double DTOA_DETECTOR(double RA, /**< spherical polar angle for detector 1 in RAD
 	}
 	return DTOA_earth_centered_coord(RA,DEC,GMST_rad,earth_centered_location1,earth_centered_location2);
 }
+template double DTOA_DETECTOR<double>(double,double,double,std::string,std::string);
+template adouble DTOA_DETECTOR<adouble>(adouble,adouble,double,std::string,std::string);
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  */
-double DTOA_earth_centered_coord(double RA, /**< spherical polar angle for detector 1 in RAD*/
-	double DEC, /**<spherical polar angle for detector 2 in RAD*/ 
+template <class T>
+T DTOA_earth_centered_coord(T RA, /**< spherical polar angle for detector 1 in RAD*/
+	T DEC, /**<spherical polar angle for detector 2 in RAD*/ 
 	double GMST_rad,/**< Greenwich mean sidereal time of detection*/
 	const double *loc1, /**< Location of the first detector in Earth centered coordinates in meters*/
 	const double *loc2 /**<Location of the second detector in Earth centered coordinates in meters*/
 	)
 {
-	double dx[3];
+	T dx[3];
 	dx[0] = loc1[0]-loc2[0];
 	dx[1] = loc1[1]-loc2[1];
 	dx[2] = loc1[2]-loc2[2];
 	
 	//Direction to source
-	double hour_angle = GMST_rad - RA;
-	double ehat[3];
+	T hour_angle = GMST_rad - RA;
+	T ehat[3];
 	ehat[0] = cos(DEC) * cos(hour_angle);
 	ehat[1] = cos(DEC) * -sin(hour_angle);
 	ehat[2] = sin(DEC) ;
@@ -658,6 +662,8 @@ double DTOA_earth_centered_coord(double RA, /**< spherical polar angle for detec
 	return (dx[0]*ehat[0] + dx[1]*ehat[1] + dx[2]*ehat[2])/c;
 
 }
+template double DTOA_earth_centered_coord<double>(double,double,double,const double *,const double *);
+template adouble DTOA_earth_centered_coord<adouble>(adouble,adouble,double,const double *,const double *);
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  */
 double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/

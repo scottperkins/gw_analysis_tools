@@ -265,7 +265,7 @@ int mcmc_injection(int argc, char *argv[])
 		}
 	}
 	for(int i = 0 ; i<detect_number; i++){
-		fisher_autodiff(freq[i],length, injection_method, detectors[i],temp_fisher,fisher_dim,&injection, "SIMPSONS",(double *)NULL,false, psd[i],NULL,NULL);
+		fisher_autodiff(freq[i],length, injection_method, detectors[i],detectors[0],temp_fisher,fisher_dim,&injection, "SIMPSONS",(double *)NULL,false, psd[i],NULL,NULL);
 		for(int k = 0 ; k<fisher_dim; k++){
 			for(int j = 0 ; j<fisher_dim; j++){
 				fisher[k][j]+=temp_fisher[k][j];	
