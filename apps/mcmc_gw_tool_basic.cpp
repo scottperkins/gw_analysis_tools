@@ -12,15 +12,13 @@ double T_mcmc_gw_tool;
  *
  * Command line tool for analyzing LOSC GW data
  *
- * Runs the ``uncorrelated'' MCMC sampler with a generic prior
- *
  * See mcmc_sampler.cpp documentation for more explanation on the sampler
  *
  * See mcmc_gw.cpp for GW specific explanation
  *
  * Usage:
  * 	
- * 	mcmc_gw_tool /PATH/TO/PARAM/FILE
+ * 	mcmc_gw_tool_basic /PATH/TO/PARAM/FILE
  *
  * See data/sample_config_files/mcmc_gw_tool_param_template.dat for an example parameter file
  *
@@ -324,26 +322,26 @@ int main(int argc, char *argv[])
 			initial_position[0] = new double[dimension];
 			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
-			std::cout<<"Running uncorrelated sampler "<<std::endl;
-			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
-					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
-					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,allocation_scheme, 
-					lp,threads, pool,show_progress,detector_N, 
+			double ***output2 = allocate_3D_array(chain_N,samples, dimension );
+			double c = 1.1;
+			chain_temps[0]=1;
+			for(int i = 1 ; i<chain_N; i++){
+				chain_temps[i]=chain_temps[i-1]*c;
+			}
+			PTMCMC_MH_dynamic_PT_alloc_GW(output2, dimension, (int)5*t0, chain_N, max_thermo_chain_N, 
+					initial_position[0],seeding_var,chain_temps, 
+					swap_freq,t0, nu, allocation_scheme,lp,threads, pool,show_progress,detector_N, 
 					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-					generation_method,stat_file,output_file, "",check_file);	
-			//double ***output2 = allocate_3D_array(chain_N,samples, dimension );
-			//double c = 1.1;
-			//chain_temps[0]=1;
-			//for(int i = 1 ; i<chain_N; i++){
-			//	chain_temps[i]=chain_temps[i-1]*c;
-			//}
-			//PTMCMC_MH_GW(output2, dimension, samples, chain_N, 
-			//		initial_position[0],seeding_var,chain_temps, 
-			//		swap_freq, lp,threads, pool,show_progress,detector_N, 
-			//		data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
-			//		generation_method,stat_file,output_file, "","data/LL.csv",check_file);	
-			//deallocate_3D_array(output2,chain_N,samples,dimension);
+					generation_method,stat_file,"", "",check_file);	
+			continue_PTMCMC_MH_GW(check_file, output2, dimension, 5*t0,  
+					swap_freq, lp,threads, pool,show_progress,detector_N, 
+					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					generation_method,stat_file,"", "","",check_file,true);	
+			continue_PTMCMC_MH_GW(check_file, output2, dimension, samples,  
+					swap_freq, lp,threads, pool,show_progress,detector_N, 
+					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					generation_method,stat_file,output_file, "","",check_file,true);	
+			deallocate_3D_array(output2,chain_N,samples,dimension);
 			delete [] initial_position[0]; delete [] initial_position;
 		}
 

@@ -2450,6 +2450,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//std::cout<<ll<<" "<<sqrt(snr)<<" "<<parameters->mass1<<" "<<parameters->mass2<<" "<<parameters->spin1[0]<<" "<<parameters->spin1[0]<<" "<<parameters->spin1[1]<<" "<<parameters->spin2[1]<<" "<<parameters->spin1[2]<<" "<<parameters->spin2[2]<<" "<<std::endl;
 	delete [] phi;
 	delete [] theta;
+	//debugger_print(__FILE__,__LINE__,std::to_string(ll));
 	return ll;
 	//return 2;
 }

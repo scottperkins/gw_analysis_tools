@@ -545,7 +545,6 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double df = 1./Tobs;
 	double dt = 1./fs;
 	int N_trimmed = Tobs*fs;
-	std::cout<<"dt: "<<dt<<std::endl;
 	for (int j = 0; j< psd_length; j++){
 		for(int i =0; i< num_detectors ; i++){
 			//psds[i][j] = temp_psds[j][i+1]/(df);
@@ -585,6 +584,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 
 	double time_start = trigger_time - Tobs*3./4.;
 	double time_end = trigger_time + Tobs/4.;
+	debugger_print(__FILE__,__LINE__,"Start,End: "+std::to_string(time_start)+","+std::to_string(time_end));
 	double **data_trimmed = allocate_2D_array(num_detectors, N_trimmed);
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double *window = (double *)malloc(sizeof(double)*N_trimmed);
@@ -604,7 +604,6 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			l++;
 		}
 	}
-	std::cout<<l<<" "<<N_trimmed<<std::endl;
 	
 	fftw_outline plan;
 	allocate_FFTW_mem_forward(&plan, N_trimmed);
@@ -642,7 +641,6 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			l++;
 		}
 	}
-	debugger_print(__FILE__,__LINE__,std::to_string(l)+" "+std::to_string(psd_length));
 
 	//Deallocate temporary arrays
 	free(times_trimmed);

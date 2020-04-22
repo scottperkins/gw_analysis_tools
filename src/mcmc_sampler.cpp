@@ -261,29 +261,29 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 	
  	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(output,
-		dimension, 	/**< dimension of the parameter space being explored*/
-		N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
-		chain_N,/**< Maximum number of chains to use */
-		max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
-		swp_freq,	/**< the frequency with which chains are swapped*/
-		t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
-		nu,/**< Initial amplitude of the dynamics (~100)*/
-		corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
-		corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
-		corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
-		corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
-		chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
-		log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
-		log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
-		fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
-		user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
-		numThreads, /**< Number of threads to use (=1 is single threaded)*/
-		pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-		show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-		statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-		chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
-		checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+		dimension, 	
+		N_steps,	
+		chain_N,
+		max_chain_N_thermo_ensemble,
+		swp_freq,	
+		t0,
+		nu,
+		corr_threshold,
+		corr_segments,
+		corr_converge_thresh,
+		corr_target_ac,
+		chain_distribution_scheme, 
+		log_prior,
+		log_likelihood,
+		fisher,
+		user_parameters,
+		numThreads, 
+		pool, 
+		show_prog,
+		statistics_filename,
+		chain_filename,
+		likelihood_log_filename,
+		checkpoint_file
 	);
 	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
 }
@@ -332,7 +332,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = 5*t0;
+	int dynamic_search_length = 2*t0;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
@@ -344,29 +344,29 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
  	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(output,
-		dimension, 	/**< dimension of the parameter space being explored*/
-		N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
-		chain_N,/**< Maximum number of chains to use */
-		max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
-		swp_freq,	/**< the frequency with which chains are swapped*/
-		t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
-		nu,/**< Initial amplitude of the dynamics (~100)*/
-		corr_threshold,/**< Maxmimum allowed autocorrelation of the samples -- suggested is 50*/
-		corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
-		corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
-		corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
-		chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
-		log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
-		log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
-		fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
-		user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
-		numThreads, /**< Number of threads to use (=1 is single threaded)*/
-		pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
-		show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
-		statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-		chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
-		checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+		dimension, 	
+		N_steps,	
+		chain_N,
+		max_chain_N_thermo_ensemble,
+		swp_freq,	
+		t0,
+		nu,
+		corr_threshold,
+		corr_segments,
+		corr_converge_thresh,
+		corr_target_ac,
+		chain_distribution_scheme, 
+		log_prior,
+		log_likelihood,
+		fisher,
+		user_parameters,
+		numThreads, 
+		pool, 
+		show_prog, 
+		statistics_filename,
+		chain_filename,
+		likelihood_log_filename,
+		checkpoint_file
 		);
 	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
 }
@@ -408,6 +408,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 	bool cumulative=true;
 	bool internal_prog=false;
+	bool full_explore=true;
 	int coldchains = count_cold_chains(chain_temps, chain_N);
 	double **reduced_temp_output, **reduced_temp_output_thinned ;
 	//int check_converg_segments=corr_segments/2;
@@ -433,8 +434,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//	check autocorrelation for convergence -- 10 chuncks, with the last three ac's within 5%
 	int dynamic_search_length;
 	int temp_length = 1*N_steps;
-	if( 5*t0<temp_length){
-		dynamic_search_length = 5*t0;
+	if( 2*t0<temp_length){
+		dynamic_search_length = 2*t0;
 	}
 	else{
 		dynamic_search_length = temp_length;
@@ -444,7 +445,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<5){
+	while(continue_dynamic_search && dynamic_ct<2){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -501,66 +502,70 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		*/
 		//####################################################################################
 		/* Do analysis one chain at a time, then combine*/
-		coldchains = count_cold_chains(chain_temps, chain_N);
-		int ***full_temp_ac = allocate_3D_array_int(coldchains,dimension, corr_segments);
-		double ***full_temp_output = allocate_3D_array(coldchains, dynamic_search_length,dimension);
-		int ccct=0;
-		for(int i = 0 ; i<chain_N;i++){
-			if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
-				for(int k = 0 ; k<dynamic_search_length; k++){
-					for(int j = 0 ; j<dimension; j++){
-						full_temp_output[ccct][k][j]=temp_output[i][k][j];
+		if(!full_explore){
+			coldchains = count_cold_chains(chain_temps, chain_N);
+			int ***full_temp_ac = allocate_3D_array_int(coldchains,dimension, corr_segments);
+			double ***full_temp_output = allocate_3D_array(coldchains, dynamic_search_length,dimension);
+			int ccct=0;
+			for(int i = 0 ; i<chain_N;i++){
+				if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
+					for(int k = 0 ; k<dynamic_search_length; k++){
+						for(int j = 0 ; j<dimension; j++){
+							full_temp_output[ccct][k][j]=temp_output[i][k][j];
+						}
 					}
+					ccct++;
 				}
-				ccct++;
 			}
-		}
-		auto_corr_from_data_batch(full_temp_output, dynamic_search_length, dimension, coldchains,full_temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
-		continue_dynamic_search=false;
-		double ave_max_ac=0;
-		max_ac_realloc=0;
-		ccct=0;
-		for(int i = 0 ; i<chain_N;i++){
-			if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
-				//auto_corr_from_data(temp_output[i], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
-				max_ac_realloc=0;
-				for(int k =0 ; k<dimension; k++){
-					if(full_temp_ac[ccct][k][corr_segments-1] >max_ac_realloc){
-						max_ac_realloc=full_temp_ac[ccct][k][corr_segments-1];
-					}	
-				}
-				ave_max_ac+=max_ac_realloc;
-				for(int k = 0 ; k<dimension; k++){
-					//ave_ac=0;
-					//for(int j = 0 ; j<check_convergence_segments; j++){
-					//	ave_ac += temp_ac[k][corr_segments-j-1];
-					//}
-					//ave_ac/=check_convergence_segments;
-					//for(int j = 0 ; j<check_convergence_segments; j++){
-					//	if(abs((double)temp_ac[k][corr_segments-j-1] - ave_ac)/ave_ac >corr_converge_thresh){
-					//		std::cout<<"FAILED "<<abs((double)temp_ac[k][corr_segments-j-1] - ave_ac)/ave_ac <<" "<<k<<" "<<j<<std::endl;
-					//		continue_dynamic_search=true;
-					//		//dynamic_search_length*=1.1;
-					//		break;
-					//	}
-					//}
-					double variance=0;
-					variance_list(full_temp_ac[ccct][k],corr_segments,&variance);
-					double mean=0;
-					mean_list(full_temp_ac[ccct][k],corr_segments,&mean);
-					double cv = sqrt(variance)/mean;
-					
-					if(cv >corr_converge_thresh){
-						std::cout<<"FAILED "<<cv<<" "<<mean<<" "<<variance<<" "<<k<<std::endl;
-						continue_dynamic_search=true;
+			auto_corr_from_data_batch(full_temp_output, dynamic_search_length, dimension, coldchains,full_temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
+			continue_dynamic_search=false;
+			double ave_max_ac=0;
+			max_ac_realloc=0;
+			ccct=0;
+			for(int i = 0 ; i<chain_N;i++){
+				if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
+					//auto_corr_from_data(temp_output[i], dynamic_search_length, dimension, temp_ac, corr_segments, corr_target_ac, numThreads, cumulative);
+					max_ac_realloc=0;
+					for(int k =0 ; k<dimension; k++){
+						if(full_temp_ac[ccct][k][corr_segments-1] >max_ac_realloc){
+							max_ac_realloc=full_temp_ac[ccct][k][corr_segments-1];
+						}	
 					}
-					//if(continue_dynamic_search){break;}
+					ave_max_ac+=max_ac_realloc;
+					for(int k = 0 ; k<dimension; k++){
+						//ave_ac=0;
+						//for(int j = 0 ; j<check_convergence_segments; j++){
+						//	ave_ac += temp_ac[k][corr_segments-j-1];
+						//}
+						//ave_ac/=check_convergence_segments;
+						//for(int j = 0 ; j<check_convergence_segments; j++){
+						//	if(abs((double)temp_ac[k][corr_segments-j-1] - ave_ac)/ave_ac >corr_converge_thresh){
+						//		std::cout<<"FAILED "<<abs((double)temp_ac[k][corr_segments-j-1] - ave_ac)/ave_ac <<" "<<k<<" "<<j<<std::endl;
+						//		continue_dynamic_search=true;
+						//		//dynamic_search_length*=1.1;
+						//		break;
+						//	}
+						//}
+						double variance=0;
+						variance_list(full_temp_ac[ccct][k],corr_segments,&variance);
+						double mean=0;
+						mean_list(full_temp_ac[ccct][k],corr_segments,&mean);
+						double cv = sqrt(variance)/mean;
+						
+						if(cv >corr_converge_thresh){
+							std::cout<<"FAILED "<<cv<<" "<<mean<<" "<<variance<<" "<<k<<std::endl;
+							continue_dynamic_search=true;
+						}
+						//if(continue_dynamic_search){break;}
+					}
+					ccct++;
 				}
-				ccct++;
 			}
-		}
 
-		max_ac_realloc = ave_max_ac/coldchains;
+			max_ac_realloc = ave_max_ac/coldchains;
+			deallocate_3D_array(full_temp_ac,coldchains,dimension, corr_segments);
+			deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
+		}
 	
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//if(temp_length < 10*max_ac_realloc){
@@ -575,22 +580,22 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 
 		//}
 
-		deallocate_3D_array(full_temp_ac,coldchains,dimension, corr_segments);
-		deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
 		dynamic_ct++;
 		//continue_dynamic_search=false;
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
-	if(temp_length < 100*max_ac_realloc){
-		deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-		temp_length = 100*max_ac_realloc;
-		temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
-	}
-	else if(temp_length>5000*max_ac_realloc){
-		deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-		temp_length = 5000*max_ac_realloc;
-		temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+	if(!full_explore){
+		if(temp_length < 100*max_ac_realloc){
+			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+			temp_length = 100*max_ac_realloc;
+			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+		}
+		else if(temp_length>5000*max_ac_realloc){
+			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+			temp_length = 5000*max_ac_realloc;
+			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
 
+		}
 	}
 
 	//for loop 
@@ -604,15 +609,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//		if over threshold, subsample ac/thresh ac>2*thresh, else every other sample
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
-	int realloc_temps_length = .1*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
+	//int realloc_temps_length = .1*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = .2*N_steps;//Steps before re-allocating chain temps
 	//int realloc_temps_length = 1;//0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	bool realloc = false;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
 		if(realloc || status>realloc_temps_thresh){
-			if( 5*t0<temp_length){
-				dynamic_search_length = 5*t0;
+			if( 2*t0<temp_length){
+				dynamic_search_length = 2*t0;
 			}
 			else{
 				dynamic_search_length = temp_length;

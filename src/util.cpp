@@ -761,7 +761,7 @@ void deallocate_FFTW_mem(fftw_outline *plan)
 	fftw_destroy_plan(plan->p);
 	fftw_free(plan->in);
 	fftw_free(plan->out);
-	fftw_cleanup();
+	//fftw_cleanup();
 }
 
 /*! \brief Builds the structure that shuttles source parameters between functions -updated version to incorporate structure argument

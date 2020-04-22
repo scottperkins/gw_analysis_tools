@@ -386,10 +386,9 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 10000;
-	int chain_N= 10;
-	double ***output;
-	output = allocate_3D_array( chain_N, N_steps, dimension );
+	int N_steps = 1000;
+	int chain_N= 5;
+	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 3;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -405,16 +404,31 @@ int mcmc_standard_test(int argc, char *argv[])
 	std::string chainfile = "data/mcmc_output.csv";
 	std::string statfilename = "data/mcmc_statistics.txt";
 	std::string checkpointfile = "data/mcmc_checkpoint.csv";
+	std::string LLfile = "data/mcmc_LL.csv";
+	//std::string LLfile = "";
 	
 	int numThreads = 10;
-	bool pool = true;
+	bool pool = false;
 	bool show_progress = true;
 	
-	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	//double ***output;
+	//output = allocate_3D_array( chain_N, N_steps, dimension );
+	//PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	//deallocate_3D_array(output, chain_N, N_steps, dimension);
+	double **output;
+	output = allocate_2D_array(  N_steps, dimension );
+	int t0 = 1000;
+	int nu = 10;
+	double corr_threshold = 0.01;
+	int corr_segments = 5;
+	double corr_convergence_thresh = 0.01;
+	double corr_target_ac = 0.01;
+	std::string chain_distribution_scheme="double";
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	deallocate_2D_array(output, N_steps, dimension);
 	std::cout<<"ENDED"<<std::endl;
 
 
-	deallocate_3D_array(output, chain_N, N_steps, dimension);
 		
 	return 0;
 

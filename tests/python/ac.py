@@ -8,14 +8,14 @@ import emcee
 
 
 #data =np.loadtxt("data/test_output.csv",delimiter=',')
-data =np.loadtxt("data/injection_output.csv",delimiter=',')
-#data =np.loadtxt("data/mcmc_output.csv",delimiter=',')
+#data =np.loadtxt("data/injection_output.csv",delimiter=',')
+data =np.loadtxt("data/mcmc_output.csv",delimiter=',')
 #data2 = data[:int(len(data)/2)]
 #data = data[int(len(data)/2):]
 dim = len(data[0])
 
-dataT =np.loadtxt("data/injection_output.csv",delimiter=',', unpack=True)
-#dataT =np.loadtxt("data/mcmc_output.csv",delimiter=',', unpack=True)
+#dataT =np.loadtxt("data/injection_output.csv",delimiter=',', unpack=True)
+dataT =np.loadtxt("data/mcmc_output.csv",delimiter=',', unpack=True)
 #dataT =np.loadtxt("data/test_output.csv",delimiter=',', unpack=True)
 i = 0 
 for x in dataT:
@@ -44,7 +44,7 @@ for x in range(dim):
 #    #plt.show()
 #    #plt.close()
 #    print(emcee.autocorr.integrated_time(data_thinned, tol=1000))
-exit()
+#exit()
 data_thinned = []
 for x in np.arange(len(data)):
         if x%1 == 0:

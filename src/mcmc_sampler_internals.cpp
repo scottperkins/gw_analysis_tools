@@ -1087,6 +1087,7 @@ void allocate_sampler_mem(sampler *sampler)
 			//}
 		}
 		else{
+			//debugger_print(__FILE__,__LINE__,std::to_string(sampler->N_steps)+" "+std::to_string(sampler->max_dim));
 			sampler->param_status[i] = (int **)malloc(sizeof(int *)*sampler->N_steps);
 			sampler->param_status[i][0] = (int *)malloc(sizeof(int )*sampler->max_dim);
 			for(int k = 0 ; k<sampler->max_dim; k++){
@@ -2442,6 +2443,18 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 			}
 		}
 	}
+	//for(int i = 0 ; i<samplerptr->chain_N; i++){
+	//	std::string string1 = std::to_string(temps_old[i])+" ";
+	//	for(int j = 0 ; j<samplerptr->max_dim; j++){
+	//		string1+=std::to_string(old_initial_pos[i][j])+" ";
+	//	}
+	//	std::string string2 = std::to_string(samplerptr->chain_temps[i])+" ";
+	//	for(int j = 0 ; j<samplerptr->max_dim; j++){
+	//		string2+=std::to_string(samplerptr->output[i][samplerptr->chain_pos[i]][j])+" ";
+	//	}
+	//	debugger_print(__FILE__,__LINE__,"Old: "+string1);
+	//	debugger_print(__FILE__,__LINE__,"New: "+string2);
+	//}
 
 	//Cleanup
 	deallocate_3D_array(history_old_pos,samplerptr->chain_N,samplerptr->history_length,samplerptr->max_dim);
