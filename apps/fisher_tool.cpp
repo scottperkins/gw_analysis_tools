@@ -150,11 +150,11 @@ int help()
 	std::cout<<std::endl;
 	std::cout<<"Waveform options: "<<std::endl;
 	std::cout<<"IMRPhenomPv2: "<<std::endl;
-	std::cout<<"12 dimension: RA, DEC, PSI_effective, IOTA, phiRef, tc, ln(Luminosity Distance), "<<std::endl;
+	std::cout<<"12 dimension: RA, DEC, PSI, IOTA, phiRef, tc, ln(Luminosity Distance), "<<std::endl;
 	std::cout<<"ln (Chirpmass), eta, aligned spin 1, aligned spin 2, In-plane effective spin"<<std::endl;
 	std::cout<<std::endl;
 	std::cout<<"IMRPhenomD: "<<std::endl;
-	std::cout<<"11 dimension: RA, DEC, PSI_effective, IOTA, phiRef, tc, ln(Luminosity Distance), "<<std::endl;
+	std::cout<<"11 dimension: RA, DEC, PSI, IOTA, phiRef, tc, ln(Luminosity Distance), "<<std::endl;
 	std::cout<<"ln (Chirpmass), eta, aligned spin 1, aligned spin 2"<<std::endl;
 	std::cout<<std::endl;
 	std::cout<<"ppE:"<<std::endl;

@@ -2233,7 +2233,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->RA=0;
 				a_params->DEC=0;
 				a_params->psi=0;
-				//a_params->incl_angle=M_PI/4.;
+				a_params->incl_angle=M_PI/4.;
 				a_params->Luminosity_Distance=100;
 
 			}

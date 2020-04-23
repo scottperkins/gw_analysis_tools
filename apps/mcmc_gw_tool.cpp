@@ -510,7 +510,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
 	if (std::exp(pos[7])<2 || std::exp(pos[7])>80 ){return a;}//chirpmass
 	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
 
