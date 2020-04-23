@@ -3,26 +3,31 @@
 #include "gwat/detector_util.h"
 #include "gwat/waveform_util.h"
 #include "gwat/pn_waveform_util.h"
-//#include "gwat/IMRPhenomD.h"
-//#include "gwat/gIMRPhenomD.h"
+#include "gwat/IMRPhenomD.h"
 #include "gwat/io_util.h"
 #include <iostream>
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 
 
-#include <lal/LALSimulation.h>
-#include <lal/LALDatatypes.h>
-#include <lal/LALSimIMR.h>
-#include <lal/LALConstants.h>
-#include <lal/FrequencySeries.h>
-#include <lal/LALAtomicDatatypes.h>
-#include <lal/Sequence.h>
-#include <lal/LALDetectors.h>
-#include <lal/LALDatatypes.h>
-#include <lal/DetResponse.h>
-#include <lal/Units.h>
-
+//#define _LAL
+#ifdef _LAL
+	#include <lal/LALSimulation.h>
+	#include <lal/LALDatatypes.h>
+	#include <lal/LALSimIMR.h>
+	#include <lal/LALConstants.h>
+	#include <lal/FrequencySeries.h>
+	#include <lal/LALAtomicDatatypes.h>
+	#include <lal/Sequence.h>
+	#include <lal/LALDetectors.h>
+	#include <lal/LALDatatypes.h>
+	#include <lal/DetResponse.h>
+	#include <lal/Units.h>
+#endif
+#ifndef _LAL
+	#include "gwat/gIMRPhenomD.h"
+	#include "gwat/gIMRPhenomP.h"
+#endif
 
 int LALSuite_vs_GWAT_WF(int argc, char *argv[]);
 int tc_comparison(int argc, char *argv[]);
@@ -41,90 +46,106 @@ int main(int argc, char *argv[])
 	
 	int runtime_opt = stoi(argv[1]);	
 	if(runtime_opt == 0){
-		return LALSuite_vs_GWAT_WF(argc,argv);
+		#ifdef _LAL
+			return LALSuite_vs_GWAT_WF(argc,argv);
+		#endif
 	}
 	if(runtime_opt == 1){
-		return tc_comparison(argc,argv);
+		#ifdef _LAL
+			return tc_comparison(argc,argv);
+		#endif
 	}
 	if(runtime_opt == 2){
-		//return gIMR_testing(argc,argv);
+		#ifndef _LAL
+			return gIMR_testing(argc,argv);
+		#endif
 	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
-//int gIMR_testing(int argc, char *argv[])
-//{
-//	std::cout.precision(5);
-//	gen_params params;	
-//	params.spin1[2] = .3;
-//	params.spin2[2] = .1;
-//	params.chip = .07;
-//	params.phip = 0.1;
-//	params.Luminosity_Distance = 100;
-//	params.phiRef = 1;
-//	params.RA = 2.;
-//	params.DEC = -1.1;
-//	params.f_ref = 1e-5;
-//	params.NSflag1 = false;
-//	params.NSflag2 = false;
-//	params.horizon_coord = false;
-//	params.shift_time=true;
-//	params.shift_phase=true;
-//	
-//	params.mass1 = 36;
-//	params.mass2 = 28;
-//	params.tc = 0;
-//	params.equatorial_orientation = false;
-//	params.psi = 1.;
-//	params.incl_angle = 0;
-//
-//	params.Nmod_phi = 1;
-//	params.phii = new int[1];
-//	params.phii[0]=4;
-//	params.delta_phi = new double[1];
-//	params.delta_phi[0]=-2;
-//
-//	double beta;
-//	int b;
-//	gIMRPhenomD<double> model;
-//	model.ppE_gIMR_mapping(&params, 4, &beta, &b);
-//	std::cout<<"Beta: "<<beta<<std::endl;
-//	std::cout<<"b: "<<b<<std::endl;
-//	params.Nmod = 1;
-//	params.bppe = new int[1];
-//	params.bppe[0] = b;
-//	params.betappe = new double[1];
-//	params.betappe[0] = beta;
-//
-//
-//	double fmin = 10;
-//	double fmax = 300;
-//	double T = 4;
-//
-//	int length = T*(fmax-fmin);
-//	double *frequency = new double[length];
-//	
-//	for(int i = 0 ; i<length; i++){
-//		frequency[i]=fmin + (double)i /T;
-//	}
-//	std::complex<double> hpg[length];
-//	std::complex<double> hcg[length];
-//	std::complex<double> hpppE[length];
-//	std::complex<double> hcppE[length];
-//	fourier_waveform(frequency, length, hpg, hcg, "gIMRPhenomD",&params);
-//	fourier_waveform(frequency, length, hpppE, hcppE, "ppE_IMRPhenomD_Inspiral",&params);
-//	//for(int i = 0 ; i<length; i++){
-//	//	std::cout<<( hpg[i] - hpppE[i])*2./( abs(hpg[i]) + abs(hpppE[i]))<<std::endl;;
-//	//}
-//	delete [] params.delta_phi;
-//	delete [] params.phii;
-//	delete [] params.bppe;
-//	delete [] params.betappe;
-//	delete [] frequency;
-//	return 0;
-//}
+#ifndef _LAL
+int gIMR_testing(int argc, char *argv[])
+{
+	std::cout.precision(5);
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.spin1[1] = .3;
+	params.spin2[1] = .1;
+	params.spin1[0] = .3;
+	params.spin2[0] = .1;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 36;
+	params.mass2 = 28;
+	params.tc = 0;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+
+	params.Nmod_phi = 1;
+	params.phii = new int[1];
+	params.phii[0]=4;
+	params.delta_phi = new double[1];
+	params.delta_phi[0]=-2;
+
+	double beta;
+	int b;
+	gIMRPhenomD<double> model;
+	model.ppE_gIMR_mapping(&params, 4, &beta, &b);
+	std::cout<<"Beta: "<<beta<<std::endl;
+	std::cout<<"b: "<<b<<std::endl;
+	params.Nmod = 1;
+	params.bppe = new int[1];
+	params.bppe[0] = b;
+	params.betappe = new double[1];
+	params.betappe[0] = beta;
+
+
+	double fmin = 10;
+	double fmax = 80;
+	double T = 4;
+
+	int length = T*(fmax-fmin);
+	double *frequency = new double[length];
+	
+	for(int i = 0 ; i<length; i++){
+		frequency[i]=fmin + (double)i /T;
+	}
+	std::complex<double> hpg[length];
+	std::complex<double> hcg[length];
+	std::complex<double> hpppE[length];
+	std::complex<double> hcppE[length];
+	fourier_waveform(frequency, length, hpg, hcg, "gIMRPhenomPv2",&params);
+	fourier_waveform(frequency, length, hpppE, hcppE, "ppE_IMRPhenomPv2_Inspiral",&params);
+	//fourier_waveform(frequency, length, hpg, hcg, "gIMRPhenomD",&params);
+	//fourier_waveform(frequency, length, hpppE, hcppE, "ppE_IMRPhenomD_Inspiral",&params);
+	for(int i = 0 ; i<length; i++){
+		//std::cout<<hpg[i]<<std::endl;;
+		std::cout<<( hpg[i] - hpppE[i])*2./( abs(hpg[i]) + abs(hpppE[i]))<<std::endl;;
+	}
+	delete [] params.delta_phi;
+	delete [] params.phii;
+	delete [] params.bppe;
+	delete [] params.betappe;
+	delete [] frequency;
+	return 0;
+}
+#endif
+#ifdef _LAL
 int tc_comparison(int argc, char *argv[])
 {
 	std::cout.precision(5);
@@ -416,7 +437,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	gsl_rng_free(r);
 	return 1; 
 }
-
+#endif
 void RT_ERROR_MSG()
 {
 	std::cout<<"ERROR -- incorrect arguments"<<std::endl;

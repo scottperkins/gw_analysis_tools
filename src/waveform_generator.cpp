@@ -5,6 +5,7 @@
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "gIMRPhenomD.h"
+#include "gIMRPhenomP.h"
 #include "util.h"
 #include <complex>
 #include <time.h>
@@ -218,6 +219,43 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		for (int i =0 ; i < length; i++){
 			waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
 			waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
+		}
+	}
+	else if(generation_method == "gIMRPhenomPv2")
+	{
+		gIMRPhenomPv2<T> gmodelp;
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+			params.chip = parameters->chip;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			gmodelp.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			gmodelp.PhenomPv2_Param_Transform(&params);
+		}
+		params.delta_phi = parameters->delta_phi;
+		params.delta_sigma = parameters->delta_sigma;
+		params.delta_beta = parameters->delta_beta;
+		params.delta_alpha = parameters->delta_alpha;
+		params.phii = parameters->phii;
+		params.sigmai = parameters->sigmai;
+		params.betai = parameters->betai;
+		params.alphai = parameters->alphai;
+		params.Nmod_phi = parameters->Nmod_phi;
+		params.Nmod_sigma = parameters->Nmod_sigma;
+		params.Nmod_beta = parameters->Nmod_beta;
+		params.Nmod_alpha = parameters->Nmod_alpha;
+		status = gmodelp.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+		std::complex<T> tempPlus,tempCross;
+		std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
+		std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = c2z*tempPlus+s2z*tempCross;
+			waveform_cross[i] = c2z*tempCross-s2z*tempPlus;
 		}
 	}
 	else if(generation_method == "IMRPhenomPv2")
@@ -994,6 +1032,39 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		//	phase_plus[i]*= (T)(-1.);
 		//	phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		//}
+	}
+	else if(generation_method == "gIMRPhenomPv2")
+	{
+		gIMRPhenomPv2<T> gmodelp;
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+			params.chip = parameters->chip;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			gmodelp.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			gmodelp.PhenomPv2_Param_Transform(&params);
+		}
+		params.delta_phi = parameters->delta_phi;
+		params.delta_sigma = parameters->delta_sigma;
+		params.delta_beta = parameters->delta_beta;
+		params.delta_alpha = parameters->delta_alpha;
+		params.phii = parameters->phii;
+		params.sigmai = parameters->sigmai;
+		params.betai = parameters->betai;
+		params.alphai = parameters->alphai;
+		params.Nmod_phi = parameters->Nmod_phi;
+		params.Nmod_sigma = parameters->Nmod_sigma;
+		params.Nmod_beta = parameters->Nmod_beta;
+		params.Nmod_alpha = parameters->Nmod_alpha;
+		T *phase_plus_temp = new T[length];
+		T *phase_cross_temp = new T[length];
+		status = gmodelp.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
+		unwrap_array(phase_plus_temp, phase_plus, length);
+		unwrap_array(phase_cross_temp, phase_cross, length);
+		delete [] phase_plus_temp;
+		delete [] phase_cross_temp;
 	}
 	else if(generation_method == "IMRPhenomPv2")
 	{

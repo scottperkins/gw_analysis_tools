@@ -72,6 +72,11 @@
 #Checkpoint file -- csv file
 [str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test_checkpoint2.csv
 #############################################################
+#Optional prior ranges for Chirpmass and DL
+[dbl] Chirpmass minimum = 20
+[dbl] Chirpmass maximum = 90
+[dbl] Luminosity distance minimum = 10
+[dbl] Luminosity distance maximum = 1000
 ##Initial checkpoint  file
 #[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
 #Checkpoint file -- csv file

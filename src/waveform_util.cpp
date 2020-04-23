@@ -6,6 +6,7 @@
 #include "IMRPhenomP.h"
 #include "IMRPhenomD.h"
 #include "gIMRPhenomD.h"
+#include "gIMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "detector_util.h"
@@ -1143,8 +1144,8 @@ void assign_freq_boundaries(double *freq_boundaries,
 		generation_method.find("IMRPhenomPv2") != std::string::npos
 		)
 		&& !input_params->sky_average){
-
 		s_param.shift_time = false;
+		double M,fRD,fpeak;
 		IMRPhenomPv2<adouble> modelp;
 		s_param.spin1z = internal_params.spin1[2];
 		s_param.spin2z = internal_params.spin2[2];
@@ -1160,11 +1161,24 @@ void assign_freq_boundaries(double *freq_boundaries,
 			s_param.spin2y = internal_params.spin2[1];
 			modelp.PhenomPv2_Param_Transform(&s_param);
 		}
-		modelp.assign_lambda_param(&s_param, &lambda);
-		modelp.post_merger_variables(&s_param);
-		double M = s_param.M.value();
-		double fRD = s_param.fRD.value();
-		double fpeak = modelp.fpeak(&s_param, &lambda).value();
+		if(generation_method.find("gIMR") !=std::string::npos){
+			gIMRPhenomPv2<adouble> gmodelp;
+			gmodelp.assign_lambda_param(&s_param, &lambda);
+			gmodelp.post_merger_variables(&s_param);
+			M = s_param.M.value();
+			fRD = s_param.fRD.value();
+			fpeak = gmodelp.fpeak(&s_param, &lambda).value();
+			std::cout<<fRD<<" "<<fpeak<<std::endl;
+		
+		}
+
+		else{
+			modelp.assign_lambda_param(&s_param, &lambda);
+			modelp.post_merger_variables(&s_param);
+			M = s_param.M.value();
+			fRD = s_param.fRD.value();
+			fpeak = modelp.fpeak(&s_param, &lambda).value();
+		}
 		//###########################################
 		freq_boundaries[0] = .014/M;
 		freq_boundaries[1] = .018/M;
@@ -1715,13 +1729,24 @@ void postmerger_params(gen_params_base<T>*params,
 		s_param.incl_angle=params->incl_angle;
 		s_param.chip = params->chip;
 		s_param.phip = params->phip;
-		IMRPhenomPv2<T> model;
-		lambda_parameters<T> lambda;
-		model.assign_lambda_param(&s_param,&lambda);	
-		model.post_merger_variables(&s_param);
-		*fRD = s_param.fRD;
-		*fdamp = s_param.fdamp;
-		*fpeak = model.fpeak(&s_param , &lambda);
+		if(generation_method.find("gIMR")!=std::string::npos){
+			gIMRPhenomPv2<T> model;
+			lambda_parameters<T> lambda;
+			model.assign_lambda_param(&s_param,&lambda);	
+			model.post_merger_variables(&s_param);
+			*fRD = s_param.fRD;
+			*fdamp = s_param.fdamp;
+			*fpeak = model.fpeak(&s_param , &lambda);
+		}
+		else{
+			IMRPhenomPv2<T> model;
+			lambda_parameters<T> lambda;
+			model.assign_lambda_param(&s_param,&lambda);	
+			model.post_merger_variables(&s_param);
+			*fRD = s_param.fRD;
+			*fdamp = s_param.fdamp;
+			*fpeak = model.fpeak(&s_param , &lambda);
+		}
 	}
 
 }

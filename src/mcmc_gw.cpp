@@ -373,9 +373,10 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 				)
 {
 	double ll = 0;
-	if(	generation_method  == "IMRPhenomD" ||
-		generation_method  == "ppE_IMRPhenomD_Inspiral" ||
-		generation_method  == "ppE_IMRPhenomD_IMR" ){
+	//if(	generation_method  == "IMRPhenomD" ||
+	//	generation_method  == "ppE_IMRPhenomD_Inspiral" ||
+	//	generation_method  == "ppE_IMRPhenomD_IMR" ){
+	if(	generation_method.find("IMRPhenomD")!=std::string::npos){
 		std::complex<double> *response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
 		fourier_detector_response_horizon(frequencies, length, response, detector, generation_method, params);
@@ -383,9 +384,10 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 		
 		free(response);
 		}
-	else if ( 	generation_method == "IMRPhenomPv2" ||
-			generation_method == "ppE_IMRPhenomPv2_Inspiral" ||
-			generation_method == "ppE_IMRPhenomPv2_IMR" ){
+	//else if ( 	generation_method == "IMRPhenomPv2" ||
+	//		generation_method == "ppE_IMRPhenomPv2_Inspiral" ||
+	//		generation_method == "ppE_IMRPhenomPv2_IMR" ){
+	if(	generation_method.find("IMRPhenomPv2")!=std::string::npos){
 				
 		std::complex<double> *hp =
 				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
@@ -2077,6 +2079,60 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 
 	}
+	else if(generation_method == "gIMRPhenomPv2" 
+		){
+		int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
+		if(dimension-totalmod == 14){
+			
+			mcmc_intrinsic=false;
+			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, theta1, theta2, phi1, phi2, phiRef, psi";
+			for(int i =0; i<totalmod; i++){
+				std::cout<<", mod "<<i;
+			}
+			std::cout<<endl;
+			if(local_seeding){
+				seeding_var = new double[dimension];
+				seeding_var[0]=.1;
+				seeding_var[1]=.5;
+				seeding_var[2]=.1;
+				seeding_var[3]=.1;
+				seeding_var[4]=.1;
+				seeding_var[5]=.1;
+				seeding_var[6]=.1;
+				seeding_var[7]=.1;
+				seeding_var[8]=.1;
+				seeding_var[9]=.1;
+				seeding_var[10]=.1;
+				seeding_var[11]=.1;
+				seeding_var[12]=.1;
+				seeding_var[13]=.1;
+				for(int i =0; i< totalmod;i++){
+					seeding_var[14 + i]=2;
+				}
+			}
+		}
+		else{
+			mcmc_intrinsic=true;
+			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, theta1, theta2, phi1, phi2, phiRef, psi";
+			for(int i =0; i<totalmod; i++){
+				std::cout<<", mod "<<i;
+			}
+			if(local_seeding){
+				seeding_var = new double[dimension];
+				seeding_var[0]=.1;
+				seeding_var[1]=.1;
+				seeding_var[2]=.1;
+				seeding_var[3]=.1;
+				seeding_var[4]=.1;
+				seeding_var[5]=.1;
+				seeding_var[6]=.1;
+				for(int i =0; i< totalmod;i++){
+					seeding_var[7 + i]=2;
+				}
+			}
+		}
+
+	}
 	else if(generation_method == "gIMRPhenomD" 
 		){
 		if(dimension-(mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha ) == 4){
@@ -2098,6 +2154,28 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				for(int i =0; i< totalmod;i++){
 					seeding_var[4 + i]=2;
 				}
+			}
+		}
+		else{
+			int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
+			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, psi"<<std::endl;
+			mcmc_intrinsic=false;
+			if(local_seeding){
+				seeding_var = new double[dimension];
+				seeding_var[0]=.1;
+				seeding_var[1]=.1;
+				seeding_var[2]=.1;
+				seeding_var[3]=.1;
+				seeding_var[4]=.5;
+				seeding_var[5]=.1;
+				seeding_var[6]=.1;
+				seeding_var[7]=.1;
+				seeding_var[8]=.1;
+				seeding_var[9]=.1;
+				seeding_var[10]=.1;
+					for(int i =0; i< totalmod;i++){
+						seeding_var[11 + i]=2;
+					}
 			}
 		}
 

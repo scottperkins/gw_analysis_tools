@@ -42,7 +42,7 @@ int network_fishers(int argc, char *argv[])
 	params.spin2[2] = -.1;
 	params.chip = .3;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 400;
+	params.Luminosity_Distance = 600;
 	params.phiRef = .0;
 	params.RA = 1.;
 	params.DEC = -0.0;
@@ -80,7 +80,7 @@ int network_fishers(int argc, char *argv[])
 	//int length = T*(fmax-fmin);
 	int length = 1000;
 	double *frequency = new double[length];
-	int Ndetect = 3;
+	int Ndetect = 2;
 	double **psd = new double*[Ndetect];
 	std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	
@@ -270,9 +270,9 @@ int AD_v_N(int argc, char *argv[])
 	gen_params params;	
 	params.spin1[2] = .1;
 	params.spin2[2] = -.1;
-	params.chip = .3;
+	params.chip = .03;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 400;
+	params.Luminosity_Distance = 1000;
 	params.phiRef = .0;
 	params.RA = 2.;
 	params.DEC = -0.9;
@@ -342,7 +342,8 @@ int AD_v_N(int argc, char *argv[])
 	//std::string method = "IMRPhenomD";
 	//std::string method = "ppE_IMRPhenomPv2_Inspiral";
 	//std::string method = "ppE_IMRPhenomD_Inspiral";
-	std::string method = "gIMRPhenomD";
+	//std::string method = "gIMRPhenomD";
+	std::string method = "gIMRPhenomPv2";
 	//transform_orientation_coords(&params, method, detector);
 
 	//params.Nmod = 1;
@@ -353,24 +354,24 @@ int AD_v_N(int argc, char *argv[])
 	//params.bppe[0] = -1;
 	//params.bppe[0] = 1;
 	//
-	//params.Nmod_phi = 1;
-	//params.delta_phi = new double[1];
-	//params.phii = new int[1];
-	//params.delta_phi[0] = 0;
+	params.Nmod_phi = 1;
+	params.delta_phi = new double[1];
+	params.phii = new int[1];
+	params.delta_phi[0] = 0;
+	params.phii[0] = 2;
+	std::cout<<"Phase power: "<<params.phii[0]<<std::endl;
 
-	params.Nmod_alpha = 1;
-	params.delta_alpha = new double[1];
-	params.alphai = new int[1];
-	params.delta_alpha[0] = 0;
-	//params.bppe[0] = -1.;
-	params.alphai[0] = 2;
-	//params.bppe[0] = 1;
+	//params.Nmod_alpha = 1;
+	//params.delta_alpha = new double[1];
+	//params.alphai = new int[1];
+	//params.delta_alpha[0] = 0;
+	//params.alphai[0] = 2;
 
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 	//std::string detectors[4] = {"LISA","Hanford","Livingston","Virgo"};
 		
-	int dim = 12;
+	int dim = 13;
 	int dimD = 12;
 	int dimDSA = 8;
 
@@ -472,8 +473,8 @@ int AD_v_N(int argc, char *argv[])
 			}
 		}
 	}
-	//matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
-	//matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
+	matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
+	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
 	snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSSLEG",weights,true);
 	std::cout<<"SNR: "<<snr<<std::endl;
@@ -481,14 +482,14 @@ int AD_v_N(int argc, char *argv[])
 	//std::cout<<"SNR (Hanford): "<<snr<<std::endl;
 	
 	
-	std::cout<<"AD:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<output_AD[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//std::cout<<"AD:"<<std::endl;
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<output_AD[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	std::cout<<"COV AD:"<<std::endl;
@@ -506,7 +507,7 @@ int AD_v_N(int argc, char *argv[])
 	std::cout<<std::endl;
 
 	//method = "ppE_IMRPhenomD_Inspiral";
-	//method = "gIMRPhenomD";
+	method = "gIMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD3_temp, dimD, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimD; k++){
@@ -558,13 +559,13 @@ int AD_v_N(int argc, char *argv[])
 	
 	
 	std::cout<<"AD-DSA:"<<std::endl;
-	for(int i = 0 ; i<dimDSA; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dimDSA; j++){
-			std::cout<<output_ADSA[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dimDSA; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dimDSA; j++){
+	//		std::cout<<output_ADSA[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
 	std::cout<<"COV AD - DSA:"<<std::endl;
 	//for(int i = 0 ; i<dimDSA; i++){
@@ -647,6 +648,7 @@ int AD_v_N(int argc, char *argv[])
 	delete [] params.phii;
 	delete [] params.delta_phi;
 	delete [] psd;
+	delete [] weights;
 	return 0;
 }
 void RT_ERROR_MSG()

@@ -15,7 +15,9 @@
  *
  * sigma can be 2,3,4
  *
- * phi can be -4-9 (8, 9 correspond to the logarithmic terms at 5 and 6)
+ * phi can be (-4)-9 (8, 9 correspond to the logarithmic terms at 5 and 6)
+ *
+ * ***Issues with logarithmic terms at the moment***
  */
 
 /*! \brief Utility to map between the \beta parameter in ppE parameterization to the \delta \phi parameter in gIMR for STATIC PN coefficients only
