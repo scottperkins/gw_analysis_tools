@@ -42,11 +42,33 @@ void matrix_multiply(double **A, double **B, double **C,int dim1, int dim2,int d
 	return;
 }
 
+template<>
 void debugger_print(const char *file, const int line,std::string message)
 {
 	std::cout.precision(15);
 	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
 	std::cout<<message<<std::endl;
+}
+template<>
+void debugger_print(const char *file, const int line,int message)
+{
+	std::cout.precision(15);
+	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
+	std::cout<<std::to_string(message)<<std::endl;
+}
+template<>
+void debugger_print(const char *file, const int line,double message)
+{
+	std::cout.precision(15);
+	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
+	std::cout<<std::to_string(message)<<std::endl;
+}
+template<>
+void debugger_print(const char *file, const int line,adouble message)
+{
+	std::cout.precision(15);
+	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
+	std::cout<<std::to_string(message.value())<<std::endl;
 }
 std::string strip_path(std::string input)
 {
@@ -826,12 +848,48 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> **par
 	(*param_out)->phiRef = param_in->phiRef;
 	(*param_out)->tc = param_in->tc;
 	(*param_out)->Nmod = param_in->Nmod;
+	(*param_out)->Nmod_phi = param_in->Nmod_phi;
+	(*param_out)->Nmod_sigma = param_in->Nmod_sigma;
+	(*param_out)->Nmod_beta = param_in->Nmod_beta;
+	(*param_out)->Nmod_alpha = param_in->Nmod_alpha;
 	if(param_in->Nmod != 0){
 		(*param_out)->bppe = new int[(*param_out)->Nmod];
 		(*param_out)->betappe = new U[(*param_out)->Nmod];
 		for(int i = 0 ;i<param_in->Nmod; i++){
 			(*param_out)->bppe[i] = param_in->bppe[i];
 			(*param_out)->betappe[i] = param_in->betappe[i];
+		}
+	}
+	if(param_in->Nmod_phi != 0){
+		(*param_out)->phii = new int[(*param_out)->Nmod_phi];
+		(*param_out)->delta_phi = new U[(*param_out)->Nmod_phi];
+		for(int i = 0 ;i<param_in->Nmod_phi; i++){
+			(*param_out)->phii[i] = param_in->phii[i];
+			(*param_out)->delta_phi[i] = param_in->delta_phi[i];
+		}
+	}
+	if(param_in->Nmod_sigma != 0){
+		(*param_out)->sigmai = new int[(*param_out)->Nmod_sigma];
+		(*param_out)->delta_sigma = new U[(*param_out)->Nmod_sigma];
+		for(int i = 0 ;i<param_in->Nmod_sigma; i++){
+			(*param_out)->sigmai[i] = param_in->sigmai[i];
+			(*param_out)->delta_sigma[i] = param_in->delta_sigma[i];
+		}
+	}
+	if(param_in->Nmod_beta != 0){
+		(*param_out)->betai = new int[(*param_out)->Nmod_beta];
+		(*param_out)->delta_beta = new U[(*param_out)->Nmod_beta];
+		for(int i = 0 ;i<param_in->Nmod_beta; i++){
+			(*param_out)->betai[i] = param_in->betai[i];
+			(*param_out)->delta_beta[i] = param_in->delta_beta[i];
+		}
+	}
+	if(param_in->Nmod_alpha != 0){
+		(*param_out)->alphai = new int[(*param_out)->Nmod_alpha];
+		(*param_out)->delta_alpha = new U[(*param_out)->Nmod_alpha];
+		for(int i = 0 ;i<param_in->Nmod_alpha; i++){
+			(*param_out)->alphai[i] = param_in->alphai[i];
+			(*param_out)->delta_alpha[i] = param_in->delta_alpha[i];
 		}
 	}
 	(*param_out)->incl_angle = param_in->incl_angle;
@@ -891,12 +949,48 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->phiRef = param_in->phiRef;
 	param_out->tc = param_in->tc;
 	param_out->Nmod = param_in->Nmod;
+	param_out->Nmod_phi = param_in->Nmod_phi;
+	param_out->Nmod_sigma = param_in->Nmod_sigma;
+	param_out->Nmod_beta = param_in->Nmod_beta;
+	param_out->Nmod_alpha = param_in->Nmod_alpha;
 	if(param_in->Nmod != 0){
 		param_out->bppe = new int[param_out->Nmod];
 		param_out->betappe = new U[param_out->Nmod];
 		for(int i = 0 ;i<param_in->Nmod; i++){
 			param_out->bppe[i] = param_in->bppe[i];
 			param_out->betappe[i] = param_in->betappe[i];
+		}
+	}
+	if(param_in->Nmod_phi != 0){
+		param_out->phii = new int[param_out->Nmod_phi];
+		param_out->delta_phi = new U[param_out->Nmod_phi];
+		for(int i = 0 ;i<param_in->Nmod_phi; i++){
+			param_out->phii[i] = param_in->phii[i];
+			param_out->delta_phi[i] = param_in->delta_phi[i];
+		}
+	}
+	if(param_in->Nmod_sigma != 0){
+		param_out->sigmai = new int[param_out->Nmod_sigma];
+		param_out->delta_sigma = new U[param_out->Nmod_sigma];
+		for(int i = 0 ;i<param_in->Nmod_sigma; i++){
+			param_out->sigmai[i] = param_in->sigmai[i];
+			param_out->delta_sigma[i] = param_in->delta_sigma[i];
+		}
+	}
+	if(param_in->Nmod_beta != 0){
+		param_out->betai = new int[param_out->Nmod_beta];
+		param_out->delta_beta = new U[param_out->Nmod_beta];
+		for(int i = 0 ;i<param_in->Nmod_beta; i++){
+			param_out->betai[i] = param_in->betai[i];
+			param_out->delta_beta[i] = param_in->delta_beta[i];
+		}
+	}
+	if(param_in->Nmod_alpha != 0){
+		param_out->alphai = new int[param_out->Nmod_alpha];
+		param_out->delta_alpha = new U[param_out->Nmod_alpha];
+		for(int i = 0 ;i<param_in->Nmod_alpha; i++){
+			param_out->alphai[i] = param_in->alphai[i];
+			param_out->delta_alpha[i] = param_in->delta_alpha[i];
 		}
 	}
 	param_out->incl_angle = param_in->incl_angle;

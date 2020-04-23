@@ -18,6 +18,40 @@
  * phi can be -4-9 (8, 9 correspond to the logarithmic terms at 5 and 6)
  */
 
+/*! \brief Utility to map between the \beta parameter in ppE parameterization to the \delta \phi parameter in gIMR for STATIC PN coefficients only
+ */
+template<class T>
+void gIMRPhenomD<T>::ppE_gIMR_mapping(gen_params_base<T> *parameters, int PN_order,T *beta,int *b  )
+{
+	source_parameters<T> params;
+	params = params.populate_source_parameters(parameters);
+	params.phi = parameters->phi;
+	params.theta = parameters->theta;
+	params.incl_angle = parameters->incl_angle;
+	params.f_ref = parameters->f_ref;
+	params.phiRef = parameters->phiRef;
+	params.cosmology = parameters->cosmology;
+	params.shift_time = parameters->shift_time;
+	params.sky_average = parameters->sky_average;
+	params.shift_phase = parameters->shift_phase;
+	params.NSflag1 = parameters->NSflag1;
+	params.NSflag2 = parameters->NSflag2;
+	params.dep_postmerger = parameters->dep_postmerger;
+	
+	int id = check_list_id(PN_order, parameters->phii, parameters->Nmod_phi);
+	if(id != -1){
+		T static_PN_coeffs[11];
+		IMRPhenomD<T> model_base;
+		model_base.assign_static_pn_phase_coeff(&params, static_PN_coeffs);
+
+		*beta = (3./ 128.) * pow(params.eta, (T)(-PN_order)/5.) * static_PN_coeffs[PN_order] * parameters->delta_phi[id];
+		*b = PN_order - 5;
+	}
+	else{
+		std::cout<<"ERROR -- gIMR modification does not exist for PN order: "+std::to_string(PN_order)<<std::endl;
+	}
+}
+
 //Handles modifications for alpha, beta, and sigma
 template<class T>
 void gIMRPhenomD<T>::assign_lambda_param(source_parameters<T> *source_param, 

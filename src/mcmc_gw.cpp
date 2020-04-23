@@ -1478,8 +1478,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	int *data_length,
 	double gps_time,
 	std::string *detectors,
-	int Nmod,
-	int *bppe,
+	MCMC_modification_struct *mod_struct,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,
@@ -1504,8 +1503,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
-	mcmc_Nmod = Nmod;
-	mcmc_bppe = bppe;
+	mcmc_Nmod = mod_struct->ppE_Nmod;
+	mcmc_bppe = mod_struct->bppe;
+	mcmc_mod_struct = mod_struct;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
 
@@ -2077,6 +2077,31 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 
 	}
+	else if(generation_method == "gIMRPhenomD" 
+		){
+		if(dimension-(mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha ) == 4){
+			
+			int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
+			mcmc_intrinsic=true;
+			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
+			for(int i =0; i<totalmod; i++){
+				std::cout<<", beta"<<i;
+			}
+			
+			std::cout<<endl;
+			if(local_seeding){
+				seeding_var = new double[dimension];
+				seeding_var[0]=.1;
+				seeding_var[1]=.1;
+				seeding_var[2]=.1;
+				seeding_var[3]=1;
+				for(int i =0; i< totalmod;i++){
+					seeding_var[4 + i]=2;
+				}
+			}
+		}
+
+	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral_log" 
 		|| generation_method == "ppE_IMRPhenomD_IMR_log"
 		|| generation_method == "ppE_IMRPhenomD_Inspiral"
@@ -2191,7 +2216,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			{
 				output[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k])){
-					//std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
+				//	std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
 				//}
 			}
 		} 
@@ -2209,7 +2234,24 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	//Cleanup
 	delete [] temp_params;
 	if(check_mod(local_gen)){
-		delete [] gen_params.betappe;
+		if(local_gen.find("ppE") != std::string::npos){
+			delete [] gen_params.betappe;
+		}
+		else if( local_gen.find("gIMR") != std::string::npos){
+			if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
+				delete [] gen_params.delta_phi;
+			}
+			if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
+				delete [] gen_params.delta_sigma;
+			}
+			if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
+				delete [] gen_params.delta_beta;
+			}
+			if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
+				delete [] gen_params.delta_alpha;
+			}
+
+		}
 	}
 
 
@@ -2473,9 +2515,33 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->NSflag1 = false;
 	gen_params->NSflag2 = false;
 	if(check_mod(generation_method)){
-		gen_params->bppe=mcmc_bppe;
-		gen_params->Nmod=mcmc_Nmod;
-		gen_params->betappe=new double[gen_params->Nmod];
+		if(generation_method.find("ppE") != std::string::npos){
+			gen_params->bppe=mcmc_bppe;
+			gen_params->Nmod=mcmc_Nmod;
+			gen_params->betappe=new double[gen_params->Nmod];
+		}
+		else if(generation_method.find("gIMR") != std::string::npos){
+			gen_params->Nmod_phi=mcmc_mod_struct->gIMR_Nmod_phi;
+			gen_params->phii=mcmc_mod_struct->gIMR_phii;
+			if(gen_params->Nmod_phi !=0){
+				gen_params->delta_phi=new double[gen_params->Nmod_phi];
+			}
+			gen_params->Nmod_sigma=mcmc_mod_struct->gIMR_Nmod_sigma;
+			gen_params->sigmai=mcmc_mod_struct->gIMR_sigmai;
+			if(gen_params->Nmod_sigma !=0){
+				gen_params->delta_sigma=new double[gen_params->Nmod_sigma];
+			}
+			gen_params->Nmod_beta=mcmc_mod_struct->gIMR_Nmod_beta;
+			gen_params->betai=mcmc_mod_struct->gIMR_betai;
+			if(gen_params->Nmod_beta !=0){
+				gen_params->delta_beta=new double[gen_params->Nmod_beta];
+			}
+			gen_params->Nmod_alpha=mcmc_mod_struct->gIMR_Nmod_alpha;
+			gen_params->alphai=mcmc_mod_struct->gIMR_alphai;
+			if(gen_params->Nmod_alpha !=0){
+				gen_params->delta_alpha=new double[gen_params->Nmod_alpha];
+			}
+		}
 	}
 	for(int i = 0 ; i <dimension; i++){
 		temp_params[i]=param[i];
@@ -2647,7 +2713,24 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 	//Cleanup
 	delete [] temp_params;
 	if(check_mod(local_gen)){
-		delete [] gen_params.betappe;
+		if( local_gen.find("ppE") != std::string::npos){
+			delete [] gen_params.betappe;
+		}
+		else if( local_gen.find("gIMR") != std::string::npos){
+			if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
+				delete [] gen_params.delta_phi;
+			}
+			if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
+				delete [] gen_params.delta_sigma;
+			}
+			if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
+				delete [] gen_params.delta_beta;
+			}
+			if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
+				delete [] gen_params.delta_alpha;
+			}
+
+		}
 	}
 	return ll;
 

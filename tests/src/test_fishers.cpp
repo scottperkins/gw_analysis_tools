@@ -108,6 +108,13 @@ int network_fishers(int argc, char *argv[])
 	//params.bppe[0] = -1.;
 	params.bppe[0] = -13;
 	//params.bppe[0] = 1;
+	params.Nmod_phi = 1;
+	params.delta_phi = new double[1];
+	params.phii = new int[1];
+	params.delta_phi[0] = 0;
+	//params.bppe[0] = -1.;
+	params.phii[0] = 4;
+	//params.bppe[0] = 1;
 
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
@@ -167,8 +174,8 @@ int network_fishers(int argc, char *argv[])
 			}
 		}
 	}
-	matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
-	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
+	//matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
+	//matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	
 	
 	std::cout<<"AD:"<<std::endl;
@@ -291,25 +298,26 @@ int AD_v_N(int argc, char *argv[])
 	//double fmax = 1e-1;
 	//double T = T_year/2;
 
-	//double fmin = 5;
-	//double fmax = 2048;
-	double fmin = f_0PN(4*T_year,chirpmass);
-	double fmax = 1;
-	//double T = 32;
-	double T = 4*T_year;
+	double fmin = 5;
+	double fmax = 2048;
+	//double fmin = f_0PN(4*T_year,chirpmass);
+	//double fmax = 1;
+	double T = 32;
+	//double T = 4*T_year;
 
-	//params.tc = 3.*T/4.;
-	params.tc = T;
+	params.tc = 3.*T/4.;
+	//params.tc = T;
 	//params.tc = 0;
 
 	//int length = T*(fmax-fmin);
 	int length = 1000;
 	double *frequency = new double[length];
 	//int Ndetect = 4;
-	int Ndetect = 1;
+	int Ndetect = 2;
 	double **psd = new double*[Ndetect];
 	//std::string SN[4] = {"CE2_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
-	std::string SN[4] = {"LISA_SADC_CONF","AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
+	std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
+	//std::string SN[4] = {"LISA_SADC_CONF","AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	//std::string SN[3] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted"};
 	
 	double *weights = new double[length];
@@ -332,21 +340,37 @@ int AD_v_N(int argc, char *argv[])
 	//std::string detector = "LISA";
 	std::string detector = "Hanford";
 	//std::string method = "IMRPhenomD";
-	std::string method = "ppE_IMRPhenomPv2_Inspiral";
+	//std::string method = "ppE_IMRPhenomPv2_Inspiral";
+	//std::string method = "ppE_IMRPhenomD_Inspiral";
+	std::string method = "gIMRPhenomD";
 	//transform_orientation_coords(&params, method, detector);
 
-	params.Nmod = 1;
-	params.betappe = new double[1];
-	params.bppe = new int[1];
-	params.betappe[0] = 0;
+	//params.Nmod = 1;
+	//params.betappe = new double[1];
+	//params.bppe = new int[1];
+	//params.betappe[0] = 0;
 	//params.bppe[0] = -1.;
-	params.bppe[0] = -13;
+	//params.bppe[0] = -1;
+	//params.bppe[0] = 1;
+	//
+	//params.Nmod_phi = 1;
+	//params.delta_phi = new double[1];
+	//params.phii = new int[1];
+	//params.delta_phi[0] = 0;
+
+	params.Nmod_alpha = 1;
+	params.delta_alpha = new double[1];
+	params.alphai = new int[1];
+	params.delta_alpha[0] = 0;
+	//params.bppe[0] = -1.;
+	params.alphai[0] = 2;
 	//params.bppe[0] = 1;
 
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
-	std::string detectors[4] = {"LISA","Hanford","Livingston","Virgo"};
+	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
+	//std::string detectors[4] = {"LISA","Hanford","Livingston","Virgo"};
 		
-	int dim = 13;
+	int dim = 12;
 	int dimD = 12;
 	int dimDSA = 8;
 
@@ -406,18 +430,19 @@ int AD_v_N(int argc, char *argv[])
 		}
 	}
 
-	params.equatorial_orientation = true;
-	//params.equatorial_orientation = false;
+	//params.equatorial_orientation = true;
+	params.equatorial_orientation = false;
 	params.sky_average = true;
-	params.theta_l = 0.12;
-	params.phi_l = 0.1;
-	params.incl_angle  = 0;
-	double snr = calculate_snr(SN[0],"LISA",method, &params, frequency, length, "GAUSSLEG",weights,true);
-	std::cout<<snr<<std::endl;
-	double SNR_TARGET = 100;
-	params.Luminosity_Distance = snr/SNR_TARGET*params.Luminosity_Distance;
+	//params.theta_l = 0.12;
+	//params.phi_l = 0.1;
+	//params.incl_angle  = 0;
+	double snr;
+	//snr = calculate_snr(SN[0],"LISA",method, &params, frequency, length, "GAUSSLEG",weights,true);
+	//std::cout<<snr<<std::endl;
+	//double SNR_TARGET = 100;
+	//params.Luminosity_Distance = snr/SNR_TARGET*params.Luminosity_Distance;
 	params.sky_average = false;
-	params.incl_angle = M_PI-.01;
+	params.incl_angle = M_PI-.51;
 
 
 
@@ -440,30 +465,30 @@ int AD_v_N(int argc, char *argv[])
 	//}
 
 	for(int i = 0 ;i < Ndetect; i++){
-		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
+		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dim; k++){
 			for(int j = 0 ; j<dim; j++){
 				output_AD[k][j]+= output_AD_temp[k][j];
 			}
 		}
 	}
-	matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
-	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
+	//matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
+	//matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSLEG",weights,true);
+	snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSSLEG",weights,true);
 	std::cout<<"SNR: "<<snr<<std::endl;
 	//snr = calculate_snr(SN[1],"Hanford",method, &params, frequency, length, "SIMPSONS",NULL,false);
 	//std::cout<<"SNR (Hanford): "<<snr<<std::endl;
 	
 	
-	//std::cout<<"AD:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<output_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	std::cout<<"AD:"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<output_AD[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	std::cout<<"COV AD:"<<std::endl;
@@ -480,9 +505,10 @@ int AD_v_N(int argc, char *argv[])
 	}
 	std::cout<<std::endl;
 
-	method = "ppE_IMRPhenomD_Inspiral";
+	//method = "ppE_IMRPhenomD_Inspiral";
+	//method = "gIMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
-		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_AD3_temp, dimD, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
+		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD3_temp, dimD, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimD; k++){
 			for(int j = 0 ; j<dimD; j++){
 				output_AD3[k][j]+= output_AD3_temp[k][j];
@@ -516,7 +542,9 @@ int AD_v_N(int argc, char *argv[])
 	}
 	std::cout<<std::endl;
 
-	method = "ppE_IMRPhenomD_Inspiral";
+	//method = "ppE_IMRPhenomD_Inspiral";
+	//method = "IMRPhenomD";
+	//dimDSA = 7;
 	params.sky_average = true;
 	params.incl_angle = 0;
 	for(int i = 0 ;i < Ndetect; i++){
@@ -529,14 +557,14 @@ int AD_v_N(int argc, char *argv[])
 	}
 	
 	
-	//std::cout<<"AD-DSA:"<<std::endl;
-	//for(int i = 0 ; i<dimDSA; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dimDSA; j++){
-	//		std::cout<<output_ADSA[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	std::cout<<"AD-DSA:"<<std::endl;
+	for(int i = 0 ; i<dimDSA; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dimDSA; j++){
+			std::cout<<output_ADSA[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 	gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
 	std::cout<<"COV AD - DSA:"<<std::endl;
 	//for(int i = 0 ; i<dimDSA; i++){
@@ -614,6 +642,10 @@ int AD_v_N(int argc, char *argv[])
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
 	}
+	//delete [] params.betappe;
+	//delete [] params.bppe;
+	delete [] params.phii;
+	delete [] params.delta_phi;
 	delete [] psd;
 	return 0;
 }

@@ -41,6 +41,20 @@ static int mcmc_deriv_order=2;
 static gsl_rng **mcmc_rvec;
 //########################################
 
+struct MCMC_modification_struct
+{
+	int ppE_Nmod = 0; //ppE
+	int *bppe = NULL; //ppE
+	int gIMR_Nmod_phi = 0; //gIMR
+	int *gIMR_phii = NULL; //gIMR
+	int gIMR_Nmod_sigma = 0; //gIMR
+	int *gIMR_sigmai = NULL; //gIMR
+	int gIMR_Nmod_beta = 0; //gIMR
+	int *gIMR_betai = NULL; //gIMR
+	int gIMR_Nmod_alpha = 0; //gIMR
+	int *gIMR_alphai = NULL; //gIMR
+};
+static MCMC_modification_struct *mcmc_mod_struct;
 
 double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 				int length,
@@ -390,8 +404,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	int *data_length,
 	double gps_time,
 	std::string *detectors,
-	int Nmod,
-	int *bppe,
+	MCMC_modification_struct *mod_struct,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,

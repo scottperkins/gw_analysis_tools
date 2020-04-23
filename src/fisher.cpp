@@ -816,6 +816,7 @@ void calculate_derivatives_autodiff(double *frequency,
 	double *grad_freqs=new double[boundary_num];
 	std::string local_gen_method = local_generation_method(generation_method);
 	assign_freq_boundaries(freq_boundaries, grad_freqs,boundary_num, parameters, generation_method);
+	std::string out_string = std::to_string(freq_boundaries[0]) + " "+ std::to_string(freq_boundaries[1])+" "+std::to_string(freq_boundaries[2]) +" "+std::to_string(freq_boundaries[3]);
 	vec_parameters[0]=grad_freqs[0];
 	unpack_parameters(&vec_parameters[1], parameters, generation_method,dimension, log_factors);
 	double *grad_times=NULL;
@@ -1896,8 +1897,10 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 					input_params->mass2));
 				parameters[1]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				parameters[2]=input_params->spin1[2];
-				parameters[3]=input_params->spin2[2];
+				//parameters[2]=input_params->spin1[2];
+				//parameters[3]=input_params->spin2[2];
+				parameters[2]=.5*(input_params->spin1[2]+input_params->spin2[2]);
+				parameters[3]=.5*(input_params->spin1[2]-input_params->spin2[2]);
 
 			}
 			else{
@@ -2230,6 +2233,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->RA=0;
 				a_params->DEC=0;
 				a_params->psi=0;
+				//a_params->incl_angle=M_PI/4.;
 				a_params->Luminosity_Distance=100;
 
 			}
@@ -2248,11 +2252,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				//T spin2sph[3] = {avec_parameters[3],0,0};
 				//transform_sph_cart(spin1sph,a_params->spin1);
 				//transform_sph_cart(spin2sph,a_params->spin2);
-				a_params->spin1[2] = avec_parameters[2];
-				a_params->spin2[2] = avec_parameters[3];
+				//a_params->spin1[2] = avec_parameters[2];
+				//a_params->spin2[2] = avec_parameters[3];
+				a_params->spin1[2]=(avec_parameters[2]+avec_parameters[3]);
+				a_params->spin2[2]=(avec_parameters[2]-avec_parameters[3]);
 				a_params->phiRef=0;
 				a_params->tc=0;
-				//a_params->incl_angle=0;
+				a_params->incl_angle=0;
 				//a_params->RA=1.;
 				//a_params->DEC=1.;
 				//a_params->psi=1.;

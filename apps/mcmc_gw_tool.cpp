@@ -30,13 +30,15 @@ double T_mcmc_gw_tool;
  * The extra parameters correspond to the injected intrinsic parameters -- exactly the format of PhenomD
  */
 
-double **beta_priors;
+double **mod_priors;
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_D_mod(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters);
-double standard_log_prior_Pv2_ppE(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
 int main(int argc, char *argv[])
 {
@@ -222,6 +224,14 @@ int main(int argc, char *argv[])
 	double chain_temps[chain_N];
 	
 	int Nmod = 0;
+	int gNmod_phi = 0;
+	int gNmod_sigma = 0;
+	int gNmod_beta = 0;
+	int gNmod_alpha = 0;
+	int *gIMR_phii = NULL;
+	int *gIMR_sigmai = NULL;
+	int *gIMR_betai = NULL;
+	int *gIMR_alphai = NULL;
 	int *bppe = NULL;
 	std::cout<<"Generation method: "<<generation_method<<std::endl;
 	if(generation_method.find("ppE") != std::string::npos){
@@ -229,18 +239,85 @@ int main(int argc, char *argv[])
 		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
 		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
 		bppe= new int[Nmod];
-		beta_priors = new double*[Nmod];
+		mod_priors = new double*[Nmod];
 		for(int i =0; i<Nmod ; i++){
 			bppe[i] = int_dict["ppE b "+std::to_string(i)];
-			beta_priors[i]= new double[2];
+			mod_priors[i]= new double[2];
 			std::cout<<i<<" : "<<bppe[i]<<std::endl;
-			beta_priors[i][0] = dbl_dict["ppE beta "+std::to_string(i)+" minimum"];
-			beta_priors[i][1] = dbl_dict["ppE beta "+std::to_string(i)+" maximum"];
+			mod_priors[i][0] = dbl_dict["ppE beta "+std::to_string(i)+" minimum"];
+			mod_priors[i][1] = dbl_dict["ppE beta "+std::to_string(i)+" maximum"];
+		}
+		
+	}
+	if(generation_method.find("gIMR") != std::string::npos){
+		gNmod_phi = int_dict["Number of phi modifications"];
+		gNmod_sigma = int_dict["Number of sigma modifications"];
+		gNmod_beta = int_dict["Number of beta modifications"];
+		gNmod_alpha = int_dict["Number of alpha modifications"];
+		int Nmod_tot = gNmod_phi+ gNmod_sigma+gNmod_beta+gNmod_alpha;
+		std::cout<<"Number of general modifications: "<<Nmod_tot<<std::endl;
+		std::cout<<"delta phi i: "<<Nmod<<std::endl;
+		mod_priors = new double*[Nmod_tot];
+		int ct = 0;
+		if(gNmod_phi != 0){
+			gIMR_phii= new int[gNmod_phi];
+			for(int i =0; i<gNmod_phi ; i++){
+				gIMR_phii[i] = int_dict["delta phi "+std::to_string(i)+" i"];
+				mod_priors[ct]= new double[2];
+				std::cout<<i<<" : "<<gIMR_phii[i]<<std::endl;
+				mod_priors[ct][0] = dbl_dict["delta phi "+std::to_string(i)+" minimum"];
+				mod_priors[ct][1] = dbl_dict["delta phi "+std::to_string(i)+" maximum"];
+				ct++;
+			}
+		}
+		if(gNmod_sigma != 0){
+			gIMR_sigmai= new int[gNmod_sigma];
+			for(int i =0; i<gNmod_sigma ; i++){
+				gIMR_sigmai[i] = int_dict["delta sigma "+std::to_string(i)+" i"];
+				mod_priors[ct]= new double[2];
+				std::cout<<i<<" : "<<gIMR_sigmai[i]<<std::endl;
+				mod_priors[ct][0] = dbl_dict["delta sigma "+std::to_string(i)+" minimum"];
+				mod_priors[ct][1] = dbl_dict["delta sigma "+std::to_string(i)+" maximum"];
+				ct++;
+			}
+		}
+		if(gNmod_beta != 0){
+			gIMR_betai= new int[gNmod_beta];
+			for(int i =0; i<gNmod_beta ; i++){
+				gIMR_betai[i] = int_dict["delta beta "+std::to_string(i)+" i"];
+				mod_priors[ct]= new double[2];
+				std::cout<<i<<" : "<<gIMR_betai[i]<<std::endl;
+				mod_priors[ct][0] = dbl_dict["delta beta "+std::to_string(i)+" minimum"];
+				mod_priors[ct][1] = dbl_dict["delta beta "+std::to_string(i)+" maximum"];
+				ct++;
+			}
+		}
+		if(gNmod_alpha != 0){
+			gIMR_alphai= new int[gNmod_alpha];
+			for(int i =0; i<gNmod_alpha ; i++){
+				gIMR_alphai[i] = int_dict["delta alpha "+std::to_string(i)+" i"];
+				mod_priors[ct]= new double[2];
+				std::cout<<i<<" : "<<gIMR_alphai[i]<<std::endl;
+				mod_priors[ct][0] = dbl_dict["delta alpha "+std::to_string(i)+" minimum"];
+				mod_priors[ct][1] = dbl_dict["delta alpha "+std::to_string(i)+" maximum"];
+				ct++;
+			}
 		}
 		
 	}
 	bool pool = true;
 	bool show_progress = true;
+	MCMC_modification_struct mod_struct;
+	mod_struct.ppE_Nmod = Nmod;
+	mod_struct.bppe = bppe;
+	mod_struct.gIMR_Nmod_phi = gNmod_phi;
+	mod_struct.gIMR_phii = gIMR_phii;
+	mod_struct.gIMR_Nmod_sigma = gNmod_sigma;
+	mod_struct.gIMR_sigmai = gIMR_sigmai;
+	mod_struct.gIMR_Nmod_beta = gNmod_beta;
+	mod_struct.gIMR_betai = gIMR_betai;
+	mod_struct.gIMR_Nmod_alpha = gNmod_alpha;
+	mod_struct.gIMR_alphai = gIMR_alphai;
 
 	//#########################################################
 	if(generation_method.find("SkySearch") != std::string::npos){
@@ -295,14 +372,26 @@ int main(int argc, char *argv[])
 		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 14){
 			lp = &standard_log_prior_Pv2;
 		}
-		else if(generation_method.find("ppE_IMRPhenomPv2") != std::string::npos && dimension >= 14){
-			lp = &standard_log_prior_Pv2_ppE;
+		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
+			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos)
+			&& dimension >= 14 ){
+			lp = &standard_log_prior_Pv2_mod;
+		}
+		else if( (generation_method.find("ppE_IMRPhenomD") != std::string::npos 
+			|| generation_method.find("gIMRPhenomD") != std::string::npos) 
+			&& dimension >= 11){
+			lp = &standard_log_prior_D_mod;
 		}
 		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 7){
 			lp = &standard_log_prior_Pv2_intrinsic;
 		}
 		else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
 			lp = &standard_log_prior_D_intrinsic;
+		}
+		else if((generation_method.find("ppE_IMRPhenomD") != std::string::npos 
+			|| generation_method.find("gIMRPhenomD") != std::string::npos) 
+			&& dimension >= 4){
+			lp = &standard_log_prior_D_intrinsic_mod;
 		}
 		else{
 			std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
@@ -330,7 +419,8 @@ int main(int argc, char *argv[])
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,
 					correlation_convergence_thresh , ac_target,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
-					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					//data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
 					generation_method,stat_file,output_file, "",check_file);	
 			//double ***output2 = allocate_3D_array(chain_N,samples, dimension );
 			//double c = 1.1;
@@ -364,12 +454,45 @@ int main(int argc, char *argv[])
 	if(generation_method.find("ppE") != std::string::npos){
 		delete [] bppe;	
 		for(int i = 0 ; i<Nmod ; i++){
-			delete [] beta_priors[i] ;
+			delete [] mod_priors[i] ;
 		}
-		delete [] beta_priors;
+		delete [] mod_priors;
 	}
 	
 	return 0;
+
+}
+double standard_log_prior_D_mod(double *pos, int dim, int chain_id,void *parameters)
+{
+	double chirp = std::exp(pos[7]);
+	double eta = pos[8];
+	double a = -std::numeric_limits<double>::infinity();
+	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
+
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	//if ((pos[1])<-M_PI/2 || (pos[1])>M_PI/2){return a;}//sinDEC
+
+	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
+	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
+	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
+	if (std::exp(pos[7])<2 || std::exp(pos[7])>80 ){return a;}//chirpmass
+	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
+
+	//if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
+	//if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	double chi1 = pos[9]+pos[10];	
+	double chi2 = pos[9]-pos[10];	
+	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	for(int i = 0 ; i<dim - 11; i++){
+		if( pos[11+i] <mod_priors[i][0] || pos[11+i] >mod_priors[i][1]){return a;}
+	}
+
+	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 
 }
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
@@ -439,7 +562,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];}
 }
-double standard_log_prior_Pv2_ppE(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[7]);
@@ -476,7 +599,7 @@ double standard_log_prior_Pv2_ppE(double *pos, int dim, int chain_id,void *param
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
 	for(int i = 0 ; i<dim - 14; i++){
-		if( pos[14+i] <beta_priors[i][0] || pos[14+i] >beta_priors[i][1]){return a;}
+		if( pos[14+i] <mod_priors[i][0] || pos[14+i] >mod_priors[i][1]){return a;}
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];
 }
@@ -488,9 +611,34 @@ double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *p
 	//Flat priors across physical regions
 	if (exp(pos[0])<2 || exp(pos[0])>100){return a;}//RA
 	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
-	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
-	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	//if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+	//if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	double chi1 = pos[2]+pos[3];	
+	double chi2 = pos[2]-pos[3];	
+	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+
+
+}
+double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	double eta = pos[1];
+	//Flat priors across physical regions
+	if (exp(pos[0])<2 || exp(pos[0])>100){return a;}//RA
+	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
+	//if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+	//if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	double chi1 = pos[2]+pos[3];	
+	double chi2 = pos[2]-pos[3];	
+	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	for(int i = 0 ; i<dim - 4; i++){
+		if( pos[4+i] <mod_priors[i][0] || pos[4+i] >mod_priors[i][1]){return a;}
+	}
+	return log(chirpmass_eta_jac(chirp,eta)) ;
 
 
 }

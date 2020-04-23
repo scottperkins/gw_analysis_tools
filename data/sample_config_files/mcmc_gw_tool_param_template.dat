@@ -77,10 +77,31 @@
 #Checkpoint file -- csv file
 #[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
 
-#Number of modifications -- only for ppE and gIMR waveforms
+#############################################################
+##ppE specific options##
+#############################################################
+#Number of modifications -- only for ppE waveforms
 [int] Number of modifications = 1
 #Power parameter from ppE -- one per modification
 [int] ppE b 0 = -1
 #Edges of ppE beta prior
-[dbl] beta 0 minimum = -10
-[dbl] beta 0 maximum = 10
+[dbl] ppE beta 0 minimum = -10
+[dbl] ppE beta 0 maximum = 10
+
+#############################################################
+##gIMR specific options##
+#############################################################
+#Number of modifications -- only for ppE and gIMR waveforms
+[int] Number of phi modifications = 1
+#Power parameter from ppE -- one per modification
+[int] delta phi 0 i = 4
+#Edges of ppE beta prior
+[dbl] delta phi 0 minimum = -10
+[dbl] delta phi 0 maximum = 10
+#Number of modifications -- only for ppE and gIMR waveforms
+[int] Number of sigma modifications = 0
+[int] delta sigma 0 i = -1
+[int] Number of beta modifications = 0
+[int] delta beta 0 i = -1
+[int] Number of alpha modifications = 0
+[int] delta alpha 0 i = -1

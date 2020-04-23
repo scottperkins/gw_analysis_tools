@@ -12,6 +12,7 @@ template<class T>
 class gIMRPhenomD: public IMRPhenomD<T>
 {
 public:
+virtual void ppE_gIMR_mapping(gen_params_base<T> *parameters, int PN_order,T *beta, int *b);
 virtual T phase_ins(T f, source_parameters<T> *param, T *pn_coeff, 
 	lambda_parameters<T> *lambda, useful_powers<T> *pow);
 virtual T Dphase_ins(T f, source_parameters<T> *params, 

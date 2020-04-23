@@ -630,6 +630,23 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
+	else if(generation_method == "gIMRPhenomD")
+	{
+		gIMRPhenomD<T> gmodeld;
+		params.delta_phi = parameters->delta_phi;
+		params.delta_sigma = parameters->delta_sigma;
+		params.delta_beta = parameters->delta_beta;
+		params.delta_alpha = parameters->delta_alpha;
+		params.phii = parameters->phii;
+		params.sigmai = parameters->sigmai;
+		params.betai = parameters->betai;
+		params.alphai = parameters->alphai;
+		params.Nmod_phi = parameters->Nmod_phi;
+		params.Nmod_sigma = parameters->Nmod_sigma;
+		params.Nmod_beta = parameters->Nmod_beta;
+		params.Nmod_alpha = parameters->Nmod_alpha;
+		status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	}
 
 	return status ;
 }
@@ -768,6 +785,26 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
 		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		for(int i = 0 ; i<length; i++){
+				phase[i]*= (T)(-1.);
+		}
+	}
+	else if(generation_method == "gIMRPhenomD")
+	{
+		gIMRPhenomD<T> gmodeld;
+		params.delta_phi = parameters->delta_phi;
+		params.delta_sigma = parameters->delta_sigma;
+		params.delta_beta = parameters->delta_beta;
+		params.delta_alpha = parameters->delta_alpha;
+		params.phii = parameters->phii;
+		params.sigmai = parameters->sigmai;
+		params.betai = parameters->betai;
+		params.alphai = parameters->alphai;
+		params.Nmod_phi = parameters->Nmod_phi;
+		params.Nmod_sigma = parameters->Nmod_sigma;
+		params.Nmod_beta = parameters->Nmod_beta;
+		params.Nmod_alpha = parameters->Nmod_alpha;
+		status = gmodeld.construct_phase(frequencies, length, phase, &params);	
 		for(int i = 0 ; i<length; i++){
 				phase[i]*= (T)(-1.);
 		}
