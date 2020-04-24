@@ -1927,13 +1927,17 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		}
 	}
 	if( check_mod(generation_method)){
-		if(generation_method.find("ppE") != std::string::npos || 
-			generation_method.find("dCS") !=std::string::npos ||
-			generation_method.find("EdGB") != std::string::npos){
+		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dimension-input_params->Nmod;
 			for(int i = 0 ;i<input_params->Nmod; i++){
 				parameters[base+i] = input_params->betappe[i];
 			}
+		}
+		else if( generation_method.find("dCS") !=std::string::npos ||
+			generation_method.find("EdGB") != std::string::npos){
+			int base = dimension-input_params->Nmod;
+			parameters[base] = input_params->betappe[0];
+			
 		}
 		else if(generation_method.find("gIMR") != std::string::npos ){
 			int mods = input_params->Nmod_phi + 
@@ -2293,12 +2297,21 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 
 	}
 	if( check_mod(generation_method)){
-		if(generation_method.find("ppE") != std::string::npos || 
-			generation_method.find("dCS") !=std::string::npos ||
-			generation_method.find("EdGB") != std::string::npos){
+		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dim - a_params->Nmod;
 			for(int i = 0 ;i<a_params->Nmod; i++){
 				a_params->betappe[i] = avec_parameters[base+i];
+			}
+		}
+		if( generation_method.find("dCS") !=std::string::npos ||
+			generation_method.find("EdGB") != std::string::npos){
+			int base = dim - a_params->Nmod;
+			a_params->betappe[0] = avec_parameters[base];
+			//MCMC samples in root(alpha) in KM 
+			//but the dCS/EdGB waveform works with (seconds)^2
+			if(generation_method.find("MCMC")!=std::string::npos){
+				a_params->betappe[0] = 
+					pow_int(a_params->betappe[0]/(c/1000.) , 4);
 			}
 		}
 		else if(generation_method.find("gIMR") != std::string::npos ){

@@ -61,11 +61,11 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag1 || NSflag2)
-	{
-		cout<<"NS waveforms still under develpment - BH only"<<endl;
-		return 0;
-	}
+	//if (NSflag1 || NSflag2)
+	//{
+	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
+	//	return 0;
+	//}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	source_parameters<T> params;
 	params = params.populate_source_parameters(parameters);
@@ -104,28 +104,6 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
 	}
-	else if(generation_method == "dCS_IMRPhenomD_log")
-	{
-		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-		bool local_spline = false;
-		dCS_IMRPhenomD_log<T> ppemodeld;
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-1};
-		params.bppe = tempbppe;
-		T temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-
-		
-		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-		for (int i =0 ; i < length; i++){
-			waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-			waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-		}
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
 		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
@@ -140,25 +118,6 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			temp[i] = params.betappe[i];
 
 		
-		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-		for (int i =0 ; i < length; i++){
-			waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-			waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-		}
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
-	else if(generation_method == "EdGB_IMRPhenomD_log")
-	{
-		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-		EdGB_IMRPhenomD_log<T> ppemodeld;
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-7};
-		params.bppe = tempbppe;
-		T temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
 		status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
 		for (int i =0 ; i < length; i++){
 			waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
@@ -400,6 +359,51 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		delete [] params.bppe;
 		delete [] params.betappe;
 	}
+	else if(generation_method == "EdGB_IMRPhenomPv2")
+	{
+		//########################################
+		//convert betappe for dCS (alpha**2) to the full betappe
+		//dCS only supports one modification
+		EdGB_IMRPhenomD<T> EdGB_phenomd;
+		params.Nmod = 1;
+		params.bppe = new int[1];
+		params.bppe[0] = -7;
+		params.betappe = new T[1];
+		params.betappe[0] = parameters->betappe[0];
+		params.betappe[0] = EdGB_phenomd.EdGB_phase_mod(&params);
+		//########################################
+
+		ppE_IMRPhenomPv2_Inspiral<T> model;
+		//Initialize Pv2 specific params	
+
+		//########################################
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+			params.chip = parameters->chip;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			model.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			model.PhenomPv2_Param_Transform(&params);
+		}
+		//Calculate Waveform
+		status = model.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+		std::complex<T> tempPlus,tempCross;
+		std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
+		std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
+		for (int i =0;i < length; i++)
+		{
+			tempPlus = waveform_plus[i];	
+			tempCross = waveform_cross[i];	
+			waveform_plus[i] = c2z*tempPlus
+					+s2z*tempCross;
+			waveform_cross[i] = c2z*tempCross
+					-s2z*tempPlus;
+		}
+		delete [] params.bppe;
+		delete [] params.betappe;
+	}
 
 	return status ;
 }
@@ -459,11 +463,11 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag1 || NSflag2)
-	{
-		cout<<"NS waveforms still under develpment - BH only"<<endl;
-		return 0;
-	}
+	//if (NSflag1 || NSflag2)
+	//{
+	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
+	//	return 0;
+	//}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	double mass1 = parameters->mass1;
 	double mass2 = parameters->mass2;
@@ -498,21 +502,6 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
 	}
-	else if(generation_method == "dCS_IMRPhenomD_log")
-	{
-		bool local_spline = false;
-		dCS_IMRPhenomD_log<double> ppemodeld;
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-1};
-		params.bppe = tempbppe;
-		double temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
 		bool local_spline = false;
@@ -520,20 +509,6 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.betappe = parameters->betappe;
 		params.Nmod = 1;
 		int tempbppe[params.Nmod] = {-1};
-		params.bppe = tempbppe;
-		double temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
-	else if(generation_method == "EdGB_IMRPhenomD_log")
-	{
-		EdGB_IMRPhenomD_log<double> ppemodeld;
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-7};
 		params.bppe = tempbppe;
 		double temp[params.Nmod] ;
 		for( int i = 0; i < params.Nmod; i++)
@@ -611,11 +586,11 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag1 || NSflag2)
-	{
-		cout<<"NS waveforms still under develpment - BH only"<<endl;
-		return 0;
-	}
+	//if (NSflag1 || NSflag2)
+	//{
+	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
+	//	return 0;
+	//}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	source_parameters<T> params;
 	params = params.populate_source_parameters(parameters);
@@ -640,19 +615,9 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
-	else if(generation_method == "dCS_IMRPhenomD_log")
-	{
-		dCS_IMRPhenomD_log<T> ppemodeld;
-		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
-	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
 		dCS_IMRPhenomD<T> ppemodeld;
-		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
-	}
-	else if(generation_method == "EdGB_IMRPhenomD_log")
-	{
-		EdGB_IMRPhenomD_log<T> ppemodeld;
 		status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 	}
 	else if(generation_method == "EdGB_IMRPhenomD")
@@ -708,11 +673,11 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag1 || NSflag2)
-	{
-		cout<<"NS waveforms still under develpment - BH only"<<endl;
-		return 0;
-	}
+	//if (NSflag1 || NSflag2)
+	//{
+	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
+	//	return 0;
+	//}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	source_parameters<T> params;
 	params = params.populate_source_parameters(parameters);
@@ -744,25 +709,6 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 	}
-	else if(generation_method == "dCS_IMRPhenomD_log")
-	{
-		bool local_spline = false;
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-1};
-		params.bppe = tempbppe;
-		T temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-		dCS_IMRPhenomD_log<T> ppemodeld;
-		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
-		for(int i = 0 ; i<length; i++){
-				phase[i]*= (T)(-1.);
-		}
-		
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
 		bool local_spline = false;
@@ -779,23 +725,6 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 		
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
-	else if(generation_method == "EdGB_IMRPhenomD_log")
-	{
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-7};
-		params.bppe = tempbppe;
-		T temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-		EdGB_IMRPhenomD_log<T> ppemodeld;
-		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
-		for(int i = 0 ; i<length; i++){
-				phase[i]*= (T)(-1.);
-		}
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
 	}
@@ -871,11 +800,11 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	bool NSflag2 = parameters->NSflag2;
 
 	/*Eventually, this will be where NS specific quantities are defined*/	
-	if (NSflag1 || NSflag2)
-	{
-		cout<<"NS waveforms still under develpment - BH only"<<endl;
-		return 0;
-	}
+	//if (NSflag1 || NSflag2)
+	//{
+	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
+	//	return 0;
+	//}
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	source_parameters<T> params;
 	//params = params.populate_source_parameters(mass1, mass2, Luminosity_Distance, spin1, spin2, phi_c,t_c);
@@ -915,26 +844,6 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 	}
-	else if(generation_method == "dCS_IMRPhenomD_log")
-	{
-		bool local_spline = false;
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-1};
-		params.bppe = tempbppe;
-		T temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-		dCS_IMRPhenomD_log<T> ppemodeld;
-		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
-		for(int i = 0 ; i<length; i++){
-			//phase_plus[i]*= (T)(-1.);
-			phase_cross[i] = phase_plus[i]+ M_PI/2.;
-		}
-		
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
 	else if(generation_method == "dCS_IMRPhenomD")
 	{
 		bool local_spline = false;
@@ -952,24 +861,6 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
 		}
 		
-		for( int i = 0; i < params.Nmod; i++)
-			parameters->betappe[i] = temp[i];
-	}
-	else if(generation_method == "EdGB_IMRPhenomD_log")
-	{
-		params.betappe = parameters->betappe;
-		params.Nmod = 1;
-		int tempbppe[params.Nmod] = {-7};
-		params.bppe = tempbppe;
-		T temp[params.Nmod] ;
-		for( int i = 0; i < params.Nmod; i++)
-			temp[i] = params.betappe[i];
-		EdGB_IMRPhenomD_log<T> ppemodeld;
-		status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
-		for(int i = 0 ; i<length; i++){
-			//phase_plus[i]*= (T)(-1.);
-			phase_cross[i] = phase_plus[i]+ M_PI/2.;
-		}
 		for( int i = 0; i < params.Nmod; i++)
 			parameters->betappe[i] = temp[i];
 	}
@@ -1155,6 +1046,82 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		//	phase_plus[i]*= (T)(-1.);
 		//	phase_cross[i]*= (T)(-1.);
 		//}
+	}
+	else if(generation_method == "dCS_IMRPhenomPv2")
+	{
+		//########################################
+		//convert betappe for dCS (alpha**2) to the full betappe
+		//dCS only supports one modification
+		dCS_IMRPhenomD<T> dcs_phenomd;
+		params.Nmod = 1;
+		params.bppe = new int[1];
+		params.bppe[0] = -1;
+		params.betappe = new T[1];
+		params.betappe[0] = parameters->betappe[0];
+		params.betappe[0] = dcs_phenomd.dCS_phase_mod(&params);
+		//########################################
+
+		ppE_IMRPhenomPv2_Inspiral<T> model;
+		//Initialize Pv2 specific params	
+
+		//########################################
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+			params.chip = parameters->chip;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			model.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			model.PhenomPv2_Param_Transform(&params);
+		}
+		T *phase_plus_temp = new T[length];
+		T *phase_cross_temp = new T[length];
+		status = model.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
+		unwrap_array(phase_plus_temp, phase_plus, length);
+		unwrap_array(phase_cross_temp, phase_cross, length);
+		delete [] phase_plus_temp;
+		delete [] phase_cross_temp;
+		delete [] params.bppe;
+		delete [] params.betappe;
+	}
+	else if(generation_method == "EdGB_IMRPhenomPv2")
+	{
+		//########################################
+		//convert betappe for dCS (alpha**2) to the full betappe
+		//dCS only supports one modification
+		EdGB_IMRPhenomD<T> EdGB_phenomd;
+		params.Nmod = 1;
+		params.bppe = new int[1];
+		params.bppe[0] = -7;
+		params.betappe = new T[1];
+		params.betappe[0] = parameters->betappe[0];
+		params.betappe[0] = EdGB_phenomd.EdGB_phase_mod(&params);
+		//########################################
+
+		ppE_IMRPhenomPv2_Inspiral<T> model;
+		//Initialize Pv2 specific params	
+
+		//########################################
+		if((parameters->chip +1)>DOUBLE_COMP_THRESH){
+			params.chip = parameters->chip;
+			params.spin1z = parameters->spin1[2];
+			params.spin2z = parameters->spin2[2];
+			params.phip = parameters->phip;
+			model.PhenomPv2_Param_Transform_reduced(&params);
+		}
+		else {
+			model.PhenomPv2_Param_Transform(&params);
+		}
+		T *phase_plus_temp = new T[length];
+		T *phase_cross_temp = new T[length];
+		status = model.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
+		unwrap_array(phase_plus_temp, phase_plus, length);
+		unwrap_array(phase_cross_temp, phase_cross, length);
+		delete [] phase_plus_temp;
+		delete [] phase_cross_temp;
+		delete [] params.bppe;
+		delete [] params.betappe;
 	}
 
 	return status ;
