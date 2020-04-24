@@ -1937,6 +1937,10 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 			generation_method.find("EdGB") != std::string::npos){
 			int base = dimension-input_params->Nmod;
 			parameters[base] = input_params->betappe[0];
+			//For MCMC, alpha is sampled in KM (alpha**2)**.25
+			if(generation_method.find("MCMC")!=std::string::npos){
+				parameters[base] = pow(input_params->betappe[0],.25)/(c*1000);
+			}
 			
 		}
 		else if(generation_method.find("gIMR") != std::string::npos ){
