@@ -110,3 +110,6 @@
 [int] delta beta 0 i = -1
 [int] Number of alpha modifications = 0
 [int] delta alpha 0 i = -1
+
+[bool] NS Flag 0 = false
+[bool] NS Flag 1 = false

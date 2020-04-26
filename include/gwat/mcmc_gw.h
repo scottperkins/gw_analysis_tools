@@ -53,6 +53,9 @@ struct MCMC_modification_struct
 	int *gIMR_betai = NULL; //gIMR
 	int gIMR_Nmod_alpha = 0; //gIMR
 	int *gIMR_alphai = NULL; //gIMR
+
+	bool NSflag1 =false;
+	bool NSflag2 =false;
 };
 static MCMC_modification_struct *mcmc_mod_struct;
 
@@ -336,8 +339,7 @@ void PTMCMC_MH_GW(double ***output,
 	int *data_length,
 	double gps_time,
 	std::string *detector,
-	int Nmod,
-	int *bppe,
+	MCMC_modification_struct *mod_struct,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,
@@ -346,37 +348,36 @@ void PTMCMC_MH_GW(double ***output,
 	std::string checkpoint_filename
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_file_start,
-			double **output,
-			int N_steps,
-			int max_chain_N_thermo_ensemble,
-			double *chain_temps,
-			int swp_freq,
-			int t0,
-			int nu,
-			int corr_threshold,
-			int corr_segments,
-			double corr_converge_thresh,
-			double corr_target_ac,
-			std::string chain_distribution_scheme,
-			double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
-			int numThreads,
-			bool pool,
-			bool show_prog,
-			int num_detectors,
-			std::complex<double> **data,
-			double **noise_psd,
-			double **frequencies,
-			int *data_length,
-			double gps_time,
-			std::string *detectors,
-			int Nmod,
-			int *bppe,
-			std::string generation_method,
-			std::string statistics_filename,
-			std::string chain_filename,
-			std::string likelihood_log_filename,
-			std::string checkpoint_filename
-			);
+	double **output,
+	int N_steps,
+	int max_chain_N_thermo_ensemble,
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	int corr_threshold,
+	int corr_segments,
+	double corr_converge_thresh,
+	double corr_target_ac,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	);
 void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	int dimension,
 	int N_steps,
@@ -434,8 +435,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	int *data_length,
 	double gps_time,
 	std::string *detectors,
-	int Nmod,
-	int *bppe,
+	MCMC_modification_struct *mod_struct,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,
@@ -458,8 +458,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	int *data_length,
 	double gps_time,
 	std::string *detector,
-	int Nmod,
-	int *bppe,
+	MCMC_modification_struct *mod_struct,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,
@@ -488,7 +487,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 
 void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id,void *parameters) ;
 
-std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method);
+std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method,MCMC_modification_struct *mod_struct);
 
 double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *parameters) ;
 

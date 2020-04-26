@@ -1266,33 +1266,32 @@ void RJPTMCMC_MH_GW(double ***output,
  * IMRPhenomPv2 - 9 dimensions -- cos J_N, ln chirpmass, eta, |chi1|, |chi1|, theta_1, theta_2, phi_1, phi_2
  */
 void PTMCMC_MH_GW(double ***output,
-		int dimension,
-		int N_steps,
-		int chain_N,
-		double *initial_pos,
-		double *seeding_var,	
-		double *chain_temps,
-		int swp_freq,
-		double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
-		int numThreads,
-		bool pool,
-		bool show_prog,
-		int num_detectors,
-		std::complex<double> **data,
-		double **noise_psd,
-		double **frequencies,
-		int *data_length,
-		double gps_time,
-		std::string *detectors,
-		int Nmod,
-		int *bppe,
-		std::string generation_method,
-		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
-		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-		std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-		std::string likelihood_log_filename,
-		std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
-					)
+	int dimension,
+	int N_steps,
+	int chain_N,
+	double *initial_pos,
+	double *seeding_var,	
+	double *chain_temps,
+	int swp_freq,
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method,
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+				)
 {
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
@@ -1312,12 +1311,13 @@ void PTMCMC_MH_GW(double ***output,
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
 	//mcmc_gmst = 2.456551496456678;
-	mcmc_Nmod = Nmod;
-	mcmc_bppe = bppe;
-	MCMC_modification_struct ms;
-	ms.ppE_Nmod = Nmod;
-	ms.bppe = bppe;
-	mcmc_mod_struct = &ms;
+	//mcmc_Nmod = Nmod;
+	//mcmc_bppe = bppe;
+	//MCMC_modification_struct ms;
+	//ms.ppE_Nmod = Nmod;
+	//ms.bppe = bppe;
+	//mcmc_mod_struct = &ms;
+	mcmc_mod_struct=mod_struct;
 	
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
@@ -1385,8 +1385,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 			int *data_length,
 			double gps_time,
 			std::string *detectors,
-			int Nmod,
-			int *bppe,
+			MCMC_modification_struct *mod_struct,
 			std::string generation_method,
 			std::string statistics_filename,
 			std::string chain_filename,
@@ -1413,8 +1412,9 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
-	mcmc_Nmod = Nmod;
-	mcmc_bppe = bppe;
+	//mcmc_Nmod = Nmod;
+	//mcmc_bppe = bppe;
+	mcmc_mod_struct = mod_struct;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
 
@@ -1508,8 +1508,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
-	mcmc_Nmod = mod_struct->ppE_Nmod;
-	mcmc_bppe = mod_struct->bppe;
+	//mcmc_Nmod = mod_struct->ppE_Nmod;
+	//mcmc_bppe = mod_struct->bppe;
 	mcmc_mod_struct = mod_struct;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
@@ -1592,36 +1592,35 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
  * numThreads and pool do not necessarily have to be the same
  */
 void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
-			int dimension,
-			int N_steps,
-			int chain_N,
-			int max_chain_N_thermo_ensemble,
-			double *initial_pos,
-			double *seeding_var,
-			double *chain_temps,
-			int swp_freq,
-			int t0,
-			int nu,
-			std::string chain_distribution_scheme,
-			double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
-			int numThreads,
-			bool pool,
-			bool show_prog,
-			int num_detectors,
-			std::complex<double> **data,
-			double **noise_psd,
-			double **frequencies,
-			int *data_length,
-			double gps_time,
-			std::string *detectors,
-			int Nmod,
-			int *bppe,
-			std::string generation_method,
-			std::string statistics_filename,
-			std::string chain_filename,
-			std::string likelihood_log_filename,
-			std::string checkpoint_filename
-			)
+	int dimension,
+	int N_steps,
+	int chain_N,
+	int max_chain_N_thermo_ensemble,
+	double *initial_pos,
+	double *seeding_var,
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	)
 {
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
@@ -1640,8 +1639,9 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
-	mcmc_Nmod = Nmod;
-	mcmc_bppe = bppe;
+	//mcmc_Nmod = Nmod;
+	//mcmc_bppe = bppe;
+	mcmc_mod_struct = mod_struct;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
 
@@ -1692,31 +1692,30 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
  * numThreads and pool do not necessarily have to be the same
  */
 void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
-			double ***output,
-			int dimension,
-			int N_steps,
-			int swp_freq,
-			double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
-			int numThreads,
-			bool pool,
-			bool show_prog,
-			int num_detectors,
-			std::complex<double> **data,
-			double **noise_psd,
-			double **frequencies,
-			int *data_length,
-			double gps_time,
-			std::string *detectors,
-			int Nmod,
-			int *bppe,
-			std::string generation_method,
-			std::string statistics_filename,
-			std::string chain_filename,
-			std::string auto_corr_filename,
-			std::string likelihood_log_filename,
-			std::string final_checkpoint_filename,
-			bool tune
-			)
+	double ***output,
+	int dimension,
+	int N_steps,
+	int swp_freq,
+	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string auto_corr_filename,
+	std::string likelihood_log_filename,
+	std::string final_checkpoint_filename,
+	bool tune
+	)
 {
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
@@ -1735,8 +1734,9 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	mcmc_num_detectors = num_detectors;
 	mcmc_gps_time = gps_time;
 	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
-	mcmc_Nmod = Nmod;
-	mcmc_bppe = bppe;
+	//mcmc_Nmod = Nmod;
+	//mcmc_bppe = bppe;
+	mcmc_mod_struct = mod_struct;
 	mcmc_log_beta = false;
 	mcmc_intrinsic = false;
 
@@ -1836,7 +1836,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 	}
 	else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
-		mcmc_Nmod = 1;
+		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
@@ -1856,7 +1856,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	//Sampling parameter is root alpha in km
 	else if(dimension==12 && generation_method =="EdGB_IMRPhenomD"){
-		mcmc_Nmod = 1;
+		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
@@ -1875,7 +1875,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 	}
 	else if(dimension==15 && generation_method =="dCS_IMRPhenomPv2"){
-		mcmc_Nmod = 1;
+		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
@@ -1898,7 +1898,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	//Sampling parameter is root alpha in km
 	else if(dimension==15 && generation_method =="EdGB_IMRPhenomPv2"){
-		mcmc_Nmod = 1;
+		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
@@ -1957,7 +1957,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	else if( generation_method == "ppE_IMRPhenomPv2_Inspiral"
 		|| generation_method == "ppE_IMRPhenomPv2_IMR"
 		){
-		if(dimension-mcmc_Nmod == 14){
+		if(dimension-mcmc_mod_struct->ppE_Nmod == 14){
 			
 			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, theta1, theta2, phi1, phi2, phiRef, psi";
 			for(int i =0; i<mcmc_Nmod; i++){
@@ -1980,15 +1980,15 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				seeding_var[11]=.1;
 				seeding_var[12]=.1;
 				seeding_var[13]=.1;
-				for(int i =0; i< mcmc_Nmod;i++){
+				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
 					seeding_var[14 + i]=2;
 				}
 			}
 		}
-		if(dimension-mcmc_Nmod == 7){
+		if(dimension-mcmc_mod_struct->ppE_Nmod == 7){
 			mcmc_intrinsic=true;
 			std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
-			for(int i =0; i<mcmc_Nmod; i++){
+			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
 				std::cout<<", beta"<<i;
 			}
 			std::cout<<endl;
@@ -2003,7 +2003,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				seeding_var[6]=.1;
 				seeding_var[7]=.1;
 				seeding_var[8]=.1;
-				for(int i =0; i< mcmc_Nmod;i++){
+				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
 					seeding_var[9 + i]=2;
 				}
 			}
@@ -2066,9 +2066,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if(generation_method == "gIMRPhenomD" 
 		){
-		if(dimension-(mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha ) == 4){
+		int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
+		if(dimension-totalmod == 4){
 			
-			int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
 			mcmc_intrinsic=true;
 			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
 			for(int i =0; i<totalmod; i++){
@@ -2088,7 +2088,6 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 		}
 		else{
-			int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
 			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, psi"<<std::endl;
 			mcmc_intrinsic=false;
 			if(local_seeding){
@@ -2114,10 +2113,10 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral"
 		|| generation_method == "ppE_IMRPhenomD_IMR"
 		){
-		if(dimension-mcmc_Nmod == 7){
+		if(dimension-mcmc_mod_struct->ppE_Nmod == 7){
 			
 			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
-			for(int i =0; i<mcmc_Nmod; i++){
+			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
 				std::cout<<", beta"<<i;
 			}
 			std::cout<<endl;
@@ -2131,15 +2130,15 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				seeding_var[5]=.1;
 				seeding_var[6]=.1;
 				seeding_var[7]=.1;
-				for(int i =0; i< mcmc_Nmod;i++){
+				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
 					seeding_var[8 + i]=2;
 				}
 			}
 		}
-		if(dimension-mcmc_Nmod == 4){
+		if(dimension-mcmc_mod_struct->ppE_Nmod == 4){
 			mcmc_intrinsic=true;
 			std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
-			for(int i =0; i<mcmc_Nmod; i++){
+			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
 				std::cout<<", beta"<<i;
 			}
 			std::cout<<endl;
@@ -2153,7 +2152,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				seeding_var[5]=.1;
 				seeding_var[6]=.1;
 				seeding_var[7]=.1;
-				for(int i =0; i< mcmc_Nmod;i++){
+				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
 					seeding_var[8 + i]=2;
 				}
 			}
@@ -2174,7 +2173,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	//#########################################################################
 	gen_params_base<double> gen_params;
 	std::string local_gen = MCMC_prep_params(param, 
-		temp_params,&gen_params, dimension, mcmc_generation_method);
+		temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
 	//gen_params.sky_average=true;
 	//gen_params.f_ref = 20;
 	//gen_params.shift_time = false;
@@ -2491,7 +2490,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
  *
  * Returns the local generation method to be used in the LL functions
  */
-std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method)
+std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method, MCMC_modification_struct *mod_struct)
 {
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
@@ -2503,14 +2502,17 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->gmst = mcmc_gmst;
 	gen_params->equatorial_orientation=false;
 	gen_params->horizon_coord=false;
-	gen_params->NSflag1 = false;
-	gen_params->NSflag2 = false;
+
+	gen_params->NSflag1 = mod_struct->NSflag1;
+	gen_params->NSflag2 = mod_struct->NSflag2;
+	//gen_params->NSflag1 = false;
+	//gen_params->NSflag2 = false;
 	if(check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ||
 			generation_method.find("dCS") !=std::string::npos||
 			generation_method.find("EdGB") != std::string::npos){
-			gen_params->bppe=mcmc_bppe;
-			gen_params->Nmod=mcmc_Nmod;
+			gen_params->bppe=mcmc_mod_struct->bppe;
+			gen_params->Nmod=mcmc_mod_struct->ppE_Nmod;
 			gen_params->betappe=new double[gen_params->Nmod];
 		}
 		else if(generation_method.find("gIMR") != std::string::npos){
@@ -2548,7 +2550,7 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 	//#########################################################################
 	gen_params_base<double> gen_params;
 	std::string local_gen = MCMC_prep_params(param, 
-		temp_params,&gen_params, dimension, mcmc_generation_method);
+		temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
 	//#########################################################################
 	//#########################################################################
 

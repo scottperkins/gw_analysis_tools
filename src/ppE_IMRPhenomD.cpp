@@ -42,18 +42,25 @@ T dCS_IMRPhenomD<T>::dCS_phase_factor(source_parameters<T> *param)
 	T m = m1+m2;
 	T chi1 = param->chi_s+param->chi_a;
 	T chi2 = param->chi_s-param->chi_a;
-	if(param->NSflag1 ){
-		chi1 = 0;
-	}
-	if(param->NSflag2 ){
-		chi2 = 0;
-	}
 	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * ((3. - 2.*sqrt(1.-chi1*chi1)));
 	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * ((3. - 2.*sqrt(1.-chi2*chi2)));
-	chi1 +=1e-10;
-	chi2 +=1e-10;
-	T s1  = s1temp/(2.*chi1*chi1*chi1);
-	T s2  = s2temp/(2.*chi2*chi2*chi2);
+	
+	//chi1 +=1e-10;
+	//chi2 +=1e-10;
+	T s1  ;
+	T s2  ;
+	if( fabs(chi1) <DOUBLE_COMP_THRESH){
+		s1 = 0;		
+	}
+	else{
+		s1  = s1temp/(2.*chi1*chi1*chi1);
+	}
+	if( fabs(chi2) <DOUBLE_COMP_THRESH){
+		s2 = 0;		
+	}
+	else{
+		s2  = s2temp/(2.*chi2*chi2*chi2);
+	}
 	//Neutron stars don't source scalar charge
 	if(param->NSflag1){s1 =0;}	
 	if(param->NSflag2){s2 =0;}	
@@ -106,18 +113,26 @@ T EdGB_IMRPhenomD<T>::EdGB_phase_factor( source_parameters<T> *param)
 	T m2 = calculate_mass2(chirpmass, eta);
 	T chi1 = param->chi_s + param->chi_a;
 	T chi2 = param->chi_s - param->chi_a;
-	if(param->NSflag1 ){
-		chi1 = 0;
-	}
-	if(param->NSflag2 ){
-		chi2 = 0;
-	}
 	T temp1 = 2.*(sqrt(1.-chi1*chi1) - 1. + chi1*chi1);
 	T temp2 = 2.*(sqrt(1.-chi2*chi2) - 1. + chi2*chi2);
-	chi1 += 1.e-10;
-	chi2 += 1.e-10;
-	T s1 = temp1/(chi1*chi1);
-	T s2 = temp2/(chi2*chi2);
+	T s1;
+        T s2;
+	if( fabs(chi1) <DOUBLE_COMP_THRESH){
+		s1 = 0;		
+	}
+	else{
+		s1  = temp1/(chi1*chi1);
+	}
+	if( fabs(chi2) <DOUBLE_COMP_THRESH){
+		s2 = 0;		
+	}
+	else{
+		s2  = temp2/(chi2*chi2);
+	}
+	//chi1 += 1.e-10;
+	//chi2 += 1.e-10;
+	//T s1 = temp1/(chi1*chi1);
+	//T s2 = temp2/(chi2*chi2);
 	if(param->NSflag1){s1 =0;}	
 	if(param->NSflag2){s2 =0;}	
 	return (-5./7168.)* pow_int((m1*m1 * s2 - m2*m2 * s1),2) / (pow_int(M,4) * pow(eta,(18./5)));

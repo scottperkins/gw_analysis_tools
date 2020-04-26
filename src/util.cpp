@@ -68,7 +68,7 @@ void debugger_print(const char *file, const int line,adouble message)
 {
 	std::cout.precision(15);
 	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
-	std::cout<<std::to_string(message.value())<<std::endl;
+	std::cout<<std::to_string(double(message.value()))<<std::endl;
 }
 std::string strip_path(std::string input)
 {

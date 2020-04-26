@@ -358,6 +358,18 @@ int main(int argc, char *argv[])
 	mod_struct.gIMR_betai = gIMR_betai;
 	mod_struct.gIMR_Nmod_alpha = gNmod_alpha;
 	mod_struct.gIMR_alphai = gIMR_alphai;
+	if(bool_dict.find("NS Flag 0") != bool_dict.end()){
+		mod_struct.NSflag1 = bool_dict["NS Flag 0"];
+		if(mod_struct.NSflag1){
+			std::cout<<"Object 0 is a NS"<<std::endl;
+		}
+	}
+	if(bool_dict.find("NS Flag 1") != bool_dict.end()){
+		mod_struct.NSflag2 = bool_dict["NS Flag 1"];
+		if(mod_struct.NSflag2){
+			std::cout<<"Object 1 is a NS"<<std::endl;
+		}
+	}
 
 	//#########################################################
 	if(generation_method.find("SkySearch") != std::string::npos){
@@ -446,7 +458,7 @@ int main(int argc, char *argv[])
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,
 					correlation_convergence_thresh , ac_target,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
-					data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
+					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
 					generation_method,stat_file,output_file, "",check_file);	
 
 		}

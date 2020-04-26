@@ -270,7 +270,7 @@ int network_fishers(int argc, char *argv[])
 int dCS_EdGB(int argc, char *argv[])
 {
 	
-	std::cout.precision(5);
+	std::cout.precision(2);
 	gen_params params;	
 	//params.mass1 = 31.5;
 	//params.mass2 = 10.3;
@@ -289,23 +289,26 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.phip = 1.0;
 	//params.Luminosity_Distance = 750;
 	//params.incl_angle = M_PI/3.;
-	params.mass1 = 4.5;
-	params.mass2 = 2.3;
-	params.spin1[2] = .08;
-	params.spin2[2] = .8;//(.21*(params.mass1+params.mass2)-params.mass1* params.spin1[2])/params.mass2 ;
-	params.chip = .29;
+
+	params.mass1 = 5.0;
+	params.mass2 = 1.4;
+	params.spin1[2] = .801;
+	params.spin2[2] = -.001;//(.21*(params.mass1+params.mass2)-params.mass1* params.spin1[2])/params.mass2 ;
+	params.chip = .001;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 100;
-	params.incl_angle = .76;
+	params.Luminosity_Distance = 70;
+	params.incl_angle = M_PI/3.;
+	
+
 	params.NSflag1 = false;
-	params.NSflag2 = false;
+	params.NSflag2 =false;
 
 	params.phiRef = .0;
 	params.RA = 1.;
-	params.DEC = -0.0;
+	params.DEC = 0.6;
 	params.f_ref = 20;
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
-	params.spin1[2] = .38;
+	//params.spin1[2] = .38;
 
 	params.horizon_coord = false;
 	params.shift_time=false;
@@ -319,8 +322,9 @@ int dCS_EdGB(int argc, char *argv[])
 	params.Nmod = 1;
 	params.betappe = new double[1];
 	params.bppe = new int[1];
-	params.betappe[0] = 0;
-	params.bppe[0] = -1.;
+	//params.betappe[0] = pow_int(8*1000./(c),4);
+	params.betappe[0] =0;
+	params.bppe[0] = -1;
 
 	double fmin = 5;
 	double fmax = 2048;
@@ -332,7 +336,8 @@ int dCS_EdGB(int argc, char *argv[])
 	int Ndetect = 3;
 	//int Ndetect = 2;
 	double **psd = new double*[Ndetect];
-	std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
+	//std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
+	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
 	
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
@@ -348,7 +353,8 @@ int dCS_EdGB(int argc, char *argv[])
 		}
 	}
 
-	std::string method = "dCS_IMRPhenomPv2";
+	//std::string method = "dCS_IMRPhenomPv2";
+	std::string method = "ppE_IMRPhenomPv2_IMR";
 	//std::string method = "EdGB_IMRPhenomPv2";
 
 
@@ -425,33 +431,91 @@ int dCS_EdGB(int argc, char *argv[])
 	matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
 	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	//std::cout<<"AD:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<output_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	std::cout<<"AD:"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<output_AD[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
+	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
 	std::cout<<"COV AD:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<COV_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<COV_AD[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 	std::cout<<"Variances (90%):"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
 	}
 	std::cout<<std::endl;
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
+	std::cout<<"Variances root delta alpha (90%):"<<std::endl;
+	if(params.NSflag2){
+		std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
+	}
+	else{
+		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
+	}
+	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
 	std::cout<<std::endl;
 
-	method = "dCS_IMRPhenomD";
+
+	double **identity_full = allocate_2D_array(dim,dim);
+	matrix_multiply(output_AD,COV_AD,identity_full,dim,dim,dim);
+	std::cout<<"IDENTITY: "<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<identity_full[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	
+	deallocate_2D_array(identity_full, dim,dim);
+
+
+
+
+	double **sub_AD_F = allocate_2D_array(dim-4,dim-4);
+	int ids[4] = {0,1,2,3};
+	rm_fisher_dim(output_AD,dim, sub_AD_F,dim-4,ids);
+	gsl_LU_matrix_invert(sub_AD_F,COV_AD,dim-4);
+	std::cout<<"SUB COV AD:"<<std::endl;
+	for(int i = 0 ; i<dim-4; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim-4; j++){
+			std::cout<<sub_AD_F[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<"Variances (90%):"<<std::endl;
+	for(int i = 0 ; i<dim-4; i++){
+		std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
+	}
+	std::cout<<std::endl;
+	std::cout<<"Variances root delta alpha (90%):"<<std::endl;
+	if(params.NSflag2){
+		std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
+	}
+	else{
+		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
+	}
+	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+	std::cout<<std::endl;
+	deallocate_2D_array(sub_AD_F,dim-4,dim-4);
+
+
+
+
+
+
+	//method = "dCS_IMRPhenomD";
+	method = "ppE_IMRPhenomD_IMR";
 	//method = "EdGB_IMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD2_temp, dimD, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
@@ -461,11 +525,11 @@ int dCS_EdGB(int argc, char *argv[])
 			}
 		}
 	}
-	matrix_multiply(output_AD2, jac_spins,output_AD2_temp,dimD,dimD,dimD);
-	matrix_multiply(jac_spins,output_AD2_temp, output_AD2,dimD,dimD,dimD);
+	//matrix_multiply(output_AD2, jac_spins,output_AD2_temp,dimD,dimD,dimD);
+	//matrix_multiply(jac_spins,output_AD2_temp, output_AD2,dimD,dimD,dimD);
 	
 	
-	//std::cout<<"AD-D:"<<std::endl;
+	std::cout<<"AD-D:"<<std::endl;
 	//for(int i = 0 ; i<dimD; i++){
 	//	std::cout<<i<<" ";
 	//	for(int j = 0 ; j<dimD; j++){
@@ -480,7 +544,14 @@ int dCS_EdGB(int argc, char *argv[])
 		std::cout<<i<<" "<<1.64*sqrt(COV_AD2[i][i])<<std::endl;
 	}
 	std::cout<<std::endl;
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD2[dimD-1][dimD-1],1./8.)*3.e5<<std::endl;
+	std::cout<<"Variances root delta alpha (90%):"<<std::endl;
+	if(params.NSflag2){
+		std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
+	}
+	else{
+		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
+	}
+	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD2[dimD-1][dimD-1],1./8.)*3.e5<<std::endl;
 	std::cout<<std::endl;
 
 	params.sky_average = true;
@@ -496,20 +567,38 @@ int dCS_EdGB(int argc, char *argv[])
 	
 	
 	std::cout<<"AD-DSA:"<<std::endl;
-	//for(int i = 0 ; i<dimDSA; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dimDSA; j++){
-	//		std::cout<<output_ADSA[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	for(int i = 0 ; i<dimDSA; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dimDSA; j++){
+			std::cout<<output_ADSA[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
 	gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
+	double **identity = allocate_2D_array(dimDSA,dimDSA);
+	matrix_multiply(output_ADSA,COV_ADSA,identity,dimDSA,dimDSA,dimDSA);
+	std::cout<<"IDENTITY: "<<std::endl;
+	for(int i = 0 ; i<dimDSA; i++){
+		for(int j = 0 ; j<dimDSA; j++){
+			std::cout<<identity[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	
+	deallocate_2D_array(identity, dimDSA,dimDSA);
 	std::cout<<"Variances (90%):"<<std::endl;
 	for(int i = 0 ; i<dimDSA; i++){
 		std::cout<<i<<" "<<1.64*sqrt(COV_ADSA[i][i])<<std::endl;
 	}
 	std::cout<<std::endl;
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_ADSA[dimDSA-1][dimDSA-1],1./8.)*3.e5<<std::endl;
+	std::cout<<"Variances root delta alpha (90%):"<<std::endl;
+	if(params.NSflag2){
+		std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
+	}
+	else{
+		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
+	}
+	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_ADSA[dimDSA-1][dimDSA-1],1./8.)*3.e5<<std::endl;
 	std::cout<<std::endl;
 	std::cout<<"SNR (SA): "<<sqrt(output_ADSA[0][0])<<std::endl;
 
