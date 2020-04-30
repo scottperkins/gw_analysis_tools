@@ -281,23 +281,23 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.Luminosity_Distance = 730;
 	//params.incl_angle = .76;
 	
-	//params.mass1 = 14.9;
-	//params.mass2 = 8.3;
-	//params.spin1[2] = .18* (params.mass1+params.mass2)/params.mass1;
-	//params.spin2[2] = 0 ;
-	//params.chip = .01;
-	//params.phip = 1.0;
-	//params.Luminosity_Distance = 750;
-	//params.incl_angle = M_PI/3.;
-
-	params.mass1 = 5.0;
-	params.mass2 = 1.4;
-	params.spin1[2] = .801;
-	params.spin2[2] = -.001;//(.21*(params.mass1+params.mass2)-params.mass1* params.spin1[2])/params.mass2 ;
-	params.chip = .001;
+	params.mass1 = 14.9;
+	params.mass2 = 8.3;
+	params.spin1[2] = .18* (params.mass1+params.mass2)/params.mass1;
+	params.spin2[2] = 0 ;
+	params.chip = .01;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 70;
+	params.Luminosity_Distance = 50;
 	params.incl_angle = M_PI/3.;
+
+	//params.mass1 = 5.0;
+	//params.mass2 = 1.4;
+	//params.spin1[2] = .801;
+	//params.spin2[2] = -.001;//(.21*(params.mass1+params.mass2)-params.mass1* params.spin1[2])/params.mass2 ;
+	//params.chip = .001;
+	//params.phip = 1.0;
+	//params.Luminosity_Distance = 70;
+	//params.incl_angle = M_PI/3.;
 	
 
 	params.NSflag1 = false;
@@ -338,6 +338,7 @@ int dCS_EdGB(int argc, char *argv[])
 	double **psd = new double*[Ndetect];
 	//std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
+	//std::string SN[3] = {"CE1","AdLIGOMidHigh","AdVIRGOPlus1"};
 	
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);

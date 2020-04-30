@@ -1516,9 +1516,10 @@ int observation_bounds(double sampling_freq, /**< Frequency at which the detecto
 	double fmax = sampling_freq /2.; //Nyquist limit
 	double fmin= 1e-6; //DC component
 	double delta_f =  1./integration_time;
+	double SN_target= 0.01;
 	
 	double bounds_from_band[2];
-	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, .1, .01, bounds_from_band,autodiff);
+	integration_bounds( params, generation_method, detector, sensitivity_curve, fmin, fmax, SN_target, .01, bounds_from_band,autodiff);
 	double times[2];
 	if(autodiff){
 		time_phase_corrected_autodiff(times, 2, bounds_from_band, params, generation_method, false, (int *)NULL, 1);
