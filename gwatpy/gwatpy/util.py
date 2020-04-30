@@ -1,6 +1,7 @@
 import ctypes
+import gwatpy.config as cf
 
-rlib = ctypes.cdll.LoadLibrary("../build/install/lib/libgwat.so")
+rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 
 def calculate_chirpmass_py(mass1,mass2):
     f=rlib.calculate_chirpmass_py
