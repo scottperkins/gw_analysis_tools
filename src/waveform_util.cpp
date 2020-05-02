@@ -796,8 +796,7 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 		delete [] tapes;
 		if(check_mod(generation_method)){
 			if(generation_method.find("ppE")!= std::string::npos ||
-			generation_method.find("dCS")!= std::string::npos ||
-			generation_method.find("EdGB")!= std::string::npos){
+			check_theory_support(generation_method)){
 				delete [] aparams.betappe;
 				delete [] aparams.bppe;
 			}
@@ -1246,8 +1245,7 @@ void assign_freq_boundaries(double *freq_boundaries,
 	}
 	if(check_mod(generation_method)){
 		if(generation_method.find("ppE")!= std::string::npos ||
-		generation_method.find("dCS")!= std::string::npos ||
-		generation_method.find("EdGB")!= std::string::npos){
+		check_theory_support(generation_method)){
 			delete [] internal_params.betappe;
 			delete [] internal_params.bppe;
 		}
