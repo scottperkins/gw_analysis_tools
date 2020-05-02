@@ -206,7 +206,8 @@ void ppE_IMRPhenomD_Inspiral<T>::fisher_calculation_sky_averaged(double *frequen
 	//populate model
 	source_parameters<double> input_params;
 	//###########################################################################
-	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	//input_params = source_parameters<double>::populate_source_parameters(parameters);
+	input_params.populate_source_parameters(parameters);
 	input_params.shift_time = parameters->shift_time;
 	//Need the splitting frequency	
 	lambda_parameters<double> lambda, *lambda_ptr;
@@ -298,7 +299,8 @@ void ppE_IMRPhenomD_Inspiral<T>::amplitude_tape(source_parameters<double> *input
 		source_parameters<adouble> intermediate_params;
 		adouble betappe[input_params->Nmod];
 		int bppe[input_params->Nmod];
-		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		//intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6], input_params->sky_average);
 		intermediate_params.shift_time = input_params->shift_time;
@@ -364,7 +366,8 @@ void ppE_IMRPhenomD_Inspiral<T>::phase_tape(source_parameters<double> *input_par
 		int bppe[input_params->Nmod];
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
-		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		//intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6],input_params->sky_average);
 		intermediate_params.shift_time = input_params->shift_time;
@@ -599,7 +602,8 @@ void ppE_IMRPhenomD_IMR<T>::fisher_calculation_sky_averaged(double *frequency,
 		int dimension = 7+parameters->Nmod;
 		//populate model
 		source_parameters<double> input_params;
-		input_params = source_parameters<double>::populate_source_parameters_old(parameters->mass1,
+		//input_params = source_parameters<double>::populate_source_parameters_old(parameters->mass1,
+		input_params.populate_source_parameters_old(parameters->mass1,
 			parameters->mass2,parameters->Luminosity_Distance,parameters->spin1,
 			parameters->spin2,parameters->phiRef,parameters->tc,parameters->sky_average);
 		input_params.shift_time = parameters->shift_time;
@@ -695,7 +699,8 @@ void ppE_IMRPhenomD_IMR<T>::amplitude_tape(source_parameters<double> *input_para
 		source_parameters<adouble> intermediate_params;
 		adouble betappe[input_params->Nmod];
 		int bppe[input_params->Nmod];
-		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		//intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6], input_params->sky_average);
 		intermediate_params.shift_time = input_params->shift_time;
@@ -761,7 +766,8 @@ void ppE_IMRPhenomD_IMR<T>::phase_tape(source_parameters<double> *input_params, 
 		int bppe[input_params->Nmod];
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
-		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		//intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6],input_params->sky_average);
 		intermediate_params.shift_time = input_params->shift_time;

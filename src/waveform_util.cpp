@@ -9,6 +9,7 @@
 #include "gIMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
+#include "ppE_utilities.h"
 #include "detector_util.h"
 #include "pn_waveform_util.h"
 #include <fftw3.h>
@@ -27,6 +28,8 @@
  *
  * Includes some utilities useful for MCMC and fisher calculations, as well as time-frequency methods for detectors like LISA
  */
+
+
 
 struct gsl_snr_struct
 {
@@ -905,7 +908,8 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	T fdamp, fRD, fpeak, deltaf;
 	if(local_method.find("IMRPhenomD")!=std::string::npos){
 		source_parameters<T> s_param;
-		s_param = source_parameters<T>::populate_source_parameters(params);
+		//s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.populate_source_parameters(params);
 		s_param.sky_average = params->sky_average;
 		s_param.f_ref = params->f_ref;
 		s_param.phiRef = params->phiRef;
@@ -923,7 +927,8 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 	}
 	else if(local_method.find("IMRPhenomPv2")!=std::string::npos){
 		source_parameters<T> s_param;
-		s_param = source_parameters<T>::populate_source_parameters(params);
+		//s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.populate_source_parameters(params);
 		s_param.sky_average = params->sky_average;
 		s_param.f_ref = params->f_ref;
 		s_param.phiRef = params->phiRef;
@@ -1130,7 +1135,8 @@ void assign_freq_boundaries(double *freq_boundaries,
 	gen_params_base<adouble> *internal_params_ptr = &internal_params;
 	transform_parameters(input_params, &internal_params_ptr);
 	source_parameters<adouble> s_param;
-	s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
+	//s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
+	s_param.populate_source_parameters(&internal_params);
 	s_param.sky_average = internal_params.sky_average;
 	s_param.f_ref = internal_params.f_ref;
 	s_param.phiRef = internal_params.phiRef;
@@ -1694,7 +1700,8 @@ void postmerger_params(gen_params_base<T>*params,
 {
 	if(generation_method.find("IMRPhenomD")!=std::string::npos){
 		source_parameters<T> s_param;
-		s_param = source_parameters<T>::populate_source_parameters(params);
+		//s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.populate_source_parameters(params);
 		s_param.sky_average = params->sky_average;
 		s_param.f_ref = params->f_ref;
 		s_param.phiRef = params->phiRef;
@@ -1722,7 +1729,8 @@ void postmerger_params(gen_params_base<T>*params,
 	}
 	else if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
 		source_parameters<T> s_param;
-		s_param = source_parameters<T>::populate_source_parameters(params);
+		//s_param = source_parameters<T>::populate_source_parameters(params);
+		s_param.populate_source_parameters(params);
 		s_param.sky_average = params->sky_average;
 		s_param.f_ref = params->f_ref;
 		s_param.phiRef = params->phiRef;

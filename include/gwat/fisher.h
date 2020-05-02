@@ -274,4 +274,29 @@ void fisher_autodiff_gsl_integration_batch_mod(double *frequency_bounds,
 	std::string error_log,
 	bool logerr
 	);
+void ppE_theory_fisher_transformation(std::string original_method, 
+	std::string new_method,
+	int dimension, 
+	gen_params_base<double> *param,
+	double **old_fisher, 
+	double **new_fisher);
+void ppE_theory_transformation_jac(
+	std::string original_method, 
+	std::string new_method,
+	int dimension, 
+	gen_params_base<double> *param, 
+	double **jac);
+void ppE_theory_fisher_transformation_calculate_derivatives(
+	std::string original_method, 
+	std::string new_method,
+	int dimension,
+	int base_dim, 
+	gen_params_base<double> *param, 
+	double **derivatives);
+void ppE_theory_covariance_transformation(std::string original_method, 
+	std::string new_method,
+	int dimension, 
+	gen_params_base<double> *param,
+	double **old_cov, 
+	double **new_cov);
 #endif

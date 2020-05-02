@@ -11,6 +11,7 @@
 #include "io_util.h"
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
+#include "ppE_utilities.h"
 #include "ppE_IMRPhenomD.h"
 #include "waveform_generator.h"
 #include "waveform_util.h"
@@ -1485,7 +1486,8 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 		T fRD, fdamp,fpeak;
 		if(local_gen.find("IMRPhenomPv2")!=std::string::npos){
 			IMRPhenomPv2<T> modelp;
-			s_param = source_parameters<T>::populate_source_parameters(params);
+			//s_param = source_parameters<T>::populate_source_parameters(params);
+			s_param.populate_source_parameters(params);
 			s_param.spin1z = params->spin1[2];
 			s_param.spin2z = params->spin2[2];
 			s_param.chip = params->chip;
@@ -1504,7 +1506,8 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 		}
 		else if(local_gen.find("IMRPhenomD")!=std::string::npos){
 			IMRPhenomD<T> model;
-			s_param = source_parameters<T>::populate_source_parameters(params);
+			//s_param = source_parameters<T>::populate_source_parameters(params);
+			s_param.populate_source_parameters(params);
 			s_param.sky_average = params->sky_average;
 			s_param.f_ref = params->f_ref;
 			s_param.phiRef = params->phiRef;
@@ -1645,7 +1648,8 @@ void detect_adjust_parameters( double *freq_boundaries,double *grad_freqs, int *
 			gen_params_base<adouble> internal_params;
 			transform_parameters(input_params, &internal_params);
 			source_parameters<adouble> s_param;
-			s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
+			//s_param = source_parameters<adouble>::populate_source_parameters(&internal_params);
+			s_param.populate_source_parameters(&internal_params);
 			s_param.sky_average = internal_params.sky_average;
 			s_param.f_ref = internal_params.f_ref;
 			s_param.phiRef = internal_params.phiRef;
@@ -1933,12 +1937,17 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[base+i] = input_params->betappe[i];
 			}
 		}
-		else if( generation_method.find("dCS") !=std::string::npos ||
-			generation_method.find("EdGB") != std::string::npos){
+		//else if( generation_method.find("dCS") !=std::string::npos ||
+		//	generation_method.find("EdGB") != std::string::npos){
+		else if( check_theory_support(generation_method)){
 			int base = dimension-input_params->Nmod;
-			parameters[base] = input_params->betappe[0];
+			for(int i = 0 ; i<input_params->Nmod; i++){
+				parameters[i+base] = input_params->betappe[i];
+			}
 			//For MCMC, alpha is sampled in KM (alpha**2)**.25
-			if(generation_method.find("MCMC")!=std::string::npos){
+			if(generation_method.find("MCMC")!=std::string::npos && 
+				(generation_method.find("dCS")!= std::string::npos ||
+				generation_method.find("EdGB")!=std::string::npos)){
 				parameters[base] = pow(input_params->betappe[0],.25)/(c*1000);
 			}
 			
@@ -2307,13 +2316,18 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->betappe[i] = avec_parameters[base+i];
 			}
 		}
-		if( generation_method.find("dCS") !=std::string::npos ||
-			generation_method.find("EdGB") != std::string::npos){
+		//if( generation_method.find("dCS") !=std::string::npos ||
+		//	generation_method.find("EdGB") != std::string::npos){
+		if( check_theory_support(generation_method)){
 			int base = dim - a_params->Nmod;
-			a_params->betappe[0] = avec_parameters[base];
+			for(int i= 0 ; i<a_params->Nmod; i++){
+				a_params->betappe[i] = avec_parameters[base+i];
+			}
 			//MCMC samples in root(alpha) in KM 
 			//but the dCS/EdGB waveform works with (seconds)^2
-			if(generation_method.find("MCMC")!=std::string::npos){
+			if(generation_method.find("MCMC")!=std::string::npos &&
+				(generation_method.find("dCS")!= std::string::npos ||
+				generation_method.find("EdGB")!=std::string::npos)){
 				a_params->betappe[0] = 
 					pow_int(a_params->betappe[0]/(c/1000.) , 4);
 			}
@@ -2379,9 +2393,11 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->phip = input_params->phip;
 	
 	if( check_mod(gen_method)){
+		//if(gen_method.find("ppE") != std::string::npos || 
+		//	gen_method.find("dCS") !=std::string::npos ||
+		//	gen_method.find("EdGB") != std::string::npos){
 		if(gen_method.find("ppE") != std::string::npos || 
-			gen_method.find("dCS") !=std::string::npos ||
-			gen_method.find("EdGB") != std::string::npos){
+			check_theory_support(gen_method)){
 			waveform_params->bppe = input_params->bppe;
 			waveform_params->Nmod = input_params->Nmod;
 			waveform_params->betappe = new T[waveform_params->Nmod];
@@ -2419,9 +2435,11 @@ template<class T>
 void deallocate_non_param_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
 {
 	if( check_mod(gen_method)){
+		//if(gen_method.find("ppE") != std::string::npos || 
+		//	gen_method.find("dCS") !=std::string::npos ||
+		//	gen_method.find("EdGB") != std::string::npos){
 		if(gen_method.find("ppE") != std::string::npos || 
-			gen_method.find("dCS") !=std::string::npos ||
-			gen_method.find("EdGB") != std::string::npos){
+			check_theory_support(gen_method)){
 			delete [] waveform_params->betappe	;
 		}
 		else if (gen_method.find("gIMR") != std::string::npos){
@@ -2676,9 +2694,11 @@ void tape_phase_gsl_subroutine(gsl_subroutine * params_packed)
 		trace_off();
 	}
 	if(check_mod(generation_method)){
+		//if(generation_method.find("ppE") != std::string::npos || 
+		//	generation_method.find("dCS") !=std::string::npos ||
+		//	generation_method.find("EdGB") != std::string::npos){
 		if(generation_method.find("ppE") != std::string::npos || 
-			generation_method.find("dCS") !=std::string::npos ||
-			generation_method.find("EdGB") != std::string::npos){
+			check_theory_support(generation_method)){
 			delete [] aparams.betappe;
 			delete [] aparams.bppe;
 		}
@@ -3298,3 +3318,163 @@ double calculate_integrand_autodiff_gsl_subroutine(double frequency, void *param
 	populate_noise(&frequency,sensitivity_curve, &psdroot, 1);
 	return std::real((waveform_deriv[0]*conj(waveform_deriv[1])))/(psdroot*psdroot);
 }
+//#################################################################
+//#################################################################
+/*! \brief Calculates the gradient of \beta_ppE wrt \vec{\theta}
+ *
+ * Computes the gradient for multiple betas, if present
+ */
+void ppE_theory_transformation_calculate_derivatives(
+	std::string original_method, 
+	std::string new_method,
+	int dimension,
+	int base_dim, 
+	gen_params_base<double> *param, 
+	double **derivatives)
+{
+	double vec_parameters[dimension];
+	bool log_factors[dimension];
+	unpack_parameters(vec_parameters, param, new_method,dimension, log_factors);
+	for(int i = 0 ; i<dimension - base_dim; i++){
+		//int id = omp_get_thread_num();
+		int id = 0;
+		trace_on(id);
+		adouble avec_parameters[dimension];
+		for(int j = 0; j < dimension; j++){
+			avec_parameters[j]<<=vec_parameters[j];	
+		}
+		//Repack parameters
+		gen_params_base<adouble> a_parameters;
+		//############################################
+		//Non variable parameters
+		repack_non_parameter_options(&a_parameters,param,new_method);
+		//############################################
+		repack_parameters(avec_parameters,&a_parameters,new_method, dimension, param);
+		source_parameters<adouble> asource;
+		std::string local_method = prep_source_parameters(&asource,&a_parameters,new_method);
+		//theory_ppE_map<adouble> mapping;
+		//assign_mapping(new_method,&mapping);
+		//adouble abeta = mapping.beta_fns[i](&asource);
+		double beta;
+		asource.betappe[i] >>=  beta;	
+		trace_off();
+		gradient(id, dimension, vec_parameters, derivatives[i]);
+		deallocate_non_param_options(&a_parameters, param, new_method);
+		cleanup_source_parameters(&asource,new_method);	
+		//deallocate_mapping(&mapping);	
+	}
+	return;
+
+}
+/*! \brief Calculates the jacobian matrix going from ppE to a specific theory
+ *
+ * d \theta_i / d \theta_j where \theta_i is the ppE parameterrs, and \theta_j are the
+ * theory specific parameters
+ */
+void ppE_theory_transformation_jac(
+	std::string original_method, 
+	std::string new_method,
+	int dimension, 
+	gen_params_base<double> *param, 
+	double **jac)
+{
+	//Figure out base dimension from generation method and sky_average flag
+	int base_dim;
+	if(new_method.find("PhenomPv2")!= std::string::npos){
+		if(param->sky_average){
+			base_dim = 7;
+		}
+		else{
+			base_dim = 12;
+		}
+	}
+	else if(new_method.find("PhenomD")!= std::string::npos){
+		if(param->sky_average){
+			base_dim = 7;
+		}
+		else{
+			base_dim = 11;
+		}
+	}
+	double **derivatives = new double*[dimension-base_dim];
+	for(int i= 0 ; i<dimension-base_dim; i++){
+		derivatives[i]=new double[dimension];
+	}
+	ppE_theory_transformation_calculate_derivatives(original_method, new_method, dimension, base_dim, param, derivatives);
+	
+	//Start with identity
+	for(int i = 0 ; i<dimension; i++){
+		for(int j = 0 ; j<dimension; j++){
+			jac[i][j]=0;
+		}
+	}
+	for(int i = 0 ; i<dimension; i++){
+		jac[i][i] = 1;	
+	}
+	
+	//Replace row of each beta with new derivatives
+	for(int j = 0 ;j<dimension-base_dim; j++){
+		for(int i = 0; i<dimension; i++){
+			jac[i][j+base_dim]= derivatives[j][i];
+		}
+	}
+	
+	
+	for(int i = 0 ; i<dimension-base_dim; i++){
+		delete [] derivatives[i];	
+	}
+	delete [] derivatives;
+}
+/*! \brief Transform a generic ppE Fisher matrix to a theory specific Fisher matrix
+ *
+ * See ppE_utilities.cpp for a list of supported theories.
+ */
+void ppE_theory_fisher_transformation(std::string original_method, 
+	std::string new_method,
+	int dimension, 
+	gen_params_base<double> *param,
+	double **old_fisher, 
+	double **new_fisher)
+{
+	double **jac = allocate_2D_array(dimension,dimension);
+	double **temp_fisher = allocate_2D_array(dimension,dimension);
+	ppE_theory_transformation_jac(original_method, new_method, 
+		dimension, param,jac);
+	
+	matrix_multiply(old_fisher,jac, temp_fisher, dimension, dimension, dimension);
+	matrix_multiply(jac,temp_fisher,new_fisher, dimension, dimension, dimension);
+	
+	deallocate_2D_array(jac,dimension,dimension);
+	deallocate_2D_array(temp_fisher,dimension,dimension);
+}
+/*! \brief Transform a generic ppE covariance matrix to a theory specific covariance matrix
+ *
+ * See ppE_utilities.cpp for a list of supported theories.
+ *
+ * The covariance matrix is defined as (\Gamma)^-1 where, \Gamma is the Fisher matrix
+ */
+void ppE_theory_covariance_transformation(std::string original_method, 
+	std::string new_method,
+	int dimension, 
+	gen_params_base<double> *param,
+	double **old_cov, 
+	double **new_cov)
+{
+	double **jac = allocate_2D_array(dimension,dimension);
+	double **jac_inverse = allocate_2D_array(dimension,dimension);
+	double **temp_cov = allocate_2D_array(dimension,dimension);
+	ppE_theory_transformation_jac(original_method, new_method, 
+		dimension, param,jac);
+
+	gsl_LU_matrix_invert(jac, jac_inverse, dimension);
+	
+	matrix_multiply(old_cov,jac_inverse, temp_cov, dimension, dimension, dimension);
+	matrix_multiply(jac_inverse,temp_cov,new_cov, dimension, dimension, dimension);
+	
+	deallocate_2D_array(jac,dimension,dimension);
+	deallocate_2D_array(jac_inverse,dimension,dimension);
+	deallocate_2D_array(temp_cov,dimension,dimension);
+}
+
+//#################################################################
+//#################################################################

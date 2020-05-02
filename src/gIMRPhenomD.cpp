@@ -26,7 +26,8 @@ template<class T>
 void gIMRPhenomD<T>::ppE_gIMR_mapping(gen_params_base<T> *parameters, int PN_order,T *beta,int *b  )
 {
 	source_parameters<T> params;
-	params = params.populate_source_parameters(parameters);
+	//params = params.populate_source_parameters(parameters);
+	params.populate_source_parameters(parameters);
 	params.phi = parameters->phi;
 	params.theta = parameters->theta;
 	params.incl_angle = parameters->incl_angle;

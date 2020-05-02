@@ -66,6 +66,10 @@ int fourier_phase(T *frequencies,
 			gen_params_base<T> *parameters
 			);
 
+template<class T>
+std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method);
+template<class T>
+void cleanup_source_parameters(source_parameters<T> *params,std::string generation_method);
 //int fourier_waveform_polarizations(double *frequencies,
 //				int length,
 //				std::complex<double> hcross,

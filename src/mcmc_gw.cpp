@@ -3,6 +3,7 @@
 #include "util.h"
 #include "io_util.h"
 #include "detector_util.h"
+#include "ppE_utilities.h"
 #include "waveform_util.h"
 #include "fisher.h"
 #include "mcmc_sampler.h"

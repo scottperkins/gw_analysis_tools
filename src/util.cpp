@@ -22,7 +22,6 @@
  *
  * General utilities that are not necessarily specific to any part of the project at large
  */
-
 /*! \brief Matrix multiplication
  *
  * Takes A -- [dim1,dim2], B -- [dim2,dim3], and produces C -- [dim1,dim3]
@@ -794,38 +793,71 @@ void deallocate_FFTW_mem(fftw_outline *plan)
  *
  */
 template <class T>
-source_parameters<T> source_parameters<T>::populate_source_parameters(
+void source_parameters<T>::populate_source_parameters(
 			gen_params_base<T> *param_in
 			) 
 {
 
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
-	source_parameters<T> params;
-	params.mass1 = param_in->mass1*MSOL_SEC;
-	params.mass2 = param_in->mass2*MSOL_SEC;
-	params.spin1x = param_in->spin1[0];
-	params.spin2x = param_in->spin2[0];
-	params.spin1y = param_in->spin1[1];
-	params.spin2y = param_in->spin2[1];
-	params.spin1z = param_in->spin1[2];
-	params.spin2z = param_in->spin2[2];
-	params.chi_s = (1./2)*(params.spin1z+params.spin2z);
-	params.chi_a = (1./2)*(params.spin1z-params.spin2z);
+	this->mass1 = param_in->mass1*MSOL_SEC;
+	this->mass2 = param_in->mass2*MSOL_SEC;
+	this->spin1x = param_in->spin1[0];
+	this->spin2x = param_in->spin2[0];
+	this->spin1y = param_in->spin1[1];
+	this->spin2y = param_in->spin2[1];
+	this->spin1z = param_in->spin1[2];
+	this->spin2z = param_in->spin2[2];
+	this->chi_s = (1./2)*(this->spin1z+this->spin2z);
+	this->chi_a = (1./2)*(this->spin1z-this->spin2z);
 	//params.chirpmass = (adouble)calculate_chirpmass((double)params.mass1.value(),(double)params.mass2.value());
-	params.chirpmass = calculate_chirpmass(params.mass1,params.mass2);
+	this->chirpmass = calculate_chirpmass(this->mass1,this->mass2);
 	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());	
-	params.eta = calculate_eta(params.mass1,params.mass2);	
-	params.M = params.mass1 + params.mass2;
-	params.chi_eff = (params.mass1*(params.spin1z)+ params.mass2*(params.spin2z))/(params.M);
-	params.chi_pn = params.chi_eff - (38*params.eta/113)*(2*params.chi_s);
-	params.DL = param_in->Luminosity_Distance*MPC_SEC;
-	params.delta_mass = sqrt(1.-4*params.eta);
-	params.phiRef = param_in->phiRef;
-	params.tc = param_in->tc;
-	params.sky_average = param_in->sky_average;
-	params.A0 = A0_from_DL(params.chirpmass, params.DL, params.sky_average);
-	return params;
+	this->eta = calculate_eta(this->mass1,this->mass2);	
+	this->M = this->mass1 + this->mass2;
+	this->chi_eff = (this->mass1*(this->spin1z)+ this->mass2*(this->spin2z))/(this->M);
+	this->chi_pn = this->chi_eff - (38*this->eta/113)*(2*this->chi_s);
+	this->DL = param_in->Luminosity_Distance*MPC_SEC;
+	this->delta_mass = sqrt(1.-4*this->eta);
+	this->phiRef = param_in->phiRef;
+	this->tc = param_in->tc;
+	this->sky_average = param_in->sky_average;
+	this->A0 = A0_from_DL(this->chirpmass, this->DL, this->sky_average);
+	//return params;
+	return;
 }
+//template <class T>
+//source_parameters<T> source_parameters<T>::populate_source_parameters(
+//			gen_params_base<T> *param_in
+//			) 
+//{
+//
+//	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
+//	source_parameters<T> params;
+//	params.mass1 = param_in->mass1*MSOL_SEC;
+//	params.mass2 = param_in->mass2*MSOL_SEC;
+//	params.spin1x = param_in->spin1[0];
+//	params.spin2x = param_in->spin2[0];
+//	params.spin1y = param_in->spin1[1];
+//	params.spin2y = param_in->spin2[1];
+//	params.spin1z = param_in->spin1[2];
+//	params.spin2z = param_in->spin2[2];
+//	params.chi_s = (1./2)*(params.spin1z+params.spin2z);
+//	params.chi_a = (1./2)*(params.spin1z-params.spin2z);
+//	//params.chirpmass = (adouble)calculate_chirpmass((double)params.mass1.value(),(double)params.mass2.value());
+//	params.chirpmass = calculate_chirpmass(params.mass1,params.mass2);
+//	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());	
+//	params.eta = calculate_eta(params.mass1,params.mass2);	
+//	params.M = params.mass1 + params.mass2;
+//	params.chi_eff = (params.mass1*(params.spin1z)+ params.mass2*(params.spin2z))/(params.M);
+//	params.chi_pn = params.chi_eff - (38*params.eta/113)*(2*params.chi_s);
+//	params.DL = param_in->Luminosity_Distance*MPC_SEC;
+//	params.delta_mass = sqrt(1.-4*params.eta);
+//	params.phiRef = param_in->phiRef;
+//	params.tc = param_in->tc;
+//	params.sky_average = param_in->sky_average;
+//	params.A0 = A0_from_DL(params.chirpmass, params.DL, params.sky_average);
+//	return params;
+//}
 /*! \brief TESTING Simple utility to copy the members of param_in to param_out, for whatever types those are.
  *
  * This is sometimes required to jump from double params to adouble params
@@ -1027,19 +1059,6 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->precess_reduced_flag = param_in->precess_reduced_flag;
 	param_out->dep_postmerger = param_in->dep_postmerger;
 	
-}
-bool check_mod(std::string generation_method)
-{
-	if(generation_method.find("ppE") != std::string::npos || 
-		generation_method.find("dCS") !=std::string::npos ||
-		generation_method.find("EdGB") !=std::string::npos ||
-		generation_method.find("gIMRPhenom") !=std::string::npos 
-		)
-	{
-		return true;
-		
-	}
-	return false;
 }
 template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> *);
 template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> **);

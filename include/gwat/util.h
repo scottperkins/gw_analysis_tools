@@ -389,7 +389,8 @@ struct source_parameters
 	T *delta_sigma;
 	T *delta_phi;
 
-static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
+//static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
+void populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(
 			T mass1, 
 			T mass2, 
@@ -461,7 +462,6 @@ adouble DL_from_Z(adouble Z, std::string cosmology);
 adouble cosmology_interpolation_function(adouble x, double *coeffs, int interp_degree);
 
 double std_omega(double RA, double std_RA, double std_DEC, double cov_RA_DEC);
-bool check_mod(std::string generation_method);
 void printProgress (double percentage);
 
 void allocate_FFTW_mem_forward(fftw_outline *plan,int length);

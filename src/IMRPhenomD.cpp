@@ -47,7 +47,8 @@ void IMRPhenomD<T>::fisher_calculation_sky_averaged(double *frequency,
 	int dimension = 7;
 	//populate model
 	source_parameters<double> input_params;
-	input_params = source_parameters<double>::populate_source_parameters(parameters);
+	//input_params = source_parameters<double>::populate_source_parameters(parameters);
+	input_params.populate_source_parameters(parameters);
 	//input_params.shift_time = parameters->shift_time;
 	input_params.shift_time = false;
 	//Need the splitting frequency	
@@ -280,7 +281,8 @@ void IMRPhenomD<T>::amplitude_tape(source_parameters<double> *input_params, /**<
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
 		source_parameters<adouble> intermediate_params;
-		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		//intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6],input_params->sky_average);
 		intermediate_params.shift_time = input_params->shift_time;
@@ -338,7 +340,8 @@ void IMRPhenomD<T>::phase_tape(source_parameters<double> *input_params, /**< sou
 		adouble spin1vec[3] = {0,0,new_params[3]};
 		adouble spin2vec[3] = {0,0,new_params[4]};
 		
-		intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		//intermediate_params = intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
+		intermediate_params.populate_source_parameters_old(new_params[0]/MSOL_SEC,
 				new_params[1]/MSOL_SEC,new_params[2]/MPC_SEC,spin1vec,spin2vec,new_params[5],
 				new_params[6], input_params->sky_average);
 		intermediate_params.shift_time = input_params->shift_time;
