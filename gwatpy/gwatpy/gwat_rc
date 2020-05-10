@@ -336,7 +336,7 @@ axes.titlesize      : large   ## fontsize of the axes title
                                ## http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
 #axes.prop_cycle    : cycler('color', ['000000', 'ff7f0e', '2ca02c', 'd62728', '9467bd', '8c564b', 'e377c2', '7f7f7f', 'bcbd22', '17becf'])
 #axes.prop_cycle    : cycler('color', ['000000', '8EA8BF','2F5973','D9CBBF','593825','A67C63'])
-axes.prop_cycle    : ( cycler("ls",['-','--','-.']) * cycler('color', ['000000', 'C2C5CC','78698C','293C73','389BA6','F2CEA2','592A19']) )
+#axes.prop_cycle    : ( cycler("ls",['-','--','-.']) * cycler('color', ['000000', 'C2C5CC','78698C','293C73','389BA6','F2CEA2','592A19']) )
 #axes.prop_cycle    : ( cycler("ls",['-','--','-.'])  )
                       ## color cycle for plot lines  as list of string
                       ## colorspecs: single letter, long name, or web-style hex
