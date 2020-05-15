@@ -8,6 +8,16 @@ int calculate_chirpmass_py(double mass1, double mass2,double *out)
 	return 0;
 }
 
+int calculate_mass1_py(double chirpmass, double eta,double *out)
+{
+	*out = calculate_mass1(chirpmass,eta);
+	return 0;
+}
+int calculate_mass2_py(double chirpmass, double eta,double *out)
+{
+	*out = calculate_mass2(chirpmass,eta);
+	return 0;
+}
 void populate_noise_py(double *frequencies, char * detector, double *noise_root, int length, double integration_time){
 	populate_noise(frequencies, std::string(detector), noise_root, length, integration_time);
 	return;

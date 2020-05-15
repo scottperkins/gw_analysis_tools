@@ -11,6 +11,8 @@ extern "C"
 #endif
 
 int calculate_chirpmass_py(double mass1, double mass2,double *out);
+int calculate_mass1_py(double chirpmass, double eta,double *out);
+int calculate_mass2_py(double chirpmass, double eta,double *out);
 
 void populate_noise_py(double *frequencies, char * detector, double *noise_root, int length, double integration_time);
 
