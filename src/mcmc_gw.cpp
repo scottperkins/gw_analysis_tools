@@ -970,8 +970,11 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain
 		hcross[i] = p->hcross[i]*c_fac;
 	}
 	std::complex<double> *response = new std::complex<double>[mcmc_data_length[0]];	
-	double delta_t;
-	double tc_ref = param[5],tc;
+	double delta_t,tc;
+	//double tc_ref = param[5],tc;
+	double T = 1./( mcmc_frequencies[0][1]-mcmc_frequencies[0][0]);
+	double tc_ref = T-param[5];
+	//double llvec[3];
 	for(int i = 0 ; i<mcmc_num_detectors; i++){
 		delta_t = DTOA_DETECTOR(param[0],asin(param[1]),mcmc_gmst, mcmc_detectors[0],mcmc_detectors[i]);
 		//tc = tc_ref + delta_t;
@@ -979,8 +982,10 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain
 		tc*=2.*M_PI;
 		fourier_detector_response_equatorial(mcmc_frequencies[i],mcmc_data_length[i],hplus,hcross, response,param[0],asin(param[1]),param[2],mcmc_gmst, (double *)NULL,0.,0.,0.,0.,mcmc_detectors[i]);
 		for(int j = 0 ; j<mcmc_data_length[i];j++){
-			response[j]*=exp(-std::complex<double>(
-				0,tc*(mcmc_frequencies[i][j]-20.) - param[4] ));
+			//response[j]*=exp(-std::complex<double>(
+			//	0,tc*(mcmc_frequencies[i][j]-20.) - param[4] ));
+			response[j]*=exp(std::complex<double>(
+				0,tc*(mcmc_frequencies[i][j]) - param[4] ));
 		}	
 		ll += Log_Likelihood_internal(mcmc_data[i], 
 			mcmc_noise[i],
@@ -989,8 +994,10 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain
 			(size_t) mcmc_data_length[i],
 			&mcmc_fftw_plans[i]
 			);
+		//llvec[i]=ll;
 		
 	}
+	//std::cout<<ll<<" "<<llvec[0]<<" "<<llvec[1]-llvec[0]<<" "<<llvec[2]-llvec[1]<<std::endl;
 	delete [] response;
 	delete [] hplus;
 	delete [] hcross;

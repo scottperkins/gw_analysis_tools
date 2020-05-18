@@ -644,7 +644,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"","",likelihood_log_filename, checkpoint_file,false);
-		write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
+		//write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
 		double ave_accept = 0;
 		int cold_chains = 0;
 		for (int i = 0 ; i< chain_N; i ++){
