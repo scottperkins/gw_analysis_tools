@@ -8,6 +8,11 @@ int calculate_chirpmass_py(double mass1, double mass2,double *out)
 	return 0;
 }
 
+int calculate_eta_py(double mass1, double mass2,double *out)
+{
+	*out = calculate_eta(mass1,mass2);
+	return 0;
+}
 int calculate_mass1_py(double chirpmass, double eta,double *out)
 {
 	*out = calculate_mass1(chirpmass,eta);

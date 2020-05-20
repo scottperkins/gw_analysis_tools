@@ -39,6 +39,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters);
 double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
@@ -223,18 +224,21 @@ int main(int argc, char *argv[])
 	//#############################################################
 	//#############################################################
 	
-	double **whitened = allocate_2D_array(data_lengths[0],7);
-	for(int i = 0 ; i<data_lengths[0]; i++){
-		whitened[i][0]= freqs[0][i];
-		whitened[i][1]=psd[0][i];
-		whitened[i][2]=psd[1][i];
-		whitened[i][3]=real(data[0][i]);
-		whitened[i][4]=imag(data[0][i]);
-		whitened[i][5]=real(data[1][i]);
-		whitened[i][6]=imag(data[1][i]);
-	}	
-	write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
-	deallocate_2D_array(whitened, data_lengths[0],7);
+	//double **whitened = allocate_2D_array(data_lengths[0],10);
+	//for(int i = 0 ; i<data_lengths[0]; i++){
+	//	whitened[i][0]= freqs[0][i];
+	//	whitened[i][1]=psd[0][i];
+	//	whitened[i][2]=psd[1][i];
+	//	whitened[i][3]=psd[2][i];
+	//	whitened[i][4]=real(data[0][i]);
+	//	whitened[i][5]=imag(data[0][i]);
+	//	whitened[i][6]=real(data[1][i]);
+	//	whitened[i][7]=real(data[1][i]);
+	//	whitened[i][8]=real(data[2][i]);
+	//	whitened[i][9]=imag(data[2][i]);
+	//}	
+	//write_file("data/whitened_data.csv",whitened,data_lengths[0],10);
+	//deallocate_2D_array(whitened, data_lengths[0],10);
 	
 	//#############################################################
 	//#############################################################
@@ -446,6 +450,11 @@ int main(int argc, char *argv[])
 			|| generation_method.find("gIMRPhenomD") != std::string::npos) 
 			&& dimension >= 4){
 			lp = &standard_log_prior_D_intrinsic_mod;
+		}
+		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
+			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos)
+			&& dimension >= 8 ){
+			lp = &standard_log_prior_Pv2_intrinsic_mod;
 		}
 		else{
 			std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
@@ -710,6 +719,25 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+
+}
+double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	double eta = pos[1];
+	//Flat priors across physical regions
+	if ((exp(pos[0]))<chirpmass_prior[0]|| exp(pos[0])>chirpmass_prior[1]){return a;}//RA
+	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
+	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
+	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
+	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
+	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
+	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
+	for(int i = 0 ; i<dim - 7; i++){
+		if( pos[7+i] <mod_priors[i][0] || pos[7+i] >mod_priors[i][1]){return a;}
+	}
+	return log(chirpmass_eta_jac(chirp,eta)) ;
 
 }
 

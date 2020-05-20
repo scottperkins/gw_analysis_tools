@@ -11,6 +11,7 @@ extern "C"
 #endif
 
 int calculate_chirpmass_py(double mass1, double mass2,double *out);
+int calculate_eta_py(double mass1, double mass2,double *out);
 int calculate_mass1_py(double chirpmass, double eta,double *out);
 int calculate_mass2_py(double chirpmass, double eta,double *out);
 
