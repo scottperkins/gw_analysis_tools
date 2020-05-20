@@ -1722,7 +1722,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[10]=spin2sph[0];
 				parameters[11]=cos(spin1sph[1]);
 				parameters[12]=cos(spin2sph[1]);
-				parameters[13]=spin1sph[2]-spin2sph[2];
+				//parameters[13]=spin1sph[2]-spin2sph[2];
+				parameters[13]=spin1sph[2];
+				parameters[14]=spin2sph[2];
 
 			}
 			else{
@@ -1879,7 +1881,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[3]=spin2sph[0];
 				parameters[4]=cos(spin1sph[1]);
 				parameters[5]=cos(spin2sph[1]);
-				parameters[6]=spin1sph[2]-spin2sph[2];
+				//parameters[6]=spin1sph[2]-spin2sph[2];
+				parameters[6]=spin1sph[2];
+				parameters[7]=spin2sph[2];
 
 
 			}
@@ -2051,7 +2055,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				T spin1sph[3] = {avec_parameters[9],local_theta1,
 					avec_parameters[13]};
 				T spin2cart[3];
-				T spin2sph[3] = {avec_parameters[10],local_theta2,0};
+				T spin2sph[3] = {avec_parameters[10],local_theta2,avec_parameters[14]};
 				transform_sph_cart(spin1sph,spin1cart);
 				transform_sph_cart(spin2sph,spin2cart);
 				a_params->spin1[0] = spin1cart[0];
@@ -2235,7 +2239,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				T spin1sph[3] = {avec_parameters[2],local_theta1,
 					avec_parameters[6]};
 				T spin2cart[3];
-				T spin2sph[3] = {avec_parameters[3],local_theta2,0};
+				T spin2sph[3] = {avec_parameters[3],local_theta2,avec_parameters[7]};
 				transform_sph_cart(spin1sph,spin1cart);
 				transform_sph_cart(spin2sph,spin2cart);
 				a_params->spin1[0] = spin1cart[0];

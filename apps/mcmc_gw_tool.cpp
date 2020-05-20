@@ -425,13 +425,13 @@ int main(int argc, char *argv[])
 		if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
 			lp = &standard_log_prior_D;
 		}
-		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 14){
+		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 15){
 			lp = &standard_log_prior_Pv2;
 		}
 		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
 			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos||
 			generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos)
-			&& dimension >= 14 ){
+			&& dimension >= 15 ){
 			lp = &standard_log_prior_Pv2_mod;
 		}
 		else if( (generation_method.find("ppE_IMRPhenomD") != std::string::npos 
@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
 			&& dimension >= 11){
 			lp = &standard_log_prior_D_mod;
 		}
-		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 7){
+		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 8){
 			lp = &standard_log_prior_Pv2_intrinsic;
 		}
 		else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
@@ -453,7 +453,7 @@ int main(int argc, char *argv[])
 		}
 		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
 			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos)
-			&& dimension >= 8 ){
+			&& dimension >= 9 ){
 			lp = &standard_log_prior_Pv2_intrinsic_mod;
 		}
 		else{
@@ -623,6 +623,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
+	if ((pos[14])<0 || (pos[14])>2*M_PI){return a;}//phip
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];}
 }
 double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *parameters)
@@ -661,8 +662,9 @@ double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *param
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
-	for(int i = 0 ; i<dim - 14; i++){
-		if( pos[14+i] <mod_priors[i][0] || pos[14+i] >mod_priors[i][1]){return a;}
+	if ((pos[14])<0 || (pos[14])>2*M_PI){return a;}//phip
+	for(int i = 0 ; i<dim - 15; i++){
+		if( pos[15+i] <mod_priors[i][0] || pos[15+i] >mod_priors[i][1]){return a;}
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];
 }
@@ -718,6 +720,7 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
+	if ((pos[7])<0 || (pos[7])>2*M_PI){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
 
 }
@@ -734,8 +737,9 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,v
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
-	for(int i = 0 ; i<dim - 7; i++){
-		if( pos[7+i] <mod_priors[i][0] || pos[7+i] >mod_priors[i][1]){return a;}
+	if ((pos[7])<0 || (pos[7])>2*M_PI){return a;}//chi2
+	for(int i = 0 ; i<dim - 8; i++){
+		if( pos[8+i] <mod_priors[i][0] || pos[8+i] >mod_priors[i][1]){return a;}
 	}
 	return log(chirpmass_eta_jac(chirp,eta)) ;
 
