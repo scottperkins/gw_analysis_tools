@@ -2218,7 +2218,7 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 			{
 				output[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k])){
-				//	std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
+				//      std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
 				//}
 			}
 		} 
