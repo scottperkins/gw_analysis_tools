@@ -10,6 +10,7 @@ extern "C"
 {
 #endif
 
+int DL_from_Z_py(double z, char * COSMOLOGY, double *out);
 int calculate_chirpmass_py(double mass1, double mass2,double *out);
 int calculate_eta_py(double mass1, double mass2,double *out);
 int calculate_mass1_py(double chirpmass, double eta,double *out);

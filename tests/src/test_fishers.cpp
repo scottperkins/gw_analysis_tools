@@ -1073,7 +1073,7 @@ int AD_v_N(int argc, char *argv[])
 	int length = 1000;
 	double *frequency = new double[length];
 	//int Ndetect = 4;
-	int Ndetect = 2;
+	int Ndetect = 1;
 	double **psd = new double*[Ndetect];
 	//std::string SN[4] = {"CE2_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
@@ -1203,7 +1203,7 @@ int AD_v_N(int argc, char *argv[])
 	//double SNR_TARGET = 100;
 	//params.Luminosity_Distance = snr/SNR_TARGET*params.Luminosity_Distance;
 	params.sky_average = false;
-	params.incl_angle = M_PI-.51;
+	params.incl_angle = .33;
 
 
 
@@ -1233,8 +1233,8 @@ int AD_v_N(int argc, char *argv[])
 			}
 		}
 	}
-	matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
-	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
+	//matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
+	//matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
 	snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSSLEG",weights,true);
 	std::cout<<"SNR: "<<snr<<std::endl;
@@ -1276,8 +1276,8 @@ int AD_v_N(int argc, char *argv[])
 			}
 		}
 	}
-	matrix_multiply(output_AD3, jac_spins,output_AD3_temp,dimD,dimD,dimD);
-	matrix_multiply(jac_spins,output_AD3_temp, output_AD3,dimD,dimD,dimD);
+	//matrix_multiply(output_AD3, jac_spins,output_AD3_temp,dimD,dimD,dimD);
+	//matrix_multiply(jac_spins,output_AD3_temp, output_AD3,dimD,dimD,dimD);
 	
 	
 	//std::cout<<"AD-D:"<<std::endl;
@@ -1306,43 +1306,43 @@ int AD_v_N(int argc, char *argv[])
 	//method = "ppE_IMRPhenomD_Inspiral";
 	//method = "IMRPhenomD";
 	//dimDSA = 7;
-	params.sky_average = true;
-	params.incl_angle = 0;
-	for(int i = 0 ;i < Ndetect; i++){
-		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
-		for(int k = 0 ; k<dimDSA; k++){
-			for(int j = 0 ; j<dimDSA; j++){
-				output_ADSA[k][j]+= output_ADSA_temp[k][j];
-			}
-		}
-	}
-	
-	
-	std::cout<<"AD-DSA:"<<std::endl;
-	//for(int i = 0 ; i<dimDSA; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dimDSA; j++){
-	//		std::cout<<output_ADSA[i][j]<<" ";
+	//params.sky_average = true;
+	//params.incl_angle = 0;
+	//for(int i = 0 ;i < Ndetect; i++){
+	//	fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
+	//	for(int k = 0 ; k<dimDSA; k++){
+	//		for(int j = 0 ; j<dimDSA; j++){
+	//			output_ADSA[k][j]+= output_ADSA_temp[k][j];
+	//		}
 	//	}
-	//	std::cout<<std::endl;
 	//}
-	gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
-	std::cout<<"COV AD - DSA:"<<std::endl;
+	//
+	//
+	//std::cout<<"AD-DSA:"<<std::endl;
+	////for(int i = 0 ; i<dimDSA; i++){
+	////	std::cout<<i<<" ";
+	////	for(int j = 0 ; j<dimDSA; j++){
+	////		std::cout<<output_ADSA[i][j]<<" ";
+	////	}
+	////	std::cout<<std::endl;
+	////}
+	//gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
+	//std::cout<<"COV AD - DSA:"<<std::endl;
+	////for(int i = 0 ; i<dimDSA; i++){
+	////	std::cout<<i<<" ";
+	////	for(int j = 0 ; j<dimDSA; j++){
+	////		std::cout<<COV_ADSA[i][j]<<" ";
+	////	}
+	////	std::cout<<std::endl;
+	////}
+	//std::cout<<"Variances:"<<std::endl;
 	//for(int i = 0 ; i<dimDSA; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dimDSA; j++){
-	//		std::cout<<COV_ADSA[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
+	//	std::cout<<i<<" "<<1.64*sqrt(COV_ADSA[i][i])<<std::endl;
 	//}
-	std::cout<<"Variances:"<<std::endl;
-	for(int i = 0 ; i<dimDSA; i++){
-		std::cout<<i<<" "<<1.64*sqrt(COV_ADSA[i][i])<<std::endl;
-	}
-	std::cout<<std::endl;
-	std::cout<<"SNR (SA): "<<sqrt(output_ADSA[0][0])<<std::endl;
-	snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSSLEG",weights,true);
-	std::cout<<"SNR (SA -- CE): "<<snr<<std::endl;
+	//std::cout<<std::endl;
+	//std::cout<<"SNR (SA): "<<sqrt(output_ADSA[0][0])<<std::endl;
+	//snr = calculate_snr(SN[0],"CE",method, &params, frequency, length, "GAUSSLEG",weights,true);
+	//std::cout<<"SNR (SA -- CE): "<<snr<<std::endl;
 	//snr = calculate_snr(SN[1],"Hanford",method, &params, frequency, length, "SIMPSONS",NULL,false);
 	//std::cout<<"SNR (SA -- Hanford): "<<snr<<std::endl;
 
@@ -1353,18 +1353,23 @@ int AD_v_N(int argc, char *argv[])
 	//If you use 13 parameters (phip and phiRef), these two parameters are exactly,
 	//linearly correlated. Simply use one. 
 	//##########################################################################
-	//params.phiRef-=1;
-	//params.phip+=1;
-	//fisher_autodiff(frequency, length, method, detector, output_AD2, dim, &params, "SIMPSONS",NULL,false, psd,NULL,NULL);
-	//
-	//std::cout<<"FD AD / AD2:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<(output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j])<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	params.phiRef-=.5;
+	params.phip+=.5;
+	//fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
+	method = "gIMRPhenomPv2";
+	fisher_autodiff(frequency, length, method, detectors[0],detectors[0], output_AD2, dim, &params, "GAUSSLEG",weights,true, psd[0],NULL,NULL);
+	
+	std::cout<<"FD AD / AD2:"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		//std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			if((output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j]) > 1e-10){ 
+				std::cout<<i<<" "<<j<<" "<<output_AD2[i][j]<<" "<<output_AD[i][j]<<std::endl;
+			}
+			//std::cout<<(output_AD2[i][j] - output_AD[i][j])*2./(output_AD2[i][j] + output_AD[i][j])<<" ";
+		}
+		std::cout<<std::endl;
+	}
 	//##########################################################################
 	//##########################################################################
 	//std::cout<<"FRACTIONAL DIFF (N-AD)*2/(N+AD):"<<std::endl;

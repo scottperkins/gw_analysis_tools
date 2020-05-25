@@ -1752,7 +1752,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[9]=input_params->spin1[2];
 				parameters[10]=input_params->spin2[2];
 				parameters[11]=input_params->chip;
-				//parameters[12]=input_params->phip;
+				parameters[12]=input_params->phip;
 
 			}
 
@@ -2091,7 +2091,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->spin1[2] = avec_parameters[9];
 				a_params->spin2[2] = avec_parameters[10];
 				a_params->chip = avec_parameters[11];
-				//a_params->phip = avec_parameters[12];
+				a_params->phip = avec_parameters[12];
 				//a_params->phip = 0;
 
 			}	
@@ -2394,7 +2394,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	//Phi_p and phiRef are exactly degenerate 
 	//Chose phiRef to be the parameter in the fisher, phip is set
 	//to the input value
-	waveform_params->phip = input_params->phip;
+	//waveform_params->phip = input_params->phip;
 	
 	if( check_mod(gen_method)){
 		//if(gen_method.find("ppE") != std::string::npos || 

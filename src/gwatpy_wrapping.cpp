@@ -2,6 +2,11 @@
 #include "util.h"
 #include "fisher.h"
 
+int DL_from_Z_py(double z, char * COSMOLOGY, double *out)
+{
+	*out = DL_from_Z(z,std::string(COSMOLOGY));
+	return 0;
+}
 int calculate_chirpmass_py(double mass1, double mass2,double *out)
 {
 	*out = calculate_chirpmass(mass1,mass2);

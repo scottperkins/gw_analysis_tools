@@ -3,14 +3,14 @@
 #include "gwat/detector_util.h"
 #include "gwat/waveform_util.h"
 #include "gwat/pn_waveform_util.h"
-#include "gwat/IMRPhenomD.h"
+//#include "gwat/IMRPhenomD.h"
 #include "gwat/io_util.h"
 #include <iostream>
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 
 
-##define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>

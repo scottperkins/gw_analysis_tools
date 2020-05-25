@@ -585,9 +585,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
-		if(temp_length < 100*max_ac_realloc){
+		if(temp_length < 1000*max_ac_realloc){
 			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-			temp_length = 100*max_ac_realloc;
+			temp_length = 1000*max_ac_realloc;
 			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
 		}
 		else if(temp_length>5000*max_ac_realloc){
@@ -785,9 +785,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
 		//if(false){
-		if(temp_length < 100*max_ac_realloc){
+		if(temp_length < 1000*max_ac_realloc){
 			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-			temp_length = 100*max_ac_realloc;
+			temp_length = 1000*max_ac_realloc;
 			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
 		}
 		else if(temp_length>5000*max_ac_realloc){
