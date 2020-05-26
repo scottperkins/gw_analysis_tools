@@ -226,6 +226,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	int corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
 	double corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
 	double corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	std::function<double(double*,int* ,int,int,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,int,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
@@ -272,6 +273,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 		corr_segments,
 		corr_converge_thresh,
 		corr_target_ac,
+		max_chunk_size,
 		chain_distribution_scheme, 
 		log_prior,
 		log_likelihood,
@@ -312,6 +314,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 	int corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
 	double corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
 	double corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	std::function<double(double*,int* ,int,int,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,int,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
@@ -355,6 +358,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 		corr_segments,
 		corr_converge_thresh,
 		corr_target_ac,
+		max_chunk_size,
 		chain_distribution_scheme, 
 		log_prior,
 		log_likelihood,
@@ -389,6 +393,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	int corr_segments,/**<Number of segments to calculate autocorrelation on for diagnostics*/
 	double corr_converge_thresh,/**< Fractional threshold for convergence of autocorrelation*/
 	double corr_target_ac,/**<Target correlation for calculating autocorrelation length*/
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	std::function<double(double*,int* ,int,int,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,int,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
@@ -586,9 +591,18 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
 		if(temp_length < 1000*max_ac_realloc){
-			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-			temp_length = 1000*max_ac_realloc;
-			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+			if(1000*max_ac_realloc < max_chunk_size){
+				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+				temp_length = 1000*max_ac_realloc;
+				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
+			}
+			else{
+				std::cout<<"WARNING -- hit maximum chunk size for a single sampler run"<<std::endl;
+				std::cout<<"Independent samples per batch are projected to be "<<max_chunk_size/max_ac_realloc<<" and at least 1000 samples per AC calculation is recommended"<<std::endl;
+				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+				temp_length = max_chunk_size;
+				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
+			}
 		}
 		else if(temp_length>5000*max_ac_realloc){
 			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
@@ -786,9 +800,19 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		//TESTING
 		//if(false){
 		if(temp_length < 1000*max_ac_realloc){
-			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-			temp_length = 1000*max_ac_realloc;
-			temp_output = allocate_3D_array(chain_N,temp_length, dimension);	
+
+			if(1000*max_ac_realloc < max_chunk_size){
+				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+				temp_length = 1000*max_ac_realloc;
+				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
+			}
+			else{
+				std::cout<<"WARNING -- hit maximum chunk size for a single sampler run"<<std::endl;
+				std::cout<<"Independent samples per batch are projected to be "<<max_chunk_size/max_ac_realloc<<" and at least 1000 samples per AC calculation is recommended"<<std::endl;
+				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
+				temp_length = max_chunk_size;
+				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
+			}
 		}
 		else if(temp_length>5000*max_ac_realloc){
 			deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
@@ -3079,6 +3103,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 	int corr_segments,
 	double corr_converge_thresh,
 	double corr_target_ac,
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	double (*log_prior)(double *param, int dimension,void *parameters),	/**<Funcion pointer for the log_prior*/
 	double (*log_likelihood)(double *param, int dimension,void *parameters),	/**<Function pointer for the log_likelihood*/
@@ -3126,6 +3151,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 			corr_segments,
 			corr_converge_thresh,
 			corr_target_ac,
+			max_chunk_size,
 			chain_distribution_scheme,
 			lp,
 			ll,
@@ -3152,6 +3178,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 	int corr_segments,
 	double corr_converge_thresh,
 	double corr_target_ac,
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	double (*log_prior)(double *param, int dimension, int chain_id,void *parameters),	/**<Funcion pointer for the log_prior*/
 	double (*log_likelihood)(double *param, int dimension, int chain_id,void *parameters),	/**<Function pointer for the log_likelihood*/
@@ -3192,6 +3219,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 			corr_segments,
 			corr_converge_thresh,
 			corr_target_ac,
+			max_chunk_size,
 			chain_distribution_scheme,
 			lp,
 			ll,
@@ -3223,6 +3251,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output 
 	int corr_segments,
 	double corr_converge_thresh,
 	double corr_target_ac,
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	double (*log_prior)(double *param, int dimension,void *parameters),	/**<Funcion pointer for the log_prior*/
 	double (*log_likelihood)(double *param, int dimension,void *parameters),	/**<Function pointer for the log_likelihood*/
@@ -3273,6 +3302,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output 
 			corr_segments,
 			corr_converge_thresh,
 			corr_target_ac,
+			max_chunk_size,
 			chain_distribution_scheme,
 			lp,
 			ll,
@@ -3302,6 +3332,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output,
 	int corr_segments,
 	double corr_converge_thresh,
 	double corr_target_ac,
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
 	std::string chain_distribution_scheme, /*How to allocate the remaining chains once equilibrium is reached*/
 	double (*log_prior)(double *param, int dimension, int chain_id,void *parameters),	/**<Funcion pointer for the log_prior*/
 	double (*log_likelihood)(double *param, int dimension, int chain_id,void *parameters),	/**<Function pointer for the log_likelihood*/
@@ -3345,6 +3376,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output,
 			corr_segments,
 			corr_converge_thresh,
 			corr_target_ac,
+			max_chunk_size,
 			chain_distribution_scheme,
 			lp,
 			ll,

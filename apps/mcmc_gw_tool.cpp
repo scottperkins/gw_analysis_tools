@@ -106,6 +106,8 @@ int main(int argc, char *argv[])
 	std::string stat_file = str_dict["output stat file"];
 	std::string check_file = str_dict["checkpoint file"];
 	int dimension = int_dict["dimension"];
+	int max_chunk_size = int_dict["Max chunk size"];
+	std::cout<<"Max chunk size: "<<max_chunk_size<<std::endl;
 	
 	std::string initial_position_file, initial_checkpoint_file;
 	int chain_N;
@@ -411,7 +413,7 @@ int main(int argc, char *argv[])
 		SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
 				max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 				swap_freq, t0, nu, correlation_thresh, correlation_segs,
-				correlation_convergence_thresh , ac_target,allocation_scheme, 
+				correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
 				standard_log_prior_skysearch,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 				hplus,hcross,stat_file,output_file, "",check_file);	
@@ -465,7 +467,7 @@ int main(int argc, char *argv[])
 			continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,output, samples,  
 					max_thermo_chain_N, chain_temps, 
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,allocation_scheme, 
+					correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
 					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
 					generation_method,stat_file,output_file, "",check_file);	
@@ -480,7 +482,7 @@ int main(int argc, char *argv[])
 			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
 					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,allocation_scheme, 
+					correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
 					//data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,

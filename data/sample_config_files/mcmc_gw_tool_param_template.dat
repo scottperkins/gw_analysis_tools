@@ -113,3 +113,4 @@
 
 [bool] NS Flag 0 = false
 [bool] NS Flag 1 = false
+[int] Max chunk size = 1000000

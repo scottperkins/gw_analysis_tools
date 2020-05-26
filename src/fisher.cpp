@@ -3389,7 +3389,7 @@ void ppE_theory_transformation_jac(
 			base_dim = 7;
 		}
 		else{
-			base_dim = 12;
+			base_dim = 13;
 		}
 	}
 	else if(new_method.find("PhenomD")!= std::string::npos){
