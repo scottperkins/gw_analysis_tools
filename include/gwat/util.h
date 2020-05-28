@@ -27,7 +27,7 @@ const double MSOL_SEC =4.925491025543575903411922162094833998e-6 ;
 /*!consts.kpc.to('m')*1000/c Mpc in sec*/
 //const double MPC_SEC = 3085677581.e13/c; 
 const double MPC_SEC = 3.085677581491367278913937957796471611e22/c; 
-/*!1 year in seconds*/
+/*!1 year in seconds -- ie seconds/year */
 const double T_year = 31557600.;
 /*!1 day in seconds*/
 const double T_day = 24*3600.;

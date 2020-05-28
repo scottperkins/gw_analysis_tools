@@ -38,4 +38,13 @@ T EdGB_phase_factor( source_parameters<T> *param);
 template<class T>
 T ExtraDimension_beta( source_parameters<T> *param);
 
+template<class T>
+T TVG_beta( source_parameters<T> *param);
+
+template<class T>
+T DipRad_beta( source_parameters<T> *param);
+
+template<class T>
+T NonComm_beta( source_parameters<T> *param);
+
 #endif

@@ -630,7 +630,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	bool realloc = false;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
-		if(realloc || status>realloc_temps_thresh){
+		//if(realloc || status>realloc_temps_thresh){
+		if(false){
 			if( 2*t0<temp_length){
 				dynamic_search_length = 2*t0;
 			}

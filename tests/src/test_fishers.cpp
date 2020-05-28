@@ -110,10 +110,11 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 
-	std::string method = "ExtraDimension_IMRPhenomPv2";
+	//std::string method = "ExtraDimension_IMRPhenomPv2";
+	std::string method = "TVG_IMRPhenomPv2";
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 		
-	int dim = 13;
+	int dim = 14;
 	int dimDSA = 8;
 
 	double **output_AD = allocate_2D_array(dim,dim);
@@ -251,7 +252,8 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
-	ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
+	//ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
+	ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","TVG_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
 	//double **derivatives = new double*[1];
 	//derivatives[0]=new double[13];
 	//ppE_theory_transformation_calculate_derivatives("ppE_IMRPhenomPv2_Inspiral","dCS_IMRPhenomPv2",dim,12, &params, derivatives);
@@ -268,7 +270,8 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 	gsl_LU_matrix_invert(output_AD2,COV_AD2,dim);
-	ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
+	//ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
+	ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","TVG_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
 	
 	std::cout<<"Covariance difference: "<<std::endl;
 	for(int i = 0 ; i<dim; i++){
@@ -329,7 +332,8 @@ int test_jac_transform(int argc, char *argv[])
 
 	params.sky_average = true;
 	params.incl_angle = 0;
-	method = "ExtraDimension_IMRPhenomD";
+	//method = "ExtraDimension_IMRPhenomD";
+	method = "TVG_IMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimDSA; k++){
@@ -348,7 +352,8 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
-	ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","ExtraDimension_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
+	//ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","ExtraDimension_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
+	ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","TVG_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
 	
 	//std::cout<<"AD-DSA:"<<std::endl;
 	//for(int i = 0 ; i<dimDSA; i++){

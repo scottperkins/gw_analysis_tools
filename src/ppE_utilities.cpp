@@ -10,6 +10,11 @@
  *
  * ExtraDimension -- input beta l^2 in seconds^2
  *
+ * TVG -- Time varying G -- input beta is \dot{G}_{z} in Hz
+ *
+ * DipRad -- Generic Dipole Radiation -- input beta is \delta \dot{E} (dimensionless)
+ *
+ * NonComm -- Noncommutatitve gravity -- input beta is \Lambda^2 in units of Planck energies (dimensionless), where \sqrt(\Lambda) defines the energy scale of noncommutativity 
  */
 
 
@@ -40,6 +45,15 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("ExtraDimension")!=std::string::npos){
 		return true;
 	}
+	if(generation_method.find("TVG")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("DipRad")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("NonComm")!=std::string::npos){
+		return true;
+	}
 	return false;
 } 
 template<class T>
@@ -66,7 +80,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping)
 		mapping->bppe[0] = -1;
 		mapping->beta_fns[0] = &dCS_beta ;
 		ins = true;
-			
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
 		mapping->Nmod = 1;
@@ -75,7 +88,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping)
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 		mapping->beta_fns[0] = &EdGB_beta ;
 		ins = true;
-			
 	}
 	else if(generation_method.find("ExtraDimension")!= std::string::npos){
 		mapping->Nmod = 1;
@@ -83,6 +95,31 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping)
 		mapping->bppe[0] =-13;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 		mapping->beta_fns[0] = &ExtraDimension_beta ;
+		ins = true;
+	}
+	else if(generation_method.find("TVG")!= std::string::npos){
+		mapping->Nmod = 1;
+		mapping->bppe = new int[1];
+		mapping->bppe[0] =-13;
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns[0] = &TVG_beta ;
+		ins = true;
+	}
+	else if(generation_method.find("DipRad")!= std::string::npos){
+		mapping->Nmod = 1;
+		mapping->bppe = new int[1];
+		mapping->bppe[0] =-7;
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns[0] = &DipRad_beta ;
+		ins = true;
+			
+	}
+	else if(generation_method.find("NonComm")!= std::string::npos){
+		mapping->Nmod = 1;
+		mapping->bppe = new int[1];
+		mapping->bppe[0] =-1;
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns[0] = &NonComm_beta ;
 		ins = true;
 			
 	}
@@ -225,3 +262,32 @@ T ExtraDimension_beta( source_parameters<T> *param)
 template adouble ExtraDimension_beta(source_parameters<adouble> *);
 template double ExtraDimension_beta(source_parameters<double> *);
 
+template<class T>
+T TVG_beta( source_parameters<T> *param)
+{
+	T Gdot = param->betappe[0];
+	T beta = ( -25. / 65526. ) * ( Gdot * param->chirpmass ) ;
+	return beta;
+} 
+template adouble TVG_beta(source_parameters<adouble> *);
+template double TVG_beta(source_parameters<double> *);
+
+template<class T>
+T DipRad_beta( source_parameters<T> *param)
+{
+	T deltaEdot =param->betappe[0];
+	T beta = ( -3. / 224. ) * pow(param->eta,2./5.) * deltaEdot;
+	return beta;
+} 
+template adouble DipRad_beta(source_parameters<adouble> *);
+template double DipRad_beta(source_parameters<double> *);
+
+template<class T>
+T NonComm_beta( source_parameters<T> *param)
+{
+	T Lambda_sq = param->betappe[0];
+	T beta = ( -75. / 256. ) * pow(param->eta,-4./5.) * ( 2.*param->eta - 1.) * Lambda_sq;
+	return beta;
+} 
+template adouble NonComm_beta(source_parameters<adouble> *);
+template double NonComm_beta(source_parameters<double> *);
