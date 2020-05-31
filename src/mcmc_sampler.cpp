@@ -1226,8 +1226,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				numThreads, pool, internal_prog, statistics_filename, 
 				"","",likelihood_log_filename, checkpoint_file,true);
 
-				realloc_temps_thresh+=realloc_temps_length;
-				realloc=false;
+			realloc_temps_thresh+=realloc_temps_length;
+			realloc=false;
 			deallocate_sampler_mem(&sampler);
 		}
 		sampler sampler;
@@ -1247,8 +1247,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		sampler_output->calc_ac_vals();
 		sampler_output->count_indep_samples();
 		status = sampler_output->indep_samples;
+		sampler_output->write_flat_thin_output(chain_filename,true);
 		max_ac_realloc = 0;
 		mean_list(sampler_output->max_acs, sampler_output->cold_chain_number,&max_ac_realloc);
+		std::cout<<"Average ac: "<<max_ac_realloc<<std::endl;
+		std::cout<<"Independent samples: "<<sampler_output->indep_samples<<std::endl;
 		//write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
 		double ave_accept = 0;
 		int cold_chains = 0;
