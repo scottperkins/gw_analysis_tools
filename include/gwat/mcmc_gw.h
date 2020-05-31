@@ -9,6 +9,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
+#include "mcmc_sampler.h"
 /*! \file 
  *
  * Header file for the Graviational Wave specific MCMC routines
@@ -224,7 +225,8 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			);
 
 double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain_id,void *parameters);
-void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
+void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_output,
+	double **output,
 	int dimension,
 	int N_steps,
 	int chain_N,
@@ -349,6 +351,7 @@ void PTMCMC_MH_GW(double ***output,
 	std::string checkpoint_filename
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
 	double **output,
 	int N_steps,
 	int max_chain_N_thermo_ensemble,
@@ -380,7 +383,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	std::string likelihood_log_filename,
 	std::string checkpoint_filename
 	);
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_output,
+	double **output,
 	int dimension,
 	int N_steps,
 	int chain_N,

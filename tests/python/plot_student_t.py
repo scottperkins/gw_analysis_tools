@@ -3,11 +3,14 @@ import matplotlib as mpl
 import corner
 import matplotlib.pyplot as plt
 import numpy as np
+import h5py
 #import gwatpy.util as gpu
 #import gwatpy.gwatpy_plot as gp; gp.set()
 #from phenompy.utilities import calculate_mass1, calculate_mass2
 
-data = np.loadtxt("data/mcmc_output.csv",delimiter=',')
+#data = np.loadtxt("data/mcmc_output.csv",delimiter=',')
+f = h5py.File("test_flat_standard.hdf5","r")
+data = f["THINNED_MCMC_OUTPUT"]["THINNED FLATTENED CHAINS"]
 
 labels = ["X","Y"]
 data_plot=[]

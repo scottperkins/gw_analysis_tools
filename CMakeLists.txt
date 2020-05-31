@@ -4,10 +4,20 @@ project(gw_analysis_tools
 	DESCRIPTION "Tools to help with gravitational wave analysis and prediction"
 	LANGUAGES CXX C)
 
+option(TEST_PROGRAMS "test-programs" OFF)
+option(DOCS "DOCS" OFF)
+option(IMPLEMENT_HDF5 "Implement HDF5 if available" ON)
+option(DEBUG "set debugger options" OFF)
+
+
 #SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libc++")
 #SET(CMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LIBRARY "libstdc++")
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libstdc++ -lc++abi")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -ffast-math")
+if(DEBUG)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -O3 -ffast-math")
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -ffast-math")
+endif()
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   #set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/gwat_base/" CACHE PATH "..." FORCE)
   set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/" CACHE PATH "..." FORCE)
@@ -18,8 +28,6 @@ set (GWAT_VERSION_MINOR 0)
 
 set (GWAT_ROOT_DIRECTORY "${PROJECT_SOURCE_DIR}/")
 
-option(TEST_PROGRAMS "test-programs" OFF)
-option(DOCS "DOCS" OFF)
 
  
 # configure a header file to pass some of the CMake settings
@@ -39,7 +47,13 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 include_directories("${PROJECT_BINARY_DIR}/include/gwat")
 #Required packages
-find_package(HDF5 REQUIRED)
+find_package(HDF5 REQUIRED COMPONENTS CXX)
+if(HDF5_FOUND AND IMPLEMENT_HDF5 )
+	add_compile_definitions(_HDF5)
+else()
+	message ( "HDF5 is currently required" )
+endif()
+
 find_package(ADOLC REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)

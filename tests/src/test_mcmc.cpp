@@ -13,14 +13,19 @@ void RT_ERROR_MSG();
 int mcmc_standard_test(int argc, char *argv[]);
 int mcmc_injection(int argc, char *argv[]);
 int mcmc_real_data(int argc, char *argv[]);
+int mcmc_rosenbock(int argc, char *argv[]);
+int mcmc_output_class(int argc, char *argv[]);
 double log_test (double *c,int dim,void *parameters);
 double log_test_prior (double *c,int dim,void *parameters);
+double log_rosenbock (double *c,int dim,void *parameters);
+double log_rosenbock_prior (double *c,int dim,void *parameters);
 void fisher_test(double *c,int dim, double **fisher,  void *parameters);
 double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
 double standard_log_prior_P(double *pos, int dim, int chain_id,void *parameters);
 double chirpmass_eta_jac(double chirpmass, double eta);
 double T_mcmc_gw_tool ;
 double standard_log_prior_dCS(double *pos, int dim, int chain_id,void *parameters);
+void fisher_rosenbock(double *c,int dim, double **fisher,  void *parameters);
 
 int main(int argc, char *argv[])
 {
@@ -43,10 +48,334 @@ int main(int argc, char *argv[])
 		std::cout<<"MCMC data GW"<<std::endl;
 		return mcmc_real_data(argc,argv);
 	}
+	else if(runtime_opt == 3){
+		std::cout<<"MCMC N-dimensional Rosenbock"<<std::endl;
+		return mcmc_rosenbock(argc,argv);
+	}
+	else if(runtime_opt == 4){
+		std::cout<<"MCMC output class testing"<<std::endl;
+		return mcmc_output_class(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+
+int mcmc_output_class(int argc, char *argv[])
+{
+	int chain_N = 3;
+	int dim = 3;
+	mcmc_sampler_output output(chain_N,dim);
+	double chain_temps[chain_N] = {1.,2.,1.};
+	output.populate_chain_temperatures(chain_temps);
+	for(int i = 0 ; i<chain_N; i++){
+		std::cout<<chain_temps[i]<<std::endl;
+	}
+	std::cout<<"Cold chains: "<<output.cold_chain_number<<std::endl;
+	std::cout<<"Cold chains id 1: "<<output.cold_chain_ids[0]<<std::endl;
+	std::cout<<"Cold chains id 2: "<<output.cold_chain_ids[1]<<std::endl;
+	double ***init_output = new double**[chain_N];
+	int steps = 5;
+	int init_positions[chain_N] = {5,3,5};
+	for(int i = 0 ; i<chain_N; i++){
+		init_output[i] = new double*[steps];
+		for(int j =0 ; j<steps; j++){
+			init_output[i][j] = new double[dim];
+			if(j < init_positions[i]){
+				for(int k =0 ; k<dim; k++){
+					init_output[i][j][k] = i+j+k;
+				}
+			}
+			else{
+				for(int k =0 ; k<dim; k++){
+					init_output[i][j][k] = 0;
+				}
+			}
+		}
+	}
+	output.populate_initial_output(init_output, init_positions);
+	std::cout<<"Initial output"<<std::endl;
+	for(int i = 0 ; i<chain_N; i++){
+		for(int j =0 ; j<init_positions[i]; j++){
+			for(int k =0 ; k<dim; k++){
+				std::cout<<output.output[i][j][k]<<" ";
+			}
+			std::cout<<std::endl;
+		}
+		std::cout<<std::endl;
+	}
+
+	std::cout<<"Creating data dump"<<std::endl;
+	output.create_data_dump(false, "./test");
+	//exit(1);
+
+	double ***app_output = new double**[chain_N];
+	int app_steps = 8;
+	int app_positions[chain_N] = {8,5,8};
+	for(int i = 0 ; i<chain_N; i++){
+		app_output[i] = new double*[app_steps];
+		for(int j =0 ; j<app_steps; j++){
+			app_output[i][j] = new double[dim];
+			if(j < app_positions[i]){
+				for(int k =0 ; k<dim; k++){
+					app_output[i][j][k] = 10*(i+j+k);
+				}
+			}
+			else{
+				for(int k =0 ; k<dim; k++){
+					app_output[i][j][k] = 0;
+				}
+			}
+		}
+	}
+	chain_temps[1]=5;
+	output.append_to_output(app_output, app_positions);
+	output.populate_chain_temperatures(chain_temps);
+
+
+	std::cout<<std::endl;
+	std::cout<<std::endl;
+	std::cout<<"Appended output"<<std::endl;
+	for(int i = 0 ; i<chain_N; i++){
+		for(int j =0 ; j<output.chain_lengths[i]; j++){
+			for(int k =0 ; k<dim; k++){
+				std::cout<<output.output[i][j][k]<<" ";
+			}
+			std::cout<<std::endl;
+		}
+		std::cout<<std::endl;
+	}
+
+	std::cout<<std::endl;
+	std::cout<<std::endl;
+	std::cout<<"Appending new data to data dump"<<std::endl;
+	output.append_to_data_dump(false, "./test");
+
+
+	output.calc_ac_vals();
+	for(int i = 0 ; i<output.cold_chain_number; i++){
+		for(int j = 0 ; j<output.dimension; j++){
+			std::cout<<output.ac_vals[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	output.count_indep_samples();
+	std::cout<<"Indep samples "<<output.indep_samples<<std::endl;
+
+
+	output.write_flat_thin_output( "./test_flat",false);
+	//############################################################
+	//Cleanup
+	//############################################################
+	for(int i = 0 ; i<chain_N; i ++){
+		for(int j = 0 ; j<steps; j++){
+			delete [] init_output[i][j];
+		}
+		delete [] init_output[i];
+	}
+	delete [] init_output;
+	init_output = NULL;
+	for(int i = 0 ; i<chain_N; i ++){
+		for(int j = 0 ; j<app_steps; j++){
+			delete [] app_output[i][j];
+		}
+		delete [] app_output[i];
+	}
+	delete [] app_output;
+	app_output = NULL;
+	
+	return 0;
+}
+struct rosenbock_param
+{
+	double a;
+	double mu;
+	int n1;
+	int n2;
+	int n;
+	double *b;
+	double *bounds_high;
+	double *bounds_low;
+};
+//https://arxiv.org/pdf/1903.09556.pdf
+int mcmc_rosenbock(int argc, char *argv[])
+{
+	double a = 1./20.;
+	int n1 = 3;
+	int n2 = 2;
+	//int n1 = 5;
+	//int n2 = 3;
+	int n = (n1-1)*n2 + 1;
+	double b[n];
+	for(int i = 0 ; i<n ; i++){
+		b[i]=100./20.;
+	}
+	double mu = 1.;
+	double bounds_high[n];
+	double bounds_low[n];
+	for(int i=0 ; i<n; i++){
+		bounds_high[i]=10000;
+		bounds_low[i]=-10000;
+	}
+	double out_param[5+n];
+	out_param[0]=a;
+	out_param[1]=mu;
+	out_param[2]=n;
+	out_param[3]=n1;
+	out_param[4]=n2;
+	for(int i = 0 ; i<n; i++){
+		out_param[5+i]=b[i];
+	}
+	write_file("data/rosenbock_parameters.csv",out_param,5+n);
+
+
+
+	double initial_pos[n];
+	double seeding_var[n] ;
+	for(int i = 0 ; i<n ; i++){
+		initial_pos[i]=1.;
+		seeding_var[i]=10.;
+	}
+	int N_steps = 10000;
+	int chain_N= 128;
+	int max_chain_N= 50;
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 2;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	//chain_temps[0] = 1.;
+	//double c = 1.8;
+	//for(int i =1; i < chain_N/2;  i ++)
+	//	chain_temps[i] =  chain_temps[i-1] * c;
+	//chain_temps[chain_N/2] = 1;
+	//for(int i =chain_N/2+1; i < chain_N;  i ++)
+	//	chain_temps[i] =  chain_temps[i-1] * c;
+	std::string autocorrfile = "";
+	std::string chainfile = "data/mcmc_output_RB.csv";
+	std::string statfilename = "data/mcmc_statistics_RB.txt";
+	std::string checkpointfile = "data/mcmc_checkpoint_RB.csv";
+	//std::string LLfile = "data/mcmc_LL_RB.csv";
+	std::string LLfile = "";
+	
+	int numThreads = 10;
+	bool pool = true;
+	bool show_progress = true;
+	
+	double **output;
+	output = allocate_2D_array(  N_steps, n );
+	int t0 = 5000;
+	int nu = 100;
+	double corr_threshold = 0.01;
+	int corr_segments = 5;
+	double corr_convergence_thresh = 0.01;
+	double corr_target_ac = 0.01;
+	std::string chain_distribution_scheme="double";
+	int max_chunk_size = 1000000;
+	
+	rosenbock_param **param = new rosenbock_param*[chain_N];
+	for(int i = 0 ; i<chain_N; i++){
+		param[i]=new rosenbock_param;
+		param[i]->a = a;
+		param[i]->b = b;
+		param[i]->bounds_high = bounds_high;
+		param[i]->bounds_low = bounds_low;
+		param[i]->mu = mu;
+		param[i]->n1 = n1;
+		param[i]->n2 = n2;
+		param[i]->n = n;
+	}
+	
+	mcmc_sampler_output sampler_output(chain_N,n);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,fisher_rosenbock,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	sampler_output.calc_ac_vals();
+	for(int i = 0 ; i<sampler_output.cold_chain_number; i++){
+		std::cout<<sampler_output.max_acs[i]<<std::endl;
+	}
+	sampler_output.count_indep_samples();
+	std::cout<<"Indep samples "<<sampler_output.indep_samples<<std::endl;
+	sampler_output.create_data_dump(false, "./test");
+	sampler_output.write_flat_thin_output( "./test_flat",true);
+	deallocate_2D_array(output, N_steps, n);
+	for(int i = 0 ; i<chain_N; i++){
+		delete param[i];	
+	}
+	delete param;	
+	std::cout<<"ENDED"<<std::endl;
+
+
+	return 0;
+}
+
+void fisher_rosenbock(double *c,int dim, double **fisher,  void *parameters)
+{
+	double epsilon = 1e-3;
+	double temp[dim];
+	for (int i = 0 ; i<dim ; i++){
+		temp[i]=c[i];	
+	}
+	for (int i = 0 ; i<dim ; i++){
+		for (int j = 0 ; j<i ; j++){
+			temp[i] = c[i]+epsilon;
+			temp[j] = c[j]+epsilon;
+			double plusplus = log_rosenbock(temp,dim, parameters);
+			temp[i] = c[i]-epsilon;
+			temp[j] = c[j]-epsilon;
+			double minusminus = log_rosenbock(temp,dim, parameters);
+			temp[i] = c[i]+epsilon;
+			temp[j] = c[j]-epsilon;
+			double plusminus = log_rosenbock(temp,dim, parameters);
+			temp[i] = c[i]-epsilon;
+			temp[j] = c[j]+epsilon;
+			double minusplus = log_rosenbock(temp,dim, parameters);
+			temp[i] = c[i];
+			temp[j] = c[j];
+			fisher[i][j]= -(plusplus -plusminus - minusplus + minusminus)/(4.*epsilon*epsilon);
+			//fisher[i][j]= 0;
+		}
+		temp[i]= c[i]+epsilon;
+		double plus = log_rosenbock(temp,dim,parameters);	
+		temp[i]= c[i]-epsilon;
+		double minus = log_rosenbock(temp,dim,parameters);	
+		temp[i]=c[i];
+		double eval = log_rosenbock(temp,dim,parameters);	
+		fisher[i][i]= -(plus -2*eval +minus)/(epsilon*epsilon);
+		//fisher[i][i]= 1;
+	}
+	for (int i = 0 ; i<dim ; i++){
+		for (int j = i+1 ; j<dim ; j++){
+			fisher[i][j] = fisher[j][i];	
+		}
+	}
+	
+	return;
+} 
+double log_rosenbock (double *c,int dim,void *parameters)
+{
+	rosenbock_param *param = (rosenbock_param *)parameters;
+	double LL = 0;
+	LL-= param->a * pow_int(c[0] - param->mu,2)	;
+	for(int j = 0 ; j<param->n2; j++){
+		for(int i = 1 ; i<param->n1; i++){
+			if(i == 1){
+				LL -= param->b[(j)*(param->n1-1) + i]*pow_int(c[(j)*(param->n1-1) + i] - c[0]*c[0],2);
+			}
+			else{
+				LL -= param->b[(j)*(param->n1-1) + i]*pow_int(c[(j)*(param->n1-1) + i] - c[(j)*(param->n1-1) + i-1]*c[(j)*(param->n1-1) + i-1],2);
+
+			}
+		}
+	}
+	return LL;
+}
+double log_rosenbock_prior (double *c,int dim,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	rosenbock_param *param = (rosenbock_param *)parameters;
+	for(int i = 0 ; i<param->n; i++){
+		if( c[i]<param->bounds_low[i] || c[i] > param->bounds_high[i]){return a;}
+	}
+	return 0;
 }
 int mcmc_real_data(int argc, char *argv[])
 {
@@ -123,18 +452,17 @@ int mcmc_real_data(int argc, char *argv[])
 	int threads = 10;
 	bool pool = true;
 	bool show_progress = true;
-	int Nmod = 0;
-	int *bppe = NULL;
 	std::string stat_file = "data/experiment_stat.txt";
 	std::string output_file = "data/experiment_output.csv";
 	std::string ll_file = "data/experiment_ll.csv";
 	std::string checkpoint_file = "data/experiment_checkpoint.csv";
 	//std::string ac_file = "data/injection_ac.csv";
 	std::string ac_file = "";
+	MCMC_modification_struct mod_struct;
 	
 	int samples = 50000;
 	double ***output  = allocate_3D_array(chains, samples, dim);
-	PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, temps, swap_freq, standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, Nmod, bppe, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
+	PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, temps, swap_freq, standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
 	deallocate_3D_array(output, chains, samples, dim);
 	//int samples = 2000;
 	//double **output  = allocate_2D_array( samples, dim);
@@ -345,18 +673,18 @@ int mcmc_injection(int argc, char *argv[])
 	int threads = 10;
 	bool pool = true;
 	bool show_progress = true;
-	int Nmod = 1;
-	int *bppe = NULL;
 	std::string stat_file = "data/injection_stat.txt";
 	std::string output_file = "data/injection_output.csv";
 	std::string ll_file = "data/injection_ll.csv";
 	std::string checkpoint_file = "data/injection_checkpoint.csv";
 	//std::string ac_file = "data/injection_ac.csv";
 	std::string ac_file = "";
+	MCMC_modification_struct mod_struct;
+	mod_struct.ppE_Nmod = 1;
 	
 	int samples = 50000;
 	double ***output  = allocate_3D_array(chains, samples, dim);
-	PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, temps, swap_freq, standard_log_prior_dCS, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, Nmod, bppe, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
+	PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, temps, swap_freq, standard_log_prior_dCS, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
 	deallocate_3D_array(output, chains, samples, dim);
 	//double **output  = allocate_2D_array( samples, dim);
 	//int max_chains_ensemble = chains;
@@ -404,11 +732,11 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 1000;
-	int chain_N= 5;
-	int max_chain_N= 5;
+	int N_steps = 50000;
+	int chain_N= 32;
+	int max_chain_N= 10;
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 3;
+	int swp_freq = 20;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	chain_temps[0] = 1.;
@@ -422,11 +750,11 @@ int mcmc_standard_test(int argc, char *argv[])
 	std::string chainfile = "data/mcmc_output.csv";
 	std::string statfilename = "data/mcmc_statistics.txt";
 	std::string checkpointfile = "data/mcmc_checkpoint.csv";
-	std::string LLfile = "data/mcmc_LL.csv";
-	//std::string LLfile = "";
+	//std::string LLfile = "data/mcmc_LL.csv";
+	std::string LLfile = "";
 	
 	int numThreads = 10;
-	bool pool = false;
+	bool pool = true;
 	bool show_progress = true;
 	
 	//double ***output;
@@ -435,15 +763,18 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 1000;
-	int nu = 10;
+	int t0 = 5000;
+	int nu = 100;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
 	double corr_convergence_thresh = 0.01;
 	double corr_target_ac = 0.01;
 	std::string chain_distribution_scheme="double";
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	int max_chunk_size = 1000000;
+	mcmc_sampler_output sampler_output(chain_N,dimension);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	deallocate_2D_array(output, N_steps, dimension);
+	sampler_output.write_flat_thin_output( "./test_flat_standard",true);
 	std::cout<<"ENDED"<<std::endl;
 
 
@@ -592,4 +923,6 @@ void RT_ERROR_MSG()
 	std::cout<<"0 --- Standard"<<std::endl;
 	std::cout<<"1 --- GW injection"<<std::endl;
 	std::cout<<"2 --- GW experimentation"<<std::endl;
+	std::cout<<"3 --- N-dimensional Rosenbock"<<std::endl;
+	std::cout<<"4 --- MCMC output class test"<<std::endl;
 }

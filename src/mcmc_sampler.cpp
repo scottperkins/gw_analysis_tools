@@ -28,6 +28,9 @@
 #include <omp.h>
 #endif
 
+#ifdef _HDF5
+#include <H5Cpp.h>
+#endif
 
 /*!\file 
  * Source file for the sampler foundation
@@ -40,6 +43,571 @@
 const gsl_rng_type *T;
 gsl_rng * r;
 sampler *samplerptr;
+
+
+//#############################################################
+//mcmc_sampler_output definitions
+//#############################################################
+mcmc_sampler_output::mcmc_sampler_output( int chain_N, int dim)
+{
+	chain_number = chain_N;
+	dimension = dim;
+	chain_temperatures = new double[chain_number];
+	chain_lengths = new int[chain_number];
+};
+mcmc_sampler_output::~mcmc_sampler_output()
+{
+	if(chain_temperatures){
+		delete [] chain_temperatures;		
+		chain_temperatures=NULL;
+	}
+	if(cold_chain_ids){
+		delete [] cold_chain_ids;		
+		cold_chain_ids=NULL;		
+	}
+	dealloc_output();
+	if(chain_lengths){
+		delete [] chain_lengths;
+		chain_lengths = NULL;
+	}
+	if(ac_vals){
+		for(int i = 0 ; i< cold_chain_number_ac_alloc; i++){
+			delete [] ac_vals[i];	
+		}
+		delete [] ac_vals;	
+	}
+	if(max_acs){
+		delete [] max_acs;
+	}
+};
+void mcmc_sampler_output::populate_chain_temperatures(double *temperatures)
+{
+	for(int i= 0 ; i<chain_number; i++){
+		chain_temperatures[i] = temperatures[i];
+	}	
+	update_cold_chain_list();
+}
+void mcmc_sampler_output::update_cold_chain_list()
+{
+	int temp=0;
+	int *cold_chain_ids_temp = new int[chain_number];
+	for(int i = 0 ; i<chain_number; i++){
+		if(fabs(chain_temperatures[i] -1)<DOUBLE_COMP_THRESH)
+		{
+			cold_chain_ids_temp[temp] = i;
+			temp +=1;
+		}
+	}
+	cold_chain_number = temp;
+	if(cold_chain_ids)
+	{
+		delete [] cold_chain_ids;
+		cold_chain_ids = NULL;
+	}
+	cold_chain_ids = new int[temp];
+	for(int i = 0 ; i<temp ; i++){
+		cold_chain_ids[i]=cold_chain_ids_temp[i];
+	}
+	delete [] cold_chain_ids_temp;
+	cold_chain_ids_temp = NULL;
+}
+void mcmc_sampler_output::populate_initial_output(double ***new_output,int *chain_positions)
+{
+	dealloc_output();	
+	output = new double**[chain_number];
+	for(int i = 0 ;i<chain_number; i++){
+		chain_lengths[i]=chain_positions[i];
+		output[i]=new double*[chain_positions[i]];
+		for(int j =0 ; j<chain_positions[i];j++){
+			output[i][j]=new double[dimension];
+			for(int k =0 ; k<dimension; k++){
+				output[i][j][k]=new_output[i][j][k];
+			}
+		}
+	}
+}
+
+void mcmc_sampler_output::append_to_output(double ***new_output, int *chain_positions)
+{
+	int *new_lengths= new int[chain_number];
+	for(int i = 0 ; i<chain_number; i++){
+		new_lengths[i]=chain_lengths[i]+chain_positions[i];
+	}
+	//Copy all values into new temp array
+	double ***new_total_output = new double**[chain_number];
+	for(int i = 0 ; i<chain_number ; i++){
+		new_total_output[i] = new double*[new_lengths[i]];
+		for(int j = 0 ; j<new_lengths[i]; j++){
+			new_total_output[i][j] = new double[dimension];
+			if(j <chain_lengths[i]){
+				for (int k = 0 ; k<dimension ; k++){
+					new_total_output[i][j][k] = output[i][j][k];
+				}
+			}
+			else{
+				for (int k = 0 ; k<dimension ; k++){
+					new_total_output[i][j][k] 
+						= new_output[i][j - chain_lengths[i]][k];
+				}
+			}
+		}
+	}
+	//deallocate and move values into output
+	dealloc_output();
+	output = new double**[chain_number];
+	for(int i = 0 ; i<chain_number ; i++){
+		chain_lengths[i]=new_lengths[i];
+		output[i] = new double*[new_lengths[i]];
+		for(int j = 0 ; j<new_lengths[i]; j++){
+			output[i][j] = new double[dimension];
+			for (int k = 0 ; k<dimension ; k++){
+				output[i][j][k] = new_total_output[i][j][k];
+				}
+		}
+	}
+	for(int j = 0 ; j<chain_number;j ++){
+		for(int i = 0 ; i<chain_lengths[j];i ++){
+			delete [] new_total_output[j][i];		
+		}
+		delete [] new_total_output[j];		
+	}
+	delete [] new_total_output;		
+	new_total_output= NULL;
+	delete [] new_lengths;
+	new_lengths = NULL;
+	
+}
+void mcmc_sampler_output::dealloc_output()
+{
+	if(output){
+		for(int j = 0 ; j<chain_number;j ++){
+			for(int i = 0 ; i<chain_lengths[j];i ++){
+				delete [] output[j][i];		
+			}
+			delete [] output[j];		
+		}
+		delete [] output;		
+		output= NULL;
+	}
+}
+
+void mcmc_sampler_output::calc_ac_vals()
+{
+	if(ac_vals){
+		for(int i = 0 ; i<cold_chain_number_ac_alloc; i++){
+			delete [] ac_vals[i];
+		}
+		delete [] ac_vals;
+	}
+	update_cold_chain_list();	
+	cold_chain_number_ac_alloc = cold_chain_number;
+	
+	ac_vals = new int*[cold_chain_number];
+	for(int i = 0 ; i<cold_chain_number; i++){
+		ac_vals[i] = new int[dimension];	
+	}
+
+	int segments = 1;
+	int ***temp = new int**[cold_chain_number];
+	for(int i = 0 ; i<cold_chain_number; i++){
+		temp[i] = new int*[dimension];
+		for(int j = 0 ; j<dimension; j++){
+			temp[i][j]=new int[segments];
+		}
+	}
+	double ***temp_chains = new double**[cold_chain_number];
+	for (int i = 0 ;i<cold_chain_number; i++){
+		int id  = cold_chain_ids[i];
+		temp_chains[i] = new double*[chain_lengths[id]];
+		for(int j = 0 ; j<chain_lengths[id]; j++){
+			temp_chains[i][j] = new double[dimension];
+			for(int k = 0 ; k<dimension  ; k++){
+				temp_chains[i][j][k] = output[id][j][k];
+			}
+		}
+	}
+	auto_corr_from_data_batch(temp_chains, chain_lengths[cold_chain_ids[0]], dimension, cold_chain_number,temp, segments, target_correlation, threads, true);
+	
+	for(int i = 0 ;i<cold_chain_number; i++){
+		int id  = cold_chain_ids[i];
+		for(int j = 0 ; j<chain_lengths[id]; j ++){
+			delete [] temp_chains[i][j];
+		}
+		delete [] temp_chains[i];
+	}
+	delete [] temp_chains;
+	temp_chains=NULL;
+	for(int i = 0 ; i<cold_chain_number; i++){
+		for(int j = 0 ; j<dimension; j++){
+			ac_vals[i][j]= temp[i][j][segments-1];
+		}
+	}
+	for(int i = 0 ; i<cold_chain_number; i++){
+		for(int j = 0  ; j<dimension; j++){
+			delete [] temp[i][j];
+		}
+		delete [] temp[i];
+	}
+	delete [] temp;
+	temp = NULL;	
+
+
+	if(max_acs){
+		delete [] max_acs;
+	}
+	max_acs = new int[cold_chain_number];
+	for(int i = 0 ; i<cold_chain_number; i ++){
+		int max_ac=0;
+		for(int j = 0 ; j<dimension; j++){
+			if(ac_vals[i][j]>max_ac){
+				max_ac = ac_vals[i][j];	
+			}
+		}
+		max_acs[i]=max_ac;
+	}
+
+}
+void mcmc_sampler_output::count_indep_samples()
+{
+	indep_samples = 0;
+	for(int i = 0 ; i<cold_chain_number; i ++){
+		int id = cold_chain_ids[i];
+		int max_ac=0;
+		for(int j = 0 ; j<dimension; j++){
+			if(ac_vals[i][j]>max_ac){
+				max_ac = ac_vals[i][j];	
+			}
+		}
+		indep_samples += chain_lengths[id]/max_ac;	
+	}
+}
+//Use HDF5 if available
+#ifdef _HDF5
+int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_stored_ac)
+{
+	try{
+		if(!use_stored_ac || !ac_vals){
+			calc_ac_vals();	
+			count_indep_samples();
+		}
+		double *flattened= new double[indep_samples*dimension];
+		int ct = 0;
+		for(int i =0  ;i<cold_chain_number; i++){
+			for(int j = 0 ; j<chain_lengths[cold_chain_ids[i]]; j++){
+				if(j%max_acs[i] == 0 && ct<indep_samples){
+					for(int k = 0 ; k<dimension; k++){
+						flattened[ct*dimension + k ] 
+							= output[cold_chain_ids[i]][j][k];		
+					}
+					ct++;
+				}
+			}
+		}
+		//#################################################################
+		std::string FILE_NAME(filename+".hdf5");
+
+		H5::H5File file(FILE_NAME,H5F_ACC_TRUNC);
+		H5::Group output_group(file.createGroup("/THINNED_MCMC_OUTPUT"));
+		H5::DataSpace *dataspace=NULL ;
+		H5::DataSet *dataset=NULL;
+		H5::DSetCreatPropList *plist=NULL;
+		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
+		int RANK=2;
+		hsize_t dims[RANK];
+		dims[0]= indep_samples;
+		dims[1]= dimension;
+
+		if(chunk_steps>dims[0]){chunk_dims[0] = dims[0];}
+		else{chunk_dims[0] = chunk_steps;}
+
+		dataspace = new H5::DataSpace(RANK,dims);
+	
+		plist = new H5::DSetCreatPropList;
+		plist->setChunk(2,chunk_dims);
+		plist->setDeflate(6);
+
+		dataset = new H5::DataSet(
+			output_group.createDataSet("THINNED FLATTENED CHAINS",
+				H5::PredType::NATIVE_DOUBLE,*dataspace,*plist)
+			);
+
+		dataset->write(flattened, H5::PredType::NATIVE_DOUBLE);	
+		//Cleanup
+		delete dataset;
+		delete dataspace;
+		delete plist;
+	
+		//Cleanup
+		output_group.close();
+		delete [] flattened;
+
+	}	
+	catch( H5::FileIException error )
+	{
+		error.printErrorStack();
+		return -1;
+	}
+	// catch failure caused by the DataSet operations
+	catch( H5::DataSetIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	// catch failure caused by the DataSpace operations
+	catch( H5::DataSpaceIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	// catch failure caused by the DataSpace operations
+	catch( H5::DataTypeIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	return 0;
+}
+int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
+{
+	try{
+		std::string FILE_NAME(filename+".hdf5");
+		int chains;
+		int *ids=NULL;
+		if(cold_only){
+			ids = cold_chain_ids;
+			chains = cold_chain_number;
+		}
+		else{
+			chains = chain_number;
+			ids = new int[chain_number];
+			for(int i = 0  ; i<chain_number; i++){
+				ids[i]=i;
+			}
+		}
+		H5::H5File file(FILE_NAME,H5F_ACC_TRUNC);
+		H5::Group output_group(file.createGroup("/MCMC_OUTPUT"));
+		H5::Group meta_group(file.createGroup("/MCMC_METADATA"));
+		double *temp_buffer=NULL;
+		H5::DataSpace *dataspace=NULL ;
+		H5::DataSet *dataset=NULL;
+		H5::DSetCreatPropList *plist=NULL;
+		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
+		hsize_t max_dims[2] = {H5S_UNLIMITED,H5S_UNLIMITED};
+		for(int i = 0 ; i<chains; i++){
+			int RANK=2;
+			hsize_t dims[RANK];
+			dims[0]= chain_lengths[ids[i]];
+			dims[1]= dimension;
+
+			if(chunk_steps>dims[0]){chunk_dims[0] = dims[0];}
+			else{chunk_dims[0] = chunk_steps;}
+
+			dataspace = new H5::DataSpace(RANK,dims,max_dims);
+	
+			plist = new H5::DSetCreatPropList;
+			plist->setChunk(2,chunk_dims);
+			plist->setDeflate(6);
+
+			dataset = new H5::DataSet(
+				output_group.createDataSet("CHAIN "+std::to_string(ids[i]),
+					H5::PredType::NATIVE_DOUBLE,*dataspace,*plist)
+				);
+
+			temp_buffer = new double[ int(dims[0]*dims[1]) ];
+			for(int j = 0 ; j<chain_lengths[ids[i]]; j++){
+				for(int k = 0 ; k<dimension; k++){
+					temp_buffer[j*dimension +k] = output[ids[i]][j][k];	
+				}
+			}
+			dataset->write(temp_buffer, H5::PredType::NATIVE_DOUBLE);	
+			//Cleanup
+			delete dataset;
+			delete dataspace;
+			delete plist;
+			delete [] temp_buffer;
+			temp_buffer = NULL;
+		}
+		hsize_t dimsT[1];
+		dimsT[0]= chain_number;
+		dataspace = new H5::DataSpace(1,dimsT);
+		dataset = new H5::DataSet(
+			meta_group.createDataSet("CHAIN TEMPERATURES",
+				H5::PredType::NATIVE_DOUBLE,*dataspace)
+			);
+		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
+		delete dataset;
+		delete dataspace;
+	
+		//Cleanup
+		output_group.close();
+		meta_group.close();
+		if(!cold_only){
+			delete [] ids;
+			ids = NULL;
+		}
+
+	}	
+	catch( H5::FileIException error )
+	{
+		error.printErrorStack();
+		return -1;
+	}
+	// catch failure caused by the DataSet operations
+	catch( H5::DataSetIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	// catch failure caused by the DataSpace operations
+	catch( H5::DataSpaceIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	// catch failure caused by the DataSpace operations
+	catch( H5::DataTypeIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	return 0;
+
+}
+int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filename)
+{
+	try{
+		std::string FILE_NAME(filename+".hdf5");
+		int chains;
+		int *ids=NULL;
+		if(cold_only){
+			ids = cold_chain_ids;
+			chains = cold_chain_number;
+		}
+		else{
+			chains = chain_number;
+			ids = new int[chain_number];
+			for(int i = 0  ; i<chain_number; i++){
+				ids[i]=i;
+			}
+		}
+		H5::H5File file(FILE_NAME,H5F_ACC_RDWR);
+		H5::Group output_group(file.openGroup("/MCMC_OUTPUT"));
+		H5::Group meta_group(file.openGroup("/MCMC_METADATA"));
+		double *temp_buffer=NULL;
+		H5::DataSpace *dataspace=NULL ;
+		H5::DataSpace *dataspace_ext=NULL ;
+		H5::DataSet *dataset=NULL;
+		H5::DSetCreatPropList *plist=NULL;
+		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
+		hsize_t max_dims[2] = {H5S_UNLIMITED,H5S_UNLIMITED};
+		for(int i = 0 ; i<chains; i++){
+			dataset = new H5::DataSet(output_group.openDataSet("CHAIN "+std::to_string(ids[i])));
+			
+			dataspace = new H5::DataSpace(dataset->getSpace());
+			plist = new H5::DSetCreatPropList(dataset->getCreatePlist());
+			int RANK = dataspace->getSimpleExtentNdims();
+			hsize_t base_dims[RANK];
+			herr_t status = dataspace->getSimpleExtentDims(base_dims);
+			int RANK_chunked;
+			hsize_t base_chunk_dims[RANK];
+			if(H5D_CHUNKED == plist->getLayout()){
+				RANK_chunked= plist->getChunk(RANK,base_chunk_dims);
+			}
+			
+			hsize_t new_size[RANK];
+			new_size[0]= chain_lengths[ids[i]];
+			new_size[1]= dimension;
+			dataset->extend(new_size);
+
+			delete dataspace;
+			dataspace = new H5::DataSpace(dataset->getSpace());
+			
+			hsize_t dimext[RANK];	
+			dimext[0]=new_size[0]-base_dims[0];
+			dimext[1]=dimension;
+			
+			hsize_t offset[RANK];
+			offset[0]=base_dims[0];	
+			offset[1]=0;	
+
+			dataspace->selectHyperslab(H5S_SELECT_SET,dimext,offset);
+
+			dataspace_ext = new H5::DataSpace(RANK, dimext,NULL);
+
+			temp_buffer = new double[ dimext[0]*dimext[1] ];
+			for(int j = base_dims[0] ; j<chain_lengths[ids[i]]; j++){
+				for(int k = 0 ; k<dimension; k++){
+					temp_buffer[(j-base_dims[0])*dimension +k] = output[ids[i]][j][k];	
+				}
+			}
+			
+			dataset->write(temp_buffer,H5::PredType::NATIVE_DOUBLE,*dataspace_ext, *dataspace);
+			
+		//	//Cleanup
+			delete dataset;
+			delete dataspace;
+			delete dataspace_ext;
+			delete plist;
+			delete [] temp_buffer;
+			temp_buffer = NULL;
+		}
+		dataset = new H5::DataSet(meta_group.openDataSet("CHAIN TEMPERATURES"));
+		
+		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
+		delete dataset;
+	
+		//Cleanup
+		output_group.close();
+		meta_group.close();
+		if(!cold_only){
+			delete [] ids;
+			ids = NULL;
+		}
+
+	}	
+	catch( H5::FileIException error )
+	{
+		error.printErrorStack();
+		return -1;
+	}
+	// catch failure caused by the DataSet operations
+	catch( H5::DataSetIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	// catch failure caused by the DataSpace operations
+	catch( H5::DataSpaceIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	// catch failure caused by the DataSpace operations
+	catch( H5::DataTypeIException error )
+	{
+		error.printErrorStack();
+	   	return -1;
+	}
+	return 0;
+
+}
+#endif
+#ifndef _HDF5
+int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
+{
+	std::cout<<"ERROR -- only HDF5 is supported at the moment"<<std::endl;
+	return 0;
+}
+int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filename)
+{
+	std::cout<<"ERROR -- only HDF5 is supported at the moment"<<std::endl;
+	return 0;
+}
+#endif
+//#############################################################
+//#############################################################
+
+
 
 //######################################################################################
 //######################################################################################
@@ -215,6 +783,7 @@ ThreadPool *poolptr;
  * Note: This method does NOT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end.
  */
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string checkpoint_file_start, 
+	mcmc_sampler_output *sampler_output,
 	double **output, /**< [out] Output shape is double[N_steps,dimension]*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
@@ -258,10 +827,11 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 		dynamic_search_length,  max_chain_N_thermo_ensemble, 
 		 chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,"","","",checkpoint_file);
+		numThreads, pool,internal_prog,true,"","","",checkpoint_file);
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 	
- 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(output,
+ 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(sampler_output,
+		output,
 		dimension, 	
 		N_steps,	
 		chain_N,
@@ -288,6 +858,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 		checkpoint_file
 	);
 	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
+	return ;
 }
 /*! \brief Parallel tempered, dynamic chain allocation MCMC with output samples with specified maximum autocorrelation. 
  *
@@ -299,7 +870,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
  *
  * Note: This method does NOT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end.
  */
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out] Output shape is double[N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampler_output,
+	double **output, /**< [out] Output shape is double[N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -342,11 +914,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
 		initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,"","","",checkpoint_file);
+		numThreads, pool,internal_prog,true,"","","",checkpoint_file);
 	
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
- 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(output,
+ 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(sampler_output,
+		output,
 		dimension, 	
 		N_steps,	
 		chain_N,
@@ -373,6 +946,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
 		checkpoint_file
 		);
 	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
+	return ;
 }
 /*! \brief Driver routine for the uncorrelated sampler -- trying not to repeat code
  * 
@@ -381,7 +955,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, /**< [out
  * It will overwrite all the file paths
  *
  */
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output *sampler_output,
+	double **output,
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -463,7 +1038,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,true,"","","",checkpoint_file);
 		}
 		
 		sampler sampler;
@@ -624,14 +1199,15 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
 	//int realloc_temps_length = .1*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
-	int realloc_temps_length = .2*N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = .3*N_steps;//Steps before re-allocating chain temps
 	//int realloc_temps_length = 1;//0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	bool realloc = false;
+	bool init = true;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
-		//if(realloc || status>realloc_temps_thresh){
-		if(false){
+		if(realloc || status>realloc_temps_thresh){
+		//if(false){
 			if( 2*t0<temp_length){
 				dynamic_search_length = 2*t0;
 			}
@@ -642,7 +1218,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,false,"","","",checkpoint_file);
 
 			sampler sampler;
 			continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, dynamic_search_length, 
@@ -659,7 +1235,21 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"","",likelihood_log_filename, checkpoint_file,false);
-		write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
+
+		sampler_output->populate_chain_temperatures(chain_temps);
+		if(init){
+			sampler_output->populate_initial_output(temp_output,sampler.chain_pos)	;
+			init=false;
+		}
+		else{
+			sampler_output->append_to_output(temp_output,sampler.chain_pos)	;
+		}
+		sampler_output->calc_ac_vals();
+		sampler_output->count_indep_samples();
+		status = sampler_output->indep_samples;
+		max_ac_realloc = 0;
+		mean_list(sampler_output->max_acs, sampler_output->cold_chain_number,&max_ac_realloc);
+		//write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
 		double ave_accept = 0;
 		int cold_chains = 0;
 		for (int i = 0 ; i< chain_N; i ++){
@@ -729,6 +1319,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 			dimension);
 		status += ct;
 		*/
+
+		
+
+		//###########################################################
+		/*
 		int local_corr_segments=2;
 		coldchains = count_cold_chains(chain_temps, chain_N);
 		int ***full_temp_ac = allocate_3D_array_int(coldchains,dimension, local_corr_segments);
@@ -796,6 +1391,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 		}
 		max_ac_realloc = ave_max_ac/coldchains;
 		deallocate_3D_array(full_temp_output,coldchains, temp_length,dimension);
+	
+		deallocate_3D_array(full_temp_ac,coldchains,dimension, local_corr_segments);
+		*/
+		//###########################################################
 
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
@@ -822,14 +1421,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 
 		}
 		//}
-		deallocate_3D_array(full_temp_ac,coldchains,dimension, local_corr_segments);
 		//deallocate_3D_array(full_temp_output,coldchains, dynamic_search_length,dimension);
 		max_ac_realloc=0;
 		//std::cout<<"status: "<<status<<" temp-length: "<<temp_length<<std::endl;
 		//Write file out as checkpoint
-		if(chain_filename != ""){
-			write_file(chain_filename, output, status, dimension);
-		}
+		//if(chain_filename != ""){
+		//	write_file(chain_filename, output, status, dimension);
+		//}
 		//if(status>0.5 * N_steps){
 		//	temp_length = 1.5*N_steps-status;
 		//}
@@ -846,7 +1444,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
 	//Cleanup
 	deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
 	deallocate_2D_array(temp_ac, dimension, corr_segments);
-
+	return;
 }
 //######################################################################################
 //######################################################################################
@@ -1283,6 +1881,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	bool dynamic_chain_number,
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
@@ -1374,7 +1973,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	//#########################################################################
 	
 	//std::cout<<"MEM CHECK : start loop allocation"<<std::endl;
-	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
+	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, dynamic_chain_number,show_prog);
 
 	//std::cout<<"MEM CHECK : start memory allocation"<<std::endl;
 	//#######################################################################
@@ -1480,6 +2079,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	bool dynamic_chain_number,
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
@@ -1565,7 +2165,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//#########################################################################
 	//#########################################################################
 	
-	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble, show_prog);
+	dynamic_temperature_internal(samplerptr, N_steps, nu, t0,swp_freq, max_chain_N_thermo_ensemble,dynamic_chain_number, show_prog);
 
 	//#######################################################################
 	//#######################################################################
@@ -1626,7 +2226,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	delete [] static_sampler.chain_temps;
 }
 
-void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, int t0,int swp_freq, int max_chain_N_thermo_ensemble, bool show_prog)
+void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, int t0,int swp_freq, int max_chain_N_thermo_ensemble, bool dynamic_chain_number, bool show_prog)
 {
 	
 	//NOTE: instead of dynamics, use variance over accept ratios over \nu steps
@@ -1660,7 +2260,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int *prev_reject_ct = new int[max_chain_N_thermo_ensemble];
 	int *prev_accept_ct = new int[max_chain_N_thermo_ensemble];
 	double *running_ratio = new double[max_chain_N_thermo_ensemble];
-	bool dynamic_chain_num = true;
+	//bool dynamic_chain_num = true;
 	//bool dynamic_chain_num = false;
 
 	bool chain_pop_target_reached = false;
@@ -1699,7 +2299,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 			//Move temperatures
 			update_temperatures(samplerptr, t0, nu, t);
 
-			if(dynamic_chain_num){
+			if(dynamic_chain_number){
 				if(pop_check_var<t){
 					pop_check_var += chain_pop_update_freq;
 					for(int i =0 ;i < samplerptr->chain_N; i++){
@@ -2893,6 +3493,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 			numThreads,
 			pool,
 			show_prog,
+			true,
 			statistics_filename,
 			chain_filename,
 			likelihood_log_filename,
@@ -2948,6 +3549,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 			numThreads,
 			pool,
 			show_prog,
+			true,
 			statistics_filename,
 			chain_filename,
 			likelihood_log_filename,
@@ -3021,6 +3623,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			numThreads,
 			pool,
 			show_prog,
+			true,
 			statistics_filename,
 			chain_filename,
 			likelihood_log_filename,
@@ -3085,6 +3688,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			numThreads,
 			pool,
 			show_prog,
+			true,
 			statistics_filename,
 			chain_filename,
 			likelihood_log_filename,
@@ -3093,7 +3697,9 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 }
 //######################################################################################
 //######################################################################################
-void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_file_start,double **output, /**< [out] Output , shape is double[N_steps,dimension]*/
+void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
+	double **output, /**< [out] Output , shape is double[N_steps,dimension]*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
@@ -3141,6 +3747,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 			fisher(param, dim, fisherm,parameters);};
 	}
 	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(checkpoint_file_start,
+			sampler_output,
 			output,
 			N_steps,
 			max_chain_N_thermo_ensemble,
@@ -3165,9 +3772,10 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 			chain_filename,
 			likelihood_log_filename,
 			checkpoint_file);
-
+	return ;
 }
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
 	double **output, /**< [out] Output, shape is double[N_steps,dimension]*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
@@ -3209,6 +3817,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 			fisher(param, dim, fisherm,chain_id,parameters);};
 	}
 	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(checkpoint_file_start,
+			sampler_output,
 			output,
 			N_steps,
 			max_chain_N_thermo_ensemble,
@@ -3233,11 +3842,12 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 			chain_filename,
 			likelihood_log_filename,
 			checkpoint_file);
-
+	return ;
 }
 //######################################################################################
 //######################################################################################
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output , shape is double[N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(mcmc_sampler_output *sampler_output,
+	double **output, /**< [out] Output , shape is double[N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -3288,7 +3898,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output 
 		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id,void *parameters){
 			fisher(param, dim, fisherm,parameters);};
 	}
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(output,
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(sampler_output,
+			output,
 			dimension,
 			N_steps,
 			chain_N,
@@ -3316,9 +3927,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output 
 			chain_filename,
 			likelihood_log_filename,
 			checkpoint_file);
+	return ;
 
 }
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output, shape is double[N_steps,dimension]*/
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(mcmc_sampler_output *sampler_output,
+	double **output, /**< [out] Output, shape is double[N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
 	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
 	int chain_N,/**< Maximum number of chains to use */
@@ -3362,7 +3975,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output,
 		f = [&fisher](double *param, int *param_status,int dim, double **fisherm, int chain_id,void * parameters){
 			fisher(param, dim, fisherm,chain_id,parameters);};
 	}
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(output,
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(sampler_output,
+			output,
 			dimension,
 			N_steps,
 			chain_N,
@@ -3390,7 +4004,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, /**< [out] Output,
 			chain_filename,
 			likelihood_log_filename,
 			checkpoint_file);
-
+	return ;
 }
 //######################################################################################
 //######################################################################################

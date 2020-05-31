@@ -845,7 +845,8 @@ struct skysearch_params{
  * hplus and hcross should be constructed with the value for inclination in initial_pos -- its scaled out internally
  *
  */
-void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
+void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_output,
+	double **output,
 	int dimension,
 	int N_steps,
 	int chain_N,
@@ -943,7 +944,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 	}
 	
 
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, 
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution_scheme,
 		//log_prior,MCMC_likelihood_wrapper_SKYSEARCH, MCMC_fisher_wrapper_SKYSEARCH,(void **)P,numThreads, pool, 
@@ -1371,6 +1372,7 @@ void PTMCMC_MH_GW(double ***output,
  * numThreads and pool do not necessarily have to be the same
  */
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
 	double **output,
 	int N_steps,
 	int max_chain_N_thermo_ensemble,
@@ -1445,7 +1447,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	double *seeding_var=NULL;
 	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
 
-	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(checkpoint_file_start,output,  N_steps,  
+	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(checkpoint_file_start,sampler_output,output,  N_steps,  
 		max_chain_N_thermo_ensemble, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
@@ -1466,7 +1468,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
  *
  * numThreads and pool do not necessarily have to be the same
  */
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_output,
+	double **output,
 	int dimension,
 	int N_steps,
 	int chain_N,
@@ -1579,7 +1582,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(double **output,
 
 
 
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(output, dimension, N_steps, chain_N, 
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 

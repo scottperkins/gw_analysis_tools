@@ -410,7 +410,8 @@ int main(int argc, char *argv[])
 	
 	
 		double *seeding_var = NULL;
-		SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+		mcmc_sampler_output sampler_output(chain_N, dimension);
+		SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
 				max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 				swap_freq, t0, nu, correlation_thresh, correlation_segs,
 				correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
@@ -464,7 +465,8 @@ int main(int argc, char *argv[])
 		}
 
 		if(continue_from_checkpoint){
-			continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,output, samples,  
+			mcmc_sampler_output sampler_output(chain_N, dimension);
+			continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,&sampler_output,output, samples,  
 					max_thermo_chain_N, chain_temps, 
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,
 					correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
@@ -479,7 +481,8 @@ int main(int argc, char *argv[])
 			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
 			std::cout<<"Running uncorrelated sampler "<<std::endl;
-			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dimension, samples, chain_N, 
+			mcmc_sampler_output sampler_output(chain_N, dimension);
+			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
 					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
 					swap_freq, t0, nu, correlation_thresh, correlation_segs,
 					correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
@@ -487,6 +490,7 @@ int main(int argc, char *argv[])
 					//data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
 					generation_method,stat_file,output_file, "",check_file);	
+			sampler_output.write_flat_thin_output(output_file, true);
 			//double ***output2 = allocate_3D_array(chain_N,samples, dimension );
 			//double c = 1.1;
 			//chain_temps[0]=1;

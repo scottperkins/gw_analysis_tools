@@ -1,4 +1,4 @@
-import gwatpy.mcmc_routines_ext as mcmc
+#import gwatpy.mcmc_routines_ext as mcmc
 #import emcee
 import numpy as np
 import matplotlib
@@ -9,7 +9,7 @@ import emcee
 
 #data =np.loadtxt("data/test_output.csv",delimiter=',')
 #data =np.loadtxt("data/injection_output.csv",delimiter=',')
-data =np.loadtxt("data/mcmc_output.csv",delimiter=',')
+data =np.loadtxt("data/mcmc_output_RB.csv",delimiter=',')
 #data2 = data[:int(len(data)/2)]
 #data = data[int(len(data)/2):]
 dim = len(data[0])
@@ -18,13 +18,13 @@ dim = len(data[0])
 dataT =np.loadtxt("data/mcmc_output.csv",delimiter=',', unpack=True)
 #dataT =np.loadtxt("data/test_output.csv",delimiter=',', unpack=True)
 i = 0 
-for x in dataT:
-    #plt.plot(x[2000:])
-    plt.plot(x)
-    plt.title(str(i))
-    plt.savefig("plots/temp{}.pdf".format(i))
-    plt.close()
-    i+=1
+#for x in dataT:
+#    #plt.plot(x[2000:])
+#    plt.plot(x)
+#    plt.title(str(i))
+#    plt.savefig("plots/temp{}.pdf".format(i))
+#    plt.close()
+#    i+=1
 
 for x in range(dim):
     data_thinned = []
@@ -35,6 +35,7 @@ for x in range(dim):
     #plt.show()
     #plt.close()
     print(emcee.autocorr.integrated_time(data_thinned, tol=10))
+exit()
 #for x in range(dim):
 #    data_thinned = []
 #    for y in np.arange(len(data2)):

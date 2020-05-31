@@ -2,10 +2,54 @@
 #define MCMC_SAMPLER_H
 #include <iostream>
 #include <functional>
+#include <math.h>
 /*! \file 
  * Header file for mcmc_sampler
  */
 #include "mcmc_sampler_internals.h"
+#include "util.h"
+
+/*! \brief Class that contains all output information from sampler
+ *
+ * Destructor takes care of all internal memory allocation
+ *
+ * It's assumed that the chain distribution is fixed, ie when you append output to the internal output, chain 7 is still chain 7
+ *
+ * It's assumed (for autocorrelation calculations) that all the cold chains have the same total length. If using GWAT MCMC routines, this is the case. If it's not the case, the ac must be calculated manually.
+ */
+class mcmc_sampler_output
+{
+public:
+	mcmc_sampler_output( int chain_N, int dim);
+	~mcmc_sampler_output();
+	void populate_chain_temperatures(double *temperatures);
+	void update_cold_chain_list();
+	void populate_initial_output(double ***new_output,int *chain_positions);
+	void append_to_output(double ***new_output, int *chain_positions);
+	void dealloc_output();
+	void calc_ac_vals();
+	void count_indep_samples();
+	int create_data_dump(bool cold_only,std::string filename);
+	int append_to_data_dump(bool cold_only,std::string filename);
+	int write_flat_thin_output(std::string filename, bool use_stored_ac);
+
+	int chunk_steps = 1000;
+	int chain_number;
+	double *chain_temperatures=NULL;
+	int *cold_chain_ids=NULL;
+	int cold_chain_number;
+	double ***output=NULL;
+	int *chain_lengths=NULL;
+	int dimension;
+	int **ac_vals=NULL;
+	int cold_chain_number_ac_alloc;
+	double target_correlation = 0.01;
+	int threads = 4;
+	int indep_samples=0;
+	int *max_acs=NULL;
+};
+
+
 void mcmc_step_threaded(int j);
 void mcmc_swap_threaded(int i, int j);
 
@@ -47,7 +91,8 @@ void continue_RJPTMCMC_MH(std::string start_checkpoint_file,
 	std::string likelihood_log_filename,
 	std::string end_checkpoint_file
 	);
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(double **output,
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output *sampler_output,
+	double **output,
 	int dimension, 	
 	int N_steps,	
 	int chain_N,
@@ -171,6 +216,7 @@ void RJPTMCMC_MH(double ***output,
 	);
 
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
 	double **output, 
 	int N_steps,	
 	int max_chain_N_thermo_ensemble,	
@@ -197,6 +243,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 	std::string checkpoint_file
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
 	double **output, 
 	int N_steps,	
 	int max_chain_N_thermo_ensemble,	
@@ -223,6 +270,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(std::string checkpoint_fil
 	std::string checkpoint_file
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
 	double **output, 
 	int N_steps,	
 	int max_chain_N_thermo_ensemble,	
@@ -248,7 +296,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, 
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(mcmc_sampler_output *sampler_output,
+	double **output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	
@@ -277,7 +326,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output,
 	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output, 
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(mcmc_sampler_output *sampler_output,
+	double **output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	
@@ -306,7 +356,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(double **output,
 	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
-void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(double **output, 
+void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampler_output,
+	double **output, 
 	int dimension, 	
 	int N_steps,	
 	int chain_N,	
@@ -341,6 +392,7 @@ void dynamic_temperature_internal(sampler *samplerptr,
 	int t0,
 	int swp_freq, 
 	int max_chain_N_thermo_ensemble, 
+	bool dynamic_chain_number,
 	bool show_prog);
 void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_start,
 	double ***output, 
@@ -358,6 +410,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	int numThreads, 
 	bool pool, 
 	bool show_prog, 
+	bool dynamic_chain_number,
 	std::string statistics_filename,
 	std::string chain_filename,
 	std::string likelihood_log_filename,
@@ -424,6 +477,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output,
 	int numThreads, 
 	bool pool, 
 	bool show_prog, 
+	bool dynamic_chain_number,
 	std::string statistics_filename,
 	std::string chain_filename,
 	std::string likelihood_log_filename,
