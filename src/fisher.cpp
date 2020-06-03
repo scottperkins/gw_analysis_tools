@@ -864,10 +864,18 @@ void calculate_derivatives_autodiff(double *frequency,
 		}
 		std::complex<adouble> a_response;
 		if(!a_parameters.sky_average){
+			//This exactly matches how it's calculated for the full
+			//MCMC, which works with real data
+			adouble tc;
 			if(detector != "LISA" && detector != reference_detector){
-				a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
+				tc = 2*M_PI*(-a_parameters.tc - DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
+				a_parameters.tc = 0;
+				//a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
 			}
 			int status  = fourier_detector_response(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
+			if(detector != "LISA" && detector != reference_detector){
+				a_response *= std::exp(std::complex<adouble>(0,tc*afreq));
+			}
 
 		}
 		else{
