@@ -21,6 +21,8 @@
 #include <adolc/adouble.h>
 #include <adolc/drivers/drivers.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_min.h>
+#include <gsl/gsl_errno.h>
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
@@ -30,13 +32,20 @@
  */
 
 
-
 struct gsl_snr_struct
 {
 	gen_params_base<double> *params;
 	std::string SN;
 	std::string generation_method;
 	std::string detector;
+	//Extra parameters for root finding
+	gsl_integration_workspace *w;
+	int np;
+	double fmin;
+	double fmax;
+	double relerr;
+	double T_obs;
+	double T_wait;
 };
 
 double data_snr(double *frequencies, 
@@ -2210,6 +2219,197 @@ void threshold_times(gen_params_base<double> *params,
 	delete [] hcross;
 }
 
+/*! \brief **NOT FINISHED -- DO NOT USE** Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh --GSL quad integration implementation
+ *
+ * NOT FINISHED -- DO NOT USE 
+ *
+ * See arXiv 1902.00021
+ *
+ * Binary must merge within time T_wait
+ *
+ * SNR is calculated with frequencies [f(t_mer),f(t_mer-T_obs)] or [f(t_mer),0] depending on whether the binary has merged or not
+ *
+ * Assumes sky average -- Only supports PhenomD for now -- No angular dependence used ( only uses plus polarization -- assumes iota = psi = 0 )
+ *
+ * If no time before merger satisfies the requirements, both are set to -1
+ *
+ * ALL temporal quantities in seconds or Hz
+ *
+ * Return values: 
+ * 	
+ * 	0 -- success
+ * 	
+ * 	11-- Failure: SNR was 0 in lower bound
+ *
+ * 	12-- Failure: SNR was 0 in upper bound
+ *
+ * 	13 -- partial success: Closest values output, but roundoff error prevented the routine from reaching the desired accuracy
+ * 	
+ * 	14 -- partial success: numerical inversion for time -> frequency had errors 
+ *
+ * 	15 -- partial success: numerical inversion for time -> frequency had failed, and a PN approximate had to be used
+ *
+ * 	16 -- max iterations reached
+ */
+int threshold_times_full_gsl(gen_params_base<double> *params,
+	std::string generation_method, /**<Generation method to use for the waveform*/
+	double T_obs, /**<Observation time -- also specifies the frequency spacing (\delta f = 1./T_obs)*/
+	double T_wait, /**<Wait time -- Maximum time for binaries to coalesce */
+	double fmin,/**<Maximum frequency array*/
+	double fmax,/**<Maximum frequency array*/
+	std::string SN,/**< Noise curve array, should be prepopulated from f_lower to f_upper with spacing 1./T_obs*/
+	double SNR_thresh, /**< Threshold SNR */
+	double *threshold_times_out,/**<[out] Output times */
+	double tolerance, /**< Percent tolerance on SNR search*/
+	gsl_integration_workspace *w,
+	int np
+	)
+{
+	int status1=0, status2=0;
+	bool forced_PN_approx = false;
+	bool bad_time_freq_inversion = false;
+	bool round_off_error=false;	
+	bool max_iterations_reached=false;	
+
+	threshold_times_out[0]=-1;
+	threshold_times_out[1]=-1;
+	if(params->equatorial_orientation){
+		transform_orientation_coords(params,generation_method,"");
+	}
+	bool save_SA = params->sky_average;
+	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
+	params->sky_average = false;
+	//params->sky_average = true;
+	
+	bool relative_time = true;
+	bool autodiff = true;	
+	//bool gsl_integration=false;
+	bool gsl_integration=true;
+
+	int GL_length = 500;
+	double *GL_freqs;
+	double *GL_w;
+	if(!gsl_integration){
+		GL_freqs = new double[GL_length];
+		GL_w = new double[GL_length];
+		params->sky_average=save_SA;
+	}
+
+
+	bool stellar_mass = true;	
+	int max_iter = 20;//Tbm
+	int max_iter_search = 200;//Box search
+	int search_ct;
+	double fpeak, fdamp,fRD;
+	postmerger_params(params,generation_method,&fpeak,&fdamp, &fRD);
+	
+	if(fpeak < fmax){
+		stellar_mass=false;
+	}
+	//stellar_mass=true;
+
+	
+	//Max number of iterations -- safety net
+	double chirpmass = calculate_chirpmass(params->mass1, params->mass2)*MSOL_SEC;
+	bool not_found = true;
+	double f_lower = fmin, f_upper = fmax;//Current ids
+	double f_lower_prev = fmin, f_upper_prev = fmax;//Current ids
+	double t_mer=T_obs; //Time before merger
+	double snr, snr_prev;
+	double rel_err = tolerance;
+	//Determine if any t_mer between [0,T_wait] allows for an SNR>SNR_thresh 
+	
+	//Frequency T_obs before it leaves band
+	//Using PN f(t) instead of local, because its faster and simpler -- maybe upgrade later
+	//Shouldn't matter this far from merger
+	if(stellar_mass){
+		t_mer= t_0PN(f_upper, chirpmass)+T_obs;
+		f_lower = f_0PN(t_mer,chirpmass);	
+	}
+	else{
+		f_upper = fpeak*2.;	
+		f_lower = f_0PN(t_mer,chirpmass);	
+		f_lower = (f_lower>fmin) ? f_lower : fmin;
+		f_upper = (f_upper<fmax) ? f_upper : fmax;
+	}
+	
+
+	//#######################################################
+	//#######################################################
+	const gsl_min_fminimizer_type *T;
+	gsl_min_fminimizer *s;
+	double m = T_obs;
+	double a = 0.01*T_year, b=T_wait;
+	gsl_snr_struct helper_params;
+	helper_params.params = params;
+	helper_params.T_obs = T_obs;
+	helper_params.T_wait = T_wait;
+	helper_params.fmax = fmax;
+	helper_params.fmin = fmin;
+	helper_params.w = w;
+	helper_params.np = np;
+	helper_params.relerr = rel_err;
+	helper_params.SN =SN ;
+	helper_params.generation_method =generation_method ;
+	gsl_function F;
+	
+	//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->Luminosity_Distance<<std::endl;	
+	F.function = [](double T, void *param){
+		//std::cout<<"TIME: "<<T/T_year<<std::endl;
+		gsl_snr_struct *param_unpacked = (gsl_snr_struct *) param;
+		gen_params_base<double> *params = param_unpacked->params;
+		double chirpmass = 
+			calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC;
+
+		double f_min =  f_0PN(T,chirpmass) ;
+		double f_max;
+		if(T-param_unpacked->T_obs > 0){
+			f_max =  std::min( f_0PN(  T - param_unpacked->T_obs,chirpmass) , param_unpacked->fmax ) ;
+		}
+		else{
+			f_max =   param_unpacked->fmax;
+
+		}
+		//std::cout<<f_min<<" "<<f_max<<" "<<(T-param_unpacked->T_obs)/T_year<<std::endl;
+		double snr =snr_threshold_subroutine(f_min,f_max,param_unpacked->relerr,params, param_unpacked->generation_method,param_unpacked->SN, param_unpacked->w, param_unpacked->np); 
+		//std::cout<<"SNR: "<<snr<<std::endl;
+		return -1.*snr;
+	};
+	F.params = (void *)&helper_params;
+
+	//double test = GSL_FN_EVAL(&F,4*T_year);
+
+	T=gsl_min_fminimizer_brent;
+	s = gsl_min_fminimizer_alloc(T);
+	gsl_min_fminimizer_set(s,&F, m, a, b);
+
+
+	int iter = 0, max_itergsl=20,status;
+	gsl_set_error_handler_off();
+	do{
+		iter++;
+		status = gsl_min_fminimizer_iterate(s);
+		if(status == GSL_EINVAL)
+			std::cout<<"NO MINIMUM"<<std::endl;
+		m = gsl_min_fminimizer_x_minimum(s);
+		a = gsl_min_fminimizer_x_lower(s);
+		b = gsl_min_fminimizer_x_upper(s);
+		status = gsl_min_test_interval(a,b,0.001,0.0);
+		if(status == GSL_SUCCESS)
+			std::cout<<"SUCCESS"<<std::endl;
+		//std::cout<<"Parameters: "<<m<<" "<<a<<" "<<b<<std::endl;
+	}while(status == GSL_CONTINUE && iter < max_itergsl);
+
+	threshold_times_out[0]=-1;
+	threshold_times_out[1]=-1;
+	//std::cout<<"done "<<m/T_year<<std::endl;
+	gsl_min_fminimizer_free(s);
+	//#######################################################
+	//#######################################################
+	
+
+	return 0;
+}
 
 /*! \brief Utility for calculating the threshold times before merger that result in an SNR>SNR_thresh --GSL quad integration implementation
  *
@@ -2250,6 +2450,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	std::string SN,/**< Noise curve array, should be prepopulated from f_lower to f_upper with spacing 1./T_obs*/
 	double SNR_thresh, /**< Threshold SNR */
 	double *threshold_times_out,/**<[out] Output times */
+	double *T_obs_SNR,
 	double tolerance, /**< Percent tolerance on SNR search*/
 	gsl_integration_workspace *w,
 	int np
@@ -2269,10 +2470,12 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	bool save_SA = params->sky_average;
 	if(!params->sky_average){ std::cout<<"NOT sky averaged -- This is not supported by threshold_freqs"<<std::endl;}
 	params->sky_average = false;
+	//params->sky_average = true;
 	
 	bool relative_time = true;
 	bool autodiff = true;	
-	bool gsl_integration=false;
+	//bool gsl_integration=false;
+	bool gsl_integration=true;
 
 	int GL_length = 500;
 	double *GL_freqs;
@@ -2331,6 +2534,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		}
 		snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
 	}
+	*T_obs_SNR= snr;
 	snr_prev=snr;
 	double t1 = t_mer, t2=t_mer;
 	if(snr>SNR_thresh){not_found= false;}
@@ -2659,6 +2863,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		//Do it again for lower bound
 		t1=t_save; t2=t_save;
 		//Initial bracketing
+		//debugger_print(__FILE__,__LINE__,"Starting bracket loop");
+		//debugger_print(__FILE__,__LINE__,"Parameters");
+		//debugger_print(__FILE__,__LINE__,params->mass1);
+		//debugger_print(__FILE__,__LINE__,params->mass2);
+		//debugger_print(__FILE__,__LINE__,params->Luminosity_Distance);
 		do{
 			t2*=2.;
 			if(t2>T_wait){t2=T_wait;}	
@@ -2702,6 +2911,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				status1=0;
 				status2=0;
 			}
+			//debugger_print(__FILE__,__LINE__,"Fmin");
+			//debugger_print(__FILE__,__LINE__,f_lower);
+			//debugger_print(__FILE__,__LINE__,"Fmax");
+			//debugger_print(__FILE__,__LINE__,f_upper);
+			
 			if(gsl_integration){
 				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			}
@@ -2714,7 +2928,16 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			if( (fabs(t2-T_wait)/T_wait < DOUBLE_COMP_THRESH) && snr>SNR_thresh){ found_upper_root=true; threshold_times_out[1]=T_wait;break;}
 		}while(snr>SNR_thresh  );
+		//debugger_print(__FILE__,__LINE__,"Finished bracket loop");
+		//debugger_print(__FILE__,__LINE__,"Exit time");
+		//debugger_print(__FILE__,__LINE__,t2/T_year);
+		//debugger_print(__FILE__,__LINE__,"SNR");
+		//debugger_print(__FILE__,__LINE__,snr);
+		//if(found_upper_root){
+		//	debugger_print(__FILE__,__LINE__,"Found upper root");
+		//}
 		search_ct = 0;
+		double t2_save_output = t2;
 		while(!found_upper_root && search_ct < max_iter_search){
 			
 			t_mer = (t1+t2)/2.;
@@ -2771,6 +2994,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
 			}
+			//std::cout<<snr<<std::endl;
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
 			else if( (fabs(t1-t2)*2/fabs(t1+t2)<1e-14) ){
 				found_upper_root=true;
@@ -2796,6 +3020,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		if(search_ct == max_iter_search ){
 			max_iterations_reached = true;
 		}
+		//std::cout<<t2_save_output/T_year<<" "<<threshold_times_out[1]/T_year<<" "<<*(T_obs_SNR)<<std::endl;
 	}
 	
 	params->sky_average = save_SA;

@@ -191,7 +191,7 @@ int threshold_times_SM(int argc, char *argv[])
 	params.spin2[2] = -.0;
 	params.chip = .5;
 	params.phip = 0.1;
-	params.Luminosity_Distance = 100;
+	params.Luminosity_Distance = 39;
 	params.phiRef = 1;
 	params.RA = 0.;
 	params.DEC = -0.1;
@@ -202,8 +202,8 @@ int threshold_times_SM(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	params.mass1 = 36;
-	params.mass2 = 29;
+	params.mass1 = 21.69;
+	params.mass2 = 21.0;
 	params.theta_l = 1;
 	params.phi_l = 2;
 	params.tc = 10*T_year;
@@ -217,18 +217,20 @@ int threshold_times_SM(int argc, char *argv[])
 	double fmin= 1e-5;
 	double fmax= 1;
 	double Tobs = 4*T_year;
-	double Twait = 20*T_year;
+	double Twait = 1000*T_year;
 	
 	std::cout<<"BOUNDS CALC"<<std::endl;
 	bool autodiff = false;
 	int np = 1000;
 	double tol = 1e-10;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
+	double SNR_TOBS=0;
 
 	clock_t start = clock();
-	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,&SNR_TOBS,tol,w,np);
 	std::cout<<"TIME: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
 	std::cout<<bounds[0]/T_year<<" "<<bounds[1]/T_year<<std::endl;
+	std::cout<<"SNR at T_OBS: "<<SNR_TOBS<<std::endl;
 	gsl_integration_workspace_free(w);
 
 
@@ -236,7 +238,7 @@ int threshold_times_SM(int argc, char *argv[])
 	double freqs[snr_pts];
 	double weights[snr_pts];
 	int iterations = 1000;
-	double delta_t = pow(200./.1,1./iterations);
+	double delta_t = pow(1000./.1,1./iterations);
 	double **snr_out = new double*[iterations];
 	double fbounds[2];
 	autodiff = true;
@@ -331,7 +333,8 @@ int threshold_times_MBH(int argc, char *argv[])
 	double tol = 1e-10;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 	clock_t start = clock();
-	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,tol,w,np);
+	double SNR_TOBS=0;
+	int status =threshold_times_gsl(&params, method, Tobs,Twait,fmin,fmax,"LISA_SADC_CONF",8.,bounds,&SNR_TOBS,tol,w,np);
 	std::cout<<"STATUS: "<<status<<std::endl;
 	std::cout<<"TIME: "<<(double)(clock()-start)/CLOCKS_PER_SEC<<std::endl;
 	std::cout<<bounds[0]/T_year<<" "<<bounds[1]/T_year<<std::endl;

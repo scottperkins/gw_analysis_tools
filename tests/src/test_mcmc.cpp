@@ -732,7 +732,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 50000;
+	int N_steps = 500;
 	int chain_N= 32;
 	int max_chain_N= 10;
 	//double *initial_pos_ptr = initial_pos;
@@ -763,7 +763,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 5000;
+	int t0 = 500;
 	int nu = 100;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
