@@ -430,6 +430,7 @@ double cosmology_lookup(std::string cosmology);
 template <class T>
 T fcontact(T M_detector, T DL, std::string cosmology);
 
+double powerlaw_from_uniform(double x0, double x1, double power, double uniform_random_number);
 double gsl_maxwell_boltzmann_distribution(double sigma, gsl_rng *r);
 template<class T>
 void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC);

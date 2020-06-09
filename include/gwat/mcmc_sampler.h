@@ -9,6 +9,12 @@
 #include "mcmc_sampler_internals.h"
 #include "util.h"
 
+struct dump_file_struct{
+	std::string filename;
+	bool trimmed;
+	bool cold_only;
+	int *file_trim_lengths=NULL;
+};
 /*! \brief Class that contains all output information from sampler
  *
  * Destructor takes care of all internal memory allocation
@@ -27,11 +33,12 @@ public:
 	void populate_initial_output(double ***new_output,int *chain_positions);
 	void append_to_output(double ***new_output, int *chain_positions);
 	void dealloc_output();
-	void calc_ac_vals();
-	void count_indep_samples();
-	int create_data_dump(bool cold_only,std::string filename);
-	int append_to_data_dump(bool cold_only,std::string filename);
-	int write_flat_thin_output(std::string filename, bool use_stored_ac);
+	void calc_ac_vals( bool trim);
+	void count_indep_samples(bool trim);
+	int create_data_dump(bool cold_only,bool trim,std::string filename);
+	int append_to_data_dump(std::string filename);
+	int write_flat_thin_output(std::string filename, bool use_stored_ac,bool trim);
+	void set_trim(int trim);
 
 	int chunk_steps = 1000;
 	int chain_number;
@@ -47,6 +54,12 @@ public:
 	int threads = 4;
 	int indep_samples=0;
 	int *max_acs=NULL;
+	int *trim_lengths=NULL;
+private:
+	int *file_trim_lengths =NULL;
+	bool trimmed_file=false;
+	std::vector<dump_file_struct *> dump_files;
+	std::vector<std::string> dump_file_names;
 };
 
 

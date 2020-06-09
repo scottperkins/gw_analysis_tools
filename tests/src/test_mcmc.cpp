@@ -105,9 +105,14 @@ int mcmc_output_class(int argc, char *argv[])
 		}
 		std::cout<<std::endl;
 	}
+	output.trim_lengths[0]=2;
+	output.trim_lengths[1]=2;
+	output.trim_lengths[2]=2;
+
 
 	std::cout<<"Creating data dump"<<std::endl;
-	output.create_data_dump(false, "./test");
+	output.create_data_dump(false,true, "./data/testT.hdf5");
+	output.create_data_dump(false,false, "./data/test.hdf5");
 	//exit(1);
 
 	double ***app_output = new double**[chain_N];
@@ -132,8 +137,7 @@ int mcmc_output_class(int argc, char *argv[])
 	chain_temps[1]=5;
 	output.append_to_output(app_output, app_positions);
 	output.populate_chain_temperatures(chain_temps);
-
-
+	
 	std::cout<<std::endl;
 	std::cout<<std::endl;
 	std::cout<<"Appended output"<<std::endl;
@@ -150,21 +154,22 @@ int mcmc_output_class(int argc, char *argv[])
 	std::cout<<std::endl;
 	std::cout<<std::endl;
 	std::cout<<"Appending new data to data dump"<<std::endl;
-	output.append_to_data_dump(false, "./test");
+	output.append_to_data_dump("./data/testT.hdf5");
+	output.append_to_data_dump("./data/test.hdf5");
 
 
-	output.calc_ac_vals();
+	output.calc_ac_vals(true);
 	for(int i = 0 ; i<output.cold_chain_number; i++){
 		for(int j = 0 ; j<output.dimension; j++){
 			std::cout<<output.ac_vals[i][j]<<" ";
 		}
 		std::cout<<std::endl;
 	}
-	output.count_indep_samples();
+	output.count_indep_samples(false);
 	std::cout<<"Indep samples "<<output.indep_samples<<std::endl;
 
 
-	output.write_flat_thin_output( "./test_flat",false);
+	output.write_flat_thin_output( "./data/test_flat",false,false);
 	//############################################################
 	//Cleanup
 	//############################################################
@@ -252,7 +257,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	//for(int i =chain_N/2+1; i < chain_N;  i ++)
 	//	chain_temps[i] =  chain_temps[i-1] * c;
 	std::string autocorrfile = "";
-	std::string chainfile = "data/mcmc_output_RB.csv";
+	std::string chainfile = "data/mcmc_output_RB.hdf5";
 	std::string statfilename = "data/mcmc_statistics_RB.txt";
 	std::string checkpointfile = "data/mcmc_checkpoint_RB.csv";
 	//std::string LLfile = "data/mcmc_LL_RB.csv";
@@ -288,14 +293,15 @@ int mcmc_rosenbock(int argc, char *argv[])
 	
 	mcmc_sampler_output sampler_output(chain_N,n);
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,fisher_rosenbock,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
-	sampler_output.calc_ac_vals();
+	sampler_output.calc_ac_vals(false);
 	for(int i = 0 ; i<sampler_output.cold_chain_number; i++){
 		std::cout<<sampler_output.max_acs[i]<<std::endl;
 	}
-	sampler_output.count_indep_samples();
+	sampler_output.count_indep_samples(false);
 	std::cout<<"Indep samples "<<sampler_output.indep_samples<<std::endl;
-	sampler_output.create_data_dump(false, "./test");
-	sampler_output.write_flat_thin_output( "./test_flat",true);
+	sampler_output.create_data_dump(true,false, chainfile);
+	sampler_output.create_data_dump(true,true,"data/mcmc_output_RB_trimmed.hdf5" );
+	//sampler_output.write_flat_thin_output( "./data/test.hdf5",true,true);
 	deallocate_2D_array(output, N_steps, n);
 	for(int i = 0 ; i<chain_N; i++){
 		delete param[i];	
@@ -774,7 +780,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	mcmc_sampler_output sampler_output(chain_N,dimension);
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	deallocate_2D_array(output, N_steps, dimension);
-	sampler_output.write_flat_thin_output( "./test_flat_standard",true);
+	sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);
 	std::cout<<"ENDED"<<std::endl;
 
 

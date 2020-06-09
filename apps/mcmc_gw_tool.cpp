@@ -490,7 +490,8 @@ int main(int argc, char *argv[])
 					//data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
 					generation_method,stat_file,output_file, "",check_file);	
-			sampler_output.write_flat_thin_output(output_file, true);
+			//sampler_output.write_flat_thin_output(output_file, true);
+			sampler_output.create_data_dump(true, false, output_file);
 			//double ***output2 = allocate_3D_array(chain_N,samples, dimension );
 			//double c = 1.1;
 			//chain_temps[0]=1;

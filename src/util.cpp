@@ -394,6 +394,14 @@ double cosmology_lookup(std::string cosmology)
 	}
 	return -1;
 }
+/*! \brief Converts a uniformly random random number into a powerlaw distribution
+ *
+ * https://mathworld.wolfram.com/RandomNumber.html
+ */
+double powerlaw_from_uniform(double x0, double x1, double power, double uniform_random_number)
+{
+	return pow( (pow(x1, power+1) - pow(x0,power+1) )*uniform_random_number + pow(x0, power+1) , 1./(power+1));
+} 
 
 /*! \brief Calculates a random number from the Maxwell-Boltzmann distribution using 3 gaussian random numbers
  *

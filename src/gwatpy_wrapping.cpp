@@ -2,6 +2,83 @@
 #include "util.h"
 #include "fisher.h"
 
+int get_detector_parameters(char *detector, double *LAT,double *LON, double *location, double *response_tensor)
+{
+	std::string local_det(detector);
+	if(local_det.find("Hanford")!=std::string::npos ||
+		local_det.find("hanford")!=std::string::npos){
+		*LAT = H_LAT;
+		*LON = H_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = H_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=Hanford_D[i][j];	
+			}
+		}
+	}
+	else if(local_det.find("Livingston")!=std::string::npos ||
+		local_det.find("livingston")!=std::string::npos){
+		*LAT = L_LAT;
+		*LON = L_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = L_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=Livingston_D[i][j];	
+			}
+		}
+	}
+	else if(local_det.find("Virgo")!=std::string::npos ||
+		local_det.find("virgo")!=std::string::npos){
+		*LAT = V_LAT;
+		*LON = V_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = V_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=Virgo_D[i][j];	
+			}
+		}
+	}
+	else if(local_det.find("Kagra")!=std::string::npos ||
+		local_det.find("kagra")!=std::string::npos){
+		*LAT = K_LAT;
+		*LON = K_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = K_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=Kagra_D[i][j];	
+			}
+		}
+	}
+	else if(local_det.find("Indigo")!=std::string::npos ||
+		local_det.find("indigo")!=std::string::npos){
+		*LAT = I_LAT;
+		*LON = I_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = I_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=Indigo_D[i][j];	
+			}
+		}
+	}
+	else if(local_det.find("CosmicExplorer")!=std::string::npos ||
+		local_det.find("cosmicexplorer")!=std::string::npos ||
+		local_det.find("CE")!=std::string::npos ){
+		*LAT = CE_LAT;
+		*LON = CE_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = CE_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=CE_D[i][j];	
+			}
+		}
+	}
+	else{
+		std::cout<<"Unsupported detector"<<std::endl;
+		return -1;
+	}
+	return 0;
+}
+
 int DL_from_Z_py(double z, char * COSMOLOGY, double *out)
 {
 	*out = DL_from_Z(z,std::string(COSMOLOGY));

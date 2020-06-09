@@ -54,6 +54,14 @@ mcmc_sampler_output::mcmc_sampler_output( int chain_N, int dim)
 	dimension = dim;
 	chain_temperatures = new double[chain_number];
 	chain_lengths = new int[chain_number];
+	trim_lengths = new int[chain_number];
+	for(int i = 0 ;i<chain_number; i++){
+		trim_lengths[i]=0;
+	}
+	file_trim_lengths = new int[chain_number];
+	for(int i = 0 ;i<chain_number; i++){
+		file_trim_lengths[i]=0;
+	}
 };
 mcmc_sampler_output::~mcmc_sampler_output()
 {
@@ -70,6 +78,14 @@ mcmc_sampler_output::~mcmc_sampler_output()
 		delete [] chain_lengths;
 		chain_lengths = NULL;
 	}
+	if(trim_lengths){
+		delete [] trim_lengths;
+		trim_lengths = NULL;
+	}
+	if(file_trim_lengths){
+		delete [] file_trim_lengths;
+		file_trim_lengths = NULL;
+	}
 	if(ac_vals){
 		for(int i = 0 ; i< cold_chain_number_ac_alloc; i++){
 			delete [] ac_vals[i];	
@@ -79,7 +95,21 @@ mcmc_sampler_output::~mcmc_sampler_output()
 	if(max_acs){
 		delete [] max_acs;
 	}
+	if(dump_files.size() != 0){
+		for(int i = 0 ; i<dump_files.size(); i++){
+			if(dump_files[i]->file_trim_lengths){
+				delete [] dump_files[i]->file_trim_lengths;
+				dump_files[i]->file_trim_lengths = NULL;
+			}
+			delete dump_files[i];
+		}
+	}
 };
+void mcmc_sampler_output::set_trim(int trim){
+	for(int i = 0 ; i<chain_number; i++){
+		trim_lengths[i]=trim;
+	}
+}
 void mcmc_sampler_output::populate_chain_temperatures(double *temperatures)
 {
 	for(int i= 0 ; i<chain_number; i++){
@@ -191,7 +221,7 @@ void mcmc_sampler_output::dealloc_output()
 	}
 }
 
-void mcmc_sampler_output::calc_ac_vals()
+void mcmc_sampler_output::calc_ac_vals(bool trim)
 {
 	if(ac_vals){
 		for(int i = 0 ; i<cold_chain_number_ac_alloc; i++){
@@ -216,22 +246,33 @@ void mcmc_sampler_output::calc_ac_vals()
 		}
 	}
 	double ***temp_chains = new double**[cold_chain_number];
+	int beginning_id = 0;
 	for (int i = 0 ;i<cold_chain_number; i++){
 		int id  = cold_chain_ids[i];
-		temp_chains[i] = new double*[chain_lengths[id]];
-		for(int j = 0 ; j<chain_lengths[id]; j++){
-			temp_chains[i][j] = new double[dimension];
+		beginning_id = 0;
+		if(trim){
+			beginning_id = trim_lengths[id];
+		}
+		temp_chains[i] = new double*[chain_lengths[id]-beginning_id];
+		for(int j = beginning_id ; j<chain_lengths[id]; j++){
+			temp_chains[i][j-beginning_id] = new double[dimension];
 			for(int k = 0 ; k<dimension  ; k++){
-				temp_chains[i][j][k] = output[id][j][k];
+				temp_chains[i][j-beginning_id][k] = output[id][j][k];
 			}
 		}
 	}
-	auto_corr_from_data_batch(temp_chains, chain_lengths[cold_chain_ids[0]], dimension, cold_chain_number,temp, segments, target_correlation, threads, true);
+	auto_corr_from_data_batch(temp_chains, chain_lengths[cold_chain_ids[0]]-beginning_id, dimension, cold_chain_number,temp, segments, target_correlation, threads, true);
 	
 	for(int i = 0 ;i<cold_chain_number; i++){
 		int id  = cold_chain_ids[i];
-		for(int j = 0 ; j<chain_lengths[id]; j ++){
-			delete [] temp_chains[i][j];
+		if(trim){
+			beginning_id = trim_lengths[id];
+		}
+		else{
+			beginning_id = 0;
+		}
+		for(int j = beginning_id ; j<chain_lengths[id]; j ++){
+			delete [] temp_chains[i][j-beginning_id];
 		}
 		delete [] temp_chains[i];
 	}
@@ -267,7 +308,7 @@ void mcmc_sampler_output::calc_ac_vals()
 	}
 
 }
-void mcmc_sampler_output::count_indep_samples()
+void mcmc_sampler_output::count_indep_samples(bool trim)
 {
 	indep_samples = 0;
 	for(int i = 0 ; i<cold_chain_number; i ++){
@@ -278,22 +319,31 @@ void mcmc_sampler_output::count_indep_samples()
 				max_ac = ac_vals[i][j];	
 			}
 		}
-		indep_samples += chain_lengths[id]/max_ac;	
+		if(trim){
+			indep_samples += (chain_lengths[id]-trim_lengths[id])/max_ac;	
+		}
+		else{
+			indep_samples += (chain_lengths[id])/max_ac;
+		}
 	}
 }
 //Use HDF5 if available
 #ifdef _HDF5
-int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_stored_ac)
+int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_stored_ac, bool trim)
 {
 	try{
 		if(!use_stored_ac || !ac_vals){
-			calc_ac_vals();	
-			count_indep_samples();
+			calc_ac_vals(trim);	
+			count_indep_samples(trim);
 		}
 		double *flattened= new double[indep_samples*dimension];
 		int ct = 0;
 		for(int i =0  ;i<cold_chain_number; i++){
-			for(int j = 0 ; j<chain_lengths[cold_chain_ids[i]]; j++){
+			int beginning_id = 0;
+			if(trim){
+				beginning_id = trim_lengths[cold_chain_ids[i]];
+			}
+			for(int j = beginning_id ; j<chain_lengths[cold_chain_ids[i]]; j++){
 				if(j%max_acs[i] == 0 && ct<indep_samples){
 					for(int k = 0 ; k<dimension; k++){
 						flattened[ct*dimension + k ] 
@@ -367,10 +417,38 @@ int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_s
 	}
 	return 0;
 }
-int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
+int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string filename)
 {
+	int file_id = 0;
+	bool found = false;
+	if(dump_files.size() != 0){
+		for(int i = 0 ; i<dump_file_names.size(); i++){
+			if( filename == dump_file_names[i]){
+				found = true;
+				file_id = i;
+			}
+		}	
+	}
+	if(!found ){
+		file_id = dump_files.size();	
+		dump_file_struct *new_dump_file = new dump_file_struct;
+		dump_files.push_back(new_dump_file);
+		dump_files[file_id]->file_trim_lengths = new int[chain_number];
+		dump_file_names.push_back(filename);
+	}
+	dump_files[file_id]->cold_only = cold_only;
+	
+	if(trim){
+		dump_files[file_id]->trimmed = true;
+		for(int i= 0 ; i<chain_number; i++){
+			dump_files[file_id]->file_trim_lengths[i]=trim_lengths[i];
+		}
+	}
+	else{
+		dump_files[file_id]->trimmed = false;
+	}
 	try{
-		std::string FILE_NAME(filename+".hdf5");
+		std::string FILE_NAME(filename);
 		int chains;
 		int *ids=NULL;
 		if(cold_only){
@@ -396,7 +474,12 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
 		for(int i = 0 ; i<chains; i++){
 			int RANK=2;
 			hsize_t dims[RANK];
-			dims[0]= chain_lengths[ids[i]];
+			if(trim){
+				dims[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
+			}
+			else{
+				dims[0]= chain_lengths[ids[i]];
+			}
 			dims[1]= dimension;
 
 			if(chunk_steps>dims[0]){chunk_dims[0] = dims[0];}
@@ -414,9 +497,11 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
 				);
 
 			temp_buffer = new double[ int(dims[0]*dims[1]) ];
-			for(int j = 0 ; j<chain_lengths[ids[i]]; j++){
+			int beginning_id=0;
+			if(trim){ beginning_id =trim_lengths[ids[i]];}
+			for(int j = 0 ; j<chain_lengths[ids[i]] - beginning_id; j++){
 				for(int k = 0 ; k<dimension; k++){
-					temp_buffer[j*dimension +k] = output[ids[i]][j][k];	
+					temp_buffer[j*dimension +k] = output[ids[i]][j+beginning_id][k];	
 				}
 			}
 			dataset->write(temp_buffer, H5::PredType::NATIVE_DOUBLE);	
@@ -473,13 +558,24 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
 	return 0;
 
 }
-int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filename)
+int mcmc_sampler_output::append_to_data_dump( std::string filename)
 {
+	int file_id = 0;
+	bool found=false;
+	for(int i = 0 ; i<dump_file_names.size(); i++){
+		if( filename == dump_file_names[i]){
+			found = true;
+			file_id = i;
+		}
+	}	
+	if(!found){
+		std::cout<<"ERROR -- File doesn't exist"<<std::endl;
+	}
 	try{
-		std::string FILE_NAME(filename+".hdf5");
+		std::string FILE_NAME(filename);
 		int chains;
 		int *ids=NULL;
-		if(cold_only){
+		if(dump_files[file_id]->cold_only){
 			ids = cold_chain_ids;
 			chains = cold_chain_number;
 		}
@@ -515,7 +611,12 @@ int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filenam
 			}
 			
 			hsize_t new_size[RANK];
-			new_size[0]= chain_lengths[ids[i]];
+			if(dump_files[file_id]->trimmed){
+				new_size[0]= chain_lengths[ids[i]]-dump_files[file_id]->file_trim_lengths[ids[i]];
+			}
+			else{
+				new_size[0]= chain_lengths[ids[i]];
+			}
 			new_size[1]= dimension;
 			dataset->extend(new_size);
 
@@ -535,9 +636,11 @@ int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filenam
 			dataspace_ext = new H5::DataSpace(RANK, dimext,NULL);
 
 			temp_buffer = new double[ dimext[0]*dimext[1] ];
-			for(int j = base_dims[0] ; j<chain_lengths[ids[i]]; j++){
+			int beginning_id = 0 ; 
+			if(dump_files[file_id]->trimmed){beginning_id = dump_files[file_id]->file_trim_lengths[ids[i]];}
+			for(int j = base_dims[0] ; j<chain_lengths[ids[i]]-beginning_id; j++){
 				for(int k = 0 ; k<dimension; k++){
-					temp_buffer[(j-base_dims[0])*dimension +k] = output[ids[i]][j][k];	
+					temp_buffer[(j-base_dims[0])*dimension +k] = output[ids[i]][j+beginning_id][k];	
 				}
 			}
 			
@@ -559,7 +662,7 @@ int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filenam
 		//Cleanup
 		output_group.close();
 		meta_group.close();
-		if(!cold_only){
+		if(!dump_files[file_id]->cold_only){
 			delete [] ids;
 			ids = NULL;
 		}
@@ -1025,7 +1128,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<2){
+	while(continue_dynamic_search && dynamic_ct<3){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -1165,10 +1268,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
-		if(temp_length < 1000*max_ac_realloc){
-			if(1000*max_ac_realloc < max_chunk_size){
+		if(temp_length < 100*max_ac_realloc){
+			if(100*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 1000*max_ac_realloc;
+				temp_length = 100*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -1204,6 +1307,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	int realloc_temps_thresh = realloc_temps_length;
 	bool realloc = false;
 	bool init = true;
+	bool relax = true;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
 		if(realloc || status>realloc_temps_thresh){
@@ -1244,10 +1348,33 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		else{
 			sampler_output->append_to_output(temp_output,sampler.chain_pos)	;
 		}
-		sampler_output->calc_ac_vals();
-		sampler_output->count_indep_samples();
+		sampler_output->calc_ac_vals(true);
+		sampler_output->count_indep_samples(true);
 		status = sampler_output->indep_samples;
-		sampler_output->write_flat_thin_output(chain_filename,true);
+		if(relax){
+			//Only considered burned in if the average (cold) chain length
+			//is 500x the average ac (trimming as we go, for the ac
+			double ac_mean = 1;
+			double pos_mean = 0;
+			mean_list(sampler_output->max_acs, sampler_output->cold_chain_number, &ac_mean);
+			double *temp_positions = new double[sampler_output->cold_chain_number];
+			for(int i= 0 ; i<sampler_output->cold_chain_number; i++){
+				temp_positions[i]=sampler_output->chain_lengths[sampler_output->cold_chain_ids[i]];	
+			}
+			mean_list(temp_positions, sampler_output->cold_chain_number, &pos_mean);
+			debugger_print(__FILE__,__LINE__,std::string("Pos/ac: ")+std::to_string(pos_mean/ac_mean));
+			delete [] temp_positions;
+			if(pos_mean/ac_mean <100){
+				sampler_output->set_trim(pos_mean);	
+			}
+			else{
+				relax=false;
+				sampler_output->create_data_dump(true,true, chain_filename);
+			}
+		}
+		else{
+			sampler_output->append_to_data_dump(chain_filename);
+		}
 		max_ac_realloc = 0;
 		mean_list(sampler_output->max_acs, sampler_output->cold_chain_number,&max_ac_realloc);
 		std::cout<<"Average ac: "<<max_ac_realloc<<std::endl;
@@ -1402,11 +1529,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
 		//if(false){
-		if(temp_length < 1000*max_ac_realloc){
+		if(temp_length < 100*max_ac_realloc){
 
-			if(1000*max_ac_realloc < max_chunk_size){
+			if(100*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 1000*max_ac_realloc;
+				temp_length = 100*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{

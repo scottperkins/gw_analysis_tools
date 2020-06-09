@@ -16,6 +16,8 @@ int calculate_eta_py(double mass1, double mass2,double *out);
 int calculate_mass1_py(double chirpmass, double eta,double *out);
 int calculate_mass2_py(double chirpmass, double eta,double *out);
 
+int get_detector_parameters(char *detector, double *LAT,double *LON, double *location, double *response_tensor);
+
 void populate_noise_py(double *frequencies, char * detector, double *noise_root, int length, double integration_time);
 
 void ppE_theory_fisher_transformation_py(double m1,
