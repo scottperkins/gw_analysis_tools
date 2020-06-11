@@ -243,7 +243,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 		seeding_var[i]=10.;
 	}
 	int N_steps = 10000;
-	int chain_N= 128;
+	int chain_N= 50;
 	int max_chain_N= 50;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 2;
@@ -270,7 +270,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	double **output;
 	output = allocate_2D_array(  N_steps, n );
 	int t0 = 5000;
-	int nu = 100;
+	int nu = 10;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
 	double corr_convergence_thresh = 0.01;
@@ -293,11 +293,11 @@ int mcmc_rosenbock(int argc, char *argv[])
 	
 	mcmc_sampler_output sampler_output(chain_N,n);
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,fisher_rosenbock,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
-	sampler_output.calc_ac_vals(false);
+	sampler_output.calc_ac_vals(true);
 	for(int i = 0 ; i<sampler_output.cold_chain_number; i++){
 		std::cout<<sampler_output.max_acs[i]<<std::endl;
 	}
-	sampler_output.count_indep_samples(false);
+	sampler_output.count_indep_samples(true);
 	std::cout<<"Indep samples "<<sampler_output.indep_samples<<std::endl;
 	sampler_output.create_data_dump(true,false, chainfile);
 	sampler_output.create_data_dump(true,true,"data/mcmc_output_RB_trimmed.hdf5" );

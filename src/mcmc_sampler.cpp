@@ -522,6 +522,42 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
 		delete dataset;
 		delete dataspace;
+
+		dataspace = new H5::DataSpace(1,dimsT);
+		dataset = new H5::DataSet(
+			meta_group.createDataSet("SUGGESTED TRIM LENGTHS",
+				H5::PredType::NATIVE_INT,*dataspace)
+			);
+		dataset->write(trim_lengths, H5::PredType::NATIVE_INT);	
+		delete dataset;
+		delete dataspace;
+
+		hsize_t dimsAC[2];
+		dimsAC[0]= cold_chain_number;
+		dimsAC[1]= dimension;
+		dataspace = new H5::DataSpace(2,dimsAC);
+
+		int *int_temp_buffer=NULL;
+		if(ac_vals){
+			int_temp_buffer = new int[cold_chain_number*dimension];
+			for(int i  = 0 ; i<cold_chain_number; i++){
+				for(int j = 0 ; j<dimension ; j++){
+					int_temp_buffer[i*dimension +j ] = ac_vals[i][j];
+				}
+			}
+
+			dataset = new H5::DataSet(
+				meta_group.createDataSet("AC VALUES",
+					H5::PredType::NATIVE_INT,*dataspace)
+				);
+			dataset->write(int_temp_buffer, H5::PredType::NATIVE_INT);	
+
+			delete [] int_temp_buffer;
+			int_temp_buffer =NULL;
+			delete dataset;
+			delete dataspace;
+		}
+
 	
 		//Cleanup
 		output_group.close();
@@ -654,10 +690,34 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 			delete [] temp_buffer;
 			temp_buffer = NULL;
 		}
+
+
+
 		dataset = new H5::DataSet(meta_group.openDataSet("CHAIN TEMPERATURES"));
 		
 		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
 		delete dataset;
+
+		if(!dump_files[file_id]->trimmed ){
+			
+			dataset = new H5::DataSet(meta_group.openDataSet("SUGGESTED TRIM LENGTHS"));
+		
+			dataset->write(trim_lengths, H5::PredType::NATIVE_INT);	
+			delete dataset;
+		}
+		if(ac_vals){
+			int *int_temp_buffer = new int[cold_chain_number*dimension];
+			dataset = new H5::DataSet(meta_group.openDataSet("AC VALUES"));
+			for(int i  = 0 ; i<cold_chain_number; i++){
+				for(int j = 0 ; j<dimension ; j++){
+					int_temp_buffer[i*dimension +j ] = ac_vals[i][j];
+				}
+			}
+			dataset->write(ac_vals, H5::PredType::NATIVE_INT);	
+			delete [] int_temp_buffer;
+			int_temp_buffer = NULL;
+			delete dataset;
+		}
 	
 		//Cleanup
 		output_group.close();
@@ -1308,6 +1368,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool realloc = false;
 	bool init = true;
 	bool relax = true;
+	double ac_save;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
 		if(realloc || status>realloc_temps_thresh){
@@ -1351,17 +1412,18 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		sampler_output->calc_ac_vals(true);
 		sampler_output->count_indep_samples(true);
 		status = sampler_output->indep_samples;
+
+		double ac_mean = 1;
+		double pos_mean = 0;
+		mean_list(sampler_output->max_acs, sampler_output->cold_chain_number, &ac_mean);
+		double *temp_positions = new double[sampler_output->cold_chain_number];
+		for(int i= 0 ; i<sampler_output->cold_chain_number; i++){
+			temp_positions[i]=sampler_output->chain_lengths[sampler_output->cold_chain_ids[i]];	
+		}
+		mean_list(temp_positions, sampler_output->cold_chain_number, &pos_mean);
 		if(relax){
 			//Only considered burned in if the average (cold) chain length
 			//is 500x the average ac (trimming as we go, for the ac
-			double ac_mean = 1;
-			double pos_mean = 0;
-			mean_list(sampler_output->max_acs, sampler_output->cold_chain_number, &ac_mean);
-			double *temp_positions = new double[sampler_output->cold_chain_number];
-			for(int i= 0 ; i<sampler_output->cold_chain_number; i++){
-				temp_positions[i]=sampler_output->chain_lengths[sampler_output->cold_chain_ids[i]];	
-			}
-			mean_list(temp_positions, sampler_output->cold_chain_number, &pos_mean);
 			debugger_print(__FILE__,__LINE__,std::string("Pos/ac: ")+std::to_string(pos_mean/ac_mean));
 			delete [] temp_positions;
 			if(pos_mean/ac_mean <100){
@@ -1369,12 +1431,20 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 			else{
 				relax=false;
-				sampler_output->create_data_dump(true,true, chain_filename);
+				sampler_output->create_data_dump(true,false, chain_filename);
 			}
 		}
 		else{
+			if(ac_mean > 2*ac_save){
+				debugger_print(__FILE__,__LINE__,"Resetting trim");
+				sampler_output->set_trim(pos_mean);	
+				//sampler_output->create_data_dump(true,false, chain_filename);
+			}
+			//else{
 			sampler_output->append_to_data_dump(chain_filename);
+			//}
 		}
+		ac_save = ac_mean;
 		max_ac_realloc = 0;
 		mean_list(sampler_output->max_acs, sampler_output->cold_chain_number,&max_ac_realloc);
 		std::cout<<"Average ac: "<<max_ac_realloc<<std::endl;
