@@ -1188,7 +1188,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<3){
+	while(continue_dynamic_search && dynamic_ct<2){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -1328,10 +1328,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
-		if(temp_length < 100*max_ac_realloc){
-			if(100*max_ac_realloc < max_chunk_size){
+		if(temp_length < 10*max_ac_realloc){
+			if(10*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 100*max_ac_realloc;
+				temp_length = 10*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -1362,7 +1362,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	//print out progress
 	coldchains = count_cold_chains(chain_temps, chain_N);
 	//int realloc_temps_length = .1*N_steps;//0.01 * N_steps;//Steps before re-allocating chain temps
-	int realloc_temps_length = .3*N_steps;//Steps before re-allocating chain temps
+	int realloc_temps_length = 2*N_steps;//Steps before re-allocating chain temps
 	//int realloc_temps_length = 1;//0.01 * N_steps;//Steps before re-allocating chain temps
 	int realloc_temps_thresh = realloc_temps_length;
 	bool realloc = false;
@@ -1599,11 +1599,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
 		//if(false){
-		if(temp_length < 100*max_ac_realloc){
+		if(temp_length < 10*max_ac_realloc){
 
-			if(100*max_ac_realloc < max_chunk_size){
+			if(10*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 100*max_ac_realloc;
+				temp_length = 10*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{

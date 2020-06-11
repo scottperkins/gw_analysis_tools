@@ -16,6 +16,8 @@ def trim_thin_file(filename,trim=None, ac=None):
     if ac is None:
         ac_local = np.amax(f["MCMC_METADATA"]["AC VALUES"][0][:])
     #print("CHAIN 0 shape: ",np.shape(f["MCMC_OUTPUT"][chains[0]]))
+    print("trim: ",trim_local)
+    print("ac: ",ac_local)
     data = f["MCMC_OUTPUT"][chains[0]][int(trim_local)::int(ac_local),:]
     for x in range(chains_N-1):
         if trim is None :
