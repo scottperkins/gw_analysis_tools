@@ -2,8 +2,45 @@ import ctypes
 import gwatpy.config as cf
 import h5py
 import numpy as np
+import matplotlib.pyplot as plt
 
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
+
+def plot_convergence(filename):
+    f = h5py.File(filename,'r')
+    chains = list(f["MCMC_OUTPUT"].keys())
+    chains_N = len(chains)
+    #trim_local = f["MCMC_METADATA"]["SUGGESTED TRIM LENGTHS"][0]
+    #ac_local = np.amax(f["MCMC_METADATA"]["AC VALUES"][0][:])
+    #data = f["MCMC_OUTPUT"][chains[-1]][trim_local::ac_local]
+    data = f["MCMC_OUTPUT"][chains[-1]]
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    alpha = .6;
+    step = int(len(data)/50)
+    for x in np.arange(len(data[0])):
+    #for x in np.arange(1):
+        means = []
+        variances = []
+        pts = []
+        meanT = np.mean(data[:,x])
+        #varT = np.var(data[:,x])
+        for y in range(50):
+            print(x,y)
+            mean = abs(np.mean(data[y*step: (y+1)*step,x])/meanT)
+            means.append(mean)
+            #var = np.var(data[y*step: (y+1)*step,x])/varT
+            #variances.append(var)
+            #frac_diff = abs((mean-data[:,x])/mean)
+            pt = (y*step+(y+1)*step)/2
+            pts.append(pt)
+            ax.scatter(pt,mean,alpha=alpha,color="black")
+            #ax.scatter(pt,var,alpha=alpha,color="blue")
+        ax.set_yscale('log')
+        plt.plot(pts,means,color="black")
+        #plt.plot(pts,variances,color="blue")
+    return fig 
 
 def trim_thin_file(filename,trim=None, ac=None):
     f = h5py.File(filename,'r')

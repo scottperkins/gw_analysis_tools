@@ -2194,17 +2194,10 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	gen_params_base<double> gen_params;
 	std::string local_gen = MCMC_prep_params(param, 
 		temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
-	//gen_params.sky_average=true;
-	//gen_params.f_ref = 20;
-	//gen_params.shift_time = false;
-	//gen_params.gmst = mcmc_gmst;
-	//gen_params.NSflag = false;
 	//#########################################################################
 	//#########################################################################
 	repack_parameters(param, &gen_params, 
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
-	//std::cout<<gen_params.mass1<<" "<<gen_params.mass2<<" "<<gen_params.spin1[2]<<" "<<gen_params.spin2[2]<<" "<<gen_params.tc<<" "<<mcmc_deriv_order<<std::endl;
-	//std::cout<<gen_params.mass1<<" "<<gen_params.mass2<<" "<<gen_params.Luminosity_Distance<<" "<<gen_params.spin1[2]<<" "<<gen_params.spin2[2]<<" "<<gen_params.sky_average<<" "<<gen_params.NSflag<<" "<<gen_params.<<std::endl;
 	//#########################################################################
 	//#########################################################################
 	//std::cout<<"INCL angle fisher: "<<gen_params.incl_angle<<std::endl;
@@ -2228,6 +2221,22 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 				//}
 			}
 		} 
+	}
+	//Add prior information to fisher
+	if(mcmc_generation_method.find("Pv2") && !mcmc_intrinsic){
+		output[0][0] += 4*M_PI*M_PI;
+		output[1][1] += 4;
+		output[2][2] += 4*M_PI*M_PI;
+		output[3][3] += 4;
+		output[4][4] += 4*M_PI*M_PI;
+		output[5][5] += .01;
+		output[8][8] += .25;
+		output[9][9] += 4;
+		output[10][10] += 4;
+		output[11][11] += 4;
+		output[12][12] += 4;
+		output[13][13] += 4*M_PI*M_PI;
+		output[14][14] += 4*M_PI*M_PI;
 	}
 	//for(int k =0  ; k<dimension; k++){
 	//	for(int j =0 ;j<dimension; j++){

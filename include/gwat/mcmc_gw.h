@@ -38,7 +38,7 @@ static gsl_spline **mcmc_splines = NULL;
 static bool mcmc_log_beta;
 static bool mcmc_intrinsic;
 static bool mcmc_save_waveform;
-static int mcmc_deriv_order=2;
+static int mcmc_deriv_order=4;
 static gsl_rng **mcmc_rvec;
 //########################################
 
