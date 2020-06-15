@@ -33,7 +33,7 @@ for x in range(len(dataT)):
 fig = corner.corner(data)
 plt.savefig("plots/mcmc_RB.pdf")
 plt.close()
-fig = corner.corner(dataTrim)
-plt.savefig("plots/mcmc_RB_trim.pdf")
-plt.close()
+#fig = corner.corner(dataTrim)
+#plt.savefig("plots/mcmc_RB_trim.pdf")
+#plt.close()
 

@@ -166,7 +166,7 @@ void fisher_step(sampler *sampler,double *current_param, double *proposed_param,
 
 void update_fisher(sampler *sampler, double *current_param, int *param_status,int chain_index);
 
-void mmala_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status);
+void mmala_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status,int chain_index);
 
 void diff_ev_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_id);
 

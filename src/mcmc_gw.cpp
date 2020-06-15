@@ -1824,10 +1824,10 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.5;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
+			seeding_var[0]=1;
+			seeding_var[1]=.3;
+			seeding_var[2]=1.;
+			seeding_var[3]=1.;
 		}
 		mcmc_intrinsic=true;
 	}
@@ -1836,17 +1836,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		mcmc_intrinsic=false;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
-			seeding_var[4]=.5;
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
+			seeding_var[3]=1;
+			seeding_var[4]=1;
 			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
 		}
 	}
 	else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
@@ -1854,17 +1854,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
 			seeding_var[3]=1;
-			seeding_var[4]=.5;
+			seeding_var[4]=1;
 			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=1;
-			seeding_var[9]=1;
-			seeding_var[10]=1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
 			seeding_var[11]=1;
 		}
 	}
@@ -1874,17 +1874,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
 			seeding_var[3]=1;
-			seeding_var[4]=.5;
+			seeding_var[4]=1;
 			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
 			seeding_var[11]=1;
 		}
 	}
@@ -1893,22 +1893,22 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
 			seeding_var[3]=1;
-			seeding_var[4]=.5;
+			seeding_var[4]=1;
 			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.1;
-			seeding_var[11]=.1;
-			seeding_var[12]=.1;
-			seeding_var[13]=.1;
-			seeding_var[14]=.1;
-			seeding_var[15]=1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
+			seeding_var[11]=1.;
+			seeding_var[12]=1.;
+			seeding_var[13]=1.;
+			seeding_var[14]=1.;
+			seeding_var[15]=1.;
 		}
 	}
 	//Sampling parameter is root alpha in km
@@ -1917,22 +1917,22 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
 			seeding_var[3]=1;
-			seeding_var[4]=.5;
+			seeding_var[4]=1;
 			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.1;
-			seeding_var[11]=1;
-			seeding_var[12]=.1;
-			seeding_var[13]=.1;
-			seeding_var[14]=.1;
-			seeding_var[15]=1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
+			seeding_var[11]=1.;
+			seeding_var[12]=1.;
+			seeding_var[13]=1.;
+			seeding_var[14]=1.;
+			seeding_var[15]=1.;
 		}
 	}
 	else if(dimension==15 && generation_method =="IMRPhenomPv2"){
@@ -1940,21 +1940,21 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
-			seeding_var[4]=.1;
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
+			seeding_var[3]=1;
+			seeding_var[4]=1;
 			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.1;
-			seeding_var[11]=.1;
-			seeding_var[12]=.1;
-			seeding_var[13]=.1;
-			seeding_var[14]=.1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
+			seeding_var[11]=1.;
+			seeding_var[12]=1.;
+			seeding_var[13]=1.;
+			seeding_var[14]=1.;
 		}
 	}
 	else if(dimension==8 && generation_method =="IMRPhenomPv2"){
@@ -1962,14 +1962,14 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
-			seeding_var[4]=.1;
-			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
+			seeding_var[0]=1.;
+			seeding_var[1]=.3;
+			seeding_var[2]=1.;
+			seeding_var[3]=1.;
+			seeding_var[4]=1.;
+			seeding_var[5]=1.;
+			seeding_var[6]=1.;
+			seeding_var[7]=1.;
 		}
 	}
 	else if( generation_method == "ppE_IMRPhenomPv2_Inspiral"
@@ -1984,21 +1984,21 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			std::cout<<endl;
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
+				seeding_var[0]=1.;
 				seeding_var[1]=.5;
-				seeding_var[2]=.1;
-				seeding_var[3]=.1;
-				seeding_var[4]=.1;
+				seeding_var[2]=1;
+				seeding_var[3]=1;
+				seeding_var[4]=1;
 				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
-				seeding_var[8]=.1;
-				seeding_var[9]=.1;
-				seeding_var[10]=.1;
-				seeding_var[11]=.1;
-				seeding_var[12]=.1;
-				seeding_var[13]=.1;
-				seeding_var[14]=.1;
+				seeding_var[6]=1;
+				seeding_var[7]=1.;
+				seeding_var[8]=.3;
+				seeding_var[9]=.5;
+				seeding_var[10]=.5;
+				seeding_var[11]=1.;
+				seeding_var[12]=1.;
+				seeding_var[13]=1.;
+				seeding_var[14]=1.;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
 					seeding_var[15 + i]=2;
 				}
@@ -2013,14 +2013,14 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			std::cout<<endl;
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
-				seeding_var[1]=5;
-				seeding_var[2]=.1;
-				seeding_var[3]=.1;
-				seeding_var[4]=.1;
-				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
+				seeding_var[0]=1.;
+				seeding_var[1]=.3;
+				seeding_var[2]=1.;
+				seeding_var[3]=1.;
+				seeding_var[4]=1.;
+				seeding_var[5]=1.;
+				seeding_var[6]=1.;
+				seeding_var[7]=1.;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
 					seeding_var[8 + i]=2;
 				}
@@ -2041,21 +2041,21 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			std::cout<<endl;
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
+				seeding_var[0]=1.;
 				seeding_var[1]=.5;
-				seeding_var[2]=.1;
-				seeding_var[3]=.1;
-				seeding_var[4]=.1;
+				seeding_var[2]=1;
+				seeding_var[3]=1;
+				seeding_var[4]=1;
 				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
-				seeding_var[8]=.1;
-				seeding_var[9]=.1;
-				seeding_var[10]=.1;
-				seeding_var[11]=.1;
-				seeding_var[12]=.1;
-				seeding_var[13]=.1;
-				seeding_var[14]=.1;
+				seeding_var[6]=1;
+				seeding_var[7]=1.;
+				seeding_var[8]=.3;
+				seeding_var[9]=.5;
+				seeding_var[10]=.5;
+				seeding_var[11]=1.;
+				seeding_var[12]=1.;
+				seeding_var[13]=1.;
+				seeding_var[14]=1.;
 				for(int i =0; i< totalmod;i++){
 					seeding_var[15 + i]=2;
 				}
@@ -2069,14 +2069,14 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
-				seeding_var[1]=.1;
-				seeding_var[2]=.1;
-				seeding_var[3]=.1;
-				seeding_var[4]=.1;
-				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
+				seeding_var[0]=1.;
+				seeding_var[1]=.3;
+				seeding_var[2]=1.;
+				seeding_var[3]=1.;
+				seeding_var[4]=1.;
+				seeding_var[5]=1.;
+				seeding_var[6]=1.;
+				seeding_var[7]=1.;
 				for(int i =0; i< totalmod;i++){
 					seeding_var[8 + i]=2;
 				}
@@ -2098,9 +2098,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			std::cout<<endl;
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
-				seeding_var[1]=.1;
-				seeding_var[2]=.1;
+				seeding_var[0]=1.;
+				seeding_var[1]=.3;
+				seeding_var[2]=1;
 				seeding_var[3]=1;
 				for(int i =0; i< totalmod;i++){
 					seeding_var[4 + i]=2;
@@ -2112,17 +2112,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			mcmc_intrinsic=false;
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
-				seeding_var[1]=.1;
-				seeding_var[2]=.1;
-				seeding_var[3]=.1;
-				seeding_var[4]=.5;
+				seeding_var[0]=1.;
+				seeding_var[1]=.5;
+				seeding_var[2]=1;
+				seeding_var[3]=1;
+				seeding_var[4]=1;
 				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
-				seeding_var[8]=.1;
-				seeding_var[9]=.1;
-				seeding_var[10]=.1;
+				seeding_var[6]=1;
+				seeding_var[7]=1.;
+				seeding_var[8]=.3;
+				seeding_var[9]=.5;
+				seeding_var[10]=.5;
 					for(int i =0; i< totalmod;i++){
 						seeding_var[11 + i]=2;
 					}
@@ -2223,20 +2223,40 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 		} 
 	}
 	//Add prior information to fisher
-	if(mcmc_generation_method.find("Pv2") && !mcmc_intrinsic){
-		output[0][0] += 4*M_PI*M_PI;
-		output[1][1] += 4;
-		output[2][2] += 4*M_PI*M_PI;
-		output[3][3] += 4;
-		output[4][4] += 4*M_PI*M_PI;
-		output[5][5] += .01;
-		output[8][8] += .25;
-		output[9][9] += 4;
-		output[10][10] += 4;
-		output[11][11] += 4;
-		output[12][12] += 4;
-		output[13][13] += 4*M_PI*M_PI;
-		output[14][14] += 4*M_PI*M_PI;
+	//if(mcmc_generation_method.find("Pv2") && !mcmc_intrinsic){
+	if(!mcmc_intrinsic){
+		output[0][0] += .5/(4*M_PI*M_PI);//RA
+		output[1][1] += .5/4;//sin DEC
+		output[2][2] += .5/(4*M_PI*M_PI);//psi
+		output[3][3] += .5/(4);//cos iota
+		output[4][4] += .5/(4*M_PI*M_PI);//phiref
+		output[5][5] += .5/(.01);//tc
+		output[8][8] += .5/.25;//eta
+		output[9][9] += .5/4;//spin1
+		output[10][10] += .5/4;//spin2
+		if(mcmc_generation_method.find("PhenomPv2") != std::string::npos){
+			output[11][11] += .5/4;//cos theta1
+			output[12][12] += .5/4;//cos theta2
+			output[13][13] += .5/(4*M_PI*M_PI);//phi1
+			output[14][14] += .5/(4*M_PI*M_PI);//phi2
+		}
+	}
+	else{
+		if(mcmc_generation_method.find("PhenomPv2") != std::string::npos){
+			output[1][1] =.5/(.25) ;//eta
+			output[2][2] =.5/(4);//spin1
+			output[3][3] =.5/(4);//spin2
+			output[4][4] =.5/(4);//cos theta1
+			output[5][5] =.5/(4);//cos theta2
+			output[6][6] =.5/(4*M_PI*M_PI) ;//phi1
+			output[7][7] =.5/(4*M_PI*M_PI) ;//phi2
+		}
+		else if (mcmc_generation_method.find("PhenomD")!=std::string::npos){
+			output[1][1] =.5/(.25) ;//eta
+			output[2][2] =.5/(4) ;//spin1
+			output[3][3] =.5/(4) ;//spin2
+	
+		}
 	}
 	//for(int k =0  ; k<dimension; k++){
 	//	for(int j =0 ;j<dimension; j++){

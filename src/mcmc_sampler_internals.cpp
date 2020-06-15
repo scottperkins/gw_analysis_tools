@@ -44,7 +44,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][2])
 	{
-		mmala_step(sampler, current_param, proposed_param, current_status, proposed_status);
+		mmala_step(sampler, current_param, proposed_param, current_status, proposed_status,chain_number);
 		sampler->num_mmala[chain_number]+=1;
 		step= 2;
 	}
@@ -350,16 +350,113 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	free(oneDfisher);
 }
 
+void calc_grad(sampler *sampler,double *current_param,int *current_status, int chain_index,double *grad)
+{
+	double epsilon =1.e-1;
+	double locationp[sampler->max_dim];
+	for(int i = 0 ; i<sampler->max_dim; i++){
+		locationp[i]=current_param[i];
+	}
+	for(int i = 0 ; i<sampler->max_dim; i++){
+		locationp[i]+=epsilon; 
+		double llp = sampler->ll(locationp, current_status, sampler->max_dim, chain_index, sampler->user_parameters[chain_index]);
+		grad[i] = (llp-sampler->current_likelihoods[chain_index])/(epsilon);
+		locationp[i]= current_param[i]; 
+	}
+
+}
 /*!\brief MMALA informed step -- Currently not supported
+ *
+ * NOTE: This assumes the Fisher doesn't change between steps. The proposal ratio only accounts for the gradient of the log likelihood
  */
 void mmala_step(sampler *sampler, /**< Sampler struct*/
 		double *current_param, /**< current position in parameter space*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
 		int *current_status,
-		int *proposed_status
+		int *proposed_status,
+		int chain_index
 		)
 {
-	
+	double scaling;
+	int beta;
+	if(!sampler->RJMCMC || sampler->min_dim ==0){
+		//beta determines direction to step in eigen directions
+		beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+		
+		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+					 sampler->randgauss_width[chain_index][2]);
+
+		scaling = 0.0;
+		//ensure the steps aren't ridiculous
+		//std::cout<<beta<<" "<<sampler->fisher_vals[chain_index][beta]<<std::endl;
+		//exit(1);
+		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+					sampler->chain_temps[chain_index];}
+		double grad[sampler->max_dim];
+		calc_grad(sampler,current_param,current_status, chain_index,grad);
+		double dotprod = 0;
+		for(int i = 0 ; i<sampler->max_dim; i++){
+			dotprod+=grad[i]*sampler->fisher_vecs[chain_index][beta][i];
+		}
+		//Take step
+		for(int i =0; i< sampler->max_dim;i++)
+		{
+			proposed_param[i] = current_param[i] +
+				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i]+
+				sampler->fisher_vecs[chain_index][beta][i]*dotprod/(2*scaling);
+			proposed_status[i] = current_status[i];
+		}
+		double grad_rev[sampler->max_dim];
+		calc_grad(sampler,proposed_param,current_status, chain_index,grad_rev);
+		double **cov = new double*[sampler->max_dim];
+		for(int i = 0 ; i<sampler->max_dim; i++){
+			cov[i]= new double[sampler->max_dim];
+			//for(int j = 0 ; j<sampler->max_dim; j++){
+			//	cov[i][j]=1;	
+			//}
+			
+		}
+		gsl_cholesky_matrix_invert(sampler->fisher_matrix[chain_index], cov, sampler->max_dim);
+		sampler->prop_MH_factor[chain_index]= 0 ;
+		double mean_forward[sampler->max_dim];
+		double mean_reverse[sampler->max_dim];
+		
+		for(int i = 0 ; i<sampler->max_dim; i++){
+			double shift_forward = 0 ;
+			double shift_reverse = 0 ;
+			for(int j = 0 ; j<sampler->max_dim; j++){
+				shift_forward += grad[j]*cov[i][j];
+				shift_reverse += grad_rev[j]*cov[i][j];
+			}
+			mean_forward[i] = current_param[i]+1./2. * shift_forward;
+			mean_reverse[i]= proposed_param[i]+1./2. * shift_reverse;
+			
+
+		}
+		for(int i = 0 ; i<sampler->max_dim; i++){
+			for(int j = 0 ; j<sampler->max_dim; j++){
+				sampler->prop_MH_factor[chain_index]+= 
+					-.5*(mean_reverse[i] - current_param[i])*
+						(mean_reverse[j]-current_param[j])*
+						sampler->fisher_matrix[chain_index][i][j];
+					+.5*(mean_forward[i] - proposed_param[i])*
+						(mean_forward[j]-proposed_param[j])*
+						sampler->fisher_matrix[chain_index][i][j];
+					
+			}
+		}
+		//sampler->prop_MH_factor[chain_index] = 0;
+		if(std::isnan(sampler->prop_MH_factor[chain_index])){
+			exit(1);
+		}
+		for(int i = 0  ; i<sampler->max_dim; i++){
+			delete [] cov[i];
+		}
+		delete [] cov;
+	}
+		
 }
 
 /*!\brief differential evolution informed step
@@ -671,11 +768,12 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
 		{
+			//Testing
 			//sampler->step_prob[chain_index][0]=.3;
 			//sampler->step_prob[chain_index][1]=0;
 			//sampler->step_prob[chain_index][2]=.3;
 			//sampler->step_prob[chain_index][3]=.4;
-			//Testing
+
 			sampler->step_prob[chain_index][0]=.1;
 			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
@@ -701,6 +799,11 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=.2;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.75;
+			//Testing
+			//sampler->step_prob[chain_index][0]=.05;
+			//sampler->step_prob[chain_index][1]=.2;
+			//sampler->step_prob[chain_index][2]=.2;
+			//sampler->step_prob[chain_index][3]=.55;
 
 		}
 	}
@@ -1143,7 +1246,8 @@ void allocate_sampler_mem(sampler *sampler)
 		gsl_rng_set(sampler->rvec[i] , i+1);
 	
 		if(sampler->tune){
-			sampler->check_stepsize_freq[i] = 500;
+			//sampler->check_stepsize_freq[i] = 500;
+			sampler->check_stepsize_freq[i] = 50;
 		}
 		else{
 			sampler->check_stepsize_freq[i] = sampler->N_steps;
@@ -1170,7 +1274,7 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->randgauss_width[i][0]=.05;
 		//sampler->randgauss_width[i][1]=.05;
 		sampler->randgauss_width[i][1]=1;
-		sampler->randgauss_width[i][2]=.05;
+		sampler->randgauss_width[i][2]=.5;
 		sampler->randgauss_width[i][3]=.5;
 		//For RJPTMCMC, this may not be used, but it'll be available
 		sampler->randgauss_width[i][4]=.5;
@@ -1178,7 +1282,8 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->prop_MH_factor[i]=0;
 	}		
 	if(sampler->tune){
-		sampler->fisher_update_number = 200;
+		//sampler->fisher_update_number = 200;
+		sampler->fisher_update_number = 50;
 	}
 	else{
 		sampler->fisher_update_number = sampler->N_steps;

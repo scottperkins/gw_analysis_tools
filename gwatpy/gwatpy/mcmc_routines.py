@@ -3,17 +3,21 @@ import gwatpy.config as cf
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+import emcee
 
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 
-def plot_convergence(filename):
+def plot_convergence(filename,trim=None,ac=None):
+    local_trim = trim
+    if trim is None:
+        local_trim  = 0
+    local_ac = ac
+    if ac is None:
+        local_ac  = 1
     f = h5py.File(filename,'r')
     chains = list(f["MCMC_OUTPUT"].keys())
     chains_N = len(chains)
-    #trim_local = f["MCMC_METADATA"]["SUGGESTED TRIM LENGTHS"][0]
-    #ac_local = np.amax(f["MCMC_METADATA"]["AC VALUES"][0][:])
-    #data = f["MCMC_OUTPUT"][chains[-1]][trim_local::ac_local]
-    data = f["MCMC_OUTPUT"][chains[-1]]
+    data = f["MCMC_OUTPUT"][chains[-1]][local_trim::local_ac]
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -25,21 +29,21 @@ def plot_convergence(filename):
         variances = []
         pts = []
         meanT = np.mean(data[:,x])
-        #varT = np.var(data[:,x])
+        varT = np.var(data[:,x])
         for y in range(50):
             print(x,y)
             mean = abs(np.mean(data[y*step: (y+1)*step,x])/meanT)
             means.append(mean)
-            #var = np.var(data[y*step: (y+1)*step,x])/varT
-            #variances.append(var)
+            var = np.var(data[y*step: (y+1)*step,x])/varT
+            variances.append(var)
             #frac_diff = abs((mean-data[:,x])/mean)
             pt = (y*step+(y+1)*step)/2
             pts.append(pt)
             ax.scatter(pt,mean,alpha=alpha,color="black")
-            #ax.scatter(pt,var,alpha=alpha,color="blue")
-        ax.set_yscale('log')
+            ax.scatter(pt,var,alpha=alpha,color="blue")
+        #ax.set_yscale('log')
         plt.plot(pts,means,color="black")
-        #plt.plot(pts,variances,color="blue")
+        plt.plot(pts,variances,color="blue")
     return fig 
 
 def trim_thin_file(filename,trim=None, ac=None):
@@ -61,6 +65,10 @@ def trim_thin_file(filename,trim=None, ac=None):
             trim_local = f["MCMC_METADATA"]["SUGGESTED TRIM LENGTHS"][x+1]
         if ac is None:
             ac_local = np.amax(f["MCMC_METADATA"]["AC VALUES"][x+1][:])
+        acs=[]
+        for y in range(len(data[0])):
+            acs.append(emcee.autocorr.integrated_time(f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),y])[0])
+        print(chains[x],np.amax(acs))
         data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:],axis=0)
     #print("data shape",np.shape(data))
     return data

@@ -242,9 +242,9 @@ int mcmc_rosenbock(int argc, char *argv[])
 		initial_pos[i]=1.;
 		seeding_var[i]=10.;
 	}
-	int N_steps = 10000;
-	int chain_N= 50;
-	int max_chain_N= 50;
+	int N_steps = 5000;
+	int chain_N= 5;
+	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 2;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -263,13 +263,13 @@ int mcmc_rosenbock(int argc, char *argv[])
 	//std::string LLfile = "data/mcmc_LL_RB.csv";
 	std::string LLfile = "";
 	
-	int numThreads = 10;
-	bool pool = true;
+	int numThreads = 1;
+	bool pool = false;
 	bool show_progress = true;
 	
 	double **output;
 	output = allocate_2D_array(  N_steps, n );
-	int t0 = 5000;
+	int t0 = 500;
 	int nu = 10;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
@@ -373,6 +373,7 @@ double log_rosenbock (double *c,int dim,void *parameters)
 		}
 	}
 	return LL;
+	//return 2;
 }
 double log_rosenbock_prior (double *c,int dim,void *parameters)
 {

@@ -173,7 +173,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	repack_non_parameter_options(&waveform_params,parameters, gen_method);
 	//##########################################################
 	
-	if(parameters->sky_average)
+	if(parameters->sky_average && local_gen_method.find("IMRPhenomD")!=std::string::npos)
 	{
 		double *amplitude_plus = new double[length];
 		double *phase_plus = new double[length];
