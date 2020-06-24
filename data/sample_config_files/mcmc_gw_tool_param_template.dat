@@ -88,7 +88,7 @@
 #Number of modifications -- only for ppE waveforms
 [int] Number of modifications = 1
 #Power parameter from ppE -- one per modification
-[int] ppE b 0 = -1
+[dbl] ppE b 0 = -1
 #Edges of ppE beta prior
 [dbl] ppE beta 0 minimum = -10
 [dbl] ppE beta 0 maximum = 10

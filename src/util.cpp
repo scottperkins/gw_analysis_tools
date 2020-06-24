@@ -295,6 +295,9 @@ double DL_from_Z(double Z, std::string cosmology)
 	double dl;
 	for (int i =0; i<num_seg; i++){
 		if ( Z<boundaries[i+1]){
+			//if(i == 0 ){
+			//	debugger_print(__FILE__,__LINE__,"Boundaries: "+std::to_string(boundaries[i])+" "+std::to_string(boundaries[i+1]) +" "+std::to_string(Z));
+			//}
 			double *coeffs = new double [interp_deg];
 			for (int j =0; j<interp_deg;j++)
 				coeffs[j]=COEFF_VEC_ZD[cosmo_index][i][j];
@@ -385,7 +388,7 @@ adouble cosmology_interpolation_function(adouble x,double *coeffs, int interp_de
 
 /*! \brief Helper function for mapping cosmology name to an internal index
  */
-double cosmology_lookup(std::string cosmology)
+int cosmology_lookup(std::string cosmology)
 {
 	for (int i =0; i<num_cosmologies; i++){
 		if (cosmology == std::string(cosmos[i])){
@@ -900,7 +903,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> **par
 	(*param_out)->Nmod_beta = param_in->Nmod_beta;
 	(*param_out)->Nmod_alpha = param_in->Nmod_alpha;
 	if(param_in->Nmod != 0){
-		(*param_out)->bppe = new int[(*param_out)->Nmod];
+		(*param_out)->bppe = new double[(*param_out)->Nmod];
 		(*param_out)->betappe = new U[(*param_out)->Nmod];
 		for(int i = 0 ;i<param_in->Nmod; i++){
 			(*param_out)->bppe[i] = param_in->bppe[i];
@@ -1001,7 +1004,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->Nmod_beta = param_in->Nmod_beta;
 	param_out->Nmod_alpha = param_in->Nmod_alpha;
 	if(param_in->Nmod != 0){
-		param_out->bppe = new int[param_out->Nmod];
+		param_out->bppe = new double[param_out->Nmod];
 		param_out->betappe = new U[param_out->Nmod];
 		for(int i = 0 ;i<param_in->Nmod; i++){
 			param_out->bppe[i] = param_in->bppe[i];
@@ -1231,12 +1234,12 @@ template void ecl_from_eq<double>( double , double, double *, double*);
 template void ecl_from_eq<adouble>( adouble , adouble, adouble *, adouble*);
 /*! \brief Utility to map source frame vectors to equatorial frame vectors
  *
- * Needs the equatorial vectors for the line of sight and the orbital angular momentum
+ * Needs the equatorial vectors for the line of sight and the spin angular momentum
  *
  * Needs the inclination angle and the reference phase
  * 
  * Works by constructing a third vector from the cross product of the two others, in both frames. This defines a family of 3 vectors 
- * that can uniquely determine a rotation matrix from source frame to equatorial, which was done analytically in mathematica ( see the nb)
+ * that can uniquely determine a rotation matrix from source frame to equatorial, which was done analytically in mathematica ( see the nb anglenb.nb)
  *
  * K = LxN
  *

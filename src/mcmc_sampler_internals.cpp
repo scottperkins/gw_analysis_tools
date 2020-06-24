@@ -497,7 +497,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		//described by dimensions 0-min_dim, so I pick an element from 
 		//the history file that has the smallest deviation from the base model, 
 		//but still has the additional dimension. This means that the extra dimensions
-		//beyond min_dim are indepent, but if the affects are indeed small, the benefit 
+		//beyond min_dim are independent, but if the affects are indeed small, the benefit 
 		//of DE should still be recovered (this is only a proposal, after all)
 		if(sampler->min_dim != 0){
 			RJ_smooth_history(sampler, current_param,current_status, i, eff_history_coord, 
@@ -537,7 +537,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	}
 
 	
-	double alpha = .1;
+	double alpha = 1.;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
 		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);

@@ -57,7 +57,6 @@ for x in data_thinned:
     data_plot.append(x)
 data_plot = np.asarray(data_plot)
 figure = corner.corner(data_plot, labels=labels,quantiles=[.1,.5,.9], show_titles=True)
-
 axes = np.array(figure.axes).reshape(dim,dim)
 for i in np.arange(dim):
     ax = axes[i,i]

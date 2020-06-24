@@ -259,16 +259,16 @@ int main(int argc, char *argv[])
 	int *gIMR_sigmai = NULL;
 	int *gIMR_betai = NULL;
 	int *gIMR_alphai = NULL;
-	int *bppe = NULL;
+	double *bppe = NULL;
 	std::cout<<"Generation method: "<<generation_method<<std::endl;
 	if(generation_method.find("ppE") != std::string::npos){
 		Nmod = int_dict["Number of modifications"];
 		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
 		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
-		bppe= new int[Nmod];
+		bppe= new double[Nmod];
 		mod_priors = new double*[Nmod];
 		for(int i =0; i<Nmod ; i++){
-			bppe[i] = int_dict["ppE b "+std::to_string(i)];
+			bppe[i] = dbl_dict["ppE b "+std::to_string(i)];
 			mod_priors[i]= new double[2];
 			std::cout<<i<<" : "<<bppe[i]<<std::endl;
 			mod_priors[i][0] = dbl_dict["ppE beta "+std::to_string(i)+" minimum"];
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
 		Nmod = 1;
 		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
 		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
-		bppe= new int[Nmod];
+		bppe= new double[Nmod];
 		mod_priors = new double*[Nmod];
 		if(generation_method.find("dCS") != std::string::npos){
 			bppe[0] = -1;
@@ -582,7 +582,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
-	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
+	if ((pos[8])<.05 || (pos[8])>.249999){return a;}//eta
 
 	//if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	//if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
@@ -624,7 +624,7 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
-	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
+	if ((pos[8])<.05 || (pos[8])>.249999){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
@@ -663,7 +663,7 @@ double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *param
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
-	if ((pos[8])<.1 || (pos[8])>.249999){return a;}//eta
+	if ((pos[8])<.05 || (pos[8])>.249999){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
@@ -682,7 +682,7 @@ double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *p
 	double eta = pos[1];
 	//Flat priors across physical regions
 	if (exp(pos[0])<chirpmass_prior[0] || exp(pos[0])>chirpmass_prior[1]){return a;}//RA
-	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
+	if ((pos[1])<.05 || (pos[1])>.25){return a;}//sinDEC
 	//if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
 	//if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
 	double chi1 = pos[2]+pos[3];	
@@ -700,7 +700,7 @@ double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,voi
 	double eta = pos[1];
 	//Flat priors across physical regions
 	if (exp(pos[0])<chirpmass_prior[0] || exp(pos[0])>chirpmass_prior[1]){return a;}//RA
-	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
+	if ((pos[1])<.05 || (pos[1])>.25){return a;}//sinDEC
 	//if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
 	//if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
 	double chi1 = pos[2]+pos[3];	
@@ -721,7 +721,7 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 	double eta = pos[1];
 	//Flat priors across physical regions
 	if ((exp(pos[0]))<chirpmass_prior[0]|| exp(pos[0])>chirpmass_prior[1]){return a;}//RA
-	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
+	if ((pos[1])<.05 || (pos[1])>.25){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
@@ -738,7 +738,7 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,v
 	double eta = pos[1];
 	//Flat priors across physical regions
 	if ((exp(pos[0]))<chirpmass_prior[0]|| exp(pos[0])>chirpmass_prior[1]){return a;}//RA
-	if ((pos[1])<.1 || (pos[1])>.25){return a;}//sinDEC
+	if ((pos[1])<.05 || (pos[1])>.25){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 

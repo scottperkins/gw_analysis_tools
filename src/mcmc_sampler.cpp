@@ -1188,7 +1188,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<2){
+	while(continue_dynamic_search && dynamic_ct<3){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -1371,8 +1371,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double ac_save;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
-		if(realloc || status>realloc_temps_thresh){
-		//if(false){
+		//if(realloc || status>realloc_temps_thresh){
+		if(false){
 			if( 2*t0<temp_length){
 				dynamic_search_length = 2*t0;
 			}
@@ -3324,26 +3324,48 @@ void PTMCMC_MH_loop(sampler *sampler)
 					//and allowed to keep stepping at low priority-- 
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
+					//
 					else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
+					//We're gonna try something here
+					//else if(false){
 
 						sampler->waiting[i]=false;
 						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
 						sampler->priority[i] = 2;
-						int pos = sampler->chain_pos[i];
-						for (int k =0; k<sampler->max_dim; k++){
-							sampler->output[i][0][k] = 
-								sampler->output[i][pos][k] ;
-							sampler->param_status[i][0][k] = 
-								sampler->param_status[i][pos][k] ;
-						}
-						sampler->chain_pos[i] = 0;
+
+
+
+						//TESTING
+						//int pos = sampler->chain_pos[i];
+						//for (int k =0; k<sampler->max_dim; k++){
+						//	sampler->output[i][0][k] = 
+						//		sampler->output[i][pos][k] ;
+						//	sampler->param_status[i][0][k] = 
+						//		sampler->param_status[i][pos][k] ;
+						//}
+						//sampler->chain_pos[i] = 0;
+
+
+
+						//TESTING
+						sampler->chain_pos[i] = sampler->N_steps-2;
+
+
+
+
 
 						poolptr->enqueue(i);
+
+
 					}
 					else{
 						//If 1 T chain, just wait till everything else is done
 						sampler->waiting[i] = false;	
 						sampler->ref_chain_status[i] = true;	
+						//Still trying something
+						//if(fabs(sampler->chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+						//	sampler->ref_chain_status[i] = true;	
+						//}
 					}
 				}
 				

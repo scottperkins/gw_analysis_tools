@@ -875,7 +875,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	double gps_time,
 	std::string *detectors,
 	int Nmod,
-	int *bppe,
+	double *bppe,
 	std::complex<double> *hplus,
 	std::complex<double> *hcross,
 	std::string statistics_filename,
@@ -1035,7 +1035,7 @@ void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
 	double gps_time,
 	std::string *detectors,
 	int Nmod,
-	int *bppe,
+	double *bppe,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,
@@ -1168,7 +1168,7 @@ void RJPTMCMC_MH_GW(double ***output,
 		double gps_time,
 		std::string *detectors,
 		int Nmod_max,
-		int *bppe,
+		double *bppe,
 		std::string generation_method,
 		std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 		std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
@@ -4043,7 +4043,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		double psi = param[8];
 		//double lnalpha2 = param[8];
 		int mods_ct = 0;
-		int *local_bppe = new int[mcmc_Nmod_max];
+		double *local_bppe = new double[mcmc_Nmod_max];
 		double local_beta[mcmc_Nmod_max] ;
 		for(int i = mcmc_min_dim ; i < mcmc_max_dim; i++){
 			if(status[i] == 1){
@@ -4083,7 +4083,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		if(mods_ct !=0){
 			parameters.Nmod =mods_ct;
 			parameters.betappe = new double[mods_ct];
-			parameters.bppe =new int[mods_ct] ;
+			parameters.bppe =new double[mods_ct] ;
 			//parameters.betappe[0] = lnalpha2;
 			for (int j = 0 ; j<mods_ct; j++){
 				parameters.betappe[j] = local_beta[j];
@@ -4134,7 +4134,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		transform_sph_cart( &spin2sphr[0], &spin2[0]);
 	
 		int mods_ct = 0;
-		int *local_bppe = new int[mcmc_Nmod_max];
+		double *local_bppe = new double[mcmc_Nmod_max];
 		double local_beta[mcmc_Nmod_max] ;
 		for(int i = mcmc_min_dim ; i < mcmc_max_dim; i++){
 			if(status[i] == 1){
@@ -4177,7 +4177,7 @@ double RJPTMCMC_likelihood_wrapper(double *param,
 		if(mods_ct !=0){
 			parameters.Nmod =mods_ct;
 			parameters.betappe = new double[mods_ct];
-			parameters.bppe =new int[mods_ct] ;
+			parameters.bppe =new double[mods_ct] ;
 			//parameters.betappe[0] = lnalpha2;
 			for (int j = 0 ; j<mods_ct; j++){
 				parameters.betappe[j] = local_beta[j];

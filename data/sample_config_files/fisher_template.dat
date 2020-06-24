@@ -55,7 +55,7 @@
 #Number of modifications
 [int] Number of Modifications = 2
 # b ppE parameters
-[int] b ppE 0 = -1
+[dbl] b ppE 0 = -1
 [int] b ppE 1 = -2
 # injected beta parameters
 [dbl] beta ppE 0 = 0

@@ -37,6 +37,9 @@ const double AXIAL_TILT=0.409092627749;
 /*! 1AU in seconds*/
 const double AU_SEC = 499.005;
 
+/*! Planck's constant (unbarred) in ev sec*/
+const double h_planck = 4.135667696e-15;
+
 /*! Sqrt(3) comes up often, precompute it*/
 const double ROOT_THREE = std::sqrt(3.);
 
@@ -183,7 +186,9 @@ public:
 	T *delta_sigma;
 	T *delta_phi;
 	/*!ppE b parameter (power of the frequency) - vector for multiple modifications*/
-	int *bppe;
+	double *bppe;
+	double *appe;
+	T *alphappe;
 	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
 	T *betappe;
 	/*!Number of phase modificatinos*/
@@ -351,7 +356,9 @@ struct source_parameters
 	/*Beta factor for ppE formalism*/
 	T *betappe;
 	/*b power for ppE formalism*/
-	int *bppe;
+	double *bppe;
+	double *appe;
+	T *alphappe;
 
 	/*! Number of modifications to phase*/	
 	int Nmod;
@@ -425,7 +432,7 @@ double Z_from_DL_interp(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *
 double Z_from_DL(double DL, std::string cosmology);
 double DL_from_Z(double Z, std::string cosmology);
 double cosmology_interpolation_function(double x, double *coeffs, int interp_degree);
-double cosmology_lookup(std::string cosmology);
+int cosmology_lookup(std::string cosmology);
 
 template <class T>
 T fcontact(T M_detector, T DL, std::string cosmology);

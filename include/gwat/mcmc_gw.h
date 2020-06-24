@@ -32,7 +32,7 @@ static int mcmc_max_dim;
 static int mcmc_min_dim;
 static int mcmc_Nmod;
 static int mcmc_Nmod_max;
-static int *mcmc_bppe;
+static double *mcmc_bppe;
 static gsl_interp_accel **mcmc_accels = NULL;
 static gsl_spline **mcmc_splines = NULL;
 static bool mcmc_log_beta;
@@ -45,7 +45,7 @@ static gsl_rng **mcmc_rvec;
 struct MCMC_modification_struct
 {
 	int ppE_Nmod = 0; //ppE
-	int *bppe = NULL; //ppE
+	double *bppe = NULL; //ppE
 	int gIMR_Nmod_phi = 0; //gIMR
 	int *gIMR_phii = NULL; //gIMR
 	int gIMR_Nmod_sigma = 0; //gIMR
@@ -255,7 +255,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	double gps_time,
 	std::string *detectors,
 	int Nmod,
-	int *bppe,
+	double *bppe,
 	std::complex<double> *hplus,
 	std::complex<double> *hcross,
 	std::string statistics_filename,
@@ -283,7 +283,7 @@ void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
 	double gps_time,
 	std::string *detectors,
 	int Nmod,
-	int *bppe,
+	double *bppe,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,
@@ -315,7 +315,7 @@ void RJPTMCMC_MH_GW(double ***output,
 	double gps_time,
 	std::string *detectors,
 	int Nmod_max,
-	int *bppe,
+	double *bppe,
 	std::string generation_method,
 	std::string statistics_filename,
 	std::string chain_filename,

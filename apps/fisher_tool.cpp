@@ -51,13 +51,13 @@ int main(int argc, char *argv[])
 		//std::cout<<detectors[i]<<"|"<<PSDs[i]<<" ";
 	}
 	//std::cout<<std::endl;
-	int Nmod = 0; int *bppe = NULL; double *betappe = NULL;
+	int Nmod = 0; double *bppe = NULL; double *betappe = NULL;
 	if(gen_method.find("ppE") != std::string::npos){
 		Nmod = int_dict["Number of Modifications"];	
-		bppe = new int[Nmod];
+		bppe = new double[Nmod];
 		betappe = new double[Nmod];
 		for(int i = 0 ; i<Nmod ; i++){
-			bppe[i]= int_dict["b ppE "+std::to_string(i)];	
+			bppe[i]= dbl_dict["b ppE "+std::to_string(i)];	
 			betappe[i]= dbl_dict["beta ppE "+std::to_string(i)];	
 		}
 	}

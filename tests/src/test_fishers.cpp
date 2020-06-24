@@ -45,14 +45,14 @@ int test_jac_transform(int argc, char *argv[])
 {
 	std::cout.precision(15);
 	gen_params params;	
-	params.mass1 = 14.9;
-	params.mass2 = 8.3;
+	params.mass1 = 33.9;
+	params.mass2 = 29.3;
 	params.spin1[2] = .18* (params.mass1+params.mass2)/params.mass1;
 	params.spin2[2] = 0.1 ;
 	params.chip = .01;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 50;
-	params.incl_angle = M_PI/3.;
+	params.Luminosity_Distance = 300;
+	params.incl_angle = M_PI/10.;
 
 	params.NSflag1 = false;
 	params.NSflag2 =false;
@@ -76,10 +76,12 @@ int test_jac_transform(int argc, char *argv[])
 	params.sky_average = false;
 	params.Nmod = 1;
 	params.betappe = new double[1];
-	params.bppe = new int[1];
+	params.bppe = new double[1];
 	params.betappe[0] =0;
 	//params.betappe[0] =1;
-	params.bppe[0] = -13;
+	//params.bppe[0] = 9;
+	params.bppe[0] = -1.5;
+	//params.bppe[0] = -3;
 	
 
 	double fmin = 5;
@@ -111,7 +113,8 @@ int test_jac_transform(int argc, char *argv[])
 	}
 
 	//std::string method = "ExtraDimension_IMRPhenomPv2";
-	std::string method = "TVG_IMRPhenomPv2";
+	//std::string method = "TVG_IMRPhenomPv2";
+	std::string method = "ModDispersion_IMRPhenomPv2";
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 		
 	int dim = 14;
@@ -154,7 +157,6 @@ int test_jac_transform(int argc, char *argv[])
 
 	double snr; 
 
-	std::cout<<"dCS fishers: "<<std::endl;
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dim; k++){
@@ -163,6 +165,8 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
+	//output_AD[9][9]+=1;
+	//output_AD[10][10]+=1;
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
 	//std::cout<<"AD:"<<std::endl;
 	//for(int i = 0 ; i<dim; i++){
@@ -173,7 +177,6 @@ int test_jac_transform(int argc, char *argv[])
 	//	std::cout<<std::endl;
 	//}
 
-	std::cout<<"dCS fishers done "<<std::endl;
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
 	//std::cout<<"COV AD:"<<std::endl;
@@ -243,7 +246,7 @@ int test_jac_transform(int argc, char *argv[])
 	//std::cout<<std::endl;
 	//deallocate_2D_array(sub_AD_F,dim-4,dim-4);
 	std::cout<<"ppE fishers: "<<std::endl;
-	method = "ppE_IMRPhenomPv2_Inspiral";
+	method = "ppE_IMRPhenomPv2_IMR";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD2_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dim; k++){
@@ -253,7 +256,7 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 	//ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
-	ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","TVG_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
+	ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_IMR","ModDispersion_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
 	//double **derivatives = new double*[1];
 	//derivatives[0]=new double[13];
 	//ppE_theory_transformation_calculate_derivatives("ppE_IMRPhenomPv2_Inspiral","dCS_IMRPhenomPv2",dim,12, &params, derivatives);
@@ -271,9 +274,9 @@ int test_jac_transform(int argc, char *argv[])
 	}
 	gsl_LU_matrix_invert(output_AD2,COV_AD2,dim);
 	//ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
-	ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","TVG_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
+	ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_IMR","ModDispersion_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
 	
-	std::cout<<"Covariance difference: "<<std::endl;
+	std::cout<<"Covariance difference: i j frac_diff Cov1 Cov2"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		for(int j = 0 ; j<dim; j++){
 			std::cout<<i<<" "<<j<<" "<<(COV_AD[i][j]-COV_AD2_T[i][j])*2./
@@ -333,7 +336,8 @@ int test_jac_transform(int argc, char *argv[])
 	params.sky_average = true;
 	params.incl_angle = 0;
 	//method = "ExtraDimension_IMRPhenomD";
-	method = "TVG_IMRPhenomD";
+	//method = "TVG_IMRPhenomD";
+	method = "ModDispersion_IMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimDSA; k++){
@@ -343,7 +347,7 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 	
-	method = "ppE_IMRPhenomD_Inspiral";
+	method = "ppE_IMRPhenomD_IMR";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA2_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimDSA; k++){
@@ -353,7 +357,8 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 	//ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","ExtraDimension_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
-	ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","TVG_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
+	//ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","TVG_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
+	ppE_theory_fisher_transformation("ppE_IMRPhenomD_IMR","ModDispersion_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
 	
 	//std::cout<<"AD-DSA:"<<std::endl;
 	//for(int i = 0 ; i<dimDSA; i++){
@@ -500,7 +505,7 @@ int network_fishers(int argc, char *argv[])
 
 	params.Nmod = 1;
 	params.betappe = new double[1];
-	params.bppe = new int[1];
+	params.bppe = new double[1];
 	params.betappe[0] = 0;
 	//params.bppe[0] = -1.;
 	params.bppe[0] = -13;
@@ -674,14 +679,15 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.Luminosity_Distance = 730;
 	//params.incl_angle = .76;
 	
-	params.mass1 = 14.9;
-	params.mass2 = 8.3;
-	params.spin1[2] = .18* (params.mass1+params.mass2)/params.mass1;
+	params.mass1 = 25.9;
+	params.mass2 = 2.3;
+	//params.spin1[2] = .08* (params.mass1+params.mass2)/params.mass1;
+	params.spin1[2] = .08;
 	params.spin2[2] = 0 ;
-	params.chip = .01;
+	params.chip = .07;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 50;
-	params.incl_angle = M_PI/3.;
+	params.Luminosity_Distance = 250;
+	params.incl_angle = .8;
 
 	//params.mass1 = 5.0;
 	//params.mass2 = 1.4;
@@ -694,7 +700,7 @@ int dCS_EdGB(int argc, char *argv[])
 	
 
 	params.NSflag1 = false;
-	params.NSflag2 =false;
+	params.NSflag2 =true;
 
 	params.phiRef = .0;
 	params.RA = 1.;
@@ -719,11 +725,11 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.delta_phi[0]=0;
 	params.Nmod = 1;
 	params.betappe = new double[1];
-	params.bppe = new int[1];
+	params.bppe = new double[1];
 	//params.betappe[0] = pow_int(8*1000./(c),4);
 	params.betappe[0] =0;
 	//params.betappe[0] =1;
-	params.bppe[0] = -7;
+	params.bppe[0] = -1;
 	
 
 	double fmin = 5;
