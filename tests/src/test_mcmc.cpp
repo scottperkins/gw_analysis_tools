@@ -292,7 +292,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	}
 	
 	mcmc_sampler_output sampler_output(chain_N,n);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,fisher_rosenbock,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,NULL,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	sampler_output.calc_ac_vals(true);
 	for(int i = 0 ; i<sampler_output.cold_chain_number; i++){
 		std::cout<<sampler_output.max_acs[i]<<std::endl;

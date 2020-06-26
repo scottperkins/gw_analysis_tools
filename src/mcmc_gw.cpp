@@ -2225,36 +2225,36 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	//Add prior information to fisher
 	//if(mcmc_generation_method.find("Pv2") && !mcmc_intrinsic){
 	if(!mcmc_intrinsic){
-		output[0][0] += .5/(4*M_PI*M_PI);//RA
-		output[1][1] += .5/4;//sin DEC
-		output[2][2] += .5/(4*M_PI*M_PI);//psi
-		output[3][3] += .5/(4);//cos iota
-		output[4][4] += .5/(4*M_PI*M_PI);//phiref
-		output[5][5] += .5/(.01);//tc
-		output[8][8] += .5/.25;//eta
-		output[9][9] += .5/4;//spin1
-		output[10][10] += .5/4;//spin2
+		output[0][0] += 1./(4*M_PI*M_PI);//RA
+		output[1][1] += 1./4;//sin DEC
+		output[2][2] += 1./(4*M_PI*M_PI);//psi
+		output[3][3] += 1./(4);//cos iota
+		output[4][4] += 1./(4*M_PI*M_PI);//phiref
+		output[5][5] += 1./(.01);//tc
+		output[8][8] += 1./.25;//eta
+		output[9][9] += 1./4;//spin1
+		output[10][10] += 1./4;//spin2
 		if(mcmc_generation_method.find("PhenomPv2") != std::string::npos){
-			output[11][11] += .5/4;//cos theta1
-			output[12][12] += .5/4;//cos theta2
-			output[13][13] += .5/(4*M_PI*M_PI);//phi1
-			output[14][14] += .5/(4*M_PI*M_PI);//phi2
+			output[11][11] += 1./4;//cos theta1
+			output[12][12] += 1./4;//cos theta2
+			output[13][13] += 1./(4*M_PI*M_PI);//phi1
+			output[14][14] += 1./(4*M_PI*M_PI);//phi2
 		}
 	}
 	else{
 		if(mcmc_generation_method.find("PhenomPv2") != std::string::npos){
-			output[1][1] =.5/(.25) ;//eta
-			output[2][2] =.5/(4);//spin1
-			output[3][3] =.5/(4);//spin2
-			output[4][4] =.5/(4);//cos theta1
-			output[5][5] =.5/(4);//cos theta2
-			output[6][6] =.5/(4*M_PI*M_PI) ;//phi1
-			output[7][7] =.5/(4*M_PI*M_PI) ;//phi2
+			output[1][1] =1./(.25) ;//eta
+			output[2][2] =1./(4);//spin1
+			output[3][3] =1./(4);//spin2
+			output[4][4] =1./(4);//cos theta1
+			output[5][5] =1./(4);//cos theta2
+			output[6][6] =1./(4*M_PI*M_PI) ;//phi1
+			output[7][7] =1./(4*M_PI*M_PI) ;//phi2
 		}
 		else if (mcmc_generation_method.find("PhenomD")!=std::string::npos){
-			output[1][1] =.5/(.25) ;//eta
-			output[2][2] =.5/(4) ;//spin1
-			output[3][3] =.5/(4) ;//spin2
+			output[1][1] =1./(.25) ;//eta
+			output[2][2] =1./(4) ;//spin1
+			output[3][3] =1./(4) ;//spin2
 	
 		}
 	}
@@ -2383,8 +2383,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//#######################################################################3
 	//Generally, the data lengths don't have to be the same
 	//if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
-	//if(false)
 	//double snr = 0;
+	//if(false)
 	{
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
@@ -2458,80 +2458,9 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		free( hplus);
 		free( hcross);
 		free( response);
-		//Referecne detector first
-		//ll += Log_Likelihood(data[0], 
-		//		psd[0],
-		//		frequencies[0],
-		//		(size_t) data_length[0],
-		//		parameters,
-		//		detectors[0],
-		//		generation_method,
-		//		&fftw_plans[0]
-		//		);
-		//tc_ref = parameters->tc;
-		//for(int i=1; i < num_detectors; i++){
-		//	celestial_horizon_transform(RA,DEC, gps_time, 
-		//			detectors[i], &phi[i], &theta[i]);
-		//	parameters->phi=phi[i];
-		//	parameters->theta=theta[i];
-		//	delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
-		//	parameters->tc = tc_ref + delta_t;
-		//
-		//	if(generation_method.find("IMRPhenomD")!=std::string::npos){
-		//		parameters->phic = phic_ref;	
-		//	}
-		//	ll += Log_Likelihood(data[i], 
-		//			psd[i],
-		//			frequencies[i],
-		//			(size_t) data_length[i],
-		//			parameters,
-		//			detectors[i],
-		//			generation_method,
-		//			&fftw_plans[i]
-		//			);
-		//}
-
 	}
-	//else{
-	//	//Referecne detector first
-	//	ll += maximized_coal_Log_Likelihood(data[0], 
-	//			psd[0],
-	//			frequencies[0],
-	//			(size_t) data_length[0],
-	//			parameters,
-	//			detectors[0],
-	//			generation_method,
-	//			&fftw_plans[0],
-	//			&tc_ref,
-	//		&phic_ref
-	//			);
-	//	for(int i=1; i < num_detectors; i++){
-	//		celestial_horizon_transform(RA,DEC, gps_time, 
-	//				detectors[i], &phi[i], &theta[i]);
-	//		parameters->phi=phi[i];
-	//		parameters->theta=theta[i];
-	//		delta_t = DTOA(theta[0], theta[i], detectors[0], detectors[i]);
-	//		parameters->tc = tc_ref + delta_t;
-	//	
-	//		if(generation_method.find("IMRPhenomD")!=std::string::npos){
-	//			parameters->phic = phic_ref;	
-	//		}
-	//		ll += Log_Likelihood(data[i], 
-	//				psd[i],
-	//				frequencies[i],
-	//				(size_t) data_length[i],
-	//				parameters,
-	//				detectors[i],
-	//				generation_method,
-	//				&fftw_plans[i]
-	//				);
-	//	}
-	//}
-	//
-	//std::cout<<ll<<" "<<sqrt(snr)<<" "<<parameters->mass1<<" "<<parameters->mass2<<" "<<parameters->spin1[0]<<" "<<parameters->spin1[0]<<" "<<parameters->spin1[1]<<" "<<parameters->spin2[1]<<" "<<parameters->spin1[2]<<" "<<parameters->spin2[2]<<" "<<std::endl;
 	delete [] phi;
 	delete [] theta;
-	//debugger_print(__FILE__,__LINE__,std::to_string(ll));
 	return ll;
 	//return 2;
 }

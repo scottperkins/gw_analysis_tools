@@ -929,6 +929,50 @@ private:
 	}
 };
 ThreadPool *poolptr;
+
+void fisher_generic(double* position,int* status,int dim,double **fish,int chain_id,void *, sampler *sampler)
+{
+	int current_pos = sampler->chain_pos[chain_id];
+	double **cov = allocate_2D_array(dim,dim);
+	if(current_pos < 10){
+		for(int i = 0 ; i<dim ; i++){
+			for(int j = 0 ; j<dim; j++){
+				fish[i][j]=0;
+			}
+			fish[i][i]=1;
+		}
+		return;
+		
+	}
+
+	double means[dim];
+	for(int i = 0 ; i<dim ; i++){
+		means[i]=0;
+		for(int j = 0 ; j<current_pos; j++){
+			means[i]+=sampler->output[chain_id][j][i];
+		}
+		means[i]/=current_pos;
+	}
+	
+	for(int i = 0 ; i<dim ; i++){
+		for(int j = 0 ; j<=i; j++){
+			cov[i][j]=0;
+			for(int k = 0 ; k<current_pos; k++){
+				cov[i][j]+=(sampler->output[chain_id][k][i] - means[i])*
+					(sampler->output[chain_id][k][j]-means[j]);
+			}
+			cov[i][j]/=current_pos;
+		}
+	}	
+	for(int i=0 ; i<dim; i++){
+		for(int j = i ; j<dim; j++){
+			cov[i][j] = cov[j][i];
+		}
+	}
+	gsl_cholesky_matrix_invert(cov,fish,dim);
+	deallocate_2D_array(cov,dim,dim);
+}
+
 //######################################################################################
 //######################################################################################
 
@@ -1188,7 +1232,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	int dynamic_temp_freq = 1;
 	bool continue_dynamic_search=true;
 	double max_ac_realloc=0;
-	while(continue_dynamic_search && dynamic_ct<3){
+	while(continue_dynamic_search && dynamic_ct<2){
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
@@ -2942,7 +2986,11 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		samplerptr->fisher_exist = false;
+		//samplerptr->fisher_exist = false;
+		samplerptr->fisher_exist = true;
+		fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
+			return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
+		};
 	}
 	else 
 		samplerptr->fisher_exist = true;

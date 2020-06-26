@@ -786,8 +786,8 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			
 			//sampler->step_prob[chain_index][0]=.2;
 			//sampler->step_prob[chain_index][1]=.8;
-			sampler->step_prob[chain_index][0]=.3;
-			sampler->step_prob[chain_index][1]=.7;
+			sampler->step_prob[chain_index][0]=.2;
+			sampler->step_prob[chain_index][1]=.8;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
 
@@ -796,9 +796,9 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		else
 		{
 			sampler->step_prob[chain_index][0]=.05;
-			sampler->step_prob[chain_index][1]=.2;
+			sampler->step_prob[chain_index][1]=.45;
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.75;
+			sampler->step_prob[chain_index][3]=.5;
 			//Testing
 			//sampler->step_prob[chain_index][0]=.05;
 			//sampler->step_prob[chain_index][1]=.2;
