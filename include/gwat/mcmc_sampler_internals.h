@@ -40,6 +40,8 @@ public:
 	bool *de_primed;
 	int *priority;
 	bool *ref_chain_status;
+	int *ref_chain_ids;
+	int ref_chain_num;
 
 	//Sets the cold chains at higher priority to push them up the queue for
 	//swapping and stepping

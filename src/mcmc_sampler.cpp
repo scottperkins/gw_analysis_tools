@@ -976,6 +976,183 @@ void fisher_generic(double* position,int* status,int dim,double **fish,int chain
 //######################################################################################
 //######################################################################################
 
+//######################################################################################
+/*! \brief Routine to take a checkpoint file and begin a new chain at said checkpoint
+ *
+ * See MCMC_MH_internal for more details of parameters (pretty much all the same)
+ */
+void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,std::string start_checkpoint_file,/**< File for starting checkpoint*/
+	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
+	int N_steps,/**< Number of new steps to take*/
+	int temp_scale_factor,
+	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	std::function<double(double*,int*,int,int,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
+	std::function<double(double*,int*,int,int,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
+	std::function<void(double*,int*,int,double**,int,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
+	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
+	int numThreads,/**<Number of threads to use*/
+	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
+	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
+	)
+{
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+
+	//sampler sampler;
+	samplerptr = sampler;
+	
+	samplerptr->tune=true;
+
+	//if Fisher is not provided, Fisher and MALA steps
+	//aren't used
+	if(fisher ==NULL){
+		//samplerptr->fisher_exist = false;
+		samplerptr->fisher_exist = true;
+		fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
+			return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
+		};
+	}
+	else 
+		samplerptr->fisher_exist = true;
+
+	if(likelihood_log_filename !=""){
+		samplerptr->log_ll = true;
+		samplerptr->log_lp = true;
+	}
+	
+	//Construct sampler structure
+	samplerptr->lp = log_prior;
+	samplerptr->ll = log_likelihood;
+	samplerptr->fish = fisher;
+	samplerptr->swp_freq = swp_freq;
+	samplerptr->N_steps = N_steps;
+	samplerptr->show_progress = show_prog;
+	samplerptr->num_threads = numThreads;
+	samplerptr->user_parameters=user_parameters;
+
+
+	samplerptr->output = output;
+	samplerptr->pool = pool;
+
+	//Unpack checkpoint file -- allocates memory internally -- separate call unneccessary
+	load_checkpoint_file(start_checkpoint_file, samplerptr);
+
+
+	//allocate other parameters
+	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
+		assign_probabilities(samplerptr, chain_index);
+	for (int j=0;j<samplerptr->chain_N;j++){
+		samplerptr->current_likelihoods[j] =
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->dimension, j,samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+		//std::cout<<samplerptr->current_likelihoods[j]<<std::endl;
+		//step_accepted[j]=0;
+		//step_rejected[j]=0;
+	}
+	
+	//Set chains with temp 1 to highest priority
+	if(samplerptr->prioritize_cold_chains){
+		for(int i =0 ;i<samplerptr->chain_N; i++){
+			if(fabs(samplerptr->chain_temps[i]-1)<DOUBLE_COMP_THRESH)
+				samplerptr->priority[i] = 0;
+		}
+	}
+	
+	//########################################################
+	double temp_save[samplerptr->chain_N];
+	int temp_step_N = (N_steps<100)? N_steps/5: 100;
+	double temp_steps[samplerptr->chain_N];
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		temp_save[i]=samplerptr->chain_temps[i];
+		double T_max = temp_scale_factor*samplerptr->chain_temps[i];
+		double T_min = samplerptr->chain_temps[i];
+		temp_steps[i] = pow(T_min/T_max,1./temp_step_N);
+		samplerptr->chain_temps[i]=T_max;
+	}
+	int steps_per_temp = N_steps/temp_step_N;
+		
+	for(int i = 0 ; i<temp_step_N ; i++){
+		//debugger_print(__FILE__,__LINE__,"Steps: "+std::to_string(i*steps_per_temp));
+		//for(int j = 0 ; j<samplerptr->chain_N; j++){
+		//	samplerptr->chain_temps[j] = temp_steps[j]*samplerptr->chain_temps[j];
+		//	std::cout<<samplerptr->chain_temps[j]<<" ";
+		//}
+		//std::cout<<std::endl;
+			
+		PTMCMC_MH_step_incremental(samplerptr, steps_per_temp);
+	}
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		samplerptr->chain_temps[i]=temp_save[i];
+	}
+	//##############################################################
+	
+	end =clock();
+	wend =omp_get_wtime();
+
+	samplerptr->time_elapsed_cpu = (double)(end-start)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall = (double)(wend-wstart);
+
+	if(show_prog){
+		std::cout<<std::endl;
+	}
+	//############################################################
+	//Write ll lp to file
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	}
+	//############################################################
+	
+	//###########################################################
+	//Auto-correlation
+	if(auto_corr_filename != ""){
+		std::cout<<"Calculating Autocorrelation: "<<std::endl;
+		int segments = 50;
+		double target_corr = .01;
+		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
+	}
+	//###########################################################
+	acend =clock();
+	wacend =omp_get_wtime();
+	samplerptr->time_elapsed_cpu_ac = (double)(acend-end)/CLOCKS_PER_SEC;
+	samplerptr->time_elapsed_wall_ac = (double)(wacend - wend);
+
+	//std::cout<<std::endl;
+	//double accepted_percent = (double)(swp_accepted)/(swp_accepted+swp_rejected);
+	//double rejected_percent = (double)(swp_rejected)/(swp_accepted+swp_rejected);
+	//std::cout<<"Accepted percentage of chain swaps (all chains): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of chain swaps (all chains): "<<rejected_percent<<std::endl;
+	//accepted_percent = (double)(step_accepted[0])/(step_accepted[0]+step_rejected[0]);
+	//rejected_percent = (double)(step_rejected[0])/(step_accepted[0]+step_rejected[0]);
+	//std::cout<<"Accepted percentage of steps (cold chain): "<<accepted_percent<<std::endl;
+	//std::cout<<"Rejected percentage of steps (cold chain): "<<rejected_percent<<std::endl;
+	//double nansum=0;
+	//for (int i =0; i< chain_N; i++)
+	//	nansum+= samplerptr->nan_counter[i];
+	//std::cout<<"NANS in Fisher Calculations (all chains): "<<nansum<<std::endl;
+	
+	if(statistics_filename != "")
+		write_stat_file(samplerptr, statistics_filename);
+	
+	if(chain_filename != "")
+		write_output_file(chain_filename, samplerptr->N_steps, samplerptr->max_dim, samplerptr->output, samplerptr->param_status,samplerptr->chain_N,samplerptr->chain_temps,false);
+
+	if(end_checkpoint_file !=""){
+		write_checkpoint_file(samplerptr, end_checkpoint_file);
+	}
+
+	//free(step_accepted);
+	//free(step_rejected);
+	//temps usually allocated by user, but for continued chains, this is done internally
+	free(samplerptr->chain_temps);
+	//deallocate_sampler_mem(samplerptr);
+}
 
 //######################################################################################
 //######################################################################################
@@ -1247,13 +1424,20 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
 				user_parameters,numThreads, pool,internal_prog,true,"","","",checkpoint_file);
 		}
-		
 		sampler sampler;
+		continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
+			100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			numThreads, pool, internal_prog, statistics_filename, 
+			"", "",likelihood_log_filename, checkpoint_file);
+		deallocate_sampler_mem(&sampler);
+
 		continue_PTMCMC_MH_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"", "",likelihood_log_filename, checkpoint_file,true);
+
 		deallocate_sampler_mem(&sampler);
+
 			
 		//####################################################################################
 		/* Save -- version that combines before calculating AC*/
@@ -1479,11 +1663,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 		}
 		else{
-			if(ac_mean > 2*ac_save){
-				debugger_print(__FILE__,__LINE__,"Resetting trim");
-				sampler_output->set_trim(pos_mean);	
-				//sampler_output->create_data_dump(true,false, chain_filename);
-			}
+			//if(ac_mean > 2*ac_save){
+			//	debugger_print(__FILE__,__LINE__,"Resetting trim");
+			//	sampler_output->set_trim(pos_mean);	
+			//	//sampler_output->create_data_dump(true,false, chain_filename);
+			//}
 			//else{
 			sampler_output->append_to_data_dump(chain_filename);
 			//}
@@ -3236,7 +3420,9 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 					//and allowed to keep stepping at low priority-- 
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
-					else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
+					//TESTING NEW METHOD
+					else if( ! check_list(i,sampler->ref_chain_ids,sampler->ref_chain_num) ){
+					//else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
 
 						sampler->waiting[i]=false;
 						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
@@ -3373,7 +3559,9 @@ void PTMCMC_MH_loop(sampler *sampler)
 					//not sure if this is the best
 					//method for keeping the 0th chain from finishing last or not
 					//
-					else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
+					//TESTING
+					else if( ! check_list(i,sampler->ref_chain_ids,sampler->ref_chain_num) ){
+					//else if(fabs(sampler->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
 					//We're gonna try something here
 					//else if(false){
 

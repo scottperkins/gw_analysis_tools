@@ -1173,12 +1173,17 @@ void allocate_sampler_mem(sampler *sampler)
 	}
 
 	sampler->ref_chain_status = (bool *) malloc(sizeof(bool)*sampler->chain_N);
+	sampler->ref_chain_ids = (int *) malloc(sizeof(int)*sampler->chain_N);
 
+	sampler->ref_chain_num = 0 ;
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		//designate T=1 chains as reference chains
 		if(fabs(sampler->chain_temps[i] - 1)<DOUBLE_COMP_THRESH){
 			sampler->ref_chain_status[i] = false;
+			sampler->ref_chain_ids[sampler->ref_chain_num]=i;
+			sampler->ref_chain_num++;
+				
 		}
 		else{
 			sampler->ref_chain_status[i] = true;
@@ -1395,6 +1400,7 @@ void deallocate_sampler_mem(sampler *sampler)
 		free(sampler->history_status);
 	}
 	free(sampler->ref_chain_status);
+	free(sampler->ref_chain_ids);
 	
 
 	//Trouble shooting
