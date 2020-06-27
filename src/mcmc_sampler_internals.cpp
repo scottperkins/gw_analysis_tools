@@ -796,9 +796,9 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		else
 		{
 			sampler->step_prob[chain_index][0]=.05;
-			sampler->step_prob[chain_index][1]=.45;
+			sampler->step_prob[chain_index][1]=.20;
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.5;
+			sampler->step_prob[chain_index][3]=.75;
 			//Testing
 			//sampler->step_prob[chain_index][0]=.05;
 			//sampler->step_prob[chain_index][1]=.2;
@@ -1282,8 +1282,8 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->prop_MH_factor[i]=0;
 	}		
 	if(sampler->tune){
-		//sampler->fisher_update_number = 200;
-		sampler->fisher_update_number = 50;
+		sampler->fisher_update_number = 200;
+		//sampler->fisher_update_number = 50;
 	}
 	else{
 		sampler->fisher_update_number = sampler->N_steps;

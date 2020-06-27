@@ -3384,19 +3384,19 @@ void PTMCMC_MH_loop(sampler *sampler)
 
 
 						//TESTING
-						//int pos = sampler->chain_pos[i];
-						//for (int k =0; k<sampler->max_dim; k++){
-						//	sampler->output[i][0][k] = 
-						//		sampler->output[i][pos][k] ;
-						//	sampler->param_status[i][0][k] = 
-						//		sampler->param_status[i][pos][k] ;
-						//}
-						//sampler->chain_pos[i] = 0;
+						int pos = sampler->chain_pos[i];
+						for (int k =0; k<sampler->max_dim; k++){
+							sampler->output[i][0][k] = 
+								sampler->output[i][pos][k] ;
+							sampler->param_status[i][0][k] = 
+								sampler->param_status[i][pos][k] ;
+						}
+						sampler->chain_pos[i] = 0;
 
 
 
 						//TESTING
-						sampler->chain_pos[i] = sampler->N_steps-2;
+						//sampler->chain_pos[i] = sampler->N_steps-2;
 
 
 
