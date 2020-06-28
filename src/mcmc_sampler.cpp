@@ -1521,11 +1521,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 		std::cout<<"Annealing"<<std::endl;
 		sampler sampler;
-		continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
-			100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-			numThreads, pool, internal_prog, statistics_filename, 
-			"", checkpoint_file);
-		deallocate_sampler_mem(&sampler);
+		//continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
+		//	100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+		//	numThreads, pool, internal_prog, statistics_filename, 
+		//	"", checkpoint_file);
+		//deallocate_sampler_mem(&sampler);
 
 		std::cout<<"Exploration"<<std::endl;
 		continue_PTMCMC_MH_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
@@ -1767,7 +1767,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//is 500x the average ac (trimming as we go, for the ac
 			debugger_print(__FILE__,__LINE__,std::string("Pos/ac: ")+std::to_string(pos_mean/ac_mean));
 			delete [] temp_positions;
-			if(pos_mean/ac_mean <100){
+			//if(pos_mean/ac_mean <100){
+			if(false){
 				sampler_output->set_trim(pos_mean);	
 			}
 			else{
