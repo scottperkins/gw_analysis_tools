@@ -30,9 +30,10 @@ public:
 	~mcmc_sampler_output();
 	void populate_chain_temperatures(double *temperatures);
 	void update_cold_chain_list();
-	void populate_initial_output(double ***new_output,int *chain_positions);
-	void append_to_output(double ***new_output, int *chain_positions);
+	void populate_initial_output(double ***new_output,double ***new_logL_logP,int *chain_positions);
+	void append_to_output(double ***new_output,double ***new_logL_logP, int *chain_positions);
 	void dealloc_output();
+	void dealloc_logL_logP();
 	void calc_ac_vals( bool trim);
 	void count_indep_samples(bool trim);
 	int create_data_dump(bool cold_only,bool trim,std::string filename);
@@ -46,6 +47,7 @@ public:
 	int *cold_chain_ids=NULL;
 	int cold_chain_number;
 	double ***output=NULL;
+	double ***logL_logP=NULL;
 	int *chain_lengths=NULL;
 	int dimension;
 	int **ac_vals=NULL;
@@ -426,7 +428,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	bool dynamic_chain_number,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
@@ -447,7 +448,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
@@ -468,7 +468,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
 void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, 
@@ -493,7 +492,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output,
 	bool dynamic_chain_number,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
@@ -517,7 +515,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
@@ -541,7 +538,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output,
 	bool show_prog, 
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_file
 	);
 void continue_PTMCMC_MH(std::string start_checkpoint_file,
@@ -557,8 +553,6 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	bool show_prog,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
 	std::string end_checkpoint_file,
 	bool tune
 	);
@@ -575,8 +569,6 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,
 	bool show_prog,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
 	std::string end_checkpoint_file,
 	bool tune
 	);
@@ -601,8 +593,6 @@ void PTMCMC_MH(	double ***output,
 	bool show_prog,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_filename
 	);
 void PTMCMC_MH(	double ***output, 
@@ -622,8 +612,6 @@ void PTMCMC_MH(	double ***output,
 	bool show_prog,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_filename
 	);
 void PTMCMC_MH_internal(	double ***output, 
@@ -643,8 +631,6 @@ void PTMCMC_MH_internal(	double ***output,
 	bool show_prog,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
 	std::string checkpoint_filename
 	);
 void continue_PTMCMC_MH_internal(sampler *samplerptr, 
@@ -661,8 +647,6 @@ void continue_PTMCMC_MH_internal(sampler *samplerptr,
 	bool show_prog,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
 	std::string end_checkpoint_file,
 	bool tune
 	);

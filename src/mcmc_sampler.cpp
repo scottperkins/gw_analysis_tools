@@ -74,6 +74,7 @@ mcmc_sampler_output::~mcmc_sampler_output()
 		cold_chain_ids=NULL;		
 	}
 	dealloc_output();
+	dealloc_logL_logP();
 	if(chain_lengths){
 		delete [] chain_lengths;
 		chain_lengths = NULL;
@@ -141,23 +142,29 @@ void mcmc_sampler_output::update_cold_chain_list()
 	delete [] cold_chain_ids_temp;
 	cold_chain_ids_temp = NULL;
 }
-void mcmc_sampler_output::populate_initial_output(double ***new_output,int *chain_positions)
+void mcmc_sampler_output::populate_initial_output(double ***new_output,double ***new_logL_logP,int *chain_positions)
 {
 	dealloc_output();	
+	dealloc_logL_logP();	
 	output = new double**[chain_number];
+	logL_logP = new double**[chain_number];
 	for(int i = 0 ;i<chain_number; i++){
 		chain_lengths[i]=chain_positions[i];
 		output[i]=new double*[chain_positions[i]];
+		logL_logP[i]=new double*[chain_positions[i]];
 		for(int j =0 ; j<chain_positions[i];j++){
+			logL_logP[i][j] = new double[2];
 			output[i][j]=new double[dimension];
 			for(int k =0 ; k<dimension; k++){
 				output[i][j][k]=new_output[i][j][k];
 			}
+			logL_logP[i][j][0] = new_logL_logP[i][j][0];
+			logL_logP[i][j][1] = new_logL_logP[i][j][1];
 		}
 	}
 }
 
-void mcmc_sampler_output::append_to_output(double ***new_output, int *chain_positions)
+void mcmc_sampler_output::append_to_output(double ***new_output,double ***new_logL_logP, int *chain_positions)
 {
 	int *new_lengths= new int[chain_number];
 	for(int i = 0 ; i<chain_number; i++){
@@ -165,47 +172,65 @@ void mcmc_sampler_output::append_to_output(double ***new_output, int *chain_posi
 	}
 	//Copy all values into new temp array
 	double ***new_total_output = new double**[chain_number];
+	double ***new_total_logL_logP = new double**[chain_number];
 	for(int i = 0 ; i<chain_number ; i++){
 		new_total_output[i] = new double*[new_lengths[i]];
+		new_total_logL_logP[i] = new double*[new_lengths[i]];
 		for(int j = 0 ; j<new_lengths[i]; j++){
 			new_total_output[i][j] = new double[dimension];
+			new_total_logL_logP[i][j] = new double[2];
 			if(j <chain_lengths[i]){
 				for (int k = 0 ; k<dimension ; k++){
 					new_total_output[i][j][k] = output[i][j][k];
 				}
+				new_total_logL_logP[i][j][0] = logL_logP[i][j][0];
+				new_total_logL_logP[i][j][1] = logL_logP[i][j][1];
 			}
 			else{
 				for (int k = 0 ; k<dimension ; k++){
 					new_total_output[i][j][k] 
 						= new_output[i][j - chain_lengths[i]][k];
 				}
+				new_total_logL_logP[i][j][0] = 
+					new_logL_logP[i][j - chain_lengths[i]][0];
+				new_total_logL_logP[i][j][1] = 
+					new_logL_logP[i][j - chain_lengths[i]][1];
 			}
 		}
 	}
 	//deallocate and move values into output
 	dealloc_output();
+	dealloc_logL_logP();
 	output = new double**[chain_number];
+	logL_logP = new double**[chain_number];
 	for(int i = 0 ; i<chain_number ; i++){
 		chain_lengths[i]=new_lengths[i];
 		output[i] = new double*[new_lengths[i]];
+		logL_logP[i] = new double*[new_lengths[i]];
 		for(int j = 0 ; j<new_lengths[i]; j++){
 			output[i][j] = new double[dimension];
+			logL_logP[i][j] = new double[2];
 			for (int k = 0 ; k<dimension ; k++){
 				output[i][j][k] = new_total_output[i][j][k];
-				}
+			}
+			logL_logP[i][j][0] = new_total_logL_logP[i][j][0];
+			logL_logP[i][j][1] = new_total_logL_logP[i][j][1];
 		}
 	}
 	for(int j = 0 ; j<chain_number;j ++){
 		for(int i = 0 ; i<chain_lengths[j];i ++){
 			delete [] new_total_output[j][i];		
+			delete [] new_total_logL_logP[j][i];		
 		}
 		delete [] new_total_output[j];		
+		delete [] new_total_logL_logP[j];		
 	}
 	delete [] new_total_output;		
+	delete [] new_total_logL_logP;		
 	new_total_output= NULL;
+	new_total_logL_logP= NULL;
 	delete [] new_lengths;
 	new_lengths = NULL;
-	
 }
 void mcmc_sampler_output::dealloc_output()
 {
@@ -218,6 +243,19 @@ void mcmc_sampler_output::dealloc_output()
 		}
 		delete [] output;		
 		output= NULL;
+	}
+}
+void mcmc_sampler_output::dealloc_logL_logP()
+{
+	if(logL_logP){
+		for(int j = 0 ; j<chain_number;j ++){
+			for(int i = 0 ; i<chain_lengths[j];i ++){
+				delete [] logL_logP[j][i];	
+			}
+			delete [] logL_logP[j];		
+		}
+		delete [] logL_logP;		
+		logL_logP= NULL;
 	}
 }
 
@@ -464,53 +502,81 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 		}
 		H5::H5File file(FILE_NAME,H5F_ACC_TRUNC);
 		H5::Group output_group(file.createGroup("/MCMC_OUTPUT"));
+		H5::Group output_LL_LP_group(file.createGroup("/MCMC_OUTPUT/LOGL_LOGP"));
 		H5::Group meta_group(file.createGroup("/MCMC_METADATA"));
 		double *temp_buffer=NULL;
+		double *temp_ll_lp_buffer=NULL;
 		H5::DataSpace *dataspace=NULL ;
+		H5::DataSpace *dataspace_ll_lp=NULL ;
 		H5::DataSet *dataset=NULL;
+		H5::DataSet *dataset_ll_lp=NULL;
 		H5::DSetCreatPropList *plist=NULL;
+		H5::DSetCreatPropList *plist_ll_lp=NULL;
 		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
+		hsize_t chunk_dims_ll_lp[2] = {chunk_steps,2};	
 		hsize_t max_dims[2] = {H5S_UNLIMITED,H5S_UNLIMITED};
 		for(int i = 0 ; i<chains; i++){
 			int RANK=2;
 			hsize_t dims[RANK];
+			hsize_t dims_ll_lp[RANK];
 			if(trim){
 				dims[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
+				dims_ll_lp[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
 			}
 			else{
 				dims[0]= chain_lengths[ids[i]];
+				dims_ll_lp[0]= chain_lengths[ids[i]];
 			}
 			dims[1]= dimension;
+			dims_ll_lp[1]= 2;
 
-			if(chunk_steps>dims[0]){chunk_dims[0] = dims[0];}
-			else{chunk_dims[0] = chunk_steps;}
+			if(chunk_steps>dims[0]){chunk_dims_ll_lp[0]=dims[0];chunk_dims[0] = dims[0];}
+			else{chunk_dims_ll_lp[0]=chunk_steps;chunk_dims[0] = chunk_steps;}
 
 			dataspace = new H5::DataSpace(RANK,dims,max_dims);
+			dataspace_ll_lp = new H5::DataSpace(RANK,dims_ll_lp,max_dims);
 	
 			plist = new H5::DSetCreatPropList;
 			plist->setChunk(2,chunk_dims);
 			plist->setDeflate(6);
 
+			plist_ll_lp = new H5::DSetCreatPropList;
+			plist_ll_lp->setChunk(2,chunk_dims_ll_lp);
+			plist_ll_lp->setDeflate(6);
+
 			dataset = new H5::DataSet(
 				output_group.createDataSet("CHAIN "+std::to_string(ids[i]),
 					H5::PredType::NATIVE_DOUBLE,*dataspace,*plist)
 				);
+			dataset_ll_lp = new H5::DataSet(
+				output_LL_LP_group.createDataSet("CHAIN "+std::to_string(ids[i]),
+					H5::PredType::NATIVE_DOUBLE,*dataspace_ll_lp,*plist_ll_lp)
+				);
 
 			temp_buffer = new double[ int(dims[0]*dims[1]) ];
+			temp_ll_lp_buffer = new double[ int(dims_ll_lp[0]*dims_ll_lp[1]) ];
 			int beginning_id=0;
 			if(trim){ beginning_id =trim_lengths[ids[i]];}
 			for(int j = 0 ; j<chain_lengths[ids[i]] - beginning_id; j++){
 				for(int k = 0 ; k<dimension; k++){
 					temp_buffer[j*dimension +k] = output[ids[i]][j+beginning_id][k];	
 				}
+				temp_ll_lp_buffer[j*2]=logL_logP[ids[i]][j+beginning_id][0];
+				temp_ll_lp_buffer[j*2+1]=logL_logP[ids[i]][j+beginning_id][1];
 			}
-			dataset->write(temp_buffer, H5::PredType::NATIVE_DOUBLE);	
+			dataset->write(temp_buffer, H5::PredType::NATIVE_DOUBLE);
+			dataset_ll_lp->write(temp_ll_lp_buffer, H5::PredType::NATIVE_DOUBLE);
 			//Cleanup
 			delete dataset;
+			delete dataset_ll_lp;
 			delete dataspace;
+			delete dataspace_ll_lp;
 			delete plist;
+			delete plist_ll_lp;
 			delete [] temp_buffer;
+			delete [] temp_ll_lp_buffer;
 			temp_buffer = NULL;
+			temp_ll_lp_buffer = NULL;
 		}
 		hsize_t dimsT[1];
 		dimsT[0]= chain_number;
@@ -560,6 +626,7 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 
 	
 		//Cleanup
+		output_LL_LP_group.close();
 		output_group.close();
 		meta_group.close();
 		if(!cold_only){
@@ -624,71 +691,115 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 		}
 		H5::H5File file(FILE_NAME,H5F_ACC_RDWR);
 		H5::Group output_group(file.openGroup("/MCMC_OUTPUT"));
+		H5::Group output_LL_LP_group(file.openGroup("/MCMC_OUTPUT/LOGL_LOGP"));
 		H5::Group meta_group(file.openGroup("/MCMC_METADATA"));
 		double *temp_buffer=NULL;
+		double *temp_buffer_ll_lp=NULL;
 		H5::DataSpace *dataspace=NULL ;
+		H5::DataSpace *dataspace_ll_lp=NULL ;
 		H5::DataSpace *dataspace_ext=NULL ;
+		H5::DataSpace *dataspace_ext_ll_lp=NULL ;
 		H5::DataSet *dataset=NULL;
+		H5::DataSet *dataset_ll_lp=NULL;
 		H5::DSetCreatPropList *plist=NULL;
+		H5::DSetCreatPropList *plist_ll_lp=NULL;
 		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
+		hsize_t chunk_dims_ll_lp[2] = {chunk_steps,2};	
 		hsize_t max_dims[2] = {H5S_UNLIMITED,H5S_UNLIMITED};
 		for(int i = 0 ; i<chains; i++){
 			dataset = new H5::DataSet(output_group.openDataSet("CHAIN "+std::to_string(ids[i])));
+			dataset_ll_lp = new H5::DataSet(output_LL_LP_group.openDataSet("CHAIN "+std::to_string(ids[i])));
 			
 			dataspace = new H5::DataSpace(dataset->getSpace());
+			dataspace_ll_lp = new H5::DataSpace(dataset_ll_lp->getSpace());
+
 			plist = new H5::DSetCreatPropList(dataset->getCreatePlist());
+			plist_ll_lp = new H5::DSetCreatPropList(dataset_ll_lp->getCreatePlist());
 			int RANK = dataspace->getSimpleExtentNdims();
+			int RANK_ll_lp = dataspace_ll_lp->getSimpleExtentNdims();
 			hsize_t base_dims[RANK];
+			hsize_t base_dims_ll_lp[RANK_ll_lp];
 			herr_t status = dataspace->getSimpleExtentDims(base_dims);
+			status = dataspace_ll_lp->getSimpleExtentDims(base_dims_ll_lp);
 			int RANK_chunked;
+			int RANK_chunked_ll_lp;
 			hsize_t base_chunk_dims[RANK];
+			hsize_t base_chunk_dims_ll_lp[RANK_ll_lp];
 			if(H5D_CHUNKED == plist->getLayout()){
 				RANK_chunked= plist->getChunk(RANK,base_chunk_dims);
 			}
+			if(H5D_CHUNKED == plist_ll_lp->getLayout()){
+				RANK_chunked_ll_lp= plist_ll_lp->getChunk(RANK_ll_lp,base_chunk_dims_ll_lp);
+			}
 			
 			hsize_t new_size[RANK];
+			hsize_t new_size_ll_lp[RANK];
 			if(dump_files[file_id]->trimmed){
 				new_size[0]= chain_lengths[ids[i]]-dump_files[file_id]->file_trim_lengths[ids[i]];
+				new_size_ll_lp[0]= chain_lengths[ids[i]]-dump_files[file_id]->file_trim_lengths[ids[i]];
 			}
 			else{
 				new_size[0]= chain_lengths[ids[i]];
+				new_size_ll_lp[0]= chain_lengths[ids[i]];
 			}
 			new_size[1]= dimension;
+			new_size_ll_lp[1]= 2;
 			dataset->extend(new_size);
+			dataset_ll_lp->extend(new_size_ll_lp);
 
 			delete dataspace;
+			delete dataspace_ll_lp;
 			dataspace = new H5::DataSpace(dataset->getSpace());
+			dataspace_ll_lp = new H5::DataSpace(dataset_ll_lp->getSpace());
 			
 			hsize_t dimext[RANK];	
+			hsize_t dimext_ll_lp[RANK];	
 			dimext[0]=new_size[0]-base_dims[0];
 			dimext[1]=dimension;
+			dimext_ll_lp[0]=new_size_ll_lp[0]-base_dims_ll_lp[0];
+			dimext_ll_lp[1]=2;
 			
 			hsize_t offset[RANK];
+			hsize_t offset_ll_lp[RANK];
 			offset[0]=base_dims[0];	
 			offset[1]=0;	
+			offset_ll_lp[0]=base_dims_ll_lp[0];	
+			offset_ll_lp[1]=0;	
 
 			dataspace->selectHyperslab(H5S_SELECT_SET,dimext,offset);
+			dataspace_ll_lp->selectHyperslab(H5S_SELECT_SET,dimext_ll_lp,offset_ll_lp);
 
 			dataspace_ext = new H5::DataSpace(RANK, dimext,NULL);
+			dataspace_ext_ll_lp = new H5::DataSpace(RANK_ll_lp, dimext_ll_lp,NULL);
 
 			temp_buffer = new double[ dimext[0]*dimext[1] ];
+			temp_buffer_ll_lp = new double[ dimext_ll_lp[0]*dimext_ll_lp[1] ];
 			int beginning_id = 0 ; 
 			if(dump_files[file_id]->trimmed){beginning_id = dump_files[file_id]->file_trim_lengths[ids[i]];}
 			for(int j = base_dims[0] ; j<chain_lengths[ids[i]]-beginning_id; j++){
 				for(int k = 0 ; k<dimension; k++){
 					temp_buffer[(j-base_dims[0])*dimension +k] = output[ids[i]][j+beginning_id][k];	
 				}
+				temp_buffer_ll_lp[(j-base_dims_ll_lp[0])*2 ] = logL_logP[ids[i]][j+beginning_id][0];	
+				temp_buffer_ll_lp[(j-base_dims_ll_lp[0])*2+1 ] = logL_logP[ids[i]][j+beginning_id][1];	
 			}
 			
 			dataset->write(temp_buffer,H5::PredType::NATIVE_DOUBLE,*dataspace_ext, *dataspace);
+			dataset_ll_lp->write(temp_buffer_ll_lp,H5::PredType::NATIVE_DOUBLE,*dataspace_ext_ll_lp, *dataspace_ll_lp);
 			
 		//	//Cleanup
 			delete dataset;
+			delete dataset_ll_lp;
 			delete dataspace;
+			delete dataspace_ll_lp;
 			delete dataspace_ext;
+			delete dataspace_ext_ll_lp;
 			delete plist;
+			delete plist_ll_lp;
 			delete [] temp_buffer;
+			delete [] temp_buffer_ll_lp;
 			temp_buffer = NULL;
+			temp_buffer_ll_lp = NULL;
 		}
 
 
@@ -713,7 +824,7 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 					int_temp_buffer[i*dimension +j ] = ac_vals[i][j];
 				}
 			}
-			dataset->write(ac_vals, H5::PredType::NATIVE_INT);	
+			dataset->write(int_temp_buffer, H5::PredType::NATIVE_INT);	
 			delete [] int_temp_buffer;
 			int_temp_buffer = NULL;
 			delete dataset;
@@ -981,7 +1092,8 @@ void fisher_generic(double* position,int* status,int dim,double **fish,int chain
  *
  * See MCMC_MH_internal for more details of parameters (pretty much all the same)
  */
-void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,std::string start_checkpoint_file,/**< File for starting checkpoint*/
+void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
+	std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
 	int temp_scale_factor,
@@ -995,8 +1107,6 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,std::strin
 	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	)
 {
@@ -1022,10 +1132,8 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,std::strin
 	else 
 		samplerptr->fisher_exist = true;
 
-	if(likelihood_log_filename !=""){
-		samplerptr->log_ll = true;
-		samplerptr->log_lp = true;
-	}
+	samplerptr->log_ll = true;
+	samplerptr->log_lp = true;
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -1103,20 +1211,20 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,std::strin
 	}
 	//############################################################
 	//Write ll lp to file
-	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	//if(samplerptr->log_ll && samplerptr->log_lp){
+		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
 		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
-	}
+	//}
 	//############################################################
 	
 	//###########################################################
 	//Auto-correlation
-	if(auto_corr_filename != ""){
-		std::cout<<"Calculating Autocorrelation: "<<std::endl;
-		int segments = 50;
-		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
-	}
+	//if(auto_corr_filename != ""){
+	//	std::cout<<"Calculating Autocorrelation: "<<std::endl;
+	//	int segments = 50;
+	//	double target_corr = .01;
+	//	write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
+	//}
 	//###########################################################
 	acend =clock();
 	wacend =omp_get_wtime();
@@ -1211,7 +1319,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 		dynamic_search_length,  max_chain_N_thermo_ensemble, 
 		 chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,true,"","","",checkpoint_file);
+		numThreads, pool,internal_prog,true,"","",checkpoint_file);
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 	
  	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(sampler_output,
@@ -1298,7 +1406,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
 		initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,true,"","","",checkpoint_file);
+		numThreads, pool,internal_prog,true,"","",checkpoint_file);
 	
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
@@ -1411,6 +1519,23 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double max_ac_realloc=0;
 	while(continue_dynamic_search && dynamic_ct<2){
 
+		std::cout<<"Annealing"<<std::endl;
+		sampler sampler;
+		continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
+			100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			numThreads, pool, internal_prog, statistics_filename, 
+			"", checkpoint_file);
+		deallocate_sampler_mem(&sampler);
+
+		std::cout<<"Exploration"<<std::endl;
+		continue_PTMCMC_MH_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
+			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			numThreads, pool, internal_prog, statistics_filename, 
+			"",  checkpoint_file,true);
+
+		deallocate_sampler_mem(&sampler);
+
+
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
 			//	dynamic_search_length = 5*t0;
@@ -1418,25 +1543,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//else{
 			//	dynamic_search_length = temp_length;
 			//}
+			std::cout<<"Temperature Relaxation"<<std::endl;
 			continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,true,"","","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file);
 		}
-		sampler sampler;
-		continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
-			100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-			numThreads, pool, internal_prog, statistics_filename, 
-			"", "",likelihood_log_filename, checkpoint_file);
-		deallocate_sampler_mem(&sampler);
-
-		continue_PTMCMC_MH_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
-			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-			numThreads, pool, internal_prog, statistics_filename, 
-			"", "",likelihood_log_filename, checkpoint_file,true);
-
-		deallocate_sampler_mem(&sampler);
 
 			
 		//####################################################################################
@@ -1556,10 +1669,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
-		if(temp_length < 10*max_ac_realloc){
-			if(10*max_ac_realloc < max_chunk_size){
+		if(temp_length < 50*max_ac_realloc){
+			if(50*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 10*max_ac_realloc;
+				temp_length = 50*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -1599,8 +1712,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double ac_save;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
-		//if(realloc || status>realloc_temps_thresh){
-		if(false){
+		if(realloc || status>realloc_temps_thresh){
+		//if(false){
 			if( 2*t0<temp_length){
 				dynamic_search_length = 2*t0;
 			}
@@ -1611,13 +1724,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,false,"","","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,false,"","",checkpoint_file);
 
 			sampler sampler;
 			continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, dynamic_search_length, 
 				swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 				numThreads, pool, internal_prog, statistics_filename, 
-				"","",likelihood_log_filename, checkpoint_file,true);
+				"", checkpoint_file,true);
 
 			realloc_temps_thresh+=realloc_temps_length;
 			realloc=false;
@@ -1627,15 +1740,15 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			"","",likelihood_log_filename, checkpoint_file,false);
+			"", checkpoint_file,false);
 
 		sampler_output->populate_chain_temperatures(chain_temps);
 		if(init){
-			sampler_output->populate_initial_output(temp_output,sampler.chain_pos)	;
+			sampler_output->populate_initial_output(temp_output, sampler.ll_lp_output,sampler.chain_pos)	;
 			init=false;
 		}
 		else{
-			sampler_output->append_to_output(temp_output,sampler.chain_pos)	;
+			sampler_output->append_to_output(temp_output,sampler.ll_lp_output,sampler.chain_pos)	;
 		}
 		sampler_output->calc_ac_vals(true);
 		sampler_output->count_indep_samples(true);
@@ -1827,11 +1940,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
 		//if(false){
-		if(temp_length < 10*max_ac_realloc){
+		if(temp_length < 50*max_ac_realloc){
 
-			if(10*max_ac_realloc < max_chunk_size){
+			if(50*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 10*max_ac_realloc;
+				temp_length = 50*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -2312,7 +2425,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	bool dynamic_chain_number,
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -2333,10 +2445,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	else 
 		samplerptr->fisher_exist = true;
 	
-	if(likelihood_log_filename !=""){
-		samplerptr->log_ll = true;
-		samplerptr->log_lp = true;
-	}
+	samplerptr->log_ll = false;
+	samplerptr->log_lp = false;
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -2422,10 +2532,10 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 
 	//############################################################
 	//Write ll lp to file
-	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
-	}
+	//if(samplerptr->log_ll && samplerptr->log_lp){
+	//	write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	//	//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	//}
 	//############################################################
 	//#################################################################
 	//
@@ -2510,7 +2620,6 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	bool dynamic_chain_number,
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -2530,10 +2639,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	else 
 		samplerptr->fisher_exist = true;
 	
-	if(likelihood_log_filename !=""){
-		samplerptr->log_ll = true;
-		samplerptr->log_lp = true;
-	}
+	samplerptr->log_ll = false;
+	samplerptr->log_lp = false;
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -2613,10 +2720,10 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 
 	//############################################################
 	//Write ll lp to file
-	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
-	}
+	//if(samplerptr->log_ll && samplerptr->log_lp){
+	//	write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	//	//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	//}
 	//############################################################
 	//#################################################################
 	//
@@ -2987,8 +3094,6 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -3008,10 +3113,8 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	else 
 		samplerptr->fisher_exist = true;
 	
-	if(likelihood_log_filename !=""){
-		samplerptr->log_ll = true;
-		samplerptr->log_lp = true;
-	}
+	samplerptr->log_ll = true;
+	samplerptr->log_lp = true;
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -3065,10 +3168,10 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	
 	//############################################################
 	//Write ll lp to file
-	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
-	}
+	//if(samplerptr->log_ll && samplerptr->log_lp){
+	//	write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	//	//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	//}
 	//############################################################
 	//##############################################################
 	int swp_accepted=0, swp_rejected=0;
@@ -3091,12 +3194,12 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	
 	//###########################################################
 	//Auto-correlation
-	if(auto_corr_filename != ""){
-		std::cout<<"Calculating Autocorrelation: "<<std::endl;
-		int segments = 20;
-		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, true);
-	}
+	//if(auto_corr_filename != ""){
+	//	std::cout<<"Calculating Autocorrelation: "<<std::endl;
+	//	int segments = 20;
+	//	double target_corr = .01;
+	//	write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, true);
+	//}
 	//###########################################################
 	acend =clock();
 	wacend =omp_get_wtime();
@@ -3151,8 +3254,6 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file,/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	bool tune /**<Allow for dynamic tuning -- technically should be turned off when drawing final samples*/
 	)
@@ -3179,10 +3280,8 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	else 
 		samplerptr->fisher_exist = true;
 
-	if(likelihood_log_filename !=""){
-		samplerptr->log_ll = true;
-		samplerptr->log_lp = true;
-	}
+	samplerptr->log_ll = true;
+	samplerptr->log_lp = true;
 	
 	//Construct sampler structure
 	samplerptr->lp = log_prior;
@@ -3236,20 +3335,20 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	}
 	//############################################################
 	//Write ll lp to file
-	if(samplerptr->log_ll && samplerptr->log_lp){
-		write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
-		//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
-	}
+	//if(samplerptr->log_ll && samplerptr->log_lp){
+	//	write_file(likelihood_log_filename,samplerptr->ll_lp_output[0],samplerptr->N_steps,2);
+	//	//write_file(likelihood_log_filename,samplerptr->ll_lp_output[samplerptr->chain_N-1],samplerptr->N_steps,2);
+	//}
 	//############################################################
 	
 	//###########################################################
 	//Auto-correlation
-	if(auto_corr_filename != ""){
-		std::cout<<"Calculating Autocorrelation: "<<std::endl;
-		int segments = 50;
-		double target_corr = .01;
-		write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
-	}
+	//if(auto_corr_filename != ""){
+	//	std::cout<<"Calculating Autocorrelation: "<<std::endl;
+	//	int segments = 50;
+	//	double target_corr = .01;
+	//	write_auto_corr_file_from_data(auto_corr_filename, samplerptr->output[0],samplerptr->N_steps,samplerptr->dimension,segments, target_corr, samplerptr->num_threads, false);
+	//}
 	//###########################################################
 	acend =clock();
 	wacend =omp_get_wtime();
@@ -3717,8 +3816,6 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -3740,7 +3837,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	
 	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f, user_parameters,numThreads, pool, show_prog, 
-			statistics_filename, chain_filename, auto_corr_filename,likelihood_log_filename, checkpoint_file);
+			statistics_filename, chain_filename, checkpoint_file);
 }
 void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chain_N, N_steps,dimension]*/
 	int dimension, 	/**< dimension of the parameter space being explored*/
@@ -3759,8 +3856,6 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -3780,7 +3875,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	}
 	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
 			lp, ll, f,user_parameters, numThreads, pool, show_prog, 
-			statistics_filename, chain_filename, auto_corr_filename,likelihood_log_filename, checkpoint_file);
+			statistics_filename, chain_filename,  checkpoint_file);
 }
 //######################################################################################
 //######################################################################################
@@ -3797,8 +3892,6 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file,/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	bool tune
 	)
@@ -3833,8 +3926,6 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			show_prog,
 			statistics_filename,
 			chain_filename,
-			auto_corr_filename,
-			likelihood_log_filename,
 			end_checkpoint_file,
 			tune);
 	deallocate_sampler_mem(&sampler);
@@ -3852,8 +3943,6 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 	bool show_prog,/**< Boolean for whether to show progress or not (turn off for cluster runs*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string auto_corr_filename,/**< Filename to output auto correlation in some interval, if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string end_checkpoint_file,/**< Filename to output data for checkpoint at the end of the continued run, if empty string, not saved*/
 	bool tune
 	)
@@ -3894,8 +3983,6 @@ void continue_PTMCMC_MH(std::string start_checkpoint_file,/**< File for starting
 			show_prog,
 			statistics_filename,
 			chain_filename,
-			auto_corr_filename,
-			likelihood_log_filename,
 			end_checkpoint_file,
 			tune);
 	deallocate_sampler_mem(&sampler);
@@ -3920,7 +4007,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -3954,7 +4040,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 			true,
 			statistics_filename,
 			chain_filename,
-			likelihood_log_filename,
 			checkpoint_file);
 
 }
@@ -3976,7 +4061,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -4010,7 +4094,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 			true,
 			statistics_filename,
 			chain_filename,
-			likelihood_log_filename,
 			checkpoint_file);
 
 }
@@ -4037,7 +4120,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -4084,7 +4166,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			true,
 			statistics_filename,
 			chain_filename,
-			likelihood_log_filename,
 			checkpoint_file);
 
 }
@@ -4109,7 +4190,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
@@ -4149,7 +4229,6 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			true,
 			statistics_filename,
 			chain_filename,
-			likelihood_log_filename,
 			checkpoint_file);
 
 }

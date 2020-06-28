@@ -76,25 +76,32 @@ int mcmc_output_class(int argc, char *argv[])
 	std::cout<<"Cold chains id 1: "<<output.cold_chain_ids[0]<<std::endl;
 	std::cout<<"Cold chains id 2: "<<output.cold_chain_ids[1]<<std::endl;
 	double ***init_output = new double**[chain_N];
+	double ***init_LL_LP = new double**[chain_N];
 	int steps = 5;
 	int init_positions[chain_N] = {5,3,5};
 	for(int i = 0 ; i<chain_N; i++){
 		init_output[i] = new double*[steps];
+		init_LL_LP[i] = new double*[steps];
 		for(int j =0 ; j<steps; j++){
 			init_output[i][j] = new double[dim];
+			init_LL_LP[i][j] = new double[2];
 			if(j < init_positions[i]){
+				init_LL_LP[i][j][0] = 10;
+				init_LL_LP[i][j][1] = 1;
 				for(int k =0 ; k<dim; k++){
 					init_output[i][j][k] = i+j+k;
 				}
 			}
 			else{
+				init_LL_LP[i][j][0] = 0;
+				init_LL_LP[i][j][1] = 0;
 				for(int k =0 ; k<dim; k++){
 					init_output[i][j][k] = 0;
 				}
 			}
 		}
 	}
-	output.populate_initial_output(init_output, init_positions);
+	output.populate_initial_output(init_output, init_LL_LP,init_positions);
 	std::cout<<"Initial output"<<std::endl;
 	for(int i = 0 ; i<chain_N; i++){
 		for(int j =0 ; j<init_positions[i]; j++){
@@ -116,18 +123,25 @@ int mcmc_output_class(int argc, char *argv[])
 	//exit(1);
 
 	double ***app_output = new double**[chain_N];
+	double ***app_LL_LP = new double**[chain_N];
 	int app_steps = 8;
 	int app_positions[chain_N] = {8,5,8};
 	for(int i = 0 ; i<chain_N; i++){
 		app_output[i] = new double*[app_steps];
+		app_LL_LP[i] = new double*[app_steps];
 		for(int j =0 ; j<app_steps; j++){
 			app_output[i][j] = new double[dim];
+			app_LL_LP[i][j] = new double[2];
 			if(j < app_positions[i]){
+				app_LL_LP[i][j][0] = 10*(i+j);
+				app_LL_LP[i][j][1] = 11*(i+j);
 				for(int k =0 ; k<dim; k++){
 					app_output[i][j][k] = 10*(i+j+k);
 				}
 			}
 			else{
+				app_LL_LP[i][j][0] = 0;
+				app_LL_LP[i][j][1] = 0;
 				for(int k =0 ; k<dim; k++){
 					app_output[i][j][k] = 0;
 				}
@@ -135,7 +149,7 @@ int mcmc_output_class(int argc, char *argv[])
 		}
 	}
 	chain_temps[1]=5;
-	output.append_to_output(app_output, app_positions);
+	output.append_to_output(app_output, app_LL_LP,app_positions);
 	output.populate_chain_temperatures(chain_temps);
 	
 	std::cout<<std::endl;
@@ -176,19 +190,27 @@ int mcmc_output_class(int argc, char *argv[])
 	for(int i = 0 ; i<chain_N; i ++){
 		for(int j = 0 ; j<steps; j++){
 			delete [] init_output[i][j];
+			delete [] init_LL_LP[i][j];
 		}
 		delete [] init_output[i];
+		delete [] init_LL_LP[i];
 	}
 	delete [] init_output;
+	delete [] init_LL_LP;
 	init_output = NULL;
+	init_LL_LP = NULL;
 	for(int i = 0 ; i<chain_N; i ++){
 		for(int j = 0 ; j<app_steps; j++){
 			delete [] app_output[i][j];
+			delete [] app_LL_LP[i][j];
 		}
 		delete [] app_output[i];
+		delete [] app_LL_LP[i];
 	}
 	delete [] app_output;
+	delete [] app_LL_LP;
 	app_output = NULL;
+	app_LL_LP = NULL;
 	
 	return 0;
 }
@@ -207,10 +229,10 @@ struct rosenbock_param
 int mcmc_rosenbock(int argc, char *argv[])
 {
 	double a = 1./20.;
-	int n1 = 3;
-	int n2 = 2;
-	//int n1 = 5;
-	//int n2 = 3;
+	//int n1 = 3;
+	//int n2 = 2;
+	int n1 = 5;
+	int n2 = 3;
 	int n = (n1-1)*n2 + 1;
 	double b[n];
 	for(int i = 0 ; i<n ; i++){
@@ -242,11 +264,11 @@ int mcmc_rosenbock(int argc, char *argv[])
 		initial_pos[i]=1.;
 		seeding_var[i]=10.;
 	}
-	int N_steps = 15000;
-	int chain_N= 50;
+	int N_steps = 10000;
+	int chain_N= 100;
 	int max_chain_N= 50;
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 2;
+	int swp_freq = 4;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	//chain_temps[0] = 1.;
@@ -264,12 +286,12 @@ int mcmc_rosenbock(int argc, char *argv[])
 	std::string LLfile = "";
 	
 	int numThreads = 10;
-	bool pool = false;
+	bool pool = true;
 	bool show_progress = true;
 	
 	double **output;
 	output = allocate_2D_array(  N_steps, n );
-	int t0 = 1000;
+	int t0 = 5000;
 	int nu = 100;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;

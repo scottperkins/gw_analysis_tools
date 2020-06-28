@@ -351,7 +351,7 @@ int main(int argc, char *argv[])
 		}
 		
 	}
-	bool pool = true;
+	bool pool = false;
 	bool show_progress = true;
 	MCMC_modification_struct mod_struct;
 	mod_struct.ppE_Nmod = Nmod;

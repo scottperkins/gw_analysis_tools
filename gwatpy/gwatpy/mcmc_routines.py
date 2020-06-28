@@ -68,7 +68,7 @@ def trim_thin_file(filename,trim=None, ac=None):
         acs=[]
         for y in range(len(data[0])):
             acs.append(emcee.autocorr.integrated_time(f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),y],tol=0)[0])
-        print(chains[x],np.amax(acs))
+        print(chains[x],np.amax(acs),np.argmax(acs))
         data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:],axis=0)
     #print("data shape",np.shape(data))
     return data

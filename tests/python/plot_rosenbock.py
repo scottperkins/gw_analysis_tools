@@ -18,18 +18,18 @@ import gwatpy.mcmc_routines as gmcmc
 #exit()
 #data = f["THINNED_MCMC_OUTPUT"]["THINNED FLATTENED CHAINS"]
 #data = f["MCMC_OUTPUT"]["CHAIN 0"]
-data = gmcmc.trim_thin_file("data/mcmc_output_RB.hdf5",trim=None,ac=400)
+data = gmcmc.trim_thin_file("data/mcmc_output_RB.hdf5",trim=0,ac=600)
 print(np.shape(data))
 #exit()
 #dataTrim = ff["MCMC_OUTPUT"]["CHAIN 0"]
 dataT = np.transpose(data)
 #dataTTrim = np.transpose(dataTrim)
-#for x in range(len(dataT)):
-#    plt.plot(dataT[x])
-#    #plt.plot(dataTTrim[x])
-#    #plt.plot(data_old[x])
-#    plt.show() 
-#    plt.close() 
+for x in range(len(dataT)):
+    plt.plot(dataT[x])
+    #plt.plot(dataTTrim[x])
+    #plt.plot(data_old[x])
+    plt.show() 
+    plt.close() 
 fig = corner.corner(data)
 plt.savefig("plots/mcmc_RB.pdf")
 plt.close()
