@@ -18,7 +18,7 @@ import gwatpy.mcmc_routines as gmcmc
 #exit()
 #data = f["THINNED_MCMC_OUTPUT"]["THINNED FLATTENED CHAINS"]
 #data = f["MCMC_OUTPUT"]["CHAIN 0"]
-data = gmcmc.trim_thin_file("data/mcmc_output_RB.hdf5",trim=0,ac=600)
+data = gmcmc.trim_thin_file("data/mcmc_output_RB.hdf5",trim=None,ac=None)
 print(np.shape(data))
 #exit()
 #dataTrim = ff["MCMC_OUTPUT"]["CHAIN 0"]

@@ -261,7 +261,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	double initial_pos[n];
 	double seeding_var[n] ;
 	for(int i = 0 ; i<n ; i++){
-		initial_pos[i]=1.;
+		initial_pos[i]=pow(-1,i)*500.;
 		seeding_var[i]=10.;
 	}
 	int N_steps = 10000;

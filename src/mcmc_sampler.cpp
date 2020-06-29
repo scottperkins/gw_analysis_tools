@@ -1129,8 +1129,9 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 			return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
 		};
 	}
-	else 
+	else {
 		samplerptr->fisher_exist = true;
+	}
 
 	samplerptr->log_ll = true;
 	samplerptr->log_lp = true;
@@ -1173,10 +1174,12 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 	}
 	
 	//########################################################
+	//########################################################
 	double temp_save[samplerptr->chain_N];
 	int temp_step_N = (N_steps<100)? N_steps/5: 100;
 	double temp_steps[samplerptr->chain_N];
 	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
 		temp_save[i]=samplerptr->chain_temps[i];
 		double T_max = temp_scale_factor*samplerptr->chain_temps[i];
 		double T_min = samplerptr->chain_temps[i];
@@ -1186,18 +1189,24 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 	int steps_per_temp = N_steps/temp_step_N;
 		
 	for(int i = 0 ; i<temp_step_N ; i++){
-		//debugger_print(__FILE__,__LINE__,"Steps: "+std::to_string(i*steps_per_temp));
-		//for(int j = 0 ; j<samplerptr->chain_N; j++){
-		//	samplerptr->chain_temps[j] = temp_steps[j]*samplerptr->chain_temps[j];
+		//debugger_print(__FILE__,__LINE__,"Steps: "+std::to_string((i+1)*steps_per_temp));
+		for(int j = 0 ; j<samplerptr->chain_N; j++){
+			//samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
+			samplerptr->chain_temps[j] = temp_steps[j]*samplerptr->chain_temps[j];
+			samplerptr->current_likelihoods[j]/=samplerptr->chain_temps[j];
 		//	std::cout<<samplerptr->chain_temps[j]<<" ";
-		//}
+		}
 		//std::cout<<std::endl;
 			
 		PTMCMC_MH_step_incremental(samplerptr, steps_per_temp);
+		for(int j = 0 ; j<samplerptr->chain_N; j++){
+			samplerptr->current_likelihoods[j]*=samplerptr->chain_temps[j];
+		}
 	}
 	for(int i = 0 ; i<samplerptr->chain_N; i++){
 		samplerptr->chain_temps[i]=temp_save[i];
 	}
+	//##############################################################
 	//##############################################################
 	
 	end =clock();
@@ -1400,6 +1409,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	bool internal_prog=false;
 
 	int dynamic_search_length = 2*t0;
+	//int dynamic_search_length = 200;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
@@ -1479,7 +1489,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double chain_temps[chain_N];
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 	bool cumulative=true;
-	bool internal_prog=false;
+	bool internal_prog=true;
 	bool full_explore=true;
 	int coldchains = count_cold_chains(chain_temps, chain_N);
 	double **reduced_temp_output, **reduced_temp_output_thinned ;
@@ -1521,17 +1531,45 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 		std::cout<<"Annealing"<<std::endl;
 		sampler sampler;
-		//continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
-		//	100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-		//	numThreads, pool, internal_prog, statistics_filename, 
-		//	"", checkpoint_file);
-		//deallocate_sampler_mem(&sampler);
+		continue_PTMCMC_MH_simulated_annealing_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
+			100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			numThreads, pool, internal_prog, statistics_filename, 
+			"", checkpoint_file);
+
+		//TESTING
+		int hot_chain_id = 0;
+		for(int i = 1 ; i<sampler.chain_N; i++){
+			if(fabs(sampler.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+				hot_chain_id = i-1;
+				break;
+			}
+		}
+		std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
+		write_file("data/post_anneal.csv",sampler.output[0],dynamic_search_length,sampler.max_dim);
+	
+		write_file("data/post_anneal_hot.csv",sampler.output[hot_chain_id],dynamic_search_length,sampler.max_dim);
+		write_file("data/post_anneal_LL.csv",sampler.ll_lp_output[0],dynamic_search_length,2);
+
+		deallocate_sampler_mem(&sampler);
 
 		std::cout<<"Exploration"<<std::endl;
 		continue_PTMCMC_MH_internal(&sampler,checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"",  checkpoint_file,true);
+		//TESTING
+		//int hot_chain_id = sampler.chain_N-1;
+		//std::cout<<"chain T: "<<sampler.chain_temps[0]<<std::endl;
+		//for(int i = 1 ; i<sampler.chain_N; i++){
+		//	std::cout<<"chain T: "<<sampler.chain_temps[i]<<std::endl;
+		//	if(fabs(sampler.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+		//		hot_chain_id = i-1;
+		//		break;
+		//	}
+		//}
+		write_file("data/post_explore.csv",sampler.output[0],dynamic_search_length,sampler.max_dim);
+		write_file("data/post_explore_hot.csv",sampler.output[hot_chain_id],dynamic_search_length,sampler.max_dim);
+		write_file("data/post_explore_LL.csv",sampler.ll_lp_output[0],dynamic_search_length,2);
 
 		deallocate_sampler_mem(&sampler);
 
@@ -3301,7 +3339,6 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	//Unpack checkpoint file -- allocates memory internally -- separate call unneccessary
 	load_checkpoint_file(start_checkpoint_file, samplerptr);
 
-
 	//allocate other parameters
 	for (int chain_index=0; chain_index<samplerptr->chain_N; chain_index++)
 		assign_probabilities(samplerptr, chain_index);
@@ -3397,8 +3434,11 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 {
 	//Make sure we're not going out of memory
-	if (sampler->progress + increment > sampler->N_steps)
+	bool reset_ref_status=true;
+	if (sampler->progress + increment > sampler->N_steps){
 		increment = sampler->N_steps - sampler->progress;
+		reset_ref_status = false;
+	}
 	//Sampler Loop - ``Deterministic'' swapping between chains
 	if (!sampler->pool)
 	{
@@ -3501,6 +3541,7 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 	//POOLING  -- ``Stochastic'' swapping between chains
 	else
 	{
+		int max_steps = increment+sampler->progress-1;
 		ThreadPool pool(sampler->num_threads);
 		poolptr = &pool;
 		//while(sampler->progress<increment-1)
@@ -3510,7 +3551,8 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 			{
 				if(sampler->waiting[i]){
 					//if(sampler->chain_pos[i]<(sampler->N_steps-1))
-					if(sampler->chain_pos[i]<(increment-1))
+					//if(sampler->chain_pos[i]<(increment-1))
+					if(sampler->chain_pos[i]<(max_steps))
 					{
 						sampler->waiting[i]=false;
 						//if(i==0) samplerptr->progress+=samplerptr->swp_freq;
@@ -3548,7 +3590,16 @@ void PTMCMC_MH_step_incremental(sampler *sampler, int increment)
 			}
 			if(sampler->show_progress)
 				printProgress((double)sampler->progress/sampler->N_steps);
-			//usleep(300);
+			usleep(10);
+		}
+		for(int i= 0 ; i<sampler->chain_N; i++){
+			if(check_list(i,sampler->ref_chain_ids,sampler->ref_chain_num)){
+				sampler->ref_chain_status[i]=false;
+			}
+			else{
+				sampler->priority[i]=1;	
+			}
+			sampler->waiting[i]=true;	
 		}
 	}
 }
@@ -3708,7 +3759,7 @@ void PTMCMC_MH_loop(sampler *sampler)
 			}
 			if(sampler->show_progress)
 				printProgress((double)sampler->progress/sampler->N_steps);
-			//usleep(300);
+			usleep(10);
 		}
 	}
 }

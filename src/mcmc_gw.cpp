@@ -2258,14 +2258,6 @@ void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chai
 	
 		}
 	}
-	//for(int k =0  ; k<dimension; k++){
-	//	for(int j =0 ;j<dimension; j++){
-	//		std::cout<<output[k][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-
-	//}
-	//	std::cout<<std::endl;
 	deallocate_2D_array(temp_out, dimension,dimension);
 
 	//Cleanup

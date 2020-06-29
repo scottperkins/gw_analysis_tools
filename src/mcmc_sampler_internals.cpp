@@ -172,9 +172,14 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		//exit(1);
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
 		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+		//##########################################################33
+		//TESTING -- Scaling for annealing
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 					sampler->chain_temps[chain_index];}
+		//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
+		//##########################################################33
 		//Take step
+		//debugger_print(__FILE__,__LINE__,scaling);
 		for(int i =0; i< sampler->max_dim;i++)
 		{
 			proposed_param[i] = current_param[i] +
@@ -256,8 +261,12 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				//Calculate new proposal prob
 				//ensure the steps aren't ridiculous
 				if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+				//###############################################
+				//TESTING
 				else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 							sampler->chain_temps[chain_index];}
+				//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
+				//###############################################
 				sampler->prop_MH_factor[chain_index]+= -0.5*log(scaling) ;
 				for(int i = 0 ; i<sampler->max_dim; i++){
 					for(int j = 0 ; j<sampler->max_dim; j++){
