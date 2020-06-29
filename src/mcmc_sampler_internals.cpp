@@ -1260,8 +1260,8 @@ void allocate_sampler_mem(sampler *sampler)
 		gsl_rng_set(sampler->rvec[i] , i+1);
 	
 		if(sampler->tune){
-			//sampler->check_stepsize_freq[i] = 500;
-			sampler->check_stepsize_freq[i] = 50;
+			sampler->check_stepsize_freq[i] = 500;
+			//sampler->check_stepsize_freq[i] = 50;
 		}
 		else{
 			sampler->check_stepsize_freq[i] = sampler->N_steps;
