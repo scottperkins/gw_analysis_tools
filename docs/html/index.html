@@ -67,13 +67,13 @@ $(function() {
 Compatibility</h1>
 <p>Known to work with gcc/g++-7</p>
 <p>Known to work with gcc/g++-9</p>
-<p>Need nvcc &ndash; known to work with v9.1 of CUDA</p>
+<p>(optional) nvcc &ndash; known to work with v9.1 of CUDA</p>
 <p>Need GSL-2.6 or higher</p>
 <h1><a class="anchor" id="external_libs"></a>
 Required Software</h1>
-<p>Required non-standard C libraries: FFTW3 ADOL-C &ndash; (must be compiled with OpenMP option) GSL CUDA</p>
-<p>Required non-standard Python packages: Cython</p>
-<p>Required non-standard packages for documentation: Doxygen</p>
+<p>Required non-standard C libraries: FFTW3 ADOL-C &ndash; (must be compiled with OpenMP option) GSL (optional) CUDA HDF5</p>
+<p>Required non-standard packages for documentation: (optional) Doxygen</p>
+<p>CMAKE</p>
 <h1><a class="anchor" id="dev"></a>
 Current Development</h1>
 <p>NOTE: currently using static parameters to share data between threads for <a class="el" href="de/dbe/mcmc__gw_8cpp.html">mcmc_gw.cpp</a>. This could cause issues when running multiple samplers at the same time. Investigating further.</p>
