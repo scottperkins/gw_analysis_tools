@@ -1496,7 +1496,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double chain_temps[chain_N];
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 	bool cumulative=true;
-	bool internal_prog=true;
+	bool internal_prog=false;
 	bool full_explore=true;
 	int coldchains = count_cold_chains(chain_temps, chain_N);
 	double **reduced_temp_output, **reduced_temp_output_thinned ;
@@ -1828,11 +1828,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 		}
 		else{
-			if(ac_mean > 2*ac_save){
-				debugger_print(__FILE__,__LINE__,"Resetting trim");
-				sampler_output->set_trim(pos_mean);	
-				//sampler_output->create_data_dump(true,false, chain_filename);
-			}
+			//if(ac_mean > 2*ac_save){
+			//	debugger_print(__FILE__,__LINE__,"Resetting trim");
+			//	sampler_output->set_trim(pos_mean);	
+			//	//sampler_output->create_data_dump(true,false, chain_filename);
+			//}
 			//else{
 			sampler_output->append_to_data_dump(chain_filename);
 			sampler_output->append_to_data_dump("data/test_full.hdf");
