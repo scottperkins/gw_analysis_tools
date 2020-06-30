@@ -1119,15 +1119,22 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 	samplerptr = sampler;
 	
 	samplerptr->tune=true;
+	//################################################
+	//This typically isn't done, but the primary focus of annealing
+	//is to get the cold chains where they need to be.
+	//The hotter chains equilibrate during normal operation
+	//much easier and don't need the annealing process as much
+	samplerptr->prioritize_cold_chains=true;
+	//################################################
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		//samplerptr->fisher_exist = false;
-		samplerptr->fisher_exist = true;
-		fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
-			return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
-		};
+		samplerptr->fisher_exist = false;
+		//samplerptr->fisher_exist = true;
+		//fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
+		//	return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
+		//};
 	}
 	else {
 		samplerptr->fisher_exist = true;
@@ -1489,7 +1496,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double chain_temps[chain_N];
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 	bool cumulative=true;
-	bool internal_prog=false;
+	bool internal_prog=true;
 	bool full_explore=true;
 	int coldchains = count_cold_chains(chain_temps, chain_N);
 	double **reduced_temp_output, **reduced_temp_output_thinned ;
@@ -1712,10 +1719,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
-		if(temp_length < 50*max_ac_realloc){
-			if(50*max_ac_realloc < max_chunk_size){
+		if(temp_length < 10*max_ac_realloc){
+			if(10*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 50*max_ac_realloc;
+				temp_length = 10*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -1810,8 +1817,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//is 500x the average ac (trimming as we go, for the ac
 			debugger_print(__FILE__,__LINE__,std::string("Pos/ac: ")+std::to_string(pos_mean/ac_mean));
 			delete [] temp_positions;
-			//if(pos_mean/ac_mean <100){
-			if(false){
+			if(pos_mean/ac_mean <100){
+			//if(false){
 				sampler_output->set_trim(pos_mean);	
 			}
 			else{
@@ -1821,11 +1828,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 		}
 		else{
-			//if(ac_mean > 2*ac_save){
-			//	debugger_print(__FILE__,__LINE__,"Resetting trim");
-			//	sampler_output->set_trim(pos_mean);	
-			//	//sampler_output->create_data_dump(true,false, chain_filename);
-			//}
+			if(ac_mean > 2*ac_save){
+				debugger_print(__FILE__,__LINE__,"Resetting trim");
+				sampler_output->set_trim(pos_mean);	
+				//sampler_output->create_data_dump(true,false, chain_filename);
+			}
 			//else{
 			sampler_output->append_to_data_dump(chain_filename);
 			sampler_output->append_to_data_dump("data/test_full.hdf");
@@ -1986,11 +1993,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
 		//if(false){
-		if(temp_length < 50*max_ac_realloc){
+		if(temp_length < 10*max_ac_realloc){
 
-			if(50*max_ac_realloc < max_chunk_size){
+			if(10*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 50*max_ac_realloc;
+				temp_length = 10*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -2834,6 +2841,8 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	//for chain swapping in a chain population
 	double chain_pop_high = .7;
 	double chain_pop_low = .4;
+	//double chain_pop_high = .4;
+	//double chain_pop_low = .15;
 
 	//Keep track of acceptance ratio in chuncks
 	int *running_accept_ct = new int[max_chain_N_thermo_ensemble];
@@ -3317,11 +3326,11 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		//samplerptr->fisher_exist = false;
-		samplerptr->fisher_exist = true;
-		fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
-			return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
-		};
+		samplerptr->fisher_exist = false;
+		//samplerptr->fisher_exist = true;
+		//fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
+		//	return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
+		//};
 	}
 	else 
 		samplerptr->fisher_exist = true;

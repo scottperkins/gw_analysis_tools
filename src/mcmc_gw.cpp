@@ -919,12 +919,13 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	//}
 
 	bool local_seeding ;
-	if(!seeding_var)
+	if(!seeding_var){
 		local_seeding = true;
+	}
 	else
 		local_seeding = false;
 
-	//PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+	PTMCMC_method_specific_prep("SkySearch", dimension, seeding_var, local_seeding);
 
 	skysearch_params p;
 	p.hplus = hplus;
@@ -999,6 +1000,7 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain
 		//llvec[i]=ll;
 		
 	}
+	//debugger_print(__FILE__,__LINE__,ll);
 	//std::cout<<ll<<" "<<llvec[0]<<" "<<llvec[1]-llvec[0]<<" "<<llvec[2]-llvec[1]<<std::endl;
 	delete [] response;
 	delete [] hplus;
@@ -1824,28 +1826,42 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
+			seeding_var[0]=.5;
+			seeding_var[1]=.1;
+			seeding_var[2]=.1;
+			seeding_var[3]=.1;
+		}
+		mcmc_intrinsic=true;
+	}
+	else if(generation_method =="SkySearch"){
+		std::cout<<"Sampling in parameters: "<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
 			seeding_var[0]=1;
 			seeding_var[1]=.3;
 			seeding_var[2]=1.;
 			seeding_var[3]=1.;
+			seeding_var[4]=1.;
+			seeding_var[5]=1.;
+			seeding_var[6]=1.;
 		}
-		mcmc_intrinsic=true;
+		mcmc_intrinsic=false;
 	}
 	else if(dimension==11 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, psi"<<std::endl;
 		mcmc_intrinsic=false;
 		if(local_seeding){
 			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
+			seeding_var[0]=.1;
+			seeding_var[1]=.1;
+			seeding_var[2]=.1;
+			seeding_var[3]=.1;
+			seeding_var[4]=.5;
 			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
+			seeding_var[6]=.1;
+			seeding_var[7]=.1;
+			seeding_var[8]=.1;
+			seeding_var[9]=.1;
 			seeding_var[10]=.5;
 		}
 	}

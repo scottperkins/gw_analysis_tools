@@ -764,7 +764,7 @@ double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *pa
 
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>10000){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
 	else { return 3*pos[6];}
 }
 
