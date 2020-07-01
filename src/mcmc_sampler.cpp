@@ -1814,10 +1814,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	}
 	std::cout<<"Number of search iterations: "<<dynamic_ct<<std::endl;
 	if(!full_explore){
-		if(temp_length < 10*max_ac_realloc){
+		if(temp_length < 100*max_ac_realloc){
 			if(10*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 10*max_ac_realloc;
+				temp_length = 100*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
@@ -1950,7 +1950,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		}
 		ave_accept /=cold_chains;
 		std::cout<<"AVE ACCEPT: "<<ave_accept<<std::endl;
-		if(ave_accept <0.1 || ave_accept>.4){ realloc=true;}
+		//if(ave_accept <0.1 || ave_accept>.4){ realloc=true;}
+		if(ave_accept <0.1 ){ realloc=true;}
 		deallocate_sampler_mem(&sampler);
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 			
@@ -2088,11 +2089,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//Harvest samples in batches between 10*ac_length and 1000*ac_length
 		//TESTING
 		//if(false){
-		if(temp_length < 10*max_ac_realloc){
+		if(temp_length < 100*max_ac_realloc){
 
 			if(10*max_ac_realloc < max_chunk_size){
 				deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
-				temp_length = 10*max_ac_realloc;
+				temp_length = 100*max_ac_realloc;
 				temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 			}
 			else{
