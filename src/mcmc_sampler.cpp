@@ -905,6 +905,25 @@ public:
 		return false;	
 	}
 };
+bool temp_neighborhood_check(int i, int j ){
+	//std::cout<<"Comparison: "<<samplerptr->chain_temps[i]-samplerptr->chain_temps[j]<<std::endl;
+	//std::cout<<"IDS: "<<i<<" "<<j<<std::endl;
+	if(samplerptr->restrict_swapping){
+		if(
+			check_list(samplerptr->chain_temps[j],samplerptr->chain_neighborhoods[i],samplerptr->chain_neighbors[i])
+		){
+			return true;
+		}
+		return false;
+	}
+	return true;
+	//return true;
+}
+struct swap_struct
+{
+	int id1;
+	int id2;
+};
 class ThreadPool
 
 {
@@ -934,11 +953,41 @@ public:
 
 	void enqueue_swap(int i)
 	{
+		bool notify = false;
 		{
 			std::unique_lock<std::mutex> lock{mEventMutexSWP};
-			mSwaps.emplace(std::move(i));
+			//mSwaps.emplace(std::move(i));
+			//mSwaps.emplace_back(i);
+
+			if(mSwaps.empty()){
+				mSwaps.emplace_back(i);
+			}
+			else{
+				std::vector<int>::iterator ptr;
+				int k=-1;
+				for(ptr=mSwaps.begin(); ptr!=mSwaps.end(); ++ptr){
+					//std::cout<<"PTR: "<<samplerptr->chain_temps[*ptr]<<std::endl;
+					if(temp_neighborhood_check(i,*ptr)){
+						k = *ptr;
+						mSwaps.erase(ptr);
+						break;
+					}
+				}
+				if(k != -1){
+					swap_struct ss;
+					ss.id1 = i;	
+					ss.id2 = k;	
+					pairs.emplace(std::move(ss));
+					notify=true;
+				}
+				else{
+					mSwaps.emplace_back(i);
+				}
+			}
 		}
-		mEventVarSWP.notify_one();
+		if(notify){
+			mEventVarSWP.notify_one();
+		}
 	}
 	
 	void public_stop()
@@ -965,7 +1014,9 @@ private:
 	//std::queue<int> mSwaps;
 	std::priority_queue<int,std::vector<int>,Comparator> mTasks;
 	//std::priority_queue<int,std::vector<int>,Comparator> mSwaps;
-	std::priority_queue<int,std::vector<int>,Comparatorswap> mSwaps;
+	//std::priority_queue<int,std::vector<int>,Comparatorswap> mSwaps;
+	std::vector<int> mSwaps;
+	std::queue<swap_struct> pairs;
 
 	void start(std::size_t numThreads)
 	{
@@ -1000,23 +1051,67 @@ private:
 			mThreads.emplace_back([=]{
 				while(true)
 				{
-					int j, k;
+					int j, k=-1;
 					{
 						std::unique_lock<std::mutex> lock{mEventMutexSWP};
 
-						//mEventVarSWP.wait(lock,[=]{return mStopping || !mSwaps.empty(); });
-						mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwaps.size()<2); });
+						//mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwaps.size()<2); });
+						mEventVarSWP.wait(lock,[=]{return mStopping || !(pairs.empty()); });
 						
-						if (mStopping && mSwaps.size()<2)
+						if (mStopping && pairs.empty())
 							break;	
+						swap_struct ss = std::move(pairs.front());
+						pairs.pop();
+						j = ss.id1;
+						k = ss.id2;
+						//std::cout<<j<<" "<<k<<std::endl;
+						//if (mStopping && mSwaps.size()<2)
+						//	break;	
+						//
 						//j = std::move(mSwaps.front());
-						j = std::move(mSwaps.top());
-						mSwaps.pop();
-						//k = std::move(mSwaps.front());
-						k = std::move(mSwaps.top());
-						mSwaps.pop();
+						//#####
+						//j = std::move(mSwaps.top());
+						//mSwaps.pop();
+						//k = std::move(mSwaps.top());
+						//mSwaps.pop();
+						//#####
+						//
+						//
+						//j = mSwaps.front();
+						//mSwaps.erase(mSwaps.begin());
+						//k = mSwaps.front();
+						//mSwaps.erase(mSwaps.begin());
+						//#####
+						//############################
+						//j = mSwaps.front();
+						//mSwaps.erase(mSwaps.begin());
+						////std::cout<<"J: "<<samplerptr->chain_temps[j]<<std::endl;
+
+						//////########################
+						//std::vector<int>::iterator ptr;
+						//for(ptr=mSwaps.begin(); ptr!=mSwaps.end(); ++ptr){
+						//	//std::cout<<"PTR: "<<samplerptr->chain_temps[*ptr]<<std::endl;
+						//	if(temp_neighborhood_check(j,*ptr)){
+						//		k = *ptr;
+						//		mSwaps.erase(ptr);
+						//		break;
+						//	}
+						//}
+						//if(k == -1){
+						//	mSwaps.emplace_back(j);
+						//}
+						//std::cout<<"Size: "<<mSwaps.size()<<std::endl;
+						//for(auto i : mSwaps){std::cout<<i<<" ";}
+						//std::cout<<std::endl;
 					}
-					mcmc_swap_threaded(j,k);
+					//if(k != -1){
+						//std::cout<<samplerptr->chain_temps[j]<<" "<<samplerptr->chain_temps[k]<<std::endl;
+						mcmc_swap_threaded(j,k);
+						//k=-1;
+					//}
+					//else{
+					//	usleep(100000);
+					//}
 					
 				}
 			});
@@ -1117,7 +1212,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 
 	//sampler sampler;
 	samplerptr = sampler;
-	
+	samplerptr->restrict_swapping=false;	
 	samplerptr->tune=true;
 	//################################################
 	//This typically isn't done, but the primary focus of annealing
@@ -1544,18 +1639,18 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		"", checkpoint_file);
 
 	//TESTING
-	int hot_chain_id = 0;
-	for(int i = 1 ; i<sampler_ann.chain_N; i++){
-		if(fabs(sampler_ann.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
-			hot_chain_id = i-1;
-			break;
-		}
-	}
-	std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
-	write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
-	
-	write_file("data/post_anneal_hot.csv",sampler_ann.output[hot_chain_id],dynamic_search_length,sampler_ann.max_dim);
-	write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
+	//int hot_chain_id = 0;
+	//for(int i = 1 ; i<sampler_ann.chain_N; i++){
+	//	if(fabs(sampler_ann.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+	//		hot_chain_id = i-1;
+	//		break;
+	//	}
+	//}
+	//std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
+	//write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
+	//
+	//write_file("data/post_anneal_hot.csv",sampler_ann.output[hot_chain_id],dynamic_search_length,sampler_ann.max_dim);
+	//write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
 
 	deallocate_sampler_mem(&sampler_ann);
 	//#################################################
@@ -1570,18 +1665,18 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			numThreads, pool, internal_prog, statistics_filename, 
 			"",  checkpoint_file,true);
 		//TESTING
-		int hot_chain_id = sampler_temp.chain_N-1;
-		//std::cout<<"chain T: "<<sampler_temp.chain_temps[0]<<std::endl;
-		for(int i = 1 ; i<sampler_temp.chain_N; i++){
-			//std::cout<<"chain T: "<<sampler_temp.chain_temps[i]<<std::endl;
-			if(fabs(sampler_temp.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
-				hot_chain_id = i-1;
-				break;
-			}
-		}
-		write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
-		write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
-		write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
+		//int hot_chain_id = sampler_temp.chain_N-1;
+		////std::cout<<"chain T: "<<sampler_temp.chain_temps[0]<<std::endl;
+		//for(int i = 1 ; i<sampler_temp.chain_N; i++){
+		//	//std::cout<<"chain T: "<<sampler_temp.chain_temps[i]<<std::endl;
+		//	if(fabs(sampler_temp.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+		//		hot_chain_id = i-1;
+		//		break;
+		//	}
+		//}
+		//write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
+		//write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
+		//write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
 
 		deallocate_sampler_mem(&sampler_temp);
 
@@ -1812,11 +1907,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			temp_positions[i]=sampler_output->chain_lengths[sampler_output->cold_chain_ids[i]];	
 		}
 		mean_list(temp_positions, sampler_output->cold_chain_number, &pos_mean);
+		delete [] temp_positions;
 		if(relax){
 			//Only considered burned in if the average (cold) chain length
 			//is 500x the average ac (trimming as we go, for the ac
 			debugger_print(__FILE__,__LINE__,std::string("Pos/ac: ")+std::to_string(pos_mean/ac_mean));
-			delete [] temp_positions;
 			if(pos_mean/ac_mean <100){
 			//if(false){
 				sampler_output->set_trim(pos_mean);	
@@ -2839,10 +2934,10 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int pop_check_var=chain_pop_update_freq;
 	//Boundaries that mark acceptable average acceptance ratios 
 	//for chain swapping in a chain population
-	double chain_pop_high = .7;
-	double chain_pop_low = .4;
-	//double chain_pop_high = .4;
-	//double chain_pop_low = .15;
+	//double chain_pop_high = .7;
+	//double chain_pop_low = .4;
+	double chain_pop_high = .4;
+	double chain_pop_low = .15;
 
 	//Keep track of acceptance ratio in chuncks
 	int *running_accept_ct = new int[max_chain_N_thermo_ensemble];

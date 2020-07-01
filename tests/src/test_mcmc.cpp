@@ -765,7 +765,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	int chain_N= 32;
 	int max_chain_N= 10;
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 20;
+	int swp_freq = 3;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	chain_temps[0] = 1.;
@@ -792,8 +792,8 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 500;
-	int nu = 100;
+	int t0 = 50;
+	int nu = 10;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
 	double corr_convergence_thresh = 0.01;

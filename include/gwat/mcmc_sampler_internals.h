@@ -27,6 +27,12 @@ public:
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
+	//########
+	double **chain_neighborhoods;
+	int *chain_neighbors;
+	int chain_radius=3;
+	bool restrict_swapping=true;
+	//########
 	bool *waiting;
 	int *chain_pos;
 	double swp_freq;

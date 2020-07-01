@@ -22,6 +22,41 @@
  *
  * General utilities that are not necessarily specific to any part of the project at large
  */
+
+
+/*! \brief Just a quick utility to see if an item is in a list
+ *
+ * Didn't want to keep rewriting this loop
+ */
+template<>
+bool check_list(int j, int *list, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if(j == list[i]) return true;
+	}
+	return false;
+}
+template<>
+bool check_list(std::string j, std::string *list, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if(j == list[i]) return true;
+	}
+	return false;
+}
+template<>
+bool check_list(double j, double *list, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if(fabs(j- list[i])<DOUBLE_COMP_THRESH) return true;
+	}
+	return false;
+}
+//template bool check_list<int>(int, int*, int);
+//template bool check_list<double>(double ,double*, int);
+//template bool check_list<std::string>(std::string ,std::string*, int);
+
+
 /*! \brief Matrix multiplication
  *
  * Takes A -- [dim1,dim2], B -- [dim2,dim3], and produces C -- [dim1,dim3]
@@ -613,21 +648,7 @@ template void variance_list<adouble,adouble>(adouble *,int,adouble*);
 template void variance_list<int,double>(int *,int,double*);
 template void variance_list<int,adouble>(int *,int,adouble*);
 
-/*! \brief Just a quick utility to see if an item is in a list
- *
- * Didn't want to keep rewriting this loop
- */
-template<class T>
-bool check_list(T j, T *list, int length)
-{
-	for(int i = 0 ; i<length; i++){
-		if(j == list[i]) return true;
-	}
-	return false;
-}
-template bool check_list<int>(int, int*, int);
-template bool check_list<double>(double ,double*, int);
-template bool check_list<std::string>(std::string ,std::string*, int);
+
 /*! \brief Just a quick utility to see if an item is in a list
  *
  * Didn't want to keep rewriting this loop

@@ -1181,10 +1181,28 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->history_status = (int ***)malloc(sizeof(int **)*sampler->chain_N);
 	}
 
+
 	sampler->ref_chain_status = (bool *) malloc(sizeof(bool)*sampler->chain_N);
 	sampler->ref_chain_ids = (int *) malloc(sizeof(int)*sampler->chain_N);
 
 	sampler->ref_chain_num = 0 ;
+
+	//#############
+	sampler->chain_neighborhoods=(double **)malloc(sizeof(double*)*sampler->chain_N);
+	sampler->chain_neighbors=(int *)malloc(sizeof(int)*sampler->chain_N);
+	int cold_chain_ids[sampler->chain_N];
+	int cold_chain_ct = 0;
+	for (i =0; i<sampler->chain_N; i++){
+		if(fabs(sampler->chain_temps[i]-1)<DOUBLE_COMP_THRESH){
+			cold_chain_ids[cold_chain_ct]=i;
+			cold_chain_ct++;
+		}
+	}
+	//The last ensemble won't have a cold chain on the end
+	//This will only cause issues if every single chain is cold (won't happen)
+	cold_chain_ids[cold_chain_ct]=sampler->chain_N;
+	cold_chain_ct = 0;
+	//#############
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		//designate T=1 chains as reference chains
@@ -1197,6 +1215,38 @@ void allocate_sampler_mem(sampler *sampler)
 		else{
 			sampler->ref_chain_status[i] = true;
 		}
+		//#######################
+		//Temp neighborhood
+		//#######################
+		//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i]);
+		int neighbors_low = sampler->chain_radius;
+		int neighbors_high = sampler->chain_radius;
+		if(i >= cold_chain_ids[cold_chain_ct+1]){cold_chain_ct++;}
+		if(i - cold_chain_ids[cold_chain_ct] < sampler->chain_radius){
+			neighbors_low = i-cold_chain_ids[cold_chain_ct];
+		}
+		if(-i + cold_chain_ids[cold_chain_ct+1]-1 < sampler->chain_radius){
+			neighbors_high = -i+cold_chain_ids[cold_chain_ct+1]-1;
+		}
+		//debugger_print(__FILE__,__LINE__,std::to_string(neighbors_high)+" "+std::to_string(neighbors_low));
+		sampler->chain_neighborhoods[i] = (double *)malloc(sizeof(double)*(neighbors_low+neighbors_high));
+		sampler->chain_neighbors[i]=neighbors_low+neighbors_high;
+		for(int j = 0 ; j< neighbors_low; j++){
+			sampler->chain_neighborhoods[i][j] = sampler->chain_temps[i-j-1];
+			//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i-j-1]);
+		}
+		for(int j = 0 ; j< neighbors_high; j++){
+			sampler->chain_neighborhoods[i][j+neighbors_low] = sampler->chain_temps[i+j+1];
+			//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i+j+1]);
+		}
+		//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i]);
+		//debugger_print(__FILE__,__LINE__,sampler->chain_neighbors[i]);
+		//for(int j = 0 ; j< sampler->chain_neighbors[i]; j++){
+		//	std::cout<<sampler->chain_neighborhoods[i][j]<<" ";	
+		//}
+		//std::cout<<std::endl;
+		//#######################
+		//#######################
 		//initial value set to one's
 		if(sampler->RJMCMC){
 			//for(int j = 0 ; j< sampler->max_dim ;j ++){
@@ -1327,11 +1377,14 @@ void deallocate_sampler_mem(sampler *sampler)
 	int i;
 	for (i =0; i<sampler->chain_N; i++)
 	{
+		free(sampler->chain_neighborhoods[i]);
 		free(sampler->step_prob[i]);
 		free(sampler->prob_boundaries[i]); 
 		gsl_rng_free(sampler->rvec[i]);
 
 	}		
+	free(sampler->chain_neighborhoods);
+	free(sampler->chain_neighbors);
 	if(sampler->local_param_allocation){
 		delete [] sampler->user_parameters;
 	}
