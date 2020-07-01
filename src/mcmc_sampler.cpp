@@ -2937,7 +2937,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	//double chain_pop_high = .7;
 	//double chain_pop_low = .4;
 	double chain_pop_high = .4;
-	double chain_pop_low = .15;
+	double chain_pop_low = .3;
 
 	//Keep track of acceptance ratio in chuncks
 	int *running_accept_ct = new int[max_chain_N_thermo_ensemble];
