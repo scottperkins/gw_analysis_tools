@@ -1923,11 +1923,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 		}
 		else{
-			//if(ac_mean > 2*ac_save){
-			//	debugger_print(__FILE__,__LINE__,"Resetting trim");
-			//	sampler_output->set_trim(pos_mean);	
-			//	//sampler_output->create_data_dump(true,false, chain_filename);
-			//}
+			if(ac_mean > 3*ac_save){
+				debugger_print(__FILE__,__LINE__,"Resetting trim");
+				sampler_output->set_trim(pos_mean);	
+				//sampler_output->create_data_dump(true,false, chain_filename);
+			}
 			//else{
 			sampler_output->append_to_data_dump(chain_filename);
 			sampler_output->append_to_data_dump("data/test_full.hdf");
