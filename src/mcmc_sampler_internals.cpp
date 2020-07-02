@@ -710,6 +710,7 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			int T2_index	/**<number of chain swapper in chain_temps*/
 			)
 {
+
 	//Unpack parameters
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
@@ -719,11 +720,13 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	}
 	double ll1 =  T1*sampler->current_likelihoods[T1_index];
 	double ll2 =  T2*sampler->current_likelihoods[T2_index];
-	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1;
+	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1 ;
 	double MH_ratio;
 	MH_ratio = pow;
 	//Averaging the two random numbers from each chains seed
-	double alpha = log( (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.);
+	//double alpha = log( (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.);
+	double alpha = (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.;
+	MH_ratio = exp(pow);
 	if (MH_ratio<alpha)
 	{
 		return -1;
