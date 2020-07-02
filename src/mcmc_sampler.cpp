@@ -351,7 +351,7 @@ void mcmc_sampler_output::count_indep_samples(bool trim)
 	indep_samples = 0;
 	for(int i = 0 ; i<cold_chain_number; i ++){
 		int id = cold_chain_ids[i];
-		int max_ac=0;
+		int max_ac=1;
 		for(int j = 0 ; j<dimension; j++){
 			if(ac_vals[i][j]>max_ac){
 				max_ac = ac_vals[i][j];	
@@ -1656,10 +1656,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	//	}
 	//}
 	//std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
-	write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
+	//write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
 	//
 	//write_file("data/post_anneal_hot.csv",sampler_ann.output[hot_chain_id],dynamic_search_length,sampler_ann.max_dim);
-	write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
+	//write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
 
 	deallocate_sampler_mem(&sampler_ann);
 	//#################################################
@@ -1684,9 +1684,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//		break;
 		//	}
 		//}
-		write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
+		//write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
 		//write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
-		write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
+		//write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
 
 		//deallocate_sampler_mem(&sampler_temp);
 
@@ -1899,11 +1899,15 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 		sampler_output->populate_chain_temperatures(chain_temps);
 		if(init){
+			debugger_print(__FILE__,__LINE__,"Init structure");
 			sampler_output->populate_initial_output(temp_output, sampler.ll_lp_output,sampler.chain_pos)	;
 			init=false;
+			debugger_print(__FILE__,__LINE__,"Finished init structure");
 		}
 		else{
+			debugger_print(__FILE__,__LINE__,"Appending structure");
 			sampler_output->append_to_output(temp_output,sampler.ll_lp_output,sampler.chain_pos)	;
+			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 		}
 		sampler_output->calc_ac_vals(true);
 		sampler_output->count_indep_samples(true);
@@ -1928,8 +1932,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 			else{
 				relax=false;
+				debugger_print(__FILE__,__LINE__,"Creating dump");
 				sampler_output->create_data_dump(true,false, chain_filename);
-				sampler_output->create_data_dump(false,false, "data/test_full.hdf");
+				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
+				//sampler_output->create_data_dump(false,false, "data/test_full.hdf");
 			}
 		}
 		else{
@@ -1939,8 +1945,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				//sampler_output->create_data_dump(true,false, chain_filename);
 			}
 			//else{
+			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
-			sampler_output->append_to_data_dump("data/test_full.hdf");
+			//sampler_output->append_to_data_dump("data/test_full.hdf");
+			debugger_print(__FILE__,__LINE__,"Finished appending dump");
 			//}
 		}
 		ac_save = ac_mean;
@@ -3470,6 +3478,12 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 		//std::cout<<samplerptr->current_likelihoods[j]<<std::endl;
 		//step_accepted[j]=0;
 		//step_rejected[j]=0;
+	}
+	if(samplerptr->log_ll && samplerptr->log_lp){
+		for(int i = 0 ; i<samplerptr->chain_N; i++){
+			samplerptr->ll_lp_output[i][0][0] = samplerptr->current_likelihoods[i];
+			samplerptr->ll_lp_output[i][0][1] = samplerptr->lp(samplerptr->output[i][0],samplerptr->param_status[i][0],samplerptr->dimension, i,samplerptr->user_parameters[i]);
+		}
 	}
 	
 	//Set chains with temp 1 to highest priority
