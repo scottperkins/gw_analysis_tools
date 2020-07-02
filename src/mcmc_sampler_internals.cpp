@@ -1352,11 +1352,13 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->prop_MH_factor[i]=0;
 	}		
 	if(sampler->tune){
-		sampler->fisher_update_number = 200;
+		//sampler->fisher_update_number = 200;
+		sampler->fisher_update_number = 1000;
 		//sampler->fisher_update_number = 50;
 	}
 	else{
-		sampler->fisher_update_number = sampler->N_steps;
+		sampler->fisher_update_number = 1000;
+		//sampler->fisher_update_number = sampler->N_steps;
 	}
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->max_dim);

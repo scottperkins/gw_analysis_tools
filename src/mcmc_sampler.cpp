@@ -1510,7 +1510,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = 2*t0;
+	//int dynamic_search_length = 2*t0;
+	int dynamic_search_length = nu*5;
 	//int dynamic_search_length = 200;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
@@ -1616,14 +1617,22 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	//while loop
 	//Dynamic pt allocation
 	//	check autocorrelation for convergence -- 10 chuncks, with the last three ac's within 5%
-	int dynamic_search_length;
+	//int dynamic_search_length;
+	//int temp_length = 1*N_steps;
+	//if( 2*t0<temp_length){
+	//	dynamic_search_length = 2*t0;
+	//}
+	//else{
+	//	dynamic_search_length = temp_length;
+	//}
+	int dynamic_search_length = 2*t0;
 	int temp_length = 1*N_steps;
-	if( 2*t0<temp_length){
-		dynamic_search_length = 2*t0;
+	if( dynamic_search_length>temp_length){
+		temp_length = dynamic_search_length;
 	}
-	else{
-		dynamic_search_length = temp_length;
-	}
+
+
+
 	double ***temp_output = allocate_3D_array(chain_N,temp_length, dimension);
 	int dynamic_ct = 0 ;
 	int dynamic_temp_freq = 1;
@@ -1647,10 +1656,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	//	}
 	//}
 	//std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
-	//write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
+	write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
 	//
 	//write_file("data/post_anneal_hot.csv",sampler_ann.output[hot_chain_id],dynamic_search_length,sampler_ann.max_dim);
-	//write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
+	write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
 
 	deallocate_sampler_mem(&sampler_ann);
 	//#################################################
@@ -1663,7 +1672,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			"",  checkpoint_file,true);
+			"",  checkpoint_file,false);
+
 		//TESTING
 		//int hot_chain_id = sampler_temp.chain_N-1;
 		////std::cout<<"chain T: "<<sampler_temp.chain_temps[0]<<std::endl;
@@ -1674,11 +1684,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//		break;
 		//	}
 		//}
-		//write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
+		write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
 		//write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
-		//write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
+		write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
 
-		deallocate_sampler_mem(&sampler_temp);
+		//deallocate_sampler_mem(&sampler_temp);
 
 
 		if(dynamic_ct%dynamic_temp_freq ==0){
@@ -1869,17 +1879,17 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,false,"","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file);
 
-			sampler sampler;
-			continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, dynamic_search_length, 
-				swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-				numThreads, pool, internal_prog, statistics_filename, 
-				"", checkpoint_file,true);
+			//sampler sampler;
+			//continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, dynamic_search_length, 
+			//	swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			//	numThreads, pool, internal_prog, statistics_filename, 
+			//	"", checkpoint_file,true);
 
+			//deallocate_sampler_mem(&sampler);
 			realloc_temps_thresh+=realloc_temps_length;
 			realloc=false;
-			deallocate_sampler_mem(&sampler);
 		}
 		sampler sampler;
 		continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, temp_length, 

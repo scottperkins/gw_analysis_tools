@@ -30,7 +30,7 @@ public:
 	//########
 	double **chain_neighborhoods;
 	int *chain_neighbors;
-	int chain_radius=3;
+	int chain_radius=2;
 	bool restrict_swapping=true;
 	//########
 	bool *waiting;
