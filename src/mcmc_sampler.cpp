@@ -1865,6 +1865,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool init = true;
 	bool relax = true;
 	double ac_save;
+	int max_search_iterations = 5;
+	int search_iterations_ct = 0;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
 		if(realloc || status>realloc_temps_thresh){
@@ -1890,6 +1892,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//deallocate_sampler_mem(&sampler);
 			realloc_temps_thresh+=realloc_temps_length;
 			realloc=false;
+			//We need to recreate the data_dump_file because the chains may
+			//have changed numbers in ensembles
+			relax=true;
+			init=true;
 		}
 		sampler sampler;
 		continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, temp_length, 
@@ -1897,10 +1903,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			numThreads, pool, internal_prog, statistics_filename, 
 			"", checkpoint_file,false);
 
+		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 		sampler_output->populate_chain_temperatures(chain_temps);
 		if(init){
 			debugger_print(__FILE__,__LINE__,"Init structure");
 			sampler_output->populate_initial_output(temp_output, sampler.ll_lp_output,sampler.chain_pos)	;
+			sampler_output->set_trim(0);	
+			sampler_output->update_cold_chain_list();	
 			init=false;
 			debugger_print(__FILE__,__LINE__,"Finished init structure");
 		}
@@ -1957,21 +1966,61 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		std::cout<<"Average ac: "<<max_ac_realloc<<std::endl;
 		std::cout<<"Independent samples: "<<sampler_output->indep_samples<<std::endl;
 		//write_file("data/test_output.csv",temp_output[0],temp_length,dimension);
-		double ave_accept = 0;
-		int cold_chains = 0;
-		for (int i = 0 ; i< chain_N; i ++){
-			if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
-				cold_chains++;
-				ave_accept+= (double)sampler.swap_accept_ct[i] / 
-					(sampler.swap_accept_ct[i] + sampler.swap_reject_ct[i]);
+		//###########################################################3
+		double temp_temps[sampler.chain_N];
+		load_temps_checkpoint_file(checkpoint_file, temp_temps, sampler.chain_N);
+		double swap_targets[2] = {.1,.9};
+		int cold_ids[sampler.chain_N];
+		int cold_chains_ct=0;
+		for(int k = 0 ; k<sampler.chain_N; k++){
+			if(fabs(temp_temps[k] - 1.) < DOUBLE_COMP_THRESH){
+				cold_ids[cold_chains_ct]=k;
+				cold_chains_ct++;
+			}	
+		}
+		int ensemble_members=sampler.chain_N;
+		if(cold_chains_ct>1){ensemble_members = cold_ids[1]-cold_ids[0];}
+		int ensemble_num = ceil((double)sampler.chain_N/ensemble_members);	
+		
+		double averages[ensemble_members];
+		int average_chain_nums[ensemble_members];
+		for(int i = 0 ; i<ensemble_members; i++){
+			averages[i]=0;
+			average_chain_nums[i]=0;
+		}
+		for(int k = 0 ; k<sampler.chain_N; k++){
+			averages[k%ensemble_members]+=(double)sampler.swap_accept_ct[k] / 
+					(sampler.swap_accept_ct[k] + sampler.swap_reject_ct[k]);
+			average_chain_nums[k%ensemble_members]++;
+		}
+		debugger_print(__FILE__,__LINE__,"Swap averages:");
+		for(int i = 0 ; i<ensemble_members; i++){
+			averages[i]/=average_chain_nums[i];
+			debugger_print(__FILE__,__LINE__,averages[i]);
+			if((averages[i]<swap_targets[0] || averages[i]>swap_targets[1]) && search_iterations_ct<max_search_iterations){
+				realloc=true;
+				search_iterations_ct++;
 			}
 		}
-		ave_accept /=cold_chains;
-		std::cout<<"AVE ACCEPT: "<<ave_accept<<std::endl;
-		//if(ave_accept <0.1 || ave_accept>.4){ realloc=true;}
-		if(ave_accept <0.1 ){ realloc=true;}
+		
+		
+		
+		//double ave_accept = 0;
+		//int cold_chains = 0;
+		//for (int i = 0 ; i< chain_N; i ++){
+		//	if(fabs(chain_temps[i]-1)<DOUBLE_COMP_THRESH){
+		//		cold_chains++;
+		//		ave_accept+= (double)sampler.swap_accept_ct[i] / 
+		//			(sampler.swap_accept_ct[i] + sampler.swap_reject_ct[i]);
+		//	}
+		//}
+		//ave_accept /=cold_chains;
+		//std::cout<<"AVE ACCEPT: "<<ave_accept<<std::endl;
+		////if(ave_accept <0.1 || ave_accept>.4){ realloc=true;}
+		//if(ave_accept <0.1 ){ realloc=true;}
+		//deallocate_sampler_mem(&sampler);
+		//###########################################################3
 		deallocate_sampler_mem(&sampler);
-		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 			
 		/* SAVE -- version that combines, then computes AC*/
 		/*

@@ -18,6 +18,20 @@ import gwatpy.mcmc_routines as gmcmc
 #exit()
 #data = f["THINNED_MCMC_OUTPUT"]["THINNED FLATTENED CHAINS"]
 #data = f["MCMC_OUTPUT"]["CHAIN 0"]
+
+#f = h5py.File("data/mcmc_output_RB.hdf5",'r')
+#print(f["MCMC_OUTPUT"].keys())
+#dataLL = f["MCMC_OUTPUT"]["LOGL_LOGP"]
+#for x in dataLL:
+#    print(x)
+#    dat = f["MCMC_OUTPUT"]["LOGL_LOGP"][x]
+#    print(np.shape(dat))
+#    plt.plot(dat[:,0],label="L")
+#    plt.plot(dat[:,1],label="P")
+#    plt.legend()
+#    plt.show()
+#    plt.close()
+
 data = gmcmc.trim_thin_file("data/mcmc_output_RB.hdf5",trim=None,ac=None)
 print(np.shape(data))
 #exit()

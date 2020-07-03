@@ -264,7 +264,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 		initial_pos[i]=pow(-1,i)*500.;
 		seeding_var[i]=10.;
 	}
-	int N_steps = 10000;
+	int N_steps = 20000;
 	int chain_N= 100;
 	int max_chain_N= 50;
 	//double *initial_pos_ptr = initial_pos;
@@ -291,7 +291,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	
 	double **output;
 	output = allocate_2D_array(  N_steps, n );
-	int t0 = 5000;
+	int t0 = 50000;
 	int nu = 100;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
@@ -761,8 +761,8 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 5000;
-	int chain_N= 32;
+	int N_steps = 20000;
+	int chain_N= 50;
 	int max_chain_N= 10;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 3;
@@ -792,8 +792,8 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 50;
-	int nu = 10;
+	int t0 = 5000;
+	int nu = 100;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
 	double corr_convergence_thresh = 0.01;

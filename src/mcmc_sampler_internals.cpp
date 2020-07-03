@@ -347,7 +347,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		sampler->fisher_update_ct[chain_index]=0;
 	}
 	else{ 
-		std::cout<<"Fisher nans"<<std::endl;
+		//std::cout<<"Fisher nans"<<std::endl;
 		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
 		sampler->nan_counter[chain_index]+=1;
 	}
