@@ -32,6 +32,7 @@ public:
 	int *chain_neighbors;
 	int chain_radius=1;
 	bool restrict_swapping=true;
+	double swap_rate=1./2.;
 	//########
 	bool *waiting;
 	int *chain_pos;

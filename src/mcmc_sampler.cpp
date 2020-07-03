@@ -4012,7 +4012,17 @@ void mcmc_step_threaded(int j)
 	//update stepsize to maximize step efficiency
 	//increases in stepsizes of 10%
 	update_step_widths(samplerptr, j);
-	poolptr->enqueue_swap(j);
+
+	//poolptr->enqueue_swap(j);
+
+	//TESTING 
+	double alpha = gsl_rng_uniform(samplerptr->rvec[j]);
+	if(alpha< samplerptr->swap_rate){
+		poolptr->enqueue_swap(j);
+	}
+	else{
+		samplerptr->waiting[j]=true;
+	}
 }
 //######################################################################################
 //######################################################################################
