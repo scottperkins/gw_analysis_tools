@@ -9,6 +9,8 @@
 #include "mcmc_sampler_internals.h"
 #include "util.h"
 
+
+
 struct dump_file_struct{
 	std::string filename;
 	bool trimmed;

@@ -17,11 +17,23 @@
 
 const double limit_inf = -std::numeric_limits<double>::infinity();
 
+
+class mcmc_data_interface{
+public:
+	int min_dim;
+	int chain_id;
+	int max_dim;
+	int chain_number;
+	bool burn_phase=false;
+	~mcmc_data_interface(){};
+};
+
 /*! Class storing everything that defines an instance of the sampler
  */
 class sampler
 {
 public:
+	mcmc_data_interface *interfaces;
 	bool tune=true;
 	int types_of_steps = 5;
 	double **step_prob;

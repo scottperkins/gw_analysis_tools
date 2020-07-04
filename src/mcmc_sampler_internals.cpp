@@ -1209,6 +1209,8 @@ void allocate_sampler_mem(sampler *sampler)
 		cold_chain_ct = 0;
 	}
 	//#############
+	sampler->interfaces = new mcmc_data_interface[sampler->chain_N];
+	//#############
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		//designate T=1 chains as reference chains
@@ -1254,6 +1256,11 @@ void allocate_sampler_mem(sampler *sampler)
 			//}
 			//std::cout<<std::endl;
 		}
+		//#######################
+		//#######################
+		sampler->interfaces[i].min_dim = sampler->min_dim;
+		sampler->interfaces[i].max_dim = sampler->max_dim;
+		sampler->interfaces[i].chain_number = i;
 		//#######################
 		//#######################
 		//initial value set to one's
@@ -1405,6 +1412,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	if(sampler->local_param_allocation){
 		delete [] sampler->user_parameters;
 	}
+	delete [] sampler->interfaces;
 	free(sampler->step_prob); 
 	free(sampler->prob_boundaries); 
 	free(sampler->de_primed);
