@@ -15,17 +15,17 @@ int mcmc_injection(int argc, char *argv[]);
 int mcmc_real_data(int argc, char *argv[]);
 int mcmc_rosenbock(int argc, char *argv[]);
 int mcmc_output_class(int argc, char *argv[]);
-double log_test (double *c,int dim,void *parameters);
-double log_test_prior (double *c,int dim,void *parameters);
-double log_rosenbock (double *c,int dim,void *parameters);
-double log_rosenbock_prior (double *c,int dim,void *parameters);
-void fisher_test(double *c,int dim, double **fisher,  void *parameters);
-double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_P(double *pos, int dim, int chain_id,void *parameters);
+double log_test (double *c,mcmc_data_interface *interface,void *parameters);
+double log_test_prior (double *c,mcmc_data_interface *interface,void *parameters);
+double log_rosenbock (double *c,mcmc_data_interface *interface,void *parameters);
+double log_rosenbock_prior (double *c,mcmc_data_interface *interface,void *parameters);
+void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, void *parameters);
+double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double chirpmass, double eta);
 double T_mcmc_gw_tool ;
-double standard_log_prior_dCS(double *pos, int dim, int chain_id,void *parameters);
-void fisher_rosenbock(double *c,int dim, double **fisher,  void *parameters);
+double standard_log_prior_dCS(double *pos, mcmc_data_interface *interface,void *parameters);
+//void fisher_rosenbock(double *c,double **fisher,  mcmc_data_interface *interface,void *parameters);
 
 int main(int argc, char *argv[])
 {
@@ -335,51 +335,52 @@ int mcmc_rosenbock(int argc, char *argv[])
 	return 0;
 }
 
-void fisher_rosenbock(double *c,int dim, double **fisher,  void *parameters)
+//void fisher_rosenbock(double *c,int dim, double **fisher,  void *parameters)
+//{
+//	double epsilon = 1e-3;
+//	double temp[dim];
+//	for (int i = 0 ; i<dim ; i++){
+//		temp[i]=c[i];	
+//	}
+//	for (int i = 0 ; i<dim ; i++){
+//		for (int j = 0 ; j<i ; j++){
+//			temp[i] = c[i]+epsilon;
+//			temp[j] = c[j]+epsilon;
+//			double plusplus = log_rosenbock(temp,dim, parameters);
+//			temp[i] = c[i]-epsilon;
+//			temp[j] = c[j]-epsilon;
+//			double minusminus = log_rosenbock(temp,dim, parameters);
+//			temp[i] = c[i]+epsilon;
+//			temp[j] = c[j]-epsilon;
+//			double plusminus = log_rosenbock(temp,dim, parameters);
+//			temp[i] = c[i]-epsilon;
+//			temp[j] = c[j]+epsilon;
+//			double minusplus = log_rosenbock(temp,dim, parameters);
+//			temp[i] = c[i];
+//			temp[j] = c[j];
+//			fisher[i][j]= -(plusplus -plusminus - minusplus + minusminus)/(4.*epsilon*epsilon);
+//			//fisher[i][j]= 0;
+//		}
+//		temp[i]= c[i]+epsilon;
+//		double plus = log_rosenbock(temp,dim,parameters);	
+//		temp[i]= c[i]-epsilon;
+//		double minus = log_rosenbock(temp,dim,parameters);	
+//		temp[i]=c[i];
+//		double eval = log_rosenbock(temp,dim,parameters);	
+//		fisher[i][i]= -(plus -2*eval +minus)/(epsilon*epsilon);
+//		//fisher[i][i]= 1;
+//	}
+//	for (int i = 0 ; i<dim ; i++){
+//		for (int j = i+1 ; j<dim ; j++){
+//			fisher[i][j] = fisher[j][i];	
+//		}
+//	}
+//	
+//	return;
+//} 
+double log_rosenbock (double *c,mcmc_data_interface *interface,void *parameters)
 {
-	double epsilon = 1e-3;
-	double temp[dim];
-	for (int i = 0 ; i<dim ; i++){
-		temp[i]=c[i];	
-	}
-	for (int i = 0 ; i<dim ; i++){
-		for (int j = 0 ; j<i ; j++){
-			temp[i] = c[i]+epsilon;
-			temp[j] = c[j]+epsilon;
-			double plusplus = log_rosenbock(temp,dim, parameters);
-			temp[i] = c[i]-epsilon;
-			temp[j] = c[j]-epsilon;
-			double minusminus = log_rosenbock(temp,dim, parameters);
-			temp[i] = c[i]+epsilon;
-			temp[j] = c[j]-epsilon;
-			double plusminus = log_rosenbock(temp,dim, parameters);
-			temp[i] = c[i]-epsilon;
-			temp[j] = c[j]+epsilon;
-			double minusplus = log_rosenbock(temp,dim, parameters);
-			temp[i] = c[i];
-			temp[j] = c[j];
-			fisher[i][j]= -(plusplus -plusminus - minusplus + minusminus)/(4.*epsilon*epsilon);
-			//fisher[i][j]= 0;
-		}
-		temp[i]= c[i]+epsilon;
-		double plus = log_rosenbock(temp,dim,parameters);	
-		temp[i]= c[i]-epsilon;
-		double minus = log_rosenbock(temp,dim,parameters);	
-		temp[i]=c[i];
-		double eval = log_rosenbock(temp,dim,parameters);	
-		fisher[i][i]= -(plus -2*eval +minus)/(epsilon*epsilon);
-		//fisher[i][i]= 1;
-	}
-	for (int i = 0 ; i<dim ; i++){
-		for (int j = i+1 ; j<dim ; j++){
-			fisher[i][j] = fisher[j][i];	
-		}
-	}
-	
-	return;
-} 
-double log_rosenbock (double *c,int dim,void *parameters)
-{
+	int dim = interface->max_dim;
 	rosenbock_param *param = (rosenbock_param *)parameters;
 	double LL = 0;
 	LL-= param->a * pow_int(c[0] - param->mu,2)	;
@@ -397,8 +398,9 @@ double log_rosenbock (double *c,int dim,void *parameters)
 	return LL;
 	//return 2;
 }
-double log_rosenbock_prior (double *c,int dim,void *parameters)
+double log_rosenbock_prior (double *c,mcmc_data_interface *interface,void *parameters)
 {
+	int dim =interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	rosenbock_param *param = (rosenbock_param *)parameters;
 	for(int i = 0 ; i<param->n; i++){
@@ -765,7 +767,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	int chain_N= 50;
 	int max_chain_N= 10;
 	//double *initial_pos_ptr = initial_pos;
-	int swp_freq = 3;
+	int swp_freq = 2;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
 	double chain_temps[chain_N];
 	chain_temps[0] = 1.;
@@ -811,7 +813,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	return 0;
 
 }
-double log_test (double *c,int dim,void *parameters)
+double log_test (double *c,mcmc_data_interface *interface,void *parameters)
 {
 	double x = c[0];
 	double y = c[1];
@@ -821,7 +823,7 @@ double log_test (double *c,int dim,void *parameters)
 	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
 	//return 2.;
 }
-double log_test_prior (double *c,int dim,void *parameters)
+double log_test_prior (double *c,mcmc_data_interface *interface,void *parameters)
 {
 	return 1.;
 }
@@ -851,7 +853,7 @@ double fisher22(double *c)
      128.*exp(-8*pow(x,2) - 8*pow(-2 + y,2))*pow(-2 + y,2) + 256*exp(-pow(x,2) - pow(9 + 4*pow(x,2) + 8*y,2))*pow(9 + 4*pow(x,2) + 8*y,2));
 
 }
-void fisher_test(double *c,int dim, double **fisher,  void *parameters)
+void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, void *parameters)
 {
 	
 	fisher[0][0] = fisher11(c);
@@ -861,7 +863,7 @@ void fisher_test(double *c,int dim, double **fisher,  void *parameters)
 	return;
 } 
 	
-double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];
@@ -887,7 +889,7 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 
 }
-double standard_log_prior_dCS(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_dCS(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];
@@ -914,7 +916,7 @@ double standard_log_prior_dCS(double *pos, int dim, int chain_id,void *parameter
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 }
-double standard_log_prior_P(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];

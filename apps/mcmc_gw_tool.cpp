@@ -33,15 +33,15 @@ double T_mcmc_gw_tool;
 double **mod_priors;
 double chirpmass_prior[2];
 double DL_prior[2];
-double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_D_mod(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters);
-double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters);
-double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *parameters);
+double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_Pv2(double *pos,  mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface, void *parameters);
+double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
 int main(int argc, char *argv[])
 {
@@ -424,7 +424,7 @@ int main(int argc, char *argv[])
 	}
 	else{
 	
-		double(*lp)(double *param, int dimension, int chain_id, void *parameters);
+		double(*lp)(double *param, mcmc_data_interface *interface, void *parameters);
 		if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
 			lp = &standard_log_prior_D;
 		}
@@ -532,8 +532,9 @@ int main(int argc, char *argv[])
 	return 0;
 
 }
-double standard_log_prior_D_mod(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim =  interface->max_dim;
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];
 	double a = -std::numeric_limits<double>::infinity();
@@ -565,8 +566,9 @@ double standard_log_prior_D_mod(double *pos, int dim, int chain_id,void *paramet
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 
 }
-double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim =  interface->max_dim;
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];
 	double a = -std::numeric_limits<double>::infinity();
@@ -595,8 +597,9 @@ double standard_log_prior_D(double *pos, int dim, int chain_id,void *parameters)
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 
 }
-double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];
@@ -633,8 +636,9 @@ double standard_log_prior_Pv2(double *pos, int dim, int chain_id,void *parameter
 	if ((pos[14])<0 || (pos[14])>2*M_PI){return a;}//phip
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];}
 }
-double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[7]);
 	double eta = pos[8];
@@ -675,8 +679,9 @@ double standard_log_prior_Pv2_mod(double *pos, int dim, int chain_id,void *param
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];
 }
-double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[0]);
 	double eta = pos[1];
@@ -693,8 +698,9 @@ double standard_log_prior_D_intrinsic(double *pos, int dim, int chain_id,void *p
 
 
 }
-double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[0]);
 	double eta = pos[1];
@@ -714,8 +720,9 @@ double standard_log_prior_D_intrinsic_mod(double *pos, int dim, int chain_id,voi
 
 
 }
-double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interface ,void *parameters)
 {
+	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[0]);
 	double eta = pos[1];
@@ -731,8 +738,9 @@ double standard_log_prior_Pv2_intrinsic(double *pos, int dim, int chain_id,void 
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
 
 }
-double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,void *parameters)
+double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
+	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[0]);
 	double eta = pos[1];
@@ -752,7 +760,7 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, int dim, int chain_id,v
 
 }
 
-double standard_log_prior_skysearch(double *pos, int dim, int chain_id, void *parameters){
+double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface, void *parameters){
 
 	double a = -std::numeric_limits<double>::infinity();
 	double DEC = asin(pos[1]);

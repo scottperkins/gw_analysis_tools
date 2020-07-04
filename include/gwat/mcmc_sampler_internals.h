@@ -24,6 +24,7 @@ public:
 	int chain_id;
 	int max_dim;
 	int chain_number;
+	double RJ_step_width=1;
 	bool burn_phase=false;
 	~mcmc_data_interface(){};
 };
@@ -33,7 +34,7 @@ public:
 class sampler
 {
 public:
-	mcmc_data_interface *interfaces;
+	mcmc_data_interface **interfaces;
 	bool tune=true;
 	int types_of_steps = 5;
 	double **step_prob;
@@ -45,6 +46,7 @@ public:
 	int chain_radius=1;
 	bool restrict_swapping=true;
 	double swap_rate=1./2.;
+	bool burn_phase=false;
 	//########
 	bool *waiting;
 	int *chain_pos;
@@ -120,9 +122,9 @@ public:
 	//log_prior lp;
 	//log_likelihood ll;
 	//fisher fish;
-	std::function<double(double*,int *, int, int, void *)> lp;
-	std::function<double(double*,int *,int, int, void *)> ll;
-	std::function<void(double*,int *,int,double**,int, void *)> fish;
+	std::function<double(double*,int *, mcmc_data_interface *, void *)> lp;
+	std::function<double(double*,int *,mcmc_data_interface *, void *)> ll;
+	std::function<void(double*,int *,double**,mcmc_data_interface *, void *)> fish;
 	
 	void ** user_parameters=NULL;
 	bool local_param_allocation=false;
@@ -173,7 +175,7 @@ public:
 	//RJPTMCMC Parameterts
 	int ***param_status;
 	bool RJMCMC=false;
-	std::function<void(double*,double*,int *,int *,int, int, int,void *)> rj;
+	std::function<void(double*,double*,int *,int *,mcmc_data_interface *,void *)> rj;
 	bool update_RJ_width=true;
 	
 };

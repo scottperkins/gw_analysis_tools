@@ -863,7 +863,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	double corr_target_ac,
 	int max_chunk_size,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -960,8 +960,9 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	if(local_seeding){ delete [] seeding_var;}
 }
 
-double MCMC_likelihood_wrapper_SKYSEARCH(double *param, int dimension, int chain_id,void *parameters)
+double MCMC_likelihood_wrapper_SKYSEARCH(double *param, mcmc_data_interface *interface,void *parameters)
 {
+	int dimension = interface->max_dim;
 	double ll = 0 ; 
 	skysearch_params *p = (skysearch_params *) parameters;
 	std::complex<double> *hplus = new std::complex<double>[mcmc_data_length[0]];	
@@ -1024,8 +1025,8 @@ void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
 	int min_dim,
 	int N_steps,
 	int swp_freq,
-	double(*log_prior)(double *param, int *status, int dimension, int chain_id,void *parameters),
-	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width,void *parameters),
+	double(*log_prior)(double *param, int *status, mcmc_data_interface *interface,void *parameters),
+	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,mcmc_data_interface *interface, void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -1107,7 +1108,7 @@ void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
 
 	//##################################################################
 	//std::function<void(double*, double*, int*, int*, int, int, double)> RJstep;
-	void (*RJstep)(double *, double *, int *, int *, int, int,double,void *);
+	void (*RJstep)(double *, double *, int *, int *, mcmc_data_interface *,void *);
 	if(!RJ_proposal){
 		RJstep = RJPTMCMC_RJ_proposal;
 	}
@@ -1157,8 +1158,8 @@ void RJPTMCMC_MH_GW(double ***output,
 		double *seeding_var,	
 		double *chain_temps,
 		int swp_freq,
-		double(*log_prior)(double *param, int *status, int dimension, int chain_id,void *parameters),
-		void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, int max_dim, int chain_id, double step_width,void *parameters),
+		double(*log_prior)(double *param, int *status, mcmc_data_interface *interface,void *parameters),
+		void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, mcmc_data_interface *interface,void *parameters),
 		int numThreads,
 		bool pool,
 		bool show_prog,
@@ -1233,7 +1234,7 @@ void RJPTMCMC_MH_GW(double ***output,
 	
 	//##################################################################
 	//std::function<void(double*, double*, int*, int*, int, int, double)> RJstep;
-	void (*RJstep)(double *, double *, int *, int *, int, int,double,void *);
+	void (*RJstep)(double *, double *, int *, int *, mcmc_data_interface *,void *);
 	if(!RJ_proposal){
 		RJstep = RJPTMCMC_RJ_proposal;
 	}
@@ -1285,7 +1286,7 @@ void PTMCMC_MH_GW(double ***output,
 	double *seeding_var,	
 	double *chain_temps,
 	int swp_freq,
-	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -1388,7 +1389,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	double corr_target_ac,
 	int max_chunk_size,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -1488,7 +1489,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	double corr_target_ac,
 	int max_chunk_size,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -1513,7 +1514,6 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	{	
 		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
 	}
-	void **user_parameters=NULL;
 	mcmc_noise = noise_psd;	
 	mcmc_frequencies = frequencies;
 	mcmc_data = data;
@@ -1552,42 +1552,57 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
 
 
-	//#################################################################################33
-	//TESTING
-	//double param[11] = {0.75,sin(-.8),2.5,.99,.75,3.03,log(587),log(27),.2499,.09,.01};
-	//double param[11] = {1.,-.2,2.59,.99,.05,3.03,log(600),log(27),.2499,.0,.0};
-
-	//double param[11] = { 1.13563473,-0.02061934,2.66447931,0.49694809,3.1010462,3.03288297,6.18601602,3.26479489,0.24844973,-0.53301645,0.60966511};
-	//double param[11] = { 0.81,-0.79,2.66447931,0.49694809,3.1010462,3.03288297,6.18601602,3.26479489,0.24844973,-0.53301645,0.60966511};
+	//######################################################
+	int T = (int)(1./(mcmc_frequencies[0][1]-mcmc_frequencies[0][0]));
+	debugger_print(__FILE__,__LINE__,T);
+	int burn_factor = T/4; //Take all sources to 4 seconds
+	debugger_print(__FILE__,__LINE__,burn_factor);
+	std::complex<double> **burn_data = new std::complex<double>*[mcmc_num_detectors];
+	double **burn_freqs = new double*[mcmc_num_detectors];
+	double **burn_noise = new double*[mcmc_num_detectors];
+	int *burn_lengths = new int[mcmc_num_detectors];
+	fftw_outline *burn_plans= new fftw_outline[num_detectors];
+	for(int j = 0; j<mcmc_num_detectors; j++){
+		burn_lengths[j] = mcmc_data_length[j]/burn_factor;
+		burn_data[j]= new std::complex<double>[burn_lengths[j]];
+		burn_freqs[j]= new double[burn_lengths[j]];
+		burn_noise[j]= new double[burn_lengths[j]];
+		allocate_FFTW_mem_forward(&burn_plans[j], burn_lengths[j]);
+		int ct = 0;
+		for( int k = 0 ; k<mcmc_data_length[j]; k++){
+			if(k%burn_factor==0 && ct<burn_lengths[j]){
+				burn_data[j][ct] = mcmc_data[j][k];
+				burn_freqs[j][ct] = mcmc_frequencies[j][k];
+				burn_noise[j][ct] = mcmc_noise[j][k];
+				ct++;
+			}
+		}
+	}
 	
-	//param[2] = M_PI*.82;
-	//param[4] = M_PI*1.02;
-	//std::cout<<MCMC_likelihood_wrapper(param,dimension, 1,(void *)NULL)<<std::endl;
-	//double deltapsi = 2*M_PI/100;
-	//double deltaphi = 2*M_PI/100;
-	//double deltaiota = 2./100;
-	//double deltaDL = 1./100;
-	//double **testing_output= allocate_2D_array(100,100);
-	//for(int j = 0 ; j<100; j++){
-	//	for(int i = 0 ; i<100; i ++){
-	//		param[2] =i*deltapsi;
-	//		//param[6] =6+j*deltaDL;
-	//		param[4] = j*deltaphi;
-	//		//param[3] =-1+ j*deltaiota;
-	//		//std::cout<<MCMC_likelihood_wrapper(param,dimension, 1,(void *)NULL)<<std::endl;
-	//		testing_output[j][i] = MCMC_likelihood_wrapper(param,dimension, 1,(void *)NULL);
-	//	}
-	//}
-	//write_file("testing/data/grid_search.csv",testing_output,100,100);
-	//deallocate_2D_array(testing_output,100,100);
-	//#################################################################################33
 
+	MCMC_user_param **user_parameters=NULL;
+	user_parameters = new MCMC_user_param*[chain_N];
+	for(int i = 0 ;i<chain_N; i++){
+		user_parameters[i] = new MCMC_user_param;
+		
+		user_parameters[i]->burn_data = burn_data;
+		user_parameters[i]->burn_freqs = burn_freqs;
+		user_parameters[i]->burn_noise = burn_noise;
+		user_parameters[i]->burn_lengths = burn_lengths;
+		user_parameters[i]->burn_plans=burn_plans;
+
+		//user_parameters[i]->burn_freqs = mcmc_frequencies;
+		//user_parameters[i]->burn_data = mcmc_data;
+		//user_parameters[i]->burn_noise = mcmc_noise;
+		//user_parameters[i]->burn_lengths = mcmc_data_length;
+	}
+	//######################################################
 
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution_scheme,
-		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
+		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
 		//log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
@@ -1595,6 +1610,22 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	//Deallocate fftw plans
 	for (int i =0;i<num_detectors;i++)
 		deallocate_FFTW_mem(&plans[i]);
+	//#################################################
+	for(int i = 0 ; i<num_detectors; i++){
+		delete [] burn_data[i];
+		delete [] burn_freqs[i];
+		delete [] burn_noise[i];
+		deallocate_FFTW_mem(&burn_plans[i]);
+	}
+	delete [] burn_data;
+	delete [] burn_noise;
+	delete [] burn_freqs;
+	delete [] burn_plans;
+	for(int i = 0 ; i<chain_N; i++){
+		delete user_parameters[i];
+	}
+	delete [] user_parameters;
+	//#################################################
 	free(plans);
 	if(local_seeding){ delete [] seeding_var;}
 }
@@ -1619,7 +1650,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	int t0,
 	int nu,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -1712,7 +1743,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	int dimension,
 	int N_steps,
 	int swp_freq,
-	double(*log_prior)(double *param, int dimension, int chain_id,void *parameters),
+	double(*log_prior)(double *param, mcmc_data_interface *interface ,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -2203,8 +2234,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 }
 
 
-void MCMC_fisher_wrapper(double *param, int dimension, double **output, int chain_id,void *parameters)
+void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *interface,void *parameters)
 {
+	int dimension = interface->max_dim;
 	double *temp_params = new double[dimension];
 	//#########################################################################
 	gen_params_base<double> gen_params;
@@ -2529,8 +2561,11 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	}
 	return generation_method;
 }
-double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *parameters)
+double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
+	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
+
+	int dimension = interface->max_dim;
 	double ll = 0;
 	double *temp_params = new double[dimension];
 	//#########################################################################
@@ -2547,7 +2582,19 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 	//#########################################################################
 	//#########################################################################
 	//return 1;
-
+	std::complex<double> **local_data = mcmc_data;
+	double **local_freqs = mcmc_frequencies;
+	double **local_noise = mcmc_noise;
+	int *local_lengths = mcmc_data_length;
+	fftw_outline *local_plans = mcmc_fftw_plans;
+	if(interface->burn_phase && user_param->burn_data){
+	//if(true){
+		local_data = user_param->burn_data;
+		local_freqs = user_param->burn_freqs;
+		local_noise = user_param->burn_noise;
+		local_lengths = user_param->burn_lengths;
+		local_plans = user_param->burn_plans;
+	}
 	if(mcmc_intrinsic){
 		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
 			if(!mcmc_save_waveform){
@@ -2560,14 +2607,14 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 					gen_params.incl_angle=0;	
 					gen_params.tc =1;
 					std::complex<double> *response =
-						(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[i]);
-					fourier_detector_response_horizon(mcmc_frequencies[i], mcmc_data_length[i], response, mcmc_detectors[i], local_gen, &gen_params);
-					ll += maximized_Log_Likelihood_aligned_spin_internal(mcmc_data[i], 
-							mcmc_noise[i],
-							mcmc_frequencies[i],
+						(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[i]);
+					fourier_detector_response_horizon(local_freqs[i], local_lengths[i], response, mcmc_detectors[i], local_gen, &gen_params);
+					ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
+							local_noise[i],
+							local_freqs[i],
 							response,
-							(size_t) mcmc_data_length[i],
-							&mcmc_fftw_plans[i]
+							(size_t) local_lengths[i],
+							&local_plans[i]
 							);
 					//ll += maximized_Log_Likelihood(mcmc_data[i], 
 					//		mcmc_noise[i],
@@ -2590,20 +2637,20 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 				gen_params.incl_angle=0;	
 				gen_params.tc =1;
 				std::complex<double> *response =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
-				fourier_detector_response_horizon(mcmc_frequencies[0], mcmc_data_length[0], response, mcmc_detectors[0], local_gen, &gen_params);
+					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
+				fourier_detector_response_horizon(local_freqs[0], local_lengths[0], response, mcmc_detectors[0], local_gen, &gen_params);
 				//std::complex<double> *hc =
 				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
 				//std::complex<double> *hp =
 				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
 				//fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
 				for(int i=0; i < mcmc_num_detectors; i++){
-					ll += maximized_Log_Likelihood_aligned_spin_internal(mcmc_data[i], 
-							mcmc_noise[i],
-							mcmc_frequencies[i],
+					ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
+							local_noise[i],
+							local_freqs[i],
 							response,
-							(size_t) mcmc_data_length[i],
-							&mcmc_fftw_plans[i]
+							(size_t) local_lengths[i],
+							&local_plans[i]
 							);
 					//ll += maximized_Log_Likelihood(mcmc_data[i], 
 					//		mcmc_noise[i],
@@ -2643,18 +2690,18 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 				gen_params.incl_angle=0;	
 				gen_params.tc =1;
 				std::complex<double> *hc =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
 				std::complex<double> *hp =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
-				fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
+					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
+				fourier_waveform(local_freqs[0],local_lengths[0], hp,hc, local_gen, &gen_params);
 				for(int i=0; i < mcmc_num_detectors; i++){
-					ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
-							mcmc_noise[i],
-							mcmc_frequencies[i],
+					ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
+							local_noise[i],
+							local_freqs[i],
 							hp,
 							hc,
-							(size_t) mcmc_data_length[i],
-							&mcmc_fftw_plans[i]
+							(size_t) local_lengths[i],
+							&local_plans[i]
 							);
 				}
 				free(hp);
@@ -2671,9 +2718,9 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 		//if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
 		
 		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
-			&gen_params,local_gen, mcmc_data_length, 
-			mcmc_frequencies, mcmc_data, mcmc_noise, mcmc_detectors, 
-			mcmc_fftw_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
+			&gen_params,local_gen, local_lengths, 
+			local_freqs, local_data, local_noise, mcmc_detectors, 
+			local_plans, mcmc_num_detectors, RA, DEC,mcmc_gps_time);
 		//ll=2;
 
 		//ll = Log_Likelihood(mcmc_data[0], 
@@ -3952,11 +3999,11 @@ double MCMC_likelihood_wrapper(double *param, int dimension, int chain_id,void *
 
 double RJPTMCMC_likelihood_wrapper(double *param, 
 	int *status,
-	int max_dim, 
-	int chain_id,
+	mcmc_data_interface *interface,
 	void *parameters
 	) 
 {
+	int dimension = interface->max_dim;
 	double ll = 0 ;
 	if(!mcmc_intrinsic && (mcmc_generation_method == "ppE_IMRPhenomD_Inspiral"||mcmc_generation_method == "ppE_IMRPhenomD_IMR")){
 	//if(false){
@@ -4136,12 +4183,13 @@ void RJPTMCMC_RJ_proposal(double *current_params,
 	double *proposed_params, 
 	int *current_status, 
 	int *proposed_status,
-	int max_dim, 
-	int chain_id, 
-	double step_width,
+	mcmc_data_interface *interface,
 	void *parameters
 	) 
 {
+	int max_dim = interface->max_dim;
+	int step_width = interface->RJ_step_width;
+	int chain_id = interface->chain_number;
 	//Sanity check -- only add or remove if you can
 	if(mcmc_max_dim == mcmc_min_dim){
 	//if(true){
@@ -4220,8 +4268,10 @@ void RJPTMCMC_RJ_proposal(double *current_params,
 	}
 }
 
-void RJPTMCMC_fisher_wrapper(double *param, int *status, int min_dim, double **output, int chain_id,void *parameters)
+void RJPTMCMC_fisher_wrapper(double *param, int *status,  double **output, mcmc_data_interface *interface,void *parameters)
 {
+	int min_dim = interface->min_dim;
+	int chain_id = interface->chain_number;
 	if(!mcmc_intrinsic && (mcmc_generation_method =="ppE_IMRPhenomD_Inspiral"||mcmc_generation_method =="ppE_IMRPhenomD_IMR")){	
 		std::string local_method = "IMRPhenomD";
 		//unpack parameter vector
