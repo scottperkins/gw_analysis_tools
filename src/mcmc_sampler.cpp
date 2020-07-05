@@ -2000,8 +2000,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			averages[i]/=average_chain_nums[i];
 			debugger_print(__FILE__,__LINE__,averages[i]);
 			if((averages[i]<swap_targets[0] || averages[i]>swap_targets[1]) && search_iterations_ct<max_search_iterations){
+				if(!realloc){
+					search_iterations_ct++;
+				}
 				realloc=true;
-				search_iterations_ct++;
 			}
 		}
 		
