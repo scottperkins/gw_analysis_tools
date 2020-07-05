@@ -1705,7 +1705,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
+				user_parameters,numThreads, pool,internal_prog,false,"","",checkpoint_file,true);
 		}
 
 			
@@ -1883,7 +1883,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file,false);
+				user_parameters,numThreads, pool,internal_prog,false,"","",checkpoint_file,false);
 
 			//sampler sampler;
 			//continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, dynamic_search_length, 
@@ -1971,7 +1971,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//###########################################################3
 		double temp_temps[sampler.chain_N];
 		load_temps_checkpoint_file(checkpoint_file, temp_temps, sampler.chain_N);
-		double swap_targets[2] = {.1,.9};
+		double swap_targets[2] = {.1,1};
 		int cold_ids[sampler.chain_N];
 		int cold_chains_ct=0;
 		for(int k = 0 ; k<sampler.chain_N; k++){
