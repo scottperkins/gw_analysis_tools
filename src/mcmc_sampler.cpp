@@ -1432,7 +1432,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 		dynamic_search_length,  max_chain_N_thermo_ensemble, 
 		 chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,true,"","",checkpoint_file);
+		numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 	
  	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(sampler_output,
@@ -1521,7 +1521,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
 		initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,true,"","",checkpoint_file);
+		numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
 	
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
@@ -1705,7 +1705,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
 		}
 
 			
@@ -1883,7 +1883,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length,  max_chain_N_thermo_ensemble, 
 				 chain_temps, swp_freq, t0, nu,
 				chain_distribution_scheme, log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file);
+				user_parameters,numThreads, pool,internal_prog,true,"","",checkpoint_file,false);
 
 			//sampler sampler;
 			//continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, dynamic_search_length, 
@@ -2645,7 +2645,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	bool dynamic_chain_number,
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	std::string checkpoint_file,/**< Filename to output data for checkpoint, if empty string, not saved*/
+	bool burn_phase 
 	)
 {
 	//std::cout<<"MEM CHECK : start continue"<<std::endl;
@@ -2680,7 +2681,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	samplerptr->num_threads = numThreads;
 	samplerptr->output =output;
 	samplerptr->user_parameters=user_parameters;
-	samplerptr->burn_phase = true;
+	samplerptr->burn_phase = burn_phase;
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
 
@@ -2843,7 +2844,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	bool dynamic_chain_number,
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
-	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	std::string checkpoint_file,/**< Filename to output data for checkpoint, if empty string, not saved*/
+	bool burn_phase
 	)
 {
 	clock_t start, end, acend;
@@ -2873,7 +2875,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->swap_rate = 1./swp_freq;
 	//For PT dynamics
 	samplerptr->N_steps = N_steps;
-	samplerptr->burn_phase = true;
+	samplerptr->burn_phase = burn_phase;
 
 	samplerptr->dimension =dimension;
 	samplerptr->min_dim=dimension;
@@ -4376,7 +4378,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 			true,
 			statistics_filename,
 			chain_filename,
-			checkpoint_file);
+			checkpoint_file,
+			false);
 
 }
 //######################################################################################
@@ -4511,7 +4514,8 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			true,
 			statistics_filename,
 			chain_filename,
-			checkpoint_file);
+			checkpoint_file,
+			false);
 
 }
 //######################################################################################

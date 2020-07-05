@@ -430,7 +430,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	bool dynamic_chain_number,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string checkpoint_file
+	std::string checkpoint_file,
+	bool burn_phase
 	);
 void continue_PTMCMC_MH_dynamic_PT_alloc(std::string checkpoint_file_start,
 	double ***output, 
@@ -494,7 +495,8 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output,
 	bool dynamic_chain_number,
 	std::string statistics_filename,
 	std::string chain_filename,
-	std::string checkpoint_file
+	std::string checkpoint_file,
+	bool burn_phase 
 	);
 void PTMCMC_MH_dynamic_PT_alloc(double ***output, 
 	int dimension, 	
