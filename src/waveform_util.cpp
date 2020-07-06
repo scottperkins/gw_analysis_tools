@@ -425,7 +425,12 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 		detector == "hanford" || 
 		detector == "VIRGO" ||
 		detector == "Virgo" ||
-		detector == "virgo")
+		detector == "virgo" ||
+		detector == "CE" ||
+		detector == "ET1"||
+		detector == "ET2"||
+		detector == "ET3"
+	)
 	{
 		fplus = right_interferometer_plus(theta,phi);
 		fcross = right_interferometer_cross(theta,phi);	
@@ -433,6 +438,13 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 		s2psi = sin(2*psi);
 		Fplus = fplus*c2psi- fcross*s2psi;
 		Fcross = fplus*s2psi+ fcross*c2psi;
+	}
+	if ( 	detector == "ET1"||
+		detector == "ET2"||
+		detector == "ET3")
+	{
+		Fplus*= ET1_geometric_factor;	
+		Fcross*= ET1_geometric_factor;	
 	}
 	for (int i =0; i <length; i++)
 	{

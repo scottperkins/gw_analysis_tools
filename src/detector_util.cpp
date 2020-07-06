@@ -77,6 +77,10 @@
  *
  * 	AdVIRGOPlus1_smoothed -- phase 1, O4 analog ( rescaled O5 curve according to BBH distance estimates in https://dcc.ligo.org/public/0161/P1900218/002/SummaryForObservers.pdf) -- without spectral lines
  *
+ * 	ET-D -- Einstein telescope with lines included. From ET website
+ *
+ * 	ET-D_smooth -- Einstein telescope without lines. From Emanuele 
+ *
  */
 void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
 		std::string detector, /**< String to designate the detector noise curve to be used */
@@ -228,6 +232,14 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		else if(detector=="KAGRA_pess"){
 			dat_length = 1000;
 			file = "kagra_80Mpc.csv";
+		}
+		else if(detector=="ET-D"){
+			dat_length = 3000;
+			file = "ET-0000A-18_ETDSensitivityCurveTxtFile.csv";
+		}
+		else if(detector=="ET-D_smoothed"){
+			dat_length = 3000;
+			file = "ETDXylophoneDwyer.csv";
 		}
 		count_lines_data_file(currently_supported_dir+file, &dat_length);
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();
@@ -531,6 +543,25 @@ void celestial_horizon_transform(T RA, /**< in RAD*/
 		azimuth_offset = CE_azimuth_offset;
 
 	}
+	else if (detector =="Einstein Telescope 1" || detector == "einstein telescope 1" || detector=="ET1")
+	{
+		LAT =  ET1_LAT;		
+		LONG =  ET1_LONG;		
+		azimuth_offset = ET1_azimuth_offset;
+
+	}
+	else if (detector =="Einstein Telescope 2" || detector == "einstein telescope 2" || detector=="ET2")
+	{
+		LAT =  ET2_LAT;		
+		LONG =  ET2_LONG;		
+		azimuth_offset = ET2_azimuth_offset;
+	}
+	else if (detector =="Einstein Telescope 3" || detector == "einstein telescope 3" || detector=="ET3")
+	{
+		LAT =  ET2_LAT;		
+		LONG =  ET2_LONG;		
+		azimuth_offset = ET2_azimuth_offset;
+	}
 	else {
 		std::cout<<"Invalid detector"<<std::endl;
 		exit(1);
@@ -608,6 +639,18 @@ T DTOA_DETECTOR(T RA, /**< spherical polar angle for detector 1 in RAD*/
 	{
 		earth_centered_location1 =CE_location ;	
 	}
+	else if(detector1 == "Einstein Telescope 1" || detector1 == "einstein telescope 1" || detector1=="ET1")
+	{
+		earth_centered_location1 =ET1_location ;	
+	}
+	else if(detector1 == "Einstein Telescope 2" || detector1 == "einstein telescope 2" || detector1=="ET2")
+	{
+		earth_centered_location1 =ET2_location ;	
+	}
+	else if(detector1 == "Einstein Telescope 3" || detector1 == "einstein telescope 3" || detector1=="ET3")
+	{
+		earth_centered_location1 =ET3_location ;	
+	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
@@ -632,6 +675,18 @@ T DTOA_DETECTOR(T RA, /**< spherical polar angle for detector 1 in RAD*/
 	else if(detector2 == "Cosmic Explorer" || detector2 == "cosmic explorer" || detector2=="CE")
 	{
 		earth_centered_location2 =CE_location ;	
+	}
+	else if(detector2 == "Einstein Telescope 1" || detector2 == "einstein telescope 1" || detector2=="ET1")
+	{
+		earth_centered_location2 =ET1_location ;	
+	}
+	else if(detector2 == "Einstein Telescope 2" || detector2 == "einstein telescope 2" || detector2=="ET2")
+	{
+		earth_centered_location2 =ET2_location ;	
+	}
+	else if(detector2 == "Einstein Telescope 3" || detector2 == "einstein telescope 3" || detector2=="ET3")
+	{
+		earth_centered_location2 =ET3_location ;	
 	}
 	return DTOA_earth_centered_coord(RA,DEC,GMST_rad,earth_centered_location1,earth_centered_location2);
 }
@@ -698,6 +753,18 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	{
 		R1 = CE_radius;	
 	}
+	else if(detector1 == "Einstein Telescope 1" || detector1 == "einstein telescope 1" || detector1=="ET1")
+	{
+		R1 = ET1_radius;	
+	}
+	else if(detector1 == "Einstein Telescope 2" || detector1 == "einstein telescope 2" || detector1=="ET2")
+	{
+		R1 = ET2_radius;	
+	}
+	else if(detector1 == "Einstein Telescope 3" || detector1 == "einstein telescope 3" || detector1=="ET3")
+	{
+		R1 = ET3_radius;	
+	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
@@ -722,6 +789,18 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	else if(detector2 == "Cosmic Explorer" || detector2 == "cosmic explorer" || detector2=="CE")
 	{
 		R2 = CE_radius;	
+	}
+	else if(detector2 == "Einstein Telescope 1" || detector2 == "einstein telescope 1" || detector2=="ET1")
+	{
+		R2 = ET1_radius;	
+	}
+	else if(detector2 == "Einstein Telescope 2" || detector2 == "einstein telescope 2" || detector2=="ET2")
+	{
+		R2 = ET2_radius;	
+	}
+	else if(detector2 == "Einstein Telescope 3" || detector2 == "einstein telescope 3" || detector2=="ET3")
+	{
+		R2 = ET3_radius;	
 	}
 	return (cos(theta1)*R1 - cos(theta2)*R2)/c;
 }
@@ -838,6 +917,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T *Fcross	/**<[out] Fcross response coefficient*/
 	)
 {
+	double geometric_factor=1;
 	//Time dependent antenna patterns
 	if(detector=="LISA" ||detector =="lisa"){
 		//Polar angle theta runs 0,PI , dec runs -PI/2,PI/2
@@ -857,6 +937,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	else{
 		double responseM[3][3];
 		if(detector =="Hanford" || detector=="hanford"){
+			geometric_factor = H_geometric_factor;
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = Hanford_D[i][j];
@@ -864,6 +945,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			}
 		}
 		else if(detector =="Livingston" || detector=="livingston"){
+			geometric_factor = L_geometric_factor;
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = Livingston_D[i][j];
@@ -871,6 +953,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			}
 		}
 		else if(detector =="Virgo" || detector=="virgo"){
+			geometric_factor = V_geometric_factor;
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = Virgo_D[i][j];
@@ -878,6 +961,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			}
 		}
 		else if(detector =="Kagra" || detector=="kagra"){
+			geometric_factor = K_geometric_factor;
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = Kagra_D[i][j];
@@ -885,6 +969,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			}
 		}
 		else if(detector =="Indigo" || detector=="indigo"){
+			geometric_factor = I_geometric_factor;
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = Indigo_D[i][j];
@@ -892,9 +977,34 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			}
 		}
 		else if(detector =="Cosmic Explorer" || detector=="cosmic explorer" || detector=="CE"){
+			geometric_factor = CE_geometric_factor;
 			for(int i =0; i<3; i++){
 				for(int j =0 ;j<3; j++){
 					responseM[i][j] = CE_D[i][j];
+				}
+			}
+		}
+		else if(detector =="Einstein Telescope 1" || detector=="einstein telescope 1" || detector=="ET1"){
+			geometric_factor = ET1_geometric_factor;
+			for(int i =0; i<3; i++){
+				for(int j =0 ;j<3; j++){
+					responseM[i][j] = ET1_D[i][j];
+				}
+			}
+		}
+		else if(detector =="Einstein Telescope 2" || detector=="einstein telescope 2" || detector=="ET2"){
+			geometric_factor = ET2_geometric_factor;
+			for(int i =0; i<3; i++){
+				for(int j =0 ;j<3; j++){
+					responseM[i][j] = ET2_D[i][j];
+				}
+			}
+		}
+		else if(detector =="Einstein Telescope 3" || detector=="einstein telescope 3" || detector=="ET3"){
+			geometric_factor = ET3_geometric_factor;
+			for(int i =0; i<3; i++){
+				for(int j =0 ;j<3; j++){
+					responseM[i][j] = ET3_D[i][j];
 				}
 			}
 		}
@@ -903,6 +1013,8 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			exit(1);
 		}
 		detector_response_functions_equatorial(responseM, ra, dec, psi, gmst, Fplus, Fcross);
+		(*Fplus)*=geometric_factor;
+		(*Fcross)*=geometric_factor;
 	}
 }
 

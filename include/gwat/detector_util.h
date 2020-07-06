@@ -18,6 +18,7 @@ const double H_radius = 6367299.93401105;
 //const double H_elevation = 123.139;//in meters
 const double H_elevation = 142.554;//in meters
 const double H_location[3] = {-2.16141492636e+06,-3.83469517889e+06,4.60035022664e+06};
+const double H_geometric_factor = 1.;
 
 const double L_LAT =0.53342313506 ;//in rad
 const double L_LONG =-1.58430937078 ;//in rad
@@ -28,6 +29,7 @@ const double L_radius = 6372795.50144497;
 //const double L_elevation = 13.1064;//in meters
 const double L_elevation = -6.574;//in meters
 const double L_location[3] = {-7.42760447238e+04,-5.49628371971e+06,3.22425701744e+06};
+const double L_geometric_factor = 1.;
 
 const double V_LAT =0.76151183984 ;//in rad
 const double V_LONG =0.18333805213 ;//in rad
@@ -39,6 +41,7 @@ const double V_radius = 6368051.92301;//in meters
 //const double V_elevation = 8;//in meters
 const double V_elevation = 51.884;//in meters
 const double V_location[3] = {4.54637409900e+06,8.42989697626e+05,4.37857696241e+06 };
+const double V_geometric_factor = 1.;
 
 
 const double K_LAT =0.6355068497 ;//in rad
@@ -51,6 +54,7 @@ const double K_azimuth_offset = 1.239;//in rad
 //######################################
 const double K_elevation = 414.181;//in meters
 const double K_location[3] = {-3777336.024,3484898.411, 3765313.697};
+const double K_geometric_factor = 1.;
 
 const double I_LAT =0.2484185302005262;//in rad
 const double I_LONG =1.3340133249409993 ;//in rad
@@ -62,6 +66,7 @@ const double I_azimuth_offset = 1.239;//in rad
 //const double I_azimuth_offset = ;//in rad
 const double I_elevation = 3.9624;//in meters
 const double I_location[3] = {1450526.82294155,6011058.39047265,1558018.27884102 };
+const double I_geometric_factor = 1.;
 
 const double CE_LAT = 0.706553;//in rad
 const double CE_LONG = -1.99869;//in rad
@@ -70,6 +75,34 @@ const double CE_azimuth_offset = 0;//in rad
 //const doublCE I_azimuth_offset = ;//in rad
 const double CE_elevation = 1190.854;//in meters
 const double CE_location[3] = {-2.01262e6,-4.41298e6,4.13995e6};
+const double CE_geometric_factor = 1.;
+
+//####################################################
+const double ET1_LAT =0.76151183984 ;//in rad
+const double ET1_LONG = 0.18333805213;//in rad
+const double ET1_radius =6.368051923006691e6;//in meters
+const double ET1_azimuth_offset = 0.33916285222 ;//in rad
+const double ET1_elevation = 51.884;//in meters
+const double ET1_location[3] = {4.54637409900e+06,8.42989697626e+05,4.37857696241e+06};
+const double ET1_geometric_factor = 0.86602540378;
+
+const double ET2_LAT = 0.76299307990;//in rad
+const double ET2_LONG = 0.18405858870;//in rad
+const double ET2_radius =6.36802814516601e6 ;//in meters
+const double ET2_azimuth_offset = 0;//in rad
+const double ET2_elevation = 59.735;//in meters
+const double ET2_location[3] = {4.53936951685e+06,8.45074592488e+05,4.38540257904e+06};
+const double ET2_geometric_factor = 0.86602540378;
+
+const double ET3_LAT = 0.76270463257;//in rad
+const double ET3_LONG = 0.18192996730;//in rad
+const double ET3_radius =6.368034296190262e6 ;//in meters
+const double ET3_azimuth_offset = 0;//in rad
+const double ET3_elevation = 59.727;//in meters
+const double ET3_location[3] = {4.54240595075e+06,8.35639650438e+05,4.38407519902e+06};
+const double ET3_geometric_factor = 0.86602540378;
+//####################################################
+
 
 //Earth radii at the poles and the equator (Earth is an ellispoid)
 const double RE_polar =6357e3 ;//in meters
@@ -105,11 +138,15 @@ const double Indigo_D[3][3] ={{0.470823664959826499, -0.120908243530907122,
  */
 const double CE_D[3][3] = {{0.377622, -0.268333, -0.102451}, {-0.268333, -0.0883621, -0.224639}, {-0.102451, -0.224639, -0.289259}};
 
+const double ET1_D[3][3] = {{0.0878588, -0.36468, -0.0208748}, {-0.36468, -0.518498,0.475276}, {-0.0208748, 0.475276, -0.0693608}};
+const double ET2_D[3][3] = {{-0.444542, 0.00279528, 0.457953}, {0.00279528,0.401623, -0.0796882}, {0.457953, -0.0796882, -0.457081}};
+const double ET3_D[3][3] = {{-0.0134683, 0.432316, -0.0687841}, {0.432316, -0.620065, -0.327299}, {-0.0687841, -0.327299, 0.133534}};
+
 
 const int analytic_PSD_models_N = 6;
 const std::string analytic_PSD_models[6] = {"aLIGO_analytic","Hanford_O1_fitted","LISA_SADC","LISA_SADC_CONF","LISA_CONF","LISA"};
-const int interp_PSD_models_N = 20;
-const std::string interp_PSD_models[20] = {"AdLIGOMidHigh","_AdLIGODesign","AdLIGODesign","AdLIGODesign_smoothed","AdLIGOAPlus","AdLIGOAPlus_smoothed","CE1","CE1_smoothed","CE2","CE2_smoothed","AdVIRGOPlus2_opt","AdVIRGOPlus2_opt_smoothed","AdVIRGOPlus2_pess","AdVIRGOPlus2_pess_smoothed","AdVIRGOPlus1","AdVIRGOPlus1_smoothed","KAGRA_opt","KAGRA_opt_smoothed","KAGRA_pess","KAGRA_pess_smoothed"};
+const int interp_PSD_models_N = 22;
+const std::string interp_PSD_models[22] = {"AdLIGOMidHigh","_AdLIGODesign","AdLIGODesign","AdLIGODesign_smoothed","AdLIGOAPlus","AdLIGOAPlus_smoothed","CE1","CE1_smoothed","CE2","CE2_smoothed","AdVIRGOPlus2_opt","AdVIRGOPlus2_opt_smoothed","AdVIRGOPlus2_pess","AdVIRGOPlus2_pess_smoothed","AdVIRGOPlus1","AdVIRGOPlus1_smoothed","KAGRA_opt","KAGRA_opt_smoothed","KAGRA_pess","KAGRA_pess_smoothed","ET-D","ET-D_smoothed"};
 void populate_noise(double *frequencies,std::string detector,double *noise_root,  int length, double integration_time=48);
 
 double aLIGO_analytic(double f);

@@ -256,6 +256,11 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 
 double PT_dynamical_timescale(int t0, int nu, int t);
 
+void update_temperatures_full_ensemble(sampler *samplerptr,
+	int t0,
+	int nu,
+	int t
+	);
 void update_temperatures(sampler *samplerptr,
 	int t0,
 	int nu,

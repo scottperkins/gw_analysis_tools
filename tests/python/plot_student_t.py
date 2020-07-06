@@ -12,7 +12,7 @@ import gwatpy.mcmc_routines as gmcmc
 #data = np.loadtxt("data/mcmc_output.csv",delimiter=',')
 #f = h5py.File("test_flat_standard.hdf5","r")
 #data = f["THINNED_MCMC_OUTPUT"]["THINNED FLATTENED CHAINS"]
-data = gmcmc.trim_thin_file("data/mcmc_output.csv")
+data = gmcmc.trim_thin_file("data/mcmc_output.csv",ac=17*5)
 
 labels = ["X","Y"]
 data_plot=[]

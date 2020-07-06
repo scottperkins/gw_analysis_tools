@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.optimize import curve_fit
 
-range_TERR = np.asarray([2.,10000],dtype=np.float64)
+range_TERR = np.asarray([1.,10000],dtype=np.float64)
 
 def fitting_func(x, logrootS,  b,c):
     return logrootS +  b*x +c*x*x
