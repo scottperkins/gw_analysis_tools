@@ -59,6 +59,7 @@ find_package(ADOLC REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
 find_package(GSL REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 
 #Library

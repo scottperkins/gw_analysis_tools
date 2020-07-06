@@ -197,6 +197,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 	samplerptr->output =output;
 	samplerptr->user_parameters=user_parameters;
 	samplerptr->burn_phase = burn_phase;
+	samplerptr->tune = false;
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
 
@@ -2001,7 +2002,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			"",  checkpoint_file,false,true);
+			"",  checkpoint_file,true,true);
 
 		//TESTING
 		//int hot_chain_id = sampler_temp.chain_N-1;
@@ -2204,8 +2205,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//if(status>realloc_temps_thresh){
 		if(realloc || status>realloc_temps_thresh){
 		//if(false){
-			if( 2*t0<temp_length){
-				dynamic_search_length = 2*t0;
+			if( t0<temp_length){
+				dynamic_search_length = t0;
 			}
 			else{
 				dynamic_search_length = temp_length;
@@ -2220,6 +2221,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				dynamic_search_length, chain_temps, swp_freq, t0, nu,
 				 log_prior, log_likelihood,fisher,
 				user_parameters,numThreads, pool,internal_prog,"","",checkpoint_file,false);
+			sampler sampler_temp;
+			std::cout<<"Exploration"<<std::endl;
+			continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, (int)(dynamic_search_length), 
+				swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+				numThreads, pool, internal_prog, statistics_filename, 
+				"",  checkpoint_file,true,true);
+			deallocate_sampler_mem(&sampler_temp);
 
 
 
