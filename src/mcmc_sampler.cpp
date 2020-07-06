@@ -677,6 +677,8 @@ void mcmc_sampler_output::calc_ac_vals(bool trim)
 void mcmc_sampler_output::count_indep_samples(bool trim)
 {
 	indep_samples = 0;
+	double mean_ac=0;
+	double mean_pos=0;
 	for(int i = 0 ; i<cold_chain_number; i ++){
 		int id = cold_chain_ids[i];
 		int max_ac=1;
@@ -685,13 +687,18 @@ void mcmc_sampler_output::count_indep_samples(bool trim)
 				max_ac = ac_vals[i][j];	
 			}
 		}
-		if(trim){
-			indep_samples += (chain_lengths[id]-trim_lengths[id])/max_ac;	
-		}
-		else{
-			indep_samples += (chain_lengths[id])/max_ac;
-		}
+		mean_ac+=max_ac;
+		mean_pos+=chain_lengths[id];
+		//if(trim){
+		//	indep_samples += (chain_lengths[id]-trim_lengths[id])/max_ac;	
+		//}
+		//else{
+		//	indep_samples += (chain_lengths[id])/max_ac;
+		//}
 	}
+	mean_ac/=cold_chain_number;
+	mean_pos/=cold_chain_number;
+	indep_samples= mean_pos/mean_ac;
 }
 //Use HDF5 if available
 #ifdef _HDF5
@@ -4416,6 +4423,7 @@ void mcmc_step_threaded(int j)
 //######################################################################################
 void mcmc_swap_threaded(int i, int j)
 {
+	//debugger_print(__FILE__,__LINE__,std::to_string(i)+" "+std::to_string(j)+" "+std::to_string(samplerptr->chain_temps[i])+" "+std::to_string(samplerptr->chain_temps[j]));
 	int k = samplerptr->chain_pos[i];
 	int l = samplerptr->chain_pos[j];
 	int success;
