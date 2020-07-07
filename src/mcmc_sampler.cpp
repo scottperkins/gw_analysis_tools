@@ -208,7 +208,6 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 	for(int i =0 ; i<samplerptr->chain_N; i++){
 		samplerptr->A[i]=0;
 	}
-	samplerptr->A = new int[samplerptr->chain_N];
 	samplerptr->PT_alloc = true;
 	
 

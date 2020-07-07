@@ -2588,7 +2588,7 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 	int *local_lengths = mcmc_data_length;
 	fftw_outline *local_plans = mcmc_fftw_plans;
 	if(interface->burn_phase && user_param->burn_data){
-	//if(true){
+	//if(false){
 		local_data = user_param->burn_data;
 		local_freqs = user_param->burn_freqs;
 		local_noise = user_param->burn_noise;
