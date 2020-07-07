@@ -688,7 +688,12 @@ void mcmc_sampler_output::count_indep_samples(bool trim)
 			}
 		}
 		mean_ac+=max_ac;
-		mean_pos+=chain_lengths[id];
+		if(trim){
+			mean_pos+=(chain_lengths[id]-trim_lengths[id]);
+		}
+		else{
+			mean_pos+=(chain_lengths[id]);
+		}
 		//if(trim){
 		//	indep_samples += (chain_lengths[id]-trim_lengths[id])/max_ac;	
 		//}
@@ -1471,8 +1476,10 @@ private:
 };
 ThreadPool *poolptr;
 
-void fisher_generic(double* position,int* status,int dim,double **fish,int chain_id,void *, sampler *sampler)
+void fisher_generic(double* position,int* status,double **fish,mcmc_data_interface *interface,void *, sampler *sampler)
 {
+	int dim = interface->max_dim;
+	int chain_id = interface->chain_number;
 	int current_pos = sampler->chain_pos[chain_id];
 	double **cov = allocate_2D_array(dim,dim);
 	if(current_pos < 10){
@@ -1561,11 +1568,11 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		samplerptr->fisher_exist = false;
-		//samplerptr->fisher_exist = true;
-		//fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
-		//	return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
-		//};
+		//samplerptr->fisher_exist = false;
+		samplerptr->fisher_exist = true;
+		fisher = [](double *param, int*param_status,  double **fish, mcmc_data_interface *interface, void *parameters){
+			return fisher_generic(param,param_status,fish, interface, parameters, samplerptr);	
+		};
 	}
 	else {
 		samplerptr->fisher_exist = true;
@@ -2342,20 +2349,24 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		int ensemble_num = ceil((double)sampler.chain_N/ensemble_members);	
 		
 		double averages[ensemble_members];
+		double average_attempts[ensemble_members];
 		int average_chain_nums[ensemble_members];
 		for(int i = 0 ; i<ensemble_members; i++){
 			averages[i]=0;
+			average_attempts[i]=0;
 			average_chain_nums[i]=0;
 		}
 		for(int k = 0 ; k<sampler.chain_N; k++){
 			averages[k%ensemble_members]+=(double)sampler.swap_accept_ct[k] / 
 					(sampler.swap_accept_ct[k] + sampler.swap_reject_ct[k]);
+			average_attempts[k%ensemble_members]+=(double)(sampler.swap_accept_ct[k] + sampler.swap_reject_ct[k]);
 			average_chain_nums[k%ensemble_members]++;
 		}
 		debugger_print(__FILE__,__LINE__,"Swap averages:");
 		for(int i = 0 ; i<ensemble_members; i++){
 			averages[i]/=average_chain_nums[i];
-			debugger_print(__FILE__,__LINE__,averages[i]);
+			average_attempts[i]/=average_chain_nums[i];
+			debugger_print(__FILE__,__LINE__,std::to_string(averages[i]) + " "+std::to_string(average_attempts[i]));
 			if((averages[i]<swap_targets[0] || averages[i]>swap_targets[1]) && search_iterations_ct<max_search_iterations){
 				if(!realloc){
 					search_iterations_ct++;
@@ -3877,11 +3888,11 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		samplerptr->fisher_exist = false;
-		//samplerptr->fisher_exist = true;
-		//fisher = [](double *param, int*param_status, int dim, double **fish, int chain_id, void *parameters){
-		//	return fisher_generic(param,param_status,dim,fish, chain_id, parameters, samplerptr);	
-		//};
+		//samplerptr->fisher_exist = false;
+		samplerptr->fisher_exist = true;
+		fisher = [](double *param, int*param_status,  double **fish, mcmc_data_interface *interface, void *parameters){
+			return fisher_generic(param,param_status,fish, interface, parameters, samplerptr);	
+		};
 	}
 	else 
 		samplerptr->fisher_exist = true;

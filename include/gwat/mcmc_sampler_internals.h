@@ -43,7 +43,7 @@ public:
 	//########
 	double **chain_neighborhoods;
 	int *chain_neighbors;
-	int chain_radius=1;
+	int chain_radius=2;
 	bool restrict_swapping=true;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
