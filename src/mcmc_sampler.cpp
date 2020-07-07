@@ -2009,31 +2009,55 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 
 	while(continue_dynamic_search && dynamic_ct<2){
-
-		sampler sampler_temp;
-		std::cout<<"Exploration"<<std::endl;
-		continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
-			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+		std::cout<<"Annealing"<<std::endl;
+		sampler sampler_ann;
+		continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
+			10,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
-			"",  checkpoint_file,true,true);
+			"", checkpoint_file);
 
 		//TESTING
-		//int hot_chain_id = sampler_temp.chain_N-1;
-		////std::cout<<"chain T: "<<sampler_temp.chain_temps[0]<<std::endl;
-		//for(int i = 1 ; i<sampler_temp.chain_N; i++){
-		//	//std::cout<<"chain T: "<<sampler_temp.chain_temps[i]<<std::endl;
-		//	if(fabs(sampler_temp.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+		//int hot_chain_id = 0;
+		//for(int i = 1 ; i<sampler_ann.chain_N; i++){
+		//	if(fabs(sampler_ann.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
 		//		hot_chain_id = i-1;
 		//		break;
 		//	}
 		//}
-		//write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
-		//write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
-		//write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
+		//std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
+		//write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
+		//
+		//write_file("data/post_anneal_hot.csv",sampler_ann.output[hot_chain_id],dynamic_search_length,sampler_ann.max_dim);
+		//write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
 
-		deallocate_sampler_mem(&sampler_temp);
+		deallocate_sampler_mem(&sampler_ann);
+		//#############################################
+
+		//sampler sampler_temp;
+		//std::cout<<"Exploration"<<std::endl;
+		//continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
+		//	swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+		//	numThreads, pool, internal_prog, statistics_filename, 
+		//	"",  checkpoint_file,true,true);
+
+		////TESTING
+		////int hot_chain_id = sampler_temp.chain_N-1;
+		//////std::cout<<"chain T: "<<sampler_temp.chain_temps[0]<<std::endl;
+		////for(int i = 1 ; i<sampler_temp.chain_N; i++){
+		////	//std::cout<<"chain T: "<<sampler_temp.chain_temps[i]<<std::endl;
+		////	if(fabs(sampler_temp.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
+		////		hot_chain_id = i-1;
+		////		break;
+		////	}
+		////}
+		////write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
+		////write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
+		////write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
+
+		//deallocate_sampler_mem(&sampler_temp);
 
 
+		//#############################################
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			//if( 5*t0<temp_length){
 			//	dynamic_search_length = 5*t0;
@@ -2370,7 +2394,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				if(!realloc){
 					search_iterations_ct++;
 				}
-				realloc=true;
+
+				//No more reallocing..
+				//realloc=true;
 			}
 		}
 		

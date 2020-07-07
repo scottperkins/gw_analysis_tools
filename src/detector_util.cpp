@@ -81,6 +81,8 @@
  *
  * 	ET-D_smooth -- Einstein telescope without lines. From Emanuele 
  *
+ * 	AdLIGOVoyager -- Voyager configuration of Advanced LIGO
+ *
  */
 void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*/
 		std::string detector, /**< String to designate the detector noise curve to be used */
@@ -240,6 +242,10 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		else if(detector=="ET-D_smoothed"){
 			dat_length = 3000;
 			file = "ETDXylophoneDwyer.csv";
+		}
+		else if(detector=="AdLIGOVoyager"){
+			dat_length = 3000;
+			file = "Voyager.csv";
 		}
 		count_lines_data_file(currently_supported_dir+file, &dat_length);
 		gsl_interp_accel *accel = gsl_interp_accel_alloc();

@@ -1,4 +1,4 @@
 import numpy as np
 
-data = np.loadtxt("ETDXylophoneDwyer.dat")
-np.savetxt("ETDXylophoneDwyer.csv",data, delimiter=',')
+data = np.loadtxt("Voyager.dat")
+np.savetxt("Voyager.csv",data, delimiter=',')
