@@ -72,6 +72,18 @@ int get_detector_parameters(char *detector, double *LAT,double *LON, double *loc
 			}
 		}
 	}
+	else if(local_det.find("Einstein Telescope 1")!=std::string::npos ||
+		local_det.find("einstein telescope 1")!=std::string::npos ||
+		local_det.find("ET1")!=std::string::npos ){
+		*LAT = ET1_LAT;
+		*LON = ET1_LONG;
+		for(int i= 0 ; i<3 ; i++){
+			location[i] = ET1_location[i];
+			for(int j= 0 ; j<3 ; j++){
+				response_tensor[3*i+j]=ET1_D[i][j];	
+			}
+		}
+	}
 	else{
 		std::cout<<"Unsupported detector"<<std::endl;
 		return -1;

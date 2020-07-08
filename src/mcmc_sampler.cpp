@@ -201,6 +201,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
 
+
 	//During chain allocation, pooling isn't used
 	samplerptr->pool = false;
 	samplerptr->numThreads = numThreads;
@@ -298,7 +299,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 			continue;
 		}
 		else{
-			chain_temp_averages[ct] +=samplerptr->chain_temps[i];
+			//chain_temp_averages[ct] +=samplerptr->chain_temps[i];
+			chain_temp_averages[ct] +=std::log(samplerptr->chain_temps[i]);
 			chain_N_per_group[ct]+=1;
 			ct++;
 				
@@ -306,6 +308,9 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 	}
 	for(int i = 0 ; i < chains_per_ensemble-2;i++){
 		chain_temp_averages[i]/=chain_N_per_group[i];	
+		chain_temp_averages[i] = std::exp(chain_temp_averages[i]);
+		//chain_temp_averages[i]=std::pow(chain_temp_averages[i],1./chain_N_per_group[i]);	
+		debugger_print(__FILE__,__LINE__,chain_temp_averages[i]);
 	}
 	ct = 0;
 	chain_temps[0]= 1;
@@ -2009,52 +2014,32 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 
 	while(continue_dynamic_search && dynamic_ct<2){
-		std::cout<<"Annealing"<<std::endl;
-		sampler sampler_ann;
-		continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
-			10,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-			numThreads, pool, internal_prog, statistics_filename, 
-			"", checkpoint_file);
+		//std::cout<<"Annealing"<<std::endl;
+		//sampler sampler_ann;
+		//continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
+		//	10,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+		//	numThreads, pool, internal_prog, statistics_filename, 
+		//	"", checkpoint_file);
 
-		//TESTING
-		//int hot_chain_id = 0;
-		//for(int i = 1 ; i<sampler_ann.chain_N; i++){
-		//	if(fabs(sampler_ann.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
-		//		hot_chain_id = i-1;
-		//		break;
-		//	}
-		//}
-		//std::cout<<"Hot id: "<<hot_chain_id<<std::endl;
-		//write_file("data/post_anneal.csv",sampler_ann.output[0],dynamic_search_length,sampler_ann.max_dim);
-		//
-		//write_file("data/post_anneal_hot.csv",sampler_ann.output[hot_chain_id],dynamic_search_length,sampler_ann.max_dim);
-		//write_file("data/post_anneal_LL.csv",sampler_ann.ll_lp_output[0],dynamic_search_length,2);
-
-		deallocate_sampler_mem(&sampler_ann);
+		//deallocate_sampler_mem(&sampler_ann);
 		//#############################################
 
-		//sampler sampler_temp;
-		//std::cout<<"Exploration"<<std::endl;
-		//continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
-		//	swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-		//	numThreads, pool, internal_prog, statistics_filename, 
-		//	"",  checkpoint_file,true,true);
+		sampler sampler_temp;
+		std::cout<<"Exploration"<<std::endl;
+		continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
+			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			numThreads, pool, internal_prog, statistics_filename, 
+			"",  checkpoint_file,true,true);
 
-		////TESTING
-		////int hot_chain_id = sampler_temp.chain_N-1;
-		//////std::cout<<"chain T: "<<sampler_temp.chain_temps[0]<<std::endl;
-		////for(int i = 1 ; i<sampler_temp.chain_N; i++){
-		////	//std::cout<<"chain T: "<<sampler_temp.chain_temps[i]<<std::endl;
-		////	if(fabs(sampler_temp.chain_temps[i] -1)<DOUBLE_COMP_THRESH){
-		////		hot_chain_id = i-1;
-		////		break;
-		////	}
-		////}
-		////write_file("data/post_explore.csv",sampler_temp.output[0],dynamic_search_length,sampler_temp.max_dim);
-		////write_file("data/post_explore_hot.csv",sampler_temp.output[hot_chain_id],dynamic_search_length,sampler_temp.max_dim);
-		////write_file("data/post_explore_LL.csv",sampler_temp.ll_lp_output[0],dynamic_search_length,2);
+		//for(int i = 0 ; i<sampler_temp.chain_N; i++){
+		//	int pos = sampler_temp.chain_pos[i];
+		//	debugger_print(__FILE__,__LINE__,pos);
+		//	for(int j = 0 ; j<sampler_temp.max_dim ; j++){
+		//		debugger_print(__FILE__,__LINE__,sampler_temp.output[i][pos][j]);
+		//	}
+		//}
 
-		//deallocate_sampler_mem(&sampler_temp);
+		deallocate_sampler_mem(&sampler_temp);
 
 
 		//#############################################
@@ -2236,7 +2221,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool init = true;
 	bool relax = true;
 	double ac_save;
-	int max_search_iterations = 5;
+	int max_search_iterations = 3;
 	int search_iterations_ct = 0;
 	while(status<N_steps){
 		//if(status>realloc_temps_thresh){
@@ -2395,8 +2380,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 					search_iterations_ct++;
 				}
 
-				//No more reallocing..
-				//realloc=true;
+				realloc=true;
 			}
 		}
 		
@@ -3970,6 +3954,7 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	
 	//########################################################
 	PTMCMC_MH_loop(samplerptr);	
+	//PTMCMC_MH_step_incremental(samplerptr,samplerptr->N_steps);	
 	//##############################################################
 	
 	end =clock();
