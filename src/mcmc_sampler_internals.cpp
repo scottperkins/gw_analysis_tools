@@ -2309,46 +2309,95 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 	int t
 	)
 {
-	//acceptance ratios -- as defined by arXiv:1501.05823v3
-	//Need to transform, because I save the total acceptance count per chain
-	//not the acceptance count between chains
-	double *old_temps = new double[samplerptr->chain_N];
-	double max_temp = 0 ;
-	int ensemble_chain_number = 0 ;
-	bool search = true;
-	for(int i =0 ; i<samplerptr->chain_N-1; i++){
-		old_temps[i] = samplerptr->chain_temps[i];
-		if(i != 0 && fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH){
-			max_temp = samplerptr->chain_temps[i-1];
-			if(search){
-				ensemble_chain_number = i;
-				search=false;
+	//Either average dynamics during sampling or after sampling run
+	bool combined_dynamics = true;
+		
+	if(combined_dynamics){
+		double *old_temps = new double[samplerptr->chain_N];
+		double max_temp = 0 ;
+		int ensemble_chain_number = 0 ;
+		bool search = true;
+		for(int i =0 ; i<samplerptr->chain_N-1; i++){
+			old_temps[i] = samplerptr->chain_temps[i];
+			if(i != 0 && fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH){
+				max_temp = samplerptr->chain_temps[i-1];
+				if(search){
+					ensemble_chain_number = i;
+					search=false;
+				}
 			}
 		}
-	}
-	if(max_temp <DOUBLE_COMP_THRESH ){
-		max_temp = samplerptr->chain_temps[samplerptr->chain_N-1];
-	}
-	double power;
-	double kappa = PT_dynamical_timescale(t0, nu, t);
-	//std::cout<<kappa<<std::endl;
-	for (int i =1 ; i<samplerptr->chain_N-1; i++){
-		if( !(fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH ||
-			fabs(samplerptr->chain_temps[i] - max_temp) < DOUBLE_COMP_THRESH)){
-			if(i!=samplerptr->chain_N-1){
-				power = kappa * (samplerptr->A[i] - samplerptr->A[i+1]);
-			}
-			else{
-				power = kappa * (samplerptr->A[i] - samplerptr->A[i+1-ensemble_chain_number]);
-				
-			}
-			samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
-				(old_temps[i] - old_temps[i-1]) * std::exp(power);
-			//Replace LL, since I store it already scaled by the old temperature
-			samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
+		if(max_temp <DOUBLE_COMP_THRESH ){
+			max_temp = samplerptr->chain_temps[samplerptr->chain_N-1];
 		}
-	} 
-	delete [] old_temps;
+		double averaged_A[ensemble_chain_number];
+		for(int i = 0 ; i<ensemble_chain_number; i++){
+			averaged_A[i]=0;
+		}
+		for(int i = 0 ; i<samplerptr->chain_N; i++){
+			averaged_A[i%ensemble_chain_number]+= samplerptr->A[i];
+		}
+		double power;
+		double kappa = PT_dynamical_timescale(t0, nu, t);
+		//std::cout<<kappa<<std::endl;
+		for (int i =1 ; i<samplerptr->chain_N-1; i++){
+			if( !(fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH ||
+				fabs(samplerptr->chain_temps[i] - max_temp) < DOUBLE_COMP_THRESH)){
+				power = kappa * (averaged_A[i%ensemble_chain_number] - averaged_A[(i+1)%ensemble_chain_number]);
+				samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
+					(old_temps[i] - old_temps[i-1]) * std::exp(power);
+				//Replace LL, since I store it already scaled by the old temperature
+				samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
+			}
+		} 
+		delete [] old_temps;
+	}
+
+	else{
+		//######################################################
+		//This worked, but we're trying something new
+		//######################################################
+		//acceptance ratios -- as defined by arXiv:1501.05823v3
+		//Need to transform, because I save the total acceptance count per chain
+		//not the acceptance count between chains
+		double *old_temps = new double[samplerptr->chain_N];
+		double max_temp = 0 ;
+		int ensemble_chain_number = 0 ;
+		bool search = true;
+		for(int i =0 ; i<samplerptr->chain_N-1; i++){
+			old_temps[i] = samplerptr->chain_temps[i];
+			if(i != 0 && fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH){
+				max_temp = samplerptr->chain_temps[i-1];
+				if(search){
+					ensemble_chain_number = i;
+					search=false;
+				}
+			}
+		}
+		if(max_temp <DOUBLE_COMP_THRESH ){
+			max_temp = samplerptr->chain_temps[samplerptr->chain_N-1];
+		}
+		double power;
+		double kappa = PT_dynamical_timescale(t0, nu, t);
+		//std::cout<<kappa<<std::endl;
+		for (int i =1 ; i<samplerptr->chain_N-1; i++){
+			if( !(fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH ||
+				fabs(samplerptr->chain_temps[i] - max_temp) < DOUBLE_COMP_THRESH)){
+				if(i!=samplerptr->chain_N-1){
+					power = kappa * (samplerptr->A[i] - samplerptr->A[i+1]);
+				}
+				else{
+					power = kappa * (samplerptr->A[i] - samplerptr->A[i+1-ensemble_chain_number]);
+					
+				}
+				samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
+					(old_temps[i] - old_temps[i-1]) * std::exp(power);
+				//Replace LL, since I store it already scaled by the old temperature
+				samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
+			}
+		} 
+		delete [] old_temps;
+	}
 }
 
 /*!  \brief For the dynamic PT sampler, this is the function that starts the full sampler with the max number of chains

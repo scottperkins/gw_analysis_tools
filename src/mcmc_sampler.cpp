@@ -202,8 +202,17 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
 
 
-	//During chain allocation, pooling isn't used
+	//###############################################
+	//We can use pooling, but the swap radius MUST be 1
+	//The equations for the temperature dynamics are written
+	//for neighboring temperatures only
+	//
+	//This is being too problematic for now
+	//samplerptr->chain_radius = 1;
+	//samplerptr->pool = true;
 	samplerptr->pool = false;
+	//###############################################
+
 	samplerptr->numThreads = numThreads;
 	samplerptr->A = new int[samplerptr->chain_N];
 	for(int i =0 ; i<samplerptr->chain_N; i++){
@@ -2271,10 +2280,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			relax=true;
 			init=true;
 		}
+		double harvest_pool = true;
 		sampler sampler;
 		continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-			numThreads, pool, internal_prog, statistics_filename, 
+			numThreads, harvest_pool, internal_prog, statistics_filename, 
 			"", checkpoint_file,false,false);
 
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
@@ -4453,10 +4463,28 @@ void mcmc_swap_threaded(int i, int j)
 	if(success ==1){
 		samplerptr->swap_accept_ct[i]+=1;	
 		samplerptr->swap_accept_ct[j]+=1;	
+		//NOTE: this only works if the swap radius is 1
+		if(samplerptr->PT_alloc){
+			if(i<j){
+				samplerptr->A[j] = 1;
+			}
+			else{
+				samplerptr->A[i] = 1;
+			}
+		}
 	}
 	else{
 		samplerptr->swap_reject_ct[i]+=1;	
 		samplerptr->swap_reject_ct[j]+=1;	
+		//NOTE: this only works if the swap radius is 1
+		if(samplerptr->PT_alloc){
+			if(i<j){
+				samplerptr->A[j] = 0;
+			}
+			else{
+				samplerptr->A[i] = 0;
+			}
+		}
 	}
 	samplerptr->waiting[i]=true;
 	samplerptr->waiting[j]=true;
