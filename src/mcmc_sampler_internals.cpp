@@ -2331,11 +2331,17 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 			max_temp = samplerptr->chain_temps[samplerptr->chain_N-1];
 		}
 		double averaged_A[ensemble_chain_number];
+		int chain_num_dt[ensemble_chain_number];
 		for(int i = 0 ; i<ensemble_chain_number; i++){
 			averaged_A[i]=0;
+			chain_num_dt[i]=0;
 		}
 		for(int i = 0 ; i<samplerptr->chain_N; i++){
 			averaged_A[i%ensemble_chain_number]+= samplerptr->A[i];
+			chain_num_dt[i%ensemble_chain_number]+=1;
+		}
+		for(int i = 0 ; i<ensemble_chain_number; i++){
+			averaged_A[i]/=chain_num_dt[i];
 		}
 		double power;
 		double kappa = PT_dynamical_timescale(t0, nu, t);

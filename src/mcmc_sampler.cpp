@@ -4593,7 +4593,7 @@ void mcmc_swap_threaded(int i, int j)
 		samplerptr->swap_accept_ct[j]+=1;	
 		//NOTE: this only works if the swap radius is 1
 		if(samplerptr->PT_alloc){
-			if(i<j){
+			if(samplerptr->chain_temps[i]<samplerptr->chain_temps[j]){
 				samplerptr->A[j] = 1;
 			}
 			else{
@@ -4606,7 +4606,7 @@ void mcmc_swap_threaded(int i, int j)
 		samplerptr->swap_reject_ct[j]+=1;	
 		//NOTE: this only works if the swap radius is 1
 		if(samplerptr->PT_alloc){
-			if(i<j){
+			if(samplerptr->chain_temps[i]<samplerptr->chain_temps[j]){
 				samplerptr->A[j] = 0;
 			}
 			else{
