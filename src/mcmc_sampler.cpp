@@ -984,6 +984,15 @@ public:
 		}
 		return length;
 	}
+	int queue_swap_element(int i )
+	{
+		int element;
+		{ 
+			std::unique_lock<std::mutex> lock{mEventMutexSWP};
+			element = mSwaps.at(i);
+		}
+		return element;
+	}
 	int queue_pairs_length()
 	{
 		int length;
@@ -1309,6 +1318,10 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr, int N_steps
 				//std::cout<<pairs<<" "<<swaps<<std::endl;
 			}
 			//debugger_print(__FILE__,__LINE__,pool.queue_swap_length());
+			//int length = pool.queue_swap_length();
+			//for(int i = 0 ; i<length; i++){
+			//	debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[pool.queue_swap_element(i)]);
+			//}
 			//std::cout<<"DOne?"<<std::endl;
 		}
 		//#######################################
