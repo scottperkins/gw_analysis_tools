@@ -1197,6 +1197,8 @@ void allocate_sampler_mem(sampler *sampler)
 	if(true){
 		sampler->chain_neighborhoods=(double **)malloc(sizeof(double*)*sampler->chain_N);
 		sampler->chain_neighbors=(int *)malloc(sizeof(int)*sampler->chain_N);
+		sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
+		sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
 		update_temp_neighborhoods(sampler);
 		//for (i =0; i<sampler->chain_N; i++){
 		//	if(fabs(sampler->chain_temps[i]-1)<DOUBLE_COMP_THRESH){
@@ -1407,10 +1409,13 @@ void deallocate_sampler_mem(sampler *sampler)
 		for (i =0; i<sampler->chain_N; i++)
 		{
 			free(sampler->chain_neighborhoods[i]);
+			free(sampler->chain_neighborhoods_ids[i]);
 			free(sampler->step_prob[i]);
 		}
 		free(sampler->chain_neighborhoods);
 		free(sampler->chain_neighbors);
+		free(sampler->chain_neighborhoods_ids);
+		free(sampler->chain_neighbors_ids);
 	}
 	if(sampler->local_param_allocation){
 		delete [] sampler->user_parameters;
@@ -2356,9 +2361,8 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 	)
 {
 	//Either average dynamics during sampling or after sampling run
-	bool combined_dynamics = true;
 		
-	if(combined_dynamics){
+	if(!(samplerptr->linear_swapping)){
 		double *old_temps = new double[samplerptr->chain_N];
 		double max_temp = 0 ;
 		int ensemble_chain_number = 0 ;
@@ -2375,6 +2379,7 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 		}
 		if(max_temp <DOUBLE_COMP_THRESH ){
 			max_temp = samplerptr->chain_temps[samplerptr->chain_N-1];
+			ensemble_chain_number = samplerptr->chain_N;
 		}
 		double averaged_A[ensemble_chain_number];
 		int chain_num_dt[ensemble_chain_number];
@@ -2387,7 +2392,12 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 			chain_num_dt[i%ensemble_chain_number]+=1;
 		}
 		for(int i = 0 ; i<ensemble_chain_number; i++){
-			averaged_A[i]/=chain_num_dt[i];
+			if(chain_num_dt[i] != 0){
+				averaged_A[i]/=chain_num_dt[i];
+			}
+			else{
+				averaged_A[i]=0;
+			}
 			//debugger_print(__FILE__,__LINE__,i);
 			//debugger_print(__FILE__,__LINE__,averaged_A[i]);
 		}
@@ -2431,6 +2441,7 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 		}
 		if(max_temp <DOUBLE_COMP_THRESH ){
 			max_temp = samplerptr->chain_temps[samplerptr->chain_N-1];
+			ensemble_chain_number = samplerptr->chain_N;
 		}
 		double power;
 		double kappa = PT_dynamical_timescale(t0, nu, t);

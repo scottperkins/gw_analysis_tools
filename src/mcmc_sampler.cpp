@@ -1287,27 +1287,40 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr, int N_steps
 	bool testing=false;
 	//step equilibrium_check_freq
 	//for(int i =0; i<N_steps/samplerptr->swp_freq; i++){
-	samplerptr->swp_freq = 5;
+	int steps  = samplerptr->swp_freq;
+	samplerptr->swap_rate = 0;
 	//while(t<(N_steps - samplerptr->swp_freq)){
-	while(t<(N_steps - 3)){
+	while(t<(N_steps - steps)){
 		//Now that swapping is stochastic, we need to make sure
 		//a swap actually happened
 		//PTMCMC_MH_step_incremental(samplerptr, samplerptr->swp_freq);	
-		PTMCMC_MH_step_incremental(samplerptr, 3);	
+		PTMCMC_MH_step_incremental(samplerptr, steps);	
+		//t+= samplerptr->swp_freq;
+		t+= steps;
 		
 		//#######################################
 		//Trying something here to increase mixing
+		if((samplerptr->linear_swapping)){
+			int swp_accepted =0, swp_rejected=0;
+			chain_swap(samplerptr, samplerptr->output, samplerptr->param_status,t, &swp_accepted, &swp_rejected);
+		}
+		else
 		{
 			ThreadPool pool(samplerptr->num_threads);
 			poolptr= &pool;
-			std::vector<int> ids;
-			for(int i = 0 ; i<samplerptr->chain_N; i++){
-				ids.push_back(i);	
-			}
-			for(int i = 0 ; i<samplerptr->chain_N; i++){
-				int alpha = (int)(gsl_rng_uniform(samplerptr->rvec[0])*ids.size());
-				poolptr->enqueue_swap(ids.at(alpha));
-				ids.erase(ids.begin()+alpha);
+			//We're gonna try swapping every chain twice to 
+			//attempt to minimize the chances a chain doesn't 
+			//swap at all
+			for(int j = 0 ; j<2; j++){
+				std::vector<int> ids;
+				for(int i = 0 ; i<samplerptr->chain_N; i++){
+					ids.push_back(i);	
+				}
+				for(int i = 0 ; i<samplerptr->chain_N; i++){
+					int alpha = (int)(gsl_rng_uniform(samplerptr->rvec[0])*ids.size());
+					poolptr->enqueue_swap(ids.at(alpha));
+					ids.erase(ids.begin()+alpha);
+				}
 			}
 			poolptr->flush_swap_queue();
 			int pairs = pool.queue_pairs_length();
@@ -1324,10 +1337,9 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr, int N_steps
 			//}
 			//std::cout<<"DOne?"<<std::endl;
 		}
+		//debugger_print(__FILE__,__LINE__,"Swapping");
 		//#######################################
 		
-		//t+= samplerptr->swp_freq;
-		t+= 3;
 		//Move temperatures
 		update_temperatures_full_ensemble(samplerptr, t0, nu, t);
 
@@ -1445,10 +1457,12 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 	//The equations for the temperature dynamics are written
 	//for neighboring temperatures only
 	//
-	//This is being too problematic for now
+	//Linear swapping averages temperatures (logarithmically) 
+	//at the end. Pooling averages at each step
 	samplerptr->chain_radius = 1;
 	//samplerptr->pool = true;
 	samplerptr->pool = false;
+	samplerptr->linear_swapping = true;
 	//###############################################
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
@@ -2138,7 +2152,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double max_ac_realloc=0;
 
 	//#################################################
-	std::cout<<"Annealing"<<std::endl;
+	//std::cout<<"Annealing"<<std::endl;
 	sampler sampler_ann;
 	continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
 		100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,

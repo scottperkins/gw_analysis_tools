@@ -43,6 +43,8 @@ public:
 	//########
 	double **chain_neighborhoods;
 	int *chain_neighbors;
+	int **chain_neighborhoods_ids;
+	int *chain_neighbors_ids;
 	int chain_radius=2;
 	bool restrict_swapping=true;
 	double swap_rate=1./2.;
@@ -171,6 +173,7 @@ public:
 	//Parameters for dynamic PT allocation
 	int *A;
 	bool PT_alloc=false;
+	bool linear_swapping=true;
 
 	//RJPTMCMC Parameterts
 	int ***param_status;
