@@ -1197,8 +1197,8 @@ void allocate_sampler_mem(sampler *sampler)
 	if(true){
 		sampler->chain_neighborhoods=(double **)malloc(sizeof(double*)*sampler->chain_N);
 		sampler->chain_neighbors=(int *)malloc(sizeof(int)*sampler->chain_N);
-		sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
-		sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
+		//sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
+		//sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
 		update_temp_neighborhoods(sampler);
 		//for (i =0; i<sampler->chain_N; i++){
 		//	if(fabs(sampler->chain_temps[i]-1)<DOUBLE_COMP_THRESH){
@@ -1409,13 +1409,13 @@ void deallocate_sampler_mem(sampler *sampler)
 		for (i =0; i<sampler->chain_N; i++)
 		{
 			free(sampler->chain_neighborhoods[i]);
-			free(sampler->chain_neighborhoods_ids[i]);
+			//free(sampler->chain_neighborhoods_ids[i]);
 			free(sampler->step_prob[i]);
 		}
 		free(sampler->chain_neighborhoods);
 		free(sampler->chain_neighbors);
-		free(sampler->chain_neighborhoods_ids);
-		free(sampler->chain_neighbors_ids);
+		//free(sampler->chain_neighborhoods_ids);
+		//free(sampler->chain_neighbors_ids);
 	}
 	if(sampler->local_param_allocation){
 		delete [] sampler->user_parameters;
