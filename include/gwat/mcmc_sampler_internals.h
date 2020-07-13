@@ -45,8 +45,12 @@ public:
 	int *chain_neighbors;
 	int **chain_neighborhoods_ids;
 	int *chain_neighbors_ids;
+	/* Chain radius controls the temperature difference allowed for swap proposals whether the chains are isolated or not*/
 	int chain_radius=2;
+	/*Restricting the swapping means that swaps can be proposed for chains with similar temperatures, in any of the ensembles*/
 	bool restrict_swapping=true;
+	/* Isolating the ensemble means the chains can only swap with those inside their ensemble*/
+	bool isolate_ensembles=false;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
 	//########

@@ -1197,8 +1197,8 @@ void allocate_sampler_mem(sampler *sampler)
 	if(true){
 		sampler->chain_neighborhoods=(double **)malloc(sizeof(double*)*sampler->chain_N);
 		sampler->chain_neighbors=(int *)malloc(sizeof(int)*sampler->chain_N);
-		//sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
-		//sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
+		sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
+		sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
 		update_temp_neighborhoods(sampler);
 		//for (i =0; i<sampler->chain_N; i++){
 		//	if(fabs(sampler->chain_temps[i]-1)<DOUBLE_COMP_THRESH){
@@ -1226,41 +1226,6 @@ void allocate_sampler_mem(sampler *sampler)
 		else{
 			sampler->ref_chain_status[i] = true;
 		}
-		//#######################
-		//Temp neighborhood
-		//#######################
-		//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i]);
-		//if(sampler->pool){
-		//if(true){
-		//	int neighbors_low = sampler->chain_radius;
-		//	int neighbors_high = sampler->chain_radius;
-		//	if(i >= cold_chain_ids[cold_chain_ct+1]){cold_chain_ct++;}
-		//	if(i - cold_chain_ids[cold_chain_ct] < sampler->chain_radius){
-		//		neighbors_low = i-cold_chain_ids[cold_chain_ct];
-		//	}
-		//	if(-i + cold_chain_ids[cold_chain_ct+1]-1 < sampler->chain_radius){
-		//		neighbors_high = -i+cold_chain_ids[cold_chain_ct+1]-1;
-		//	}
-		//	//debugger_print(__FILE__,__LINE__,std::to_string(neighbors_high)+" "+std::to_string(neighbors_low));
-		//	sampler->chain_neighborhoods[i] = (double *)malloc(sizeof(double)*(neighbors_low+neighbors_high));
-		//	sampler->chain_neighbors[i]=neighbors_low+neighbors_high;
-		//	for(int j = 0 ; j< neighbors_low; j++){
-		//		sampler->chain_neighborhoods[i][j] = sampler->chain_temps[i-j-1];
-		//		//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i-j-1]);
-		//	}
-		//	for(int j = 0 ; j< neighbors_high; j++){
-		//		sampler->chain_neighborhoods[i][j+neighbors_low] = sampler->chain_temps[i+j+1];
-		//		//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i+j+1]);
-		//	}
-		//	//debugger_print(__FILE__,__LINE__,sampler->chain_temps[i]);
-		//	//debugger_print(__FILE__,__LINE__,sampler->chain_neighbors[i]);
-		//	//for(int j = 0 ; j< sampler->chain_neighbors[i]; j++){
-		//	//	std::cout<<sampler->chain_neighborhoods[i][j]<<" ";	
-		//	//}
-		//	//std::cout<<std::endl;
-		//}
-		//#######################
-		//#######################
 		sampler->interfaces[i] = new mcmc_data_interface;
 		sampler->interfaces[i]->min_dim = sampler->min_dim;
 		sampler->interfaces[i]->max_dim = sampler->max_dim;
@@ -1409,13 +1374,13 @@ void deallocate_sampler_mem(sampler *sampler)
 		for (i =0; i<sampler->chain_N; i++)
 		{
 			free(sampler->chain_neighborhoods[i]);
-			//free(sampler->chain_neighborhoods_ids[i]);
+			free(sampler->chain_neighborhoods_ids[i]);
 			free(sampler->step_prob[i]);
 		}
 		free(sampler->chain_neighborhoods);
 		free(sampler->chain_neighbors);
-		//free(sampler->chain_neighborhoods_ids);
-		//free(sampler->chain_neighbors_ids);
+		free(sampler->chain_neighborhoods_ids);
+		free(sampler->chain_neighbors_ids);
 	}
 	if(sampler->local_param_allocation){
 		delete [] sampler->user_parameters;
@@ -2334,14 +2299,18 @@ void update_temp_neighborhoods(sampler *samplerptr){
 			neighbors_high = -i+cold_chain_ids[cold_chain_ct+1]-1;
 		}
 		//debugger_print(__FILE__,__LINE__,std::to_string(neighbors_high)+" "+std::to_string(neighbors_low));
-		samplerptr->chain_neighborhoods[i] = (double *)malloc(sizeof(double)*(neighbors_low+neighbors_high));
 		samplerptr->chain_neighbors[i]=neighbors_low+neighbors_high;
+		samplerptr->chain_neighborhoods[i] = (double *)malloc(sizeof(double)*(neighbors_low+neighbors_high));
+		samplerptr->chain_neighborhoods_ids[i] = (int*) malloc(sizeof(int)*(neighbors_low+neighbors_high));
 		for(int j = 0 ; j< neighbors_low; j++){
 			samplerptr->chain_neighborhoods[i][j] = samplerptr->chain_temps[i-j-1];
+			samplerptr->chain_neighborhoods_ids[i][j] = i-j-1;
 			//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i-j-1]);
 		}
 		for(int j = 0 ; j< neighbors_high; j++){
 			samplerptr->chain_neighborhoods[i][j+neighbors_low] = samplerptr->chain_temps[i+j+1];
+			samplerptr->chain_neighborhoods_ids[i][j+neighbors_low] = i+j+1;
+			//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i-j-1]);
 			//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i+j+1]);
 		}
 		//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i]);

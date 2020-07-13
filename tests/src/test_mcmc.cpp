@@ -264,8 +264,8 @@ int mcmc_rosenbock(int argc, char *argv[])
 		initial_pos[i]=pow(-1,i)*500.;
 		seeding_var[i]=10.;
 	}
-	int N_steps = 2000;
-	int chain_N= 100;
+	int N_steps = 10000;
+	int chain_N= 80;
 	int max_chain_N= 40;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 2;
@@ -763,9 +763,9 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 200;
-	int chain_N= 50;
-	int max_chain_N= 10;
+	int N_steps = 5000;
+	int chain_N= 200;
+	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 2;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -794,7 +794,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 50;
+	int t0 = 5000;
 	int nu = 10;
 	double corr_threshold = 0.01;
 	int corr_segments = 5;
@@ -804,6 +804,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	int max_chunk_size = 1000000;
 	mcmc_sampler_output sampler_output(chain_N,dimension);
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	sampler_output.create_data_dump(false,false,chainfile);
 	deallocate_2D_array(output, N_steps, dimension);
 	sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);
 	std::cout<<"ENDED"<<std::endl;
@@ -825,7 +826,10 @@ double log_test (double *c,mcmc_data_interface *interface,void *parameters)
 }
 double log_test_prior (double *c,mcmc_data_interface *interface,void *parameters)
 {
-	return 1.;
+	if( fabs(c[0]) > 100){ return 0;}
+	if( fabs(c[1]) > 100){ return 0;}
+	return -pow_int(c[0]-4,2)/4. -pow_int(c[1]+3,2)/6.;
+	//return 1.;
 }
 
 double fisher11(double *c)

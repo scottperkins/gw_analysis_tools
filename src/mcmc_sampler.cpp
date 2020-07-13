@@ -935,11 +935,14 @@ bool temp_neighborhood_check(int i, int j ){
 	//std::cout<<"IDS: "<<i<<" "<<j<<std::endl;
 	if(samplerptr->restrict_swapping){
 		if(
-			check_list(samplerptr->chain_temps[j],samplerptr->chain_neighborhoods[i],samplerptr->chain_neighbors[i])
-		){
+		(samplerptr->isolate_ensembles && check_list(j,samplerptr->chain_neighborhoods_ids[i],samplerptr->chain_neighbors[i])) 
+		|| 
+		(!samplerptr->isolate_ensembles && check_list(samplerptr->chain_temps[j],samplerptr->chain_neighborhoods[i],samplerptr->chain_neighbors[i]))){
 			return true;
 		}
-		return false;
+		else{
+			return false;
+		}
 	}
 	return true;
 	//return true;
@@ -1725,6 +1728,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 	samplerptr->restrict_swapping=false;	
 	samplerptr->tune=true;
 	samplerptr->burn_phase = true;
+	samplerptr->isolate_ensembles = false;
 	//################################################
 	//This typically isn't done, but the primary focus of annealing
 	//is to get the cold chains where they need to be.
@@ -3226,6 +3230,9 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	samplerptr->output =output;
 	samplerptr->user_parameters=user_parameters;
 	samplerptr->burn_phase = burn_phase;
+	if(burn_phase){
+		samplerptr->isolate_ensembles=false;	
+	}
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
 
@@ -3420,6 +3427,9 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	//For PT dynamics
 	samplerptr->N_steps = N_steps;
 	samplerptr->burn_phase = burn_phase;
+	if(burn_phase){
+		samplerptr->isolate_ensembles=false;	
+	}
 
 	samplerptr->dimension =dimension;
 	samplerptr->min_dim=dimension;
@@ -3891,6 +3901,9 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	
 	samplerptr->tune = tune;
 	samplerptr->burn_phase = burn_phase;
+	if(burn_phase){
+		samplerptr->isolate_ensembles=false;	
+	}
 
 
 	//if Fisher is not provided, Fisher and MALA steps

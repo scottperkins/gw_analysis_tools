@@ -72,4 +72,6 @@ def trim_thin_file(filename,trim=None, ac=None):
             print(chains[x],np.amax(acs),np.argmax(acs))
             data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:],axis=0)
     #print("data shape",np.shape(data))
+    #data = data[::chains_N]
     return data
+    
