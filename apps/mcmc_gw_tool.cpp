@@ -537,12 +537,12 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
 	if ((pos[8])<.01 || (pos[8])>.249999){return a;}//eta
 
-	//if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
-	//if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
-	double chi1 = pos[9]+pos[10];	
-	double chi2 = pos[9]-pos[10];	
-	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
-	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
+	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	//double chi1 = pos[9]+pos[10];	
+	//double chi2 = pos[9]-pos[10];	
+	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	for(int i = 0 ; i<dim - 11; i++){
 		if( pos[11+i] <mod_priors[i][0] || pos[11+i] >mod_priors[i][1]){return a;}
 	}
@@ -571,12 +571,12 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
 	if ((pos[8])<.01 || (pos[8])>.249999){return a;}//eta
 
-	//if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
-	//if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
-	double chi1 = pos[9]+pos[10];	
-	double chi2 = pos[9]-pos[10];	
-	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
-	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
+	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	//double chi1 = pos[9]+pos[10];	
+	//double chi2 = pos[9]-pos[10];	
+	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 
 	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
@@ -673,12 +673,12 @@ double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interfac
 	//Flat priors across physical regions
 	if (exp(pos[0])<chirpmass_prior[0] || exp(pos[0])>chirpmass_prior[1]){return a;}//RA
 	if ((pos[1])<.01 || (pos[1])>.25){return a;}//sinDEC
-	//if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
-	//if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
-	double chi1 = pos[2]+pos[3];	
-	double chi2 = pos[2]-pos[3];	
-	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
-	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	//double chi1 = pos[2]+pos[3];	
+	//double chi2 = pos[2]-pos[3];	
+	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
 
 
@@ -692,12 +692,12 @@ double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *inte
 	//Flat priors across physical regions
 	if (exp(pos[0])<chirpmass_prior[0] || exp(pos[0])>chirpmass_prior[1]){return a;}//RA
 	if ((pos[1])<.01 || (pos[1])>.25){return a;}//sinDEC
-	//if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
-	//if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
-	double chi1 = pos[2]+pos[3];	
-	double chi2 = pos[2]-pos[3];	
-	if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
-	if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	//double chi1 = pos[2]+pos[3];	
+	//double chi2 = pos[2]-pos[3];	
+	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	for(int i = 0 ; i<dim - 4; i++){
 		if( pos[4+i] <mod_priors[i][0] || pos[4+i] >mod_priors[i][1]){return a;}
 	}
