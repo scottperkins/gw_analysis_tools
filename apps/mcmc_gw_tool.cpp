@@ -150,21 +150,6 @@ int main(int argc, char *argv[])
 	int psd_length ;
 	count_lines_LOSC_PSD_file(psd_file, &psd_length);
 	std::cout<<"Length of PSD: "<<psd_length<<std::endl;
-	//########################################################################
-	//########################################################################
-	//TESTING
-	//psd_length = 4096;
-	//double **unpack1 = new double*[psd_length];
-	//double **unpack2 = new double*[psd_length];
-	//for(int i =0 ; i<psd_length; i++){
-	//	unpack1[i]=new double[1+detector_N];
-	//	unpack2[i]=new double[1+2*detector_N];
-	//}
-	//read_file("data/testing_PSDs.dat",unpack1,psd_length, 1+detector_N);
-	//read_file("data/testing_data.dat",unpack2, psd_length,1+2*detector_N);
-	//########################################################################
-	//########################################################################
-
 
 	double **psd = allocate_2D_array(detector_N,psd_length);
 	double **freqs = allocate_2D_array(detector_N,psd_length);

@@ -1178,7 +1178,12 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->chain_neighbors=(int *)malloc(sizeof(int)*sampler->chain_N);
 		sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
 		sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
+		for(int i = 0  ;i<sampler->chain_N; i++){
+			sampler->chain_neighborhoods[i]=NULL;	
+			sampler->chain_neighborhoods_ids[i]=NULL;	
+		}
 		update_temp_neighborhoods(sampler);
+		
 	}
 	//#############
 	sampler->interfaces = new mcmc_data_interface*[sampler->chain_N];
@@ -2258,7 +2263,13 @@ void update_temp_neighborhoods(sampler *samplerptr){
 			neighbors_high = -i+cold_chain_ids[cold_chain_ct+1]-1;
 		}
 		samplerptr->chain_neighbors[i]=neighbors_low+neighbors_high;
+		if(samplerptr->chain_neighborhoods[i]){
+			free(samplerptr->chain_neighborhoods[i]);
+		}
 		samplerptr->chain_neighborhoods[i] = (double *)malloc(sizeof(double)*(neighbors_low+neighbors_high));
+		if(samplerptr->chain_neighborhoods_ids[i]){
+			free(samplerptr->chain_neighborhoods_ids[i]);
+		}
 		samplerptr->chain_neighborhoods_ids[i] = (int*) malloc(sizeof(int)*(neighbors_low+neighbors_high));
 		for(int j = 0 ; j< neighbors_low; j++){
 			samplerptr->chain_neighborhoods[i][j] = samplerptr->chain_temps[i-j-1];

@@ -547,33 +547,11 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	int N_trimmed = Tobs*fs;
 	for (int j = 0; j< psd_length; j++){
 		for(int i =0; i< num_detectors ; i++){
-			//psds[i][j] = temp_psds[j][i+1]/(df);
-			//###########################################
-			//psds[i][j] = temp_psds[j][i+1]/Tobs;
 			psds[i][j] = temp_psds[j][i+1];
-			//psds[i][j] = temp_psds[j][i+1]*df;
-			//psds[i][j] = temp_psds[j][i+1]/dt;
-
-
-
-			//psds[i][j] = temp_psds[j][i+1]/dt/dt;
-
-			//psds[i][j] = temp_psds[j][i+1]/dt/2.;
-			//psds[i][j] = temp_psds[j][i+1]/Tobs*2.*N_trimmed;
-
-			//psds[i][j] = temp_psds[j][i+1]/Tobs;
-			//psds[i][j] = temp_psds[j][i+1]/Tobs/Tobs;
-			//###########################################
-			//psds[i][j] = temp_psds[j][i+1]*Tobs;
-			//psds[i][j] = temp_psds[j][i+1]*Tobs;
-			//psds[i][j] = temp_psds[j][i+1]*2;
 			freqs[i][j] = temp_psds[j][0];
-			//freqs[i][j] = temp_psds[j][0]/dt;
 		}	
 	}
 		
-	//double Tobs = 1./(freqs[0][1] - freqs[0][0]);
-	//double df = 1./Tobs;
 	int N = fs*duration;
 	double *times_untrimmed = (double *)malloc(sizeof(double)*N);
 
@@ -589,7 +567,8 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double *window = (double *)malloc(sizeof(double)*N_trimmed);
 	//double alpha = .4; //Standard alpha choice
-	double alpha = 2*0.5/Tobs; //Standard alpha choice
+	double alpha = 2*0.4/Tobs; //Standard alpha choice
+
 	//double alpha = 0.5; //Standard alpha choice
 	//double alpha = 0.5/32.; //Standard alpha choice
 	tukey_window(window,N_trimmed, alpha);
@@ -604,7 +583,6 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			l++;
 		}
 	}
-	
 	fftw_outline plan;
 	allocate_FFTW_mem_forward(&plan, N_trimmed);
 	std::complex<double> **fft_data = (std::complex<double> **)
