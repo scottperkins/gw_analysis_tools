@@ -85,17 +85,11 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
 		}
 	}
-	//std::cout<<step<<" "<<sampler->prop_MH_factor[chain_number]<<std::endl;
 	//Some proposals are not symmetric
 	MH_ratio += sampler->prop_MH_factor[chain_number];
 	//Reset proposal factor to 0 because some proposals assume symmetry
 	sampler->prop_MH_factor[chain_number]=0;
 
-	//if(sampler->chain_temps[chain_number]==1 && sampler->chain_pos[chain_number]%1000==0){
-	//	std::cout<<proposed_ll<<" "<<current_ll<<std::endl;
-	//	std::cout<<proposed_lp<<" "<<current_lp<<std::endl;
-	//	std::cout<<chain_number<<" "<<sampler->chain_pos[chain_number]<<std::endl;
-	//}
 	int i;
 	//Random number to determine step acceptance
 	double beta = log(gsl_rng_uniform(sampler->rvec[chain_number]));
@@ -168,8 +162,6 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 
 		scaling = 0.0;
 		//ensure the steps aren't ridiculous
-		//std::cout<<beta<<" "<<sampler->fisher_vals[chain_index][beta]<<std::endl;
-		//exit(1);
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
 		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
 		//##########################################################33
@@ -179,7 +171,6 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
 		//##########################################################33
 		//Take step
-		//debugger_print(__FILE__,__LINE__,scaling);
 		for(int i =0; i< sampler->max_dim;i++)
 		{
 			proposed_param[i] = current_param[i] +
@@ -233,10 +224,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	{
  		if(lp != limit_inf)
 		{
-			//std::cout<<"Updating fisher"<<std::endl;
-			//std::cout<<std::endl<<sampler->prop_MH_factor[chain_index]<<std::endl;
 			sampler->prop_MH_factor[chain_index]=0;
-			//std::cout<<std::endl<<sampler->prop_MH_factor[chain_index]<<std::endl;
 			//Calculate old proposal prob
 			sampler->prop_MH_factor[chain_index]-= -0.5*log(scaling) ;
 			for(int i = 0 ; i<sampler->max_dim; i++){
@@ -249,7 +237,6 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 					}
 				}
 			}
-			//std::cout<<std::endl<<sampler->prop_MH_factor[chain_index]<<std::endl;
 			//Update fisher
 			update_fisher(sampler, proposed_param, proposed_status,chain_index);	
 			//Update failed
@@ -279,10 +266,8 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 					}
 				}
 			}
-			//std::cout<<sampler->prop_MH_factor[chain_index]<<std::endl;
 		}
 		else {
-			//std::cout<<"Tried updating fisher"<<std::endl;
 			//Should update, but need to wait for a better proposal
 			//Ensures the counts stay lined up
 			sampler->fisher_update_ct[chain_index]-=1;	
@@ -347,7 +332,6 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		sampler->fisher_update_ct[chain_index]=0;
 	}
 	else{ 
-		//std::cout<<"Fisher nans"<<std::endl;
 		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
 		sampler->nan_counter[chain_index]+=1;
 	}
@@ -397,8 +381,6 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 
 		scaling = 0.0;
 		//ensure the steps aren't ridiculous
-		//std::cout<<beta<<" "<<sampler->fisher_vals[chain_index][beta]<<std::endl;
-		//exit(1);
 		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
 		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
@@ -422,9 +404,6 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 		double **cov = new double*[sampler->max_dim];
 		for(int i = 0 ; i<sampler->max_dim; i++){
 			cov[i]= new double[sampler->max_dim];
-			//for(int j = 0 ; j<sampler->max_dim; j++){
-			//	cov[i][j]=1;	
-			//}
 			
 		}
 		gsl_cholesky_matrix_invert(sampler->fisher_matrix[chain_index], cov, sampler->max_dim);
@@ -1200,16 +1179,6 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->chain_neighborhoods_ids=(int **)malloc(sizeof(int*)*sampler->chain_N);
 		sampler->chain_neighbors_ids=(int *)malloc(sizeof(int)*sampler->chain_N);
 		update_temp_neighborhoods(sampler);
-		//for (i =0; i<sampler->chain_N; i++){
-		//	if(fabs(sampler->chain_temps[i]-1)<DOUBLE_COMP_THRESH){
-		//		cold_chain_ids[cold_chain_ct]=i;
-		//		cold_chain_ct++;
-		//	}
-		//}
-		////The last ensemble won't have a cold chain on the end
-		////This will only cause issues if every single chain is cold (won't happen)
-		//cold_chain_ids[cold_chain_ct]=sampler->chain_N;
-		//cold_chain_ct = 0;
 	}
 	//#############
 	sampler->interfaces = new mcmc_data_interface*[sampler->chain_N];
@@ -1447,7 +1416,6 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->min_target_accept_ratio);
 	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
 	if(sampler->RJMCMC){
-		//deallocate_3D_array(sampler->param_status,sampler->chain_N, sampler->N_steps, sampler->max_dim);
 		deallocate_3D_array(sampler->history_status,sampler->chain_N, sampler->history_length, sampler->max_dim);
 	}
 	else{
@@ -2175,7 +2143,6 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 						}
 					}
 					attempts+=1;
-					//std::cout<<samplerptr->lp(temp_pos, temp_status,samplerptr->max_dim,j)<<std::endl;
 				}while(samplerptr->lp(temp_pos, temp_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) == limit_inf && attempts<max_attempts);
 				attempts =0;
 				if(samplerptr->lp(temp_pos, temp_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) != limit_inf ){
@@ -2213,15 +2180,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
 		for(int i=0 ; i<samplerptr->chain_N; i++){
-			//std::cout<<"BEFORE : "<<samplerptr->nan_counter[i]<<std::endl;
-			//for(int j = 0 ; j<samplerptr->max_dim; j++){
-			//	std::cout<<samplerptr->output[i][0][j]<<std::endl;	
-			//}
 			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
-			//std::cout<<"AFTER: "<<samplerptr->nan_counter[i]<<std::endl;
-			//for(int j = 0 ; j<samplerptr->max_dim; j++){
-			//	std::cout<<samplerptr->fisher_vals[i][j]<<std::endl;
-			//}
 		}
 	}
 }
@@ -2298,27 +2257,17 @@ void update_temp_neighborhoods(sampler *samplerptr){
 		if(-i + cold_chain_ids[cold_chain_ct+1]-1 < samplerptr->chain_radius){
 			neighbors_high = -i+cold_chain_ids[cold_chain_ct+1]-1;
 		}
-		//debugger_print(__FILE__,__LINE__,std::to_string(neighbors_high)+" "+std::to_string(neighbors_low));
 		samplerptr->chain_neighbors[i]=neighbors_low+neighbors_high;
 		samplerptr->chain_neighborhoods[i] = (double *)malloc(sizeof(double)*(neighbors_low+neighbors_high));
 		samplerptr->chain_neighborhoods_ids[i] = (int*) malloc(sizeof(int)*(neighbors_low+neighbors_high));
 		for(int j = 0 ; j< neighbors_low; j++){
 			samplerptr->chain_neighborhoods[i][j] = samplerptr->chain_temps[i-j-1];
 			samplerptr->chain_neighborhoods_ids[i][j] = i-j-1;
-			//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i-j-1]);
 		}
 		for(int j = 0 ; j< neighbors_high; j++){
 			samplerptr->chain_neighborhoods[i][j+neighbors_low] = samplerptr->chain_temps[i+j+1];
 			samplerptr->chain_neighborhoods_ids[i][j+neighbors_low] = i+j+1;
-			//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i-j-1]);
-			//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i+j+1]);
 		}
-		//debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[i]);
-		//debugger_print(__FILE__,__LINE__,samplerptr->chain_neighbors[i]);
-		//for(int j = 0 ; j< samplerptr->chain_neighbors[i]; j++){
-		//	std::cout<<samplerptr->chain_neighborhoods[i][j]<<" ";	
-		//}
-		//std::cout<<std::endl;
 	}
 
 }
@@ -2367,12 +2316,9 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 			else{
 				averaged_A[i]=0;
 			}
-			//debugger_print(__FILE__,__LINE__,i);
-			//debugger_print(__FILE__,__LINE__,averaged_A[i]);
 		}
 		double power;
 		double kappa = PT_dynamical_timescale(t0, nu, t);
-		//std::cout<<kappa<<std::endl;
 		for (int i =1 ; i<samplerptr->chain_N-1; i++){
 			if( !(fabs(samplerptr->chain_temps[i] - 1) < DOUBLE_COMP_THRESH ||
 				fabs(samplerptr->chain_temps[i] - max_temp) < DOUBLE_COMP_THRESH)){
@@ -2741,7 +2687,6 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 				cp_index = old_index;
 				old_index++;	
 			}
-			//std::cout<<i<<" "<<cp_index<<" "<<samplerptr->chain_temps[i]<<" "<<temps_old[cp_index]<<std::endl;
 			//###########################################################
 			//copy old values at cp_index into chain i of new ensemble
 			for(int j = 0 ; j<samplerptr->max_dim; j++){
@@ -2777,18 +2722,6 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 			}
 		}
 	}
-	//for(int i = 0 ; i<samplerptr->chain_N; i++){
-	//	std::string string1 = std::to_string(temps_old[i])+" ";
-	//	for(int j = 0 ; j<samplerptr->max_dim; j++){
-	//		string1+=std::to_string(old_initial_pos[i][j])+" ";
-	//	}
-	//	std::string string2 = std::to_string(samplerptr->chain_temps[i])+" ";
-	//	for(int j = 0 ; j<samplerptr->max_dim; j++){
-	//		string2+=std::to_string(samplerptr->output[i][samplerptr->chain_pos[i]][j])+" ";
-	//	}
-	//	debugger_print(__FILE__,__LINE__,"Old: "+string1);
-	//	debugger_print(__FILE__,__LINE__,"New: "+string2);
-	//}
 
 	//Cleanup
 	deallocate_3D_array(history_old_pos,samplerptr->chain_N,samplerptr->history_length,samplerptr->max_dim);

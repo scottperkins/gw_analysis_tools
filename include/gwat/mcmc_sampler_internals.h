@@ -53,6 +53,10 @@ public:
 	bool isolate_ensembles=false;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
+	/* If true, the ensembles are only allowed to PT swap with those in their ensemble, but each ensemble is allowed to propose steps with the ensemble-approach. The frequency with which two ensembles are walked forward with this proposal is 1/ensemble_rate*/
+	bool ensemble_proposal=true;
+	double ensemble_proposal_rate = 0.25;
+	double ensemble_prop_a = 1.;
 	//########
 	bool *waiting;
 	int *chain_pos;
