@@ -616,7 +616,8 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
-	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
 	if ((pos[8])<.001 || (pos[8])>1){return a;}//eta
@@ -657,7 +658,8 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
-	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
@@ -774,7 +776,8 @@ double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface,
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
-	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
+	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
 	else { return 3*pos[6];}
 }
