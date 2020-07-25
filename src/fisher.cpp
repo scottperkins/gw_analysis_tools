@@ -1716,8 +1716,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[6]=log(input_params->Luminosity_Distance);
 				parameters[7]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				parameters[8]=calculate_eta(input_params->mass1, 
-					input_params->mass2);
+				//parameters[8]=calculate_eta(input_params->mass1, 
+				//	input_params->mass2);
+				parameters[8]=input_params->mass2/input_params->mass1;
 				//parameters[9]=input_params->spin1[2];
 				//parameters[10]=input_params->spin2[2];
 				//parameters[11]=input_params->chip;
@@ -1880,8 +1881,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				}
 				parameters[0]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				parameters[1]=calculate_eta(input_params->mass1, 
-					input_params->mass2);
+				//parameters[1]=calculate_eta(input_params->mass1, 
+				//	input_params->mass2);
+				parameters[1]=input_params->mass2/input_params->mass1;
 				double spin1sph[3];
 				double spin2sph[3];
 				transform_cart_sph(input_params->spin1,spin1sph);
@@ -1912,8 +1914,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 
 				parameters[0]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				parameters[1]=calculate_eta(input_params->mass1, 
-					input_params->mass2);
+				//parameters[1]=calculate_eta(input_params->mass1, 
+				//	input_params->mass2);
+				parameters[1]=input_params->mass2/input_params->mass1;
 				//parameters[2]=input_params->spin1[2];
 				//parameters[3]=input_params->spin2[2];
 				parameters[2]=.5*(input_params->spin1[2]+input_params->spin2[2]);
@@ -2010,9 +2013,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	if(!a_params->sky_average){
 		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
+				//a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
+				//	avec_parameters[8]);
+				//a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
+				//	avec_parameters[8]);
+				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[7]),
 					avec_parameters[8]);
-				a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
+				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[7]),
 					avec_parameters[8]);
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
@@ -2223,8 +2230,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
 
-				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),avec_parameters[1]);
-				a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),avec_parameters[1]);
+				//a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),avec_parameters[1]);
+				//a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),avec_parameters[1]);
+				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[0]),
+					avec_parameters[1]);
+				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[0]),
+					avec_parameters[1]);
 
 				T local_theta1;
 				if(avec_parameters[4] > 1){
@@ -2277,10 +2288,16 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 		else if(generation_method.find("IMRPhenomD") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),
+				//a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),
+				//	avec_parameters[1]);
+				//a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),
+				//	avec_parameters[1]);
+
+				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[0]),
 					avec_parameters[1]);
-				a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),
+				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[0]),
 					avec_parameters[1]);
+
 				a_params->Luminosity_Distance = 1000;
 				//T spin1sph[3] = {avec_parameters[2],0,0};
 				//T spin2sph[3] = {avec_parameters[3],0,0};

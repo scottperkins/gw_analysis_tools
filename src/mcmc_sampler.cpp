@@ -45,19 +45,6 @@ gsl_rng * r;
 sampler *samplerptr;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 //#############################################################
 //mcmc_sampler_output definitions
 //#############################################################
@@ -953,7 +940,6 @@ struct swap_struct
 	int id2;
 };
 class ThreadPool
-
 {
 public:
 	//using Task = std::function<void()>;
@@ -983,7 +969,7 @@ public:
 		int length;
 		{ 
 			std::unique_lock<std::mutex> lock{mEventMutexSWP};
-			length = mSwaps.size();
+			length = mSwapsSWP.size();
 		}
 		return length;
 	}
@@ -992,7 +978,7 @@ public:
 		int element;
 		{ 
 			std::unique_lock<std::mutex> lock{mEventMutexSWP};
-			element = mSwaps.at(i);
+			element = mSwapsSWPP.at(i);
 		}
 		return element;
 	}
@@ -1001,7 +987,7 @@ public:
 		int length;
 		{ 
 			std::unique_lock<std::mutex> lock{mEventMutexSWP};
-			length = pairs.size();
+			length = mSwapsSWP.size();
 		}
 		return length;
 	}
@@ -1017,23 +1003,31 @@ public:
 
 	void enqueue_swap(int i)
 	{
+		{
+			std::unique_lock<std::mutex> lock{mEventMutexSWPQ};
+			mSwapsSWPQ.emplace(std::move(i));
+		}
+		mEventVarSWPQ.notify_one();
+	}
+	
+
+	void match_swap_pairs(int i)
+	{
 		bool notify = false;
 		{
-			std::unique_lock<std::mutex> lock{mEventMutexSWP};
-			//mSwaps.emplace(std::move(i));
-			//mSwaps.emplace_back(i);
+			std::unique_lock<std::mutex> lock{mEventMutexSWPP};
 
-			if(mSwaps.empty()){
-				mSwaps.emplace_back(i);
+			if(mSwapsSWPP.empty()){
+				mSwapsSWPP.emplace_back(i);
 			}
 			else{
 				std::vector<int>::iterator ptr;
 				int k=-1;
-				for(ptr=mSwaps.begin(); ptr!=mSwaps.end(); ++ptr){
+				for(ptr=mSwapsSWPP.begin(); ptr!=mSwapsSWPP.end(); ++ptr){
 					//std::cout<<"PTR: "<<samplerptr->chain_temps[*ptr]<<std::endl;
 					if(temp_neighborhood_check(i,*ptr)){
 						k = *ptr;
-						mSwaps.erase(ptr);
+						mSwapsSWPP.erase(ptr);
 						break;
 					}
 				}
@@ -1041,11 +1035,12 @@ public:
 					swap_struct ss;
 					ss.id1 = i;	
 					ss.id2 = k;	
-					pairs.emplace(std::move(ss));
+					std::unique_lock<std::mutex> lock{mEventMutexSWP};
+					mSwapsSWP.emplace(std::move(ss));
 					notify=true;
 				}
 				else{
-					mSwaps.emplace_back(i);
+					mSwapsSWPP.emplace_back(i);
 				}
 			}
 		}
@@ -1060,51 +1055,13 @@ public:
 			int l;	
 			{
 				std::unique_lock<std::mutex> lock{mEventMutexSWP};
-				l = mSwaps.front();
+				l = mSwapsSWPP.front();
 				
-				mSwaps.erase(mSwaps.begin());
+				mSwapsSWPP.erase(mSwapsSWPP.begin());
 			}
 			enqueue_swap(l);
 		
 		}
-		//bool notify = false;
-		//{
-		//	std::unique_lock<std::mutex> lock{mEventMutexSWP};
-		//	//mSwaps.emplace(std::move(i));
-		//	//mSwaps.emplace_back(i);
-
-		//	if(!mSwaps.empty()){
-		//		for(int i = 0 ; i<mSwaps.size()/2; i++){
-		//			int l = mSwaps.back();
-		//			mSwaps.pop_back();
-
-		//			std::vector<int>::iterator ptr;
-		//			int k=-1;
-		//			for(ptr=mSwaps.begin(); ptr!=mSwaps.end(); ++ptr){
-		//				//std::cout<<"PTR: "<<samplerptr->chain_temps[*ptr]<<std::endl;
-		//				if(temp_neighborhood_check(l,*ptr)){
-		//					k = *ptr;
-		//					mSwaps.erase(ptr);
-		//					break;
-		//				}
-		//			}
-		//			if(k != -1){
-		//				swap_struct ss;
-		//				ss.id1 = l;	
-		//				ss.id2 = k;	
-		//				pairs.emplace(std::move(ss));
-		//				debugger_print(__FILE__,__LINE__,"Swapped flush");
-		//				notify=true;
-		//			}
-		//			else{
-		//				mSwaps.emplace_back(l);
-		//			}
-		//		}
-		//	}
-		//}
-		//if(notify){
-		//	mEventVarSWP.notify_one();
-		//}
 	}
 	
 	void public_stop()
@@ -1120,11 +1077,16 @@ private:
 
 	bool mStopping = false;
 	
-	int numSwpThreads= 1;
+	int numSwpSWPThreads= 1;
+	int numSwpSWPPThreads= 1;
 		
 	std::condition_variable mEventVarSWP;
 
+	std::condition_variable mEventVarSWPQ;
+
 	std::mutex mEventMutexSWP;
+	std::mutex mEventMutexSWPP;
+	std::mutex mEventMutexSWPQ;
 
 	//std::queue<Task> mTasks;
 	//std::queue<int> mTasks;
@@ -1132,12 +1094,14 @@ private:
 	std::priority_queue<int,std::vector<int>,Comparator> mTasks;
 	//std::priority_queue<int,std::vector<int>,Comparator> mSwaps;
 	//std::priority_queue<int,std::vector<int>,Comparatorswap> mSwaps;
-	std::vector<int> mSwaps;
-	std::queue<swap_struct> pairs;
+	std::priority_queue<int,std::vector<int>,Comparator> mSwapsSWPQ;
+	//std::vector<int> mSwapsSWPQ;
+	std::vector<int> mSwapsSWPP;
+	std::queue<swap_struct> mSwapsSWP;
 
 	void start(std::size_t numThreads)
 	{
-		for(auto i =0u; i<numThreads-numSwpThreads; i++)
+		for(auto i =0u; i<numThreads-numSwpSWPThreads-numSwpSWPPThreads; i++)
 		{
 			mThreads.emplace_back([=]{
 				while(true)
@@ -1163,7 +1127,7 @@ private:
 		}
 
 		//Swapping thread
-		for(auto i =0u; i<numSwpThreads; i++)
+		for(auto i =0u; i<numSwpSWPThreads; i++)
 		{
 			mThreads.emplace_back([=]{
 				while(true)
@@ -1173,62 +1137,40 @@ private:
 						std::unique_lock<std::mutex> lock{mEventMutexSWP};
 
 						//mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwaps.size()<2); });
-						mEventVarSWP.wait(lock,[=]{return mStopping || !(pairs.empty()); });
+						mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwapsSWP.empty()); });
 						
-						if (mStopping && pairs.empty())
+						if (mStopping && mSwapsSWP.empty())
 							break;	
-						swap_struct ss = std::move(pairs.front());
-						pairs.pop();
+						swap_struct ss = std::move(mSwapsSWP.front());
+						mSwapsSWP.pop();
 						j = ss.id1;
 						k = ss.id2;
-						//std::cout<<j<<" "<<k<<std::endl;
-						//if (mStopping && mSwaps.size()<2)
-						//	break;	
-						//
-						//j = std::move(mSwaps.front());
-						//#####
-						//j = std::move(mSwaps.top());
-						//mSwaps.pop();
-						//k = std::move(mSwaps.top());
-						//mSwaps.pop();
-						//#####
-						//
-						//
-						//j = mSwaps.front();
-						//mSwaps.erase(mSwaps.begin());
-						//k = mSwaps.front();
-						//mSwaps.erase(mSwaps.begin());
-						//#####
-						//############################
-						//j = mSwaps.front();
-						//mSwaps.erase(mSwaps.begin());
-						////std::cout<<"J: "<<samplerptr->chain_temps[j]<<std::endl;
-
-						//////########################
-						//std::vector<int>::iterator ptr;
-						//for(ptr=mSwaps.begin(); ptr!=mSwaps.end(); ++ptr){
-						//	//std::cout<<"PTR: "<<samplerptr->chain_temps[*ptr]<<std::endl;
-						//	if(temp_neighborhood_check(j,*ptr)){
-						//		k = *ptr;
-						//		mSwaps.erase(ptr);
-						//		break;
-						//	}
-						//}
-						//if(k == -1){
-						//	mSwaps.emplace_back(j);
-						//}
-						//std::cout<<"Size: "<<mSwaps.size()<<std::endl;
-						//for(auto i : mSwaps){std::cout<<i<<" ";}
-						//std::cout<<std::endl;
 					}
-					//if(k != -1){
-						//std::cout<<samplerptr->chain_temps[j]<<" "<<samplerptr->chain_temps[k]<<std::endl;
 						mcmc_swap_threaded(j,k);
-						//k=-1;
-					//}
-					//else{
-					//	usleep(100000);
-					//}
+					
+				}
+			});
+		}
+		//Swapping thread
+		for(auto i =0u; i<numSwpSWPPThreads; i++)
+		{
+			mThreads.emplace_back([=]{
+				while(true)
+				{
+					int j;
+					{
+						std::unique_lock<std::mutex> lock{mEventMutexSWPQ};
+
+						//mEventVarSWP.wait(lock,[=]{return mStopping || !(mSwaps.size()<2); });
+						mEventVarSWPQ.wait(lock,[=]{return mStopping || !(mSwapsSWPQ.empty()); });
+						
+						if (mStopping && mSwapsSWPQ.empty())
+							break;	
+						
+						j = std::move(mSwapsSWPQ.top());
+						mSwapsSWPQ.pop();
+					}
+						match_swap_pairs(j);
 					
 				}
 			});
@@ -1240,12 +1182,14 @@ private:
 		//std::cout<<"Stop initiated -- waiting for threads to finish"<<std::endl;
 		{
 			std::unique_lock<std::mutex> lock{mEventMutex};
-			//std::unique_lock<std::mutex> lock{mEventMutexSWP};
+			std::unique_lock<std::mutex> lock2{mEventMutexSWP};
+			std::unique_lock<std::mutex> lock3{mEventMutexSWPQ};
 			mStopping = true;
 		}
 		
 		mEventVar.notify_all();
 		mEventVarSWP.notify_all();
+		mEventVarSWPQ.notify_all();
 		
 		for(auto &thread: mThreads)
 			thread.join();
