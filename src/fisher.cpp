@@ -1809,8 +1809,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[6]=log(input_params->Luminosity_Distance);
 				parameters[7]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				parameters[8]=calculate_eta(input_params->mass1, 
-					input_params->mass2);
+				//parameters[8]=calculate_eta(input_params->mass1, 
+				//	input_params->mass2);
+				parameters[8]=input_params->mass2/input_params->mass1;
 				parameters[9]=input_params->spin1[2];
 				parameters[10]=input_params->spin2[2];
 				//parameters[9]=.5*(input_params->spin1[2]+input_params->spin2[2]);
@@ -2106,9 +2107,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 		else if(generation_method.find("IMRPhenomD") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
+				//a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
+				//	avec_parameters[8]);
+				//a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
+				//	avec_parameters[8]);
+				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[7]),
 					avec_parameters[8]);
-				a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
+				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[7]),
 					avec_parameters[8]);
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];

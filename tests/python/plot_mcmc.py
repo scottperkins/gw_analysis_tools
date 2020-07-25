@@ -3,17 +3,29 @@ import matplotlib as mpl
 import corner
 import matplotlib.pyplot as plt
 import numpy as np
+import gwatpy.mcmc_routines as gmcmc
+import h5py
 #import gwatpy.util as gpu
 #import gwatpy.gwatpy_plot as gp; gp.set()
 #from phenompy.utilities import calculate_mass1, calculate_mass2
 
-data = np.loadtxt("data/injection_output.csv",delimiter=',')
+#data = np.loadtxt("data/injection_output.csv",delimiter=',')
 #data = np.loadtxt("data/experiment_output.csv",delimiter=',')
 #data = np.loadtxt("data/test_output.csv",delimiter=',')
-#injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)
 injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)
+#injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)
 #dim = 11
-dim = 15
+data = gmcmc.trim_thin_file("data/injection_output.csv",trim=None,ac=None)
+print("Samples: ",len(data))
+dim = 11
+
+f = h5py.File("data/injection_output.csv",'r')
+testdata=f["MCMC_OUTPUT"]["CHAIN 0"]
+for x in np.arange(len(testdata[0])):
+    plt.plot(testdata[:,x])
+    plt.show()
+    plt.close()
+#exit()
 
 #data = data[100:]
 for x in data:
@@ -37,7 +49,7 @@ for x in np.arange(len(data)):
 #    plt.show()
 #    plt.close()
 ndim, nsamples = 11, len(data) 
-labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_p$",r"$\sqrt{\alpha}$"]
+labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$q$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_p$",r"$\sqrt{\alpha}$"]
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$"]
 data_plot=[]
 for x in data_thinned:

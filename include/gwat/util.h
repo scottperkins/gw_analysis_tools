@@ -512,6 +512,12 @@ adouble calculate_mass1(adouble chirpmass, adouble eta);
 double calculate_mass2(double chirpmass, double eta);
 adouble calculate_mass2(adouble chirpmass, adouble eta);
 
+double calculate_mass1_Mcq(double chirpmass, double q);
+adouble calculate_mass1_Mcq(adouble chirpmass, adouble q);
+	
+double calculate_mass2_Mcq(double chirpmass, double q);
+adouble calculate_mass2_Mcq(adouble chirpmass, adouble q);
+
 template<class T>
 void celestial_horizon_transform(T RA, T DEC, double gps_time, T LONG, T LAT,
 				T *phi, T *theta);

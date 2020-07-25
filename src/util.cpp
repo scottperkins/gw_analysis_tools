@@ -667,6 +667,9 @@ int check_list_id(T j, T *list, int length)
 }
 template int check_list_id<int>(int, int*, int);
 template int check_list_id<double>(double ,double*, int);
+
+
+
 template<class T>
 void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 {
@@ -713,23 +716,28 @@ int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 	gsl_permutation_free(p);
 	
 	bool failed=false;
-	for(int row=0; row<dim; row++){
-		for(int column = 0 ;column<dim; column++){
-			if(!std::isnan(gsl_matrix_get(inv,row,column))){
-				inverse[row][column] = gsl_matrix_get(inv,row,column);
+	if(status != 0 ){
+		failed = true;
+	}
+	else{
+		for(int row=0; row<dim; row++){
+			for(int column = 0 ;column<dim; column++){
+				if(!std::isnan(gsl_matrix_get(inv,row,column))){
+					inverse[row][column] = gsl_matrix_get(inv,row,column);
+				}
+				else{
+					//std::cout<<"Inversion failed -- NAN in inverse matrix -- cholesky decomposition"<<std::endl;
+					failed=true;
+					break;
+				}
 			}
-			else{
-				std::cout<<"Inversion failed -- NAN in inverse matrix -- cholesky decomposition"<<std::endl;
-				failed=true;
-				break;
-			}
+			if(failed){break;}
 		}
-		if(failed){break;}
 	}
 	gsl_matrix_free(matrix);
 	gsl_matrix_free(inv);
-	if(failed){return 0;}
-	return 1;
+	if(failed){return 1;}
+	return 0;
 	
     
 }
@@ -1375,6 +1383,31 @@ adouble calculate_mass2(adouble chirpmass, adouble eta)
 {
 	adouble etapow = pow(eta,3./5);
     	return 1./2*(chirpmass / etapow - sqrt(1.-4*eta)*chirpmass / etapow);
+}
+/*! \brief Calculates the larger mass given a chirp mass and asymmetric mass ratio
+ *
+ * Units of the output match the units of the input chirp mass
+ */
+double calculate_mass1_Mcq(double chirpmass, double q)
+{
+	return 1./(1+q) * chirpmass * pow( q/pow_int(1+q,2), -3./5.);
+}
+
+adouble calculate_mass1_Mcq(adouble chirpmass, adouble q)
+{
+	return 1./(1+q) * chirpmass * pow( q/pow_int(1+q,2), -3./5.);
+}
+/*! \brief Calculates the smaller mass given a chirp mass and asymmetric mass ratio
+ *
+ * Units of the output match the units of the input chirp mass
+ */
+double calculate_mass2_Mcq(double chirpmass, double q)
+{
+	return q/(1+q) * chirpmass * pow( q/pow_int(1+q,2), -3./5.);
+}
+adouble calculate_mass2_Mcq(adouble chirpmass, adouble q)
+{
+	return q/(1+q) * chirpmass * pow( q/pow_int(1+q,2), -3./5.);
 }
 
 /*! \brief Local function to calculate a factorial
