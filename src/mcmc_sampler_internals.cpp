@@ -1203,7 +1203,8 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->interfaces[i] = new mcmc_data_interface;
 		sampler->interfaces[i]->min_dim = sampler->min_dim;
 		sampler->interfaces[i]->max_dim = sampler->max_dim;
-		sampler->interfaces[i]->chain_number = i;
+		sampler->interfaces[i]->chain_number = sampler->chain_N;
+		sampler->interfaces[i]->chain_id = i;
 		sampler->interfaces[i]->burn_phase = sampler->burn_phase;
 		//#######################
 		//#######################

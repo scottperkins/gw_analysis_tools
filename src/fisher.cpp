@@ -3449,7 +3449,8 @@ void ppE_theory_transformation_jac(
 	//Replace row of each beta with new derivatives
 	for(int j = 0 ;j<dimension-base_dim; j++){
 		for(int i = 0; i<dimension; i++){
-			jac[i][j+base_dim]= derivatives[j][i];
+			//jac[i][j+base_dim]= derivatives[j][i];
+			jac[j+base_dim][i]= derivatives[j][i];
 		}
 	}
 	
@@ -3462,6 +3463,9 @@ void ppE_theory_transformation_jac(
 /*! \brief Transform a generic ppE Fisher matrix to a theory specific Fisher matrix
  *
  * See ppE_utilities.cpp for a list of supported theories.
+ *
+ * The beta value in the input parameter structure must be the value of the theory-specific 
+ * parameter, ie \alpha_dCS^2 and not \beta_2PN
  */
 void ppE_theory_fisher_transformation(std::string original_method, 
 	std::string new_method,
@@ -3471,14 +3475,29 @@ void ppE_theory_fisher_transformation(std::string original_method,
 	double **new_fisher)
 {
 	double **jac = allocate_2D_array(dimension,dimension);
+	double **jacT = allocate_2D_array(dimension,dimension);
 	double **temp_fisher = allocate_2D_array(dimension,dimension);
 	ppE_theory_transformation_jac(original_method, new_method, 
 		dimension, param,jac);
 	
+	for(int i = 0 ; i<dimension; i++){
+		for(int j = 0 ; j<dimension; j++){
+			jacT[i][j]=jac[j][i];
+		}
+	}
+	
 	matrix_multiply(old_fisher,jac, temp_fisher, dimension, dimension, dimension);
-	matrix_multiply(jac,temp_fisher,new_fisher, dimension, dimension, dimension);
+	matrix_multiply(jacT,temp_fisher,new_fisher, dimension, dimension, dimension);
+	//debugger_print(__FILE__,__LINE__,"Jac testing");
+	//for(int i = 0 ; i<dimension; i++){
+	//	for(int j = 0 ; j<dimension; j++){
+	//		std::cout<<jac[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	
 	deallocate_2D_array(jac,dimension,dimension);
+	deallocate_2D_array(jacT,dimension,dimension);
 	deallocate_2D_array(temp_fisher,dimension,dimension);
 }
 /*! \brief Transform a generic ppE covariance matrix to a theory specific covariance matrix
@@ -3496,17 +3515,24 @@ void ppE_theory_covariance_transformation(std::string original_method,
 {
 	double **jac = allocate_2D_array(dimension,dimension);
 	double **jac_inverse = allocate_2D_array(dimension,dimension);
+	double **jac_inverseT = allocate_2D_array(dimension,dimension);
 	double **temp_cov = allocate_2D_array(dimension,dimension);
 	ppE_theory_transformation_jac(original_method, new_method, 
 		dimension, param,jac);
 
 	gsl_LU_matrix_invert(jac, jac_inverse, dimension);
+	for(int i = 0 ; i<dimension; i++){
+		for(int j = 0 ; j<dimension; j++){
+			jac_inverseT[i][j]=jac_inverse[j][i];
+		}
+	}
 	
-	matrix_multiply(old_cov,jac_inverse, temp_cov, dimension, dimension, dimension);
+	matrix_multiply(old_cov,jac_inverseT, temp_cov, dimension, dimension, dimension);
 	matrix_multiply(jac_inverse,temp_cov,new_cov, dimension, dimension, dimension);
 	
 	deallocate_2D_array(jac,dimension,dimension);
 	deallocate_2D_array(jac_inverse,dimension,dimension);
+	deallocate_2D_array(jac_inverseT,dimension,dimension);
 	deallocate_2D_array(temp_cov,dimension,dimension);
 }
 

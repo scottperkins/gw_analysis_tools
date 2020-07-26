@@ -1644,11 +1644,11 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler,
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		//samplerptr->fisher_exist = false;
-		samplerptr->fisher_exist = true;
-		fisher = [](double *param, int*param_status,  double **fish, mcmc_data_interface *interface, void *parameters){
-			return fisher_generic(param,param_status,fish, interface, parameters, samplerptr);	
-		};
+		samplerptr->fisher_exist = false;
+		//samplerptr->fisher_exist = true;
+		//fisher = [](double *param, int*param_status,  double **fish, mcmc_data_interface *interface, void *parameters){
+		//	return fisher_generic(param,param_status,fish, interface, parameters, samplerptr);	
+		//};
 	}
 	else {
 		samplerptr->fisher_exist = true;
@@ -3611,11 +3611,11 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
 	if(fisher ==NULL){
-		//samplerptr->fisher_exist = false;
-		samplerptr->fisher_exist = true;
-		fisher = [](double *param, int*param_status,  double **fish, mcmc_data_interface *interface, void *parameters){
-			return fisher_generic(param,param_status,fish, interface, parameters, samplerptr);	
-		};
+		samplerptr->fisher_exist = false;
+		//samplerptr->fisher_exist = true;
+		//fisher = [](double *param, int*param_status,  double **fish, mcmc_data_interface *interface, void *parameters){
+		//	return fisher_generic(param,param_status,fish, interface, parameters, samplerptr);	
+		//};
 	}
 	else 
 		samplerptr->fisher_exist = true;

@@ -1602,8 +1602,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution_scheme,
-		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
-		//log_prior,MCMC_likelihood_wrapper, NULL,(void **)user_parameters,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
+		log_prior,MCMC_likelihood_wrapper, NULL,(void **)user_parameters,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
@@ -2264,7 +2264,8 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 			for(int k =0; k<dimension; k++)
 			{
 				output[j][k] +=temp_out[j][k];
-				//if(std::isnan(output[j][k])){
+				//if(std::isnan(output[j][k]))
+				//{
 				//      std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
 				//}
 			}
@@ -2307,6 +2308,22 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 		}
 	}
 	deallocate_2D_array(temp_out, dimension,dimension);
+	//////////////////////////////////////////////
+	//if(!interface->burn_phase){
+	//	debugger_print(__FILE__,__LINE__,"Fisher MCMC");
+	//	double **cov = allocate_2D_array( dimension,dimension);
+	//	gsl_cholesky_matrix_invert(output, cov, dimension);
+	//	for(int i = 0 ; i<dimension; i++){
+	//		std::cout<<cov[i][i]<<std::endl;;	
+	//		for(int j = 0 ; j<dimension; j++){
+	//			std::cout<<cov[i][j]<<" ";	
+	//		}
+	//		std::cout<<std::endl;	
+	//		
+	//	}
+	//	deallocate_2D_array(cov, dimension,dimension);
+	//}
+	//////////////////////////////////////////////
 
 	//Cleanup
 	delete [] temp_params;
