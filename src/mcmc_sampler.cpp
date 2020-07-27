@@ -2237,7 +2237,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				debugger_print(__FILE__,__LINE__,"Creating dump");
 				sampler_output->create_data_dump(true,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
-				//sampler_output->create_data_dump(false,false, "data/test_full.hdf");
+				sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 			}
 		}
 		else{
@@ -2249,7 +2249,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//else{
 			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
-			//sampler_output->append_to_data_dump("data/test_full.hdf");
+			sampler_output->append_to_data_dump("data/test_full.hdf5");
 			debugger_print(__FILE__,__LINE__,"Finished appending dump");
 			//}
 		}
@@ -3597,6 +3597,9 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	bool burn_phase /**<Passed to LL function for user information*/
 	)
 {
+	//if(pool){
+	//	std::cout<<"Pooling"<<std::endl;
+	//}
 	clock_t start, end, acend;
 	double wstart, wend, wacend;
 	start = clock();

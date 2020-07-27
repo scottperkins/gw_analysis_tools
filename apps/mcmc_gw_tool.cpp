@@ -790,6 +790,7 @@ double chirpmass_eta_jac(double chirpmass, double eta){
 //Uniform in m1 and m2, transformed to lnM and q
 double chirpmass_q_jac(double chirpmass, double q){
 	return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
+	//return chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
 }
 //Uniform in m1 and m2, transformed to lnM and eta
 //double chirpmass_eta_jac(double m1,double m2)

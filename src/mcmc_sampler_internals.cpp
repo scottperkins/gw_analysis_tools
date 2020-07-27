@@ -798,7 +798,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=.45;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.5;
-
 		}
 	}
 	else{
