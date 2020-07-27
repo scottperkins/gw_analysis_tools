@@ -12,6 +12,7 @@ int AD_v_N(int argc, char *argv[]);
 int network_fishers(int argc, char *argv[]);
 int dCS_EdGB(int argc, char *argv[]);
 int test_jac_transform(int argc, char *argv[]);
+int test_MCMC_fisher(int argc, char *argv[]);
 void RT_ERROR_MSG();
 
 int main(int argc, char *argv[])
@@ -36,10 +37,133 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 3){
 		return test_jac_transform(argc,argv);
 	}
+	if(runtime_opt == 4){
+		return test_MCMC_fisher(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int test_MCMC_fisher(int argc, char *argv[])
+{
+	std::cout.precision(15);
+	gen_params params;	
+	params.mass1 = 20.9;
+	params.mass2 = 1.93;
+	params.spin1[2] = .0* (params.mass1+params.mass2)/params.mass1;
+	params.spin2[2] = 0. ;
+	params.chip = .01;
+	params.phip = 1.0;
+	//params.Luminosity_Distance = 290;
+	params.Luminosity_Distance = 50;
+	//params.incl_angle = acos(.75);
+	params.incl_angle = M_PI-.001;
+
+	params.NSflag1 = false;
+	params.NSflag2 =false;
+
+	params.phiRef = .0;
+	params.RA = .234;
+	params.DEC = asin(-.45);
+	params.f_ref = 20;
+	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
+	std::cout<<"chirpmass: "<<chirpmass/MSOL_SEC<<std::endl;
+	//params.spin1[2] = .38;
+
+	params.horizon_coord = false;
+	params.shift_time=false;
+	params.shift_phase=false;
+	params.dep_postmerger=true;
+	params.sky_average=false;
+	params.equatorial_orientation=false;
+	
+	params.psi = 1.;
+	params.gmst = 2.;
+	params.sky_average = false;
+	params.Nmod = 0;
+
+
+	double fmin = 5;
+	double fmax = 2048;
+	double T = 16;
+
+	params.tc = 3.*T/4.;
+	int length = (1024-20)*T;
+	double *frequency = new double[length];
+	int Ndetect = 3;
+	//int Ndetect = 2;
+	double **psd = new double*[Ndetect];
+	//std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
+	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
+	//std::string SN[3] = {"CE1","AdLIGOMidHigh","AdVIRGOPlus1"};
+	double deltaf = 1./T;
+	for(int i = 0 ; i<length; i++){
+		frequency[i] = 20+i*deltaf;	
+	}
+	for(int i = 0 ; i<Ndetect; i++){
+		psd[i]= new double[length];
+		populate_noise(frequency, SN[i],psd[i], length, 48);
+		//populate_noise(frequency, "LISA_CONF",psd, length, 12);
+		for(int j = 0 ; j<length; j++){
+			psd[i][j]*=psd[i][j];	
+		}
+	}
+
+
+	int dim = 11;
+	double **output =NULL;
+	output= allocate_2D_array(dim,dim);
+	double **output_temp = allocate_2D_array(dim,dim);
+	double **COV = allocate_2D_array(dim,dim);
+	for(int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j<dim; j++){
+			output[i][j]= 0;
+			output_temp[i][j]= 0;
+		}
+	}
+	std::string method = "MCMC_IMRPhenomD";
+	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
+	for(int i = 0 ;i < Ndetect; i++){
+		//fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_temp, dim, &params, "SIMPSONS",(double*)NULL,false, psd[i],NULL,NULL);
+		fisher_numerical(frequency, length, method, detectors[i],detectors[0], output_temp, dim, &params, 2,NULL,NULL, psd[i]);
+		for(int k = 0 ; k<dim; k++){
+			for(int j = 0 ; j<dim; j++){
+				output[k][j]+= output_temp[k][j];
+			}
+		}
+	}
+	std::cout<<"SNR: "<<sqrt(output[6][6])<<std::endl;
+
+	gsl_LU_matrix_invert(output,COV,dim);
+	for(int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<output[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	for(int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<COV[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<sqrt(COV[i][i])<<std::endl;
+	}
+
+	deallocate_2D_array(output,dim,dim);
+	deallocate_2D_array(output_temp,dim,dim);
+	deallocate_2D_array(COV,dim,dim);
+	
+	delete [] frequency;
+	for(int i = 0 ; i<Ndetect; i++){
+		delete [] psd[i];
+	}
+	delete [] psd;
+	return 0;
+
+
 }
 int test_jac_transform(int argc, char *argv[])
 {
@@ -75,12 +199,13 @@ int test_jac_transform(int argc, char *argv[])
 	params.gmst = 2.;
 	params.sky_average = false;
 	params.Nmod = 1;
+	double mod_value = 1;
 	params.betappe = new double[1];
 	params.bppe = new double[1];
-	params.betappe[0] =0;
-	//params.betappe[0] =1;
-	//params.bppe[0] = 9;
-	params.bppe[0] = -1.5;
+	//params.betappe[0] =0;
+	params.betappe[0] =mod_value;
+	params.bppe[0] = -7;
+	//params.bppe[0] = -1.5;
 	//params.bppe[0] = -3;
 	
 
@@ -112,10 +237,23 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 
+	std::string method = "DipRad_IMRPhenomPv2";
 	//std::string method = "ExtraDimension_IMRPhenomPv2";
 	//std::string method = "TVG_IMRPhenomPv2";
-	std::string method = "ModDispersion_IMRPhenomPv2";
+	//std::string method = "ModDispersion_IMRPhenomPv2";
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
+
+	//#########################
+	source_parameters<double> sparam;
+	std::string local_method = prep_source_parameters(&sparam,&params,method);
+	double beta_value =  sparam.betappe[0];
+	
+	std::cout<<beta_value<<std::endl;;
+	std::cout<<local_method<<std::endl;;
+	cleanup_source_parameters(&sparam, method);
+	//#########################
+
+
 		
 	int dim = 14;
 	int dimDSA = 8;
@@ -165,42 +303,9 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
-	//output_AD[9][9]+=1;
-	//output_AD[10][10]+=1;
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	//std::cout<<"AD:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<output_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
-	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
-	//std::cout<<"COV AD:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<COV_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
-	//std::cout<<"Variances (90%):"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
-	//}
-	//std::cout<<std::endl;
-	//std::cout<<"Variances root delta alpha (90%):"<<std::endl;
-	//if(params.NSflag2){
-	//	std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
-	//}
-	//else{
-	//	std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
-	//}
-	//std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
-	//std::cout<<std::endl;
 
 
 	double **identity_full = allocate_2D_array(dim,dim);
@@ -217,36 +322,9 @@ int test_jac_transform(int argc, char *argv[])
 
 
 
-
-	//double **sub_AD_F = allocate_2D_array(dim-4,dim-4);
-	//int ids[4] = {0,1,2,3};
-	//rm_fisher_dim(output_AD,dim, sub_AD_F,dim-4,ids);
-	//gsl_LU_matrix_invert(sub_AD_F,COV_AD,dim-4);
-	//std::cout<<"SUB COV AD:"<<std::endl;
-	//for(int i = 0 ; i<dim-4; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim-4; j++){
-	//		std::cout<<sub_AD_F[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
-	//std::cout<<"Variances (90%):"<<std::endl;
-	//for(int i = 0 ; i<dim-4; i++){
-	//	std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
-	//}
-	//std::cout<<std::endl;
-	//std::cout<<"Variances root delta alpha (90%):"<<std::endl;
-	//if(params.NSflag2){
-	//	std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
-	//}
-	//else{
-	//	std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
-	//}
-	//std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
-	//std::cout<<std::endl;
-	//deallocate_2D_array(sub_AD_F,dim-4,dim-4);
 	std::cout<<"ppE fishers: "<<std::endl;
-	method = "ppE_IMRPhenomPv2_IMR";
+	method = "ppE_IMRPhenomPv2_Inspiral";
+	params.betappe[0]=beta_value;
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD2_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dim; k++){
@@ -255,15 +333,9 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
-	//ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
-	ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_IMR","ModDispersion_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
-	//double **derivatives = new double*[1];
-	//derivatives[0]=new double[13];
-	//ppE_theory_transformation_calculate_derivatives("ppE_IMRPhenomPv2_Inspiral","dCS_IMRPhenomPv2",dim,12, &params, derivatives);
-	//for(int i = 0; i<dim; i++){
-	//	std::cout<<derivatives[0][i]<<std::endl;
-	//}	
-	
+	params.betappe[0]=mod_value;
+	ppE_theory_fisher_transformation("ppE_IMRPhenomPv2_Inspiral","DipRad_IMRPhenomPv2",dim, &params, output_AD2,output_AD2_T);
+	std::cout<<"Fisher comparison: i j frac_diff F1 F2 F3"<<std::endl;	
 	for(int i = 0 ; i<dim; i++){
 		for(int j = 0 ; j<dim; j++){
 			std::cout<<i<<" "<<j<<" "<<(output_AD[i][j]-output_AD2_T[i][j])*2./
@@ -273,10 +345,17 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 	gsl_LU_matrix_invert(output_AD2,COV_AD2,dim);
-	//ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","ExtraDimension_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
-	ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_IMR","ModDispersion_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
+	ppE_theory_covariance_transformation("ppE_IMRPhenomPv2_Inspiral","DipRad_IMRPhenomPv2",dim, &params, COV_AD2,COV_AD2_T);
+	double cov_ppe[dim-1];
+	double cov_dcs[dim-1];
+	std::cout<<"Cov comparison: dcs ppe dCS-cov-comp ppE-cov-comp"<<std::endl;
+	for(int i = 0 ; i<dim-1; i++){
+		cov_ppe[i] = COV_AD2[i][dim-1] / sqrt( COV_AD2[i][i]*COV_AD2[dim-1][dim-1]);
+		cov_dcs[i] = COV_AD[i][dim-1] / sqrt( COV_AD[i][i]*COV_AD[dim-1][dim-1]);
+		std::cout<<cov_dcs[i]<<" "<<cov_ppe[i]<<" "<<COV_AD2[i][dim-1]<<" "<<COV_AD[i][dim-1]<<std::endl;
+	}
 	
-	std::cout<<"Covariance difference: i j frac_diff Cov1 Cov2"<<std::endl;
+	std::cout<<"Covariance difference: i j frac_diff Cov1 Cov2 ppE"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		for(int j = 0 ; j<dim; j++){
 			std::cout<<i<<" "<<j<<" "<<(COV_AD[i][j]-COV_AD2_T[i][j])*2./
@@ -300,44 +379,12 @@ int test_jac_transform(int argc, char *argv[])
 	
 	deallocate_2D_array(identity_full2, dim,dim);
 
-
-
-
-
-	//matrix_multiply(output_AD2, jac_spins,output_AD2_temp,dimD,dimD,dimD);
-	//matrix_multiply(jac_spins,output_AD2_temp, output_AD2,dimD,dimD,dimD);
-	
 	
 	std::cout<<"AD-2:"<<std::endl;
-	//for(int i = 0 ; i<dimD; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dimD; j++){
-	//		std::cout<<output_AD2[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
-	//gsl_LU_matrix_invert(output_AD2,COV_AD2,dimD);
-	//std::cout<<"COV AD - D:"<<std::endl;
-	//std::cout<<"Variances (90%):"<<std::endl;
-	//for(int i = 0 ; i<dimD; i++){
-	//	std::cout<<i<<" "<<1.64*sqrt(COV_AD2[i][i])<<std::endl;
-	//}
-	//std::cout<<std::endl;
-	//std::cout<<"Variances root delta alpha (90%):"<<std::endl;
-	//if(params.NSflag2){
-	//	std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
-	//}
-	//else{
-	//	std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
-	//}
-	//std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD2[dimD-1][dimD-1],1./8.)*3.e5<<std::endl;
-	//std::cout<<std::endl;
 
 	params.sky_average = true;
 	params.incl_angle = 0;
-	//method = "ExtraDimension_IMRPhenomD";
-	//method = "TVG_IMRPhenomD";
-	method = "ModDispersion_IMRPhenomD";
+	method = "DipRad_IMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimDSA; k++){
@@ -347,7 +394,8 @@ int test_jac_transform(int argc, char *argv[])
 		}
 	}
 	
-	method = "ppE_IMRPhenomD_IMR";
+	method = "ppE_IMRPhenomD_Inspiral";
+	params.betappe[0]=beta_value;
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[i], output_ADSA2_temp, dimDSA, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimDSA; k++){
@@ -356,48 +404,10 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
-	//ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","ExtraDimension_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
-	//ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","TVG_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
-	ppE_theory_fisher_transformation("ppE_IMRPhenomD_IMR","ModDispersion_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
+	params.betappe[0]=mod_value;
+	ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","DipRad_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
 	
-	//std::cout<<"AD-DSA:"<<std::endl;
-	//for(int i = 0 ; i<dimDSA; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dimDSA; j++){
-	//		std::cout<<output_ADSA[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
-	//gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
-	//double **identity = allocate_2D_array(dimDSA,dimDSA);
-	//matrix_multiply(output_ADSA,COV_ADSA,identity,dimDSA,dimDSA,dimDSA);
-	//std::cout<<"IDENTITY: "<<std::endl;
-	//for(int i = 0 ; i<dimDSA; i++){
-	//	for(int j = 0 ; j<dimDSA; j++){
-	//		std::cout<<identity[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
-	//
-	//deallocate_2D_array(identity, dimDSA,dimDSA);
-	//std::cout<<"Variances (90%):"<<std::endl;
-	//for(int i = 0 ; i<dimDSA; i++){
-	//	std::cout<<i<<" "<<1.64*sqrt(COV_ADSA[i][i])<<std::endl;
-	//}
-	//std::cout<<std::endl;
-	//std::cout<<"Variances root delta alpha (90%):"<<std::endl;
-	//if(params.NSflag2){
-	//	std::cout<<"Cutoff:"<<params.mass1*.5*1.5<<std::endl;
-	//}
-	//else{
-	//	std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
-	//}
-	//std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_ADSA[dimDSA-1][dimDSA-1],1./8.)*3.e5<<std::endl;
-	//std::cout<<std::endl;
-	//std::cout<<"SNR (SA): "<<sqrt(output_ADSA[0][0])<<std::endl;
-	
-
-
+	std::cout<<"Sky averaged fisher diff: i j fracdiff F1 F2 F3"<<std::endl;
 	for(int i = 0 ; i<dimDSA; i++){
 		for(int j = 0 ; j<dimDSA; j++){
 			std::cout<<i<<" "<<j<<" "<<(output_ADSA[i][j]-output_ADSA2_T[i][j])*2./
@@ -1435,6 +1445,7 @@ void RT_ERROR_MSG()
 	std::cout<<"1 --- Network Fishers"<<std::endl;
 	std::cout<<"2 --- dCS or EdGB"<<std::endl;
 	std::cout<<"3 --- Check ppE-theory jac transform"<<std::endl;
+	std::cout<<"4 --- Test MCMC fisher"<<std::endl;
 }
 
 

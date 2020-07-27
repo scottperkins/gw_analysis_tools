@@ -110,7 +110,6 @@ void fisher_numerical(double *frequency,
 	for (int i = 0 ; i<dimension; i++){
 		response_deriv[i] = new std::complex<double>[length];
 	}
-	
 	calculate_derivatives(response_deriv, 
 			frequency,
 			length, 
@@ -153,7 +152,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-	double epsilon = 1e-5;
+	double epsilon = 1e-7;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
@@ -172,6 +171,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	gen_params waveform_params;
 	repack_non_parameter_options(&waveform_params,parameters, gen_method);
 	//##########################################################
+	//debugger_print(__FILE__,__LINE__,"WHAT THE FUCK");	
+	//for(int i = 0 ; i<dimension; i++){
+	//	std::cout<<parameters_vec[i]<<std::endl;
+	//}
 	
 	if(parameters->sky_average && local_gen_method.find("IMRPhenomD")!=std::string::npos)
 	{

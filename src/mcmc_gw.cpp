@@ -1602,8 +1602,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
 		swp_freq, t0, nu, corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution_scheme,
-		//log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
-		log_prior,MCMC_likelihood_wrapper, NULL,(void **)user_parameters,numThreads, pool, 
+		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, NULL,(void **)user_parameters,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	
@@ -2239,16 +2239,16 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	int dimension = interface->max_dim;
 	double *temp_params = new double[dimension];
 	//#########################################################################
-	gen_params_base<double> gen_params;
+	gen_params_base<double> params;
 	std::string local_gen = MCMC_prep_params(param, 
-		temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
+		temp_params,&params, dimension, mcmc_generation_method,mcmc_mod_struct);
 	//#########################################################################
 	//#########################################################################
-	repack_parameters(param, &gen_params, 
+	repack_parameters(param, &params, 
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
 	//#########################################################################
 	//#########################################################################
-	//std::cout<<"INCL angle fisher: "<<gen_params.incl_angle<<std::endl;
+	//std::cout<<"INCL angle fisher: "<<params.incl_angle<<std::endl;
 	for(int j =0; j<dimension; j++){
 		for(int k =0; k<dimension; k++)
 		{
@@ -2258,8 +2258,11 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	double **temp_out = allocate_2D_array(dimension,dimension);
 	for(int i =0 ; i <mcmc_num_detectors; i++){
 		fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
-		"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
-		&gen_params, mcmc_deriv_order, NULL, NULL, mcmc_noise[i]);
+			"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+			&params, mcmc_deriv_order, NULL, NULL, mcmc_noise[i]);
+		//fisher_autodiff(mcmc_frequencies[i], mcmc_data_length[i],
+		//	"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+		//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmc_noise[i]);
 		for(int j =0; j<dimension; j++){
 			for(int k =0; k<dimension; k++)
 			{
@@ -2309,18 +2312,20 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	}
 	deallocate_2D_array(temp_out, dimension,dimension);
 	//////////////////////////////////////////////
-	//if(!interface->burn_phase){
+	//if(!interface->burn_phase)
+	//{
 	//	debugger_print(__FILE__,__LINE__,"Fisher MCMC");
 	//	double **cov = allocate_2D_array( dimension,dimension);
 	//	gsl_cholesky_matrix_invert(output, cov, dimension);
 	//	for(int i = 0 ; i<dimension; i++){
-	//		std::cout<<cov[i][i]<<std::endl;;	
-	//		for(int j = 0 ; j<dimension; j++){
-	//			std::cout<<cov[i][j]<<" ";	
-	//		}
-	//		std::cout<<std::endl;	
+	//		std::cout<<sqrt(cov[i][i])<<" ";	
+	//		//for(int j = 0 ; j<dimension; j++){
+	//		//	std::cout<<cov[i][j]<<" ";	
+	//		//}
+	//		//std::cout<<std::endl;	
 	//		
 	//	}
+	//	std::cout<<std::endl;	
 	//	deallocate_2D_array(cov, dimension,dimension);
 	//}
 	//////////////////////////////////////////////
@@ -2331,20 +2336,20 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 		if(local_gen.find("ppE") != std::string::npos ||
 			local_gen.find("dCS")!=std::string::npos||
 			local_gen.find("EdGB")!=std::string::npos){
-			delete [] gen_params.betappe;
+			delete [] params.betappe;
 		}
 		else if( local_gen.find("gIMR") != std::string::npos){
 			if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
-				delete [] gen_params.delta_phi;
+				delete [] params.delta_phi;
 			}
 			if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
-				delete [] gen_params.delta_sigma;
+				delete [] params.delta_sigma;
 			}
 			if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
-				delete [] gen_params.delta_beta;
+				delete [] params.delta_beta;
 			}
 			if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
-				delete [] gen_params.delta_alpha;
+				delete [] params.delta_alpha;
 			}
 
 		}

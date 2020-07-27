@@ -334,6 +334,9 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	else{ 
 		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
 		sampler->nan_counter[chain_index]+=1;
+		if(sampler->nan_counter[chain_index] > 50){
+			debugger_print(__FILE__,__LINE__,"WARNING -- NANs from Fisher inversion are over 50! You're Fisher's may be unstable!");
+		}
 	}
 
 	for (int i =0; i<local_dim;i++){
@@ -786,15 +789,15 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//all methods available
 		else
 		{
-			sampler->step_prob[chain_index][0]=.05;
-			sampler->step_prob[chain_index][1]=.20;
-			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.75;
-			//Testing
 			//sampler->step_prob[chain_index][0]=.05;
-			//sampler->step_prob[chain_index][1]=.2;
-			//sampler->step_prob[chain_index][2]=.2;
-			//sampler->step_prob[chain_index][3]=.55;
+			//sampler->step_prob[chain_index][1]=.20;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.75;
+			//Testing
+			sampler->step_prob[chain_index][0]=.05;
+			sampler->step_prob[chain_index][1]=.45;
+			sampler->step_prob[chain_index][2]=.0;
+			sampler->step_prob[chain_index][3]=.5;
 
 		}
 	}
