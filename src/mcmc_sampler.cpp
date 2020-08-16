@@ -3610,6 +3610,9 @@ void continue_PTMCMC_MH_internal(sampler *sampler,std::string start_checkpoint_f
 	
 	samplerptr->tune=tune;
 	samplerptr->burn_phase = burn_phase;
+	if(burn_phase){
+		samplerptr->isolate_ensembles=false;	
+	}
 
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used

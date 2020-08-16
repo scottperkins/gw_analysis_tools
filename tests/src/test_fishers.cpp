@@ -56,9 +56,9 @@ int test_MCMC_fisher(int argc, char *argv[])
 	params.chip = .01;
 	params.phip = 1.0;
 	//params.Luminosity_Distance = 290;
-	params.Luminosity_Distance = 50;
+	params.Luminosity_Distance = 80;
 	//params.incl_angle = acos(.75);
-	params.incl_angle = M_PI-.001;
+	params.incl_angle = M_PI/2;
 
 	params.NSflag1 = false;
 	params.NSflag2 =false;
