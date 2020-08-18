@@ -1314,6 +1314,7 @@ void allocate_sampler_mem(sampler *sampler)
 		//sampler->fisher_update_number = 50;
 	}
 	else{
+		//sampler->fisher_update_number = 50;
 		sampler->fisher_update_number = 1000;
 		//sampler->fisher_update_number = sampler->N_steps;
 	}

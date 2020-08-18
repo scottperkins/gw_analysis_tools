@@ -531,7 +531,7 @@ int network_fishers(int argc, char *argv[])
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 		
-	int dim = 13;
+	int dim = 14;
 
 	double **jac_spins = allocate_2D_array(dim,dim);
 	for (int i = 0 ;i<dim; i++){
@@ -778,7 +778,7 @@ int dCS_EdGB(int argc, char *argv[])
 
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 		
-	int dim = 13;
+	int dim = 14;
 	int dimD = 12;
 	int dimDSA = 8;
 

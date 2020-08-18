@@ -515,8 +515,10 @@ int mcmc_real_data(int argc, char *argv[])
 int mcmc_injection(int argc, char *argv[])
 {
 	gen_params injection;
-	injection.mass1 = 20;
-	injection.mass2 = 3;
+	//injection.mass1 = 1.4;
+	//injection.mass2 = 1.3;
+	injection.mass1 = 1.4;
+	injection.mass2 = 1.3;
 	//injection.mass1 = 9;
 	//injection.mass2 = 7;
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
@@ -526,15 +528,15 @@ int mcmc_injection(int argc, char *argv[])
 	//double eta = .22;
 	//injection.mass1 = calculate_mass1(chirpmass,eta);
 	//injection.mass2 = calculate_mass2(chirpmass,eta);
-	injection.Luminosity_Distance =400;
+	injection.Luminosity_Distance =40;
 	injection.psi = .2;
 	injection.phiRef = 2.;
 	injection.f_ref = 20.;
-	injection.RA = 1.5;
-	injection.DEC = -1.2;
+	injection.RA = 13.*M_PI/12.;
+	injection.DEC = -20*M_PI/180.;
 	//injection.RA = 1.5;
 	//injection.DEC = 1.;
-	injection.spin1[2] = .41;
+	injection.spin1[2] = .01;
 	injection.spin2[2] = -.01;
 	injection.spin1[1] = .01;
 	injection.spin2[1] = -.01;
@@ -564,8 +566,9 @@ int mcmc_injection(int argc, char *argv[])
 	std::string detectors[4] = {"Hanford","Livingston","Virgo","Kagra"};
 	//std::string detectors[3] = {"Livingston","Hanford","Virgo"};
 	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
-	std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
-	std::string injection_method = "IMRPhenomPv2";
+	//std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
+	std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
+	std::string injection_method = "IMRPhenomD";
 	double fmin = 5;
 	double fmax =1024;
 	T_mcmc_gw_tool= 4;
@@ -671,18 +674,18 @@ int mcmc_injection(int argc, char *argv[])
 	//#############################################################
 	//#############################################################
 	
-	double **whitened = allocate_2D_array(data_lengths[0],7);
-	for(int i = 0 ; i<data_lengths[0]; i++){
-		whitened[i][0]= freq[0][i];
-		whitened[i][1]=psd[0][i];
-		whitened[i][2]=psd[1][i];
-		whitened[i][3]=real(data[0][i]);
-		whitened[i][4]=imag(data[0][i]);
-		whitened[i][5]=real(data[1][i]);
-		whitened[i][6]=imag(data[1][i]);
-	}	
-	write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
-	deallocate_2D_array(whitened, data_lengths[0],7);
+	//double **whitened = allocate_2D_array(data_lengths[0],7);
+	//for(int i = 0 ; i<data_lengths[0]; i++){
+	//	whitened[i][0]= freq[0][i];
+	//	whitened[i][1]=psd[0][i];
+	//	whitened[i][2]=psd[1][i];
+	//	whitened[i][3]=real(data[0][i]);
+	//	whitened[i][4]=imag(data[0][i]);
+	//	whitened[i][5]=real(data[1][i]);
+	//	whitened[i][6]=imag(data[1][i]);
+	//}	
+	//write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
+	//deallocate_2D_array(whitened, data_lengths[0],7);
 	
 	//#############################################################
 	//#############################################################
@@ -690,8 +693,8 @@ int mcmc_injection(int argc, char *argv[])
 
 	int dim = 11;
 	std::string recovery_method = "IMRPhenomD";
-	int ensemble = 5;
-	int chains = 15;
+	int ensemble = 15;
+	int chains = 45;
 	double temps[chains];
 	double c = 1.2;
 	temps[0]=1;
@@ -704,7 +707,8 @@ int mcmc_injection(int argc, char *argv[])
 	transform_cart_sph(injection.spin1,spin1sph);
 	transform_cart_sph(injection.spin2,spin2sph);
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, spin1sph[0],spin2sph[0],cos(spin1sph[1]),cos(spin2sph[1]),fabs(spin1sph[2]-spin2sph[2]),0.01};
-	double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), q, injection.spin1[2],injection.spin2[2]};
+	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), q, injection.spin1[2],injection.spin2[2]};
+	double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),chirpmass, q, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC), cos(injection.incl_angle), injection.phiRef, tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
 	write_file("data/injections.csv",initial_position,dim);
@@ -883,7 +887,8 @@ void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, voi
 	
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters)
 {
-	double chirp = std::exp(pos[7]);
+	//double chirp = std::exp(pos[7]);
+	double chirp = pos[7];
 	//double eta = pos[8];
 	double q = pos[8];
 	double a = -std::numeric_limits<double>::infinity();
@@ -895,10 +900,11 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
-	//if ((pos[5])<T_mcmc_gw_tool*3./4.-.1 || (pos[5])>T_mcmc_gw_tool*3./4.+.1){return a;}//tc
-	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>1500){return a;}//DL
-	if (std::exp(pos[7])<.2 || std::exp(pos[7])>50 ){return a;}//chirpmass
+	if ((pos[5])<T_mcmc_gw_tool*3./4.-.1 || (pos[5])>T_mcmc_gw_tool*3./4.+.1){return a;}//tc
+	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>50){return a;}//DL
+	//if (std::exp(pos[7])<.01 || std::exp(pos[7])>5 ){return a;}//chirpmass
+	if (pos[7]<.01 || pos[7]>10 ){return a;}//chirpmass
 	//if ((pos[8])<.01 || (pos[8])>.249999){return a;}//eta
 	if ((pos[8])<.01 || (pos[8])>1){return a;}//eta
 	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//eta
@@ -972,7 +978,8 @@ double chirpmass_eta_jac(double chirpmass, double eta){
 //Uniform in m1 and m2, transformed to lnM and q
 double chirpmass_q_jac(double chirpmass, double q){
 	//return (pow(q/pow_int(q+1,2),1./5.) * q);
-	return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
+	//return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
+	return chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
 }
 
 void RT_ERROR_MSG()

@@ -521,7 +521,8 @@ int main(int argc, char *argv[])
 double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
-	double chirp = std::exp(pos[7]);
+	//double chirp = std::exp(pos[7]);
+	double chirp = pos[7];
 	//double eta = pos[8];
 	double q = pos[8];
 	double a = -std::numeric_limits<double>::infinity();
@@ -536,7 +537,8 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	//if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	if (pos[7]<chirpmass_prior[0] || pos[7]>chirpmass_prior[1] ){return a;}//chirpmass
 	if ((pos[8])<.001 || (pos[8])>1){return a;}//eta
 
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
@@ -557,7 +559,8 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
-	double chirp = std::exp(pos[7]);
+	//double chirp = std::exp(pos[7]);
+	double chirp = pos[7];
 	//double eta = pos[8];
 	double q = pos[8];
 	double a = -std::numeric_limits<double>::infinity();
@@ -572,7 +575,8 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	//if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	if (pos[7]<chirpmass_prior[0] || pos[7]>chirpmass_prior[1] ){return a;}//chirpmass
 	//if ((pos[8])<.01 || (pos[8])>.249999){return a;}//eta
 	if ((pos[8])<.001 || (pos[8])>1){return a;}//eta
 
