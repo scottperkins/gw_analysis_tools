@@ -2013,15 +2013,15 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double max_ac_realloc=0;
 
 	//#################################################
-	std::cout<<"Annealing"<<std::endl;
-	sampler sampler_ann;
-	continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
-		100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-		numThreads, pool, internal_prog, statistics_filename, 
-		"", checkpoint_file);
+	//std::cout<<"Annealing"<<std::endl;
+	//sampler sampler_ann;
+	//continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
+	//	100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+	//	numThreads, pool, internal_prog, statistics_filename, 
+	//	"", checkpoint_file);
 
 
-	deallocate_sampler_mem(&sampler_ann);
+	//deallocate_sampler_mem(&sampler_ann);
 	//#################################################
 
 
