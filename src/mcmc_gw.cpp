@@ -5,6 +5,7 @@
 #include "detector_util.h"
 #include "ppE_utilities.h"
 #include "waveform_util.h"
+#include "ortho_basis.h"
 #include "fisher.h"
 #include "mcmc_sampler.h"
 #include <iostream>
@@ -19,6 +20,9 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 /*! \file 
  * Routines for implementation in MCMC algorithms specific to GW CBC analysis
@@ -1508,6 +1512,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	std::string checkpoint_filename
 	)
 {
+	bool GAUSS_QUAD = false;
+	std::mutex fisher_mutex;
+
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
 	for (int i =0;i<num_detectors;i++)
@@ -1580,6 +1587,38 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	}
 	
 
+	//######################################################
+	//######################################################
+	//Fishers sometimes need AD, but that's slow and single 
+	//threaded -- use GAUSS quad with precomputed weights 
+	//and abscissa 
+	double *fish_freqs = NULL;
+	double *fish_weights = NULL;
+	double **fish_psd = NULL; //Needs to be interpolated from data given
+	int fish_length = 100;
+	double flow = mcmc_frequencies[0][0];
+	double fhigh = mcmc_frequencies[0][mcmc_data_length[0]-1];
+	if(GAUSS_QUAD){
+		fish_freqs = new double[fish_length];	
+		fish_weights = new double[fish_length];	
+		fish_psd = new double*[mcmc_num_detectors];	
+		
+		gauleg(log10(flow), log10(fhigh), fish_freqs, fish_weights, fish_length);
+		for(int i = 0 ; i<fish_length; i++){
+			fish_freqs[i]=pow(10,fish_freqs[i]);
+		}
+		for(int i = 0 ; i<mcmc_num_detectors; i++){
+			fish_psd[i] = new double[fish_length];
+			gsl_interp_accel *accel = gsl_interp_accel_alloc();
+			gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, mcmc_data_length[i]);
+			gsl_spline_init(spline, mcmc_frequencies[i], mcmc_noise[i],mcmc_data_length[i]);
+			for(int j = 0 ; j<fish_length; j++){
+				fish_psd[i][j] = gsl_spline_eval(spline, fish_freqs[j],accel);
+			}
+			gsl_spline_free(spline);
+		}
+	}
+	//######################################################
 	MCMC_user_param **user_parameters=NULL;
 	user_parameters = new MCMC_user_param*[chain_N];
 	for(int i = 0 ;i<chain_N; i++){
@@ -1590,6 +1629,13 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		user_parameters[i]->burn_noise = burn_noise;
 		user_parameters[i]->burn_lengths = burn_lengths;
 		user_parameters[i]->burn_plans=burn_plans;
+
+		user_parameters[i]->mFish= &fisher_mutex;
+		user_parameters[i]->GAUSS_QUAD= GAUSS_QUAD;
+		user_parameters[i]->fish_freqs= fish_freqs;
+		user_parameters[i]->fish_weights= fish_weights;
+		user_parameters[i]->fish_psd= fish_psd;
+		user_parameters[i]->fish_length= fish_length;
 
 		//user_parameters[i]->burn_freqs = mcmc_frequencies;
 		//user_parameters[i]->burn_data = mcmc_data;
@@ -1616,6 +1662,14 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		delete [] burn_freqs[i];
 		delete [] burn_noise[i];
 		deallocate_FFTW_mem(&burn_plans[i]);
+	}
+	if(GAUSS_QUAD){
+		delete [] fish_freqs;
+		delete [] fish_weights;
+		for(int i = 0 ;i<mcmc_num_detectors; i++){
+			delete [] fish_psd[i];
+		}
+		delete [] fish_psd;
 	}
 	delete [] burn_data;
 	delete [] burn_noise;
@@ -2236,6 +2290,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 
 void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *interface,void *parameters)
 {
+	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 	int dimension = interface->max_dim;
 	double *temp_params = new double[dimension];
 	//#########################################################################
@@ -2257,12 +2312,24 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	} 
 	double **temp_out = allocate_2D_array(dimension,dimension);
 	for(int i =0 ; i <mcmc_num_detectors; i++){
-		fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
-			"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
-			&params, mcmc_deriv_order, NULL, NULL, mcmc_noise[i]);
-		//fisher_autodiff(mcmc_frequencies[i], mcmc_data_length[i],
-		//	"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
-		//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmc_noise[i]);
+		
+		//Use AD 
+		if(user_param->GAUSS_QUAD)
+		{	
+			std::unique_lock<std::mutex> lock{*(user_param->mFish)};
+			//fisher_autodiff(mcmc_frequencies[i], mcmc_data_length[i],
+			//	"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+			//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmc_noise[i]);
+			fisher_autodiff(user_param->fish_freqs, user_param->fish_length,
+				"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+				(gen_params *)(&params),  "GAUSSLEG",user_param->fish_weights,true,user_param->fish_psd[i]);
+		}
+		else{
+			fisher_numerical(mcmc_frequencies[i], mcmc_data_length[i],
+				"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+				&params, mcmc_deriv_order, NULL, NULL, mcmc_noise[i]);
+
+		}
 		for(int j =0; j<dimension; j++){
 			for(int k =0; k<dimension; k++)
 			{
@@ -2609,8 +2676,8 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 	double **local_noise = mcmc_noise;
 	int *local_lengths = mcmc_data_length;
 	fftw_outline *local_plans = mcmc_fftw_plans;
-	if(interface->burn_phase && user_param->burn_data){
-	//if(true){
+	//if(interface->burn_phase && user_param->burn_data){
+	if(false){
 		local_data = user_param->burn_data;
 		local_freqs = user_param->burn_freqs;
 		local_noise = user_param->burn_noise;

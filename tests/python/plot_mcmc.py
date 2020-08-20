@@ -17,7 +17,7 @@ injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)
 #dim = 11
 data = gmcmc.trim_thin_file("data/injection_output.csv",trim=None,ac=None)
 print("Samples: ",len(data))
-dim = 11
+dim = len(data[0])
 
 f = h5py.File("data/injection_output.csv",'r')
 testdata=f["MCMC_OUTPUT"]["CHAIN 0"]
@@ -48,9 +48,10 @@ for x in np.arange(len(data)):
 #    plt.plot(parameter)
 #    plt.show()
 #    plt.close()
-ndim, nsamples = 11, len(data) 
-#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$q$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_p$",r"$\sqrt{\alpha}$"]
-labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$q$",r"$\chi_{1}$",r"$\chi_2$"]
+ndim, nsamples = 15, len(data) 
+#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$q$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
+#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$q$",r"$\chi_{1}$",r"$\chi_2$",r"$m_1$",r"$m_2$"]
+labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$\chi_{1}$",r"$\chi_2$"]
 data_plot=[]
 for x in data_thinned:
     #chi1 = x[2]*(x[4])
@@ -67,8 +68,11 @@ for x in data_thinned:
     #m2 = gpu.calculate_mass2_py(x[7],x[8])
     #x=np.append(x,(chi1*m1 + chi2*m2 ) /(m1+m2))
     data_plot.append(x)
+    #data_plot[-1] = np.insert(data_plot[-1],len(data_plot[-1]),x[7] / (1+x[8]) * np.power(x[8]/(1+x[8])**2, -3./5))
+    #data_plot[-1] = np.insert(data_plot[-1],len(data_plot[-1]),x[7]*x[8] / (1+x[8]) * np.power(x[8]/(1+x[8])**2, -3./5))
 data_plot = np.asarray(data_plot)
-figure = corner.corner(data_plot, labels=labels,quantiles=[.1,.5,.9], show_titles=True)
+print(np.shape(data_plot))
+figure = corner.corner(data_plot, labels=labels,quantiles=[.1,.5,.9],bins=40, show_titles=True)
 axes = np.array(figure.axes).reshape(dim,dim)
 for i in np.arange(dim):
     ax = axes[i,i]

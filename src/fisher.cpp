@@ -152,7 +152,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-	double epsilon = 1e-7;
+	double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
@@ -1817,6 +1817,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				//	input_params->mass2));
 				parameters[7]=calculate_chirpmass(input_params->mass1, 
 					input_params->mass2);
+				//parameters[7]=input_params->mass1;
+				//parameters[8]=input_params->mass2;
 				//parameters[8]=calculate_eta(input_params->mass1, 
 				//	input_params->mass2);
 				parameters[8]=input_params->mass2/input_params->mass1;
@@ -2137,6 +2139,8 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					avec_parameters[8]);
 				a_params->mass2 = calculate_mass2_Mcq(avec_parameters[7],
 					avec_parameters[8]);
+				//a_params->mass1 = avec_parameters[7];
+				//a_params->mass2 = avec_parameters[8];
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = asin(avec_parameters[1]);

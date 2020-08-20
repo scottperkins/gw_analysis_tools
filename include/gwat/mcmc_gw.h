@@ -9,6 +9,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_errno.h>
+#include <mutex>
 #include "mcmc_sampler.h"
 /*! \file 
  *
@@ -49,6 +50,12 @@ struct MCMC_user_param
 	double **burn_freqs=NULL;
 	int *burn_lengths=NULL;
 	fftw_outline *burn_plans=NULL;
+	std::mutex *mFish;
+	double *fish_freqs=NULL;
+	double *fish_weights=NULL;
+	double **fish_psd=NULL;
+	double fish_length;
+	bool GAUSS_QUAD=false;
 };
 
 //########################################

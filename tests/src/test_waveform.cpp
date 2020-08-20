@@ -274,7 +274,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		REAL8 chip ;
 		REAL8 thetaJ ;
 		REAL8 zeta_polariz ;
-		double tempm1=10+50*alpha[10],tempm2 = 10+50*alpha[11];
+		double tempm1=1+5*alpha[10],tempm2 = 1+5*alpha[11];
 			
 		REAL8 m1_SI;
 		REAL8 m2_SI;
