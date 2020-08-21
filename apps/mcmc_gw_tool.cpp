@@ -596,7 +596,8 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 {
 	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
-	double chirp = std::exp(pos[7]);
+	//double chirp = std::exp(pos[7]);
+	double chirp = pos[7];
 	//double eta = pos[8];
 	double q = pos[8];
 	//double m1 = calculate_mass1(chirp,eta );
@@ -623,7 +624,8 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	//if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	if (pos[7]<chirpmass_prior[0] || pos[7]>chirpmass_prior[1] ){return a;}//chirpmass
 	if ((pos[8])<.001 || (pos[8])>1){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
@@ -638,7 +640,8 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 {
 	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
-	double chirp = std::exp(pos[7]);
+	//double chirp = std::exp(pos[7]);
+	double chirp = pos[7];
 	//double eta = pos[8];
 	double q = pos[8];
 	//double m1 = calculate_mass1(chirp,eta );
@@ -666,7 +669,8 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	//if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	if (pos[7]<chirpmass_prior[0] || pos[7]>chirpmass_prior[1] ){return a;}//chirpmass
 	if ((pos[8])<.001 || (pos[8])>1){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
@@ -793,8 +797,8 @@ double chirpmass_eta_jac(double chirpmass, double eta){
 
 //Uniform in m1 and m2, transformed to lnM and q
 double chirpmass_q_jac(double chirpmass, double q){
-	return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
-	//return chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
+	//return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
+	return chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
 }
 //Uniform in m1 and m2, transformed to lnM and eta
 //double chirpmass_eta_jac(double m1,double m2)

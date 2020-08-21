@@ -1717,10 +1717,10 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[4]=input_params->phiRef;
 				parameters[5]=input_params->tc;
 				parameters[6]=log(input_params->Luminosity_Distance);
-				parameters[7]=log(calculate_chirpmass(input_params->mass1, 
-					input_params->mass2));
-				//parameters[7]=calculate_chirpmass(input_params->mass1, 
-				//	input_params->mass2);
+				//parameters[7]=log(calculate_chirpmass(input_params->mass1, 
+				//	input_params->mass2));
+				parameters[7]=calculate_chirpmass(input_params->mass1, 
+					input_params->mass2);
 				//parameters[8]=calculate_eta(input_params->mass1, 
 				//	input_params->mass2);
 				parameters[8]=input_params->mass2/input_params->mass1;
@@ -2026,14 +2026,14 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				//	avec_parameters[8]);
 				//a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
 				//	avec_parameters[8]);
-				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[7]),
-					avec_parameters[8]);
-				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[7]),
-					avec_parameters[8]);
-				//a_params->mass1 = calculate_mass1_Mcq(avec_parameters[7],
+				//a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[7]),
 				//	avec_parameters[8]);
-				//a_params->mass2 = calculate_mass2_Mcq(avec_parameters[7],
+				//a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[7]),
 				//	avec_parameters[8]);
+				a_params->mass1 = calculate_mass1_Mcq(avec_parameters[7],
+					avec_parameters[8]);
+				a_params->mass2 = calculate_mass2_Mcq(avec_parameters[7],
+					avec_parameters[8]);
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = asin(avec_parameters[1]);

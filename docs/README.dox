@@ -12,6 +12,8 @@ Known to work with gcc/g++-7
 
 Known to work with gcc/g++-9
 
+DOES NOT WORK WITH gcc/g++-10 (tested on macOS)
+
 (optional) nvcc -- known to work with v9.1 of CUDA 
 
 Need GSL-2.6 or higher
@@ -67,6 +69,8 @@ utilizes the above waveform templates
 Has a generic MCMC sampler, MCMC_MH, that utilizes gaussian steps, differential evolution steps, and Fisher informed steps. Includes wrapping MCMC_MH_GW for GW specific sampling, currently only for one detector. 
 
 Includes log likelihood caclulation for implementation in other samplers.
+
+Red flags to look for when using the sampler: Chains of equal temperatures with drastically different swap acceptance -- for cold chains especially, this could mean the chain is in a very different part of parameter space than the true maximum. Look at log likelihood and prior values. Known to not have good exploration, so make your initial state as close to the true values as possible. If strange artifacts show up in chains, look to likelihood and prior values. Could be bad exploration for initial run. May want to run short runs to try and find the global max before running a long run.
 
 \section usage Usage
 

@@ -516,8 +516,8 @@ int mcmc_real_data(int argc, char *argv[])
 int mcmc_injection(int argc, char *argv[])
 {
 	gen_params injection;
-	injection.mass1 = 2.4;
-	injection.mass2 = 2.3;
+	injection.mass1 = 36.4;
+	injection.mass2 = 29.3;
 	//injection.mass1 = 1.4;
 	//injection.mass2 = 1.3;
 	//injection.mass1 = 9;
@@ -529,19 +529,19 @@ int mcmc_injection(int argc, char *argv[])
 	//double eta = .22;
 	//injection.mass1 = calculate_mass1(chirpmass,eta);
 	//injection.mass2 = calculate_mass2(chirpmass,eta);
-	injection.Luminosity_Distance =120;
+	injection.Luminosity_Distance =2000;
 	//injection.Luminosity_Distance =80;
 	injection.psi = .2;
 	injection.phiRef = 2.;
 	injection.f_ref = 20.;
-	injection.RA = 13.*M_PI/12.;
-	injection.DEC = -20*M_PI/180.;
-	//injection.RA = 1.5;
-	//injection.DEC = 1.;
-	injection.spin1[2] = .01;
-	injection.spin2[2] = -.01;
-	injection.spin1[1] = .01;
-	injection.spin2[1] = -.01;
+	//injection.RA = 13.*M_PI/12.;
+	//injection.DEC = -20*M_PI/180.;
+	injection.RA = 1.375;
+	injection.DEC = -1.21;
+	injection.spin1[2] = .3;
+	injection.spin2[2] = .2;
+	injection.spin1[1] = .1;
+	injection.spin2[1] = -.1;
 	injection.spin1[0] = .01;
 	injection.spin2[0] = -.01;
 	injection.incl_angle = -M_PI +.51;
@@ -565,15 +565,15 @@ int mcmc_injection(int argc, char *argv[])
 	//injection.phii = new int[1];
 	//injection.phii[0] = 5;
 	
-	int detect_number = 3;
+	int detect_number = 2;
 	std::string detectors[4] = {"Hanford","Livingston","Virgo","Kagra"};
 	//std::string detectors[3] = {"Livingston","Hanford","Virgo"};
 	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
-	//std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
-	std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
+	std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
+	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
 	std::string injection_method = "IMRPhenomPv2";
-	double fmin = 5;
-	double fmax =1024;
+	double fmin = 20;
+	double fmax =2048;
 	T_mcmc_gw_tool= 4;
 	double tc_ref = T_mcmc_gw_tool*(1-3./4.);
 	//double tc_ref = T_mcmc_gw_tool*(3./4.);
@@ -698,7 +698,7 @@ int mcmc_injection(int argc, char *argv[])
 	int dim = 15;
 	std::string recovery_method = "IMRPhenomPv2";
 	int ensemble = 10;
-	int chains = 100;
+	int chains = 70;
 	double temps[chains];
 	double c = 1.2;
 	temps[0]=1;
@@ -754,7 +754,7 @@ int mcmc_injection(int argc, char *argv[])
 	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dim , samples, chains, max_chains_ensemble,initial_position, seeding, temps, swap_freq,t0,nu,correlation_thresh, correlation_segs,correlation_convergence, ac_target,allocation_scheme, standard_log_prior_dCS, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
 	//deallocate_2D_array(output,  samples, dim);
 	//
-	int samples = 2000;
+	int samples = 1000;
 	double **output  = allocate_2D_array( samples, dim);
 	double t0 = 5000;
 	double nu = 100;
@@ -978,8 +978,8 @@ double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4.-.1 || (pos[5])>T_mcmc_gw_tool*3./4.+.1){return a;}//tc
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>200){return a;}//DL
-	if (std::exp(pos[7])<2 || std::exp(pos[7])>15 ){return a;}//chirpmass
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>5000){return a;}//DL
+	if (std::exp(pos[7])<2 || std::exp(pos[7])>80 ){return a;}//chirpmass
 	if ((pos[8])<.01 || (pos[8])>1){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//chi2
