@@ -20,6 +20,7 @@
 //MCMC global variables - facilitate wrapping 
 //of likelihood function 
 static double **mcmc_noise=NULL;
+static double *mcmc_init_pos=NULL;
 static std::complex<double> **mcmc_data=NULL;
 static double **mcmc_frequencies=NULL;
 static std::string *mcmc_detectors=NULL;

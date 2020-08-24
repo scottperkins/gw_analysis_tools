@@ -1522,6 +1522,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
 	}
 	mcmc_noise = noise_psd;	
+	mcmc_init_pos = initial_pos;
 	mcmc_frequencies = frequencies;
 	mcmc_data = data;
 	mcmc_data_length = data_length;
@@ -2299,7 +2300,9 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 		temp_params,&params, dimension, mcmc_generation_method,mcmc_mod_struct);
 	//#########################################################################
 	//#########################################################################
-	repack_parameters(param, &params, 
+	//repack_parameters(param, &params, 
+	//	"MCMC_"+mcmc_generation_method, dimension, NULL);
+	repack_parameters(mcmc_init_pos, &params, 
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
 	//#########################################################################
 	//#########################################################################

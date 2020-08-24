@@ -3,10 +3,9 @@ import h5py
 import matplotlib.pyplot as plt
 import corner
 import gwatpy.mcmc_routines as gmcmc
+import scipy
 
 #data = np.loadtxt("data/mcmc_output_RB.csv",delimiter=',')
-#f = h5py.File("data/mcmc_output_RB.hdf5",'r')
-#ff = h5py.File("data/mcmc_output_RB_trimmed.hdf5",'r')
 #print(f.keys())
 #print(f["MCMC_METADATA"]["CHAIN TEMPERATURES"][:])
 #print(f["MCMC_METADATA"]["SUGGESTED TRIM LENGTHS"][:])
@@ -32,18 +31,46 @@ import gwatpy.mcmc_routines as gmcmc
 #    plt.show()
 #    plt.close()
 
+f = h5py.File("data/mcmc_output_RB.hdf5",'r')
+
+
+chains = list(f["MCMC_OUTPUT/LOGL_LOGP"])
+testdata = f["MCMC_OUTPUT/CHAIN 0"]
+for y in range(len(list(f["MCMC_OUTPUT/LOGL_LOGP"]))):
+    print(chains[y])
+    lllpdata = f["MCMC_OUTPUT/LOGL_LOGP"][chains[y]]
+    def _line(x,m,b):
+        return x*m +b
+    x = np.arange(len(lllpdata[:,0]))
+    popt,pcov = scipy.optimize.curve_fit(_line,x,lllpdata[:,0])
+    print(popt)
+    plt.plot(lllpdata[:,0],label="{} \ {}".format(y,f["MCMC_METADATA"]["CHAIN TEMPERATURES"][y]))
+    plt.plot(x,_line(x,*popt))
+    plt.plot(lllpdata[:,1],label='P')
+    plt.plot(lllpdata[:,1]+lllpdata[:,0],label='P+L')
+    plt.legend()
+    plt.show()
+    #plt.savefig("plots/ll_lp_d.pdf")
+    plt.close()
+    for x in np.arange(len(f["MCMC_OUTPUT/"+chains[y]][0])):
+        plt.plot(f["MCMC_OUTPUT/"+chains[y]][:,x],label=chains[y]+"-"+str(x))
+        #plt.plot(testdata2[:,x])
+        plt.legend()
+        plt.show()
+        plt.close()
+#for x in np.arange(len(testdata[0])):
+#    plt.plot(testdata[:,x])
+#    #plt.plot(testdata2[:,x])
+#    plt.show()
+#    plt.close()
+exit()
+
+
+
+
+
 data = gmcmc.trim_thin_file("data/mcmc_output_RB.hdf5",trim=None,ac=None)
 print(np.shape(data))
-#exit()
-#dataTrim = ff["MCMC_OUTPUT"]["CHAIN 0"]
-dataT = np.transpose(data)
-#dataTTrim = np.transpose(dataTrim)
-for x in range(len(dataT)):
-    plt.plot(dataT[x])
-    #plt.plot(dataTTrim[x])
-    #plt.plot(data_old[x])
-    plt.show() 
-    plt.close() 
 fig = corner.corner(data)
 plt.savefig("plots/mcmc_RB.pdf")
 plt.close()
