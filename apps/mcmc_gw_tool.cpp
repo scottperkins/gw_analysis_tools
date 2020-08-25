@@ -32,6 +32,8 @@ double T_mcmc_gw_tool;
 
 double **mod_priors;
 double chirpmass_prior[2];
+double mass1_prior[2];
+double mass2_prior[2];
 double DL_prior[2];
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -134,6 +136,22 @@ int main(int argc, char *argv[])
 	else{
 		chirpmass_prior[0]=dbl_dict["Chirpmass minimum"];
 		chirpmass_prior[1]=dbl_dict["Chirpmass maximum"];
+	}
+	if(dbl_dict.find("Mass1 minimum") == dbl_dict.end()){
+		mass1_prior[0]=1;
+		mass1_prior[1]=80;
+	}
+	else{
+		mass1_prior[0]=dbl_dict["Mass1 minimum"];
+		mass1_prior[1]=dbl_dict["Mass1 maximum"];
+	}
+	if(dbl_dict.find("Mass2 minimum") == dbl_dict.end()){
+		mass2_prior[0]=1;
+		mass2_prior[1]=80;
+	}
+	else{
+		mass2_prior[0]=dbl_dict["Mass2 minimum"];
+		mass2_prior[1]=dbl_dict["Mass2 maximum"];
 	}
 	if(dbl_dict.find("Luminosity distance minimum") == dbl_dict.end()){
 		DL_prior[0]=10;
@@ -600,8 +618,6 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	//double chirp = pos[7];
 	double eta = pos[8];
 	//double q = pos[8];
-	//double m1 = calculate_mass1(chirp,eta );
-	//double m2 = calculate_mass2(chirp,eta );
 	//double q =m1/m2;
 	//double W = (3*q +4)/ ( 4*q*q +3*q);
 	////Max values
@@ -624,9 +640,14 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//PhiRef
 	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
+	//if (std::exp(pos[7])<chirpmass_prior[0] || std::exp(pos[7])>chirpmass_prior[1] ){return a;}//chirpmass
 	//if (pos[7]<chirpmass_prior[0] || pos[7]>chirpmass_prior[1] ){return a;}//chirpmass
-	if ((pos[8])<.001 || (pos[8])>.25){return a;}//eta
+	if (std::exp(pos[7])<0 ){return a;}//chirpmass
+	if ((pos[8])<.0 || (pos[8])>.25){return a;}//eta
+	double m1 = calculate_mass1(chirp,eta );
+	double m2 = calculate_mass2(chirp,eta );
+	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
+	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
