@@ -2103,7 +2103,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				int alpha = (int)(gsl_rng_uniform(r_reset)*selection_length);
 				debugger_print(__FILE__,__LINE__,"Pos");
 				debugger_print(__FILE__,__LINE__,alpha);
-				int temp_id = std::get<1>(temp_arr.at(temp_arr.size() - alpha ));
+				int temp_id = std::get<1>(temp_arr.at(temp_arr.size()-1 - alpha ));
 				double posterior = std::get<0>(temp_arr.at(temp_arr.size()-1 - alpha ));
 				std::cout<<temp_id<<std::endl;
 				std::cout<<posterior<<std::endl;
