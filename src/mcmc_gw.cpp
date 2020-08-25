@@ -2516,7 +2516,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//Generally, the data lengths don't have to be the same
 	//if(generation_method.find("IMRPhenomPv2") !=std::string::npos){
 	//double snr = 0;
-	if(false)
+	//if(false)
 	{
 		std::complex<double> *hplus = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
@@ -2593,8 +2593,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	}
 	delete [] phi;
 	delete [] theta;
-	//return ll;
-	return 2;
+	return ll;
+	//return 2;
 }
 /*! \brief utility to do MCMC specific transformations on the input param vector before passing to the repacking utillity
  *
