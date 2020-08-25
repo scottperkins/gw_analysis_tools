@@ -518,8 +518,8 @@ int mcmc_injection(int argc, char *argv[])
 	gen_params injection;
 	//injection.mass1 = 36.4;
 	//injection.mass2 = 29.3;
-	injection.mass1 = 1.4;
-	injection.mass2 = 1.3;
+	injection.mass1 = 24.4;
+	injection.mass2 = 2.7;
 	//injection.mass1 = 9;
 	//injection.mass2 = 7;
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
@@ -530,21 +530,21 @@ int mcmc_injection(int argc, char *argv[])
 	//injection.mass1 = calculate_mass1(chirpmass,eta);
 	//injection.mass2 = calculate_mass2(chirpmass,eta);
 	//injection.Luminosity_Distance =2000;
-	injection.Luminosity_Distance =180;
+	injection.Luminosity_Distance =400;
 	injection.psi = .2;
 	injection.phiRef = 2.;
 	injection.f_ref = 20.;
 	//injection.RA = 13.*M_PI/12.;
 	//injection.DEC = -20*M_PI/180.;
-	injection.RA = 1.375;
-	injection.DEC = -1.21;
+	injection.RA = .275;
+	injection.DEC = -.44;
 	injection.spin1[2] = .03;
 	injection.spin2[2] = .02;
 	injection.spin1[1] = .01;
-	injection.spin2[1] = -.1;
+	injection.spin2[1] = -.01;
 	injection.spin1[0] = .01;
 	injection.spin2[0] = -.01;
-	injection.incl_angle = -M_PI +.51;
+	injection.incl_angle = .051;
 	//injection.incl_angle = -M_PI +.01;
 	double gps = 1126259462.4;
 	//double gps = 1180922494.5;
@@ -565,7 +565,7 @@ int mcmc_injection(int argc, char *argv[])
 	//injection.phii = new int[1];
 	//injection.phii[0] = 5;
 	
-	int detect_number = 2;
+	int detect_number = 3;
 	std::string detectors[4] = {"Hanford","Livingston","Virgo","Kagra"};
 	//std::string detectors[3] = {"Livingston","Hanford","Virgo"};
 	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
@@ -697,8 +697,10 @@ int mcmc_injection(int argc, char *argv[])
 
 	int dim = 15;
 	std::string recovery_method = "IMRPhenomPv2";
-	int ensemble = 10;
-	int chains = 50;
+	int ensemble = 15;
+	//int ensemble = 5;
+	int chains = 45;
+	//int chains = 10;
 	double temps[chains];
 	double c = 1.2;
 	temps[0]=1;
@@ -717,6 +719,27 @@ int mcmc_injection(int argc, char *argv[])
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC), cos(injection.incl_angle), injection.phiRef, tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
 	write_file("data/injections.csv",initial_position,dim);
+
+
+	//////////////////////////////////////////////
+	//initial_position[0]+=.1;
+	//initial_position[1]+=.4;
+	//initial_position[2]+=.1;
+	//initial_position[3]-=.07;
+	//initial_position[4]+=.7;
+	//initial_position[5]+=.02;
+	//initial_position[6]+=.1;
+	//initial_position[7]+=.4;
+	//initial_position[8]+=.05;
+	//initial_position[9]+=.2;
+	//initial_position[10]+=.1;
+	//initial_position[11]+=.1;
+	//initial_position[12]+=.1;
+	//initial_position[13]+=.1;
+	//initial_position[14]+=.1;
+	//////////////////////////////////////////////
+
+
 	//initial_position[3] = -initial_position[3];
 	//initial_position[1] = 0;
 	//initial_position[0] = 2.;
@@ -787,9 +810,9 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 20;
-	int chain_N= 6;
-	int max_chain_N= 3;
+	int N_steps = 200;
+	int chain_N= 20;
+	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 5;
 	//double chain_temps[chain_N] ={1,2,3,10,12};
@@ -978,8 +1001,8 @@ double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4.-.1 || (pos[5])>T_mcmc_gw_tool*3./4.+.1){return a;}//tc
 	if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>300){return a;}//DL
-	if (std::exp(pos[7])<.01 || std::exp(pos[7])>10 ){return a;}//chirpmass
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>800){return a;}//DL
+	if (std::exp(pos[7])<.01 || std::exp(pos[7])>15 ){return a;}//chirpmass
 	//if (pos[7]<2 || pos[7]>80 ){return a;}//chirpmass
 	if ((pos[8])<.01 || (pos[8])>.25){return a;}//eta
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//chi1 

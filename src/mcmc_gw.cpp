@@ -2300,10 +2300,10 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 		temp_params,&params, dimension, mcmc_generation_method,mcmc_mod_struct);
 	//#########################################################################
 	//#########################################################################
-	//repack_parameters(param, &params, 
-	//	"MCMC_"+mcmc_generation_method, dimension, NULL);
-	repack_parameters(mcmc_init_pos, &params, 
+	repack_parameters(param, &params, 
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
+	//repack_parameters(mcmc_init_pos, &params, 
+	//	"MCMC_"+mcmc_generation_method, dimension, NULL);
 	//#########################################################################
 	//#########################################################################
 	//std::cout<<"INCL angle fisher: "<<params.incl_angle<<std::endl;
