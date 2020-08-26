@@ -1934,7 +1934,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		mcmc_intrinsic=false;
 	}
 	else if(dimension==11 && generation_method =="IMRPhenomD"){
-		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, psi"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
 		mcmc_intrinsic=false;
 		if(local_seeding){
 			seeding_var = new double[dimension];
@@ -1953,7 +1953,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
 		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1.;
@@ -1973,7 +1973,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	//Sampling parameter is root alpha in km
 	else if(dimension==12 && generation_method =="EdGB_IMRPhenomD"){
 		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1.;
@@ -1992,7 +1992,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if(dimension==16 && generation_method =="dCS_IMRPhenomPv2"){
 		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1.;
@@ -2016,7 +2016,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	//Sampling parameter is root alpha in km
 	else if(dimension==16 && generation_method =="EdGB_IMRPhenomPv2"){
 		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, alpha^2 "<<std::endl;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1.;
@@ -2039,7 +2039,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if(dimension==15 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=false;
-		std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1.;
@@ -2061,7 +2061,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if(dimension==8 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=true;
-		std::cout<<"Sampling in parameters: chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi"<<std::endl;
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];
 			seeding_var[0]=1.;
@@ -2079,7 +2079,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		){
 		if(dimension-mcmc_mod_struct->ppE_Nmod == 15){
 			
-			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, theta1, theta2, phi1, phi2, phiRef, psi";
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
 			for(int i =0; i<mcmc_Nmod; i++){
 				std::cout<<", beta"<<i;
 			}
@@ -2108,7 +2108,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		if(dimension-mcmc_mod_struct->ppE_Nmod == 8){
 			mcmc_intrinsic=true;
-			std::cout<<"Sampling in parameters: cos J_N, chirpmass, eta, |chi1|, |chi2|, theta_1, theta_2, phi_1, phi_2"<<std::endl;
+			std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
 			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
 				std::cout<<", beta"<<i;
 			}
@@ -2136,7 +2136,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		if(dimension-totalmod == 15){
 			
 			mcmc_intrinsic=false;
-			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, theta1, theta2, phi1, phi2, phiRef, psi";
+			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
 			for(int i =0; i<totalmod; i++){
 				std::cout<<", mod "<<i;
 			}
@@ -2165,7 +2165,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		else{
 			mcmc_intrinsic=true;
-			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, theta1, theta2, phi1, phi2, phiRef, psi";
+			std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
 			for(int i =0; i<totalmod; i++){
 				std::cout<<", mod "<<i;
 			}
@@ -2190,9 +2190,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		){
 		int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
 		if(dimension-totalmod == 4){
+			std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
 			
 			mcmc_intrinsic=true;
-			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
 			for(int i =0; i<totalmod; i++){
 				std::cout<<", beta"<<i;
 			}
@@ -2210,7 +2210,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 		}
 		else{
-			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2, psi"<<std::endl;
+			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
 			mcmc_intrinsic=false;
 			if(local_seeding){
 				seeding_var = new double[dimension];
@@ -2225,9 +2225,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				seeding_var[8]=.3;
 				seeding_var[9]=.5;
 				seeding_var[10]=.5;
-					for(int i =0; i< totalmod;i++){
-						seeding_var[11 + i]=2;
-					}
+				for(int i =0; i< totalmod;i++){
+					seeding_var[11 + i]=2;
+				}
 			}
 		}
 
@@ -2235,25 +2235,28 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral"
 		|| generation_method == "ppE_IMRPhenomD_IMR"
 		){
-		if(dimension-mcmc_mod_struct->ppE_Nmod == 7){
+		if(dimension-mcmc_mod_struct->ppE_Nmod == 11){
 			
-			std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL, ln chirpmass, eta, chi1, chi2";
+			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
 			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
 				std::cout<<", beta"<<i;
 			}
 			std::cout<<endl;
 			if(local_seeding){
 				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
-				seeding_var[1]=.1;
-				seeding_var[2]=.1;
+				seeding_var[0]=1.;
+				seeding_var[1]=.5;
+				seeding_var[2]=1;
 				seeding_var[3]=1;
-				seeding_var[4]=.5;
+				seeding_var[4]=1;
 				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
+				seeding_var[6]=1;
+				seeding_var[7]=1.;
+				seeding_var[8]=.3;
+				seeding_var[9]=.5;
+				seeding_var[10]=.5;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					seeding_var[8 + i]=2;
+					seeding_var[11 + i]=2;
 				}
 			}
 		}

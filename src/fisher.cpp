@@ -1719,15 +1719,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[6]=log(input_params->Luminosity_Distance);
 				parameters[7]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				//parameters[7]=calculate_chirpmass(input_params->mass1, 
-				//	input_params->mass2);
 				parameters[8]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				//parameters[8]=input_params->mass2/input_params->mass1;
-				//parameters[9]=input_params->spin1[2];
-				//parameters[10]=input_params->spin2[2];
-				//parameters[11]=input_params->chip;
-				//parameters[12]=input_params->phip;
 				double spin1sph[3];
 				double spin2sph[3];
 				transform_cart_sph(input_params->spin1,spin1sph);
@@ -1736,7 +1729,6 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[10]=spin2sph[0];
 				parameters[11]=cos(spin1sph[1]);
 				parameters[12]=cos(spin2sph[1]);
-				//parameters[13]=spin1sph[2]-spin2sph[2];
 				parameters[13]=spin1sph[2];
 				parameters[14]=spin2sph[2];
 
@@ -1776,31 +1768,8 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
 				}
-				//double spin1spher[3];
-				//double spin2spher[3];
-				//parameters[0]=input_params->RA;
-				//parameters[1]=input_params->DEC;
-				//if(input_params->equatorial_orientation){
-				//	parameters[2]=input_params->theta_l;
-				//	parameters[3]=input_params->phi_l;
-				//}
-				//else{
-				//	parameters[2]=input_params->psi;
-				//	parameters[3]=cos(input_params->incl_angle);
-				//}
-				//parameters[4]=log(input_params->Luminosity_Distance);
-				//parameters[5]=log(calculate_chirpmass(input_params->mass1, 
-				//	input_params->mass2));
-				//parameters[6]=calculate_eta(input_params->mass1, 
-				//	input_params->mass2);
-				//parameters[7]=input_params->spin1[2];
-				//parameters[8]=input_params->spin2[2];
-				
-				//double spin1spher[3];
-				//double spin2spher[3];
 				parameters[0]=input_params->RA;
 				parameters[1]=sin(input_params->DEC);
-				//parameters[1]=(input_params->DEC);
 
 				if(input_params->equatorial_orientation){
 					parameters[2]=input_params->theta_l;
@@ -1813,40 +1782,12 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[4] = input_params->phiRef;
 				parameters[5] = input_params->tc;
 				parameters[6]=log(input_params->Luminosity_Distance);
-				//parameters[7]=log(calculate_chirpmass(input_params->mass1, 
-				//	input_params->mass2));
-				parameters[7]=calculate_chirpmass(input_params->mass1, 
+				parameters[7]=log(calculate_chirpmass(input_params->mass1, 
+					input_params->mass2));
+				parameters[8]=calculate_eta(input_params->mass1, 
 					input_params->mass2);
-				//parameters[7]=input_params->mass1;
-				//parameters[8]=input_params->mass2;
-				//parameters[8]=calculate_eta(input_params->mass1, 
-				//	input_params->mass2);
-				parameters[8]=input_params->mass2/input_params->mass1;
 				parameters[9]=input_params->spin1[2];
 				parameters[10]=input_params->spin2[2];
-				//parameters[9]=.5*(input_params->spin1[2]+input_params->spin2[2]);
-				//parameters[10]=.5*(input_params->spin1[2]-input_params->spin2[2]);
-				//parameters[0]=input_params->RA;
-				//parameters[1]=sin(input_params->DEC);
-				////parameters[1]=(input_params->DEC);
-
-				////if(input_params->equatorial_orientation){
-				////	parameters[2]=input_params->theta_l;
-				////	parameters[3]=input_params->phi_l;
-				////}
-				////else{
-				//{
-				//	parameters[2]=cos(input_params->incl_angle);
-				//}
-				//parameters[3] = input_params->phiRef;
-				//parameters[4] = input_params->tc;
-				//parameters[5]=log(input_params->Luminosity_Distance);
-				//parameters[6]=log(calculate_chirpmass(input_params->mass1, 
-				//	input_params->mass2));
-				//parameters[7]=calculate_eta(input_params->mass1, 
-				//	input_params->mass2);
-				//parameters[8]=input_params->spin1[2];
-				//parameters[9]=input_params->spin2[2];
 
 			}
 			else{
@@ -1890,9 +1831,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				}
 				parameters[0]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				//parameters[1]=calculate_eta(input_params->mass1, 
-				//	input_params->mass2);
-				parameters[1]=input_params->mass2/input_params->mass1;
+				parameters[1]=calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				//parameters[1]=input_params->mass2/input_params->mass1;
 				double spin1sph[3];
 				double spin2sph[3];
 				transform_cart_sph(input_params->spin1,spin1sph);
@@ -1923,13 +1864,10 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 
 				parameters[0]=log(calculate_chirpmass(input_params->mass1, 
 					input_params->mass2));
-				//parameters[1]=calculate_eta(input_params->mass1, 
-				//	input_params->mass2);
-				parameters[1]=input_params->mass2/input_params->mass1;
-				//parameters[2]=input_params->spin1[2];
-				//parameters[3]=input_params->spin2[2];
-				parameters[2]=.5*(input_params->spin1[2]+input_params->spin2[2]);
-				parameters[3]=.5*(input_params->spin1[2]-input_params->spin2[2]);
+				parameters[1]=calculate_eta(input_params->mass1, 
+					input_params->mass2);
+				parameters[2]=input_params->spin1[2];
+				parameters[3]=input_params->spin2[2];
 
 			}
 			else{
@@ -2026,14 +1964,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					avec_parameters[8]);
 				a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
 					avec_parameters[8]);
-				//a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[7]),
-				//	avec_parameters[8]);
-				//a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[7]),
-				//	avec_parameters[8]);
-				//a_params->mass1 = calculate_mass1_Mcq(avec_parameters[7],
-				//	avec_parameters[8]);
-				//a_params->mass2 = calculate_mass2_Mcq(avec_parameters[7],
-				//	avec_parameters[8]);
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = asin(avec_parameters[1]);
@@ -2046,12 +1976,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					a_params->incl_angle=acos(avec_parameters[3]);
 				}
 				a_params->phiRef = avec_parameters[4];
-				//a_params->chi1_l = avec_parameters[8];
-				//a_params->chi2_l = avec_parameters[9];
-				//a_params->spin1[2] = avec_parameters[9];
-				//a_params->spin2[2] = avec_parameters[10];
-				//a_params->chip = avec_parameters[11];
-				//a_params->phip = avec_parameters[12];
 
 				//###################################
 				//Fishers don't necessarily respect the bounds of 
@@ -2115,36 +2039,22 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				}
 				a_params->phiRef = avec_parameters[4];
 				a_params->tc = avec_parameters[5];
-				//a_params->chi1_l = avec_parameters[9];
-				//a_params->chi2_l = avec_parameters[10];
 				a_params->spin1[2] = avec_parameters[9];
 				a_params->spin2[2] = avec_parameters[10];
 				a_params->chip = avec_parameters[11];
 				a_params->phip = avec_parameters[12];
-				//a_params->phip = 0;
 
 			}	
 		}	
 		else if(generation_method.find("IMRPhenomD") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				//a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
-				//	avec_parameters[8]);
-				//a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
-				//	avec_parameters[8]);
-				//a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[7]),
-				//	avec_parameters[8]);
-				//a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[7]),
-				//	avec_parameters[8]);
-				a_params->mass1 = calculate_mass1_Mcq(avec_parameters[7],
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
 					avec_parameters[8]);
-				a_params->mass2 = calculate_mass2_Mcq(avec_parameters[7],
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[7]),
 					avec_parameters[8]);
-				//a_params->mass1 = avec_parameters[7];
-				//a_params->mass2 = avec_parameters[8];
 				a_params->Luminosity_Distance = exp(avec_parameters[6]);
 				a_params->RA = avec_parameters[0];
 				a_params->DEC = asin(avec_parameters[1]);
-				//a_params->DEC = (avec_parameters[1]);
 				if(a_params->equatorial_orientation){
 					a_params->theta_l = avec_parameters[2];
 					a_params->phi_l=avec_parameters[3];
@@ -2153,68 +2063,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 					a_params->psi = avec_parameters[2];
 					a_params->incl_angle=acos(avec_parameters[3]);
 				}
-				//T spin1sph[3] = {avec_parameters[9],0,0};
-				//T spin2sph[3] = {avec_parameters[10],0,0};
 				a_params->spin1[2] = avec_parameters[9];
 				a_params->spin2[2] = avec_parameters[10];
-				//a_params->spin1[2]=(avec_parameters[9]+avec_parameters[10]);
-				//a_params->spin2[2]=(avec_parameters[9]-avec_parameters[10]);
 
 
-				//transform_sph_cart(spin1sph,a_params->spin1);
-				//transform_sph_cart(spin2sph,a_params->spin2);
-				//maximized out
 				a_params->phiRef = avec_parameters[4];
 				a_params->tc = avec_parameters[5];
 
-				//a_params->mass1 = calculate_mass1(exp(avec_parameters[6]),
-				//	avec_parameters[7]);
-				//a_params->mass2 = calculate_mass2(exp(avec_parameters[6]),
-				//	avec_parameters[7]);
-				//a_params->Luminosity_Distance = exp(avec_parameters[5]);
-				//a_params->RA = avec_parameters[0];
-				//a_params->DEC = asin(avec_parameters[1]);
-				////a_params->DEC = (avec_parameters[1]);
-				////if(a_params->equatorial_orientation){
-				////	a_params->theta_l = avec_parameters[2];
-				////	a_params->phi_l=avec_parameters[3];
-				////}
-				////else{
-				//{
-				//	a_params->psi = 0;//avec_parameters[2];
-				//	a_params->incl_angle=acos(avec_parameters[2]);
-				//}
-				////T spin1sph[3] = {avec_parameters[9],0,0};
-				////T spin2sph[3] = {avec_parameters[10],0,0};
-				//a_params->spin1[2] = avec_parameters[8];
-				//a_params->spin2[2] = avec_parameters[9];
-				////transform_sph_cart(spin1sph,a_params->spin1);
-				////transform_sph_cart(spin2sph,a_params->spin2);
-				////maximized out
-				//a_params->phiRef = avec_parameters[3];
-				//a_params->tc = avec_parameters[4];
-
-				//a_params->mass1 = calculate_mass1(exp(avec_parameters[5]),
-				//	avec_parameters[6]);
-				//a_params->mass2 = calculate_mass2(exp(avec_parameters[5]),
-				//	avec_parameters[6]);
-				//a_params->Luminosity_Distance = exp(avec_parameters[4]);
-				//a_params->RA = avec_parameters[0];
-				//a_params->DEC = avec_parameters[1];
-				//if(a_params->equatorial_orientation){
-				//	a_params->theta_l = avec_parameters[2];
-				//	a_params->phi_l=avec_parameters[3];
-				//}
-				//else{
-				//	a_params->psi = avec_parameters[2];
-				//	a_params->incl_angle=(avec_parameters[3]);
-				//}
-				//a_params->spin1[2] = avec_parameters[7];
-				//a_params->spin2[2] = avec_parameters[8];
-				////maximized out
-				//a_params->phiRef = 1;
-				//a_params->phic = 0;
-				//a_params->tc = 1;
 
 			}
 			else{
@@ -2235,10 +2090,6 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				}
 				a_params->phiRef = avec_parameters[4];
 				a_params->tc = avec_parameters[5];
-				//T spin1sph[3] = {avec_parameters[9],0,0};
-				//T spin2sph[3] = {avec_parameters[10],0,0};
-				//transform_sph_cart(spin1sph,a_params->spin1);
-				//transform_sph_cart(spin2sph,a_params->spin2);
 				a_params->spin1[2] = avec_parameters[9];
 				a_params->spin2[2] = avec_parameters[10];
 
@@ -2249,12 +2100,8 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
 
-				//a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),avec_parameters[1]);
-				//a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),avec_parameters[1]);
-				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[0]),
-					avec_parameters[1]);
-				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[0]),
-					avec_parameters[1]);
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),avec_parameters[1]);
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),avec_parameters[1]);
 
 				T local_theta1;
 				if(avec_parameters[4] > 1){
@@ -2307,32 +2154,17 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 		else if(generation_method.find("IMRPhenomD") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
-				//a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),
-				//	avec_parameters[1]);
-				//a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),
-				//	avec_parameters[1]);
-
-				a_params->mass1 = calculate_mass1_Mcq(exp(avec_parameters[0]),
+				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),
 					avec_parameters[1]);
-				a_params->mass2 = calculate_mass2_Mcq(exp(avec_parameters[0]),
+				a_params->mass2 = calculate_mass2(exp(avec_parameters[0]),
 					avec_parameters[1]);
 
 				a_params->Luminosity_Distance = 1000;
-				//T spin1sph[3] = {avec_parameters[2],0,0};
-				//T spin2sph[3] = {avec_parameters[3],0,0};
-				//transform_sph_cart(spin1sph,a_params->spin1);
-				//transform_sph_cart(spin2sph,a_params->spin2);
-				//a_params->spin1[2] = avec_parameters[2];
-				//a_params->spin2[2] = avec_parameters[3];
-				a_params->spin1[2]=(avec_parameters[2]+avec_parameters[3]);
-				a_params->spin2[2]=(avec_parameters[2]-avec_parameters[3]);
+				a_params->spin1[2] = avec_parameters[2];
+				a_params->spin2[2] = avec_parameters[3];
 				a_params->phiRef=0;
 				a_params->tc=0;
 				a_params->incl_angle=0;
-				//a_params->RA=1.;
-				//a_params->DEC=1.;
-				//a_params->psi=1.;
-				//a_params->gmst=1185389807.3;
 
 			}
 			else{
@@ -2347,17 +2179,9 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 				a_params->phiRef = avec_parameters[1];
 				T chi1 = avec_parameters[5] + avec_parameters[6];
 				T chi2 = avec_parameters[5] - avec_parameters[6];
-				//T spin1sph[3] = {chi1,0,0};
-				//T spin2sph[3] = {chi2,0,0};
-				//transform_sph_cart(spin1sph,a_params->spin1);
 				//transform_sph_cart(spin2sph,a_params->spin2);
 				a_params->spin1[2]  = chi1;
 				a_params->spin2[2]  = chi2;
-				//a_params->incl_angle=0;
-				//a_params->RA=1.;
-				//a_params->DEC=1.;
-				//a_params->psi=1.;
-				//a_params->gmst=1185389807.3;
 			}	
 		}	
 

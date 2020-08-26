@@ -2069,8 +2069,6 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				break;
 			}
 		}
-		debugger_print(__FILE__,__LINE__,"Members in Ensemble");
-		debugger_print(__FILE__,__LINE__,ensemble_members);
 		//Loop through ensembles
 		for(int i = 0 ; i<  ensemble_members; i++){
 			//##############################################
@@ -2088,31 +2086,20 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				}
 				elements+=sampler_temp.chain_pos[chain_id];
 			}
-			std::cout<<temp_arr_pos.size()<<std::endl;
 
 			int selection_length = elements*.1;
 			//int selection_length = sampler_temp.chain_N/ensemble_members * 100;
 			//if(selection_length > elements){selection_length = elements;}
 			
 			std::sort(temp_arr.begin(), temp_arr.end());
-			//std::cout<<std::get<0>(temp_arr.back())<<std::endl;
-			//std::cout<<std::get<1>(temp_arr.back())<<std::endl;
 			for(int j = 0 ; j<sampler_temp.chain_N/ensemble_members;j++){
 				int chain_id = i+j*ensemble_members;
 				int pos = sampler_temp.chain_pos[chain_id];
 				int alpha = (int)(gsl_rng_uniform(r_reset)*selection_length);
-				debugger_print(__FILE__,__LINE__,"Pos");
-				debugger_print(__FILE__,__LINE__,alpha);
 				int temp_id = std::get<1>(temp_arr.at(temp_arr.size()-1 - alpha ));
 				double posterior = std::get<0>(temp_arr.at(temp_arr.size()-1 - alpha ));
-				std::cout<<temp_id<<std::endl;
-				std::cout<<posterior<<std::endl;
-				std::cout<<chain_id<<std::endl;
-				std::cout<<pos<<std::endl;
 				double *temp_pos = temp_arr_pos.at(temp_id);
 				for(int l = 0 ; l<sampler_temp.dimension; l++){
-					
-					std::cout<<l<<" "<<temp_pos[l]<<std::endl;
 					sampler_temp.output[chain_id][pos][l] = temp_pos[l];
 				}
 			
