@@ -13,6 +13,7 @@ int network_fishers(int argc, char *argv[]);
 int dCS_EdGB(int argc, char *argv[]);
 int test_jac_transform(int argc, char *argv[]);
 int test_MCMC_fisher(int argc, char *argv[]);
+int test_LISA_fisher(int argc, char *argv[]);
 void RT_ERROR_MSG();
 
 int main(int argc, char *argv[])
@@ -40,10 +41,130 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 4){
 		return test_MCMC_fisher(argc,argv);
 	}
+	if(runtime_opt == 5){
+		return test_LISA_fisher(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int test_LISA_fisher(int argc, char *argv[])
+{
+	std::cout.precision(15);
+	gen_params params;	
+	params.mass1 = 36.9e5;
+	params.mass2 = 35.93e5;
+	params.spin1[2] = .8;
+	params.spin2[2] = .8 ;
+	params.chip = .07;
+	params.phip = 1.0;
+	params.Luminosity_Distance = 48000;
+	//params.Luminosity_Distance = DL_from_Z(10,"PLANCK15");
+	//params.Luminosity_Distance = DL_from_Z(0.0019,"PLANCK15");
+	//params.incl_angle = acos(.75);
+	params.incl_angle = 0;
+	params.phi_l = M_PI/4;
+	params.theta_l = M_PI/2;
+
+	params.NSflag1 = false;
+	params.NSflag2 =false;
+
+	params.phiRef = .0;
+	params.RA = .234;
+	params.DEC = asin(-.45);
+	params.f_ref = 1;
+	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
+	std::cout<<"chirpmass: "<<chirpmass/MSOL_SEC<<std::endl;
+	//params.spin1[2] = .38;
+
+	params.horizon_coord = false;
+	params.shift_time=false;
+	params.shift_phase=false;
+	params.dep_postmerger=true;
+	//params.equatorial_orientation=true;
+	params.equatorial_orientation=false;
+	
+	params.gmst = 2.;
+	//params.sky_average = false;
+	params.sky_average = true;
+	params.Nmod = 1;
+	params.betappe = new double[1];
+	params.bppe = new double[1];
+	params.bppe[0]=-13;
+	params.betappe[0]=0;
+
+
+	double fmin = 1e-5;
+	double fmax = 1e-3;
+	//double fmin = .006508;
+	//double fmax = .0067506;
+	//double fmin = .01208;
+	//double fmax = 1.00;
+	double T =(t_0PN(fmin,chirpmass)- t_0PN(fmax,chirpmass));
+	std::cout<<"TIME: "<<T/T_year<<std::endl;
+
+	params.tc = 3.*T/4.;
+	int length = 5000;
+	double *frequency = new double[length];
+	double *weights = new double[length];
+	double *psd = new double[length];
+	gauleg(log10(fmin),log10(fmax), frequency, weights, length);
+	for(int j = 0 ; j<length; j++){
+		frequency[j] = pow(10,frequency[j]);	
+	}
+	string SN = "LISA_SADC_CONF";
+	populate_noise(frequency, SN,psd, length, 48);
+	for(int j = 0 ; j<length; j++){
+		psd[j]*=psd[j];	
+	}
+
+
+	int dim = 8;
+	double **output =NULL;
+	output= allocate_2D_array(dim,dim);
+	double **output_temp = allocate_2D_array(dim,dim);
+	double **COV = allocate_2D_array(dim,dim);
+	for(int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j<dim; j++){
+			output[i][j]= 0;
+			output_temp[i][j]= 0;
+		}
+	}
+	//std::string method = "ppE_IMRPhenomPv2_Inspiral";
+	std::string method = "ppE_IMRPhenomD_IMR";
+	std::string detector = "LISA";
+	fisher_autodiff(frequency, length, method, detector,detector, output, dim, &params, "GAUSSLEG",weights,true, psd,NULL,NULL);
+	//fisher_autodiff(frequency, length, method, detector,detector, output, dim, &params, "GAUSSLEG",weights,true, psd,NULL,NULL);
+	std::cout<<"SNR: "<<sqrt(output[6][6])<<std::endl;
+
+	gsl_LU_matrix_invert(output,COV,dim);
+	//for(int i = 0 ; i<dim; i++){
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<output[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
+	//for(int i = 0 ; i<dim; i++){
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<COV[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<sqrt(COV[i][i])<<std::endl;
+	}
+
+	deallocate_2D_array(output,dim,dim);
+	deallocate_2D_array(output_temp,dim,dim);
+	deallocate_2D_array(COV,dim,dim);
+	
+	delete [] frequency;
+	delete [] weights;
+	delete [] psd;
+	return 0;
+
+
 }
 int test_MCMC_fisher(int argc, char *argv[])
 {
@@ -1446,6 +1567,7 @@ void RT_ERROR_MSG()
 	std::cout<<"2 --- dCS or EdGB"<<std::endl;
 	std::cout<<"3 --- Check ppE-theory jac transform"<<std::endl;
 	std::cout<<"4 --- Test MCMC fisher"<<std::endl;
+	std::cout<<"5 --- Test LISA fisher"<<std::endl;
 }
 
 

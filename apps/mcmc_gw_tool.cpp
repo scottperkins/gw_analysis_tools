@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
 	for(int i = 0 ; i<detector_N; i++){
 		detectors[i]= str_dict["detector name "+std::to_string(i)];
 		detector_files[i]= str_dict["data file "+std::to_string(i)];
+		std::cout<<"Detector stream file: "<<detectors[i]<<" : "<<detector_files[i]<<std::endl;
 	}
 	std::string generation_method = str_dict["generation method"];
 	
@@ -101,10 +102,10 @@ int main(int argc, char *argv[])
 	std::cout<<"swap_freq: "<<swap_freq<<std::endl;
 	int threads = int_dict["thread number"];
 	std::cout<<"threads: "<<threads<<std::endl;
-	int correlation_thresh = int_dict["correlation threshold"];
-	int correlation_segs = int_dict["correlation segments"];
-	double correlation_convergence_thresh = dbl_dict["correlation convergence threshold"];
-	double ac_target = dbl_dict["autocorrelation target"];
+	int correlation_thresh =10; 
+	int correlation_segs = 10;
+	double correlation_convergence_thresh =0.2;
+	double ac_target = 0.01;
 	std::string output_file = str_dict["output data file"];
 	std::string stat_file = str_dict["output stat file"];
 	std::string check_file = str_dict["checkpoint file"];
@@ -126,17 +127,11 @@ int main(int argc, char *argv[])
 		continue_from_checkpoint=true;
 		initial_checkpoint_file = str_dict["initial checkpoint file"];
 		std::cout<<"INITIAL checkpoint file: "<<initial_checkpoint_file<<std::endl;
+		chain_number_from_checkpoint_file(initial_checkpoint_file,&chain_N);
+		std::cout<<"Chain number: "<<chain_N<<std::endl;
 		
 	}
 
-	if(dbl_dict.find("Chirpmass minimum") == dbl_dict.end()){
-		chirpmass_prior[0]=2;
-		chirpmass_prior[1]=80;
-	}
-	else{
-		chirpmass_prior[0]=dbl_dict["Chirpmass minimum"];
-		chirpmass_prior[1]=dbl_dict["Chirpmass maximum"];
-	}
 	if(dbl_dict.find("Mass1 minimum") == dbl_dict.end()){
 		mass1_prior[0]=1;
 		mass1_prior[1]=80;
@@ -161,7 +156,8 @@ int main(int argc, char *argv[])
 		DL_prior[0]=dbl_dict["Luminosity distance minimum"];
 		DL_prior[1]=dbl_dict["Luminosity distance maximum"];
 	}
-	std::cout<<"Range of chirpmasses: "<<chirpmass_prior[0]<<" - "<<chirpmass_prior[1]<<std::endl;
+	std::cout<<"Range of Mass1: "<<mass1_prior[0]<<" - "<<mass1_prior[1]<<std::endl;
+	std::cout<<"Range of Mass2: "<<mass2_prior[0]<<" - "<<mass2_prior[1]<<std::endl;
 	std::cout<<"Range of DL: "<<DL_prior[0]<<" - "<<DL_prior[1]<<std::endl;
 	
 
@@ -417,8 +413,7 @@ int main(int argc, char *argv[])
 		mcmc_sampler_output sampler_output(chain_N, dimension);
 		SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
 				max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
-				swap_freq, t0, nu, correlation_thresh, correlation_segs,
-				correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
+				swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 				standard_log_prior_skysearch,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 				hplus,hcross,stat_file,output_file, "",check_file);	
@@ -472,8 +467,7 @@ int main(int argc, char *argv[])
 			mcmc_sampler_output sampler_output(chain_N, dimension);
 			continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,&sampler_output,output, samples,  
 					max_thermo_chain_N, chain_temps, 
-					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
+					swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
 					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
 					generation_method,stat_file,output_file, "",check_file);	
@@ -488,8 +482,7 @@ int main(int argc, char *argv[])
 			mcmc_sampler_output sampler_output(chain_N, dimension);
 			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
 					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
-					swap_freq, t0, nu, correlation_thresh, correlation_segs,
-					correlation_convergence_thresh , ac_target,max_chunk_size,allocation_scheme, 
+					swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
 					//data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
 					data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
@@ -547,7 +540,7 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
@@ -575,7 +568,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
@@ -599,7 +592,7 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//####################
 
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
@@ -628,7 +621,7 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//####################
 
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
@@ -660,7 +653,7 @@ double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interfac
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
 	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
@@ -679,7 +672,7 @@ double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *inte
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
 	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
@@ -701,7 +694,7 @@ double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interf
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
 	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
@@ -723,7 +716,7 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *in
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
-	if(m2<mass1_prior[0] || m2>mass1_prior[1]){return a;}
+	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
 	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
