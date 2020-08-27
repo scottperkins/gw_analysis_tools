@@ -578,6 +578,11 @@ double IMRPhenomPv2<double>::calculate_time_shift(source_parameters<double> *par
 	double freqs_fixed_start = .8*(f_final);
 	double freqs_fixed_stop = 1.2*(f_final);
 	double delta_freqs_fixed  =  (freqs_fixed_stop-freqs_fixed_start)/(n_fixed-1);
+	if(std::isnan(delta_freqs_fixed) || delta_freqs_fixed<= 0)
+	{
+		debugger_print(__FILE__,__LINE__,"Issue with phase interpolation in PhenomPv");
+		debugger_print(__FILE__,__LINE__,"Delta_f, f_final: "+std::to_string(delta_freqs_fixed)+" , "+std::to_string(f_final));
+	}
 	for(int j =0; j<n_fixed; j++){
 		freqs_fixed[j] = freqs_fixed_start +  j *delta_freqs_fixed;
 	}
