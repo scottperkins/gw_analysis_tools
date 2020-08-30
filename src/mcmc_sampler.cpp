@@ -76,6 +76,7 @@ mcmc_sampler_output::~mcmc_sampler_output()
 		cold_chain_ids=NULL;		
 	}
 	dealloc_output();
+	dealloc_status();
 	dealloc_logL_logP();
 	if(chain_lengths){
 		delete [] chain_lengths;
@@ -144,7 +145,7 @@ void mcmc_sampler_output::update_cold_chain_list()
 	delete [] cold_chain_ids_temp;
 	cold_chain_ids_temp = NULL;
 }
-void mcmc_sampler_output::populate_initial_output(double ***new_output,double ***new_logL_logP,int *chain_positions)
+void mcmc_sampler_output::populate_initial_output(double ***new_output, int ***new_status,double ***new_logL_logP,int *chain_positions)
 {
 	dealloc_output();	
 	dealloc_logL_logP();	
@@ -164,9 +165,22 @@ void mcmc_sampler_output::populate_initial_output(double ***new_output,double **
 			logL_logP[i][j][1] = new_logL_logP[i][j][1];
 		}
 	}
+	if(RJ){
+		dealloc_status();	
+		status = new int**[chain_number];
+		for(int i = 0 ;i<chain_number; i++){
+			status[i] = new int*[chain_positions[i]];	
+			for(int j =0 ; j<chain_positions[i];j++){
+				status[i][j] = new int[dimension];	
+				for(int k =0 ; k<dimension; k++){
+					status[i][j][k]=new_status[i][j][k];
+				}
+			}
+		}
+	}
 }
 
-void mcmc_sampler_output::append_to_output(double ***new_output,double ***new_logL_logP, int *chain_positions)
+void mcmc_sampler_output::append_to_output(double ***new_output,int ***new_status, double ***new_logL_logP, int *chain_positions)
 {
 	int *new_lengths= new int[chain_number];
 	for(int i = 0 ; i<chain_number; i++){
@@ -197,6 +211,27 @@ void mcmc_sampler_output::append_to_output(double ***new_output,double ***new_lo
 					new_logL_logP[i][j - chain_lengths[i]][0];
 				new_total_logL_logP[i][j][1] = 
 					new_logL_logP[i][j - chain_lengths[i]][1];
+			}
+		}
+	}
+	int ***new_total_status;
+	if(RJ){
+		new_total_status = new int**[chain_number];
+		for(int i = 0 ; i<chain_number ; i++){
+			new_total_status[i] = new int*[new_lengths[i]];
+			for(int j = 0 ; j<new_lengths[i]; j++){
+				new_total_status[i][j] = new int[dimension];
+				if(j <chain_lengths[i]){
+					for (int k = 0 ; k<dimension ; k++){
+						new_total_status[i][j][k] = status[i][j][k];
+					}
+				}
+				else{
+					for (int k = 0 ; k<dimension ; k++){
+						new_total_status[i][j][k] 
+							= new_status[i][j - chain_lengths[i]][k];
+					}
+				}
 			}
 		}
 	}
@@ -233,6 +268,27 @@ void mcmc_sampler_output::append_to_output(double ***new_output,double ***new_lo
 	new_total_logL_logP= NULL;
 	delete [] new_lengths;
 	new_lengths = NULL;
+	if(RJ){
+		dealloc_status();
+		status = new int**[chain_number];
+		for(int i = 0 ; i<chain_number ; i++){
+			status[i] = new int*[chain_lengths[i]];
+			for(int j = 0 ; j<chain_lengths[i]; j++){
+				status[i][j] = new int[dimension];
+				for (int k = 0 ; k<dimension ; k++){
+					status[i][j][k] = new_total_status[i][j][k];
+				}
+			}
+		}
+		for(int j = 0 ; j<chain_number;j ++){
+			for(int i = 0 ; i<chain_lengths[j];i ++){
+				delete [] new_total_status[j][i];		
+			}
+			delete [] new_total_status[j];		
+		}
+		delete [] new_total_status;		
+		new_total_status= NULL;
+	}
 }
 void mcmc_sampler_output::dealloc_output()
 {
@@ -245,6 +301,19 @@ void mcmc_sampler_output::dealloc_output()
 		}
 		delete [] output;		
 		output= NULL;
+	}
+}
+void mcmc_sampler_output::dealloc_status()
+{
+	if(status){
+		for(int j = 0 ; j<chain_number;j ++){
+			for(int i = 0 ; i<chain_lengths[j];i ++){
+				delete [] status[j][i];		
+			}
+			delete [] status[j];		
+		}
+		delete [] status;		
+		status= NULL;
 	}
 }
 void mcmc_sampler_output::dealloc_logL_logP()
@@ -517,38 +586,54 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 		H5::H5File file(FILE_NAME,H5F_ACC_TRUNC);
 		H5::Group output_group(file.createGroup("/MCMC_OUTPUT"));
 		H5::Group output_LL_LP_group(file.createGroup("/MCMC_OUTPUT/LOGL_LOGP"));
+		H5::Group status_group;
+		if(RJ){
+			status_group = H5::Group(file.createGroup("/MCMC_OUTPUT/STATUS"));
+		}
 		H5::Group meta_group(file.createGroup("/MCMC_METADATA"));
 		double *temp_buffer=NULL;
 		double *temp_ll_lp_buffer=NULL;
+		int *temp_status_buffer=NULL;
 		H5::DataSpace *dataspace=NULL ;
 		H5::DataSpace *dataspace_ll_lp=NULL ;
+		H5::DataSpace *dataspace_status=NULL ;
 		H5::DataSet *dataset=NULL;
 		H5::DataSet *dataset_ll_lp=NULL;
+		H5::DataSet *dataset_status=NULL;
 		H5::DSetCreatPropList *plist=NULL;
 		H5::DSetCreatPropList *plist_ll_lp=NULL;
+		H5::DSetCreatPropList *plist_status=NULL;
 		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
 		hsize_t chunk_dims_ll_lp[2] = {chunk_steps,2};	
+		hsize_t chunk_dims_status[2] = {chunk_steps,2};	
 		hsize_t max_dims[2] = {H5S_UNLIMITED,H5S_UNLIMITED};
 		for(int i = 0 ; i<chains; i++){
 			int RANK=2;
 			hsize_t dims[RANK];
 			hsize_t dims_ll_lp[RANK];
+			hsize_t dims_status[RANK];
 			if(trim){
 				dims[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
 				dims_ll_lp[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
+				dims_status[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
 			}
 			else{
 				dims[0]= chain_lengths[ids[i]];
 				dims_ll_lp[0]= chain_lengths[ids[i]];
+				dims_status[0]= chain_lengths[ids[i]];
 			}
 			dims[1]= dimension;
 			dims_ll_lp[1]= 2;
+			dims_status[1]= dimension;
 
 			if(chunk_steps>dims[0]){chunk_dims_ll_lp[0]=dims[0];chunk_dims[0] = dims[0];}
 			else{chunk_dims_ll_lp[0]=chunk_steps;chunk_dims[0] = chunk_steps;}
 
 			dataspace = new H5::DataSpace(RANK,dims,max_dims);
 			dataspace_ll_lp = new H5::DataSpace(RANK,dims_ll_lp,max_dims);
+			if(RJ){
+				dataspace_status = new H5::DataSpace(RANK,dims_status,max_dims);
+			}
 	
 			plist = new H5::DSetCreatPropList;
 			plist->setChunk(2,chunk_dims);
@@ -558,6 +643,13 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 			plist_ll_lp->setChunk(2,chunk_dims_ll_lp);
 			plist_ll_lp->setDeflate(6);
 
+			if(RJ){
+				plist_status = new H5::DSetCreatPropList;
+				plist_status->setChunk(2,chunk_dims_status);
+				plist_status->setDeflate(6);
+
+			}
+
 			dataset = new H5::DataSet(
 				output_group.createDataSet("CHAIN "+std::to_string(ids[i]),
 					H5::PredType::NATIVE_DOUBLE,*dataspace,*plist)
@@ -566,6 +658,13 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 				output_LL_LP_group.createDataSet("CHAIN "+std::to_string(ids[i]),
 					H5::PredType::NATIVE_DOUBLE,*dataspace_ll_lp,*plist_ll_lp)
 				);
+			if(RJ){
+				dataset_status = new H5::DataSet(
+					status_group.createDataSet("CHAIN "+std::to_string(ids[i]),
+						H5::PredType::NATIVE_INT,*dataspace_status,*plist_status)
+					);
+
+			}
 
 			temp_buffer = new double[ int(dims[0]*dims[1]) ];
 			temp_ll_lp_buffer = new double[ int(dims_ll_lp[0]*dims_ll_lp[1]) ];
@@ -580,6 +679,18 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 			}
 			dataset->write(temp_buffer, H5::PredType::NATIVE_DOUBLE);
 			dataset_ll_lp->write(temp_ll_lp_buffer, H5::PredType::NATIVE_DOUBLE);
+			if(RJ){
+				temp_status_buffer = new int[ int(dims_status[0]*dims_status[1]) ];
+				int beginning_id=0;
+				if(trim){ beginning_id =trim_lengths[ids[i]];}
+				for(int j = 0 ; j<chain_lengths[ids[i]] - beginning_id; j++){
+					for(int k = 0 ; k<dimension; k++){
+						temp_status_buffer[j*dimension +k] = status[ids[i]][j+beginning_id][k];	
+					}
+				}
+				dataset_status->write(temp_status_buffer, H5::PredType::NATIVE_INT);
+
+			}
 			//Cleanup
 			delete dataset;
 			delete dataset_ll_lp;
@@ -591,6 +702,14 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 			delete [] temp_ll_lp_buffer;
 			temp_buffer = NULL;
 			temp_ll_lp_buffer = NULL;
+			if(RJ){
+				delete dataset_status;
+				delete dataspace_status;
+				delete plist_status;
+				delete [] temp_status_buffer;
+				temp_status_buffer = NULL;
+
+			}
 		}
 		hsize_t dimsT[1];
 		dimsT[0]= chain_number;
@@ -642,6 +761,9 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 		//Cleanup
 		output_LL_LP_group.close();
 		output_group.close();
+		if(RJ){
+			status_group.close();
+		}
 		meta_group.close();
 		if(!cold_only){
 			delete [] ids;
@@ -706,23 +828,37 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 		H5::H5File file(FILE_NAME,H5F_ACC_RDWR);
 		H5::Group output_group(file.openGroup("/MCMC_OUTPUT"));
 		H5::Group output_LL_LP_group(file.openGroup("/MCMC_OUTPUT/LOGL_LOGP"));
+		H5::Group status_group;
+		if(RJ){
+			status_group = H5::Group(file.openGroup("/MCMC_OUTPUT/STATUS"));
+		}
 		H5::Group meta_group(file.openGroup("/MCMC_METADATA"));
 		double *temp_buffer=NULL;
 		double *temp_buffer_ll_lp=NULL;
+		double *temp_buffer_status=NULL;
 		H5::DataSpace *dataspace=NULL ;
 		H5::DataSpace *dataspace_ll_lp=NULL ;
+		H5::DataSpace *dataspace_status=NULL ;
 		H5::DataSpace *dataspace_ext=NULL ;
 		H5::DataSpace *dataspace_ext_ll_lp=NULL ;
+		H5::DataSpace *dataspace_ext_status=NULL ;
 		H5::DataSet *dataset=NULL;
 		H5::DataSet *dataset_ll_lp=NULL;
+		H5::DataSet *dataset_status=NULL;
 		H5::DSetCreatPropList *plist=NULL;
 		H5::DSetCreatPropList *plist_ll_lp=NULL;
+		H5::DSetCreatPropList *plist_status=NULL;
 		hsize_t chunk_dims[2] = {chunk_steps,dimension};	
 		hsize_t chunk_dims_ll_lp[2] = {chunk_steps,2};	
+		hsize_t chunk_dims_status[2] = {chunk_steps,dimension};	
 		hsize_t max_dims[2] = {H5S_UNLIMITED,H5S_UNLIMITED};
 		for(int i = 0 ; i<chains; i++){
 			dataset = new H5::DataSet(output_group.openDataSet("CHAIN "+std::to_string(ids[i])));
 			dataset_ll_lp = new H5::DataSet(output_LL_LP_group.openDataSet("CHAIN "+std::to_string(ids[i])));
+			if(RJ){
+
+				dataset_status = new H5::DataSet(status_group.openDataSet("CHAIN "+std::to_string(ids[i])));
+			}
 			
 			dataspace = new H5::DataSpace(dataset->getSpace());
 			dataspace_ll_lp = new H5::DataSpace(dataset_ll_lp->getSpace());
@@ -731,10 +867,11 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 			plist_ll_lp = new H5::DSetCreatPropList(dataset_ll_lp->getCreatePlist());
 			int RANK = dataspace->getSimpleExtentNdims();
 			int RANK_ll_lp = dataspace_ll_lp->getSimpleExtentNdims();
+
 			hsize_t base_dims[RANK];
 			hsize_t base_dims_ll_lp[RANK_ll_lp];
-			herr_t status = dataspace->getSimpleExtentDims(base_dims);
-			status = dataspace_ll_lp->getSimpleExtentDims(base_dims_ll_lp);
+			herr_t statusH5 = dataspace->getSimpleExtentDims(base_dims);
+			statusH5 = dataspace_ll_lp->getSimpleExtentDims(base_dims_ll_lp);
 			int RANK_chunked;
 			int RANK_chunked_ll_lp;
 			hsize_t base_chunk_dims[RANK];
@@ -800,8 +937,10 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 			
 			dataset->write(temp_buffer,H5::PredType::NATIVE_DOUBLE,*dataspace_ext, *dataspace);
 			dataset_ll_lp->write(temp_buffer_ll_lp,H5::PredType::NATIVE_DOUBLE,*dataspace_ext_ll_lp, *dataspace_ll_lp);
+
+
 			
-		//	//Cleanup
+			//Cleanup
 			delete dataset;
 			delete dataset_ll_lp;
 			delete dataspace;
@@ -814,6 +953,63 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 			delete [] temp_buffer_ll_lp;
 			temp_buffer = NULL;
 			temp_buffer_ll_lp = NULL;
+
+			if(RJ){
+
+				dataspace_status = new H5::DataSpace(dataset_status->getSpace());
+				plist_status= new H5::DSetCreatPropList(dataset_status->getCreatePlist());
+				int RANK_status = dataspace_status->getSimpleExtentNdims();
+				hsize_t base_dims_status[RANK_status];
+				herr_t statusH5 = dataspace_status->getSimpleExtentDims(base_dims_status);
+				int RANK_chunked_status;
+				hsize_t base_chunk_dims_status[RANK_status];
+				if(H5D_CHUNKED == plist->getLayout()){
+					RANK_chunked_status= plist_status->getChunk(RANK_status,base_chunk_dims_status);
+				}
+				
+				hsize_t new_size_status[RANK];
+				if(dump_files[file_id]->trimmed){
+					new_size_status[0]= chain_lengths[ids[i]]-dump_files[file_id]->file_trim_lengths[ids[i]];
+				}
+				else{
+					new_size_status[0]= chain_lengths[ids[i]];
+				}
+				new_size_status[1]= dimension;
+				dataset_status->extend(new_size_status);
+
+				delete dataspace_status;
+				dataspace_status = new H5::DataSpace(dataset_status->getSpace());
+				
+				hsize_t dimext_status[RANK];	
+				dimext_status[0]=new_size_status[0]-base_dims_status[0];
+				dimext_status[1]=dimension;
+				
+				hsize_t offset_status[RANK];
+				offset_status[0]=base_dims_status[0];	
+				offset_status[1]=0;	
+
+				dataspace_status->selectHyperslab(H5S_SELECT_SET,dimext_status,offset_status);
+
+				dataspace_ext_status = new H5::DataSpace(RANK_status, dimext_status,NULL);
+
+				temp_buffer_status = new double[ dimext_status[0]*dimext_status[1] ];
+				int beginning_id = 0 ; 
+				if(dump_files[file_id]->trimmed){beginning_id = dump_files[file_id]->file_trim_lengths[ids[i]];}
+				for(int j = base_dims_status[0] ; j<chain_lengths[ids[i]]-beginning_id; j++){
+					for(int k = 0 ; k<dimension; k++){
+						temp_buffer_status[(j-base_dims_status[0])*dimension +k] = status[ids[i]][j+beginning_id][k];	
+					}
+				}
+				
+				dataset_status->write(temp_buffer_status,H5::PredType::NATIVE_INT,*dataspace_ext_status, *dataspace_status);
+				//Cleanup
+				delete dataset_status;
+				delete dataspace_status;
+				delete dataspace_ext_status;
+				delete plist_status;
+				delete [] temp_buffer_status;
+				temp_buffer_status = NULL;
+			}
 		}
 
 
@@ -846,6 +1042,10 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 	
 		//Cleanup
 		output_group.close();
+		output_LL_LP_group.close();
+		if(RJ){
+			status_group.close();
+		}
 		meta_group.close();
 		if(!dump_files[file_id]->cold_only){
 			delete [] ids;
@@ -1805,7 +2005,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = N_steps;
+	int dynamic_search_length = nu;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	sampler sampler_temp;
@@ -2310,7 +2510,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		sampler_output->populate_chain_temperatures(chain_temps);
 		if(init){
 			debugger_print(__FILE__,__LINE__,"Init structure");
-			sampler_output->populate_initial_output(temp_output, sampler.ll_lp_output,sampler.chain_pos)	;
+			sampler_output->populate_initial_output(temp_output, (int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
 			sampler_output->set_trim(0);	
 			sampler_output->update_cold_chain_list();	
 			init=false;
@@ -2318,7 +2518,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		}
 		else{
 			debugger_print(__FILE__,__LINE__,"Appending structure");
-			sampler_output->append_to_output(temp_output,sampler.ll_lp_output,sampler.chain_pos)	;
+			sampler_output->append_to_output(temp_output,(int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
 			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 		}
 		sampler_output->calc_ac_vals(true);

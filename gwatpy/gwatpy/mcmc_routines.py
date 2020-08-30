@@ -55,7 +55,10 @@ def trim_thin_file(filename,trim=None, ac=None):
     if trim is None :
         trim_local = f["MCMC_METADATA"]["SUGGESTED TRIM LENGTHS"][0]
     if ac is None:
-        ac_local = np.amax(f["MCMC_METADATA"]["AC VALUES"][0][:])
+        aclist = []
+        for x in np.arange(len(f["MCMC_METADATA"]["AC VALUES"])):
+            aclist.append(np.amax(f["MCMC_METADATA"]["AC VALUES"][x][:]))
+        ac_local = np.mean(aclist)
     #print("CHAIN 0 shape: ",np.shape(f["MCMC_OUTPUT"][chains[0]]))
     print("trim: ",trim_local)
     print("ac: ",ac_local)

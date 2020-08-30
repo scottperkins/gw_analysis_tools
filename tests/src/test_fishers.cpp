@@ -1001,7 +1001,8 @@ int dCS_EdGB(int argc, char *argv[])
 	else{
 		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
 	}
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
+	std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
+	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
 	std::cout<<std::endl;
 
 
@@ -1044,7 +1045,8 @@ int dCS_EdGB(int argc, char *argv[])
 	else{
 		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
 	}
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+	std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
 	std::cout<<std::endl;
 	deallocate_2D_array(sub_AD_F,dim-4,dim-4);
 

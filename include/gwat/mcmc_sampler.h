@@ -32,9 +32,18 @@ public:
 	~mcmc_sampler_output();
 	void populate_chain_temperatures(double *temperatures);
 	void update_cold_chain_list();
-	void populate_initial_output(double ***new_output,double ***new_logL_logP,int *chain_positions);
-	void append_to_output(double ***new_output,double ***new_logL_logP, int *chain_positions);
+	void populate_initial_output(
+		double ***new_output,	
+		int ***new_status,
+		double ***new_logL_logP,
+		int *chain_positions);
+	void append_to_output(
+		double ***new_output,
+		int ***new_status,
+		double ***new_logL_logP, 
+		int *chain_positions);
 	void dealloc_output();
+	void dealloc_status();
 	void dealloc_logL_logP();
 	void calc_ac_vals( bool trim);
 	void count_indep_samples(bool trim);
@@ -59,6 +68,8 @@ public:
 	int indep_samples=0;
 	int *max_acs=NULL;
 	int *trim_lengths=NULL;
+	bool RJ=false;
+	int ***status=NULL;
 private:
 	int *file_trim_lengths =NULL;
 	bool trimmed_file=false;

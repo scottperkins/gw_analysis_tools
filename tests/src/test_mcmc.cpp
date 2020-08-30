@@ -103,7 +103,7 @@ int mcmc_output_class(int argc, char *argv[])
 			}
 		}
 	}
-	output.populate_initial_output(init_output, init_LL_LP,init_positions);
+	output.populate_initial_output(init_output,(int***)NULL, init_LL_LP,init_positions);
 	std::cout<<"Initial output"<<std::endl;
 	for(int i = 0 ; i<chain_N; i++){
 		for(int j =0 ; j<init_positions[i]; j++){
@@ -151,7 +151,7 @@ int mcmc_output_class(int argc, char *argv[])
 		}
 	}
 	chain_temps[1]=5;
-	output.append_to_output(app_output, app_LL_LP,app_positions);
+	output.append_to_output(app_output,(int***)NULL, app_LL_LP,app_positions);
 	output.populate_chain_temperatures(chain_temps);
 	
 	std::cout<<std::endl;
@@ -316,7 +316,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	}
 	
 	mcmc_sampler_output sampler_output(chain_N,n);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,NULL,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,NULL,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	sampler_output.calc_ac_vals(true);
 	for(int i = 0 ; i<sampler_output.cold_chain_number; i++){
 		std::cout<<sampler_output.max_acs[i]<<std::endl;
@@ -789,7 +789,7 @@ int mcmc_injection(int argc, char *argv[])
 	int max_chunk_size = 1e6;
 	mcmc_sampler_output sampler_output(chains,dim);
 	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution,standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution,standard_log_prior_P, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_P, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, dim);
 
 	
@@ -850,7 +850,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	std::string chain_distribution_scheme="double";
 	int max_chunk_size = 1000000;
 	mcmc_sampler_output sampler_output(chain_N,dimension);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu,corr_threshold, corr_segments, corr_convergence_thresh,corr_target_ac, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	sampler_output.create_data_dump(false,false,chainfile);
 	deallocate_2D_array(output, N_steps, dimension);
 	sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);

@@ -167,9 +167,9 @@ T dCS_beta(source_parameters<T> *param)
  	T M = param->M;	
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
-	T redshiftedM = M/(1.+Z);
+	T unredshiftedM = M/(1.+Z);
 	T phase_mod = (param->betappe[0]);
-	T out =  16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) *dCS_phase_factor(param);
+	T out =  16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) *dCS_phase_factor(param);
 	return out;
 }
 template double dCS_beta(source_parameters<double> *);
@@ -222,9 +222,9 @@ T EdGB_beta( source_parameters<T> *param)
  	T M = param->M;	
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
-	T redshiftedM = M/(1.+Z);
+	T unredshiftedM = M/(1.+Z);
 	T phase_mod = param->betappe[0];
-	return 16.*M_PI*phase_mod/(pow_int(redshiftedM,4)) * EdGB_phase_factor(param);
+	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
 } 
 template adouble EdGB_beta(source_parameters<adouble> *);
 template double EdGB_beta(source_parameters<double> *);
@@ -266,9 +266,11 @@ template<class T>
 T ExtraDimension_beta( source_parameters<T> *param)
 {
 	T ED_length_sq = param->betappe[0]; //Length in seconds
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T ten_mircometer = 10.e-6 / c; //10 micrometers in seconds
-	T m1dot = -2.8e-7 * pow_int(MSOL_SEC/ param->mass1,2)* ED_length_sq /pow_int( ten_mircometer, 2) *MSOL_SEC/T_year;
-	T m2dot = -2.8e-7 * pow_int(MSOL_SEC/ param->mass2,2)* ED_length_sq/pow_int( ten_mircometer, 2) *MSOL_SEC/T_year;
+	T m1dot = -2.8e-7 * pow_int(MSOL_SEC * (1+Z)/ param->mass1,2)* ED_length_sq /pow_int( ten_mircometer, 2) *MSOL_SEC/T_year;
+	T m2dot = -2.8e-7 * pow_int(MSOL_SEC* (1+Z)/ param->mass2,2)* ED_length_sq/pow_int( ten_mircometer, 2) *MSOL_SEC/T_year;
 	T beta = (m1dot + m2dot) * (25. / 851968.) * 
 		( ( 3. - 26.*param->eta + 34. * param->eta*param->eta) / 
 		( pow(param->eta, 2./5.) * ( 1- 2*param->eta)) );
@@ -281,8 +283,10 @@ template double ExtraDimension_beta(source_parameters<double> *);
 template<class T>
 T TVG_beta( source_parameters<T> *param)
 {
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T Gdot = param->betappe[0];
-	T beta = ( -25. / 65526. ) * ( Gdot * param->chirpmass ) ;
+	T beta = ( -25. / 65526. ) * ( Gdot * param->chirpmass/(1+Z)) ;
 	return beta;
 } 
 template adouble TVG_beta(source_parameters<adouble> *);
