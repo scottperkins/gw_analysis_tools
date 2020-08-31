@@ -28,11 +28,11 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	double proposed_param[sampler->max_dim];
 	int proposed_status[sampler->max_dim];
 
-	int step;	
+	int step, selected_dimension;	
 	//Determine which step to take and calculate proposed coord.
 	if (alpha<sampler->prob_boundaries[chain_number][0])
 	{
-		gaussian_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
+		gaussian_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number,&selected_dimension);
 		sampler->num_gauss[chain_number]+=1;
 		step = 0;
 	}
@@ -126,19 +126,37 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
 		int *current_status,
 		int *proposed_status,
-		int chain_id
+		int chain_id,
+		int *selected_dimension
 		)
 {
+	int beta = 0;
+	do{
+		beta = gsl_rng_uniform(sampler->rvec[chain_id]) * sampler->max_dim;
+	}while(current_status[beta] == 1);
+	*selected_dimension = beta;
+
 	double alpha = sampler->randgauss_width[chain_id][0];
 	for (int i=0;i<sampler->max_dim;i++){
 		if(current_status[i] == 1){
-			proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
+			proposed_param[i] = current_param[i];
 		}
 		else{
 			proposed_param[i] = 0;
 		}
 		proposed_status[i] = current_status[i];
 	}
+	
+	proposed_param[beta] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[beta];
+	//for (int i=0;i<sampler->max_dim;i++){
+	//	if(current_status[i] == 1){
+	//		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
+	//	}
+	//	else{
+	//		proposed_param[i] = 0;
+	//	}
+	//	proposed_status[i] = current_status[i];
+	//}
 }
 
 /*!\brief Fisher informed gaussian step

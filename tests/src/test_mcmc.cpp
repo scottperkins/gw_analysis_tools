@@ -10,12 +10,20 @@
 #include <iostream>
 
 
+double root2 = std::sqrt(2.);
 void RT_ERROR_MSG();
 int mcmc_standard_test(int argc, char *argv[]);
 int mcmc_injection(int argc, char *argv[]);
 int mcmc_real_data(int argc, char *argv[]);
 int mcmc_rosenbock(int argc, char *argv[]);
 int mcmc_output_class(int argc, char *argv[]);
+int mcmc_RJ_sin(int argc, char *argv[]);
+void RJ_sin_fish(double *c,int *status,double **fisher,mcmc_data_interface *interface, void *parameters);
+//double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters);
+double RJ_sin_logL(double *params, int *status,mcmc_data_interface *interface, void *parameters);
+void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status, mcmc_data_interface *interface, void *parameters);
+//double RJ_sin_prior(double *params,  mcmc_data_interface *interface, void *parameters);
+double RJ_sin_prior(double *params,  int *status,mcmc_data_interface *interface, void *parameters);
 double log_test (double *c,mcmc_data_interface *interface,void *parameters);
 double log_test_prior (double *c,mcmc_data_interface *interface,void *parameters);
 double log_rosenbock (double *c,mcmc_data_interface *interface,void *parameters);
@@ -29,6 +37,12 @@ double T_mcmc_gw_tool ;
 double standard_log_prior_dCS(double *pos, mcmc_data_interface *interface,void *parameters);
 //void fisher_rosenbock(double *c,double **fisher,  mcmc_data_interface *interface,void *parameters);
 
+struct RJ_sin_param
+{
+	double *data;
+	int N;
+	gsl_rng *r;
+};
 int main(int argc, char *argv[])
 {
 	std::cout<<"TESTING MCMC CALCULATIONS"<<std::endl;
@@ -58,10 +72,295 @@ int main(int argc, char *argv[])
 		std::cout<<"MCMC output class testing"<<std::endl;
 		return mcmc_output_class(argc,argv);
 	}
+	else if(runtime_opt == 5){
+		std::cout<<"RJ sine wave test"<<std::endl;
+		return mcmc_RJ_sin(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+
+int mcmc_RJ_sin(int argc, char *argv[])
+{
+	int dim = 6;
+	int N = 5000;
+	double injections[dim];
+	injections[0]=300;
+	injections[1]=2;
+	injections[2]=.1;
+	injections[3]=500.;
+	injections[4]=N/2.;
+	injections[5]=0.05;
+
+	write_file("data/RJ_injections_sin.csv",injections,dim);
+
+	double *data = new double[N];
+	double *data_pure = new double[N];
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	gsl_rng *rand = gsl_rng_alloc(T);
+	gsl_rng_set(rand,10);
+	double snr = 0;
+	double alpha = injections[5];
+	for(int i= 0 ; i<N; i++){
+		double r = gsl_ran_gaussian(rand,1);
+		double shifting_factor = (1+erf((alpha*(i-injections[4]))/root2));
+		data_pure[i]=injections[0]*sin(injections[2]*(i)+injections[1])
+			*exp(-.5*(injections[4]-i)*(injections[4]-i)/(injections[3]*injections[3]))/sqrt(2*injections[3]*injections[3]) *shifting_factor;
+		data[i]=data_pure[i]+r;
+		snr+=data[i]*data[i];
+	}
+	snr /= N;
+	std::cout<<"SNR: "<<sqrt(snr)<<std::endl;
+	
+	write_file("data/RJ_sin_data_injection.csv",data,N);
+	write_file("data/RJ_sin_data_pure_injection.csv",data_pure,N);
+	delete [] data_pure;
+	gsl_rng_free(rand);
+
+	int chain_N = 16;
+	int max_ensemble_chain_N = 8;
+	double initial_pos[dim];	
+	double seeding_var[dim];	
+	for(int i = 0 ; i<dim; i++){
+		initial_pos[i] = injections[i];
+		seeding_var[i] = injections[i];
+	}
+	int swp_freq = 5;
+	int t0 = 1000;
+	int nu = 100;
+	int max_chunk_size = 100000;
+	std::string chain_distribution="double";
+	RJ_sin_param **param = new RJ_sin_param*[chain_N];
+	for(int i = 0 ; i<chain_N; i++){
+		param[i]=new RJ_sin_param;
+		param[i]->data = data;
+		param[i]->N = N;
+		param[i]->r = gsl_rng_alloc(T);
+	}
+	std::string stat_file = "data/stat_RJ_sin.txt";
+	std::string chain_file = "data/chains_RJ_sin.hdf5";
+	std::string checkpoint = "data/checkpoint_RJ_sin.csv";
+	double chain_temps[chain_N];
+	for(int i = 0 ; i<chain_N; i++){
+		if( i %max_ensemble_chain_N == 0 ){
+			chain_temps[i] = 1.;
+		}
+		else{
+			chain_temps[i] = chain_temps[i-1]*1.5;
+		}
+	}
+	int numthreads = 10;
+	bool pool = true;
+	bool show_prog = true;
+	
+	//############################################3
+	//int N_steps = 1000;
+	//mcmc_sampler_output sampler_output(chain_N,dim);
+	//double **output = new double*[N_steps];
+	//for(int i = 0 ; i<N_steps;i++){
+	//	output[i]=new double[dim];
+	//}
+	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dim, N_steps, chain_N,max_ensemble_chain_N, initial_pos, seeding_var, chain_temps, swp_freq, t0,nu, max_chunk_size, chain_distribution, RJ_sin_prior, RJ_sin_logL, NULL, (void **)param, numthreads, pool, show_prog, stat_file, chain_file, "",checkpoint);
+	//sampler_output.calc_ac_vals(true);
+	//sampler_output.count_indep_samples(true);
+	//sampler_output.create_data_dump(true,false,"data/chains_RJ_sin.hdf5");
+	//sampler_output.create_data_dump(false,false,"data/chains_sin_full.hdf5");
+	//for(int i = 0 ; i<N_steps;i++){
+	//	delete [] output[i];
+	//}
+	//delete [] output;
+	//############################################3
+	int N_steps = 10*10;
+	int max_dim = dim;
+	int min_dim = dim-1;
+	double ***output = new double**[chain_N];
+	int ***status = new int**[chain_N];
+	for(int i = 0 ; i<chain_N;i++){
+		output[i]=new double*[N_steps];
+		status[i]=new int*[N_steps];
+		for(int j = 0 ; j<N_steps;j ++){
+			output[i][j]=new double[dim];
+			status[i][j]=new int[dim];
+		}
+	}
+	int initial_status[max_dim];
+	for(int i = 0 ; i<max_dim; i++){
+		initial_status[i]=1;
+	}
+	RJPTMCMC_MH(output,status, max_dim,min_dim, N_steps, chain_N, initial_pos,initial_status, seeding_var, chain_temps, swp_freq,  RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, stat_file, chain_file, "","",checkpoint);
+	for(int i = 0 ; i<chain_N;i++){
+		for(int j = 0 ; j<N_steps;j++){
+			delete [] output[i][j];
+			delete [] status[i][j];
+		}
+		delete [] output[i];
+		delete [] status[i];
+	}
+	delete [] output;
+	delete [] status;
+	//###############################################
+	
+	//Cleanup
+	for(int i = 0 ; i<chain_N; i++){
+		gsl_rng_free(param[i]->r);
+		delete param[i];	
+	}
+	delete [] param;
+	delete [] data;
+	return 0;
+}
+
+void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status, mcmc_data_interface *interface, void *parameters)
+{
+	int current_dim = 0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		current_dim+=current_status[i];
+	}
+	RJ_sin_param *param = (RJ_sin_param *) parameters;
+	double alpha = gsl_rng_uniform(param->r);
+	if(alpha<.5){
+		for(int i = 0 ; i<interface->max_dim; i++){
+			proposed_params[i]=current_params[i];
+			proposed_status[i]=current_status[i];
+		}
+	}
+	else{
+		if(current_dim == 5){
+			for(int i = 0 ; i<interface->max_dim; i++){
+				proposed_params[i]=current_params[i];
+				proposed_status[i]=current_status[i];
+			}
+			proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,.1)) ;
+			proposed_status[5] = 1;
+		}
+		else{
+			for(int i = 0 ; i<interface->max_dim; i++){
+				proposed_params[i]=current_params[i];
+				proposed_status[i]=current_status[i];
+			}
+			proposed_params[5] =0 ;
+			proposed_status[5] = 0;
+
+		}
+
+	}
+	return ;
+}
+
+double RJ_sin_logL(double *params, int *status,mcmc_data_interface *interface, void *parameters)
+//double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters)
+{
+	int dim = 0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		dim+=status[i];
+	}
+	if(dim == 5){
+		RJ_sin_param *param = (RJ_sin_param *)parameters;
+		double A = params[0];
+		double phi0 = params[1];
+		double f = params[2];
+		double sigma = params[3];
+		double N0 = params[4];
+		//double t = params[3];
+		double L = 0;
+		for(int i= 0 ; i<param->N; i ++){
+			L -= .5 * pow_int( A*sin(f*(i) +phi0)*exp(-.5*(N0-i)*(N0-i)/(sigma*sigma))/sqrt(2*sigma*sigma) - param->data[i] ,2);
+		}
+		return L;
+	}
+	else{
+
+		RJ_sin_param *param = (RJ_sin_param *)parameters;
+		double A = params[0];
+		double phi0 = params[1];
+		double f = params[2];
+		double sigma = params[3];
+		double N0 = params[4];
+		double alpha = params[5];
+		double L = 0;
+		for(int i= 0 ; i<param->N; i ++){
+			double shifting_factor = (1+erf((alpha*(i-N0))/root2));
+			L -= .5 * pow_int( A*sin(f*(i) +phi0)*exp(-.5*(N0-i)*(N0-i)/(sigma*sigma))/sqrt(2*sigma*sigma)*shifting_factor - param->data[i] ,2);
+		}
+		return L;
+	}
+}
+double RJ_sin_prior(double *params,  int *status,mcmc_data_interface *interface, void *parameters)
+//double RJ_sin_prior(double *params,  mcmc_data_interface *interface, void *parameters)
+{
+	//int dim = interface->max_dim;
+	
+	int dim = 0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		dim+=status[i];
+	}
+	double p = 0;
+	double a = -std::numeric_limits<double>::infinity();
+	RJ_sin_param *param = (RJ_sin_param *)parameters;
+	if(params[0]<0 || params[0]>5000){return a;}
+	//if(params[0]<0 || params[0]>10000){return a;}
+	if(params[1]<0 || params[1]>2*M_PI){return a;}
+	if(params[2]<0 || params[2]>.5){return a;}
+	if(params[3]<0 || params[3]>1000){return a;}
+	if(params[4]<0 || params[4]>param->N){return a;}
+	if(dim>4){
+		if(params[5]<0 || params[5]>.2){return a;}
+	}
+	//if(params[3]<0 || params[3]>5){return a;}
+	return p;
+}
+void RJ_sin_fish(double *c, int *status,double **fisher,mcmc_data_interface *interface, void *parameters)
+{
+	int dim = interface->min_dim;
+	double epsilon = 1e-3;
+	int current_dim = 0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		current_dim+=status[i];
+	}
+	double temp[current_dim];
+	for (int i = 0 ; i<current_dim ; i++){
+		temp[i]=c[i];	
+	}
+	for (int i = 0 ; i<dim ; i++){
+		for (int j = 0 ; j<i ; j++){
+			//temp[i] = c[i]+epsilon;
+			//temp[j] = c[j]+epsilon;
+			//double plusplus = logL(temp,dim,chain_id, parameters);
+			//temp[i] = c[i]-epsilon;
+			//temp[j] = c[j]-epsilon;
+			//double minusminus = logL(temp,dim,chain_id, parameters);
+			//temp[i] = c[i]+epsilon;
+			//temp[j] = c[j]-epsilon;
+			//double plusminus = logL(temp,dim,chain_id, parameters);
+			//temp[i] = c[i]-epsilon;
+			//temp[j] = c[j]+epsilon;
+			//double minusplus = logL(temp,dim,chain_id, parameters);
+			//temp[i] = c[i];
+			//temp[j] = c[j];
+			//fisher[i][j]= -(plusplus -plusminus - minusplus + minusminus)/(4.*epsilon*epsilon);
+			fisher[i][j]= 0;
+		}
+		temp[i]= c[i]+epsilon;
+		double plus = RJ_sin_logL(temp,status,interface,parameters);	
+		temp[i]= c[i]-epsilon;
+		double minus = RJ_sin_logL(temp,status,interface,parameters);	
+		temp[i]=c[i];
+		double eval = RJ_sin_logL(temp,status,interface,parameters);	
+		fisher[i][i]= -(plus -2*eval +minus)/(epsilon*epsilon);
+		if(fisher[i][i]!=fisher[i][i])
+			std::cout<<fisher[i][i]<<std::endl;
+		//fisher[i][i]= 1;
+	}
+	for (int i = 0 ; i<dim ; i++){
+		for (int j = i+1 ; j<dim ; j++){
+			fisher[i][j] = fisher[j][i];	
+		}
+	}
+	
+	return;
 }
 
 int mcmc_output_class(int argc, char *argv[])
@@ -1036,4 +1335,5 @@ void RT_ERROR_MSG()
 	std::cout<<"2 --- GW experimentation"<<std::endl;
 	std::cout<<"3 --- N-dimensional Rosenbock"<<std::endl;
 	std::cout<<"4 --- MCMC output class test"<<std::endl;
+	std::cout<<"5 --- MCMC RJ Sine Wave test"<<std::endl;
 }

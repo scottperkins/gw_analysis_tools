@@ -109,6 +109,7 @@ public:
 	int *fish_last_reject_ct;
 	int *RJstep_last_accept_ct;
 	int *RJstep_last_reject_ct;
+	//int **randgauss_width;
 	double **randgauss_width;
 
 	double ***fisher_vecs;
@@ -194,7 +195,7 @@ public:
 
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *next_status, int chain_number);
 
-void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status, int chain_id);
+void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status, int chain_id, int *selected_dimension);
 
 void fisher_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_index);
 
