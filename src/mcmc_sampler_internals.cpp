@@ -133,10 +133,10 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	int beta = 0;
 	do{
 		beta = gsl_rng_uniform(sampler->rvec[chain_id]) * sampler->max_dim;
-	}while(current_status[beta] == 1);
+	}while(current_status[beta] == 0);
 	*selected_dimension = beta;
 
-	double alpha = sampler->randgauss_width[chain_id][0];
+	double alpha = sampler->randgauss_width[chain_id][0][0];
 	for (int i=0;i<sampler->max_dim;i++){
 		if(current_status[i] == 1){
 			proposed_param[i] = current_param[i];
@@ -176,7 +176,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 		
 		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][3]);
+					 sampler->randgauss_width[chain_index][3][0]);
 
 		scaling = 0.0;
 		//ensure the steps aren't ridiculous
@@ -204,7 +204,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		beta = (int)((sampler->min_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 		
 		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][3]);
+					 sampler->randgauss_width[chain_index][3][0]);
 
 		scaling = 0.0;
 		//ensure the steps aren't ridiculous
@@ -222,7 +222,7 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		}
 		//Generate new step for gaussian steps, using gaussian width	
 		alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][0]);
+					 sampler->randgauss_width[chain_index][0][0]);
 		for(int i =sampler->min_dim; i< sampler->max_dim;i++)
 		{
 			if(current_status[i] == 1){
@@ -398,7 +398,7 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 		beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
 		
 		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][2]);
+					 sampler->randgauss_width[chain_index][2][0]);
 
 		scaling = 0.0;
 		//ensure the steps aren't ridiculous
@@ -549,7 +549,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	double alpha = .1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
-		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1]);
+		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1][0]);
 	for (int k = 0; k<sampler->max_dim; k++)
 	{
 //		proposed_param[k] = current_param[k] + alpha*
@@ -962,8 +962,10 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 			= samplerptr_source->step_prob[id_source][i];
 		samplerptr_dest->prob_boundaries[id_dest][i] 
 			= samplerptr_source->prob_boundaries[id_source][i];
-		samplerptr_dest->randgauss_width[id_dest][i] 
-			= samplerptr_source->randgauss_width[id_source][i];
+		for(int j = 0 ; j<samplerptr_dest->randgauss_width_number[id_source][i];j++){
+			samplerptr_dest->randgauss_width[id_dest][i][j]
+				= samplerptr_source->randgauss_width[id_source][i][j];
+		}
 	}
 	//Fisher
 	if(samplerptr_dest->fisher_exist){
@@ -1055,10 +1057,10 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 			rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
 			frac = acc / (acc + rej);
 			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][0] *=.9;	
+				samplerptr->randgauss_width[j][0][0] *=.9;	
 			}
 			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][0] *=1.1;	
+				samplerptr->randgauss_width[j][0][0] *=1.1;	
 			}
 			samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
 			samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
@@ -1069,10 +1071,10 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 			rej = samplerptr->de_reject_ct[j] - samplerptr->de_last_reject_ct[j];	
 			frac = acc / (acc + rej);
 			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][1] *=.9;	
+				samplerptr->randgauss_width[j][1][0] *=.9;	
 			}
 			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][1] *=1.1;	
+				samplerptr->randgauss_width[j][1][0] *=1.1;	
 			}
 			samplerptr->de_last_accept_ct[j]=samplerptr->de_accept_ct[j];
 			samplerptr->de_last_reject_ct[j]=samplerptr->de_reject_ct[j];
@@ -1083,10 +1085,10 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 			rej = samplerptr->fish_reject_ct[j] - samplerptr->fish_last_reject_ct[j];	
 			frac = acc / (acc + rej);
 			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][3] *=.9;	
+				samplerptr->randgauss_width[j][3][0] *=.9;	
 			}
 			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][3] *=1.1;	
+				samplerptr->randgauss_width[j][3][0] *=1.1;	
 			}
 			samplerptr->fish_last_accept_ct[j]=samplerptr->fish_accept_ct[j];
 			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
@@ -1098,10 +1100,10 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 				rej = samplerptr->RJstep_reject_ct[j] - samplerptr->RJstep_last_reject_ct[j];	
 				frac = acc / (acc + rej);
 				if(frac<samplerptr->min_target_accept_ratio[j]){
-					samplerptr->randgauss_width[j][4] *=.9;	
+					samplerptr->randgauss_width[j][4][0] *=.9;	
 				}
 				else if(frac>samplerptr->max_target_accept_ratio[j]){
-					samplerptr->randgauss_width[j][4] *=1.1;	
+					samplerptr->randgauss_width[j][4][0] *=1.1;	
 				}
 				samplerptr->RJstep_last_accept_ct[j]=samplerptr->RJstep_accept_ct[j];
 				samplerptr->RJstep_last_reject_ct[j]=samplerptr->RJstep_reject_ct[j];
@@ -1169,7 +1171,9 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->RJstep_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 		sampler->RJstep_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	}
-	sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
+	//sampler->randgauss_width = allocate_2D_array(sampler->chain_N, sampler->types_of_steps); //Second dimension is types of steps
+	sampler->randgauss_width = new double **[sampler->chain_N]; //Second dimension is types of steps
+	sampler->randgauss_width_number = new int *[sampler->chain_N]; //Second dimension is types of steps
 	sampler->prop_MH_factor = (double *)malloc(sizeof(double) *sampler->chain_N);
 
 	//RJ parameters -- initialize status array with 1's for now, then repopulate with initial position
@@ -1315,14 +1319,27 @@ void allocate_sampler_mem(sampler *sampler)
 		}
 
 		//Initial width size for all chains, all steps is 1.
+		sampler->randgauss_width[i] = new double*[sampler->types_of_steps];
+		sampler->randgauss_width_number[i] = new int[sampler->types_of_steps];
+		sampler->randgauss_width_number[i][0] = 1;
+		sampler->randgauss_width_number[i][1] = 1;
+		sampler->randgauss_width_number[i][2] = 1;
+		sampler->randgauss_width_number[i][3] = 1;
+		sampler->randgauss_width_number[i][4] = 1;
+		sampler->randgauss_width[i][0] = new double[1];
+		sampler->randgauss_width[i][1] = new double[1];
+		sampler->randgauss_width[i][2] = new double[1];
+		sampler->randgauss_width[i][3] = new double[1];
+		sampler->randgauss_width[i][4] = new double[1];
+		
 		//sampler->randgauss_width[i][0]=.01;
-		sampler->randgauss_width[i][0]=.05;
+		sampler->randgauss_width[i][0][0]=.05;
 		//sampler->randgauss_width[i][1]=.05;
-		sampler->randgauss_width[i][1]=1;
-		sampler->randgauss_width[i][2]=.05;
-		sampler->randgauss_width[i][3]=.5;
+		sampler->randgauss_width[i][1][0]=1;
+		sampler->randgauss_width[i][2][0]=.05;
+		sampler->randgauss_width[i][3][0]=.5;
 		//For RJPTMCMC, this may not be used, but it'll be available
-		sampler->randgauss_width[i][4]=.5;
+		sampler->randgauss_width[i][4][0]=.5;
 
 		sampler->prop_MH_factor[i]=0;
 	}		
@@ -1441,7 +1458,16 @@ void deallocate_sampler_mem(sampler *sampler)
 	}
 	free(sampler->max_target_accept_ratio);
 	free(sampler->min_target_accept_ratio);
-	deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
+	//deallocate_2D_array(sampler->randgauss_width,sampler->chain_N, sampler->types_of_steps);
+	for(int i = 0 ; i<sampler->chain_N; i++){
+		for (int j = 0 ; j<sampler->types_of_steps; j++){
+			delete [] sampler->randgauss_width[i][j];
+		}
+		delete [] sampler->randgauss_width[i];
+		delete [] sampler->randgauss_width_number[i];
+	}
+	delete [] sampler->randgauss_width;
+	delete [] sampler->randgauss_width_number;
 	if(sampler->RJMCMC){
 		deallocate_3D_array(sampler->history_status,sampler->chain_N, sampler->history_length, sampler->max_dim);
 	}
@@ -1682,41 +1708,41 @@ void write_stat_file(sampler *sampler,
 	out_file<<std::endl;	
 	//########################################################
 	
-	out_file<<
-		std::setw(width)<<std::left<<
-		"Final width of Gaussian random number per step type: "<<std::endl;
-	out_file<<
-		std::setw(sixth)<<std::left<<
-		"Chain Number"<<
-		std::setw(sixth)<<std::left<<
-		"Gaussian"<<
-		std::setw(sixth)<<std::left<<
-		"Diff. Ev."<<
-		std::setw(sixth)<<std::left<<
-		"MMALA"<<
-		std::setw(sixth)<<std::left<<
-		"Fisher"<<
-		std::setw(sixth)<<std::left<<
-		"RJ"<<
-		std::endl;
-	for (int i =0; i < sampler->chain_N; i++){	
-		out_file<<
-			std::setw(sixth)<<std::left<<
-			i<<
-			std::setw(sixth)<<std::left<<
-			(double)sampler->randgauss_width[i][0]<<
-			std::setw(sixth)<<std::left<<
-			(double)sampler->randgauss_width[i][1]<<
-			std::setw(sixth)<<std::left<<
-			(double)sampler->randgauss_width[i][2]<<
-			std::setw(sixth)<<std::left<<
-			(double)sampler->randgauss_width[i][3]<<
-			std::setw(sixth)<<std::left<<
-			(double)sampler->randgauss_width[i][4]<<
-			std::endl;
-		
-	}
-	out_file<<std::endl;	
+	//out_file<<
+	//	std::setw(width)<<std::left<<
+	//	"Final width of Gaussian random number per step type: "<<std::endl;
+	//out_file<<
+	//	std::setw(sixth)<<std::left<<
+	//	"Chain Number"<<
+	//	std::setw(sixth)<<std::left<<
+	//	"Gaussian"<<
+	//	std::setw(sixth)<<std::left<<
+	//	"Diff. Ev."<<
+	//	std::setw(sixth)<<std::left<<
+	//	"MMALA"<<
+	//	std::setw(sixth)<<std::left<<
+	//	"Fisher"<<
+	//	std::setw(sixth)<<std::left<<
+	//	"RJ"<<
+	//	std::endl;
+	//for (int i =0; i < sampler->chain_N; i++){	
+	//	out_file<<
+	//		std::setw(sixth)<<std::left<<
+	//		i<<
+	//		std::setw(sixth)<<std::left<<
+	//		(double)sampler->randgauss_width[i][0]<<
+	//		std::setw(sixth)<<std::left<<
+	//		(double)sampler->randgauss_width[i][1]<<
+	//		std::setw(sixth)<<std::left<<
+	//		(double)sampler->randgauss_width[i][2]<<
+	//		std::setw(sixth)<<std::left<<
+	//		(double)sampler->randgauss_width[i][3]<<
+	//		std::setw(sixth)<<std::left<<
+	//		(double)sampler->randgauss_width[i][4]<<
+	//		std::endl;
+	//	
+	//}
+	//out_file<<std::endl;	
 
 	//#######################################################
 
@@ -1850,12 +1876,27 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 	}
 	checkfile<<std::endl;
 	//step widths
+	//for(int i =0 ; i<sampler->chain_N; i++){
+	//	checkfile<<sampler->randgauss_width[i][0];
+	//	for(int j =1 ;j<sampler->types_of_steps; j++){
+	//		checkfile<<" , "<<sampler->randgauss_width[i][j];
+	//	}
+	//	checkfile<<std::endl;
+	//}
+	//step widths
 	for(int i =0 ; i<sampler->chain_N; i++){
-		checkfile<<sampler->randgauss_width[i][0];
+		checkfile<<sampler->randgauss_width_number[i][0];
 		for(int j =1 ;j<sampler->types_of_steps; j++){
-			checkfile<<" , "<<sampler->randgauss_width[i][j];
+			checkfile<<" , "<<sampler->randgauss_width_number[i][j];
 		}
 		checkfile<<std::endl;
+		for(int k = 0 ; k<sampler->types_of_steps; k++){
+			checkfile<<sampler->randgauss_width[i][k][0];
+			for(int j =1 ;j<sampler->randgauss_width_number[i][k]; j++){
+				checkfile<<" , "<<sampler->randgauss_width[i][k][j];
+			}
+			checkfile<<std::endl;
+		}
 	}
 	//final position
 	for(int i =0 ; i< sampler->chain_N; i++){
@@ -2035,14 +2076,34 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		allocate_sampler_mem(sampler);
 		//###################################
 
+
+		//third row+chain_N -- step widths
+		//for(int j =0 ;j<sampler->chain_N; j++){
+		//	i=0;
+		//	std::getline(file_in,line);
+		//	std::stringstream lineStreamwidths(line);
+		//	while(std::getline(lineStreamwidths, item, ',')){
+		//		sampler->randgauss_width[j][i] = std::stod(item);
+		//		i++;
+		//	}
+		//}
 		//third row+chain_N -- step widths
 		for(int j =0 ;j<sampler->chain_N; j++){
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreamwidths(line);
 			while(std::getline(lineStreamwidths, item, ',')){
-				sampler->randgauss_width[j][i] = std::stod(item);
+				sampler->randgauss_width_number[j][i] = std::stoi(item);
 				i++;
+			}
+			for(int k = 0 ; k<sampler->types_of_steps;k++){
+				i=0;
+				std::getline(file_in,line);
+				std::stringstream lineStreamwidths(line);
+				while(std::getline(lineStreamwidths, item, ',')){
+					sampler->randgauss_width[j][k][i] = std::stod(item);
+					i++;
+				}
 			}
 		}
 
@@ -2570,7 +2631,9 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 	double temps_old[samplerptr->chain_N];
 	double ***history_old_pos=allocate_3D_array(samplerptr->chain_N, samplerptr->history_length, samplerptr->max_dim);
 	int ***history_old_status=allocate_3D_array_int(samplerptr->chain_N, samplerptr->history_length, samplerptr->max_dim);
-	double **old_gauss_width=allocate_2D_array(samplerptr->chain_N,samplerptr->types_of_steps);
+	//double **old_gauss_width=allocate_2D_array(samplerptr->chain_N,samplerptr->types_of_steps);
+	double ***old_gauss_width=new double**[samplerptr->chain_N];//,samplerptr->types_of_steps);
+	int **old_gauss_width_number=new int*[samplerptr->chain_N];//,samplerptr->types_of_steps);
 	double **old_initial_pos = allocate_2D_array(samplerptr->chain_N,samplerptr->max_dim);
 	int **old_initial_status = allocate_2D_array_int(samplerptr->chain_N,samplerptr->max_dim);
 	bool no_history=false;
@@ -2592,12 +2655,24 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 
 		//third row+chain_N -- step widths
 		for(int j =0 ;j<samplerptr->chain_N; j++){
+			old_gauss_width[j]= new double*[samplerptr->types_of_steps];
+			old_gauss_width_number[j]= new int[samplerptr->types_of_steps];
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreamwidths(line);
 			while(std::getline(lineStreamwidths, item, ',')){
-				old_gauss_width[j][i] = std::stod(item);
+				old_gauss_width_number[j][i] = std::stoi(item);
 				i++;
+			}
+			for(int k = 0 ; k < samplerptr->types_of_steps; k ++){
+				old_gauss_width[j][k]= new double[old_gauss_width_number[j][i]];
+				i=0;
+				std::getline(file_in,line);
+				std::stringstream lineStreamwidths(line);
+				while(std::getline(lineStreamwidths, item, ',')){
+					old_gauss_width[j][k][i] = std::stod(item);
+					i++;
+				}
 			}
 		}
 
@@ -2726,8 +2801,13 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 				samplerptr->output[i][samplerptr->chain_pos[i]][j]=old_initial_pos[cp_index][j];
 				samplerptr->param_status[i][samplerptr->chain_pos[i]][j]=old_initial_status[cp_index][j];
 			}
+			//for(int j = 0 ; j<samplerptr->types_of_steps ; j++){
+			//	samplerptr->randgauss_width[i][j] = old_gauss_width[cp_index][j];
+			//}
 			for(int j = 0 ; j<samplerptr->types_of_steps ; j++){
-				samplerptr->randgauss_width[i][j] = old_gauss_width[cp_index][j];
+				for(int k = 0 ; k < samplerptr->randgauss_width_number[i][j]; k ++){
+					samplerptr->randgauss_width[i][j][k] = old_gauss_width[cp_index][j][k];
+				}
 			}
 			if(!no_history){
 				for(int j =0  ;j<samplerptr->history_length; j++){
@@ -2759,7 +2839,16 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 	//Cleanup
 	deallocate_3D_array(history_old_pos,samplerptr->chain_N,samplerptr->history_length,samplerptr->max_dim);
 	deallocate_3D_array(history_old_status,samplerptr->chain_N,samplerptr->history_length,samplerptr->max_dim);
-	deallocate_2D_array(old_gauss_width, samplerptr->chain_N,samplerptr->types_of_steps);
+	//deallocate_2D_array(old_gauss_width, samplerptr->chain_N,samplerptr->types_of_steps);
+	for(int i = 0 ; i<samplerptr->chain_N; i ++){
+		for(int j = 0  ; j<samplerptr->types_of_steps; j++){
+			delete [] old_gauss_width[i][j];
+		}
+		delete [] old_gauss_width[i];
+		delete [] old_gauss_width_number[i];
+	}
+	delete [] old_gauss_width_number;
+	delete [] old_gauss_width;
 	deallocate_2D_array(old_initial_pos,samplerptr->chain_N, samplerptr->max_dim);
 	deallocate_2D_array(old_initial_status,samplerptr->chain_N, samplerptr->max_dim);
 

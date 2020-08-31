@@ -109,8 +109,8 @@ public:
 	int *fish_last_reject_ct;
 	int *RJstep_last_accept_ct;
 	int *RJstep_last_reject_ct;
-	//int **randgauss_width;
-	double **randgauss_width;
+	int **randgauss_width_number;
+	double ***randgauss_width;
 
 	double ***fisher_vecs;
 	double **fisher_vals;
@@ -160,6 +160,8 @@ public:
 	int *de_reject_ct;
 	int *gauss_accept_ct;
 	int *gauss_reject_ct;
+	int **gauss_accept_ct_per_dim;
+	int **gauss_reject_ct_per_dim;
 	int *mmala_accept_ct;
 	int *mmala_reject_ct;
 	int *RJstep_accept_ct;
