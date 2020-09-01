@@ -120,7 +120,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	delete [] data_pure;
 	gsl_rng_free(rand);
 
-	int chain_N = 16;
+	int chain_N = 64;
 	int max_ensemble_chain_N = 8;
 	double initial_pos[dim];	
 	double seeding_var[dim];	
@@ -129,7 +129,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 		seeding_var[i] = injections[i];
 	}
 	int swp_freq = 5;
-	int t0 = 1000;
+	int t0 = 2000;
 	int nu = 100;
 	int max_chunk_size = 100000;
 	std::string chain_distribution="double";
@@ -173,7 +173,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 10*10;
+	int N_steps = 50*1000;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	double ***output = new double**[chain_N];
@@ -1109,7 +1109,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 200;
+	int N_steps = 10000;
 	int chain_N= 20;
 	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
@@ -1140,12 +1140,8 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 500;
+	int t0 = 2000;
 	int nu = 100;
-	double corr_threshold = 0.01;
-	int corr_segments = 5;
-	double corr_convergence_thresh = 0.01;
-	double corr_target_ac = 0.01;
 	std::string chain_distribution_scheme="double";
 	int max_chunk_size = 1000000;
 	mcmc_sampler_output sampler_output(chain_N,dimension);
@@ -1172,10 +1168,11 @@ double log_test (double *c,mcmc_data_interface *interface,void *parameters)
 }
 double log_test_prior (double *c,mcmc_data_interface *interface,void *parameters)
 {
-	if( fabs(c[0]) > 100){ return 0;}
-	if( fabs(c[1]) > 100){ return 0;}
-	return -pow_int(c[0]-4,2)/4. -pow_int(c[1]+3,2)/6.;
-	//return 1.;
+	double a = -std::numeric_limits<double>::infinity();
+	if( fabs(c[0]) > 100){ return a;}
+	if( fabs(c[1]) > 100){ return a;}
+	//return -pow_int(c[0]-4,2)/4. -pow_int(c[1]+3,2)/6.;
+	return 0.;
 }
 
 double fisher11(double *c)

@@ -103,6 +103,8 @@ public:
 	double *min_target_accept_ratio;
 	int *gauss_last_accept_ct;
 	int *gauss_last_reject_ct;
+	int **gauss_last_accept_ct_per_dim;
+	int **gauss_last_reject_ct_per_dim;
 	int *de_last_accept_ct;
 	int *de_last_reject_ct;
 	int *fish_last_accept_ct;
@@ -263,8 +265,8 @@ void load_checkpoint_file(std::string check_file, sampler *sampler);
 
 void load_temps_checkpoint_file(std::string check_file, double *temps, int chain_N);
 
-void assign_ct_p(sampler *sampler, int step, int chain_index);
-void assign_ct_m(sampler *sampler, int step, int chain_index);
+void assign_ct_p(sampler *sampler, int step, int chain_index, int gauss_dim);
+void assign_ct_m(sampler *sampler, int step, int chain_index, int gauss_dim);
 
 void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,double *seeding_var) ;
 

@@ -99,7 +99,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			next_param[i] = current_param[i];
 			next_status[i] = current_status[i];
 		}
-		assign_ct_m(sampler, step,chain_number);
+		assign_ct_m(sampler, step,chain_number,selected_dimension);
 		return -1;
 	}	
 	else
@@ -109,7 +109,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			next_param[i] = proposed_param[i];
 			next_status[i] = proposed_status[i];
 		}
-		assign_ct_p(sampler, step, chain_number);
+		assign_ct_p(sampler, step, chain_number, selected_dimension);
 		sampler->current_likelihoods[chain_number] = proposed_ll;
 		return 1;
 	}		
@@ -136,7 +136,7 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	}while(current_status[beta] == 0);
 	*selected_dimension = beta;
 
-	double alpha = sampler->randgauss_width[chain_id][0][0];
+	double alpha = sampler->randgauss_width[chain_id][0][beta];
 	for (int i=0;i<sampler->max_dim;i++){
 		if(current_status[i] == 1){
 			proposed_param[i] = current_param[i];
@@ -148,6 +148,21 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	}
 	
 	proposed_param[beta] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[beta];
+	//double alpha = sampler->randgauss_width[chain_id][0][0];
+	//for (int i=0;i<sampler->max_dim;i++){
+	//	if(current_status[i] == 1){
+	//		proposed_param[i] = current_param[i];
+	//	}
+	//	else{
+	//		proposed_param[i] = 0;
+	//	}
+	//	proposed_status[i] = current_status[i];
+	//}
+	//
+	//proposed_param[beta] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[beta];
+	//#####################################################
+	//
+	//
 	//for (int i=0;i<sampler->max_dim;i++){
 	//	if(current_status[i] == 1){
 	//		proposed_param[i] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[i];
@@ -221,11 +236,11 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 			proposed_status[i] = current_status[i];
 		}
 		//Generate new step for gaussian steps, using gaussian width	
-		alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][0][0]);
 		for(int i =sampler->min_dim; i< sampler->max_dim;i++)
 		{
 			if(current_status[i] == 1){
+				alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+					sampler->randgauss_width[chain_index][0][i]);
 				proposed_param[i] = alpha+current_param[i];
 				proposed_status[i] = current_status[i];
 			}
@@ -812,8 +827,13 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][2]=.0;
 			//sampler->step_prob[chain_index][3]=.75;
 			//Testing
-			sampler->step_prob[chain_index][0]=.05;
-			sampler->step_prob[chain_index][1]=.45;
+			//sampler->step_prob[chain_index][0]=.05;
+			//sampler->step_prob[chain_index][1]=.45;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.5;
+			//Testing
+			sampler->step_prob[chain_index][0]=.1;
+			sampler->step_prob[chain_index][1]=.4;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.5;
 		}
@@ -831,10 +851,10 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
 		{
-			sampler->step_prob[chain_index][0]=.05;
+			sampler->step_prob[chain_index][0]=.1;
 			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.75;
+			sampler->step_prob[chain_index][3]=.7;
 			sampler->step_prob[chain_index][4]=.2;
 
 		}
@@ -852,8 +872,8 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//all methods available
 		else
 		{
-			sampler->step_prob[chain_index][0]=.05;
-			sampler->step_prob[chain_index][1]=.15;
+			sampler->step_prob[chain_index][0]=.1;
+			sampler->step_prob[chain_index][1]=.1;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.6;
 			sampler->step_prob[chain_index][4]=.2;
@@ -932,6 +952,19 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 		= samplerptr_source->gauss_last_accept_ct[id_source]; 
 	samplerptr_dest->gauss_last_reject_ct[id_dest] 
 		= samplerptr_source->gauss_last_reject_ct[id_source]; 
+
+	for(int i = 0 ; i<samplerptr_dest->max_dim; i++){
+		samplerptr_dest->gauss_last_accept_ct_per_dim[id_dest][i]
+			= samplerptr_source->gauss_last_accept_ct_per_dim[id_source][i]; 
+		samplerptr_dest->gauss_last_reject_ct_per_dim[id_dest][i]
+			= samplerptr_source->gauss_last_reject_ct_per_dim[id_source][i]; 
+
+		samplerptr_dest->gauss_accept_ct_per_dim[id_dest][i]
+			= samplerptr_source->gauss_accept_ct_per_dim[id_source][i]; 
+		samplerptr_dest->gauss_reject_ct_per_dim[id_dest][i] 
+			= samplerptr_source->gauss_reject_ct_per_dim[id_source][i]; 
+	}
+
 	samplerptr_dest->de_last_accept_ct[id_dest] 
 		= samplerptr_source->de_last_accept_ct[id_source]; 
 	samplerptr_dest->de_last_reject_ct[id_dest] 
@@ -1052,18 +1085,33 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 	double frac, acc, rej;
 	if(samplerptr->chain_pos[j]%samplerptr->check_stepsize_freq[j] == 0){
 		//Gaussian
+		//if(samplerptr->step_prob[j][0]!= 0){
+		//	acc = samplerptr->gauss_accept_ct[j] - samplerptr->gauss_last_accept_ct[j];	
+		//	rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
+		//	frac = acc / (acc + rej);
+		//	if(frac<samplerptr->min_target_accept_ratio[j]){
+		//		samplerptr->randgauss_width[j][0][0] *=.9;	
+		//	}
+		//	else if(frac>samplerptr->max_target_accept_ratio[j]){
+		//		samplerptr->randgauss_width[j][0][0] *=1.1;	
+		//	}
+		//	samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
+		//	samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
+		//}	
 		if(samplerptr->step_prob[j][0]!= 0){
-			acc = samplerptr->gauss_accept_ct[j] - samplerptr->gauss_last_accept_ct[j];	
-			rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
-			frac = acc / (acc + rej);
-			if(frac<samplerptr->min_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][0][0] *=.9;	
+			for(int i =0 ; i<samplerptr->max_dim ; i++){
+				acc = samplerptr->gauss_accept_ct_per_dim[j][i] - samplerptr->gauss_last_accept_ct_per_dim[j][i];	
+				rej = samplerptr->gauss_reject_ct_per_dim[j][i] - samplerptr->gauss_last_reject_ct_per_dim[j][i];	
+				frac = acc / (acc + rej);
+				if(frac<samplerptr->min_target_accept_ratio[j]){
+					samplerptr->randgauss_width[j][0][i] *=.9;	
+				}
+				else if(frac>samplerptr->max_target_accept_ratio[j]){
+					samplerptr->randgauss_width[j][0][i] *=1.1;	
+				}
+				samplerptr->gauss_last_accept_ct_per_dim[j][i]=samplerptr->gauss_accept_ct_per_dim[j][i];
+				samplerptr->gauss_last_reject_ct_per_dim[j][i]=samplerptr->gauss_reject_ct_per_dim[j][i];
 			}
-			else if(frac>samplerptr->max_target_accept_ratio[j]){
-				samplerptr->randgauss_width[j][0][0] *=1.1;	
-			}
-			samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
-			samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
 		}	
 		//de
 		if(samplerptr->step_prob[j][1]!= 0){
@@ -1134,8 +1182,13 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->fish_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+
 	sampler->gauss_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->gauss_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+
+	sampler->gauss_accept_ct_per_dim = new int*[sampler->chain_N];
+	sampler->gauss_reject_ct_per_dim = new int*[sampler->chain_N];
+
 	sampler->mmala_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->mmala_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->RJstep_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1161,8 +1214,12 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->check_stepsize_freq = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->max_target_accept_ratio = (double *)malloc(sizeof(double) * sampler->chain_N);
 	sampler->min_target_accept_ratio = (double *)malloc(sizeof(double) * sampler->chain_N);
+
 	sampler->gauss_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->gauss_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->gauss_last_accept_ct_per_dim = new int*[ sampler->chain_N];
+	sampler->gauss_last_reject_ct_per_dim = new int*[ sampler->chain_N];
+
 	sampler->fish_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1309,6 +1366,19 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->min_target_accept_ratio[i] = .2;
 		sampler->gauss_last_accept_ct[i] = 0.;
 		sampler->gauss_last_reject_ct[i] = 0.;
+
+		sampler->gauss_last_accept_ct_per_dim[i] = new int[sampler->max_dim];
+		sampler->gauss_last_reject_ct_per_dim[i] = new int[sampler->max_dim];
+
+		sampler->gauss_accept_ct_per_dim[i] = new int[sampler->max_dim];
+		sampler->gauss_reject_ct_per_dim[i] = new int[sampler->max_dim];
+		for(int j = 0 ; j<sampler->max_dim; j++){
+			sampler->gauss_last_accept_ct_per_dim[i][j]=0;
+			sampler->gauss_last_reject_ct_per_dim[i][j]=0;
+			sampler->gauss_accept_ct_per_dim[i][j]=0;
+			sampler->gauss_reject_ct_per_dim[i][j]=0;
+		}
+
 		sampler->fish_last_accept_ct[i] = 0.;
 		sampler->fish_last_reject_ct[i] = 0.;
 		sampler->de_last_accept_ct[i] = 0.;
@@ -1321,19 +1391,21 @@ void allocate_sampler_mem(sampler *sampler)
 		//Initial width size for all chains, all steps is 1.
 		sampler->randgauss_width[i] = new double*[sampler->types_of_steps];
 		sampler->randgauss_width_number[i] = new int[sampler->types_of_steps];
-		sampler->randgauss_width_number[i][0] = 1;
+		sampler->randgauss_width_number[i][0] = sampler->max_dim;
 		sampler->randgauss_width_number[i][1] = 1;
 		sampler->randgauss_width_number[i][2] = 1;
 		sampler->randgauss_width_number[i][3] = 1;
 		sampler->randgauss_width_number[i][4] = 1;
-		sampler->randgauss_width[i][0] = new double[1];
+		sampler->randgauss_width[i][0] = new double[sampler->max_dim];
 		sampler->randgauss_width[i][1] = new double[1];
 		sampler->randgauss_width[i][2] = new double[1];
 		sampler->randgauss_width[i][3] = new double[1];
 		sampler->randgauss_width[i][4] = new double[1];
 		
 		//sampler->randgauss_width[i][0]=.01;
-		sampler->randgauss_width[i][0][0]=.05;
+		for(int j = 0 ; j<sampler->max_dim; j++){
+			sampler->randgauss_width[i][0][j]=.05;
+		}
 		//sampler->randgauss_width[i][1]=.05;
 		sampler->randgauss_width[i][1][0]=1;
 		sampler->randgauss_width[i][2][0]=.05;
@@ -1448,6 +1520,17 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->check_stepsize_freq);
 	free(sampler->gauss_last_accept_ct);
 	free(sampler->gauss_last_reject_ct);
+	for(int i = 0 ; i < sampler->chain_N ; i++){
+		delete [] sampler->gauss_last_reject_ct_per_dim[i];
+		delete [] sampler->gauss_last_accept_ct_per_dim[i];
+		delete [] sampler->gauss_reject_ct_per_dim[i];
+		delete [] sampler->gauss_accept_ct_per_dim[i];
+	}
+	delete [] sampler->gauss_last_reject_ct_per_dim;
+	delete [] sampler->gauss_last_accept_ct_per_dim;
+	delete [] sampler->gauss_reject_ct_per_dim;
+	delete [] sampler->gauss_accept_ct_per_dim;
+
 	free(sampler->de_last_accept_ct);
 	free(sampler->de_last_reject_ct);
 	free(sampler->fish_last_accept_ct);
@@ -2162,17 +2245,23 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 
 }
 
-void assign_ct_p(sampler *sampler, int step, int chain_index)
+void assign_ct_p(sampler *sampler, int step, int chain_index, int gauss_dim)
 {
-	if(step ==0) sampler->gauss_accept_ct[chain_index]+=1;
+	if(step ==0) {
+		sampler->gauss_accept_ct[chain_index]+=1;
+		sampler->gauss_accept_ct_per_dim[chain_index][gauss_dim]+=1;
+	}
 	else if(step ==1) sampler->de_accept_ct[chain_index]+=1;
 	else if(step ==2) sampler->mmala_accept_ct[chain_index]+=1;
 	else if(step ==3) sampler->fish_accept_ct[chain_index]+=1;
 	else if(step ==4) sampler->RJstep_accept_ct[chain_index]+=1;
 }
-void assign_ct_m(sampler *sampler, int step, int chain_index)
+void assign_ct_m(sampler *sampler, int step, int chain_index, int gauss_dim)
 {
-	if(step ==0) sampler->gauss_reject_ct[chain_index]+=1;
+	if(step ==0) {
+		sampler->gauss_reject_ct[chain_index]+=1;
+		sampler->gauss_reject_ct_per_dim[chain_index][gauss_dim]+=1;
+	}
 	else if(step ==1) sampler->de_reject_ct[chain_index]+=1;
 	else if(step ==2) sampler->mmala_reject_ct[chain_index]+=1;
 	else if(step ==3) sampler->fish_reject_ct[chain_index]+=1;
