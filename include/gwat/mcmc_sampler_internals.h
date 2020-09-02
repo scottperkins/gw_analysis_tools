@@ -68,6 +68,7 @@ public:
 	int min_dim;
 	int max_dim;
 	bool fisher_exist;
+	bool proper_fisher=false;
 	bool *de_primed;
 	int *priority;
 	bool *ref_chain_status;
@@ -116,10 +117,10 @@ public:
 
 	double ***fisher_vecs;
 	double **fisher_vals;
-	double ***fisher_vecs_prev;
-	double **fisher_vals_prev;
+	double ***fisher_vecs_prop;
+	double **fisher_vals_prop;
 	double ***fisher_matrix;
-	double ***fisher_matrix_prev;
+	double ***fisher_matrix_prop;
 	int *fisher_update_ct;
 	double *prop_MH_factor;
 	//Number of steps to take with the fisher before updating the fisher 
@@ -197,6 +198,7 @@ public:
 };
 
 
+void iterate_fisher(sampler *samplerptr, int chain_id);
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *next_status, int chain_number);
 
 void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status, int chain_id, int *selected_dimension);

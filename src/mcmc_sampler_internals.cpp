@@ -111,6 +111,9 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 		}
 		assign_ct_p(sampler, step, chain_number, selected_dimension);
 		sampler->current_likelihoods[chain_number] = proposed_ll;
+		if(step == 3 && sampler->proper_fisher){	
+			iterate_fisher(sampler,chain_number);
+		}
 		return 1;
 	}		
 	
@@ -184,6 +187,10 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		int chain_index
 		)
 {
+	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
+	{
+		update_fisher(sampler, current_param, current_status,chain_index);	
+	}
 	double scaling;
 	int beta;
 	if(!sampler->RJMCMC || sampler->min_dim ==0){
@@ -251,65 +258,94 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		}
 		
 	}
-	double lp =sampler->lp(proposed_param,proposed_status, sampler->interfaces[chain_index], sampler->user_parameters[chain_index]) ;
-	//Check whether or not we need to update the fisher
-	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
-	{
- 		if(lp != limit_inf)
-		{
-			sampler->prop_MH_factor[chain_index]=0;
-			//Calculate old proposal prob
-			sampler->prop_MH_factor[chain_index]-= -0.5*log(scaling) ;
-			for(int i = 0 ; i<sampler->max_dim; i++){
-				for(int j = 0 ; j<sampler->max_dim; j++){
-					if(proposed_status[i] == 1 && proposed_status[j]==1){
-						sampler->prop_MH_factor[chain_index] -= - 0.5 * 
-							( current_param[i]-proposed_param[i])*
-							(current_param[j]-proposed_param[j]) *
-							sampler->fisher_matrix[chain_index][i][j];
+	if(sampler->proper_fisher){
+		double lp =sampler->lp(proposed_param,proposed_status, sampler->interfaces[chain_index], sampler->user_parameters[chain_index]) ;
+		if(lp != limit_inf){
+			update_fisher(sampler, proposed_param, proposed_status, chain_index);
+			sampler->prop_MH_factor[chain_index] = 0;
+			for(int i = 0 ; i<sampler->max_dim ; i++){
+				for(int j = 0 ; j<sampler->max_dim ; j++){
+					if(proposed_status[i] == 1 && proposed_status[j] == 1 &&
+						current_status[i] == 1 && current_status[j] ==1){
+						sampler->prop_MH_factor[chain_index] += 
+							-0.5 *(current_param[i] - proposed_param[i])*
+							(current_param[j] - proposed_param[j])*
+							(sampler->fisher_matrix[chain_index][i][j] -
+							sampler->fisher_matrix_prop[chain_index][i][j]) ;
 					}
 				}
 			}
-			//Update fisher
-			update_fisher(sampler, proposed_param, proposed_status,chain_index);	
-			//Update failed
-			if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number-1){
-				sampler->prop_MH_factor[chain_index] = 0;	
-			}
-			//Finish prop_MH_factor calc
-			else{
-				//Calculate new proposal prob
-				//ensure the steps aren't ridiculous
-				if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-				//###############################################
-				//TESTING
-				else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
-							sampler->chain_temps[chain_index];}
-				//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
-				//###############################################
-				sampler->prop_MH_factor[chain_index]+= -0.5*log(scaling) ;
-				for(int i = 0 ; i<sampler->max_dim; i++){
-					for(int j = 0 ; j<sampler->max_dim; j++){
-						if(proposed_status[i] == 1 && proposed_status[j]==1){
-							sampler->prop_MH_factor[chain_index] += - 0.5 * 
-								( current_param[i]-proposed_param[i])*
-								(current_param[j]-proposed_param[j]) *
-								sampler->fisher_matrix[chain_index][i][j];
-						}
-					}
-				}
-			}
-		}
-		else {
-			//Should update, but need to wait for a better proposal
-			//Ensures the counts stay lined up
-			sampler->fisher_update_ct[chain_index]-=1;	
 		}
 	}
+	//Check whether or not we need to update the fisher
+	//if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
+	//{
+ 	//	if(lp != limit_inf)
+	//	{
+	//		sampler->prop_MH_factor[chain_index]=0;
+	//		//Calculate old proposal prob
+	//		sampler->prop_MH_factor[chain_index]-= -0.5*log(scaling) ;
+	//		for(int i = 0 ; i<sampler->max_dim; i++){
+	//			for(int j = 0 ; j<sampler->max_dim; j++){
+	//				if(proposed_status[i] == 1 && proposed_status[j]==1){
+	//					sampler->prop_MH_factor[chain_index] -= - 0.5 * 
+	//						( current_param[i]-proposed_param[i])*
+	//						(current_param[j]-proposed_param[j]) *
+	//						sampler->fisher_matrix[chain_index][i][j];
+	//				}
+	//			}
+	//		}
+	//		//Update fisher
+	//		update_fisher(sampler, proposed_param, proposed_status,chain_index);	
+	//		//Update failed
+	//		if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number-1){
+	//			sampler->prop_MH_factor[chain_index] = 0;	
+	//		}
+	//		//Finish prop_MH_factor calc
+	//		else{
+	//			//Calculate new proposal prob
+	//			//ensure the steps aren't ridiculous
+	//			if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+	//			//###############################################
+	//			//TESTING
+	//			else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+	//						sampler->chain_temps[chain_index];}
+	//			//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
+	//			//###############################################
+	//			sampler->prop_MH_factor[chain_index]+= -0.5*log(scaling) ;
+	//			for(int i = 0 ; i<sampler->max_dim; i++){
+	//				for(int j = 0 ; j<sampler->max_dim; j++){
+	//					if(proposed_status[i] == 1 && proposed_status[j]==1){
+	//						sampler->prop_MH_factor[chain_index] += - 0.5 * 
+	//							( current_param[i]-proposed_param[i])*
+	//							(current_param[j]-proposed_param[j]) *
+	//							sampler->fisher_matrix[chain_index][i][j];
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//	else {
+	//		//Should update, but need to wait for a better proposal
+	//		//Ensures the counts stay lined up
+	//		sampler->fisher_update_ct[chain_index]-=1;	
+	//	}
+	//}
 
 	//update the count of steps since last fisher update
 	sampler->fisher_update_ct[chain_index] += 1;
 
+}
+
+void iterate_fisher(sampler *samplerptr,int chain_id)
+{
+	for(int i = 0 ; i<samplerptr->max_dim; i++){
+		for(int j = 0 ; j<samplerptr->max_dim; j++){
+			samplerptr->fisher_matrix[chain_id][i][j] = samplerptr->fisher_matrix_prop[chain_id][i][j];
+			samplerptr->fisher_vecs[chain_id][i][j] = samplerptr->fisher_vecs_prop[chain_id][i][j];
+		}
+		samplerptr->fisher_vals[chain_id][i] = samplerptr->fisher_vals_prop[chain_id][i];
+	}
 }
 
 
@@ -353,14 +389,27 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		nansum+= std::isnan(eigen_vals(j));
 	}
 	if(!nansum){
-		for (int i =0; i < local_dim; i++)
-		{
-			for(int j = 0; j<local_dim; j++)
+		if(!sampler->proper_fisher){
+			for (int i =0; i < local_dim; i++)
 			{
-				sampler->fisher_matrix[chain_index][i][j] = fisher[i][j];
-				sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
+				for(int j = 0; j<local_dim; j++)
+				{
+					sampler->fisher_matrix[chain_index][i][j] = fisher[i][j];
+					sampler->fisher_vecs[chain_index][i][j] = eigen_vecs.col(i)(j);
+				}
+				sampler->fisher_vals[chain_index][i]=eigen_vals[i];
 			}
-			sampler->fisher_vals[chain_index][i]=eigen_vals[i];
+		}
+		else{
+			for (int i =0; i < local_dim; i++)
+			{
+				for(int j = 0; j<local_dim; j++)
+				{
+					sampler->fisher_matrix_prop[chain_index][i][j] = fisher[i][j];
+					sampler->fisher_vecs_prop[chain_index][i][j] = eigen_vecs.col(i)(j);
+				}
+				sampler->fisher_vals_prop[chain_index][i]=eigen_vals[i];
+			}
 		}
 		sampler->fisher_update_ct[chain_index]=0;
 	}
@@ -922,6 +971,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 		}
 	}
 	samplerptr_dest->current_likelihoods[id_dest] = samplerptr_source->current_likelihoods[id_source];
+	samplerptr_dest->proper_fisher=samplerptr_source->proper_fisher;
 
 	//Histories
 	samplerptr_dest->de_primed[id_dest] 
@@ -1007,21 +1057,24 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 				for (int j =0 ; j<samplerptr_source->max_dim; j++){
 					samplerptr_dest->fisher_vecs[id_dest][i][j] = 
 						samplerptr_source->fisher_vecs[id_source][i][j];
-					samplerptr_dest->fisher_vecs_prev[id_dest][i][j] = 
-						samplerptr_source->fisher_vecs_prev[id_source][i][j];
+					samplerptr_dest->fisher_vecs_prop[id_dest][i][j] = 
+						samplerptr_source->fisher_vecs_prop[id_source][i][j];
 					samplerptr_dest->fisher_matrix[id_dest][i][j]=samplerptr_source->fisher_matrix[id_source][i][j];
-					samplerptr_dest->fisher_matrix_prev[id_dest][i][j]=samplerptr_source->fisher_matrix_prev[id_source][i][j];
+					samplerptr_dest->fisher_matrix_prop[id_dest][i][j]=samplerptr_source->fisher_matrix_prop[id_source][i][j];
 				}
 				samplerptr_dest->fisher_vals[id_dest][i] = 
 					samplerptr_source->fisher_vals[id_source][i];
-				samplerptr_dest->fisher_vals_prev[id_dest][i] = 
-					samplerptr_source->fisher_vals_prev[id_source][i];
+				samplerptr_dest->fisher_vals_prop[id_dest][i] = 
+					samplerptr_source->fisher_vals_prop[id_source][i];
 			}
 			samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_source->fisher_update_ct[id_source];
 		}
 		else{
 			samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_dest->fisher_update_number;
 			update_fisher(samplerptr_dest, samplerptr_dest->output[id_dest][samplerptr_dest->chain_pos[id_dest]], samplerptr_dest->param_status[id_dest][samplerptr_dest->chain_pos[id_dest]],id_dest);	
+			if(samplerptr_dest->proper_fisher){
+				iterate_fisher(samplerptr_dest, id_dest);
+			}
 		}
 	}
 
@@ -1416,26 +1469,27 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->prop_MH_factor[i]=0;
 	}		
 	if(sampler->tune){
-		//sampler->fisher_update_number = 200;
-		sampler->fisher_update_number = 1000;
+		sampler->fisher_update_number = 200;
+		//sampler->fisher_update_number = 1000;
 		//sampler->fisher_update_number = 50;
 	}
 	else{
 		//sampler->fisher_update_number = 50;
-		sampler->fisher_update_number = 1000;
-		//sampler->fisher_update_number = sampler->N_steps;
+		//sampler->fisher_update_number = 1000;
+		//sampler->fisher_update_number = 5000;
+		sampler->fisher_update_number = sampler->N_steps;
 	}
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->max_dim);
 	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 
 				sampler->max_dim, sampler->max_dim);
 	sampler->fisher_vals = allocate_2D_array(sampler->chain_N, sampler->max_dim);
-	sampler->fisher_vecs_prev = allocate_3D_array(sampler->chain_N, 
+	sampler->fisher_vecs_prop = allocate_3D_array(sampler->chain_N, 
 				sampler->max_dim, sampler->max_dim);
-	sampler->fisher_vals_prev = allocate_2D_array(sampler->chain_N, sampler->max_dim);
+	sampler->fisher_vals_prop = allocate_2D_array(sampler->chain_N, sampler->max_dim);
 	sampler->fisher_matrix = allocate_3D_array(sampler->chain_N, 
 				sampler->max_dim, sampler->max_dim);
-	sampler->fisher_matrix_prev = allocate_3D_array(sampler->chain_N, sampler->max_dim,sampler->max_dim);
+	sampler->fisher_matrix_prop = allocate_3D_array(sampler->chain_N, sampler->max_dim,sampler->max_dim);
 	
 
 	//Trouble Shooting:
@@ -1509,10 +1563,10 @@ void deallocate_sampler_mem(sampler *sampler)
 				sampler->history_length, sampler->max_dim);
 	deallocate_3D_array(sampler->fisher_vecs, sampler->chain_N, sampler->max_dim, sampler->max_dim);
 	deallocate_2D_array(sampler->fisher_vals, sampler->chain_N, sampler->max_dim);
-	deallocate_3D_array(sampler->fisher_vecs_prev, sampler->chain_N, sampler->max_dim, sampler->max_dim);
-	deallocate_2D_array(sampler->fisher_vals_prev, sampler->chain_N, sampler->max_dim);
+	deallocate_3D_array(sampler->fisher_vecs_prop, sampler->chain_N, sampler->max_dim, sampler->max_dim);
+	deallocate_2D_array(sampler->fisher_vals_prop, sampler->chain_N, sampler->max_dim);
 	deallocate_3D_array(sampler->fisher_matrix, sampler->chain_N, sampler->max_dim,sampler->max_dim);
-	deallocate_3D_array(sampler->fisher_matrix_prev, sampler->chain_N, sampler->max_dim,sampler->max_dim);
+	deallocate_3D_array(sampler->fisher_matrix_prop, sampler->chain_N, sampler->max_dim,sampler->max_dim);
  
 	free(sampler->fisher_update_ct);
 	free(sampler->rvec);
@@ -2240,6 +2294,9 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		//check whether or not we need to update the fisher
 		for(int i=0 ; i<sampler->chain_N; i++){
 			update_fisher(sampler, sampler->output[i][0], sampler->param_status[i][0],i);	
+			if(sampler->proper_fisher){
+				iterate_fisher(sampler, i);
+			}
 		}
 	}
 
@@ -2358,6 +2415,9 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 		//check whether or not we need to update the fisher
 		for(int i=0 ; i<samplerptr->chain_N; i++){
 			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
+			if(samplerptr->proper_fisher){
+				iterate_fisher(samplerptr, i);
+			}
 		}
 	}
 }
