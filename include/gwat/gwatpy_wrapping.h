@@ -4,23 +4,11 @@
 #include "util.h"
 #include "detector_util.h"
 
-class tester
-{
-	public:
-	double s1;
-	tester(double s)
-	{
-		s1 = s;
-	}
-	void get_s1(){std::cout<< s1<<std::endl;};
-};
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-void * new_tester(double a );
-void get_s1(void * t);
 
 int fourier_waveform_py(double *frequencies,
 	int length, 
@@ -33,7 +21,6 @@ int fourier_waveform_py(double *frequencies,
 
 gen_params_base<double>* gen_params_base_py(double mass1, double mass2);
 void gen_params_base_py_destructor(gen_params_base<double> *p);
-void print_params_py(gen_params_base<double> *p);
 
 int DL_from_Z_py(double z, char * COSMOLOGY, double *out);
 int calculate_chirpmass_py(double mass1, double mass2,double *out);

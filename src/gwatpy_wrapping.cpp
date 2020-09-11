@@ -3,24 +3,6 @@
 #include "fisher.h"
 #include "waveform_generator.h"
 
-void* new_tester(double a )
-{
-	tester *t = new tester( a);
-	void * t2 = (void *)t;
-	std::cout<<t<<std::endl;
-	std::cout<<t2<<std::endl;
-	return t2;
-}
-
-void get_s1(void * t){
-	tester *t2 = (tester *) t;
-	std::cout<<t2<<std::endl;
-	std::cout<<t<<std::endl;
-	
-	t2->get_s1();
-	//return;
-}
-
 
 int fourier_waveform_py(double *frequencies,
 	int length, 
@@ -34,10 +16,7 @@ int fourier_waveform_py(double *frequencies,
 	std::string gen_meth(generation_method);
 	std::complex<double> *wf_p = new std::complex<double>[length];
 	std::complex<double> *wf_c = new std::complex<double>[length];
-	std::cout<<"TEST"<<std::endl;
-	std::cout<<parameters->mass1<<std::endl;
 	int status =  fourier_waveform(frequencies, length, wf_p, wf_c, gen_meth, parameters);
-	std::cout<<"TEST"<<std::endl;
 	for(int i = 0 ; i<length; i++){
 		wf_plus_real[i] = std::real(wf_p[i]);
 		wf_cross_real[i] = std::real(wf_c[i]);
@@ -64,16 +43,7 @@ gen_params_base<double>* gen_params_base_py(double mass1, double mass2)
 	p->spin2[2] = 0;	
 	p->incl_angle = M_PI;
 
-	std::cout<<"TEST creation "<<p<<std::endl;
-	//return p;
-	return new gen_params_base<double>;
-}
-
-void print_params_py(gen_params_base<double> *p)
-{
-	std::cout<<"TEST "<<p<<std::endl;
-	std::cout<<"TEST "<<p->mass1<<std::endl;
-	return;
+	return p;
 }
 
 void gen_params_base_py_destructor(gen_params_base<double> *p)

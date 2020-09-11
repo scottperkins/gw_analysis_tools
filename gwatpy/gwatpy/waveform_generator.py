@@ -7,19 +7,16 @@ rlib = ctypes.CDLL(cf.LIB)
 
 ####################################################################
 rlib.gen_params_base_py.argtypes = [ctypes.c_double,ctypes.c_double]
-rlib.gen_params_base_py.restypes = ctypes.c_void_p
+rlib.gen_params_base_py.restype = ctypes.c_void_p
 
 rlib.gen_params_base_py_destructor.argtypes = [ctypes.c_void_p]
-rlib.gen_params_base_py_destructor.restypes = ctypes.c_void_p
+rlib.gen_params_base_py_destructor.restype = ctypes.c_void_p
 
 rlib.fourier_waveform_py.argtypes=\
     [ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), 
     ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double), \
     ctypes.POINTER(ctypes.c_double), ctypes.c_char_p, ctypes.c_void_p]
-rlib.fourier_waveform_py.restypes=ctypes.c_int
-
-rlib.print_params_py.argtypes = [ctypes.c_void_p]
-rlib.print_params_py.restypes = ctypes.c_void_p
+rlib.fourier_waveform_py.restype=ctypes.c_int
 ####################################################################
 
 def waveform_generator(frequencies, generation_method, parameters):
@@ -111,23 +108,6 @@ class gen_params:
         if "spin2_z" in kwargs:
             self.spin2_z = kwargs["spin2_z"] 
         self.obj = rlib.gen_params_base_py(self.mass1,self.mass2)
-        print(self.obj)
     def __del__(self):
         rlib.gen_params_base_py_destructor(self.obj)
-    def print_params_py(self):
-        rlib.print_params_py(self.obj)
-
-
-rlib.new_tester.argtypes = [ctypes.c_double]
-rlib.new_tester.restypes = [ctypes.c_void_p]
-
-rlib.get_s1.argtypes = [ctypes.c_void_p]
-#rlib.get_s1.restypes = ctypes.c_double
-rlib.get_s1.restypes = [None]
-class Tester(object):
-    def __init__(self, a):
-        self.a = ctypes.c_double(a)
-        self.obj = rlib.new_tester(self.a);
-    def get_s1(self):
-        rlib.get_s1(self.obj)
 

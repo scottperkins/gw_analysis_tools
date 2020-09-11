@@ -579,6 +579,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
 double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *parameters)
