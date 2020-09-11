@@ -25,6 +25,8 @@ static std::complex<double> **mcmc_data=NULL;
 static double **mcmc_frequencies=NULL;
 static std::string *mcmc_detectors=NULL;
 static std::string mcmc_generation_method="";
+static std::string mcmc_generation_method_base="";
+static std::string mcmc_generation_method_extended="";
 static int *mcmc_data_length=NULL ;
 static fftw_outline *mcmc_fftw_plans=NULL ;
 static int mcmc_num_detectors=2;
@@ -57,6 +59,8 @@ struct MCMC_user_param
 	double **fish_psd=NULL;
 	double fish_length;
 	bool GAUSS_QUAD=false;
+	
+	gsl_rng *r;
 };
 
 //########################################
@@ -278,65 +282,6 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	std::string likelihood_log_filename,
 	std::string checkpoint_filename
 	);
-void continue_RJPTMCMC_MH_GW(std::string start_checkpoint_file,
-	double ***output,
-	int ***status,
-	int max_dim,
-	int min_dim,
-	int N_steps,
-	int swp_freq,
-	double(*log_prior)(double *param, int *status, mcmc_data_interface *interface ,void *parameters),
-	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, mcmc_data_interface *interface,void *parameters),
-	int numThreads,
-	bool pool,
-	bool show_prog,
-	int num_detectors,
-	std::complex<double> **data,
-	double **noise_psd,
-	double **frequencies,
-	int *data_length,
-	double gps_time,
-	std::string *detectors,
-	int Nmod,
-	double *bppe,
-	std::string generation_method,
-	std::string statistics_filename,
-	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
-	std::string final_checkpoint_filename
-	);
-void RJPTMCMC_MH_GW(double ***output,
-	int ***status,
-	int max_dim,
-	int min_dim,
-	int N_steps,
-	int chain_N,
-	double *initial_pos,
-	int *initial_status,
-	double *seeding_var,	
-	double *chain_temps,
-	int swp_freq,
-	double(*log_prior)(double *param, int *status, mcmc_data_interface *interface,void *parameters),
-	void (*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status, mcmc_data_interface *interface,void *parameters),
-	int numThreads,
-	bool pool,
-	bool show_prog,
-	int num_detectors,
-	std::complex<double> **data,
-	double **noise_psd,
-	double **frequencies,
-	int *data_length,
-	double gps_time,
-	std::string *detectors,
-	int Nmod_max,
-	double *bppe,
-	std::string generation_method,
-	std::string statistics_filename,
-	std::string chain_filename,
-	std::string auto_corr_filename,
-	std::string likelihood_log_filename,
-	std::string checkpoint_file);
 
 void PTMCMC_MH_GW(double ***output,
 	int dimension,
@@ -505,8 +450,60 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters) ;
 
-double RJPTMCMC_likelihood_wrapper(double *param, int *status, mcmc_data_interface *interface,void *parameters) ;
+void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
+	mcmc_sampler_output *sampler_output,
+	double **output,
+	int **status,
+	int max_dimension,
+	int min_dimension,
+	int N_steps,
+	int chain_N,
+	int max_chain_N_thermo_ensemble,
+	double *initial_pos,
+	int *initial_status,
+	double *seeding_var,
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	int max_chunk_size,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int *status,mcmc_data_interface *interface,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method_base,
+	std::string generation_method_extended,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	);
+void RJMCMC_2WF_RJ_proposal_wrapper(
+	double *current_param, 
+	double *proposed_param, 
+	int *current_status, 
+	int *proposed_status, 
+	mcmc_data_interface *interface, 
+	void *user_param);
+void RJMCMC_2WF_fisher_wrapper(
+	double *param, 
+	int *status, 
+	double **fisher,
+	mcmc_data_interface *interface, 
+	void *user_param);
+double RJMCMC_2WF_likelihood_wrapper(
+	double *param, 
+	int *status, 
+	mcmc_data_interface *interface, 
+	void *user_param);
 
-void RJPTMCMC_fisher_wrapper(double *param, int *status,  double **output, mcmc_data_interface *interface,void *parameters);
-void RJPTMCMC_RJ_proposal(double *current_param, double *proposed_params, int *current_status, int *proposed_status,mcmc_data_interface *interface,void *parameters) ;
 #endif

@@ -2173,7 +2173,7 @@ int chain_number_from_checkpoint_file(std::string check_file, int *chain_N)
  *
  * *NOTE* -- sampler->chain_temps allocated internally -- MUST free manually
  */
-void load_checkpoint_file(std::string check_file,sampler *sampler)
+void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 {
 	std::fstream file_in;
 	file_in.open(check_file, std::ios::in);
@@ -2185,32 +2185,32 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		std::getline(file_in,line);
 		std::stringstream lineStream(line);
 		std::getline(lineStream, item, ',');
-		sampler->min_dim = std::stod(item);
+		samplerptr->min_dim = std::stod(item);
 		std::getline(lineStream, item, ',');
-		sampler->max_dim = std::stod(item);
-		if(sampler->min_dim == sampler->max_dim){
-			sampler->dimension=sampler->min_dim;
-			sampler->RJMCMC = false;
+		samplerptr->max_dim = std::stod(item);
+		if(samplerptr->min_dim == samplerptr->max_dim){
+			samplerptr->dimension=samplerptr->min_dim;
+			samplerptr->RJMCMC = false;
 		}
 		else{
-			sampler->RJMCMC=true;
+			samplerptr->RJMCMC=true;
 		}
 		std::getline(lineStream, item, ',');
-		sampler->chain_N = std::stod(item);
+		samplerptr->chain_N = std::stod(item);
 
 		//Second Row -- temps
 		std::getline(file_in,line);
 		std::stringstream lineStreamtemps(line);
-		sampler->chain_temps = (double *)malloc(sizeof(double)*sampler->chain_N);
+		samplerptr->chain_temps = (double *)malloc(sizeof(double)*samplerptr->chain_N);
 		i=0;
 		while(std::getline(lineStreamtemps, item, ',')){
-			sampler->chain_temps[i] = std::stod(item);
+			samplerptr->chain_temps[i] = std::stod(item);
 			i++;
 		}
 		
 		//###################################
 		//Allocate memory, now we have initial parameters
-		allocate_sampler_mem(sampler);
+		allocate_sampler_mem(samplerptr);
 		//###################################
 
 
@@ -2225,39 +2225,39 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		//	}
 		//}
 		//third row+chain_N -- step widths
-		for(int j =0 ;j<sampler->chain_N; j++){
+		for(int j =0 ;j<samplerptr->chain_N; j++){
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreamwidths(line);
 			while(std::getline(lineStreamwidths, item, ',')){
-				sampler->randgauss_width_number[j][i] = std::stoi(item);
+				samplerptr->randgauss_width_number[j][i] = std::stoi(item);
 				i++;
 			}
-			for(int k = 0 ; k<sampler->types_of_steps;k++){
+			for(int k = 0 ; k<samplerptr->types_of_steps;k++){
 				i=0;
 				std::getline(file_in,line);
 				std::stringstream lineStreamwidths(line);
 				while(std::getline(lineStreamwidths, item, ',')){
-					sampler->randgauss_width[j][k][i] = std::stod(item);
+					samplerptr->randgauss_width[j][k][i] = std::stod(item);
 					i++;
 				}
 			}
 		}
 
 		//row 3 +chain_N  to 3+2 chain_N-- initial positions
-		for(int j =0 ;j<sampler->chain_N; j++){
+		for(int j =0 ;j<samplerptr->chain_N; j++){
 			i=0;
 			std::getline(file_in,line);
 			std::stringstream lineStreampos(line);
 			//while(i<sampler->max_dim && std::getline(lineStreampos, item, ',')){
-			while(i<sampler->max_dim  ){
+			while(i<samplerptr->max_dim  ){
 				std::getline(lineStreampos, item, ',');
-				sampler->output[j][0][i] = std::stod(item);
+				samplerptr->output[j][0][i] = std::stod(item);
 				i++;
 			}
 			i=0;
 			while(std::getline(lineStreampos, item, ',')){
-				sampler->param_status[j][0][i] = std::stod(item);
+				samplerptr->param_status[j][0][i] = std::stod(item);
 				i++;
 			}
 		}
@@ -2265,23 +2265,23 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 		std::stringstream lineStreamprimed(line);
 		std::getline(lineStreamprimed, item, ',');
 		if(item =="true"){
-			for(int j =0 ;j<sampler->chain_N; j++){
+			for(int j =0 ;j<samplerptr->chain_N; j++){
 				std::getline(file_in,line);
 				std::stringstream lineStreamhist(line);
 				i=0;
 				while(std::getline(lineStreamhist,item,',')){	
-					int step = i/sampler->max_dim ;
-					int pos = i%sampler->max_dim;
-					sampler->history[j][step][pos] = std::stod(item);	
+					int step = i/samplerptr->max_dim ;
+					int pos = i%samplerptr->max_dim;
+					samplerptr->history[j][step][pos] = std::stod(item);	
 					i++;
 				}
 			}
-			for(int j =0 ;j<sampler->chain_N; j++)
-				sampler->de_primed[j] =true;
+			for(int j =0 ;j<samplerptr->chain_N; j++)
+				samplerptr->de_primed[j] =true;
 		}
 		else{
-			for(int j =0 ;j<sampler->chain_N; j++)
-				sampler->de_primed[j] =false;
+			for(int j =0 ;j<samplerptr->chain_N; j++)
+				samplerptr->de_primed[j] =false;
 
 		}
 	
@@ -2290,39 +2290,39 @@ void load_checkpoint_file(std::string check_file,sampler *sampler)
 	}
 	else{std::cout<<"ERROR -- File "<<check_file<<" not found"<<std::endl; exit(1);}
 	file_in.close();
-	if(sampler->fisher_exist){
+	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
-		for(int i=0 ; i<sampler->chain_N; i++){
-			update_fisher(sampler, sampler->output[i][0], sampler->param_status[i][0],i);	
-			if(sampler->proper_fisher){
-				iterate_fisher(sampler, i);
+		for(int i=0 ; i<samplerptr->chain_N; i++){
+			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
+			if(samplerptr->proper_fisher){
+				iterate_fisher(samplerptr, i);
 			}
 		}
 	}
 
 }
 
-void assign_ct_p(sampler *sampler, int step, int chain_index, int gauss_dim)
+void assign_ct_p(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 {
 	if(step ==0) {
-		sampler->gauss_accept_ct[chain_index]+=1;
-		sampler->gauss_accept_ct_per_dim[chain_index][gauss_dim]+=1;
+		samplerptr->gauss_accept_ct[chain_index]+=1;
+		samplerptr->gauss_accept_ct_per_dim[chain_index][gauss_dim]+=1;
 	}
-	else if(step ==1) sampler->de_accept_ct[chain_index]+=1;
-	else if(step ==2) sampler->mmala_accept_ct[chain_index]+=1;
-	else if(step ==3) sampler->fish_accept_ct[chain_index]+=1;
-	else if(step ==4) sampler->RJstep_accept_ct[chain_index]+=1;
+	else if(step ==1) samplerptr->de_accept_ct[chain_index]+=1;
+	else if(step ==2) samplerptr->mmala_accept_ct[chain_index]+=1;
+	else if(step ==3) samplerptr->fish_accept_ct[chain_index]+=1;
+	else if(step ==4) samplerptr->RJstep_accept_ct[chain_index]+=1;
 }
-void assign_ct_m(sampler *sampler, int step, int chain_index, int gauss_dim)
+void assign_ct_m(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 {
 	if(step ==0) {
-		sampler->gauss_reject_ct[chain_index]+=1;
-		sampler->gauss_reject_ct_per_dim[chain_index][gauss_dim]+=1;
+		samplerptr->gauss_reject_ct[chain_index]+=1;
+		samplerptr->gauss_reject_ct_per_dim[chain_index][gauss_dim]+=1;
 	}
-	else if(step ==1) sampler->de_reject_ct[chain_index]+=1;
-	else if(step ==2) sampler->mmala_reject_ct[chain_index]+=1;
-	else if(step ==3) sampler->fish_reject_ct[chain_index]+=1;
-	else if(step ==4) sampler->RJstep_reject_ct[chain_index]+=1;
+	else if(step ==1) samplerptr->de_reject_ct[chain_index]+=1;
+	else if(step ==2) samplerptr->mmala_reject_ct[chain_index]+=1;
+	else if(step ==3) samplerptr->fish_reject_ct[chain_index]+=1;
+	else if(step ==4) samplerptr->RJstep_reject_ct[chain_index]+=1;
 }
 
 void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,double *seeding_var) 

@@ -46,7 +46,7 @@ def plot_convergence(filename,trim=None,ac=None):
         plt.plot(pts,variances,color="blue")
     return fig 
 
-def trim_thin_file(filename,trim=None, ac=None):
+def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False):
     f = h5py.File(filename,'r')
     chains = list(f["MCMC_OUTPUT"].keys())
     chains_N = len(chains)
@@ -69,12 +69,24 @@ def trim_thin_file(filename,trim=None, ac=None):
                 trim_local = f["MCMC_METADATA"]["SUGGESTED TRIM LENGTHS"][x+1]
             if ac is None:
                 ac_local = np.amax(f["MCMC_METADATA"]["AC VALUES"][x+1][:])
-            acs=[]
-            for y in range(len(data[0])):
-                acs.append(emcee.autocorr.integrated_time(f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),y],tol=0)[0])
-            print(chains[x],np.amax(acs),np.argmax(acs))
+            if recalc_ac:
+                acs=[]
+                for y in range(len(data[0])):
+                    acs.append(emcee.autocorr.integrated_time(f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),y],tol=0)[0])
+                print(chains[x],np.amax(acs),np.argmax(acs))
             data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:],axis=0)
     #print("data shape",np.shape(data))
     #data = data[::chains_N]
     return data
     
+def RJPTMCMC_unpack_file(filename):
+    f = h5py.File(filename,'r')
+    chains = list(f["MCMC_OUTPUT"].keys())
+    chains_N = len(chains)
+    data = f["MCMC_OUTPUT"][chains[0]]
+    status = f["MCMC_OUTPUT/STATUS"][chains[0]]
+    for x in range(chains_N-1):
+        if( "CHAIN" in chains[x+1]):
+            data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]],axis=0)
+            status = np.insert(status,-1, f["MCMC_OUTPUT/STATUS"][chains[x+1]],axis=0)
+    return data, status

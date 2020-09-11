@@ -34,10 +34,16 @@ plt.plot(injected_data_clean)
 plt.savefig("plots/RJ_sin_injected_data.pdf")
 plt.close()
 
-#data = gmcmc.trim_thin_file("data/chains_RJ_sin.hdf5",trim=None,ac=None)
-data = np.loadtxt("data/chains_RJ_sin.hdf5",delimiter=',')
-status =data[1000::100,max_dim:]
-data =data[1000::100,:max_dim]
+data,status = gmcmc.RJPTMCMC_unpack_file("data/chains_RJ_sin.hdf5")
+data = data[::100]
+status = status[::100]
+print(np.shape(data))
+print(np.shape(status))
+#data = np.loadtxt("data/chains_RJ_sin.hdf5",delimiter=',')
+#status =data[1000::100,max_dim:]
+#data =data[1000::100,:max_dim]
+print(status)
+
 symm_mask = (status[:,-1] ==0)
 print("Sym: ",np.sum(symm_mask))
 nonsymm_mask = (status[:,-1] ==1)

@@ -255,7 +255,7 @@ T EdGB_phase_factor( source_parameters<T> *param)
 	else{
 		s2  = temp2/(chi2*chi2);
 	}
-	if(param->NSflag1){s1 =0;}	
+	if(param->NSflag1){debugger_print(__FILE__,__LINE__,"NS 1");s1 =0;}	
 	if(param->NSflag2){s2 =0;}	
 	return (-5./7168.)* pow_int((m1*m1 * s2 - m2*m2 * s1),2) / (pow_int(M,4) * pow(eta,(18./5)));
 } 

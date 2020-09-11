@@ -813,8 +813,8 @@ int dCS_EdGB(int argc, char *argv[])
 	params.mass1 = 25.9;
 	params.mass2 = 2.3;
 	//params.spin1[2] = .08* (params.mass1+params.mass2)/params.mass1;
-	params.spin1[2] = .08;
-	params.spin2[2] = 0 ;
+	params.spin1[2] = .04;
+	params.spin2[2] = .02 ;
 	params.chip = .07;
 	params.phip = 1.0;
 	params.Luminosity_Distance = 250;
