@@ -3,7 +3,82 @@
 #include "fisher.h"
 #include "waveform_generator.h"
 #include "waveform_util.h"
+#include "mcmc_gw.h"
+#include "fisher.h"
 
+
+void MCMC_modification_struct_py_destructor(MCMC_modification_struct *mod_struct)
+{
+	if(mod_struct->bppe){delete [] mod_struct->bppe;mod_struct->bppe = NULL;}
+	if(mod_struct->gIMR_phii){delete [] mod_struct->gIMR_phii;mod_struct->gIMR_phii = NULL;}
+	if(mod_struct->gIMR_sigmai){delete [] mod_struct->gIMR_sigmai;mod_struct->gIMR_sigmai = NULL;}
+	if(mod_struct->gIMR_betai){delete [] mod_struct->gIMR_betai;mod_struct->gIMR_betai = NULL;}
+	if(mod_struct->gIMR_alphai){delete [] mod_struct->gIMR_alphai;mod_struct->gIMR_alphai = NULL;}
+}
+
+MCMC_modification_struct * MCMC_modification_struct_py( 
+	int ppE_Nmod, 
+	double *bppe,
+	int gIMR_Nmod_phi,
+	int *gIMR_phii,
+	int gIMR_Nmod_sigma,
+	int *gIMR_sigmai,
+	int gIMR_Nmod_beta,
+	int *gIMR_betai,
+	int gIMR_Nmod_alpha,
+	int *gIMR_alphai,
+	bool NSflag1,
+	bool NSflag2
+	)
+{
+	std::cout<<ppE_Nmod<<std::endl;
+	MCMC_modification_struct *mod_struct = new MCMC_modification_struct;
+	mod_struct->ppE_Nmod = ppE_Nmod;
+	mod_struct->bppe = NULL;
+	if(mod_struct->ppE_Nmod !=0){
+		mod_struct->bppe = new double[mod_struct->ppE_Nmod];
+	}
+	mod_struct->gIMR_Nmod_phi = gIMR_Nmod_phi;
+	mod_struct->gIMR_phii = NULL;
+	if(mod_struct->gIMR_Nmod_phi !=0){
+		mod_struct->gIMR_phii = new int[mod_struct->gIMR_Nmod_phi];
+	}
+	mod_struct->gIMR_Nmod_sigma = gIMR_Nmod_sigma;
+	mod_struct->gIMR_sigmai = NULL;
+	if(mod_struct->gIMR_Nmod_sigma !=0){
+		mod_struct->gIMR_sigmai = new int[mod_struct->gIMR_Nmod_sigma];
+	}
+	mod_struct->gIMR_Nmod_beta = gIMR_Nmod_beta;
+	mod_struct->gIMR_betai = NULL;
+	if(mod_struct->gIMR_Nmod_beta !=0){
+		mod_struct->gIMR_betai = new int[mod_struct->gIMR_Nmod_beta];
+	}
+	mod_struct->gIMR_Nmod_alpha = gIMR_Nmod_alpha;
+	mod_struct->gIMR_alphai = NULL;
+	if(mod_struct->gIMR_Nmod_alpha !=0){
+		mod_struct->gIMR_alphai = new int[mod_struct->gIMR_Nmod_alpha];
+	}
+	mod_struct->NSflag1 = NSflag1;
+	mod_struct->NSflag2 = NSflag2;
+	return mod_struct;
+}
+
+char * MCMC_prep_params_py(
+	double *param, 
+	double *temp_params, 
+	gen_params_base<double> *gen_params, 
+	int dimension, 
+	char * generation_method, 
+	MCMC_modification_struct *mod_struct)
+{
+	char * char_arr = const_cast<char *>( MCMC_prep_params(param, temp_params, gen_params, dimension, std::string(generation_method), mod_struct).c_str());
+	return char_arr;
+}
+
+void repack_parameters_py(double *parameters, gen_params_base<double> *gen_param, char * generation_method, int dim )
+{
+	repack_parameters(parameters, gen_param, std::string(generation_method), dim , (gen_params_base<double> *)NULL);
+}
 
 int fourier_detector_response_py(double *frequencies,
 	int length, 
@@ -201,16 +276,16 @@ gen_params_base<double>* gen_params_base_py(
 
 void gen_params_base_py_destructor(gen_params_base<double> *p)
 {
-	if(!p->betappe){delete [] p->betappe;p->betappe=NULL;}
-	if(!p->bppe){delete [] p->bppe;p->bppe=NULL;}
-	if(!p->phii){delete [] p->phii;p->phii=NULL;}
-	if(!p->delta_phi){delete [] p->delta_phi;p->delta_phi=NULL;}
-	if(!p->sigmai){delete [] p->sigmai;p->sigmai=NULL;}
-	if(!p->delta_sigma){delete [] p->delta_sigma;p->delta_sigma=NULL;}
-	if(!p->betai){delete [] p->betai;p->betai=NULL;}
-	if(!p->delta_beta){delete [] p->delta_beta;p->delta_beta=NULL;}
-	if(!p->alphai){delete [] p->alphai;p->alphai=NULL;}
-	if(!p->delta_alpha){delete [] p->delta_alpha;p->delta_alpha=NULL;}
+	if(p->betappe){delete [] p->betappe;p->betappe=NULL;}
+	if(p->bppe){delete [] p->bppe;p->bppe=NULL;}
+	if(p->phii){delete [] p->phii;p->phii=NULL;}
+	if(p->delta_phi){delete [] p->delta_phi;p->delta_phi=NULL;}
+	if(p->sigmai){delete [] p->sigmai;p->sigmai=NULL;}
+	if(p->delta_sigma){delete [] p->delta_sigma;p->delta_sigma=NULL;}
+	if(p->betai){delete [] p->betai;p->betai=NULL;}
+	if(p->delta_beta){delete [] p->delta_beta;p->delta_beta=NULL;}
+	if(p->alphai){delete [] p->alphai;p->alphai=NULL;}
+	if(p->delta_alpha){delete [] p->delta_alpha;p->delta_alpha=NULL;}
 	delete p;
 	p=NULL;
 }

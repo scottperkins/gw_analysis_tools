@@ -3,6 +3,7 @@
 #define GWATPY_WRAPPING_H
 #include "util.h"
 #include "detector_util.h"
+#include "mcmc_gw.h"
 
 
 #ifdef __cplusplus
@@ -10,6 +11,35 @@ extern "C"
 {
 #endif
 
+
+MCMC_modification_struct * MCMC_modification_struct_py( 
+	int ppE_Nmod, 
+	double *bppe,
+	int gIMR_Nmod_phi,
+	int *gIMR_phii,
+	int gIMR_Nmod_sigma,
+	int *gIMR_sigmai,
+	int gIMR_Nmod_beta,
+	int *gIMR_betai,
+	int gIMR_Nmod_alpha,
+	int *gIMR_alphai,
+	bool NSflag1,
+	bool NSflag2
+	);
+
+char * MCMC_prep_params_py(
+	double *param, 
+	double *temp_params, 
+	gen_params_base<double> *gen_params, 
+	int dimension, char * generation_method, 
+	MCMC_modification_struct *mod_struct);
+
+void MCMC_modification_struct_py_destructor(MCMC_modification_struct *mod_struct);
+void repack_parameters_py(
+	double *parameters, 
+	gen_params_base<double> *gen_param, 
+	char * generation_method, 
+	int dim );
 int fourier_detector_response_py(double *frequencies,
 	int length, 
 	double  *response_real,

@@ -273,6 +273,8 @@ int main(int argc, char *argv[])
 			std::cout<<i<<" : "<<bppe[i]<<std::endl;
 			mod_priors[i][0] = dbl_dict["ppE beta "+std::to_string(i)+" minimum"];
 			mod_priors[i][1] = dbl_dict["ppE beta "+std::to_string(i)+" maximum"];
+			std::cout<<"Min"<<" : "<<mod_priors[i][0]<<std::endl;
+			std::cout<<"Max"<<" : "<<mod_priors[i][1]<<std::endl;
 		}
 		
 	}
