@@ -4,6 +4,9 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import emcee
+import gwatpy.waveform_generator as gwg
+import gwatpy.util as gpu
+from scipy.signal.windows import tukey
 
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 
@@ -90,3 +93,84 @@ def RJPTMCMC_unpack_file(filename):
             data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]],axis=0)
             status = np.insert(status,-1, f["MCMC_OUTPUT/STATUS"][chains[x+1]],axis=0)
     return data, status
+
+#Thanks to Neil for the term 'Bayesogram..'
+def plot_bayesogram(filename, freqs,detector, generation_method_base, generation_method_extended=None,min_dim= 0):
+
+    psd_in = np.loadtxt("/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt",skiprows=1)
+    freqs = psd_in[:,0]
+    psd = psd_in[:,1]
+
+    fig,ax = plt.subplots(nrows=1,ncols=1)
+    if(generation_method_extended is not None):
+        data,status = RJPTMCMC_unpack_file(filename)     
+        for i in np.arange(len(data)):
+            if(np.sum(status[i]) > min_dim):
+                gparam = map_method_output(data[i],status[i], generation_method_extended,min_dim )
+            else:
+                gparam = map_method_output(data[i],status[i], generation_method_base,min_dim )
+    else:
+        N = 100
+        data = trim_thin_file(filename)     
+        data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
+        data_sub = data[data_sub_indices,:] 
+        status = np.ones(len(data[0]))
+        df = freqs[1]-freqs[0]
+        T = 1./(df)
+        dt = T / len(freqs)
+        times = np.linspace(0,T, len(freqs))
+        responses = np.zeros( (N,len(freqs)))
+        #parallelize in the future
+        for i in np.arange(N):
+            gparam = map_method_output(data_sub[i],status, generation_method_base ,len(data_sub[i]))
+            response = gwg.response_generator(freqs,detector,generation_method_base, gparam)
+            response*= np.exp( 1j*(T-data_sub[i,5] )*2*np.pi*freqs)
+            window = tukey(len(response),4*2/T)
+            response_t = np.fft.ifft(response*window/psd**.5)*df
+            responses[i] = response_t
+        for i in np.arange(N):
+            ax.plot(times,responses[i],alpha=.1,color='blue' )
+            #ax.hexbin(times,responses[i],mincnt=1 )
+    return fig
+
+def map_method_output(data, status, method, min_dim):
+    kwargs = {};
+    if("PhenomPv2" in method):
+        m1 = gpu.calculate_mass1(np.exp(data[7]),data[8])
+        m2 = gpu.calculate_mass2(np.exp(data[7]),data[8])
+        kwargs["mass1"] = m1
+        kwargs["mass2"] = m2
+        kwargs["RA"] = data[0]
+        kwargs["DEC"] = np.arcsin(data[1])
+        kwargs["psi"] = data[2]
+        kwargs["incl_angle"] = np.arccos(data[3])
+        kwargs["phiRef"] = data[4]
+        kwargs["tc"] = data[5]
+        kwargs["Luminosity_Distance"] = np.exp(data[6])
+        a1 = data[9]
+        a2 = data[10]
+        ctilt1 = data[11]
+        stilt1 = np.sqrt(1-ctilt1**2)
+        ctilt2 = data[12]
+        stilt2 = np.sqrt(1-ctilt2**2)
+        phi1 = data[13]
+        phi2 = data[14]
+        kwargs["spin1"] = [ a1*stilt1*np.cos(phi1), a1*stilt1*np.sin(phi1), a1*ctilt1]
+        kwargs["spin2"] = [ a2*stilt2*np.cos(phi2), a2*stilt2*np.sin(phi2), a1*ctilt2]
+    elif("PhenomD" in method):
+        m1 = gpu.calculate_mass1_py(np.exp(data[7]),data[8])
+        m2 = gpu.calculate_mass2_py(np.exp(data[7]),data[8])
+        kwargs["mass1"] = m1
+        kwargs["mass2"] = m2
+        kwargs["RA"] = data[0]
+        kwargs["DEC"] = np.arcsin(data[1])
+        kwargs["psi"] = data[2]
+        kwargs["incl_angle"] = np.arccos(data[3])
+        kwargs["phiRef"] = data[4]
+        #kwargs["tc"] = data[5]
+        kwargs["tc"] = 0
+        kwargs["Luminosity_Distance"] = np.exp(data[6])
+        kwargs["spin1"] = [ 0,0, data[9]]
+        kwargs["spin2"] = [ 0,0, data[10]]
+    gparams =gwg.gen_params(**kwargs) 
+    return gparams

@@ -176,21 +176,21 @@ public:
 	int Nmod_sigma=0;
 	int Nmod_phi=0;
 
-	int *betai;
-	int *alphai;
-	int *sigmai;
-	int *phii;
+	int *betai=NULL;
+	int *alphai=NULL;
+	int *sigmai=NULL;
+	int *phii=NULL;
 
-	T *delta_beta;
-	T *delta_alpha;
-	T *delta_sigma;
-	T *delta_phi;
+	T *delta_beta=NULL;
+	T *delta_alpha=NULL;
+	T *delta_sigma=NULL;
+	T *delta_phi=NULL;
 	/*!ppE b parameter (power of the frequency) - vector for multiple modifications*/
-	double *bppe;
-	double *appe;
-	T *alphappe;
+	double *bppe=NULL;
+	double *appe=NULL;
+	T *alphappe=NULL;
 	/*!ppE coefficient for the phase modification - vector for multiple modifications*/
-	T *betappe;
+	T *betappe=NULL;
 	/*!Number of phase modificatinos*/
 	int Nmod=0;
 	//###################################################

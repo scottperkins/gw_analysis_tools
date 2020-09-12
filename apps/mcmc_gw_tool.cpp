@@ -278,21 +278,40 @@ int main(int argc, char *argv[])
 	}
 	if(generation_method.find("dCS") != std::string::npos
 	|| generation_method.find("EdGB") != std::string::npos){
-		Nmod = 1;
-		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
-		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
-		bppe= new double[Nmod];
-		mod_priors = new double*[Nmod];
-		if(generation_method.find("dCS") != std::string::npos){
-			bppe[0] = -1;
-		}
-		if(generation_method.find("EdGB") != std::string::npos){
+		if(generation_method.find("EdGB_GHO") != std::string::npos){
+			Nmod = 2;
+			std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
+			std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
+			bppe= new double[Nmod];
+			mod_priors = new double*[Nmod];
 			bppe[0] = -7;
+			bppe[1] = -3;
+			mod_priors[0]= new double[2];
+			mod_priors[1]= new double[2];
+			std::cout<<0<<" : "<<bppe[0]<<std::endl;
+			mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
+			mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
+			mod_priors[1][0] = dbl_dict["ppE beta "+std::to_string(1)+" minimum"];
+			mod_priors[1][1] = dbl_dict["ppE beta "+std::to_string(1)+" maximum"];
+		
 		}
-		mod_priors[0]= new double[2];
-		std::cout<<0<<" : "<<bppe[0]<<std::endl;
-		mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
-		mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
+		else{
+			Nmod = 1;
+			std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
+			std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
+			bppe= new double[Nmod];
+			mod_priors = new double*[Nmod];
+			if(generation_method.find("dCS") != std::string::npos){
+				bppe[0] = -1;
+			}
+			if(generation_method.find("EdGB") != std::string::npos){
+				bppe[0] = -7;
+			}
+			mod_priors[0]= new double[2];
+			std::cout<<0<<" : "<<bppe[0]<<std::endl;
+			mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
+			mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
+		}
 		
 	}
 	if(generation_method.find("gIMR") != std::string::npos){
@@ -438,7 +457,9 @@ int main(int argc, char *argv[])
 		}
 		else if( (generation_method.find("ppE_IMRPhenomD") != std::string::npos 
 			|| generation_method.find("gIMRPhenomD") != std::string::npos
-			|| generation_method.find("dCS_IMRPhenomD") != std::string::npos || generation_method.find("EdGB_IMRPhenomD") != std::string::npos)
+			|| generation_method.find("dCS_IMRPhenomD") != std::string::npos 
+			|| generation_method.find("EdGB_IMRPhenomD") != std::string::npos 
+			|| generation_method.find("EdGB_GHO_IMRPhenomD") != std::string::npos)
 			&& dimension >= 11){
 			lp = &standard_log_prior_D_mod;
 		}

@@ -1812,6 +1812,26 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			seeding_var[11]=1;
 		}
 	}
+	else if(dimension==13 && generation_method =="EdGB_GHO_IMRPhenomD"){
+		mcmc_mod_struct->ppE_Nmod = 2;
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km), gamma (generic 1PN term)"<<std::endl;
+		if(local_seeding){
+			seeding_var = new double[dimension];
+			seeding_var[0]=1.;
+			seeding_var[1]=.5;
+			seeding_var[2]=1;
+			seeding_var[3]=1;
+			seeding_var[4]=1;
+			seeding_var[5]=.1;
+			seeding_var[6]=1;
+			seeding_var[7]=1.;
+			seeding_var[8]=.3;
+			seeding_var[9]=.5;
+			seeding_var[10]=.5;
+			seeding_var[11]=1;
+			seeding_var[12]=1;
+		}
+	}
 	else if(dimension==16 && generation_method =="dCS_IMRPhenomPv2"){
 		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;

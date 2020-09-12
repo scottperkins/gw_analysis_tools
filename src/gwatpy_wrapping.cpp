@@ -2,7 +2,28 @@
 #include "util.h"
 #include "fisher.h"
 #include "waveform_generator.h"
+#include "waveform_util.h"
 
+
+int fourier_detector_response_py(double *frequencies,
+	int length, 
+	double  *response_real,
+	double  *response_imaginary,
+	char * detector,
+	char *generation_method, 
+	gen_params_base<double> *parameters)
+{
+	std::string gen_meth(generation_method);
+	std::string det(detector);
+	std::complex<double> *response = new std::complex<double>[length];
+	int status =  fourier_detector_response(frequencies, length, response,det, gen_meth, parameters,(double*)NULL);
+	for(int i = 0 ; i<length; i++){
+		response_real[i] = std::real(response[i]);
+		response_imaginary[i] = std::imag(response[i]);
+	}
+	delete [] response;	
+	return status;
+}
 
 int fourier_waveform_py(double *frequencies,
 	int length, 
@@ -14,6 +35,10 @@ int fourier_waveform_py(double *frequencies,
 	gen_params_base<double> *parameters)
 {
 	std::string gen_meth(generation_method);
+	std::cout<<parameters->Nmod<<std::endl;
+	std::cout<<parameters->spin1[0]<<std::endl;
+	std::cout<<parameters->spin1[1]<<std::endl;
+	std::cout<<parameters->betappe[0]<<std::endl;
 	std::complex<double> *wf_p = new std::complex<double>[length];
 	std::complex<double> *wf_c = new std::complex<double>[length];
 	int status =  fourier_waveform(frequencies, length, wf_p, wf_c, gen_meth, parameters);
@@ -29,26 +54,165 @@ int fourier_waveform_py(double *frequencies,
 }
 
 
-gen_params_base<double>* gen_params_base_py(double mass1, double mass2)
+gen_params_base<double>* gen_params_base_py(
+	double mass1, 
+	double mass2,
+	double *spin1,
+	double *spin2,
+	double Luminosity_Distance,
+	double incl_angle,
+	double RA,
+	double DEC,
+	double psi,
+	double gmst,
+	double f_ref,
+	double theta_l,
+	double phi_l,
+	double theta,
+	double phi,
+	char * cosmology,
+	bool equatorial_orientation,
+	bool horizon_coord,
+	bool NSflag1,
+	bool NSflag2,
+	bool dep_postmerger,
+	bool shift_time,
+	bool shift_phase,
+	bool sky_average,
+	double LISA_alpha0,
+	double LISA_phi0,
+	int Nmod_phi,
+	int Nmod_sigma,
+	int Nmod_beta,
+	int Nmod_alpha,
+	int *phii,
+	int *sigmai,
+	int *betai,
+	int *alphai,
+	double *delta_phi,
+	double *delta_sigma,
+	double *delta_beta,
+	double *delta_alpha,
+	int Nmod,
+	double *bppe,
+	double *betappe
+ )
 {
 	gen_params_base<double> *p = new gen_params_base<double> ;
 	p->mass1 = mass1;	
 	p->mass2 = mass2;	
-	p->Luminosity_Distance = 100;	
-	p->spin1[0] = 0;	
-	p->spin1[1] = 0;	
-	p->spin1[2] = 0;	
-	p->spin2[0] = 0;	
-	p->spin2[1] = 0;	
-	p->spin2[2] = 0;	
-	p->incl_angle = M_PI;
+	p->spin1[0] = spin1[0];	
+	p->spin1[1] = spin1[1];	
+	p->spin1[2] = spin1[2];	
+	p->spin2[0] = spin2[0];	
+	p->spin2[1] = spin2[1];	
+	p->spin2[2] = spin2[2];	
+	p->Luminosity_Distance = Luminosity_Distance;	
+	p->incl_angle = incl_angle;
+	p->RA = RA;
+	p->DEC = DEC;
+	p->psi = psi;
+	p->f_ref = f_ref;
+	p->theta_l = theta_l;
+	p->phi_l = phi_l;
+	p->theta = theta;
+	p->phi = phi;
+	p->cosmology = std::string(cosmology);
+	p->equatorial_orientation=equatorial_orientation;
+	p->horizon_coord=horizon_coord;
+	p->NSflag1=NSflag1;
+	p->NSflag2=NSflag2;
+	p->dep_postmerger=dep_postmerger;
+	p->shift_time=shift_time;
+	p->shift_phase=shift_phase;
+	p->sky_average=sky_average;
+	p->LISA_alpha0=LISA_alpha0;
+	p->LISA_phi0=LISA_phi0;
+	p->Nmod_phi = Nmod_phi;
+	p->Nmod_sigma = Nmod_sigma;
+	p->Nmod_beta = Nmod_beta;
+	p->Nmod_alpha = Nmod_alpha;
+	if(p->Nmod_phi != 0){
+		p->phii = new int[p->Nmod_phi];
+		p->delta_phi = new double[p->Nmod_phi];
+		for(int i = 0 ; i<p->Nmod_phi;i++){
+			p->phii[i] = phii[i];
+			p->delta_phi[i] = delta_phi[i];
+		}
+	}
+	else{
+		p->phii = NULL;
+		p->delta_phi = NULL;
+	}
+	if(p->Nmod_sigma !=0){
+		p->sigmai = new int[p->Nmod_sigma];
+		p->delta_sigma = new double[p->Nmod_sigma];
+		for(int i = 0 ; i<p->Nmod_sigma;i++){
+			p->sigmai[i] = sigmai[i];
+			p->delta_sigma[i] = delta_sigma[i];
+		}
+	}
+	else{
+		p->sigmai = NULL;
+		p->delta_sigma = NULL;
+	}
+	if(p->Nmod_beta !=0){
+		p->betai = new int[p->Nmod_beta];
+		p->delta_beta = new double[p->Nmod_beta];
+		for(int i = 0 ; i<p->Nmod_beta;i++){
+			p->betai[i] = betai[i];
+			p->delta_beta[i] = delta_beta[i];
+		}
+	}
+	else{
+		p->betai = NULL;
+		p->delta_beta = NULL;
+	}
+	if(p->Nmod_alpha!=0){
+		p->alphai = new int[p->Nmod_alpha];
+		p->delta_alpha = new double[p->Nmod_alpha];
+		for(int i = 0 ; i<p->Nmod_alpha;i++){
+			p->alphai[i] = alphai[i];
+			p->delta_alpha[i] = delta_alpha[i];
+		}
+	}
+	else{
+		p->alphai = NULL;
+		p->delta_alpha = NULL;
+	}
+	p->Nmod = Nmod;
+	if(Nmod != 0){
+		p->bppe = new double[p->Nmod];
+		p->betappe = new double[p->Nmod];
+		for(int i = 0 ; i<p->Nmod;i++){
+			p->bppe[i] = bppe[i];
+			p->betappe[i] = betappe[i];
+		}
+	}
+	else{
+		p->betappe = NULL;
+		p->bppe = NULL;
+
+	}
+	
 
 	return p;
 }
 
 void gen_params_base_py_destructor(gen_params_base<double> *p)
 {
+	if(!p->betappe){delete [] p->betappe;p->betappe=NULL;}
+	if(!p->bppe){delete [] p->bppe;p->bppe=NULL;}
+	if(!p->phii){delete [] p->phii;p->phii=NULL;}
+	if(!p->delta_phi){delete [] p->delta_phi;p->delta_phi=NULL;}
+	if(!p->sigmai){delete [] p->sigmai;p->sigmai=NULL;}
+	if(!p->delta_sigma){delete [] p->delta_sigma;p->delta_sigma=NULL;}
+	if(!p->betai){delete [] p->betai;p->betai=NULL;}
+	if(!p->delta_beta){delete [] p->delta_beta;p->delta_beta=NULL;}
+	if(!p->alphai){delete [] p->alphai;p->alphai=NULL;}
+	if(!p->delta_alpha){delete [] p->delta_alpha;p->delta_alpha=NULL;}
 	delete p;
+	p=NULL;
 }
 
 
