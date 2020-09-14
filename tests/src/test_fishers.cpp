@@ -589,8 +589,8 @@ int network_fishers(int argc, char *argv[])
 	params.dep_postmerger=true;
 	params.sky_average=false;
 	
-	params.mass1 = 36;
-	params.mass2 = 29;
+	params.mass1 = 15;
+	params.mass2 = 8;
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
 	params.psi = 1.;
 	params.gmst = 2.;
@@ -634,12 +634,14 @@ int network_fishers(int argc, char *argv[])
 	std::string method = "ppE_IMRPhenomPv2_Inspiral";
 	//transform_orientation_coords(&params, method, detector);
 
-	params.Nmod = 1;
-	params.betappe = new double[1];
-	params.bppe = new double[1];
+	params.Nmod = 2;
+	params.betappe = new double[params.Nmod];
+	params.bppe = new double[params.Nmod];
 	params.betappe[0] = 0;
+	params.betappe[1] = 0;
 	//params.bppe[0] = -1.;
-	params.bppe[0] = -13;
+	params.bppe[0] = -7;
+	params.bppe[1] = -3;
 	//params.bppe[0] = 1;
 	params.Nmod_phi = 1;
 	params.delta_phi = new double[1];
@@ -652,7 +654,7 @@ int network_fishers(int argc, char *argv[])
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 		
-	int dim = 14;
+	int dim = 15;
 
 	double **jac_spins = allocate_2D_array(dim,dim);
 	for (int i = 0 ;i<dim; i++){

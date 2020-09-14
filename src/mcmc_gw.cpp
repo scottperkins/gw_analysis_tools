@@ -2134,6 +2134,68 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 }
 
 
+void MCMC_fisher_transformations(
+	double *param, 
+	double **fisher, 
+	int dimension,
+	std::string generation_method,
+	bool intrinsic,
+	mcmc_data_interface *interface, 
+	MCMC_modification_struct *mod_struct,
+	void *parameters)
+{
+	if(!intrinsic){
+		fisher[0][0] += 1./(4*M_PI*M_PI);//RA
+		fisher[1][1] += 1./4;//sin DEC
+		fisher[2][2] += 1./(4*M_PI*M_PI);//psi
+		fisher[3][3] += 1./(4);//cos iota
+		fisher[4][4] += 1./(4*M_PI*M_PI);//phiref
+		fisher[5][5] += 1./(.01);//tc
+		fisher[8][8] += 1./.25;//eta
+		fisher[9][9] += 1./4;//spin1
+		fisher[10][10] += 1./4;//spin2
+		if(generation_method.find("PhenomPv2") != std::string::npos){
+			fisher[11][11] += 1./4;//cos theta1
+			fisher[12][12] += 1./4;//cos theta2
+			fisher[13][13] += 1./(4*M_PI*M_PI);//phi1
+			fisher[14][14] += 1./(4*M_PI*M_PI);//phi2
+		}
+	}
+	else{
+		if(generation_method.find("PhenomPv2") != std::string::npos){
+			fisher[1][1] =1./(.25) ;//eta
+			fisher[2][2] =1./(4);//spin1
+			fisher[3][3] =1./(4);//spin2
+			fisher[4][4] =1./(4);//cos theta1
+			fisher[5][5] =1./(4);//cos theta2
+			fisher[6][6] =1./(4*M_PI*M_PI) ;//phi1
+			fisher[7][7] =1./(4*M_PI*M_PI) ;//phi2
+		}
+		else if (generation_method.find("PhenomD")!=std::string::npos){
+			fisher[1][1] =1./(.25) ;//eta
+			fisher[2][2] =1./(4) ;//spin1
+			fisher[3][3] =1./(4) ;//spin2
+	
+		}
+	}
+
+	if(generation_method.find("dCS") != std::string::npos ||
+		generation_method.find("EdGB") != std::string::npos){
+		int base = dimension - mod_struct->ppE_Nmod;
+		for(int i = 0 ; i<dimension; i++){
+			//Transform to root alpha from alpha^2
+			double factor = 4* pow(param[base], 3./4.);
+			//Transform to km from sec
+			factor *= 1000 / c ;
+			fisher[base][i] *= factor ;
+			fisher[i][base] *= factor;
+		}
+	}
+	return;
+
+}
+
+
 void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *interface,void *parameters)
 {
 	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
@@ -2145,8 +2207,9 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 		temp_params,&params, dimension, mcmc_generation_method,mcmc_mod_struct);
 	//#########################################################################
 	//#########################################################################
-	repack_parameters(param, &params, 
+	repack_parameters(temp_params, &params, 
 		"MCMC_"+mcmc_generation_method, dimension, NULL);
+	//std::cout<<temp_params[11]<<" "<<temp_params[12]<<std::endl;
 	//repack_parameters(mcmc_init_pos, &params, 
 	//	"MCMC_"+mcmc_generation_method, dimension, NULL);
 	//#########################################################################
@@ -2191,40 +2254,9 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	}
 	//Add prior information to fisher
 	//if(mcmc_generation_method.find("Pv2") && !mcmc_intrinsic){
-	if(!mcmc_intrinsic){
-		output[0][0] += 1./(4*M_PI*M_PI);//RA
-		output[1][1] += 1./4;//sin DEC
-		output[2][2] += 1./(4*M_PI*M_PI);//psi
-		output[3][3] += 1./(4);//cos iota
-		output[4][4] += 1./(4*M_PI*M_PI);//phiref
-		output[5][5] += 1./(.01);//tc
-		output[8][8] += 1./.25;//eta
-		output[9][9] += 1./4;//spin1
-		output[10][10] += 1./4;//spin2
-		if(mcmc_generation_method.find("PhenomPv2") != std::string::npos){
-			output[11][11] += 1./4;//cos theta1
-			output[12][12] += 1./4;//cos theta2
-			output[13][13] += 1./(4*M_PI*M_PI);//phi1
-			output[14][14] += 1./(4*M_PI*M_PI);//phi2
-		}
-	}
-	else{
-		if(mcmc_generation_method.find("PhenomPv2") != std::string::npos){
-			output[1][1] =1./(.25) ;//eta
-			output[2][2] =1./(4);//spin1
-			output[3][3] =1./(4);//spin2
-			output[4][4] =1./(4);//cos theta1
-			output[5][5] =1./(4);//cos theta2
-			output[6][6] =1./(4*M_PI*M_PI) ;//phi1
-			output[7][7] =1./(4*M_PI*M_PI) ;//phi2
-		}
-		else if (mcmc_generation_method.find("PhenomD")!=std::string::npos){
-			output[1][1] =1./(.25) ;//eta
-			output[2][2] =1./(4) ;//spin1
-			output[3][3] =1./(4) ;//spin2
 	
-		}
-	}
+	MCMC_fisher_transformations(temp_params, output,dimension,local_gen,mcmc_intrinsic,
+		interface,mcmc_mod_struct, parameters);
 	deallocate_2D_array(temp_out, dimension,dimension);
 	//////////////////////////////////////////////
 	//if(!interface->burn_phase)
@@ -2248,9 +2280,13 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	//Cleanup
 	delete [] temp_params;
 	if(check_mod(local_gen)){
+		//if(local_gen.find("ppE") != std::string::npos ||
+		//	local_gen.find("dCS")!=std::string::npos||
+		//	local_gen.find("EdGB")!=std::string::npos){
+		//	delete [] params.betappe;
+		//}
 		if(local_gen.find("ppE") != std::string::npos ||
-			local_gen.find("dCS")!=std::string::npos||
-			local_gen.find("EdGB")!=std::string::npos){
+			check_theory_support(local_gen)){
 			delete [] params.betappe;
 		}
 		else if( local_gen.find("gIMR") != std::string::npos){
@@ -2462,13 +2498,24 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->NSflag2 = mod_struct->NSflag2;
 	//gen_params->NSflag1 = false;
 	//gen_params->NSflag2 = false;
+	for(int i = 0 ; i <dimension; i++){
+		temp_params[i]=param[i];
+	}
+	int base = dimension;
 	if(check_mod(generation_method)){
+		//if(generation_method.find("ppE") != std::string::npos ||
+		//	generation_method.find("dCS") !=std::string::npos||
+		//	generation_method.find("EdGB") != std::string::npos){
+		//	gen_params->bppe=mcmc_mod_struct->bppe;
+		//	gen_params->Nmod=mcmc_mod_struct->ppE_Nmod;
+		//	gen_params->betappe=new double[gen_params->Nmod];
+		//}
 		if(generation_method.find("ppE") != std::string::npos ||
-			generation_method.find("dCS") !=std::string::npos||
-			generation_method.find("EdGB") != std::string::npos){
+			check_theory_support(generation_method)){
 			gen_params->bppe=mcmc_mod_struct->bppe;
 			gen_params->Nmod=mcmc_mod_struct->ppE_Nmod;
 			gen_params->betappe=new double[gen_params->Nmod];
+			base = dimension - mcmc_mod_struct->ppE_Nmod;
 		}
 		else if(generation_method.find("gIMR") != std::string::npos){
 			gen_params->Nmod_phi=mcmc_mod_struct->gIMR_Nmod_phi;
@@ -2491,10 +2538,18 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 			if(gen_params->Nmod_alpha !=0){
 				gen_params->delta_alpha=new double[gen_params->Nmod_alpha];
 			}
+			base = dimension 
+				- mcmc_mod_struct->gIMR_Nmod_phi 
+				- mcmc_mod_struct->gIMR_Nmod_sigma 
+				- mcmc_mod_struct->gIMR_Nmod_beta 
+				- mcmc_mod_struct->gIMR_Nmod_alpha; 
 		}
-	}
-	for(int i = 0 ; i <dimension; i++){
-		temp_params[i]=param[i];
+		if((generation_method.find("dCS")!= std::string::npos ||
+			generation_method.find("EdGB")!=std::string::npos)){
+			//temp_params[base] = pow(temp_params[base],.25)/(c*1000);
+			temp_params[base] = 
+				pow_int(temp_params[base]/(c/1000.) , 4);
+		}
 	}
 	return generation_method;
 }
@@ -2679,9 +2734,13 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 	//Cleanup
 	delete [] temp_params;
 	if(check_mod(local_gen)){
+		//if( local_gen.find("ppE") != std::string::npos ||
+		//	local_gen.find("dCS") != std::string::npos ||
+		//	local_gen.find("EdGB") != std::string::npos){
+		//	delete [] gen_params.betappe;
+		//}
 		if( local_gen.find("ppE") != std::string::npos ||
-			local_gen.find("dCS") != std::string::npos ||
-			local_gen.find("EdGB") != std::string::npos){
+			check_theory_support(local_gen)){
 			delete [] gen_params.betappe;
 		}
 		else if( local_gen.find("gIMR") != std::string::npos){

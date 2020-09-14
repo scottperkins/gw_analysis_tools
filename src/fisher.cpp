@@ -1908,11 +1908,11 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[i+base] = input_params->betappe[i];
 			}
 			//For MCMC, alpha is sampled in KM (alpha**2)**.25
-			if(generation_method.find("MCMC")!=std::string::npos && 
-				(generation_method.find("dCS")!= std::string::npos ||
-				generation_method.find("EdGB")!=std::string::npos)){
-				parameters[base] = pow(input_params->betappe[0],.25)/(c*1000);
-			}
+			//if(generation_method.find("MCMC")!=std::string::npos && 
+			//	(generation_method.find("dCS")!= std::string::npos ||
+			//	generation_method.find("EdGB")!=std::string::npos)){
+			//	parameters[base] = pow(input_params->betappe[0],.25)/(c*1000);
+			//}
 			
 		}
 		else if(generation_method.find("gIMR") != std::string::npos ){
@@ -2202,12 +2202,12 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 			}
 			//MCMC samples in root(alpha) in KM 
 			//but the dCS/EdGB waveform works with (seconds)^2
-			if(generation_method.find("MCMC")!=std::string::npos &&
-				(generation_method.find("dCS")!= std::string::npos ||
-				generation_method.find("EdGB")!=std::string::npos)){
-				a_params->betappe[0] = 
-					pow_int(a_params->betappe[0]/(c/1000.) , 4);
-			}
+			//if(generation_method.find("MCMC")!=std::string::npos &&
+			//	(generation_method.find("dCS")!= std::string::npos ||
+			//	generation_method.find("EdGB")!=std::string::npos)){
+			//	a_params->betappe[0] = 
+			//		pow_int(a_params->betappe[0]/(c/1000.) , 4);
+			//}
 		}
 		else if(generation_method.find("gIMR") != std::string::npos ){
 			int mods = a_params->Nmod_phi + 
