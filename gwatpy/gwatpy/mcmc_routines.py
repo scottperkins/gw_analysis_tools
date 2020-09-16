@@ -10,6 +10,9 @@ from scipy.signal.windows import tukey
 import multiprocessing as mp
 from functools import partial
 
+from scipy.stats import  dirichlet
+from scipy.optimize import NonlinearConstraint,differential_evolution
+
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 ##########################################################
 rlib.MCMC_modification_struct_py.argtypes = \
@@ -280,3 +283,104 @@ def create_waveform_from_MCMC_output(parameters,psd,freqs, dim,generation_method
     
     return response_t
     
+def dirichlet_wrapper_full(p,*bincts):
+    ptemp = np.insert(p, len(p), 1-np.sum(p))
+    returnval = 0
+    if np.sum(ptemp<=0):
+        return 10**20
+    for x in bincts:
+        returnval +=dirichlet.logpdf(ptemp, x)  
+    #return  -np.exp(returnval)
+    return  -(returnval)
+
+    
+
+def dirichlet_wrapper(p,bincts):
+    ptemp = np.insert(np.asarray(p), len(p), 1-np.sum(p))
+    #print("ptemp: ",ptemp)
+    returnval = 0
+    if np.sum(ptemp<=0):
+        return 10**20
+    returnval +=dirichlet.logpdf(ptemp, bincts)  
+    #return  -np.exp(returnval)
+    return  -(returnval)
+
+    #return -np.exp(dirichlet.logpdf(ptemp, mvec)+dirichlet.logpdf(ptemp,mvec2))
+
+
+def emcee_wrapper(p, bincts):
+    if np.sum(p<0) or  (np.sum(p) > 1):
+        return -10**20
+    ptemp = np.insert(np.asarray(p), len(p), 1-np.sum(p))
+    #print("ptemp: ",ptemp)
+    returnval = 0
+    for x in bincts:
+        returnval +=dirichlet.logpdf(ptemp, x)  
+    #return  -np.exp(returnval)
+    return  (returnval)
+
+import emcee
+import corner
+#Returns an array of probabilities pvec at corresponding values of the parameter xvec
+#data has shape (M,N) where M is the number of independent datasets and N is the length of each data set (can be different for each set)
+def combine_discrete_marginalized_posteriors(datasets, bins=None):
+    if bins is None:
+        minval = np.amin(datasets)
+        maxval = np.amax(datasets)
+        bins = np.linspace(minval,maxval, 20)
+    elif isinstance(bins, int):
+        minval = np.amin(datasets)
+        maxval = np.amax(datasets)
+        bins = np.linspace(minval,maxval, bins)
+    
+    pvec = np.ones(len(bins)-1) 
+    #pvec = np.ones(len(bins)-2) 
+    pvec_arr = [] 
+    bincts = np.zeros( (len(datasets), len(bins)-1))
+    for x in np.arange(len(datasets)):
+        binctstemp,binstemp = np.histogram(datasets[x], bins=bins)
+        bincts[x] = binctstemp
+    #bincts = bincts+ 1e-10
+    bincts = bincts+ 1
+    
+    constr = NonlinearConstraint(lambda x : 1-np.sum(x), 0, 1)
+    bnds = []
+    for x in np.arange(len(bins)-2):
+        bnds.append((0,1))
+
+    res = differential_evolution(dirichlet_wrapper_full,args=bincts, bounds=bnds,constraints=(constr), maxiter=10000)
+    print(res)
+    pvec = np.insert(res.x,len(res.x), 1-np.sum(res.x))
+
+    #pvec = np.ones(len(bins)-1) 
+    #for x in bincts: 
+    #    print(x)
+    #    res = differential_evolution(dirichlet_wrapper,args=[x], bounds=bnds,constraints=(constr),maxiter=10000)
+    #    print(res)
+    #    pvectemp = np.insert(res.x,len(res.x), 1-np.sum(res.x))
+    #    pvec_arr.append(pvectemp/(bins[1]-bins[0]))
+    #    pvec*=pvectemp
+    #    pvec = pvec/(np.sum(pvec) )
+
+    #nwalkers = 250
+    #ndim = len(pvec)
+    #p0=[]
+    #for x in np.arange(nwalkers):
+    #    p0.append(bincts[0,:-1]/np.sum(bincts[0,:])*np.random.rand(ndim))
+    #sampler = emcee.EnsembleSampler(nwalkers, ndim, emcee_wrapper,threads=10, args=[bincts])
+
+    #pos, prob, state = sampler.run_mcmc(p0,10000,progress=True)
+    #
+    ##print("Ac time",sampler.get_autocorr_time())
+    #temp = sampler.flatchain
+    ##fig = corner.corner(temp)
+    ##plt.savefig("test_corner.pdf")
+    ##plt.close()
+    #for x in np.arange(len(temp[0])):
+    #    pvec[x] = np.median(temp[:,x])
+    #pvec = np.insert(pvec,len(pvec), 1-np.sum(pvec))
+
+    pvec = pvec/(bins[1]-bins[0])
+    bin_midpoints = (bins[:-1] + bins[1:])/2
+    
+    return pvec, pvec_arr,bin_midpoints
