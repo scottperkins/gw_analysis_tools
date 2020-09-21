@@ -285,13 +285,16 @@ def create_waveform_from_MCMC_output(parameters,psd,freqs, dim,generation_method
     
 def dirichlet_wrapper_full(p,*bincts):
     ptemp = np.insert(p, len(p), 1-np.sum(p))
-    returnval = 0
+
     if np.sum(ptemp<=0):
         return 10**20
-    for x in bincts:
-        returnval +=dirichlet.logpdf(ptemp, x)  
-    #return  -np.exp(returnval)
+    #returnval = 0
+    #for x in bincts:
+    #    returnval +=dirichlet.logpdf(ptemp, x)  
+    #return  -(returnval)
+    returnval =dirichlet.logpdf(ptemp, np.prod(bincts,axis=0)  )
     return  -(returnval)
+
 
     
 
@@ -321,16 +324,27 @@ def emcee_wrapper(p, bincts):
 
 import emcee
 import corner
+import scipy
+from multiprocessing import Pool
+
+def beta_int_fn(ind_counts, ind_total_counts,dim, y):
+    result = 1
+    prior_val = 1 #uniform
+    #prior_val = .5 #Jeffreys
+    for x in np.arange(len(ind_counts)):
+        result *= scipy.stats.beta.ppf(y, ind_counts[x] + prior_val, ind_total_counts[x]+dim*prior_val - ind_counts[x] - prior_val)
+    return y*result
+
 #Returns an array of probabilities pvec at corresponding values of the parameter xvec
 #data has shape (M,N) where M is the number of independent datasets and N is the length of each data set (can be different for each set)
 def combine_discrete_marginalized_posteriors(datasets, bins=None):
     if bins is None:
-        minval = np.amin(datasets)
-        maxval = np.amax(datasets)
+        minval = np.amin(np.hstack(datasets))
+        maxval = np.amax(np.hstack(datasets))
         bins = np.linspace(minval,maxval, 20)
     elif isinstance(bins, int):
-        minval = np.amin(datasets)
-        maxval = np.amax(datasets)
+        minval = np.amin(np.hstack(datasets))
+        maxval = np.amax(np.hstack(datasets))
         bins = np.linspace(minval,maxval, bins)
     
     pvec = np.ones(len(bins)-1) 
@@ -340,17 +354,28 @@ def combine_discrete_marginalized_posteriors(datasets, bins=None):
     for x in np.arange(len(datasets)):
         binctstemp,binstemp = np.histogram(datasets[x], bins=bins)
         bincts[x] = binctstemp
+    bincts = np.asarray(bincts)
     #bincts = bincts+ 1e-10
-    bincts = bincts+ 1
+    #bincts = bincts+ 1
     
-    constr = NonlinearConstraint(lambda x : 1-np.sum(x), 0, 1)
-    bnds = []
-    for x in np.arange(len(bins)-2):
-        bnds.append((0,1))
+    total_counts = np.sum(bincts,axis=1)
 
-    res = differential_evolution(dirichlet_wrapper_full,args=bincts, bounds=bnds,constraints=(constr), maxiter=10000)
-    print(res)
-    pvec = np.insert(res.x,len(res.x), 1-np.sum(res.x))
+    #with Pool(5) as p :
+    #    pvec = p.map(lambda x: scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec), y), 0,1)[0], np.arange(len(pvec)))
+    for x in np.arange(len(pvec)):
+        pvec[x],err = scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec) ,y), 0,1)
+        print(err)
+    print(pvec)
+    pvec /= np.sum(pvec)
+
+    #constr = NonlinearConstraint(lambda x : 1-np.sum(x), 0, 1)
+    #bnds = []
+    #for x in np.arange(len(bins)-2):
+    #    bnds.append((0,1))
+
+    #res = differential_evolution(dirichlet_wrapper_full,args=bincts, bounds=bnds,constraints=(constr), maxiter=10000)
+    #print(res)
+    #pvec = np.insert(res.x,len(res.x), 1-np.sum(res.x))
 
     #pvec = np.ones(len(bins)-1) 
     #for x in bincts: 
@@ -383,4 +408,4 @@ def combine_discrete_marginalized_posteriors(datasets, bins=None):
     pvec = pvec/(bins[1]-bins[0])
     bin_midpoints = (bins[:-1] + bins[1:])/2
     
-    return pvec, pvec_arr,bin_midpoints
+    return pvec, bin_midpoints,bins

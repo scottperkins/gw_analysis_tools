@@ -13,11 +13,14 @@ import scipy
 print(scipy.__version__)
 
 #pvec = [.3,.3,.4]
-means = np.random.uniform(size=10)*0
-sigmas = np.random.uniform(size=10)*10
-data = [np.random.normal(means[x],sigmas[x], 10000) for x in np.arange(len(means))]
+N = 3
+means = np.random.uniform(size=N)*3-1.5
+sigmas = np.random.uniform(size=N)*5
+cts = np.random.uniform(size=N)*1000+1000
+#sigmas = np.ones(10)
+data = np.asarray([np.random.normal(means[x],sigmas[x], int(cts[x])) for x in np.arange(len(means))])
 
-bins =100
+bins =20
 #bins = np.linspace(minval, maxval, 7)
 #mvec, bins = np.histogram(data1, bins=bins)
 #mvec2, bins = np.histogram(data2, bins=bins)
@@ -65,29 +68,66 @@ bins =100
 #plt.hist(data2,bins=bins,density=True,alpha=.5)
 
 
-pvec_test, pvec_arr,bins_test = gmcmc.combine_discrete_marginalized_posteriors(data,bins=bins)
-plt.plot(bins_test,pvec_test,label='dirichlet test')
+pvec_test,bins_mid,bins_edges = gmcmc.combine_discrete_marginalized_posteriors(data,bins=bins)
+#plt.plot(bins_mid,pvec_test,label='dirichlet test')
 #bins_test = np.linspace(np.amin(data),np.amax(data), bins)
 
 for i in np.arange(len(means)):
-    plt.hist(data[i],bins=bins_test,alpha=.5,density=True,label='data {}'.format(i))
+    plt.hist(data[i],bins=bins_edges,alpha=.5,density=True,label='data {}'.format(i))
 
-#prod = np.ones(bins)
-#for i in np.arange(len(means)):
-#    hist, b = np.histogram(data[i],bins=bins_test)
-#    prod *= hist
-#prod /=  (np.sum(prod)*(b[1]-b[0]))
-#print(np.sum(prod))
-#plt.plot(b[1:],prod,label='prod')
+prod = np.ones(bins-1)
+dists = []
+for i in np.arange(len(means)):
+    hist, b = np.histogram(data[i],bins=bins_edges)
+    prod *= hist
+    dists.append(scipy.stats.rv_histogram((hist,b)))
+prod /=  (np.sum(prod)*(b[1]-b[0]))
+print("PVEC",pvec_test)
+print("PROD",prod)
+print(np.sum(prod))
+#plt.plot(bins_mid,prod,label='prod')
+fits = np.product([fn.pdf(bins_mid) for fn in dists], axis=0)
+fits /= (np.sum(fits)*(bins_mid[1]-bins_mid[0]))
+#plt.plot(bins_mid, fits,label='fits')
 
 print(sigmas)
 sigma_tot = np.sqrt( 1./ np.sum( 1/sigmas**2))
+mean_tot = np.sum(means/(2*sigmas**2)) / (np.sum(1./(2*sigmas**2)))
 print(sigma_tot)
 #xvals = np.linspace(np.amin(data),np.amax(data),1000)
-xvals = bins_test
-vals = 1./np.sqrt( sigma_tot**2 * 2 *np.pi) * np.exp( - ( xvals)**2/(2.*sigma_tot**2))
-print(vals)
-plt.plot(xvals,vals,label='true')
+xvals = bins_mid
+def true_dist(x,sigmatot,meantot):
+    return 1./np.sqrt( sigmatot**2 * 2 *np.pi) * np.exp( - (meantot- x)**2/(2.*sigmatot**2))
+vals = true_dist(xvals, sigma_tot,mean_tot)
+#plt.plot(xvals,vals,label='true')
+xvals = np.linspace(np.amin(bins_mid),np.amax(bins_mid),1000)
+vals = true_dist(xvals, sigma_tot,mean_tot)
+plt.plot(xvals,vals,label='true-full')
+print("True sigma",sigma_tot)
+print("True mean",mean_tot)
+
+
+dirichlet_fn = scipy.interpolate.interp1d(bins_mid, pvec_test,kind='linear')
+prod_fn = scipy.interpolate.interp1d(bins_mid, prod,kind='linear')
+per_dirichlet_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(dirichlet_fn,x,xvals[-1])[0], x0=0)
+per_prod_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(prod_fn,x,xvals[-1])[0], x0=0)
+per_true_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(lambda y: true_dist(y,sigma_tot,mean_tot),x,xvals[-1])[0], x0=0)
+per_dirichlet_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(dirichlet_fn,xvals[0],x)[0], x0=0)
+per_prod_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(prod_fn,xvals[0],x)[0], x0=0)
+per_true_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(lambda y: true_dist(y,sigma_tot,mean_tot),xvals[0],x)[0], x0=0)
+print("Dirichlet 90%",per_dirichlet_upper)
+print("Prod 90%",per_prod_upper)
+print("True 90%",per_true_upper)
+print("Dirichlet 90%",per_dirichlet_lower)
+print("Prod 90%",per_prod_lower)
+print("True 90%",per_true_lower)
+
+plt.plot(xvals, dirichlet_fn(xvals),label='dirichlet')
+plt.plot(xvals, prod_fn(xvals),label='prod')
+
+#print("95 dirichlet",per_dirichlet)
+#print("95 dirichlet",per_dirichlet)
+
 
 #true_dist = 1./np.sqrt( sigma1**2 * 2 *np.pi) * np.exp( - ( bins_test[1:]-mean1)**2/(2.*sigma1**2))*\
 #    1./np.sqrt( sigma2**2 * 2 *np.pi) * np.exp( - ( mean2-bins_test[1:])**2/(2.*sigma2**2))
