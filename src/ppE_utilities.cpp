@@ -97,7 +97,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
-			mapping->bppe[1] =-3;
+			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 			mapping->beta_fns[0] = &EdGB_beta ;
 			mapping->beta_fns[1] = &EdGB_GHO_beta ;

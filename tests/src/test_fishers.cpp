@@ -4,6 +4,7 @@
 #include "gwat/waveform_util.h"
 #include "gwat/ortho_basis.h"
 #include "gwat/pn_waveform_util.h"
+#include "gwat/ppE_utilities.h"
 #include <iostream>
 
 
@@ -812,15 +813,19 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.Luminosity_Distance = 730;
 	//params.incl_angle = .76;
 	
-	params.mass1 = 25.9;
-	params.mass2 = 2.3;
+	params.mass1 = 16.29;
+	params.mass2 = 7.83;
 	//params.spin1[2] = .08* (params.mass1+params.mass2)/params.mass1;
-	params.spin1[2] = .04;
-	params.spin2[2] = .02 ;
-	params.chip = .07;
-	params.phip = 1.0;
-	params.Luminosity_Distance = 250;
-	params.incl_angle = .8;
+	params.spin1[2] = 0.52*.51;
+	params.spin2[2] = 0.43*.20 ;
+	params.spin1[1] = 0.52*sqrt(1-.51*.51)*sin(2.79);
+	params.spin2[1] = 0.43*sqrt(1-.2*.2)*sin(2.99);
+	params.spin1[0] = 0.52*sqrt(1-.51*.51)*cos(2.79);
+	params.spin2[0] = 0.43*sqrt(1-.2*.2)*cos(2.99);
+	//params.chip = .07;
+	//params.phip = 1.0;
+	params.Luminosity_Distance = 461;
+	params.incl_angle = .63;
 
 	//params.mass1 = 5.0;
 	//params.mass2 = 1.4;
@@ -833,13 +838,14 @@ int dCS_EdGB(int argc, char *argv[])
 	
 
 	params.NSflag1 = false;
-	params.NSflag2 =true;
+	params.NSflag2 =false;
 
 	params.phiRef = .0;
 	params.RA = 1.;
 	params.DEC = 0.6;
 	params.f_ref = 20;
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
+	double eta = calculate_eta(params.mass1,params.mass2)*MSOL_SEC;
 	//params.spin1[2] = .38;
 
 	params.horizon_coord = false;
@@ -862,7 +868,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.betappe[0] = pow_int(8*1000./(c),4);
 	params.betappe[0] =0;
 	//params.betappe[0] =1;
-	params.bppe[0] = -1;
+	params.bppe[0] = -7;
 	
 
 	double fmin = 5;
@@ -897,6 +903,14 @@ int dCS_EdGB(int argc, char *argv[])
 	//std::string method = "ppE_IMRPhenomPv2_IMR";
 	//std::string method = "gIMRPhenomPv2";
 	//std::string method = "EdGB_IMRPhenomPv2";
+	
+
+	source_parameters<double> sp;
+	std::string temp_meth = prep_source_parameters(&sp, &params, "EdGB_IMRPhenomPv2");
+	double phase_factor = EdGB_phase_factor(&sp);
+	double fisco = pow(6.,-3./2.) * pow(eta,3./5.)/(M_PI * chirpmass);
+	std::cout<<phase_factor * pow( M_PI * chirpmass * fisco,-2./3.)<<std::endl;
+	exit(0);
 
 
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
