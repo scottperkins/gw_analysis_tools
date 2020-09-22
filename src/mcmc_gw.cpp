@@ -1880,7 +1880,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 	}
 	else if(dimension==17 && generation_method =="EdGB_GHO_IMRPhenomPv2"){
-		mcmc_mod_struct->ppE_Nmod = 1;
+		mcmc_mod_struct->ppE_Nmod = 2;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
 			seeding_var = new double[dimension];

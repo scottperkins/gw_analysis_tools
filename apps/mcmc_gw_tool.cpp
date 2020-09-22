@@ -287,14 +287,19 @@ int main(int argc, char *argv[])
 			bppe= new double[Nmod];
 			mod_priors = new double*[Nmod];
 			bppe[0] = -7;
-			bppe[1] = -3;
+			bppe[1] = -5;
 			mod_priors[0]= new double[2];
 			mod_priors[1]= new double[2];
-			std::cout<<0<<" : "<<bppe[0]<<std::endl;
 			mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
 			mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
 			mod_priors[1][0] = dbl_dict["ppE beta "+std::to_string(1)+" minimum"];
 			mod_priors[1][1] = dbl_dict["ppE beta "+std::to_string(1)+" maximum"];
+			std::cout<<0<<" : "<<bppe[0]<<std::endl;
+			std::cout<<"Min"<<" : "<<mod_priors[0][0]<<std::endl;
+			std::cout<<"Max"<<" : "<<mod_priors[0][1]<<std::endl;
+			std::cout<<0<<" : "<<bppe[1]<<std::endl;
+			std::cout<<"Min"<<" : "<<mod_priors[1][0]<<std::endl;
+			std::cout<<"Max"<<" : "<<mod_priors[1][1]<<std::endl;
 		
 		}
 		else{
