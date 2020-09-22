@@ -453,7 +453,9 @@ int main(int argc, char *argv[])
 		}
 		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
 			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos||
-			generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos)
+			generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || 
+			generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos ||
+			generation_method.find("EdGB_GHO_IMRPhenomPv2") != std::string::npos)
 			&& dimension >= 16 ){
 			lp = &standard_log_prior_Pv2_mod;
 		}
