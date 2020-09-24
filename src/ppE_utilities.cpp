@@ -9,7 +9,11 @@
  * 
  * EdGB -- input beta is \alpha^2 in seconds^4
  * 
- * EdGB_GHO -- EdGB Generic Higher Order -- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
+ * EdGB_GHOv1 -- EdGB Generic Higher Order version 1-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
+ *
+ * EdGB_GHOv2 -- EdGB Generic Higher Order version 2-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
+ * 
+ * EdGB_GHOv3 -- EdGB Generic Higher Order version 3-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
  *
  * ExtraDimension -- input beta l^2 in seconds^2
  *
@@ -93,14 +97,32 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		ins = true;
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
-		if(generation_method.find("EdGB_GHO")!= std::string::npos){
+		if(generation_method.find("EdGB_GHOv1")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 			mapping->beta_fns[0] = &EdGB_beta ;
-			mapping->beta_fns[1] = &EdGB_GHO_beta ;
+			mapping->beta_fns[1] = &EdGB_GHO_betav1 ;
+		}
+		if(generation_method.find("EdGB_GHOv2")!= std::string::npos){
+			mapping->Nmod = 2;
+			mapping->bppe = new double[2];
+			mapping->bppe[0] =-7;
+			mapping->bppe[1] =-5;
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns[0] = &EdGB_beta ;
+			mapping->beta_fns[1] = &EdGB_GHO_betav2 ;
+		}
+		if(generation_method.find("EdGB_GHOv3")!= std::string::npos){
+			mapping->Nmod = 2;
+			mapping->bppe = new double[2];
+			mapping->bppe[0] =-7;
+			mapping->bppe[1] =-5;
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns[0] = &EdGB_beta ;
+			mapping->beta_fns[1] = &EdGB_GHO_betav3 ;
 		}
 		else{
 			mapping->Nmod = 1;
@@ -280,7 +302,7 @@ template adouble EdGB_phase_factor(source_parameters<adouble> *);
 template double EdGB_phase_factor(source_parameters<double> *);
 
 template<class T>
-T EdGB_GHO_beta( source_parameters<T> *param)
+T EdGB_GHO_betav1( source_parameters<T> *param)
 {
  	T M = param->M;	
 	T DL = param->DL;
@@ -290,8 +312,39 @@ T EdGB_GHO_beta( source_parameters<T> *param)
 	T generic_mod = param->betappe[1];
 	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * generic_mod;
 } 
-template adouble EdGB_GHO_beta(source_parameters<adouble> *);
-template double EdGB_GHO_beta(source_parameters<double> *);
+template adouble EdGB_GHO_betav1(source_parameters<adouble> *);
+template double EdGB_GHO_betav1(source_parameters<double> *);
+
+template<class T>
+T EdGB_GHO_betav2( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T phase_mod = param->betappe[0];
+	T generic_mod = param->betappe[1];
+	T phase_factor = EdGB_phase_factor(param);
+	return 16.*M_PI*phase_factor*phase_mod/(pow_int(unredshiftedM,4)) * generic_mod;
+} 
+template adouble EdGB_GHO_betav2(source_parameters<adouble> *);
+template double EdGB_GHO_betav2(source_parameters<double> *);
+
+template<class T>
+T EdGB_GHO_betav3( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T phase_mod = param->betappe[0];
+	T generic_mod = param->betappe[1];
+	T phase_factor = EdGB_phase_factor(param);
+	T phase_GR_1PN = (3715./756. + 55. * param->eta / 9.);
+	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * generic_mod* phase_factor*phase_GR_1PN;
+} 
+template adouble EdGB_GHO_betav3(source_parameters<adouble> *);
+template double EdGB_GHO_betav3(source_parameters<double> *);
 
 template<class T>
 T ExtraDimension_beta( source_parameters<T> *param)

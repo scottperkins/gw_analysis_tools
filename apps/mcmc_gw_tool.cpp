@@ -460,7 +460,9 @@ int main(int argc, char *argv[])
 			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos||
 			generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || 
 			generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos ||
-			generation_method.find("EdGB_GHO_IMRPhenomPv2") != std::string::npos)
+			generation_method.find("EdGB_GHOv1_IMRPhenomPv2") != std::string::npos|| 
+			generation_method.find("EdGB_GHOv2_IMRPhenomPv2") != std::string::npos|| 
+			generation_method.find("EdGB_GHOv3_IMRPhenomPv2") != std::string::npos)
 			&& dimension >= 16 ){
 			lp = &standard_log_prior_Pv2_mod;
 		}
@@ -468,7 +470,9 @@ int main(int argc, char *argv[])
 			|| generation_method.find("gIMRPhenomD") != std::string::npos
 			|| generation_method.find("dCS_IMRPhenomD") != std::string::npos 
 			|| generation_method.find("EdGB_IMRPhenomD") != std::string::npos 
-			|| generation_method.find("EdGB_GHO_IMRPhenomD") != std::string::npos)
+			|| generation_method.find("EdGB_GHOv1_IMRPhenomD") != std::string::npos
+			|| generation_method.find("EdGB_GHOv2_IMRPhenomD") != std::string::npos
+			|| generation_method.find("EdGB_GHOv3_IMRPhenomD") != std::string::npos)
 			&& dimension >= 11){
 			lp = &standard_log_prior_D_mod;
 		}

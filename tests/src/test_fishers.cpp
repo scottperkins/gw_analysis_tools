@@ -905,12 +905,12 @@ int dCS_EdGB(int argc, char *argv[])
 	//std::string method = "EdGB_IMRPhenomPv2";
 	
 
-	//source_parameters<double> sp;
-	//std::string temp_meth = prep_source_parameters(&sp, &params, "EdGB_IMRPhenomPv2");
-	//double phase_factor = EdGB_phase_factor(&sp);
-	//double fisco = pow(6.,-3./2.) * pow(eta,3./5.)/(M_PI * chirpmass);
-	//std::cout<<phase_factor * pow( M_PI * chirpmass * fisco,-2./3.)<<std::endl;
-	//exit(0);
+	source_parameters<double> sp;
+	std::string temp_meth = prep_source_parameters(&sp, &params, "EdGB_IMRPhenomPv2");
+	double phase_factor = EdGB_phase_factor(&sp);
+	double fisco = pow(6.,-3./2.) * pow(eta,3./5.)/(M_PI * chirpmass);
+	std::cout<<phase_factor * pow( M_PI * chirpmass * fisco,-2./3.)<<std::endl;
+	exit(0);
 
 
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};

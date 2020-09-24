@@ -36,7 +36,13 @@ template<class T>
 T EdGB_phase_factor( source_parameters<T> *param);
 
 template<class T>
-T EdGB_GHO_beta( source_parameters<T> *param);
+T EdGB_GHO_betav1( source_parameters<T> *param);
+
+template<class T>
+T EdGB_GHO_betav2( source_parameters<T> *param);
+
+template<class T>
+T EdGB_GHO_betav3( source_parameters<T> *param);
 
 template<class T>
 T ExtraDimension_beta( source_parameters<T> *param);

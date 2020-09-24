@@ -13,14 +13,14 @@ import scipy
 print(scipy.__version__)
 
 #pvec = [.3,.3,.4]
-N = 3
+N = 50
 means = np.random.uniform(size=N)*3-1.5
 sigmas = np.random.uniform(size=N)*5
-cts = np.random.uniform(size=N)*1000+1000
+cts = np.random.uniform(size=N)*50+10000
 #sigmas = np.ones(10)
 data = np.asarray([np.random.normal(means[x],sigmas[x], int(cts[x])) for x in np.arange(len(means))])
 
-bins =20
+bins=400
 #bins = np.linspace(minval, maxval, 7)
 #mvec, bins = np.histogram(data1, bins=bins)
 #mvec2, bins = np.histogram(data2, bins=bins)
@@ -72,8 +72,8 @@ pvec_test,bins_mid,bins_edges = gmcmc.combine_discrete_marginalized_posteriors(d
 #plt.plot(bins_mid,pvec_test,label='dirichlet test')
 #bins_test = np.linspace(np.amin(data),np.amax(data), bins)
 
-for i in np.arange(len(means)):
-    plt.hist(data[i],bins=bins_edges,alpha=.5,density=True,label='data {}'.format(i))
+#for i in np.arange(len(means)):
+#    plt.hist(data[i],bins=bins_edges,alpha=.5,density=True,label='data {}'.format(i))
 
 prod = np.ones(bins-1)
 dists = []
@@ -86,8 +86,8 @@ print("PVEC",pvec_test)
 print("PROD",prod)
 print(np.sum(prod))
 #plt.plot(bins_mid,prod,label='prod')
-fits = np.product([fn.pdf(bins_mid) for fn in dists], axis=0)
-fits /= (np.sum(fits)*(bins_mid[1]-bins_mid[0]))
+#fits = np.product([fn.pdf(bins_mid) for fn in dists], axis=0)
+#fits /= (np.sum(fits)*(bins_mid[1]-bins_mid[0]))
 #plt.plot(bins_mid, fits,label='fits')
 
 print(sigmas)
@@ -107,20 +107,21 @@ print("True sigma",sigma_tot)
 print("True mean",mean_tot)
 
 
+
 dirichlet_fn = scipy.interpolate.interp1d(bins_mid, pvec_test,kind='linear')
 prod_fn = scipy.interpolate.interp1d(bins_mid, prod,kind='linear')
-per_dirichlet_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(dirichlet_fn,x,xvals[-1])[0], x0=0)
-per_prod_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(prod_fn,x,xvals[-1])[0], x0=0)
-per_true_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(lambda y: true_dist(y,sigma_tot,mean_tot),x,xvals[-1])[0], x0=0)
-per_dirichlet_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(dirichlet_fn,xvals[0],x)[0], x0=0)
-per_prod_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(prod_fn,xvals[0],x)[0], x0=0)
-per_true_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(lambda y: true_dist(y,sigma_tot,mean_tot),xvals[0],x)[0], x0=0)
-print("Dirichlet 90%",per_dirichlet_upper)
-print("Prod 90%",per_prod_upper)
-print("True 90%",per_true_upper)
-print("Dirichlet 90%",per_dirichlet_lower)
-print("Prod 90%",per_prod_lower)
-print("True 90%",per_true_lower)
+#per_dirichlet_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(dirichlet_fn,x,xvals[-1])[0], x0=0)
+#per_prod_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(prod_fn,x,xvals[-1])[0], x0=0)
+#per_true_upper = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(lambda y: true_dist(y,sigma_tot,mean_tot),x,xvals[-1])[0], x0=0)
+#per_dirichlet_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(dirichlet_fn,xvals[0],x)[0], x0=0)
+#per_prod_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(prod_fn,xvals[0],x)[0], x0=0)
+#per_true_lower = scipy.optimize.fsolve(lambda x: 0.05-scipy.integrate.quad(lambda y: true_dist(y,sigma_tot,mean_tot),xvals[0],x)[0], x0=0)
+#print("Dirichlet 90%",per_dirichlet_upper)
+#print("Prod 90%",per_prod_upper)
+#print("True 90%",per_true_upper)
+#print("Dirichlet 90%",per_dirichlet_lower)
+#print("Prod 90%",per_prod_lower)
+#print("True 90%",per_true_lower)
 
 plt.plot(xvals, dirichlet_fn(xvals),label='dirichlet')
 plt.plot(xvals, prod_fn(xvals),label='prod')
@@ -136,6 +137,14 @@ plt.plot(xvals, prod_fn(xvals),label='prod')
 
 plt.legend()
 plt.show()
+
+xvals = bins_mid
+vals = true_dist(xvals, sigma_tot,mean_tot)
+plt.plot(xvals, vals-pvec_test,label="d-resid")
+plt.plot(xvals, vals-prod,label="p-resid")
+plt.legend()
+plt.show()
+plt.close()
 
 #print( dirichlet.pdf(pvec_fit, mvec))
 #print( multinom.pdf(pvec_fit, mvec))
