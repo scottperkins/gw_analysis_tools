@@ -19,7 +19,7 @@
 
 /*! \brief interface function between the sampler and the internal step functions
  */
-int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *current_status, int *next_status, int chain_number)
+int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *current_status, int *next_status,int *current_model_status, int *next_model_status, int chain_number)
 {
 	//Random number to determine type of step
 	double alpha = gsl_rng_uniform(sampler->rvec[chain_number]);
@@ -27,42 +27,46 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 
 	double proposed_param[sampler->max_dim];
 	int proposed_status[sampler->max_dim];
+	int *proposed_model_status=NULL;
+	if(sampler->nested_model_number >0){
+		proposed_model_status = new int[sampler->nested_model_number];
+	}
 
 	int step, selected_dimension;	
 	//Determine which step to take and calculate proposed coord.
 	if (alpha<sampler->prob_boundaries[chain_number][0])
 	{
-		gaussian_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number,&selected_dimension);
+		gaussian_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, proposed_model_status, chain_number,&selected_dimension);
 		sampler->num_gauss[chain_number]+=1;
 		step = 0;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][1])
 	{
-		diff_ev_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
+		diff_ev_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, proposed_model_status, chain_number);
 		sampler->num_de[chain_number]+=1;
 		step = 1;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][2])
 	{
-		mmala_step(sampler, current_param, proposed_param, current_status, proposed_status,chain_number);
+		mmala_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, proposed_model_status,chain_number);
 		sampler->num_mmala[chain_number]+=1;
 		step= 2;
 	}
 	else if (alpha<sampler->prob_boundaries[chain_number][3])
 	{
-		fisher_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
+		fisher_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, proposed_model_status, chain_number);
 		sampler->num_fish[chain_number]+=1;
 		step = 3;
 	}
 	else 
 	{
-		RJ_step(sampler, current_param, proposed_param, current_status, proposed_status, chain_number);
+		RJ_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, proposed_model_status, chain_number);
 		sampler->num_RJstep[chain_number]+=1;
 		step = 4;
 	}
 	
-	double current_lp = sampler->lp(current_param, current_status,sampler->interfaces[chain_number], sampler->user_parameters[chain_number]);
-	double proposed_lp = sampler->lp(proposed_param,proposed_status, sampler->interfaces[ chain_number], sampler->user_parameters[chain_number]);
+	double current_lp = sampler->lp(current_param, current_status,current_model_status,sampler->interfaces[chain_number], sampler->user_parameters[chain_number]);
+	double proposed_lp = sampler->lp(proposed_param,proposed_status, proposed_model_status,sampler->interfaces[ chain_number], sampler->user_parameters[chain_number]);
 	double current_ll=0, proposed_ll=0;
 	double MH_ratio;
 	double power;
@@ -75,7 +79,7 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	else{
 		//Calculate log_likelihood and log prior
 		current_ll = sampler->current_likelihoods[chain_number];
-		proposed_ll = sampler->ll(proposed_param, proposed_status,sampler->interfaces[chain_number], sampler->user_parameters[chain_number]);
+		proposed_ll = sampler->ll(proposed_param, proposed_status,proposed_model_status,sampler->interfaces[chain_number], sampler->user_parameters[chain_number]);
 		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 		//Calculate MH ratio
 		if(std::isnan(proposed_ll)){
@@ -99,7 +103,16 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			next_param[i] = current_param[i];
 			next_status[i] = current_status[i];
 		}
+		for ( i=0;i<sampler->nested_model_number; i ++)
+		{
+			next_model_status[i] = current_model_status[i];
+		}
 		assign_ct_m(sampler, step,chain_number,selected_dimension);
+
+		if(proposed_model_status){
+			delete [] proposed_model_status;
+		}
+
 		return -1;
 	}	
 	else
@@ -109,11 +122,20 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 			next_param[i] = proposed_param[i];
 			next_status[i] = proposed_status[i];
 		}
+		for ( i=0;i<sampler->nested_model_number; i ++)
+		{
+			next_model_status[i] = proposed_model_status[i];
+		}
 		assign_ct_p(sampler, step, chain_number, selected_dimension);
 		sampler->current_likelihoods[chain_number] = proposed_ll;
 		if(step == 3 && sampler->proper_fisher){	
 			iterate_fisher(sampler,chain_number);
 		}
+
+		if(proposed_model_status){
+			delete [] proposed_model_status;
+		}
+
 		return 1;
 	}		
 	
@@ -129,6 +151,8 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
 		int *current_status,
 		int *proposed_status,
+		int *current_model_status,
+		int *proposed_model_status,
 		int chain_id,
 		int *selected_dimension
 		)
@@ -151,6 +175,11 @@ void gaussian_step(sampler *sampler, /**< Sampler struct*/
 	}
 	
 	proposed_param[beta] = gsl_ran_gaussian(sampler->rvec[chain_id], alpha)+current_param[beta];
+
+	for(int i =0; i< sampler->nested_model_number;i++){
+		proposed_model_status[i] = current_model_status[i];	
+	}
+
 	//double alpha = sampler->randgauss_width[chain_id][0][0];
 	//for (int i=0;i<sampler->max_dim;i++){
 	//	if(current_status[i] == 1){
@@ -184,12 +213,14 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
 		int *current_status,
 		int *proposed_status,
+		int *current_model_status,
+		int *proposed_model_status,
 		int chain_index
 		)
 {
 	if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
 	{
-		update_fisher(sampler, current_param, current_status,chain_index);	
+		update_fisher(sampler, current_param, current_status,current_model_status,chain_index);	
 	}
 	double scaling;
 	int beta;
@@ -216,6 +247,9 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 			proposed_param[i] = current_param[i] +
 				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 			proposed_status[i] = current_status[i];
+		}
+		for(int i =0; i< sampler->nested_model_number;i++){
+			proposed_model_status[i] = current_model_status[i];	
 		}
 		
 	}
@@ -256,12 +290,15 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				proposed_status[i] = current_status[i];
 			}
 		}
+		for(int i =0; i< sampler->nested_model_number;i++){
+			proposed_model_status[i] = current_model_status[i];	
+		}
 		
 	}
 	if(sampler->proper_fisher){
-		double lp =sampler->lp(proposed_param,proposed_status, sampler->interfaces[chain_index], sampler->user_parameters[chain_index]) ;
+		double lp =sampler->lp(proposed_param,proposed_status, proposed_model_status,sampler->interfaces[chain_index], sampler->user_parameters[chain_index]) ;
 		if(lp != limit_inf){
-			update_fisher(sampler, proposed_param, proposed_status, chain_index);
+			update_fisher(sampler, proposed_param, proposed_status,proposed_model_status, chain_index);
 			sampler->prop_MH_factor[chain_index] = 0;
 			for(int i = 0 ; i<sampler->max_dim ; i++){
 				for(int j = 0 ; j<sampler->max_dim ; j++){
@@ -349,7 +386,7 @@ void iterate_fisher(sampler *samplerptr,int chain_id)
 }
 
 
-void update_fisher(sampler *sampler, double *current_param, int *param_status, int chain_index)
+void update_fisher(sampler *sampler, double *current_param, int *param_status, int *model_status,int chain_index)
 {
 	int local_dim = sampler->max_dim;
 	if(sampler->RJMCMC && sampler->min_dim !=0) local_dim=sampler->min_dim;
@@ -358,7 +395,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	for (int i =0; i<local_dim;i++){
 		fisher[i] = (double*)malloc(sizeof(double)*local_dim);
 	}
-	sampler->fish(current_param, param_status, fisher,sampler->interfaces[chain_index], sampler->user_parameters[chain_index]);
+	sampler->fish(current_param, param_status,model_status, fisher,sampler->interfaces[chain_index], sampler->user_parameters[chain_index]);
 
 	//Convert to 1D array for Eigen
 	double *oneDfisher=(double *)malloc(sizeof(double)*local_dim*local_dim);
@@ -428,7 +465,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	free(oneDfisher);
 }
 
-void calc_grad(sampler *sampler,double *current_param,int *current_status, int chain_index,double *grad)
+void calc_grad(sampler *sampler,double *current_param,int *current_status, int *current_model_status,int chain_index,double *grad)
 {
 	double epsilon =1.e-1;
 	double locationp[sampler->max_dim];
@@ -437,7 +474,7 @@ void calc_grad(sampler *sampler,double *current_param,int *current_status, int c
 	}
 	for(int i = 0 ; i<sampler->max_dim; i++){
 		locationp[i]+=epsilon; 
-		double llp = sampler->ll(locationp, current_status, sampler->interfaces[chain_index], sampler->user_parameters[chain_index]);
+		double llp = sampler->ll(locationp, current_status, current_model_status,sampler->interfaces[chain_index], sampler->user_parameters[chain_index]);
 		grad[i] = (llp-sampler->current_likelihoods[chain_index])/(epsilon);
 		locationp[i]= current_param[i]; 
 	}
@@ -452,6 +489,8 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
 		int *current_status,
 		int *proposed_status,
+		int *current_model_status,
+		int *proposed_model_status,
 		int chain_index
 		)
 {
@@ -471,7 +510,7 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
 					sampler->chain_temps[chain_index];}
 		double grad[sampler->max_dim];
-		calc_grad(sampler,current_param,current_status, chain_index,grad);
+		calc_grad(sampler,current_param,current_status, current_model_status,chain_index,grad);
 		double dotprod = 0;
 		for(int i = 0 ; i<sampler->max_dim; i++){
 			dotprod+=grad[i]*sampler->fisher_vecs[chain_index][beta][i];
@@ -484,8 +523,12 @@ void mmala_step(sampler *sampler, /**< Sampler struct*/
 				sampler->fisher_vecs[chain_index][beta][i]*dotprod/(2*scaling);
 			proposed_status[i] = current_status[i];
 		}
+		for(int i =0; i< sampler->nested_model_number;i++){
+			proposed_model_status[i] = current_model_status[i];	
+		}
+		
 		double grad_rev[sampler->max_dim];
-		calc_grad(sampler,proposed_param,current_status, chain_index,grad_rev);
+		calc_grad(sampler,proposed_param,current_status, current_model_status,chain_index,grad_rev);
 		double **cov = new double*[sampler->max_dim];
 		for(int i = 0 ; i<sampler->max_dim; i++){
 			cov[i]= new double[sampler->max_dim];
@@ -544,6 +587,8 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		double *proposed_param, /**< [out] Proposed position in parameter space*/
 		int *current_status,
 		int *proposed_status,
+		int *current_model_status,
+		int *proposed_model_status,
 		int chain_id
 		)
 {
@@ -626,6 +671,9 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 			proposed_param[k] = 0;
 		}
 		proposed_status[k]=eff_history_status[k];
+	}
+	for(int i =0; i< sampler->nested_model_number;i++){
+		proposed_model_status[i] = current_model_status[i];	
 	}
 	delete [] eff_history_coord;
 	delete [] eff_history_status;
@@ -718,10 +766,12 @@ void RJ_step(sampler *sampler, /**< sampler*/
 	double *proposed_param, /**<[out] Proposed coordinates in parameter space*/
 	int *current_status, /**< Current status of parameters*/
 	int *proposed_status, /**<[out] Proposed status of parameters*/
+	int *current_model_status, /**< Current status of parameters*/
+	int *proposed_model_status, /**<[out] Proposed status of parameters*/
 	int chain_number/**< chain mumber*/
 	)
 {
-	sampler->rj(current_param, proposed_param, current_status, proposed_status, sampler->interfaces[chain_number],sampler->user_parameters[chain_number]);
+	sampler->rj(current_param, proposed_param, current_status, proposed_status, current_model_status,proposed_model_status,sampler->interfaces[chain_number],sampler->user_parameters[chain_number]);
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
@@ -734,6 +784,7 @@ void RJ_step(sampler *sampler, /**< sampler*/
 void chain_swap(sampler *sampler, /**<sampler struct*/
 		double ***output, /**<output vector containing chains*/
 		int ***param_status,/**< Parameter status*/
+		int ***model_status,/**< Parameter status*/
 		int step_num,	  /**<current step number*/ 
 		int *swp_accepted,
 		int *swp_rejected
@@ -742,7 +793,7 @@ void chain_swap(sampler *sampler, /**<sampler struct*/
 	for (int i =0; i < sampler->chain_N-1; i ++)
 	{
 		int success = single_chain_swap(sampler, output[i][step_num],output[i+1][step_num],
-			param_status[i][step_num],param_status[i+1][step_num], i, i+1);
+			param_status[i][step_num],param_status[i+1][step_num],model_status[i][step_num],model_status[i+1][step_num], i, i+1);
 		if(success==1){
 			sampler->swap_accept_ct[i]+=1;
 			sampler->swap_accept_ct[i+1]+=1;
@@ -770,6 +821,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			double *chain2, /**< chain that is not swapped, but provides parameters to be swapped by the other chain*/
 			int *chain1_status,/**<Parameter status array for chain1*/
 			int *chain2_status,/**<Parameter status array for chain2*/
+			int *chain1_model_status,/**<Parameter status array for chain1*/
+			int *chain2_model_status,/**<Parameter status array for chain2*/
 			int T1_index,	/**<number of chain swappe in chain_temps*/
 			int T2_index	/**<number of chain swapper in chain_temps*/
 			)
@@ -812,6 +865,13 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 		sampler->current_likelihoods[T1_index] = 
 				T2/T1 * sampler->current_likelihoods[T2_index];
 		sampler->current_likelihoods[T2_index] = T1/T2*templl;
+		int temp_model;
+		for(int i =0; i< sampler->nested_model_number;i++){
+			temp_model = chain1_model_status[i];
+			chain1_model_status[i] = chain2_model_status[i];
+			chain2_model_status[i] = temp_model;
+		}
+
 		return 1;
 	}
 
@@ -968,6 +1028,10 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 						samplerptr_source->param_status[id_source][i][j];
 				}
 			}
+			for(int j =0; j<samplerptr_dest->nested_model_number; j++){
+				samplerptr_dest->model_status[id_dest][i][j] = 
+					samplerptr_source->model_status[id_source][i][j];
+			}
 		}
 	}
 	samplerptr_dest->current_likelihoods[id_dest] = samplerptr_source->current_likelihoods[id_source];
@@ -1071,7 +1135,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 		}
 		else{
 			samplerptr_dest->fisher_update_ct[id_dest] = samplerptr_dest->fisher_update_number;
-			update_fisher(samplerptr_dest, samplerptr_dest->output[id_dest][samplerptr_dest->chain_pos[id_dest]], samplerptr_dest->param_status[id_dest][samplerptr_dest->chain_pos[id_dest]],id_dest);	
+			update_fisher(samplerptr_dest, samplerptr_dest->output[id_dest][samplerptr_dest->chain_pos[id_dest]], samplerptr_dest->param_status[id_dest][samplerptr_dest->chain_pos[id_dest]],samplerptr_dest->model_status[id_dest][samplerptr_dest->chain_pos[id_dest]],id_dest);	
 			if(samplerptr_dest->proper_fisher){
 				iterate_fisher(samplerptr_dest, id_dest);
 			}
@@ -1296,6 +1360,9 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->param_status = (int ***)malloc(sizeof(int **)*sampler->chain_N);
 		sampler->history_status = (int ***)malloc(sizeof(int **)*sampler->chain_N);
 	}
+	if(sampler->nested_model_number == 0){
+		sampler->model_status = (int ***)malloc(sizeof(int **)*sampler->chain_N);
+	}
 
 
 	sampler->ref_chain_status = (bool *) malloc(sizeof(bool)*sampler->chain_N);
@@ -1366,6 +1433,18 @@ void allocate_sampler_mem(sampler *sampler)
 			for(int k = 1 ; k<sampler->history_length; k ++){
 				sampler->history_status[i][k] = sampler->history_status[i][0];
 			}
+
+		}
+		if(sampler->nested_model_number ==0){
+			sampler->model_status[i] = (int **)malloc(sizeof(int *)*sampler->N_steps);
+			//sampler->model_status[i][0] = (int *)malloc(sizeof(int ));
+			//for(int k = 0 ; k<1; k++){
+			//	sampler->model_status[i][0][k] = 1;
+			//}
+			//for(int k = 1 ; k<sampler->N_steps; k ++){
+			//	sampler->model_status[i][k] = sampler->model_status[i][0];
+			//}
+
 		}
 
 		sampler->step_prob[i] = (double *)malloc(sizeof(double)*sampler->types_of_steps);
@@ -1619,6 +1698,13 @@ void deallocate_sampler_mem(sampler *sampler)
 			free(sampler->history_status[j]);
 		}
 		free(sampler->history_status);
+	}
+	if(sampler->nested_model_number == 0){
+		for(int j = 0; j<sampler->chain_N; j++){
+			free(sampler->model_status[j]);
+		}
+		free(sampler->model_status);
+		
 	}
 	free(sampler->ref_chain_status);
 	free(sampler->ref_chain_ids);
@@ -2005,7 +2091,8 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 	std::ofstream checkfile;
 	checkfile.open(filename);
 	checkfile.precision(15);
-	checkfile<<sampler->min_dim<<" , "<<sampler->max_dim<<" , "<<sampler->chain_N<<std::endl;//Dim, chain_N
+	//checkfile<<sampler->min_dim<<" , "<<sampler->max_dim<<" , "<<sampler->chain_N<<std::endl;//Dim, chain_N
+	checkfile<<sampler->min_dim<<" , "<<sampler->max_dim<<" , "<<sampler->chain_N<<" , "<<sampler->nested_model_number<<std::endl;//min dim, max dim, chain_N, nested model number
 	//Chain temps
 	checkfile<<sampler->chain_temps[0];
 	for(int i =1 ; i<sampler->chain_N; i++){
@@ -2044,6 +2131,10 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 		}
 		for(int j =0; j<sampler->max_dim;j++){
 			checkfile<<" , "<<sampler->param_status[i][pos][j];
+			//std::cout<<sampler->param_status[i][pos][j]<<std::endl;
+		}
+		for(int j =0; j<sampler->nested_model_number;j++){
+			checkfile<<" , "<<sampler->model_status[i][pos][j];
 			//std::cout<<sampler->param_status[i][pos][j]<<std::endl;
 		}
 		checkfile<<std::endl;
@@ -2197,6 +2288,8 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 		}
 		std::getline(lineStream, item, ',');
 		samplerptr->chain_N = std::stod(item);
+		std::getline(lineStream, item, ',');
+		samplerptr->nested_model_number = std::stod(item);
 
 		//Second Row -- temps
 		std::getline(file_in,line);
@@ -2260,6 +2353,13 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 				samplerptr->param_status[j][0][i] = std::stod(item);
 				i++;
 			}
+			if(samplerptr->nested_model_number>0){
+				i=0;
+				while(std::getline(lineStreampos, item, ',')){
+					samplerptr->model_status[j][0][i] = std::stod(item);
+					i++;
+				}
+			}
 		}
 		std::getline(file_in,line);
 		std::stringstream lineStreamprimed(line);
@@ -2293,7 +2393,7 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
 		for(int i=0 ; i<samplerptr->chain_N; i++){
-			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
+			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],samplerptr->model_status[i][0],i);	
 			if(samplerptr->proper_fisher){
 				iterate_fisher(samplerptr, i);
 			}
@@ -2325,8 +2425,16 @@ void assign_ct_m(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 	else if(step ==4) samplerptr->RJstep_reject_ct[chain_index]+=1;
 }
 
-void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,double *seeding_var) 
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status, int *initial_model_status,double *seeding_var) 
 {
+	if(samplerptr->nested_model_number >0){
+		for(int j = 0 ; j<samplerptr->chain_N; j++){
+			for (int i = 0 ; i<samplerptr->nested_model_number; i++){
+				samplerptr->model_status[j][0][i] = initial_model_status[i];
+			}
+		}
+	}
+
 	if(!seeding_var){ 
 		for (int j=0;j<samplerptr->chain_N;j++){
 			samplerptr->de_primed[j]=false;
@@ -2342,7 +2450,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 				
 			}
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 		}
 	}
 	//Seed non-zero chains normally with variance as specified
@@ -2377,9 +2485,9 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 						}
 					}
 					attempts+=1;
-				}while(samplerptr->lp(temp_pos, temp_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) == limit_inf && attempts<max_attempts);
+				}while(samplerptr->lp(temp_pos, temp_status,initial_model_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) == limit_inf && attempts<max_attempts);
 				attempts =0;
-				if(samplerptr->lp(temp_pos, temp_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) != limit_inf ){
+				if(samplerptr->lp(temp_pos, temp_status,initial_model_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) != limit_inf ){
 					for(int i =0; i<samplerptr->max_dim;i++){
 						for(int l =0; l<samplerptr->N_steps; l++){
 							samplerptr->output[j][l][i] = temp_pos[i];
@@ -2399,7 +2507,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			}
 			
 			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->interfaces[ j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[ j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 		}
 	}
 	if(samplerptr->log_ll || samplerptr->log_lp){
@@ -2407,14 +2515,14 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			samplerptr->ll_lp_output[i][0][0] = samplerptr->current_likelihoods[i];
 			samplerptr->ll_lp_output[i][0][1] = 
 				samplerptr->lp(samplerptr->output[i][0],
-				samplerptr->param_status[i][0],
+				samplerptr->param_status[i][0],samplerptr->model_status[i][0],
 				samplerptr->interfaces[i], samplerptr->user_parameters[i]);
 		}
 	}
 	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
 		for(int i=0 ; i<samplerptr->chain_N; i++){
-			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],i);	
+			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],samplerptr->model_status[i][0],i);	
 			if(samplerptr->proper_fisher){
 				iterate_fisher(samplerptr, i);
 			}
@@ -2664,9 +2772,12 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old, /**<Dynam
 	sampler_new->fisher_update_number = sampler_old->fisher_update_number;
 	sampler_new->pool = sampler_old->pool;
 	sampler_new->swp_freq = sampler_old->swp_freq;
+	sampler_new->nested_model_number = sampler_old->nested_model_number;
 
 	//This is a reference copy, not a value.
 	sampler_new->output = sampler_old->output;
+	sampler_new->param_status = sampler_old->param_status;
+	sampler_new->model_status = sampler_old->model_status;
 	//sampler_new->output = allocate_3D_array(chain_N, sampler_old->N_steps, sampler_old->dimension);
 
 	sampler_new->fisher_exist = sampler_old->fisher_exist;
@@ -2785,11 +2896,16 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 	int **old_gauss_width_number=new int*[samplerptr->chain_N];//,samplerptr->types_of_steps);
 	double **old_initial_pos = allocate_2D_array(samplerptr->chain_N,samplerptr->max_dim);
 	int **old_initial_status = allocate_2D_array_int(samplerptr->chain_N,samplerptr->max_dim);
+	int **old_model_status; 
+	if(samplerptr->nested_model_number>0){
+		old_model_status = allocate_2D_array_int(samplerptr->chain_N,samplerptr->nested_model_number);
+	}
 	bool no_history=false;
 	if(file_in){
 		//First row -- dim, chain_N
 		std::getline(file_in,line);
 		std::stringstream lineStream(line);
+		std::getline(lineStream, item, ',');
 		std::getline(lineStream, item, ',');
 		std::getline(lineStream, item, ',');
 		std::getline(lineStream, item, ',');
@@ -2838,6 +2954,11 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 			i=0;
 			while(std::getline(lineStreampos, item, ',')){
 				old_initial_status[j][i] = std::stod(item);
+				i++;
+			}
+			i=0;
+			while(std::getline(lineStreampos, item, ',')){
+				old_model_status[j][i] = std::stod(item);
 				i++;
 			}
 		}
@@ -2950,6 +3071,9 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 				samplerptr->output[i][samplerptr->chain_pos[i]][j]=old_initial_pos[cp_index][j];
 				samplerptr->param_status[i][samplerptr->chain_pos[i]][j]=old_initial_status[cp_index][j];
 			}
+			for(int j = 0 ; j<samplerptr->nested_model_number; j++){
+				samplerptr->model_status[i][samplerptr->chain_pos[i]][j]=old_model_status[cp_index][j];
+			}
 			//for(int j = 0 ; j<samplerptr->types_of_steps ; j++){
 			//	samplerptr->randgauss_width[i][j] = old_gauss_width[cp_index][j];
 			//}
@@ -3000,11 +3124,14 @@ void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr)
 	delete [] old_gauss_width;
 	deallocate_2D_array(old_initial_pos,samplerptr->chain_N, samplerptr->max_dim);
 	deallocate_2D_array(old_initial_status,samplerptr->chain_N, samplerptr->max_dim);
+	if(old_model_status){
+		deallocate_2D_array(old_model_status,samplerptr->chain_N,samplerptr->nested_model_number);
+	}
 
 }
 /*! \brief Utility to write out the parameters and status of a sampler to a file
  */
-void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status,int chain_N,double *temps,bool RJ)
+void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status,int ***model_status, int chain_N,int nested_model_number,double *temps,bool RJ)
 {
 	std::ofstream out_file;
 	out_file.open(file);
@@ -3026,10 +3153,17 @@ void write_output_file(std::string file, int step_num, int max_dimension, double
 					out_file<<output[cold_chain_ids[k]][i][j]<<" , ";
 				}
 				for(int j = 0 ; j<max_dimension; j++){
-					if(j==max_dimension-1)
+					//if(j==max_dimension-1)
+					if(j==max_dimension-1 && nested_model_number >0)
 						out_file<<status[cold_chain_ids[k]][i][j]<<std::endl;
 					else
 						out_file<<status[cold_chain_ids[k]][i][j]<<" , ";
+				}
+				for(int j = 0 ; j<nested_model_number; j++){
+					if(j==nested_model_number-1)
+						out_file<<model_status[cold_chain_ids[k]][i][j]<<std::endl;
+					else
+						out_file<<model_status[cold_chain_ids[k]][i][j]<<" , ";
 				}
 			}
 		}
@@ -3065,7 +3199,7 @@ int count_cold_chains(double *temps, int chain_N)
 
 /*! \brief Utility to write out the parameters and status of a sampler to a file
  */
-void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,double **output_new, int **status_new,int chain_N,double *temps,bool RJ)
+void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,int ***model_status_old,double **output_new, int **status_new,int **model_status_new,int chain_N,int nested_model_number,double *temps,bool RJ)
 {
 	int coldchains=0;
 	int cold_chain_ids[chain_N];
@@ -3083,6 +3217,12 @@ void reduce_output(int step_num, int max_dimension, double ***output_old, int **
 				if(RJ){
 					status_new[i*coldchains + j][k] = 
 						status_old[cold_chain_ids[j]][i][k];
+				}
+			}
+			if(RJ){
+				for(int k = 0 ; k<nested_model_number; k++){
+					model_status_new[i*coldchains + j][k] = 
+						model_status_old[cold_chain_ids[j]][i][k];
 				}
 			}
 	

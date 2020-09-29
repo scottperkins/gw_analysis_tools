@@ -454,6 +454,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	mcmc_sampler_output *sampler_output,
 	double **output,
 	int **status,
+	int **model_status,
+	int nested_model_number,
 	int max_dimension,
 	int min_dimension,
 	int N_steps,
@@ -468,7 +470,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int nu,
 	int max_chunk_size,
 	std::string chain_distribution_scheme,
-	double(*log_prior)(double *param, int *status,mcmc_data_interface *interface,void *parameters),
+	double(*log_prior)(double *param, int *status,int *model_status,mcmc_data_interface *interface,void *parameters),
 	int numThreads,
 	bool pool,
 	bool show_prog,
@@ -492,17 +494,21 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 	double *proposed_param, 
 	int *current_status, 
 	int *proposed_status, 
+	int *current_model_status, 
+	int *proposed_model_status, 
 	mcmc_data_interface *interface, 
 	void *user_param);
 void RJMCMC_2WF_fisher_wrapper(
 	double *param, 
 	int *status, 
+	int *model_status, 
 	double **fisher,
 	mcmc_data_interface *interface, 
 	void *user_param);
 double RJMCMC_2WF_likelihood_wrapper(
 	double *param, 
 	int *status, 
+	int *model_status, 
 	mcmc_data_interface *interface, 
 	void *user_param);
 

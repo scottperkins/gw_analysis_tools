@@ -13,14 +13,14 @@ import scipy
 print(scipy.__version__)
 
 #pvec = [.3,.3,.4]
-N = 50
-means = np.random.uniform(size=N)*3-1.5
+N = 10
+means = np.random.uniform(size=N)*1-0.5
 sigmas = np.random.uniform(size=N)*5
 cts = np.random.uniform(size=N)*50+10000
 #sigmas = np.ones(10)
 data = np.asarray([np.random.normal(means[x],sigmas[x], int(cts[x])) for x in np.arange(len(means))])
 
-bins=400
+bins=100
 #bins = np.linspace(minval, maxval, 7)
 #mvec, bins = np.histogram(data1, bins=bins)
 #mvec2, bins = np.histogram(data2, bins=bins)
@@ -69,11 +69,11 @@ bins=400
 
 
 pvec_test,bins_mid,bins_edges = gmcmc.combine_discrete_marginalized_posteriors(data,bins=bins)
-#plt.plot(bins_mid,pvec_test,label='dirichlet test')
+plt.plot(bins_mid,pvec_test,label='dirichlet test')
 #bins_test = np.linspace(np.amin(data),np.amax(data), bins)
 
-#for i in np.arange(len(means)):
-#    plt.hist(data[i],bins=bins_edges,alpha=.5,density=True,label='data {}'.format(i))
+for i in np.arange(len(means)):
+    plt.hist(data[i],bins=bins_edges,alpha=.5,density=True,label='data {}'.format(i))
 
 prod = np.ones(bins-1)
 dists = []

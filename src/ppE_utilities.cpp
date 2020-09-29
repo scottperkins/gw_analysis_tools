@@ -325,7 +325,7 @@ T EdGB_GHO_betav2( source_parameters<T> *param)
 	T phase_mod = param->betappe[0];
 	T generic_mod = param->betappe[1];
 	T phase_factor = EdGB_phase_factor(param);
-	return 16.*M_PI*phase_factor*phase_mod/(pow_int(unredshiftedM,4)) * generic_mod;
+	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) *phase_factor* generic_mod;
 } 
 template adouble EdGB_GHO_betav2(source_parameters<adouble> *);
 template double EdGB_GHO_betav2(source_parameters<double> *);

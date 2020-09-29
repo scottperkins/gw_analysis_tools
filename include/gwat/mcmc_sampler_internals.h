@@ -23,6 +23,7 @@ public:
 	int min_dim;
 	int chain_id;
 	int max_dim;
+	int nested_model_number;
 	int chain_number;
 	double RJ_step_width=1;
 	bool burn_phase=false;
@@ -136,9 +137,9 @@ public:
 	//log_prior lp;
 	//log_likelihood ll;
 	//fisher fish;
-	std::function<double(double*,int *, mcmc_data_interface *, void *)> lp;
-	std::function<double(double*,int *,mcmc_data_interface *, void *)> ll;
-	std::function<void(double*,int *,double**,mcmc_data_interface *, void *)> fish;
+	std::function<double(double*,int *, int *,mcmc_data_interface *, void *)> lp;
+	std::function<double(double*,int *,int *,mcmc_data_interface *, void *)> ll;
+	std::function<void(double*,int *,int *,double**,mcmc_data_interface *, void *)> fish;
 	
 	void ** user_parameters=NULL;
 	bool local_param_allocation=false;
@@ -192,24 +193,26 @@ public:
 	//RJPTMCMC Parameterts
 	int ***param_status;
 	bool RJMCMC=false;
-	std::function<void(double*,double*,int *,int *,mcmc_data_interface *,void *)> rj;
+	std::function<void(double*,double*,int *,int *,int *,int *,mcmc_data_interface *,void *)> rj;
 	bool update_RJ_width=true;
+	int ***model_status = NULL;//Tracks which models are being used
+	int nested_model_number = 0;//Number of models that are perfectly nested
 	
 };
 
 
 void iterate_fisher(sampler *samplerptr, int chain_id);
-int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *next_status, int chain_number);
+int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *next_status,int *current_model_status, int *next_model_status, int chain_number);
 
-void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status, int chain_id, int *selected_dimension);
+void gaussian_step(sampler *sampler, double *current_param,double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, int chain_id, int *selected_dimension);
 
-void fisher_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_index);
+void fisher_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, int chain_index);
 
-void update_fisher(sampler *sampler, double *current_param, int *param_status,int chain_index);
+void update_fisher(sampler *sampler, double *current_param, int *param_status,int *model_status,int chain_index);
 
-void mmala_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status,int chain_index);
+void mmala_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status,int chain_index);
 
-void diff_ev_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status, int chain_id);
+void diff_ev_step(sampler *sampler,double *current_param, double *proposed_param,int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, int chain_id);
 
 void RJ_smooth_history(sampler *sampler, double *current_param, int *current_param_status,int base_history_id, double *eff_history_coord, int *eff_history_status, int chain_id);
 
@@ -218,11 +221,13 @@ void RJ_step(sampler *sampler,
 	double *proposed_param, 
 	int *current_status, 
 	int *proposed_status, 
+	int *current_model_status, 
+	int *proposed_model_status, 
 	int chain_number);
 
-void chain_swap(sampler *sampler, double ***output, int ***param_status,int step_num,int *swp_accepted, int *swp_rejected);
+void chain_swap(sampler *sampler, double ***output, int ***param_status,int ***model_status,int step_num,int *swp_accepted, int *swp_rejected);
 
-int single_chain_swap(sampler *sampler, double *chain1, double *chain2,int *chain1_status, int *chain2_status, int T1_index, int T2_index);
+int single_chain_swap(sampler *sampler, double *chain1, double *chain2,int *chain1_status, int *chain2_status,int *chain1_model_status, int *chain2_model_status, int T1_index, int T2_index);
 
 void assign_probabilities(sampler *sampler, int chain_index);
 
@@ -239,23 +244,6 @@ void deallocate_sampler_mem(sampler *sampler);
 void update_history(sampler *sampler, double *new_params, int *new_param_status,int chain_index);
 
 
-//void auto_correlation_spectral(double *chain, int length, double *autocorr);
-//
-//double auto_correlation(double *arr, int length, double tolerance);
-//
-//double auto_correlation_serial(double *arr, int length);
-//
-//double auto_correlation_grid_search(double *arr, int length, int box_num=10, int final_length= 50, double target_length=.01);
-//
-//double auto_correlation_internal(double *arr, int length, int lag, double ave);
-//
-//void auto_corr_intervals(double *data, int length,double *output, int num_segments,  double accuracy);
-//
-//void write_auto_corr_file_from_data(std::string autocorr_filename, double **output,int intervals, int dimension, int N_steps);
-//
-//void write_auto_corr_file_from_data_file(std::string autocorr_filename, std::string output_file,int intervals, int dimension, int N_steps);
-
-//void write_stat_file(sampler *sampler, std::string filename, int *accepted_steps, int *rejected_steps,int accepted_swps, int rejected_swps);
 void write_stat_file(sampler *sampler, std::string filename);
 
 void write_checkpoint_file(sampler *sampler, std::string filename);
@@ -270,7 +258,7 @@ void load_temps_checkpoint_file(std::string check_file, double *temps, int chain
 void assign_ct_p(sampler *sampler, int step, int chain_index, int gauss_dim);
 void assign_ct_m(sampler *sampler, int step, int chain_index, int gauss_dim);
 
-void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,double *seeding_var) ;
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,int *initial_model_status,double *seeding_var) ;
 
 double PT_dynamical_timescale(int t0, int nu, int t);
 
@@ -292,9 +280,9 @@ void initiate_full_sampler(sampler *sampler_new, sampler *sampler_old,
 	std::string checkpoint_file_start
 	);
 void copy_base_checkpoint_properties(std::string check_file,sampler *samplerptr);
-void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status, int chain_N,double *temps,bool RJ);
+void write_output_file(std::string file, int step_num, int max_dimension, double ***output, int ***status, int ***model_status,int chain_N,int nested_model_number, double *temps,bool RJ);
 
-void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,double **output_new, int **status_new,int chain_N,double *temps,bool RJ);
+void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,int ***model_status_old,double **output_new, int **status_new,int **model_status_new,int chain_N,double *temps,bool RJ);
 
 int count_cold_chains(double *temps, int chain_N);
 #endif

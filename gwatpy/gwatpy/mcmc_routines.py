@@ -12,6 +12,7 @@ from functools import partial
 
 from scipy.stats import  dirichlet
 from scipy.optimize import NonlinearConstraint,differential_evolution
+from scipy.special import hyp2f1, beta, gamma, loggamma,betaln
 
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 ##########################################################
@@ -335,6 +336,23 @@ def beta_int_fn(ind_counts, ind_total_counts,dim, y):
         result *= scipy.stats.beta.ppf(y, ind_counts[x] + prior_val, ind_total_counts[x]+dim*prior_val - ind_counts[x] - prior_val)
     return y*result
 
+def p_mean_analytic(ind_counts, ind_total_counts):
+    prior_val = 1 #uniform
+    #prior_val = .5 #Jeffreys
+    new_ind_counts = ind_counts + prior_val
+    new_ind_total_counts = ind_total_counts + prior_val
+    print(new_ind_total_counts)
+    print(ind_total_counts)
+    #prior_val = .5 #Jeffreys
+    nvals = new_ind_total_counts - new_ind_counts
+    N = len(new_ind_counts)
+
+    return_val= loggamma(2 - N + np.sum(new_ind_counts)) + loggamma( 2-2*N + np.sum(nvals)+np.sum(new_ind_counts))
+    return_val -= loggamma(1 - N + np.sum(new_ind_counts) )
+    return_val -= loggamma(3 - 2*N + np.sum(new_ind_counts)+np.sum(nvals) )
+    return np.exp(return_val)
+
+
 #Returns an array of probabilities pvec at corresponding values of the parameter xvec
 #data has shape (M,N) where M is the number of independent datasets and N is the length of each data set (can be different for each set)
 def combine_discrete_marginalized_posteriors(datasets, bins=None):
@@ -360,11 +378,13 @@ def combine_discrete_marginalized_posteriors(datasets, bins=None):
     
     total_counts = np.sum(bincts,axis=1)
 
+
     #with Pool(5) as p :
     #    pvec = p.map(lambda x: scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec), y), 0,1)[0], np.arange(len(pvec)))
     for x in np.arange(len(pvec)):
-        pvec[x],err = scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec) ,y), 0,1)
-        print(err)
+        print("analytic",p_mean_analytic(bincts[:,x], total_counts))
+        #pvec[x],err = scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec) ,y), 0,1)
+        pvec[x]=p_mean_analytic(bincts[:,x], total_counts)
     print(pvec)
     pvec /= np.sum(pvec)
 
