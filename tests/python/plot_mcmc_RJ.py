@@ -1,5 +1,4 @@
 import matplotlib as mpl
-#mpl.use("pdf")
 import corner
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,14 +14,14 @@ import emcee
 #data = np.loadtxt("data/experiment_output.csv",delimiter=',')
 #data = np.loadtxt("data/test_output.csv",delimiter=',')
 injections = np.loadtxt("data/injections.csv",delimiter=',',unpack=True)
-f = h5py.File("data/injection_output.csv",'r')
+f = h5py.File("data/RJ_injection_output.csv",'r')
 
 
-data,status = gmcmc.RJPTMCMC_unpack_file("data/RJ_injection_output.csv")
+data,status,model = gmcmc.RJPTMCMC_unpack_file("data/RJ_injection_output.csv")
 for x in data:
     x[6] = np.exp(x[6])
     x[7] = np.exp(x[7])
-GRdim = 15
+GRdim = 11
 mask_GR = np.sum(status[:,GRdim:],axis=1) == 0
 mask_nonGR = np.logical_not( mask_GR)
 data_GR = data[mask_GR]
@@ -31,6 +30,11 @@ data_nonGR = data[mask_nonGR]
 data_nonGR = data_nonGR[:]
 print(np.shape(data_GR))
 print(np.shape(data_nonGR))
+print("non Isolated")
+print(np.sum((status[:,-1] == 1) ) )
+print(np.sum((status[:,-2] == 1) ) )
+print(np.sum((status[:,-3] == 1) ) )
+print("Isolated")
 print(np.sum((status[:,-1] == 1) & (status[:,-2] == 0)& (status[:,-3] == 0) ))
 print(np.sum((status[:,-1] == 0) & (status[:,-2] == 1)& (status[:,-3] == 0) ))
 print(np.sum((status[:,-1] == 0) & (status[:,-2] == 0)& (status[:,-3] == 1) ))
@@ -41,24 +45,29 @@ print(np.sum((status[:,-1] == 0) & (status[:,-2] == 0)& (status[:,-3] == 1) ))
 #    plt.close()
 
 numMods =  np.sum(status[:,GRdim:],axis=1)
+print(numMods)
 plt.hist(numMods)
-plt.show()
+plt.savefig('plots/mod1.pdf')
+#plt.show()
 plt.close()
 
 plt.hist(data[:,-1],bins=50,density=True)
-plt.show()
+plt.savefig('plots/mod2.pdf')
+#plt.show()
 plt.close()
 
 plt.hist(data[:,-2],bins=50,density=True)
-plt.show()
+plt.savefig('plots/mod3.pdf')
+#plt.show()
 plt.close()
 
 plt.hist(data[:,-3],bins=50,density=True)
-plt.show()
+plt.savefig('plots/mod4.pdf')
+#plt.show()
 plt.close()
 
-for x in range(len(data_GR[0])):
-    print(emcee.autocorr.integrated_time(data_GR[:,x],tol=0))
+#for x in range(len(data_GR[0])):
+#    print(emcee.autocorr.integrated_time(data_GR[:,x]))
 
 #chains = list(f["MCMC_OUTPUT/LOGL_LOGP"])
 #for y in range(len(list(f["MCMC_OUTPUT/LOGL_LOGP"]))):

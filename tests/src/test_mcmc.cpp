@@ -33,6 +33,7 @@ void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, voi
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_P_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double chirpmass, double eta);
 double chirpmass_q_jac(double chirpmass, double q);
 double T_mcmc_gw_tool ;
@@ -183,9 +184,9 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	//#############################################################
 	
 
-	int min_dim = 15;
-	std::string recovery_method_base = "IMRPhenomPv2";
-	std::string recovery_method_extended = "gIMRPhenomPv2";
+	int min_dim = 11;
+	std::string recovery_method_base = "IMRPhenomD";
+	std::string recovery_method_extended = "gIMRPhenomD";
 	int ensemble = 10;
 	//int ensemble = 5;
 	int chains = 40;
@@ -223,7 +224,7 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	//initial_position[0] = 2.;
 	double *seeding = NULL;
 	int swap_freq = 5;
-	int threads = 10;
+	int threads = 8;
 	bool pool = true;
 	bool show_progress = true;
 	std::string stat_file = "data/RJ_injection_stat.txt";
@@ -262,7 +263,8 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	double spin2sph[3];
 	transform_cart_sph(injection.spin1,spin1sph);
 	transform_cart_sph(injection.spin2,spin2sph);
-	double initial_position[max_dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, spin1sph[0],spin2sph[0],cos(spin1sph[1]),cos(spin2sph[1]),spin1sph[2],spin2sph[2],0,0,0};
+	//double initial_position[max_dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, spin1sph[0],spin2sph[0],cos(spin1sph[1]),cos(spin2sph[1]),spin1sph[2],spin2sph[2],0,0,0};
+	double initial_position[max_dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta,injection.spin1[2],injection.spin2[2],0,0,0};
 
 	int initial_status[max_dim];
 	for(int i = 0 ; i<min_dim; i++){
@@ -289,7 +291,7 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	
 	mcmc_sampler_output sampler_output(chains,max_dim);
 	sampler_output.RJ = true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_P_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, max_dim);
 	deallocate_2D_array(status,  samples, max_dim);
 
@@ -1625,6 +1627,37 @@ double chirpmass_q_jac(double chirpmass, double q){
 	//return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
 	return chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
 }
+
+double standard_log_prior_D_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[7]);
+	double eta = pos[8];
+
+	if (eta<.0 || eta>.25){return a;}//eta
+	double m1 = calculate_mass1(chirp,eta );
+	double m2 = calculate_mass2(chirp,eta );
+	if(m1<0.01 || m1>50){return a;}
+	if(m2<0.01 || m2>50){return a;}
+
+	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
+
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
+	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>5000){return a;}//DL
+	if ((pos[9])<-.9 || (pos[9])>.95){return a;}//chi1 
+	if ((pos[10])<-.9 || (pos[10])>.95){return a;}//chi2
+	for(int i = interface->min_dim; i<interface->max_dim; i++){
+		if(status[i] ==1 ){
+			if ((pos[i])<-10 || (pos[i])>10){return a;}//gIMR
+		}
+	}
+	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+}
 double standard_log_prior_P_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
@@ -1634,8 +1667,8 @@ double standard_log_prior_P_RJ(double *pos,int *status,int *model_status, mcmc_d
 	if (eta<.0 || eta>.25){return a;}//eta
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
-	if(m1<0.01 || m1>5){return a;}
-	if(m2<0.01 || m2>5){return a;}
+	if(m1<0.01 || m1>50){return a;}
+	if(m2<0.01 || m2>50){return a;}
 
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 
