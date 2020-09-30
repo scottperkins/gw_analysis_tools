@@ -2913,6 +2913,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	int *initial_status,
+	int *initial_model_status,
 	double *seeding_var,
 	double *chain_temps,
 	int swp_freq,
@@ -3090,7 +3091,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 
 	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(sampler_output,output,status, model_status, nested_model_number,
 		max_dimension,min_dimension, N_steps, chain_N, 
-		max_chain_N_thermo_ensemble,initial_pos,initial_status,seeding_var, chain_temps, 
+		max_chain_N_thermo_ensemble,initial_pos,initial_status,initial_model_status,seeding_var, chain_temps, 
 		swp_freq, t0, nu,max_chunk_size,chain_distribution_scheme,
 		log_prior,RJMCMC_2WF_likelihood_wrapper, RJMCMC_2WF_fisher_wrapper,RJMCMC_2WF_RJ_proposal_wrapper,(void**)user_parameters,numThreads, pool, 
 		show_prog,update_RJ_widths,statistics_filename,

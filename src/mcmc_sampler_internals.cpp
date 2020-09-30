@@ -1406,6 +1406,7 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->interfaces[i]->max_dim = sampler->max_dim;
 		sampler->interfaces[i]->chain_number = sampler->chain_N;
 		sampler->interfaces[i]->chain_id = i;
+		sampler->interfaces[i]->nested_model_number = sampler->nested_model_number;
 		sampler->interfaces[i]->burn_phase = sampler->burn_phase;
 		//#######################
 		//#######################
@@ -2349,13 +2350,16 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 				i++;
 			}
 			i=0;
-			while(std::getline(lineStreampos, item, ',')){
+			//while(std::getline(lineStreampos, item, ',')){
+			while(i<samplerptr->max_dim  ){
+				std::getline(lineStreampos, item, ',');
 				samplerptr->param_status[j][0][i] = std::stod(item);
 				i++;
 			}
 			if(samplerptr->nested_model_number>0){
 				i=0;
-				while(std::getline(lineStreampos, item, ',')){
+				while(i<samplerptr->nested_model_number  ){
+					std::getline(lineStreampos, item, ',');
 					samplerptr->model_status[j][0][i] = std::stod(item);
 					i++;
 				}

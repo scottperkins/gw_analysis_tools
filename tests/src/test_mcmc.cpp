@@ -278,6 +278,10 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	int **status  = allocate_2D_array_int( samples, max_dim);
 	int **model_status  = NULL;
 	int nested_model_number = 0;
+	int *initial_model_status= NULL;
+	if(nested_model_number != 0 ){
+		initial_model_status = new int[nested_model_number];
+	}
 	double t0 = 2000;
 	double nu = 100;
 	std::string chain_distribution="double";
@@ -285,10 +289,13 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	
 	mcmc_sampler_output sampler_output(chains,max_dim);
 	sampler_output.RJ = true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_P_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_P_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, max_dim);
 	deallocate_2D_array(status,  samples, max_dim);
 
+	if(initial_model_status){
+		delete [] initial_model_status;
+	}
 	if(mod_struct.gIMR_phii){
 		delete [] mod_struct.gIMR_phii;
 	}
@@ -404,7 +411,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 5*10;
+	int N_steps = 5*10000;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -437,14 +444,22 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//delete [] status;
 	//##################################################	
 	//###############################################
-	int t0 = 20;
-	int nu = 10;
-	int max_chunksize = 10;
+	int t0 = 2000;
+	int nu = 100;
+	int max_chunksize = 10000;
 	bool update_RJ_width = true;
 	double **output = new double*[N_steps];
 	int **status = new int*[N_steps];
+	int nested_model_number =3;
 	int **model_status = NULL;
-	int nested_model_number =0;
+	int *initial_model_status = NULL;
+	if(nested_model_number !=0){
+		initial_model_status = new int[nested_model_number];
+		model_status = allocate_2D_array_int(N_steps, nested_model_number);
+		for(int i = 0 ; i<nested_model_number; i++){
+			initial_model_status[i]=0;
+		}
+	}
 	for(int j = 0 ; j<N_steps;j ++){
 		output[j]=new double[dim];
 		status[j]=new int[dim];
@@ -452,7 +467,14 @@ int mcmc_RJ_sin(int argc, char *argv[])
 
 	mcmc_sampler_output sampler_output(chain_N,max_dim,nested_model_number);
 	sampler_output.RJ = true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(&sampler_output,output,status, model_status,nested_model_number,max_dim,min_dim, N_steps, chain_N, max_ensemble_chain_N,initial_pos,initial_status, seeding_var, chain_temps, swp_freq,  t0, nu, max_chunksize, chain_distribution,RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, update_RJ_width, stat_file, chain_file, "",checkpoint);
+	sampler_output.nested_model_number = nested_model_number;
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(&sampler_output,output,status, model_status,nested_model_number,max_dim,min_dim, N_steps, chain_N, max_ensemble_chain_N,initial_pos,initial_status, initial_model_status,seeding_var, chain_temps, swp_freq,  t0, nu, max_chunksize, chain_distribution,RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, update_RJ_width, stat_file, chain_file, "",checkpoint);
+	if(initial_model_status){
+		delete [] initial_model_status;
+	}
+	if(model_status){
+		deallocate_2D_array(model_status, N_steps, nested_model_number);
+	}
 	for(int j = 0 ; j<N_steps;j++){
 		delete [] output[j];
 		delete [] status[j];
@@ -508,12 +530,19 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 		}
 
 	}
+	for(int i = 0 ; i<interface->nested_model_number; i++){
+		proposed_model_status[i] = current_model_status[i];
+	}
 	return ;
 }
 
 double RJ_sin_logL(double *params, int *status,int *model_status,mcmc_data_interface *interface, void *parameters)
 //double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters)
 {
+	//for(int i = 0 ; i<2; i++){
+	//	std::cout<<model_status[i]<<" ";
+	//}
+	//std::cout<<std::endl;
 	int dim = 0;
 	for(int i = 0 ; i<interface->max_dim; i++){
 		dim+=status[i];

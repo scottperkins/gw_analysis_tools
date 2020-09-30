@@ -220,7 +220,13 @@ def RJPTMCMC_unpack_file(filename):
         if( "CHAIN" in chains[x+1]):
             data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]],axis=0)
             status = np.insert(status,-1, f["MCMC_OUTPUT/STATUS"][chains[x+1]],axis=0)
-    return data, status
+    model_status = []
+    if "MCMC_OUTPUT/MODEL_STATUS" in f.keys():
+        model_status = f["MCMC_OUTPUT/MODEL_STATUS"][chains[0]]
+        for x in range(chains_N-1):
+            if( "CHAIN" in chains[x+1]):
+                model_status = np.insert(model_status,-1, f["MCMC_OUTPUT/MODEL_STATUS"][chains[x+1]],axis=0)
+    return data, status,model_status
 
 #Thanks to Neil for the term 'Bayesogram..'
 def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, threads=1 ,**mod_struct_kwargs):
@@ -341,8 +347,6 @@ def p_mean_analytic(ind_counts, ind_total_counts):
     #prior_val = .5 #Jeffreys
     new_ind_counts = ind_counts + prior_val
     new_ind_total_counts = ind_total_counts + prior_val
-    print(new_ind_total_counts)
-    print(ind_total_counts)
     #prior_val = .5 #Jeffreys
     nvals = new_ind_total_counts - new_ind_counts
     N = len(new_ind_counts)
@@ -382,10 +386,8 @@ def combine_discrete_marginalized_posteriors(datasets, bins=None):
     #with Pool(5) as p :
     #    pvec = p.map(lambda x: scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec), y), 0,1)[0], np.arange(len(pvec)))
     for x in np.arange(len(pvec)):
-        print("analytic",p_mean_analytic(bincts[:,x], total_counts))
         #pvec[x],err = scipy.integrate.quad(lambda y: beta_int_fn(bincts[:,x],total_counts, len(pvec) ,y), 0,1)
         pvec[x]=p_mean_analytic(bincts[:,x], total_counts)
-    print(pvec)
     pvec /= np.sum(pvec)
 
     #constr = NonlinearConstraint(lambda x : 1-np.sum(x), 0, 1)

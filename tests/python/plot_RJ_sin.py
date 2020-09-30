@@ -34,7 +34,8 @@ plt.plot(injected_data_clean)
 plt.savefig("plots/RJ_sin_injected_data.pdf")
 plt.close()
 
-data,status = gmcmc.RJPTMCMC_unpack_file("data/chains_RJ_sin.hdf5")
+data,status,model_status = gmcmc.RJPTMCMC_unpack_file("data/chains_RJ_sin.hdf5")
+print("MS",model_status)
 data = data[::100]
 status = status[::100]
 print(np.shape(data))

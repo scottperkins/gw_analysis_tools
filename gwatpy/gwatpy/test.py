@@ -13,14 +13,14 @@ import scipy
 print(scipy.__version__)
 
 #pvec = [.3,.3,.4]
-N = 10
+N = 100
 means = np.random.uniform(size=N)*1-0.5
 sigmas = np.random.uniform(size=N)*5
 cts = np.random.uniform(size=N)*50+10000
 #sigmas = np.ones(10)
 data = np.asarray([np.random.normal(means[x],sigmas[x], int(cts[x])) for x in np.arange(len(means))])
 
-bins=100
+bins=1000
 #bins = np.linspace(minval, maxval, 7)
 #mvec, bins = np.histogram(data1, bins=bins)
 #mvec2, bins = np.histogram(data2, bins=bins)
@@ -75,25 +75,22 @@ plt.plot(bins_mid,pvec_test,label='dirichlet test')
 for i in np.arange(len(means)):
     plt.hist(data[i],bins=bins_edges,alpha=.5,density=True,label='data {}'.format(i))
 
+fns = []
 prod = np.ones(bins-1)
 dists = []
 for i in np.arange(len(means)):
     hist, b = np.histogram(data[i],bins=bins_edges)
     prod *= hist
     dists.append(scipy.stats.rv_histogram((hist,b)))
+    fns.append(scipy.interpolate.interp1d(bins_mid, pvec_test,kind='quadratic'))
 prod /=  (np.sum(prod)*(b[1]-b[0]))
-print("PVEC",pvec_test)
-print("PROD",prod)
-print(np.sum(prod))
 #plt.plot(bins_mid,prod,label='prod')
 #fits = np.product([fn.pdf(bins_mid) for fn in dists], axis=0)
 #fits /= (np.sum(fits)*(bins_mid[1]-bins_mid[0]))
 #plt.plot(bins_mid, fits,label='fits')
 
-print(sigmas)
 sigma_tot = np.sqrt( 1./ np.sum( 1/sigmas**2))
 mean_tot = np.sum(means/(2*sigmas**2)) / (np.sum(1./(2*sigmas**2)))
-print(sigma_tot)
 #xvals = np.linspace(np.amin(data),np.amax(data),1000)
 xvals = bins_mid
 def true_dist(x,sigmatot,meantot):
@@ -106,7 +103,12 @@ plt.plot(xvals,vals,label='true-full')
 print("True sigma",sigma_tot)
 print("True mean",mean_tot)
 
+totalfn = lambda x: np.prod([ y(x) for y in fns])
+norm = scipy.integrate.quad(totalfn,xvals[0],xvals[-1])[0]
+yplot = np.asarray([totalfn(x) for x in xvals])/norm
 
+print(yplot)
+plt.plot(xvals, yplot, label='fit ')
 
 dirichlet_fn = scipy.interpolate.interp1d(bins_mid, pvec_test,kind='linear')
 prod_fn = scipy.interpolate.interp1d(bins_mid, prod,kind='linear')

@@ -463,6 +463,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	int *initial_status,
+	int *initial_model_status,
 	double *seeding_var,
 	double *chain_temps,
 	int swp_freq,

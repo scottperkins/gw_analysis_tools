@@ -697,18 +697,18 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 			hsize_t dims[RANK];
 			hsize_t dims_ll_lp[RANK];
 			hsize_t dims_status[RANK];
-			hsize_t dims_model_status[RANK];
+			//hsize_t dims_model_status[RANK];
 			if(trim){
 				dims[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
 				dims_ll_lp[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
 				dims_status[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
-				dims_model_status[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
+				//dims_model_status[0]= chain_lengths[ids[i]]-trim_lengths[ids[i]];
 			}
 			else{
 				dims[0]= chain_lengths[ids[i]];
 				dims_ll_lp[0]= chain_lengths[ids[i]];
 				dims_status[0]= chain_lengths[ids[i]];
-				dims_model_status[0]= chain_lengths[ids[i]];
+				//dims_model_status[0]= chain_lengths[ids[i]];
 			}
 			dims[1]= dimension;
 			dims_ll_lp[1]= 2;
@@ -809,7 +809,7 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 				}
 				dims_model_status[1]= nested_model_number;
 
-				dataspace_model_status = new H5::DataSpace(RANK,dims_model_status,dims);
+				dataspace_model_status = new H5::DataSpace(RANK,dims_model_status,max_dims);
 	
 
 				plist_model_status = new H5::DSetCreatPropList;
@@ -826,7 +826,7 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 				if(trim){ beginning_id =trim_lengths[ids[i]];}
 				for(int j = 0 ; j<chain_lengths[ids[i]] - beginning_id; j++){
 					for(int k = 0 ; k<nested_model_number; k++){
-						temp_model_status_buffer[j*dimension +k] = model_status[ids[i]][j+beginning_id][k];	
+						temp_model_status_buffer[j*nested_model_number +k] = model_status[ids[i]][j+beginning_id][k];	
 					}
 				}
 				dataset_model_status->write(temp_model_status_buffer, H5::PredType::NATIVE_INT);
@@ -1168,7 +1168,7 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 					else{
 						new_size_model_status[0]= chain_lengths[ids[i]];
 					}
-					new_size_model_status[1]= dimension;
+					new_size_model_status[1]= nested_model_number;
 					dataset_model_status->extend(new_size_model_status);
 
 					delete dataspace_model_status;
@@ -1191,7 +1191,7 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 					if(dump_files[file_id]->trimmed){beginning_id = dump_files[file_id]->file_trim_lengths[ids[i]];}
 					for(int j = base_dims_model_status[0] ; j<chain_lengths[ids[i]]-beginning_id; j++){
 						for(int k = 0 ; k<nested_model_number; k++){
-							temp_buffer_model_status[(j-base_dims_model_status[0])*dimension +k] = model_status[ids[i]][j+beginning_id][k];	
+							temp_buffer_model_status[(j-base_dims_model_status[0])*nested_model_number +k] = model_status[ids[i]][j+beginning_id][k];	
 						}
 					}
 					
@@ -2453,6 +2453,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[max_dimension]*/
 	int *initial_status, 	/**<Initial status in parameter space - shape int[max_dimension]*/
+	int *initial_model_status, 	/**<Initial model status in parameter space - shape int[nested_model_number]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
 	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
@@ -2505,7 +2506,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 	//#####################################################################
 	RJPTMCMC_MH_internal(temp_output,temp_status, temp_model_status, nested_model_number,max_dimension, min_dimension,
 		dynamic_search_length, chain_N,  
-		initial_pos,initial_status, seeding_var, chain_temps, swp_freq, 
+		initial_pos,initial_status,initial_model_status, seeding_var, chain_temps, swp_freq, 
 		 log_prior, log_likelihood,fisher,RJ_proposal,user_parameters,
 		numThreads, pool,internal_prog,update_RJ_width,statistics_filename,"","","",checkpoint_file);
 	
@@ -3859,6 +3860,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	int chain_N,	/**< Number of chains*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	int *initial_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
+	int *initial_model_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
@@ -3878,7 +3880,6 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
-	int *initial_model_status=NULL;
 	//To Do:
 	//	Retrofit the sampler_internal functions to accept dim-status array -- for regular PTMCMC, just submit with all 1's
 	//		Includes statistics file, percentage of time spent on/off, etc
@@ -5809,6 +5810,7 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 	int chain_N,	/**< Number of chains*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	int *initial_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
+	int *initial_model_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
@@ -5851,6 +5853,7 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		chain_N,	
 		initial_pos, 	
 		initial_status, 	
+		initial_model_status, 	
 		seeding_var, 	
 		chain_temps,	
 		swp_freq,	
@@ -5948,6 +5951,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos, 	
 	int *initial_status, 	
+	int *initial_model_status, 	
 	double *seeding_var, 	
 	double *chain_temps, 
 	int swp_freq,	
@@ -5996,6 +6000,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 		max_chain_N_thermo_ensemble,
 		initial_pos,
 		initial_status,
+		initial_model_status,
 		seeding_var,
 		chain_temps,
 		swp_freq,
