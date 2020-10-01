@@ -3646,3 +3646,8 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 	
 	return ;
 }
+
+
+
+
+

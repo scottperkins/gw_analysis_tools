@@ -71,6 +71,7 @@ public:
 	int indep_samples=0;
 	int *max_acs=NULL;
 	int *trim_lengths=NULL;
+
 	bool RJ=false;
 	int ***status=NULL;
 	int ***model_status=NULL;
