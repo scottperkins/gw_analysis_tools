@@ -454,7 +454,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
 		sampler->nan_counter[chain_index]+=1;
 		if(sampler->nan_counter[chain_index] > 50){
-			debugger_print(__FILE__,__LINE__,"WARNING -- NANs from Fisher inversion are over 50! You're Fisher's may be unstable!");
+			//debugger_print(__FILE__,__LINE__,"WARNING -- NANs from Fisher inversion are over 50! You're Fisher's may be unstable!");
 		}
 	}
 
@@ -2081,6 +2081,11 @@ void write_stat_file(sampler *sampler,
 			accepted_swp_fraction
 			<<std::setw(fourth)<<"Rejected fraction: "<<std::setw(fourth)<< 
 			rejected_swp_fraction<<std::endl;
+	int nan_ct = 0;
+	for(int i = 0 ; i<sampler->chain_N; i++){
+		nan_ct+=sampler->nan_counter[i];
+	}
+	out_file<<std::left<<std::setw(half)<<"Nans in Fisher: "<<std::setw(half)<<nan_ct<<std::endl;
 	out_file.close();
 	free(accepted_steps);free(rejected_steps);
 }

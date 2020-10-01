@@ -2566,6 +2566,11 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 			swp_freq,log_prior, log_likelihood, fisher, RJ_proposal,user_parameters,
 			numThreads, pool, internal_prog, update_RJ_width, statistics_filename, 
 			"",  "","",checkpoint_file,true,true);
+		int nan_counter = 0;
+		for(int i = 0  ;i<sampler_temp.chain_N;i++){
+			nan_counter+= sampler_temp.nan_counter[i];
+		}
+		std::cout<<"NANs in Fisher: "<<nan_counter<<std::endl;
 		//##############################################################
 		//Reset positions and rewrite checkpoint file
 		//##############################################################
@@ -2654,6 +2659,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 				dynamic_search_length, chain_temps, swp_freq, t0, nu,
 				log_prior, log_likelihood,fisher,RJ_proposal,
 				user_parameters,numThreads, pool,internal_prog,update_RJ_width,"","",checkpoint_file,true);
+
 		}
 
 			
@@ -3262,6 +3268,11 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 			swp_freq,log_prior, log_likelihood, fisher,RJ_proposal, user_parameters,
 			numThreads, harvest_pool, internal_prog, update_RJ_width, statistics_filename, 
 			"", "","",checkpoint_file,false,false);
+		int nan_counter = 0;
+		for(int i = 0  ;i<sampler.chain_N;i++){
+			nan_counter+= sampler.nan_counter[i];
+		}
+		std::cout<<"NANs in Fisher: "<<nan_counter<<std::endl;
 
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 		sampler_output->populate_chain_temperatures(chain_temps);
