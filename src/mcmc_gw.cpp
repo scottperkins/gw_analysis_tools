@@ -2915,6 +2915,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int *initial_status,
 	int *initial_model_status,
 	double *seeding_var,
+	double **prior_ranges,/**< Range of priors on MODIFICATIONS -- shape : double[N_mods][2] with low in 0 and high in 1**/
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -3080,6 +3081,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 		user_parameters[i]->fish_length= fish_length;
 
 		user_parameters[i]->r = rvec[i];
+
+		user_parameters[i]->mod_prior_ranges = prior_ranges;
 
 		//user_parameters[i]->burn_freqs = mcmc_frequencies;
 		//user_parameters[i]->burn_data = mcmc_data;
@@ -3575,7 +3578,10 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 				if(current_status[i] == 0){
 					if(ct == beta){
 						proposed_status[i] = 1;
-						proposed_param[i] = gsl_ran_gaussian(user_param->r,interface->RJ_step_width);
+						//proposed_param[i] = gsl_ran_gaussian(user_param->r,interface->RJ_step_width);
+						proposed_param[i] = gsl_rng_uniform(user_param->r) 
+							* (user_param->mod_prior_ranges[i-min_dimension][1]-user_param->mod_prior_ranges[i-min_dimension][0]) 
+							+ user_param->mod_prior_ranges[i-min_dimension][0];
 						//proposed_param[i] = gsl_ran_gaussian(user_param->r,10);
 						break;
 					}
@@ -3608,7 +3614,10 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 			if(current_status[i] == 0){
 				if(ct == beta){
 					proposed_status[i] = 1;
-					proposed_param[i] = gsl_ran_gaussian(user_param->r,interface->RJ_step_width);
+					//proposed_param[i] = gsl_ran_gaussian(user_param->r,interface->RJ_step_width);
+					proposed_param[i] = gsl_rng_uniform(user_param->r) 
+						* (user_param->mod_prior_ranges[i-min_dimension][1]-user_param->mod_prior_ranges[i-min_dimension][0]) 
+						+ user_param->mod_prior_ranges[i-min_dimension][0];
 					//proposed_param[i] = gsl_ran_gaussian(user_param->r,10);
 					break;
 				}

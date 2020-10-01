@@ -59,6 +59,9 @@ struct MCMC_user_param
 	double **fish_psd=NULL;
 	double fish_length;
 	bool GAUSS_QUAD=false;
+		
+	//RJ stuff
+	double **mod_prior_ranges=NULL;
 	
 	gsl_rng *r;
 };
@@ -465,6 +468,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int *initial_status,
 	int *initial_model_status,
 	double *seeding_var,
+	double **prior_ranges,
 	double *chain_temps,
 	int swp_freq,
 	int t0,

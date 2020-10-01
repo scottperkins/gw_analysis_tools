@@ -413,7 +413,7 @@ int main(int argc, char *argv[])
 		sampler_output.threads = threads;
 		
 		RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output, status, model_status,nested_model_number, max_dimension, min_dimension,samples, chain_N, 
-				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,chain_temps, 
+				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,mod_priors,chain_temps, 
 				swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
