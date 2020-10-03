@@ -4,6 +4,8 @@
 #include "waveform_generator.h"
 #include "waveform_util.h"
 #include "mcmc_gw.h"
+#include "mcmc_sampler.h"
+#include "mcmc_sampler_internals.h"
 #include "fisher.h"
 
 
@@ -14,6 +16,33 @@ void MCMC_modification_struct_py_destructor(MCMC_modification_struct *mod_struct
 	if(mod_struct->gIMR_sigmai){delete [] mod_struct->gIMR_sigmai;mod_struct->gIMR_sigmai = NULL;}
 	if(mod_struct->gIMR_betai){delete [] mod_struct->gIMR_betai;mod_struct->gIMR_betai = NULL;}
 	if(mod_struct->gIMR_alphai){delete [] mod_struct->gIMR_alphai;mod_struct->gIMR_alphai = NULL;}
+}
+
+
+mcmc_data_interface * mcmc_data_interface_py(
+	int min_dim,
+	int max_dim,
+	int chain_id,
+	int nested_model_number,
+	int chain_number,
+	double RJ_step_width,
+	bool burn_phase)
+{
+	
+	mcmc_data_interface *interface = new mcmc_data_interface;
+	interface->min_dim = min_dim;
+	interface->max_dim = max_dim;
+	interface->chain_id = chain_id;
+	interface->nested_model_number = nested_model_number;
+	interface->chain_number = chain_number;
+	interface->RJ_step_width = chain_number;
+	interface->burn_phase = burn_phase;
+	return interface;
+
+}
+void mcmc_data_interface_destructor_py(mcmc_data_interface *interface)
+{
+	delete interface;
 }
 
 MCMC_modification_struct * MCMC_modification_struct_py( 
@@ -31,7 +60,7 @@ MCMC_modification_struct * MCMC_modification_struct_py(
 	bool NSflag2
 	)
 {
-	std::cout<<ppE_Nmod<<std::endl;
+	//std::cout<<ppE_Nmod<<std::endl;
 	MCMC_modification_struct *mod_struct = new MCMC_modification_struct;
 	mod_struct->ppE_Nmod = ppE_Nmod;
 	mod_struct->bppe = NULL;
@@ -62,6 +91,21 @@ MCMC_modification_struct * MCMC_modification_struct_py(
 	mod_struct->NSflag2 = NSflag2;
 	return mod_struct;
 }
+
+
+void pack_local_mod_structure_py(
+	mcmc_data_interface *interface, 
+	double *param, 
+	int *status, 
+	char *waveform_extended,
+	void * parameters, 
+	MCMC_modification_struct *full_struct,
+	MCMC_modification_struct *local_struct)
+{
+	pack_local_mod_structure(interface, param, status, std::string(waveform_extended),parameters, full_struct, local_struct);
+	return;
+}
+
 
 char * MCMC_prep_params_py(
 	double *param, 

@@ -516,6 +516,13 @@ double RJMCMC_2WF_likelihood_wrapper(
 	int *model_status, 
 	mcmc_data_interface *interface, 
 	void *user_param);
+void pack_local_mod_structure(mcmc_data_interface *interface,
+	double *param,
+	int *status,
+	std::string waveform_extended, 
+	void *parameters, 
+	MCMC_modification_struct *full_struct, 
+	MCMC_modification_struct *local_struct );
 
 
 #endif

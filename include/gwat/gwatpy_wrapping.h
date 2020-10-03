@@ -4,6 +4,7 @@
 #include "util.h"
 #include "detector_util.h"
 #include "mcmc_gw.h"
+#include "mcmc_sampler.h"
 
 
 #ifdef __cplusplus
@@ -11,6 +12,15 @@ extern "C"
 {
 #endif
 
+void mcmc_data_interface_destructor_py(mcmc_data_interface *interface);
+mcmc_data_interface * mcmc_data_interface_py(
+	int min_dim,
+	int max_dim,
+	int chain_id,
+	int nested_model_number,
+	int chain_number,
+	double RJ_step_width,
+	bool burn_phase);
 
 MCMC_modification_struct * MCMC_modification_struct_py( 
 	int ppE_Nmod, 
@@ -27,6 +37,14 @@ MCMC_modification_struct * MCMC_modification_struct_py(
 	bool NSflag2
 	);
 
+void pack_local_mod_structure_py(
+	mcmc_data_interface *interface, 
+	double *param, 
+	int *status, 
+	char * waveform_extended, 
+	void * parameters, 
+	MCMC_modification_struct *full_struct,
+	MCMC_modification_struct *local_struct);
 char * MCMC_prep_params_py(
 	double *param, 
 	double *temp_params, 

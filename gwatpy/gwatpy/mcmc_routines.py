@@ -54,7 +54,47 @@ rlib.MCMC_prep_params_py.argtypes = [
     ]
 rlib.MCMC_prep_params_py.restype = ctypes.c_char_p
 
+rlib.pack_local_mod_structure_py.argtypes = [
+    ctypes.c_void_p,
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_int),
+    ctypes.c_char_p,
+    ctypes.c_void_p,    
+    ctypes.c_void_p,    
+    ctypes.c_void_p
+    ]
+rlib.pack_local_mod_structure_py.restype = None
+
+
+rlib.mcmc_data_interface_py.argtypes = [\
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_int,
+    ctypes.c_double,
+    ctypes.c_bool]
+rlib.mcmc_data_interface_py.restype = ctypes.c_void_p
+
+rlib.mcmc_data_interface_destructor_py.argtypes = [ctypes.c_void_p]
+rlib.mcmc_data_interface_destructor_py.restype=None
+
 ##########################################################
+def pack_local_mod_structure(interface, param,status,  waveform_extended,parameters,  full_struct,local_struct):
+    p_type = ctypes.c_double * (len(param)) 
+
+    s_type = ctypes.c_int * (len(status)) 
+     
+    rlib.MCMC_prep_params_py(
+        interface.obj,
+        p_type(* ( np.ascontiguousarray(param,dtype=ctypes.c_double))), 
+        s_type(* ( np.ascontiguousarray(status,dtype=ctypes.c_int))), 
+        #parameters.obj,
+        ctypes.c_void_p,#Right now, this isn't even used.
+        waveform_extended.encode('utf-8'), 
+        full_struct.obj,
+        local_struct.obj
+        )
 
 def MCMC_prep_params_py(param,  gen_params, dim,generation_method, mod_struct):
     p_type = ctypes.c_double * (len(param)) 
