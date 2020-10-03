@@ -363,13 +363,11 @@ int main(int argc, char *argv[])
 	else if(generation_method_base.find("IMRPhenomPv2") != std::string::npos && min_dimension == 15){
 		lp = &standard_log_prior_Pv2_mod;
 	}
-	else if((generation_method_base.find("IMRPhenomD") != std::string::npos 
-		|| generation_method_base.find("IMRPhenomD") != std::string::npos) 
+	else if(generation_method_base.find("IMRPhenomD") != std::string::npos 
 		&& min_dimension == 4){
 		lp = &standard_log_prior_D_intrinsic_mod;
 	}
-	else if( (generation_method_base.find("IMRPhenomPv2") != std::string::npos  
-		|| generation_method_base.find("IMRPhenomPv2") !=std::string::npos)
+	else if( generation_method_base.find("IMRPhenomPv2") != std::string::npos  
 		&& min_dimension == 8 ){
 		lp = &standard_log_prior_Pv2_intrinsic_mod;
 	}

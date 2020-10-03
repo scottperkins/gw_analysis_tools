@@ -2538,37 +2538,37 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 		//}
 		if(generation_method.find("ppE") != std::string::npos ||
 			check_theory_support(generation_method)){
-			gen_params->bppe=mcmc_mod_struct->bppe;
-			gen_params->Nmod=mcmc_mod_struct->ppE_Nmod;
+			gen_params->bppe=mod_struct->bppe;
+			gen_params->Nmod=mod_struct->ppE_Nmod;
 			gen_params->betappe=new double[gen_params->Nmod];
-			base = dimension - mcmc_mod_struct->ppE_Nmod;
+			base = dimension - mod_struct->ppE_Nmod;
 		}
 		else if(generation_method.find("gIMR") != std::string::npos){
-			gen_params->Nmod_phi=mcmc_mod_struct->gIMR_Nmod_phi;
-			gen_params->phii=mcmc_mod_struct->gIMR_phii;
+			gen_params->Nmod_phi=mod_struct->gIMR_Nmod_phi;
+			gen_params->phii=mod_struct->gIMR_phii;
 			if(gen_params->Nmod_phi !=0){
 				gen_params->delta_phi=new double[gen_params->Nmod_phi];
 			}
-			gen_params->Nmod_sigma=mcmc_mod_struct->gIMR_Nmod_sigma;
-			gen_params->sigmai=mcmc_mod_struct->gIMR_sigmai;
+			gen_params->Nmod_sigma=mod_struct->gIMR_Nmod_sigma;
+			gen_params->sigmai=mod_struct->gIMR_sigmai;
 			if(gen_params->Nmod_sigma !=0){
 				gen_params->delta_sigma=new double[gen_params->Nmod_sigma];
 			}
-			gen_params->Nmod_beta=mcmc_mod_struct->gIMR_Nmod_beta;
-			gen_params->betai=mcmc_mod_struct->gIMR_betai;
+			gen_params->Nmod_beta=mod_struct->gIMR_Nmod_beta;
+			gen_params->betai=mod_struct->gIMR_betai;
 			if(gen_params->Nmod_beta !=0){
 				gen_params->delta_beta=new double[gen_params->Nmod_beta];
 			}
-			gen_params->Nmod_alpha=mcmc_mod_struct->gIMR_Nmod_alpha;
-			gen_params->alphai=mcmc_mod_struct->gIMR_alphai;
+			gen_params->Nmod_alpha=mod_struct->gIMR_Nmod_alpha;
+			gen_params->alphai=mod_struct->gIMR_alphai;
 			if(gen_params->Nmod_alpha !=0){
 				gen_params->delta_alpha=new double[gen_params->Nmod_alpha];
 			}
 			base = dimension 
-				- mcmc_mod_struct->gIMR_Nmod_phi 
-				- mcmc_mod_struct->gIMR_Nmod_sigma 
-				- mcmc_mod_struct->gIMR_Nmod_beta 
-				- mcmc_mod_struct->gIMR_Nmod_alpha; 
+				- mod_struct->gIMR_Nmod_phi 
+				- mod_struct->gIMR_Nmod_sigma 
+				- mod_struct->gIMR_Nmod_beta 
+				- mod_struct->gIMR_Nmod_alpha; 
 		}
 		if((generation_method.find("dCS")!= std::string::npos ||
 			generation_method.find("EdGB")!=std::string::npos)){
@@ -2942,6 +2942,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	std::string checkpoint_filename
 	)
 {
+	
 	sampler_output->RJ = true;
 
 	bool GAUSS_QUAD = false;
@@ -3367,6 +3368,8 @@ double RJMCMC_2WF_likelihood_wrapper(
 	}
 	//Cleanup
 	delete [] temp_params;
+	//We DO need to delete gIMR index arrays because we're making a copy, unlike in 
+	//regular MCMC
 	if(check_mod(local_gen)){
 		if( local_gen.find("ppE") != std::string::npos ||
 			local_gen.find("dCS") != std::string::npos ||
@@ -3376,15 +3379,19 @@ double RJMCMC_2WF_likelihood_wrapper(
 		else if( local_gen.find("gIMR") != std::string::npos){
 			if(mod_struct_local.gIMR_Nmod_phi !=0){
 				delete [] gen_params.delta_phi;
+				delete [] gen_params.phii;
 			}
 			if(mod_struct_local.gIMR_Nmod_sigma !=0){
 				delete [] gen_params.delta_sigma;
+				delete [] gen_params.sigmai;
 			}
 			if(mod_struct_local.gIMR_Nmod_beta !=0){
 				delete [] gen_params.delta_beta;
+				delete [] gen_params.betai;
 			}
 			if(mod_struct_local.gIMR_Nmod_alpha !=0){
 				delete [] gen_params.delta_alpha;
+				delete [] gen_params.alphai;
 			}
 
 		}

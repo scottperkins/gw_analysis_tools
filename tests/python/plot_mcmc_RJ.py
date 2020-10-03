@@ -66,8 +66,8 @@ plt.savefig('plots/mod4.pdf')
 #plt.show()
 plt.close()
 
-#for x in range(len(data_GR[0])):
-#    print(emcee.autocorr.integrated_time(data_GR[:,x]))
+for x in range(len(data_GR[0])):
+    print(emcee.autocorr.integrated_time(data_GR[:,x],tol=0))
 
 #chains = list(f["MCMC_OUTPUT/LOGL_LOGP"])
 #for y in range(len(list(f["MCMC_OUTPUT/LOGL_LOGP"]))):

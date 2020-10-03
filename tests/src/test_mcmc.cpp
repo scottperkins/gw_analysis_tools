@@ -275,7 +275,7 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	}
 	write_file("data/injections.csv",initial_position,max_dim);
 
-	int samples = 50000;
+	int samples = 500;
 	double **output  = allocate_2D_array( samples, max_dim);
 	int **status  = allocate_2D_array_int( samples, max_dim);
 	int **model_status  = NULL;
@@ -284,14 +284,21 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	if(nested_model_number != 0 ){
 		initial_model_status = new int[nested_model_number];
 	}
-	double t0 = 2000;
-	double nu = 100;
+	double t0 = 200;
+	double nu = 10;
 	std::string chain_distribution="double";
-	int max_chunk_size = 5e3;
+	int max_chunk_size = 5e1;
+	
+	double **prior_ranges = new double*[max_dim-min_dim];
+	for(int i = 0 ; i<max_dim-min_dim; i++){
+		prior_ranges[i] = new double[2];
+		prior_ranges[i][0]=-10;
+		prior_ranges[i][1]=10;
+	}
 	
 	mcmc_sampler_output sampler_output(chains,max_dim);
 	sampler_output.RJ = true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, prior_ranges,temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, max_dim);
 	deallocate_2D_array(status,  samples, max_dim);
 
@@ -413,7 +420,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 5*10000;
+	int N_steps = 5*100;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -446,9 +453,9 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//delete [] status;
 	//##################################################	
 	//###############################################
-	int t0 = 2000;
-	int nu = 100;
-	int max_chunksize = 10000;
+	int t0 = 200;
+	int nu = 10;
+	int max_chunksize = 100;
 	bool update_RJ_width = true;
 	double **output = new double*[N_steps];
 	int **status = new int*[N_steps];
