@@ -1,0 +1,95 @@
+#Number of detectors
+[int] detector number = 2
+#Name of the detectors
+[str] detector name 0 = Hanford
+[str] detector name 1 = Livingston
+#[str] detector name 2 = Virgo
+[dbl] gps = 1126259462.4
+#File path to the PSD file
+[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
+#File path to each data file
+[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
+[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
+#Length of data in seconds
+[dbl] data length = 32
+#Generation method 
+[str] generation method base = IMRPhenomD
+[str] generation method extended = gIMRPhenomD
+#Number of ~uncorrelated samples to take
+[int] samples = 5000
+#Step size to take before outputting checkpoints
+[int] Max chunk size = 1000
+#Maximum number of chains per thermodynamic ensemble
+[int] max thermo chain number = 10
+#Dynamic chain allocation parameter t0 -- approximately how many steps chains are allowed to move
+[int] t0=1000
+#Dynamic chain allocation parameter nu -- approximately how many steps swapping effects are averaged over
+[int] nu=100
+#Chain allocation -- how to place the rest of the chains after thermodynamic equilibrium is reached
+[str] allocation scheme  = double
+#Swap frequency between chains in steps
+[int] swap frequency = 3
+#Number of threads to use
+[int] thread number = 10
+#Output data file -- will be csv
+[str] output data file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test2.csv
+#Output statistics file -- will be txt
+[str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test_stat2.txt
+#############################################################
+#Dimension of the parameter space
+[int] min dimension =7
+[int] nested model number =0
+#Number of chains
+[int] chain number = 10
+#Initial position file
+[str] initial position file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_config_files/rj_sample_init_pos.csv
+[str] initial status file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_config_files/rj_sample_init_status.csv
+#[str] initial model status file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_config_files/rj_sample_init_status.csv
+#Checkpoint file -- csv file
+[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test_checkpoint2.csv
+#############################################################
+#Optional prior ranges for Mass1
+[dbl] Mass1 minimum = 10
+[dbl] Mass1 maximum = 80
+#Optional prior ranges for Mass2 
+[dbl] Mass2 minimum = 10
+[dbl] Mass2 maximum = 80
+#Optional prior ranges for Luminosity Distance 
+[dbl] Luminosity distance minimum = 10
+[dbl] Luminosity distance maximum = 1000
+##Initial checkpoint  file
+#[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
+#Checkpoint file -- csv file
+#[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
+
+#############################################################
+##ppE specific options##
+#############################################################
+#Number of modifications -- only for ppE waveforms
+[int] Number of modifications = 1
+#Power parameter from ppE -- one per modification
+[dbl] ppE b 0 = -1
+#Edges of ppE beta prior
+[dbl] ppE beta 0 minimum = -10
+[dbl] ppE beta 0 maximum = 10
+
+#############################################################
+##gIMR specific options##
+#############################################################
+#Number of modifications -- only for ppE and gIMR waveforms
+[int] Number of phi modifications = 1
+#Power parameter from ppE -- one per modification
+[int] delta phi 0 i = 4
+#Edges of ppE beta prior
+[dbl] delta phi 0 minimum = -10
+[dbl] delta phi 0 maximum = 10
+#Number of modifications -- only for ppE and gIMR waveforms
+[int] Number of sigma modifications = 0
+[int] delta sigma 0 i = -1
+[int] Number of beta modifications = 0
+[int] delta beta 0 i = -1
+[int] Number of alpha modifications = 0
+[int] delta alpha 0 i = -1
+
+[bool] NS Flag 0 = false
+[bool] NS Flag 1 = false
