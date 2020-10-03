@@ -10,7 +10,7 @@ from scipy.signal.windows import tukey
 import multiprocessing as mp
 from functools import partial
 
-from scipy.stats import  dirichlet
+from scipy.stats import  dirichlet,kde
 from scipy.optimize import NonlinearConstraint,differential_evolution
 from scipy.special import hyp2f1, beta, gamma, loggamma,betaln
 
@@ -229,22 +229,26 @@ def RJPTMCMC_unpack_file(filename):
     return data, status,model_status
 
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, threads=1 ,**mod_struct_kwargs):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, threads=1 ,xlim=None,ylim=None,data_stream_file=None,**mod_struct_kwargs):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
     psd = psd_in[:,1]
+    df = freqs[1]-freqs[0]
+    T = 1./(df)
+    dt = T / len(freqs)
+    times = np.linspace(0,T, len(freqs))
 
     fig,ax = plt.subplots(nrows=1,ncols=1)
     if(generation_method_extended is not None):
-        data,status = RJPTMCMC_unpack_file(filename)     
+        data,status,model_status = RJPTMCMC_unpack_file(filename)     
         for i in np.arange(len(data)):
             if(np.sum(status[i]) > min_dim):
                 gparam = map_method_output(data[i],status[i], generation_method_extended,min_dim )
             else:
                 gparam = map_method_output(data[i],status[i], generation_method_base,min_dim )
     else:
-        N = 100
+        N = 500
         data = trim_thin_file(filename)     
         dim = len(data[0])
 
@@ -253,10 +257,6 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     
         status = np.ones(dim)
 
-        df = freqs[1]-freqs[0]
-        T = 1./(df)
-        dt = T / len(freqs)
-        times = np.linspace(0,T, len(freqs))
         responses = np.zeros( (N,len(freqs)))
         mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
     
@@ -265,8 +265,34 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
         responses = pool.map(waveform_reduced, data_sub)
 
         for i in np.arange(N):
-            ax.plot(times,responses[i],alpha=.1,color='blue' )
-            #ax.hexbin(times,responses[i],mincnt=1 )
+            ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+
+        #time_arr,responses_arr = times,np.real(responses[0])
+        #for i in np.arange(N-1):
+        #    time_arr = np.insert(time_arr, len(time_arr), times,axis=0)
+        #    responses_arr = np.insert(responses_arr, len(responses_arr), np.real(responses[i+1]),axis=0)
+        #h, xsides, ysides,im = plt.hist2d(time_arr, responses_arr,bins=100,range=[xlim,ylim],cmin=1)
+
+        #time_arr,responses_arr = times,np.real(responses[0])
+        #for i in np.arange(N-1):
+        #    time_arr = np.insert(time_arr, len(time_arr), times,axis=0)
+        #    responses_arr = np.insert(responses_arr, len(responses_arr), np.real(responses[i+1]),axis=0)
+        #nbins = 30
+        #k = kde.gaussian_kde([time_arr, responses_arr])
+        #xi,yi = np.mgrid[time_arr.min():time_arr.max():nbins*1j, responses_arr.min():responses_arr.max():nbins*1j]
+        #zi = k(np.vstack([xi.flatten(),yi.flatten()]))
+        #ax.pcolormesh(xi,yi,zi.reshape(xi.shape))
+
+    if data_stream_file is not None:
+        datastream = np.loadtxt(data_stream_file, skiprows=3)
+        data_ft = np.fft.fft(datastream) * df
+        dataplot = np.fft.ifft(data_ft / psd**.5)*dt
+        ax.plot(times, dataplot)
+
+    if(xlim is not None):
+        ax.set_xlim(xlim)
+    if(ylim is not None):
+        ax.set_ylim(ylim)
     return fig
 
 def create_waveform_from_MCMC_output(parameters,psd,freqs, dim,generation_method, detector,mod_struct):
@@ -290,6 +316,7 @@ def create_waveform_from_MCMC_output(parameters,psd,freqs, dim,generation_method
     
     return response_t
     
+########################################################################################################################
 def dirichlet_wrapper_full(p,*bincts):
     ptemp = np.insert(p, len(p), 1-np.sum(p))
 
