@@ -487,8 +487,44 @@ void rm_fisher_dim(double **input,int full_dim, double **output,  int reduced_di
 		}
 	}
 }
+/*! \brief Finds union of two lists which have been pre-sorted. Returns the union, also sorted
+ *
+ * Allocates memory for C, needs to be deallocated
+ *
+ */
+void vector_union(std::vector<double> A, std::vector<double> B, std::vector<double> *C )
+{
+	auto itA = A.begin();
+	auto itB = B.begin();
+	while(itA !=A.end() && itB !=B.end())
+	{
+		if(*itA == *itB){
+			(*C).push_back(*itA);
+			itA++;
+			itB++;
+		}
+		else if(*itA < *itB){
+			(*C).push_back(*itA);
+			itA++;
 
-/*! \brief Custom list-interesction implementation for sorted lists 
+		}
+		else {
+			(*C).push_back(*itB);
+			itB++;
+
+		}
+	}
+	while(itA != A.end()){
+		(*C).push_back(*itA);
+		itA++;
+	}
+	while(itB != B.end()){
+		(*C).push_back(*itB);
+		itB++;
+	}
+}
+
+/*! \brief SHOULDN'T BE USED FOR DOUBLESCustom list-interesction implementation for sorted lists 
  *
  * Uses pointers for efficiency -- NOT COPIED -- used std library for that
  *
@@ -526,8 +562,8 @@ void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC)
 	}
 	*lenC = i_C;
 }
-template void list_intersect_ptrs<double>(double**,int,double**,int,double**,int *);
-template void list_intersect_ptrs<adouble>(adouble**,int,adouble**,int,adouble**,int *);
+//template void list_intersect_ptrs<double>(double**,int,double**,int,double**,int *);
+//template void list_intersect_ptrs<adouble>(adouble**,int,adouble**,int,adouble**,int *);
 template void list_intersect_ptrs<int>(int**,int,int**,int,int**,int *);
 /*! \brief Custom list-interesction implementation for sorted lists 
  *
@@ -570,8 +606,8 @@ void list_intersect(T *A, int lenA,T *B, int lenB, T **C, int *lenC)
 	*lenC = i_C;
 }
 template void list_intersect<double>(double*,int,double*,int,double**,int *);
-template void list_intersect<adouble>(adouble*,int,adouble*,int,adouble**,int *);
-template void list_intersect<int>(int*,int,int*,int,int**,int *);
+//template void list_intersect<adouble>(adouble*,int,adouble*,int,adouble**,int *);
+//template void list_intersect<int>(int*,int,int*,int,int**,int *);
 /*! \brief Custom list-interesction implementation for sorted lists 
  *
  * Uses pointers for efficiency -- NOT COPIED -- used std library for that
@@ -612,8 +648,8 @@ void list_intersect_value(T *A, int lenA,T *B, int lenB, T *C, int *lenC)
 	}
 	*lenC = i_C;
 }
-template void list_intersect_value<double>(double*,int,double*,int,double*,int *);
-template void list_intersect_value<adouble>(adouble*,int,adouble*,int,adouble*,int *);
+//template void list_intersect_value<double>(double*,int,double*,int,double*,int *);
+//template void list_intersect_value<adouble>(adouble*,int,adouble*,int,adouble*,int *);
 template void list_intersect_value<int>(int*,int,int*,int,int*,int *);
 
 template<class T, class U>
@@ -657,17 +693,31 @@ template void variance_list<int,adouble>(int *,int,adouble*);
  *
  * Returns -1 if not found
  */
-template<class T>
-int check_list_id(T j, T *list, int length)
+//template<class T>
+//int check_list_id(T j, T *list, int length)
+//{
+//	for(int i = 0 ; i<length; i++){
+//		if(j == list[i]) return i;
+//	}
+//	return -1;
+//}
+//template int check_list_id<int>(int, int*, int);
+//template int check_list_id<double>(double ,double*, int);
+template<>
+int check_list_id(int j, int *list, int length)
 {
 	for(int i = 0 ; i<length; i++){
 		if(j == list[i]) return i;
 	}
 	return -1;
 }
-template int check_list_id<int>(int, int*, int);
-template int check_list_id<double>(double ,double*, int);
-
+int check_list_id(double j, double *list, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		if((j - list[i] ) < DOUBLE_COMP_THRESH) return i;
+	}
+	return -1;
+}
 
 
 template<class T>

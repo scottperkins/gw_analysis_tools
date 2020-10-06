@@ -4,14 +4,18 @@
 #include <gwat/detector_util.h>
 #include <gwat/io_util.h>
 
-#include <lal/TimeDelay.h>
-#include <lal/LALDetectors.h>
+//#define _LAL
+#ifdef _LAL
+	#include <lal/TimeDelay.h>
+	#include <lal/LALDetectors.h>
+#endif
 
 int test_newton_raphson(int argc, char *argv[]);
 void cos_sin(double x, double *func, double *func_prime, void *param);
 int HDF5_testing_write(int argc,char *argv[]);
 int time_delay_testing(int argc,char *argv[]);
 int matrix_multiplication(int argc,char *argv[]);
+int vector_union_test(int argc,char *argv[]);
 void RT_ERROR_MSG();
 int main(int argc, char *argv[])
 {
@@ -34,10 +38,24 @@ int main(int argc, char *argv[])
 	else if(runtime_opt == 3){
 		return matrix_multiplication(argc,argv);	
 	}
+	else if(runtime_opt == 4){
+		return vector_union_test(argc,argv);	
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int vector_union_test(int argc,char *argv[])
+{
+	std::vector<double> A = {1,3,8,9};
+	std::vector<double> B = {3,4,5,10};
+	std::vector<double> C;
+	vector_union(A, B, &C);
+	for(auto i = C.begin(); i!=C.end(); i++){
+		std::cout<<*i<<std::endl;
+	}
+	return 0;
 }
 int matrix_multiplication(int argc,char *argv[])
 {
@@ -92,6 +110,7 @@ int HDF5_testing_write(int argc,char *argv[])
 }
 int time_delay_testing(int argc,char *argv[])
 {
+#ifdef _LAL
 	std::cout.precision(15);
 	LALDetector LALD1 = lalCachedDetectors[6];		
 	LALDetector LALD2 = lalCachedDetectors[5];		
@@ -113,6 +132,7 @@ int time_delay_testing(int argc,char *argv[])
 	std::cout<<"GWAT DTOA: "<<DTOA_GWAT<<std::endl;
 	std::cout<<"fractional diff: "<<(DTOA_GWAT - DTOA)/(DTOA)<<std::endl;
 
+#endif
 	return 0;
 }
 int test_newton_raphson(int argc, char *argv[])
@@ -141,4 +161,5 @@ void RT_ERROR_MSG()
 	std::cout<<"1 --- Test HDF5 file write"<<std::endl;
 	std::cout<<"2 --- Test Time Delay "<<std::endl;
 	std::cout<<"3 --- Matrix Multiplication "<<std::endl;
+	std::cout<<"4 --- Vector Union "<<std::endl;
 }

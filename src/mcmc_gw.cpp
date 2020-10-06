@@ -2942,7 +2942,6 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	std::string checkpoint_filename
 	)
 {
-	
 	sampler_output->RJ = true;
 
 	bool GAUSS_QUAD = false;
@@ -3084,6 +3083,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 		user_parameters[i]->r = rvec[i];
 
 		user_parameters[i]->mod_prior_ranges = prior_ranges;
+		user_parameters[i]->mod_struct = mod_struct;
 
 		//user_parameters[i]->burn_freqs = mcmc_frequencies;
 		//user_parameters[i]->burn_data = mcmc_data;
@@ -3153,7 +3153,6 @@ void pack_local_mod_structure(mcmc_data_interface *interface,
 				dimct++;
 			}
 			if( i >= interface->min_dim){
-				
 				if(status[i] == 1 && i<dphi_boundary){
 					local_struct->gIMR_Nmod_phi ++;
 				}
@@ -3220,6 +3219,7 @@ double RJMCMC_2WF_likelihood_wrapper(
 	mcmc_data_interface *interface, 
 	void *parameters)
 {
+	//debugger_print(__FILE__,__LINE__,mcmc_mod_struct->gIMR_phii[0]);	
 	//return 2;
 	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 

@@ -45,27 +45,6 @@ static bool mcmc_save_waveform;
 static int mcmc_deriv_order=4;
 static gsl_rng **mcmc_rvec;
 
-
-struct MCMC_user_param
-{
-	std::complex<double> **burn_data=NULL;
-	double **burn_noise=NULL;
-	double **burn_freqs=NULL;
-	int *burn_lengths=NULL;
-	fftw_outline *burn_plans=NULL;
-	std::mutex *mFish;
-	double *fish_freqs=NULL;
-	double *fish_weights=NULL;
-	double **fish_psd=NULL;
-	double fish_length;
-	bool GAUSS_QUAD=false;
-		
-	//RJ stuff
-	double **mod_prior_ranges=NULL;
-	
-	gsl_rng *r;
-};
-
 //########################################
 
 struct MCMC_modification_struct
@@ -84,7 +63,30 @@ struct MCMC_modification_struct
 	bool NSflag1 =false;
 	bool NSflag2 =false;
 };
+
 static MCMC_modification_struct *mcmc_mod_struct;
+
+struct MCMC_user_param
+{
+	std::complex<double> **burn_data=NULL;
+	double **burn_noise=NULL;
+	double **burn_freqs=NULL;
+	int *burn_lengths=NULL;
+	fftw_outline *burn_plans=NULL;
+	std::mutex *mFish;
+	double *fish_freqs=NULL;
+	double *fish_weights=NULL;
+	double **fish_psd=NULL;
+	double fish_length;
+	bool GAUSS_QUAD=false;
+		
+	//RJ stuff
+	double **mod_prior_ranges=NULL;
+	MCMC_modification_struct *mod_struct;
+	
+	gsl_rng *r;
+};
+
 
 double maximized_coal_log_likelihood_IMRPhenomD(double *frequencies,
 				int length,
