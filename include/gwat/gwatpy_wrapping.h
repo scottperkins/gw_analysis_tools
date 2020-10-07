@@ -42,7 +42,7 @@ void pack_local_mod_structure_py(
 	double *param, 
 	int *status, 
 	char * waveform_extended, 
-	void * parameters, 
+	//void * parameters, 
 	MCMC_modification_struct *full_struct,
 	MCMC_modification_struct *local_struct);
 char * MCMC_prep_params_py(

@@ -9,14 +9,6 @@
 #include "fisher.h"
 
 
-void MCMC_modification_struct_py_destructor(MCMC_modification_struct *mod_struct)
-{
-	if(mod_struct->bppe){delete [] mod_struct->bppe;mod_struct->bppe = NULL;}
-	if(mod_struct->gIMR_phii){delete [] mod_struct->gIMR_phii;mod_struct->gIMR_phii = NULL;}
-	if(mod_struct->gIMR_sigmai){delete [] mod_struct->gIMR_sigmai;mod_struct->gIMR_sigmai = NULL;}
-	if(mod_struct->gIMR_betai){delete [] mod_struct->gIMR_betai;mod_struct->gIMR_betai = NULL;}
-	if(mod_struct->gIMR_alphai){delete [] mod_struct->gIMR_alphai;mod_struct->gIMR_alphai = NULL;}
-}
 
 
 mcmc_data_interface * mcmc_data_interface_py(
@@ -45,6 +37,14 @@ void mcmc_data_interface_destructor_py(mcmc_data_interface *interface)
 	delete interface;
 }
 
+void MCMC_modification_struct_py_destructor(MCMC_modification_struct *mod_struct)
+{
+	if(mod_struct->bppe){delete [] mod_struct->bppe;mod_struct->bppe = NULL;}
+	if(mod_struct->gIMR_phii){delete [] mod_struct->gIMR_phii;mod_struct->gIMR_phii = NULL;}
+	if(mod_struct->gIMR_sigmai){delete [] mod_struct->gIMR_sigmai;mod_struct->gIMR_sigmai = NULL;}
+	if(mod_struct->gIMR_betai){delete [] mod_struct->gIMR_betai;mod_struct->gIMR_betai = NULL;}
+	if(mod_struct->gIMR_alphai){delete [] mod_struct->gIMR_alphai;mod_struct->gIMR_alphai = NULL;}
+}
 MCMC_modification_struct * MCMC_modification_struct_py( 
 	int ppE_Nmod, 
 	double *bppe,
@@ -98,11 +98,12 @@ void pack_local_mod_structure_py(
 	double *param, 
 	int *status, 
 	char *waveform_extended,
-	void * parameters, 
+	//void * parameters, 
 	MCMC_modification_struct *full_struct,
 	MCMC_modification_struct *local_struct)
 {
-	pack_local_mod_structure(interface, param, status, std::string(waveform_extended),parameters, full_struct, local_struct);
+	//pack_local_mod_structure(interface, param, status, std::string(waveform_extended),parameters, full_struct, local_struct);
+	pack_local_mod_structure(interface, param, status, std::string(waveform_extended),(void *)NULL, full_struct, local_struct);
 	return;
 }
 

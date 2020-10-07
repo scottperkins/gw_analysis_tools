@@ -60,7 +60,6 @@ rlib.pack_local_mod_structure_py.argtypes = [
     ctypes.POINTER(ctypes.c_int),
     ctypes.c_char_p,
     ctypes.c_void_p,    
-    ctypes.c_void_p,    
     ctypes.c_void_p
     ]
 rlib.pack_local_mod_structure_py.restype = None
@@ -80,17 +79,53 @@ rlib.mcmc_data_interface_destructor_py.argtypes = [ctypes.c_void_p]
 rlib.mcmc_data_interface_destructor_py.restype=None
 
 ##########################################################
-def pack_local_mod_structure(interface, param,status,  waveform_extended,parameters,  full_struct,local_struct):
+class mcmc_data_interface_py(object):
+    min_dim = 0
+    max_dim = 0
+    chain_id = 0
+    nested_model_number = 0
+    chain_number = 0
+    RJ_step_width = 0.0
+    burn_phase = False
+    obj=None
+    def __init__(self, **kwargs):
+        if "min_dim" in kwargs:
+            self.min_dim = kwargs["min_dim"]
+        if "max_dim" in kwargs:
+            self.max_dim = kwargs["max_dim"]
+        if "chain_id" in kwargs:
+            self.chain_id = kwargs["chain_id"]
+        if "nested_model_number" in kwargs:
+            self.nested_model_number = kwargs["nested_model_number"]
+        if "chain_number" in kwargs:
+            self.chain_number = kwargs["chain_number"]
+        if "RJ_step_width" in kwargs:
+            self.RJ_step_width = kwargs["RJ_step_width"]
+        if "burn_phase" in kwargs:
+            self.burn_phase = kwargs["burn_phase"]
+        self.obj = rlib.mcmc_data_interface_py(
+                self.min_dim,   
+                self.max_dim, 
+                self.chain_id, 
+                self.nested_model_number, 
+                self.chain_number, 
+                self.RJ_step_width, 
+                self.burn_phase)
+    def __del__(self):
+        rlib.mcmc_data_interface_destructor_py(self.obj)
+    
+
+def pack_local_mod_structure_py(interface, param,status,  waveform_extended,parameters,  full_struct,local_struct):
     p_type = ctypes.c_double * (len(param)) 
 
     s_type = ctypes.c_int * (len(status)) 
      
-    rlib.MCMC_prep_params_py(
+
+    rlib.pack_local_mod_structure_py(
         interface.obj,
         p_type(* ( np.ascontiguousarray(param,dtype=ctypes.c_double))), 
         s_type(* ( np.ascontiguousarray(status,dtype=ctypes.c_int))), 
-        #parameters.obj,
-        ctypes.c_void_p,#Right now, this isn't even used.
+        #ctypes.c_void_p,#Right now, this isn't even used.
         waveform_extended.encode('utf-8'), 
         full_struct.obj,
         local_struct.obj
@@ -268,6 +303,7 @@ def RJPTMCMC_unpack_file(filename):
                 model_status = np.insert(model_status,-1, f["MCMC_OUTPUT/MODEL_STATUS"][chains[x+1]],axis=0)
     return data, status,model_status
 
+########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
 def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, threads=1 ,xlim=None,ylim=None,data_stream_file=None,**mod_struct_kwargs):
 
@@ -279,49 +315,60 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     dt = T / len(freqs)
     times = np.linspace(0,T, len(freqs))
 
+    N = 1000
+
     fig,ax = plt.subplots(nrows=1,ncols=1)
+    data_sub, status_sub = [],[]
+    waveform_reduced=None
+    mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
+
     if(generation_method_extended is not None):
         data,status,model_status = RJPTMCMC_unpack_file(filename)     
-        for i in np.arange(len(data)):
-            if(np.sum(status[i]) > min_dim):
-                gparam = map_method_output(data[i],status[i], generation_method_extended,min_dim )
-            else:
-                gparam = map_method_output(data[i],status[i], generation_method_base,min_dim )
-    else:
-        N = 500
-        data = trim_thin_file(filename)     
-        dim = len(data[0])
-
         data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
         data_sub = data[data_sub_indices,:] 
-    
-        status = np.ones(dim)
+        status_sub = status[data_sub_indices,:]
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct)
 
-        responses = np.zeros( (N,len(freqs)))
-        mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
-    
-        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, dim=dim, generation_method = generation_method_base, detector=detector, mod_struct=mod_struct)
-        pool = mp.Pool(processes=threads)
-        responses = pool.map(waveform_reduced, data_sub)
+    else:
+        data = trim_thin_file(filename)     
+        dim = len(data[0])
+        data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
+        data_sub = data[data_sub_indices,:] 
+        status_sub = np.ones((N,dim))
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=dim,max_dim=dim, generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct)
 
-        for i in np.arange(N):
-            ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+    data_sub_packed = [[data_sub[x],status_sub[x]] for x in np.arange(len(data_sub))]
+    responses = np.zeros( (N,len(freqs)))
+    pool = mp.Pool(processes=threads)
 
-        #time_arr,responses_arr = times,np.real(responses[0])
-        #for i in np.arange(N-1):
-        #    time_arr = np.insert(time_arr, len(time_arr), times,axis=0)
-        #    responses_arr = np.insert(responses_arr, len(responses_arr), np.real(responses[i+1]),axis=0)
-        #h, xsides, ysides,im = plt.hist2d(time_arr, responses_arr,bins=100,range=[xlim,ylim],cmin=1)
+    #parallel
+    responses = pool.map(waveform_reduced, data_sub_packed)
+    #Serial
+    #for x in np.arange(len(data_sub_packed)):
+    #    responses[x] = waveform_reduced( data_sub_packed[x])
 
-        #time_arr,responses_arr = times,np.real(responses[0])
-        #for i in np.arange(N-1):
-        #    time_arr = np.insert(time_arr, len(time_arr), times,axis=0)
-        #    responses_arr = np.insert(responses_arr, len(responses_arr), np.real(responses[i+1]),axis=0)
-        #nbins = 30
-        #k = kde.gaussian_kde([time_arr, responses_arr])
-        #xi,yi = np.mgrid[time_arr.min():time_arr.max():nbins*1j, responses_arr.min():responses_arr.max():nbins*1j]
-        #zi = k(np.vstack([xi.flatten(),yi.flatten()]))
-        #ax.pcolormesh(xi,yi,zi.reshape(xi.shape))
+    for i in np.arange(N):
+        ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+    #ninetyp = np.quantile(np.real(responses),.90,axis=0)
+    #tenthp = np.quantile(np.real(responses),.1,axis=0)
+    #ax.plot(times,ninetyp)
+    #ax.plot(times,tenthp)
+
+    #time_arr,responses_arr = times,np.real(responses[0])
+    #for i in np.arange(N-1):
+    #    time_arr = np.insert(time_arr, len(time_arr), times,axis=0)
+    #    responses_arr = np.insert(responses_arr, len(responses_arr), np.real(responses[i+1]),axis=0)
+    #h, xsides, ysides,im = plt.hist2d(time_arr, responses_arr,bins=100,range=[xlim,ylim],cmin=1)
+
+    #time_arr,responses_arr = times,np.real(responses[0])
+    #for i in np.arange(N-1):
+    #    time_arr = np.insert(time_arr, len(time_arr), times,axis=0)
+    #    responses_arr = np.insert(responses_arr, len(responses_arr), np.real(responses[i+1]),axis=0)
+    #nbins = 30
+    #k = kde.gaussian_kde([time_arr, responses_arr])
+    #xi,yi = np.mgrid[time_arr.min():time_arr.max():nbins*1j, responses_arr.min():responses_arr.max():nbins*1j]
+    #zi = k(np.vstack([xi.flatten(),yi.flatten()]))
+    #ax.pcolormesh(xi,yi,zi.reshape(xi.shape))
 
     if data_stream_file is not None:
         datastream = np.loadtxt(data_stream_file, skiprows=3)
@@ -335,28 +382,53 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
         ax.set_ylim(ylim)
     return fig
 
-def create_waveform_from_MCMC_output(parameters,psd,freqs, dim,generation_method, detector,mod_struct):
+def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_dim,generation_method_base,generation_method_extended, detector,mod_struct):
+
+    parameters = parameters_status[0]
+    status = parameters_status[1]
+
     df = freqs[1]-freqs[0]
     T = 1./(df)
     gparam = gpu.gen_params()
+    response = None
+
+    dimct =  np.sum(status)
     
-    temp_gen,temp_param = MCMC_prep_params_py(parameters,gparam,dim, 
-        generation_method,mod_struct )
+    temp_params = parameters[ status == 1]
+
+    if(dimct==min_dim):
+        temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,min_dim, 
+            generation_method_base,mod_struct )
+        #THIS IS A TEMPORARY FIX
+        time_shift = temp_temp_param[5]
+        temp_temp_param[5] = 0 
+        repack_parameters_py(temp_temp_param, gparam, "MCMC_"+temp_gen, min_dim)
+        response = gwg.response_generator(freqs,detector,generation_method_base, gparam)
+
+    else:
+        interface_kwargs = {"min_dim":min_dim,"max_dim":max_dim}
+        interface = mcmc_data_interface_py(**interface_kwargs) 
+        mod_struct_local=MCMC_modification_struct_py() 
+
+        pack_local_mod_structure_py( interface, parameters, status, generation_method_extended, ctypes.c_void_p, mod_struct, mod_struct_local)
+
+        temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,dimct, 
+            generation_method_extended,mod_struct_local )
+        #THIS IS A TEMPORARY FIX
+        time_shift = temp_temp_param[5]
+        temp_temp_param[5] = 0 
+        repack_parameters_py(temp_temp_param, gparam, "MCMC_"+temp_gen, dimct)
+        response = gwg.response_generator(freqs,detector,generation_method_extended, gparam)
     
-    #THIS IS A TEMPORARY FIX
-    time_shift = temp_param[5]
-    temp_param[5] = 0 
-    repack_parameters_py(temp_param, gparam, "MCMC_"+temp_gen, dim)
-    
-    response = gwg.response_generator(freqs,detector,generation_method, gparam)
+
     response*= np.exp( 1j*(T-time_shift )*2*np.pi*freqs)
     
     window = tukey(len(response),4*2/T)
     response_t = np.fft.ifft(response*window/psd**.5)*df
-    
     return response_t
     
-########################################################################################################################
+#######################################################################################
+#######################################################################################
 def dirichlet_wrapper_full(p,*bincts):
     ptemp = np.insert(p, len(p), 1-np.sum(p))
 
