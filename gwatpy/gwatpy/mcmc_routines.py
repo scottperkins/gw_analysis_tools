@@ -429,6 +429,47 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     
 #######################################################################################
 #######################################################################################
+
+def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,titles=None):
+    data_shape = np.shape(data)
+    dim = data_shape[1]
+    
+    fig, axes = plt.subplots(nrows=dim,ncols=dim,figsize=figsize,sharex='col')
+    
+    for x in np.arange(dim):
+        for y in np.arange(x+1):
+            axes[x,y].grid(False)
+            if y == x:
+                #marginalized
+                mask = status[:,x] == 1
+                if(np.sum(mask) !=0):
+                    axes[x,y].hist(data[mask,x],bins=marginal_bins,density=True,edgecolor='black',histtype='step')
+                axes[x,y].get_yaxis().set_ticks([])
+                if titles is not None:
+                    axes[x,y].set_title(titles[x])
+            else:
+                #covariance
+                mask = (status[:,x] == 1) & (status[:,y] == 1)
+                if(np.sum(mask) !=0):
+                    axes[x,y].hexbin(data[mask,y],data[mask,x],bins=cov_bins,mincnt=1)
+                axes[x,y].get_shared_y_axes().join(axes[0,y])
+                if y != 0 :
+                    axes[x,y].get_yaxis().set_ticks([])
+                else:
+                    if titles is not None:
+                        axes[x,y].set_ylabel(titles[x])
+    for x in np.arange(dim-1):
+        for y in np.arange(x+1,dim):
+            axes[x,y].axis('off')
+    if titles is not None:
+        for x in np.arange(dim):
+            axes[dim-1,x].set_xlabel(titles[x])
+    fig.subplots_adjust(hspace=0.03,wspace=0.03)
+    return fig
+
+
+#######################################################################################
+#######################################################################################
 def dirichlet_wrapper_full(p,*bincts):
     ptemp = np.insert(p, len(p), 1-np.sum(p))
 
