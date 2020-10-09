@@ -430,7 +430,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
 #######################################################################################
 #######################################################################################
 
-def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,titles=None):
+def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantiles=False,titles=None):
     data_shape = np.shape(data)
     dim = data_shape[1]
     
@@ -446,7 +446,20 @@ def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,titles=None):
                     axes[x,y].hist(data[mask,x],bins=marginal_bins,density=True,edgecolor='black',histtype='step')
                 axes[x,y].get_yaxis().set_ticks([])
                 if titles is not None:
-                    axes[x,y].set_title(titles[x])
+                    if show_quantiles and np.sum(mask) != 0:
+                        fifty = np.quantile(data[mask,x],.50)
+                        upper = np.quantile(data[mask,x],.84)#1 sigma, for symmetric, gaussian like distribution
+                        lower = np.quantile(data[mask,x],.16)#1 sigma, for symmetric, gaussian like distribution
+                        #axes[x,y].set_title(str(titles[x])+r"$={0:1.2e}^{{+ {1:1.2e} }}_{{- {2:1.2e} }}$".format(fifty,upper-fifty,fifty-lower))
+                        axes[x,y].set_title(r"${0:1.2e}^{{+ {1:1.2e} }}_{{- {2:1.2e} }}$".format(fifty,upper-fifty,fifty-lower))
+                    else:
+                        axes[x,y].set_title(str(titles[x]))
+                else:
+                    if show_quantiles and np.sum(mask) != 0:
+                        fifty = np.quantile(data[mask,x],.50)
+                        upper = np.quantile(data[mask,x],.84)#1 sigma, for symmetric, gaussian like distribution
+                        lower = np.quantile(data[mask,x],.16)#1 sigma, for symmetric, gaussian like distribution
+                        axes[x,y].set_title(r"${0:1.2e}^{{+ {1:1.2e} }}_{{- {2:1.2e} }}$".format(fifty,upper-fifty,fifty-lower))
             else:
                 #covariance
                 mask = (status[:,x] == 1) & (status[:,y] == 1)
