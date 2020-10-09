@@ -2486,6 +2486,30 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
+	//int dynamic_search_length = 2*t0;
+	int dynamic_search_length = nu*2;
+	//int dynamic_search_length = 200;
+	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, max_dimension);
+	int ***temp_status = allocate_3D_array_int(chain_N,dynamic_search_length, max_dimension);
+	int ***temp_model_status = NULL;
+	if(nested_model_number > 0 ){
+		temp_model_status = allocate_3D_array_int(chain_N, dynamic_search_length, nested_model_number);
+	}
+	sampler sampler_temp;
+	continue_RJPTMCMC_MH_internal(&sampler_temp,checkpoint_file_start,temp_output,
+		temp_status,temp_model_status, nested_model_number, dynamic_search_length, 
+		swp_freq,log_prior, log_likelihood, fisher, RJ_proposal,user_parameters,
+		numThreads, pool, internal_prog, update_RJ_width, statistics_filename, 
+		"",  "","",checkpoint_file,true,true);
+	
+	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, max_dimension);
+	deallocate_3D_array(temp_status, chain_N, dynamic_search_length, max_dimension);
+	if(temp_model_status){
+		deallocate_3D_array(temp_model_status, chain_N,dynamic_search_length, nested_model_number);
+		temp_model_status = NULL;
+	}
+	deallocate_sampler_mem(&sampler_temp);
+
 	
 	std::cout<<"Starting driver"<<std::endl;
  	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(sampler_output,
