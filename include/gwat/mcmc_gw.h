@@ -455,6 +455,41 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters) ;
 
+void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
+	std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
+	double **output,
+	int **status,
+	int **model_status,
+	int nested_model_number,
+	int N_steps,
+	int max_chain_N_thermo_ensemble,
+	double **prior_ranges,
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	int max_chunk_size,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int *status,int *model_status,mcmc_data_interface *interface,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method_base,
+	std::string generation_method_extended,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	);
 void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	mcmc_sampler_output *sampler_output,
 	double **output,

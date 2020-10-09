@@ -2900,6 +2900,235 @@ void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, i
 /*! \brief Performs RJPTMCMC on two competeting models, waveform 1 and waveform 2. Assumes waveform 2 is a superset including waveform 1 (ie dCS Pv2 and Pv2 or NRT Pv2 and Pv2, but not dCS Pv2 and D).
  *
  */
+void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
+	std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
+	double **output,
+	int **status,
+	int **model_status,
+	int nested_model_number,
+	int N_steps,
+	int max_chain_N_thermo_ensemble,
+	double **prior_ranges,/**< Range of priors on MODIFICATIONS -- shape : double[N_mods][2] with low in 0 and high in 1**/
+	double *chain_temps,
+	int swp_freq,
+	int t0,
+	int nu,
+	int max_chunk_size,
+	std::string chain_distribution_scheme,
+	double(*log_prior)(double *param, int *status,int *model_status,mcmc_data_interface *interface,void *parameters),
+	int numThreads,
+	bool pool,
+	bool show_prog,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method_base,
+	std::string generation_method_extended,
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_filename
+	)
+{
+	int max_dimension, min_dimension,chain_N;
+	dimension_from_checkpoint_file(checkpoint_file_start, &min_dimension, &max_dimension);
+	chain_number_from_checkpoint_file(checkpoint_file_start, &chain_N) ;
+	sampler_output->RJ = true;
+
+	bool GAUSS_QUAD = false;
+	std::mutex fisher_mutex;
+
+	bool update_RJ_widths = false;
+	//Create fftw plan for each detector (length of data stream may be different)
+	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
+	for (int i =0;i<num_detectors;i++)
+	{	
+		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
+	}
+	mcmc_noise = noise_psd;	
+	mcmc_frequencies = frequencies;
+	mcmc_data = data;
+	mcmc_data_length = data_length;
+	mcmc_detectors = detectors;
+	mcmc_generation_method_base = generation_method_base;
+	mcmc_generation_method_extended = generation_method_extended;
+	mcmc_fftw_plans = plans;
+	mcmc_num_detectors = num_detectors;
+	mcmc_gps_time = gps_time;
+	mcmc_gmst = gps_to_GMST_radian(mcmc_gps_time);
+	mcmc_mod_struct = mod_struct;
+	mcmc_log_beta = false;
+	mcmc_intrinsic = false;
+
+	//To save time, intrinsic waveforms can be saved between detectors, if the 
+	//frequencies are all the same
+	mcmc_save_waveform = true;
+	for(int i =1 ;i<mcmc_num_detectors; i++){
+		if( mcmc_data_length[i] != mcmc_data_length[0] ||
+			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
+			mcmc_frequencies[i][mcmc_data_length[i]-1] 
+				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
+			mcmc_save_waveform= false;
+		}
+			
+	}
+
+	bool local_seeding = false;
+	double *seeding_var = NULL;
+
+	RJPTMCMC_method_specific_prep(generation_method_extended, max_dimension, min_dimension,seeding_var, local_seeding);
+
+
+	//######################################################
+	int T = (int)(1./(mcmc_frequencies[0][1]-mcmc_frequencies[0][0]));
+	debugger_print(__FILE__,__LINE__,T);
+	int burn_factor = T/4; //Take all sources to 4 seconds
+	debugger_print(__FILE__,__LINE__,burn_factor);
+	std::complex<double> **burn_data = new std::complex<double>*[mcmc_num_detectors];
+	double **burn_freqs = new double*[mcmc_num_detectors];
+	double **burn_noise = new double*[mcmc_num_detectors];
+	int *burn_lengths = new int[mcmc_num_detectors];
+	fftw_outline *burn_plans= new fftw_outline[num_detectors];
+	for(int j = 0; j<mcmc_num_detectors; j++){
+		burn_lengths[j] = mcmc_data_length[j]/burn_factor;
+		burn_data[j]= new std::complex<double>[burn_lengths[j]];
+		burn_freqs[j]= new double[burn_lengths[j]];
+		burn_noise[j]= new double[burn_lengths[j]];
+		allocate_FFTW_mem_forward(&burn_plans[j], burn_lengths[j]);
+		int ct = 0;
+		for( int k = 0 ; k<mcmc_data_length[j]; k++){
+			if(k%burn_factor==0 && ct<burn_lengths[j]){
+				burn_data[j][ct] = mcmc_data[j][k];
+				burn_freqs[j][ct] = mcmc_frequencies[j][k];
+				burn_noise[j][ct] = mcmc_noise[j][k];
+				ct++;
+			}
+		}
+	}
+	
+
+	//######################################################
+	//######################################################
+	//Fishers sometimes need AD, but that's slow and single 
+	//threaded -- use GAUSS quad with precomputed weights 
+	//and abscissa 
+	double *fish_freqs = NULL;
+	double *fish_weights = NULL;
+	double **fish_psd = NULL; //Needs to be interpolated from data given
+	int fish_length = 100;
+	double flow = mcmc_frequencies[0][0];
+	double fhigh = mcmc_frequencies[0][mcmc_data_length[0]-1];
+	if(GAUSS_QUAD){
+		fish_freqs = new double[fish_length];	
+		fish_weights = new double[fish_length];	
+		fish_psd = new double*[mcmc_num_detectors];	
+		
+		gauleg(log10(flow), log10(fhigh), fish_freqs, fish_weights, fish_length);
+		for(int i = 0 ; i<fish_length; i++){
+			fish_freqs[i]=pow(10,fish_freqs[i]);
+		}
+		for(int i = 0 ; i<mcmc_num_detectors; i++){
+			fish_psd[i] = new double[fish_length];
+			gsl_interp_accel *accel = gsl_interp_accel_alloc();
+			gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, mcmc_data_length[i]);
+			gsl_spline_init(spline, mcmc_frequencies[i], mcmc_noise[i],mcmc_data_length[i]);
+			for(int j = 0 ; j<fish_length; j++){
+				fish_psd[i][j] = gsl_spline_eval(spline, fish_freqs[j],accel);
+			}
+			gsl_spline_free(spline);
+		}
+	}
+	//######################################################
+	//######################################################
+	const gsl_rng_type *gsl_T;
+	gsl_rng **rvec = new gsl_rng*[chain_N];
+	gsl_rng_env_setup();	
+	gsl_T = gsl_rng_default;
+	for(int i = 0 ; i<chain_N; i++){
+		rvec[i] = gsl_rng_alloc(gsl_T);
+	}
+	
+	//######################################################
+	MCMC_user_param **user_parameters=NULL;
+	user_parameters = new MCMC_user_param*[chain_N];
+	for(int i = 0 ;i<chain_N; i++){
+		user_parameters[i] = new MCMC_user_param;
+		
+		user_parameters[i]->burn_data = burn_data;
+		user_parameters[i]->burn_freqs = burn_freqs;
+		user_parameters[i]->burn_noise = burn_noise;
+		user_parameters[i]->burn_lengths = burn_lengths;
+		user_parameters[i]->burn_plans=burn_plans;
+
+		user_parameters[i]->mFish= &fisher_mutex;
+		user_parameters[i]->GAUSS_QUAD= GAUSS_QUAD;
+		user_parameters[i]->fish_freqs= fish_freqs;
+		user_parameters[i]->fish_weights= fish_weights;
+		user_parameters[i]->fish_psd= fish_psd;
+		user_parameters[i]->fish_length= fish_length;
+
+		user_parameters[i]->r = rvec[i];
+
+		user_parameters[i]->mod_prior_ranges = prior_ranges;
+		user_parameters[i]->mod_struct = mod_struct;
+
+		//user_parameters[i]->burn_freqs = mcmc_frequencies;
+		//user_parameters[i]->burn_data = mcmc_data;
+		//user_parameters[i]->burn_noise = mcmc_noise;
+		//user_parameters[i]->burn_lengths = mcmc_data_length;
+	}
+	//######################################################
+
+
+	continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(checkpoint_file_start,sampler_output,output,status, model_status, nested_model_number,
+		N_steps, 
+		max_chain_N_thermo_ensemble, chain_temps, 
+		swp_freq, t0, nu,max_chunk_size,chain_distribution_scheme,
+		log_prior,RJMCMC_2WF_likelihood_wrapper, RJMCMC_2WF_fisher_wrapper,RJMCMC_2WF_RJ_proposal_wrapper,(void**)user_parameters,numThreads, pool, 
+		show_prog,update_RJ_widths,statistics_filename,
+		chain_filename, likelihood_log_filename,checkpoint_filename);
+	
+	//Deallocate fftw plans
+	for (int i =0;i<num_detectors;i++)
+		deallocate_FFTW_mem(&plans[i]);
+	//#################################################
+	for(int i = 0 ; i<num_detectors; i++){
+		delete [] burn_data[i];
+		delete [] burn_freqs[i];
+		delete [] burn_noise[i];
+		deallocate_FFTW_mem(&burn_plans[i]);
+	}
+	if(GAUSS_QUAD){
+		delete [] fish_freqs;
+		delete [] fish_weights;
+		for(int i = 0 ;i<mcmc_num_detectors; i++){
+			delete [] fish_psd[i];
+		}
+		delete [] fish_psd;
+	}
+	delete [] burn_data;
+	delete [] burn_noise;
+	delete [] burn_freqs;
+	delete [] burn_plans;
+	for(int i = 0 ; i<chain_N; i++){
+		delete user_parameters[i];
+		gsl_rng_free(rvec[i]);
+	}
+	delete [] rvec;
+	delete [] user_parameters;
+	//#################################################
+	free(plans);
+}
+
+/*! \brief Performs RJPTMCMC on two competeting models, waveform 1 and waveform 2. Assumes waveform 2 is a superset including waveform 1 (ie dCS Pv2 and Pv2 or NRT Pv2 and Pv2, but not dCS Pv2 and D).
+ *
+ */
 void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	mcmc_sampler_output *sampler_output,
 	double **output,

@@ -1277,17 +1277,22 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 	return 0;
 
 }
-#endif
-#ifndef _HDF5
-int mcmc_sampler_output::create_data_dump(bool cold_only, std::string filename)
+#else
+int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string filename)
 {
 	std::cout<<"ERROR -- only HDF5 is supported at the moment"<<std::endl;
 	return 0;
 }
-int mcmc_sampler_output::append_to_data_dump(bool cold_only, std::string filename)
+int mcmc_sampler_output::append_to_data_dump( std::string filename)
 {
 	std::cout<<"ERROR -- only HDF5 is supported at the moment"<<std::endl;
 	return 0;
+}
+int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_stored_ac, bool trim)
+{
+	std::cout<<"ERROR -- only HDF5 is supported at the moment"<<std::endl;
+	return 0;
+
 }
 #endif
 //#############################################################
@@ -2281,6 +2286,8 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	int N_steps,/**< Number of new steps to take*/
 	int temp_scale_factor,
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
 	std::function<double(double*,int*,int*,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
 	std::function<double(double*,int*,int*,mcmc_data_interface *,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int dimension, int chain_id*/
 	std::function<void(double*,int*,int*,double**,mcmc_data_interface *,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int dimension, double **output_fisher, int chain_id*/
@@ -2434,12 +2441,92 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 
 
 
+/*! \brief Parallel tempered, dynamic chain allocation MCMC. Reversible Jump version, which doesn't currently have any autocorrelation calculations currently.
+ *
+ * Runs dynamic chain allocation, then it will run the RJPTMCMC routine repeatedly 
+ *
+ */
+void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(
+	std::string checkpoint_file_start, 
+	mcmc_sampler_output *sampler_output,
+	double **output, /**< [out] Output shape is double[N_steps,dimension]*/
+	int **parameter_status, /**< [out] Output shape is int[N_steps,dimension]*/
+	int **model_status,
+	int nested_model_number,
+	int N_steps,	/**< Number of total steps to be taken, per chain AFTER chain allocation*/
+	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
+	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
+	int swp_freq,	/**< the frequency with which chains are swapped*/
+	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
+	int nu,/**< Initial amplitude of the dynamics (~100)*/
+	int max_chunk_size,/**<Maximum number of steps to take in a single sampler run*/
+	std::string chain_distribution_scheme,
+	std::function<double(double*, int*,int*,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
+	std::function<double(double*,int*,int*,mcmc_data_interface *,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,int*,int*,double**,mcmc_data_interface *,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
+	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
+	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
+	bool show_prog, /**< boolean whether to print out progress (for example, should be set to ``false'' if submitting to a cluster)*/
+	bool update_RJ_width,
+	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
+	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
+	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
+	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	)
+{
+	int max_dimension,min_dimension;
+	dimension_from_checkpoint_file(checkpoint_file_start, &min_dimension,&max_dimension);
+	int chain_N;
+	chain_number_from_checkpoint_file(checkpoint_file_start, &chain_N);
+	clock_t start, end, acend;
+	double wstart, wend, wacend;
+	start = clock();
+	wstart = omp_get_wtime();
+	bool internal_prog=false;
+
+	
+	std::cout<<"Starting driver"<<std::endl;
+ 	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(sampler_output,
+		output,
+		parameter_status,
+		model_status,
+		nested_model_number,
+		max_dimension, 	
+		min_dimension, 	
+		N_steps,	
+		chain_N,
+		max_chain_N_thermo_ensemble,
+		swp_freq,	
+		t0,
+		nu,
+		max_chunk_size,
+		chain_distribution_scheme, 
+		log_prior,
+		log_likelihood,
+		fisher,
+		RJ_proposal,
+		user_parameters,
+		numThreads, 
+		pool, 
+		show_prog, 
+		update_RJ_width,
+		statistics_filename,
+		chain_filename,
+		likelihood_log_filename,
+		checkpoint_file
+		);
+	std::cout<<std::endl;
+	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
+	return ;
+
+}
 
 /*! \brief Parallel tempered, dynamic chain allocation MCMC. Reversible Jump version, which doesn't currently have any autocorrelation calculations currently.
  *
  * Runs dynamic chain allocation, then it will run the RJPTMCMC routine repeatedly 
  *
- * Note: This method does NOT guarantee the final autocorrelation length of the chains will the be the target. It merely uses the requested autocorrelation length as a guide to thin the chains as samples are accrued and to estimate the total number of effective samples. Its best to request extra samples and thin the chains out at the end one final time, or to run multiple runs and combine the results at the end.
  */
 void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sampler_output,
 	double **output, /**< [out] Output shape is double[N_steps,dimension]*/
@@ -6013,6 +6100,80 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 		initial_status,
 		initial_model_status,
 		seeding_var,
+		chain_temps,
+		swp_freq,
+		t0, 
+		nu, 
+		max_chunk_size,
+		chain_distribution_scheme,
+		lp,
+		ll,
+		f,
+		rj,
+		user_parameters,
+		numThreads,
+		pool,
+		show_prog,
+		update_RJ_width,
+		statistics_filename,
+		chain_filename,
+		likelihood_log_filename,
+		checkpoint_file);
+}
+//#############################################################################
+void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(
+	std::string checkpoint_file_start,
+	mcmc_sampler_output *sampler_output,
+	double **output, 
+	int **parameter_status, 
+	int **model_status,
+	int nested_model_number,
+	int N_steps,	
+	int max_chain_N_thermo_ensemble,
+	double *chain_temps, 
+	int swp_freq,	
+	int t0,
+	int nu,
+	int max_chunk_size,
+	std::string chain_distribution_scheme, 
+	double (*log_prior)(double *param, int *status, int *model_status,mcmc_data_interface *interface, void * parameters),	
+	double (*log_likelihood)(double *param, int *status,int *model_status, mcmc_data_interface *interface, void * parameters),
+	void (*fisher)(double *param, int *status,int *model_status, double **fisher, mcmc_data_interface *interface, void * parameters),
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface,  void * parameters),
+	void **user_parameters,
+	int numThreads, 
+	bool pool, 
+	bool show_prog, 
+	bool update_RJ_width, 
+	std::string statistics_filename,
+	std::string chain_filename,
+	std::string likelihood_log_filename,
+	std::string checkpoint_file
+	)
+{
+	std::function<double(double*,int*,int *,mcmc_data_interface *,void *)> ll =NULL;
+	ll = [&log_likelihood](double *param, int *param_status,int *model_status,mcmc_data_interface *interf,void *parameters){
+			return log_likelihood(param, param_status,model_status,interf ,parameters);};
+	std::function<double(double*,int*,int*,mcmc_data_interface *,void *)> lp =NULL;
+	lp = [&log_prior](double *param, int *param_status,int *model_status,mcmc_data_interface *interf,void *parameters){
+			return log_prior(param, param_status, model_status,interf,parameters);};
+	std::function<void(double*,int*,int *,double**,mcmc_data_interface *,void *)> f =NULL;
+	if(fisher){
+		f = [&fisher](double *param, int *param_status,int *model_status, double **fisherm, mcmc_data_interface *interf,void *parameters){
+			fisher(param, param_status, model_status,fisherm,interf,parameters);};
+	}
+	std::function<void(double*,double*, int*,int*,int*,int*,mcmc_data_interface *, void*)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,mcmc_data_interface *interf,void *parameters){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,interf,parameters);};
+	continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(
+		checkpoint_file_start, 
+		sampler_output,
+		output,
+		parameter_status,
+		model_status,
+		nested_model_number,
+		N_steps,
+		max_chain_N_thermo_ensemble,
 		chain_temps,
 		swp_freq,
 		t0, 

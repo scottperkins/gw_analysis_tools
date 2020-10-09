@@ -377,15 +377,20 @@ int main(int argc, char *argv[])
 	}
 
 	//Doesn't exist yet
-	//if(continue_from_checkpoint){
-	if(false){
-		//mcmc_sampler_output sampler_output(chain_N, max_dimension);
-		//continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(initial_checkpoint_file,&sampler_output,output, samples,  
-		//		max_thermo_chain_N, chain_temps, 
-		//		swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
-		//		lp,threads, pool,show_progress,detector_N, 
-		//		data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
-		//		generation_method,stat_file,output_file, "",check_file);	
+	if(continue_from_checkpoint){
+		std::cout<<"Running uncorrelated sampler "<<std::endl;
+		mcmc_sampler_output sampler_output(chain_N, max_dimension,nested_model_number);
+		sampler_output.RJ = true;
+		sampler_output.threads = threads;
+		
+		continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
+			initial_checkpoint_file,&sampler_output,output, status, model_status,
+			nested_model_number, samples, max_thermo_chain_N, mod_priors,
+			chain_temps, swap_freq,t0, nu,max_chunk_size,allocation_scheme, 
+			lp,threads, pool,show_progress,detector_N, data,psd,
+			freqs, data_lengths,gps_time, detectors,&mod_struct,generation_method_base,
+			generation_method_extended,stat_file,output_file, "",check_file);	
+		sampler_output.create_data_dump(true, false, output_file);
 
 	}
 	else{
@@ -410,7 +415,8 @@ int main(int argc, char *argv[])
 		sampler_output.RJ = true;
 		sampler_output.threads = threads;
 		
-		RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output, status, model_status,nested_model_number, max_dimension, min_dimension,samples, chain_N, 
+		RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
+				&sampler_output,output, status, model_status,nested_model_number, max_dimension, min_dimension,samples, chain_N, 
 				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,mod_priors,chain_temps, 
 				swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
