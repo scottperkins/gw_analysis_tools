@@ -395,7 +395,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     dimct =  np.sum(status)
     
     temp_params = parameters[ status == 1]
-
+    time_shift=0
     if(dimct==min_dim):
         temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,min_dim, 
             generation_method_base,mod_struct )
