@@ -47,6 +47,13 @@ gsl_rng * r;
 sampler *samplerptr_global;
 
 
+//double *testing_thread_access=NULL;
+double testing_thread_access[50000];
+int thread_access_ct = 0;
+
+//Time for queueing threads to wait after assigning job
+//Helps to even out the load
+int THREADWAIT=400; //in microseconds -- should only need a few clock cycles
 //#############################################################
 //mcmc_sampler_output definitions
 //#############################################################
@@ -1402,8 +1409,17 @@ public:
 		{
 			std::unique_lock<std::mutex> lock{mEventMutex};
 			mTasks.emplace(std::move(i));
+			//if(thread_access_ct<50000){
+			//	testing_thread_access[thread_access_ct] = i;
+			//	thread_access_ct ++;
+			//}
+			//else{
+			//	write_file("data/thread_access_test.csv",testing_thread_access,50000);
+			//	thread_access_ct = 0;
+			//}
 		}
 		mEventVar.notify_one();
+		usleep(THREADWAIT);
 	}
 
 	void enqueue_swap(int i)
@@ -1411,8 +1427,10 @@ public:
 		{
 			std::unique_lock<std::mutex> lock{mEventMutexSWPQ};
 			mSwapsSWPQ.emplace(std::move(i));
+			
 		}
 		mEventVarSWPQ.notify_one();
+		usleep(THREADWAIT);
 	}
 	
 
@@ -1452,6 +1470,7 @@ public:
 		if(notify){
 			mEventVarSWP.notify_one();
 		}
+		usleep(THREADWAIT);
 	}
 	void flush_swap_queue()
 	{

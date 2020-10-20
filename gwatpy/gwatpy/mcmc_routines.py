@@ -423,7 +423,8 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
 
     response*= np.exp( 1j*(T-time_shift )*2*np.pi*freqs)
     
-    window = tukey(len(response),4*2/T)
+    window = tukey(len(response),.4*2/T)
+    #window = np.ones(len(response))
     response_t = np.fft.ifft(response*window/psd**.5)*df
     return response_t
     
