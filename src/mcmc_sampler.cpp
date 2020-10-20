@@ -48,8 +48,8 @@ sampler *samplerptr_global;
 
 
 //double *testing_thread_access=NULL;
-double testing_thread_access[50000];
-int thread_access_ct = 0;
+//double testing_thread_access[50000];
+//int thread_access_ct = 0;
 
 //Time for queueing threads to wait after assigning job
 //Helps to even out the load

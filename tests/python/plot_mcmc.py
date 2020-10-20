@@ -22,31 +22,31 @@ data = gmcmc.trim_thin_file("data/injection_output.csv",trim=None,ac=None)
 #data = f["MCMC_OUTPUT/CHAIN 80"][::100]
 dim = len(data[0])
 print("Final samples: ",len(data))
-for x in range(len(data[0])):
-    print(emcee.autocorr.integrated_time(data[:,x],tol=0))
+#for x in range(len(data[0])):
+#    print(emcee.autocorr.integrated_time(data[:,x],tol=0))
 
-chains = list(f["MCMC_OUTPUT/LOGL_LOGP"])
-for y in range(len(list(f["MCMC_OUTPUT/LOGL_LOGP"]))):
-    print(chains[y])
-    lllpdata = f["MCMC_OUTPUT/LOGL_LOGP"][chains[y]]
-    def _line(x,m,b):
-        return x*m +b
-    x = np.arange(len(lllpdata[:,0]))
-    popt,pcov = scipy.optimize.curve_fit(_line,x,lllpdata[:,0])
-    print(popt)
-    plt.plot(lllpdata[:,0],label="{} \ {}".format(y,f["MCMC_METADATA"]["CHAIN TEMPERATURES"][y]))
-    plt.plot(x,_line(x,*popt))
-    plt.plot(lllpdata[:,1],label='P')
-    plt.plot(lllpdata[:,1]+lllpdata[:,0],label='P+L')
-    plt.legend()
-    plt.show()
-    plt.close()
-    for x in np.arange(len(f["MCMC_OUTPUT/"+chains[y]][0])):
-        plt.plot(f["MCMC_OUTPUT/"+chains[y]][:,x],label=chains[y]+"-"+str(x))
-        #plt.plot(testdata2[:,x])
-        plt.legend()
-        plt.show()
-        plt.close()
+#chains = list(f["MCMC_OUTPUT/LOGL_LOGP"])
+#for y in range(len(list(f["MCMC_OUTPUT/LOGL_LOGP"]))):
+#    print(chains[y])
+#    lllpdata = f["MCMC_OUTPUT/LOGL_LOGP"][chains[y]]
+#    def _line(x,m,b):
+#        return x*m +b
+#    x = np.arange(len(lllpdata[:,0]))
+#    popt,pcov = scipy.optimize.curve_fit(_line,x,lllpdata[:,0])
+#    print(popt)
+#    plt.plot(lllpdata[:,0],label="{} \ {}".format(y,f["MCMC_METADATA"]["CHAIN TEMPERATURES"][y]))
+#    plt.plot(x,_line(x,*popt))
+#    plt.plot(lllpdata[:,1],label='P')
+#    plt.plot(lllpdata[:,1]+lllpdata[:,0],label='P+L')
+#    plt.legend()
+#    plt.show()
+#    plt.close()
+#    for x in np.arange(len(f["MCMC_OUTPUT/"+chains[y]][0])):
+#        plt.plot(f["MCMC_OUTPUT/"+chains[y]][:,x],label=chains[y]+"-"+str(x))
+#        #plt.plot(testdata2[:,x])
+#        plt.legend()
+#        plt.show()
+#        plt.close()
 #testdata=f["MCMC_OUTPUT"]["CHAIN 0"]
 #for x in np.arange(len(testdata[0])):
 #    plt.plot(testdata[:,x])
@@ -70,14 +70,15 @@ data_thinned = []
 for x in np.arange(len(data)):
     if x%1 ==0:
         data_thinned.append(data[x]) 
-#for i in np.arange(8):
-#    parameter = [x[i] for x in data]
-#    plt.plot(parameter)
-#    plt.show()
-#    plt.close()
+for i in np.arange(len(data[0])):
+    parameter = [x[i] for x in data]
+    plt.plot(parameter)
+    #plt.show()
+    plt.savefig("plots/{}.pdf".format(i))
+    plt.close()
 ndim, nsamples = 15, len(data) 
-labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
-#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$q$",r"$\chi_{1}$",r"$\chi_2$",r"$m_1$",r"$m_2$"]
+#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
+labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$m_1$",r"$m_2$"]
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$\chi_{1}$",r"$\chi_2$"]
 data_plot=[]
 for x in data_thinned:
