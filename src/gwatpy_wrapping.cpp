@@ -7,6 +7,7 @@
 #include "mcmc_sampler.h"
 #include "mcmc_sampler_internals.h"
 #include "fisher.h"
+#include <bits/stdc++.h> 
 
 
 
@@ -128,7 +129,9 @@ char * MCMC_prep_params_py(
 	char * generation_method, 
 	MCMC_modification_struct *mod_struct)
 {
-	char * char_arr = const_cast<char *>( MCMC_prep_params(param, temp_params, gen_params, dimension, std::string(generation_method), mod_struct).c_str());
+	std::string str =  MCMC_prep_params(param, temp_params, gen_params, dimension, std::string(generation_method), mod_struct);
+	char *char_arr = new char[  str.length()];
+	strcpy(char_arr,str.c_str());
 	return char_arr;
 }
 

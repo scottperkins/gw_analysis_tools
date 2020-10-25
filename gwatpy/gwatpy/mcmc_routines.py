@@ -374,6 +374,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
 
     for i in np.arange(N):
         ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+
     #ninetyp = np.quantile(np.real(responses),.90,axis=0)
     #tenthp = np.quantile(np.real(responses),.1,axis=0)
     #ax.plot(times,ninetyp)

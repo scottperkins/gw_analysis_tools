@@ -249,6 +249,7 @@ T dCS_phase_factor(source_parameters<T> *param)
 	if(param->NSflag2){s2 =0;}	
 	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
 	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 350./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
+
 	return g;
 }
 template double dCS_phase_factor(source_parameters<double> *);
@@ -262,7 +263,9 @@ T EdGB_beta( source_parameters<T> *param)
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
 	T phase_mod = param->betappe[0];
-	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	return out;
 } 
 template adouble EdGB_beta(source_parameters<adouble> *);
 template double EdGB_beta(source_parameters<double> *);
