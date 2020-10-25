@@ -1,3 +1,4 @@
+import multiprocessing as mp
 import ctypes
 import gwatpy.config as cf
 import h5py
@@ -7,7 +8,6 @@ import emcee
 import gwatpy.waveform_generator as gwg
 import gwatpy.util as gpu
 from scipy.signal.windows import tukey
-import multiprocessing as mp
 from functools import partial
 
 from scipy.stats import  dirichlet,kde
@@ -152,6 +152,30 @@ def repack_parameters_py(param,  gen_params, generation_method, dim):
         generation_method.encode('utf-8'), 
         dim)
 
+def populate_dummy_vals(kwargs):
+    if kwargs["Nmod"] !=0:
+        kwargs["betappe"] = np.zeros(kwargs["Nmod"])
+    if kwargs["Nmod_phi"] !=0:
+        kwargs["delta_phi"] = np.zeros(kwargs["Nmod_phi"])
+    if kwargs["Nmod_sigma"] !=0:
+        kwargs["delta_sigma"] = np.zeros(kwargs["Nmod_sigma"])
+    if kwargs["Nmod_beta"] !=0:
+        kwargs["delta_beta"] = np.zeros(kwargs["Nmod_beta"])
+    if kwargs["Nmod_alpha"] !=0:
+        kwargs["delta_alpha"] = np.zeros(kwargs["Nmod_alpha"])
+def transform_mcmc_mod_struct_to_gen_param(mod_struct):
+    kwargs = {"bppe":mod_struct.bppe,
+        "Nmod":mod_struct.ppE_Nmod,
+        "Nmod_phi":mod_struct.gIMR_Nmod_phi ,
+        "Nmod_sigma":mod_struct.gIMR_Nmod_sigma ,
+        "Nmod_beta":mod_struct.gIMR_Nmod_beta ,
+        "Nmod_alpha":mod_struct.gIMR_Nmod_alpha ,
+        "phii":mod_struct.gIMR_phii ,
+        "sigmai":mod_struct.gIMR_sigmai ,
+        "betai":mod_struct.gIMR_betai ,
+        "alphai":mod_struct.gIMR_alphai 
+    }
+    return kwargs
 class MCMC_modification_struct_py(object):
     ppE_Nmod = 0
     bppe = []
@@ -305,7 +329,7 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, threads=1 ,xlim=None,ylim=None,data_stream_file=None,**mod_struct_kwargs):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs=None,injection=None,injection_status=None):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -327,7 +351,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
         data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
         data_sub = data[data_sub_indices,:] 
         status_sub = status[data_sub_indices,:]
-        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct)
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_extended, detector=detector, mod_struct=mod_struct)
 
     else:
         data = trim_thin_file(filename)     
@@ -342,10 +366,11 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     pool = mp.Pool(processes=threads)
 
     #parallel
-    responses = pool.map(waveform_reduced, data_sub_packed)
+    #responses = pool.map(waveform_reduced, data_sub_packed)
     #Serial
-    #for x in np.arange(len(data_sub_packed)):
-    #    responses[x] = waveform_reduced( data_sub_packed[x])
+    for x in np.arange(len(data_sub_packed)):
+        responses[x] = waveform_reduced( data_sub_packed[x])
+    print("DONE")
 
     for i in np.arange(N):
         ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
@@ -370,6 +395,12 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     #zi = k(np.vstack([xi.flatten(),yi.flatten()]))
     #ax.pcolormesh(xi,yi,zi.reshape(xi.shape))
 
+    if injection is not None:
+        data_packed = [injection,np.asarray(injection_status,dtype=np.int32)]
+
+        response = waveform_reduced( data_packed)
+        ax.plot(times,np.real(response),alpha=1,color='red' ,linewidth=1)
+
     if data_stream_file is not None:
         datastream = np.loadtxt(data_stream_file, skiprows=3)
         data_ft = np.fft.fft(datastream) * df
@@ -383,13 +414,15 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     return fig
 
 def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_dim,generation_method_base,generation_method_extended, detector,mod_struct):
-
     parameters = parameters_status[0]
     status = parameters_status[1]
-
     df = freqs[1]-freqs[0]
     T = 1./(df)
-    gparam = gpu.gen_params()
+    ###############################
+    kwargs = transform_mcmc_mod_struct_to_gen_param(mod_struct)
+    populate_dummy_vals(kwargs)
+    gparam = gpu.gen_params(**kwargs)
+    ###############################
     response = None
 
     dimct =  np.sum(status)
@@ -399,6 +432,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     if(dimct==min_dim):
         temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,min_dim, 
             generation_method_base,mod_struct )
+
         #THIS IS A TEMPORARY FIX
         time_shift = temp_temp_param[5]
         temp_temp_param[5] = 0 
@@ -501,7 +535,6 @@ def dirichlet_wrapper_full(p,*bincts):
 
 def dirichlet_wrapper(p,bincts):
     ptemp = np.insert(np.asarray(p), len(p), 1-np.sum(p))
-    #print("ptemp: ",ptemp)
     returnval = 0
     if np.sum(ptemp<=0):
         return 10**20

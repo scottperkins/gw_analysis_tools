@@ -60,7 +60,6 @@ MCMC_modification_struct * MCMC_modification_struct_py(
 	bool NSflag2
 	)
 {
-	//std::cout<<ppE_Nmod<<std::endl;
 	MCMC_modification_struct *mod_struct = new MCMC_modification_struct;
 	mod_struct->ppE_Nmod = ppE_Nmod;
 	mod_struct->bppe = NULL;
@@ -71,21 +70,33 @@ MCMC_modification_struct * MCMC_modification_struct_py(
 	mod_struct->gIMR_phii = NULL;
 	if(mod_struct->gIMR_Nmod_phi !=0){
 		mod_struct->gIMR_phii = new int[mod_struct->gIMR_Nmod_phi];
+		for(int i = 0 ;i<mod_struct->gIMR_Nmod_phi; i++){
+			mod_struct->gIMR_phii[i] = gIMR_phii[i];
+		}
 	}
 	mod_struct->gIMR_Nmod_sigma = gIMR_Nmod_sigma;
 	mod_struct->gIMR_sigmai = NULL;
 	if(mod_struct->gIMR_Nmod_sigma !=0){
 		mod_struct->gIMR_sigmai = new int[mod_struct->gIMR_Nmod_sigma];
+		for(int i = 0 ;i<mod_struct->gIMR_Nmod_sigma; i++){
+			mod_struct->gIMR_sigmai[i] = gIMR_sigmai[i];
+		}
 	}
 	mod_struct->gIMR_Nmod_beta = gIMR_Nmod_beta;
 	mod_struct->gIMR_betai = NULL;
 	if(mod_struct->gIMR_Nmod_beta !=0){
 		mod_struct->gIMR_betai = new int[mod_struct->gIMR_Nmod_beta];
+		for(int i = 0 ;i<mod_struct->gIMR_Nmod_beta; i++){
+			mod_struct->gIMR_betai[i] = gIMR_betai[i];
+		}
 	}
 	mod_struct->gIMR_Nmod_alpha = gIMR_Nmod_alpha;
 	mod_struct->gIMR_alphai = NULL;
 	if(mod_struct->gIMR_Nmod_alpha !=0){
 		mod_struct->gIMR_alphai = new int[mod_struct->gIMR_Nmod_alpha];
+		for(int i = 0 ;i<mod_struct->gIMR_Nmod_alpha; i++){
+			mod_struct->gIMR_alphai[i] = gIMR_alphai[i];
+		}
 	}
 	mod_struct->NSflag1 = NSflag1;
 	mod_struct->NSflag2 = NSflag2;
@@ -102,6 +113,7 @@ void pack_local_mod_structure_py(
 	MCMC_modification_struct *full_struct,
 	MCMC_modification_struct *local_struct)
 {
+
 	//pack_local_mod_structure(interface, param, status, std::string(waveform_extended),parameters, full_struct, local_struct);
 	pack_local_mod_structure(interface, param, status, std::string(waveform_extended),(void *)NULL, full_struct, local_struct);
 	return;
@@ -155,10 +167,6 @@ int fourier_waveform_py(double *frequencies,
 	gen_params_base<double> *parameters)
 {
 	std::string gen_meth(generation_method);
-	std::cout<<parameters->Nmod<<std::endl;
-	std::cout<<parameters->spin1[0]<<std::endl;
-	std::cout<<parameters->spin1[1]<<std::endl;
-	std::cout<<parameters->betappe[0]<<std::endl;
 	std::complex<double> *wf_p = new std::complex<double>[length];
 	std::complex<double> *wf_c = new std::complex<double>[length];
 	int status =  fourier_waveform(frequencies, length, wf_p, wf_c, gen_meth, parameters);
@@ -322,14 +330,14 @@ gen_params_base<double>* gen_params_base_py(
 void gen_params_base_py_destructor(gen_params_base<double> *p)
 {
 	if(p->betappe){delete [] p->betappe;p->betappe=NULL;}
-	if(p->bppe){delete [] p->bppe;p->bppe=NULL;}
-	if(p->phii){delete [] p->phii;p->phii=NULL;}
+	//if(p->bppe){delete [] p->bppe;p->bppe=NULL;}
 	if(p->delta_phi){delete [] p->delta_phi;p->delta_phi=NULL;}
-	if(p->sigmai){delete [] p->sigmai;p->sigmai=NULL;}
+	//if(p->phii){delete [] p->phii;p->phii=NULL;}
+	//if(p->sigmai){delete [] p->sigmai;p->sigmai=NULL;}
 	if(p->delta_sigma){delete [] p->delta_sigma;p->delta_sigma=NULL;}
-	if(p->betai){delete [] p->betai;p->betai=NULL;}
+	//if(p->betai){delete [] p->betai;p->betai=NULL;}
 	if(p->delta_beta){delete [] p->delta_beta;p->delta_beta=NULL;}
-	if(p->alphai){delete [] p->alphai;p->alphai=NULL;}
+	//if(p->alphai){delete [] p->alphai;p->alphai=NULL;}
 	if(p->delta_alpha){delete [] p->delta_alpha;p->delta_alpha=NULL;}
 	delete p;
 	p=NULL;
