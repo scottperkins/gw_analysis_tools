@@ -329,7 +329,7 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs=None,injection=None,injection_status=None):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -363,7 +363,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
 
     data_sub_packed = [[data_sub[x],status_sub[x]] for x in np.arange(len(data_sub))]
     responses = np.zeros( (N,len(freqs)))
-    pool = mp.Pool(processes=threads)
+    #pool = mp.Pool(processes=threads)
 
     #parallel
     #responses = pool.map(waveform_reduced, data_sub_packed)
@@ -421,6 +421,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     T = 1./(df)
     ###############################
     kwargs = transform_mcmc_mod_struct_to_gen_param(mod_struct)
+    kwargs["gmst"]=2.45682
     populate_dummy_vals(kwargs)
     gparam = gpu.gen_params(**kwargs)
     ###############################
@@ -430,7 +431,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     
     temp_params = parameters[ status == 1]
     time_shift=0
-    if(dimct==min_dim):
+    if(len(parameters)==min_dim):
         temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,min_dim, 
             generation_method_base,mod_struct )
 
@@ -461,6 +462,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     window = tukey(len(response),.4*2/T)
     #window = np.ones(len(response))
     response_t = np.fft.ifft(response*window/psd**.5)*df
+    #response_t = np.fft.ifft(response*window)*df
     return response_t
     
 #######################################################################################

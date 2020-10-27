@@ -117,6 +117,7 @@ void pack_local_mod_structure_py(
 
 	//pack_local_mod_structure(interface, param, status, std::string(waveform_extended),parameters, full_struct, local_struct);
 	pack_local_mod_structure(interface, param, status, std::string(waveform_extended),(void *)NULL, full_struct, local_struct);
+
 	return;
 }
 
@@ -251,6 +252,7 @@ gen_params_base<double>* gen_params_base_py(
 	p->cosmology = std::string(cosmology);
 	p->equatorial_orientation=equatorial_orientation;
 	p->horizon_coord=horizon_coord;
+	p->gmst=gmst;
 	p->NSflag1=NSflag1;
 	p->NSflag2=NSflag2;
 	p->dep_postmerger=dep_postmerger;

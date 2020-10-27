@@ -61,6 +61,26 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
+	//debugger_print(__FILE__,__LINE__, "");
+	//parameters->gmst = 2.45682;
+	//debugger_print(__FILE__,__LINE__, parameters->gmst);
+	//debugger_print(__FILE__,__LINE__, parameters->RA);
+	//debugger_print(__FILE__,__LINE__, parameters->DEC);
+	//debugger_print(__FILE__,__LINE__, parameters->psi);
+	//debugger_print(__FILE__,__LINE__, parameters->Luminosity_Distance);
+	//debugger_print(__FILE__,__LINE__, parameters->phiRef);
+	//debugger_print(__FILE__,__LINE__, parameters->tc);
+	//debugger_print(__FILE__,__LINE__, parameters->mass1);
+	//debugger_print(__FILE__,__LINE__, parameters->mass2);
+	//debugger_print(__FILE__,__LINE__, parameters->spin1[2]);
+	//debugger_print(__FILE__,__LINE__, parameters->spin2[2]);
+	//debugger_print(__FILE__,__LINE__, parameters->incl_angle);
+	//debugger_print(__FILE__,__LINE__, parameters->Nmod_phi);
+	//debugger_print(__FILE__,__LINE__, int(parameters->shift_time));
+	//debugger_print(__FILE__,__LINE__, int(parameters->shift_phase));
+	//debugger_print(__FILE__,__LINE__, int(parameters->sky_average));
+	//debugger_print(__FILE__,__LINE__, "");
+
 	/*Eventually, this will be where NS specific quantities are defined*/	
 	//if (NSflag1 || NSflag2)
 	//{
