@@ -50,7 +50,8 @@ rlib.MCMC_prep_params_py.argtypes = [
     ctypes.c_void_p,    
     ctypes.c_int, 
     ctypes.c_char_p,
-    ctypes.c_void_p
+    ctypes.c_void_p,
+    ctypes.c_bool
     ]
 rlib.MCMC_prep_params_py.restype = ctypes.c_char_p
 
@@ -131,7 +132,7 @@ def pack_local_mod_structure_py(interface, param,status,  waveform_extended,para
         local_struct.obj
         )
 
-def MCMC_prep_params_py(param,  gen_params, dim,generation_method, mod_struct):
+def MCMC_prep_params_py(param,  gen_params, dim,generation_method, mod_struct,save_gmst=True):
     p_type = ctypes.c_double * (len(param)) 
     tp = (ctypes.c_double * (len(param)) )()
      
@@ -141,7 +142,8 @@ def MCMC_prep_params_py(param,  gen_params, dim,generation_method, mod_struct):
         gen_params.obj, 
         dim,
         generation_method.encode('utf-8'), 
-        mod_struct.obj
+        mod_struct.obj,
+        save_gmst
         ).decode()
     return return_meth, np.asarray(tp)
 
@@ -329,7 +331,7 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -351,7 +353,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
         data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
         data_sub = data[data_sub_indices,:] 
         status_sub = status[data_sub_indices,:]
-        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_extended, detector=detector, mod_struct=mod_struct)
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_extended, detector=detector, mod_struct=mod_struct,gmst=gmst)
 
     else:
         data = trim_thin_file(filename)     
@@ -359,7 +361,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
         data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
         data_sub = data[data_sub_indices,:] 
         status_sub = np.ones((N,dim))
-        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=dim,max_dim=dim, generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct)
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=dim,max_dim=dim, generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct,gmst=gmst)
 
     data_sub_packed = [[data_sub[x],status_sub[x]] for x in np.arange(len(data_sub))]
     responses = np.zeros( (N,len(freqs)))
@@ -414,14 +416,14 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
         ax.set_ylim(ylim)
     return fig
 
-def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_dim,generation_method_base,generation_method_extended, detector,mod_struct):
+def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_dim,generation_method_base,generation_method_extended, detector,mod_struct,gmst):
     parameters = parameters_status[0]
     status = parameters_status[1]
     df = freqs[1]-freqs[0]
     T = 1./(df)
     ###############################
     kwargs = transform_mcmc_mod_struct_to_gen_param(mod_struct)
-    kwargs["gmst"]=2.45682
+    kwargs["gmst"]=gmst
     populate_dummy_vals(kwargs)
     gparam = gpu.gen_params(**kwargs)
     ###############################
@@ -433,7 +435,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
     time_shift=0
     if(len(parameters)==min_dim):
         temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,min_dim, 
-            generation_method_base,mod_struct )
+            generation_method_base,mod_struct ,save_gmst=True)
 
         #THIS IS A TEMPORARY FIX
         time_shift = temp_temp_param[5]
@@ -449,7 +451,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
         pack_local_mod_structure_py( interface, parameters, status, generation_method_extended, ctypes.c_void_p, mod_struct, mod_struct_local)
 
         temp_gen,temp_temp_param = MCMC_prep_params_py(temp_params,gparam,dimct, 
-            generation_method_extended,mod_struct_local )
+            generation_method_extended,mod_struct_local ,save_gmst=True)
         #THIS IS A TEMPORARY FIX
         time_shift = temp_temp_param[5]
         temp_temp_param[5] = 0 

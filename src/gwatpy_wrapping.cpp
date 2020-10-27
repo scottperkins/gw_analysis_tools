@@ -128,17 +128,28 @@ char * MCMC_prep_params_py(
 	gen_params_base<double> *gen_params, 
 	int dimension, 
 	char * generation_method, 
-	MCMC_modification_struct *mod_struct)
+	MCMC_modification_struct *mod_struct,
+	bool save_gmst)
 {
+	double gmst;
+	if (save_gmst){
+		gmst = gen_params->gmst;
+	}
 	std::string str =  MCMC_prep_params(param, temp_params, gen_params, dimension, std::string(generation_method), mod_struct);
 	char *char_arr = new char[  str.length()];
 	strcpy(char_arr,str.c_str());
+
+	if (save_gmst){
+		gen_params->gmst=gmst;
+	}
+
 	return char_arr;
 }
 
 void repack_parameters_py(double *parameters, gen_params_base<double> *gen_param, char * generation_method, int dim )
 {
 	repack_parameters(parameters, gen_param, std::string(generation_method), dim , (gen_params_base<double> *)NULL);
+
 }
 
 int fourier_detector_response_py(double *frequencies,

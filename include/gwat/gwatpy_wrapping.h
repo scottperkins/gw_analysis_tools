@@ -50,7 +50,8 @@ char * MCMC_prep_params_py(
 	double *temp_params, 
 	gen_params_base<double> *gen_params, 
 	int dimension, char * generation_method, 
-	MCMC_modification_struct *mod_struct);
+	MCMC_modification_struct *mod_struct,
+	bool save_gmst);
 
 void MCMC_modification_struct_py_destructor(MCMC_modification_struct *mod_struct);
 void repack_parameters_py(
