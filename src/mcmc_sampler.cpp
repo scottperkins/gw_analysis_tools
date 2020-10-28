@@ -48,8 +48,8 @@ sampler *samplerptr_global;
 
 
 //double *testing_thread_access=NULL;
-double testing_thread_access[50000];
-int thread_access_ct = 0;
+//double testing_thread_access[50000];
+//int thread_access_ct = 0;
 
 //Time for queueing threads to wait after assigning job
 //Helps to even out the load
@@ -1409,14 +1409,14 @@ public:
 		{
 			std::unique_lock<std::mutex> lock{mEventMutex};
 			mTasks.emplace(std::move(i));
-			if(thread_access_ct<50000){
-				testing_thread_access[thread_access_ct] = i;
-				thread_access_ct ++;
-			}
-			else{
-				write_file("data/thread_access_test.csv",testing_thread_access,50000);
-				thread_access_ct = 0;
-			}
+			//if(thread_access_ct<50000){
+			//	testing_thread_access[thread_access_ct] = i;
+			//	thread_access_ct ++;
+			//}
+			//else{
+			//	write_file("data/thread_access_test.csv",testing_thread_access,50000);
+			//	thread_access_ct = 0;
+			//}
 		}
 		mEventVar.notify_one();
 		//usleep(THREADWAIT);
@@ -1470,7 +1470,7 @@ public:
 		if(notify){
 			mEventVarSWP.notify_one();
 		}
-		usleep(THREADWAIT);
+		//usleep(THREADWAIT);
 	}
 	void flush_swap_queue()
 	{
@@ -3664,7 +3664,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				debugger_print(__FILE__,__LINE__,"Creating dump");
 				sampler_output->create_data_dump(true,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
-				sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
+				//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 			}
 		}
 		else{
@@ -3676,7 +3676,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//else{
 			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
-			sampler_output->append_to_data_dump("data/test_full.hdf5");
+			//sampler_output->append_to_data_dump("data/test_full.hdf5");
 			debugger_print(__FILE__,__LINE__,"Finished appending dump");
 			//}
 		}
