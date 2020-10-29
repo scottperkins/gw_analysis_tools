@@ -59,13 +59,14 @@ for x in data:
     #x[1] = np.arcsin(x[1])
     #x[3] = np.arccos(x[3])
     #x[1] = np.arcsin(x[1])*180./np.pi
-    x[6] = np.exp(x[6])
-    x[7] = np.exp(x[7])
-    #x[0] = np.exp(x[0])
+    #x[6] = np.exp(x[6])
+    #x[7] = np.exp(x[7])
+    x[0] = np.exp(x[0])
 #injections[1] = np.arcsin(injections[1])
 #injections[3] = np.arccos(injections[3])
-injections[6] = np.exp(injections[6])
-injections[7] = np.exp(injections[7])
+#injections[6] = np.exp(injections[6])
+#injections[7] = np.exp(injections[7])
+injections[0] = np.exp(injections[0])
 data_thinned = []
 for x in np.arange(len(data)):
     if x%1 ==0:
@@ -78,7 +79,8 @@ for i in np.arange(len(data[0])):
     plt.close()
 ndim, nsamples = 15, len(data) 
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos(\iota)$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_{1}$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
-labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$m_1$",r"$m_2$"]
+#labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$m_1$",r"$m_2$"]
+labels = [r"$\mathcal{M}$",r"$\eta$",r"$\chi_{1}$",r"$\chi_2$",r"$\beta$"]
 #labels = [r"$\alpha$",r"$\sin(\delta)$",r"$\psi$",r"$\cos \iota$","$\phi_{ref}$","$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$\chi_{1}$",r"$\chi_2$"]
 data_plot=[]
 for x in data_thinned:

@@ -31,6 +31,7 @@ double log_rosenbock (double *c,mcmc_data_interface *interface,void *parameters)
 double log_rosenbock_prior (double *c,mcmc_data_interface *interface,void *parameters);
 void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, void *parameters);
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_sa(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_P_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters);
@@ -1173,7 +1174,7 @@ int mcmc_injection(int argc, char *argv[])
 	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
 	std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
 	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
-	std::string injection_method = "IMRPhenomD";
+	std::string injection_method = "ppE_IMRPhenomD_Inspiral";
 	double fmin = 20;
 	double fmax =2048;
 	T_mcmc_gw_tool= 16;
@@ -1301,8 +1302,8 @@ int mcmc_injection(int argc, char *argv[])
 	//#############################################################
 	
 
-	int dim = 11;
-	std::string recovery_method = "IMRPhenomD";
+	int dim = 5;
+	std::string recovery_method = "ppE_IMRPhenomD_Inspiral";
 	int ensemble = 5;
 	//int ensemble = 5;
 	int chains = 25;
@@ -1319,7 +1320,8 @@ int mcmc_injection(int argc, char *argv[])
 	transform_cart_sph(injection.spin1,spin1sph);
 	transform_cart_sph(injection.spin2,spin2sph);
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, spin1sph[0],spin2sph[0],cos(spin1sph[1]),cos(spin2sph[1]),spin1sph[2],spin2sph[2],injection.betappe[0]};
-	double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
+	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
+	double initial_position[dim]= {log(chirpmass), eta, injection.spin1[2],injection.spin2[2],0};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),chirpmass, q, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),injection.mass1, injection.mass2, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
@@ -1393,7 +1395,7 @@ int mcmc_injection(int argc, char *argv[])
 	int max_chunk_size = 1e6;
 	mcmc_sampler_output sampler_output(chains,dim);
 	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution,standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_sa, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, dim);
 
 	
@@ -1516,6 +1518,32 @@ void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, voi
 	fisher[0][1] = fisher12(c);
 	return;
 } 
+double standard_log_prior_D_sa(double *pos, mcmc_data_interface *interface,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = std::exp(pos[0]);
+	//double chirp = pos[7];
+	double eta = pos[1];
+	//double q = pos[8];
+	if ((pos[1])<.01 || (pos[1])>.25){return a;}//eta
+	if (pos[0]<.01  ){return a;}//chirpmass
+	double m1 = calculate_mass1(chirp,eta);
+	double m2 = calculate_mass2(chirp,eta);
+	if (m1<.1 || m1>8){return a;}//PSI
+	if (m2<.1 || m2>8){return a;}//PSI
+	if ((pos[2])<-.9 || (pos[2])>.9){return a;}//eta
+	if ((pos[3])<-.9 || (pos[3])>.9){return a;}//eta
+	if ((pos[4])<-10 || (pos[4])>10){return a;}//eta
+	//double chi1 = pos[9]+pos[10];
+	//double chi2 = pos[9]-pos[10];
+	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
+	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
+	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
+	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
+	//else {return 3*pos[6] ;}
+	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
+
+}
 	
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters)
 {
