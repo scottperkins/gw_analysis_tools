@@ -813,19 +813,19 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.Luminosity_Distance = 730;
 	//params.incl_angle = .76;
 	
-	params.mass1 = 16.29;
-	params.mass2 = 7.83;
+	params.mass1 = 5.7;
+	params.mass2 = 1.5;
 	//params.spin1[2] = .08* (params.mass1+params.mass2)/params.mass1;
-	params.spin1[2] = 0.52*.51;
-	params.spin2[2] = 0.43*.20 ;
+	params.spin1[2] = -.03*(1.5+5.7)/5.7;
+	params.spin2[2] = 0 ;
 	//params.spin1[1] = 0.52*sqrt(1-.51*.51)*sin(2.79);
 	//params.spin2[1] = 0.43*sqrt(1-.2*.2)*sin(2.99);
 	//params.spin1[0] = 0.52*sqrt(1-.51*.51)*cos(2.79);
 	//params.spin2[0] = 0.43*sqrt(1-.2*.2)*cos(2.99);
-	params.chip = .07;
+	params.chip = .1;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 461;
-	params.incl_angle = .63;
+	params.Luminosity_Distance = 380;
+	params.incl_angle = .13;
 
 	//params.mass1 = 5.0;
 	//params.mass2 = 1.4;
@@ -838,7 +838,7 @@ int dCS_EdGB(int argc, char *argv[])
 	
 
 	params.NSflag1 = false;
-	params.NSflag2 =false;
+	params.NSflag2 =true;
 
 	params.phiRef = .0;
 	params.RA = 1.;
@@ -873,7 +873,7 @@ int dCS_EdGB(int argc, char *argv[])
 
 	double fmin = 5;
 	double fmax = 2048;
-	double T = 32;
+	double T = 16;
 
 	params.tc = 3.*T/4.;
 	int length = 1000;
@@ -905,12 +905,12 @@ int dCS_EdGB(int argc, char *argv[])
 	//std::string method = "EdGB_IMRPhenomPv2";
 	
 
-	source_parameters<double> sp;
-	std::string temp_meth = prep_source_parameters(&sp, &params, "EdGB_IMRPhenomPv2");
-	double phase_factor = EdGB_phase_factor(&sp);
-	double fisco = pow(6.,-3./2.) * pow(eta,3./5.)/(M_PI * chirpmass);
-	std::cout<<phase_factor * pow( M_PI * chirpmass * fisco,-2./3.)<<std::endl;
-	exit(0);
+	//source_parameters<double> sp;
+	//std::string temp_meth = prep_source_parameters(&sp, &params, "EdGB_IMRPhenomPv2");
+	//double phase_factor = EdGB_phase_factor(&sp);
+	//double fisco = pow(6.,-3./2.) * pow(eta,3./5.)/(M_PI * chirpmass);
+	//std::cout<<phase_factor * pow( M_PI * chirpmass * fisco,-2./3.)<<std::endl;
+	//exit(0);
 
 
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};

@@ -89,9 +89,12 @@ int main(int argc, char *argv[])
 	double data_time_length = dbl_dict["data length"];
 	std::cout<<"data length: "<<data_time_length<<std::endl;
 	int data_length=131072;
-	//if((int)data_time_length == 32){
-	//	data_length = 131072;
-	//}	
+	if((int)data_time_length == 32){
+		data_length = 131072;
+	}	
+	else if((int)data_time_length == 4096){
+		data_length = 16777216;
+	}	
 	count_lines_LOSC_data_file(detector_files[0], &data_length);
 	std::cout<<"data length (lines): "<<data_length<<std::endl;
 	double gps_time = dbl_dict["gps"];
