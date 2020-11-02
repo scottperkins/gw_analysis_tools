@@ -54,7 +54,7 @@ sampler *samplerptr_global;
 //Time for queueing threads to wait after assigning job
 //Helps to even out the load
 int THREADWAIT=500; //in microseconds -- should only need a few clock cycles
-int QUEUE_SLEEP=int(1e4);
+int QUEUE_SLEEP=int(1e2);
 //#############################################################
 //mcmc_sampler_output definitions
 //#############################################################
