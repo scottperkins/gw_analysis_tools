@@ -6,6 +6,7 @@
 #include <functional>
 #include <limits>
 #include <iomanip>
+#include <mutex>
 
 /*! \file
  * Internal functions of the generic MCMC sampler (nothing specific to GW)
@@ -50,6 +51,7 @@ public:
 	int chain_radius=2;
 	/*Restricting the swapping means that swaps can be proposed for chains with similar temperatures, in any of the ensembles*/
 	bool restrict_swapping=true;
+	//bool restrict_swapping=false;
 	/* Isolating the ensemble means the chains can only swap with those inside their ensemble*/
 	bool isolate_ensembles=false;
 	double swap_rate=1./2.;
@@ -60,6 +62,8 @@ public:
 	double ensemble_prop_a = 1.;
 	//########
 	bool *waiting;
+	bool *waiting_SWP;
+	std::mutex *queue_mutexes;
 	int *chain_pos;
 	double swp_freq;
 	int chain_N;

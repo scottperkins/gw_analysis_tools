@@ -331,7 +331,7 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -343,7 +343,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
 
     N = 1000
 
-    fig,ax = plt.subplots(nrows=1,ncols=1)
+    fig,ax = plt.subplots(nrows=1,ncols=1,figsize=figsize)
     data_sub, status_sub = [],[]
     waveform_reduced=None
     mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
@@ -375,7 +375,8 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     print("DONE")
 
     for i in np.arange(N):
-        ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+        #ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+        ax.plot(times,np.real(responses[i]),alpha=.05,color='#254159' ,linewidth=.5)
 
     #ninetyp = np.quantile(np.real(responses),.90,axis=0)
     #tenthp = np.quantile(np.real(responses),.1,axis=0)

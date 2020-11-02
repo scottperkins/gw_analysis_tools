@@ -1144,6 +1144,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 
 	//Sampling parameters
 	samplerptr_dest->waiting[id_dest] = samplerptr_source->waiting[id_source];
+	samplerptr_dest->waiting_SWP[id_dest] = samplerptr_source->waiting_SWP[id_source];
 	samplerptr_dest->priority[id_dest] = samplerptr_source->priority[id_source];
 	samplerptr_dest->ref_chain_status[id_dest] = samplerptr_source->ref_chain_status[id_source];
 	samplerptr_dest->nan_counter[id_dest] = samplerptr_source->nan_counter[id_source];
@@ -1292,6 +1293,8 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->prob_boundaries = (double **)malloc(sizeof(double *) * sampler->chain_N);
 	sampler->de_primed = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
 	sampler->waiting = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
+	sampler->waiting_SWP = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
+	sampler->queue_mutexes = new std::mutex[sampler->chain_N];
 	sampler->current_hist_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
 	sampler->chain_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
 
@@ -1465,6 +1468,7 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->fisher_update_ct[i] = sampler->fisher_update_number;
 		sampler->chain_pos[i]=0;
 		sampler->waiting[i]=true;
+		sampler->waiting_SWP[i]=false;
 		sampler->swap_accept_ct[i]=0;
 		sampler->swap_reject_ct[i]=0;
 		sampler->step_accept_ct[i]=0;
@@ -1624,6 +1628,8 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->RJstep_reject_ct);
 	free(sampler->chain_pos);
 	free(sampler->waiting);
+	free(sampler->waiting_SWP);
+	delete [] sampler->queue_mutexes;
 	free(sampler->swap_accept_ct);
 	free(sampler->swap_reject_ct);
 	free(sampler->step_accept_ct);

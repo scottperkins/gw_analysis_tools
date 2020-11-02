@@ -54,6 +54,7 @@ sampler *samplerptr_global;
 //Time for queueing threads to wait after assigning job
 //Helps to even out the load
 int THREADWAIT=500; //in microseconds -- should only need a few clock cycles
+int QUEUE_SLEEP=int(1e4);
 //#############################################################
 //mcmc_sampler_output definitions
 //#############################################################
@@ -4710,6 +4711,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 							assign_probabilities(samplerptr, min_id);	
 							samplerptr->fisher_update_ct[min_id] = samplerptr->fisher_update_number;
 							samplerptr->waiting[min_id] = true;
+							samplerptr->waiting_SWP[min_id] = false;
 							samplerptr->priority[min_id] =1;
 							samplerptr->ref_chain_status[min_id]=true;
 							samplerptr->nan_counter[min_id] = 0;
@@ -5261,7 +5263,14 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 		{
 			for(int i =0; i<samplerptr->chain_N; i++)
 			{
-				if(samplerptr->waiting[i]){
+				bool waiting,waiting_SWP;
+				{
+					std::unique_lock<std::mutex> lock{samplerptr->queue_mutexes[i]};
+					waiting = samplerptr->waiting[i];
+					waiting_SWP = samplerptr->waiting_SWP[i];
+				}
+				//if(samplerptr->waiting[i]){
+				if(waiting){
 					if(samplerptr->chain_pos[i]<(max_steps))
 					{
 						samplerptr->waiting[i]=false;
@@ -5294,11 +5303,19 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 						samplerptr->ref_chain_status[i] = true;
 					}
 				}
+				else if(waiting_SWP){
+					samplerptr->waiting_SWP[i] = false;
+					poolptr->enqueue_swap(i);
+
+				}
 				
 			}
 			if(samplerptr->show_progress)
 				printProgress((double)samplerptr->progress/samplerptr->N_steps);
-			usleep(10);
+			while(poolptr->queue_swap_length() > samplerptr->num_threads 
+				||  poolptr->queue_length() > samplerptr->num_threads){
+				usleep(QUEUE_SLEEP);
+			}
 		}
 		for(int i= 0 ; i<samplerptr->chain_N; i++){
 			if(check_list(i,samplerptr->ref_chain_ids,samplerptr->ref_chain_num)){
@@ -5406,7 +5423,14 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 		{
 			for(int i =0; i<samplerptr->chain_N; i++)
 			{
-				if(samplerptr->waiting[i]){
+				bool waiting,waiting_SWP;
+				{
+					std::unique_lock<std::mutex> lock{samplerptr->queue_mutexes[i]};
+					waiting = samplerptr->waiting[i];
+					waiting_SWP = samplerptr->waiting_SWP[i];
+				}
+				//if(samplerptr->waiting[i]){
+				if(waiting){
 					if(samplerptr->chain_pos[i]<(samplerptr->N_steps-1))
 					{
 						samplerptr->waiting[i]=false;
@@ -5463,11 +5487,23 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 						//}
 					}
 				}
+				else if(waiting_SWP){
+					samplerptr->waiting_SWP[i] = false;
+					poolptr->enqueue_swap(i);
+
+				}
 				
 			}
 			if(samplerptr->show_progress)
 				printProgress((double)samplerptr->progress/samplerptr->N_steps);
-			usleep(10);
+			//usleep(10);
+			//We get in trouble when over accessing the queue -- just wait until more jobs can be run
+			//This may be more inefficient short term, but it will ensure a more balanced load for 
+			//the ensemble
+			while(poolptr->queue_swap_length() > samplerptr->num_threads 
+				||  poolptr->queue_length() > samplerptr->num_threads){
+				usleep(QUEUE_SLEEP);
+			}
 		}
 	}
 }
@@ -5534,9 +5570,12 @@ void mcmc_step_threaded(int j)
 
 	double alpha = gsl_rng_uniform(samplerptr_global->rvec[j]);
 	if(alpha< samplerptr_global->swap_rate){
-		poolptr->enqueue_swap(j);
+		std::unique_lock<std::mutex> lock{samplerptr_global->queue_mutexes[j]};
+		//poolptr->enqueue_swap(j);
+		samplerptr_global->waiting_SWP[j] = true;
 	}
 	else{
+		std::unique_lock<std::mutex> lock{samplerptr_global->queue_mutexes[j]};
 		samplerptr_global->waiting[j]=true;
 	}
 }
@@ -5577,8 +5616,12 @@ void mcmc_swap_threaded(int i, int j)
 			}
 		}
 	}
-	samplerptr_global->waiting[i]=true;
-	samplerptr_global->waiting[j]=true;
+	{
+		std::unique_lock<std::mutex> locki{samplerptr_global->queue_mutexes[i]};
+		std::unique_lock<std::mutex> lockj{samplerptr_global->queue_mutexes[j]};
+		samplerptr_global->waiting[i]=true;
+		samplerptr_global->waiting[j]=true;
+	}
 }
 void mcmc_ensemble_step(sampler *s, int id1, int id2)
 {
