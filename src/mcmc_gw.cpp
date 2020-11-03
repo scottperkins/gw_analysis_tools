@@ -1280,6 +1280,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 		user_parameters[i]->fish_psd= fish_psd;
 		user_parameters[i]->fish_length= fish_length;
 
+		user_parameters[i]->mod_struct = mod_struct;
+
 		//user_parameters[i]->burn_freqs = mcmc_frequencies;
 		//user_parameters[i]->burn_data = mcmc_data;
 		//user_parameters[i]->burn_noise = mcmc_noise;
@@ -1491,6 +1493,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		user_parameters[i]->fish_weights= fish_weights;
 		user_parameters[i]->fish_psd= fish_psd;
 		user_parameters[i]->fish_length= fish_length;
+
+		user_parameters[i]->mod_struct = mod_struct;
 
 		//user_parameters[i]->burn_freqs = mcmc_frequencies;
 		//user_parameters[i]->burn_data = mcmc_data;
