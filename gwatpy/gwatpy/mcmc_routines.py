@@ -331,7 +331,7 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -343,7 +343,12 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
 
     N = 1000
 
-    fig,ax = plt.subplots(nrows=1,ncols=1,figsize=figsize)
+    ax = None
+    fig = None
+    if axis is None:
+        fig,ax = plt.subplots(nrows=1,ncols=1,figsize=figsize)
+    else:
+        ax = axis
     data_sub, status_sub = [],[]
     waveform_reduced=None
     mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
