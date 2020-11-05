@@ -32,6 +32,7 @@ T ppE_IMRPhenomD_Inspiral<T>::phase_ins(T f, source_parameters<T> *param, T *pn_
 	
 	for(int i = 0; i<param->Nmod; i++)
 		phaseout =phaseout +  pow((PIMFcube),param->bppe[i]) * param->betappe[i];
+
 	return phaseout;
 
 }

@@ -1948,6 +1948,8 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if( generation_method == "ppE_IMRPhenomPv2_Inspiral"
 		|| generation_method == "ppE_IMRPhenomPv2_IMR"
+		|| generation_method == "PNSeries_ppE_IMRPhenomPv2_IMR"
+		|| generation_method == "PNSeries_ppE_IMRPhenomPv2_Inspiral"
 		){
 		if(dimension-mcmc_mod_struct->ppE_Nmod == 15){
 			
@@ -2106,6 +2108,8 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral"
 		|| generation_method == "ppE_IMRPhenomD_IMR"
+		|| generation_method == "PNSeries_ppE_IMRPhenomD_IMR"
+		|| generation_method == "PNSeries_ppE_IMRPhenomD_Inspiral"
 		){
 		if(dimension-mcmc_mod_struct->ppE_Nmod == 11){
 			

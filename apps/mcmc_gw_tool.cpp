@@ -461,6 +461,7 @@ int main(int argc, char *argv[])
 		}
 		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
 			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos||
+			generation_method.find("PNSeries_ppE_IMRPhenomPv2") !=std::string::npos||
 			generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || 
 			generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos ||
 			generation_method.find("EdGB_GHOv1_IMRPhenomPv2") != std::string::npos|| 
@@ -471,6 +472,7 @@ int main(int argc, char *argv[])
 		}
 		else if( (generation_method.find("ppE_IMRPhenomD") != std::string::npos 
 			|| generation_method.find("gIMRPhenomD") != std::string::npos
+			|| generation_method.find("PNSeries_ppE_IMRPhenomD") != std::string::npos
 			|| generation_method.find("dCS_IMRPhenomD") != std::string::npos 
 			|| generation_method.find("EdGB_IMRPhenomD") != std::string::npos 
 			|| generation_method.find("EdGB_GHOv1_IMRPhenomD") != std::string::npos

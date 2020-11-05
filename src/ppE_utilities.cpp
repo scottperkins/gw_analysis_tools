@@ -15,6 +15,10 @@
  * 
  * EdGB_GHOv3 -- EdGB Generic Higher Order version 3-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
  *
+ * PNSeries_ppE_*_Inspiral -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) -- for inspiral only
+ *
+ * PNSeries_ppE_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
+ *
  * ExtraDimension -- input beta l^2 in seconds^2
  *
  * TVG -- Time varying G -- input beta is \dot{G}_{z} in Hz
@@ -25,7 +29,6 @@
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
  */
-
 
 
 bool check_mod(std::string generation_method)
@@ -69,6 +72,10 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("ModDispersion")!=std::string::npos){
 		return true;
 	}
+	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
+		//debugger_print(__FILE__,__LINE__,"wut");
+		return true;
+	}
 	return false;
 } 
 template<class T>
@@ -78,6 +85,13 @@ void deallocate_mapping(theory_ppE_map<T> *mapping){
 	}
 	if(mapping->beta_fns){
 		delete [] mapping->beta_fns;
+	}
+	//Only used for a select few theories 
+	if(mapping->beta_fns_ptrs){
+		for(int i = 0 ;i < mapping->Nmod; i++){
+			delete mapping->beta_fns_ptrs[i];
+		}
+		delete [] mapping->beta_fns_ptrs;
 	}
 }
 template void deallocate_mapping(theory_ppE_map<adouble> *mapping);
@@ -93,7 +107,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		//mapping->beta_fn = new T (**)(source_parameters<T> *)[mapping->Nmod]; 
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 		mapping->bppe[0] = -1;
-		mapping->beta_fns[0] = &dCS_beta ;
+		//mapping->beta_fns[0] = &dCS_beta ;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return dCS_beta(p);} ;
 		ins = true;
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
@@ -103,8 +118,10 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			mapping->beta_fns[0] = &EdGB_beta ;
-			mapping->beta_fns[1] = &EdGB_GHO_betav1 ;
+			//mapping->beta_fns[0] = &EdGB_beta ;
+			//mapping->beta_fns[1] = &EdGB_GHO_betav1 ;
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
+			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav1(p);} ;
 		}
 		if(generation_method.find("EdGB_GHOv2")!= std::string::npos){
 			mapping->Nmod = 2;
@@ -112,8 +129,10 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			mapping->beta_fns[0] = &EdGB_beta ;
-			mapping->beta_fns[1] = &EdGB_GHO_betav2 ;
+			//mapping->beta_fns[0] = &EdGB_beta ;
+			//mapping->beta_fns[1] = &EdGB_GHO_betav2 ;
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
+			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav2(p);} ;
 		}
 		if(generation_method.find("EdGB_GHOv3")!= std::string::npos){
 			mapping->Nmod = 2;
@@ -121,15 +140,18 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			mapping->beta_fns[0] = &EdGB_beta ;
-			mapping->beta_fns[1] = &EdGB_GHO_betav3 ;
+			//mapping->beta_fns[0] = &EdGB_beta ;
+			//mapping->beta_fns[1] = &EdGB_GHO_betav3 ;
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
+			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav3(p);} ;
 		}
 		else{
 			mapping->Nmod = 1;
 			mapping->bppe = new double[1];
 			mapping->bppe[0] =-7;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			mapping->beta_fns[0] = &EdGB_beta ;
+			//mapping->beta_fns[0] = &EdGB_beta ;
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 		}
 		ins = true;
 	}
@@ -138,7 +160,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns[0] = &ExtraDimension_beta ;
+		//mapping->beta_fns[0] = &ExtraDimension_beta ;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return ExtraDimension_beta(p);} ;
 		ins = true;
 	}
 	else if(generation_method.find("TVG")!= std::string::npos){
@@ -146,7 +169,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns[0] = &TVG_beta ;
+		//mapping->beta_fns[0] = &TVG_beta ;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return TVG_beta(p);} ;
 		ins = true;
 	}
 	else if(generation_method.find("DipRad")!= std::string::npos){
@@ -154,7 +178,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-7;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns[0] = &DipRad_beta ;
+		//mapping->beta_fns[0] = &DipRad_beta ;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return DipRad_beta(p);} ;
 		ins = true;
 			
 	}
@@ -163,7 +188,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-1;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns[0] = &NonComm_beta ;
+		//mapping->beta_fns[0] = &NonComm_beta ;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return NonComm_beta(p);} ;
 		ins = true;
 			
 	}
@@ -173,8 +199,30 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		//mapping->bppe[0] =-1;
 		mapping->bppe[0] =params_in->bppe[0];
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns[0] = &ModDispersion_beta ;
+		//mapping->beta_fns[0] = &ModDispersion_beta ;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return ModDispersion_beta(p);} ;
 		ins = false;
+			
+	}
+	else if(generation_method.find("PNSeries")!= std::string::npos){
+		mapping->Nmod = params_in->Nmod;
+		mapping->bppe = new double[params_in->Nmod];
+		for(int i = 0 ; i<params_in->Nmod; i++){
+			mapping->bppe[i] =params_in->bppe[i];
+		}
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod]; 
+		for(int i = 0 ; i<params_in->Nmod; i++){
+			auto lam = new std::function<T(source_parameters<T> *)>( [i](source_parameters<T> *p){ return PNSeries_beta(i,p);} );
+			mapping->beta_fns_ptrs[i] = lam;
+			mapping->beta_fns[i] = *(lam); 
+		}
+		if(generation_method.find("Inspiral")!= std::string::npos){
+			ins = true;
+		}
+		else{
+			ins = false;
+		}
 			
 	}
 	if(generation_method.find("Pv2")!=std::string::npos){
@@ -198,6 +246,22 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 }
 template void assign_mapping(std::string,theory_ppE_map<double>*,gen_params_base<double>*);
 template void assign_mapping(std::string,theory_ppE_map<adouble>*,gen_params_base<adouble>*);
+
+
+template<class T>
+T PNSeries_beta(int term,source_parameters<T> *param)
+{
+	T out = 0;
+	if(term == 0 ){
+		out = param->betappe[0];
+	}
+	else {
+		out = param->betappe[0]* param->betappe[term];
+	}
+	return out;
+}
+template double PNSeries_beta(int ,source_parameters<double> *);
+template adouble PNSeries_beta(int , source_parameters<adouble> *);
 
 template<class T>
 T dCS_beta(source_parameters<T> *param)

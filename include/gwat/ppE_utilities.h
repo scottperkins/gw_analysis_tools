@@ -5,14 +5,16 @@
 
 //typedef T (*beta_fn)(source_parameters<T> *);
 template <class T>
-using beta_fn = T (*)(source_parameters<T> *);
+//using beta_fn = T (*)(source_parameters<T> *);
+using beta_fn = std::function<T(source_parameters<T> *)>;
 
 template<class T>
 struct theory_ppE_map{
 	double *bppe=NULL;
 	int Nmod;
 	//T (*beta_fn)(source_parameters<T> *);
-	beta_fn<T> *beta_fns;
+	beta_fn<T> *beta_fns=NULL;
+	beta_fn<T> **beta_fns_ptrs=NULL;//Only necessary for certain theories
 	std::string ppE_method;
 };
 
@@ -23,6 +25,10 @@ template<class T>
 void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping,gen_params_base<T> *params_in);
 template<class T>
 void deallocate_mapping(theory_ppE_map<T> *mapping);
+
+template<class T>
+T PNSeries_beta(int term,source_parameters<T> *param);
+
 
 template<class T>
 T dCS_beta(source_parameters<T> *param);

@@ -632,24 +632,24 @@ int network_fishers(int argc, char *argv[])
 		}
 	}
 
-	std::string method = "ppE_IMRPhenomPv2_Inspiral";
+	std::string method = "PNSeries_ppE_IMRPhenomPv2_Inspiral";
 	//transform_orientation_coords(&params, method, detector);
 
 	params.Nmod = 2;
 	params.betappe = new double[params.Nmod];
 	params.bppe = new double[params.Nmod];
-	params.betappe[0] = 0;
-	params.betappe[1] = 0;
+	params.betappe[0] = 3;
+	params.betappe[1] = 2;
 	//params.bppe[0] = -1.;
 	params.bppe[0] = -7;
-	params.bppe[1] = -3;
+	params.bppe[1] = -5;
 	//params.bppe[0] = 1;
-	params.Nmod_phi = 1;
-	params.delta_phi = new double[1];
-	params.phii = new int[1];
-	params.delta_phi[0] = 0;
+	//params.Nmod_phi = 1;
+	//params.delta_phi = new double[1];
+	//params.phii = new int[1];
+	//params.delta_phi[0] = 0;
 	//params.bppe[0] = -1.;
-	params.phii[0] = 4;
+	//params.phii[0] = 4;
 	//params.bppe[0] = 1;
 
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
