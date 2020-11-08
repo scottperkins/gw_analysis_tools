@@ -1,0 +1,9 @@
+#include "ppE_IMRPhenomD.h"
+#include <math.h>
+#include <adolc/adouble.h>
+#include <adolc/taping.h>
+#include <adolc/drivers/drivers.h>
+#include <iostream>
+#include <cmath>
+#include <complex>
+#include "util.h"
