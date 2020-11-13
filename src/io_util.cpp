@@ -567,7 +567,9 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
 	double *window = (double *)malloc(sizeof(double)*N_trimmed);
 	//double alpha = .4; //Standard alpha choice
-	double alpha = 2*0.4/Tobs; //Standard alpha choice
+	//double alpha = 2*0.4/Tobs; //Standard alpha choice
+	double alpha = 2*.4/Tobs; //Standard alpha choice
+	//double alpha = .1; //Standard alpha choice
 
 	//double alpha = 0.5; //Standard alpha choice
 	//double alpha = 0.5/32.; //Standard alpha choice

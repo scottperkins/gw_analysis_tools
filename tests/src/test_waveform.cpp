@@ -294,6 +294,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		const REAL8 f_max = .19*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		int length = 4016;
+		//int length = 131072;
 		double deltaf = (f_max-f_min)/(length-1);
 		const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
