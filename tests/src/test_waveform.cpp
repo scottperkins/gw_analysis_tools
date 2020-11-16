@@ -30,6 +30,7 @@
 #endif
 
 int LALSuite_vs_GWAT_WF(int argc, char *argv[]);
+int PNSeries_testing(int argc, char *argv[]);
 int tc_comparison(int argc, char *argv[]);
 int gIMR_testing(int argc, char *argv[]);
 void RT_ERROR_MSG();
@@ -60,10 +61,102 @@ int main(int argc, char *argv[])
 			return gIMR_testing(argc,argv);
 		#endif
 	}
+	if(runtime_opt == 3){
+			return PNSeries_testing(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int PNSeries_testing(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.spin1[1] = .3;
+	params.spin2[1] = .1;
+	params.spin1[0] = .3;
+	params.spin2[0] = .1;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 3.6;
+	params.mass2 = 2.8;
+	params.tc = 0;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	params.Nmod = 8;
+	params.bppe = new double[8];
+	params.bppe[0] = -7;
+	params.bppe[1] = -5;
+	params.bppe[2] = -4;
+	params.bppe[3] = -3;
+	params.bppe[4] = -2;
+	params.bppe[5] = -1;
+	params.bppe[6] = 1;
+	params.bppe[7] = 2;
+	params.betappe = new double[8];
+	params.betappe[0] = .001;
+	params.betappe[1] = 5;
+	params.betappe[2] = -7;
+	params.betappe[3] = 8;
+	params.betappe[4] = -2;
+	params.betappe[5] = 8;
+	params.betappe[6] = 3;
+	params.betappe[7] = -15;
+	
+	int length = 10000;
+	double freqs[length];
+	double fhigh =10* pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	std::cout<<flow<< " " <<fhigh<<std::endl;
+	double delta_f = (fhigh - flow)/length;
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = flow + delta_f*i;
+	}
+	std::complex<double> response[length];
+	double **output = new double*[2];
+	output[0] = new double[length];
+	output[1] = new double[length];
+
+
+	fourier_detector_response(freqs, length, response, "Hanford", "ppE_IMRPhenomPv2_Inspiral",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(response[i]);
+		output[1][i] = std::imag(response[i]);
+	}
+	write_file("data/PNSeries_Raw_ppE.csv",output, 2,length);
+	//################################
+	for(int i = 1 ; i<8; i++){
+		params.betappe[i] = params.betappe[i]/params.betappe[0];
+		std::cout<<params.betappe[i]<<std::endl;
+	}
+	fourier_detector_response(freqs, length, response, "Hanford", "PNSeries_ppE_IMRPhenomPv2_Inspiral",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(response[i]);
+		output[1][i] = std::imag(response[i]);
+	}
+	write_file("data/PNSeries_PNS_ppE.csv",output, 2,length);
+	
+	
+	
+
+	delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
+	return 0;
 }
 #ifndef _LAL
 int gIMR_testing(int argc, char *argv[])
@@ -446,4 +539,5 @@ void RT_ERROR_MSG()
 	std::cout<<"0 --- Compare LALSuite vs GWAT"<<std::endl;
 	std::cout<<"1 --- Compare the effect of tc on LISA"<<std::endl;
 	std::cout<<"2 --- test gIMR waveforms"<<std::endl;
+	std::cout<<"2 --- test PNSeries waveforms"<<std::endl;
 }
