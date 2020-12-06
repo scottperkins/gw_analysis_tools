@@ -435,7 +435,11 @@ int main(int argc, char *argv[])
 		params.Luminosity_Distance = exp(initial_position[0][6]);
 		params.incl_angle = acos(initial_position[0][3]);
 
-		fourier_waveform(freqs[0],data_lengths[0],hplus, hcross, "IMRPhenomD",&params);
+		//fourier_waveform(freqs[0],data_lengths[0],hplus, hcross, "IMRPhenomD",&params);
+		waveform_polarizations<double> wp;
+		wp.hplus = hplus;
+		wp.hcross = hcross;
+		fourier_waveform(freqs[0],data_lengths[0],&wp, "IMRPhenomD",&params);
 	
 	
 		double *seeding_var = NULL;

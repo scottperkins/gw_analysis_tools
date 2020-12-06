@@ -1,5 +1,6 @@
 #include "ppE_utilities.h"
 #include "util.h"
+#include "waveform_generator.h"
 #include "D_Z_Config_modified_dispersion.h"
 /*! \brief Utilities for ppE parameterizations of gravitational waves
  *
@@ -29,6 +30,39 @@
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
  */
+
+
+bool check_extra_polarizations(std::string generation_method)
+{
+	if(generation_method == "polarization_test_IMRPhenomD"){
+		return true;
+	}
+	return false;
+}
+
+template<class T>
+void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp)
+{
+	if(generation_method == "polarization_test_IMRPhenomD"){
+		wp->active_polarizations[0]=true;
+		wp->active_polarizations[1]=true;
+		wp->active_polarizations[2]=true;
+		wp->active_polarizations[3]=true;
+		wp->active_polarizations[4]=true;
+		wp->active_polarizations[5]=true;
+	}
+	else{	
+		wp->active_polarizations[0]=true;
+		wp->active_polarizations[1]=true;
+		wp->active_polarizations[2]=false;
+		wp->active_polarizations[3]=false;
+		wp->active_polarizations[4]=false;
+		wp->active_polarizations[5]=false;
+	}
+	return ;
+}
+template void assign_polarizations<double>(std::string generation_method, waveform_polarizations<double> *wp);
+template void assign_polarizations<adouble>(std::string generation_method, waveform_polarizations<adouble> *wp);
 
 
 bool check_mod(std::string generation_method)
@@ -73,7 +107,9 @@ bool check_theory_support(std::string generation_method)
 		return true;
 	}
 	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
-		//debugger_print(__FILE__,__LINE__,"wut");
+		return true;
+	}
+	if(generation_method.find("polarization_test")!=std::string::npos){
 		return true;
 	}
 	return false;
@@ -100,6 +136,7 @@ template void deallocate_mapping(theory_ppE_map<double> *mapping);
 template<class T>
 void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, gen_params_base<T> *params_in)
 {
+	mapping->extra_polarizations = check_extra_polarizations(generation_method);
 	bool ins=false;
 	if(generation_method.find("dCS")!= std::string::npos){
 		mapping->Nmod = 1;
@@ -224,6 +261,10 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			ins = false;
 		}
 			
+	}
+	else if(generation_method.find("polarization_test")!= std::string::npos){
+		mapping->Nmod = params_in->Nmod;
+		ins = true;
 	}
 	if(generation_method.find("Pv2")!=std::string::npos){
 		if(ins){

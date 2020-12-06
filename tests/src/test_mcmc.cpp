@@ -1177,7 +1177,7 @@ int mcmc_injection(int argc, char *argv[])
 	std::string injection_method = "ppE_IMRPhenomD_Inspiral";
 	double fmin = 20;
 	double fmax =2048;
-	T_mcmc_gw_tool= 16;
+	T_mcmc_gw_tool= 4;
 	double tc_ref = T_mcmc_gw_tool*(1-3./4.);
 	//double tc_ref = T_mcmc_gw_tool*(3./4.);
 	double deltaf = 1./T_mcmc_gw_tool;
@@ -1539,7 +1539,7 @@ double standard_log_prior_D_sa(double *pos, mcmc_data_interface *interface,void 
 	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
 	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
-	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
+	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
 	//else {return 3*pos[6] ;}
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 

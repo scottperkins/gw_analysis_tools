@@ -57,7 +57,10 @@ int fourier_waveformC(double *frequencies,
 	params.sky_average=false;
 	std::complex<double> *waveform_plus = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	std::complex<double> *waveform_cross = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
-	fourier_waveform(frequencies, length, waveform_plus, waveform_cross, method,&params);	
+	waveform_polarizations<double> wp;
+	wp.hplus = waveform_plus;
+	wp.hcross = waveform_cross;
+	fourier_waveform(frequencies, length, &wp, method,&params);	
 	//fourier_waveform(frequencies, length, waveform_plus_real, waveform_plus_imag,waveform_cross_real,waveform_cross_imag, method,&params);	
 	//std::cout<<mass1<<" "<<mass2<<" "<<DL<<" "<<spin1z<<" "<<spin2z<<" "<<tc<<" "<<phic<<" "<<ppE_b<<" "<<ppE_beta<<" "<<incl_angle<<" "<<theta<<" "<<phi<<" "<<phiRef<<" "<<f_ref<<" "<<generation_method<<" "<<std::endl;
 	for (int i = 0; i<length; i ++){

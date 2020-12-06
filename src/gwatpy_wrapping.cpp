@@ -171,6 +171,61 @@ int fourier_detector_response_py(double *frequencies,
 	delete [] response;	
 	return status;
 }
+int fourier_waveform_full_py(double *frequencies,
+	int length, 
+	double  *wf_plus_real,
+	double  *wf_plus_imaginary,
+	double  *wf_cross_real,
+	double  *wf_cross_imaginary,
+	double  *wf_x_real,
+	double  *wf_x_imaginary,
+	double  *wf_y_real,
+	double  *wf_y_imaginary,
+	double  *wf_b_real,
+	double  *wf_b_imaginary,
+	double  *wf_l_real,
+	double  *wf_l_imaginary,
+	char *generation_method, 
+	gen_params_base<double> *parameters)
+{
+	std::string gen_meth(generation_method);
+	std::complex<double> *wf_p = new std::complex<double>[length];
+	std::complex<double> *wf_c = new std::complex<double>[length];
+	std::complex<double> *wf_x = new std::complex<double>[length];
+	std::complex<double> *wf_y = new std::complex<double>[length];
+	std::complex<double> *wf_b = new std::complex<double>[length];
+	std::complex<double> *wf_l = new std::complex<double>[length];
+	waveform_polarizations<double> *wp = new waveform_polarizations<double>;
+	wp->hplus = wf_p;
+	wp->hcross = wf_c;
+	wp->hx = wf_x;
+	wp->hy = wf_y;
+	wp->hb = wf_b;
+	wp->hl = wf_l;
+	int status =  fourier_waveform(frequencies, length, wp, gen_meth, parameters);
+	for(int i = 0 ; i<length; i++){
+		wf_plus_real[i] = std::real(wf_p[i]);
+		wf_cross_real[i] = std::real(wf_c[i]);
+		wf_plus_imaginary[i] = std::imag(wf_p[i]);
+		wf_cross_imaginary[i] = std::imag(wf_c[i]);
+		wf_x_real[i] = std::real(wf_x[i]);
+		wf_x_imaginary[i] = std::imag(wf_x[i]);
+		wf_y_real[i] = std::real(wf_y[i]);
+		wf_y_imaginary[i] = std::imag(wf_y[i]);
+		wf_b_real[i] = std::real(wf_b[i]);
+		wf_b_imaginary[i] = std::imag(wf_b[i]);
+		wf_l_real[i] = std::real(wf_l[i]);
+		wf_l_imaginary[i] = std::imag(wf_l[i]);
+	}
+	delete [] wf_p;	
+	delete [] wf_c;	
+	delete [] wf_x;	
+	delete [] wf_y;	
+	delete [] wf_b;	
+	delete [] wf_l;	
+	delete wp;
+	return status;
+}
 
 int fourier_waveform_py(double *frequencies,
 	int length, 
@@ -184,7 +239,10 @@ int fourier_waveform_py(double *frequencies,
 	std::string gen_meth(generation_method);
 	std::complex<double> *wf_p = new std::complex<double>[length];
 	std::complex<double> *wf_c = new std::complex<double>[length];
-	int status =  fourier_waveform(frequencies, length, wf_p, wf_c, gen_meth, parameters);
+	waveform_polarizations<double> *wp = new waveform_polarizations<double>;
+	wp->hplus = wf_p;
+	wp->hcross = wf_c;
+	int status =  fourier_waveform(frequencies, length, wp, gen_meth, parameters);
 	for(int i = 0 ; i<length; i++){
 		wf_plus_real[i] = std::real(wf_p[i]);
 		wf_cross_real[i] = std::real(wf_c[i]);
@@ -193,6 +251,7 @@ int fourier_waveform_py(double *frequencies,
 	}
 	delete [] wf_p;	
 	delete [] wf_c;	
+	delete wp;
 	return status;
 }
 

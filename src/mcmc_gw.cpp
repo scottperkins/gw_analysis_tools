@@ -378,9 +378,6 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 				)
 {
 	double ll = 0;
-	//if(	generation_method  == "IMRPhenomD" ||
-	//	generation_method  == "ppE_IMRPhenomD_Inspiral" ||
-	//	generation_method  == "ppE_IMRPhenomD_IMR" ){
 	if(	generation_method.find("IMRPhenomD")!=std::string::npos){
 		std::complex<double> *response =
 			(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
@@ -389,20 +386,16 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 		
 		free(response);
 		}
-	//else if ( 	generation_method == "IMRPhenomPv2" ||
-	//		generation_method == "ppE_IMRPhenomPv2_Inspiral" ||
-	//		generation_method == "ppE_IMRPhenomPv2_IMR" ){
 	if(	generation_method.find("IMRPhenomPv2")!=std::string::npos){
 				
-		std::complex<double> *hp =
-				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-		std::complex<double> *hc =
-				(std::complex<double> *) malloc(sizeof(std::complex<double>) * length);
-		fourier_waveform(frequencies,length,hp,hc,generation_method,params);
-		ll = maximized_Log_Likelihood_unaligned_spin_internal(data,psd,frequencies,hp,hc, length, plan);
+		//fourier_waveform(frequencies,length,hp,hc,generation_method,params);
+		waveform_polarizations<double> wp;
+		assign_polarizations(generation_method, &wp);
+		wp.allocate_memory(length);
+		fourier_waveform(frequencies,length,&wp,generation_method,params);
+		ll = maximized_Log_Likelihood_unaligned_spin_internal(data,psd,frequencies,wp.hplus,wp.hcross, length, plan);
+		wp.deallocate_memory();
 
-		free(hp);
-		free(hc);
 	}
 	return ll;
 }
@@ -660,6 +653,8 @@ double maximized_Log_Likelihood_aligned_spin_internal(std::complex<double> *data
 /*! \brief log likelihood function that maximizes over extrinsic parameters tc, phic, D, and phiRef, the reference frequency - for unaligned spins 
  *
  * Ref: arXiv 1603.02444v2
+ *
+ * NOTE: Only works for +/x polarizations
  */
 double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
 				double *psd,
@@ -965,13 +960,14 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, mcmc_data_interface *int
 	int dimension = interface->max_dim;
 	double ll = 0 ; 
 	skysearch_params *p = (skysearch_params *) parameters;
-	std::complex<double> *hplus = new std::complex<double>[mcmc_data_length[0]];	
-	std::complex<double> *hcross = new std::complex<double>[mcmc_data_length[0]];	
+	waveform_polarizations<double> wp ;
+	//assign_polarizations(generation_method,&wp);
+	wp.allocate_memory(mcmc_data_length[0]);
 	double p_fac = 0.5*(1+param[3]*param[3])/(exp(param[6])*MPC_SEC);
 	double c_fac = (param[3])/(exp(param[6])*MPC_SEC);
 	for(int i = 0 ; i<mcmc_data_length[0]; i ++){
-		hplus[i] = p->hplus[i]*p_fac;
-		hcross[i] = p->hcross[i]*c_fac;
+		wp.hplus[i] = p->hplus[i]*p_fac;
+		wp.hcross[i] = p->hcross[i]*c_fac;
 	}
 	std::complex<double> *response = new std::complex<double>[mcmc_data_length[0]];	
 	double delta_t,tc;
@@ -984,7 +980,7 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, mcmc_data_interface *int
 		//tc = tc_ref + delta_t;
 		tc = tc_ref - delta_t;
 		tc*=2.*M_PI;
-		fourier_detector_response_equatorial(mcmc_frequencies[i],mcmc_data_length[i],hplus,hcross, response,param[0],asin(param[1]),param[2],mcmc_gmst, (double *)NULL,0.,0.,0.,0.,mcmc_detectors[i]);
+		fourier_detector_response_equatorial(mcmc_frequencies[i],mcmc_data_length[i],&wp, response,param[0],asin(param[1]),param[2],mcmc_gmst, (double *)NULL,0.,0.,0.,0.,mcmc_detectors[i]);
 		for(int j = 0 ; j<mcmc_data_length[i];j++){
 			//response[j]*=exp(-std::complex<double>(
 			//	0,tc*(mcmc_frequencies[i][j]-20.) - param[4] ));
@@ -1004,8 +1000,7 @@ double MCMC_likelihood_wrapper_SKYSEARCH(double *param, mcmc_data_interface *int
 	//debugger_print(__FILE__,__LINE__,ll);
 	//std::cout<<ll<<" "<<llvec[0]<<" "<<llvec[1]-llvec[0]<<" "<<llvec[2]-llvec[1]<<std::endl;
 	delete [] response;
-	delete [] hplus;
-	delete [] hcross;
+	wp.deallocate_memory();
 	return ll;
 }
 
@@ -2357,24 +2352,23 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//#######################################################################3
 	//if (save_waveform){
 	if (false){
-		std::complex<double> *hplus = 
-			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-				data_length[0]);
-		std::complex<double> *hcross = 
-			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-				data_length[0]);
 		std::complex<double> *response = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
 		parameters->tc=0;
+		//fourier_waveform(frequencies[0], data_length[0], 
+		//	hplus, hcross,generation_method, parameters);
+		waveform_polarizations<double> wp;
+		assign_polarizations(generation_method, &wp);
+		wp.allocate_memory(data_length[0]);
 		fourier_waveform(frequencies[0], data_length[0], 
-			hplus, hcross,generation_method, parameters);
+			&wp,generation_method, parameters);
 		//std::cout<<hplus[100]<<" "<<hcross[100]<<std::endl;	
 		//fourier_detector_response(frequencies[0], data_length[0], 
 		//	hplus, hcross, response, parameters->theta, parameters->phi, 
 		//	detectors[0]);
 		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
-			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+			&wp, response, parameters->RA, parameters->DEC, parameters->psi,
 			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
 		ll += maximized_coal_Log_Likelihood_internal(data[0], 
 				psd[0],
@@ -2409,7 +2403,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			//	parameters->theta, parameters->phi, parameters->psi,
 			//	detectors[i]);
 			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
-				hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+				&wp, response, parameters->RA, parameters->DEC, parameters->psi,
 				parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
 			for(int j =0; j<data_length[i]; j++){
 				//response[j] *=std::exp(std::complex<double>(0,-parameters->tc*2*M_PI*frequencies[i][j]+ phic_ref) );	
@@ -2425,7 +2419,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 					&fftw_plans[i]
 					);
 		}
-		free(hplus); free(hcross); free(response);
+		
+		wp.deallocate_memory(); free(response);
 	}
 	//#######################################################################3
 	//Generally, the data lengths don't have to be the same
@@ -2433,12 +2428,6 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	//double snr = 0;
 	//if(false)
 	{
-		std::complex<double> *hplus = 
-			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-				data_length[0]);
-		std::complex<double> *hcross = 
-			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-				data_length[0]);
 		std::complex<double> *response = 
 			(std::complex<double> *)malloc(sizeof(std::complex<double>)*
 				data_length[0]);
@@ -2448,10 +2437,15 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 		double tc = tc_ref;
 		tc*=2.*M_PI;
 		parameters->tc=0;
+		//fourier_waveform(frequencies[0], data_length[0], 
+		//	hplus, hcross,generation_method, parameters);
+		waveform_polarizations<double> wp;
+		assign_polarizations(generation_method, &wp);
+		wp.allocate_memory(data_length[0]);
 		fourier_waveform(frequencies[0], data_length[0], 
-			hplus, hcross,generation_method, parameters);
+			&wp,generation_method, parameters);
 		fourier_detector_response_equatorial(frequencies[0], data_length[0], 
-			hplus, hcross, response, parameters->RA, parameters->DEC, parameters->psi,
+			&wp, response, parameters->RA, parameters->DEC, parameters->psi,
 			parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
 		for(int i = 0 ; i<data_length[0];i++){
 			//response[i]*=exp(-std::complex<double>(0,tc*(frequencies[0][i]-parameters->f_ref)));
@@ -2477,7 +2471,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 			//tc = tc_ref + delta_t;
 			tc = tc_ref - delta_t;
 			fourier_detector_response_equatorial(frequencies[i], data_length[i], 
-				hplus, hcross, response, parameters->RA, parameters->DEC, 
+				&wp, response, parameters->RA, parameters->DEC, 
 				parameters->psi,parameters->gmst,times, LISA_alpha0, 
 				LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
 			tc*=2.*M_PI;
@@ -2502,8 +2496,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 				&fftw_plans[i]
 				);
 		}
-		free( hplus);
-		free( hcross);
+		wp.deallocate_memory();
 		free( response);
 	}
 	delete [] phi;
@@ -2716,24 +2709,21 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 				gen_params.f_ref = 20;
 				gen_params.incl_angle=0;	
 				gen_params.tc =1;
-				std::complex<double> *hc =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
-				std::complex<double> *hp =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
-				fourier_waveform(local_freqs[0],local_lengths[0], hp,hc, local_gen, &gen_params);
+				waveform_polarizations<double> wp;
+				assign_polarizations(mcmc_generation_method,&wp);
+				wp.allocate_memory(local_lengths[0]);
+				fourier_waveform(local_freqs[0],local_lengths[0], &wp, local_gen, &gen_params);
 				for(int i=0; i < mcmc_num_detectors; i++){
 					ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
 							local_noise[i],
 							local_freqs[i],
-							hp,
-							hc,
+							wp.hplus,
+							wp.hcross,
 							(size_t) local_lengths[i],
 							&local_plans[i]
 							);
 				}
-				free(hp);
-				free(hc);
-				//std::cout<<ll<<std::endl;
+				wp.deallocate_memory();
 			}
 
 		}
@@ -3572,23 +3562,22 @@ double RJMCMC_2WF_likelihood_wrapper(
 				gen_params.f_ref = 20;
 				gen_params.incl_angle=0;	
 				gen_params.tc =1;
-				std::complex<double> *hc =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
-				std::complex<double> *hp =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
-				fourier_waveform(local_freqs[0],local_lengths[0], hp,hc, local_gen, &gen_params);
+				//fourier_waveform(local_freqs[0],local_lengths[0], hp,hc, local_gen, &gen_params);
+				waveform_polarizations<double> wp;
+				assign_polarizations(gen_meth, &wp);	
+				wp.allocate_memory(local_lengths[0]);	
+				fourier_waveform(local_freqs[0],local_lengths[0], &wp, local_gen, &gen_params);
 				for(int i=0; i < mcmc_num_detectors; i++){
 					ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
 							local_noise[i],
 							local_freqs[i],
-							hp,
-							hc,
+							wp.hplus,
+							wp.hcross,
 							(size_t) local_lengths[i],
 							&local_plans[i]
 							);
 				}
-				free(hp);
-				free(hc);
+				wp.deallocate_memory();	
 			}
 
 		}

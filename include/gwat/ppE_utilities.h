@@ -2,6 +2,7 @@
 #define PPE_UTILITIES_H
 #include <functional>
 #include "util.h"
+#include "waveform_util.h"
 
 //typedef T (*beta_fn)(source_parameters<T> *);
 template <class T>
@@ -9,15 +10,20 @@ template <class T>
 using beta_fn = std::function<T(source_parameters<T> *)>;
 
 template<class T>
+void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp);
+bool check_extra_polarizations(std::string generation_method);
+template<class T>
 struct theory_ppE_map{
 	double *bppe=NULL;
 	int Nmod;
+	bool extra_polarizations=false;
 	//T (*beta_fn)(source_parameters<T> *);
 	beta_fn<T> *beta_fns=NULL;
 	beta_fn<T> **beta_fns_ptrs=NULL;//Only necessary for certain theories
 	std::string ppE_method;
 };
 
+int check_num_polar(std::string generation_method);
 bool check_mod(std::string generation_method);
 bool check_theory_support(std::string generation_method);
 
