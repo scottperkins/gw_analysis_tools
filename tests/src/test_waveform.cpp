@@ -10,7 +10,7 @@
 #include <gsl/gsl_complex_math.h>
 
 
-//#define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -119,8 +119,7 @@ int polarization_testing(int argc, char *argv[])
 	double **output = new double*[2];
 	output[0] = new double[length];
 	output[1] = new double[length];
-
-
+	
 	fourier_detector_response(freqs, length, response, "Hanford", "polarization_test_IMRPhenomD",&params, (double*)NULL);
 	for(int i =0 ; i<length ; i++){
 		output[0][i] = std::real(response[i]);
@@ -505,7 +504,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		double fplus,fcross;
 		double fplusG,fcrossG;
 		XLALComputeDetAMResponse(&fplus,&fcross, LALD.response, RA,DEC,psi,gmst);
-		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &fplusG,&fcrossG);
+		
+		det_res_pat<double> r_pat;
+		r_pat.Fplus = &fplusG;
+		r_pat.Fcross = &fcrossG;
+		bool pol_arr[6] = {true, true, false, false, false, false};
+		r_pat.active_polarizations = &pol_arr[0];
+		
+		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &r_pat);
 		std::cout<<"Fractional error on F+/Fx: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<std::endl;
 		for(int i = 0 ; i<length ; i++){
 			(det->data->data)[i]=gsl_complex_add(

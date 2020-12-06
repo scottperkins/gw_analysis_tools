@@ -12,8 +12,8 @@ LFLAGS:= -fopenmp -L../lib -L/usr/local/opt/hdf5/lib -L/home/sperkins/git-repos/
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation -lhdf5 -lhdf5_cpp
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
-#LIBS:=-lm -lgwat -llal -llalsimulation
-LIBS:=-lm -lgsl -lgwat 
+LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
+#LIBS:=-lm -lgsl -lgwat 
 
 SRCDIR:=src
 ODIR:=build
