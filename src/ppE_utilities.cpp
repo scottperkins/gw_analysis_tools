@@ -289,15 +289,21 @@ template void assign_mapping(std::string,theory_ppE_map<double>*,gen_params_base
 template void assign_mapping(std::string,theory_ppE_map<adouble>*,gen_params_base<adouble>*);
 
 
+/* \brief PNSeries conversion
+ *
+ * The basis is M f and not \mathcal{M} f, so there's a conversion to account for using ppE waveforms
+ */
 template<class T>
 T PNSeries_beta(int term,source_parameters<T> *param)
 {
 	T out = 0;
+	T chirpmass = calculate_chirpmass(param->mass1,param->mass2);
+	T total_m = param->mass1 + param->mass2;
 	if(term == 0 ){
-		out = param->betappe[0];
+		out = param->betappe[0] * pow(total_m/chirpmass,param->bppe[0]/3.);
 	}
 	else {
-		out = param->betappe[0]* param->betappe[term];
+		out = param->betappe[0]* param->betappe[term]* pow(total_m/chirpmass,param->bppe[term]/3.);
 	}
 	return out;
 }
