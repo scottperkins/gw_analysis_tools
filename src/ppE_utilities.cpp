@@ -21,6 +21,8 @@
  * PNSeries_ppE_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
  *
  * ExtraDimension -- input beta l^2 in seconds^2
+ * 
+ * BHEvaporation -- input dm / dt (dimensionless)
  *
  * TVG -- Time varying G -- input beta is \dot{G}_{z} in Hz
  *
@@ -94,6 +96,9 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("ExtraDimension")!=std::string::npos){
 		return true;
 	}
+	if(generation_method.find("BHEvaporation")!=std::string::npos){
+		return true;
+	}
 	if(generation_method.find("TVG")!=std::string::npos){
 		return true;
 	}
@@ -141,10 +146,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 	if(generation_method.find("dCS")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
-		//mapping->beta_fn = new T (**)(source_parameters<T> *)[mapping->Nmod]; 
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 		mapping->bppe[0] = -1;
-		//mapping->beta_fns[0] = &dCS_beta ;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return dCS_beta(p);} ;
 		ins = true;
 	}
@@ -155,8 +158,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			//mapping->beta_fns[0] = &EdGB_beta ;
-			//mapping->beta_fns[1] = &EdGB_GHO_betav1 ;
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav1(p);} ;
 		}
@@ -166,8 +167,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			//mapping->beta_fns[0] = &EdGB_beta ;
-			//mapping->beta_fns[1] = &EdGB_GHO_betav2 ;
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav2(p);} ;
 		}
@@ -177,8 +176,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			//mapping->beta_fns[0] = &EdGB_beta ;
-			//mapping->beta_fns[1] = &EdGB_GHO_betav3 ;
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav3(p);} ;
 		}
@@ -187,7 +184,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe = new double[1];
 			mapping->bppe[0] =-7;
 			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-			//mapping->beta_fns[0] = &EdGB_beta ;
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 		}
 		ins = true;
@@ -197,8 +193,15 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		//mapping->beta_fns[0] = &ExtraDimension_beta ;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ExtraDimension_beta(p);} ;
+		ins = true;
+	}
+	else if(generation_method.find("BHEvaporation")!= std::string::npos){
+		mapping->Nmod = 1;
+		mapping->bppe = new double[1];
+		mapping->bppe[0] =-13;
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return BHEvaporation_beta(p);} ;
 		ins = true;
 	}
 	else if(generation_method.find("TVG")!= std::string::npos){
@@ -206,7 +209,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		//mapping->beta_fns[0] = &TVG_beta ;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return TVG_beta(p);} ;
 		ins = true;
 	}
@@ -215,7 +217,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-7;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		//mapping->beta_fns[0] = &DipRad_beta ;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return DipRad_beta(p);} ;
 		ins = true;
 			
@@ -225,7 +226,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-1;
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		//mapping->beta_fns[0] = &NonComm_beta ;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return NonComm_beta(p);} ;
 		ins = true;
 			
@@ -233,10 +233,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 	else if(generation_method.find("ModDispersion")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
-		//mapping->bppe[0] =-1;
 		mapping->bppe[0] =params_in->bppe[0];
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		//mapping->beta_fns[0] = &ModDispersion_beta ;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ModDispersion_beta(p);} ;
 		ins = false;
 			
@@ -477,6 +475,19 @@ T ExtraDimension_beta( source_parameters<T> *param)
 } 
 template adouble ExtraDimension_beta(source_parameters<adouble> *);
 template double ExtraDimension_beta(source_parameters<double> *);
+	
+template<class T>
+T BHEvaporation_beta( source_parameters<T> *param)
+{
+	T mdot = param->betappe[0]; //evaporation rate -- dimensionless
+	T beta = (mdot) * (25. / 851968.) * 
+		( ( 3. - 26.*param->eta + 34. * param->eta*param->eta) / 
+		( pow(param->eta, 2./5.) * ( 1- 2*param->eta)) );
+
+	return beta;
+} 
+template adouble BHEvaporation_beta(source_parameters<adouble> *);
+template double BHEvaporation_beta(source_parameters<double> *);
 
 template<class T>
 T TVG_beta( source_parameters<T> *param)

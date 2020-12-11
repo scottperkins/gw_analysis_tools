@@ -58,6 +58,9 @@ T EdGB_GHO_betav3( source_parameters<T> *param);
 
 template<class T>
 T ExtraDimension_beta( source_parameters<T> *param);
+	
+template<class T>
+T BHEvaporation_beta( source_parameters<T> *param);
 
 template<class T>
 T TVG_beta( source_parameters<T> *param);

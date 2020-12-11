@@ -34,6 +34,7 @@ int PNSeries_testing(int argc, char *argv[]);
 int tc_comparison(int argc, char *argv[]);
 int gIMR_testing(int argc, char *argv[]);
 int polarization_testing(int argc, char *argv[]);
+int BHEvaporation_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
 
@@ -68,10 +69,99 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 4){
 		return polarization_testing(argc,argv);
 	}
+	if(runtime_opt == 5){
+		return BHEvaporation_test(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+
+int BHEvaporation_test(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.spin1[1] = .3;
+	params.spin2[1] = .1;
+	params.spin1[0] = .3;
+	params.spin2[0] = .1;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 3.6;
+	params.mass2 = 2.8;
+	params.tc = 0;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	params.Nmod = 1;
+	params.bppe = new double[1];
+	params.bppe[0] = -13;
+	params.betappe = new double[1];
+	//params.betappe[0] = .001;
+	params.betappe[0] = 100;
+	
+	int length = 10000;
+	double freqs[length];
+	double fhigh =10* pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	std::cout<<flow<< " " <<fhigh<<std::endl;
+	double delta_f = (fhigh - flow)/length;
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = flow + delta_f*i;
+	}
+	std::complex<double> responseED[length];
+	std::complex<double> responseBHE[length];
+	double **output = new double*[2];
+	output[0] = new double[length];
+	output[1] = new double[length];
+
+
+	fourier_detector_response(freqs, length, responseED, "Hanford", "ExtraDimension_IMRPhenomPv2",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(responseED[i]);
+		output[1][i] = std::imag(responseED[i]);
+	}
+	write_file("data/ED_waveform.csv",output, 2,length);
+	//################################
+	double Z = Z_from_DL(params.Luminosity_Distance,"PLANCK15");
+	double ten_micrometer = 10.e-6/c;
+	params.betappe[0] = -2.8e-7 * ( pow_int((1+Z) / params.mass1,2)+pow_int((1+Z) / params.mass2,2)) * params.betappe[0]/pow_int(ten_micrometer,2) * MSOL_SEC/T_year;
+
+	fourier_detector_response(freqs, length, responseBHE, "Hanford", "BHEvaporation_IMRPhenomPv2",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(responseBHE[i]);
+		output[1][i] = std::imag(responseBHE[i]);
+	}
+	std::complex<double> ave=0;
+	for (int i = 0 ; i<length ; i++){
+		if (std::abs(responseED[i] ) > 0 || std::abs(responseBHE[i] ) > 0){
+			ave+= std::abs(responseED[i] -  responseBHE[i])*2./(std::abs(responseED[i]) +  std::abs(responseBHE[i]));
+		}
+	}
+	ave/=length;
+	std::cout<<"Average fractional difference: "<<ave<<std::endl;
+	write_file("data/BHE_waveform.csv",output, 2,length);
+	
+	
+	
+
+	delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
+	return 0;
 }
 int polarization_testing(int argc, char *argv[])
 {
@@ -615,4 +705,5 @@ void RT_ERROR_MSG()
 	std::cout<<"2 --- test gIMR waveforms"<<std::endl;
 	std::cout<<"3 --- test PNSeries waveforms"<<std::endl;
 	std::cout<<"4 --- test polarizations waveforms"<<std::endl;
+	std::cout<<"5 --- test BHEvaporation waveforms"<<std::endl;
 }
