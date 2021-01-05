@@ -1,2 +1,0 @@
-#The cpp source files are a middle step - real source code is in the .pyx files and the C++ lib directory
-*.cpp
