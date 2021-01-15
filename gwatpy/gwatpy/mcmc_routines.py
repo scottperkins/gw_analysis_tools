@@ -248,8 +248,9 @@ def plot_convergence(filename,trim=None,ac=None):
         local_ac  = 1
     f = h5py.File(filename,'r')
     chains = list(f["MCMC_OUTPUT"].keys())
+    chains = [chain for chain in chains if "CHAIN" in chain ]
     chains_N = len(chains)
-    data = f["MCMC_OUTPUT"][chains[-1]][local_trim::local_ac]
+    data = f["MCMC_OUTPUT"][str(chains[-1])][local_trim::local_ac]
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -476,7 +477,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
 #######################################################################################
 #######################################################################################
 
-def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantiles=False,titles=None):
+def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantiles=False,titles=None,marginal_color='black',cov_color='gray',alpha=1):
     data_shape = np.shape(data)
     dim = data_shape[1]
     
@@ -489,7 +490,7 @@ def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantile
                 #marginalized
                 mask = status[:,x] == 1
                 if(np.sum(mask) !=0):
-                    axes[x,y].hist(data[mask,x],bins=marginal_bins,density=True,edgecolor='black',histtype='step')
+                    axes[x,y].hist(data[mask,x],bins=marginal_bins,density=True,edgecolor=marginal_color,histtype='step', color=marginal_color,alpha=alpha)
                 axes[x,y].get_yaxis().set_ticks([])
                 if titles is not None:
                     if show_quantiles and np.sum(mask) != 0:
@@ -510,7 +511,7 @@ def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantile
                 #covariance
                 mask = (status[:,x] == 1) & (status[:,y] == 1)
                 if(np.sum(mask) !=0):
-                    axes[x,y].hexbin(data[mask,y],data[mask,x],bins=cov_bins,mincnt=1)
+                    axes[x,y].hexbin(data[mask,y],data[mask,x],bins=cov_bins,mincnt=1,cmap=cov_color,alpha=alpha)
                 axes[x,y].get_shared_y_axes().join(axes[0,y])
                 if y != 0 :
                     axes[x,y].get_yaxis().set_ticks([])
