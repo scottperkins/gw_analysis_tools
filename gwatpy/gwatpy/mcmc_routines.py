@@ -377,11 +377,11 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
-    psd = psd_in[:,1]
+    psd = psd_in[:,psd_column+1]
     df = freqs[1]-freqs[0]
     T = 1./(df)
     dt = T / len(freqs)
@@ -398,7 +398,6 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     data_sub, status_sub = [],[]
     waveform_reduced=None
     mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
-
     if(generation_method_extended is not None):
         data,status,model_status = RJPTMCMC_unpack_file(filename)     
         data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)

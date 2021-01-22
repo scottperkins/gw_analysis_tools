@@ -66,6 +66,9 @@ MCMC_modification_struct * MCMC_modification_struct_py(
 	mod_struct->bppe = NULL;
 	if(mod_struct->ppE_Nmod !=0){
 		mod_struct->bppe = new double[mod_struct->ppE_Nmod];
+		for(int i = 0 ;i<mod_struct->ppE_Nmod; i++){
+			mod_struct->bppe[i] = bppe[i];
+		}
 	}
 	mod_struct->gIMR_Nmod_phi = gIMR_Nmod_phi;
 	mod_struct->gIMR_phii = NULL;
@@ -135,6 +138,7 @@ char * MCMC_prep_params_py(
 	if (save_gmst){
 		gmst = gen_params->gmst;
 	}
+	
 	std::string str =  MCMC_prep_params(param, temp_params, gen_params, dimension, std::string(generation_method), mod_struct);
 	char *char_arr = new char[  str.length()];
 	strcpy(char_arr,str.c_str());
@@ -149,7 +153,7 @@ char * MCMC_prep_params_py(
 void repack_parameters_py(double *parameters, gen_params_base<double> *gen_param, char * generation_method, int dim )
 {
 	repack_parameters(parameters, gen_param, std::string(generation_method), dim , (gen_params_base<double> *)NULL);
-
+	return;
 }
 
 int fourier_detector_response_py(double *frequencies,
@@ -397,7 +401,6 @@ gen_params_base<double>* gen_params_base_py(
 		p->bppe = NULL;
 
 	}
-	
 
 	return p;
 }

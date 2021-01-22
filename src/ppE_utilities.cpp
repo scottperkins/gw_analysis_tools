@@ -297,6 +297,7 @@ T PNSeries_beta(int term,source_parameters<T> *param)
 	T out = 0;
 	T chirpmass = calculate_chirpmass(param->mass1,param->mass2);
 	T total_m = param->mass1 + param->mass2;
+	
 	if(term == 0 ){
 		out = param->betappe[0] * pow(total_m/chirpmass,param->bppe[0]/3.);
 	}

@@ -1120,6 +1120,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->bppe[i]=mapping.bppe[i];
 			out->betappe[i]=in->betappe[i];
 			temp_beta[i]=mapping.beta_fns[i](out);
+			
 		}
 		for(int i = 0 ; i<out->Nmod; i++){
 			out->betappe[i]=temp_beta[i];
