@@ -145,8 +145,9 @@ def MCMC_prep_params_py(param,  gen_params, dim,generation_method, mod_struct,sa
         generation_method.encode('utf-8'), 
         mod_struct.obj,
         save_gmst
-        ).decode()
-    return return_meth, np.asarray(tp)
+        )
+    temp = return_meth.decode("utf-8")
+    return temp, np.asarray(tp)
 
 def repack_parameters_py(param,  gen_params, generation_method, dim):
     p_type = ctypes.c_double * (len(param)) 

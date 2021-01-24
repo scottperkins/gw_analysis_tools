@@ -150,6 +150,7 @@ char * MCMC_prep_params_py(
 	return char_arr;
 }
 
+
 void repack_parameters_py(double *parameters, gen_params_base<double> *gen_param, char * generation_method, int dim )
 {
 	repack_parameters(parameters, gen_param, std::string(generation_method), dim , (gen_params_base<double> *)NULL);
