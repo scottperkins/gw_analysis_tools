@@ -377,6 +377,41 @@ def RJPTMCMC_unpack_file(filename):
     return data, status,model_status
 
 ########################################################################################
+
+def plot_injection(injection,injection_status, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},gmst=0,figsize=None,axis=None):
+    psd_in = np.loadtxt(psd_file_in,skiprows=1)
+    freqs = psd_in[:,0]
+    psd = psd_in[:,psd_column+1]
+    df = freqs[1]-freqs[0]
+    T = 1./(df)
+    dt = T / len(freqs)
+    times = np.linspace(0,T, len(freqs))
+
+    ax = None
+    fig = None
+    if axis is None:
+        fig,ax = plt.subplots(nrows=1,ncols=1,figsize=figsize)
+    else:
+        ax = axis
+    waveform_reduced=None
+    mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
+    if(generation_method_extended is not None):
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_extended, detector=detector, mod_struct=mod_struct,gmst=gmst)
+    else:
+        dim = len(injection)
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=dim,max_dim=dim, generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct,gmst=gmst)
+
+    data_packed = [injection,np.asarray(injection_status,dtype=np.int32)]
+
+    response = waveform_reduced( data_packed)
+    ax.plot(times,np.real(response),alpha=1,color='red' ,linewidth=1)
+
+    if(xlim is not None):
+        ax.set_xlim(xlim)
+    if(ylim is not None):
+        ax.set_ylim(ylim)
+    return fig
+
 #Thanks to Neil for the term 'Bayesogram..'
 def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None):
 
