@@ -25,3 +25,7 @@ xlim = [2.8,3.1]
 fig = gmcmc.plot_bayesogram(filename, psd_file, "Hanford", generation_method_base, psd_column=0,threads=threads, xlim = xlim,injection=inject, injection_status=inject_stat,gmst=2.45682,mod_struct_kwargs=mod_kwargs)
 plt.savefig("plots/bayesogram.pdf")
 plt.close()
+
+fig = gmcmc.plot_injection(inject, inject_stat, psd_file, "Hanford", generation_method_base, psd_column=0,threads=threads, xlim = xlim,gmst=2.45682,mod_struct_kwargs=mod_kwargs)
+plt.savefig("plots/injection.pdf")
+plt.close()

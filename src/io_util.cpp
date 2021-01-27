@@ -500,7 +500,7 @@ void read_LOSC_PSD_file(std::string filename,
 }
 /*!\brief Prepare data for MCMC directly from LIGO Open Science Center
  *
- * Trims data for Tobs (determined by PSD file) 3/4*Tobs in front of trigger, and 1/4*Tobs behind
+ * Trims data for Tobs (determined by PSD file) 3/4*Tobs in front of trigger, and 1/4*Tobs behind or max 2 seconds on the end
  *
  * Currently, default to sampling frequency and observation time set by PSD -- cannot be customized
  *
@@ -562,6 +562,12 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 
 	double time_start = trigger_time - Tobs*3./4.;
 	double time_end = trigger_time + Tobs/4.;
+	
+	//Shift for times longer than 8 -- no more than 2 seconds longer than merger
+	if(Tobs >= 8 ){
+		time_start = trigger_time - (Tobs - 2);
+		time_end = trigger_time +  2;
+	}
 	debugger_print(__FILE__,__LINE__,"Start,End: "+std::to_string(time_start)+","+std::to_string(time_end));
 	double **data_trimmed = allocate_2D_array(num_detectors, N_trimmed);
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);

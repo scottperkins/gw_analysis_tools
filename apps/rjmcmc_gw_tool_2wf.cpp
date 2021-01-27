@@ -472,7 +472,13 @@ double standard_log_prior_D_mod(double *pos,int *status, int *model_status, mcmc
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
-	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	if(T_mcmc_gw_tool <= 8 ){
+		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	}
+	else{
+		if ((pos[5])<(T_mcmc_gw_tool-2) -.1 || (pos[5])>(T_mcmc_gw_tool-2) + .1){return a;}//tc
+	}
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
@@ -503,7 +509,13 @@ double standard_log_prior_Pv2_mod(double *pos,int *status, int *model_status, mc
 	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
-	if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	if(T_mcmc_gw_tool <= 8 ){
+		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
+	}
+	else{
+		if ((pos[5])<(T_mcmc_gw_tool-2) -.1 || (pos[5])>(T_mcmc_gw_tool-2) + .1){return a;}//tc
+	}
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
 	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
