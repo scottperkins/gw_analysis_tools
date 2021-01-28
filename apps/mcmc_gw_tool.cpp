@@ -229,21 +229,21 @@ int main(int argc, char *argv[])
 	//#############################################################
 	//#############################################################
 	
-	double **whitened = allocate_2D_array(data_lengths[0],10);
-	for(int i = 0 ; i<data_lengths[0]; i++){
-		whitened[i][0]= freqs[0][i];
-		whitened[i][1]=psd[0][i];
-		whitened[i][2]=psd[1][i];
-		whitened[i][3]=psd[2][i];
-		whitened[i][4]=real(data[0][i])/std::pow(psd[0][i],.5);
-		whitened[i][5]=imag(data[0][i])/std::pow(psd[0][i],.5);
-		whitened[i][6]=real(data[1][i])/std::pow(psd[1][i],.5);
-		whitened[i][7]=imag(data[1][i])/std::pow(psd[1][i],.5);
-		whitened[i][8]=real(data[2][i])/std::pow(psd[2][i],.5);
-		whitened[i][9]=imag(data[2][i])/std::pow(psd[2][i],.5);
-	}	
-	write_file("data/whitened_data.csv",whitened,data_lengths[0],10);
-	deallocate_2D_array(whitened, data_lengths[0],10);
+	//double **whitened = allocate_2D_array(data_lengths[0],10);
+	//for(int i = 0 ; i<data_lengths[0]; i++){
+	//	whitened[i][0]= freqs[0][i];
+	//	whitened[i][1]=psd[0][i];
+	//	whitened[i][2]=psd[1][i];
+	//	whitened[i][3]=psd[2][i];
+	//	whitened[i][4]=real(data[0][i])/std::pow(psd[0][i],.5);
+	//	whitened[i][5]=imag(data[0][i])/std::pow(psd[0][i],.5);
+	//	whitened[i][6]=real(data[1][i])/std::pow(psd[1][i],.5);
+	//	whitened[i][7]=imag(data[1][i])/std::pow(psd[1][i],.5);
+	//	whitened[i][8]=real(data[2][i])/std::pow(psd[2][i],.5);
+	//	whitened[i][9]=imag(data[2][i])/std::pow(psd[2][i],.5);
+	//}	
+	//write_file("data/whitened_data.csv",whitened,data_lengths[0],10);
+	//deallocate_2D_array(whitened, data_lengths[0],10);
 	
 	//#############################################################
 	//#############################################################
@@ -576,7 +576,7 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
-	if(T_mcmc_gw_tool <= 8){
+	if(T_mcmc_gw_tool < 8){
 		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	}
 	else{
@@ -610,7 +610,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
-	if(T_mcmc_gw_tool <= 8){
+	if(T_mcmc_gw_tool < 8){
 		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	}
 	else{
@@ -642,7 +642,7 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
-	if(T_mcmc_gw_tool <= 8){
+	if(T_mcmc_gw_tool < 8){
 		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	}
 	else{
@@ -677,7 +677,7 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
-	if(T_mcmc_gw_tool <= 8){
+	if(T_mcmc_gw_tool < 8){
 		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	}
 	else{
@@ -793,7 +793,7 @@ double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface,
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
-	if(T_mcmc_gw_tool <= 8){
+	if(T_mcmc_gw_tool < 8){
 		if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
 	}
 	else{

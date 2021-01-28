@@ -564,7 +564,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	double time_end = trigger_time + Tobs/4.;
 	
 	//Shift for times longer than 8 -- no more than 2 seconds longer than merger
-	if(Tobs >= 8 ){
+	if(Tobs > 8 ){
 		time_start = trigger_time - (Tobs - 2);
 		time_end = trigger_time +  2;
 	}
