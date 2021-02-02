@@ -102,6 +102,10 @@ public:
 	T spin2[3];
 	/*!coalescence time of the binary*/
 	T tc=0;
+	/*! tidal deformability of the larger component*/
+        T tidal1;
+        /*! tidal deformability of the smaller component*/
+        T tidal2;
 
 	//Polarization angle
 	T psi =0 ;
@@ -352,6 +356,14 @@ struct source_parameters
 	T chi2_l = 0;
 	T phiJL = 0 ;
 	T thetaJL = -1 ;
+	//######## NRT parameters ###############
+	/*! tidal deformability of the larger component*/
+        T tidal1;
+        /*! tidal deformability of the smaller component*/
+        T tidal2;
+	/*! mass-weighted tidal deformability*/
+	T tidal_weighted;
+
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
 	T *betappe;

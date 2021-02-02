@@ -1,5 +1,5 @@
 #Number of dimensions of the Fisher
-[int] Dimension = 14
+[int] Dimension = 15
 #Waveform to use
 [str] Generation Method = ppE_IMRPhenomPv2_Inspiral
 #Number of detectors
