@@ -147,14 +147,14 @@ void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *
 
 int multiple_continue(int argc, char *argv[])
 {
-	int dimension = 1;	
-	int N_steps = 100;
-	int chain_N = 50;
-	int max_chain_N_thermo_ensemble = 5;	
+	int dimension = 4;	
+	int N_steps = 5000;
+	int chain_N = 80;
+	int max_chain_N_thermo_ensemble = 20;	
 	double *seeding_var=NULL;
 	double chain_temps[chain_N];
 	int swp_freq = 5;
-	int t0 = 200;
+	int t0 = 2000;
 	int nu = 100;
 	int max_chunk_size = 100000;	
 	std::string chain_distribution_scheme = "double";
@@ -176,14 +176,14 @@ int multiple_continue(int argc, char *argv[])
 	multi_gaussian_like_mean = new double[dimension];
 	multi_gaussian_prior_mean = new double[dimension];
 	multi_gaussian_like_mean[0]=0;
-	//multi_gaussian_like_mean[1]=0;
-	//multi_gaussian_like_mean[2]=2;
-	//multi_gaussian_like_mean[3]=-1;
+	multi_gaussian_like_mean[1]=0;
+	multi_gaussian_like_mean[2]=2;
+	multi_gaussian_like_mean[3]=-1;
 	
 	multi_gaussian_prior_mean[0]=10;
-	//multi_gaussian_prior_mean[1]=20;
-	//multi_gaussian_prior_mean[2]=2;
-	//multi_gaussian_prior_mean[3]=-1;
+	multi_gaussian_prior_mean[1]=20;
+	multi_gaussian_prior_mean[2]=2;
+	multi_gaussian_prior_mean[3]=-1;
 	for(int i = 0 ; i<dimension; i++){
 		multi_gaussian_prior_cov[i]=new double[dimension];
 		multi_gaussian_like_cov[i]=new double[dimension];
@@ -210,14 +210,14 @@ int multiple_continue(int argc, char *argv[])
 	write_file("data/multi_gaussian_like_mean.csv",multi_gaussian_like_mean,dimension);
 	write_file("data/multi_gaussian_prior_mean.csv",multi_gaussian_prior_mean,dimension);
 	
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
 	
-	for(int i = 1 ; i<2; i++){
+	for(int i = 1 ; i<20; i++){
 		std::string stat_file_new = "data/gaussian_stat_"+std::to_string(i)+".txt";
 		std::string chain_file_new = "data/gaussian_output_"+std::to_string(i)+".hdf5";
 		std::string likelihood_file_new = "data/gaussian_likelihood_"+std::to_string(i)+".csv";
 		std::string check_file_new = "data/gaussian_checkpoint_"+std::to_string(i)+".csv"	;
-		std::string old_check = "data/gaussian_stat_"+std::to_string(i-1)+".txt";
+		std::string old_check = "data/gaussian_checkpoint_"+std::to_string(i-1)+".csv";
 		
 		mcmc_sampler_output s_out(chain_N,dimension);
 		continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(old_check,&s_out,output,  N_steps,  max_chain_N_thermo_ensemble,   chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file_new, chain_file_new, likelihood_file_new, check_file_new);
