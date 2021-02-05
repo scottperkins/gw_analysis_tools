@@ -489,7 +489,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;	
 	std::cout.precision(15);
 	bool P = false;
-	bool NRT = false;
+	bool NRT = true;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
@@ -509,8 +509,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		else if(k%3 == 2){ DETECTOR = "Livingston";}
 		COMPLEX16FrequencySeries *hptilde=NULL;
 		COMPLEX16FrequencySeries *hctilde=NULL;
-		double alpha[15];
-		for (int j = 0 ; j<15; j++){
+		double alpha[17];
+		for (int j = 0 ; j<17; j++){
 			alpha[j] = gsl_rng_uniform(r);
 		}
 		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
@@ -550,8 +550,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
-		REAL8 lambda1 = 0 ;
-		REAL8 lambda2 = 0 ;
+		REAL8 lambda1 = alpha[15] ;
+		REAL8 lambda2 = alpha[16] ;
 		//NRTidal_version_type NRT_v=NRTidalv2_V;
 
 		//NRTidal_version_type tidalType= NoNRT_V;
