@@ -907,6 +907,7 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	int i;
 	T X[3];
 	T Y[3];
+	T Z[3];
 	
 	/* Greenwich hour angle of source (radians). */
 	T gha = gmst - ra;
@@ -931,36 +932,80 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	Y[0] =  sinpsi * singha - cospsi * cosgha * sindec;
 	Y[1] =  sinpsi * cosgha + cospsi * singha * sindec;
 	Y[2] =  cospsi * cosdec;
+
+/* Eqns from [Blaut2012] - but converted from Blaut's theta = pi/2 - dec
+ * given cos(dec) = sin(theta) and cos(theta) = sin(dec), and Blaut's phi = ra
+ * - gmst, so cos(phi) = cos(gha) and sin(phi) = -sin(gha). This is consistent
+ * with the convention in XLALComputeDetAMResponse.
+ */
+	Z[0] = -cosdec * cosgha;
+	Z[1] = cosdec * singha;
+	Z[2] = -sindec;
 	
 	/* Now compute Eq. (B7) of [ABCF] for each polarization state, i.e.,
 	 * with s+=1 and sx=0 to get F+, with s+=0 and sx=1 to get Fx */
 	*(r_pat->Fplus)= 0.0;
 	*(r_pat->Fcross)= 0.0;
+	if(r_pat->active_polarizations[2]){
+		*(r_pat->Fx) = 0.0;
+	}
+	if(r_pat->active_polarizations[3]){
+		*(r_pat->Fy) = 0.0;
+	}
+	if(r_pat->active_polarizations[4]){
+		*(r_pat->Fb) = 0.0;
+	}
+	if(r_pat->active_polarizations[5]){
+		*(r_pat->Fl) = 0.0;
+	}
 	for(i = 0; i < 3; i++) {
 	        T DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
 	        T DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
+		T DZ = D[i][0] * Z[0] + D[i][1] * Z[1] + D[i][2] * Z[2];
 	        *(r_pat->Fplus ) += X[i] * DX - Y[i] * DY;
 	        *(r_pat->Fcross) += X[i] * DY + Y[i] * DX;
+		if(r_pat->active_polarizations[2]){
+			*(r_pat->Fx) += X[i] * DZ + Z[i] * DX;
+		}
+		if(r_pat->active_polarizations[3]){
+			*(r_pat->Fy) += Y[i] * DZ + Z[i] * DY;
+		}
+		if(r_pat->active_polarizations[4]){
+			*(r_pat->Fb) += X[i] * DX + Y[i] * DY;
+		}
+		if(r_pat->active_polarizations[5]){
+			*(r_pat->Fl) += Z[i] * DZ;
+		}
 	}
 
-	//###############################################
-	//Stand in for TESTING MUST BE FIXED
-	if(r_pat->active_polarizations[2]){
-		//vector x
-		*(r_pat->Fx) = 1;
-	}	
-	if(r_pat->active_polarizations[3]){
-		//vector y
-		*(r_pat->Fy) = 1;
-	}	
-	if(r_pat->active_polarizations[4]){
-		//breathing
-		*(r_pat->Fb) = 1;
-	}	
-	if(r_pat->active_polarizations[5]){
-		//longitudinal 
-		*(r_pat->Fl) = 1;
-	}	
+	//if(r_pat->active_polarizations[2]){
+	//	//vector x
+	//	*(r_pat->Fx) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fx) += X[i] * DZ + Z[i] * DX;
+	//	}
+	//}	
+	//if(r_pat->active_polarizations[3]){
+	//	//vector y
+	//	*(r_pat->Fy) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fy) += Y[i] * DZ + Z[i] * DY;
+	//	}
+	//}	
+	//if(r_pat->active_polarizations[4]){
+	//	//breathing
+	//	*(r_pat->Fb) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fb) += X[i] * DX + Y[i] * DY;
+	//	}
+	//}	
+	//if(r_pat->active_polarizations[5]){
+	//	//longitudinal 
+	//	*(r_pat->Fl) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fl) += Z[i] * DZ;
+	//	}
+	//}	
 	//###############################################
 
 }
