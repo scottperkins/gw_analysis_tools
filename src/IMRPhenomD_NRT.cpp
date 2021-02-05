@@ -20,19 +20,13 @@
 //##############################################################################
 template<class T>
 T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
-{
+{ 
   T x = pow((M_PI * param->M *f/2.), 2./3.); 
   T xpowers[5];
   for(int i = 0; i<5; i++)
     {
       xpowers[i] = pow(x, 1 + i/2.);
-      //std::cout<< "x^"<< 1 + i/2.<<": "<< xpowers[i]<<"  "; 
     }
-  /* std::cout<<std::endl;
-   for(int j = 0; j<5; j++)
-    std::cout<< "n_NRT["<< j<<"]: "<< n_NRT[j]<<std::endl;
-  for(int i=0; i<3; i++) std::cout<< "d_NRT["<<i<<"]: "<< d_NRT[i]<<std::endl; 
-  */
   
   T P_NRT = 1, P_NRTdenom = 1;
   for(int i = 0; i<5; i++)
@@ -43,8 +37,7 @@ T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
 
   if(!deriv)
     {
-      P_NRT = xpowers[3] * P_NRT/P_NRTdenom;
-      std::cout<<"Pade function: " << P_NRT<<std::endl; 
+      P_NRT = xpowers[3] * P_NRT/P_NRTdenom; //Note that this is the Pade function times x^(5/2).
       return P_NRT;
     }
   else
@@ -100,8 +93,10 @@ T IMRPhenomD_NRT<T>::amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
 
   T x = pow((M_PI * param->M *f/2.), 2./3.);
   T amp_NRT = -sqrt(5*M_PI*param->eta / 24) * (9 * pow(param->M, 2.0) / param->DL) * (3./16.) * param->tidal_weighted * pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8* pow(x, 4));
+  amp_NRT = amp_NRT/ (param->A0*pow(param->M, 7/6.));
 
   ampout += amp_NRT;
+  //std::cout<<"amplitude correction:"<<amp_NRT<<"  total amplitude:"<<ampout<<std::endl;
   return ampout; 
 }
 
@@ -118,6 +113,8 @@ T IMRPhenomD_NRT<T>::Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lam
   T coefficient =  -sqrt(5*M_PI*param->eta / 24) * (9 * pow(param->M, 2.0) / param->DL) * (3./16.) * param->tidal_weighted;
 
   T DaNRT = coefficient * ( (-53911.2 * pow(x, 25./4.) * aNRT /(aNRTdenom * aNRTdenom)) + (pow(x, 13./4.) * ((449/108) + 7280.23* pow(x, 1.89))/aNRTdenom) + (13*pow(x, 9./4.) * aNRT/(4*aNRTdenom)) );
+
+  DaNRT = DaNRT/ (param->A0*pow(param->M, 7/6.)); //dividing by the same coefficient as for the amplitude correction
 
   ampout = ampout + DaNRT; 
   return ampout; 
