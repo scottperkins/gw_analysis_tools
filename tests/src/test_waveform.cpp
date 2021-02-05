@@ -10,7 +10,7 @@
 #include <gsl/gsl_complex_math.h>
 
 
-//#define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -488,7 +488,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 {
 	LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;	
 	std::cout.precision(15);
-	bool P = true;
+	bool P = false;
+	bool NRT = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
@@ -549,6 +550,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
+		REAL8 lambda1 = 0 ;
+		REAL8 lambda2 = 0 ;
+		//NRTidal_version_type NRT_v=NRTidalv2_V;
 
 		//NRTidal_version_type tidalType= NoNRT_V;
 
@@ -564,7 +568,12 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//XLALSimIMRPhenomP(&hptilde,&hctilde,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,deltaf,f_min,f_max,f_ref, version, extraParams);
 		if(P){
 			//XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version, tidalType,extraParams);
-			XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version,extraParams);
+			if(!NRT){
+				XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version,extraParams);
+			}
+			else{
+				//XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, NRT_v,extraParams);
+			}
 			for(int i = 0 ; i<length; i++){
 				gsl_complex tempPlus = (hptilde->data->data)[i];	
 				gsl_complex tempCross = (hctilde->data->data)[i];	
@@ -579,8 +588,12 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			}
 		}
 		else{
-			//XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams,tidalType);
-			XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams);
+			if(!NRT){
+				XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams);
+			}
+			else{
+				XLALSimIMRPhenomDNRTidalFrequencySequence(&hptilde,freqs,phiRef,f_ref,distance,m1_SI,m2_SI,s1z,s2z, lambda1,lambda2,extraParams);
+			}
 			hctilde = XLALCreateCOMPLEX16FrequencySeries("hctilde: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
 			for(int i = 0 ; i<length; i++){
 				gsl_complex f2 = gsl_complex_rect(0.,-cos(incl));
@@ -591,18 +604,23 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			}
 		}
 		COMPLEX16FrequencySeries *det = XLALCreateCOMPLEX16FrequencySeries("det: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
-		double fplus,fcross;
-		double fplusG,fcrossG;
+		double fplus,fcross,fb,fl,fx,fy;
+		double fplusG,fcrossG,fbG,flG,fxG,fyG;
 		XLALComputeDetAMResponse(&fplus,&fcross, LALD.response, RA,DEC,psi,gmst);
+		XLALComputeDetAMResponseExtraModes(&fplus,&fcross,&fb,&fl,&fx,&fy, LALD.response, RA,DEC,psi,gmst);
 		
 		det_res_pat<double> r_pat;
 		r_pat.Fplus = &fplusG;
 		r_pat.Fcross = &fcrossG;
-		bool pol_arr[6] = {true, true, false, false, false, false};
+		r_pat.Fx = &fxG;
+		r_pat.Fy = &fyG;
+		r_pat.Fb = &fbG;
+		r_pat.Fl = &flG;
+		bool pol_arr[6] = {true, true, true, true, true, true};
 		r_pat.active_polarizations = &pol_arr[0];
 		
 		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &r_pat);
-		std::cout<<"Fractional error on F+/Fx: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<std::endl;
+		std::cout<<"Fractional error on F+/Fx/Fx/Fy/Fb/Fl: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<(fx-fxG)/fx<<" "<<(fy-fyG)/fy<<" "<<(fb-fbG)/fb<<" "<<(fl-flG)/fl<<" "<<std::endl;
 		for(int i = 0 ; i<length ; i++){
 			(det->data->data)[i]=gsl_complex_add(
 			gsl_complex_mul(gsl_complex_rect(fplus,0.),(hptilde->data->data)[i]),
