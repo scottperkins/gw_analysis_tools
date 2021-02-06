@@ -3045,129 +3045,129 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			"",  checkpoint_file,true,true);
 
 		//##############################################################
-		//Reset positions and rewrite checkpoint file
+		//Reset positions and rewrite checkpoint file -- turning this off for now
 		//##############################################################
 
-		const gsl_rng_type *T_reset;
-		gsl_rng * r_reset;
-		gsl_rng_env_setup();
-		T_reset = gsl_rng_default;
-		r_reset = gsl_rng_alloc(T_reset);
-		double tempT[chain_N];
-		load_temps_checkpoint_file(checkpoint_file, tempT, chain_N);
-		
-		sampler_temp.chain_temps = tempT;
-		
-		double mean, sigma,posterior_norm;
-		int elements;
-		int ensemble_members=sampler_temp.chain_N;//number of chains IN ensemble
-		for(int i = 1 ; i<sampler_temp.chain_N; i++){
-			if(fabs(sampler_temp.chain_temps[i]-sampler_temp.chain_temps[0]) 
-				< DOUBLE_COMP_THRESH){
-				ensemble_members = i;
-				break;
-			}
-		}
-		//Loop through ensembles
-		for(int i = 0 ; i<  ensemble_members; i++){
-			//##############################################
-			//top percentile method
-			//##############################################
-			elements = 0 ;
-			std::vector<std::pair<double,int>> temp_arr;
-			std::vector<double*> temp_arr_pos;
-			for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
-				int chain_id = i+j*ensemble_members;
-				for(int k = 0 ; k<=sampler_temp.chain_pos[chain_id]; k++){
-					std::pair<double,int>P = std::make_pair((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1]), k+elements);
-					temp_arr.push_back(P);
-					temp_arr_pos.push_back(sampler_temp.output[chain_id][k]);
-				}
-				elements+=sampler_temp.chain_pos[chain_id];
-			}
+		//const gsl_rng_type *T_reset;
+		//gsl_rng * r_reset;
+		//gsl_rng_env_setup();
+		//T_reset = gsl_rng_default;
+		//r_reset = gsl_rng_alloc(T_reset);
+		//double tempT[chain_N];
+		//load_temps_checkpoint_file(checkpoint_file, tempT, chain_N);
+		//
+		//sampler_temp.chain_temps = tempT;
+		//
+		//double mean, sigma,posterior_norm;
+		//int elements;
+		//int ensemble_members=sampler_temp.chain_N;//number of chains IN ensemble
+		//for(int i = 1 ; i<sampler_temp.chain_N; i++){
+		//	if(fabs(sampler_temp.chain_temps[i]-sampler_temp.chain_temps[0]) 
+		//		< DOUBLE_COMP_THRESH){
+		//		ensemble_members = i;
+		//		break;
+		//	}
+		//}
+		////Loop through ensembles
+		//for(int i = 0 ; i<  ensemble_members; i++){
+		//	//##############################################
+		//	//top percentile method
+		//	//##############################################
+		//	elements = 0 ;
+		//	std::vector<std::pair<double,int>> temp_arr;
+		//	std::vector<double*> temp_arr_pos;
+		//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
+		//		int chain_id = i+j*ensemble_members;
+		//		for(int k = 0 ; k<=sampler_temp.chain_pos[chain_id]; k++){
+		//			std::pair<double,int>P = std::make_pair((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1]), k+elements);
+		//			temp_arr.push_back(P);
+		//			temp_arr_pos.push_back(sampler_temp.output[chain_id][k]);
+		//		}
+		//		elements+=sampler_temp.chain_pos[chain_id];
+		//	}
 
-			int selection_length = elements*.1;
-			//int selection_length = sampler_temp.chain_N/ensemble_members * 100;
-			//if(selection_length > elements){selection_length = elements;}
-			
-			std::sort(temp_arr.begin(), temp_arr.end());
-			for(int j = 0 ; j<sampler_temp.chain_N/ensemble_members;j++){
-				int chain_id = i+j*ensemble_members;
-				int pos = sampler_temp.chain_pos[chain_id];
-				int alpha = (int)(gsl_rng_uniform(r_reset)*selection_length);
-				int temp_id = std::get<1>(temp_arr.at(temp_arr.size()-1 - alpha ));
-				double posterior = std::get<0>(temp_arr.at(temp_arr.size()-1 - alpha ));
-				double *temp_pos = temp_arr_pos.at(temp_id);
-				for(int l = 0 ; l<sampler_temp.dimension; l++){
-					sampler_temp.output[chain_id][pos][l] = temp_pos[l];
-				}
-			
-			}
-			//##############################################
-			//Averaging method -- not promising
-			//##############################################
-			//Loop through dimensions
-			//for(int l = 0 ; l < sampler_temp.dimension; l++){
-			//	mean = 0 ;
-			//	sigma = 0 ;
-			//	elements = 0 ;
-			//	posterior_norm = 0 ;
-			//	//Loop through members of ensemble
-			//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
-			//		int chain_id = i+j*ensemble_members;
-			//		for(int k = 0 ; k<sampler_temp.chain_pos[chain_id]; k++){
-			//			posterior_norm +=(sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1]	);
-			//		}
-			//		elements+=sampler_temp.chain_pos[chain_id];
-			//	}
-			//	posterior_norm /= elements;
-			//	posterior_norm=0;
-			//	std::cout<<posterior_norm<<std::endl;
-			//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
-			//		int chain_id = i+j*ensemble_members;
-			//		for(int k = 0 ; k<sampler_temp.chain_pos[chain_id]; k++){
-			//			mean += exp((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1])-posterior_norm) * (sampler_temp.output[chain_id][k][l]);
-			//		}
-			//	}
-			//	mean/=elements;
-			//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
-			//		int chain_id = i+j*ensemble_members;
-			//		for(int k = 0 ; k<sampler_temp.chain_pos[chain_id]; k++){
-			//			sigma += pow_int(exp((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1])-posterior_norm) * sampler_temp.output[chain_id][k][l]-mean,2);
-			//		}
-			//	}
-			//	sigma/=elements;
-			//	sigma = std::sqrt(sigma);
-			//	debugger_print(__FILE__,__LINE__,"Ensemble number");
-			//	debugger_print(__FILE__,__LINE__,i);
-			//	debugger_print(__FILE__,__LINE__,"Dimension");
-			//	debugger_print(__FILE__,__LINE__,l);
-			//	debugger_print(__FILE__,__LINE__,"mean");
-			//	debugger_print(__FILE__,__LINE__,mean);
-			//	debugger_print(__FILE__,__LINE__,"STD");
-			//	debugger_print(__FILE__,__LINE__,sigma);
-			//	for(int j = 0 ; j<sampler_temp.chain_N/ensemble_members;j++){
-			//		int chain_id = i+j*ensemble_members;
-			//		int pos = sampler_temp.chain_pos[chain_id];
-			//		double alpha = gsl_ran_gaussian(r_reset,sigma)+mean;
-			//		debugger_print(__FILE__,__LINE__,"Pos");
-			//		debugger_print(__FILE__,__LINE__,alpha);
-			//		sampler_temp.output[chain_id][pos][l] = alpha;
-			//	
-			//	}
-			//}
-			//##############################################
-			//##############################################
-		}
-		for(int i = 0 ; i<sampler_temp.chain_N; i++){
-			sampler_temp.de_primed[i] = false;
-		}
-		
-		write_checkpoint_file(&sampler_temp, checkpoint_file);
+		//	int selection_length = elements*.1;
+		//	//int selection_length = sampler_temp.chain_N/ensemble_members * 100;
+		//	//if(selection_length > elements){selection_length = elements;}
+		//	
+		//	std::sort(temp_arr.begin(), temp_arr.end());
+		//	for(int j = 0 ; j<sampler_temp.chain_N/ensemble_members;j++){
+		//		int chain_id = i+j*ensemble_members;
+		//		int pos = sampler_temp.chain_pos[chain_id];
+		//		int alpha = (int)(gsl_rng_uniform(r_reset)*selection_length);
+		//		int temp_id = std::get<1>(temp_arr.at(temp_arr.size()-1 - alpha ));
+		//		double posterior = std::get<0>(temp_arr.at(temp_arr.size()-1 - alpha ));
+		//		double *temp_pos = temp_arr_pos.at(temp_id);
+		//		for(int l = 0 ; l<sampler_temp.dimension; l++){
+		//			sampler_temp.output[chain_id][pos][l] = temp_pos[l];
+		//		}
+		//	
+		//	}
+		//	//##############################################
+		//	//Averaging method -- not promising
+		//	//##############################################
+		//	//Loop through dimensions
+		//	//for(int l = 0 ; l < sampler_temp.dimension; l++){
+		//	//	mean = 0 ;
+		//	//	sigma = 0 ;
+		//	//	elements = 0 ;
+		//	//	posterior_norm = 0 ;
+		//	//	//Loop through members of ensemble
+		//	//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
+		//	//		int chain_id = i+j*ensemble_members;
+		//	//		for(int k = 0 ; k<sampler_temp.chain_pos[chain_id]; k++){
+		//	//			posterior_norm +=(sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1]	);
+		//	//		}
+		//	//		elements+=sampler_temp.chain_pos[chain_id];
+		//	//	}
+		//	//	posterior_norm /= elements;
+		//	//	posterior_norm=0;
+		//	//	std::cout<<posterior_norm<<std::endl;
+		//	//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
+		//	//		int chain_id = i+j*ensemble_members;
+		//	//		for(int k = 0 ; k<sampler_temp.chain_pos[chain_id]; k++){
+		//	//			mean += exp((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1])-posterior_norm) * (sampler_temp.output[chain_id][k][l]);
+		//	//		}
+		//	//	}
+		//	//	mean/=elements;
+		//	//	for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
+		//	//		int chain_id = i+j*ensemble_members;
+		//	//		for(int k = 0 ; k<sampler_temp.chain_pos[chain_id]; k++){
+		//	//			sigma += pow_int(exp((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1])-posterior_norm) * sampler_temp.output[chain_id][k][l]-mean,2);
+		//	//		}
+		//	//	}
+		//	//	sigma/=elements;
+		//	//	sigma = std::sqrt(sigma);
+		//	//	debugger_print(__FILE__,__LINE__,"Ensemble number");
+		//	//	debugger_print(__FILE__,__LINE__,i);
+		//	//	debugger_print(__FILE__,__LINE__,"Dimension");
+		//	//	debugger_print(__FILE__,__LINE__,l);
+		//	//	debugger_print(__FILE__,__LINE__,"mean");
+		//	//	debugger_print(__FILE__,__LINE__,mean);
+		//	//	debugger_print(__FILE__,__LINE__,"STD");
+		//	//	debugger_print(__FILE__,__LINE__,sigma);
+		//	//	for(int j = 0 ; j<sampler_temp.chain_N/ensemble_members;j++){
+		//	//		int chain_id = i+j*ensemble_members;
+		//	//		int pos = sampler_temp.chain_pos[chain_id];
+		//	//		double alpha = gsl_ran_gaussian(r_reset,sigma)+mean;
+		//	//		debugger_print(__FILE__,__LINE__,"Pos");
+		//	//		debugger_print(__FILE__,__LINE__,alpha);
+		//	//		sampler_temp.output[chain_id][pos][l] = alpha;
+		//	//	
+		//	//	}
+		//	//}
+		//	//##############################################
+		//	//##############################################
+		//}
+		//for(int i = 0 ; i<sampler_temp.chain_N; i++){
+		//	sampler_temp.de_primed[i] = false;
+		//}
+		//
+		//write_checkpoint_file(&sampler_temp, checkpoint_file);
 
-		gsl_rng_free(r_reset);
-		//##############################################################
-		//##############################################################
+		//gsl_rng_free(r_reset);
+		////##############################################################
+		////##############################################################
 
 		deallocate_sampler_mem(&sampler_temp);
 

@@ -18,6 +18,7 @@ double **multi_gaussian_like_fisher;
 double **multi_gaussian_prior_fisher;
 double *multi_gaussian_prior_mean;
 double *multi_gaussian_like_mean;
+double multi_gaussian_scale = 1.;
 
 void RT_ERROR_MSG();
 int mcmc_standard_test(int argc, char *argv[]);
@@ -118,19 +119,25 @@ double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, v
 			return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
 		}
 	}
-	return return_val;
+	return return_val/multi_gaussian_scale;
 	//return 1;
 }
 
 double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters)
 {
-	double return_val=0;
+	double return_val1=0;
 	for(int i = 0 ; i<interface->max_dim; i++){
 		for(int j = 0 ; j<interface->max_dim; j++){
-			return_val-= (multi_gaussian_like_mean[i]-param[i])*(multi_gaussian_like_mean[j]-param[j])/2*multi_gaussian_like_fisher[i][j];
+			return_val1-= (multi_gaussian_like_mean[i]-param[i])*(multi_gaussian_like_mean[j]-param[j])/2*multi_gaussian_like_fisher[i][j];
 		}
 	}
-	return return_val;
+	double return_val2=0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		for(int j = 0 ; j<interface->max_dim; j++){
+			return_val2-= (-multi_gaussian_like_mean[i]-param[i])*(-multi_gaussian_like_mean[j]-param[j])/2*multi_gaussian_like_fisher[i][j];
+		}
+	}
+	return log(exp(return_val1) + exp(return_val2))/multi_gaussian_scale;
 	//return 1;
 
 }
@@ -147,9 +154,9 @@ void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *
 
 int multiple_continue(int argc, char *argv[])
 {
-	int dimension = 4;	
-	int N_steps = 10000;
-	int chain_N = 20;
+	int dimension = 10;	
+	int N_steps = 5000;
+	int chain_N = 200;
 	int max_chain_N_thermo_ensemble = 20;	
 	double *seeding_var=NULL;
 	double chain_temps[chain_N];
@@ -162,13 +169,13 @@ int multiple_continue(int argc, char *argv[])
 	int numthreads = 10;
 	bool pool = true;
 	bool show_prog = true;
-	std::string modifier="";
+	std::string modifier="small_E";
 	std::string stat_file = "data/gaussian_stat_0_"+modifier+".txt";
 	std::string chain_file = "data/gaussian_output_0_"+modifier+".hdf5";
 	std::string likelihood_file = "data/gaussian_likelihood_0_"+modifier+".csv";
 	std::string check_file = "data/gaussian_checkpoint_0_"+modifier+".csv"	;
 	mcmc_sampler_output sampler_output(chain_N, dimension) ;
-	double **output = allocate_2D_array(chain_N,N_steps);
+	double **output = allocate_2D_array(N_steps,dimension);
 
 	multi_gaussian_like_cov = new double*[dimension];
 	multi_gaussian_prior_cov = new double*[dimension];
@@ -176,15 +183,27 @@ int multiple_continue(int argc, char *argv[])
 	multi_gaussian_prior_fisher = new double*[dimension];
 	multi_gaussian_like_mean = new double[dimension];
 	multi_gaussian_prior_mean = new double[dimension];
-	multi_gaussian_like_mean[0]=0;
-	multi_gaussian_like_mean[1]=0;
+	multi_gaussian_like_mean[0]=4;
+	multi_gaussian_like_mean[1]=2;
 	multi_gaussian_like_mean[2]=2;
-	multi_gaussian_like_mean[3]=-1;
+	multi_gaussian_like_mean[3]=1;
+	multi_gaussian_like_mean[4]=2;
+	multi_gaussian_like_mean[5]=3;
+	multi_gaussian_like_mean[6]=2;
+	multi_gaussian_like_mean[7]=8;
+	multi_gaussian_like_mean[8]=9;
+	multi_gaussian_like_mean[9]=2;
 	
-	multi_gaussian_prior_mean[0]=10;
-	multi_gaussian_prior_mean[1]=20;
-	multi_gaussian_prior_mean[2]=2;
-	multi_gaussian_prior_mean[3]=-1;
+	multi_gaussian_prior_mean[0]=0;
+	multi_gaussian_prior_mean[1]=0;
+	multi_gaussian_prior_mean[2]=0;
+	multi_gaussian_prior_mean[3]=0;
+	multi_gaussian_prior_mean[4]=0;
+	multi_gaussian_prior_mean[5]=0;
+	multi_gaussian_prior_mean[6]=0;
+	multi_gaussian_prior_mean[7]=0;
+	multi_gaussian_prior_mean[8]=0;
+	multi_gaussian_prior_mean[9]=0;
 	for(int i = 0 ; i<dimension; i++){
 		multi_gaussian_prior_cov[i]=new double[dimension];
 		multi_gaussian_like_cov[i]=new double[dimension];
@@ -192,12 +211,12 @@ int multiple_continue(int argc, char *argv[])
 		multi_gaussian_prior_fisher[i]=new double[dimension];
 		for(int j = 0 ; j<dimension; j++){
 			if(j == i){
-				multi_gaussian_prior_cov[i][j] = 1;
+				multi_gaussian_prior_cov[i][j] = 1000;
 				multi_gaussian_like_cov[i][j] = 1;
 			}
 			else{
 				multi_gaussian_prior_cov[i][j] = 0;
-				multi_gaussian_like_cov[i][j] = .5;
+				multi_gaussian_like_cov[i][j] = pow(-1, j) * .1;
 			}
 		}
 
@@ -205,7 +224,7 @@ int multiple_continue(int argc, char *argv[])
 	gsl_LU_matrix_invert(multi_gaussian_prior_cov, multi_gaussian_prior_fisher, dimension);
 	gsl_LU_matrix_invert(multi_gaussian_like_cov, multi_gaussian_like_fisher, dimension);
 
-	double *init_pos = multi_gaussian_like_mean;
+	double *init_pos = &multi_gaussian_like_mean[0];
 	write_file("data/multi_gaussian_prior_cov.csv",multi_gaussian_prior_cov,dimension,dimension);
 	write_file("data/multi_gaussian_like_cov.csv",multi_gaussian_like_cov,dimension,dimension);
 	write_file("data/multi_gaussian_like_mean.csv",multi_gaussian_like_mean,dimension);
@@ -213,7 +232,7 @@ int multiple_continue(int argc, char *argv[])
 	
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
 	
-	for(int i = 1 ; i<2; i++){
+	for(int i = 1 ; i<1; i++){
 		std::string stat_file_new = "data/gaussian_stat_"+std::to_string(i)+"_"+modifier+".txt";
 		std::string chain_file_new = "data/gaussian_output_"+std::to_string(i)+"_"+modifier+".hdf5";
 		std::string likelihood_file_new = "data/gaussian_likelihood_"+std::to_string(i)+"_"+modifier+".csv";
