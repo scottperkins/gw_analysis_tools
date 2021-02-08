@@ -7,6 +7,24 @@
  * Header file for all detector-specific utilities
  */
 
+/* Struct containing the detector response patterns Fplus, Fcross, Fx, Fy, Fb, Fl
+ *
+ * GR only requires the plus and cross modes
+ */
+template<class T>
+struct det_res_pat
+{
+	//Tensor modes
+	T *Fplus = NULL;
+	T *Fcross = NULL;
+	//Vector modes
+	T *Fx = NULL;
+	T *Fy = NULL;
+	//Scalar modes
+	T *Fb = NULL;
+	T *Fl = NULL;
+	bool *active_polarizations;
+};
 
 /*Found LIGOs version see https://www.ligo.org/scientists/GW100916/detectors.txt*/
 const double H_LAT =0.81079526383 ;//in rad
@@ -162,13 +180,25 @@ std::complex<double> Q(double theta, double phi, double iota);
 std::complex<double> Q(double theta, double phi, double iota, double psi);
 
 template<class T>
+T right_interferometer_l(T theta, T phi, T psi);
+
+template<class T>
+T right_interferometer_b(T theta, T phi, T psi);
+
+template<class T>
+T right_interferometer_y(T theta, T phi, T psi);
+
+template<class T>
+T right_interferometer_x(T theta, T phi, T psi);
+
+template<class T>
 T right_interferometer_cross(T theta, T phi);
 
 template<class T>
 T right_interferometer_plus(T theta, T phi);
 
 template<class T>
-void right_interferometer(T *fplus, T *fcross, T theta, T phi, T psi);
+void right_interferometer(det_res_pat<T> *r_pat, T theta, T phi, T psi);
 
 double Hanford_O1_fitted(double f);
 
@@ -195,8 +225,7 @@ void detector_response_functions_equatorial(double D[3][3],
 	T dec,
 	T psi,
 	double gmst,
-	T *Fplus,
-	T *Fcross
+	det_res_pat<T> *r_pat
 	);
 template<class T>
 void detector_response_functions_equatorial(std::string detector,
@@ -204,8 +233,7 @@ void detector_response_functions_equatorial(std::string detector,
 	T dec,
 	T psi,
 	double gmst,
-	T *Fplus,
-	T *Fcross
+	det_res_pat<T> *r_pat
 	);
 
 template<class T>
@@ -220,8 +248,7 @@ void detector_response_functions_equatorial(std::string detector,
 	T LISA_phi0,
 	T theta_j_ecl,
 	T phi_j_ecl,
-	T *Fplus,
-	T *Fcross
+	det_res_pat<T> *r_pat
 	);
 
 template<class T>

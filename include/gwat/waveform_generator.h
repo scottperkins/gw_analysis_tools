@@ -9,11 +9,33 @@
 /*! \file 
  */
 
+template<class T>
+class waveform_polarizations
+{
+public:
+	//Tensor modes
+	std::complex<T> *hplus= NULL;
+	std::complex<T> *hcross= NULL;
+	//Vector modes
+	std::complex<T> *hx= NULL;
+	std::complex<T> *hy= NULL;
+	//Scalar modes
+	std::complex<T> *hb= NULL;
+	std::complex<T> *hl= NULL;
+	//Track what polarizations are active 
+	//Order: {Tensor plus, Tensor cross, vector x, vector y, scalar breathing, scalar longitudinal}
+	bool active_polarizations[6]={true,true,false,false,false,false};
+
+	void allocate_memory(int length);
+	void deallocate_memory();
+};
+
 template<class  T>
 int fourier_waveform(T *frequencies, 
 			int length,
-			std::complex<T> *waveform_plus, 
-			std::complex<T> *waveform_cross, 
+			waveform_polarizations<T> *wp,
+			//std::complex<T> *waveform_plus, 
+			//std::complex<T> *waveform_cross, 
 			std::string generation_method,
 			gen_params_base<T> *parameters
 			);
@@ -24,6 +46,14 @@ int fourier_waveform(double *frequencies,
 			double *waveform_plus_imag, 
 			double *waveform_cross_real, 
 			double *waveform_cross_imag,
+			double *waveform_x_real, 
+			double *waveform_x_imag,
+			double *waveform_y_real, 
+			double *waveform_y_imag,
+			double *waveform_b_real, 
+			double *waveform_b_imag,
+			double *waveform_l_real, 
+			double *waveform_l_imag,
 			std::string generation_method,
 			gen_params *parameters
 			);

@@ -62,6 +62,8 @@ struct fftw_outline
 	fftw_plan p;
 };
 
+
+
 /*!\struct
  *
  * Container for set of spin weighted spherical harmonics (all spins are -2)

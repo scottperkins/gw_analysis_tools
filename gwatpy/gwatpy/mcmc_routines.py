@@ -13,6 +13,7 @@ from functools import partial
 from scipy.stats import  dirichlet,kde
 from scipy.optimize import NonlinearConstraint,differential_evolution
 from scipy.special import hyp2f1, beta, gamma, loggamma,betaln
+import math
 
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 ##########################################################
@@ -144,8 +145,9 @@ def MCMC_prep_params_py(param,  gen_params, dim,generation_method, mod_struct,sa
         generation_method.encode('utf-8'), 
         mod_struct.obj,
         save_gmst
-        ).decode()
-    return return_meth, np.asarray(tp)
+        )
+    temp = return_meth.decode("utf-8")
+    return temp, np.asarray(tp)
 
 def repack_parameters_py(param,  gen_params, generation_method, dim):
     p_type = ctypes.c_double * (len(param)) 
@@ -246,36 +248,81 @@ def plot_convergence(filename,trim=None,ac=None):
     local_ac = ac
     if ac is None:
         local_ac  = 1
+
     f = h5py.File(filename,'r')
     chains = list(f["MCMC_OUTPUT"].keys())
+    chains = [chain for chain in chains if "CHAIN" in chain ]
     chains_N = len(chains)
     data = f["MCMC_OUTPUT"][chains[-1]][local_trim::local_ac]
+    dim = len(data[0])
 
-    fig = plt.figure()
-    ax = fig.add_subplot()
+    cols = 2
+    dims_per_fig = 5
+    plots_per_fig = dims_per_fig * 2
+    rows = dim
+    if rows > dims_per_fig:
+        rows = dims_per_fig
+     
+    fig=[]
+    axes=[]
+    for x in range(int(math.ceil(dim/dims_per_fig))):
+        fig_t,ax_t = plt.subplots(nrows=rows,ncols=cols,figsize=(15,15))
+        fig.append(fig_t)
+        axes.append(ax_t)
     alpha = .6;
-    step = int(len(data)/50)
-    for x in np.arange(len(data[0])):
-    #for x in np.arange(1):
-        means = []
-        variances = []
-        pts = []
-        meanT = np.mean(data[:,x])
-        varT = np.var(data[:,x])
-        for y in range(50):
-            print(x,y)
-            mean = abs(np.mean(data[y*step: (y+1)*step,x])/meanT)
-            means.append(mean)
-            var = np.var(data[y*step: (y+1)*step,x])/varT
-            variances.append(var)
-            #frac_diff = abs((mean-data[:,x])/mean)
-            pt = (y*step+(y+1)*step)/2
-            pts.append(pt)
-            ax.scatter(pt,mean,alpha=alpha,color="black")
-            ax.scatter(pt,var,alpha=alpha,color="blue")
-        #ax.set_yscale('log')
-        plt.plot(pts,means,color="black")
-        plt.plot(pts,variances,color="blue")
+    iterations = 20
+    step = int(len(data)/iterations)
+    means = np.zeros((dim,iterations))
+    variances = np.zeros((dim,iterations))
+    pts = np.zeros(iterations)
+    data_full = None
+    time_steps_full = None
+    lengths= []
+    ids= [0]
+    
+    for j in chains:
+        data = f["MCMC_OUTPUT"][str(j)][local_trim::local_ac]
+        lengths.append(len(data))
+        ids.append(ids[-1]+lengths[-1])
+        if data_full is None:
+            data_full = data
+            time_steps_full = np.arange(len(data))
+        else:
+            data_full = np.append(data_full, data, axis=0)
+            time_steps_full = np.append(time_steps_full, np.arange(len(data)))
+        print(np.shape(data_full))
+        print(np.shape(time_steps_full))
+        for x in np.arange(len(data[0])):
+            meanT = np.mean(data[:,x])
+            varT = np.var(data[:,x])
+            for y in range(iterations):
+                mean = abs(np.mean(data[y*step: (y+1)*step,x]))/meanT
+                means[x,y]+= (mean)
+                var = np.var(data[y*step: (y+1)*step,x])/varT
+                variances[x,y]+=(var)
+                #frac_diff = abs((mean-data[:,x])/mean)
+                pt = (y*step+(y+1)*step)/2
+                pts[y]=(pt)
+    
+    for x in np.arange(dim):
+        for y in range(iterations):
+            means[x,y]/=chains_N
+            variances[x,y]/=chains_N
+    for x in np.arange(dim):
+        z = int(x%dims_per_fig)
+        k = int(x/(dims_per_fig))
+        print("Dimension: ",x)
+        axes[k][z,0].scatter(pts,means[x,:],alpha=alpha,color="black",label='mean')
+        axes[k][z,0].scatter(pts,variances[x,:],alpha=alpha,color="blue",label='variance')
+        axes[k][z,0].set_ylabel("Dim {}".format(x))
+        #for l in np.arange(len(lengths)):
+        #   axes[k][z,1].hexbin(np.arange(len(data_full[ids[l]:ids[l+1],x])),data_full[ids[l]:ids[l+1],int(x)],alpha=alpha,color="black")
+        axes[k][z,1].hexbin(time_steps_full,data_full[:,int(x)],alpha=alpha,gridsize=50,mincnt=1,color="black")
+        axes[k][z,0].xaxis.set_ticks([])
+        axes[k][z,1].xaxis.set_ticks([])
+    for x in np.arange(int(dim / (dims_per_fig))): 
+        print(x)
+        axes[x][0,0].legend()
     return fig 
 
 def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False):
@@ -330,12 +377,47 @@ def RJPTMCMC_unpack_file(filename):
     return data, status,model_status
 
 ########################################################################################
+
+def plot_injection(injection,injection_status, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},gmst=0,figsize=None,axis=None):
+    psd_in = np.loadtxt(psd_file_in,skiprows=1)
+    freqs = psd_in[:,0]
+    psd = psd_in[:,psd_column+1]
+    df = freqs[1]-freqs[0]
+    T = 1./(df)
+    dt = T / len(freqs)
+    times = np.linspace(0,T, len(freqs))
+
+    ax = None
+    fig = None
+    if axis is None:
+        fig,ax = plt.subplots(nrows=1,ncols=1,figsize=figsize)
+    else:
+        ax = axis
+    waveform_reduced=None
+    mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
+    if(generation_method_extended is not None):
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=min_dim,max_dim=len(data_sub[0]), generation_method_base = generation_method_base,generation_method_extended = generation_method_extended, detector=detector, mod_struct=mod_struct,gmst=gmst)
+    else:
+        dim = len(injection)
+        waveform_reduced = partial(create_waveform_from_MCMC_output, psd=psd, freqs=freqs, min_dim=dim,max_dim=dim, generation_method_base = generation_method_base,generation_method_extended = generation_method_base, detector=detector, mod_struct=mod_struct,gmst=gmst)
+
+    data_packed = [injection,np.asarray(injection_status,dtype=np.int32)]
+
+    response = waveform_reduced( data_packed)
+    ax.plot(times,np.real(response),alpha=1,color='red' ,linewidth=1)
+
+    if(xlim is not None):
+        ax.set_xlim(xlim)
+    if(ylim is not None):
+        ax.set_ylim(ylim)
+    return fig
+
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
-    psd = psd_in[:,1]
+    psd = psd_in[:,psd_column+1]
     df = freqs[1]-freqs[0]
     T = 1./(df)
     dt = T / len(freqs)
@@ -352,7 +434,6 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, gene
     data_sub, status_sub = [],[]
     waveform_reduced=None
     mod_struct = MCMC_modification_struct_py(**mod_struct_kwargs)
-
     if(generation_method_extended is not None):
         data,status,model_status = RJPTMCMC_unpack_file(filename)     
         data_sub_indices = np.random.choice(np.linspace(0,len(data)-1,dtype=np.int),N)
@@ -476,7 +557,7 @@ def create_waveform_from_MCMC_output(parameters_status,psd,freqs, min_dim,max_di
 #######################################################################################
 #######################################################################################
 
-def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantiles=False,titles=None):
+def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantiles=False,titles=None,marginal_color='black',cov_color='gray',alpha=1):
     data_shape = np.shape(data)
     dim = data_shape[1]
     
@@ -489,7 +570,7 @@ def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantile
                 #marginalized
                 mask = status[:,x] == 1
                 if(np.sum(mask) !=0):
-                    axes[x,y].hist(data[mask,x],bins=marginal_bins,density=True,edgecolor='black',histtype='step')
+                    axes[x,y].hist(data[mask,x],bins=marginal_bins,density=True,edgecolor=marginal_color,histtype='step', color=marginal_color,alpha=alpha)
                 axes[x,y].get_yaxis().set_ticks([])
                 if titles is not None:
                     if show_quantiles and np.sum(mask) != 0:
@@ -510,7 +591,7 @@ def RJcorner(data,status,figsize=None,marginal_bins=20,cov_bins=20,show_quantile
                 #covariance
                 mask = (status[:,x] == 1) & (status[:,y] == 1)
                 if(np.sum(mask) !=0):
-                    axes[x,y].hexbin(data[mask,y],data[mask,x],bins=cov_bins,mincnt=1)
+                    axes[x,y].hexbin(data[mask,y],data[mask,x],bins=cov_bins,mincnt=1,cmap=cov_color,alpha=alpha)
                 axes[x,y].get_shared_y_axes().join(axes[0,y])
                 if y != 0 :
                     axes[x,y].get_yaxis().set_ticks([])

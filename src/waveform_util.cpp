@@ -74,13 +74,13 @@ double data_snr(double *frequencies,
  * The gen_params structure holds the parameters for the template to be used (the maximimum likelihood parameters)
  */
 double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used by data*/
-				int length,/**< length of the data*/
-				std::complex<double> *data,/**< input data in the fourier domain*/
-				double *psd,/**< PSD for the detector that created the data*/
-				std::string detector,/**< Name of the detector --See noise_util for options */
-				std::string generation_method,/**< Generation method for the template -- See waveform_generation.cpp for options*/
-				gen_params *param/**< gen_params structure for the template*/
-				)
+	int length,/**< length of the data*/
+	std::complex<double> *data,/**< input data in the fourier domain*/
+	double *psd,/**< PSD for the detector that created the data*/
+	std::string detector,/**< Name of the detector --See noise_util for options */
+	std::string generation_method,/**< Generation method for the template -- See waveform_generation.cpp for options*/
+	gen_params *param/**< gen_params structure for the template*/
+	)
 {
 	
 	/*produce noise curve*/
@@ -147,14 +147,14 @@ double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used b
  * Splits the data into real and imaginary, so all the arguments are C-safe
  */
 double data_snr_maximized_extrinsic(double *frequencies, /**< Frequencies used by data*/
-				int length,/**< length of the data*/
-				double *data_real,/**< input data in the fourier domain -- real part*/
-				double *data_imag,/**< input data in the fourier domain -- imaginary part*/
-				double *psd,/**< PSD for the detector that created the data*/
-				std::string detector,/**< Name of the detector --See noise_util for options */
-				std::string generation_method,/**< Generation method for the template -- See waveform_generation.cpp for options*/
-				gen_params *param/**< gen_params structure for the template*/
-				)
+	int length,/**< length of the data*/
+	double *data_real,/**< input data in the fourier domain -- real part*/
+	double *data_imag,/**< input data in the fourier domain -- imaginary part*/
+	double *psd,/**< PSD for the detector that created the data*/
+	std::string detector,/**< Name of the detector --See noise_util for options */
+	std::string generation_method,/**< Generation method for the template -- See waveform_generation.cpp for options*/
+	gen_params *param/**< gen_params structure for the template*/
+	)
 {
 	std::complex<double> *data = (std::complex<double> *)malloc(sizeof(std::complex<double>) * length);
         for (int i =0; i<length; i++)
@@ -207,12 +207,14 @@ double calculate_snr(std::string sensitivity_curve,
 		if(sensitivity_curve.find("SADC") != std::string::npos && params->sky_average){
 			params->sky_average=false;//We don't want the sky averaging factor typically used for terrestrial detectors, so we need to turn this off
 		}
-		std::complex<double> *hp = new std::complex<double>[length];
-		std::complex<double> *hc = new std::complex<double>[length];
-		fourier_waveform(frequencies, length, hp,hc, generation_method, params);
-		snr = calculate_snr(sensitivity_curve, hp, frequencies, length,integration_method, weights, log10_freq);
-		delete [] hp;	
-		delete [] hc;	
+		//fourier_waveform(frequencies, length, hp,hc, generation_method, params);
+		waveform_polarizations<double> wp;
+		assign_polarizations(generation_method, &wp);
+		wp.allocate_memory(length);
+			
+		fourier_waveform(frequencies, length, &wp, generation_method, params);
+		snr = calculate_snr(sensitivity_curve, wp.hplus, frequencies, length,integration_method, weights, log10_freq);
+		wp.deallocate_memory();
 
 	}
 	params->sky_average=SA_save;
@@ -295,16 +297,23 @@ int calculate_snr_gsl(double *snr,
 }
 
 /*! \brief Internal function to calculate the SNR integrand for sky-averaged waveforms
+ *
+ * NOTE: Only works for GR spin aligned 
  */
 double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 {
 	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
-	std::complex<double> wfp, wfc;
-	fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
+	//fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
+	waveform_polarizations<double> wp;
+	assign_polarizations(cast_params.generation_method, &wp);
+	wp.allocate_memory(1);
+	fourier_waveform(&f, 1,&wp, cast_params.generation_method, cast_params.params);
 	double SN;
 	populate_noise(&f, cast_params.SN, &SN,1);
 	SN*=SN;
-	return 4*std::real(std::conj(wfp)*wfp)/SN;
+	double retval =  4*std::real(std::conj(wp.hplus[0])*wp.hplus[0])/SN;
+	wp.deallocate_memory();
+	return retval;
 }
 /*! \brief Internal function to calculate the SNR integrand for full waveforms
  */
@@ -332,12 +341,12 @@ double integrand_snr_subroutine(double f, void *subroutine_params)
  * This function computes the un-normalized snr: \sqrt( ( H | H ) )
  */     
 double calculate_snr(std::string sensitivity_curve, /**< detector name - must match the string of populate_noise precisely*/
-                        std::complex<double> *waveform,/**< complex waveform */
-                        double *frequencies,/**< double array of frequencies that the waveform is evaluated at*/
-                        int length,/**< length of the above two arrays*/
-			std::string integration_method,
-			double *weights,
-			bool log10_freq)
+        std::complex<double> *waveform,/**< complex waveform */
+        double *frequencies,/**< double array of frequencies that the waveform is evaluated at*/
+        int length,/**< length of the above two arrays*/
+	std::string integration_method,
+	double *weights,
+	bool log10_freq)
 {
         double *noise = (double *)malloc(sizeof(double)*length);
         populate_noise(frequencies,sensitivity_curve, noise,  length);
@@ -388,15 +397,17 @@ double calculate_snr_internal(double *psd,
 template<class T>
 int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
-			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			//std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			//std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			waveform_polarizations<T> *wp,
 			std::complex<T> *detector_response, /**< [out] detector response*/
 			T theta, /**< polar angle (rad) theta in detector frame*/
 			T phi, /**< azimuthal angle (rad) phi in detector frame*/ 
 			std::string detector/**< detector - list of supported detectors in noise_util*/
 			)
 {
-	return fourier_detector_response_horizon(frequencies, length, hplus, hcross, detector_response, theta, phi, (T)0., detector);
+	//return fourier_detector_response_horizon(frequencies, length, hplus, hcross, detector_response, theta, phi, (T)0., detector);
+	return fourier_detector_response_horizon(frequencies, length, wp, detector_response, theta, phi, (T)0., detector);
 	
 }
 /* \brief calculates the detector response for a given waveform and detector
@@ -404,8 +415,9 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 template<class T>
 int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
-			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			//std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			//std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			waveform_polarizations<T> *wp,
 			std::complex<T> *detector_response, /**< [out] detector response*/
 			T theta, /**< polar angle (rad) theta in detector frame*/
 			T phi, /**< azimuthal angle (rad) phi in detector frame*/ 
@@ -414,7 +426,13 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 			)
 {
 	int status=1;
-	T fplus, fcross, Fplus, Fcross, c2psi, s2psi;
+	bool extra_polarizations = false;
+	for(int i = 2 ; i<6; i++){
+		if(wp->active_polarizations[i]){
+			extra_polarizations=true;
+		}
+	}
+	T fplus, fcross, Fplus, Fcross, c2psi, s2psi,Fx,Fy,Fb,Fl;
 	
 	if(	detector == "LIGO" || 
 		detector == "Livingston" || 
@@ -432,12 +450,21 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 		detector == "ET3"
 	)
 	{
-		fplus = right_interferometer_plus(theta,phi);
-		fcross = right_interferometer_cross(theta,phi);	
-		c2psi = cos(2*psi);
-		s2psi = sin(2*psi);
-		Fplus = fplus*c2psi- fcross*s2psi;
-		Fcross = fplus*s2psi+ fcross*c2psi;
+		//fplus = right_interferometer_plus(theta,phi);
+		//fcross = right_interferometer_cross(theta,phi);	
+		//c2psi = cos(2*psi);
+		//s2psi = sin(2*psi);
+		//Fplus = fplus*c2psi- fcross*s2psi;
+		//Fcross = fplus*s2psi+ fcross*c2psi;
+		det_res_pat<T> r_pat;
+		r_pat.Fplus = &Fplus;
+		r_pat.Fcross = &Fcross;
+		r_pat.Fx = &Fx;
+		r_pat.Fy = &Fy;
+		r_pat.Fb = &Fb;
+		r_pat.Fl = &Fl;
+		r_pat.active_polarizations = &(wp->active_polarizations[0]);
+		right_interferometer(&r_pat, theta, phi,psi);
 	}
 	if ( 	detector == "ET1"||
 		detector == "ET2"||
@@ -445,12 +472,45 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 	{
 		Fplus*= ET1_geometric_factor;	
 		Fcross*= ET1_geometric_factor;	
+		if(extra_polarizations){
+			Fx*= ET1_geometric_factor;	
+			Fy*= ET1_geometric_factor;	
+			Fb*= ET1_geometric_factor;	
+			Fl*= ET1_geometric_factor;	
+		}
 	}
 	for (int i =0; i <length; i++)
 	{
-		detector_response[i] = Fplus * hplus[i] 
-					+ (Fcross )*hcross[i];
+		detector_response[i] = Fplus * wp->hplus[i] 
+					+ (Fcross )*wp->hcross[i];
 	}	
+	if(extra_polarizations){
+
+		if(wp->active_polarizations[2]){
+			for (int i =0; i <length; i++)
+			{
+				detector_response[i] += Fx * wp->hx[i] ;
+			}	
+		}
+		if(wp->active_polarizations[3]){
+			for (int i =0; i <length; i++)
+			{
+				detector_response[i] += Fy * wp->hy[i] ;
+			}	
+		}
+		if(wp->active_polarizations[4]){
+			for (int i =0; i <length; i++)
+			{
+				detector_response[i] += Fb * wp->hb[i] ;
+			}	
+		}
+		if(wp->active_polarizations[5]){
+			for (int i =0; i <length; i++)
+			{
+				detector_response[i] += Fl * wp->hl[i] ;
+			}	
+		}
+	}
 	return status;
 	
 }
@@ -477,21 +537,19 @@ int fourier_detector_response_horizon(T *frequencies, /**< double array of frequ
 {
 	int status = 1;
 	//generate waveform
-	std::complex<T> *waveform_plus =
-		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
-	std::complex<T> *waveform_cross=
-		(std::complex<T> *)malloc(sizeof(std::complex<T>) * length);
+	waveform_polarizations<T> wp;
+	assign_polarizations(generation_method, &wp);
+	wp.allocate_memory(length);
+
 	status = fourier_waveform(frequencies, 
 			length,
-			waveform_plus, 
-			waveform_cross, 
+			&wp,
 			generation_method,
 			parameters
 			);
 	status = fourier_detector_response_horizon(frequencies, 
 			length, 
-			waveform_plus, 
-			waveform_cross,
+			&wp,
 			response, 
 			parameters->theta, 
 			parameters->phi, 
@@ -501,8 +559,7 @@ int fourier_detector_response_horizon(T *frequencies, /**< double array of frequ
 	
 		
 	//Deallocate memory
-	free(waveform_plus);
-	free(waveform_cross);
+	wp.deallocate_memory();
 
 	return status;
 }
@@ -511,8 +568,9 @@ int fourier_detector_response_horizon(T *frequencies, /**< double array of frequ
 template<class T>
 int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencies corresponding to waveform*/
 			int length,/**< length of frequency/waveform arrays*/
-			std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
-			std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			//std::complex<T> *hplus, /*<precomputed plus polarization of the waveform*/ 
+			//std::complex<T> *hcross, /**<precomputed cross polarization of the waveform*/ 
+			waveform_polarizations<T> *wp,
 			std::complex<T> *detector_response, /**< [out] detector response*/
 			T ra, /**< Right Ascension in rad*/
 			T dec, /**< Declination in rad*/ 
@@ -527,34 +585,124 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 			)
 {
 	int status=1;
+	//Check for extra polarizations
+	bool extra_polarizations = false;
+	for(int i = 2 ; i<6; i++){
+		if(wp->active_polarizations[i]){
+			extra_polarizations=true;
+		}
+	}
 	//Not an elegant solution, but should work..
 	T fplus ;
 	T fcross ;
 	T *Fplus;
 	T *Fcross;
+	T *Fx,*Fy,*Fb,*Fl;
+	T fx,fy,fb,fl;
+	det_res_pat<T> r_pat;
+	r_pat.active_polarizations = &(wp->active_polarizations[0]);
 	if(detector=="LISA"){
 		Fplus = new T[length];
 		Fcross = new T[length];
-		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, Fplus, Fcross);
+		r_pat.Fplus = Fplus;
+		r_pat.Fcross = Fcross;
+		if(extra_polarizations){
+			if(wp->active_polarizations[2]){
+				Fx = new T[length];
+				r_pat.Fx = Fx;
+			}
+			if(wp->active_polarizations[3]){
+				Fy = new T[length];
+				r_pat.Fy = Fy;
+			}
+			if(wp->active_polarizations[4]){
+				Fb = new T[length];
+				r_pat.Fb = Fb;
+			}
+			if(wp->active_polarizations[5]){
+				Fl = new T[length];
+				r_pat.Fl = Fl;
+			}
+		}
+		//detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, Fplus, Fcross);
+		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, &r_pat);
 	}
 	else{
-		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, &fplus, &fcross);
+		r_pat.Fplus = &fplus;
+		r_pat.Fcross = &fcross;
+		if(extra_polarizations){
+			if(wp->active_polarizations[2]){
+				r_pat.Fx = &fx;
+			}
+			if(wp->active_polarizations[3]){
+				r_pat.Fy = &fy;
+			}
+			if(wp->active_polarizations[4]){
+				r_pat.Fb = &fb;
+			}
+			if(wp->active_polarizations[5]){
+				r_pat.Fl = &fl;
+			}
+		}
+		detector_response_functions_equatorial(detector, ra, dec, psi, gmst,times, length,LISA_alpha0, LISA_phi0,theta_j_ecl,phi_j_ecl, &r_pat);
 	}
 	
 	if(detector == "LISA"){
 		for (int i =0; i <length; i++)
 		{
 			//Doppler phase shift
+
+			//detector_response[i] = (r_pat.Fplus[i] * wp->hplus[i] 
+			//			+ (r_pat.Fcross[i] )*wp->hcross[i]) * std::exp(std::complex<T>(0, - doppler_phase_shift ) );
+			detector_response[i] = (r_pat.Fplus[i] * wp->hplus[i] 
+						+ (r_pat.Fcross[i] )*wp->hcross[i]) ;
+		}	
+		if(extra_polarizations){
+			if(wp->active_polarizations[2]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += r_pat.Fx[i] * wp->hx[i];
+				}
+			}
+			if(wp->active_polarizations[3]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += r_pat.Fy[i] * wp->hy[i];
+				}
+			}
+			if(wp->active_polarizations[4]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += r_pat.Fb[i] * wp->hb[i];
+				}
+			}
+			if(wp->active_polarizations[5]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += r_pat.Fl[i] * wp->hl[i];
+				}
+			}
+		}
+		for (int i =0; i <length; i++)
+		{
 			T theta_s, phi_s, phi_t;
 			ecl_from_eq((T)(M_PI/2. - dec), ra, &theta_s, &phi_s);
 			phi_t = LISA_phi0 + 2. * M_PI * times[i] / T_year;
 			T doppler_phase_shift = 2*M_PI * frequencies[i] * AU_SEC *sin(theta_s) *cos(phi_t - phi_s);
-
-			detector_response[i] = (Fplus[i] * hplus[i] 
-						+ (Fcross[i] )*hcross[i]) * std::exp(std::complex<T>(0, - doppler_phase_shift ) );
-		}	
+			detector_response[i]*= std::exp(std::complex<T>(0, - doppler_phase_shift ) );
+		}
 		delete [] Fplus; 
 		delete [] Fcross;
+		if(extra_polarizations){
+			if(wp->active_polarizations[2]){
+				delete [] Fx;
+			}
+			if(wp->active_polarizations[3]){
+				delete [] Fy;
+			}
+			if(wp->active_polarizations[4]){
+				delete [] Fb;
+			}
+			if(wp->active_polarizations[5]){
+				delete [] Fl;
+			}
+		}
 
 	}
 	else{
@@ -562,9 +710,33 @@ int fourier_detector_response_equatorial(T *frequencies, /**<array of frequencie
 		{
 			//detector_response[i] = fplus * hplus[i] 
 			//			+ (fcross )*hcross[i];
-			detector_response[i] = fplus * hplus[i] 
-						+ (fcross )*hcross[i];
+			//detector_response[i] = fplus * hplus[i] 
+			//			+ (fcross )*hcross[i];
+			detector_response[i] = (*(r_pat.Fplus)) * wp->hplus[i] 
+						+ (*(r_pat.Fcross ))*wp->hcross[i];
 		}	
+		if(extra_polarizations){
+			if(wp->active_polarizations[2]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += (*(r_pat.Fx)) * wp->hx[i];
+				}
+			}
+			if(wp->active_polarizations[3]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += (*(r_pat.Fy)) * wp->hy[i];
+				}
+			}
+			if(wp->active_polarizations[4]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += (*(r_pat.Fb)) * wp->hb[i];
+				}
+			}
+			if(wp->active_polarizations[5]){
+				for(int i = 0 ; i<length; i++){
+					detector_response[i] += (*(r_pat.Fl)) * wp->hl[i];
+				}
+			}
+		}
 	}
 	return status;
 	
@@ -616,8 +788,6 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 {
 	int status = 1;
 	//generate waveform
-	std::complex<T> *waveform_plus = new std::complex<T>[length];
-	std::complex<T> *waveform_cross = new std::complex<T>[length];
 	if(parameters->equatorial_orientation){
 		transform_orientation_coords(parameters, generation_method,detector);
 	}
@@ -626,17 +796,18 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 			std::cout<<"ERROR -- fourier_detector_response_equatorial -- LISA currently only accepts equatorial_orientation parameters"<<std::endl;
 		}
 	}
+	waveform_polarizations<T> wp;
+	assign_polarizations(generation_method, &wp);
+	wp.allocate_memory(length);
 	status = fourier_waveform(frequencies, 
 			length,
-			waveform_plus, 
-			waveform_cross, 
+			&wp,	
 			generation_method,
 			parameters
 			);
 	status = fourier_detector_response_equatorial(frequencies, 
 			length, 
-			waveform_plus, 
-			waveform_cross,
+			&wp,
 			response, 
 			parameters->RA, 
 			parameters->DEC, 
@@ -652,8 +823,7 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 	
 		
 	//Deallocate memory
-	delete [] waveform_plus;
-	delete [] waveform_cross;
+	wp.deallocate_memory();
 
 	return status;
 }
@@ -2025,6 +2195,8 @@ void threshold_times(gen_params_base<double> *params,
  * Assumes this is for multiband -- ie stellar mass BHs -- Only uses pn approximation of time frequency relation
  *
  * If no time before merger satisfies the requirements, both are set to -1
+ *
+ * Only supports tensor polarizations !!!
  */
 void threshold_times(gen_params_base<double> *params,
 	std::string generation_method, /**<Generation method to use for the waveform*/
@@ -2064,7 +2236,11 @@ void threshold_times(gen_params_base<double> *params,
 	t_mer= t_0PN(freqs[bound_id_upper], chirpmass)+T_obs;
 	bound_id_lower = (f_0PN(t_mer, chirpmass)- freqs[0])/deltaf;
 
-	fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+	//fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+	waveform_polarizations<double> wp;
+	wp.hplus = &hplus[bound_id_lower];
+	wp.hcross = &hcross[bound_id_lower];
+	fourier_waveform(&freqs[bound_id_lower], bound_id_upper-bound_id_lower, &wp, generation_method,params);
 	precalc_wf_id = bound_id_lower;
 	snr = std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
 	snr_prev=snr;
@@ -2079,7 +2255,10 @@ void threshold_times(gen_params_base<double> *params,
 			bound_id_lower = (f_0PN(t_mer, chirpmass)- freqs[0])/deltaf;
 			bound_id_upper = (f_0PN(t_mer-T_obs, chirpmass)- freqs[0])/deltaf;
 
-			fourier_waveform(&freqs[bound_id_lower], bound_id_lower_prev-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+			//fourier_waveform(&freqs[bound_id_lower], bound_id_lower_prev-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+			wp.hplus = &hplus[bound_id_lower];
+			wp.hcross = &hcross[bound_id_lower];
+			fourier_waveform(&freqs[bound_id_lower], bound_id_lower_prev-bound_id_lower, &wp, generation_method,params);
 			precalc_wf_id = bound_id_lower;
 			snr = std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
 			if(snr<snr_prev){bound_search=false;}	
@@ -2098,7 +2277,11 @@ void threshold_times(gen_params_base<double> *params,
 			}
 			//Update waveform if using new frequencies
 			if(bound_id_lower < precalc_wf_id){
-				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				//fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+
+				wp.hplus = &hplus[bound_id_lower];
+				wp.hcross = &hcross[bound_id_lower];
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &wp, generation_method,params);
 				precalc_wf_id = bound_id_lower;
 			}
 			bound_id_lower_prev= bound_id_lower;
@@ -2161,7 +2344,10 @@ void threshold_times(gen_params_base<double> *params,
 			}
 			//Update waveform if using new frequencies
 			if(bound_id_lower < precalc_wf_id){
-				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				//fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				wp.hplus = &hplus[bound_id_lower];
+				wp.hcross = &hcross[bound_id_lower];
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &wp, generation_method,params);
 				precalc_wf_id = bound_id_lower;
 			}
 			bound_id_lower_prev= bound_id_lower;
@@ -2190,7 +2376,10 @@ void threshold_times(gen_params_base<double> *params,
 
 			}
 			if(bound_id_lower < precalc_wf_id){
-				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				//fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				wp.hplus = &hplus[bound_id_lower];
+				wp.hcross = &hcross[bound_id_lower];
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &wp, generation_method,params);
 				precalc_wf_id = bound_id_lower;
 			}
 			snr =std::sqrt(1.)*calculate_snr_internal(&SN[bound_id_lower], &hplus[bound_id_lower],&freqs[bound_id_lower],bound_id_upper-bound_id_lower);
@@ -2210,7 +2399,11 @@ void threshold_times(gen_params_base<double> *params,
 			}
 			//Update waveform if using new frequencies
 			if(bound_id_lower < precalc_wf_id){
-				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				//fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &hplus[bound_id_lower], &hcross[bound_id_lower], generation_method,params);
+				waveform_polarizations<double> wp;
+				wp.hplus = &hplus[bound_id_lower];
+				wp.hcross = &hcross[bound_id_lower];
+				fourier_waveform(&freqs[bound_id_lower], precalc_wf_id-bound_id_lower, &wp, generation_method,params);
 				precalc_wf_id = bound_id_lower;
 			}
 			bound_id_lower_prev= bound_id_lower;
@@ -3076,11 +3269,11 @@ double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_pa
 template void  time_phase_corrected<double>(double *, int, double *, gen_params_base<double> *, std::string, bool,int );
 template void  time_phase_corrected<adouble>(adouble *, int, adouble *, gen_params_base<adouble> *, std::string, bool,int);
 
-template int fourier_detector_response_horizon<double>(double *, int, std::complex<double> *, std::complex<double> *,std::complex<double> *, double, double, std::string);
-template int fourier_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);
+template int fourier_detector_response_horizon<double>(double *, int, waveform_polarizations<double> *,std::complex<double> *, double, double, std::string);
+template int fourier_detector_response_horizon<adouble>(adouble *, int, waveform_polarizations<adouble> *,std::complex<adouble> *, adouble, adouble, std::string);
 //
-template int fourier_detector_response_horizon<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double, double, std::string);
-template int fourier_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble, adouble, std::string);
+template int fourier_detector_response_horizon<double>(double *, int, waveform_polarizations<double> *, std::complex<double> *, double, double, double, std::string);
+template int fourier_detector_response_horizon<adouble>(adouble *, int, waveform_polarizations<adouble> *, std::complex<adouble> *, adouble, adouble, adouble, std::string);
 //
 //
 template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *);
@@ -3091,5 +3284,5 @@ template int fourier_detector_response_equatorial<adouble>(adouble *, int , std:
 template int fourier_detector_response_horizon<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double>*);
 template int fourier_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble>*);
 //
-template int fourier_detector_response_equatorial<double>(double *, int, std::complex<double> *, std::complex<double> *, std::complex<double> *, double, double , double, double,double *, double, double, double, double, std::string);
-template int fourier_detector_response_equatorial<adouble>(adouble *, int, std::complex<adouble> *, std::complex<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double,adouble*, adouble, adouble, adouble, adouble,  std::string);
+template int fourier_detector_response_equatorial<double>(double *, int, waveform_polarizations<double> *, std::complex<double> *, double, double , double, double,double *, double, double, double, double, std::string);
+template int fourier_detector_response_equatorial<adouble>(adouble *, int, waveform_polarizations<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double,adouble*, adouble, adouble, adouble, adouble,  std::string);

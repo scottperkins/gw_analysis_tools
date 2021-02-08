@@ -446,6 +446,47 @@ std::complex<double> Q(double theta, double phi, double iota)
 	return Qout;
 }
 
+
+/*! \brief Response function of a 90 deg interferometer for longitudinal (scalar) polarization
+ *
+ * Theta, phi, and psi are local, horizontal coordinates relative to the detector
+ */
+template<class T>
+T right_interferometer_l(T theta, T phi, T psi)
+{
+	return 1;
+}
+
+/*! \brief Response function of a 90 deg interferometer for breathing (scalar) polarization
+ *
+ * Theta, phi, and psi are local, horizontal coordinates relative to the detector
+ */
+template<class T>
+T right_interferometer_b(T theta, T phi, T psi)
+{
+	return 1;
+}
+
+/*! \brief Response function of a 90 deg interferometer for y (vector) polarization
+ *
+ * Theta, phi, and psi are local, horizontal coordinates relative to the detector
+ */
+template<class T>
+T right_interferometer_y(T theta, T phi, T psi)
+{
+	return 1;
+}
+
+/*! \brief Response function of a 90 deg interferometer for x (vector) polarization
+ *
+ * Theta, phi, and psi are local, horizontal coordinates relative to the detector
+ */
+template<class T>
+T right_interferometer_x(T theta, T phi, T psi)
+{
+	return 1;
+}
+
 /*! \brief Response function of a 90 deg interferometer for plus polarization
  *
  * Theta and phi are local, horizontal coordinates relative to the detector
@@ -478,14 +519,34 @@ T right_interferometer_cross(T theta, T phi)
  * With general psi
  */
 template<class T>
-void right_interferometer(T *fplus, T *fcross,T theta, T phi, T psi)
+void right_interferometer(det_res_pat<T> *r_pat,T theta, T phi, T psi)
 {
 	T Fplus = right_interferometer_plus(theta,phi);
 	T Fcross = right_interferometer_cross(theta,phi);
 	T c2psi = cos(2.*psi);
 	T s2psi = sin(2.*psi);
-	*fplus = Fplus*c2psi - Fcross*s2psi;
-	*fcross = Fplus*s2psi + Fcross*c2psi;
+	*(r_pat->Fplus) = Fplus*c2psi - Fcross*s2psi;
+	*(r_pat->Fcross) = Fplus*s2psi + Fcross*c2psi;
+
+	//###############################################
+	//Stand in for TESTING MUST BE FIXED
+	if(r_pat->active_polarizations[2]){
+		//vector x
+		*(r_pat->Fx) = right_interferometer_x(theta,phi,psi);
+	}	
+	if(r_pat->active_polarizations[3]){
+		//vector y
+		*(r_pat->Fy) = right_interferometer_y(theta,phi,psi);
+	}	
+	if(r_pat->active_polarizations[4]){
+		//breathing
+		*(r_pat->Fb) = right_interferometer_b(theta,phi,psi);
+	}	
+	if(r_pat->active_polarizations[5]){
+		//longitudinal 
+		*(r_pat->Fl) = right_interferometer_l(theta,phi,psi);
+	}	
+	//###############################################
 }
 
 
@@ -840,13 +901,13 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	T dec,/**<Declination in rad*/
 	T psi,/**< polarization angle in rad*/
 	double gmst,/**<Greenwich mean sidereal time (rad)*/
-	T *Fplus,/**< [out] Fplus response coefficient*/
-	T *Fcross	/**<[out] Fcross response coefficient*/
+	det_res_pat<T> *r_pat
 	)
 {
 	int i;
 	T X[3];
 	T Y[3];
+	T Z[3];
 	
 	/* Greenwich hour angle of source (radians). */
 	T gha = gmst - ra;
@@ -871,17 +932,81 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	Y[0] =  sinpsi * singha - cospsi * cosgha * sindec;
 	Y[1] =  sinpsi * cosgha + cospsi * singha * sindec;
 	Y[2] =  cospsi * cosdec;
+
+/* Eqns from [Blaut2012] - but converted from Blaut's theta = pi/2 - dec
+ * given cos(dec) = sin(theta) and cos(theta) = sin(dec), and Blaut's phi = ra
+ * - gmst, so cos(phi) = cos(gha) and sin(phi) = -sin(gha). This is consistent
+ * with the convention in XLALComputeDetAMResponse.
+ */
+	Z[0] = -cosdec * cosgha;
+	Z[1] = cosdec * singha;
+	Z[2] = -sindec;
 	
 	/* Now compute Eq. (B7) of [ABCF] for each polarization state, i.e.,
 	 * with s+=1 and sx=0 to get F+, with s+=0 and sx=1 to get Fx */
-	*Fplus = 0.0;
-	*Fcross = 0.0;
+	*(r_pat->Fplus)= 0.0;
+	*(r_pat->Fcross)= 0.0;
+	if(r_pat->active_polarizations[2]){
+		*(r_pat->Fx) = 0.0;
+	}
+	if(r_pat->active_polarizations[3]){
+		*(r_pat->Fy) = 0.0;
+	}
+	if(r_pat->active_polarizations[4]){
+		*(r_pat->Fb) = 0.0;
+	}
+	if(r_pat->active_polarizations[5]){
+		*(r_pat->Fl) = 0.0;
+	}
 	for(i = 0; i < 3; i++) {
 	        T DX = D[i][0] * X[0] + D[i][1] * X[1] + D[i][2] * X[2];
 	        T DY = D[i][0] * Y[0] + D[i][1] * Y[1] + D[i][2] * Y[2];
-	        *Fplus  += X[i] * DX - Y[i] * DY;
-	        *Fcross += X[i] * DY + Y[i] * DX;
+		T DZ = D[i][0] * Z[0] + D[i][1] * Z[1] + D[i][2] * Z[2];
+	        *(r_pat->Fplus ) += X[i] * DX - Y[i] * DY;
+	        *(r_pat->Fcross) += X[i] * DY + Y[i] * DX;
+		if(r_pat->active_polarizations[2]){
+			*(r_pat->Fx) += X[i] * DZ + Z[i] * DX;
+		}
+		if(r_pat->active_polarizations[3]){
+			*(r_pat->Fy) += Y[i] * DZ + Z[i] * DY;
+		}
+		if(r_pat->active_polarizations[4]){
+			*(r_pat->Fb) += X[i] * DX + Y[i] * DY;
+		}
+		if(r_pat->active_polarizations[5]){
+			*(r_pat->Fl) += Z[i] * DZ;
+		}
 	}
+
+	//if(r_pat->active_polarizations[2]){
+	//	//vector x
+	//	*(r_pat->Fx) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fx) += X[i] * DZ + Z[i] * DX;
+	//	}
+	//}	
+	//if(r_pat->active_polarizations[3]){
+	//	//vector y
+	//	*(r_pat->Fy) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fy) += Y[i] * DZ + Z[i] * DY;
+	//	}
+	//}	
+	//if(r_pat->active_polarizations[4]){
+	//	//breathing
+	//	*(r_pat->Fb) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fb) += X[i] * DX + Y[i] * DY;
+	//	}
+	//}	
+	//if(r_pat->active_polarizations[5]){
+	//	//longitudinal 
+	//	*(r_pat->Fl) = 0.0;
+	//	for(i = 0; i < 3; i++) {
+	//		*(r_pat->Fl) += Z[i] * DZ;
+	//	}
+	//}	
+	//###############################################
 
 }
 /*! \brief Wrapping of the equatorial detector response for terrestial based detectors
@@ -894,12 +1019,11 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T dec,/**<Declination in rad*/
 	T psi,/**< polarization angle in rad*/
 	double gmst,/**<Greenwich mean sidereal time (rad)*/
-	T *Fplus,/**< [out] Fplus response coefficient*/
-	T *Fcross	/**<[out] Fcross response coefficient*/
+	det_res_pat<T> *r_pat
 	)
 {
 	//FIX -- dec goes frorm pi/2 to -pi/2 while theta goes from 0 to pi
-	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0., Fplus,Fcross);
+	detector_response_functions_equatorial(detector,ra,dec,psi,gmst,(T *)NULL,0,(T)0.,(T)0.,(T)0.,(T)0., r_pat);
 }
 /*! \brief Same as the other function, but for active and future detectors
  *
@@ -919,8 +1043,7 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 	T LISA_phi0,/**<Offset for phi*/
 	T theta_j_ecl,/**< Ecliptic spherical polar angle of Lhat (Jhat for precessing systems)*/
 	T phi_j_ecl,/**< Ecliptic sherical azimuthal angle (Jhat  for precessing systems)*/
-	T *Fplus,/**< [out] Fplus response coefficient*/
-	T *Fcross	/**<[out] Fcross response coefficient*/
+	det_res_pat<T> *r_pat
 	)
 {
 	double geometric_factor=1;
@@ -935,9 +1058,22 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 		ecl_from_eq((T)( M_PI/2. - dec), ra, &theta_s, &phi_s);
 		for(int i =0 ; i<length; i++){
 
-			Fplus[i]  = LISA_response_plus_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
-			Fcross[i]  = LISA_response_cross_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
+			r_pat->Fplus[i]  = LISA_response_plus_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
+			r_pat->Fcross[i]  = LISA_response_cross_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
 		}
+		
+		if(r_pat->active_polarizations[2]){
+			//vector x
+		}	
+		if(r_pat->active_polarizations[3]){
+			//vector y
+		}	
+		if(r_pat->active_polarizations[4]){
+			//breathing
+		}	
+		if(r_pat->active_polarizations[5]){
+			//longitudinal 
+		}	
 	}
 	//Time independent response functions
 	else{
@@ -1018,9 +1154,25 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			std::cout<<"ERROR -- unsupported detector"<<std::endl;
 			exit(1);
 		}
-		detector_response_functions_equatorial(responseM, ra, dec, psi, gmst, Fplus, Fcross);
-		(*Fplus)*=geometric_factor;
-		(*Fcross)*=geometric_factor;
+		detector_response_functions_equatorial(responseM, ra, dec, psi, gmst, r_pat);
+		(*(r_pat->Fplus))*=geometric_factor;
+		(*(r_pat->Fcross))*=geometric_factor;
+		if(r_pat->active_polarizations[2]){
+			//vector x
+			(*(r_pat->Fx))*=geometric_factor;
+		}	
+		if(r_pat->active_polarizations[3]){
+			//vector y
+			(*(r_pat->Fy))*=geometric_factor;
+		}	
+		if(r_pat->active_polarizations[4]){
+			//breathing
+			(*(r_pat->Fb))*=geometric_factor;
+		}	
+		if(r_pat->active_polarizations[5]){
+			//longitudinal 
+			(*(r_pat->Fl))*=geometric_factor;
+		}	
 	}
 }
 
@@ -1090,6 +1242,7 @@ double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
 	double twopi = 2.*M_PI;
 	double omega_squared = omega*omega;
 	double sum = 0;
+	bool active_polar[6] = {true, true, false, false, false, false};
 	for(int i= 0 ; i<samples ; i++){
 		psi = gsl_rng_uniform(r)*twopi;	
 		cosiota = gsl_rng_uniform(r)*2.-1.;	
@@ -1097,7 +1250,12 @@ double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
 		phi = gsl_rng_uniform(r)*twopi;	
 		iota = acos(cosiota);
 		theta = acos(costheta);
-		right_interferometer(&Fplus, &Fcross, theta, phi, psi);
+		det_res_pat<double> r_pat;
+		
+		r_pat.Fplus = &Fplus;
+		r_pat.Fcross = &Fcross;
+		r_pat.active_polarizations = &active_polar[0];
+		right_interferometer(&r_pat, theta, phi, psi);
 		//Do squared to avoid the expensive sqrt function
 		omega_prime_squared =(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
 		if(omega_prime_squared>omega_squared){sum++;}
@@ -1141,6 +1299,11 @@ double p_N_detector(double omega, /**< \omega = \rho/\rho_opt**/
 	double twopi = 2.*M_PI;
 	double omega_squared = omega*omega;
 	double sum = 0;
+	det_res_pat<double> r_pat;
+	r_pat.Fplus = &Fplus;	
+	r_pat.Fcross = &Fcross;	
+	bool active_polar[6] = {true, true, false, false, false, false};
+	r_pat.active_polarizations = &active_polar[0];
 	for(int i= 0 ; i<samples ; i++){
 		psi = gsl_rng_uniform(r)*twopi;	
 		cosiota = gsl_rng_uniform(r)*2.-1.;	
@@ -1150,7 +1313,8 @@ double p_N_detector(double omega, /**< \omega = \rho/\rho_opt**/
 		DEC = asin(sinDEC);
 		omega_prime_squared=0;
 		for(int j = 0 ; j<N_detectors; j++){	
-			detector_response_functions_equatorial(detectors[j],RA,DEC,psi,gmst, &Fplus,&Fcross);	
+				
+			detector_response_functions_equatorial(detectors[j],RA,DEC,psi,gmst, &r_pat);	
 			//right_interferometer(&Fplus, &Fcross, theta, phi, psi);
 			//Do squared to avoid the expensive sqrt function
 			omega_prime_squared +=(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
@@ -1313,17 +1477,29 @@ template adouble right_interferometer_cross<adouble>(adouble, adouble);
 template double right_interferometer_plus<double>(double, double);
 template adouble right_interferometer_plus<adouble>(adouble, adouble);
 //
-template void right_interferometer<double>(double*, double*,double, double,double);
-template void right_interferometer<adouble>(adouble*, adouble*,adouble,adouble, adouble);
+template double  right_interferometer_x<double>(double, double,double);
+template adouble right_interferometer_x<adouble>(adouble, adouble,adouble);
+//
+template double  right_interferometer_y<double>(double, double,double);
+template adouble right_interferometer_y<adouble>(adouble, adouble,adouble);
+//
+template double  right_interferometer_b<double>(double, double,double);
+template adouble right_interferometer_b<adouble>(adouble, adouble,adouble);
+//
+template double  right_interferometer_l<double>(double, double,double);
+template adouble right_interferometer_l<adouble>(adouble, adouble,adouble);
+//
+template void right_interferometer<double>(det_res_pat<double> *,double, double,double);
+template void right_interferometer<adouble>(det_res_pat<adouble> *,adouble, adouble,adouble);
 //
 template void celestial_horizon_transform<double>(double, double, double, std::string, double *,double*);
 template void celestial_horizon_transform<adouble>(adouble, adouble, double, std::string, adouble *,adouble*);
 //
-template void detector_response_functions_equatorial<double>(double[3][3],double, double, double, double, double *, double*);
-template void detector_response_functions_equatorial<adouble>(double[3][3],adouble, adouble, adouble, double, adouble *, adouble*);
+template void detector_response_functions_equatorial<double>(double[3][3],double, double, double, double, det_res_pat<double> *);
+template void detector_response_functions_equatorial<adouble>(double[3][3],adouble, adouble, adouble, double, det_res_pat<adouble> *);
 //
-template void detector_response_functions_equatorial<double>(std::string, double, double, double, double, double*,int, double, double, double, double,  double*, double*);
-template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble, double, adouble*,int, adouble, adouble, adouble, adouble, adouble*, adouble*);
+template void detector_response_functions_equatorial<double>(std::string, double, double, double, double, double*,int, double, double, double, double,  det_res_pat<double> *);
+template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble, double, adouble*,int, adouble, adouble, adouble, adouble, det_res_pat<adouble> *);
 //
-template void detector_response_functions_equatorial<double>(std::string, double, double, double ,double ,double * , double *);
-template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble ,double ,adouble * , adouble *);
+template void detector_response_functions_equatorial<double>(std::string, double, double, double ,double ,det_res_pat<double> *);
+template void detector_response_functions_equatorial<adouble>(std::string, adouble, adouble, adouble ,double ,det_res_pat<adouble> *);

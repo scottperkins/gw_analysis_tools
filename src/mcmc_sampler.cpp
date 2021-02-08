@@ -3045,7 +3045,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			"",  checkpoint_file,true,true);
 
 		//##############################################################
-		//Reset positions and rewrite checkpoint file
+		//Reset positions and rewrite checkpoint file -- turning this off for now
 		//##############################################################
 
 		const gsl_rng_type *T_reset;
@@ -3166,8 +3166,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		write_checkpoint_file(&sampler_temp, checkpoint_file);
 
 		gsl_rng_free(r_reset);
-		//##############################################################
-		//##############################################################
+		////##############################################################
+		////##############################################################
 
 		deallocate_sampler_mem(&sampler_temp);
 

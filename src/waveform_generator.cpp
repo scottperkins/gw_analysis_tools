@@ -51,8 +51,9 @@ using namespace std;
 template<class T>
 int fourier_waveform(T *frequencies, /**< double array of frequencies for the waveform to be evaluated at*/
 			int length,/**<integer length of all the arrays*/
-			std::complex<T> *waveform_plus, /**< [out] complex array for the output plus polarization waveform*/
-			std::complex<T> *waveform_cross, /**< [out] complex array for the output cross polarization waveform*/
+			waveform_polarizations<T> *wp,/**< [out] Output waveforms by polarization*/
+			//std::complex<T> *waveform_plus, /**< [out] complex array for the output plus polarization waveform*/
+			//std::complex<T> *waveform_cross, /**< [out] complex array for the output cross polarization waveform*/
 			string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
 			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
 			)
@@ -79,28 +80,28 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		if(local_method == "ppE_IMRPhenomD_Inspiral")
 		{
 			ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-			status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
 		else if(local_method == "ppE_IMRPhenomD_IMR")
 		{
 			ppE_IMRPhenomD_IMR<T> ppemodeld;
-			status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
 		else if(local_method == "gIMRPhenomD")
 		{
 			gIMRPhenomD<T> gmodeld;
-			status = gmodeld.construct_waveform(frequencies, length, waveform_plus, &params);
+			status = gmodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
 		else{
 			IMRPhenomD<T> modeld;
-			status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
+			status = modeld.construct_waveform(frequencies, length, wp->hplus, &params);
 		}
 		for (int i =0 ; i < length; i++){
-			waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-			waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
+			wp->hcross[i] = ci*std::complex<T>(0,-1) * wp->hplus[i];
+			wp->hplus[i] = wp->hplus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
 	}
 	else if(local_method.find("IMRPhenomPv2")!=std::string::npos)
@@ -108,393 +109,48 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		if(local_method == "ppE_IMRPhenomPv2_Inspiral")
 		{
 			ppE_IMRPhenomPv2_Inspiral<T> ppemodel;
-			status = ppemodel.construct_waveform(frequencies, length, waveform_plus, waveform_cross,&params);
+			status = ppemodel.construct_waveform(frequencies, length, wp->hplus, wp->hcross,&params);
 
 		}
 		else if(local_method == "ppE_IMRPhenomPv2_IMR")
 		{
 			ppE_IMRPhenomPv2_IMR<T> ppemodel;
-			status = ppemodel.construct_waveform(frequencies, length, waveform_plus,waveform_cross, &params);
+			status = ppemodel.construct_waveform(frequencies, length, wp->hplus,wp->hcross, &params);
 
 		}
 		else if(local_method == "gIMRPhenomPv2")
 		{
 			gIMRPhenomPv2<T> gmodel;
-			status = gmodel.construct_waveform(frequencies, length, waveform_plus,waveform_cross, &params);
+			status = gmodel.construct_waveform(frequencies, length, wp->hplus,wp->hcross, &params);
 
 		}
 		else{
 			IMRPhenomPv2<T> model;
-			status = model.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
+			status = model.construct_waveform(frequencies, length, wp->hplus, wp->hcross, &params);
 		}
 		std::complex<T> tempPlus,tempCross;
 		std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
 		std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
 		for (int i =0;i < length; i++)
 		{
-			tempPlus = waveform_plus[i];	
-			tempCross = waveform_cross[i];	
-			waveform_plus[i] = c2z*tempPlus+s2z*tempCross;
-			waveform_cross[i] = c2z*tempCross-s2z*tempPlus;
+			tempPlus = wp->hplus[i];	
+			tempCross = wp->hcross[i];	
+			wp->hplus[i] = c2z*tempPlus+s2z*tempCross;
+			wp->hcross[i] = c2z*tempCross-s2z*tempPlus;
+		}
+	}
+	if(check_extra_polarizations(generation_method))
+	{
+		//TESTING MUST FIX
+		for (int i =0;i < length; i++)
+		{
+			wp->hx[i] = wp->hplus[i];
+			wp->hy[i] = wp->hplus[i];
+			wp->hb[i] = wp->hplus[i];
+			wp->hl[i] = wp->hplus[i];
 		}
 	}
 	cleanup_source_parameters(&params,generation_method);
-	//params.populate_source_parameters(parameters);
-	//params.phi = parameters->phi;
-	//params.theta = parameters->theta;
-	//params.incl_angle = parameters->incl_angle;
-	//params.f_ref = parameters->f_ref;
-	//params.phiRef = parameters->phiRef;
-	//params.cosmology = parameters->cosmology;
-	//params.shift_time = parameters->shift_time;
-	//params.sky_average = parameters->sky_average;
-	//params.shift_phase = parameters->shift_phase;
-	//params.NSflag1 = parameters->NSflag1;
-	//params.NSflag2 = parameters->NSflag2;
-	//params.dep_postmerger = parameters->dep_postmerger;
-	//if(generation_method == "IMRPhenomD")
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	IMRPhenomD<T> modeld;
-	//	status = modeld.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//}
-	//else if(generation_method == "ppE_IMRPhenomD_Inspiral")
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-	//	//params.betappe = parameters->betappe;
-	//	//params.bppe = parameters->bppe;
-	//	//params.Nmod = parameters->Nmod;
-	//	status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//}
-	//else if(local_method == "dCS_IMRPhenomPv2")
-	//{
-	//	debugger_print(__FILE__,__LINE__,std::string("test"));
-	//	//########################################
-	//	//convert betappe for dCS (alpha**2) to the full betappe
-	//	//dCS only supports one modification
-	//	//dCS_IMRPhenomD<T> dcs_phenomd;
-	//	//params.Nmod = 1;
-	//	//params.bppe = new int[1];
-	//	//params.bppe[0] = -1;
-	//	//params.betappe = new T[1];
-	//	//params.betappe[0] = parameters->betappe[0];
-	//	//params.betappe[0] = dcs_phenomd.dCS_phase_mod(&params);
-	//	//########################################
-
-	//	ppE_IMRPhenomPv2_Inspiral<T> model;
-	//	//Initialize Pv2 specific params	
-
-	//	//########################################
-	//	//if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-	//	//	params.chip = parameters->chip;
-	//	//	params.spin1z = parameters->spin1[2];
-	//	//	params.spin2z = parameters->spin2[2];
-	//	//	params.phip = parameters->phip;
-	//	//	model.PhenomPv2_Param_Transform_reduced(&params);
-	//	//}
-	//	//else {
-	//	//	model.PhenomPv2_Param_Transform(&params);
-	//	//}
-	//	//Calculate Waveform
-	//	status = model.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-	//	std::complex<T> tempPlus,tempCross;
-	//	std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
-	//	std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
-	//	for (int i =0;i < length; i++)
-	//	{
-	//		tempPlus = waveform_plus[i];	
-	//		tempCross = waveform_cross[i];	
-	//		waveform_plus[i] = c2z*tempPlus
-	//				+s2z*tempCross;
-	//		waveform_cross[i] = c2z*tempCross
-	//				-s2z*tempPlus;
-	//	}
-	//	delete [] params.bppe;
-	//	delete [] params.betappe;
-	//}
-	//else if(check_theory_support(generation_method))
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	ppE_IMRPhenomD_Inspiral<T> ppEmodel;
-	//	params.betappe = parameters->betappe;
-	//	params.Nmod = 1;
-	//	theory_ppE_map<T> mapping = assign_mapping<T>(generation_method);	
-	//	params.bppe = &(mapping.bppe);
-	//	T temp[params.Nmod] ;
-	//	temp[0] =mapping.beta_fn(&params); 
-	//	params.betappe = temp;
-	//	
-	//	status = ppEmodel.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//}
-	//else if(generation_method == "_dCS_IMRPhenomD")
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	bool local_spline = false;
-	//	dCS_IMRPhenomD<T> ppemodeld;
-	//	params.betappe = parameters->betappe;
-	//	params.Nmod = 1;
-	//	int tempbppe[params.Nmod] = {-1};
-	//	params.bppe = tempbppe;
-	//	T temp[params.Nmod] ;
-	//	for( int i = 0; i < params.Nmod; i++)
-	//		temp[i] = params.betappe[i];
-
-	//	
-	//	status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//	for( int i = 0; i < params.Nmod; i++)
-	//		parameters->betappe[i] = temp[i];
-	//}
-	//else if(generation_method == "EdGB_IMRPhenomD")
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	EdGB_IMRPhenomD<T> ppemodeld;
-	//	params.betappe = parameters->betappe;
-	//	params.Nmod = 1;
-	//	int tempbppe[params.Nmod] = {-7};
-	//	params.bppe = tempbppe;
-	//	T temp[params.Nmod] ;
-	//	for( int i = 0; i < params.Nmod; i++)
-	//		temp[i] = params.betappe[i];
-	//	status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//	for( int i = 0; i < params.Nmod; i++)
-	//		parameters->betappe[i] = temp[i];
-	//}
-	//else if(generation_method == "ppE_IMRPhenomD_IMR")
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	ppE_IMRPhenomD_IMR<T> ppemodeld;
-	//	params.betappe = parameters->betappe;
-	//	params.bppe = parameters->bppe;
-	//	params.Nmod = parameters->Nmod;
-	//	status = ppemodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i] * std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//}
-	//else if(generation_method == "gIMRPhenomD")
-	//{
-	//	std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-	//	gIMRPhenomD<T> gmodeld;
-	//	params.delta_phi = parameters->delta_phi;
-	//	params.delta_sigma = parameters->delta_sigma;
-	//	params.delta_beta = parameters->delta_beta;
-	//	params.delta_alpha = parameters->delta_alpha;
-	//	params.phii = parameters->phii;
-	//	params.sigmai = parameters->sigmai;
-	//	params.betai = parameters->betai;
-	//	params.alphai = parameters->alphai;
-	//	params.Nmod_phi = parameters->Nmod_phi;
-	//	params.Nmod_sigma = parameters->Nmod_sigma;
-	//	params.Nmod_beta = parameters->Nmod_beta;
-	//	params.Nmod_alpha = parameters->Nmod_alpha;
-	//	status = gmodeld.construct_waveform(frequencies, length, waveform_plus, &params);
-	//	for (int i =0 ; i < length; i++){
-	//		waveform_cross[i] = ci*std::complex<T>(0,-1) * waveform_plus[i];
-	//		waveform_plus[i] = waveform_plus[i]* std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
-	//	}
-	//}
-	//else if(generation_method == "gIMRPhenomPv2")
-	//{
-	//	gIMRPhenomPv2<T> gmodelp;
-	//	if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-	//		params.chip = parameters->chip;
-	//		params.spin1z = parameters->spin1[2];
-	//		params.spin2z = parameters->spin2[2];
-	//		params.phip = parameters->phip;
-	//		gmodelp.PhenomPv2_Param_Transform_reduced(&params);
-	//	}
-	//	else {
-	//		gmodelp.PhenomPv2_Param_Transform(&params);
-	//	}
-	//	params.delta_phi = parameters->delta_phi;
-	//	params.delta_sigma = parameters->delta_sigma;
-	//	params.delta_beta = parameters->delta_beta;
-	//	params.delta_alpha = parameters->delta_alpha;
-	//	params.phii = parameters->phii;
-	//	params.sigmai = parameters->sigmai;
-	//	params.betai = parameters->betai;
-	//	params.alphai = parameters->alphai;
-	//	params.Nmod_phi = parameters->Nmod_phi;
-	//	params.Nmod_sigma = parameters->Nmod_sigma;
-	//	params.Nmod_beta = parameters->Nmod_beta;
-	//	params.Nmod_alpha = parameters->Nmod_alpha;
-	//	status = gmodelp.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-	//	std::complex<T> tempPlus,tempCross;
-	//	std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
-	//	std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
-	//	for (int i =0;i < length; i++)
-	//	{
-	//		tempPlus = waveform_plus[i];	
-	//		tempCross = waveform_cross[i];	
-	//		waveform_plus[i] = c2z*tempPlus+s2z*tempCross;
-	//		waveform_cross[i] = c2z*tempCross-s2z*tempPlus;
-	//	}
-	//}
-	//else if(generation_method == "IMRPhenomPv2")
-	//{
-	//	//std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
-
-	//	IMRPhenomPv2<T> modeld;
-	//	//Calculate Waveform
-	//	if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-	//		params.chip = parameters->chip;
-	//		params.spin1z = parameters->spin1[2];
-	//		params.spin2z = parameters->spin2[2];
-	//		params.phip = parameters->phip;
-	//		modeld.PhenomPv2_Param_Transform_reduced(&params);
-	//	}
-	//	else {
-	//		modeld.PhenomPv2_Param_Transform(&params);
-	//	}
-	//	status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-	//	std::complex<T> tempPlus,tempCross;
-	//	std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
-	//	std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
-	//	for (int i =0;i < length; i++)
-	//	{
-	//		tempPlus = waveform_plus[i];	
-	//		tempCross = waveform_cross[i];	
-	//		waveform_plus[i] = c2z*tempPlus+s2z*tempCross;
-	//		waveform_cross[i] = c2z*tempCross-s2z*tempPlus;
-	//	}
-	//}
-	//else if(local_method == "ppE_IMRPhenomPv2_Inspiral")
-	//{
-	//	debugger_print(__FILE__,__LINE__,std::string("test"));
-	//	ppE_IMRPhenomPv2_Inspiral<T> modeld;
-	//	//Initialize Pv2 specific params	
-
-	//	//params.betappe = parameters->betappe;
-	//	//params.bppe = parameters->bppe;
-	//	//params.Nmod = parameters->Nmod;
-	//	//########################################
-	//	//Check to see if thetaJN was used
-	//	//If not, its calculated
-	//	//if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-	//	//	params.chip = parameters->chip;
-	//	//	params.spin1z = parameters->spin1[2];
-	//	//	params.spin2z = parameters->spin2[2];
-	//	//	params.phip = parameters->phip;
-	//	//	modeld.PhenomPv2_Param_Transform_reduced(&params);
-	//	//}
-	//	//else {
-	//	//	modeld.PhenomPv2_Param_Transform(&params);
-	//	//}
-	//	status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-	//	std::complex<T> tempPlus,tempCross;
-	//	std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
-	//	std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
-	//	for (int i =0;i < length; i++)
-	//	{
-	//		tempPlus = waveform_plus[i];	
-	//		tempCross = waveform_cross[i];	
-	//		waveform_plus[i] = c2z*tempPlus
-	//				+s2z*tempCross;
-	//		waveform_cross[i] = c2z*tempCross
-	//				-s2z*tempPlus;
-	//	}
-	//}
-	//else if(generation_method == "ppE_IMRPhenomPv2_IMR")
-	//{
-	//	ppE_IMRPhenomPv2_IMR<T> modeld;
-	//	//Initialize Pv2 specific params	
-
-	//	params.betappe = parameters->betappe;
-	//	params.bppe = parameters->bppe;
-	//	params.Nmod = parameters->Nmod;
-	//	//########################################
-	//	if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-	//		params.chip = parameters->chip;
-	//		params.spin1z = parameters->spin1[2];
-	//		params.spin2z = parameters->spin2[2];
-	//		params.phip = parameters->phip;
-	//		modeld.PhenomPv2_Param_Transform_reduced(&params);
-	//	}
-	//	else {
-	//		modeld.PhenomPv2_Param_Transform(&params);
-	//	}
-	//	//Calculate Waveform
-	//	status = modeld.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-	//	std::complex<T> tempPlus,tempCross;
-	//	std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
-	//	std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
-	//	for (int i =0;i < length; i++)
-	//	{
-	//		tempPlus = waveform_plus[i];	
-	//		tempCross = waveform_cross[i];	
-	//		waveform_plus[i] = c2z*tempPlus
-	//				+s2z*tempCross;
-	//		waveform_cross[i] = c2z*tempCross
-	//				-s2z*tempPlus;
-	//	}
-	//}
-	//else if(generation_method == "EdGB_IMRPhenomPv2")
-	//{
-	//	//########################################
-	//	//convert betappe for dCS (alpha**2) to the full betappe
-	//	//dCS only supports one modification
-	//	EdGB_IMRPhenomD<T> EdGB_phenomd;
-	//	params.Nmod = 1;
-	//	params.bppe = new int[1];
-	//	params.bppe[0] = -7;
-	//	params.betappe = new T[1];
-	//	params.betappe[0] = parameters->betappe[0];
-	//	params.betappe[0] = EdGB_phenomd.EdGB_phase_mod(&params);
-	//	//########################################
-
-	//	ppE_IMRPhenomPv2_Inspiral<T> model;
-	//	//Initialize Pv2 specific params	
-
-	//	//########################################
-	//	if((parameters->chip +1)>DOUBLE_COMP_THRESH){
-	//		params.chip = parameters->chip;
-	//		params.spin1z = parameters->spin1[2];
-	//		params.spin2z = parameters->spin2[2];
-	//		params.phip = parameters->phip;
-	//		model.PhenomPv2_Param_Transform_reduced(&params);
-	//	}
-	//	else {
-	//		model.PhenomPv2_Param_Transform(&params);
-	//	}
-	//	//Calculate Waveform
-	//	status = model.construct_waveform(frequencies, length, waveform_plus, waveform_cross, &params);
-	//	std::complex<T> tempPlus,tempCross;
-	//	std::complex<T> c2z = std::complex<T>(cos(2.*params.zeta_polariz));
-	//	std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
-	//	for (int i =0;i < length; i++)
-	//	{
-	//		tempPlus = waveform_plus[i];	
-	//		tempCross = waveform_cross[i];	
-	//		waveform_plus[i] = c2z*tempPlus
-	//				+s2z*tempCross;
-	//		waveform_cross[i] = c2z*tempCross
-	//				-s2z*tempPlus;
-	//	}
-	//	delete [] params.bppe;
-	//	delete [] params.betappe;
-	//}
 
 	return status ;
 }
@@ -511,6 +167,14 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			double *waveform_plus_imag, /**< complex array for the output waveform*/
 			double *waveform_cross_real, /**< complex array for the output waveform*/
 			double *waveform_cross_imag, /**< complex array for the output waveform*/
+			double *waveform_x_real, /**< complex array for the output waveform*/
+			double *waveform_x_imag, /**< complex array for the output waveform*/
+			double *waveform_y_real, /**< complex array for the output waveform*/
+			double *waveform_y_imag, /**< complex array for the output waveform*/
+			double *waveform_b_real, /**< complex array for the output waveform*/
+			double *waveform_b_imag, /**< complex array for the output waveform*/
+			double *waveform_l_real, /**< complex array for the output waveform*/
+			double *waveform_l_imag, /**< complex array for the output waveform*/
 			string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
 			gen_params *parameters/**<structure containing all the source parameters*/
 			)
@@ -519,15 +183,76 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	//std::complex<double> *waveform_cross = (std::complex<double> *)malloc(sizeof(std::complex<double>)*length);
 	std::complex<double> *waveform_plus = new std::complex<double>[length];
 	std::complex<double> *waveform_cross = new std::complex<double>[length];
-	int status = fourier_waveform(frequencies, length, waveform_plus,waveform_cross, generation_method, parameters);
+	std::complex<double> *waveform_x;
+	std::complex<double> *waveform_y;
+	std::complex<double> *waveform_b;
+	std::complex<double> *waveform_l;
+	if(waveform_x_real){
+		waveform_x = new std::complex<double>[length];
+	}
+	if(waveform_y_real){
+		waveform_y = new std::complex<double>[length];
+	}
+	if(waveform_b_real){
+		waveform_b = new std::complex<double>[length];
+	}
+	if(waveform_l_real){
+		waveform_l = new std::complex<double>[length];
+	}
+	waveform_polarizations<double> *wp = new waveform_polarizations<double>;
+	wp->hplus = waveform_plus;
+	wp->hcross = waveform_cross;
+	wp->hx = waveform_x;
+	wp->hy = waveform_y;
+	wp->hb = waveform_b;
+	wp->hl = waveform_l;
+	//int status = fourier_waveform(frequencies, length, waveform_plus,waveform_cross, generation_method, parameters);
+	int status = fourier_waveform(frequencies, length, wp, generation_method, parameters);
 	for(int l = 0 ; l<length;l++){
 		waveform_plus_real[l] = std::real(waveform_plus[l]);
 		waveform_plus_imag[l] = std::imag(waveform_plus[l]);
 		waveform_cross_real[l] = std::real(waveform_cross[l]);
 		waveform_cross_imag[l] = std::imag(waveform_cross[l]);
 	}
+	if(waveform_x_real){
+		for(int l = 0 ; l<length;l++){
+			waveform_x_real[l] = std::real(waveform_x[l]);
+			waveform_x_imag[l] = std::imag(waveform_x[l]);
+		}
+	}
+	if(waveform_y_real){
+		for(int l = 0 ; l<length;l++){
+			waveform_y_real[l] = std::real(waveform_y[l]);
+			waveform_y_imag[l] = std::imag(waveform_y[l]);
+		}
+	}
+	if(waveform_b_real){
+		for(int l = 0 ; l<length;l++){
+			waveform_b_real[l] = std::real(waveform_b[l]);
+			waveform_b_imag[l] = std::imag(waveform_b[l]);
+		}
+	}
+	if(waveform_l_real){
+		for(int l = 0 ; l<length;l++){
+			waveform_l_real[l] = std::real(waveform_l[l]);
+			waveform_l_imag[l] = std::imag(waveform_l[l]);
+		}
+	}
 	delete [] waveform_plus;
 	delete [] waveform_cross;
+	if(waveform_x_real){
+		delete [] waveform_x;
+	}
+	if(waveform_y_real){
+		delete [] waveform_y;
+	}
+	if(waveform_b_real){
+		delete [] waveform_b;
+	}
+	if(waveform_l_real){
+		delete [] waveform_l;
+	}
+	delete wp;
 	return status;
 }
 
@@ -1324,8 +1049,11 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 
 
 
-template int fourier_waveform<double>(double *, int, std::complex<double> *,std::complex<double> *, std::string, gen_params_base<double> *);
-template int fourier_waveform<adouble>(adouble *, int, std::complex<adouble> *,std::complex<adouble> *, std::string, gen_params_base<adouble> *);
+//template int fourier_waveform<double>(double *, int, std::complex<double> *,std::complex<double> *, std::string, gen_params_base<double> *);
+//template int fourier_waveform<adouble>(adouble *, int, std::complex<adouble> *,std::complex<adouble> *, std::string, gen_params_base<adouble> *);
+template int fourier_waveform<double>(double *, int, waveform_polarizations<double> *wp, std::string, gen_params_base<double> *);
+template int fourier_waveform<adouble>(adouble *, int, waveform_polarizations<adouble> *wp, std::string, gen_params_base<adouble> *);
+
 template int fourier_phase<double>(double *, int, double *,double *, std::string, gen_params_base<double> *);
 template int fourier_phase<adouble>(adouble *, int, adouble *,adouble *, std::string, gen_params_base<adouble> *);
 
@@ -1398,6 +1126,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->bppe[i]=mapping.bppe[i];
 			out->betappe[i]=in->betappe[i];
 			temp_beta[i]=mapping.beta_fns[i](out);
+			
 		}
 		for(int i = 0 ; i<out->Nmod; i++){
 			out->betappe[i]=temp_beta[i];
@@ -1422,5 +1151,63 @@ void cleanup_source_parameters(source_parameters<T> *params,std::string generati
 }
 template void cleanup_source_parameters(source_parameters<adouble> *,std::string );
 template void cleanup_source_parameters(source_parameters<double> *,std::string );
+
+template<class T>	
+void waveform_polarizations<T>::allocate_memory(int length)
+{
+	if(this->active_polarizations[0]){
+		this->hplus = new std::complex<T>[length];
+	}	
+	if(this->active_polarizations[1]){
+		this->hcross = new std::complex<T>[length];
+	}	
+	if(this->active_polarizations[2]){
+		this->hx = new std::complex<T>[length];
+	}	
+	if(this->active_polarizations[3]){
+		this->hy = new std::complex<T>[length];
+	}	
+	if(this->active_polarizations[4]){
+		this->hb = new std::complex<T>[length];
+	}	
+	if(this->active_polarizations[5]){
+		this->hl = new std::complex<T>[length];
+	}	
+	return;	
+}	
+template void waveform_polarizations<double>::allocate_memory(int length);
+template void waveform_polarizations<adouble>::allocate_memory(int length);
+	
+template<class T>	
+void waveform_polarizations<T>::deallocate_memory()
+{
+	if(this->hplus){
+		delete [] this->hplus;
+		this->hplus = NULL;
+	}	
+	if(this->hcross){
+		delete [] this->hcross;
+		this->hcross = NULL;
+	}	
+	if(this->hx){
+		delete [] this->hx;
+		this->hx = NULL;
+	}	
+	if(this->hy){
+		delete [] this->hy;
+		this->hy = NULL;
+	}	
+	if(this->hb){
+		delete [] this->hb;
+		this->hb = NULL;
+	}	
+	if(this->hl){
+		delete [] this->hl;
+		this->hl = NULL;
+	}	
+	return;	
+}	
+template void waveform_polarizations<double>::deallocate_memory();
+template void waveform_polarizations<adouble>::deallocate_memory();
 
 

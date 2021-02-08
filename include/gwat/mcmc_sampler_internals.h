@@ -53,6 +53,7 @@ public:
 	bool restrict_swapping=true;
 	//bool restrict_swapping=false;
 	/* Isolating the ensemble means the chains can only swap with those inside their ensemble*/
+	//bool isolate_ensembles=false;
 	bool isolate_ensembles=false;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
