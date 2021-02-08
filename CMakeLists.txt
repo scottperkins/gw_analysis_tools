@@ -47,9 +47,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 include_directories("${PROJECT_BINARY_DIR}/include/gwat")
 #Required packages
-find_package(HDF5 COMPONENTS CXX)
 if(HDF5_FOUND AND IMPLEMENT_HDF5 )
 	add_compile_definitions(_HDF5)
+	find_package(HDF5 COMPONENTS CXX)
 else()
 	message ( "HDF5 is currently required for some MCMC and RJMCMC functionality" )
 endif()
