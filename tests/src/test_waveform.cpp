@@ -10,7 +10,7 @@
 #include <gsl/gsl_complex_math.h>
 
 
-#define _LAL
+//#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -30,8 +30,11 @@
 #endif
 
 int LALSuite_vs_GWAT_WF(int argc, char *argv[]);
+int PNSeries_testing(int argc, char *argv[]);
 int tc_comparison(int argc, char *argv[]);
 int gIMR_testing(int argc, char *argv[]);
+int polarization_testing(int argc, char *argv[]);
+int BHEvaporation_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
 
@@ -60,10 +63,252 @@ int main(int argc, char *argv[])
 			return gIMR_testing(argc,argv);
 		#endif
 	}
+	if(runtime_opt == 3){
+		return PNSeries_testing(argc,argv);
+	}
+	if(runtime_opt == 4){
+		return polarization_testing(argc,argv);
+	}
+	if(runtime_opt == 5){
+		return BHEvaporation_test(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+
+int BHEvaporation_test(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.spin1[1] = .3;
+	params.spin2[1] = .1;
+	params.spin1[0] = .3;
+	params.spin2[0] = .1;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 3.6;
+	params.mass2 = 2.8;
+	params.tc = 0;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	params.Nmod = 1;
+	params.bppe = new double[1];
+	params.bppe[0] = -13;
+	params.betappe = new double[1];
+	//params.betappe[0] = .001;
+	params.betappe[0] = 100;
+	
+	int length = 10000;
+	double freqs[length];
+	double fhigh =10* pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	std::cout<<flow<< " " <<fhigh<<std::endl;
+	double delta_f = (fhigh - flow)/length;
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = flow + delta_f*i;
+	}
+	std::complex<double> responseED[length];
+	std::complex<double> responseBHE[length];
+	double **output = new double*[2];
+	output[0] = new double[length];
+	output[1] = new double[length];
+
+
+	fourier_detector_response(freqs, length, responseED, "Hanford", "ExtraDimension_IMRPhenomPv2",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(responseED[i]);
+		output[1][i] = std::imag(responseED[i]);
+	}
+	write_file("data/ED_waveform.csv",output, 2,length);
+	//################################
+	double Z = Z_from_DL(params.Luminosity_Distance,"PLANCK15");
+	double ten_micrometer = 10.e-6/c;
+	params.betappe[0] = -2.8e-7 * ( pow_int((1+Z) / params.mass1,2)+pow_int((1+Z) / params.mass2,2)) * params.betappe[0]/pow_int(ten_micrometer,2) * MSOL_SEC/T_year;
+
+	fourier_detector_response(freqs, length, responseBHE, "Hanford", "BHEvaporation_IMRPhenomPv2",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(responseBHE[i]);
+		output[1][i] = std::imag(responseBHE[i]);
+	}
+	std::complex<double> ave=0;
+	for (int i = 0 ; i<length ; i++){
+		if (std::abs(responseED[i] ) > 0 || std::abs(responseBHE[i] ) > 0){
+			ave+= std::abs(responseED[i] -  responseBHE[i])*2./(std::abs(responseED[i]) +  std::abs(responseBHE[i]));
+		}
+	}
+	ave/=length;
+	std::cout<<"Average fractional difference: "<<ave<<std::endl;
+	write_file("data/BHE_waveform.csv",output, 2,length);
+	
+	
+	
+
+	delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
+	return 0;
+}
+int polarization_testing(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.spin1[1] = .3;
+	params.spin2[1] = .1;
+	params.spin1[0] = .3;
+	params.spin2[0] = .1;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.theta = 2.;
+	params.phi = -1.1;
+	params.f_ref = 20;
+	params.horizon_coord =false;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 3.6;
+	params.mass2 = 2.8;
+	params.tc = 0;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	
+	int length = 10000;
+	double freqs[length];
+	double fhigh =10* pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	std::cout<<flow<< " " <<fhigh<<std::endl;
+	double delta_f = (fhigh - flow)/length;
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = flow + delta_f*i;
+	}
+	std::complex<double> response[length];
+	double **output = new double*[2];
+	output[0] = new double[length];
+	output[1] = new double[length];
+	
+	fourier_detector_response(freqs, length, response, "Hanford", "polarization_test_IMRPhenomD",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(response[i]);
+		output[1][i] = std::imag(response[i]);
+	}
+	write_file("data/polarization_test.csv",output, 2,length);
+	
+
+	delete [] output[0];delete [] output[1];delete [] output;
+	return 0;
+}
+int PNSeries_testing(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .3;
+	params.spin2[2] = .1;
+	params.spin1[1] = .3;
+	params.spin2[1] = .1;
+	params.spin1[0] = .3;
+	params.spin2[0] = .1;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = false;
+	params.NSflag2 = false;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 3.6;
+	params.mass2 = 2.8;
+	params.tc = 0;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	params.Nmod = 8;
+	params.bppe = new double[8];
+	params.bppe[0] = -7;
+	params.bppe[1] = -5;
+	params.bppe[2] = -4;
+	params.bppe[3] = -3;
+	params.bppe[4] = -2;
+	params.bppe[5] = -1;
+	params.bppe[6] = 1;
+	params.bppe[7] = 2;
+	params.betappe = new double[8];
+	params.betappe[0] = .001;
+	params.betappe[1] = 5;
+	params.betappe[2] = -7;
+	params.betappe[3] = 8;
+	params.betappe[4] = -2;
+	params.betappe[5] = 8;
+	params.betappe[6] = 3;
+	params.betappe[7] = -15;
+	
+	int length = 10000;
+	double freqs[length];
+	double fhigh =10* pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	std::cout<<flow<< " " <<fhigh<<std::endl;
+	double delta_f = (fhigh - flow)/length;
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = flow + delta_f*i;
+	}
+	std::complex<double> response[length];
+	double **output = new double*[2];
+	output[0] = new double[length];
+	output[1] = new double[length];
+
+
+	fourier_detector_response(freqs, length, response, "Hanford", "ppE_IMRPhenomPv2_Inspiral",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(response[i]);
+		output[1][i] = std::imag(response[i]);
+	}
+	write_file("data/PNSeries_Raw_ppE.csv",output, 2,length);
+	//################################
+	for(int i = 1 ; i<8; i++){
+		params.betappe[i] = params.betappe[i]/params.betappe[0];
+		std::cout<<params.betappe[i]<<std::endl;
+	}
+	fourier_detector_response(freqs, length, response, "Hanford", "PNSeries_ppE_IMRPhenomPv2_Inspiral",&params, (double*)NULL);
+	for(int i =0 ; i<length ; i++){
+		output[0][i] = std::real(response[i]);
+		output[1][i] = std::imag(response[i]);
+	}
+	write_file("data/PNSeries_PNS_ppE.csv",output, 2,length);
+	
+	
+	
+
+	delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
+	return 0;
 }
 #ifndef _LAL
 int gIMR_testing(int argc, char *argv[])
@@ -109,7 +354,7 @@ int gIMR_testing(int argc, char *argv[])
 	std::cout<<"Beta: "<<beta<<std::endl;
 	std::cout<<"b: "<<b<<std::endl;
 	params.Nmod = 1;
-	params.bppe = new int[1];
+	params.bppe = new double[1];
 	params.bppe[0] = b;
 	params.betappe = new double[1];
 	params.betappe[0] = beta;
@@ -129,8 +374,13 @@ int gIMR_testing(int argc, char *argv[])
 	std::complex<double> hcg[length];
 	std::complex<double> hpppE[length];
 	std::complex<double> hcppE[length];
-	fourier_waveform(frequency, length, hpg, hcg, "gIMRPhenomPv2",&params);
-	fourier_waveform(frequency, length, hpppE, hcppE, "ppE_IMRPhenomPv2_Inspiral",&params);
+	waveform_polarizations<double> wp;
+	wp.hplus = hpg;	
+	wp.hcross = hcg;	
+	fourier_waveform(frequency, length, &wp, "gIMRPhenomPv2",&params);
+	wp.hplus = hpppE;	
+	wp.hcross = hcppE;	
+	fourier_waveform(frequency, length, &wp, "ppE_IMRPhenomPv2_Inspiral",&params);
 	//fourier_waveform(frequency, length, hpg, hcg, "gIMRPhenomD",&params);
 	//fourier_waveform(frequency, length, hpppE, hcppE, "ppE_IMRPhenomD_Inspiral",&params);
 	for(int i = 0 ; i<length; i++){
@@ -238,7 +488,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 {
 	LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;	
 	std::cout.precision(15);
-	bool P = true;
+	bool P = false;
+	bool NRT = true;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
@@ -258,8 +509,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		else if(k%3 == 2){ DETECTOR = "Livingston";}
 		COMPLEX16FrequencySeries *hptilde=NULL;
 		COMPLEX16FrequencySeries *hctilde=NULL;
-		double alpha[15];
-		for (int j = 0 ; j<15; j++){
+		double alpha[17];
+		for (int j = 0 ; j<17; j++){
 			alpha[j] = gsl_rng_uniform(r);
 		}
 		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
@@ -294,10 +545,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		const REAL8 f_max = .19*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		int length = 4016;
+		//int length = 131072;
 		double deltaf = (f_max-f_min)/(length-1);
 		const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
+		REAL8 lambda1 = alpha[15] ;
+		REAL8 lambda2 = alpha[16] ;
+		//NRTidal_version_type NRT_v=NRTidalv2_V;
 
 		//NRTidal_version_type tidalType= NoNRT_V;
 
@@ -313,7 +568,12 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//XLALSimIMRPhenomP(&hptilde,&hctilde,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,deltaf,f_min,f_max,f_ref, version, extraParams);
 		if(P){
 			//XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version, tidalType,extraParams);
-			XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version,extraParams);
+			if(!NRT){
+				XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version,extraParams);
+			}
+			else{
+				XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, NRT_v,extraParams);
+			}
 			for(int i = 0 ; i<length; i++){
 				gsl_complex tempPlus = (hptilde->data->data)[i];	
 				gsl_complex tempCross = (hctilde->data->data)[i];	
@@ -328,8 +588,12 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			}
 		}
 		else{
-			//XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams,tidalType);
-			XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams);
+			if(!NRT){
+				XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams);
+			}
+			else{
+				XLALSimIMRPhenomDNRTidalFrequencySequence(&hptilde,freqs,phiRef,f_ref,distance,m1_SI,m2_SI,s1z,s2z, lambda1,lambda2,extraParams);
+			}
 			hctilde = XLALCreateCOMPLEX16FrequencySeries("hctilde: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
 			for(int i = 0 ; i<length; i++){
 				gsl_complex f2 = gsl_complex_rect(0.,-cos(incl));
@@ -340,11 +604,23 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			}
 		}
 		COMPLEX16FrequencySeries *det = XLALCreateCOMPLEX16FrequencySeries("det: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
-		double fplus,fcross;
-		double fplusG,fcrossG;
+		double fplus,fcross,fb,fl,fx,fy;
+		double fplusG,fcrossG,fbG,flG,fxG,fyG;
 		XLALComputeDetAMResponse(&fplus,&fcross, LALD.response, RA,DEC,psi,gmst);
-		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &fplusG,&fcrossG);
-		std::cout<<"Fractional error on F+/Fx: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<std::endl;
+		XLALComputeDetAMResponseExtraModes(&fplus,&fcross,&fb,&fl,&fx,&fy, LALD.response, RA,DEC,psi,gmst);
+		
+		det_res_pat<double> r_pat;
+		r_pat.Fplus = &fplusG;
+		r_pat.Fcross = &fcrossG;
+		r_pat.Fx = &fxG;
+		r_pat.Fy = &fyG;
+		r_pat.Fb = &fbG;
+		r_pat.Fl = &flG;
+		bool pol_arr[6] = {true, true, true, true, true, true};
+		r_pat.active_polarizations = &pol_arr[0];
+		
+		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &r_pat);
+		std::cout<<"Fractional error on F+/Fx/Fx/Fy/Fb/Fl: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<(fx-fxG)/fx<<" "<<(fy-fyG)/fy<<" "<<(fb-fbG)/fb<<" "<<(fl-flG)/fl<<" "<<std::endl;
 		for(int i = 0 ; i<length ; i++){
 			(det->data->data)[i]=gsl_complex_add(
 			gsl_complex_mul(gsl_complex_rect(fplus,0.),(hptilde->data->data)[i]),
@@ -381,10 +657,22 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tc = .0 ;
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
-		if(P)
-			method = "IMRPhenomPv2";
-		else 
-			method = "IMRPhenomD";
+		if(P){
+			if(NRT){
+				method = "IMRPhenomPv2_NRT";
+			}
+			else{
+				method = "IMRPhenomPv2";
+			}
+		}
+		else {
+			if(NRT){
+				method = "IMRPhenomD_NRT";
+			}
+			else{
+				method = "IMRPhenomD";
+			}
+		}
 		start =clock();
 
 		fourier_detector_response(frequencies, length, response,DETECTOR, method,&param,(double*)NULL);
@@ -445,4 +733,7 @@ void RT_ERROR_MSG()
 	std::cout<<"0 --- Compare LALSuite vs GWAT"<<std::endl;
 	std::cout<<"1 --- Compare the effect of tc on LISA"<<std::endl;
 	std::cout<<"2 --- test gIMR waveforms"<<std::endl;
+	std::cout<<"3 --- test PNSeries waveforms"<<std::endl;
+	std::cout<<"4 --- test polarizations waveforms"<<std::endl;
+	std::cout<<"5 --- test BHEvaporation waveforms"<<std::endl;
 }
