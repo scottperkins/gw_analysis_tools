@@ -10,7 +10,7 @@
 #include <gsl/gsl_complex_math.h>
 
 
-//#define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -552,7 +552,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		LALDict *extraParams = NULL;
 		REAL8 lambda1 = alpha[15] ;
 		REAL8 lambda2 = alpha[16] ;
-		//NRTidal_version_type NRT_v=NRTidalv2_V;
+		NRTidal_version_type NRT_v=NoNRT_V;
 
 		//NRTidal_version_type tidalType= NoNRT_V;
 
