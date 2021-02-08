@@ -1108,9 +1108,20 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	}
 	
 	if(generation_method.find("NRT") != std::string::npos){
-		out->tidal_weighted = in->tidal_weighted;
-		out->tidal1 = in->tidal1;
-		out->tidal2 = in->tidal2;
+		
+		if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
+			out->tidal_weighted = in->tidal_weighted;
+		}
+		else if((in->tidal1 > 0 && in->tidal2>0) ) {
+			out->tidal1 = in->tidal1;
+			out->tidal2 = in->tidal2;
+			//arXiv 1402.5156
+			out->tidal_weighted = 8./13. * ( (1. + 7.*out->eta - 31.*out->eta*out->eta)*(out->tidal1 + out->tidal2) 
+						+ sqrt( 1. - 4.*out->eta ) * ( 1. + 9.*out->eta - 11. * out->eta*out->eta) * (out->tidal1 - out->tidal2) ) ;
+			out->delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*out->eta ) * ( 1. - 13272./1319. * out->eta + 8944./1319. * out->eta*out->eta) *
+						(out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319. 
+						* out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
+		}
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;

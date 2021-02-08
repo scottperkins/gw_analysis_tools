@@ -108,7 +108,8 @@ public:
         T tidal1=-1;
         /*! tidal deformability of the smaller component*/
         T tidal2=-1;
-	T tidal_weighted=0;
+	T tidal_weighted=-1;
+	T delta_tidal_weighted=-1;
 
 	//Polarization angle
 	T psi =0 ;
@@ -361,11 +362,12 @@ struct source_parameters
 	T thetaJL = -1 ;
 	//######## NRT parameters ###############
 	/*! tidal deformability of the larger component*/
-        T tidal1;
+        T tidal1=-1;
         /*! tidal deformability of the smaller component*/
-        T tidal2;
+        T tidal2=-1;
 	/*! mass-weighted tidal deformability*/
-	T tidal_weighted;
+	T tidal_weighted=-1;
+	T delta_tidal_weighted=-1;
 
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/

@@ -93,7 +93,9 @@ T IMRPhenomD_NRT<T>::amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
 
   T x = pow((M_PI * param->M *f/2.), 2./3.);
   T amp_NRT = -sqrt(5*M_PI*param->eta / 24) * (9 * pow(param->M, 2.0) / param->DL) * (3./16.) * param->tidal_weighted * pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8* pow(x, 4));
-  amp_NRT = amp_NRT/ (param->A0*pow(param->M, 7/6.));
+  //amp_NRT = amp_NRT/ (param->A0*pow(param->M, 7/6.));
+  //SCOTT MODIFIED 
+  amp_NRT = amp_NRT*powers->MF7sixth/ (param->A0*pow(param->M, 7/6.));
 
   ampout += amp_NRT;
   //std::cout<<"amplitude correction:"<<amp_NRT<<"  total amplitude:"<<ampout<<std::endl;

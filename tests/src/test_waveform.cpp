@@ -494,7 +494,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 50;
+	int iterations = 1;
 	double times[iterations][2];
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
@@ -525,7 +525,17 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		REAL8 chip ;
 		REAL8 thetaJ ;
 		REAL8 zeta_polariz ;
-		double tempm1=1+5*alpha[10],tempm2 = 1+5*alpha[11];
+		//double tempm1=1+5*alpha[10],tempm2 = 1+5*alpha[11];
+		double tempm1,tempm2 ;
+		if(NRT){
+			tempm1 = 1+1*alpha[10];
+			tempm2 = 1+1*alpha[11];
+		}
+		else{
+			tempm1 = 1+15*alpha[10];
+			tempm2 = 1+15*alpha[11];
+
+		}
 			
 		REAL8 m1_SI;
 		REAL8 m2_SI;
@@ -550,9 +560,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
-		REAL8 lambda1 = alpha[15] ;
-		REAL8 lambda2 = alpha[16] ;
-		NRTidal_version_type NRT_v=NoNRT_V;
+		REAL8 lambda1 = 100*fabs(alpha[15]) ;
+		REAL8 lambda2 = 100*fabs(alpha[16]) ;
+		NRTidal_version_type NRT_v=NRTidalv2_V;
 
 		//NRTidal_version_type tidalType= NoNRT_V;
 
@@ -569,10 +579,11 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		if(P){
 			//XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version, tidalType,extraParams);
 			if(!NRT){
-				XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version,extraParams);
+				NRT_v = NoNRT_V;
+				XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, version,NRT_v,extraParams);
 			}
 			else{
-				XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, NRT_v,extraParams);
+				//XLALSimIMRPhenomPFrequencySequence(&hptilde,&hctilde,freqs,chi1_l,chi2_l,chip,thetaJ,m1_SI,m2_SI,distance,alpha0,phi_aligned,f_ref, NRT_v,extraParams);
 			}
 			for(int i = 0 ; i<length; i++){
 				gsl_complex tempPlus = (hptilde->data->data)[i];	
@@ -589,10 +600,11 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		}
 		else{
 			if(!NRT){
-				XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams);
+				NRT_v = NoNRT_V;
+				XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams,NRT_v);
 			}
 			else{
-				XLALSimIMRPhenomDNRTidalFrequencySequence(&hptilde,freqs,phiRef,f_ref,distance,m1_SI,m2_SI,s1z,s2z, lambda1,lambda2,extraParams);
+				XLALSimIMRPhenomDNRTidalFrequencySequence(&hptilde,freqs,phiRef,f_ref,distance,m1_SI,m2_SI,s1z,s2z, lambda1,lambda2,extraParams,NRT_v);
 			}
 			hctilde = XLALCreateCOMPLEX16FrequencySeries("hctilde: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
 			for(int i = 0 ; i<length; i++){
@@ -655,6 +667,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.psi = psi;
 		param.gmst = gmst;
 		param.tc = .0 ;
+		param.tidal1 =100*fabs(alpha[15]) ;
+		param.tidal2 =100*fabs(alpha[16]) ;
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
 		if(P){
