@@ -103,9 +103,10 @@ public:
 	/*!coalescence time of the binary*/
 	T tc=0;
 	/*! tidal deformability of the larger component*/
-        T tidal1;
+        T tidal1=-1;
         /*! tidal deformability of the smaller component*/
-        T tidal2;
+        T tidal2=-1;
+	T tidal_weighted=0;
 
 	//Polarization angle
 	T psi =0 ;

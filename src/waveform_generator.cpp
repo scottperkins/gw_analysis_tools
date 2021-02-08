@@ -1378,6 +1378,12 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->Nmod_beta = in->Nmod_beta;
 			out->Nmod_alpha = in->Nmod_alpha;
 	}
+	
+	if(generation_method.find("NRT") != std::string::npos){
+		out->tidal_weighted = in->tidal_weighted;
+		out->tidal1 = in->tidal1;
+		out->tidal2 = in->tidal2;
+	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
 		assign_mapping<T>(generation_method,&mapping,in);
