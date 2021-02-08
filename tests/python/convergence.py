@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #fig = gmcmc.plot_convergence("data/continue_output_injection.hdf5",ac=None,trim=None)
-fig = gmcmc.plot_convergence("data/test.hdf5",ac=None,trim=None)
+fig = gmcmc.plot_convergence("data/gaussian_output_0_.hdf5",ac=None,trim=None)
 ct = 0
 for f in fig:
     plt.figure(f.number)

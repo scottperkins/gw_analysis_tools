@@ -4,5 +4,6 @@ import matplotlib.pyplot  as plt
 dat = np.loadtxt("data/emcee_samples_multi_gaussian.csv",delimiter=',')
 for x in np.arange(len(dat[0])):
     plt.plot(dat[:,x])
-    plt.show()
+    #plt.show()
+    plt.savefig("plots/emcee_trace_{}.pdf".format(x))
     plt.close()

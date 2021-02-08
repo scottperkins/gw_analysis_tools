@@ -41,7 +41,7 @@ from multiprocessing import Pool
 
 with Pool() as pool:
 
-    ndim = 10
+    ndim = 5
     prior_mean = np.loadtxt("data/multi_gaussian_prior_mean.csv",delimiter=',')
     like_mean = np.loadtxt("data/multi_gaussian_like_mean.csv",delimiter=',')
     prior_cov = np.loadtxt("data/multi_gaussian_prior_cov.csv",delimiter=',')
@@ -49,7 +49,7 @@ with Pool() as pool:
     like_fish = np.linalg.inv(like_cov)
     prior_fish = np.linalg.inv(prior_cov)
     
-    nwalkers = 500
+    nwalkers = 200
     #p0 = np.random.rand(nwalkers, ndim)
     p0 = [-(1) * like_mean*np.random.rand(ndim) for x in np.arange(nwalkers)]
     #p0 = [  10*np.diagonal(like_cov)*np.random.rand(ndim) for x in np.arange(nwalkers)]
@@ -57,9 +57,9 @@ with Pool() as pool:
     
     sampler = emcee.EnsembleSampler(nwalkers, ndim, prob, args=[like_fish,prior_fish, like_mean,prior_mean,scale],pool=pool)
     
-    state = sampler.run_mcmc(p0, 5000)
+    state = sampler.run_mcmc(p0, 10000)
     sampler.reset()
-    sampler.run_mcmc(state, 10000,progress=True)
+    sampler.run_mcmc(state, 40000,progress=True)
     tau = np.max(sampler.get_autocorr_time(tol=0))
     print("AC: ",tau)
     samples = sampler.get_chain(flat=True,thin=int(tau))
@@ -67,4 +67,7 @@ with Pool() as pool:
     print("Samples: ",len(samples))
     fig = corner(samples)
     plt.savefig("plots/gaussian_emcee.pdf")
+    plt.close()
+    for x in np.arange(len(samples[0])):
+        print(emcee.autocorr.integrated_time(samples[:,x]))
     

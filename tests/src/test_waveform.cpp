@@ -10,7 +10,7 @@
 #include <gsl/gsl_complex_math.h>
 
 
-#define _LAL
+//#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>

@@ -137,7 +137,9 @@ double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, vo
 			return_val2-= (-multi_gaussian_like_mean[i]-param[i])*(-multi_gaussian_like_mean[j]-param[j])/2*multi_gaussian_like_fisher[i][j];
 		}
 	}
+	//double long_target = -pow(param[0]-30,2)/2 ;
 	return log(exp(return_val1) + exp(return_val2))/multi_gaussian_scale;
+	//return (log(exp(return_val1) + exp(return_val2)+exp(long_target)))/multi_gaussian_scale;
 	//return 1;
 
 }
@@ -154,14 +156,14 @@ void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *
 
 int multiple_continue(int argc, char *argv[])
 {
-	int dimension = 10;	
-	int N_steps = 5000;
-	int chain_N = 200;
-	int max_chain_N_thermo_ensemble = 20;	
+	int dimension = 5;	
+	int N_steps = 2000;
+	int chain_N = 100;
+	int max_chain_N_thermo_ensemble = 10;	
 	double *seeding_var=NULL;
 	double chain_temps[chain_N];
 	int swp_freq = 5;
-	int t0 = 5000;
+	int t0 = 2000;
 	int nu = 100;
 	int max_chunk_size = 100000;	
 	std::string chain_distribution_scheme = "double";
@@ -169,7 +171,7 @@ int multiple_continue(int argc, char *argv[])
 	int numthreads = 10;
 	bool pool = true;
 	bool show_prog = true;
-	std::string modifier="small_E";
+	std::string modifier="";
 	std::string stat_file = "data/gaussian_stat_0_"+modifier+".txt";
 	std::string chain_file = "data/gaussian_output_0_"+modifier+".hdf5";
 	std::string likelihood_file = "data/gaussian_likelihood_0_"+modifier+".csv";
@@ -188,22 +190,22 @@ int multiple_continue(int argc, char *argv[])
 	multi_gaussian_like_mean[2]=2;
 	multi_gaussian_like_mean[3]=1;
 	multi_gaussian_like_mean[4]=2;
-	multi_gaussian_like_mean[5]=3;
-	multi_gaussian_like_mean[6]=2;
-	multi_gaussian_like_mean[7]=8;
-	multi_gaussian_like_mean[8]=9;
-	multi_gaussian_like_mean[9]=2;
+	//multi_gaussian_like_mean[5]=3;
+	//multi_gaussian_like_mean[6]=2;
+	//multi_gaussian_like_mean[7]=8;
+	//multi_gaussian_like_mean[8]=9;
+	//multi_gaussian_like_mean[9]=2;
 	
 	multi_gaussian_prior_mean[0]=0;
 	multi_gaussian_prior_mean[1]=0;
 	multi_gaussian_prior_mean[2]=0;
 	multi_gaussian_prior_mean[3]=0;
 	multi_gaussian_prior_mean[4]=0;
-	multi_gaussian_prior_mean[5]=0;
-	multi_gaussian_prior_mean[6]=0;
-	multi_gaussian_prior_mean[7]=0;
-	multi_gaussian_prior_mean[8]=0;
-	multi_gaussian_prior_mean[9]=0;
+	//multi_gaussian_prior_mean[5]=0;
+	//multi_gaussian_prior_mean[6]=0;
+	//multi_gaussian_prior_mean[7]=0;
+	//multi_gaussian_prior_mean[8]=0;
+	//multi_gaussian_prior_mean[9]=0;
 	for(int i = 0 ; i<dimension; i++){
 		multi_gaussian_prior_cov[i]=new double[dimension];
 		multi_gaussian_like_cov[i]=new double[dimension];
@@ -211,20 +213,35 @@ int multiple_continue(int argc, char *argv[])
 		multi_gaussian_prior_fisher[i]=new double[dimension];
 		for(int j = 0 ; j<dimension; j++){
 			if(j == i){
+				//multi_gaussian_prior_cov[i][j] = 10*multi_gaussian_like_mean[j];
 				multi_gaussian_prior_cov[i][j] = 1000;
 				multi_gaussian_like_cov[i][j] = 1;
 			}
 			else{
 				multi_gaussian_prior_cov[i][j] = 0;
-				multi_gaussian_like_cov[i][j] = pow(-1, j) * .1;
+				multi_gaussian_like_cov[i][j] = pow(-1, j+i) * .8;
+				//multi_gaussian_like_cov[i][j] = 0;
 			}
 		}
 
 	}
 	gsl_LU_matrix_invert(multi_gaussian_prior_cov, multi_gaussian_prior_fisher, dimension);
 	gsl_LU_matrix_invert(multi_gaussian_like_cov, multi_gaussian_like_fisher, dimension);
+	for(int i = 0 ; i<dimension; i++){
+		for(int j = 0 ; j<dimension; j++){
+			std::cout<<multi_gaussian_like_fisher[i][j]<<" ";	
+		}
+		std::cout<<std::endl;
+	
+	}
+	
 
-	double *init_pos = &multi_gaussian_like_mean[0];
+	//double *init_pos = &multi_gaussian_like_mean[0];
+	double *init_pos = new double[dimension];
+	for(int i = 0 ;i<dimension; i++){
+		//init_pos[i] = -10;
+		init_pos[i] = -multi_gaussian_like_mean[i];
+	}
 	write_file("data/multi_gaussian_prior_cov.csv",multi_gaussian_prior_cov,dimension,dimension);
 	write_file("data/multi_gaussian_like_cov.csv",multi_gaussian_like_cov,dimension,dimension);
 	write_file("data/multi_gaussian_like_mean.csv",multi_gaussian_like_mean,dimension);
@@ -255,6 +272,7 @@ int multiple_continue(int argc, char *argv[])
 	delete [] multi_gaussian_prior_fisher;	
 	delete [] multi_gaussian_like_mean;	
 	delete [] multi_gaussian_prior_mean;	
+	delete [] init_pos;
 	return 0;
 }
 
