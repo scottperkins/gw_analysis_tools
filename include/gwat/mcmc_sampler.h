@@ -87,6 +87,7 @@ private:
 void mcmc_step_threaded(int j);
 void mcmc_swap_threaded(int i, int j);
 
+void full_random_swap(sampler *s);
 void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_output *sampler_output,
 	double **output,
 	int **status,

@@ -41,28 +41,31 @@ from multiprocessing import Pool
 
 with Pool() as pool:
 
-    ndim = 5
     prior_mean = np.loadtxt("data/multi_gaussian_prior_mean.csv",delimiter=',')
     like_mean = np.loadtxt("data/multi_gaussian_like_mean.csv",delimiter=',')
     prior_cov = np.loadtxt("data/multi_gaussian_prior_cov.csv",delimiter=',')
     like_cov = np.loadtxt("data/multi_gaussian_like_cov.csv",delimiter=',')
     like_fish = np.linalg.inv(like_cov)
     prior_fish = np.linalg.inv(prior_cov)
+    ndim = len(like_mean)
     
-    nwalkers = 200
-    #p0 = np.random.rand(nwalkers, ndim)
-    p0 = [-(1) * like_mean*np.random.rand(ndim) for x in np.arange(nwalkers)]
+    nwalkers = 100
+    p0 = np.random.rand(nwalkers, ndim)*5-2.5
+    #p0 = [-(1) * like_mean*np.random.rand(ndim) for x in np.arange(nwalkers)]
+    #p0 = [-(1)**x * like_mean+np.random.rand(ndim)-.5 for x in np.arange(nwalkers)]
     #p0 = [  10*np.diagonal(like_cov)*np.random.rand(ndim) for x in np.arange(nwalkers)]
     scale = 1
     
     sampler = emcee.EnsembleSampler(nwalkers, ndim, prob, args=[like_fish,prior_fish, like_mean,prior_mean,scale],pool=pool)
     
-    state = sampler.run_mcmc(p0, 10000)
+    state = sampler.run_mcmc(p0, 1000)
     sampler.reset()
     sampler.run_mcmc(state, 40000,progress=True)
+    #sampler.run_mcmc(p0, nsteps=30000,progress=True)
     tau = np.max(sampler.get_autocorr_time(tol=0))
     print("AC: ",tau)
     samples = sampler.get_chain(flat=True,thin=int(tau))
+    #samples = sampler.get_chain(flat=True)
     np.savetxt("data/emcee_samples_multi_gaussian.csv",samples,delimiter=',')
     print("Samples: ",len(samples))
     fig = corner(samples)

@@ -42,6 +42,8 @@ public:
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
+	double **swap_partners; 
+	bool random_swaps = true;
 	//########
 	double **chain_neighborhoods;
 	int *chain_neighbors;

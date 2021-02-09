@@ -156,13 +156,13 @@ void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *
 
 int multiple_continue(int argc, char *argv[])
 {
-	int dimension = 5;	
+	int dimension = 3;	
 	int N_steps = 2000;
 	int chain_N = 100;
 	int max_chain_N_thermo_ensemble = 10;	
 	double *seeding_var=NULL;
 	double chain_temps[chain_N];
-	int swp_freq = 5;
+	int swp_freq = 10;
 	int t0 = 2000;
 	int nu = 100;
 	int max_chunk_size = 100000;	
@@ -188,24 +188,24 @@ int multiple_continue(int argc, char *argv[])
 	multi_gaussian_like_mean[0]=4;
 	multi_gaussian_like_mean[1]=2;
 	multi_gaussian_like_mean[2]=2;
-	multi_gaussian_like_mean[3]=1;
-	multi_gaussian_like_mean[4]=2;
+	//multi_gaussian_like_mean[3]=1;
+	//multi_gaussian_like_mean[4]=2;
 	//multi_gaussian_like_mean[5]=3;
 	//multi_gaussian_like_mean[6]=2;
-	//multi_gaussian_like_mean[7]=8;
-	//multi_gaussian_like_mean[8]=9;
+	//multi_gaussian_like_mean[7]=4;
+	//multi_gaussian_like_mean[8]=3;
 	//multi_gaussian_like_mean[9]=2;
 	
-	multi_gaussian_prior_mean[0]=0;
-	multi_gaussian_prior_mean[1]=0;
-	multi_gaussian_prior_mean[2]=0;
-	multi_gaussian_prior_mean[3]=0;
-	multi_gaussian_prior_mean[4]=0;
-	//multi_gaussian_prior_mean[5]=0;
-	//multi_gaussian_prior_mean[6]=0;
-	//multi_gaussian_prior_mean[7]=0;
-	//multi_gaussian_prior_mean[8]=0;
-	//multi_gaussian_prior_mean[9]=0;
+	multi_gaussian_prior_mean[0]=4;
+	multi_gaussian_prior_mean[1]=2;
+	multi_gaussian_prior_mean[2]=2;
+	//multi_gaussian_prior_mean[3]=1;
+	//multi_gaussian_prior_mean[4]=2;
+	//multi_gaussian_prior_mean[5]=3;
+	//multi_gaussian_prior_mean[6]=2;
+	//multi_gaussian_prior_mean[7]=4;
+	//multi_gaussian_prior_mean[8]=3;
+	//multi_gaussian_prior_mean[9]=2;
 	for(int i = 0 ; i<dimension; i++){
 		multi_gaussian_prior_cov[i]=new double[dimension];
 		multi_gaussian_like_cov[i]=new double[dimension];
@@ -213,8 +213,8 @@ int multiple_continue(int argc, char *argv[])
 		multi_gaussian_prior_fisher[i]=new double[dimension];
 		for(int j = 0 ; j<dimension; j++){
 			if(j == i){
-				//multi_gaussian_prior_cov[i][j] = 10*multi_gaussian_like_mean[j];
-				multi_gaussian_prior_cov[i][j] = 1000;
+				multi_gaussian_prior_cov[i][j] = 25*multi_gaussian_like_mean[j];
+				//multi_gaussian_prior_cov[i][j] = 1000;
 				multi_gaussian_like_cov[i][j] = 1;
 			}
 			else{

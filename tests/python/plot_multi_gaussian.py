@@ -7,7 +7,7 @@ import emcee
 lab=np.arange(10)
 
 
-data = gmcmc.trim_thin_file("data/gaussian_output_0_.hdf5",ac=None,trim=None,recalc_ac=False)
+data = gmcmc.trim_thin_file("data/gaussian_output_0_.hdf5",ac=None,trim=None,recalc_ac=True)
 print(np.std(data[:,0]))
 L1 = len(data)
 print(len(data))

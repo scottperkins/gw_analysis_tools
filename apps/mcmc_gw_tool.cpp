@@ -380,7 +380,8 @@ int main(int argc, char *argv[])
 		}
 		
 	}
-	bool pool = true;
+	bool pool = false;
+	debugger_print(__FILE__,__LINE__,"NOT POOLING");
 	bool show_progress = true;
 	MCMC_modification_struct mod_struct;
 	mod_struct.ppE_Nmod = Nmod;
@@ -572,7 +573,7 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	//###########
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
@@ -606,7 +607,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	//###########
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
@@ -638,7 +639,7 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc
@@ -673,7 +674,7 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 
 	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
-	if ((pos[2])<0 || (pos[2])>2*M_PI){return a;}//PSI
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	//if ((pos[5])<T_mcmc_gw_tool*3./4. -.1 || (pos[5])>3.*T_mcmc_gw_tool/4. + .1){return a;}//tc

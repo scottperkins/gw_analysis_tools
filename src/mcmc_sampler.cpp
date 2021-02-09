@@ -3582,6 +3582,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	double ac_save;
 	int max_search_iterations = 3;
 	int search_iterations_ct = 0;
+	int spct=0;
 	while(status<N_steps){
 		if(realloc || status>realloc_temps_thresh){
 		//if(false){
@@ -3617,12 +3618,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			relax=true;
 			init=true;
 		}
-		double harvest_pool = true;
+		double harvest_pool = pool;
 		sampler sampler;
+
 		continue_PTMCMC_MH_internal(&sampler, checkpoint_file,temp_output, temp_length, 
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, harvest_pool, internal_prog, statistics_filename, 
 			"", checkpoint_file,false,false);
+		debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
+		spct++;
 
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 		sampler_output->populate_chain_temperatures(chain_temps);
@@ -5243,7 +5248,12 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 				//TEST
 				double alpha = gsl_rng_uniform(samplerptr->rvec[0]);
 				if(alpha< samplerptr->swap_rate){
-					chain_swap(samplerptr, samplerptr->output, samplerptr->param_status,samplerptr->model_status,k, &swp_accepted, &swp_rejected);
+					if(samplerptr->random_swaps){
+						full_random_swap(samplerptr);
+					}
+					else{
+						chain_swap(samplerptr, samplerptr->output, samplerptr->param_status,samplerptr->model_status,k, &swp_accepted, &swp_rejected);
+					}
 				}
 				if(samplerptr->show_progress)
 					printProgress((double)samplerptr->progress/samplerptr->N_steps);	
@@ -5285,7 +5295,8 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 					//else if(fabs(samplerptr->chain_temps[i] -1)>DOUBLE_COMP_THRESH){
 
 						samplerptr->waiting[i]=false;
-						samplerptr->priority[i] = 2;
+						//TESTING
+						//samplerptr->priority[i] = 2;
 						int pos = samplerptr->chain_pos[i];
 						for (int k =0; k<samplerptr->dimension; k++){
 							samplerptr->output[i][0][k] = 
@@ -5404,8 +5415,14 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 				int swp_accepted=0, swp_rejected=0;
 				double alpha = gsl_rng_uniform(samplerptr->rvec[0]);
 				if(alpha< samplerptr->swap_rate){
-					chain_swap(samplerptr, samplerptr->output, samplerptr->param_status,samplerptr->model_status,k, &swp_accepted, &swp_rejected);
+					if(samplerptr->random_swaps){
+						full_random_swap(samplerptr);
+					}
+					else{
+						chain_swap(samplerptr, samplerptr->output, samplerptr->param_status,samplerptr->model_status,k, &swp_accepted, &swp_rejected);
+					}
 				}
+
 				if(samplerptr->show_progress)
 					printProgress((double)k/samplerptr->N_steps);	
 			}
@@ -5450,7 +5467,8 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 
 						samplerptr->waiting[i]=false;
 						//std::cout<<"Chain "<<i<<" finished-- being reset"<<std::endl;
-						samplerptr->priority[i] = 2;
+						//TESTING
+						//samplerptr->priority[i] = 2;
 
 
 
@@ -5508,6 +5526,32 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 	}
 }
 
+void full_random_swap(sampler *s)
+{
+	//debugger_print(__FILE__,__LINE__,"Started swap");
+	ThreadPool pool(s->num_threads);
+	poolptr = &pool;
+	std::vector<int> ids;
+	int ct = 0 ;
+	for(int i =0 ; i<s->chain_N; i++){
+		ids.insert(ids.begin()+i,i);
+		ct++;
+	}
+	int alpha;
+	while(ids.size()>0){
+		alpha=(int)(gsl_rng_uniform(s->rvec[0])*ids.size());
+		poolptr->enqueue_swap(ids.at(alpha));	
+		ids.erase(ids.begin()+alpha);
+	}
+	
+	//poolptr->flush_swap_queue();
+	int pairs = poolptr->queue_pairs_length();
+	while(pairs > 0  ){
+		pairs = poolptr->queue_pairs_length();
+		usleep(1e2);
+	}
+	//debugger_print(__FILE__,__LINE__,"Finished swap");
+}
 
 //######################################################################################
 //######################################################################################
