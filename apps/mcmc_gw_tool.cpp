@@ -380,8 +380,13 @@ int main(int argc, char *argv[])
 		}
 		
 	}
-	bool pool = false;
-	debugger_print(__FILE__,__LINE__,"NOT POOLING");
+	bool pool = true;
+	if(pool){
+		debugger_print(__FILE__,__LINE__,"POOLING");
+	}
+	else{
+		debugger_print(__FILE__,__LINE__,"NOT POOLING");
+	}
 	bool show_progress = true;
 	MCMC_modification_struct mod_struct;
 	mod_struct.ppE_Nmod = Nmod;
