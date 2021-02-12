@@ -1,5 +1,6 @@
 #include <iostream>
 #include "waveform_generator.h"
+#include "TaylorT2.h"
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
@@ -18,6 +19,50 @@ using namespace std;
  * 
  * Builds a waveform for given DETECTOR FRAME parameters
  */
+
+template<class T>
+int time_waveform(T *times, /**< double array of frequencies for the waveform to be evaluated at*/
+	int length,/**<integer length of all the arrays*/
+	waveform_polarizations<T> *wp,/**< [out] Output waveforms by polarization*/
+	string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+	gen_params_base<T> *parameters/**<structure containing all the source parameters*/
+	)
+{
+	int status=1;
+	bool NSflag1 = parameters->NSflag1;
+	bool NSflag2 = parameters->NSflag2;
+
+
+	source_parameters<T> params;
+	
+	std::string local_method = prep_source_parameters(&params, parameters,generation_method);
+	if(local_method.find("Taylor")!=std::string::npos)
+	{
+		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		if(local_method == "TaylorT2")
+		{
+			TaylorT2<T> T2model;
+			status = T2model.construct_waveform(times, length, wp->hplus,wp->hcross, &params);
+
+		}
+	}
+	if(check_extra_polarizations(generation_method))
+	{
+		//TESTING MUST FIX
+		for (int i =0;i < length; i++)
+		{
+			wp->hx[i] = wp->hplus[i];
+			wp->hy[i] = wp->hplus[i];
+			wp->hb[i] = wp->hplus[i];
+			wp->hl[i] = wp->hplus[i];
+		}
+	}
+	cleanup_source_parameters(&params,generation_method);
+
+	return status ;
+}
+
+
 
 /*!\brief Function to produce the plus/cross polarizations of an quasi-circular binary
  *
@@ -1057,6 +1102,9 @@ template int fourier_waveform<adouble>(adouble *, int, waveform_polarizations<ad
 template int fourier_phase<double>(double *, int, double *,double *, std::string, gen_params_base<double> *);
 template int fourier_phase<adouble>(adouble *, int, adouble *,adouble *, std::string, gen_params_base<adouble> *);
 
+template int time_waveform<double>(double *, int, waveform_polarizations<double> *wp, std::string, gen_params_base<double> *);
+template int time_waveform<adouble>(adouble *, int, waveform_polarizations<adouble> *wp, std::string, gen_params_base<adouble> *);
+
 
 template<class T>
 std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method){
@@ -1128,6 +1176,9 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		delete [] temp_beta;
 		local_method = mapping.ppE_method;
 		deallocate_mapping(&mapping);
+	}
+	if(generation_method.find("TaylorT2") != std::string::npos){
+		out->x0 = in->x0;
 	}
 	return local_method;
 }

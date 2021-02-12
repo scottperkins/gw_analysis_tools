@@ -91,6 +91,7 @@ template<class T>
 class gen_params_base
 {
 public:	
+	T x0 = 1;
 	std::string cosmology="PLANCK15";
 	/*!mass of the larger body in Solar Masses*/
 	T mass1;
@@ -346,6 +347,8 @@ struct source_parameters
 	T thetaJN;
 
 	T zeta_polariz;
+
+	T x0 = 1;
 
 	//#####################################
 	T chi1_p = 0;

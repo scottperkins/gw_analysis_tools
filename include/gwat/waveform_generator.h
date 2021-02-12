@@ -30,12 +30,17 @@ public:
 	void deallocate_memory();
 };
 
+template<class T>
+int time_waveform(T *times, 
+	int length,
+	waveform_polarizations<T> *wp,
+	std::string generation_method,
+	gen_params_base<T> *parameters
+	);
 template<class  T>
 int fourier_waveform(T *frequencies, 
 			int length,
 			waveform_polarizations<T> *wp,
-			//std::complex<T> *waveform_plus, 
-			//std::complex<T> *waveform_cross, 
 			std::string generation_method,
 			gen_params_base<T> *parameters
 			);
