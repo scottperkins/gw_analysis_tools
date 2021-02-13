@@ -38,7 +38,7 @@ int time_waveform(T *times, /**< double array of frequencies for the waveform to
 	std::string local_method = prep_source_parameters(&params, parameters,generation_method);
 	if(local_method.find("Taylor")!=std::string::npos)
 	{
-		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		//std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
 		if(local_method == "TaylorT2")
 		{
 			TaylorT2<T> T2model;

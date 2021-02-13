@@ -142,6 +142,7 @@ class gen_params:
     Nmod=0
     bppe=[]
     betappe=[]
+    x0 = 0
     obj=None
 
     
@@ -231,6 +232,8 @@ class gen_params:
             self.Nmod = kwargs["Nmod"] 
         if "bppe" in kwargs:
             self.bppe = kwargs["bppe"] 
+        if "x0" in kwargs:
+            self.x0 = kwargs["x0"] 
         if "betappe" in kwargs:
             self.betappe = kwargs["betappe"] 
         spin_array_type = 3*ctypes.c_double

@@ -18,28 +18,70 @@
  */
 template <class T>
 int TaylorT2<T>::construct_waveform(T *times, /**< T array of frequencies the waveform is to be evaluated at*/
-				int length, /**< integer length of the array of frequencies and the waveform*/	
-				std::complex<T> *hplus,/**< complex T array for the waveform to be output*/ 
-				std::complex<T> *hcross,/**< complex T array for the waveform to be output*/ 
-				source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
-				)
+	int length, /**< integer length of the array of frequencies and the waveform*/	
+	std::complex<T> *hplus,/**< complex T array for the waveform to be output*/ 
+	std::complex<T> *hcross,/**< complex T array for the waveform to be output*/ 
+	source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
+	)
 {
+	T omega0 = 1;
+	T mu = params->mass1 * params->mass2 / params->M;
 	for (int i = 0 ; i<length ; i++){
-		T theta = 1;
-		T x = 1;
-		T phi = 1;
-		T psi = 1;
-		hplus[i] = 1;
-		hcross[i] = 1;
+		T theta = THETA(times[i], params);
+		T x = X(theta, params);
+		T phi = PHI(x, params);
+		T gamma = GAMMA(x,params);
+		T MADM = M_ADM(gamma, params);
+		T omega = pow(x,3./2.) / MADM;
+		T psi = phi - 2 * params->M * omega * log(omega/omega0);
+		contract_H(x,psi,params, &hplus[i], &hcross[i]) ;
+		hplus[i]*= mu * x / params->DL;
+		hcross[i]*= mu * x / params->DL;
 	}
 	return 1;
 }
 
+template<class T>
+T TaylorT2<T>::GAMMA(T x, source_parameters<T> *params)
+{
+	T eta = params->eta;
+	T out =   1 ;
+	out+= ( 1 - eta/3.) * x ;
+	out+= ( 1. - 65./12. * eta ) *x * x;
+	//out+= (1 + ( -2203. / 2520. - 41. / 192. * M_PI * M_PI - 22./3. * log(r/r0))*eta + 229./36. * eta * eta + 1./81. * eta*eta*eta) * x *x *x;
+	out*= x;
+	return out;
+}
+
+template<class T> 
+void TaylorT2<T>::contract_H(T x, T psi, source_parameters<T> *params, std::complex<T> *hplus, std::complex<T> *hcross)
+{
+	T ci = cos(params->incl_angle);
+	T si = sin(params->incl_angle);
+	T cp = cos(2.*psi);
+	T sp = sin(2.*psi);
+
+	T rootx = sqrt(x);
+
+	*hplus = 0;
+	*hplus += (-(1. + ci*ci) * cp - 1. / 96. * si*si * ( 17. + ci*ci))  ;//p = 0
+
+	*hcross = 0;
+	*hcross += -2. * ci * sp  ;//p = 0
+
+}
+
+template<class T>
+T TaylorT2<T>::M_ADM(T gamma, source_parameters<T> *params)
+{
+	T eta = params->eta;
+	return params->M*(1 - eta/2. * gamma + eta / 8. * ( 7 - eta) * gamma * gamma);
+}
 
 /*! \brief phi function from 318 1310.1528 
  */
 template<class T>
-std::complex<T> TaylorT2<T>::phi(T x , source_parameters<T> *params)
+T TaylorT2<T>::PHI(T x , source_parameters<T> *params)
 {
 	T x_2 = sqrt(x);
 	T x_3_2 = x * x_2;
@@ -64,7 +106,7 @@ std::complex<T> TaylorT2<T>::phi(T x , source_parameters<T> *params)
 /*! \brief x function from 316 1310.1528 
  */
 template<class T>
-std::complex<T> TaylorT2<T>::x(T theta , source_parameters<T> *params)
+T TaylorT2<T>::X(T theta , source_parameters<T> *params)
 {
 	T theta_8 = pow(theta, 1./8.);
 	T theta_4 = theta_8*theta_8;
@@ -74,7 +116,6 @@ std::complex<T> TaylorT2<T>::x(T theta , source_parameters<T> *params)
 	T theta_3_4 = theta_5_8*theta_8;
 	T theta_7_8 = theta_3_4*theta_8;
 	T eta = params->eta;
-
 	
 	T out = 0;
 	out+= 1;
@@ -93,9 +134,9 @@ std::complex<T> TaylorT2<T>::x(T theta , source_parameters<T> *params)
 /*! \brief Theta function from 315 1310.1528 
  */
 template<class T>
-std::complex<T> TaylorT2<T>::THETA(T time, source_parameters<T> *params)
+T TaylorT2<T>::THETA(T time, source_parameters<T> *params)
 {
-	T out = params->eta * time / params->M;
+	T out = params->eta * (-1)*time / params->M;
 	return out;
 }
 

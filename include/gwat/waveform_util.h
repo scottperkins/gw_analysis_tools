@@ -97,6 +97,15 @@ int fourier_detector_response_horizon(T *frequencies,
 	T phi, 
 	T psi, 
 	std::string detector);
+
+template<class T>
+int time_detector_response_horizon(T *times, 
+	int length,
+	std::complex<T> *response, 
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters
+	);
 template<class T>
 int fourier_detector_response_horizon(T *frequencies, 
 	int length,
@@ -122,6 +131,14 @@ int fourier_detector_response_equatorial(T *frequencies,
 	std::string detector);
 
 template<class T>
+int time_detector_response_equatorial(T *times, 
+	int length,
+	std::complex<T> *response, 
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters
+	);
+template<class T>
 int fourier_detector_response_equatorial(T *frequencies, 
 	int length,
 	std::complex<T> *response, 
@@ -138,6 +155,14 @@ int fourier_detector_response_equatorial(T *frequencies,
 	gen_params_base<T> *parameters,
 	T *times
 	);
+
+template<class T>
+int time_detector_response(T *times,
+	int length,
+	std::complex<T> *response,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters);
 
 template<class T>
 int fourier_detector_response(T *frequencies,

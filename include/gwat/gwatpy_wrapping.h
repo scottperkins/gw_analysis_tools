@@ -59,11 +59,36 @@ void repack_parameters_py(
 	gen_params_base<double> *gen_param, 
 	char * generation_method, 
 	int dim );
+
+int time_detector_response_py(double *times,
+	int length, 
+	double  *response_real,
+	double  *response_imaginary,
+	char * detector,
+	char *generation_method, 
+	gen_params_base<double> *parameters);
 int fourier_detector_response_py(double *frequencies,
 	int length, 
 	double  *response_real,
 	double  *response_imaginary,
 	char * detector,
+	char *generation_method, 
+	gen_params_base<double> *parameters);
+
+int time_waveform_full_py(double *times,
+	int length, 
+	double  *wf_plus_real,
+	double  *wf_plus_imaginary,
+	double  *wf_cross_real,
+	double  *wf_cross_imaginary,
+	double  *wf_x_real,
+	double  *wf_x_imaginary,
+	double  *wf_y_real,
+	double  *wf_y_imaginary,
+	double  *wf_b_real,
+	double  *wf_b_imaginary,
+	double  *wf_l_real,
+	double  *wf_l_imaginary,
 	char *generation_method, 
 	gen_params_base<double> *parameters);
 

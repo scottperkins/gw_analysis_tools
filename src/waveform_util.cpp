@@ -514,6 +514,44 @@ int fourier_detector_response_horizon(T *frequencies, /**<array of frequencies c
 	return status;
 	
 }
+template<class T>
+int time_detector_response_horizon(T *times, /**< double array of frequencies for the waveform to be evaluated at*/
+	int length,/**<integer length of all the arrays*/
+	std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
+	std::string detector,
+	std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+	gen_params_base<T> *parameters/**<structure containing all the source parameters*/
+	)
+{
+	int status = 1;
+	//generate waveform
+	waveform_polarizations<T> wp;
+	assign_polarizations(generation_method, &wp);
+	wp.allocate_memory(length);
+
+	status = time_waveform(times, 
+			length,
+			&wp,
+			generation_method,
+			parameters
+			);
+	//Not sure why horizon needs frequencies?? 
+	status = fourier_detector_response_horizon((T *)NULL, 
+			length, 
+			&wp,
+			response, 
+			parameters->theta, 
+			parameters->phi, 
+			parameters->psi, 
+			detector 
+			) ;
+	
+		
+	//Deallocate memory
+	wp.deallocate_memory();
+
+	return status;
+}
 
 /*!\brief Function to produce the detector response caused by impinging gravitational waves from a quasi-circular binary
  *
@@ -563,6 +601,7 @@ int fourier_detector_response_horizon(T *frequencies, /**< double array of frequ
 
 	return status;
 }
+
 /* \brief calculates the detector response for a given waveform and detector -- using equatorial coordinates and greenwich mean sidereal time
  */
 template<class T>
@@ -827,6 +866,85 @@ int fourier_detector_response_equatorial(T *frequencies, /**< double array of fr
 
 	return status;
 }
+
+template<class T>
+int time_detector_response_equatorial(T *times, /**< double array of frequencies for the waveform to be evaluated at*/ 
+			int length,/**<integer length of all the arrays*/
+			std::complex<T> *response, /**< [out] complex array for the output plus polarization waveform*/
+			std::string detector,
+			std::string generation_method,/**<String that corresponds to the generation method - MUST BE SPELLED EXACTLY*/
+			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
+			)
+{
+	int status = 1;
+	if(detector=="LISA"){
+		debugger_print(__FILE__,__LINE__,"LISA is not supported for TD waveforms because of doppler shift issues");
+		return 1;
+	}
+	//generate waveform
+	if(parameters->equatorial_orientation){
+		transform_orientation_coords(parameters, generation_method,detector);
+	}
+	else{
+		if(detector=="LISA"){
+			std::cout<<"ERROR -- fourier_detector_response_equatorial -- LISA currently only accepts equatorial_orientation parameters"<<std::endl;
+		}
+	}
+	waveform_polarizations<T> wp;
+	assign_polarizations(generation_method, &wp);
+	wp.allocate_memory(length);
+	status = time_waveform(times, 
+			length,
+			&wp,	
+			generation_method,
+			parameters
+			);
+	//Nothing changes in fourier_detector_response_equatorial for time waveforms except for 
+	//LISA's doppler shift
+	status = fourier_detector_response_equatorial((T *)NULL, 
+			length, 
+			&wp,
+			response, 
+			parameters->RA, 
+			parameters->DEC, 
+			parameters->psi, 
+			parameters->gmst, 
+			times,
+			parameters->LISA_alpha0,
+			parameters->LISA_phi0,
+			parameters->theta_j_ecl,
+			parameters->phi_j_ecl,
+			detector 
+			) ;
+	
+		
+	//Deallocate memory
+	wp.deallocate_memory();
+
+	return status;
+}
+template<class T>
+int time_detector_response(T *times,
+	int length,
+	std::complex<T> *response,
+	std::string detector,
+	std::string generation_method,
+	gen_params_base<T> *parameters
+	)
+{
+	int status;
+	if(parameters->horizon_coord){
+		status=time_detector_response_horizon(times, length, response, detector, generation_method, parameters);
+	}
+	else{
+		status=time_detector_response_equatorial(times, length, response, detector, generation_method, parameters);
+
+	}
+	return status;
+
+}
+template int time_detector_response<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double> *);
+template int time_detector_response<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble> *);
 
 /*! \brief Wrapper to handle all detector_response calls -- horizon and equatorial
  *
@@ -3274,6 +3392,13 @@ template int fourier_detector_response_horizon<adouble>(adouble *, int, waveform
 //
 template int fourier_detector_response_horizon<double>(double *, int, waveform_polarizations<double> *, std::complex<double> *, double, double, double, std::string);
 template int fourier_detector_response_horizon<adouble>(adouble *, int, waveform_polarizations<adouble> *, std::complex<adouble> *, adouble, adouble, adouble, std::string);
+//
+//
+template int time_detector_response_horizon<double>(double *, int, std::complex<double> *, std::string, std::string, gen_params_base<double>*);
+template int time_detector_response_horizon<adouble>(adouble *, int, std::complex<adouble> *, std::string, std::string, gen_params_base<adouble>*);
+//
+template int time_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *);
+template int time_detector_response_equatorial<adouble>(adouble *, int , std::complex<adouble> *,std::string, std::string, gen_params_base<adouble> *);
 //
 //
 template int fourier_detector_response_equatorial<double>(double *, int , std::complex<double> *,std::string, std::string, gen_params_base<double> *);

@@ -21,11 +21,18 @@ public:
 
 virtual int construct_waveform(T *times, int length, std::complex<T> *hplus, std::complex<T> *hcross, source_parameters<T> *params);
 
-virtual std::complex<T> THETA(T time, source_parameters<T> *params);
+virtual T THETA(T time, source_parameters<T> *params);
 
-virtual std::complex<T> x(T theta , source_parameters<T> *params);
+virtual T X(T theta , source_parameters<T> *params);
 
-virtual std::complex<T> phi(T theta , source_parameters<T> *params);
+virtual T PHI(T theta , source_parameters<T> *params);
+
+virtual T GAMMA(T x, source_parameters<T> *params);
+
+virtual T M_ADM(T gamma, source_parameters<T> *params);
+
+virtual void contract_H(T x, T psi, source_parameters<T> *params, std::complex<T> *hplus, std::complex<T> *hcross);
+
 
 };
 //###########################################################################

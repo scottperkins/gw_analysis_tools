@@ -3,6 +3,7 @@
 #include "gwat/detector_util.h"
 #include "gwat/waveform_util.h"
 #include "gwat/pn_waveform_util.h"
+#include "gwat/TaylorT2.h"
 //#include "gwat/IMRPhenomD.h"
 #include "gwat/io_util.h"
 #include <iostream>
@@ -29,6 +30,7 @@
 	#include "gwat/gIMRPhenomP.h"
 #endif
 
+int time_domain_testing(int argc, char *argv[]);
 int LALSuite_vs_GWAT_WF(int argc, char *argv[]);
 int PNSeries_testing(int argc, char *argv[]);
 int tc_comparison(int argc, char *argv[]);
@@ -72,12 +74,53 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 5){
 		return BHEvaporation_test(argc,argv);
 	}
+	if(runtime_opt == 6){
+		return time_domain_testing(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
 
+int time_domain_testing(int argc, char *argv[])
+{
+
+	gen_params p ;
+	p.mass1 = 20;
+	p.mass2 = 10;
+	p.Luminosity_Distance = 100;
+	p.x0 = 1;
+	p.incl_angle = 0;
+	p.RA = .1;
+	p.DEC = .1;
+	p.psi = .1;
+	p.phi = .1;
+	p.theta = .1;
+	p.horizon_coord=false;
+	p.gmst= .21;
+	
+	int length = 1000;
+	std::complex<double> *hplus = new std::complex<double>[length];
+	std::complex<double> *hcross = new std::complex<double>[length];
+	std::complex<double> *response = new std::complex<double>[length];
+	
+	waveform_polarizations<double> wp;
+	wp.hplus = hplus;	
+	wp.hcross = hcross;	
+	double times[length]; 
+	for(int i=0 ; i<length; i++){
+		times[i] = -100 + 90*i/length;
+	}
+	time_waveform(times, length, &wp, "TaylorT2", &p);	
+	time_detector_response(times, length, response, "Hanford", "TaylorT2", &p);	
+	
+	delete[] hplus;
+	delete[] hcross;
+	delete[] response;
+
+	return 0;
+}
 int BHEvaporation_test(int argc, char *argv[])
 {
 	gen_params params;	
@@ -724,4 +767,5 @@ void RT_ERROR_MSG()
 	std::cout<<"3 --- test PNSeries waveforms"<<std::endl;
 	std::cout<<"4 --- test polarizations waveforms"<<std::endl;
 	std::cout<<"5 --- test BHEvaporation waveforms"<<std::endl;
+	std::cout<<"6 --- test time domain waveforms"<<std::endl;
 }
