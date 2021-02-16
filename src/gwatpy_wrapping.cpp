@@ -1,5 +1,6 @@
 #include "gwatpy_wrapping.h"
 #include "util.h"
+#include "detector_util.h"
 #include "fisher.h"
 #include "waveform_generator.h"
 #include "waveform_util.h"
@@ -10,6 +11,15 @@
 #include <bits/stdc++.h> 
 
 
+
+double DTOA_DETECTOR_py(double RA, double DEC, double GMST_rad, char *det1, char *det2)
+{
+	std::string d1(det1); 
+	std::string d2(det2); 
+	double DTOA = DTOA_DETECTOR(RA,DEC,GMST_rad, d1,d2);
+
+	return DTOA;
+}
 
 
 mcmc_data_interface * mcmc_data_interface_py(

@@ -12,6 +12,8 @@ extern "C"
 {
 #endif
 
+double DTOA_DETECTOR_py(double RA, double DEC, double GMST_rad, char *det1, char *det2);
+
 void mcmc_data_interface_destructor_py(mcmc_data_interface *interface);
 mcmc_data_interface * mcmc_data_interface_py(
 	int min_dim,

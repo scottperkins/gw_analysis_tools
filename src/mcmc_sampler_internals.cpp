@@ -1346,7 +1346,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->fish_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
-	sampler->swap_partners = new double*[sampler->chain_N];
+	sampler->swap_partners = new int*[sampler->chain_N];
 	if(sampler->update_RJ_width){
 		sampler->RJstep_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 		sampler->RJstep_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1397,7 +1397,7 @@ void allocate_sampler_mem(sampler *sampler)
 	//#############
 	for (i =0; i<sampler->chain_N; i++)
 	{
-		sampler->swap_partners[i] = new double[sampler->chain_N];
+		sampler->swap_partners[i] = new int[sampler->chain_N];
 		for(int j = 0 ; j<sampler->chain_N;j++){
 			sampler->swap_partners[i][j] = 0 ;
 		}

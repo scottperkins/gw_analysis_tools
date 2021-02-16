@@ -3682,9 +3682,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, harvest_pool, internal_prog, statistics_filename, 
 			"", checkpoint_file,false,false);
-		debugger_print(__FILE__,__LINE__,"Writing out swap partners");
-		write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
-		spct++;
+		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		//write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
+		//spct++;
 
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 		sampler_output->populate_chain_temperatures(chain_temps);

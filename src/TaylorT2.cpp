@@ -24,7 +24,7 @@ int TaylorT2<T>::construct_waveform(T *times, /**< T array of frequencies the wa
 	source_parameters<T> *params /*Structure of source parameters to be initialized before computation*/
 	)
 {
-	T omega0 = 1;
+	T omega0 = pow(params->x0,3./2.)/params->M;
 	T mu = params->mass1 * params->mass2 / params->M;
 	for (int i = 0 ; i<length ; i++){
 		T theta = THETA(times[i], params);
@@ -32,11 +32,12 @@ int TaylorT2<T>::construct_waveform(T *times, /**< T array of frequencies the wa
 		T phi = PHI(x, params);
 		T gamma = GAMMA(x,params);
 		T MADM = M_ADM(gamma, params);
-		T omega = pow(x,3./2.) / MADM;
-		T psi = phi - 2 * params->M * omega * log(omega/omega0);
+		//T omega = pow(x,3./2.) / MADM;
+		T omega = pow(x,3./2.)/params->M ;
+		T psi = phi - 2 * MADM * omega * log(omega/omega0);
 		contract_H(x,psi,params, &hplus[i], &hcross[i]) ;
-		hplus[i]*= mu * x / params->DL;
-		hcross[i]*= mu * x / params->DL;
+		hplus[i]*= 2*mu * x / params->DL;
+		hcross[i]*= 2*mu * x / params->DL;
 	}
 	return 1;
 }

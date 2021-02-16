@@ -4,6 +4,25 @@ import gwatpy.config as cf
 
 rlib = ctypes.cdll.LoadLibrary(cf.LIB)
 
+###############################################
+rlib.DTOA_DETECTOR_py.argtypes = \
+    [ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_char_p,
+    ctypes.c_char_p,
+]
+rlib.DTOA_DETECTOR_py.restype = ctypes.c_double
+###############################################
+
+def DTOA_DETECTOR_py( RA, DEC, GMST_rad, detector1, detector2):
+    returnval = rlib.DTOA_DETECTOR_py(
+        RA,
+        DEC,
+        GMST_rad,
+        detector1.encode('utf-8'),
+        detector2.encode('utf-8'))
+    return returnval
 def populate_noise_py(frequencies,detector, length, integration_time):
     f=rlib.populate_noise_py
     f.argtypes=[\

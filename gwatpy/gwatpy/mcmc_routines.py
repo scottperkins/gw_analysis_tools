@@ -423,7 +423,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
     dt = T / len(freqs)
     times = np.linspace(0,T, len(freqs))
 
-    N = 1000
+    N = 100
 
     ax = None
     fig = None

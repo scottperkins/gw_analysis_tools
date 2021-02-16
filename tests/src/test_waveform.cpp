@@ -86,11 +86,12 @@ int main(int argc, char *argv[])
 int time_domain_testing(int argc, char *argv[])
 {
 
+	//#############################################################################
 	gen_params p ;
 	p.mass1 = 20;
 	p.mass2 = 10;
 	p.Luminosity_Distance = 100;
-	p.x0 = 1;
+	p.x0 = pow((p.mass1+p.mass2)*MSOL_SEC*10,2./3.);
 	p.incl_angle = 0;
 	p.RA = .1;
 	p.DEC = .1;

@@ -526,6 +526,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 			int psd_length,/**< Length of the PSD file (number of rows of DATA)*/
 			int data_file_length,/**< Length of the data file (number of rows of DATA)*/
 			double trigger_time, /**< Time for the signal trigger (GPS)*/
+			double post_merger_duration, /**< Time after trigger to end the data*/
 			std::complex<double> **data,/**<[out] Output array of data for each detector*/
 			double **psds,/**<[out] Output array of psds for each detector */
 			double **freqs/**<[out] Output array of freqs for each detector*/
@@ -537,6 +538,9 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	for(int i =0; i< num_detectors ; i++){
 		read_LOSC_data_file(data_files[i],temp_data[i], &file_start, &duration, &fs);
 	}	
+	debugger_print(__FILE__,__LINE__,"File initial GPS: "+std::to_string(file_start));
+	debugger_print(__FILE__,__LINE__,"Data file duration: "+std::to_string(duration));
+	debugger_print(__FILE__,__LINE__,"Data file sampling frequency: "+std::to_string(fs));
 
 	//Read in frequencies and PSDs from files
 	double **temp_psds = allocate_2D_array( psd_length,num_detectors+1);
@@ -560,14 +564,22 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 		times_untrimmed[i] = file_start + i*dt;
 	}
 
-	double time_start = trigger_time - Tobs*3./4.;
-	double time_end = trigger_time + Tobs/4.;
+	double time_start = trigger_time - (Tobs-post_merger_duration);
+	double time_end = trigger_time + (post_merger_duration);
+	//double time_start = trigger_time - Tobs*3./4.;
+	//double time_end = trigger_time + Tobs/4.;
 	
 	//Shift for times longer than 8 -- no more than 2 seconds longer than merger
-	if(Tobs > 8 ){
-		time_start = trigger_time - (Tobs - 2);
-		time_end = trigger_time +  2;
+	//if(Tobs > 8 ){
+	//	time_start = trigger_time - (Tobs - 2);
+	//	time_end = trigger_time +  2;
+	//}
+
+	if(time_start < file_start || time_end > (file_start+duration) ){
+		debugger_print(__FILE__,__LINE__,"ERROR -- trigger time does not fit inside data file!");
+		return;
 	}
+
 	debugger_print(__FILE__,__LINE__,"Start,End: "+std::to_string(time_start)+","+std::to_string(time_end));
 	double **data_trimmed = allocate_2D_array(num_detectors, N_trimmed);
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);

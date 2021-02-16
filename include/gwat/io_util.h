@@ -41,6 +41,7 @@ void allocate_LOSC_data(std::string *data_files,
 			int psd_length,
 			int data_file_length,
 			double trigger_time,
+			double post_merger_duration,
 			std::complex<double> **data,
 			double **psds,
 			double **freqs

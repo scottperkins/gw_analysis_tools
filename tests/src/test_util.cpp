@@ -16,11 +16,12 @@ int HDF5_testing_write(int argc,char *argv[]);
 int time_delay_testing(int argc,char *argv[]);
 int matrix_multiplication(int argc,char *argv[]);
 int vector_union_test(int argc,char *argv[]);
+int GPS_to_GMST(int argc,char *argv[]);
 void RT_ERROR_MSG();
 int main(int argc, char *argv[])
 {
 	std::cout<<"TESTING UTILITY FUNCTIONS"<<std::endl;
-	if(argc != 2){
+	if(argc < 2){
 		RT_ERROR_MSG();
 		return 1;
 	}
@@ -41,10 +42,26 @@ int main(int argc, char *argv[])
 	else if(runtime_opt == 4){
 		return vector_union_test(argc,argv);	
 	}
+	else if(runtime_opt == 5){
+		return GPS_to_GMST(argc,argv);	
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int GPS_to_GMST(int argc,char *argv[])
+{
+	if (argc != 3){
+		std::cout<<"Supply GPS time!"<<std::endl;
+		return 1;
+	}
+	double gps = std::stod(argv[2]);	
+		
+	std::cout<<"In radian: "<<gps_to_GMST_radian(gps)<<std::endl;
+	std::cout<<"In hours: "<<gps_to_GMST(gps)<<std::endl;
+	return 0;
+
 }
 int vector_union_test(int argc,char *argv[])
 {
@@ -162,4 +179,5 @@ void RT_ERROR_MSG()
 	std::cout<<"2 --- Test Time Delay "<<std::endl;
 	std::cout<<"3 --- Matrix Multiplication "<<std::endl;
 	std::cout<<"4 --- Vector Union "<<std::endl;
+	std::cout<<"5 --- GPS to GMST "<<std::endl;
 }

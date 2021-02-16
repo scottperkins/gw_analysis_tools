@@ -171,7 +171,13 @@ int main(int argc, char *argv[])
 		data[i] = (std::complex<double>*)malloc(sizeof(std::complex<double>)*psd_length);
 	}
 
-	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time, data, psd, freqs);
+	double post_merger_duration = 2;
+	if( dbl_dict.find("Post merger signal duration") != dbl_dict.end()){
+		post_merger_duration = dbl_dict["Post merger signal duration"];
+	}
+	std::cout<<"Poster merger signal duration: "<<post_merger_duration<<std::endl;
+
+	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time,post_merger_duration, data, psd, freqs);
 	std::cout<<"DATA loaded"<<std::endl;
 
 	T_mcmc_gw_tool = 1./(freqs[0][2]-freqs[0][1]);

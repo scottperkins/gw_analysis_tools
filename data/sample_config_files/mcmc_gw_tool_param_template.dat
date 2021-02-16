@@ -51,6 +51,8 @@
 [str] output data file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test2.csv
 #Output statistics file -- will be txt
 [str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test_stat2.txt
+#Amount of time (in seconds) to include post trigger
+[dbl] Post merger signal duration = 2
 #############################################################
 #Dimension of the parameter space
 [int] dimension =7
