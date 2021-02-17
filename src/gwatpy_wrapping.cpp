@@ -4,6 +4,7 @@
 #include "fisher.h"
 #include "waveform_generator.h"
 #include "waveform_util.h"
+#include "pn_waveform_util.h"
 #include "mcmc_gw.h"
 #include "mcmc_sampler.h"
 #include "mcmc_sampler_internals.h"
@@ -11,6 +12,14 @@
 #include <bits/stdc++.h> 
 
 
+double t_0PN_py(double f, double chirpmass)
+{
+	return t_0PN(f,chirpmass);
+}
+double f_0PN_py(double t, double chirpmass)
+{
+	return f_0PN(t,chirpmass);
+}
 
 double DTOA_DETECTOR_py(double RA, double DEC, double GMST_rad, char *det1, char *det2)
 {

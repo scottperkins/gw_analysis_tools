@@ -30,7 +30,7 @@ ELSE( ADOLC_FOUND )
 		   ${INC_SEARCH_LIST}
 		   )
            
-  string(REPLACE ":" ";" LIB_SEARCH_LIST $ENV{LIBRARY_PATH})
+  string(REPLACE ":" ";" LIB_SEARCH_LIST "$ENV{LIBRARY_PATH}")
   FIND_LIBRARY(ADOLC_LIBRARY adolc
                 HINTS "$ENV{ADOLC_HOME}/lib64"
                       "/usr/lib" 

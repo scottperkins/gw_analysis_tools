@@ -48,7 +48,7 @@ T TaylorT2<T>::GAMMA(T x, source_parameters<T> *params)
 	T eta = params->eta;
 	T out =   1 ;
 	out+= ( 1 - eta/3.) * x ;
-	out+= ( 1. - 65./12. * eta ) *x * x;
+	//out+= ( 1. - 65./12. * eta ) *x * x;
 	//out+= (1 + ( -2203. / 2520. - 41. / 192. * M_PI * M_PI - 22./3. * log(r/r0))*eta + 229./36. * eta * eta + 1./81. * eta*eta*eta) * x *x *x;
 	out*= x;
 	return out;
@@ -76,7 +76,8 @@ template<class T>
 T TaylorT2<T>::M_ADM(T gamma, source_parameters<T> *params)
 {
 	T eta = params->eta;
-	return params->M*(1 - eta/2. * gamma + eta / 8. * ( 7 - eta) * gamma * gamma);
+	//return params->M*(1 - eta/2. * gamma + eta / 8. * ( 7 - eta) * gamma * gamma);
+	return params->M*(1 - eta/2. * gamma );
 }
 
 /*! \brief phi function from 318 1310.1528 
@@ -95,11 +96,11 @@ T TaylorT2<T>::PHI(T x , source_parameters<T> *params)
 	T out = 0;
 	out += 1;
 	out+= ( 3715./1008. + 55./12. * eta) * x;
-	out+= -10. * M_PI * x_3_2;
-	out += ( 15293365. / 1016064. + 27145. / 1008. * eta + 3085. / 144. * eta * eta ) * x2;
-	out += ( 38645. / 1344. - 65. / 16. * eta) * M_PI * x_5_2 * log(x/params->x0);
-	out += ( 12348611926451. / 18776862720. - 160. / 3. * M_PI * M_PI  - 1712./21. * gamma_E - 856. / 21. * log(16.*x) + ( -15737765635. / 12192768. + 2255. / 48. * M_PI * M_PI ) * eta + 76055./6912. * eta * eta - 127825. / 5184. * eta * eta * eta) * x3;
-	out += (77096675. / 2032128. + 378515. / 12096. * eta - 74045./6048. * eta * eta) * M_PI * x_7_2;
+	//out+= -10. * M_PI * x_3_2;
+	//out += ( 15293365. / 1016064. + 27145. / 1008. * eta + 3085. / 144. * eta * eta ) * x2;
+	//out += ( 38645. / 1344. - 65. / 16. * eta) * M_PI * x_5_2 * log(x/params->x0);
+	//out += ( 12348611926451. / 18776862720. - 160. / 3. * M_PI * M_PI  - 1712./21. * gamma_E - 856. / 21. * log(16.*x) + ( -15737765635. / 12192768. + 2255. / 48. * M_PI * M_PI ) * eta + 76055./6912. * eta * eta - 127825. / 5184. * eta * eta * eta) * x3;
+	//out += (77096675. / 2032128. + 378515. / 12096. * eta - 74045./6048. * eta * eta) * M_PI * x_7_2;
 	out *= - 1./ 32. / eta / x_5_2;
 	return out;	
 }
@@ -121,11 +122,11 @@ T TaylorT2<T>::X(T theta , source_parameters<T> *params)
 	T out = 0;
 	out+= 1;
 	out+= (743./4032. + 11./48. * eta) /theta_4;	
-	out+= (-1./5.) *M_PI / theta_3_8;
-	out+= (19583./254016.  + 24401./193536. * eta + 31./288. * eta*eta ) / theta_2;
-	out += (-11891./53760. + 109./1920. * eta) *M_PI / theta_5_8;
-	out += (-10052469856691./6008596070400. + 1./6. * M_PI * M_PI + 107./420. * gamma_E - 107./3360. * log(theta/256.) + (3147553127./780337152. - 451. / 3072. *M_PI * M_PI) * eta - 15211./442368. * eta*eta + 25565./331776. * eta * eta * eta) / theta_3_4;
-	out += (-113868647./433520640. - 31821./143360. * eta + 294941./3870720. * eta * eta ) * M_PI / theta_7_8;
+	//out+= (-1./5.) *M_PI / theta_3_8;
+	//out+= (19583./254016.  + 24401./193536. * eta + 31./288. * eta*eta ) / theta_2;
+	//out += (-11891./53760. + 109./1920. * eta) *M_PI / theta_5_8;
+	//out += (-10052469856691./6008596070400. + 1./6. * M_PI * M_PI + 107./420. * gamma_E - 107./3360. * log(theta/256.) + (3147553127./780337152. - 451. / 3072. *M_PI * M_PI) * eta - 15211./442368. * eta*eta + 25565./331776. * eta * eta * eta) / theta_3_4;
+	//out += (-113868647./433520640. - 31821./143360. * eta + 294941./3870720. * eta * eta ) * M_PI / theta_7_8;
 	out *= 1./4. * 1./theta_4 ;
 
 	//T term1 = 
@@ -137,7 +138,7 @@ T TaylorT2<T>::X(T theta , source_parameters<T> *params)
 template<class T>
 T TaylorT2<T>::THETA(T time, source_parameters<T> *params)
 {
-	T out = params->eta * (-1)*time / params->M;
+	T out = params->eta * (-1)*time / params->M/ 5;
 	return out;
 }
 

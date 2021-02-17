@@ -50,6 +50,17 @@ rlib.gen_params_base_py.argtypes = \
 ]
 rlib.gen_params_base_py.restype = ctypes.c_void_p
 
+
+rlib.t_0PN_py.argtypes = \
+    [ctypes.c_double,
+    ctypes.c_double]
+rlib.t_0PN_py.restype = ctypes.c_double
+
+rlib.f_0PN_py.argtypes = \
+    [ctypes.c_double,
+    ctypes.c_double]
+rlib.f_0PN_py.restype = ctypes.c_double
+
 rlib.gen_params_base_py_destructor.argtypes = [ctypes.c_void_p]
 rlib.gen_params_base_py_destructor.restype = ctypes.c_void_p
 
@@ -58,12 +69,18 @@ rlib.gen_params_base_py_destructor.restype = ctypes.c_void_p
 c = 299792458.
 T_year = 31557600.
 MPC_SEC = 3.085677581491367278913937957796471611e22/c
+MSOL_SEC = 4.925491025543575903411922162094833998e-6
 def calculate_chirpmass_py(mass1,mass2):
     f=rlib.calculate_chirpmass_py
     f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
     cm = ctypes.c_double()
     f(ctypes.c_double(mass1),ctypes.c_double(mass2),ctypes.byref(cm))
     return(cm.value)
+
+def t_0PN_py(f ,chirpmass):
+    return rlib.t_0PN_py(f,chirpmass)
+def f_0PN_py(t ,chirpmass):
+    return rlib.f_0PN_py(t,chirpmass)
 
 def calculate_eta_py(mass1,mass2):
     f=rlib.calculate_eta_py
