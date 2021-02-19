@@ -592,6 +592,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	//double alpha = 0.5; //Standard alpha choice
 	//double alpha = 0.5/32.; //Standard alpha choice
 	tukey_window(window,N_trimmed, alpha);
+	//hann_window(window,N_trimmed);
 	//Trim data to Tobs, and apply tukey windowing for fft
 	int l=0 ;
 	for (int i =0; i<N; i ++){

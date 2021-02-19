@@ -1619,6 +1619,12 @@ void deallocate_3D_array(int ***array, int dim1, int dim2, int dim3)
 }
 
 
+void hann_window(double *window,int length){
+	for (int i = 0 ; i<length; i++){
+		window[i] = 0.5 * ( 1 - std::cos(2 * M_PI * i / length));
+	}
+}
+
 /*! \brief Tukey window function for FFTs
  *
  * As defined by https://en.wikipedia.org/wiki/Window_function

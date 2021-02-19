@@ -492,6 +492,7 @@ int*** allocate_3D_array_int( int dim1, int dim2, int dim3);
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3);
 void deallocate_3D_array(int ***array, int dim1, int dim2, int dim3);
 
+void hann_window(double *window,int length);
 void tukey_window(double *window,
 		int length,
 		double alpha);
