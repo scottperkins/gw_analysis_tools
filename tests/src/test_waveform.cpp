@@ -511,7 +511,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		COMPLEX16FrequencySeries *hctilde=NULL;
 		double alpha[17];
 		for (int j = 0 ; j<17; j++){
-			alpha[j] = gsl_rng_uniform(r);
+		  //alpha[j] = 0.1; 
+		  alpha[j] = gsl_rng_uniform(r);
 		}
 		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
 		const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6;
@@ -560,6 +561,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
+		//alpha[15] = 0.0;
+		//alpha[16] = 0.0; 
 		REAL8 lambda1 = 100*fabs(alpha[15]) ;
 		REAL8 lambda2 = 100*fabs(alpha[16]) ;
 		NRTidal_version_type NRT_v=NRTidalv2_V;
@@ -668,7 +671,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.gmst = gmst;
 		param.tc = .0 ;
 		param.tidal1 =100*fabs(alpha[15]) ;
+		//param.tidal1 = 0.0 ;
 		param.tidal2 =100*fabs(alpha[16]) ;
+		//param.tidal2 = 0.0 ;
+		//param.tidal_weighted = 0.0;
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
 		if(P){
@@ -687,6 +693,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 				method = "IMRPhenomD";
 			}
 		}
+		std::cout<<"method:"<<method<<std::endl; 
 		start =clock();
 
 		fourier_detector_response(frequencies, length, response,DETECTOR, method,&param,(double*)NULL);

@@ -14,14 +14,18 @@ template<class T>
 class IMRPhenomD_NRT: public IMRPhenomD<T>
 {
 public:
-  virtual T Pade(T f, source_parameters<T> *param, char deriv); 
+  virtual T Pade(T f, source_parameters<T> *param, char deriv);
   
-virtual T phase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *pow); 
-virtual T Dphase_ins(T r, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda); 
+  virtual T phase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *pow); 
+  virtual T Dphase_ins(T r, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda); 
 
-virtual T amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
+  virtual T amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
                         lambda_parameters<T> *lambda,useful_powers<T> *pow);
-virtual T Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda);
+  virtual T Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda);
+ 
+  virtual int construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params);
+  
+  virtual T taper(T f, int length, source_parameters<T> *params); 
 
 };
 
@@ -30,7 +34,7 @@ virtual T Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_paramet
 /*!Numerically calibrated coefficients of Pade approximant (PNRTidal_v2) 
  *from arXiv:1905.06011 equations 19, 20, and 21.
  */
-const double c_NRT[4] = {3115./1248, -M_PI, 28024205./3302208., -4283.* M_PI/1092.};
+const double c_NRT[4] = {3115./1248., -M_PI, 28024205./3302208., -4283.* M_PI/1092.};
 const double d_NRT[3]={-15.111208, -(c_NRT[3] + (c_NRT[1] * d_NRT[0]) - 90.550822)/c_NRT[0], 8.0641096};
 const double n_NRT[5]={c_NRT[0] + d_NRT[0], ((c_NRT[0] * c_NRT[1]) - c_NRT[3] - (c_NRT[1] * d_NRT[0]) + 90.550822)/c_NRT[0], c_NRT[2] + (c_NRT[0] * d_NRT[0]) + d_NRT[2], 90.550822, -60.253578};
 

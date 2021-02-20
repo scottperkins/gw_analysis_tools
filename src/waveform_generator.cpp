@@ -5,6 +5,8 @@
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "gIMRPhenomD.h"
+#include "IMRPhenomD_NRT.h"
+#include "IMRPhenomP_NRT.h"
 #include "ppE_utilities.h"
 #include "gIMRPhenomP.h"
 #include "util.h"
@@ -58,6 +60,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
 			)
 {
+    std::cout<<"Entered fourier_waveform function"<<std::endl; 
+
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -93,8 +97,14 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		{
 			gIMRPhenomD<T> gmodeld;
 			status = gmodeld.construct_waveform(frequencies, length, wp->hplus, &params);
-
+			
 		}
+		else if(local_method == "IMRPhenomD_NRT")
+		  {
+		    IMRPhenomD_NRT<T> modeldNRT;
+		    status = modeldNRT.construct_waveform(frequencies, length, wp->hplus, &params);
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_waveform(frequencies, length, wp->hplus, &params);
@@ -124,6 +134,12 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			status = gmodel.construct_waveform(frequencies, length, wp->hplus,wp->hcross, &params);
 
 		}
+		else if(local_method == "IMRPhenomPv2_NRT")
+		  {
+		    IMRPhenomPv2_NRT<T> modelNRT;
+		    status = modelNRT.construct_waveform(frequencies, length, wp->hplus, wp->hcross, &params);
+		    
+		  }
 		else{
 			IMRPhenomPv2<T> model;
 			status = model.construct_waveform(frequencies, length, wp->hplus, wp->hcross, &params);
@@ -356,6 +372,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
 	}
+	else if(generation_method == "IMRPhenomD_NRT")
+	  {
+	    IMRPhenomD_NRT<double> modeldNRT;
+	    status = modeldNRT.construct_waveform(frequencies, length, waveform, &params);	
+
+	  }
 	//else if(generation_method == "IMRPhenomPv2")
 	//{
 	//	IMRPhenomPv2<double> modeld;
@@ -398,6 +420,7 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 			gen_params_base<T> *parameters
 			)
 {
+  std::cout<<"Entered fourier_amplitude function"<<std::endl; 
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -435,9 +458,16 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 			status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 
 		}
+		else if(local_method == "IMRPhenomD_NRT")
+		  {
+		    IMRPhenomD_NRT<T> modeldNRT;
+		    status = modeldNRT.construct_amplitude(frequencies, length, amplitude, &params);
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
-			status = modeld.construct_amplitude(frequencies, length, amplitude, &params);	
+			status = modeld.construct_amplitude(frequencies, length, amplitude, &params);
+
 		}
 	}
 	cleanup_source_parameters(&params,generation_method);
@@ -520,6 +550,8 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			gen_params_base<T> *parameters
 			)
 {
+    std::cout<<"Entered fourier_phase function"<<std::endl; 
+
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -629,6 +661,13 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 	}
+	else if(generation_method == "IMRPhenomD_NRT")
+	  {
+	    IMRPhenomD_NRT<T> modeldNRT;
+	    params.tidal1 = parameters->tidal1; //Is this right?!?
+	    params.tidal2 = parameters->tidal2; 
+	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);	
+	  }
 
 	return status ;
 }
@@ -682,6 +721,12 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);	
 
 		}
+		else if(local_method == "IMRPhenomD_NRT")
+		  {
+		    IMRPhenomD_NRT<T> modeldNRT;
+		    status = modeldNRT.construct_phase(frequencies, length, phase_plus, &params);	
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_phase(frequencies, length, phase_plus, &params);	
@@ -712,6 +757,12 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			status = gmodel.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
 
 		}
+		else if(local_method == "IMRPhenomPv2_NRT")
+		  {
+		    IMRPhenomPv2_NRT<T> modelNRT;
+		    status = modelNRT.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
+
+		  }
 		else{
 			IMRPhenomPv2<T> model;
 			status = model.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
