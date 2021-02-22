@@ -416,6 +416,9 @@ int main(int argc, char *argv[])
 		}
 		
 		double *seeding_var = NULL;
+		double **ensemble_initial_position = NULL;
+		int **ensemble_initial_status = NULL;
+		int **ensemble_initial_model_status = NULL;
 		std::cout<<"Running uncorrelated sampler "<<std::endl;
 		mcmc_sampler_output sampler_output(chain_N, max_dimension,nested_model_number);
 		sampler_output.RJ = true;
@@ -423,7 +426,7 @@ int main(int argc, char *argv[])
 		
 		RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 				&sampler_output,output, status, model_status,nested_model_number, max_dimension, min_dimension,samples, chain_N, 
-				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,mod_priors,chain_temps, 
+				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,ensemble_initial_position,ensemble_initial_model_status,ensemble_initial_model_status,mod_priors,chain_temps, 
 				swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,

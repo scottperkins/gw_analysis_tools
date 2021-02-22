@@ -852,6 +852,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -920,7 +921,8 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	else
 		local_seeding = false;
 
-	PTMCMC_method_specific_prep("SkySearch", dimension, seeding_var, local_seeding);
+	double **seeding_var_ptr = &seeding_var;
+	PTMCMC_method_specific_prep("SkySearch", dimension, seeding_var_ptr, local_seeding);
 
 	skysearch_params p;
 	p.hplus = hplus;
@@ -941,7 +943,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
-		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
+		max_chain_N_thermo_ensemble,initial_pos,seeding_var,ensemble_initial_pos, chain_temps, 
 		swp_freq, t0, nu,max_chunk_size,chain_distribution_scheme,
 		//log_prior,MCMC_likelihood_wrapper_SKYSEARCH, MCMC_fisher_wrapper_SKYSEARCH,(void **)P,numThreads, pool, 
 		log_prior,MCMC_likelihood_wrapper_SKYSEARCH, NULL,(void **)P,numThreads, pool, 
@@ -1032,6 +1034,7 @@ void PTMCMC_MH_GW(double ***output,
 	int chain_N,
 	double *initial_pos,
 	double *seeding_var,	
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
@@ -1101,9 +1104,10 @@ void PTMCMC_MH_GW(double ***output,
 		local_seeding = true;
 	else
 		local_seeding = false;
-	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+	double **seeding_var_ptr = &seeding_var;
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var_ptr, local_seeding);
 
-	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var, chain_temps, swp_freq,
+	PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,ensemble_initial_pos, chain_temps, swp_freq,
 		 log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, show_prog,statistics_filename,
 		 //log_prior,MCMC_likelihood_wrapper, NULL,user_parameters,numThreads, pool, show_prog,statistics_filename,
 		chain_filename, checkpoint_file);
@@ -1194,7 +1198,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 
 	bool local_seeding=false;
 	double *seeding_var=NULL;
-	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+	double **seeding_var_ptr = &seeding_var;
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var_ptr, local_seeding);
 	//######################################################
 	int T = (int)(1./(mcmc_frequencies[0][1]-mcmc_frequencies[0][0]));
 	debugger_print(__FILE__,__LINE__,T);
@@ -1313,6 +1318,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 		delete [] fish_psd;
 	}
 	delete [] burn_data;
+	delete [] burn_lengths;
 	delete [] burn_noise;
 	delete [] burn_freqs;
 	delete [] burn_plans;
@@ -1338,6 +1344,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -1403,14 +1410,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	}
 
 	bool local_seeding ;
-	if(!seeding_var)
+	if(!seeding_var){
 		local_seeding = true;
-	else
+	}
+	else{
 		local_seeding = false;
+	}
 
-	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
-
-
+	double **seeding_var_ptr = &seeding_var;
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var_ptr, local_seeding);
+	
 	//######################################################
 	int T = (int)(1./(mcmc_frequencies[0][1]-mcmc_frequencies[0][0]));
 	debugger_print(__FILE__,__LINE__,T);
@@ -1500,7 +1509,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
-		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
+		max_chain_N_thermo_ensemble,initial_pos,seeding_var,ensemble_initial_pos, chain_temps, 
 		swp_freq, t0, nu,max_chunk_size,chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
 		//log_prior,MCMC_likelihood_wrapper, NULL,(void **)user_parameters,numThreads, pool, 
@@ -1526,6 +1535,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		delete [] fish_psd;
 	}
 	delete [] burn_data;
+	delete [] burn_lengths;
 	delete [] burn_noise;
 	delete [] burn_freqs;
 	delete [] burn_plans;
@@ -1553,6 +1563,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -1619,10 +1630,11 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	else
 		local_seeding = false;
 
-	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var, local_seeding);
+	double **seeding_var_ptr = &seeding_var;
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var_ptr, local_seeding);
 
 	PTMCMC_MH_dynamic_PT_alloc(output, dimension, N_steps, chain_N, 
-		max_chain_N_thermo_ensemble,initial_pos,seeding_var, chain_temps, 
+		max_chain_N_thermo_ensemble,initial_pos,seeding_var,ensemble_initial_pos, chain_temps, 
 		swp_freq, t0, nu, chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
 		//log_prior,MCMC_likelihood_wrapper, NULL,numThreads, pool, 
@@ -1710,7 +1722,8 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 
 	bool local_seeding=false ;
 
-	PTMCMC_method_specific_prep(generation_method, dimension, NULL, local_seeding);
+	double **seeding_var_ptr = NULL;
+	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var_ptr, local_seeding);
 
 	continue_PTMCMC_MH(start_checkpoint_file,output, N_steps,swp_freq,log_prior,
 			MCMC_likelihood_wrapper, MCMC_fisher_wrapper,user_parameters,numThreads, pool, 
@@ -1727,30 +1740,30 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
  *
  * Populates seeding vector if non supplied, populates mcmc_Nmod, populates mcmc_log_beta, populates mcmc_intrinsic
  */
-void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding)
+void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double **seeding_var, bool local_seeding)
 {
 	if(dimension==4 && generation_method =="IMRPhenomD"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=.5;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.5;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
 		}
 		mcmc_intrinsic=true;
 	}
 	else if(generation_method =="SkySearch"){
 		std::cout<<"Sampling in parameters: "<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1;
-			seeding_var[1]=.3;
-			seeding_var[2]=1.;
-			seeding_var[3]=1.;
-			seeding_var[4]=1.;
-			seeding_var[5]=1.;
-			seeding_var[6]=1.;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1;
+			(*seeding_var)[1]=.3;
+			(*seeding_var)[2]=1.;
+			(*seeding_var)[3]=1.;
+			(*seeding_var)[4]=1.;
+			(*seeding_var)[5]=1.;
+			(*seeding_var)[6]=1.;
 		}
 		mcmc_intrinsic=false;
 	}
@@ -1758,37 +1771,37 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
 		mcmc_intrinsic=false;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=.1;
-			seeding_var[1]=.1;
-			seeding_var[2]=.1;
-			seeding_var[3]=.1;
-			seeding_var[4]=.5;
-			seeding_var[5]=.1;
-			seeding_var[6]=.1;
-			seeding_var[7]=.1;
-			seeding_var[8]=.1;
-			seeding_var[9]=.1;
-			seeding_var[10]=.5;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.1;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=.5;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=.1;
+			(*seeding_var)[7]=.1;
+			(*seeding_var)[8]=.1;
+			(*seeding_var)[9]=.1;
+			(*seeding_var)[10]=.5;
 		}
 	}
 	else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
 		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1;
 		}
 	}
 	//Sampling parameter is root alpha in km
@@ -1796,19 +1809,19 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1;
 		}
 	}
 	else if(dimension==13 && 
@@ -1816,43 +1829,43 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		mcmc_mod_struct->ppE_Nmod = 2;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km), gamma (generic 1PN term)"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1;
-			seeding_var[12]=1;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1;
+			(*seeding_var)[12]=1;
 		}
 	}
 	else if(dimension==16 && generation_method =="dCS_IMRPhenomPv2"){
 		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1.;
-			seeding_var[12]=1.;
-			seeding_var[13]=1.;
-			seeding_var[14]=1.;
-			seeding_var[15]=1.;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1.;
+			(*seeding_var)[12]=1.;
+			(*seeding_var)[13]=1.;
+			(*seeding_var)[14]=1.;
+			(*seeding_var)[15]=1.;
 		}
 	}
 	//Sampling parameter is root alpha in km
@@ -1860,23 +1873,23 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		mcmc_mod_struct->ppE_Nmod = 1;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1.;
-			seeding_var[12]=1.;
-			seeding_var[13]=1.;
-			seeding_var[14]=1.;
-			seeding_var[15]=1.;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1.;
+			(*seeding_var)[12]=1.;
+			(*seeding_var)[13]=1.;
+			(*seeding_var)[14]=1.;
+			(*seeding_var)[15]=1.;
 		}
 	}
 	else if(dimension==17 && 
@@ -1884,61 +1897,61 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		mcmc_mod_struct->ppE_Nmod = 2;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1.;
-			seeding_var[12]=1.;
-			seeding_var[13]=1.;
-			seeding_var[14]=1.;
-			seeding_var[15]=1.;
-			seeding_var[16]=1.;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1.;
+			(*seeding_var)[12]=1.;
+			(*seeding_var)[13]=1.;
+			(*seeding_var)[14]=1.;
+			(*seeding_var)[15]=1.;
+			(*seeding_var)[16]=1.;
 		}
 	}
 	else if(dimension==15 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=false;
 		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.5;
-			seeding_var[2]=1;
-			seeding_var[3]=1;
-			seeding_var[4]=1;
-			seeding_var[5]=.1;
-			seeding_var[6]=1;
-			seeding_var[7]=1.;
-			seeding_var[8]=.3;
-			seeding_var[9]=.5;
-			seeding_var[10]=.5;
-			seeding_var[11]=1.;
-			seeding_var[12]=1.;
-			seeding_var[13]=1.;
-			seeding_var[14]=1.;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.5;
+			(*seeding_var)[2]=1;
+			(*seeding_var)[3]=1;
+			(*seeding_var)[4]=1;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=1;
+			(*seeding_var)[7]=1.;
+			(*seeding_var)[8]=.3;
+			(*seeding_var)[9]=.5;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=1.;
+			(*seeding_var)[12]=1.;
+			(*seeding_var)[13]=1.;
+			(*seeding_var)[14]=1.;
 		}
 	}
 	else if(dimension==8 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=true;
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
 		if(local_seeding){
-			seeding_var = new double[dimension];
-			seeding_var[0]=1.;
-			seeding_var[1]=.3;
-			seeding_var[2]=1.;
-			seeding_var[3]=1.;
-			seeding_var[4]=1.;
-			seeding_var[5]=1.;
-			seeding_var[6]=1.;
-			seeding_var[7]=1.;
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=1.;
+			(*seeding_var)[1]=.3;
+			(*seeding_var)[2]=1.;
+			(*seeding_var)[3]=1.;
+			(*seeding_var)[4]=1.;
+			(*seeding_var)[5]=1.;
+			(*seeding_var)[6]=1.;
+			(*seeding_var)[7]=1.;
 		}
 	}
 	else if( generation_method == "ppE_IMRPhenomPv2_Inspiral"
@@ -1954,24 +1967,24 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 			std::cout<<endl;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.5;
-				seeding_var[2]=1;
-				seeding_var[3]=1;
-				seeding_var[4]=1;
-				seeding_var[5]=.1;
-				seeding_var[6]=1;
-				seeding_var[7]=1.;
-				seeding_var[8]=.3;
-				seeding_var[9]=.5;
-				seeding_var[10]=.5;
-				seeding_var[11]=1.;
-				seeding_var[12]=1.;
-				seeding_var[13]=1.;
-				seeding_var[14]=1.;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.5;
+				(*seeding_var)[2]=1;
+				(*seeding_var)[3]=1;
+				(*seeding_var)[4]=1;
+				(*seeding_var)[5]=.1;
+				(*seeding_var)[6]=1;
+				(*seeding_var)[7]=1.;
+				(*seeding_var)[8]=.3;
+				(*seeding_var)[9]=.5;
+				(*seeding_var)[10]=.5;
+				(*seeding_var)[11]=1.;
+				(*seeding_var)[12]=1.;
+				(*seeding_var)[13]=1.;
+				(*seeding_var)[14]=1.;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					seeding_var[15 + i]=2;
+					(*seeding_var)[15 + i]=2;
 				}
 			}
 		}
@@ -1983,17 +1996,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 			std::cout<<endl;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.3;
-				seeding_var[2]=1.;
-				seeding_var[3]=1.;
-				seeding_var[4]=1.;
-				seeding_var[5]=1.;
-				seeding_var[6]=1.;
-				seeding_var[7]=1.;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.3;
+				(*seeding_var)[2]=1.;
+				(*seeding_var)[3]=1.;
+				(*seeding_var)[4]=1.;
+				(*seeding_var)[5]=1.;
+				(*seeding_var)[6]=1.;
+				(*seeding_var)[7]=1.;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					seeding_var[8 + i]=2;
+					(*seeding_var)[8 + i]=2;
 				}
 			}
 		}
@@ -2011,24 +2024,24 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 			std::cout<<endl;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.5;
-				seeding_var[2]=1;
-				seeding_var[3]=1;
-				seeding_var[4]=1;
-				seeding_var[5]=.1;
-				seeding_var[6]=1;
-				seeding_var[7]=1.;
-				seeding_var[8]=.3;
-				seeding_var[9]=.5;
-				seeding_var[10]=.5;
-				seeding_var[11]=1.;
-				seeding_var[12]=1.;
-				seeding_var[13]=1.;
-				seeding_var[14]=1.;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.5;
+				(*seeding_var)[2]=1;
+				(*seeding_var)[3]=1;
+				(*seeding_var)[4]=1;
+				(*seeding_var)[5]=.1;
+				(*seeding_var)[6]=1;
+				(*seeding_var)[7]=1.;
+				(*seeding_var)[8]=.3;
+				(*seeding_var)[9]=.5;
+				(*seeding_var)[10]=.5;
+				(*seeding_var)[11]=1.;
+				(*seeding_var)[12]=1.;
+				(*seeding_var)[13]=1.;
+				(*seeding_var)[14]=1.;
 				for(int i =0; i< totalmod;i++){
-					seeding_var[15 + i]=2;
+					(*seeding_var)[15 + i]=2;
 				}
 			}
 		}
@@ -2039,17 +2052,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 				std::cout<<", mod "<<i;
 			}
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.3;
-				seeding_var[2]=1.;
-				seeding_var[3]=1.;
-				seeding_var[4]=1.;
-				seeding_var[5]=1.;
-				seeding_var[6]=1.;
-				seeding_var[7]=1.;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.3;
+				(*seeding_var)[2]=1.;
+				(*seeding_var)[3]=1.;
+				(*seeding_var)[4]=1.;
+				(*seeding_var)[5]=1.;
+				(*seeding_var)[6]=1.;
+				(*seeding_var)[7]=1.;
 				for(int i =0; i< totalmod;i++){
-					seeding_var[8 + i]=2;
+					(*seeding_var)[8 + i]=2;
 				}
 			}
 		}
@@ -2068,13 +2081,13 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			
 			std::cout<<endl;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.3;
-				seeding_var[2]=1;
-				seeding_var[3]=1;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.3;
+				(*seeding_var)[2]=1;
+				(*seeding_var)[3]=1;
 				for(int i =0; i< totalmod;i++){
-					seeding_var[4 + i]=2;
+					(*seeding_var)[4 + i]=2;
 				}
 			}
 		}
@@ -2082,20 +2095,20 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
 			mcmc_intrinsic=false;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.5;
-				seeding_var[2]=1;
-				seeding_var[3]=1;
-				seeding_var[4]=1;
-				seeding_var[5]=.1;
-				seeding_var[6]=1;
-				seeding_var[7]=1.;
-				seeding_var[8]=.3;
-				seeding_var[9]=.5;
-				seeding_var[10]=.5;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.5;
+				(*seeding_var)[2]=1;
+				(*seeding_var)[3]=1;
+				(*seeding_var)[4]=1;
+				(*seeding_var)[5]=.1;
+				(*seeding_var)[6]=1;
+				(*seeding_var)[7]=1.;
+				(*seeding_var)[8]=.3;
+				(*seeding_var)[9]=.5;
+				(*seeding_var)[10]=.5;
 				for(int i =0; i< totalmod;i++){
-					seeding_var[11 + i]=2;
+					(*seeding_var)[11 + i]=2;
 				}
 			}
 		}
@@ -2114,20 +2127,20 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 			std::cout<<endl;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=1.;
-				seeding_var[1]=.5;
-				seeding_var[2]=1;
-				seeding_var[3]=1;
-				seeding_var[4]=1;
-				seeding_var[5]=.1;
-				seeding_var[6]=1;
-				seeding_var[7]=1.;
-				seeding_var[8]=.3;
-				seeding_var[9]=.5;
-				seeding_var[10]=.5;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=1.;
+				(*seeding_var)[1]=.5;
+				(*seeding_var)[2]=1;
+				(*seeding_var)[3]=1;
+				(*seeding_var)[4]=1;
+				(*seeding_var)[5]=.1;
+				(*seeding_var)[6]=1;
+				(*seeding_var)[7]=1.;
+				(*seeding_var)[8]=.3;
+				(*seeding_var)[9]=.5;
+				(*seeding_var)[10]=.5;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					seeding_var[11 + i]=2;
+					(*seeding_var)[11 + i]=2;
 				}
 			}
 		}
@@ -2139,17 +2152,17 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			}
 			std::cout<<endl;
 			if(local_seeding){
-				seeding_var = new double[dimension];
-				seeding_var[0]=.1;
-				seeding_var[1]=.1;
-				seeding_var[2]=.1;
-				seeding_var[3]=1;
-				seeding_var[4]=.5;
-				seeding_var[5]=.1;
-				seeding_var[6]=.1;
-				seeding_var[7]=.1;
+				(*seeding_var) = new double[dimension];
+				(*seeding_var)[0]=.1;
+				(*seeding_var)[1]=.1;
+				(*seeding_var)[2]=.1;
+				(*seeding_var)[3]=1;
+				(*seeding_var)[4]=.5;
+				(*seeding_var)[5]=.1;
+				(*seeding_var)[6]=.1;
+				(*seeding_var)[7]=.1;
 				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					seeding_var[8 + i]=2;
+					(*seeding_var)[8 + i]=2;
 				}
 			}
 		}
@@ -3111,6 +3124,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 		delete [] fish_psd;
 	}
 	delete [] burn_data;
+	delete [] burn_lengths;
 	delete [] burn_noise;
 	delete [] burn_freqs;
 	delete [] burn_plans;
@@ -3142,6 +3156,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int *initial_status,
 	int *initial_model_status,
 	double *seeding_var,
+	double **ensemble_initial_pos,
+	int **ensemble_initial_status,
+	int **ensemble_initial_model_status,
 	double **prior_ranges,/**< Range of priors on MODIFICATIONS -- shape : double[N_mods][2] with low in 0 and high in 1**/
 	double *chain_temps,
 	int swp_freq,
@@ -3216,7 +3233,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	else
 		local_seeding = false;
 
-	RJPTMCMC_method_specific_prep(generation_method_extended, max_dimension, min_dimension,seeding_var, local_seeding);
+	RJPTMCMC_method_specific_prep(generation_method_extended, max_dimension, min_dimension,seeding_var,local_seeding);
 
 
 	//######################################################
@@ -3322,7 +3339,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 
 	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(sampler_output,output,status, model_status, nested_model_number,
 		max_dimension,min_dimension, N_steps, chain_N, 
-		max_chain_N_thermo_ensemble,initial_pos,initial_status,initial_model_status,seeding_var, chain_temps, 
+		max_chain_N_thermo_ensemble,initial_pos,initial_status,initial_model_status,seeding_var, ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status, chain_temps, 
 		swp_freq, t0, nu,max_chunk_size,chain_distribution_scheme,
 		log_prior,RJMCMC_2WF_likelihood_wrapper, RJMCMC_2WF_fisher_wrapper,RJMCMC_2WF_RJ_proposal_wrapper,(void**)user_parameters,numThreads, pool, 
 		show_prog,update_RJ_widths,statistics_filename,
@@ -3347,6 +3364,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 		delete [] fish_psd;
 	}
 	delete [] burn_data;
+	delete [] burn_lengths;
 	delete [] burn_noise;
 	delete [] burn_freqs;
 	delete [] burn_plans;

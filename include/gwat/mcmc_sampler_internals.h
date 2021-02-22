@@ -265,7 +265,7 @@ void load_temps_checkpoint_file(std::string check_file, double *temps, int chain
 void assign_ct_p(sampler *sampler, int step, int chain_index, int gauss_dim);
 void assign_ct_m(sampler *sampler, int step, int chain_index, int gauss_dim);
 
-void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status,int *initial_model_status,double *seeding_var) ;
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status, int *initial_model_status,double **ensemble_initial_pos,int **ensemble_initial_status,int **ensemble_initial_model_status,double *seeding_var) ;
 
 double PT_dynamical_timescale(int t0, int nu, int t);
 

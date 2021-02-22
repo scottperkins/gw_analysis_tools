@@ -117,14 +117,27 @@ int main(int argc, char *argv[])
 	int max_chunk_size = int_dict["Max chunk size"];
 	std::cout<<"Max chunk size: "<<max_chunk_size<<std::endl;
 	
-	std::string initial_position_file, initial_checkpoint_file;
+	std::string initial_position_file="", initial_checkpoint_file="",initial_ensemble_position_file="";
 	int chain_N;
 	bool continue_from_checkpoint=false;
 	if(str_dict.find("initial checkpoint file") == str_dict.end()){
 		//Original
-		initial_position_file = str_dict["initial position file"];
-		chain_N = int_dict["chain number"];
-		std::cout<<"Chain number: "<<chain_N<<std::endl;
+		if(str_dict.find("initial position file") != str_dict.end()){
+			initial_position_file = str_dict["initial position file"];
+			chain_N = int_dict["chain number"];
+			std::cout<<"Chain number: "<<chain_N<<std::endl;
+			std::cout<<"Initial position file: "<<initial_position_file<<std::endl;
+		}
+		if (str_dict.find("initial ensemble position file") != str_dict.end()){
+			initial_ensemble_position_file = str_dict["initial ensemble position file"];
+			chain_N = int_dict["chain number"];
+			std::cout<<"Chain number: "<<chain_N<<std::endl;
+			std::cout<<"Initial ensemble position file: "<<initial_ensemble_position_file<<std::endl;
+		}
+		if ( initial_position_file =="" && initial_ensemble_position_file ==""){
+			std::cout<<"ERROR -- you need an initial checkpoint file, an initial position file, or an initial ensemble file"<<std::endl;
+			exit(1);
+		}
 	}
 	else{
 		//Continue	
@@ -457,9 +470,10 @@ int main(int argc, char *argv[])
 	
 	
 		double *seeding_var = NULL;
+		double **ensemble_initial_position=NULL;
 		mcmc_sampler_output sampler_output(chain_N, dimension);
 		SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
-				max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
+				max_thermo_chain_N, initial_position[0],seeding_var,ensemble_initial_position,chain_temps, 
 				swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 				standard_log_prior_skysearch,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
@@ -531,14 +545,31 @@ int main(int argc, char *argv[])
 
 		}
 		else{
-			double **initial_position = new double*[1];
+			double **initial_position=NULL;
+			initial_position = new double*[1];
 			initial_position[0] = new double[dimension];
-			read_file(initial_position_file, initial_position,1,dimension);
 			double *seeding_var = NULL;
+			double **ensemble_initial_position = NULL;
+			if(initial_position_file != ""){
+				read_file(initial_position_file, initial_position,1,dimension);
+			}
+			if(initial_ensemble_position_file != ""){
+				ensemble_initial_position = new double*[chain_N];
+				for(int i = 0 ; i<chain_N; i++){
+					ensemble_initial_position[i] = new double[dimension];
+				}
+				read_file(initial_ensemble_position_file, ensemble_initial_position,chain_N,dimension);
+				//for(int i = 0 ; i<chain_N; i++){
+				//	for(int j = 0 ; j<dimension; j++){
+				//		std::cout<<ensemble_initial_position[i][j]<<" ";
+				//	}	
+				//	std::cout<<std::endl;
+				//}
+			}
 			std::cout<<"Running uncorrelated sampler "<<std::endl;
 			mcmc_sampler_output sampler_output(chain_N, dimension);
 			PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
-					max_thermo_chain_N, initial_position[0],seeding_var,chain_temps, 
+					max_thermo_chain_N, initial_position[0],seeding_var,ensemble_initial_position,chain_temps, 
 					swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 					lp,threads, pool,show_progress,detector_N, 
 					//data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
@@ -546,6 +577,12 @@ int main(int argc, char *argv[])
 					generation_method,stat_file,output_file, "",check_file);	
 			sampler_output.create_data_dump(true, false, output_file);
 			delete [] initial_position[0]; delete [] initial_position;
+			if(initial_ensemble_position_file != ""){
+				for(int i = 0 ; i<chain_N; i++){
+					delete [] ensemble_initial_position[i]; 
+				}
+				delete [] ensemble_initial_position;
+			}
 		}
 
 	}

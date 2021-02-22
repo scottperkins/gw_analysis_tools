@@ -261,6 +261,7 @@ void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *s
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -294,6 +295,7 @@ void PTMCMC_MH_GW(double ***output,
 	int chain_N,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	double(*log_prior)(double *param, mcmc_data_interface *interface,void *parameters),
@@ -352,6 +354,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -383,6 +386,7 @@ void PTMCMC_MH_dynamic_PT_alloc_GW(double ***output,
 	int max_chain_N_thermo_ensemble,
 	double *initial_pos,
 	double *seeding_var,
+	double **ensemble_initial_pos,
 	double *chain_temps,
 	int swp_freq,
 	int t0,
@@ -431,7 +435,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 	std::string final_checkpoint_filename,
 	bool tune
 	);
-void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double *seeding_var, bool local_seeding);
+void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double **seeding_var_ptr, bool local_seeding);
 
 void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, int min_dim,double *seeding_var, bool local_seeding);
 
@@ -505,6 +509,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 	int *initial_status,
 	int *initial_model_status,
 	double *seeding_var,
+	double **ensemble_initial_pos,
+	int **ensemble_initial_status,
+	int **ensemble_initial_model_status,
 	double **prior_ranges,
 	double *chain_temps,
 	int swp_freq,

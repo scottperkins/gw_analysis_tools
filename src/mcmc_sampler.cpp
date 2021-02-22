@@ -2643,6 +2643,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 	int *initial_status, 	/**<Initial status in parameter space - shape int[max_dimension]*/
 	int *initial_model_status, 	/**<Initial model status in parameter space - shape int[nested_model_number]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
+	int **ensemble_initial_status,
+	int **ensemble_initial_model_status,
 	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
@@ -2694,7 +2697,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 	//#####################################################################
 	RJPTMCMC_MH_internal(temp_output,temp_status, temp_model_status, nested_model_number,max_dimension, min_dimension,
 		dynamic_search_length, chain_N,  
-		initial_pos,initial_status,initial_model_status, seeding_var, chain_temps, swp_freq, 
+		initial_pos,initial_status,initial_model_status, seeding_var,ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status, chain_temps, swp_freq, 
 		 log_prior, log_likelihood,fisher,RJ_proposal,user_parameters,
 		numThreads, pool,internal_prog,update_RJ_width,statistics_filename,"","","",checkpoint_file);
 	
@@ -3002,6 +3005,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
 	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
@@ -3034,7 +3038,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//#####################################################################
 	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
 		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
-		initial_pos, seeding_var, chain_temps, swp_freq, t0, nu,
+		initial_pos, seeding_var,ensemble_initial_pos, chain_temps, swp_freq, t0, nu,
 		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
 		numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
 	
@@ -4066,6 +4070,9 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	int *initial_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
 	int *initial_model_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
+	double **ensemble_initial_pos,
+	int **ensemble_initial_status,
+	int **ensemble_initial_model_status,
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	std::function<double(double*, int*,int*,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
@@ -4166,7 +4173,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 
 	
 	//Assign initial position to start chains
-	assign_initial_pos(samplerptr, initial_pos, initial_status,initial_model_status,seeding_var);	
+	assign_initial_pos(samplerptr, initial_pos, initial_status,initial_model_status,ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status,seeding_var);	
 
 		
 	PTMCMC_MH_loop(samplerptr);	
@@ -4452,6 +4459,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
 	double *chain_temps, /**<[out] Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
@@ -4546,8 +4554,20 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	for(int i = 0; i<samplerptr->max_dim; i++){
 		initial_status[i]=1;	
 	}
-	assign_initial_pos(samplerptr, initial_pos,initial_status,initial_model_status,seeding_var);	
+	int **ensemble_initial_model_status = NULL;
+	int **ensemble_initial_status = new int*[samplerptr->chain_N];
+	for(int j = 0 ; j<samplerptr->chain_N; j++){
+		ensemble_initial_status[j] = new int[samplerptr->max_dim];
+		for(int i = 0; i<samplerptr->max_dim; i++){
+			ensemble_initial_status[j][i]=1;	
+		}
+	}
+	assign_initial_pos(samplerptr, initial_pos,initial_status,initial_model_status,ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status,seeding_var);	
 	delete [] initial_status;
+	for(int j = 0 ; j<samplerptr->chain_N; j++){
+		delete [] ensemble_initial_status[j];
+	}
+	delete [] ensemble_initial_status;
 	
 	
 	//#########################################################################
@@ -4936,6 +4956,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	int chain_N,	/**< Number of chains*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	std::function<double(double*,int *,int*,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int dimension, int chain_id*/
@@ -5025,8 +5046,20 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	//Assign initial position to start chains
 	int *init_status = new int[samplerptr->dimension];
 	for(int i =0 ; i<samplerptr->dimension; i++)init_status[i]=1;
-	assign_initial_pos(samplerptr, initial_pos, init_status,initial_model_status,seeding_var);	
+	int **ensemble_initial_model_status = NULL;
+	int **ensemble_initial_status = new int*[samplerptr->chain_N];
+	for(int j = 0 ; j<samplerptr->chain_N; j++){
+		ensemble_initial_status[j] = new int[samplerptr->max_dim];
+		for(int i = 0; i<samplerptr->max_dim; i++){
+			ensemble_initial_status[j][i]=1;	
+		}
+	}
+	assign_initial_pos(samplerptr, initial_pos, init_status,initial_model_status,ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status,seeding_var);	
 	delete [] init_status;
+	for(int j = 0 ; j<samplerptr->chain_N; j++){
+		delete [] ensemble_initial_status[j];
+	}
+	delete [] ensemble_initial_status;
 
 		
 	//############################################################
@@ -5740,6 +5773,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 	int chain_N,	/**< Number of chains*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	double (*log_prior)(double *param, mcmc_data_interface *interface,void * parameters),	/**<Funcion pointer for the log_prior*/
@@ -5768,7 +5802,7 @@ void PTMCMC_MH(	double ***output, /**< [out] Output chains, shape is double[chai
 		f = [&fisher](double *param, int *param_status, int *model_status,double **fisherm, mcmc_data_interface *interf,void *parameters){
 			fisher(param, fisherm,interf,parameters);};
 	}
-	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,chain_temps, swp_freq, 
+	PTMCMC_MH_internal(output, dimension, N_steps, chain_N, initial_pos, seeding_var,ensemble_initial_pos,chain_temps, swp_freq, 
 			lp, ll, f,user_parameters, numThreads, pool, show_prog, 
 			statistics_filename, chain_filename,  checkpoint_file,false,false);
 }
@@ -5892,6 +5926,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
 	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
@@ -5930,6 +5965,7 @@ void PTMCMC_MH_dynamic_PT_alloc(double ***output, /**< [out] Output chains, shap
 			max_chain_N_thermo_ensemble,
 			initial_pos,
 			seeding_var,
+			ensemble_initial_pos,
 			chain_temps,
 			swp_freq,
 			t0,
@@ -6023,6 +6059,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(mcmc_sampler_output *sampler_output
 	int max_chain_N_thermo_ensemble,/**< Maximum number of chains to use in the thermodynamic ensemble (may use less)*/
 	double *initial_pos, 	/**<Initial position in parameter space - shape double[dimension]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[dimension]*/
+	double **ensemble_initial_pos,
 	double *chain_temps, /**< Final chain temperatures used -- should be shape double[chain_N]*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
@@ -6064,6 +6101,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated(mcmc_sampler_output *sampler_output
 			max_chain_N_thermo_ensemble,
 			initial_pos,
 			seeding_var,
+			ensemble_initial_pos,
 			chain_temps,
 			swp_freq,
 			t0,
@@ -6097,6 +6135,9 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 	int *initial_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
 	int *initial_model_status, 	/**<Initial status of the parameters in the initial position in parameter space - shape int[max_dim]*/
 	double *seeding_var, 	/**<Variance of the normal distribution used to seed each chain higher than 0 - shape double[max_dimension] -- initial seeding of zero corresponds to the dimension turned off initially*/
+	double **ensemble_initial_pos,
+	int **ensemble_initial_status,
+	int **ensemble_initial_model_status,
 	double *chain_temps,	/**<Double array of temperatures for the chains*/
 	int swp_freq,	/**< the frequency with which chains are swapped*/
 	double (*log_prior)(double *param, int *status, int *model_status,mcmc_data_interface *interface,void *parameters),	
@@ -6140,6 +6181,9 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		initial_status, 	
 		initial_model_status, 	
 		seeding_var, 	
+		ensemble_initial_pos,
+		ensemble_initial_status,
+		ensemble_initial_model_status,
 		chain_temps,	
 		swp_freq,	
 		lp,
@@ -6238,6 +6282,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 	int *initial_status, 	
 	int *initial_model_status, 	
 	double *seeding_var, 	
+	double **ensemble_initial_pos,
+	int **ensemble_initial_status,
+	int **ensemble_initial_model_status,
 	double *chain_temps, 
 	int swp_freq,	
 	int t0,
@@ -6287,6 +6334,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 		initial_status,
 		initial_model_status,
 		seeding_var,
+		ensemble_initial_pos,
+		ensemble_initial_status,
+		ensemble_initial_model_status,
 		chain_temps,
 		swp_freq,
 		t0, 

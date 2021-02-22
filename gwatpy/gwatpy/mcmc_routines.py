@@ -423,7 +423,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
     dt = T / len(freqs)
     times = np.linspace(0,T, len(freqs))
 
-    N = 100
+    N = 1000
 
     ax = None
     fig = None
@@ -495,7 +495,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
         datastream = np.loadtxt(data_stream_file, skiprows=3)
         data_ft = np.fft.fft(datastream) * df
         dataplot = np.fft.ifft(data_ft / psd**.5)*dt
-        ax.plot(times, dataplot)
+        ax.plot(times, dataplot,color='red')
 
     if(xlim is not None):
         ax.set_xlim(xlim)
@@ -750,3 +750,31 @@ def combine_discrete_marginalized_posteriors(datasets, bins=None):
     bin_midpoints = (bins[:-1] + bins[1:])/2
     
     return pvec, bin_midpoints,bins
+
+def check_initial_distribution(method,dim, distribution):
+    output_distribution = []
+    if(method == "IMRPhenomD" and dim == 4):
+        for x in distribution:
+            output_distribution.append(x)
+            if output_distribution[-1][0]<0:
+                output_distribution[-1][0] = 1
+            if output_distribution[-1][1]<.01 or output_distribution[-1][1]>.245:
+                output_distribution[-1][1] = .245
+            if output_distribution[-1][2]<-.9 or output_distribution[-1][2]>.9:
+                output_distribution[-1][2] = 0
+            if output_distribution[-1][3]<-.9 or output_distribution[-1][3]>.9:
+                output_distribution[-1][3] = 0
+    if(method == "IMRPhenomD" and dim == 11):
+        for x in distribution:
+            output_distribution.append(x)
+            if output_distribution[-1][0]<0:
+                output_distribution[-1][0] = 1
+            if output_distribution[-1][7]<0:
+                output_distribution[-1][7] = 1
+            if output_distribution[-1][8]<.01 or output_distribution[-1][8]>.245:
+                output_distribution[-1][8] = .245
+            if output_distribution[-1][9]<-.9 or output_distribution[-1][9]>.9:
+                output_distribution[-1][9] = 0
+            if output_distribution[-1][10]<-.9 or output_distribution[-1][10]>.9:
+                output_distribution[-1][10] = 0
+

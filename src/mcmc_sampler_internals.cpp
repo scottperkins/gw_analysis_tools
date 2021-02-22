@@ -12,6 +12,14 @@
 #include <iomanip>
 #include <fftw3.h>
 #include <stdio.h>
+#ifndef _OPENMP
+#define omp ignore
+#endif
+
+#ifdef _OPENMP
+#include <adolc/adolc_openmp.h>
+#include <omp.h>
+#endif
 
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
@@ -1015,6 +1023,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
  */
 void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_dest, int id_source, bool transfer_output)
 {	
+	samplerptr_dest->user_parameters[id_dest] = samplerptr_source->user_parameters[id_source];
 	//Position and output and likelihood and temp
 	samplerptr_dest->chain_temps[id_dest] = 
 		samplerptr_source->chain_temps[id_source];
@@ -2449,89 +2458,164 @@ void assign_ct_m(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 	else if(step ==4) samplerptr->RJstep_reject_ct[chain_index]+=1;
 }
 
-void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status, int *initial_model_status,double *seeding_var) 
+void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status, int *initial_model_status,double **ensemble_initial_pos,int **ensemble_initial_status,int **ensemble_initial_model_status,double *seeding_var) 
 {
-	if(samplerptr->nested_model_number >0){
-		for(int j = 0 ; j<samplerptr->chain_N; j++){
-			for (int i = 0 ; i<samplerptr->nested_model_number; i++){
-				samplerptr->model_status[j][0][i] = initial_model_status[i];
+	if(ensemble_initial_pos){
+		debugger_print(__FILE__,__LINE__,"Using initial ENSEMBLE position");
+		if(samplerptr->nested_model_number >0){
+			for(int j = 0 ; j<samplerptr->chain_N; j++){
+				for (int i = 0 ; i<samplerptr->nested_model_number; i++){
+					samplerptr->model_status[j][0][i] = ensemble_initial_model_status[j][i];
+				}
 			}
 		}
-	}
-
-	if(!seeding_var){ 
+		bool valid_pos[samplerptr->chain_N];
+		omp_set_num_threads(samplerptr->num_threads);
+		#pragma omp parallel ADOLC_OPENMP
+		{
+		#pragma omp for 
 		for (int j=0;j<samplerptr->chain_N;j++){
 			samplerptr->de_primed[j]=false;
 			for (int i = 0; i<samplerptr->max_dim; i++)
 			{
+				samplerptr->output[j][0][i] = ensemble_initial_pos[j][i];
+				samplerptr->param_status[j][0][i] = ensemble_initial_status[j][i];
 				//Only doing this last loop because there is sometimes ~5 elements 
 				//not initialized on the end of the output, which screw up plotting
-				for(int l =0; l<samplerptr->N_steps; l++){
-					samplerptr->output[j][l][i] = initial_pos[i];
-					samplerptr->param_status[j][l][i] = initial_status[i];
+				for(int l =1; l<samplerptr->N_steps; l++){
+					samplerptr->output[j][l][i] = 0;
+					samplerptr->param_status[j][l][i] = 1;
+					//samplerptr->output[j][l][i] = ensemble_initial_pos[j][i];
+					//samplerptr->param_status[j][l][i] = ensemble_initial_status[j][i];
 				}
-				//std::cout<<initial_pos[i]<<" "<<initial_status[i]<<std::endl;
 				
 			}
-			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			double lp = samplerptr->lp(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j]);
+			if(lp == limit_inf){
+				
+				valid_pos[j] = false;	
+				debugger_print(__FILE__,__LINE__,"Chain "+std::to_string(j)+" has invalid position");
+			}
+
+			else{
+				valid_pos[j] = true;
+				samplerptr->current_likelihoods[j] =
+					samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			}
 		}
+		bool all_bad= true;
+		double good_pos[samplerptr->max_dim];
+		int good_status[samplerptr->max_dim];
+		for(int i = 0 ; i<samplerptr->chain_N; i ++){
+			if(valid_pos[i]) { 
+				all_bad = false;
+				for(int j = 0 ; j<samplerptr->max_dim; j++){
+					good_pos[j] = samplerptr->output[i][0][j];
+					good_status[j] = samplerptr->param_status[i][0][j];
+				}
+			}	
+		}
+		if(all_bad){
+			debugger_print(__FILE__,__LINE__,"ALL positions are bad! Fix your initial positions!");
+			exit(1);
+		}
+		#pragma omp for 
+		for(int i = 0 ; i<samplerptr->chain_N; i ++){
+			if(!valid_pos[i]){
+				for(int j = 0 ; j<samplerptr->max_dim; j++){
+					samplerptr->output[i][0][j] = good_pos[j];
+					samplerptr->param_status[i][0][j] = good_status[j];
+				}
+				samplerptr->current_likelihoods[i] =
+					samplerptr->ll(samplerptr->output[i][0],samplerptr->param_status[i][0],samplerptr->model_status[i][0],samplerptr->interfaces[i], samplerptr->user_parameters[i])/samplerptr->chain_temps[i];
+			}
+		}	
+		}
+		
 	}
-	//Seed non-zero chains normally with variance as specified
 	else{
-		int attempts = 0;
-		int max_attempts = 10;
-		double temp_pos[samplerptr->max_dim];
-		int temp_status[samplerptr->max_dim];
-		for (int j=0;j<samplerptr->chain_N;j++){
-			samplerptr->de_primed[j]=false;
-			if(j == 0){
+		if(samplerptr->nested_model_number >0){
+			for(int j = 0 ; j<samplerptr->chain_N; j++){
+				for (int i = 0 ; i<samplerptr->nested_model_number; i++){
+					samplerptr->model_status[j][0][i] = initial_model_status[i];
+				}
+			}
+		}
+
+		if(!seeding_var){ 
+			for (int j=0;j<samplerptr->chain_N;j++){
+				samplerptr->de_primed[j]=false;
 				for (int i = 0; i<samplerptr->max_dim; i++)
 				{
-				//Only doing this last loop because there is sometimes ~5 elements 
-				//not initialized on the end of the output, which screw up plotting
+					//Only doing this last loop because there is sometimes ~5 elements 
+					//not initialized on the end of the output, which screw up plotting
 					for(int l =0; l<samplerptr->N_steps; l++){
 						samplerptr->output[j][l][i] = initial_pos[i];
 						samplerptr->param_status[j][l][i] = initial_status[i];
 					}
+					//std::cout<<initial_pos[i]<<" "<<initial_status[i]<<std::endl;
+					
 				}
+				samplerptr->current_likelihoods[j] =
+					 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 			}
-			else{
-				do{
-					for(int i =0; i<samplerptr->max_dim; i++){
-						if(initial_status[i] ==1){
-							temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
-							temp_status[i]=1;
-						}
-						else{
-							temp_pos[i]=0;
-							temp_status[i]=0;
-						}
-					}
-					attempts+=1;
-				}while(samplerptr->lp(temp_pos, temp_status,initial_model_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) == limit_inf && attempts<max_attempts);
-				attempts =0;
-				if(samplerptr->lp(temp_pos, temp_status,initial_model_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) != limit_inf ){
-					for(int i =0; i<samplerptr->max_dim;i++){
-						for(int l =0; l<samplerptr->N_steps; l++){
-							samplerptr->output[j][l][i] = temp_pos[i];
-							samplerptr->param_status[j][l][i] = temp_status[i];
-						}
-					}
-				}
-				else{
-					for(int i =0; i<samplerptr->max_dim;i++){
+		}
+		//Seed non-zero chains normally with variance as specified
+		else{
+			int attempts = 0;
+			int max_attempts = 10;
+			double temp_pos[samplerptr->max_dim];
+			int temp_status[samplerptr->max_dim];
+			for (int j=0;j<samplerptr->chain_N;j++){
+				samplerptr->de_primed[j]=false;
+				if(j == 0){
+					for (int i = 0; i<samplerptr->max_dim; i++)
+					{
+					//Only doing this last loop because there is sometimes ~5 elements 
+					//not initialized on the end of the output, which screw up plotting
 						for(int l =0; l<samplerptr->N_steps; l++){
 							samplerptr->output[j][l][i] = initial_pos[i];
 							samplerptr->param_status[j][l][i] = initial_status[i];
 						}
 					}
-			
 				}
+				else{
+					do{
+						for(int i =0; i<samplerptr->max_dim; i++){
+							if(initial_status[i] ==1){
+								temp_pos[i] = gsl_ran_gaussian(samplerptr->rvec[j],seeding_var[i]) + initial_pos[i];
+								temp_status[i]=1;
+							}
+							else{
+								temp_pos[i]=0;
+								temp_status[i]=0;
+							}
+						}
+						attempts+=1;
+					}while(samplerptr->lp(temp_pos, temp_status,initial_model_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) == limit_inf && attempts<max_attempts);
+					attempts =0;
+					if(samplerptr->lp(temp_pos, temp_status,initial_model_status,samplerptr->interfaces[j], samplerptr->user_parameters[j]) != limit_inf ){
+						for(int i =0; i<samplerptr->max_dim;i++){
+							for(int l =0; l<samplerptr->N_steps; l++){
+								samplerptr->output[j][l][i] = temp_pos[i];
+								samplerptr->param_status[j][l][i] = temp_status[i];
+							}
+						}
+					}
+					else{
+						for(int i =0; i<samplerptr->max_dim;i++){
+							for(int l =0; l<samplerptr->N_steps; l++){
+								samplerptr->output[j][l][i] = initial_pos[i];
+								samplerptr->param_status[j][l][i] = initial_status[i];
+							}
+						}
+				
+					}
+				}
+				
+				samplerptr->current_likelihoods[j] =
+					 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[ j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 			}
-			
-			samplerptr->current_likelihoods[j] =
-				 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[ j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
 		}
 	}
 	if(samplerptr->log_ll || samplerptr->log_lp){
@@ -2545,11 +2629,36 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 	}
 	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
+		omp_set_num_threads(samplerptr->num_threads);
+		#pragma omp parallel ADOLC_OPENMP
+		{
+		#pragma omp for 
 		for(int i=0 ; i<samplerptr->chain_N; i++){
 			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],samplerptr->model_status[i][0],i);	
+			if(samplerptr->fisher_update_ct[i] +1 == samplerptr->fisher_update_number){
+				//If NAN in fisher, it won't set the values. 
+				//Just set to junk so memory error doesn't occur
+				//It should be immediately overwritten after first step
+				for(int j = 0 ; j<samplerptr->max_dim; j++){
+					for(int l = 0 ; l<samplerptr->max_dim ; l++){
+						samplerptr->fisher_vecs[i][j][l] = 0;
+						samplerptr->fisher_vecs_prop[i][j][l] = 0;
+						samplerptr->fisher_matrix[i][j][l] = 0;
+						samplerptr->fisher_matrix_prop[i][j][l] = 0;
+					}
+					samplerptr->fisher_vecs[i][j][j] = 1;
+					samplerptr->fisher_vecs_prop[i][j][j] = 1;
+					samplerptr->fisher_matrix[i][j][j] = 1;
+					samplerptr->fisher_matrix_prop[i][j][j] = 1;
+				
+					samplerptr->fisher_vals[i][j] = 1;
+					samplerptr->fisher_vals_prop[i][j] = 1;
+				}
+			}
 			if(samplerptr->proper_fisher){
 				iterate_fisher(samplerptr, i);
 			}
+		}
 		}
 	}
 }
