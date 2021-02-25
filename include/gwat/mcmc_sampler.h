@@ -346,7 +346,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	std::string statistics_filename,
 	std::string chain_filename,
 	std::string likelihood_log_filename,
-	std::string checkpoint_file
+	std::string checkpoint_file,
+	bool continue_burn
 	);
 void continue_RJPTMCMC_MH_internal(
 	sampler *samplerptr,

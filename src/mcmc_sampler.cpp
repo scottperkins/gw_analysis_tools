@@ -2982,7 +2982,8 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 		statistics_filename,
 		chain_filename,
 		likelihood_log_filename,
-		checkpoint_file
+		checkpoint_file,
+		false
 	);
 	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
 	return ;
@@ -3333,7 +3334,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		statistics_filename,
 		chain_filename,
 		likelihood_log_filename,
-		checkpoint_file
+		checkpoint_file,
+		true
 		);
 	std::cout<<std::endl;
 	std::cout<<"WALL time: "<<omp_get_wtime()-wstart<<std::endl;
@@ -3605,9 +3607,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	std::string statistics_filename,/**< Filename to output sampling statistics, if empty string, not output*/
 	std::string chain_filename,/**< Filename to output data (chain 0 only), if empty string, not output*/
 	std::string likelihood_log_filename,/**< Filename to write the log_likelihood and log_prior at each step -- use empty string to skip*/
-	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
+	std::string checkpoint_file,/**< Filename to output data for checkpoint, if empty string, not saved*/
+	bool continue_burn
 	)
 {
+	bool local_continue_burn = continue_burn;
 	int status = 0;
 	double chain_temps[chain_N];
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
@@ -3677,6 +3681,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//We need to recreate the data_dump_file because the chains may
 			//have changed numbers in ensembles
 			relax=true;
+			local_continue_burn = true;
 			init=true;
 		}
 		double harvest_pool = pool;
@@ -3722,7 +3727,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			//Only considered burned in if the average (cold) chain length
 			//is 500x the average ac (trimming as we go, for the ac
 			debugger_print(__FILE__,__LINE__,std::string("Pos/ac: ")+std::to_string(pos_mean/ac_mean));
-			if(pos_mean/ac_mean <100){
+			if(pos_mean/ac_mean <100 && local_continue_burn){
 			//if(false){
 				sampler_output->set_trim(pos_mean);	
 			}
