@@ -23,7 +23,7 @@ def DTOA_DETECTOR_py( RA, DEC, GMST_rad, detector1, detector2):
         detector1.encode('utf-8'),
         detector2.encode('utf-8'))
     return returnval
-def populate_noise_py(frequencies,detector, length, integration_time):
+def populate_noise_py(frequencies,detector, integration_time):
     f=rlib.populate_noise_py
     f.argtypes=[\
         ctypes.POINTER(ctypes.c_double),\
@@ -35,7 +35,7 @@ def populate_noise_py(frequencies,detector, length, integration_time):
     freq = np.asarray(frequencies).ctypes.data_as(ctypes.POINTER(ctypes.c_double))
     detect = detector.encode("utf-8")
     noise_root = (ctypes.c_double*length)()
-    f(freq, detect,noise_root,ctypes.c_int(length),ctypes.c_double(integration_time))
+    f(freq, detect,noise_root,ctypes.c_int(len(frequencies)),ctypes.c_double(integration_time))
     return(noise_root)
 def get_detector_parameters_py(detector):
     f = rlib.get_detector_parameters
