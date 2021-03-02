@@ -31,7 +31,7 @@ def populate_noise_py(frequencies,detector, integration_time):
         ctypes.c_int,\
         ctypes.c_double \
     ]
-    
+    length = len(frequencies) 
     freq = np.asarray(frequencies).ctypes.data_as(ctypes.POINTER(ctypes.c_double))
     detect = detector.encode("utf-8")
     noise_root = (ctypes.c_double*length)()
