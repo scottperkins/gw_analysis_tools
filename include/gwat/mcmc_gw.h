@@ -62,6 +62,24 @@ struct MCMC_modification_struct
 
 	bool NSflag1 =false;
 	bool NSflag2 =false;
+
+	/* Whether to use Gauss-Legendre Quadrature for the LIKELIHOOD
+ * 		If using GLQ, provide the weights vector for the integration */
+	bool GAUSS_QUAD=false;
+	bool log10F = false;
+	double **weights=NULL;
+
+	
+	/*If set to anything besides NULL, this overrides the frequency/PSD arrays passed
+ * 		to sampler.
+ * 		These parameters are for the fishers ONLY*/
+	double **fisher_freq=NULL;
+	double **fisher_weights=NULL;
+	double **fisher_PSD=NULL;
+	bool fisher_GAUSS_QUAD=false;
+	int *fisher_length =NULL;
+	bool fisher_log10F = false;
+
 };
 
 static MCMC_modification_struct *mcmc_mod_struct;
@@ -74,11 +92,18 @@ struct MCMC_user_param
 	int *burn_lengths=NULL;
 	fftw_outline *burn_plans=NULL;
 	std::mutex *mFish;
-	double *fish_freqs=NULL;
-	double *fish_weights=NULL;
-	double **fish_psd=NULL;
-	double fish_length;
+
 	bool GAUSS_QUAD=false;
+	bool log10F = false;
+	double **weights;
+
+	double **fisher_freq=NULL;
+	double **fisher_weights=NULL;
+	double **fisher_PSD=NULL;
+	bool fisher_AD=false;
+	bool fisher_GAUSS_QUAD=false;
+	int *fisher_length =NULL;
+	bool fisher_log10F = false;
 		
 	//RJ stuff
 	double **mod_prior_ranges=NULL;
@@ -247,9 +272,12 @@ double maximized_coal_Log_Likelihood_internal(std::complex<double> *data,
 double Log_Likelihood_internal(std::complex<double> *data,
 			double *psd,
 			double *frequencies,
+			double *weights,
 			std::complex<double> *detector_response,
 			int length,
-			fftw_outline *plan
+			fftw_outline *plan,
+			bool log10F,
+			std::string integration_method
 			);
 
 double MCMC_likelihood_wrapper_SKYSEARCH(double *param, mcmc_data_interface *interface,void *parameters);
@@ -445,7 +473,10 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	int *data_length, 
 	double **frequencies, 
 	std::complex<double> **data, 
-	double **psd, 
+	double **psd,  
+	double **weights, 
+	std::string integration_method, 
+	bool log10F,
 	std::string *detectors, 
 	fftw_outline *fftw_plans, 
 	int num_detectors, 
