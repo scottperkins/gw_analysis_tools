@@ -812,29 +812,46 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	double delta_f = frequencies[length/2]-frequencies[length/2-1];
 	double sum = 0.;
 	double *integrand = (double *)malloc(sizeof(double)*length);
-	for (int i =0;i< length;i++)
+	for (int i =0;i< length;i++){
 		integrand[i] = real(detector_response[i]*std::conj(detector_response[i]))/psd[i];
+	}
 	double integral = 0;
 	if(integration_method=="SIMPSONS"){
 		integral = 4.*simpsons_sum(delta_f, length, integrand);
 	}
 	else if(integration_method=="GAUSSLEG"){
-		for(int i = 0 ; i<length; i++){
-			integral+=weights[i]*integrand[i];	
+		if(log10F){
+			for(int i = 0 ; i<length; i++){
+				integral+=weights[i]*integrand[i]*frequencies[i]*LOG10;	
+			}
+		}
+		else{
+			for(int i = 0 ; i<length; i++){
+				integral+=weights[i]*integrand[i];	
+			}
 		}
 		integral *= 4;
 	}
 	double HH = integral;
 	integral = 0;
 
-	for (int i =0;i< length;i++)
+	for (int i =0;i< length;i++){
 		integrand[i] = real(data[i]*std::conj(detector_response[i]))/psd[i];
+	}
 	if(integration_method=="SIMPSONS"){
 		integral = 4.*simpsons_sum(delta_f, length, integrand);
 	}
 	else if(integration_method=="GAUSSLEG"){
-		for(int i = 0 ; i<length; i++){
-			integral+=weights[i]*integrand[i];	
+		
+		if(log10F){
+			for(int i = 0 ; i<length; i++){
+				integral+=weights[i]*integrand[i]*frequencies[i]*LOG10;	
+			}
+		}
+		else{
+			for(int i = 0 ; i<length; i++){
+				integral+=weights[i]*integrand[i];	
+			}
 		}
 		integral *= 4;
 	}
@@ -2355,7 +2372,7 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	double **local_weights=user_param->weights;
 	int *local_lengths= mcmc_data_length;
 	std::string local_integration_method = "SIMPSONS";
-	bool local_log10F = user_param->log10F;
+	bool local_log10F = user_param->fisher_log10F;
 	if(user_param->fisher_freq){
 		local_freq = user_param->fisher_freq;
 	}
@@ -2631,6 +2648,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform, gen_params_base<double> *pa
 	}
 	delete [] phi;
 	delete [] theta;
+	
 	return ll;
 	//return 2;
 }

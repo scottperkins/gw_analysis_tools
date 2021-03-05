@@ -2,16 +2,16 @@ import gwatpy.mcmc_routines as gmcmc
 import matplotlib.pyplot as plt
 import numpy as np
 
-filename = "data/light.hdf5"
+filename = "data/injection_output.csv"
 #filename = "data/heavy.hdf5"
-psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt"
+psd_file = "/Users/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt"
 #filename = "data/test.hdf5"
 #psd_file = "/home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt"
 
-generation_method_base = "PNSeries_ppE_IMRPhenomD_Inspiral"
-#generation_method_base = "ppE_IMRPhenomD_Inspiral"
+#generation_method_base = "PNSeries_ppE_IMRPhenomD_Inspiral"
+generation_method_base = "ppE_IMRPhenomD_Inspiral"
 #generation_method_base = "IMRPhenomD"
-mod_kwargs = {"ppE_Nmod":6,"bppe":[-7,-5,-4,-3,-2,-1]}
+mod_kwargs = {"ppE_Nmod":1,"bppe":[-1]}
 #mod_kwargs = {"ppE_Nmod":6,"bppe":[0,0,0,0,0,0]}
 #mod_kwargs = {}
 threads = 10

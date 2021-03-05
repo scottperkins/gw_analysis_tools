@@ -5,6 +5,7 @@
 #include <gwat/mcmc_gw.h>
 #include <gwat/detector_util.h>
 #include <gwat/util.h>
+#include <gwat/waveform_util.h>
 #include <gwat/IMRPhenomP.h>
 #include <gwat/fisher.h>
 #include <iostream>
@@ -21,6 +22,7 @@ double *multi_gaussian_like_mean;
 double multi_gaussian_scale = 1.;
 
 void RT_ERROR_MSG();
+int test_likelihood(int argc, char *argv[]);
 int mcmc_standard_test(int argc, char *argv[]);
 int mcmc_injection(int argc, char *argv[]);
 int mcmc_injection_RJ(int argc, char *argv[]);
@@ -101,12 +103,100 @@ int main(int argc, char *argv[])
 		std::cout<<"Continue MCMC validation"<<std::endl;
 		return multiple_continue(argc,argv);
 	}
+	else if(runtime_opt == 8){
+		std::cout<<"Test Likelihood"<<std::endl;
+		return test_likelihood(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
 
+int test_likelihood(int argc, char *argv[])
+{
+	gen_params *gp = new gen_params;
+
+	gp->mass1 = 20;
+	gp->mass2 = 19;
+	gp->Luminosity_Distance = 90;
+	gp->phiRef = 0;
+	gp->f_ref = 20;
+	gp->tc = 0;
+	gp->spin1[2] = 0;
+	gp->spin2[2] = 0;
+	gp->gmst = .2;
+	gp->psi = .2;
+	gp->RA = .2;
+	gp->DEC = .2;
+	gp->incl_angle = .051;
+	gp->shift_phase = true;
+	gp->shift_time = true;
+	gp->equatorial_orientation = false;
+	gp->horizon_coord = false;
+	
+	//#############################################################
+	//SIMPSONS
+	int length = 4*4096;
+	double *freqs = new double[length];
+	double *psd = new double[length];
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = 10+(2048.-10.)*i / length;
+	}
+	populate_noise(freqs, "AdLIGODesign",psd,length,48);
+	for(int i = 0 ; i<length; i++){
+		psd[i] *=psd[i];
+	}
+	
+	std::complex<double> *response = new std::complex<double>[length];
+	fourier_detector_response(freqs, length, response, "Hanford", "IMRPhenomD",gp, (double*)NULL);
+	double snr = calculate_snr_internal(psd, response,freqs, length, "SIMPSONS",(double*)NULL,false);
+	std::cout<<"SNR: "<<snr<<std::endl;
+	
+	clock_t start = clock();
+	double ll = Log_Likelihood_internal(response,psd, freqs,(double*)NULL,response,length,(fftw_outline*)NULL,false,"SIMPSONS");
+	double t1 = (double)(clock()-start)/CLOCKS_PER_SEC;
+	std::cout<<"time: "<<t1<<std::endl;
+	std::cout<<"LL: "<<ll<<std::endl;
+	std::cout<<"'SNR': "<<sqrt(2*ll)<<std::endl;
+	delete [] response;
+	delete [] freqs;
+	delete [] psd;
+
+	//#############################################################
+	//GLQ
+	length = 1000;
+	freqs = new double[length];
+	double *weights = new double[length];
+	psd = new double[length];
+	gauleg(log10(10),log10(1024),freqs,weights,length);
+	for(int i = 0 ; i<length; i++){
+		freqs[i] = pow(10,freqs[i]);
+	}
+	populate_noise(freqs, "AdLIGODesign",psd,length,48);
+	for(int i = 0 ; i<length; i++){
+		psd[i] *=psd[i];
+	}
+	
+	response = new std::complex<double>[length];
+	fourier_detector_response(freqs, length, response, "Hanford", "IMRPhenomD",gp, (double*)NULL);
+	snr = calculate_snr_internal(psd, response,freqs, length, "GAUSSLEG",weights,true);
+	std::cout<<"SNR: "<<snr<<std::endl;
+	
+	start = clock();
+	ll = Log_Likelihood_internal(response,psd, freqs,weights,response,length,(fftw_outline*)NULL,true,"GAUSSLEG");
+	double t2 = (double)(clock()-start)/CLOCKS_PER_SEC;
+	std::cout<<"time: "<<t2<<std::endl;
+	std::cout<<"Speedup: "<<t1/t2<<std::endl;
+	delete [] response;
+	delete [] freqs;
+	delete [] psd;
+
+		
+	std::cout<<"LL: "<<ll<<std::endl;
+	std::cout<<"'SNR': "<<sqrt(2*ll)<<std::endl;
+	delete gp;
+}
 double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
@@ -247,7 +337,7 @@ int multiple_continue(int argc, char *argv[])
 	write_file("data/multi_gaussian_like_mean.csv",multi_gaussian_like_mean,dimension);
 	write_file("data/multi_gaussian_prior_mean.csv",multi_gaussian_prior_mean,dimension);
 	
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, (double**)NULL,chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
 	
 	for(int i = 1 ; i<1; i++){
 		std::string stat_file_new = "data/gaussian_stat_"+std::to_string(i)+"_"+modifier+".txt";
@@ -485,7 +575,7 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	
 	mcmc_sampler_output sampler_output(chains,max_dim);
 	sampler_output.RJ = true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, prior_ranges,temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, (double**)NULL,(int**)NULL,(int**)NULL,prior_ranges,temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, max_dim);
 	deallocate_2D_array(status,  samples, max_dim);
 
@@ -664,7 +754,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	mcmc_sampler_output sampler_output(chain_N,max_dim,nested_model_number);
 	sampler_output.RJ = true;
 	sampler_output.nested_model_number = nested_model_number;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(&sampler_output,output,status, model_status,nested_model_number,max_dim,min_dim, N_steps, chain_N, max_ensemble_chain_N,initial_pos,initial_status, initial_model_status,seeding_var, chain_temps, swp_freq,  t0, nu, max_chunksize, chain_distribution,RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, update_RJ_width, stat_file, chain_file, "",checkpoint);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(&sampler_output,output,status, model_status,nested_model_number,max_dim,min_dim, N_steps, chain_N, max_ensemble_chain_N,initial_pos,initial_status, initial_model_status,seeding_var,(double**)NULL,(int**)NULL,(int**)NULL, chain_temps, swp_freq,  t0, nu, max_chunksize, chain_distribution,RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, update_RJ_width, stat_file, chain_file, "",checkpoint);
 	if(initial_model_status){
 		delete [] initial_model_status;
 	}
@@ -1101,7 +1191,7 @@ int mcmc_rosenbock(int argc, char *argv[])
 	}
 	
 	mcmc_sampler_output sampler_output(chain_N,n);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,NULL,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, n, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,(double**)NULL,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_rosenbock_prior, log_rosenbock,NULL,(void **)param,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	sampler_output.calc_ac_vals(true);
 	for(int i = 0 ; i<sampler_output.cold_chain_number; i++){
 		std::cout<<sampler_output.max_acs[i]<<std::endl;
@@ -1280,7 +1370,7 @@ int mcmc_real_data(int argc, char *argv[])
 	
 	int samples = 50000;
 	double ***output  = allocate_3D_array(chains, samples, dim);
-	PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, temps, swap_freq, standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
+	PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, (double**)NULL,temps, swap_freq, standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
 	deallocate_3D_array(output, chains, samples, dim);
 	//int samples = 2000;
 	//double **output  = allocate_2D_array( samples, dim);
@@ -1300,27 +1390,17 @@ int mcmc_real_data(int argc, char *argv[])
 }
 int mcmc_injection(int argc, char *argv[])
 {
+	bool GLQ = true;
 	gen_params injection;
-	//injection.mass1 = 36.4;
-	//injection.mass2 = 29.3;
-	injection.mass1 = 4.4;
-	injection.mass2 = 3.7;
-	//injection.mass1 = 9;
-	//injection.mass2 = 7;
+	injection.mass1 = 36.4;
+	injection.mass2 = 29.3;
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
 	double eta = calculate_eta(injection.mass1,injection.mass2);
 	double q = injection.mass2/injection.mass1;
-	//double chirpmass = 8.49;
-	//double eta = .22;
-	//injection.mass1 = calculate_mass1(chirpmass,eta);
-	//injection.mass2 = calculate_mass2(chirpmass,eta);
-	//injection.Luminosity_Distance =2000;
-	injection.Luminosity_Distance =800;
+	injection.Luminosity_Distance =500;
 	injection.psi = .2;
 	injection.phiRef = 2.;
 	injection.f_ref = 20.;
-	//injection.RA = 13.*M_PI/12.;
-	//injection.DEC = -20*M_PI/180.;
 	injection.RA = .275;
 	injection.DEC = -.44;
 	injection.spin1[2] = .3;
@@ -1330,10 +1410,9 @@ int mcmc_injection(int argc, char *argv[])
 	injection.spin1[0] = .01;
 	injection.spin2[0] = -.01;
 	injection.incl_angle = .51;
-	//injection.incl_angle = -M_PI +.01;
 	double gps = 1126259462.4;
-	//double gps = 1180922494.5;
 	injection.gmst = gps_to_GMST_radian(gps);
+	std::cout<<"GMST: "<<injection.gmst<<std::endl;
 	injection.equatorial_orientation = false;
 	injection.horizon_coord = false;
 	injection.shift_time = true;
@@ -1349,89 +1428,119 @@ int mcmc_injection(int argc, char *argv[])
 	injection.betappe = new double[1];
 	injection.bppe[0] = -1;
 	injection.betappe[0] = 0;
-	//injection.delta_phi = new double[1];
-	//injection.delta_phi[0] = 1;
-	//injection.phii = new int[1];
-	//injection.phii[0] = 5;
 	
-	int detect_number = 3;
+	int detect_number = 4;
 	std::string detectors[4] = {"Hanford","Livingston","Virgo","Kagra"};
-	//std::string detectors[3] = {"Livingston","Hanford","Virgo"};
-	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
 	std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
-	//std::string SN[4] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted","KAGRA_pess"};
 	std::string injection_method = "ppE_IMRPhenomD_Inspiral";
-	double fmin = 20;
-	double fmax =2048;
+	double fmin = 10;
+	double fmax =512;
 	T_mcmc_gw_tool= 4;
-	double tc_ref = T_mcmc_gw_tool*(1-3./4.);
-	//double tc_ref = T_mcmc_gw_tool*(3./4.);
-	double deltaf = 1./T_mcmc_gw_tool;
-	int length = (fmax-fmin)/deltaf;
-	std::complex<double> **data = new std::complex<double>*[detect_number];
-	double **psd = new double*[detect_number];
-	double **freq = new double*[detect_number];
-	double total_snr = 0;
-	double tc=0;
-	injection.tc = 0;
-	for(int i = 0 ; i<detect_number; i++){
-		data[i]= new std::complex<double>[length];
-		psd[i]= new double[length];
-		freq[i]= new double[length];
-		for(int j =0 ; j<length; j++){
-			freq[i][j] = fmin + j*deltaf;
+	int length = 10;
+	int fish_length = 1000;
+	double **psd;
+	double **freq;
+	double **weights;
+	double **fish_freq;
+	double **fish_psd;
+	std::complex<double> **data ;
+	double tc_ref=0;
+	if(GLQ){
+		std::cout<<"Using GLQ"<<std::endl;
+		tc_ref = T_mcmc_gw_tool*(1-3./4.);
+		//double tc_ref = T_mcmc_gw_tool*(3./4.);
+		length = 2000;
+		data = new std::complex<double>*[detect_number];
+		psd = new double*[detect_number];
+		fish_psd = new double*[detect_number];
+		fish_freq = new double*[detect_number];
+		freq = new double*[detect_number];
+		weights = new double*[detect_number];
+		double total_snr = 0;
+		double tc=0;
+		injection.tc = 0;
+		for(int i = 0 ; i<detect_number; i++){
+			data[i]= new std::complex<double>[length];
+			psd[i]= new double[length];
+			freq[i]= new double[length];
+			fish_psd[i]= new double[fish_length];
+			fish_freq[i]= new double[fish_length];
+			weights[i]= new double[length];
+			gauleg(log10(fmin),log10(fmax),freq[i],weights[i],length);
+			for(int j =0 ; j<length; j++){
+				freq[i][j] = pow(10,freq[i][j]);
+			}
+			for(int j =0 ; j<fish_length; j++){
+				fish_freq[i][j] = fmin+ (fmax-fmin)/fish_length;
+			}
+			populate_noise(freq[i],SN[i],psd[i],length);
+			populate_noise(fish_freq[i],SN[i],fish_psd[i],fish_length);
+			for(int j =0 ; j<length; j++){
+				psd[i][j] *= psd[i][j];
+			}
+			for(int j =0 ; j<fish_length; j++){
+				fish_psd[i][j] *= fish_psd[i][j];
+			}
+			double deltat = DTOA_DETECTOR(injection.RA,injection.DEC,injection.gmst,detectors[0],detectors[i]);
+			//injection.tc = tc_ref + deltat;
+			tc = tc_ref - deltat;
+			tc*=2*M_PI;
+			fourier_detector_response(freq[i],length, data[i],detectors[i],injection_method, &injection, (double *)NULL);
+			for(int j = 0 ; j<length; j++){
+				data[i][j]*=exp(std::complex<double>(0,tc*freq[i][j]));
+			}
+			total_snr += pow_int( calculate_snr_internal(psd[i],data[i],freq[i],length, "GAUSSLEG",weights[i], true), 2);
 		}
-		populate_noise(freq[i],SN[i],psd[i],length);
-		for(int j =0 ; j<length; j++){
-			psd[i][j] *= psd[i][j];
-		}
-		double deltat = DTOA_DETECTOR(injection.RA,injection.DEC,injection.gmst,detectors[0],detectors[i]);
-		//injection.tc = tc_ref + deltat;
-		tc = tc_ref - deltat;
-		tc*=2*M_PI;
-		fourier_detector_response(freq[i],length, data[i],detectors[i],injection_method, &injection, (double *)NULL);
-		for(int j = 0 ; j<length; j++){
-			data[i][j]*=exp(std::complex<double>(0,tc*freq[i][j]));
-		}
-		total_snr += pow_int( calculate_snr_internal(psd[i],data[i],freq[i],length, "SIMPSONS",(double*) NULL, false), 2);
+		injection.tc=tc_ref;
+		std::cout<<"NETWORK SNR of injection: "<<sqrt(total_snr)<<std::endl;
 	}
-	injection.tc=tc_ref;
-	std::cout<<"NETWORK SNR of injection: "<<sqrt(total_snr)<<std::endl;
-
+	else{
+		tc_ref = T_mcmc_gw_tool*(1-3./4.);
+		//double tc_ref = T_mcmc_gw_tool*(3./4.);
+		double deltaf = 1./T_mcmc_gw_tool;
+		length = (fmax-fmin)/deltaf;
+		data = new std::complex<double>*[detect_number];
+		psd = new double*[detect_number];
+		freq = new double*[detect_number];
+		double total_snr = 0;
+		double tc=0;
+		injection.tc = 0;
+		for(int i = 0 ; i<detect_number; i++){
+			data[i]= new std::complex<double>[length];
+			psd[i]= new double[length];
+			freq[i]= new double[length];
+			for(int j =0 ; j<length; j++){
+				freq[i][j] = fmin + j*deltaf;
+			}
+			populate_noise(freq[i],SN[i],psd[i],length);
+			for(int j =0 ; j<length; j++){
+				psd[i][j] *= psd[i][j];
+			}
+			double deltat = DTOA_DETECTOR(injection.RA,injection.DEC,injection.gmst,detectors[0],detectors[i]);
+			//injection.tc = tc_ref + deltat;
+			tc = tc_ref - deltat;
+			tc*=2*M_PI;
+			fourier_detector_response(freq[i],length, data[i],detectors[i],injection_method, &injection, (double *)NULL);
+			for(int j = 0 ; j<length; j++){
+				data[i][j]*=exp(std::complex<double>(0,tc*freq[i][j]));
+			}
+			total_snr += pow_int( calculate_snr_internal(psd[i],data[i],freq[i],length, "SIMPSONS",(double*) NULL, false), 2);
+		}
+		injection.tc=tc_ref;
+		std::cout<<"NETWORK SNR of injection: "<<sqrt(total_snr)<<std::endl;
+	}
 
 	int data_lengths[detect_number];
+	int fisher_data_lengths[detect_number];
 	for(int i = 0 ; i<detect_number; i++){
 		data_lengths[i]=length;	
+		fisher_data_lengths[i] = fish_length;
 	}
 	//###################################################################
 	//###################################################################
 	injection.shift_time = false;
 	injection.shift_phase = false;
-	double fisher_dim = 11;
-	//double **jac_spins = allocate_2D_array(fisher_dim,fisher_dim);
-	//for (int i = 0 ;i<fisher_dim; i++){
-	//	for(int j =0 ;j<fisher_dim; j++){
-	//		if(i == 9 and j ==10){
-	//			jac_spins[i][j] = .5;
-	//		}
-	//		else if(i == 10 and j ==9){
-	//			jac_spins[i][j] = .5;
-	//		}
-	//		else if(i == 10 and j ==10){
-	//			jac_spins[i][j] = -.5;
-	//		}
-	//		else if(i == 9 and j ==9){
-	//			jac_spins[i][j] =.5;
-	//		}
-	//		else if(i != j ){
-	//			jac_spins[i][j] =0;
-	//		}
-	//		else {
-	//			jac_spins[i][j] =1;
-	//		}
-	//	}
-	//}
-	//
+	double fisher_dim = 12;
 	double **temp_fisher = allocate_2D_array(fisher_dim,fisher_dim);
 	double **fisher = allocate_2D_array(fisher_dim,fisher_dim);
 	double **cov = allocate_2D_array(fisher_dim,fisher_dim);
@@ -1441,20 +1550,18 @@ int mcmc_injection(int argc, char *argv[])
 		}
 	}
 	for(int i = 0 ; i<detect_number; i++){
-		fisher_autodiff(freq[i],length, "IMRPhenomD", detectors[i],detectors[0],temp_fisher,fisher_dim,&injection, "SIMPSONS",(double *)NULL,false, psd[i],NULL,NULL);
+		if(GLQ){
+			fisher_autodiff(freq[i],length, "ppE_IMRPhenomD_Inspiral", detectors[i],detectors[0],temp_fisher,fisher_dim,&injection, "GAUSSLEG",weights[i],true, psd[i],NULL,NULL);
+		}
+		else{
+			fisher_autodiff(freq[i],length, "ppE_IMRPhenomD_Inspiral", detectors[i],detectors[0],temp_fisher,fisher_dim,&injection, "SIMPSONS",(double *)NULL,false, psd[i],NULL,NULL);
+		}
 		for(int k = 0 ; k<fisher_dim; k++){
 			for(int j = 0 ; j<fisher_dim; j++){
 				fisher[k][j]+=temp_fisher[k][j];	
 			}
 		}
 	}
-	//matrix_multiply(fisher, jac_spins,temp_fisher,fisher_dim,fisher_dim,fisher_dim);
-	//matrix_multiply( jac_spins,temp_fisher,fisher,fisher_dim,fisher_dim,fisher_dim);
-	//for(int k = 0 ; k<fisher_dim; k++){
-	//	for(int j = 0 ; j<fisher_dim; j++){
-	//		std::cout<<fisher[k][j]<<std::endl;	
-	//	}
-	//}
 	gsl_LU_matrix_invert(fisher, cov, fisher_dim);
 	std::cout<<"Fisher estimates of covariances: "<<std::endl;
 	for(int i = 0  ;i<fisher_dim; i++){
@@ -1466,33 +1573,13 @@ int mcmc_injection(int argc, char *argv[])
 	deallocate_2D_array(cov,fisher_dim,fisher_dim);
 	injection.shift_time = true;
 	injection.shift_phase = true;
-	//###################################################################
-	//###################################################################
-	//#############################################################
-	//#############################################################
-	
-	//double **whitened = allocate_2D_array(data_lengths[0],7);
-	//for(int i = 0 ; i<data_lengths[0]; i++){
-	//	whitened[i][0]= freq[0][i];
-	//	whitened[i][1]=psd[0][i];
-	//	whitened[i][2]=psd[1][i];
-	//	whitened[i][3]=real(data[0][i]);
-	//	whitened[i][4]=imag(data[0][i]);
-	//	whitened[i][5]=real(data[1][i]);
-	//	whitened[i][6]=imag(data[1][i]);
-	//}	
-	//write_file("data/whitened_data.csv",whitened,data_lengths[0],7);
-	//deallocate_2D_array(whitened, data_lengths[0],7);
-	
-	//#############################################################
-	//#############################################################
 	
 
-	int dim = 5;
+	int dim = 12;
 	std::string recovery_method = "ppE_IMRPhenomD_Inspiral";
-	int ensemble = 5;
+	int ensemble = 15;
 	//int ensemble = 5;
-	int chains = 25;
+	int chains = 405;
 	//int chains = 10;
 	double temps[chains];
 	double c = 1.2;
@@ -1506,8 +1593,8 @@ int mcmc_injection(int argc, char *argv[])
 	transform_cart_sph(injection.spin1,spin1sph);
 	transform_cart_sph(injection.spin2,spin2sph);
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, spin1sph[0],spin2sph[0],cos(spin1sph[1]),cos(spin2sph[1]),spin1sph[2],spin2sph[2],injection.betappe[0]};
-	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
-	double initial_position[dim]= {log(chirpmass), eta, injection.spin1[2],injection.spin2[2],0};
+	double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2],0};
+	//double initial_position[dim]= {log(chirpmass), eta, injection.spin1[2],injection.spin2[2],0};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),chirpmass, q, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),injection.mass1, injection.mass2, injection.spin1[2],injection.spin2[2]};
 	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
@@ -1515,28 +1602,8 @@ int mcmc_injection(int argc, char *argv[])
 	write_file("data/injections.csv",initial_position,dim);
 
 
-	//////////////////////////////////////////////
-	//initial_position[0]+=.1;
-	//initial_position[1]+=.4;
-	//initial_position[2]+=.1;
-	//initial_position[3]-=.07;
-	//initial_position[4]+=.7;
-	//initial_position[5]+=.02;
-	//initial_position[6]+=.1;
-	//initial_position[7]+=.4;
-	//initial_position[8]+=.05;
-	//initial_position[9]+=.2;
-	//initial_position[10]+=.1;
-	//initial_position[11]+=.1;
-	//initial_position[12]+=.1;
-	//initial_position[13]+=.1;
-	//initial_position[14]+=.1;
-	//////////////////////////////////////////////
 
 
-	//initial_position[3] = -initial_position[3];
-	//initial_position[1] = 0;
-	//initial_position[0] = 2.;
 	double *seeding = NULL;
 	int swap_freq = 5;
 	int threads = 8;
@@ -1553,35 +1620,25 @@ int mcmc_injection(int argc, char *argv[])
 	double b = -1;
 	mod_struct.bppe =&b ;
 	
-	//int samples = 5000;
-	//double ***output  = allocate_3D_array(chains, samples, dim);
-	//PTMCMC_MH_GW(output, dim , samples, chains, initial_position, seeding, temps, swap_freq, standard_log_prior_dCS, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ac_file,ll_file, checkpoint_file);
-	//deallocate_3D_array(output, chains, samples, dim);
-	//double **output  = allocate_2D_array( samples, dim);
-	//int max_chains_ensemble = chains;
-	//int t0 = 1000;
-	//int nu = 100;
-	//MCMC_modification_struct mod_struct;
-	//mod_struct.ppE_Nmod = 1;
-	//int b = -1;
-	//mod_struct.bppe =&b ;
-	//double ac_target = .01;
-	//int correlation_thresh = 10;
-	//int correlation_segs =10 ;
-	//double correlation_convergence =.1 ;
-	//std::string allocation_scheme = "double";
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(output, dim , samples, chains, max_chains_ensemble,initial_position, seeding, temps, swap_freq,t0,nu,correlation_thresh, correlation_segs,correlation_convergence, ac_target,allocation_scheme, standard_log_prior_dCS, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
-	//deallocate_2D_array(output,  samples, dim);
-	//
+	if(GLQ){
+		mod_struct.weights=weights;
+		mod_struct.log10F=true;
+		mod_struct.fisher_log10F=false;
+		mod_struct.fisher_GAUSS_QUAD=false;
+		mod_struct.GAUSS_QUAD=true;
+		mod_struct.fisher_freq = fish_freq;
+		mod_struct.fisher_PSD= fish_psd;
+		mod_struct.fisher_length= fisher_data_lengths;
+	}
+	
 	int samples = 1000;
 	double **output  = allocate_2D_array( samples, dim);
-	double t0 = 2000;
+	double t0 = 1000;
 	double nu = 100;
 	std::string chain_distribution="double";
 	int max_chunk_size = 1e6;
 	mcmc_sampler_output sampler_output(chains,dim);
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,corr_threshold, corr_segments, corr_converge_thresh, corr_target_ac,max_chunk_size,chain_distribution,standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_sa, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dim , samples, chains, ensemble,initial_position, seeding, (double**)NULL,temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, dim);
 
 	
@@ -1589,13 +1646,22 @@ int mcmc_injection(int argc, char *argv[])
 		delete [] freq[i];	
 		delete [] psd[i];	
 		delete [] data[i];	
+		if(GLQ){
+			delete [] weights[i];
+			delete [] fish_freq[i];
+			delete [] fish_psd[i];
+		}
 	}
 	delete [] injection.bppe;
 	delete [] injection.betappe;
 	delete [] freq;
 	delete [] psd;
 	delete [] data;
-	//deallocate_2D_array(jac_spins,  fisher_dim, fisher_dim);
+	if(GLQ){
+		delete [] weights;
+		delete [] fish_freq;
+		delete [] fish_psd;
+	}
 
 	return 0;
 }
@@ -1640,7 +1706,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	std::string chain_distribution_scheme="double";
 	int max_chunk_size = 1000000;
 	mcmc_sampler_output sampler_output(chain_N,dimension);
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,(double**)NULL,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	sampler_output.create_data_dump(false,false,chainfile);
 	deallocate_2D_array(output, N_steps, dimension);
 	sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);
@@ -1715,8 +1781,8 @@ double standard_log_prior_D_sa(double *pos, mcmc_data_interface *interface,void 
 	if (pos[0]<.01  ){return a;}//chirpmass
 	double m1 = calculate_mass1(chirp,eta);
 	double m2 = calculate_mass2(chirp,eta);
-	if (m1<.1 || m1>8){return a;}//PSI
-	if (m2<.1 || m2>8){return a;}//PSI
+	if (m1<.1 || m1>50){return a;}//PSI
+	if (m2<.1 || m2>50){return a;}//PSI
 	if ((pos[2])<-.9 || (pos[2])>.9){return a;}//eta
 	if ((pos[3])<-.9 || (pos[3])>.9){return a;}//eta
 	if ((pos[4])<-10 || (pos[4])>10){return a;}//eta
@@ -1742,8 +1808,8 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if (pos[7]<.01  ){return a;}//chirpmass
 	double m1 = calculate_mass1(chirp,eta);
 	double m2 = calculate_mass2(chirp,eta);
-	if (m1<.1 || m1>8){return a;}//PSI
-	if (m2<.1 || m2>8){return a;}//PSI
+	if (m1<.1 || m1>50){return a;}//PSI
+	if (m2<.1 || m2>50){return a;}//PSI
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
@@ -1754,7 +1820,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if ((pos[5])<T_mcmc_gw_tool*3./4.-.1 || (pos[5])>T_mcmc_gw_tool*3./4.+.1){return a;}//tc
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>1000){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>800){return a;}//DL
 	//if (std::exp(pos[7])<.01 || std::exp(pos[7])>5 ){return a;}//chirpmass
 	//if (pos[7]<.01 || pos[7]>14 ){return a;}//chirpmass
 	//if (pos[7]<.1 || pos[7]>10 ){return a;}//chirpmass
@@ -1764,12 +1830,16 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	//if (pos[8]>pos[7]){return a;}//m1 greater than m2
 	if ((pos[9])<-.9 || (pos[9])>.9){return a;}//eta
 	if ((pos[10])<-.9 || (pos[10])>.9){return a;}//eta
+	for(int i = 11 ; i<interface->max_dim; i++){
+
+		if ((pos[i])<-10 || (pos[i])>10){return a;}//eta
+	}
 	//double chi1 = pos[9]+pos[10];
 	//double chi2 = pos[9]-pos[10];
 	//if ((chi1)<-.95 || (chi1)>.95){return a;}//chi1 
 	//if ((chi2)<-.95 || (chi2)>.95){return a;}//chi2
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
-	else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;}
+	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 	//else {return 3*pos[6] ;}
 	//else {return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] -log(cos(asin(pos[1]))) ;}
 
@@ -1925,4 +1995,5 @@ void RT_ERROR_MSG()
 	std::cout<<"5 --- MCMC RJ Sine Wave test"<<std::endl;
 	std::cout<<"6 --- MCMC RJ GW injection test"<<std::endl;
 	std::cout<<"7 --- Multiple continue mcmc testing"<<std::endl;
+	std::cout<<"8 --- Test likelihood"<<std::endl;
 }
