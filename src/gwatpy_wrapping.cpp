@@ -12,6 +12,12 @@
 #include <bits/stdc++.h> 
 
 
+
+double gps_to_GMST_radian_py(double gps)
+{
+	return gps_to_GMST_radian(gps);
+}
+
 double t_0PN_py(double f, double chirpmass)
 {
 	return t_0PN(f,chirpmass);
@@ -159,7 +165,7 @@ char * MCMC_prep_params_py(
 	}
 	
 	std::string str =  MCMC_prep_params(param, temp_params, gen_params, dimension, std::string(generation_method), mod_struct);
-	char *char_arr = new char[  str.length()];
+	char *char_arr = new char[  str.length()+1];
 	strcpy(char_arr,str.c_str());
 
 	if (save_gmst){

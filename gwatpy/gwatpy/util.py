@@ -51,6 +51,9 @@ rlib.gen_params_base_py.argtypes = \
 rlib.gen_params_base_py.restype = ctypes.c_void_p
 
 
+rlib.gps_to_GMST_radian_py.argtypes =[ctypes.c_double]
+rlib.gps_to_GMST_radian_py.restype = ctypes.c_double
+
 rlib.t_0PN_py.argtypes = \
     [ctypes.c_double,
     ctypes.c_double]
@@ -70,6 +73,9 @@ c = 299792458.
 T_year = 31557600.
 MPC_SEC = 3.085677581491367278913937957796471611e22/c
 MSOL_SEC = 4.925491025543575903411922162094833998e-6
+
+def gps_to_GMST_radian_py(gpstime):
+    return rlib.gps_to_GMST_radian_py(gpstime)
 def calculate_chirpmass_py(mass1,mass2):
     f=rlib.calculate_chirpmass_py
     f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]

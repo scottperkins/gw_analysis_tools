@@ -413,7 +413,7 @@ def plot_injection(injection,injection_status, psd_file_in,detector, generation_
     return fig
 
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gmst=0,figsize=None,axis=None,color='#254159'):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gpstime=1126259462.4,figsize=None,axis=None,color='#254159'):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -422,6 +422,8 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
     T = 1./(df)
     dt = T / len(freqs)
     times = np.linspace(0,T, len(freqs))
+
+    gmst = gpu.gps_to_GMST_radian_py(gpstime)
 
     N = 1000
 
@@ -457,7 +459,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
     #responses = pool.map(waveform_reduced, data_sub_packed)
     #Serial
     for x in np.arange(len(data_sub_packed)):
-        responses[x] = waveform_reduced( data_sub_packed[x])
+        responses[x] = np.real(waveform_reduced( data_sub_packed[x]))
     print("DONE")
 
     for i in np.arange(N):
@@ -488,7 +490,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
     if injection is not None:
         data_packed = [injection,np.asarray(injection_status,dtype=np.int32)]
 
-        response = waveform_reduced( data_packed)
+        response = np.real(waveform_reduced( data_packed))
         ax.plot(times,np.real(response),alpha=1,color='red' ,linewidth=1)
 
     if data_stream_file is not None:

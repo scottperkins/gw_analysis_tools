@@ -12,6 +12,7 @@ extern "C"
 {
 #endif
 
+double gps_to_GMST_radian_py(double gps);
 double t_0PN_py(double f, double chirpmass);
 double f_0PN_py(double t, double chirpmass);
 double DTOA_DETECTOR_py(double RA, double DEC, double GMST_rad, char *det1, char *det2);

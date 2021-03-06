@@ -91,6 +91,13 @@ void debugger_print(const char *file, const int line,const char *message)
 	std::cout<<message<<std::endl;
 }
 template<>
+void debugger_print(const char *file, const int line,char *message)
+{
+	std::cout.precision(15);
+	std::cout<<"DEBUGGER:["<<strip_path(std::string(file))<<","<<line<<"]:";
+	std::cout<<message<<std::endl;
+}
+template<>
 void debugger_print(const char *file, const int line,int message)
 {
 	std::cout.precision(15);
