@@ -47,6 +47,7 @@ double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface,
 double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
 double chirpmass_q_jac(double chirpmass, double q);
+double aligned_spin_prior(double chi);
 int main(int argc, char *argv[])
 {
 	std::cout.precision(15);
@@ -658,7 +659,8 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
-	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+	return log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
 double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *parameters)
@@ -737,7 +739,8 @@ double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interfac
 	//###########
 	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
 	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
-	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+	//else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+	else {return log(aligned_spin_prior(pos[2]))+log(aligned_spin_prior(pos[3])) + log(chirpmass_eta_jac(chirp,eta));} 
 
 
 }
@@ -832,4 +835,12 @@ double chirpmass_eta_jac(double chirpmass, double eta){
 //Uniform in m1 and m2, transformed to lnM and q
 double chirpmass_q_jac(double chirpmass, double q){
 	return chirpmass*chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
+}
+
+//For use with spin aligned system 
+//-- mimics uniform magnitude and uniform cos \tilt, but mapped to chi
+//-- Fit in mathematica 
+double aligned_spin_prior(double chi){
+	double a=0.0039132 , b= 3.95381;
+	return a * exp(-b * abs(chi));	
 }
