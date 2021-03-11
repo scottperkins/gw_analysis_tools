@@ -378,7 +378,9 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 
-def plot_injection(injection,injection_status, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},gmst=0,figsize=None,axis=None):
+def plot_injection(injection,injection_status, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},gpstime=1126259462.4,figsize=None,axis=None):
+
+    gmst = gpu.gps_to_GMST_radian_py(gpstime)
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
     psd = psd_in[:,psd_column+1]
@@ -413,7 +415,7 @@ def plot_injection(injection,injection_status, psd_file_in,detector, generation_
     return fig
 
 #Thanks to Neil for the term 'Bayesogram..'
-def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gpstime=1126259462.4,figsize=None,axis=None,color='#254159'):
+def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},injection=None,injection_status=None,gpstime=1126259462.4,figsize=None,axis=None,color='#254159',alpha=.8,symmetric_percentile=.90,N_waveforms=1000):
 
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
     freqs = psd_in[:,0]
@@ -425,7 +427,7 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
 
     gmst = gpu.gps_to_GMST_radian_py(gpstime)
 
-    N = 1000
+    N = N_waveforms
 
     ax = None
     fig = None
@@ -462,9 +464,16 @@ def plot_bayesogram(filename, psd_file_in,detector, generation_method_base, psd_
         responses[x] = np.real(waveform_reduced( data_sub_packed[x]))
     print("DONE")
 
-    for i in np.arange(N):
-        #ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
-        ax.plot(times,np.real(responses[i]),alpha=.05,color=color ,linewidth=.5)
+    final_response_max = np.quantile(responses,.5 + symmetric_percentile/2,axis=0 )
+    final_response_min = np.quantile(responses,.5-symmetric_percentile/2,axis=0 )
+    ax.fill_between(times,final_response_max,final_response_min,alpha=alpha,color=color ,linewidth=.5)
+    #################################################################################
+    #################################################################################
+    #for i in np.arange(N):
+    #    #ax.plot(times,np.real(responses[i]),alpha=.05,color='blue' ,linewidth=.1)
+    #    ax.plot(times,np.real(responses[i]),alpha=.05,color=color ,linewidth=.5)
+    #################################################################################
+    #################################################################################
 
     #ninetyp = np.quantile(np.real(responses),.90,axis=0)
     #tenthp = np.quantile(np.real(responses),.1,axis=0)
