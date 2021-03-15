@@ -58,9 +58,9 @@ with Pool() as pool:
     
     sampler = emcee.EnsembleSampler(nwalkers, ndim, prob, args=[like_fish,prior_fish, like_mean,prior_mean,scale],pool=pool)
     
-    state = sampler.run_mcmc(p0, 1000)
+    state = sampler.run_mcmc(p0, 100)
     sampler.reset()
-    sampler.run_mcmc(state, 40000,progress=True)
+    sampler.run_mcmc(state, 4000,progress=True)
     #sampler.run_mcmc(p0, nsteps=30000,progress=True)
     tau = np.max(sampler.get_autocorr_time(tol=0))
     print("AC: ",tau)

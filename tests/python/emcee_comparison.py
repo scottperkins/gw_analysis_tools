@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from multiprocessing import Pool
 from time import time
 import os 
-os.environ["OMP_NUM_THREADS"] = "10"
+os.environ["OMP_NUM_THREADS"] = "1"
 
 distribution_data = np.loadtxt("data/rosenbock_parameters.csv")
 a = distribution_data[0]
@@ -36,6 +36,7 @@ with Pool() as pool:
     ndim, nwalkers = n, 300
     ivar = None
     p0 = np.random.rand(nwalkers,ndim)
+    print(p0)
     #mu = np.random.rand(ndim)
     #cov = 0.5 - np.random.rand(ndim ** 2).reshape((ndim, ndim))
     #cov = np.triu(cov)
@@ -44,10 +45,10 @@ with Pool() as pool:
     
     #sampler = emcee.EnsembleSampler(nwalkers, ndim, log_l, args=[mu,cov],pool=pool)
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_l, args=[],pool=pool)
-    state = sampler.run_mcmc(p0, 10000,progress=True)
+    state = sampler.run_mcmc(p0, 100,progress=True)
     sampler.reset()
     print("Burned")
-    sampler.run_mcmc(state,50000,progress=True)
+    sampler.run_mcmc(state,500,progress=True)
     ac = sampler.get_autocorr_time(tol=0)
     print(ac)
 print("finished sampling",time()-start)
@@ -68,6 +69,12 @@ for y in range(nwalkers):
 meantau/=nwalkers
 max_meantau = int(np.amax(meantau))
 print(max_meantau)
+samples_full = sampler.get_chain()
+print(samples_full.shape)
+for x in samples_full[1:]:
+    #for y in len(samples
+    cc, pval = scipy.stats.spearmanr(samples_full[0],x)
+    #print(pval)
 samples = sampler.get_chain(flat=True,thin=max_meantau)
 np.savetxt("data/emcee_output.dat",samples)
 fig = corner.corner(samples)
