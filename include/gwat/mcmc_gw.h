@@ -208,8 +208,7 @@ double Log_Likelihood(std::complex<double> *data,
 				size_t length,
 				gen_params_base<double> *params,
 				std::string detector,
-				std::string generation_method,
-				fftw_outline *plan
+				std::string generation_method
 				);
 
 double maximized_Log_Likelihood_unaligned_spin_internal(std::complex<double> *data,
@@ -275,7 +274,6 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			double *weights,
 			std::complex<double> *detector_response,
 			int length,
-			fftw_outline *plan,
 			bool log10F,
 			std::string integration_method
 			);
@@ -478,11 +476,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	std::string integration_method, 
 	bool log10F,
 	std::string *detectors, 
-	fftw_outline *fftw_plans, 
-	int num_detectors, 
-	double RA, 
-	double DEC,
-	double gps_time);
+	int num_detectors
+	);
 
 void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *interface ,void *parameters) ;
 
