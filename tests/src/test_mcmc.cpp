@@ -154,7 +154,7 @@ int test_likelihood(int argc, char *argv[])
 	std::cout<<"SNR: "<<snr<<std::endl;
 	
 	clock_t start = clock();
-	double ll = Log_Likelihood_internal(response,psd, freqs,(double*)NULL,response,length,(fftw_outline*)NULL,false,"SIMPSONS");
+	double ll = Log_Likelihood_internal(response,psd, freqs,(double*)NULL,response,length,false,"SIMPSONS");
 	double t1 = (double)(clock()-start)/CLOCKS_PER_SEC;
 	std::cout<<"time: "<<t1<<std::endl;
 	std::cout<<"LL: "<<ll<<std::endl;
@@ -184,7 +184,7 @@ int test_likelihood(int argc, char *argv[])
 	std::cout<<"SNR: "<<snr<<std::endl;
 	
 	start = clock();
-	ll = Log_Likelihood_internal(response,psd, freqs,weights,response,length,(fftw_outline*)NULL,true,"GAUSSLEG");
+	ll = Log_Likelihood_internal(response,psd, freqs,weights,response,length,true,"GAUSSLEG");
 	double t2 = (double)(clock()-start)/CLOCKS_PER_SEC;
 	std::cout<<"time: "<<t2<<std::endl;
 	std::cout<<"Speedup: "<<t1/t2<<std::endl;
@@ -1390,7 +1390,7 @@ int mcmc_real_data(int argc, char *argv[])
 }
 int mcmc_injection(int argc, char *argv[])
 {
-	bool GLQ = true;
+	bool GLQ = false;
 	gen_params injection;
 	injection.mass1 = 36.4;
 	injection.mass2 = 29.3;
@@ -1449,7 +1449,7 @@ int mcmc_injection(int argc, char *argv[])
 		std::cout<<"Using GLQ"<<std::endl;
 		tc_ref = T_mcmc_gw_tool*(1-3./4.);
 		//double tc_ref = T_mcmc_gw_tool*(3./4.);
-		length = 2000;
+		length = 1000;
 		data = new std::complex<double>*[detect_number];
 		psd = new double*[detect_number];
 		fish_psd = new double*[detect_number];
