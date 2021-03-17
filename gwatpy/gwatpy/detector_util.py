@@ -32,10 +32,10 @@ def populate_noise_py(frequencies,detector, integration_time):
         ctypes.c_double \
     ]
     length = len(frequencies) 
-    freq = np.asarray(frequencies).ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    d_dtype = ctypes.c_double*(len(frequencies))
     detect = detector.encode("utf-8")
     noise_root = (ctypes.c_double*length)()
-    f(freq, detect,noise_root,ctypes.c_int(len(frequencies)),ctypes.c_double(integration_time))
+    f(d_dtype (*np.ascontiguousarray(frequencies,dtype=ctypes.c_double)), detect,noise_root,ctypes.c_int(len(frequencies)),ctypes.c_double(integration_time))
     return(noise_root)
 def get_detector_parameters_py(detector):
     f = rlib.get_detector_parameters

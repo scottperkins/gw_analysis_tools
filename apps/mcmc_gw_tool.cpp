@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
 	//	output_test[i][5] =real( data[1][i]);	
 	//	output_test[i][6] =imag( data[1][i]);	
 	//}
-	//write_file("testing/data/data_output.csv",output_test,psd_length,7);
+	//write_file("data/processed_data.csv",output_test,psd_length,7);
 	//deallocate_2D_array(output_test,psd_length,7);
 	
 

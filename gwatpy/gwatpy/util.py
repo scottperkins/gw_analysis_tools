@@ -208,7 +208,7 @@ class gen_params:
         if "cosmology" in kwargs:
             self.cosmology = kwargs["cosmology"] 
         if "equatorial_orientation" in kwargs:
-            self.cosmology = kwargs["equatorial_orientation"] 
+            self.equatorial_orientation = kwargs["equatorial_orientation"] 
         if "horizon_coord" in kwargs:
             self.horizon_coord = kwargs["horizon_coord"] 
         if "NSflag1" in kwargs:

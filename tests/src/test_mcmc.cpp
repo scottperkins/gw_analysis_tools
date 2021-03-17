@@ -1538,6 +1538,14 @@ int mcmc_injection(int argc, char *argv[])
 	}
 	//###################################################################
 	//###################################################################
+	double **weights_temp= new double*[detect_number];
+	injection.tc = T_mcmc_gw_tool - injection.tc ;
+	double sample_ll = MCMC_likelihood_extrinsic(true, &injection, injection_method, data_lengths,freq, data,psd,  weights_temp, "SIMPSONS",false, detectors, detect_number);
+	std::cout<<"Sample LL: "<<sample_ll<<std::endl;
+	delete [] weights_temp;
+	//###################################################################
+	//###################################################################
+	
 	injection.shift_time = false;
 	injection.shift_phase = false;
 	double fisher_dim = 12;

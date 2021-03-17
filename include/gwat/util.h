@@ -213,6 +213,93 @@ public:
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
 		
+	void print_properties()
+	{
+		std::cout<<"Source Properties: "<<std::endl;
+		std::cout<<"mass1 | mass2 | DL: "<<this->mass1<<" | "<<this->mass2<<" | "<<this->Luminosity_Distance<<std::endl;	
+		std::cout<<"spin1 | spin2: "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<" | "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<std::endl;	
+		std::cout<<"psi | iota | RA | DEC | gmst: "<<this->psi<<" | "<<this->incl_angle<<" | "<<this->RA<<" | "<<this->DEC<<" | "<<this->gmst<<std::endl;
+		std::cout<<"f_ref | shift_time | shift_phase: " <<this->f_ref<<" | "<<this->shift_time<<" | "<<this->shift_phase<<std::endl;
+		std::cout<<"horizon_coord | equatorial_orientation | sky_average | dep_postmerger: " <<this->horizon_coord<<" | "<<this->equatorial_orientation<<" | "<<this->sky_average<< " | "<<this->dep_postmerger<<std::endl;
+		std::cout<<"Cosmology: "<<this->cosmology<<std::endl;
+		if(this->Nmod > 0 ){
+			std::cout<<"Nmod: "<<this->Nmod<<std::endl;
+			std::cout<<"Betas: ";
+			for(int i = 0 ; i<this->Nmod; i++){
+				std::cout<<this->betappe[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+			std::cout<<"bppe: ";
+			for(int i = 0 ; i<this->Nmod; i++){
+				std::cout<<this->bppe[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+		}
+		if(this->Nmod_phi > 0 ){
+			std::cout<<"Nmod_phi: "<<this->Nmod_phi<<std::endl;
+			std::cout<<"delta phi: ";
+			for(int i = 0 ; i<this->Nmod_phi; i++){
+				std::cout<<this->delta_phi[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+			std::cout<<"phi i: ";
+			for(int i = 0 ; i<this->Nmod_phi; i++){
+				std::cout<<this->phii[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+		}
+		if(this->Nmod_sigma > 0 ){
+			std::cout<<"Nmod_sigma: "<<this->Nmod_sigma<<std::endl;
+			std::cout<<"delta sigma: ";
+			for(int i = 0 ; i<this->Nmod_sigma; i++){
+				std::cout<<this->delta_sigma[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+			std::cout<<"sigma i: ";
+			for(int i = 0 ; i<this->Nmod_sigma; i++){
+				std::cout<<this->sigmai[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+		}
+		if(this->Nmod_beta > 0 ){
+			std::cout<<"Nmod_beta: "<<this->Nmod_beta<<std::endl;
+			std::cout<<"delta beta: ";
+			for(int i = 0 ; i<this->Nmod_beta; i++){
+				std::cout<<this->delta_beta[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+			std::cout<<"beta i: ";
+			for(int i = 0 ; i<this->Nmod_beta; i++){
+				std::cout<<this->betai[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+		}
+		if(this->Nmod_alpha > 0 ){
+			std::cout<<"Nmod_alpha: "<<this->Nmod_alpha<<std::endl;
+			std::cout<<"delta alpha: ";
+			for(int i = 0 ; i<this->Nmod_alpha; i++){
+				std::cout<<this->delta_alpha[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+			std::cout<<"alpha i: ";
+			for(int i = 0 ; i<this->Nmod_alpha; i++){
+				std::cout<<this->alphai[i]<<" | ";
+
+			}
+			std::cout<<std::endl;
+		}
+
+	}
+
 };
 
 /*! \brief convience wrapper for the gen_params_base class

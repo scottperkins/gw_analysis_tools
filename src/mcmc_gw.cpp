@@ -2556,6 +2556,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	delete [] phi;
 	delete [] theta;
 	
+	//debugger_print(__FILE__,__LINE__,ll);
+	
 	return ll;
 }
 /*! \brief utility to do MCMC specific transformations on the input param vector before passing to the repacking utillity

@@ -80,7 +80,51 @@ rlib.mcmc_data_interface_py.restype = ctypes.c_void_p
 rlib.mcmc_data_interface_destructor_py.argtypes = [ctypes.c_void_p]
 rlib.mcmc_data_interface_destructor_py.restype=None
 
+rlib.MCMC_likelihood_extrinsic_py.argtypes = [
+    ctypes.c_bool,
+    ctypes.c_void_p,
+    ctypes.c_char_p,
+    ctypes.POINTER(ctypes.c_int),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.c_char_p,
+    ctypes.c_bool,
+    ctypes.c_char_p,
+    ctypes.c_int
+    ]
+rlib.MCMC_likelihood_extrinsic_py.restype=ctypes.c_double
 ##########################################################
+def MCMC_likelihood_extrinsic_py(save_waveform, parameters, generation_method, frequencies, data,  psd, weights, integration_method, log10F, detectors ):
+    ndet = len(data)
+    length = len(data[0])
+    d_type = ctypes.c_double * (ndet*length) 
+    c_type = ctypes.c_char_p * (ndet) 
+    i_type = ctypes.c_int * (ndet) 
+
+    f = frequencies.reshape(ndet*length)
+    dR = np.real(data).reshape(ndet*length)
+    dI = np.imag(data).reshape(ndet*length)
+    PSD = psd.reshape(ndet*length)
+    WEIGHTS = weights.reshape(ndet*length)
+    data_lengths = np.asarray([len(x) for x in data])
+    return rlib.MCMC_likelihood_extrinsic_py(
+        save_waveform,
+        parameters.obj,
+        generation_method.encode('utf-8'), 
+        i_type(* ( np.ascontiguousarray(data_lengths,dtype=ctypes.c_int))), 
+        d_type(* ( np.ascontiguousarray(f,dtype=ctypes.c_double))), 
+        d_type(* ( np.ascontiguousarray(dR,dtype=ctypes.c_double))), 
+        d_type(* ( np.ascontiguousarray(dI,dtype=ctypes.c_double))), 
+        d_type(* ( np.ascontiguousarray(PSD,dtype=ctypes.c_double))), 
+        d_type(* ( np.ascontiguousarray(WEIGHTS,dtype=ctypes.c_double))), 
+        integration_method.encode('utf-8'), 
+        log10F, 
+        detectors.encode('utf-8'),
+        ndet 
+        ) 
 class mcmc_data_interface_py(object):
     min_dim = 0
     max_dim = 0
