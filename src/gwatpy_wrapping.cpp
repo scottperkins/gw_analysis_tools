@@ -81,7 +81,7 @@ double MCMC_likelihood_extrinsic_py(bool save_waveform,
 		else if( std::strcmp(&(detectors[i]) ,"C") == 0)
 			DET[i] = "CE";
 	}
-	parameters->print_properties();
+	//parameters->print_properties();
 	double LL =  MCMC_likelihood_extrinsic(save_waveform, parameters, std::string(generation_method), data_length, FREQ, data,PSD, WEIGHTS, std::string(integration_method), log10F, DET, num_detectors);
 	for(int i = 0 ; i<num_detectors; i++){
 		delete [] data[i];
