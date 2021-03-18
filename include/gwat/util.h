@@ -220,6 +220,7 @@ public:
 		std::cout<<"spin1 | spin2: "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<" | "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<std::endl;	
 		std::cout<<"psi | iota | RA | DEC | gmst: "<<this->psi<<" | "<<this->incl_angle<<" | "<<this->RA<<" | "<<this->DEC<<" | "<<this->gmst<<std::endl;
 		std::cout<<"f_ref | shift_time | shift_phase: " <<this->f_ref<<" | "<<this->shift_time<<" | "<<this->shift_phase<<std::endl;
+		std::cout<<"tc | phiRef: " <<this->tc<<" | "<<this->phiRef<<std::endl;
 		std::cout<<"horizon_coord | equatorial_orientation | sky_average | dep_postmerger: " <<this->horizon_coord<<" | "<<this->equatorial_orientation<<" | "<<this->sky_average<< " | "<<this->dep_postmerger<<std::endl;
 		std::cout<<"Cosmology: "<<this->cosmology<<std::endl;
 		if(this->Nmod > 0 ){

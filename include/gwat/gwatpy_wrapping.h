@@ -148,6 +148,8 @@ gen_params_base<double>* gen_params_base_py(
 	double DEC,
 	double psi,
 	double gmst,
+	double tc,
+	double phiRef,
 	double f_ref,
 	double theta_l,
 	double phi_l,

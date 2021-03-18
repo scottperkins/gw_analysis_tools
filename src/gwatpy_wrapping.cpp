@@ -81,7 +81,7 @@ double MCMC_likelihood_extrinsic_py(bool save_waveform,
 		else if( std::strcmp(&(detectors[i]) ,"C") == 0)
 			DET[i] = "CE";
 	}
-	//parameters->print_properties();
+	parameters->print_properties();
 	double LL =  MCMC_likelihood_extrinsic(save_waveform, parameters, std::string(generation_method), data_length, FREQ, data,PSD, WEIGHTS, std::string(integration_method), log10F, DET, num_detectors);
 	for(int i = 0 ; i<num_detectors; i++){
 		delete [] data[i];
@@ -441,6 +441,8 @@ gen_params_base<double>* gen_params_base_py(
 	double DEC,
 	double psi,
 	double gmst,
+	double tc,
+	double phiRef,
 	double f_ref,
 	double theta_l,
 	double phi_l,
@@ -477,6 +479,8 @@ gen_params_base<double>* gen_params_base_py(
 	gen_params_base<double> *p = new gen_params_base<double> ;
 	p->mass1 = mass1;	
 	p->mass2 = mass2;	
+	p->tc = tc;
+	p->phiRef = phiRef;
 	p->spin1[0] = spin1[0];	
 	p->spin1[1] = spin1[1];	
 	p->spin1[2] = spin1[2];	
