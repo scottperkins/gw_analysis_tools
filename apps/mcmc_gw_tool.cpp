@@ -232,20 +232,23 @@ int main(int argc, char *argv[])
 	}
 
 
-	//double **output_test = allocate_2D_array(psd_length, 7 );
+	//double **output_test = allocate_2D_array(psd_length, 10 );
 	//
 	//for(int i = 0 ; i<psd_length; i++)
 	//{
 	//	output_test[i][0] = freqs[0][i];	
 	//	output_test[i][1] = psd[0][i];	
 	//	output_test[i][2] = psd[1][i];	
-	//	output_test[i][3] =real( data[0][i]);	
-	//	output_test[i][4] =imag( data[0][i]);	
-	//	output_test[i][5] =real( data[1][i]);	
-	//	output_test[i][6] =imag( data[1][i]);	
+	//	output_test[i][3] = psd[2][i];	
+	//	output_test[i][4] =real( data[0][i]);	
+	//	output_test[i][5] =imag( data[0][i]);	
+	//	output_test[i][6] =real( data[1][i]);	
+	//	output_test[i][7] =imag( data[1][i]);	
+	//	output_test[i][8] =real( data[2][i]);	
+	//	output_test[i][9] =imag( data[2][i]);	
 	//}
-	//write_file("data/processed_data.csv",output_test,psd_length,7);
-	//deallocate_2D_array(output_test,psd_length,7);
+	//write_file("data/processed_data.csv",output_test,psd_length,10);
+	//deallocate_2D_array(output_test,psd_length,10);
 	
 
 	//#############################################################
