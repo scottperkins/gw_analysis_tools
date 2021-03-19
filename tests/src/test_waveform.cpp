@@ -3,6 +3,7 @@
 #include "gwat/detector_util.h"
 #include "gwat/waveform_util.h"
 #include "gwat/pn_waveform_util.h"
+//#include "gwat/waveform_generator.h"
 //#include "gwat/IMRPhenomD.h"
 #include "gwat/io_util.h"
 #include <iostream>
@@ -511,11 +512,13 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		COMPLEX16FrequencySeries *hctilde=NULL;
 		double alpha[17];
 		for (int j = 0 ; j<17; j++){
-		  //alpha[j] = 0.1; 
-		  alpha[j] = gsl_rng_uniform(r);
+		  alpha[j] = 0.1; 
+		  //alpha[j] = gsl_rng_uniform(r);
 		}
-		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
-		const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6;
+		//const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
+		//const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6;
+		const REAL8 s1x = 0.0, s1y=0.0,s1z=0.0;
+		const REAL8 s2x =0.0, s2y=0.0,s2z=0.0;
 		//const REAL8 incl = M_PI/5.;
 		const REAL8 incl = M_PI * alpha[6];
 		double RA = 2*M_PI * alpha[7];
@@ -553,16 +556,23 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		const REAL8 phiRef = 2*M_PI * alpha[13];
 		double gmst = 2*M_PI*alpha[14];
 		REAL8 phi_aligned;
+		//const REAL8 f_min = .0017*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		//std::cout<<"f_min: "<<f_min<< std::endl; 
+		//const REAL8 f_max = .0171*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		//std::cout<<"f_max: "<<f_max<< std::endl; 
 		const REAL8 f_max = .19*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		int length = 4016;
-		//int length = 131072;
+		//int length = 4016;
+		int length = 131072;
 		double deltaf = (f_max-f_min)/(length-1);
-		const REAL8 f_ref = (f_max-f_min)/2.;
+		const REAL8 f_ref = .002;
+		//const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
 		//alpha[15] = 0.0;
 		//alpha[16] = 0.0; 
+		//REAL8 lambda1 = 0.0 ;
+		//REAL8 lambda2 = 0.0 ;
 		REAL8 lambda1 = 100*fabs(alpha[15]) ;
 		REAL8 lambda2 = 100*fabs(alpha[16]) ;
 		NRTidal_version_type NRT_v=NRTidalv2_V;
@@ -647,8 +657,11 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//###############################################################################
 		gen_params param;
 		param.mass1 = m1_SI/LAL_MSUN_SI;	
-		param.mass2 = m2_SI/LAL_MSUN_SI;	
+		param.mass2 = m2_SI/LAL_MSUN_SI;
+		//std::cout<<"mass1: "<<param.mass1<<std::endl;
+		//std::cout<<"mass2: "<<param.mass2<<std::endl; 
 		param.Luminosity_Distance = distance/MPC_M;
+		//std::cout<<"Luminosity distance: "<<param.Luminosity_Distance<<std::endl; 
 		param.incl_angle = incl;
 		param.phiRef = phiRef;
 		param.f_ref = f_ref;
@@ -658,6 +671,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.spin2[0] = s2x;
 		param.spin2[1] = s2y;
 		param.spin2[2] = s2z;
+		std::cout<<"spin1[0]: "<<param.spin1[0]<<"\t spin1[1]:"<<param.spin1[1]<<"\t spin2[2]:"<<param.spin1[2]<<std::endl; 
+		std::cout<<"spin2[0]: "<<param.spin2[0]<<"\t spin2[1]:"<<param.spin2[1]<<"\t spin2[2]:"<<param.spin2[2]<<std::endl; 
+
 		param.NSflag1=false;
 		param.NSflag2=false;
 		param.sky_average=false;
@@ -671,10 +687,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.gmst = gmst;
 		param.tc = .0 ;
 		param.tidal1 =100*fabs(alpha[15]) ;
-		//param.tidal1 = 0.0 ;
 		param.tidal2 =100*fabs(alpha[16]) ;
-		//param.tidal2 = 0.0 ;
-		//param.tidal_weighted = 0.0;
+		//std::cout<<"tidal1: "<<param.tidal1<<"\t tidal2: "<<param.tidal2<<std::endl;
+		
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
 		if(P){
@@ -693,7 +708,39 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 				method = "IMRPhenomD";
 			}
 		}
-		std::cout<<"method:"<<method<<std::endl; 
+		/*
+		//Attempting to plot frequency transitions
+		source_parameters<double> sp;
+		//populate_source_parameters(param); 
+		std::string temp_method = prep_source_parameters(&sp, &param, method);
+		//Declare internal structures and arrays that are needed
+		//These are always used internally, and we typically won't modify them manually
+		double pn_coeff_phase[12];
+		double pn_coeff_amp[7];
+		double deltas[6];
+		lambda_parameters<double> *lambda = new lambda_parameters<double>;
+		useful_powers<double> *powers = new useful_powers<double>;
+		IMRPhenomD<double> model; 
+		//Populate the internal structures
+		model.precalc_powers_PI(powers);
+		model.assign_lambda_param(sp, lambda);
+		model.assign_static_pn_phase_coeff(sp, pn_coeff_phase);
+		model.assign_pn_amplitude_coeff(sp, pn_coeff_amp);
+		model.post_merger_variables(sp);
+		sp.f1_phase = 0.018/(sp.M);
+		sp.f2_phase = sp.fRD/2.;
+
+		std::cout<<"f1_phase: "<<sp.f1_phase<<std::endl;
+		std::cout<<"f2_phase: "<<sp.f2_phase<<std::endl;
+		std::cout<<"fRD: "<<sp.fRD<<std::endl; 
+		*/
+		
+
+		//sp.f2_phase = sp->fRD/2.;
+  
+		//sp.f1 = 0.014/(sp->M);
+		//sp.f3 = IMRPhenomD<T>->fpeak(params, &lambda);
+		
 		start =clock();
 
 		fourier_detector_response(frequencies, length, response,DETECTOR, method,&param,(double*)NULL);
@@ -721,6 +768,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			output[i][5] = phaseLAL[i];
 			output[i][6] = phaseGWAT[i];
 		}
+		std::cout<<output[0][1]<<"\t"<< output[0][2]<<"\t"<<output[0][3]<<"\t"<<output[0][4]<<std::endl; 
 		write_file("data/response_"+std::to_string(k)+".csv",output,length,7);
 		deallocate_2D_array(output,length,7);
 		delete [] response;

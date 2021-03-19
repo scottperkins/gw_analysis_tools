@@ -1163,7 +1163,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
 			out->tidal_weighted = in->tidal_weighted;
 		}
-		else if((in->tidal1 > 0 && in->tidal2>0) ) {
+		else if((in->tidal1 >= 0 && in->tidal2>=0) ) {
 			out->tidal1 = in->tidal1;
 			out->tidal2 = in->tidal2;
 			//arXiv 1402.5156

@@ -1,4 +1,5 @@
 #include "IMRPhenomD_NRT.h"
+#include "IMRPhenomD.h"
 #include <math.h>
 #include <adolc/adouble.h>
 #include <adolc/taping.h>
@@ -22,9 +23,6 @@ template<class T>
 T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
 { 
   T x = pow((M_PI * param->M *f), 2./3.);
-  //T x = pow((M_PI * param->M *f*1000), 2./3.);
-  //x = 0.0;
-  //std::cout<<x<<","<<std::endl; 
   
   T xpowers[5];
   for(int i = 0; i<5; i++)
@@ -42,6 +40,7 @@ T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
   if(!deriv)
     {
       P_NRT = xpowers[3] * P_NRT/P_NRTdenom; //Note that this is the Pade function times x^(5/2).
+      //std::cout<<P_NRT<<","<<std::endl; 
       return P_NRT;
     }
   else
@@ -67,15 +66,18 @@ T IMRPhenomD_NRT<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff, la
   IMRPhenomD<T> model;
   T gr_ins = model.phase_ins(f, param, pn_coeff, lambda, powers);
   T phaseout = gr_ins;
+  T phasefix; 
   bool deriv = false; //tells the Pade function not to take a derivative
 
   //std::cout<<f<<","<<std::endl; 
   //std::cout<<Pade(f, param, deriv)<<","<<std::endl; 
 
-  //std::cout<<"{"<<f<<","<<Pade(f, param, deriv)<<"},"<<std::endl; 
-  phaseout = phaseout - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv)); 
-  //phaseout = phaseout + (1e6)*((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
-  std::cout<<"Called IMRPhenomD_NRT::phase_ins"<<std::endl; 
+  phasefix = - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
+  phaseout = phaseout + phasefix;
+  // phaseout = phaseout - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
+  //std::cout<<"{"<<f<<","<<Pade(f, param, deriv)<<","<<phasefix<<"},"<<std::endl; 
+
+  //std::cout<<"Called IMRPhenomD_NRT::phase_ins"<<std::endl; 
   
   return phaseout;
 }
@@ -88,17 +90,6 @@ T IMRPhenomD_NRT<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, l
   T gr_ins = model.Dphase_ins(f, param, pn_coeff, lambda);
   T phaseout = gr_ins;
   bool deriv = true;
-
-  /*
-  for(int i = 0; i<5; i++)
-    {
-      std::cout<<"n_NRT["<<i<<"]:"<<n_NRT[i]<<std::endl;
-    }
-  for(int i = 0; i<3; i++)
-    {
-      std::cout<<"d_NRT["<<i<<"]:"<<d_NRT[i]<<std::endl;
-    }
-  */
   
   phaseout = phaseout - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
   
@@ -120,7 +111,7 @@ T IMRPhenomD_NRT<T>::amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
   amp_NRT = amp_NRT*powers->MF7sixth/ (param->A0*pow(param->M, 7/6.));
 
   ampout += amp_NRT;
-  std::cout<<"Called IMRPhenomD_NRT::amp_ins"<<std::endl; 
+  //std::cout<<"Called IMRPhenomD_NRT::amp_ins"<<std::endl; 
   return ampout; 
 }
 
@@ -146,7 +137,8 @@ T IMRPhenomD_NRT<T>::Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lam
 
   DaNRT = DaNRT *pow(param->M * f, 7/6.)/ (param->A0*pow(param->M, 7/6.)) + amp_NRT * (7/6.)*pow(f,1/6.)/ (param->A0);
   //with appropriate scaling factors
-
+  std::cout<<"DaNRT ="<<DaNRT<<std::endl;
+  debugger_print(__FILE__,__LINE__,DaNRT);
   ampout = ampout + DaNRT; 
   return ampout; 
 }
@@ -165,7 +157,7 @@ T IMRPhenomD_NRT<T>::taper(T f, int length, source_parameters<T> *params)
   //it is accurate enough to use kappa effective. Can test by turning this back on. No change in output.
   
   kappa = kappa_eff;
-  fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa);
+  fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa); //Equation 11 of arXiv:1804.02235
   T fmerger12 = fmerger*1.2;
   T z = (fmerger - fmerger12)/(f - fmerger) + (fmerger - fmerger12)/(f - fmerger12); 
   
@@ -190,13 +182,117 @@ template<class T>
 int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
   IMRPhenomD<T> model;
-  int status = model.construct_waveform(frequencies, length, waveform, params);
-  T f; 
+  //int status = model.construct_waveform(frequencies, length, waveform, params);
+  T M = params-> M;
+  T chirpmass = params->chirpmass;
+  T DL = params->DL;
+  lambda_parameters<T> lambda, *lambda_ptr;
+  this->assign_lambda_param(params, &lambda);
+  
+  /*Initialize the post merger quantities*/
+  this->post_merger_variables(params);
+  params->f1_phase = 0.018/(params->M);
+  params->f2_phase = params->fRD/2.;
+  
+  params->f1 = 0.014/(params->M);
+  params->f3 = this->fpeak(params, &lambda);
+
+  /* T fmerger, kappa, kappa_eff;
+  kappa_eff = (3./16.) * params->tidal_weighted; //kappa effective as defined in arXiv:1804.02235 and arXiv:1905.06011v2.
+  
+  //kappa = 3.*(params->mass2 * pow(params->mass1, 4.)* params->tidal1/ pow(params->M,5.) + params->mass1 * pow(params->mass2, 4.)* params->tidal2/ pow(params->M,5.));
+  //This is the definition for kappa_2^T given in arXiv:1804.02235. As described in that paper,
+  //it is accurate enough to use kappa effective. Can test by turning this back on. No change in output.
+  
+  kappa = kappa_eff;
+  fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa);
+
+  params->f3 = fmerger;
+  */
+  //Wanted to try using the fmerger defined in the NR Tidal paper instead of fpeak. This made a huge difference...
+	
+  useful_powers<T> pows;
+  this->precalc_powers_PI(&pows);
+
+  T deltas[6];
+  T pn_amp_coeffs[7];
+  T pn_phase_coeffs[12];
+  
+  this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
+  this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
+  
+  this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
+  this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
+  
+  //################################################################
+  //Calculate phase and coalescence time variables
+  T phic, f_ref, tc, phi_shift, tc_shift;
+  //If phic is unspecified - use f_ref and phiRef
+  if(params->shift_phase ){
+    f_ref = params->f_ref;
+    this->precalc_powers_ins(f_ref, M, &pows);
+    phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
+    phic = 2*params->phiRef + phi_shift;
+  }
+  //If phic is specified, ignore f_ref phiRef and use phic
+  else{
+    f_ref = 0;
+    phic = params->phiRef;
+  }
+  
+  //Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
+  //This aligns more with the physical meaning of tc, but the phase is NO LONGER just
+  if(params->shift_time){
+    T alpha1_offset = this->assign_lambda_param_element(params,14);
+    tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
+  }
+  else{
+    tc_shift=0;
+  }
+  //tc = 2*M_PI*params->tc - tc_shift;
+  tc = 2*M_PI*params->tc + tc_shift;
+  
+  //T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
+  T A0 = params->A0* pow(M,7./6.);
+  
+  T f;
+  std::complex<T> amp, phase;
+  std::complex<T> i;
+  i = std::complex<T> (0,1.);
+  T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
+  for (size_t j =0; j< length; j++)
+    {
+      f = frequencies[j];
+      if(f>fcut){
+	amp = 0.0;
+	waveform[j] = 0.0;
+      }
+      else{	
+	if (f<params->f1_phase)
+	  {
+	    this->precalc_powers_ins(f, M, &pows);
+	  }
+	else
+	  {
+	    pows.MFsixth= pow(M*f,1./6.);	
+	    pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+	  }
+	amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
+	phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+	//phase +=   (T)(tc*(f-f_ref) - phic);
+	phase -=   (T)(tc*(f-f_ref) + phic);
+	waveform[j] = amp * std::exp(-i * phase);
+      }
+      
+    }
+	
+  //###################################### The next part applies the taper.  
   for(int i = 0; i<length; i++)
     {
       waveform[i] = waveform[i] * taper(frequencies[i], length, params);
     }
-  return status;
+  
+  return 1;
 }
 
 template class IMRPhenomD_NRT<double>;
