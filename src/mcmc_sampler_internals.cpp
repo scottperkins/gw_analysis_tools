@@ -7,6 +7,10 @@
 #include <math.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_integration.h>
 #include <eigen3/Eigen/Eigen>
 #include <limits>
 #include <iomanip>
@@ -1305,6 +1309,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->de_primed = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
 	sampler->waiting = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
 	sampler->waiting_SWP = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
+	sampler->restarted_chain = (bool *)malloc(sizeof(bool ) * sampler->chain_N);
 	sampler->queue_mutexes = new std::mutex[sampler->chain_N];
 	sampler->current_hist_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
 	sampler->chain_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
@@ -1356,6 +1361,8 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->swap_partners = new int*[sampler->chain_N];
+	sampler->thermodynamic_integrated_likelihood = new double[sampler->chain_N];
+	sampler->thermodynamic_integrated_likelihood_terms = new int[sampler->chain_N];
 	if(sampler->update_RJ_width){
 		sampler->RJstep_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 		sampler->RJstep_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1498,6 +1505,9 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->num_RJstep[i]=0;
 	
 		sampler->priority[i] = 1; //Default priority
+		sampler->restarted_chain[i]=false;
+		sampler->thermodynamic_integrated_likelihood[i]=0;
+		sampler->thermodynamic_integrated_likelihood_terms[i]=0;
 
 		sampler->rvec[i] = gsl_rng_alloc(T);
 
@@ -1662,6 +1672,9 @@ void deallocate_sampler_mem(sampler *sampler)
 
 	free(sampler->current_likelihoods);
 	free(sampler->priority);
+	free(sampler->restarted_chain);
+	delete [] sampler->thermodynamic_integrated_likelihood;
+	delete [] sampler->thermodynamic_integrated_likelihood_terms;
 
 	deallocate_3D_array(sampler->history,sampler->chain_N, 
 				sampler->history_length, sampler->max_dim);
@@ -3363,4 +3376,100 @@ void reduce_output(int step_num, int max_dimension, double ***output_old, int **
 	}
 
 }
+
+void integrate_likelihood(sampler *samplerptr)
+{
+		
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		samplerptr->thermodynamic_integrated_likelihood[i] =0;	
+		samplerptr->thermodynamic_integrated_likelihood_terms[i] =0;	
+	}
+
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		int pos = samplerptr->chain_pos[i];
+		if(samplerptr->restarted_chain[i]){
+			pos = samplerptr->N_steps;
+		}
+		for(int j = 0 ; j<pos; j++){
+			samplerptr->thermodynamic_integrated_likelihood[i] += samplerptr->ll_lp_output[i][j][0];
+		}
+		samplerptr->thermodynamic_integrated_likelihood_terms[i]+=pos;
+		samplerptr->thermodynamic_integrated_likelihood[i] /= samplerptr->thermodynamic_integrated_likelihood_terms[i];
+	}
+	
+}
+
+int combine_chain_evidence(sampler *samplerptr, double *evidences, int *total_terms)
+{
+	int ensemble_size = 0;
+	for(int i = 1 ; i<samplerptr->chain_N; i++){
+		if(fabs(samplerptr->chain_temps[i]-1) <1e-10){
+			break;
+		}
+		ensemble_size++;
+	}	
+	evidences = new double[ensemble_size];
+	total_terms = new int[ensemble_size];
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		evidences[i] = 0;		
+		total_terms[i] = 0;		
+	}
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		evidences[ i%ensemble_size]+= samplerptr->thermodynamic_integrated_likelihood[i]*samplerptr->thermodynamic_integrated_likelihood_terms[i];
+		total_terms[i%ensemble_size] += samplerptr->thermodynamic_integrated_likelihood_terms[i];
+	}
+	for(int i = 0 ; i<samplerptr->chain_N; i++){
+		evidences[i] /= total_terms[i];		
+	}
+	
+	return ensemble_size;
+}
+
+//##################################################################
+//Simple solution to integration issue
+//##################################################################
+struct helper_params
+{
+	gsl_interp_accel *a;	
+	gsl_spline *s;	
+};
+double integration_helper(double beta, void *params)
+{
+	helper_params *p = (helper_params *) params;
+	double likelihood =  gsl_spline_eval(p->s, beta, p->a);
+	return likelihood;
+}
+//##################################################################
+
+int thermodynamic_integration(double *integrated_likelihoods,double *temps,int temps_N, double *evidence, double *error)
+{
+	double betas[temps_N];
+	double temp_integrated_likelihoods[temps_N];
+	//Reverse the order because interpolation needs beta going up
+	for(int i = 0 ; i<temps_N; i++){
+		betas[i] = 1./temps[temps_N - i-1];
+		temp_integrated_likelihoods[i] = integrated_likelihoods[temps_N - i-1];
+	}
+	gsl_interp_accel *acc = gsl_interp_accel_alloc();	
+	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, temps_N);
+	gsl_spline_init(spline, betas, temp_integrated_likelihoods, temps_N);
+
+	helper_params params;
+	params.a = acc;
+	params.s = spline;
+
+	gsl_function F;
+	F.function = &integration_helper;
+	F.params = &params;
+
+	gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+
+	int errorcode = gsl_integration_qags(&F, betas[0],betas[temps_N-1],0,1e-7,1000,w, evidence, error);
+
+	gsl_integration_workspace_free(w);
+	gsl_spline_free(spline);
+	gsl_interp_accel_free(acc);
+	return errorcode;
+}
+
 

@@ -65,6 +65,7 @@ public:
 	double ensemble_prop_a = 1.;
 	//########
 	bool *waiting;
+	bool *restarted_chain;
 	bool *waiting_SWP;
 	std::mutex *queue_mutexes;
 	int *chain_pos;
@@ -183,6 +184,9 @@ public:
 	int *step_accept_ct;
 	int *step_reject_ct;
 
+	double *thermodynamic_integrated_likelihood;
+	int *thermodynamic_integrated_likelihood_terms;
+
 	//Pointer for testing -- stores log likelihood and log prior for output
 	//Quite a bit of memory (order chain_N * N_steps * 2), so probably not good to run every single time. Just for trouble
 	//shooting.
@@ -206,6 +210,8 @@ public:
 	int nested_model_number = 0;//Number of models that are perfectly nested
 	
 };
+
+int thermodynamic_integration(double *integrated_likelihoods,double *temps,int temps_N, double *evidence, double *error);
 
 
 void iterate_fisher(sampler *samplerptr, int chain_id);

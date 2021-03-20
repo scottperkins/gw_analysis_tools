@@ -5400,6 +5400,7 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 								samplerptr->param_status[i][pos][k] ;
 						}
 						samplerptr->chain_pos[i] = 0;
+						samplerptr->restarted_chain[i] = true;
 
 						poolptr->enqueue(i);
 					}
@@ -5576,6 +5577,7 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 								samplerptr->param_status[i][pos][k] ;
 						}
 						samplerptr->chain_pos[i] = 0;
+						samplerptr->restarted_chain[i] = true;
 
 
 

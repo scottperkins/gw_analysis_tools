@@ -53,6 +53,7 @@ double T_mcmc_gw_tool ;
 double standard_log_prior_dCS(double *pos, mcmc_data_interface *interface,void *parameters);
 //void fisher_rosenbock(double *c,double **fisher,  mcmc_data_interface *interface,void *parameters);
 
+int test_evidence(int argc, char *argv[]);
 double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters);
 double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters);
 void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *interface, void *parameters);
@@ -107,12 +108,33 @@ int main(int argc, char *argv[])
 		std::cout<<"Test Likelihood"<<std::endl;
 		return test_likelihood(argc,argv);
 	}
+	else if(runtime_opt == 9){
+		std::cout<<"Test evidence calculation"<<std::endl;
+		return test_evidence(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
 
+int test_evidence(int argc, char *argv[])
+{
+	int temps_N = 100;
+	double likelihood_vals[temps_N];
+	double temps[temps_N];
+	double beta;
+	for(int i = 0 ; i<temps_N; i++){
+		likelihood_vals[i] = 10 + 90. * i/99;	
+		beta = (0+(98.-i)*1.00/99);
+		temps[i] = 1./beta;	
+		//std::cout<<temps[i]<<" "<<1./temps[i]<<" "<<likelihood_vals[i]<<std::endl;
+	}
+	double evidence, error;
+	thermodynamic_integration(likelihood_vals, temps, temps_N, &evidence,&error);
+	std::cout<<evidence<<" "<<error<<std::endl;
+	return 0;
+}
 int test_likelihood(int argc, char *argv[])
 {
 	gen_params *gp = new gen_params;
@@ -2004,4 +2026,5 @@ void RT_ERROR_MSG()
 	std::cout<<"6 --- MCMC RJ GW injection test"<<std::endl;
 	std::cout<<"7 --- Multiple continue mcmc testing"<<std::endl;
 	std::cout<<"8 --- Test likelihood"<<std::endl;
+	std::cout<<"9 --- Test evidence calculation"<<std::endl;
 }
