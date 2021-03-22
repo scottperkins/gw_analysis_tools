@@ -213,6 +213,9 @@ public:
 
 int thermodynamic_integration(double *integrated_likelihoods,double *temps,int temps_N, double *evidence, double *error);
 
+double calculate_evidence(sampler *samplerptr);
+void combine_chain_evidence(sampler *samplerptr, double *evidences, int *total_terms, int ensemble_size);
+void integrate_likelihood(sampler *samplerptr);
 
 void iterate_fisher(sampler *samplerptr, int chain_id);
 int mcmc_step(sampler *sampler, double *current_param,double *next_param, int *current_status, int *next_status,int *current_model_status, int *next_model_status, int chain_number);

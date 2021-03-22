@@ -788,7 +788,7 @@ double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interf
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
 	if ((pos[7])<0 || (pos[7])>2*M_PI){return a;}//chi2
-	else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+	return log(chirpmass_eta_jac(chirp,eta)) ;
 
 }
 double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters)

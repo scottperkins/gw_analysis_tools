@@ -3377,6 +3377,9 @@ void reduce_output(int step_num, int max_dimension, double ***output_old, int **
 
 }
 
+//##################################################################
+//Evidence Calculation
+//##################################################################
 void integrate_likelihood(sampler *samplerptr)
 {
 		
@@ -3399,18 +3402,10 @@ void integrate_likelihood(sampler *samplerptr)
 	
 }
 
-int combine_chain_evidence(sampler *samplerptr, double *evidences, int *total_terms)
+
+void combine_chain_evidence(sampler *samplerptr, double *evidences, int *total_terms, int ensemble_size)
 {
-	int ensemble_size = 0;
-	for(int i = 1 ; i<samplerptr->chain_N; i++){
-		if(fabs(samplerptr->chain_temps[i]-1) <1e-10){
-			break;
-		}
-		ensemble_size++;
-	}	
-	evidences = new double[ensemble_size];
-	total_terms = new int[ensemble_size];
-	for(int i = 0 ; i<samplerptr->chain_N; i++){
+	for(int i = 0 ; i<ensemble_size; i++){
 		evidences[i] = 0;		
 		total_terms[i] = 0;		
 	}
@@ -3418,11 +3413,11 @@ int combine_chain_evidence(sampler *samplerptr, double *evidences, int *total_te
 		evidences[ i%ensemble_size]+= samplerptr->thermodynamic_integrated_likelihood[i]*samplerptr->thermodynamic_integrated_likelihood_terms[i];
 		total_terms[i%ensemble_size] += samplerptr->thermodynamic_integrated_likelihood_terms[i];
 	}
-	for(int i = 0 ; i<samplerptr->chain_N; i++){
+	for(int i = 0 ; i<ensemble_size; i++){
 		evidences[i] /= total_terms[i];		
 	}
 	
-	return ensemble_size;
+	return ;
 }
 
 //##################################################################
@@ -3472,4 +3467,20 @@ int thermodynamic_integration(double *integrated_likelihoods,double *temps,int t
 	return errorcode;
 }
 
+double calculate_evidence(sampler *samplerptr)
+{
+	
+	integrate_likelihood(samplerptr);
+	double integrated_likelihoods[samplerptr->chain_N];
+	int total_terms[samplerptr->chain_N];
+	int temps_N = (int)(samplerptr->chain_N /count_cold_chains(samplerptr->chain_temps, samplerptr->chain_N));
+	combine_chain_evidence(samplerptr, integrated_likelihoods, total_terms,temps_N);
+	double evidence,error;
+	int errcode = thermodynamic_integration(integrated_likelihoods,samplerptr->chain_temps,temps_N, &evidence, &error);
+	
+	return evidence;
+}
+
+//##################################################################
+//##################################################################
 

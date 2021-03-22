@@ -88,6 +88,12 @@ mcmc_sampler_output::~mcmc_sampler_output()
 	dealloc_status();
 	dealloc_model_status();
 	dealloc_logL_logP();
+	if(integrated_likelihoods){
+		delete [] integrated_likelihoods;
+	}
+	if(integrated_likelihoods_terms){
+		delete [] integrated_likelihoods_terms;
+	}
 	if(chain_lengths){
 		delete [] chain_lengths;
 		chain_lengths = NULL;
@@ -1303,6 +1309,32 @@ int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_s
 
 }
 #endif
+void mcmc_sampler_output::append_integrated_likelihoods(double *integrated_likelihoods_new, int * integrated_likelihoods_terms_new, int ensemble_size)
+{
+	if(!integrated_likelihoods)
+	{
+		integrated_likelihoods = new double[ensemble_size];
+		for(int i = 0 ; i<ensemble_size; i++){
+			integrated_likelihoods[i] = 0 ;
+		}
+	}
+	if(!integrated_likelihoods_terms)
+	{	
+		integrated_likelihoods_terms = new int[ensemble_size];
+		for(int i = 0 ; i<ensemble_size; i++){
+			integrated_likelihoods_terms[i] = 0 ;
+		}
+	}
+	for(int i = 0; i<ensemble_size; i++){
+		integrated_likelihoods[i] = integrated_likelihoods_terms[i]*integrated_likelihoods[i] + integrated_likelihoods_terms_new[i] * integrated_likelihoods_new[i];
+		integrated_likelihoods_terms[i] += integrated_likelihoods_terms_new[i];
+		integrated_likelihoods[i]/= integrated_likelihoods_terms[i];
+	}
+}
+void mcmc_sampler_output::calculate_evidence()
+{
+	int errcode = thermodynamic_integration(integrated_likelihoods, chain_temperatures, (int)(chain_number/ cold_chain_number), &evidence, &evidence_error);
+}
 //#############################################################
 //#############################################################
 
@@ -3694,9 +3726,11 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
 		//write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
 		//spct++;
+		
 
 		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
 		sampler_output->populate_chain_temperatures(chain_temps);
+
 		if(init){
 			debugger_print(__FILE__,__LINE__,"Init structure");
 			sampler_output->populate_initial_output(temp_output, (int ***)NULL,(int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
@@ -3713,6 +3747,21 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		sampler_output->calc_ac_vals(true);
 		sampler_output->count_indep_samples(true);
 		status = sampler_output->indep_samples;
+
+
+		//##############################################
+		//Evidence calculation
+		sampler.chain_temps = &chain_temps[0];
+		integrate_likelihood(&sampler);
+		int ensemble_size= (int)(sampler.chain_N/coldchains);
+		double integrated_likelihoods[ensemble_size];
+		int integrated_likelihoods_terms[ensemble_size];
+		combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+		//double evidence = calculate_evidence(&sampler);
+		//debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(evidence));
+		sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+		sampler_output->calculate_evidence();
+		//##############################################
 
 		double ac_mean = 1;
 		double pos_mean = 0;
@@ -3831,7 +3880,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	}
 	
 	//Maybe write new stat file format
-	
+	std::cout<<std::endl;
+	debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(sampler_output->evidence));	
 
 	//Cleanup
 	deallocate_3D_array(temp_output, chain_N, temp_length, dimension);

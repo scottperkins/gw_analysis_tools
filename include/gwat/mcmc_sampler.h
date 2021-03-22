@@ -54,6 +54,8 @@ public:
 	int append_to_data_dump(std::string filename);
 	int write_flat_thin_output(std::string filename, bool use_stored_ac,bool trim);
 	void set_trim(int trim);
+	void append_integrated_likelihoods(double *integrated_likelihoods, int * integrated_likelihoods_terms, int ensemble_size);
+	void calculate_evidence();
 
 	int chunk_steps = 1000;
 	int chain_number;
@@ -71,6 +73,10 @@ public:
 	int indep_samples=0;
 	int *max_acs=NULL;
 	int *trim_lengths=NULL;
+	int *integrated_likelihoods_terms=NULL;
+	double *integrated_likelihoods=NULL;
+	double evidence=0;
+	double evidence_error=0;
 
 	bool RJ=false;
 	int ***status=NULL;
