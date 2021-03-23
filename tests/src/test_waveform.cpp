@@ -561,11 +561,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//std::cout<<"f_min: "<<f_min<< std::endl; 
 		//const REAL8 f_max = .0171*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		//std::cout<<"f_max: "<<f_max<< std::endl; 
-		const REAL8 f_max = .19*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		const REAL8 f_max = .15*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		//int length = 4016;
 		int length = 131072;
 		double deltaf = (f_max-f_min)/(length-1);
-		const REAL8 f_ref = .002;
 		//const REAL8 f_ref = (f_max-f_min)/2.;
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
@@ -573,6 +572,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//alpha[16] = 0.0; 
 		//REAL8 lambda1 = 0.0 ;
 		//REAL8 lambda2 = 0.0 ;
+		alpha[15] = 1.0;
+		alpha[16] = 1.0; 
 		REAL8 lambda1 = 100*fabs(alpha[15]) ;
 		REAL8 lambda2 = 100*fabs(alpha[16]) ;
 		NRTidal_version_type NRT_v=NRTidalv2_V;
@@ -585,6 +586,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			freqs->data[i] = f_min + i * deltaf;
 			frequencies[i] = f_min+i*deltaf;
 		}
+		//const REAL8 f_ref = frequencies[0];
+		const REAL8 f_ref = 200;
 		clock_t start,end;
 		start = clock();
 		XLALSimIMRPhenomPCalculateModelParametersFromSourceFrame(&chi1_l, &chi2_l, &chip, &thetaJ, &alpha0, &phi_aligned, &zeta_polariz, m1_SI, m2_SI, f_ref, phiRef, incl, s1x,s1y,s1z,s2x,s2y,s2z,version);

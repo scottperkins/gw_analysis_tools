@@ -16,8 +16,11 @@ class IMRPhenomD_NRT: public IMRPhenomD<T>
 public:
   virtual T Pade(T f, source_parameters<T> *param, char deriv);
   
-  virtual T phase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *pow); 
-  virtual T Dphase_ins(T r, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda); 
+  //virtual T phase_ins_NRT(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *pow); 
+  //This is NOT overloaded anymore -- completely different function than phase_ins
+  virtual T phase_ins_NRT(T f, source_parameters<T> *param); 
+  //Probably not needed anymore, but I'll leave for now
+  //virtual T Dphase_ins_NRT(T r, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda); 
 
   virtual T amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
                         lambda_parameters<T> *lambda,useful_powers<T> *pow);
