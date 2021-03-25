@@ -139,8 +139,8 @@ int test_likelihood(int argc, char *argv[])
 {
 	gen_params *gp = new gen_params;
 
-	gp->mass1 = 20;
-	gp->mass2 = 19;
+	gp->mass1 = 2;
+	gp->mass2 = 1.9;
 	gp->Luminosity_Distance = 90;
 	gp->phiRef = 0;
 	gp->f_ref = 20;
@@ -159,13 +159,13 @@ int test_likelihood(int argc, char *argv[])
 	
 	//#############################################################
 	//SIMPSONS
-	int length = 4*4096;
+	int length = 2*2048;
 	double *freqs = new double[length];
 	double *psd = new double[length];
 	for(int i = 0 ; i<length; i++){
-		freqs[i] = 10+(2048.-10.)*i / length;
+		freqs[i] = 5+(2048.-5.)*i / length;
 	}
-	populate_noise(freqs, "AdLIGODesign",psd,length,48);
+	populate_noise(freqs, "aLIGO_analytic",psd,length,48);
 	for(int i = 0 ; i<length; i++){
 		psd[i] *=psd[i];
 	}
@@ -187,15 +187,15 @@ int test_likelihood(int argc, char *argv[])
 
 	//#############################################################
 	//GLQ
-	length = 1000;
+	length = 4000;
 	freqs = new double[length];
 	double *weights = new double[length];
 	psd = new double[length];
-	gauleg(log10(10),log10(1024),freqs,weights,length);
+	gauleg(log10(5),log10(2048),freqs,weights,length);
 	for(int i = 0 ; i<length; i++){
 		freqs[i] = pow(10,freqs[i]);
 	}
-	populate_noise(freqs, "AdLIGODesign",psd,length,48);
+	populate_noise(freqs, "aLIGO_analytic",psd,length,48);
 	for(int i = 0 ; i<length; i++){
 		psd[i] *=psd[i];
 	}

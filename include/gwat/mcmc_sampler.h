@@ -32,6 +32,7 @@ public:
 	~mcmc_sampler_output();
 	void populate_chain_temperatures(double *temperatures);
 	void update_cold_chain_list();
+
 	void populate_initial_output(
 		double ***new_output,	
 		int ***new_status,
@@ -44,18 +45,24 @@ public:
 		int ***new_model_status,
 		double ***new_logL_logP, 
 		int *chain_positions);
-	void dealloc_output();
-	void dealloc_status();
-	void dealloc_model_status();
-	void dealloc_logL_logP();
+
 	void calc_ac_vals( bool trim);
 	void count_indep_samples(bool trim);
+
 	int create_data_dump(bool cold_only,bool trim,std::string filename);
 	int append_to_data_dump(std::string filename);
 	int write_flat_thin_output(std::string filename, bool use_stored_ac,bool trim);
 	void set_trim(int trim);
-	void append_integrated_likelihoods(double *integrated_likelihoods, int * integrated_likelihoods_terms, int ensemble_size);
+
+	void append_integrated_likelihoods(double *integrated_likelihoods, int * integrated_likelihoods_terms, int ensemble_size_new);
 	void calculate_evidence();
+
+
+	void dealloc_output();
+	void dealloc_status();
+	void dealloc_model_status();
+	void dealloc_logL_logP();
+	void dealloc_integrated_likelihoods();
 
 	int chunk_steps = 1000;
 	int chain_number;
@@ -77,6 +84,7 @@ public:
 	double *integrated_likelihoods=NULL;
 	double evidence=0;
 	double evidence_error=0;
+	int ensemble_size;
 
 	bool RJ=false;
 	int ***status=NULL;

@@ -88,12 +88,7 @@ mcmc_sampler_output::~mcmc_sampler_output()
 	dealloc_status();
 	dealloc_model_status();
 	dealloc_logL_logP();
-	if(integrated_likelihoods){
-		delete [] integrated_likelihoods;
-	}
-	if(integrated_likelihoods_terms){
-		delete [] integrated_likelihoods_terms;
-	}
+	dealloc_integrated_likelihoods();
 	if(chain_lengths){
 		delete [] chain_lengths;
 		chain_lengths = NULL;
@@ -854,6 +849,7 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 
 			}
 		}
+		//#################################################
 		hsize_t dimsT[1];
 		dimsT[0]= chain_number;
 		dataspace = new H5::DataSpace(1,dimsT);
@@ -864,7 +860,44 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
 		delete dataset;
 		delete dataspace;
-
+		//#################################################
+		if(integrated_likelihoods){
+			hsize_t dimsIL[1];
+			dimsIL[0]= ensemble_size;
+			dataspace = new H5::DataSpace(1,dimsIL);
+			dataset = new H5::DataSet(
+				meta_group.createDataSet("INTEGRATED LIKELIHOODS",
+					H5::PredType::NATIVE_DOUBLE,*dataspace)
+				);
+			dataset->write(integrated_likelihoods, H5::PredType::NATIVE_DOUBLE);	
+			delete dataset;
+			delete dataspace;
+		}
+		//#################################################
+		if(integrated_likelihoods_terms){
+			hsize_t dimsILT[1];
+			dimsILT[0]= ensemble_size;
+			dataspace = new H5::DataSpace(1,dimsILT);
+			dataset = new H5::DataSet(
+				meta_group.createDataSet("INTEGRATED LIKELIHOODS TERM NUMBER",
+					H5::PredType::NATIVE_INT,*dataspace)
+				);
+			dataset->write(integrated_likelihoods_terms, H5::PredType::NATIVE_INT);	
+			delete dataset;
+			delete dataspace;
+		}
+		//#################################################
+		hsize_t dimsE[1];
+		dimsE[0]= 1;
+		dataspace = new H5::DataSpace(1,dimsE);
+		dataset = new H5::DataSet(
+			meta_group.createDataSet("EVIDENCE",
+				H5::PredType::NATIVE_DOUBLE,*dataspace)
+			);
+		dataset->write(&evidence, H5::PredType::NATIVE_DOUBLE);	
+		delete dataset;
+		delete dataspace;
+		//#################################################
 		dataspace = new H5::DataSpace(1,dimsT);
 		dataset = new H5::DataSet(
 			meta_group.createDataSet("SUGGESTED TRIM LENGTHS",
@@ -873,7 +906,7 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 		dataset->write(trim_lengths, H5::PredType::NATIVE_INT);	
 		delete dataset;
 		delete dataspace;
-
+		//#################################################
 		hsize_t dimsAC[2];
 		dimsAC[0]= cold_chain_number;
 		dimsAC[1]= dimension;
@@ -899,7 +932,7 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 			delete dataset;
 			delete dataspace;
 		}
-
+		//#################################################
 	
 		//Cleanup
 		output_LL_LP_group.close();
@@ -1223,11 +1256,23 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 
 
 
+		//#####################################################
 		dataset = new H5::DataSet(meta_group.openDataSet("CHAIN TEMPERATURES"));
-		
 		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
 		delete dataset;
-
+		//#####################################################
+		dataset = new H5::DataSet(meta_group.openDataSet("INTEGRATED LIKELIHOODS"));
+		dataset->write(integrated_likelihoods, H5::PredType::NATIVE_DOUBLE);	
+		delete dataset;
+		//#####################################################
+		dataset = new H5::DataSet(meta_group.openDataSet("INTEGRATED LIKELIHOODS TERM NUMBER"));
+		dataset->write(integrated_likelihoods_terms, H5::PredType::NATIVE_INT);	
+		delete dataset;
+		//#####################################################
+		dataset = new H5::DataSet(meta_group.openDataSet("EVIDENCE"));
+		dataset->write(&evidence, H5::PredType::NATIVE_DOUBLE);	
+		delete dataset;
+		//#####################################################
 		if(!dump_files[file_id]->trimmed ){
 			
 			dataset = new H5::DataSet(meta_group.openDataSet("SUGGESTED TRIM LENGTHS"));
@@ -1309,8 +1354,9 @@ int mcmc_sampler_output::write_flat_thin_output(std::string filename, bool use_s
 
 }
 #endif
-void mcmc_sampler_output::append_integrated_likelihoods(double *integrated_likelihoods_new, int * integrated_likelihoods_terms_new, int ensemble_size)
+void mcmc_sampler_output::append_integrated_likelihoods(double *integrated_likelihoods_new, int * integrated_likelihoods_terms_new, int ensemble_size_new)
 {
+	ensemble_size = ensemble_size_new;
 	if(!integrated_likelihoods)
 	{
 		integrated_likelihoods = new double[ensemble_size];
@@ -1331,9 +1377,25 @@ void mcmc_sampler_output::append_integrated_likelihoods(double *integrated_likel
 		integrated_likelihoods[i]/= integrated_likelihoods_terms[i];
 	}
 }
+void mcmc_sampler_output::dealloc_integrated_likelihoods()
+{
+	if(integrated_likelihoods){
+		delete [] integrated_likelihoods;
+		integrated_likelihoods=NULL;
+	}
+	if(integrated_likelihoods_terms){
+		delete [] integrated_likelihoods_terms;
+		integrated_likelihoods_terms=NULL;
+	}
+}
 void mcmc_sampler_output::calculate_evidence()
 {
+	debugger_print(__FILE__,__LINE__,"Integrated likelihoods and number of terms");
+	for(int i = 0 ; i<ensemble_size; i++){
+		std::cout<<integrated_likelihoods[i]<< " "<<integrated_likelihoods_terms[i]<<std::endl;
+	}
 	int errcode = thermodynamic_integration(integrated_likelihoods, chain_temperatures, (int)(chain_number/ cold_chain_number), &evidence, &evidence_error);
+	debugger_print(__FILE__,__LINE__,"Evidence: " + std::to_string(evidence));
 }
 //#############################################################
 //#############################################################
@@ -3749,19 +3811,6 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		status = sampler_output->indep_samples;
 
 
-		//##############################################
-		//Evidence calculation
-		sampler.chain_temps = &chain_temps[0];
-		integrate_likelihood(&sampler);
-		int ensemble_size= (int)(sampler.chain_N/coldchains);
-		double integrated_likelihoods[ensemble_size];
-		int integrated_likelihoods_terms[ensemble_size];
-		combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
-		//double evidence = calculate_evidence(&sampler);
-		//debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(evidence));
-		sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
-		sampler_output->calculate_evidence();
-		//##############################################
 
 		double ac_mean = 1;
 		double pos_mean = 0;
@@ -3781,10 +3830,28 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				sampler_output->set_trim(pos_mean);	
 			}
 			else{
+				//##############################################
+				//Evidence calculation
+				debugger_print(__FILE__,__LINE__,"Deallocating integrated likelihoods (if set)");
+				sampler_output->dealloc_integrated_likelihoods();
+				debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
+				sampler.chain_temps = &chain_temps[0];
+				integrate_likelihood(&sampler);
+				int ensemble_size= (int)(sampler.chain_N/coldchains);
+				double integrated_likelihoods[ensemble_size];
+				int integrated_likelihoods_terms[ensemble_size];
+				combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+				sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+				debugger_print(__FILE__,__LINE__,"Calculating evidence");
+				sampler_output->calculate_evidence();
+				//##############################################
+				
 				relax=false;
 				debugger_print(__FILE__,__LINE__,"Creating dump");
 				sampler_output->create_data_dump(true,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
+			
+
 				//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 			}
 		}
@@ -3793,13 +3860,30 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				debugger_print(__FILE__,__LINE__,"Resetting trim");
 				sampler_output->set_trim(pos_mean);	
 				//sampler_output->create_data_dump(true,false, chain_filename);
+				debugger_print(__FILE__,__LINE__,"Deallocating integrated likelihoods");
+				sampler_output->dealloc_integrated_likelihoods();
 			}
+
+			//##############################################
+			//Evidence calculation
+			debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
+			sampler.chain_temps = &chain_temps[0];
+			integrate_likelihood(&sampler);
+			int ensemble_size= (int)(sampler.chain_N/coldchains);
+			double integrated_likelihoods[ensemble_size];
+			int integrated_likelihoods_terms[ensemble_size];
+			combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+			sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+			debugger_print(__FILE__,__LINE__,"Calculating evidence");
+			sampler_output->calculate_evidence();
+			//##############################################
 			//else{
 			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
 			//sampler_output->append_to_data_dump("data/test_full.hdf5");
 			debugger_print(__FILE__,__LINE__,"Finished appending dump");
 			//}
+
 		}
 		ac_save = ac_mean;
 		max_ac_realloc = 0;
