@@ -565,8 +565,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//int length = 4016;
 		int length = 131072;
 		double deltaf = (f_max-f_min)/(length-1);
-		const REAL8 f_ref = .002;
+		const REAL8 f_ref = 20.;
+		//const REAL8 f_ref = .002;
 		//const REAL8 f_ref = (f_max-f_min)/2.;
+		std::cout<<"(f_max - f_min)/2: "<<(f_max-f_min)/2.<<std::endl; 
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = NULL;
 		//alpha[15] = 0.0;

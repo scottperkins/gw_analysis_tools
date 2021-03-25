@@ -197,7 +197,12 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   params->f1 = 0.014/(params->M);
   params->f3 = this->fpeak(params, &lambda);
 
-  /* T fmerger, kappa, kappa_eff;
+  std::cout<<"f1_phase: "<<params->f1_phase<<std::endl;
+  std::cout<<"f2_phase: "<<params->f2_phase<<std::endl;
+  std::cout<<"f1_amp: "<<params->f1<<std::endl; 
+  std::cout<<"f3_amp: "<<params->f3<<std::endl;
+
+   T fmerger, kappa, kappa_eff;
   kappa_eff = (3./16.) * params->tidal_weighted; //kappa effective as defined in arXiv:1804.02235 and arXiv:1905.06011v2.
   
   //kappa = 3.*(params->mass2 * pow(params->mass1, 4.)* params->tidal1/ pow(params->M,5.) + params->mass1 * pow(params->mass2, 4.)* params->tidal2/ pow(params->M,5.));
@@ -207,6 +212,8 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   kappa = kappa_eff;
   fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa);
 
+  std::cout<<"fmerger: "<<1.2*fmerger<<std::endl; 
+  /*
   params->f3 = fmerger;
   */
   //Wanted to try using the fmerger defined in the NR Tidal paper instead of fpeak. This made a huge difference...
@@ -223,7 +230,7 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   
   this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
   this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
-  
+
   //################################################################
   //Calculate phase and coalescence time variables
   T phic, f_ref, tc, phi_shift, tc_shift;
