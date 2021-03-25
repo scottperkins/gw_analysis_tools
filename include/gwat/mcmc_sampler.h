@@ -85,6 +85,7 @@ public:
 	double evidence=0;
 	double evidence_error=0;
 	int ensemble_size;
+	bool calculated_evidence=false;
 
 	bool RJ=false;
 	int ***status=NULL;

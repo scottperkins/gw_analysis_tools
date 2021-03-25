@@ -887,16 +887,18 @@ int mcmc_sampler_output::create_data_dump(bool cold_only, bool trim,std::string 
 			delete dataspace;
 		}
 		//#################################################
-		hsize_t dimsE[1];
-		dimsE[0]= 1;
-		dataspace = new H5::DataSpace(1,dimsE);
-		dataset = new H5::DataSet(
-			meta_group.createDataSet("EVIDENCE",
-				H5::PredType::NATIVE_DOUBLE,*dataspace)
-			);
-		dataset->write(&evidence, H5::PredType::NATIVE_DOUBLE);	
-		delete dataset;
-		delete dataspace;
+		if(calculated_evidence){
+			hsize_t dimsE[1];
+			dimsE[0]= 1;
+			dataspace = new H5::DataSpace(1,dimsE);
+			dataset = new H5::DataSet(
+				meta_group.createDataSet("EVIDENCE",
+					H5::PredType::NATIVE_DOUBLE,*dataspace)
+				);
+			dataset->write(&evidence, H5::PredType::NATIVE_DOUBLE);	
+			delete dataset;
+			delete dataspace;
+		}
 		//#################################################
 		dataspace = new H5::DataSpace(1,dimsT);
 		dataset = new H5::DataSet(
@@ -1261,17 +1263,23 @@ int mcmc_sampler_output::append_to_data_dump( std::string filename)
 		dataset->write(chain_temperatures, H5::PredType::NATIVE_DOUBLE);	
 		delete dataset;
 		//#####################################################
-		dataset = new H5::DataSet(meta_group.openDataSet("INTEGRATED LIKELIHOODS"));
-		dataset->write(integrated_likelihoods, H5::PredType::NATIVE_DOUBLE);	
-		delete dataset;
+		if(integrated_likelihoods){
+			dataset = new H5::DataSet(meta_group.openDataSet("INTEGRATED LIKELIHOODS"));
+			dataset->write(integrated_likelihoods, H5::PredType::NATIVE_DOUBLE);	
+			delete dataset;
+		}
 		//#####################################################
-		dataset = new H5::DataSet(meta_group.openDataSet("INTEGRATED LIKELIHOODS TERM NUMBER"));
-		dataset->write(integrated_likelihoods_terms, H5::PredType::NATIVE_INT);	
-		delete dataset;
+		if(integrated_likelihoods_terms){
+			dataset = new H5::DataSet(meta_group.openDataSet("INTEGRATED LIKELIHOODS TERM NUMBER"));
+			dataset->write(integrated_likelihoods_terms, H5::PredType::NATIVE_INT);	
+			delete dataset;
+		}
 		//#####################################################
-		dataset = new H5::DataSet(meta_group.openDataSet("EVIDENCE"));
-		dataset->write(&evidence, H5::PredType::NATIVE_DOUBLE);	
-		delete dataset;
+		if(calculated_evidence){
+			dataset = new H5::DataSet(meta_group.openDataSet("EVIDENCE"));
+			dataset->write(&evidence, H5::PredType::NATIVE_DOUBLE);	
+			delete dataset;
+		}
 		//#####################################################
 		if(!dump_files[file_id]->trimmed ){
 			
@@ -1379,6 +1387,9 @@ void mcmc_sampler_output::append_integrated_likelihoods(double *integrated_likel
 }
 void mcmc_sampler_output::dealloc_integrated_likelihoods()
 {
+	calculated_evidence = false;
+	evidence = 0;
+	evidence_error = 0;
 	if(integrated_likelihoods){
 		delete [] integrated_likelihoods;
 		integrated_likelihoods=NULL;
@@ -1390,12 +1401,14 @@ void mcmc_sampler_output::dealloc_integrated_likelihoods()
 }
 void mcmc_sampler_output::calculate_evidence()
 {
-	debugger_print(__FILE__,__LINE__,"Integrated likelihoods and number of terms");
-	for(int i = 0 ; i<ensemble_size; i++){
-		std::cout<<integrated_likelihoods[i]<< " "<<integrated_likelihoods_terms[i]<<std::endl;
-	}
+	//debugger_print(__FILE__,__LINE__,"Integrated likelihoods and number of terms");
+	//for(int i = 0 ; i<ensemble_size; i++){
+	//	std::cout<<integrated_likelihoods[i]<< " "<<integrated_likelihoods_terms[i]<<std::endl;
+	//}
+	calculated_evidence = true;
 	int errcode = thermodynamic_integration(integrated_likelihoods, chain_temperatures, (int)(chain_number/ cold_chain_number), &evidence, &evidence_error);
 	debugger_print(__FILE__,__LINE__,"Evidence: " + std::to_string(evidence));
+	
 }
 //#############################################################
 //#############################################################
