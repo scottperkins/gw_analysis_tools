@@ -129,6 +129,7 @@ struct trans_helper
 	int N;
 	double dt;
 	double * data;
+	gsl_rng *r;
 };
 double Chebyshev_fn(int P, double *coeff, double x)
 {
@@ -195,9 +196,28 @@ void transdimensional_RJprop(
 	mcmc_data_interface *interface, 
 	void * parameters)
 {
+	trans_helper *h = (trans_helper *)parameters;
+	int P = 0;
 	for(int i = 0 ; i<interface->max_dim; i++){
 		prop_param[i] = current_param[i] ; 
 		prop_status[i] = current_status[i] ; 
+		P += current_status[i];
+	}
+	P -=1;//For sigma
+
+	double alpha = gsl_rng_uniform(h->r);
+	
+	//Kill 
+	if(alpha < .5 && P >1){
+		prop_status[P] = 0;
+		prop_param[P] = 0;
+
+	}
+	//Create 
+	else if(alpha >= .5 && P <(interface->max_dim-1)){
+		prop_status[P+1] = 1;
+		prop_param[P+1] = gsl_ran_gaussian(h->r,1);
+
 	}
 	return ;
 }
@@ -212,13 +232,13 @@ int validate_evidence(int argc, char *argv[])
 	read_file("data/"+data_file, data);
 
 
-	int max_thermo = 20;
-	int chain_N = 100;
+	int max_thermo = 10;
+	int chain_N = 50;
 	int max_dim = 10;
 	int min_dim = 2;
 	int samples = 50000;
 	int swp_freq = 5;
-	int t0 = 5000;
+	int t0 = 10000;
 	int nu = 100;
 	int max_chunk_size = 100000;
 	int nested_models=0;
@@ -250,11 +270,15 @@ int validate_evidence(int argc, char *argv[])
 	
 
 	trans_helper **helpers = new trans_helper*[chain_N];
+	const gsl_rng_type *T;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
 	for(int i = 0 ; i<chain_N; i++){
 		helpers[i] = new trans_helper;
 		helpers[i]->dt = dt;
 		helpers[i]->N = N;
 		helpers[i]->data = data;
+		helpers[i]->r = gsl_rng_alloc(T);
 	}
 	std::string stat_file = "data/stat_trans.txt";
 	std::string chain_file = "data/output_trans.hdf5";
@@ -269,6 +293,7 @@ int validate_evidence(int argc, char *argv[])
 	deallocate_2D_array(output,samples,max_dim);
 	deallocate_2D_array(status,samples,max_dim);
 	for(int i = 0 ; i<chain_N; i++){
+		gsl_rng_free(helpers[i]->r);
 		delete helpers[i];
 	}
 	delete [] helpers;
