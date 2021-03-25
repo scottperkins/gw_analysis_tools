@@ -54,6 +54,7 @@ double standard_log_prior_dCS(double *pos, mcmc_data_interface *interface,void *
 //void fisher_rosenbock(double *c,double **fisher,  mcmc_data_interface *interface,void *parameters);
 
 int test_evidence(int argc, char *argv[]);
+int validate_evidence(int argc, char *argv[]);
 double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters);
 double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters);
 void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *interface, void *parameters);
@@ -112,12 +113,171 @@ int main(int argc, char *argv[])
 		std::cout<<"Test evidence calculation"<<std::endl;
 		return test_evidence(argc,argv);
 	}
+	else if(runtime_opt == 10){
+		std::cout<<"Validate evidence calculation"<<std::endl;
+		return validate_evidence(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
+//########################################################################
+//########################################################################
+struct trans_helper
+{
+	int N;
+	double dt;
+	double * data;
+};
+double Chebyshev_fn(int P, double *coeff, double x)
+{
+	double sum = 0 ;
+	for (int i = 0 ; i<P; i++){
+		sum += coeff[i] * std::cos( i * std::acos(x));
+	}
+	return sum;
+}
+double transdimensional_likelihood(
+	double *param, 
+	int *status, 
+	int *model_status, 
+	mcmc_data_interface *interface, 
+	void * parameters)
+{
+	//Sigma first, always there
+	//start at 1 so there's always at least one coeff
+	int P = 1;
+	for(int i = 2 ; i<interface->max_dim; i++){
+		if(status[i] == 0){
+			break;
+		}
+		P+=1;
+	}
+	trans_helper *h = (trans_helper *)parameters;
+	double reconst_signal[h->N];
+	double dn =2. / ( h->N-1); 
+	for(int i = 0 ; i < h->N; i++){
+		reconst_signal[i] = Chebyshev_fn(P, &param[1], -1 + i *dn );
+	}
+	
+	double ll = 0;
+	for (int i = 0 ; i<h->N; i++){
+		ll -= pow_int((h->data[i] - reconst_signal[i]),2) / ( 2 * param[0]*param[0]);
+	}
+	ll-= (h->N / 2)*std::log(2 * M_PI * param[0]*param[0]);
+	
+	return ll;
+}
+double transdimensional_prior(
+	double *param, 
+	int *status, 
+	int *model_status, 
+	mcmc_data_interface *interface, 
+	void * parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	if (param[0] < .1|| param[0] > 10){ return a;}
+	for(int i = 0 ; i<interface->max_dim; i++){
+		if(status[i] !=0){
+			if (param[i+1] < -100|| param[i+1] > 100){ return a;}
+		}
+	}
+	return 1;
+}
+void transdimensional_RJprop(
+	double *current_param, 
+	double *prop_param, 
+	int *current_status, 
+	int *prop_status, 
+	int *current_model_status, 
+	int *prop_model_status, 
+	mcmc_data_interface *interface, 
+	void * parameters)
+{
+	for(int i = 0 ; i<interface->max_dim; i++){
+		prop_param[i] = current_param[i] ; 
+		prop_status[i] = current_status[i] ; 
+	}
+	return ;
+}
 
+int validate_evidence(int argc, char *argv[])
+{
+	std::string data_file("full_data_transdimensional_5_5_1_100.csv");
+	int N = 100;
+	double dt = 1;
+
+	double *data=new double[N] ;
+	read_file("data/"+data_file, data);
+
+
+	int max_thermo = 20;
+	int chain_N = 100;
+	int max_dim = 10;
+	int min_dim = 2;
+	int samples = 50000;
+	int swp_freq = 5;
+	int t0 = 5000;
+	int nu = 100;
+	int max_chunk_size = 100000;
+	int nested_models=0;
+	double **output = allocate_2D_array(samples, max_dim);
+	int **status = allocate_2D_array_int(samples, max_dim);
+	int **model_status = NULL;
+	double initial_position[max_dim];	
+	int initial_status[max_dim];	
+	int initial_model_status[max_dim];	
+	double seeding_var[max_dim];	
+	double **ensemble_initial_pos = NULL;
+	int **ensemble_initial_status = NULL;
+	int **ensemble_initial_model_status = NULL;
+	double chain_temps[chain_N];
+	int initnum = 5;
+	initial_position[0] = 1;	
+	initial_status[0] = 1;	
+	seeding_var[0] = 1;	
+	for(int i = 1 ; i<initnum+1; i++){
+		initial_position[i] = 1;	
+		initial_status[i] = 1;	
+		seeding_var[i] = 1;	
+	}
+	for(int i = initnum+1; i<max_dim; i++){
+		initial_position[i] = 0;	
+		initial_status[i] = 0;	
+		seeding_var[i] = 1;	
+	}
+	
+
+	trans_helper **helpers = new trans_helper*[chain_N];
+	for(int i = 0 ; i<chain_N; i++){
+		helpers[i] = new trans_helper;
+		helpers[i]->dt = dt;
+		helpers[i]->N = N;
+		helpers[i]->data = data;
+	}
+	std::string stat_file = "data/stat_trans.txt";
+	std::string chain_file = "data/output_trans.hdf5";
+	std::string likelihood_file = "data/likelihood_trans.txt";
+	std::string checkpoint_file = "data/checkpoint_trans.csv";
+		
+	mcmc_sampler_output mcmc_out(chain_N,max_dim, nested_models) ; 
+
+	mcmc_out.RJ= true;
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(&mcmc_out, output, status, model_status,nested_models, max_dim, min_dim , samples, chain_N, max_thermo, initial_position, initial_status, initial_model_status, seeding_var, ensemble_initial_pos, ensemble_initial_status, ensemble_initial_model_status, chain_temps, swp_freq, t0,nu, max_chunk_size, "double", transdimensional_prior, transdimensional_likelihood, NULL, transdimensional_RJprop, (void**)helpers, 10, true, true, true, stat_file, chain_file, likelihood_file, checkpoint_file);
+	
+	deallocate_2D_array(output,samples,max_dim);
+	deallocate_2D_array(status,samples,max_dim);
+	for(int i = 0 ; i<chain_N; i++){
+		delete helpers[i];
+	}
+	delete [] helpers;
+	delete [] data;
+	return 0;
+}
+
+//########################################################################
+//########################################################################
 int test_evidence(int argc, char *argv[])
 {
 	int temps_N = 100;
@@ -135,6 +295,8 @@ int test_evidence(int argc, char *argv[])
 	std::cout<<evidence<<" "<<error<<std::endl;
 	return 0;
 }
+
+
 int test_likelihood(int argc, char *argv[])
 {
 	gen_params *gp = new gen_params;
@@ -2027,4 +2189,5 @@ void RT_ERROR_MSG()
 	std::cout<<"7 --- Multiple continue mcmc testing"<<std::endl;
 	std::cout<<"8 --- Test likelihood"<<std::endl;
 	std::cout<<"9 --- Test evidence calculation"<<std::endl;
+	std::cout<<"10 --- Validate evidence calculation"<<std::endl;
 }
