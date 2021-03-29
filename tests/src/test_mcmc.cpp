@@ -189,8 +189,8 @@ double transdimensional_prior(
 	prior*= 1. /(10-.01); 	
 	for(int i = 1 ; i<interface->max_dim; i++){
 		if(status[i] !=0){
-			if (param[i] < -5|| param[i] > 5){ return a;}
-			prior*= 1. /(10); 	
+			if (param[i] < -10|| param[i] > 10){ return a;}
+			prior*= 1. /(20); 	
 		}
 	}
 	return std::log(prior);
@@ -249,7 +249,7 @@ void transdimensional_RJprop(
 	else if(alpha >= .5 && P <(interface->max_dim-1)){
 		prop_status[P+1] = 1;
 		//prop_param[P+1] = gsl_ran_gaussian(h->r,10);
-		prop_param[P+1] = gsl_rng_uniform(h->r)*10-5;
+		prop_param[P+1] = gsl_rng_uniform(h->r)*20-10;
 
 	}
 	return ;
@@ -381,7 +381,7 @@ int validate_evidence(int argc, char *argv[])
 	int chain_N = 100;
 	int max_dim = 10;
 	int min_dim = 2;
-	int samples = 500000;
+	int samples = 1000000;
 	int swp_freq = 5;
 	int t0 = 10000;
 	int nu = 100;
@@ -433,7 +433,7 @@ int validate_evidence(int argc, char *argv[])
 	mcmc_sampler_output mcmc_out(chain_N,max_dim, nested_models) ; 
 
 	mcmc_out.RJ= true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(&mcmc_out, output, status, model_status,nested_models, max_dim, min_dim , samples, chain_N, max_thermo, initial_position, initial_status, initial_model_status, seeding_var, ensemble_initial_pos, ensemble_initial_status, ensemble_initial_model_status, chain_temps, swp_freq, t0,nu, max_chunk_size, "double", transdimensional_prior, transdimensional_likelihood, NULL, transdimensional_RJprop, (void**)helpers, 10, true, true, true, stat_file, chain_file, likelihood_file, checkpoint_file);
+	//RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(&mcmc_out, output, status, model_status,nested_models, max_dim, min_dim , samples, chain_N, max_thermo, initial_position, initial_status, initial_model_status, seeding_var, ensemble_initial_pos, ensemble_initial_status, ensemble_initial_model_status, chain_temps, swp_freq, t0,nu, max_chunk_size, "double", transdimensional_prior, transdimensional_likelihood, NULL, transdimensional_RJprop, (void**)helpers, 10, true, true, true, stat_file, chain_file, likelihood_file, checkpoint_file);
 	mcmc_out.~mcmc_sampler_output();
 	
 	deallocate_2D_array(output,samples,max_dim);
@@ -443,7 +443,7 @@ int validate_evidence(int argc, char *argv[])
 	max_dim = 5;
 	min_dim = 5;
 	initnum = 4;
-	samples = 3000;
+	samples = 6000;
 
 	output = allocate_2D_array(samples, max_dim);
 
@@ -471,7 +471,7 @@ int validate_evidence(int argc, char *argv[])
 	max_dim = 6;
 	min_dim = 6;
 	initnum = 5;
-	samples = 3000;
+	samples = 6000;
 
 	output = allocate_2D_array(samples, max_dim);
 
@@ -488,7 +488,7 @@ int validate_evidence(int argc, char *argv[])
 		seeding_var[i] = 1;	
 	}
 	mcmc_sampler_output mcmc_out_fixed_2(chain_N,max_dim, 0) ; 
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&mcmc_out_fixed_2, output,max_dim, samples,chain_N, max_thermo, initial_position, seeding_var, (double **)NULL, chain_temps, swp_freq, t0,nu, max_chunk_size, "double",transdimensional_prior_fixed, transdimensional_likelihood_fixed, NULL, (void **)helpers, 10, true, true, stat_file_3, chain_file_3, likelihood_file_3, checkpoint_file_3);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&mcmc_out_fixed_2, output,max_dim, samples,chain_N, max_thermo, initial_position, seeding_var, (double **)NULL, chain_temps, swp_freq, t0,nu, max_chunk_size, "double",transdimensional_prior_fixed, transdimensional_likelihood_fixed, NULL, (void **)helpers, 10, true, true, stat_file_3, chain_file_3, likelihood_file_3, checkpoint_file_3);
 
 	deallocate_2D_array(output,samples,max_dim);
 	mcmc_out_fixed_2.~mcmc_sampler_output();
@@ -497,7 +497,7 @@ int validate_evidence(int argc, char *argv[])
 	max_dim = 4;
 	min_dim = 4;
 	initnum = 3;
-	samples = 3000;
+	samples = 6000;
 
 	output = allocate_2D_array(samples, max_dim);
 
@@ -514,7 +514,7 @@ int validate_evidence(int argc, char *argv[])
 		seeding_var[i] = 1;	
 	}
 	mcmc_sampler_output mcmc_out_fixed_3(chain_N,max_dim, 0) ; 
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&mcmc_out_fixed_3, output,max_dim, samples,chain_N, max_thermo, initial_position, seeding_var, (double **)NULL, chain_temps, swp_freq, t0,nu, max_chunk_size, "double",transdimensional_prior_fixed, transdimensional_likelihood_fixed, NULL, (void **)helpers, 10, true, true, stat_file_4, chain_file_4, likelihood_file_4, checkpoint_file_4);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&mcmc_out_fixed_3, output,max_dim, samples,chain_N, max_thermo, initial_position, seeding_var, (double **)NULL, chain_temps, swp_freq, t0,nu, max_chunk_size, "double",transdimensional_prior_fixed, transdimensional_likelihood_fixed, NULL, (void **)helpers, 10, true, true, stat_file_4, chain_file_4, likelihood_file_4, checkpoint_file_4);
 
 	deallocate_2D_array(output,samples,max_dim);
 	mcmc_out_fixed_3.~mcmc_sampler_output();
@@ -523,7 +523,7 @@ int validate_evidence(int argc, char *argv[])
 	max_dim = 3;
 	min_dim = 3;
 	initnum = 2;
-	samples = 3000;
+	samples = 12000;
 
 	output = allocate_2D_array(samples, max_dim);
 
@@ -540,7 +540,7 @@ int validate_evidence(int argc, char *argv[])
 		seeding_var[i] = 1;	
 	}
 	mcmc_sampler_output mcmc_out_fixed_4(chain_N,max_dim, 0) ; 
-	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&mcmc_out_fixed_4, output,max_dim, samples,chain_N, max_thermo, initial_position, seeding_var, (double **)NULL, chain_temps, swp_freq, t0,nu, max_chunk_size, "double",transdimensional_prior_fixed, transdimensional_likelihood_fixed, NULL, (void **)helpers, 10, true, true, stat_file_5, chain_file_5, likelihood_file_5, checkpoint_file_5);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&mcmc_out_fixed_4, output,max_dim, samples,chain_N, max_thermo, initial_position, seeding_var, (double **)NULL, chain_temps, swp_freq, t0,nu, max_chunk_size, "double",transdimensional_prior_fixed, transdimensional_likelihood_fixed, NULL, (void **)helpers, 10, true, true, stat_file_5, chain_file_5, likelihood_file_5, checkpoint_file_5);
 
 	deallocate_2D_array(output,samples,max_dim);
 	mcmc_out_fixed_4.~mcmc_sampler_output();

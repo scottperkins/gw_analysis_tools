@@ -21,6 +21,10 @@
 #include "adolc/adolc.h"
 //#include <adolc/adolc_openmp.h>
 
+
+double TMAX = 10e3;
+//double TMAX = 1e14;
+
 #ifndef _OPENMP
 #define omp ignore
 #endif
@@ -2785,7 +2789,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 			chain_temps[i] = 1;
 		}
 		else if( (i+1) % max_chain_N_thermo_ensemble  == 0 ){
-			chain_temps[i] = 1e14;
+			chain_temps[i] =TMAX;
 		}
 		else{
 			chain_temps[i] = 1.1* chain_temps[i-1];	
@@ -4682,7 +4686,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 		samplerptr->chain_temps[i] = c * samplerptr->chain_temps[i-1];
 	}
 	//Set last chain essentially at infinity
-	samplerptr->chain_temps[samplerptr->chain_N -1] = 1.e14;
+	samplerptr->chain_temps[samplerptr->chain_N -1] = TMAX;
 
 
 	//During chain allocation, pooling isn't used

@@ -3394,7 +3394,7 @@ void integrate_likelihood(sampler *samplerptr)
 			pos = samplerptr->N_steps;
 		}
 		for(int j = 0 ; j<pos; j++){
-			samplerptr->thermodynamic_integrated_likelihood[i] += samplerptr->ll_lp_output[i][j][0];
+			samplerptr->thermodynamic_integrated_likelihood[i] += samplerptr->ll_lp_output[i][j][0]*samplerptr->chain_temps[i];
 		}
 		samplerptr->thermodynamic_integrated_likelihood_terms[i]+=pos;
 		samplerptr->thermodynamic_integrated_likelihood[i] /= samplerptr->thermodynamic_integrated_likelihood_terms[i];
