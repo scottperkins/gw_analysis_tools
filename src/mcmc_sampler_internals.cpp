@@ -92,13 +92,13 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 		//Calculate log_likelihood and log prior
 		current_ll = sampler->current_likelihoods[chain_number];
 		proposed_ll = sampler->ll(proposed_param, proposed_status,proposed_model_status,sampler->interfaces[chain_number], sampler->user_parameters[chain_number]);
-		proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
+		//proposed_ll = (proposed_ll )/sampler->chain_temps[chain_number];
 		//Calculate MH ratio
 		if(std::isnan(proposed_ll)){
 			MH_ratio = limit_inf;
 		}
 		else{
-			MH_ratio = -current_ll+proposed_ll-current_lp + proposed_lp;
+			MH_ratio = (-current_ll+proposed_ll)/sampler->chain_temps[chain_number]-current_lp + proposed_lp;
 		}
 	}
 	//Some proposals are not symmetric
@@ -477,6 +477,7 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	free(oneDfisher);
 }
 
+/*!!!!!!!!DON'T TRUST!!!!!!!!!!!!!!!*/
 void calc_grad(sampler *sampler,double *current_param,int *current_status, int *current_model_status,int chain_index,double *grad)
 {
 	double epsilon =1.e-1;
@@ -849,8 +850,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	if(T1==T2){
 		return -1;
 	}
-	double ll1 =  T1*sampler->current_likelihoods[T1_index];
-	double ll2 =  T2*sampler->current_likelihoods[T2_index];
+	double ll1 =  sampler->current_likelihoods[T1_index];
+	double ll2 =  sampler->current_likelihoods[T2_index];
 	double pow = (ll1-ll2)/T2 - (ll1-ll2)/T1 ;
 	double MH_ratio;
 	MH_ratio = pow;
@@ -877,8 +878,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 		}
 		double templl = sampler->current_likelihoods[T1_index];
 		sampler->current_likelihoods[T1_index] = 
-				T2/T1 * sampler->current_likelihoods[T2_index];
-		sampler->current_likelihoods[T2_index] = T1/T2*templl;
+				 sampler->current_likelihoods[T2_index];
+		sampler->current_likelihoods[T2_index] = templl;
 		int temp_model;
 		for(int i =0; i< sampler->nested_model_number;i++){
 			temp_model = chain1_model_status[i];
@@ -2513,7 +2514,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 			else{
 				valid_pos[j] = true;
 				samplerptr->current_likelihoods[j] =
-					samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+					samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j]);
 			}
 		}
 		bool all_bad= true;
@@ -2540,7 +2541,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 					samplerptr->param_status[i][0][j] = good_status[j];
 				}
 				samplerptr->current_likelihoods[i] =
-					samplerptr->ll(samplerptr->output[i][0],samplerptr->param_status[i][0],samplerptr->model_status[i][0],samplerptr->interfaces[i], samplerptr->user_parameters[i])/samplerptr->chain_temps[i];
+					samplerptr->ll(samplerptr->output[i][0],samplerptr->param_status[i][0],samplerptr->model_status[i][0],samplerptr->interfaces[i], samplerptr->user_parameters[i]);
 			}
 		}	
 		}
@@ -2570,7 +2571,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 					
 				}
 				samplerptr->current_likelihoods[j] =
-					 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+					 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j], samplerptr->user_parameters[j]);
 			}
 		}
 		//Seed non-zero chains normally with variance as specified
@@ -2627,7 +2628,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 				}
 				
 				samplerptr->current_likelihoods[j] =
-					 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[ j], samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+					 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[ j], samplerptr->user_parameters[j]);
 			}
 		}
 	}
@@ -2720,7 +2721,6 @@ void update_temperatures(sampler *samplerptr,
 		samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
 			(old_temps[i] - old_temps[i-1]) * std::exp(power);
 		//Replace LL, since I store it already scaled by the old temperature
-		samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
 	} 
 	delete [] old_temps;
 }
@@ -2823,7 +2823,6 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 				samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
 					(old_temps[i] - old_temps[i-1]) * std::exp(power);
 				//Replace LL, since I store it already scaled by the old temperature
-				samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
 			}
 		} 
 		delete [] old_temps;
@@ -2871,7 +2870,6 @@ void update_temperatures_full_ensemble(sampler *samplerptr,
 				samplerptr->chain_temps[i] = samplerptr->chain_temps[i-1] +
 					(old_temps[i] - old_temps[i-1]) * std::exp(power);
 				//Replace LL, since I store it already scaled by the old temperature
-				samplerptr->current_likelihoods[i] =(old_temps[i] / samplerptr->chain_temps[i]) *samplerptr->current_likelihoods[i]; 
 			}
 		} 
 		delete [] old_temps;
@@ -3394,7 +3392,7 @@ void integrate_likelihood(sampler *samplerptr)
 			pos = samplerptr->N_steps;
 		}
 		for(int j = 0 ; j<pos; j++){
-			samplerptr->thermodynamic_integrated_likelihood[i] += samplerptr->ll_lp_output[i][j][0]*samplerptr->chain_temps[i];
+			samplerptr->thermodynamic_integrated_likelihood[i] += samplerptr->ll_lp_output[i][j][0];
 		}
 		samplerptr->thermodynamic_integrated_likelihood_terms[i]+=pos;
 		samplerptr->thermodynamic_integrated_likelihood[i] /= samplerptr->thermodynamic_integrated_likelihood_terms[i];

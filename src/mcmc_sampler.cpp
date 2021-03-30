@@ -22,7 +22,8 @@
 //#include <adolc/adolc_openmp.h>
 
 
-double TMAX = 10e3;
+//double TMAX = 10e2;
+double TMAX = 1e8;
 //double TMAX = 1e14;
 
 #ifndef _OPENMP
@@ -2021,7 +2022,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 	
 	for (int j=0;j<samplerptr->chain_N;j++){
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j]);
 		//std::cout<<samplerptr->current_likelihoods[j]<<std::endl;
 		//step_accepted[j]=0;
 		//step_rejected[j]=0;
@@ -2121,9 +2122,9 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 			continue;
 		}
 		else{
-			samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
+			//samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
 			samplerptr->chain_temps[i] = chain_temp_averages[ct];
-			samplerptr->current_likelihoods[i]/=samplerptr->chain_temps[i];
+			//samplerptr->current_likelihoods[i]/=samplerptr->chain_temps[i];
 			ct++;
 		}
 		chain_temps[i]= samplerptr->chain_temps[i];
@@ -2283,7 +2284,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string ch
 	
 	for (int j=0;j<samplerptr->chain_N;j++){
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j]);
 		//std::cout<<samplerptr->current_likelihoods[j]<<std::endl;
 		//step_accepted[j]=0;
 		//step_rejected[j]=0;
@@ -2389,9 +2390,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string ch
 			continue;
 		}
 		else{
-			samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
 			samplerptr->chain_temps[i] = chain_temp_averages[ct];
-			samplerptr->current_likelihoods[i]/=samplerptr->chain_temps[i];
 			ct++;
 		}
 		chain_temps[i]= samplerptr->chain_temps[i];
@@ -2548,7 +2547,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 		assign_probabilities(samplerptr, chain_index);
 	for (int j=0;j<samplerptr->chain_N;j++){
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j]);
 	}
 	
 	//Set chains with temp 1 to highest priority
@@ -2565,7 +2564,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	int temp_step_N = (N_steps<100)? N_steps/5: 100;
 	double temp_steps[samplerptr->chain_N];
 	for(int i = 0 ; i<samplerptr->chain_N; i++){
-		samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
+		//samplerptr->current_likelihoods[i]*=samplerptr->chain_temps[i];
 		temp_save[i]=samplerptr->chain_temps[i];
 		double T_max = temp_scale_factor*samplerptr->chain_temps[i];
 		double T_min = samplerptr->chain_temps[i];
@@ -2577,13 +2576,13 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	for(int i = 0 ; i<temp_step_N ; i++){
 		for(int j = 0 ; j<samplerptr->chain_N; j++){
 			samplerptr->chain_temps[j] = temp_steps[j]*samplerptr->chain_temps[j];
-			samplerptr->current_likelihoods[j]/=samplerptr->chain_temps[j];
+			//samplerptr->current_likelihoods[j]/=samplerptr->chain_temps[j];
 		}
 			
 		PTMCMC_MH_step_incremental(samplerptr, steps_per_temp);
-		for(int j = 0 ; j<samplerptr->chain_N; j++){
-			samplerptr->current_likelihoods[j]*=samplerptr->chain_temps[j];
-		}
+		//for(int j = 0 ; j<samplerptr->chain_N; j++){
+		//	samplerptr->current_likelihoods[j]*=samplerptr->chain_temps[j];
+		//}
 	}
 	for(int i = 0 ; i<samplerptr->chain_N; i++){
 		samplerptr->chain_temps[i]=temp_save[i];
@@ -2909,7 +2908,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 			for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
 				int chain_id = i+j*ensemble_members;
 				for(int k = 0 ; k<=sampler_temp.chain_pos[chain_id]; k++){
-					std::pair<double,int>P = std::make_pair((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1]), k+elements);
+					std::pair<double,int>P = std::make_pair((sampler_temp.ll_lp_output[chain_id][k][0]/sampler_temp.chain_temps[chain_id]+sampler_temp.ll_lp_output[chain_id][k][1]), k+elements);
 					temp_arr.push_back(P);
 					temp_arr_pos.push_back(sampler_temp.output[chain_id][k]);
 					temp_arr_status.push_back(sampler_temp.param_status[chain_id][k]);
@@ -3252,7 +3251,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			for( int j = 0 ; j<sampler_temp.chain_N/ensemble_members; j++){
 				int chain_id = i+j*ensemble_members;
 				for(int k = 0 ; k<=sampler_temp.chain_pos[chain_id]; k++){
-					std::pair<double,int>P = std::make_pair((sampler_temp.ll_lp_output[chain_id][k][0]+sampler_temp.ll_lp_output[chain_id][k][1]), k+elements);
+					std::pair<double,int>P = std::make_pair((sampler_temp.ll_lp_output[chain_id][k][0]/sampler_temp.chain_temps[chain_id]+sampler_temp.ll_lp_output[chain_id][k][1]), k+elements);
 					temp_arr.push_back(P);
 					temp_arr_pos.push_back(sampler_temp.output[chain_id][k]);
 				}
@@ -3589,6 +3588,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 			init=false;
 			debugger_print(__FILE__,__LINE__,"Finished init structure");
 			debugger_print(__FILE__,__LINE__,"Creating dump");
+			//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
+			//sampler_output->create_data_dump(false,false, chain_filename);
 			sampler_output->create_data_dump(true,false, chain_filename);
 			debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
@@ -3865,6 +3866,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				
 				relax=false;
 				debugger_print(__FILE__,__LINE__,"Creating dump");
+				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
+				//sampler_output->create_data_dump(false,false, chain_filename);
 				sampler_output->create_data_dump(true,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			
@@ -4076,7 +4079,7 @@ void continue_RJPTMCMC_MH_internal(sampler *samplerptr,
 		assign_probabilities(samplerptr, chain_index);
 	for (int j=0;j<samplerptr->chain_N;j++){
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j]);
 	}
 	if(samplerptr->log_ll && samplerptr->log_lp){
 		for(int i = 0 ; i<samplerptr->chain_N; i++){
@@ -4505,7 +4508,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	
 	for (int j=0;j<samplerptr->chain_N;j++){
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j]);
 	}
 	
 	//Set chains with temp 1 to highest priority
@@ -4927,7 +4930,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 								samplerptr->output[min_id][0][i] = samplerptr->output[min_id-1][samplerptr->chain_pos[min_id-1]][i];
 								samplerptr->param_status[min_id][0][i] = samplerptr->param_status[min_id-1][samplerptr->chain_pos[min_id-1]][i];
 							}
-							samplerptr->current_likelihoods[min_id] = samplerptr->ll(samplerptr->output[min_id][0],samplerptr->param_status[min_id][0],samplerptr->model_status[min_id][0],samplerptr->interfaces[min_id],samplerptr->user_parameters[min_id])/samplerptr->chain_temps[min_id];
+							samplerptr->current_likelihoods[min_id] = samplerptr->ll(samplerptr->output[min_id][0],samplerptr->param_status[min_id][0],samplerptr->model_status[min_id][0],samplerptr->interfaces[min_id],samplerptr->user_parameters[min_id]);
 							samplerptr->current_hist_pos[min_id] = 0;
 							samplerptr->chain_pos[min_id] = 0;
 							samplerptr->de_primed[min_id]=false;
@@ -5356,7 +5359,7 @@ void continue_PTMCMC_MH_internal(sampler *sampler_in,
 		assign_probabilities(samplerptr, chain_index);
 	for (int j=0;j<samplerptr->chain_N;j++){
 		samplerptr->current_likelihoods[j] =
-			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j])/samplerptr->chain_temps[j];
+			 samplerptr->ll(samplerptr->output[j][0],samplerptr->param_status[j][0],samplerptr->model_status[j][0],samplerptr->interfaces[j],samplerptr->user_parameters[j]);
 	}
 	if(samplerptr->log_ll && samplerptr->log_lp){
 		for(int i = 0 ; i<samplerptr->chain_N; i++){
