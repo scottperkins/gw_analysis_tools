@@ -23,7 +23,8 @@
 
 
 //double TMAX = 10e2;
-double TMAX = 1e8;
+//double TMAX = 1e8;
+double TMAX = 1e10;
 //double TMAX = 1e14;
 
 #ifndef _OPENMP

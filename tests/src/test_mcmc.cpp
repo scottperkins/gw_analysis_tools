@@ -377,8 +377,8 @@ int validate_evidence(int argc, char *argv[])
 
 	//######################################################################
 	//######################################################################
-	int max_thermo = 10;
-	int chain_N = 100;
+	int max_thermo = 50;
+	int chain_N = 200;
 	int max_dim = 10;
 	int min_dim = 2;
 	int samples = 1000000;
