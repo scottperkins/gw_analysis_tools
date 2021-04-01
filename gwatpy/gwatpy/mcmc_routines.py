@@ -422,7 +422,7 @@ def RJPTMCMC_unpack_file(filename):
 
 ########################################################################################
 
-def plot_injection(injection,injection_status, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},gpstime=1126259462.4,figsize=None,axis=None):
+def plot_injection(injection,injection_status, psd_file_in,detector, generation_method_base, psd_column=0,generation_method_extended=None,min_dim= 0, max_dim=None,threads=1 ,xlim=None,ylim=None,data_stream_file=None,mod_struct_kwargs={},gpstime=1126259462.4,figsize=None,axis=None,alpha=1):
 
     gmst = gpu.gps_to_GMST_radian_py(gpstime)
     psd_in = np.loadtxt(psd_file_in,skiprows=1)
@@ -450,7 +450,7 @@ def plot_injection(injection,injection_status, psd_file_in,detector, generation_
     data_packed = [injection,np.asarray(injection_status,dtype=np.int32)]
 
     response = waveform_reduced( data_packed)
-    ax.plot(times,np.real(response),alpha=1,color='red' ,linewidth=1)
+    ax.plot(times,np.real(response),alpha=alpha,color='red' ,linewidth=1)
 
     if(xlim is not None):
         ax.set_xlim(xlim)
