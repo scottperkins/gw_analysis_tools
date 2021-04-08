@@ -2437,13 +2437,47 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 	}
 	else{std::cout<<"ERROR -- File "<<check_file<<" not found"<<std::endl; exit(1);}
 	file_in.close();
+	//if(samplerptr->fisher_exist){
+	//	//check whether or not we need to update the fisher
+	//	for(int i=0 ; i<samplerptr->chain_N; i++){
+	//		update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],samplerptr->model_status[i][0],i);	
+	//		if(samplerptr->proper_fisher){
+	//			iterate_fisher(samplerptr, i);
+	//		}
+	//	}
+	//}
 	if(samplerptr->fisher_exist){
 		//check whether or not we need to update the fisher
+		omp_set_num_threads(samplerptr->num_threads);
+		#pragma omp parallel ADOLC_OPENMP
+		{
+		#pragma omp for 
 		for(int i=0 ; i<samplerptr->chain_N; i++){
 			update_fisher(samplerptr, samplerptr->output[i][0], samplerptr->param_status[i][0],samplerptr->model_status[i][0],i);	
+			if(samplerptr->fisher_update_ct[i] +1 == samplerptr->fisher_update_number){
+				//If NAN in fisher, it won't set the values. 
+				//Just set to junk so memory error doesn't occur
+				//It should be immediately overwritten after first step
+				for(int j = 0 ; j<samplerptr->max_dim; j++){
+					for(int l = 0 ; l<samplerptr->max_dim ; l++){
+						samplerptr->fisher_vecs[i][j][l] = 0;
+						samplerptr->fisher_vecs_prop[i][j][l] = 0;
+						samplerptr->fisher_matrix[i][j][l] = 0;
+						samplerptr->fisher_matrix_prop[i][j][l] = 0;
+					}
+					samplerptr->fisher_vecs[i][j][j] = 1;
+					samplerptr->fisher_vecs_prop[i][j][j] = 1;
+					samplerptr->fisher_matrix[i][j][j] = 1;
+					samplerptr->fisher_matrix_prop[i][j][j] = 1;
+				
+					samplerptr->fisher_vals[i][j] = 1;
+					samplerptr->fisher_vals_prop[i][j] = 1;
+				}
+			}
 			if(samplerptr->proper_fisher){
 				iterate_fisher(samplerptr, i);
 			}
+		}
 		}
 	}
 
