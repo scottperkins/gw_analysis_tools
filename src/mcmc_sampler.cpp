@@ -1806,8 +1806,14 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr,
 	//Frequency to check for equilibrium
 	
 	double *old_temps = new double[samplerptr->chain_N];
-	for(int i =0; i<samplerptr->chain_N; i++){
+	int ensemble_size = 1;
+	std::cout<<samplerptr->chain_temps[0]<<std::endl;
+	for(int i =1; i<samplerptr->chain_N; i++){
+		if(fabs(samplerptr->chain_temps[i] - 1 ) < 1e-10){break;}
 		std::cout<<samplerptr->chain_temps[i]<<std::endl;
+		ensemble_size ++;
+	}
+	for(int i =0; i<samplerptr->chain_N; i++){
 		old_temps[i]=samplerptr->chain_temps[i];
 	}
 
@@ -1883,14 +1889,32 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr,
 		update_temperatures_full_ensemble(samplerptr, t0, nu, t);
 
 	}
-	int acc, rej;
+	double acc, rej;
+	double average_accept[ensemble_size];
+	double average_reject[ensemble_size];
+	int swap_attemps[ensemble_size];
+	for(int j = 0 ; j<ensemble_size ; j++){
+		average_accept[j] = 0;
+		average_reject[j] = 0;
+		swap_attemps[j] = 0;
+	}
 	for (int j =0; j<samplerptr->chain_N; j++){
-		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
+		//std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
 		acc = samplerptr->swap_accept_ct[j];	
 		rej = samplerptr->swap_reject_ct[j];	
-		std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
-		std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
+		average_accept[j % ensemble_size] += (double)acc/(acc+rej);
+		average_reject[j % ensemble_size] += (double)rej/(acc+rej);
+		swap_attemps[j%ensemble_size] += acc+rej;
+		//std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
+		//std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
 		
+	}
+	for (int j =0; j<ensemble_size; j++){
+		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
+		acc = average_accept[j]/ensemble_size;	
+		rej = average_reject[j]/ensemble_size;	
+		std::cout<<"Accept ratio "<<j<<": "<<acc<<std::endl;
+		std::cout<<"Swap Attempts "<<j<<": "<<swap_attemps[j]<<std::endl;
 	}
 	delete [] running_accept_ct;
 	delete [] running_reject_ct;
@@ -2112,7 +2136,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string chec
 		chain_temp_averages[i]/=chain_N_per_group[i];	
 		chain_temp_averages[i] = std::exp(chain_temp_averages[i]);
 		//chain_temp_averages[i]=std::pow(chain_temp_averages[i],1./chain_N_per_group[i]);	
-		debugger_print(__FILE__,__LINE__,chain_temp_averages[i]);
+		//debugger_print(__FILE__,__LINE__,chain_temp_averages[i]);
 	}
 	ct = 0;
 	chain_temps[0]= 1;
@@ -3189,39 +3213,47 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	double max_ac_realloc=0;
 
 	//#################################################
-	//std::cout<<"Annealing"<<std::endl;
-	//sampler sampler_ann;
-	//continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
-	//	100,swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-	//	numThreads, pool, internal_prog, statistics_filename, 
-	//	"", checkpoint_file);
-
-
-	//deallocate_sampler_mem(&sampler_ann);
+	//Do the annealing process 3 times
+	//Start out raising the temperature by a huge amount (x1000)
+	//then make it less intense
 	//#################################################
-
-
-	while(continue_dynamic_search && dynamic_ct<3){
+	int temp_factor = 1000;
+	for(int i = 0 ; i<2; i++){
+		if(i >=1 ){ temp_factor = 100;}
 		std::cout<<"Annealing"<<std::endl;
 		sampler sampler_ann;
 		continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
-			10,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
+			100,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"", checkpoint_file);
 
+
 		deallocate_sampler_mem(&sampler_ann);
+	}
+	//#################################################
+
+
+	while(continue_dynamic_search && dynamic_ct<2){
+		//std::cout<<"Annealing"<<std::endl;
+		//sampler sampler_ann;
+		//continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
+		//	10,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
+		//	numThreads, pool, internal_prog, statistics_filename, 
+		//	"", checkpoint_file);
+
+		//deallocate_sampler_mem(&sampler_ann);
 		//#############################################
 
-		//sampler sampler_temp;
-		//std::cout<<"Exploration"<<std::endl;
-		//continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
-		//	swp_freq,log_prior, log_likelihood, fisher, user_parameters,
-		//	numThreads, pool, internal_prog, statistics_filename, 
-		//	"",  checkpoint_file,true,true);
+		sampler sampler_temp;
+		std::cout<<"Exploration"<<std::endl;
+		continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
+			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
+			numThreads, pool, internal_prog, statistics_filename, 
+			"",  checkpoint_file,true,true);
 
-		////##############################################################
-		////Reset positions and rewrite checkpoint file -- turning this off for now
-		////##############################################################
+		//##############################################################
+		//Reset positions and rewrite checkpoint file -- turning this off for now
+		//##############################################################
 
 		//const gsl_rng_type *T_reset;
 		//gsl_rng * r_reset;
@@ -3341,10 +3373,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		//write_checkpoint_file(&sampler_temp, checkpoint_file);
 
 		//gsl_rng_free(r_reset);
-		//////##############################################################
-		//////##############################################################
+		//##############################################################
+		//##############################################################
 
-		//deallocate_sampler_mem(&sampler_temp);
+		deallocate_sampler_mem(&sampler_temp);
 
 
 		//#############################################
@@ -4801,8 +4833,14 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	int equilibrium_check_freq=2*nu;
 	
 	double *old_temps = new double[max_chain_N_thermo_ensemble];
-	for(int i =0; i<samplerptr->chain_N; i++){
+	int ensemble_size = 1;
+	std::cout<<samplerptr->chain_temps[0]<<std::endl;
+	for(int i =1; i<samplerptr->chain_N; i++){
+		if(fabs(samplerptr->chain_temps[i] - 1 ) < 1e-10){break;}
 		std::cout<<samplerptr->chain_temps[i]<<std::endl;
+		ensemble_size ++;
+	}
+	for(int i =0; i<samplerptr->chain_N; i++){
 		old_temps[i]=samplerptr->chain_temps[i];
 	}
 
@@ -5036,14 +5074,32 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 		}
 	}
 	//std::cout<<"MEM CHECK : loop finished"<<std::endl;
-	int acc, rej;
+	double acc, rej;
+	double average_accept[ensemble_size];
+	double average_reject[ensemble_size];
+	int swap_attemps[ensemble_size];
+	for(int j = 0 ; j<ensemble_size ; j++){
+		average_accept[j] = 0;
+		average_reject[j] = 0;
+		swap_attemps[j] = 0;
+	}
 	for (int j =0; j<samplerptr->chain_N; j++){
-		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
+		//std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
 		acc = samplerptr->swap_accept_ct[j];	
 		rej = samplerptr->swap_reject_ct[j];	
-		std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
-		std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
+		average_accept[j % ensemble_size] += (double)acc/(acc+rej);
+		average_reject[j % ensemble_size] += (double)rej/(acc+rej);
+		swap_attemps[j%ensemble_size] += acc+rej;
+		//std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
+		//std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
 		
+	}
+	for (int j =0; j<ensemble_size; j++){
+		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
+		acc = average_accept[j]/ensemble_size;	
+		rej = average_reject[j]/ensemble_size;	
+		std::cout<<"Accept ratio "<<j<<": "<<acc<<std::endl;
+		std::cout<<"Swap Attempts "<<j<<": "<<swap_attemps[j]<<std::endl;
 	}
 	delete [] running_accept_ct;
 	delete [] running_reject_ct;
