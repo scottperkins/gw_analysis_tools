@@ -1893,6 +1893,7 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr,
 	double average_accept[ensemble_size];
 	double average_reject[ensemble_size];
 	int swap_attemps[ensemble_size];
+	int ensemble_number =0;
 	for(int j = 0 ; j<ensemble_size ; j++){
 		average_accept[j] = 0;
 		average_reject[j] = 0;
@@ -1907,12 +1908,13 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr,
 		swap_attemps[j%ensemble_size] += acc+rej;
 		//std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
 		//std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
+		if(j%ensemble_size == 0){ensemble_number++;}
 		
 	}
 	for (int j =0; j<ensemble_size; j++){
 		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
-		acc = average_accept[j]/ensemble_size;	
-		rej = average_reject[j]/ensemble_size;	
+		acc = average_accept[j]/ensemble_number;	
+		rej = average_reject[j]/ensemble_number;	
 		std::cout<<"Accept ratio "<<j<<": "<<acc<<std::endl;
 		std::cout<<"Swap Attempts "<<j<<": "<<swap_attemps[j]<<std::endl;
 	}
@@ -5078,6 +5080,7 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 	double average_accept[ensemble_size];
 	double average_reject[ensemble_size];
 	int swap_attemps[ensemble_size];
+	int ensemble_number=0;
 	for(int j = 0 ; j<ensemble_size ; j++){
 		average_accept[j] = 0;
 		average_reject[j] = 0;
@@ -5090,14 +5093,15 @@ void dynamic_temperature_internal(sampler *samplerptr, int N_steps, double nu, i
 		average_accept[j % ensemble_size] += (double)acc/(acc+rej);
 		average_reject[j % ensemble_size] += (double)rej/(acc+rej);
 		swap_attemps[j%ensemble_size] += acc+rej;
+		if(j%ensemble_size == 0){ensemble_number++;}
 		//std::cout<<"Accept ratio "<<j<<": "<<(double)acc/(acc+rej)<<std::endl;
 		//std::cout<<"Swap attempts "<<j<<": "<<(acc+rej)<<std::endl;
 		
 	}
 	for (int j =0; j<ensemble_size; j++){
 		std::cout<<"TEMP "<<j<<": "<<samplerptr->chain_temps[j]<<std::endl;
-		acc = average_accept[j]/ensemble_size;	
-		rej = average_reject[j]/ensemble_size;	
+		acc = average_accept[j]/ensemble_number;	
+		rej = average_reject[j]/ensemble_number;	
 		std::cout<<"Accept ratio "<<j<<": "<<acc<<std::endl;
 		std::cout<<"Swap Attempts "<<j<<": "<<swap_attemps[j]<<std::endl;
 	}
