@@ -13,8 +13,8 @@
  * File for the addition of tidal effects to the waveform. 
  *
  *Extends the IMRPhenomD template to include tidal effects, following the 
- * NRTidal model of arXiv:1905.06011v2. Specifically, equations 17, 18, 19, 20, 21, 
- * and 24 were used. 
+ * NRTidal model of arXiv:1905.06011v2. Specifically, equations 17, 18, 19, 20, 21, 24
+ * and 25 were used. A Planck taper was added to the waveform following arXiv:1003.2939.
  */
 
 //##############################################################################
@@ -41,6 +41,7 @@ T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
     {
       P_NRT = xpowers[3] * P_NRT/P_NRTdenom; //Note that this is the Pade function times x^(5/2).
       //std::cout<<P_NRT<<","<<std::endl; 
+      
       return P_NRT;
     }
   else
@@ -55,93 +56,214 @@ T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
       //This is a derivative with respect to x. To get a derivative with respect to f, need to multiply by dx/df
       DP_NRT = DP_NRT* (2/3.)*pow((param->M*param->M* M_PI*M_PI/f), 1/3.);
 
+      /*With the current structure of the code, this portion of this function will never be needed since
+	we're not actually calculating the derivative of the phase to do matching between inspiral and 
+	intermediate regions. */
       return DP_NRT;
     }
 }
 
-
+/* Note that this is NOT an overloaded version of phase_ins -- completely new. Only calculates the NRT phase, not the total phase_ins. It will be appended to the entire waveform later
+ */
 template<class T> 
-T IMRPhenomD_NRT<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *powers)
+T IMRPhenomD_NRT<T>::phase_ins_NRT(T f, source_parameters<T> *param)
 {
-  IMRPhenomD<T> model;
-  T gr_ins = model.phase_ins(f, param, pn_coeff, lambda, powers);
-  T phaseout = gr_ins;
-  T phasefix; 
+  
+  /*Note that this is just the NRT part now*/
+  T phaseout;
   bool deriv = false; //tells the Pade function not to take a derivative
 
-  //std::cout<<f<<","<<std::endl; 
-  //std::cout<<Pade(f, param, deriv)<<","<<std::endl; 
-
-  phasefix = - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
-  phaseout = phaseout + phasefix;
-  // phaseout = phaseout - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
-  //std::cout<<"{"<<f<<","<<Pade(f, param, deriv)<<","<<phasefix<<"},"<<std::endl; 
-
-  //std::cout<<"Called IMRPhenomD_NRT::phase_ins"<<std::endl; 
+  phaseout = - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
   
   return phaseout;
 }
 
+//Old version...
+/*template<class T>
+T IMRPhenomD_NRT<T>::spin_spin(source_parameters<T> *param, double PNorder)
+{
+  //T ss, X, Xsq, chi, chisq, X_other, chi_other, lambda, quad, oct;
+  T ssA_2PN, ssB_2PN, ss_2PN, ssA_3PN, ssB_3PN, ss_3PN, ssA_3p5PN, ssB_3p5PN, ss_3p5PN;
+  T X_A, X_Asq, chi1, chi1_sq, lambda1, quad1, oct1; 
+  T X_B, X_Bsq, chi2, chi2_sq, lambda2, quad2, oct2;  
+
+  lambda1 = param->tidal1;
+  lambda2 = param->tidal1;
+  
+  X_A = param->mass1 / param->M;    
+  X_B = param->mass2 / param->M;
+  chi1 = param->spin1z;
+  chi2 = param->spin2z;
+  
+  X_Asq = X_A * X_A;
+  X_Bsq = X_B * X_B; 
+  chi1_sq = chi1 * chi1;
+  chi2_sq = chi2 * chi2;
+  
+      /*  if(body == 1)
+    {
+      lambda = param->tidal1;
+      X = param->mass1 / param->M;    
+      X_other = param->mass2 / param->M;
+      chi = param->spin1z;
+      chi_other = param->spin2z; 
+
+      //chi = sqrt(param->spin1x*param->spin1x + param->spin1y*param->spin1y + param->spin1z*param->spin1z);
+      //chi_other = sqrt(param->spin2x*param->spin2x + param->spin2y*param->spin2y + param->spin2z*param->spin2z);
+    }
+  else
+    {
+      lambda = param->tidal2;
+      X = param->mass2 / param->M;
+      X_other = param->mass1 / param->M;
+      chi = param->spin2z;
+      chi_other = param->spin1z; 
+      
+      //chi = sqrt(param->spin2x*param->spin2x + param->spin2y*param->spin2y + param->spin2z*param->spin2z);
+      //chi_other = sqrt(param->spin1x*param->spin1x + param->spin1y*param->spin1y + param->spin1z*param->spin1z);
+    }
+      */
+
+    /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
+/*  T q0 = 0.1940;
+  T q1 = 0.09163;
+  T q2 = 0.04812;
+  T q3 = -0.004286;
+  T q4 = 0.00012450;
+
+  T o0 = 0.003131;
+  T o1 = 2.071;
+  T o2 = -0.7152;
+  T o3 = 0.2458;
+  T o4 = -0.03309;
+*/
+  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities*/
+/*  quad1 = exp(q0 + q1*log(lambda1) + q2*log(lambda1)*log(lambda1) + q3*log(lambda1)*log(lambda1)*log(lambda1) + q4*log(lambda1)*log(lambda1)*log(lambda1)*log(lambda1));
+  oct = exp(o0 + o1*log(quad1) + o2*log(quad1)*log(quad1) + o3*log(quad1)*log(quad1)*log(quad1) + o4*log(quad1)*log(quad1)*log(quad1)*log(quad1));
+  
+  quad2 = exp(q0 + q1*log(lambda2) + q2*log(lambda2)*log(lambda2) + q3*log(lambda2)*log(lambda2)*log(lambda2) + q4*log(lambda2)*log(lambda2)*log(lambda2)*log(lambda2));
+  oct2 = exp(o0 + o1*log(quad2) + o2*log(quad2)*log(quad2) + o3*log(quad2)*log(quad2)*log(quad2) + o4*log(quad2)*log(quad2)*log(quad2)*log(quad2)); 
+*/
+  //quad = exp(q0) * pow(lambda, q1 + q2 * log(lambda) + q3 * pow(log(lambda),2) + q4 * pow(log(lambda),3));
+  //oct = exp(o0) * pow(quad, o1 + o2 * log(quad) + o3 * pow(log(quad),2) + o4 * pow(log(quad),3));
+/*  
+  if(PNorder == 2.0)
+    {
+      //ss_2PN = 0.0;
+      ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
+      ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
+      ss_2PN = ssA_2PN + ssB_2PN;
+    }
+  else if(PNorder == 3.0)
+    {
+      //ss = 0.0;
+      ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
+      ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
+      ss_3PN = ssA_3PN + ssB_3PN; 
+    }
+  else
+    {
+      ssA_3p5PN = 10 * ((X_Asq + (308./3.)*X_A)*chi1 + (X_Bsq - (89/3.)*X_B)*chi2 - 40* M_PI)*(quad1 - 1.)*X_Asq*chi1_sq - 440*(oct1 - 1.)*X_Asq*X_A*chi1_sq*chi1; 
+      ssB_3p5PN = 10 * ((X_Bsq + (308./3.)*X_B)*chi2 + (X_Asq - (89/3.)*X_A)*chi1 - 40* M_PI)*(quad2 - 1.)*X_Bsq*chi2_sq - 440*(oct2 - 1.)*X_Bsq*X_B*chi2_sq*chi2;
+      ss_3p5PN = ssA_3p5PN + ssB_3p5PN; 
+    }
+  
+  return ss; 
+}*/
 
 template<class T>
-T IMRPhenomD_NRT<T>::Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda)
+T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
 {
-  IMRPhenomD<T> model;
-  T gr_ins = model.Dphase_ins(f, param, pn_coeff, lambda);
-  T phaseout = gr_ins;
-  bool deriv = true;
+  T ssA_2PN, ssB_2PN, ss_2PN, ssA_3PN, ssB_3PN, ss_3PN, ssA_3p5PN, ssB_3p5PN, ss_3p5PN;
+  T X_A, X_Asq, chi1, chi1_sq, lambda1, quad1, oct1; 
+  T X_B, X_Bsq, chi2, chi2_sq, lambda2, quad2, oct2;  
+
+  lambda1 = param->tidal1;
+  lambda2 = param->tidal1;
   
-  phaseout = phaseout - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
+  X_A = param->mass1 / param->M;    
+  X_B = param->mass2 / param->M;
+  chi1 = param->spin1z;
+  chi2 = param->spin2z;
+  
+  X_Asq = X_A * X_A;
+  X_Bsq = X_B * X_B; 
+  chi1_sq = chi1 * chi1;
+  chi2_sq = chi2 * chi2;
+
+  /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
+  T q0 = 0.1940;
+  T q1 = 0.09163;
+  T q2 = 0.04812;
+  T q3 = -0.004286;
+  T q4 = 0.00012450;
+
+  T o0 = 0.003131;
+  T o1 = 2.071;
+  T o2 = -0.7152;
+  T o3 = 0.2458;
+  T o4 = -0.03309;
+  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities*/
+  quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
+  oct1 = exp(o0 + o1*log(quad1) + o2*pow(log(quad1), 2.) + o3*pow(log(quad1), 3.) + o4*pow(log(quad1), 4.));
+  
+  quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
+  oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
+
+  /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
+  //2 PN contribution
+  ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
+  ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
+  ss_2PN = ssA_2PN + ssB_2PN;
+  //ss_2PN = 0.0;
+
+  //3 PN contribution 
+  ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
+  ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
+  ss_3PN = ssA_3PN + ssB_3PN;
+  //ss_3PN = 0.0;
+
+  //3.5 PN contribution
+  ssA_3p5PN = 10 * ((X_Asq + (308./3.)*X_A)*chi1 + (X_Bsq - (89/3.)*X_B)*chi2 - 40* M_PI)*(quad1 - 1.)*X_Asq*chi1_sq - 440*(oct1 - 1.)*X_Asq*X_A*chi1_sq*chi1; 
+  ssB_3p5PN = 10 * ((X_Bsq + (308./3.)*X_B)*chi2 + (X_Asq - (89/3.)*X_A)*chi1 - 40* M_PI)*(quad2 - 1.)*X_Bsq*chi2_sq - 440*(oct2 - 1.)*X_Bsq*X_B*chi2_sq*chi2;
+  ss_3p5PN = ssA_3p5PN + ssB_3p5PN;
+  
+  T phaseout, spin_spin;
+  T x = pow((M_PI * param->M *f), 2./3.);
+
+  T coeff = (3./(128.* param->eta))* pow(x, -5/2.);
+
+  spin_spin = ss_2PN * pow(x, 2.) + ss_3PN  * pow(x, 3.) + ss_3p5PN  * pow(x, 7/2.);
+  
+  phaseout = coeff*spin_spin;
+  //equation 26 of arXiv:1905.06011v2
   
   return phaseout; 
+ 
 }
 
 template<class T>
-T IMRPhenomD_NRT<T>::amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
-                        lambda_parameters<T> *lambda, useful_powers<T> *powers)
+T IMRPhenomD_NRT<T>::amp_ins_NRT(T f, source_parameters<T> *param)
 {
-  IMRPhenomD<T> model;
+  /*IMRPhenomD<T> model;
   T gr_ins = model.amp_ins(f, param, pn_coeff, lambda, powers);
   T ampout = gr_ins;
+  */
 
   T x = pow((M_PI * param->M *f), 2./3.);
 
   T amp_NRT = -sqrt(5*M_PI*param->eta / 24.) * (9 * param->M * param->M / param->DL) * (3./16.) * param->tidal_weighted * pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8* pow(x, 4));
   //has to be scaled by f^(7/6)/A0 to be consistent with the rest of GW analysis tools
-  amp_NRT = amp_NRT*powers->MF7sixth/ (param->A0*pow(param->M, 7/6.));
+  //amp_NRT = amp_NRT*powers->MF7sixth/ (param->A0*pow(param->M, 7/6.));
+  //amp_NRT = amp_NRT*pow(f, 7/6.)/(param->A0);
+  //amp_NRT = amp_NRT/(param->A0); 
 
-  ampout += amp_NRT;
+  //ampout += amp_NRT;
   //std::cout<<"Called IMRPhenomD_NRT::amp_ins"<<std::endl; 
-  return ampout; 
+  return amp_NRT; 
 }
 
-template<class T>
-T IMRPhenomD_NRT<T>::Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda)
-{
-  IMRPhenomD<T> model;
-  T gr_ins = model.Damp_ins(f, param, pn_coeff, lambda);
-  T ampout = gr_ins; 
 
-  T x = pow((M_PI * param->M *f), 2./3.);
-  
-  T aNRT = (1 + (449./108.)*x + (22672./9.) * pow(x, 2.89) );
-  T aNRTdenom = (1 + 13477.8* pow(x, 4));
-  T coefficient =  -sqrt(5*M_PI*param->eta / 24.) * (9 * pow(param->M, 2.0) / param->DL) * (3./16.) * param->tidal_weighted;
-
-  T amp_NRT = coefficient* pow(x,13./4.)* aNRT/aNRTdenom;
-
-  T DaNRT = coefficient * ( (-53911.2 * pow(x, 25./4.) * aNRT /(aNRTdenom * aNRTdenom)) + (pow(x, 13./4.) * ((449./108.) + 7280.23* pow(x, 1.89))/aNRTdenom) + (13*pow(x, 9./4.) * aNRT/(4.*aNRTdenom)) );
-  //This is actually the derivative of the amplitude with respect to x
-  //to make it the derivative of the amplitude with respect to f, need to multiply by dx/df, done in the next line  
-  DaNRT = DaNRT* (2/3.)*pow((param->M*param->M* M_PI*M_PI/f), 1/3.);
-
-  DaNRT = DaNRT *pow(param->M * f, 7/6.)/ (param->A0*pow(param->M, 7/6.)) + amp_NRT * (7/6.)*pow(f,1/6.)/ (param->A0);
-  //with appropriate scaling factors
-  std::cout<<"DaNRT ="<<DaNRT<<std::endl;
-  debugger_print(__FILE__,__LINE__,DaNRT);
-  ampout = ampout + DaNRT; 
-  return ampout; 
-}
 
 template<class T>
 T IMRPhenomD_NRT<T>::taper(T f, int length, source_parameters<T> *params)
@@ -155,29 +277,42 @@ T IMRPhenomD_NRT<T>::taper(T f, int length, source_parameters<T> *params)
   //kappa = 3.*(params->mass2 * pow(params->mass1, 4.)* params->tidal1/ pow(params->M,5.) + params->mass1 * pow(params->mass2, 4.)* params->tidal2/ pow(params->M,5.));
   //This is the definition for kappa_2^T given in arXiv:1804.02235. As described in that paper,
   //it is accurate enough to use kappa effective. Can test by turning this back on. No change in output.
+
+  double a0 = 0.3586;
+  double n1 = 3.35411203e-2;
+  double n2 = 4.31460284e-5;
+  double d1 = 7.54224145e-2;
+  double d2 = 2.23626859e-4;
+  /*In order to reproduce LAL's result exactly had to get these coefficients from their code
+   instead of the paper because there are more digits given. */
   
   kappa = kappa_eff;
-  fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa); //Equation 11 of arXiv:1804.02235
+  fmerger = (1./(2.*params->M * M_PI))* a0* sqrt(params->mass2 / params->mass1) *(1.0 + n1 * kappa + n2 * kappa * kappa)/(1.0 + d1 * kappa + d2* kappa * kappa);
+  //Equation 11 of arXiv:1804.02235
+
   T fmerger12 = fmerger*1.2;
   T z = (fmerger - fmerger12)/(f - fmerger) + (fmerger - fmerger12)/(f - fmerger12); 
   
   if(f < fmerger)
     {
-      return 1.0; 
+      return 0.0; 
     }
   else if(fmerger < f && f < fmerger12)
     {
-      sigma = 1.0/(exp(z) + 1.0);
+      sigma = 1.0/(exp(-z) + 1.0);
       return sigma; 
     }
   else if(f > fmerger12)
     {
-      return 0.0; 
+      return 1.0; 
     }
 
   return -1.0; //If it gets to this point, something is wrong and the change in sign should indicate that
 }
 
+
+/*Just calls the phenomD construct_waveform and tacks on the phase and amplitude corrections at the end with the taper
+ */
 template<class T>
 int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
@@ -197,12 +332,8 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   params->f1 = 0.014/(params->M);
   params->f3 = this->fpeak(params, &lambda);
 
-  std::cout<<"f1_phase: "<<params->f1_phase<<std::endl;
-  std::cout<<"f2_phase: "<<params->f2_phase<<std::endl;
-  std::cout<<"f1_amp: "<<params->f1<<std::endl; 
-  std::cout<<"f3_amp: "<<params->f3<<std::endl;
-
-   T fmerger, kappa, kappa_eff;
+  /*This is only here so that fmerger can be printed out and then put on the plots*/
+  T fmerger, kappa, kappa_eff;
   kappa_eff = (3./16.) * params->tidal_weighted; //kappa effective as defined in arXiv:1804.02235 and arXiv:1905.06011v2.
   
   //kappa = 3.*(params->mass2 * pow(params->mass1, 4.)* params->tidal1/ pow(params->M,5.) + params->mass1 * pow(params->mass2, 4.)* params->tidal2/ pow(params->M,5.));
@@ -211,12 +342,16 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   
   kappa = kappa_eff;
   fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa);
+  
 
-  std::cout<<"fmerger: "<<1.2*fmerger<<std::endl; 
-  /*
-  params->f3 = fmerger;
-  */
-  //Wanted to try using the fmerger defined in the NR Tidal paper instead of fpeak. This made a huge difference...
+  //Print statements so that we can put the transition frequencies on the plots
+  std::cout<<"f1_phase: "<<params->f1_phase<<std::endl;
+  //std::cout<<"f2_phase: "<<params->f2_phase<<std::endl;
+  std::cout<<"f1_amp: "<<params->f1<<std::endl; 
+  //std::cout<<"f3_amp: "<<params->f3<<std::endl;
+  std::cout<<"fmerger: "<<fmerger<<std::endl; 
+  std::cout<<"1.2*fmerger: "<<1.2*fmerger<<std::endl; 
+  
 	
   useful_powers<T> pows;
   this->precalc_powers_PI(&pows);
@@ -234,7 +369,9 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   //################################################################
   //Calculate phase and coalescence time variables
   T phic, f_ref, tc, phi_shift, tc_shift;
-  //If phic is unspecified - use f_ref and phiRef
+  /*Note -- to match LALSuite, this sets phiRef equal to phi_phenomD at f_ref, not phenomD_NRT
+ * Arbitrary constant, not really important
+ */
   if(params->shift_phase ){
     f_ref = params->f_ref;
     this->precalc_powers_ins(f_ref, M, &pows);
@@ -249,6 +386,9 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   
   //Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
   //This aligns more with the physical meaning of tc, but the phase is NO LONGER just
+  /*Note -- to match LALSuite, this sets phiRef equal to phi_phenomD at f_ref, not phenomD_NRT
+ * Arbitrary constant, not really important
+ */
   if(params->shift_time){
     T alpha1_offset = this->assign_lambda_param_element(params,14);
     tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
@@ -256,10 +396,8 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   else{
     tc_shift=0;
   }
-  //tc = 2*M_PI*params->tc - tc_shift;
   tc = 2*M_PI*params->tc + tc_shift;
   
-  //T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
   T A0 = params->A0* pow(M,7./6.);
   
   T f;
@@ -286,6 +424,16 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
 	  }
 	amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+	/*Append phase_ins_NRT and amp_ins_NRT to the entire waveform*/
+	{
+		T phaseNRT = this->phase_ins_NRT(f, params);
+		phase += phaseNRT;
+		T phaseSpinNRT = this->phase_spin_NRT(f, params);
+		phase += phaseSpinNRT;
+		//I don't know why this would be minus instead of plus, but it seems to get closer to LAL's result if it's minus phaseSpinNRT
+		T ampNRT = (A0*this->amp_ins_NRT(f, params));
+		amp +=ampNRT;
+	}
 	//phase +=   (T)(tc*(f-f_ref) - phic);
 	phase -=   (T)(tc*(f-f_ref) + phic);
 	waveform[j] = amp * std::exp(-i * phase);
@@ -296,11 +444,231 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   //###################################### The next part applies the taper.  
   for(int i = 0; i<length; i++)
     {
-      waveform[i] = waveform[i] * taper(frequencies[i], length, params);
+      waveform[i] = waveform[i] * std::complex<T>((T)(1.0) -  taper(frequencies[i], length, params),0);
     }
   
   return 1;
 }
+
+/*Old version*/
+//template<class T> 
+//T IMRPhenomD_NRT<T>::phase_ins_NRT(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *powers)
+//{
+//  IMRPhenomD<T> model;
+//  T gr_ins = model.phase_ins(f, param, pn_coeff, lambda, powers);
+//  T phaseout = gr_ins;
+//  
+//  T phasefix; 
+//  bool deriv = false; //tells the Pade function not to take a derivative
+//
+//  phasefix = - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
+//  phaseout = phaseout + phasefix;
+//  
+//  return phaseout;
+//}
+
+
+/* This shouldn't be needed anymore, but I'll leave it in. At the moment, it's not called at all (changed the name so its not overloaded)
+ */
+/*
+template<class T>
+T IMRPhenomD_NRT<T>::Dphase_ins_NRT(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda)
+{
+  IMRPhenomD<T> model;
+  T gr_ins = model.Dphase_ins(f, param, pn_coeff, lambda);
+  T phaseout = gr_ins;
+  bool deriv = true;
+  
+  phaseout = phaseout - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
+  return gr_ins; 
+}
+*/
+
+/*For the amplitude, you may want to call build_amp instead of each amplitude component (ins,int,mr) separately, since LALsuite seems to append the correction
+ * to the entire waveform. Up to you though. You would overload that function exactly like the others
+ */
+
+/*Still be used as overloaded function*/
+ /*template<class T>
+T IMRPhenomD_NRT<T>::amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
+                        lambda_parameters<T> *lambda, useful_powers<T> *powers)
+{
+  IMRPhenomD<T> model;
+  T gr_ins = model.amp_ins(f, param, pn_coeff, lambda, powers);
+  T ampout = gr_ins;
+
+  T x = pow((M_PI * param->M *f), 2./3.);
+
+  T amp_NRT = -sqrt(5*M_PI*param->eta / 24.) * (9 * param->M * param->M / param->DL) * (3./16.) * param->tidal_weighted * pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8* pow(x, 4));
+  //has to be scaled by f^(7/6)/A0 to be consistent with the rest of GW analysis tools
+  amp_NRT = amp_NRT*powers->MF7sixth/ (param->A0*pow(param->M, 7/6.));
+
+  ampout += amp_NRT;
+  //std::cout<<"Called IMRPhenomD_NRT::amp_ins"<<std::endl; 
+  return ampout; 
+  }*/
+
+/*Still be used as overloaded function*/
+/*template<class T>
+T IMRPhenomD_NRT<T>::Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda)
+{
+  IMRPhenomD<T> model;
+  T gr_ins = model.Damp_ins(f, param, pn_coeff, lambda);
+  T ampout = gr_ins; 
+
+  T x = pow((M_PI * param->M *f), 2./3.);
+  
+  T aNRT = (1 + (449./108.)*x + (22672./9.) * pow(x, 2.89) );
+  T aNRTdenom = (1 + 13477.8* pow(x, 4));
+  T coefficient =  -sqrt(5*M_PI*param->eta / 24.) * (9 * pow(param->M, 2.0) / param->DL) * (3./16.) * param->tidal_weighted;
+
+  T amp_NRT = coefficient* pow(x,13./4.)* aNRT/aNRTdenom;
+
+  T DaNRT = coefficient * ( (-53911.2 * pow(x, 25./4.) * aNRT /(aNRTdenom * aNRTdenom)) + (pow(x, 13./4.) * ((449./108.) + 7280.23* pow(x, 1.89))/aNRTdenom) + (13*pow(x, 9./4.) * aNRT/(4.*aNRTdenom)) );
+  //This is actually the derivative of the amplitude with respect to x
+  //to make it the derivative of the amplitude with respect to f, need to multiply by dx/df, done in the next line  
+  DaNRT = DaNRT* (2/3.)*pow((param->M*param->M* M_PI*M_PI/f), 1/3.);
+
+  DaNRT = DaNRT *pow(param->M * f, 7/6.)/ (param->A0*pow(param->M, 7/6.)) + amp_NRT * (7/6.)*pow(f,1/6.)/ (param->A0);
+  //with appropriate scaling factors
+  std::cout<<"DaNRT ="<<DaNRT<<std::endl;
+  debugger_print(__FILE__,__LINE__,DaNRT);
+  ampout = ampout + DaNRT; 
+  return ampout; 
+}
+*/
+ 
+/*Old version*/
+
+//template<class T>
+//int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
+//{
+////TESTING 
+//  T kappa_eff = (3./16.) * params->tidal_weighted; //kappa effective as defined in arXiv:1804.02235 and arXiv:1905.06011v2.
+//  T kappa = kappa_eff;
+//  T fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa); //Equation 11 of arXiv:1804.02235
+////#############################
+//  IMRPhenomD<T> model;
+//  //int status = model.construct_waveform(frequencies, length, waveform, params);
+//  T M = params-> M;
+//  T chirpmass = params->chirpmass;
+//  T DL = params->DL;
+//  lambda_parameters<T> lambda, *lambda_ptr;
+//  this->assign_lambda_param(params, &lambda);
+//  
+//  /*Initialize the post merger quantities*/
+//  this->post_merger_variables(params);
+//  params->f1_phase = 0.018/(params->M);
+//  params->f2_phase = params->fRD/2.;
+//  
+//  params->f1 = 0.014/(params->M);
+//  params->f3 = this->fpeak(params, &lambda);
+//
+//  /* T fmerger, kappa, kappa_eff;
+//  kappa_eff = (3./16.) * params->tidal_weighted; //kappa effective as defined in arXiv:1804.02235 and arXiv:1905.06011v2.
+//  
+//  //kappa = 3.*(params->mass2 * pow(params->mass1, 4.)* params->tidal1/ pow(params->M,5.) + params->mass1 * pow(params->mass2, 4.)* params->tidal2/ pow(params->M,5.));
+//  //This is the definition for kappa_2^T given in arXiv:1804.02235. As described in that paper,
+//  //it is accurate enough to use kappa effective. Can test by turning this back on. No change in output.
+//  
+//  kappa = kappa_eff;
+//  fmerger = (1./(2*params->M * M_PI))* 0.3586* sqrt(params->mass2 / params->mass1) *(1 + 3.354e-2 * kappa + 4.315e-5 * kappa * kappa)/(1 + 7.542e-2 * kappa + 2.236e-4* kappa * kappa);
+//
+//  params->f3 = fmerger;
+//  */
+//  //Wanted to try using the fmerger defined in the NR Tidal paper instead of fpeak. This made a huge difference...
+//	
+//  useful_powers<T> pows;
+//  this->precalc_powers_PI(&pows);
+//
+//  T deltas[6];
+//  T pn_amp_coeffs[7];
+//  T pn_phase_coeffs[12];
+//  
+//  this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
+//  this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
+//  
+//  this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
+//  this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
+//  
+//  //################################################################
+//  //Calculate phase and coalescence time variables
+//  T phic, f_ref, tc, phi_shift, tc_shift;
+//  //If phic is unspecified - use f_ref and phiRef
+//  if(params->shift_phase ){
+//    f_ref = params->f_ref;
+//    this->precalc_powers_ins(f_ref, M, &pows);
+//    //NOTE : this is weird, but seems to agree with LIGO
+//    //phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
+//    phi_shift = (model.build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
+//    phic = 2*params->phiRef + phi_shift;
+//  }
+//  //If phic is specified, ignore f_ref phiRef and use phic
+//  else{
+//    f_ref = 0;
+//    phic = params->phiRef;
+//  }
+//  
+//  //Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
+//  //This aligns more with the physical meaning of tc, but the phase is NO LONGER just
+//  if(params->shift_time){
+//    T alpha1_offset = this->assign_lambda_param_element(params,14);
+//    //NOTE : this is weird, but seems to agree with LIGO
+//    //tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
+//    tc_shift = model.Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
+//  }
+//  else{
+//    tc_shift=0;
+//  }
+//  //tc = 2*M_PI*params->tc - tc_shift;
+//  tc = 2*M_PI*params->tc + tc_shift;
+//  
+//  //T A0 = sqrt(M_PI/30)*chirpmass*chirpmass/DL * pow(M_PI*chirpmass,-7./6);
+//  T A0 = params->A0* pow(M,7./6.);
+//  
+//  T f;
+//  std::complex<T> amp, phase;
+//  std::complex<T> i;
+//  i = std::complex<T> (0,1.);
+//  T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
+//  for (size_t j =0; j< length; j++)
+//    {
+//      f = frequencies[j];
+//      if(f>fcut){
+//	amp = 0.0;
+//	waveform[j] = 0.0;
+//      }
+//      else{	
+//	if (f<params->f1_phase)
+//	  {
+//	    this->precalc_powers_ins(f, M, &pows);
+//	  }
+//	else
+//	  {
+//	    pows.MFsixth= pow(M*f,1./6.);	
+//	    pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+//	  }
+//	amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
+//	phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+//	if(true){
+//		T phaseNRT = this->phase_ins_NRT(f, params,pn_phase_coeffs,&lambda,&pows);
+//		phase += phaseNRT;
+//	}
+//	//phase +=   (T)(tc*(f-f_ref) - phic);
+//	phase -=   (T)(tc*(f-f_ref) + phic);
+//	waveform[j] = amp * std::exp(-i * phase);
+//      }
+//      
+//    }
+//	
+//  //###################################### The next part applies the taper.  
+//  for(int i = 0; i<length; i++)
+//    {
+//      waveform[i] = waveform[i] * taper(frequencies[i], length, params);
+//    }
+//  
+//  return 1;
+//}
 
 template class IMRPhenomD_NRT<double>;
 template class IMRPhenomD_NRT<adouble>;
