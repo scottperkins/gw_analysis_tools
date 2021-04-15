@@ -3640,9 +3640,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 			init=false;
 			debugger_print(__FILE__,__LINE__,"Finished init structure");
 			debugger_print(__FILE__,__LINE__,"Creating dump");
-			debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
-			sampler_output->create_data_dump(false,false, chain_filename);
-			//sampler_output->create_data_dump(true,false, chain_filename);
+			//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
+			//sampler_output->create_data_dump(false,false, chain_filename);
+			sampler_output->create_data_dump(true,false, chain_filename);
 			debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 		}
@@ -3951,9 +3951,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				
 				relax=false;
 				debugger_print(__FILE__,__LINE__,"Creating dump");
-				debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
-				sampler_output->create_data_dump(false,false, chain_filename);
-				//sampler_output->create_data_dump(true,false, chain_filename);
+				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
+				//sampler_output->create_data_dump(false,false, chain_filename);
+				sampler_output->create_data_dump(true,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			
 
