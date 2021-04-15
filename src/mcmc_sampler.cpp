@@ -3228,6 +3228,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			100,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"", checkpoint_file);
+		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		//write_file("data/swap_partners_"+std::to_string(i)+".csv",sampler_ann.swap_partners,sampler_ann.chain_N,sampler_ann.chain_N);
 
 
 		deallocate_sampler_mem(&sampler_ann);
@@ -3252,6 +3254,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"",  checkpoint_file,true,true);
+		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		//write_file("data/swap_partners_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_partners,sampler_temp.chain_N,sampler_temp.chain_N);
 
 		//##############################################################
 		//Reset positions and rewrite checkpoint file -- turning this off for now
@@ -3619,21 +3623,43 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 		sampler_output->populate_chain_temperatures(chain_temps);
 		if(init){
 			debugger_print(__FILE__,__LINE__,"Init structure");
-			sampler_output->populate_initial_output(temp_output, temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos)	;
+			//###################################################
+			//TESTING
+			int temp_pos[sampler.chain_N];
+			for(int z = 0; z<sampler.chain_N;z++){
+				temp_pos[z] = sampler.chain_pos[z];
+				if(sampler.restarted_chain[z]){
+					temp_pos[z] = sampler.N_steps;
+				}
+			}
+			sampler_output->populate_initial_output(temp_output, temp_status,temp_model_status,sampler.ll_lp_output,temp_pos)	;
+			//sampler_output->populate_initial_output(temp_output, temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos)	;
+			//###################################################
 			sampler_output->set_trim(0);	
 			sampler_output->update_cold_chain_list();	
 			init=false;
 			debugger_print(__FILE__,__LINE__,"Finished init structure");
 			debugger_print(__FILE__,__LINE__,"Creating dump");
-			//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
-			//sampler_output->create_data_dump(false,false, chain_filename);
-			sampler_output->create_data_dump(true,false, chain_filename);
+			debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
+			sampler_output->create_data_dump(false,false, chain_filename);
+			//sampler_output->create_data_dump(true,false, chain_filename);
 			debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 		}
 		else{
 			debugger_print(__FILE__,__LINE__,"Appending structure");
-			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
+			//###################################################
+			//TESTING
+			int temp_pos[sampler.chain_N];
+			for(int z = 0; z<sampler.chain_N;z++){
+				temp_pos[z] = sampler.chain_pos[z];
+				if(sampler.restarted_chain[z]){
+					temp_pos[z] = sampler.N_steps;
+				}
+			}
+			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,temp_pos);
+			//sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
+			//###################################################
 			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
@@ -3850,7 +3876,18 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 		if(init){
 			debugger_print(__FILE__,__LINE__,"Init structure");
-			sampler_output->populate_initial_output(temp_output, (int ***)NULL,(int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
+			//###################################################
+			//TESTING
+			int temp_pos[sampler.chain_N];
+			for(int z = 0; z<sampler.chain_N;z++){
+				temp_pos[z] = sampler.chain_pos[z];
+				if(sampler.restarted_chain[z]){
+					temp_pos[z] = sampler.N_steps;
+				}
+			}
+			sampler_output->populate_initial_output(temp_output, (int ***)NULL,(int ***)NULL,sampler.ll_lp_output,temp_pos)	;
+			//sampler_output->populate_initial_output(temp_output, (int ***)NULL,(int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
+			//###################################################
 			sampler_output->set_trim(0);	
 			sampler_output->update_cold_chain_list();	
 			init=false;
@@ -3858,7 +3895,18 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		}
 		else{
 			debugger_print(__FILE__,__LINE__,"Appending structure");
-			sampler_output->append_to_output(temp_output,(int ***)NULL,(int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
+			//###################################################
+			//TESTING
+			int temp_pos[sampler.chain_N];
+			for(int z = 0; z<sampler.chain_N;z++){
+				temp_pos[z] = sampler.chain_pos[z];
+				if(sampler.restarted_chain[z]){
+					temp_pos[z] = sampler.N_steps;
+				}
+			}
+			sampler_output->append_to_output(temp_output,(int ***)NULL,(int ***)NULL,sampler.ll_lp_output,temp_pos)	;
+			//sampler_output->append_to_output(temp_output,(int ***)NULL,(int ***)NULL,sampler.ll_lp_output,sampler.chain_pos)	;
+			//###################################################
 			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 		}
 		sampler_output->calc_ac_vals(true);
@@ -3903,9 +3951,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				
 				relax=false;
 				debugger_print(__FILE__,__LINE__,"Creating dump");
-				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
-				//sampler_output->create_data_dump(false,false, chain_filename);
-				sampler_output->create_data_dump(true,false, chain_filename);
+				debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
+				sampler_output->create_data_dump(false,false, chain_filename);
+				//sampler_output->create_data_dump(true,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			
 
