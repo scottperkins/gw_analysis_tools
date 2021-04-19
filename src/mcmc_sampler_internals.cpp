@@ -843,6 +843,7 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 
 	sampler->swap_partners[T1_index][T2_index]++;
 	sampler->swap_partners[T2_index][T1_index]++;
+	
 	//Unpack parameters
 	double T1 = sampler->chain_temps[T1_index];
 	double T2 = sampler->chain_temps[T2_index];
@@ -865,6 +866,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	}	
 	else
 	{
+		sampler->swap_accepts[T1_index][T2_index]++;
+		sampler->swap_accepts[T2_index][T1_index]++;
 		double temp[sampler->max_dim];
 		int tempstat[sampler->max_dim];
 		for(int i =0; i < sampler->max_dim;i++)
@@ -1362,6 +1365,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->swap_partners = new int*[sampler->chain_N];
+	sampler->swap_accepts = new int*[sampler->chain_N];
 	sampler->thermodynamic_integrated_likelihood = new double[sampler->chain_N];
 	sampler->thermodynamic_integrated_likelihood_terms = new int[sampler->chain_N];
 	if(sampler->update_RJ_width){
@@ -1415,8 +1419,10 @@ void allocate_sampler_mem(sampler *sampler)
 	for (i =0; i<sampler->chain_N; i++)
 	{
 		sampler->swap_partners[i] = new int[sampler->chain_N];
+		sampler->swap_accepts[i] = new int[sampler->chain_N];
 		for(int j = 0 ; j<sampler->chain_N;j++){
 			sampler->swap_partners[i][j] = 0 ;
+			sampler->swap_accepts[i][j] = 0 ;
 		}
 		//designate T=1 chains as reference chains
 		if(fabs(sampler->chain_temps[i] - 1)<DOUBLE_COMP_THRESH){
@@ -1618,9 +1624,11 @@ void deallocate_sampler_mem(sampler *sampler)
 		free(sampler->prob_boundaries[i]); 
 		gsl_rng_free(sampler->rvec[i]);
 		delete [] sampler->swap_partners[i];
+		delete [] sampler->swap_accepts[i];
 
 	}		
 	delete [] sampler->swap_partners;
+	delete [] sampler->swap_accepts;
 	//if(sampler->pool){
 	if(true){
 		for (i =0; i<sampler->chain_N; i++)

@@ -3254,8 +3254,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"",  checkpoint_file,true,true);
-		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
-		//write_file("data/swap_partners_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_partners,sampler_temp.chain_N,sampler_temp.chain_N);
+		debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		write_file("data/swap_partners_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_partners,sampler_temp.chain_N,sampler_temp.chain_N);
+		write_file("data/swap_accepts_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_accepts,sampler_temp.chain_N,sampler_temp.chain_N);
 
 		//##############################################################
 		//Reset positions and rewrite checkpoint file -- turning this off for now
@@ -3866,8 +3867,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, harvest_pool, internal_prog, statistics_filename, 
 			"", checkpoint_file,false,false);
-		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
-		//write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
+		debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
+		write_file("data/swap_accepts_"+std::to_string(spct)+".csv",sampler.swap_accepts,sampler.chain_N,sampler.chain_N);
 		//spct++;
 		
 

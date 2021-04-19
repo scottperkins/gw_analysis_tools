@@ -43,6 +43,7 @@ public:
 	double **prob_boundaries;
 	double *chain_temps;
 	int **swap_partners; 
+	int **swap_accepts; 
 	bool random_swaps = true;
 	//########
 	double **chain_neighborhoods;
@@ -50,7 +51,8 @@ public:
 	int **chain_neighborhoods_ids;
 	int *chain_neighbors_ids;
 	/* Chain radius controls the temperature difference allowed for swap proposals whether the chains are isolated or not*/
-	int chain_radius=2;
+	//int chain_radius=2;
+	int chain_radius=5;
 	/*Restricting the swapping means that swaps can be proposed for chains with similar temperatures, in any of the ensembles*/
 	bool restrict_swapping=true;
 	//bool restrict_swapping=false;
