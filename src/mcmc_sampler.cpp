@@ -4012,11 +4012,20 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 		int ensemble_num = ceil((double)sampler.chain_N/ensemble_members);	
 		
 		double averages[ensemble_members];
+		double average_accept_up[ensemble_members];
+		int average_accept_up_attempts[ensemble_members];
+		int average_accept_down_attempts[ensemble_members];
+		double average_accept_down[ensemble_members];
 		double average_attempts[ensemble_members];
 		int average_chain_nums[ensemble_members];
+		
 		for(int i = 0 ; i<ensemble_members; i++){
 			averages[i]=0;
 			average_attempts[i]=0;
+			average_accept_up[i]=0;
+			average_accept_down_attempts[i]=0;
+			average_accept_up_attempts[i]=0;
+			average_accept_down[i]=0;
 			average_chain_nums[i]=0;
 		}
 		for(int k = 0 ; k<sampler.chain_N; k++){
@@ -4024,12 +4033,44 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 					(sampler.swap_accept_ct[k] + sampler.swap_reject_ct[k]);
 			average_attempts[k%ensemble_members]+=(double)(sampler.swap_accept_ct[k] + sampler.swap_reject_ct[k]);
 			average_chain_nums[k%ensemble_members]++;
+			for(int l = 0 ; l<sampler.chain_N; l++){
+				if(temp_temps[l] < temp_temps[k]){
+					average_accept_down[k%ensemble_members]+=sampler.swap_accepts[k][l];
+					average_accept_down_attempts[k%ensemble_members]+=sampler.swap_partners[k][l];
+
+				}
+				else if(temp_temps[l] > temp_temps[k]){
+					average_accept_up[k%ensemble_members]+=sampler.swap_accepts[k][l];
+					average_accept_up_attempts[k%ensemble_members]+=sampler.swap_partners[k][l];
+				}
+
+			}
 		}
-		debugger_print(__FILE__,__LINE__,"Swap averages:");
+		
+		debugger_print(__FILE__,__LINE__,"Temp, Average [acceptance, to colder chains, to hotter chains], Average attempts");
 		for(int i = 0 ; i<ensemble_members; i++){
+			if(average_accept_up_attempts[i] != 0){
+				average_accept_up[i] /= average_accept_up_attempts[i];
+			}
+			else{
+				average_accept_up[i] =0;
+			}
+			if(average_accept_down_attempts[i] != 0){
+				average_accept_down[i] /= average_accept_down_attempts[i];
+			}
+			else{
+				average_accept_down[i] =0;
+			}
 			averages[i]/=average_chain_nums[i];
 			average_attempts[i]/=average_chain_nums[i];
-			debugger_print(__FILE__,__LINE__,std::to_string(averages[i]) + " "+std::to_string(average_attempts[i]));
+			//debugger_print(__FILE__,__LINE__,std::to_string(averages[i]) + " "+std::to_string(average_attempts[i]));
+			debugger_print(__FILE__,__LINE__,
+				std::to_string(temp_temps[i]) + " "+
+				std::to_string(averages[i]) + " "+
+				std::to_string(average_accept_down[i]) + " "+
+				std::to_string(average_accept_up[i]) + " "+
+				std::to_string(average_attempts[i])
+			);
 			if((averages[i]<swap_targets[0] || averages[i]>swap_targets[1]) && search_iterations_ct<max_search_iterations){
 				if(!realloc){
 					search_iterations_ct++;
