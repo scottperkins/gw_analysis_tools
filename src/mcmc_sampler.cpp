@@ -3220,7 +3220,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//Start out raising the temperature by a huge amount (x1000)
 	//then make it less intense
 	//#################################################
-	dynamic_search_length*=2;
+	//dynamic_search_length*=2;
 	int temp_factor = 10000;
 	for(int i = 0 ; i<1; i++){
 		if(i >=1 ){ temp_factor = 100;}
@@ -3237,7 +3237,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		deallocate_sampler_mem(&sampler_ann);
 	}
 	//#################################################
-	dynamic_search_length/=2;
+	//dynamic_search_length/=2;
 
 
 	while(continue_dynamic_search && dynamic_ct<2){
@@ -3266,9 +3266,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"",  checkpoint_file,true,true);
-		debugger_print(__FILE__,__LINE__,"Writing out swap partners");
-		write_file("data/swap_partners_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_partners,sampler_temp.chain_N,sampler_temp.chain_N);
-		write_file("data/swap_accepts_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_accepts,sampler_temp.chain_N,sampler_temp.chain_N);
+		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		//write_file("data/swap_partners_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_partners,sampler_temp.chain_N,sampler_temp.chain_N);
+		//write_file("data/swap_accepts_"+std::to_string(dynamic_ct)+".csv",sampler_temp.swap_accepts,sampler_temp.chain_N,sampler_temp.chain_N);
 
 		//##############################################################
 		//Reset positions and rewrite checkpoint file -- turning this off for now
@@ -3865,9 +3865,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			swp_freq,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, harvest_pool, internal_prog, statistics_filename, 
 			"", checkpoint_file,false,false);
-		debugger_print(__FILE__,__LINE__,"Writing out swap partners");
-		write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
-		write_file("data/swap_accepts_"+std::to_string(spct)+".csv",sampler.swap_accepts,sampler.chain_N,sampler.chain_N);
+		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
+		//write_file("data/swap_partners_"+std::to_string(spct)+".csv",sampler.swap_partners,sampler.chain_N,sampler.chain_N);
+		//write_file("data/swap_accepts_"+std::to_string(spct)+".csv",sampler.swap_accepts,sampler.chain_N,sampler.chain_N);
 		//spct++;
 		
 
@@ -4047,6 +4047,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			}
 		}
 		
+		bool reset = false;
 		debugger_print(__FILE__,__LINE__,"Temp, Average [acceptance, to colder chains, to hotter chains], Average attempts");
 		for(int i = 0 ; i<ensemble_members; i++){
 			if(average_accept_up_attempts[i] != 0){
@@ -4071,13 +4072,27 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				std::to_string(average_accept_up[i]) + " "+
 				std::to_string(average_attempts[i])
 			);
-			if((averages[i]<swap_targets[0] || averages[i]>swap_targets[1]) && search_iterations_ct<max_search_iterations){
-				if(!realloc){
-					search_iterations_ct++;
+			if(search_iterations_ct < max_search_iterations){
+				if(averages[i]<swap_targets[0] || averages[i]>swap_targets[1] ){
+					debugger_print(__FILE__,__LINE__,"Average swap not in range -- restarting");
+					reset=true;
 				}
-
-				realloc=true;
+				else if ( (average_accept_up[i] < swap_targets[0] || average_accept_up[i] > swap_targets[1] ) && (i!= 0 && i!=(ensemble_members-1))){
+					debugger_print(__FILE__,__LINE__,"Average swap to hot chains not in range -- restarting");
+					reset=true;
+				}
+				else if ( (average_accept_down[i] < swap_targets[0] || average_accept_down[i] > swap_targets[1]) && (i!= 0 && i!=(ensemble_members-1))){
+					debugger_print(__FILE__,__LINE__,"Average swap to cold chains not in range -- restarting");
+					reset=true;
+				}
 			}
+		}
+		if (reset){
+			if(!realloc){
+				search_iterations_ct++;
+			}
+
+			realloc=true;
 		}
 		
 		//###########################################################3
