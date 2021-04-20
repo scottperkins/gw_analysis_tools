@@ -2606,6 +2606,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 		for(int j = 0 ; j<samplerptr->chain_N; j++){
 			samplerptr->chain_temps[j] = temp_steps[j]*samplerptr->chain_temps[j];
 			//samplerptr->current_likelihoods[j]/=samplerptr->chain_temps[j];
+			//if(j == 0 ){debugger_print(__FILE__,__LINE__,samplerptr->chain_temps[j]);}
 		}
 			
 		PTMCMC_MH_step_incremental(samplerptr, steps_per_temp);
@@ -3202,8 +3203,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	
 	dynamic_search_length = 2*t0;
 	int temp_length = 1*N_steps;
-	if( dynamic_search_length>temp_length){
-		temp_length = dynamic_search_length;
+	if( 2*dynamic_search_length>temp_length){
+		temp_length = 2*dynamic_search_length;
 	}
 
 
@@ -3219,13 +3220,14 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//Start out raising the temperature by a huge amount (x1000)
 	//then make it less intense
 	//#################################################
-	int temp_factor = 1000;
-	for(int i = 0 ; i<2; i++){
+	dynamic_search_length*=2;
+	int temp_factor = 10000;
+	for(int i = 0 ; i<1; i++){
 		if(i >=1 ){ temp_factor = 100;}
 		std::cout<<"Annealing"<<std::endl;
 		sampler sampler_ann;
 		continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
-			100,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
+			temp_factor,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
 			numThreads, pool, internal_prog, statistics_filename, 
 			"", checkpoint_file);
 		//debugger_print(__FILE__,__LINE__,"Writing out swap partners");
@@ -3235,6 +3237,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 		deallocate_sampler_mem(&sampler_ann);
 	}
 	//#################################################
+	dynamic_search_length/=2;
 
 
 	while(continue_dynamic_search && dynamic_ct<2){
@@ -3247,7 +3250,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 
 		//deallocate_sampler_mem(&sampler_ann);
 		//#############################################
+		//#############################################
+		if(dynamic_ct%dynamic_temp_freq ==0){
+			std::cout<<"Temperature Relaxation"<<std::endl;
+			continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(checkpoint_file,temp_output, 
+				dynamic_search_length, chain_temps, swp_freq, t0, nu,
+				 log_prior, log_likelihood,fisher,
+				user_parameters,numThreads, pool,internal_prog,"","",checkpoint_file,true);
+		}
 
+		//#######################################
 		sampler sampler_temp;
 		std::cout<<"Exploration"<<std::endl;
 		continue_PTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output, dynamic_search_length, 
@@ -3385,20 +3397,6 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 
 		deallocate_sampler_mem(&sampler_temp);
 
-
-		//#############################################
-		if(dynamic_ct%dynamic_temp_freq ==0){
-			std::cout<<"Temperature Relaxation"<<std::endl;
-			//continue_PTMCMC_MH_dynamic_PT_alloc_internal(checkpoint_file,temp_output, 
-			//	dynamic_search_length,  max_chain_N_thermo_ensemble, 
-			//	 chain_temps, swp_freq, t0, nu,
-			//	chain_distribution_scheme, log_prior, log_likelihood,fisher,
-			//	user_parameters,numThreads, pool,internal_prog,false,"","",checkpoint_file,true);
-			continue_PTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(checkpoint_file,temp_output, 
-				dynamic_search_length, chain_temps, swp_freq, t0, nu,
-				 log_prior, log_likelihood,fisher,
-				user_parameters,numThreads, pool,internal_prog,"","",checkpoint_file,true);
-		}
 
 			
 		//####################################################################################
