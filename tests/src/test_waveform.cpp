@@ -495,7 +495,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 1;
+	int iterations = 10;
 	double times[iterations][2];
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
@@ -512,11 +512,13 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		COMPLEX16FrequencySeries *hctilde=NULL;
 		double alpha[17];
 		for (int j = 0 ; j<17; j++){
-		  alpha[j] = 0.1; 
-		  //alpha[j] = gsl_rng_uniform(r);
+		  //alpha[j] = 0.1; 
+		  alpha[j] = gsl_rng_uniform(r);
 		}
-		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
-		const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6;
+		//const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
+		//const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6;
+		const REAL8 s1x = 0, s1y=0,s1z=-.4+alpha[2]*.6;
+		const REAL8 s2x = 0, s2y=0,s2z=-.4+alpha[5]*.6;
 		//const REAL8 s1x = 0.0, s1y=0.0,s1z=0.0;
 		//const REAL8 s2x =0.0, s2y=0.0,s2z=0.0;
 		//const REAL8 incl = M_PI/5.;
@@ -558,20 +560,41 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		REAL8 phi_aligned;
 		//const REAL8 f_min = .0017*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		//const REAL8 f_max = .0171*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		const REAL8 f_max = .15*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		//int length = 4016;
-		int length = 131072;
+		const REAL8 f_max = .0171*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		//const REAL8 f_max = .15*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		//const REAL8 f_max = 1600;
+		int length = 4016;
+		//int length = 131072;
 		double deltaf = (f_max-f_min)/(length-1);
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
-		LALDict *extraParams = NULL;
-		//alpha[15] = 0.0;
-		//alpha[16] = 0.0; 
+		LALDict *extraParams = XLALCreateDict();
+		//alpha[15] = .19;
+		//alpha[16] = .19; 
+		//alpha[15] = 10.0;
+		//alpha[16] = 10.0; 
 		//alpha[15] = 1.0;
 		//alpha[16] = 1.0; 
 		REAL8 lambda1 = 100*fabs(alpha[15]) ;
-		REAL8 lambda2 = 100*fabs(alpha[16]) ;
+		REAL8 lambda2 = 100*fabs(alpha[15]) ;
+		std::cout<<"TIDAL LOVE NUMBERS: "<<lambda1<<" "<<lambda2<<std::endl;
 		NRTidal_version_type NRT_v=NRTidalv2_V;
+
+		double q0 = 0.1940;
+		double q1 = 0.09163;
+		double q2 = 0.04812;
+		double q3 = -0.004286;
+		double q4 = 0.00012450;
+		double o0 = 0.003131;
+		double o1 = 2.071;
+		double o2 = -0.7152;
+		double o3 = 0.2458;
+		double o4 = -0.03309;
+
+		double quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
+		double quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
+		//double quad1 = 1;
+		//double quad2 = 1;
+		
 
 		//NRTidal_version_type tidalType= NoNRT_V;
 
@@ -582,7 +605,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			frequencies[i] = f_min+i*deltaf;
 		}
 		//const REAL8 f_ref = frequencies[0];
-		const REAL8 f_ref = 200.;
+		const REAL8 f_ref = 20.;
 		clock_t start,end;
 		start = clock();
 		XLALSimIMRPhenomPCalculateModelParametersFromSourceFrame(&chi1_l, &chi2_l, &chip, &thetaJ, &alpha0, &phi_aligned, &zeta_polariz, m1_SI, m2_SI, f_ref, phiRef, incl, s1x,s1y,s1z,s2x,s2y,s2z,version);
@@ -615,6 +638,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 				XLALSimIMRPhenomDFrequencySequence(&hptilde,freqs,phiRef,f_ref,m1_SI,m2_SI,s1z,s2z,distance, extraParams,NRT_v);
 			}
 			else{
+				XLALSimInspiralWaveformParamsInsertdQuadMon1(extraParams, quad1-1);
+				XLALSimInspiralWaveformParamsInsertdQuadMon2(extraParams, quad2-1);
 				XLALSimIMRPhenomDNRTidalFrequencySequence(&hptilde,freqs,phiRef,f_ref,distance,m1_SI,m2_SI,s1z,s2z, lambda1,lambda2,extraParams,NRT_v);
 			}
 			hctilde = XLALCreateCOMPLEX16FrequencySeries("hctilde: FD waveform", &ligotimegps_zero, 0.0, freqs->data[1]-freqs->data[0], &lalStrainUnit, length);
@@ -684,8 +709,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.psi = psi;
 		param.gmst = gmst;
 		param.tc = .0 ;
-		param.tidal1 =100*fabs(alpha[15]) ;
-		param.tidal2 =100*fabs(alpha[16]) ;
+		param.tidal1 =lambda1 ;
+		param.tidal2 =lambda2 ;
 		//std::cout<<"tidal1: "<<param.tidal1<<"\t tidal2: "<<param.tidal2<<std::endl;
 		
 		std::complex<double> *response = new std::complex<double>[length];

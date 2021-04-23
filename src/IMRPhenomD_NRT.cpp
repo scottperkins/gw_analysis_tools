@@ -204,22 +204,32 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   T o3 = 0.2458;
   T o4 = -0.03309;
   /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities*/
+  if(lambda1<=0){oct1=1;quad1 = 1;}
+  else{
   quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
   oct1 = exp(o0 + o1*log(quad1) + o2*pow(log(quad1), 2.) + o3*pow(log(quad1), 3.) + o4*pow(log(quad1), 4.));
+  }
   
+  if(lambda2<=0){oct2=1;quad2 = 1;}
+  else{
   quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
   oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
-
+ }
+  
   /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
   //2 PN contribution
   ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
   ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
+  //ssA_2PN = -50*(quad1) * X_Asq * chi1_sq;
+  //ssB_2PN = -50*(quad2) * X_Bsq * chi2_sq;
   ss_2PN = ssA_2PN + ssB_2PN;
   //ss_2PN = 0.0;
 
   //3 PN contribution 
   ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
   ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
+  //ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 ) * X_Asq * chi1_sq;
+  //ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 ) * X_Bsq * chi2_sq;
   ss_3PN = ssA_3PN + ssB_3PN;
   //ss_3PN = 0.0;
 
