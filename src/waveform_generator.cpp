@@ -60,8 +60,6 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
 			)
 {
-    std::cout<<"Entered fourier_waveform function"<<std::endl; 
-
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -420,7 +418,6 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 			gen_params_base<T> *parameters
 			)
 {
-  std::cout<<"Entered fourier_amplitude function"<<std::endl; 
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -550,8 +547,6 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			gen_params_base<T> *parameters
 			)
 {
-    std::cout<<"Entered fourier_phase function"<<std::endl; 
-
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
