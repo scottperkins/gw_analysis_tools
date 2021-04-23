@@ -195,7 +195,8 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   T q0 = 0.1940;
   T q1 = 0.09163;
   T q2 = 0.04812;
-  T q3 = -0.004286;
+  //T q3 = -0.004286;
+  T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
   T q4 = 0.00012450;
 
   T o0 = 0.003131;
@@ -210,6 +211,12 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
   oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
 
+  //trying to match figure 7 of NRTidalv2 paper
+  /*quad1 = 4.3;
+  quad2 = quad1;
+  oct1 = 7.28;
+  oct2 = oct1; */
+
   /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
   //2 PN contribution
   ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
@@ -221,6 +228,7 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
   ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
   ss_3PN = ssA_3PN + ssB_3PN;
+  //ss_3PN = -1*ss_3PN;
   //ss_3PN = 0.0;
 
   //3.5 PN contribution

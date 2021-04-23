@@ -515,10 +515,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		  alpha[j] = 0.1; 
 		  //alpha[j] = gsl_rng_uniform(r);
 		}
-		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
-		const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6;
-		//const REAL8 s1x = 0.0, s1y=0.0,s1z=0.0;
-		//const REAL8 s2x =0.0, s2y=0.0,s2z=0.0;
+		//const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
+		//const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6; 
+		const REAL8 s1x = 0.0, s1y=0.0,s1z=0.2;
+		const REAL8 s2x =0.0, s2y=0.0,s2z=0.2;
 		//const REAL8 incl = M_PI/5.;
 		const REAL8 incl = M_PI * alpha[6];
 		double RA = 2*M_PI * alpha[7];
@@ -568,7 +568,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		//alpha[15] = 0.0;
 		//alpha[16] = 0.0; 
 		//alpha[15] = 1.0;
-		//alpha[16] = 1.0; 
+		//alpha[16] = 1.0;
+		alpha[15] = 3.5;
+		alpha[16] = 3.5; 
 		REAL8 lambda1 = 100*fabs(alpha[15]) ;
 		REAL8 lambda2 = 100*fabs(alpha[16]) ;
 		NRTidal_version_type NRT_v=NRTidalv2_V;
