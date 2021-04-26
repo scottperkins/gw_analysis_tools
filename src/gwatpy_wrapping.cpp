@@ -1,4 +1,5 @@
 #include "gwatpy_wrapping.h"
+#include "ppE_utilities.h"
 #include "util.h"
 #include "detector_util.h"
 #include "fisher.h"
@@ -35,6 +36,94 @@ double DTOA_DETECTOR_py(double RA, double DEC, double GMST_rad, char *det1, char
 	double DTOA = DTOA_DETECTOR(RA,DEC,GMST_rad, d1,d2);
 
 	return DTOA;
+}
+
+double MCMC_likelihood_extrinsic_pyv2(bool save_waveform, 
+	double *parameters,
+	MCMC_modification_struct  *mod_struct,
+	int dimension,
+	char *generation_method, 
+	int *data_length, 
+	double *frequencies, 
+	double *dataREAL, 
+	double *dataIMAG, 
+	double *psd, 
+	double *weights, 
+	char *integration_method, 
+	bool log10F, 
+	char  *detectors, 
+	int num_detectors
+	)
+{
+	std::string dettemp(detectors);
+	std::complex<double> **data= new std::complex<double>*[num_detectors];
+	double **FREQ= new double*[num_detectors];
+	double **PSD= new double*[num_detectors];
+	double **WEIGHTS= new double*[num_detectors];
+	std::string DET[3]={"Hanford","Livingston","Virgo"};
+	const char *det_arr ="HLVKC";
+	for ( int i = 0 ; i<num_detectors; i++){
+		data[i] = new std::complex<double>[data_length[i]];
+		FREQ[i] = new double[data_length[i]];
+		PSD[i] = new double[data_length[i]];
+		WEIGHTS[i] = new double[data_length[i]];
+		for(int j = 0 ; j<data_length[i]; j++){
+			data[i][j] = std::complex<double>(dataREAL[i*data_length[i] + j],dataIMAG[i*data_length[i] + j]);
+			FREQ[i][j] = frequencies[i*data_length[i] + j];
+			PSD[i][j] = psd[i*data_length[i] + j];
+			WEIGHTS[i][j] = weights[i*data_length[i] + j];
+		}
+		if( std::strcmp(&(detectors[i]) ,"H") == 0)
+			DET[i] = "Hanford";
+		else if( std::strcmp(&(detectors[i]) ,"L") == 0)
+			DET[i] = "Livingston";
+		else if( std::strcmp(&(detectors[i]) ,"V") == 0)
+			DET[i] = "Virgo";
+		else if( std::strcmp(&(detectors[i]) ,"K") == 0)
+			DET[i] = "KAGRA";
+		else if( std::strcmp(&(detectors[i]) ,"C") == 0)
+			DET[i] = "CE";
+	}
+	//###############################
+	gen_params_base<double> gp;
+	double *temp_params = new double[dimension];
+	std::string local_gen = MCMC_prep_params(parameters, temp_params,&gp, dimension, std::string(generation_method), mod_struct);
+	repack_parameters(temp_params, &gp, "MCMC_"+std::string(generation_method), dimension,NULL);
+	//###############################
+	//parameters->print_properties();
+	double LL =  MCMC_likelihood_extrinsic(save_waveform, &gp, std::string(generation_method), data_length, FREQ, data,PSD, WEIGHTS, std::string(integration_method), log10F, DET, num_detectors);
+	for(int i = 0 ; i<num_detectors; i++){
+		delete [] data[i];
+		delete [] FREQ[i];
+		delete [] PSD[i];
+		delete [] WEIGHTS[i];
+	}
+	delete [] data;
+	delete [] FREQ;
+	delete [] PSD;
+	delete [] WEIGHTS;
+
+	delete [] temp_params;
+	if(check_mod(local_gen)){
+		if(local_gen.find("ppE") != std::string::npos || check_theory_support(local_gen)){
+			delete [] gp.betappe;	
+		}
+		else if (local_gen.find("gIMR") != std::string::npos){
+			if(mod_struct->gIMR_Nmod_phi !=0){
+				delete [] gp.delta_phi;
+			}	
+			if(mod_struct->gIMR_Nmod_sigma !=0){
+				delete [] gp.delta_sigma;
+			}	
+			if(mod_struct->gIMR_Nmod_beta !=0){
+				delete [] gp.delta_beta;
+			}	
+			if(mod_struct->gIMR_Nmod_alpha !=0){
+				delete [] gp.delta_alpha;
+			}	
+		}
+	}
+	return LL;
 }
 
 double MCMC_likelihood_extrinsic_py(bool save_waveform, 

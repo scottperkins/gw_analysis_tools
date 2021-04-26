@@ -17,6 +17,23 @@ double t_0PN_py(double f, double chirpmass);
 double f_0PN_py(double t, double chirpmass);
 double DTOA_DETECTOR_py(double RA, double DEC, double GMST_rad, char *det1, char *det2);
 
+double MCMC_likelihood_extrinsic_pyv2(bool save_waveform, 
+	double *parameters,
+	MCMC_modification_struct  *mod_struct,
+	int dimension,
+	char *generation_method, 
+	int *data_length, 
+	double *frequencies, 
+	double *dataREAL, 
+	double *dataIMAG, 
+	double *psd, 
+	double *weights, 
+	char *integration_method, 
+	bool log10F, 
+	char  *detectors, 
+	int num_detectors
+	);
+
 double MCMC_likelihood_extrinsic_py(bool save_waveform, 
 	gen_params_base<double> *parameters,
 	char *generation_method, 
