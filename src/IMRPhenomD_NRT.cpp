@@ -265,7 +265,8 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   T q0 = 0.1940;
   T q1 = 0.09163;
   T q2 = 0.04812;
-  T q3 = -0.004286;
+  //T q3 = -0.004286; //This matches LAL. Ask Nico about which one we should use
+  T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
   T q4 = 0.00012450;
 
   T o0 = 0.003131;
@@ -273,7 +274,7 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   T o2 = -0.7152;
   T o3 = 0.2458;
   T o4 = -0.03309;
-  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities*/
+  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities. Note that this only works for lambda >= 1*/
   if(lambda1<=0){oct1=1;quad1 = 1;}
   else{
   quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
@@ -284,8 +285,9 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   else{
   quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
   oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
- }
-  
+  }
+
+  //std::cout<<"quad1: "<<quad1<<"\t quad2: "<<quad2<<std::endl; 
   /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
   //2 PN contribution
   ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
@@ -317,7 +319,7 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   
   phaseout = coeff*spin_spin;
   //equation 26 of arXiv:1905.06011v2
-  
+  //std::cout<<"ss_2PN: "<<ss_2PN<<"\t ss_3PN: "<<ss_3PN<<"\t ss_3p5PN: "<<ss_3p5PN<<std::endl; 
   return phaseout; 
  
 }
@@ -425,13 +427,12 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   
 
   //Print statements so that we can put the transition frequencies on the plots
-  std::cout<<"f1_phase: "<<params->f1_phase<<std::endl;
+  //std::cout<<"f1_phase: "<<params->f1_phase<<std::endl;
   //std::cout<<"f2_phase: "<<params->f2_phase<<std::endl;
-  std::cout<<"f1_amp: "<<params->f1<<std::endl; 
+  //std::cout<<"f1_amp: "<<params->f1<<std::endl; 
   //std::cout<<"f3_amp: "<<params->f3<<std::endl;
-  std::cout<<"fmerger: "<<fmerger<<std::endl; 
-  std::cout<<"1.2*fmerger: "<<1.2*fmerger<<std::endl; 
-  
+  //std::cout<<"fmerger: "<<fmerger<<std::endl; 
+  //std::cout<<"1.2*fmerger: "<<1.2*fmerger<<std::endl; 
 	
   useful_powers<T> pows;
   this->precalc_powers_PI(&pows);

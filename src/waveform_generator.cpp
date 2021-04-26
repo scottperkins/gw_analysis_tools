@@ -60,8 +60,6 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			gen_params_base<T> *parameters/**<structure containing all the source parameters*/
 			)
 {
-    std::cout<<"Entered fourier_waveform function"<<std::endl; 
-
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -420,7 +418,6 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 			gen_params_base<T> *parameters
 			)
 {
-  std::cout<<"Entered fourier_amplitude function"<<std::endl; 
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -550,8 +547,6 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			gen_params_base<T> *parameters
 			)
 {
-    std::cout<<"Entered fourier_phase function"<<std::endl; 
-
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
@@ -1174,6 +1169,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 						* out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
 		debugger_print(__FILE__,__LINE__,out->tidal_weighted);
 		}
+		//TODO Need to modify this in case only tidal1 or tidal2 is set 
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
