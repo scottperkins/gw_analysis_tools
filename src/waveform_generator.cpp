@@ -1167,7 +1167,9 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*out->eta ) * ( 1. - 13272./1319. * out->eta + 8944./1319. * out->eta*out->eta) *
 						(out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319. 
 						* out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
+		debugger_print(__FILE__,__LINE__,out->tidal_weighted);
 		}
+		//TODO Need to modify this in case only tidal1 or tidal2 is set 
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
