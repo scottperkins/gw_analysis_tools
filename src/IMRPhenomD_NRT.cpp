@@ -17,6 +17,76 @@
  * and 25 were used. A Planck taper was added to the waveform following arXiv:1003.2939.
  */
 
+
+template<class T>
+void IMRPhenomD_NRT<T>::assign_static_pn_phase_coeff(source_parameters<T> *source_param, T *coeff)
+{
+	IMRPhenomD<T> base_model;
+	base_model.assign_static_pn_phase_coeff(source_param,coeff);
+
+  T ssA_2PN, ssB_2PN, ss_2PN, ssA_3PN, ssB_3PN, ss_3PN, ssA_3p5PN, ssB_3p5PN, ss_3p5PN;
+  T X_A, X_Asq, chi1, chi1_sq, lambda1, quad1, oct1; 
+  T X_B, X_Bsq, chi2, chi2_sq, lambda2, quad2, oct2;  
+
+  lambda1 = source_param->tidal1;
+  lambda2 = source_param->tidal2;
+  
+  X_A = source_param->mass1 / source_param->M;    
+  X_B = source_param->mass2 / source_param->M;
+  chi1 = source_param->spin1z;
+  chi2 = source_param->spin2z;
+  
+  X_Asq = X_A * X_A;
+  X_Bsq = X_B * X_B; 
+  chi1_sq = chi1 * chi1;
+  chi2_sq = chi2 * chi2;
+
+  /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
+  T q0 = 0.1940;
+  T q1 = 0.09163;
+  T q2 = 0.04812;
+  T q3 = -0.004286;
+  T q4 = 0.00012450;
+
+  T o0 = 0.003131;
+  T o1 = 2.071;
+  T o2 = -0.7152;
+  T o3 = 0.2458;
+  T o4 = -0.03309;
+  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities*/
+  if(lambda1<=0){oct1=1;quad1 = 1;}
+  else{
+  quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
+  oct1 = exp(o0 + o1*log(quad1) + o2*pow(log(quad1), 2.) + o3*pow(log(quad1), 3.) + o4*pow(log(quad1), 4.));
+  }
+  
+  if(lambda2<=0){oct2=1;quad2 = 1;}
+  else{
+  quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
+  oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
+ }
+  
+  /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
+  //2 PN contribution
+  ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
+  ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
+  //ssA_2PN = -50*(quad1) * X_Asq * chi1_sq;
+  //ssB_2PN = -50*(quad2) * X_Bsq * chi2_sq;
+  ss_2PN = ssA_2PN + ssB_2PN;
+  //ss_2PN = 0.0;
+
+  //3 PN contribution 
+  ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
+  ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
+  //ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 ) * X_Asq * chi1_sq;
+  //ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 ) * X_Bsq * chi2_sq;
+  ss_3PN = ssA_3PN + ssB_3PN;
+  //ss_3PN = 0.0;
+
+	coeff[4]+= ss_2PN;
+	coeff[10]+= ss_3PN;
+}
+
 //##############################################################################
 //##############################################################################
 template<class T>
@@ -179,7 +249,7 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   T X_B, X_Bsq, chi2, chi2_sq, lambda2, quad2, oct2;  
 
   lambda1 = param->tidal1;
-  lambda2 = param->tidal1;
+  lambda2 = param->tidal2;
   
   X_A = param->mass1 / param->M;    
   X_B = param->mass2 / param->M;
@@ -222,16 +292,16 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
   //ssA_2PN = -50*(quad1) * X_Asq * chi1_sq;
   //ssB_2PN = -50*(quad2) * X_Bsq * chi2_sq;
-  ss_2PN = ssA_2PN + ssB_2PN;
-  //ss_2PN = 0.0;
+  //ss_2PN = ssA_2PN + ssB_2PN;
+  ss_2PN = 0.0;
 
   //3 PN contribution 
   ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
   ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
   //ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 ) * X_Asq * chi1_sq;
   //ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 ) * X_Bsq * chi2_sq;
-  ss_3PN = ssA_3PN + ssB_3PN;
-  //ss_3PN = 0.0;
+  //ss_3PN = ssA_3PN + ssB_3PN;
+  ss_3PN = 0.0;
 
   //3.5 PN contribution
   ssA_3p5PN = 10 * ((X_Asq + (308./3.)*X_A)*chi1 + (X_Bsq - (89/3.)*X_B)*chi2 - 40* M_PI)*(quad1 - 1.)*X_Asq*chi1_sq - 440*(oct1 - 1.)*X_Asq*X_A*chi1_sq*chi1; 

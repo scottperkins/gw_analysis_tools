@@ -560,8 +560,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		REAL8 phi_aligned;
 		//const REAL8 f_min = .0017*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		const REAL8 f_min = .002*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		const REAL8 f_max = .0171*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
-		//const REAL8 f_max = .15*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		//const REAL8 f_max = .0171*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
+		const REAL8 f_max = .15*LAL_MSUN_SI/MSOL_SEC/(m1_SI+m2_SI);
 		//const REAL8 f_max = 1600;
 		int length = 4016;
 		//int length = 131072;

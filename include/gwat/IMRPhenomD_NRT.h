@@ -35,6 +35,9 @@ public:
   
   virtual T taper(T f, int length, source_parameters<T> *params); 
 
+
+  virtual void assign_static_pn_phase_coeff(source_parameters<T> *source_param, T *coeff);
+
 };
 
 //##############################################################################
