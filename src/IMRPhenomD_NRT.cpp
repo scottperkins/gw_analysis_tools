@@ -42,11 +42,19 @@ void IMRPhenomD_NRT<T>::assign_static_pn_phase_coeff(source_parameters<T> *sourc
   chi2_sq = chi2 * chi2;
 
   /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
+  //T q0 = 0.1940;
+  //T q1 = 0.09163;
+  //T q2 = 0.04812;
+  //T q3 = -0.004286;
+  //T q4 = 0.00012450;
+
   T q0 = 0.1940;
   T q1 = 0.09163;
   T q2 = 0.04812;
-  T q3 = -0.004286;
+  //T q3 = -0.004286; //This matches LAL. Ask Nico about which one we should use
+  T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
   T q4 = 0.00012450;
+
 
   T o0 = 0.003131;
   T o1 = 2.071;
