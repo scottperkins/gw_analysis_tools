@@ -455,6 +455,9 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	if(params->shift_time){
 		T alpha1_offset = assign_lambda_param_element(params,14);
 		tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
+
+		//tc_shift = this->Dphase_mr(params->f3, params, &lambda);
+		//debugger_print(__FILE__,__LINE__,"SHIFTING DOES NOT MATCH LALSUITE");
 	}
 	else{
 		tc_shift=0;

@@ -236,6 +236,8 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	}
 	double scaling;
 	int beta;
+	//TODO : Need to specialize this more with RJ and min_dim == 0 case
+	//look for discrete model number
 	if(!sampler->RJMCMC || sampler->min_dim ==0){
 		//beta determines direction to step in eigen directions
 		beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
@@ -326,62 +328,6 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 			}
 		}
 	}
-	//Check whether or not we need to update the fisher
-	//if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number )
-	//{
- 	//	if(lp != limit_inf)
-	//	{
-	//		sampler->prop_MH_factor[chain_index]=0;
-	//		//Calculate old proposal prob
-	//		sampler->prop_MH_factor[chain_index]-= -0.5*log(scaling) ;
-	//		for(int i = 0 ; i<sampler->max_dim; i++){
-	//			for(int j = 0 ; j<sampler->max_dim; j++){
-	//				if(proposed_status[i] == 1 && proposed_status[j]==1){
-	//					sampler->prop_MH_factor[chain_index] -= - 0.5 * 
-	//						( current_param[i]-proposed_param[i])*
-	//						(current_param[j]-proposed_param[j]) *
-	//						sampler->fisher_matrix[chain_index][i][j];
-	//				}
-	//			}
-	//		}
-	//		//Update fisher
-	//		update_fisher(sampler, proposed_param, proposed_status,chain_index);	
-	//		//Update failed
-	//		if(sampler->fisher_update_ct[chain_index]==sampler->fisher_update_number-1){
-	//			sampler->prop_MH_factor[chain_index] = 0;	
-	//		}
-	//		//Finish prop_MH_factor calc
-	//		else{
-	//			//Calculate new proposal prob
-	//			//ensure the steps aren't ridiculous
-	//			if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-	//			//###############################################
-	//			//TESTING
-	//			else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
-	//						sampler->chain_temps[chain_index];}
-	//			//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
-	//			//###############################################
-	//			sampler->prop_MH_factor[chain_index]+= -0.5*log(scaling) ;
-	//			for(int i = 0 ; i<sampler->max_dim; i++){
-	//				for(int j = 0 ; j<sampler->max_dim; j++){
-	//					if(proposed_status[i] == 1 && proposed_status[j]==1){
-	//						sampler->prop_MH_factor[chain_index] += - 0.5 * 
-	//							( current_param[i]-proposed_param[i])*
-	//							(current_param[j]-proposed_param[j]) *
-	//							sampler->fisher_matrix[chain_index][i][j];
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//	else {
-	//		//Should update, but need to wait for a better proposal
-	//		//Ensures the counts stay lined up
-	//		sampler->fisher_update_ct[chain_index]-=1;	
-	//	}
-	//}
-
-	//update the count of steps since last fisher update
 	sampler->fisher_update_ct[chain_index] += 1;
 
 }
@@ -401,6 +347,8 @@ void iterate_fisher(sampler *samplerptr,int chain_id)
 void update_fisher(sampler *sampler, double *current_param, int *param_status, int *model_status,int chain_index)
 {
 	int local_dim = sampler->max_dim;
+
+	//In the case we have nested models, just calculate fisher for the base model
 	if(sampler->RJMCMC && sampler->min_dim !=0) local_dim=sampler->min_dim;
 	//Fisher calculation
 	double **fisher=(double **)malloc(sizeof(double*)*local_dim);	
@@ -465,9 +413,9 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	else{ 
 		sampler->fisher_update_ct[chain_index]=sampler->fisher_update_number-1;
 		sampler->nan_counter[chain_index]+=1;
-		if(sampler->nan_counter[chain_index] > 50){
-			//debugger_print(__FILE__,__LINE__,"WARNING -- NANs from Fisher inversion are over 50! You're Fisher's may be unstable!");
-		}
+		//if(sampler->nan_counter[chain_index] > 50){
+		//	debugger_print(__FILE__,__LINE__,"WARNING -- NANs from Fisher inversion are over 50! You're Fisher's may be unstable!");
+		//}
 	}
 
 	for (int i =0; i<local_dim;i++){
@@ -477,7 +425,9 @@ void update_fisher(sampler *sampler, double *current_param, int *param_status, i
 	free(oneDfisher);
 }
 
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*!!!!!!!!DON'T TRUST!!!!!!!!!!!!!!!*/
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 void calc_grad(sampler *sampler,double *current_param,int *current_status, int *current_model_status,int chain_index,double *grad)
 {
 	double epsilon =1.e-1;
@@ -493,6 +443,10 @@ void calc_grad(sampler *sampler,double *current_param,int *current_status, int *
 	}
 
 }
+
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+/*!!!!!!!!DON'T TRUST!!!!!!!!!!!!!!!*/
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 /*!\brief MMALA informed step -- Currently not supported
  *
  * NOTE: This assumes the Fisher doesn't change between steps. The proposal ratio only accounts for the gradient of the log likelihood
@@ -636,13 +590,14 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 			RJ_smooth_history(sampler, current_param, current_status, j, eff_history_coord2, 
 				eff_history_status2,chain_id);
 		}
+		//TODO
 		//For models that are composed of discrete models (ie model A or B 
 		//and min_dim = 0), I just need to continue picking history members 
 		//until I get two that match the correct model.If two elements that 
 		//contain a given model, we just use a gaussian step and abandon DE 
 		//for this step.
 		else{
-
+			debugger_print(__FILE__,__LINE__,"ERROR : diff ev is broken with min_dim ==0");
 		}
 		
 	}
@@ -694,6 +649,11 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	delete [] eff_history_status2;
 }
 
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+//TODO
+/*This could be a problem -- We're not randomly selecting history elements anymore*/
+/*This could actually be okay -- We're using most of the correct parameters, just filling in with almost right parameters*/
+/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 void RJ_smooth_history(sampler *sampler, /**<Current sampler */
 	double *current_param,/**<Current parameters to match*/
 	int *current_param_status,/**<Current parameters to match*/
@@ -922,12 +882,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
 		{
-			//Testing
-			//sampler->step_prob[chain_index][0]=.3;
-			//sampler->step_prob[chain_index][1]=0;
-			//sampler->step_prob[chain_index][2]=.3;
-			//sampler->step_prob[chain_index][3]=.4;
-
 			sampler->step_prob[chain_index][0]=.1;
 			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
@@ -937,9 +891,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//No fisher, but de ready
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
-			
-			//sampler->step_prob[chain_index][0]=.2;
-			//sampler->step_prob[chain_index][1]=.8;
 			sampler->step_prob[chain_index][0]=.3;
 			sampler->step_prob[chain_index][1]=.7;
 			sampler->step_prob[chain_index][2]=.0;
@@ -949,16 +900,6 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//all methods available
 		else
 		{
-			//sampler->step_prob[chain_index][0]=.05;
-			//sampler->step_prob[chain_index][1]=.20;
-			//sampler->step_prob[chain_index][2]=.0;
-			//sampler->step_prob[chain_index][3]=.75;
-			//Testing
-			//sampler->step_prob[chain_index][0]=.05;
-			//sampler->step_prob[chain_index][1]=.45;
-			//sampler->step_prob[chain_index][2]=.0;
-			//sampler->step_prob[chain_index][3]=.5;
-			//Testing
 			sampler->step_prob[chain_index][0]=.1;
 			sampler->step_prob[chain_index][1]=.4;
 			sampler->step_prob[chain_index][2]=.0;
@@ -1222,19 +1163,6 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 	double frac, acc, rej;
 	if(samplerptr->chain_pos[j]%samplerptr->check_stepsize_freq[j] == 0){
 		//Gaussian
-		//if(samplerptr->step_prob[j][0]!= 0){
-		//	acc = samplerptr->gauss_accept_ct[j] - samplerptr->gauss_last_accept_ct[j];	
-		//	rej = samplerptr->gauss_reject_ct[j] - samplerptr->gauss_last_reject_ct[j];	
-		//	frac = acc / (acc + rej);
-		//	if(frac<samplerptr->min_target_accept_ratio[j]){
-		//		samplerptr->randgauss_width[j][0][0] *=.9;	
-		//	}
-		//	else if(frac>samplerptr->max_target_accept_ratio[j]){
-		//		samplerptr->randgauss_width[j][0][0] *=1.1;	
-		//	}
-		//	samplerptr->gauss_last_accept_ct[j]=samplerptr->gauss_accept_ct[j];
-		//	samplerptr->gauss_last_reject_ct[j]=samplerptr->gauss_reject_ct[j];
-		//}	
 		if(samplerptr->step_prob[j][0]!= 0){
 			for(int i =0 ; i<samplerptr->max_dim ; i++){
 				acc = samplerptr->gauss_accept_ct_per_dim[j][i] - samplerptr->gauss_last_accept_ct_per_dim[j][i];	
@@ -1445,9 +1373,6 @@ void allocate_sampler_mem(sampler *sampler)
 		//#######################
 		//initial value set to one's
 		if(sampler->RJMCMC){
-			//for(int j = 0 ; j< sampler->max_dim ;j ++){
-			//	sampler->param_status[i][0][j] = 1;
-			//}
 		}
 		else{
 			//debugger_print(__FILE__,__LINE__,std::to_string(sampler->N_steps)+" "+std::to_string(sampler->max_dim));
@@ -1469,6 +1394,8 @@ void allocate_sampler_mem(sampler *sampler)
 			}
 
 		}
+		//TODO
+		//Should this not be ( != 0 ) ?
 		if(sampler->nested_model_number ==0){
 			sampler->model_status[i] = (int **)malloc(sizeof(int *)*sampler->N_steps);
 			//sampler->model_status[i][0] = (int *)malloc(sizeof(int ));
@@ -1766,6 +1693,8 @@ void deallocate_sampler_mem(sampler *sampler)
 	
 }
 
+//TODO 
+//shouldn't history store model numbers too?
 void update_history(sampler *sampler, double *new_params, int *new_param_status, int chain_index)
 {
 	if(sampler->current_hist_pos[chain_index] < sampler->history_length-1)
