@@ -35,10 +35,10 @@ double chirpmass_prior[2];
 double mass1_prior[2];
 double mass2_prior[2];
 double DL_prior[2];
-double standard_log_prior_D_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_intrinsic_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_Pv2_intrinsic_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_Pv2_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_intrinsic_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_Pv2_intrinsic_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_Pv2_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
 double chirpmass_q_jac(double chirpmass, double q);
 int main(int argc, char *argv[])
@@ -347,7 +347,7 @@ int main(int argc, char *argv[])
 	output = allocate_2D_array(samples, max_dimension );
 	int **status=NULL;
 	status = allocate_2D_array_int(samples, max_dimension );
-	int **model_status=NULL;
+	int *model_status=NULL;
 	double chain_temps[chain_N];
 	if(bool_dict.find("NS Flag 0") != bool_dict.end()){
 		mod_struct.NSflag1 = bool_dict["NS Flag 0"];
@@ -362,7 +362,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	double(*lp)(double *param,int *status, int *model_status, mcmc_data_interface *interface, void *parameters);
+	double(*lp)(double *param,int *status, int model_status, mcmc_data_interface *interface, void *parameters);
 	if(generation_method_base.find("IMRPhenomD") != std::string::npos && min_dimension == 11){
 		lp = &standard_log_prior_D_mod;
 	}
@@ -407,18 +407,20 @@ int main(int argc, char *argv[])
 		initial_status[0] = new int[max_dimension];
 		read_file(initial_status_file, initial_status,1,max_dimension);
 		
-		int **initial_model_status = NULL;
-		initial_model_status = new int*[1];
-		initial_model_status[0] = NULL;
-		if(initial_model_status_file != ""){
-			initial_model_status[0] = new int[nested_model_number];
-			read_file(initial_model_status_file, initial_model_status,1,nested_model_number);
-		}
+		//TODO This doesn't make sense anymore
+		int initial_model_status[1] = {0};
+		//int **initial_model_status = NULL;
+		//initial_model_status = new int*[1];
+		//initial_model_status[0] = NULL;
+		//if(initial_model_status_file != ""){
+		//	initial_model_status[0] = new int[nested_model_number];
+		//	read_file(initial_model_status_file, initial_model_status,1,nested_model_number);
+		//}
 		
 		double *seeding_var = NULL;
 		double **ensemble_initial_position = NULL;
 		int **ensemble_initial_status = NULL;
-		int **ensemble_initial_model_status = NULL;
+		int *ensemble_initial_model_status = NULL;
 		std::cout<<"Running uncorrelated sampler "<<std::endl;
 		mcmc_sampler_output sampler_output(chain_N, max_dimension,nested_model_number);
 		sampler_output.RJ = true;
@@ -426,7 +428,7 @@ int main(int argc, char *argv[])
 		
 		RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 				&sampler_output,output, status, model_status,nested_model_number, max_dimension, min_dimension,samples, chain_N, 
-				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,ensemble_initial_position,ensemble_initial_model_status,ensemble_initial_model_status,mod_priors,chain_temps, 
+				max_thermo_chain_N, initial_position[0],initial_status[0],initial_model_status[0],seeding_var,ensemble_initial_position,ensemble_initial_status,ensemble_initial_model_status,mod_priors,chain_temps, 
 				swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 				lp,threads, pool,show_progress,detector_N, 
 				data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
@@ -434,10 +436,10 @@ int main(int argc, char *argv[])
 		sampler_output.create_data_dump(true, false, output_file);
 		delete [] initial_position[0]; delete [] initial_position;
 		delete [] initial_status[0]; delete [] initial_status;
-		if(initial_model_status){
-			delete [] initial_model_status[0]; 
-		}
-		delete [] initial_model_status;
+		//if(initial_model_status){
+		//	delete [] initial_model_status[0]; 
+		//}
+		//delete [] initial_model_status;
 	}
 
 	
@@ -463,7 +465,7 @@ int main(int argc, char *argv[])
 	return 0;
 
 }
-double standard_log_prior_D_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters)
+double standard_log_prior_D_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
@@ -499,7 +501,7 @@ double standard_log_prior_D_mod(double *pos,int *status, int *model_status, mcmc
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
-double standard_log_prior_Pv2_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters)
+double standard_log_prior_Pv2_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters)
 {
 	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
@@ -539,7 +541,7 @@ double standard_log_prior_Pv2_mod(double *pos,int *status, int *model_status, mc
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];
 }
-double standard_log_prior_D_intrinsic_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters)
+double standard_log_prior_D_intrinsic_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters)
 {
 	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
@@ -563,7 +565,7 @@ double standard_log_prior_D_intrinsic_mod(double *pos,int *status, int *model_st
 
 
 }
-double standard_log_prior_Pv2_intrinsic_mod(double *pos,int *status, int *model_status, mcmc_data_interface *interface,void *parameters)
+double standard_log_prior_Pv2_intrinsic_mod(double *pos,int *status, int model_status, mcmc_data_interface *interface,void *parameters)
 {
 	int dim = interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();

@@ -31,12 +31,12 @@ int mcmc_rosenbock(int argc, char *argv[]);
 int mcmc_output_class(int argc, char *argv[]);
 int mcmc_RJ_sin(int argc, char *argv[]);
 int multiple_continue(int argc, char *argv[]);
-void RJ_sin_fish(double *c,int *status,int *model_status,double **fisher,mcmc_data_interface *interface, void *parameters);
+void RJ_sin_fish(double *c,int *status,int model_status,double **fisher,mcmc_data_interface *interface, void *parameters);
 //double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters);
-double RJ_sin_logL(double *params, int *status,int *model_status,mcmc_data_interface *interface, void *parameters);
+double RJ_sin_logL(double *params, int *status,int model_status,mcmc_data_interface *interface, void *parameters);
 void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface, void *parameters);
 //double RJ_sin_prior(double *params,  mcmc_data_interface *interface, void *parameters);
-double RJ_sin_prior(double *params,  int *status,int *model_status,mcmc_data_interface *interface, void *parameters);
+double RJ_sin_prior(double *params,  int *status,int model_status,mcmc_data_interface *interface, void *parameters);
 double log_test (double *c,mcmc_data_interface *interface,void *parameters);
 double log_test_prior (double *c,mcmc_data_interface *interface,void *parameters);
 double log_rosenbock (double *c,mcmc_data_interface *interface,void *parameters);
@@ -45,8 +45,8 @@ void fisher_test(double *c, double **fisher, mcmc_data_interface *interface, voi
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_sa(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_P(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_P_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_P_RJ(double *pos,int *status,int model_status, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_RJ(double *pos,int *status,int model_status, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double chirpmass, double eta);
 double chirpmass_q_jac(double chirpmass, double q);
 double T_mcmc_gw_tool ;
@@ -147,7 +147,7 @@ double Chebyshev_fn(int P, double *coeff, double x)
 double transdimensional_likelihood(
 	double *param, 
 	int *status, 
-	int *model_status, 
+	int model_status, 
 	mcmc_data_interface *interface, 
 	void * parameters)
 {
@@ -179,7 +179,7 @@ double transdimensional_likelihood(
 double transdimensional_prior(
 	double *param, 
 	int *status, 
-	int *model_status, 
+	int model_status, 
 	mcmc_data_interface *interface, 
 	void * parameters)
 {
@@ -204,7 +204,7 @@ double transdimensional_likelihood_fixed(
 	for(int i = 0 ; i<interface->max_dim; i++){
 		temp_status[i] = 1;
 	}
-	return transdimensional_likelihood(param, temp_status, (int*)NULL, interface, parameters);
+	return transdimensional_likelihood(param, temp_status, 0, interface, parameters);
 
 }
 double transdimensional_prior_fixed(
@@ -216,7 +216,7 @@ double transdimensional_prior_fixed(
 	for(int i = 0 ; i<interface->max_dim; i++){
 		temp_status[i] = 1;
 	}
-	return transdimensional_prior(param, temp_status, (int*)NULL, interface, parameters);
+	return transdimensional_prior(param, temp_status, 0, interface, parameters);
 }
 void transdimensional_RJprop(
 	double *current_param, 
@@ -277,14 +277,14 @@ int ensemble_size(int argc, char *argv[])
 	int nested_models=0;
 	double **output = allocate_2D_array(samples, max_dim);
 	int **status = allocate_2D_array_int(samples, max_dim);
-	int **model_status = NULL;
+	int *model_status = NULL;
 	double initial_position[max_dim];	
 	int initial_status[max_dim];	
-	int initial_model_status[max_dim];	
+	int initial_model_status =  0;	
 	double seeding_var[max_dim];	
 	double **ensemble_initial_pos = NULL;
 	int **ensemble_initial_status = NULL;
-	int **ensemble_initial_model_status = NULL;
+	int *ensemble_initial_model_status = NULL;
 	double chain_temps[chain_N];
 	int initnum = 5;
 	initial_position[0] = 1;	
@@ -389,14 +389,14 @@ int validate_evidence(int argc, char *argv[])
 	int nested_models=0;
 	double **output = allocate_2D_array(samples, max_dim);
 	int **status = allocate_2D_array_int(samples, max_dim);
-	int **model_status = NULL;
+	int *model_status = NULL;
 	double initial_position[max_dim];	
 	int initial_status[max_dim];	
-	int initial_model_status[max_dim];	
+	int initial_model_status=0;	
 	double seeding_var[max_dim];	
 	double **ensemble_initial_pos = NULL;
 	int **ensemble_initial_status = NULL;
-	int **ensemble_initial_model_status = NULL;
+	int *ensemble_initial_model_status = NULL;
 	double chain_temps[chain_N];
 	int initnum = 5;
 	initial_position[0] = 1;	
@@ -1019,12 +1019,12 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	int samples = 500;
 	double **output  = allocate_2D_array( samples, max_dim);
 	int **status  = allocate_2D_array_int( samples, max_dim);
-	int **model_status  = NULL;
+	int *model_status  = NULL;
 	int nested_model_number = 0;
-	int *initial_model_status= NULL;
-	if(nested_model_number != 0 ){
-		initial_model_status = new int[nested_model_number];
-	}
+	int initial_model_status= 0;
+	//if(nested_model_number != 0 ){
+	//	initial_model_status = new int[nested_model_number];
+	//}
 	double t0 = 200;
 	double nu = 10;
 	std::string chain_distribution="double";
@@ -1039,13 +1039,10 @@ int mcmc_injection_RJ(int argc, char *argv[])
 	
 	mcmc_sampler_output sampler_output(chains,max_dim);
 	sampler_output.RJ = true;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, (double**)NULL,(int**)NULL,(int**)NULL,prior_ranges,temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(&sampler_output,output,status,model_status, nested_model_number,max_dim, min_dim , samples, chains, ensemble,initial_position,initial_status, initial_model_status, seeding, (double**)NULL,(int**)NULL,(int*)NULL,prior_ranges,temps, swap_freq, t0,nu,max_chunk_size,chain_distribution,standard_log_prior_D_RJ, threads, pool, show_progress, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method_base, recovery_method_extended, stat_file, output_file, ll_file, checkpoint_file);
 	deallocate_2D_array(output,  samples, max_dim);
 	deallocate_2D_array(status,  samples, max_dim);
 
-	if(initial_model_status){
-		delete [] initial_model_status;
-	}
 	if(mod_struct.gIMR_phii){
 		delete [] mod_struct.gIMR_phii;
 	}
@@ -1161,7 +1158,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 5*100;
+	int N_steps = 5*10000;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -1194,21 +1191,17 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//delete [] status;
 	//##################################################	
 	//###############################################
-	int t0 = 200;
-	int nu = 10;
+	int t0 = 2000;
+	int nu = 100;
 	int max_chunksize = 100;
 	bool update_RJ_width = true;
 	double **output = new double*[N_steps];
 	int **status = new int*[N_steps];
 	int nested_model_number =3;
-	int **model_status = NULL;
-	int *initial_model_status = NULL;
+	int *model_status = NULL;
+	int initial_model_status = 0;
 	if(nested_model_number !=0){
-		initial_model_status = new int[nested_model_number];
-		model_status = allocate_2D_array_int(N_steps, nested_model_number);
-		for(int i = 0 ; i<nested_model_number; i++){
-			initial_model_status[i]=0;
-		}
+		model_status = new int[N_steps];
 	}
 	for(int j = 0 ; j<N_steps;j ++){
 		output[j]=new double[dim];
@@ -1218,12 +1211,9 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	mcmc_sampler_output sampler_output(chain_N,max_dim,nested_model_number);
 	sampler_output.RJ = true;
 	sampler_output.nested_model_number = nested_model_number;
-	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(&sampler_output,output,status, model_status,nested_model_number,max_dim,min_dim, N_steps, chain_N, max_ensemble_chain_N,initial_pos,initial_status, initial_model_status,seeding_var,(double**)NULL,(int**)NULL,(int**)NULL, chain_temps, swp_freq,  t0, nu, max_chunksize, chain_distribution,RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, update_RJ_width, stat_file, chain_file, "",checkpoint);
-	if(initial_model_status){
-		delete [] initial_model_status;
-	}
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(&sampler_output,output,status, model_status,nested_model_number,max_dim,min_dim, N_steps, chain_N, max_ensemble_chain_N,initial_pos,initial_status, initial_model_status,seeding_var,(double**)NULL,(int**)NULL,(int*)NULL, chain_temps, swp_freq,  t0, nu, max_chunksize, chain_distribution,RJ_sin_prior, RJ_sin_logL, RJ_sin_fish, RJ_sin_proposal, (void **)param, numthreads, pool, show_prog, update_RJ_width, stat_file, chain_file, "",checkpoint);
 	if(model_status){
-		deallocate_2D_array(model_status, N_steps, nested_model_number);
+		delete [] model_status;
 	}
 	for(int j = 0 ; j<N_steps;j++){
 		delete [] output[j];
@@ -1280,13 +1270,11 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 		}
 
 	}
-	for(int i = 0 ; i<interface->nested_model_number; i++){
-		proposed_model_status[i] = current_model_status[i];
-	}
+	*(proposed_model_status) = *(current_model_status);
 	return ;
 }
 
-double RJ_sin_logL(double *params, int *status,int *model_status,mcmc_data_interface *interface, void *parameters)
+double RJ_sin_logL(double *params, int *status,int model_status,mcmc_data_interface *interface, void *parameters)
 //double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters)
 {
 	//for(int i = 0 ; i<2; i++){
@@ -1328,7 +1316,7 @@ double RJ_sin_logL(double *params, int *status,int *model_status,mcmc_data_inter
 		return L;
 	}
 }
-double RJ_sin_prior(double *params,  int *status,int *model_status,mcmc_data_interface *interface, void *parameters)
+double RJ_sin_prior(double *params,  int *status,int model_status,mcmc_data_interface *interface, void *parameters)
 //double RJ_sin_prior(double *params,  mcmc_data_interface *interface, void *parameters)
 {
 	//int dim = interface->max_dim;
@@ -1352,7 +1340,7 @@ double RJ_sin_prior(double *params,  int *status,int *model_status,mcmc_data_int
 	//if(params[3]<0 || params[3]>5){return a;}
 	return p;
 }
-void RJ_sin_fish(double *c, int *status,int *model_status,double **fisher,mcmc_data_interface *interface, void *parameters)
+void RJ_sin_fish(double *c, int *status,int model_status,double **fisher,mcmc_data_interface *interface, void *parameters)
 {
 	int dim = interface->min_dim;
 	double epsilon = 1e-3;
@@ -1405,9 +1393,13 @@ void RJ_sin_fish(double *c, int *status,int *model_status,double **fisher,mcmc_d
 
 int mcmc_output_class(int argc, char *argv[])
 {
+	bool RJ = true;
+	int nested_models = 0;
+	if(RJ){nested_models = 1;}
 	int chain_N = 3;
 	int dim = 3;
-	mcmc_sampler_output output(chain_N,dim);
+	mcmc_sampler_output output(chain_N,dim,nested_models);
+	output.RJ = RJ;
 	double chain_temps[chain_N] = {1.,2.,1.};
 	output.populate_chain_temperatures(chain_temps);
 	for(int i = 0 ; i<chain_N; i++){
@@ -1418,12 +1410,27 @@ int mcmc_output_class(int argc, char *argv[])
 	std::cout<<"Cold chains id 2: "<<output.cold_chain_ids[1]<<std::endl;
 	double ***init_output = new double**[chain_N];
 	double ***init_LL_LP = new double**[chain_N];
+	int **init_model_status =NULL;
+	int ***init_status =NULL;
+	if(RJ){
+		init_model_status = new int*[chain_N];
+		init_status = new int**[chain_N];
+	}
+	
 	int steps = 5;
 	int init_positions[chain_N] = {5,3,5};
 	for(int i = 0 ; i<chain_N; i++){
+		if(RJ){
+			init_model_status[i]  = new int[steps];
+			init_status[i]  = new int*[steps];
+		}
 		init_output[i] = new double*[steps];
 		init_LL_LP[i] = new double*[steps];
 		for(int j =0 ; j<steps; j++){
+			if(RJ){
+				init_model_status[i][j] = 3;
+				init_status[i][j] = new int[dim];
+			}
 			init_output[i][j] = new double[dim];
 			init_LL_LP[i][j] = new double[2];
 			if(j < init_positions[i]){
@@ -1431,6 +1438,9 @@ int mcmc_output_class(int argc, char *argv[])
 				init_LL_LP[i][j][1] = 1;
 				for(int k =0 ; k<dim; k++){
 					init_output[i][j][k] = i+j+k;
+					if(RJ){
+						init_status[i][j][k] = 1;	
+					}
 				}
 			}
 			else{
@@ -1438,11 +1448,14 @@ int mcmc_output_class(int argc, char *argv[])
 				init_LL_LP[i][j][1] = 0;
 				for(int k =0 ; k<dim; k++){
 					init_output[i][j][k] = 0;
+					if(RJ){
+						init_status[i][j][k] = 0;	
+					}
 				}
 			}
 		}
 	}
-	output.populate_initial_output(init_output,(int***)NULL,(int***)NULL, init_LL_LP,init_positions);
+	output.populate_initial_output(init_output,init_status,init_model_status, init_LL_LP,init_positions);
 	std::cout<<"Initial output"<<std::endl;
 	for(int i = 0 ; i<chain_N; i++){
 		for(int j =0 ; j<init_positions[i]; j++){
@@ -1465,12 +1478,26 @@ int mcmc_output_class(int argc, char *argv[])
 
 	double ***app_output = new double**[chain_N];
 	double ***app_LL_LP = new double**[chain_N];
+	int ***app_status = NULL;
+	int **app_model_status = NULL;
+	if(RJ){
+		app_status = new int**[chain_N];
+		app_model_status = new int*[chain_N];
+	}
 	int app_steps = 8;
 	int app_positions[chain_N] = {8,5,8};
 	for(int i = 0 ; i<chain_N; i++){
+		if(RJ){
+			app_status[i] = new int*[app_steps];
+			app_model_status[i] = new int[app_steps];
+		}
 		app_output[i] = new double*[app_steps];
 		app_LL_LP[i] = new double*[app_steps];
 		for(int j =0 ; j<app_steps; j++){
+			if(RJ){
+				app_status[i][j] = new int[dim];
+				app_model_status[i][j] = 4;
+			}
 			app_output[i][j] = new double[dim];
 			app_LL_LP[i][j] = new double[2];
 			if(j < app_positions[i]){
@@ -1478,6 +1505,9 @@ int mcmc_output_class(int argc, char *argv[])
 				app_LL_LP[i][j][1] = 11*(i+j);
 				for(int k =0 ; k<dim; k++){
 					app_output[i][j][k] = 10*(i+j+k);
+					if(RJ){
+						app_status[i][j][k] = 1;
+					}
 				}
 			}
 			else{
@@ -1485,12 +1515,15 @@ int mcmc_output_class(int argc, char *argv[])
 				app_LL_LP[i][j][1] = 0;
 				for(int k =0 ; k<dim; k++){
 					app_output[i][j][k] = 0;
+					if(RJ){
+						app_status[i][j][k] = 0;
+					}
 				}
 			}
 		}
 	}
 	chain_temps[1]=5;
-	output.append_to_output(app_output,(int***)NULL,(int***)NULL, app_LL_LP,app_positions);
+	output.append_to_output(app_output,app_status,app_model_status, app_LL_LP,app_positions);
 	output.populate_chain_temperatures(chain_temps);
 	
 	std::cout<<std::endl;
@@ -1528,6 +1561,23 @@ int mcmc_output_class(int argc, char *argv[])
 	//############################################################
 	//Cleanup
 	//############################################################
+	if(init_model_status){
+		for(int i = 0 ; i<chain_N; i ++){
+			delete [] init_model_status[i];
+		}
+		delete [] init_model_status;
+
+	}
+	if(init_status){
+		for(int i = 0 ; i<chain_N; i ++){
+			for(int j = 0 ; j<steps; j++){
+				delete [] init_status[i][j];
+			}
+			delete [] init_status[i];
+		}
+		delete [] init_status;
+
+	}
 	for(int i = 0 ; i<chain_N; i ++){
 		for(int j = 0 ; j<steps; j++){
 			delete [] init_output[i][j];
@@ -1552,6 +1602,23 @@ int mcmc_output_class(int argc, char *argv[])
 	delete [] app_LL_LP;
 	app_output = NULL;
 	app_LL_LP = NULL;
+	if(app_model_status){
+		for(int i = 0 ; i<chain_N; i ++){
+			delete [] app_model_status[i];
+		}
+		delete [] app_model_status;
+
+	}
+	if(app_status){
+		for(int i = 0 ; i<chain_N; i ++){
+			for(int j = 0 ; j<steps; j++){
+				delete [] app_status[i][j];
+			}
+			delete [] app_status[i];
+		}
+		delete [] app_status;
+
+	}
 	
 	return 0;
 }
@@ -2391,7 +2458,7 @@ double chirpmass_q_jac(double chirpmass, double q){
 	return chirpmass/(pow(q/pow_int(q+1,2),1./5.) * q);
 }
 
-double standard_log_prior_D_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters)
+double standard_log_prior_D_RJ(double *pos,int *status,int model_status, mcmc_data_interface *interface,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[7]);
@@ -2421,7 +2488,7 @@ double standard_log_prior_D_RJ(double *pos,int *status,int *model_status, mcmc_d
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 }
-double standard_log_prior_P_RJ(double *pos,int *status,int *model_status, mcmc_data_interface *interface,void *parameters)
+double standard_log_prior_P_RJ(double *pos,int *status,int model_status, mcmc_data_interface *interface,void *parameters)
 {
 	double a = -std::numeric_limits<double>::infinity();
 	double chirp = std::exp(pos[7]);
