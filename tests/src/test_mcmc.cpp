@@ -269,11 +269,11 @@ int ensemble_size(int argc, char *argv[])
 	int chain_N = 1000;
 	int max_dim = 10;
 	int min_dim = 2;
-	int samples = 500000;
+	int samples = 50000;
 	int swp_freq = 5;
 	int t0 = 10000;
 	int nu = 100;
-	int max_chunk_size = 500000;
+	int max_chunk_size = 5000;
 	int nested_models=0;
 	double **output = allocate_2D_array(samples, max_dim);
 	int **status = allocate_2D_array_int(samples, max_dim);
@@ -321,7 +321,7 @@ int ensemble_size(int argc, char *argv[])
 	mcmc_sampler_output mcmc_out(chain_N,max_dim, nested_models) ; 
 
 	mcmc_out.RJ= true;
-	//RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(&mcmc_out, output, status, model_status,nested_models, max_dim, min_dim , samples, chain_N, max_thermo, initial_position, initial_status, initial_model_status, seeding_var, ensemble_initial_pos, ensemble_initial_status, ensemble_initial_model_status, chain_temps, swp_freq, t0,nu, max_chunk_size, "double", transdimensional_prior, transdimensional_likelihood, NULL, transdimensional_RJprop, (void**)helpers, 10, true, true, true, stat_file, chain_file, likelihood_file, checkpoint_file);
+	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(&mcmc_out, output, status, model_status,nested_models, max_dim, min_dim , samples, chain_N, max_thermo, initial_position, initial_status, initial_model_status, seeding_var, ensemble_initial_pos, ensemble_initial_status, ensemble_initial_model_status, chain_temps, swp_freq, t0,nu, max_chunk_size, "double", transdimensional_prior, transdimensional_likelihood, NULL, transdimensional_RJprop, (void**)helpers, 10, true, true, true, stat_file, chain_file, likelihood_file, checkpoint_file);
 	mcmc_out.~mcmc_sampler_output();
 	
 	deallocate_2D_array(output,samples,max_dim);
@@ -345,6 +345,7 @@ int ensemble_size(int argc, char *argv[])
 	//######################################################################
 	samples = 300;
 	chain_N = 1000;
+	max_chunk_size = 1e5;
 	output = allocate_2D_array(samples, max_dim);
 	std::string stat_file_2 = "data/stat_ensemble_size_testing_"+std::to_string(chain_N)+".txt";
 	std::string chain_file_2 = "data/output_ensemble_size_testing_"+std::to_string(chain_N)+".hdf5";
@@ -1070,12 +1071,16 @@ int mcmc_injection_RJ(int argc, char *argv[])
 
 }
 
+double RJ_sin_tilt_range[2];
 int mcmc_RJ_sin(int argc, char *argv[])
 {
+	RJ_sin_tilt_range[0] = 0;
+	RJ_sin_tilt_range[1] = .2;
 	int dim = 6;
 	int N = 5000;
 	double injections[dim];
 	injections[0]=200;
+	//injections[0]=2000;
 	injections[1]=2;
 	injections[2]=.1;
 	injections[3]=500.;
@@ -1108,7 +1113,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	delete [] data_pure;
 	gsl_rng_free(rand);
 
-	int chain_N = 64;
+	int chain_N = 80;
 	int max_ensemble_chain_N = 8;
 	double initial_pos[dim];	
 	double seeding_var[dim];	
@@ -1137,7 +1142,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 			chain_temps[i] = chain_temps[i-1]*1.5;
 		}
 	}
-	int numthreads = 10;
+	int numthreads = 8;
 	bool pool = true;
 	bool show_prog = true;
 	
@@ -1243,33 +1248,51 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 		current_dim+=current_status[i];
 	}
 	RJ_sin_param *param = (RJ_sin_param *) parameters;
-	double alpha = gsl_rng_uniform(param->r);
-	if(alpha<.5){
+	//double alpha = gsl_rng_uniform(param->r);
+	if(current_dim == 5){
 		for(int i = 0 ; i<interface->max_dim; i++){
 			proposed_params[i]=current_params[i];
 			proposed_status[i]=current_status[i];
 		}
+		proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,.1)) ;
+		proposed_status[5] = 1;
 	}
 	else{
-		if(current_dim == 5){
-			for(int i = 0 ; i<interface->max_dim; i++){
-				proposed_params[i]=current_params[i];
-				proposed_status[i]=current_status[i];
-			}
-			proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,.1)) ;
-			proposed_status[5] = 1;
+		for(int i = 0 ; i<interface->max_dim; i++){
+			proposed_params[i]=current_params[i];
+			proposed_status[i]=current_status[i];
 		}
-		else{
-			for(int i = 0 ; i<interface->max_dim; i++){
-				proposed_params[i]=current_params[i];
-				proposed_status[i]=current_status[i];
-			}
-			proposed_params[5] =0 ;
-			proposed_status[5] = 0;
-
-		}
+		proposed_params[5] =0 ;
+		proposed_status[5] = 0;
 
 	}
+
+	//if(alpha<.5){
+	//	for(int i = 0 ; i<interface->max_dim; i++){
+	//		proposed_params[i]=current_params[i];
+	//		proposed_status[i]=current_status[i];
+	//	}
+	//}
+	//else{
+	//	if(current_dim == 5){
+	//		for(int i = 0 ; i<interface->max_dim; i++){
+	//			proposed_params[i]=current_params[i];
+	//			proposed_status[i]=current_status[i];
+	//		}
+	//		proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,.1)) ;
+	//		proposed_status[5] = 1;
+	//	}
+	//	else{
+	//		for(int i = 0 ; i<interface->max_dim; i++){
+	//			proposed_params[i]=current_params[i];
+	//			proposed_status[i]=current_status[i];
+	//		}
+	//		proposed_params[5] =0 ;
+	//		proposed_status[5] = 0;
+
+	//	}
+
+	//}
 	*(proposed_model_status) = *(current_model_status);
 	return ;
 }
@@ -1334,8 +1357,14 @@ double RJ_sin_prior(double *params,  int *status,int model_status,mcmc_data_inte
 	if(params[2]<0 || params[2]>.5){return a;}
 	if(params[3]<0 || params[3]>1000){return a;}
 	if(params[4]<0 || params[4]>param->N){return a;}
+	p += 1./(5000. - 0);
+	p += 1./(2.*M_PI - 0);
+	p += 1./(0.5 - 0);
+	p += 1./(1000 - 0);
+	p += 1./(param->N - 0);
 	if(dim>4){
-		if(params[5]<0 || params[5]>.2){return a;}
+		if(params[5]<RJ_sin_tilt_range[0] || params[5]>RJ_sin_tilt_range[1]){return a;}
+		p += 1./(RJ_sin_tilt_range[1] -RJ_sin_tilt_range[0]);
 	}
 	//if(params[3]<0 || params[3]>5){return a;}
 	return p;

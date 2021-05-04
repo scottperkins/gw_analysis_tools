@@ -36,8 +36,8 @@ plt.close()
 
 data,status,model_status = gmcmc.RJPTMCMC_unpack_file("data/chains_RJ_sin.hdf5")
 print("MS",model_status)
-data = data[::100]
-status = status[::100]
+#data = data[::100]
+#status = status[::100]
 print(np.shape(data))
 print(np.shape(status))
 #data = np.loadtxt("data/chains_RJ_sin.hdf5",delimiter=',')
@@ -109,47 +109,59 @@ plt.close()
 
 
 ct = 0
-plt.plot(injected_data)
+plt.plot(injected_data,alpha=.5)
+recons_nonsym = []
 for x in data_nonsym[::100]:
-    #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')
-    plt.plot(fn(x,xpts),alpha=.01,color='red')
+    #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')   
+    recons_nonsym.append(fn(x,xpts))
+    #plt.plot(fn(x,xpts),alpha=.01,color='red')
     ct+=1
+upper_lim_nonsym = np.quantile(recons_nonsym, .95,axis=0)
+lower_lim_nonsym = np.quantile(recons_nonsym, .05,axis=0)
+plt.fill_between(xpts, lower_lim_nonsym, upper_lim_nonsym,alpha=.5,color='red')
 plt.savefig("plots/RJ_sin_reconstruction_full_data_nonsym.pdf")
 plt.close()
 
 ct = 0
-plt.plot(injected_data)
+plt.plot(injected_data,alpha=.5)
+recons_sym = []
 for x in data_sym[::100]:
     #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')
-    plt.plot(fn_sym(x,xpts),alpha=.01,color='red')
+    #plt.plot(fn_sym(x,xpts),alpha=.01,color='red')
+    recons_sym.append(fn_sym(x,xpts))
     ct+=1
+upper_lim_sym = np.quantile(recons_sym, .95,axis=0)
+lower_lim_sym = np.quantile(recons_sym, .05,axis=0)
+plt.fill_between(xpts, lower_lim_sym, upper_lim_sym,alpha=.5,color='red')
 plt.savefig("plots/RJ_sin_reconstruction_full_data_sym.pdf")
 plt.close()
 
 ct = 0
-for x in data_nonsym[::10]:
-    #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')
-    plt.plot(fn(x,xpts),alpha=.01,color='red')
-    #plt.plot(\
-    #    x[0]*np.sin(x[2]*xpts + x[1])\
-    #    *1./np.sqrt(2.*x[3]*x[3]) \
-    #    * np.exp(-.5 * (x[4]-xpts)*(x[4]-xpts)/(x[3]*x[3]))\
-    #    ,alpha=.01,color='red')
-    ct+=1
+#for x in data_nonsym[::10]:
+#    #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')
+#    plt.plot(fn(x,xpts),alpha=.01,color='red')
+#    #plt.plot(\
+#    #    x[0]*np.sin(x[2]*xpts + x[1])\
+#    #    *1./np.sqrt(2.*x[3]*x[3]) \
+#    #    * np.exp(-.5 * (x[4]-xpts)*(x[4]-xpts)/(x[3]*x[3]))\
+#    #    ,alpha=.01,color='red')
+#    ct+=1
+plt.fill_between(xpts, lower_lim_nonsym, upper_lim_nonsym,alpha=.5,color='red')
 plt.plot(injected_data_clean)
 plt.savefig("plots/RJ_sin_reconstruction_clean_data_nonsym.pdf")
 plt.close()
 
-ct = 0
-for x in data_sym[::10]:
-    #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')
-    plt.plot(fn_sym(x,xpts),alpha=.01,color='red')
-    #plt.plot(\
-    #    x[0]*np.sin(x[2]*xpts + x[1])\
-    #    *1./np.sqrt(2.*x[3]*x[3]) \
-    #    * np.exp(-.5 * (x[4]-xpts)*(x[4]-xpts)/(x[3]*x[3]))\
-    #    ,alpha=.01,color='red')
-    ct+=1
+#ct = 0
+#for x in data_sym[::10]:
+#    #plt.plot(x[0]*np.sin(x[2]*xpts + x[1]),alpha=.1,color='red')
+#    plt.plot(fn_sym(x,xpts),alpha=.01,color='red')
+#    #plt.plot(\
+#    #    x[0]*np.sin(x[2]*xpts + x[1])\
+#    #    *1./np.sqrt(2.*x[3]*x[3]) \
+#    #    * np.exp(-.5 * (x[4]-xpts)*(x[4]-xpts)/(x[3]*x[3]))\
+#    #    ,alpha=.01,color='red')
+#    ct+=1
+plt.fill_between(xpts, lower_lim_sym, upper_lim_sym,alpha=.5,color='red')
 plt.plot(injected_data_clean)
 plt.savefig("plots/RJ_sin_reconstruction_clean_data_sym.pdf")
 plt.close()
