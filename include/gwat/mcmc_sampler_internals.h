@@ -206,7 +206,7 @@ public:
 	//RJPTMCMC Parameterts
 	int ***param_status;
 	bool RJMCMC=false;
-	std::function<void(double*,double*,int *,int *,int *,int *,mcmc_data_interface *,void *)> rj;
+	std::function<void(double*,double*,int *,int *,int *,int *,double*,mcmc_data_interface *,void *)> rj;
 	bool update_RJ_width=true;
 	int **model_status = NULL;//Tracks which models are being used
 	int nested_model_number = 0;//Number of models that are perfectly nested
@@ -241,6 +241,7 @@ void RJ_step(sampler *sampler,
 	int *proposed_status, 
 	int *current_model_status, 
 	int *proposed_model_status, 
+	double *MH_corrections,
 	int chain_number);
 
 void chain_swap(sampler *sampler, double ***output, int ***param_status,int **model_status,int step_num,int *swp_accepted, int *swp_rejected);

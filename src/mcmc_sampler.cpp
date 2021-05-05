@@ -848,7 +848,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string ch
 	std::function<double(double*, int*,int,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,mcmc_data_interface *,void*)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,mcmc_data_interface *,void*)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *,void*)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,double *,mcmc_data_interface *,void*)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
@@ -1319,7 +1319,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(
 	std::function<double(double*, int*,int,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,mcmc_data_interface *,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,mcmc_data_interface *,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,double *,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
@@ -1431,7 +1431,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 	std::function<double(double*, int*,int,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,mcmc_data_interface *,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,mcmc_data_interface *,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,double *,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
@@ -2149,7 +2149,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 	std::function<double(double*, int*,int,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,mcmc_data_interface *,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,mcmc_data_interface *,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,double *,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
@@ -2780,7 +2780,7 @@ void continue_RJPTMCMC_MH_internal(sampler *samplerptr,
 	std::function<double(double*, int*,int,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,mcmc_data_interface *,void*)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,mcmc_data_interface *,void*)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *,void*)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,double *,mcmc_data_interface *,void*)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads,/**<Number of threads to use*/
 	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
@@ -3008,7 +3008,7 @@ void RJPTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is 
 	std::function<double(double*, int*,int,mcmc_data_interface *,void *)> log_prior,/**< std::function for the log_prior function -- takes double *position, int *param_status, int dimension, int chain_id*/
 	std::function<double(double*,int*,int,mcmc_data_interface *,void *)> log_likelihood,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	std::function<void(double*,int*,int,double**,mcmc_data_interface *,void *)>fisher,/**< std::function for the fisher function -- takes double *position, int *param_status,int dimension, double **output_fisher, int chain_id*/
-	std::function<void(double*,double*,int*,int*,int*,int*,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	std::function<void(double*,double*,int*,int*,int*,int*,double *,mcmc_data_interface *, void *)> RJ_proposal,/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
@@ -5101,7 +5101,7 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 	double (*log_prior)(double *param, int *status, int model_status,mcmc_data_interface *interface,void *parameters),	
 	double (*log_likelihood)(double *param, int *status,int model_status, mcmc_data_interface *interface,void *parameters),
 	void (*fisher)(double *param, int *status,int model_status, double **fisher, mcmc_data_interface *interface,void *parameters),
-	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface,void *parameters),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status,double *MH_corrections, mcmc_data_interface *interface,void *parameters),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads, /**< Number of threads to use (=1 is single threaded)*/
 	bool pool, /**< boolean to use stochastic chain swapping (MUST have >2 threads)*/
@@ -5124,9 +5124,9 @@ void RJPTMCMC_MH(double ***output, /**< [out] Output chains, shape is double[cha
 		f = [&fisher](double *param, int *param_status,int model_status, double **fisherm, mcmc_data_interface *interf,void *parameters){
 			fisher(param, param_status,model_status, fisherm,interf,parameters);};
 	}
-	std::function<void(double*,double*, int*,int*,int*,int*,mcmc_data_interface *, void *)> rj =NULL;
-	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,mcmc_data_interface *interf, void *parameters){
-			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,interf,parameters);};
+	std::function<void(double*,double*, int*,int*,int*,int*,double*,mcmc_data_interface *, void *)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,double *MH_corrections,mcmc_data_interface *interf, void *parameters){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,MH_corrections,interf,parameters);};
 	RJPTMCMC_MH_internal(output, 
 		parameter_status, 	
 		model_status,
@@ -5171,7 +5171,7 @@ void continue_RJPTMCMC_MH(std::string start_checkpoint_file,/**< File for starti
 	double (*log_prior)(double *param, int *status,int model_status, mcmc_data_interface *interface,void *parameters),	
 	double (*log_likelihood)(double *param, int *status,int model_status, mcmc_data_interface *interface,void *parameters),
 	void (*fisher)(double *param, int *status,int model_status, double **fisher, mcmc_data_interface *interface,void *parameters),
-	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface,void *parameters),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status,double *MH_corrections, mcmc_data_interface *interface,void *parameters),/**< std::function for the log_likelihood function -- takes double *position, int *param_status,int dimension, int chain_id*/
 	void **user_parameters,/**< Void pointer to any parameters the user may need inside log_prior, log_likelihood, or fisher. Should have one pointer for each chain. If this isn't needed, use (void**) NULL**/
 	int numThreads,/**<Number of threads to use*/
 	bool pool,/**<Boolean for whether to use ``deterministic'' vs ``stochastic'' sampling*/
@@ -5195,9 +5195,9 @@ void continue_RJPTMCMC_MH(std::string start_checkpoint_file,/**< File for starti
 		f = [&fisher](double *param, int *param_status,int model_status, double **fisherm, mcmc_data_interface *interf,void *parameters){
 			fisher(param, param_status,model_status, fisherm,interf,parameters);};
 	}
-	std::function<void(double*,double*, int*,int*,int*,int*,mcmc_data_interface *, void*)> rj =NULL;
-	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,mcmc_data_interface *interf,void *parameters){
-			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,interf,parameters);};
+	std::function<void(double*,double*, int*,int*,int*,int*,double*,mcmc_data_interface *, void*)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,double *MH_corrections,mcmc_data_interface *interf,void *parameters){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,MH_corrections,interf,parameters);};
 	sampler samplerref;
 	continue_RJPTMCMC_MH_internal(&samplerref,
 		start_checkpoint_file,
@@ -5252,7 +5252,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 	double (*log_prior)(double *param, int *status, int model_status,mcmc_data_interface *interface, void * parameters),	
 	double (*log_likelihood)(double *param, int *status,int model_status, mcmc_data_interface *interface, void * parameters),
 	void (*fisher)(double *param, int *status,int model_status, double **fisher, mcmc_data_interface *interface, void * parameters),
-	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface,  void * parameters),
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status,double *MH_corrections, mcmc_data_interface *interface,  void * parameters),
 	void **user_parameters,
 	int numThreads, 
 	bool pool, 
@@ -5275,9 +5275,9 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(mcmc_sampler_output *sampler_out
 		f = [&fisher](double *param, int *param_status,int model_status, double **fisherm, mcmc_data_interface *interf,void *parameters){
 			fisher(param, param_status, model_status,fisherm,interf,parameters);};
 	}
-	std::function<void(double*,double*, int*,int*,int*,int*,mcmc_data_interface *, void*)> rj =NULL;
-	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,mcmc_data_interface *interf,void *parameters){
-			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,interf,parameters);};
+	std::function<void(double*,double*, int*,int*,int*,int*,double*,mcmc_data_interface *, void*)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,double *MH_corrections,mcmc_data_interface *interf,void *parameters){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,MH_corrections,interf,parameters);};
 	RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(sampler_output,
 		output,
 		parameter_status,
@@ -5334,7 +5334,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(
 	double (*log_prior)(double *param, int *status, int model_status,mcmc_data_interface *interface, void * parameters),	
 	double (*log_likelihood)(double *param, int *status,int model_status, mcmc_data_interface *interface, void * parameters),
 	void (*fisher)(double *param, int *status,int model_status, double **fisher, mcmc_data_interface *interface, void * parameters),
-	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface,  void * parameters),
+	void(*RJ_proposal)(double *current_param, double *proposed_param, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status,double *MH_corrections, mcmc_data_interface *interface,  void * parameters),
 	void **user_parameters,
 	int numThreads, 
 	bool pool, 
@@ -5357,9 +5357,9 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive(
 		f = [&fisher](double *param, int *param_status,int model_status, double **fisherm, mcmc_data_interface *interf,void *parameters){
 			fisher(param, param_status, model_status,fisherm,interf,parameters);};
 	}
-	std::function<void(double*,double*, int*,int*,int*,int*,mcmc_data_interface *, void*)> rj =NULL;
-	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,mcmc_data_interface *interf,void *parameters){
-			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,interf,parameters);};
+	std::function<void(double*,double*, int*,int*,int*,int*,double*,mcmc_data_interface *, void*)> rj =NULL;
+	rj = [&RJ_proposal](double *current_param, double *prop_param,int *current_param_status,int *prop_param_status,int *current_model_status,int *prop_model_status,double *MH_corrections,mcmc_data_interface *interf,void *parameters){
+			RJ_proposal(current_param, prop_param,current_param_status, prop_param_status,current_model_status, prop_model_status,MH_corrections,interf,parameters);};
 	continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(
 		checkpoint_file_start, 
 		sampler_output,

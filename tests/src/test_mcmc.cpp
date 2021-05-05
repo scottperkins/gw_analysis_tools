@@ -9,6 +9,7 @@
 #include <gwat/IMRPhenomP.h>
 #include <gwat/fisher.h>
 #include <iostream>
+#include <gsl/gsl_sf_gamma.h>
 
 
 double root2 = std::sqrt(2.);
@@ -34,7 +35,7 @@ int multiple_continue(int argc, char *argv[]);
 void RJ_sin_fish(double *c,int *status,int model_status,double **fisher,mcmc_data_interface *interface, void *parameters);
 //double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters);
 double RJ_sin_logL(double *params, int *status,int model_status,mcmc_data_interface *interface, void *parameters);
-void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface, void *parameters);
+void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, double *MH_corrections,mcmc_data_interface *interface, void *parameters);
 //double RJ_sin_prior(double *params,  mcmc_data_interface *interface, void *parameters);
 double RJ_sin_prior(double *params,  int *status,int model_status,mcmc_data_interface *interface, void *parameters);
 double log_test (double *c,mcmc_data_interface *interface,void *parameters);
@@ -225,6 +226,7 @@ void transdimensional_RJprop(
 	int *prop_status, 
 	int *current_model_status, 
 	int *prop_model_status, 
+	double *MH_corrections,
 	mcmc_data_interface *interface, 
 	void * parameters)
 {
@@ -1080,7 +1082,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	int N = 5000;
 	double injections[dim];
 	injections[0]=200;
-	//injections[0]=2000;
+	//injections[0]=400;
 	injections[1]=2;
 	injections[2]=.1;
 	injections[3]=500.;
@@ -1114,7 +1116,9 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	gsl_rng_free(rand);
 
 	int chain_N = 80;
+	//int chain_N = 21;
 	int max_ensemble_chain_N = 8;
+	//int max_ensemble_chain_N = 3;
 	double initial_pos[dim];	
 	double seeding_var[dim];	
 	for(int i = 0 ; i<dim; i++){
@@ -1163,7 +1167,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 5*10000;
+	int N_steps = 50*10000;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -1196,7 +1200,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//delete [] status;
 	//##################################################	
 	//###############################################
-	int t0 = 2000;
+	int t0 = 5000;
 	int nu = 100;
 	int max_chunksize = 100;
 	bool update_RJ_width = true;
@@ -1241,7 +1245,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	return 0;
 }
 
-void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, mcmc_data_interface *interface, void *parameters)
+void RJ_sin_proposal(double *current_params, double *proposed_params, int *current_status, int *proposed_status,int *current_model_status, int *proposed_model_status, double *MH_corrections,mcmc_data_interface *interface, void *parameters)
 {
 	int current_dim = 0;
 	for(int i = 0 ; i<interface->max_dim; i++){
@@ -1249,50 +1253,50 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 	}
 	RJ_sin_param *param = (RJ_sin_param *) parameters;
 	//double alpha = gsl_rng_uniform(param->r);
+	double std = 1;
+	double mean = .10;
+	double a = 1;
+	double b = 1;
+	//if(alpha < .5 && current_dim == 5){
 	if(current_dim == 5){
 		for(int i = 0 ; i<interface->max_dim; i++){
 			proposed_params[i]=current_params[i];
 			proposed_status[i]=current_status[i];
 		}
-		proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,.1)) ;
+		//proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,std)) ;
+		//proposed_params[5] =gsl_ran_gaussian(param->r,std)+mean ;
+		proposed_params[5] =gsl_ran_gamma(param->r,a,b);
+		//proposed_params[5] =gsl_rng_uniform(param->r)*(RJ_sin_tilt_range[1]-RJ_sin_tilt_range[0])+RJ_sin_tilt_range[0] ;
 		proposed_status[5] = 1;
+		//double gaussian_cor = 2*1./sqrt(2*M_PI*std*std) * exp(-0.5*pow_int(proposed_params[5],2)/(std*std));
+		//double log_gaussian_cor = log(2*1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(proposed_params[5],2)/(std*std));
+		//double log_gaussian_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-proposed_params[5],2)/(std*std));
+		//double log_gaussian_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-proposed_params[5],2)/(std*std));
+		//double log_gaussian_cor = log(pow(proposed_params[5],a-1.)/(gsl_sf_gamma(a)*pow(b,a) ) )-( proposed_params[5]/b);
+		double log_gaussian_cor = log(gsl_ran_gamma_pdf(proposed_params[5],a,b));
+		//*(MH_corrections) = -1*(log_gaussian_cor);
 	}
-	else{
+	//else if (alpha >= .5 && current_dim ==6){
+	else if (current_dim ==6){
 		for(int i = 0 ; i<interface->max_dim; i++){
 			proposed_params[i]=current_params[i];
 			proposed_status[i]=current_status[i];
 		}
 		proposed_params[5] =0 ;
 		proposed_status[5] = 0;
+		//double log_gaussian_cor = log(2*1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(proposed_params[5],2)/(std*std));
+		//double log_gaussian_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-current_params[5],2)/(std*std));
+		//double log_gaussian_cor = log(pow(current_params[5],a-1.)/(gsl_sf_gamma(a)*pow(b,a) ) )-( current_params[5]/b);
+		double log_gaussian_cor = log(gsl_ran_gamma_pdf(current_params[5],a,b));
+		*(MH_corrections) = 1*(log_gaussian_cor);
 
 	}
-
-	//if(alpha<.5){
-	//	for(int i = 0 ; i<interface->max_dim; i++){
-	//		proposed_params[i]=current_params[i];
-	//		proposed_status[i]=current_status[i];
-	//	}
-	//}
-	//else{
-	//	if(current_dim == 5){
-	//		for(int i = 0 ; i<interface->max_dim; i++){
-	//			proposed_params[i]=current_params[i];
-	//			proposed_status[i]=current_status[i];
-	//		}
-	//		proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,.1)) ;
-	//		proposed_status[5] = 1;
-	//	}
-	//	else{
-	//		for(int i = 0 ; i<interface->max_dim; i++){
-	//			proposed_params[i]=current_params[i];
-	//			proposed_status[i]=current_status[i];
-	//		}
-	//		proposed_params[5] =0 ;
-	//		proposed_status[5] = 0;
-
-	//	}
-
-	//}
+	else{
+		for(int i = 0 ; i<interface->max_dim; i++){
+			proposed_params[i]=current_params[i];
+			proposed_status[i]=current_status[i];
+		}
+	}
 	*(proposed_model_status) = *(current_model_status);
 	return ;
 }
@@ -1300,6 +1304,7 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 double RJ_sin_logL(double *params, int *status,int model_status,mcmc_data_interface *interface, void *parameters)
 //double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters)
 {
+	//return 0;
 	//for(int i = 0 ; i<2; i++){
 	//	std::cout<<model_status[i]<<" ";
 	//}
@@ -1357,14 +1362,14 @@ double RJ_sin_prior(double *params,  int *status,int model_status,mcmc_data_inte
 	if(params[2]<0 || params[2]>.5){return a;}
 	if(params[3]<0 || params[3]>1000){return a;}
 	if(params[4]<0 || params[4]>param->N){return a;}
-	p += 1./(5000. - 0);
-	p += 1./(2.*M_PI - 0);
-	p += 1./(0.5 - 0);
-	p += 1./(1000 - 0);
-	p += 1./(param->N - 0);
-	if(dim>4){
+	p += log(1./(5000. - 0));
+	p += log(1./(2.*M_PI - 0));
+	p += log(1./(0.5 - 0));
+	p += log(1./(1000 - 0));
+	p += log(1./(param->N - 0));
+	if(dim==6){
 		if(params[5]<RJ_sin_tilt_range[0] || params[5]>RJ_sin_tilt_range[1]){return a;}
-		p += 1./(RJ_sin_tilt_range[1] -RJ_sin_tilt_range[0]);
+		p += log(1./(RJ_sin_tilt_range[1] -RJ_sin_tilt_range[0]));
 	}
 	//if(params[3]<0 || params[3]>5){return a;}
 	return p;
@@ -1407,9 +1412,7 @@ void RJ_sin_fish(double *c, int *status,int model_status,double **fisher,mcmc_da
 		temp[i]=c[i];
 		double eval = RJ_sin_logL(temp,status,model_status,interface,parameters);	
 		fisher[i][i]= -(plus -2*eval +minus)/(epsilon*epsilon);
-		if(fisher[i][i]!=fisher[i][i])
-			std::cout<<fisher[i][i]<<std::endl;
-		//fisher[i][i]= 1;
+		fisher[i][i]= 1;
 	}
 	for (int i = 0 ; i<dim ; i++){
 		for (int j = i+1 ; j<dim ; j++){

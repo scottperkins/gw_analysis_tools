@@ -69,8 +69,9 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	}
 	else 
 	{
-		RJ_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, &proposed_model_status, chain_number);
+		RJ_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, &proposed_model_status, &(sampler->prop_MH_factor[chain_number]),chain_number);
 		sampler->num_RJstep[chain_number]+=1;
+		//sampler->prop_MH_factor[chain_number] = log(sampler->prop_MH_factor[chain_number]);
 		step = 4;
 	}
 	
@@ -716,10 +717,11 @@ void RJ_step(sampler *sampler, /**< sampler*/
 	int *proposed_status, /**<[out] Proposed status of parameters*/
 	int *current_model_status, /**< Current status of parameters*/
 	int *proposed_model_status, /**<[out] Proposed status of parameters*/
+	double *MH_corrections,
 	int chain_number/**< chain mumber*/
 	)
 {
-	sampler->rj(current_param, proposed_param, current_status, proposed_status, current_model_status,proposed_model_status,sampler->interfaces[chain_number],sampler->user_parameters[chain_number]);
+	sampler->rj(current_param, proposed_param, current_status, proposed_status, current_model_status,proposed_model_status,MH_corrections,sampler->interfaces[chain_number],sampler->user_parameters[chain_number]);
 }
 
 /*! \brief subroutine to perform chain comparison for parallel tempering
@@ -775,6 +777,7 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 			int T2_index	/**<number of chain swapper in chain_temps*/
 			)
 {
+	//return 0;
 
 	sampler->swap_partners[T1_index][T2_index]++;
 	sampler->swap_partners[T2_index][T1_index]++;

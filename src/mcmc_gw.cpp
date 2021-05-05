@@ -3869,6 +3869,7 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 	int *proposed_status, 
 	int *current_model_status, 
 	int *proposed_model_status, 
+	double *MH_corrections,
 	mcmc_data_interface *interface, 
 	void *parameters)
 {

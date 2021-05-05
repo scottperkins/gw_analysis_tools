@@ -49,6 +49,7 @@ symm_mask = (status[:,-1] ==0)
 print("Sym: ",np.sum(symm_mask))
 nonsymm_mask = (status[:,-1] ==1)
 print("NonSym: ",np.sum(nonsymm_mask))
+print("Bayes_sym_nonsym: ",np.sum(symm_mask)/np.sum(nonsymm_mask))
 data_sym = data[symm_mask,:-1]
 data_nonsym = data[nonsymm_mask]
 print(np.shape(data))
