@@ -304,4 +304,6 @@ void write_output_file(std::string file, int step_num, int max_dimension, double
 void reduce_output(int step_num, int max_dimension, double ***output_old, int ***status_old,int **model_status_old,double **output_new, int **status_new,int **model_status_new,int chain_N,double *temps,bool RJ);
 
 int count_cold_chains(double *temps, int chain_N);
+void assign_ensemble_temps(double *chain_temps, int chain_N,int max_chain_N_thermo_ensemble,double TMAX);
+
 #endif

@@ -3394,4 +3394,36 @@ double calculate_evidence(sampler *samplerptr)
 
 //##################################################################
 //##################################################################
+void assign_ensemble_temps(double *chain_temps, int chain_N,int max_chain_N_thermo_ensemble,double TMAX)
+{
+	//Geometric
+	//double temp_step = pow(TMAX/1.,1./max_chain_N_thermo_ensemble);
+	////Initial temps
+	//for(int i = 0 ; i<chain_N;i++){
+	//	if(i % max_chain_N_thermo_ensemble == 0 ){
+	//		chain_temps[i] = 1;
+	//	}
+	//	else if( (i+1) % max_chain_N_thermo_ensemble  == 0 ){
+	//		chain_temps[i] =TMAX;
+	//	}
+	//	else{
+	//		chain_temps[i] = temp_step* chain_temps[i-1];	
+	//	}
+	//}
+	//Linear in beta
+	//Initial temps
+	double delta_beta = (1-1./TMAX)/(max_chain_N_thermo_ensemble-1);
+	for(int i = 0 ; i<chain_N;i++){
+		if(i % max_chain_N_thermo_ensemble == 0 ){
+			chain_temps[i] = 1;
+		}
+		else if( (i+1) % max_chain_N_thermo_ensemble  == 0 ){
+			chain_temps[i] =TMAX;
+		}
+		else{
+			chain_temps[i] = 1./(1 - (i%max_chain_N_thermo_ensemble)*delta_beta);	
+		}
+	}
+	return;
+}
 

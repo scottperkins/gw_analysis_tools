@@ -1167,7 +1167,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 50*10000;
+	int N_steps = 5*10000;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -1202,7 +1202,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//###############################################
 	int t0 = 5000;
 	int nu = 100;
-	int max_chunksize = 100;
+	int max_chunksize = 10000;
 	bool update_RJ_width = true;
 	double **output = new double*[N_steps];
 	int **status = new int*[N_steps];
