@@ -95,7 +95,7 @@ struct MCMC_user_param
 
 	bool GAUSS_QUAD=false;
 	bool log10F = false;
-	double **weights;
+	double **weights=NULL;
 
 	double **fisher_freq=NULL;
 	double **fisher_weights=NULL;

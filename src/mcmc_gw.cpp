@@ -806,7 +806,6 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			std::string integration_method
 			)
 {
-	
 	double delta_f = frequencies[length/2]-frequencies[length/2-1];
 	double sum = 0.;
 	double *integrand = (double *)malloc(sizeof(double)*length);
@@ -2517,6 +2516,7 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 		response[i]*=exp(std::complex<double>(0,tc*(frequencies[0][i])));
 	}	
 	//Referecne detector first
+
 	ll += Log_Likelihood_internal(data[0], 
 			psd[0],
 			frequencies[0],
@@ -3130,6 +3130,12 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 		if(mod_struct->GAUSS_QUAD){
 			user_parameters[i]->weights = mod_struct->weights;			
 		}
+		else{
+			user_parameters[i]->weights = new double*[num_detectors];			
+			for(int j = 0 ; j<num_detectors; j++){
+				user_parameters[i]->weights[j]=NULL;
+			}
+		}
 
 		user_parameters[i]->fisher_GAUSS_QUAD = mod_struct->fisher_GAUSS_QUAD;
 		user_parameters[i]->fisher_log10F = mod_struct->fisher_log10F;
@@ -3377,6 +3383,12 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_2WF_GW(
 		user_parameters[i]->log10F = mod_struct->log10F;
 		if(mod_struct->GAUSS_QUAD){
 			user_parameters[i]->weights = mod_struct->weights;			
+		}
+		else{
+			user_parameters[i]->weights = new double*[num_detectors];			
+			for(int j = 0 ; j<num_detectors; j++){
+				user_parameters[i]->weights[j]=NULL;
+			}
 		}
 
 		user_parameters[i]->fisher_GAUSS_QUAD = mod_struct->fisher_GAUSS_QUAD;
