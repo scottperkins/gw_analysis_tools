@@ -897,6 +897,7 @@ void continue_RJPTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(std::string ch
 
 	samplerptr->nested_model_number = nested_model_number;
 	samplerptr->model_status = model_status;
+	samplerptr->RJMCMC = true;
 
 	samplerptr->num_threads = numThreads;
 	samplerptr->output =output;
@@ -1172,6 +1173,7 @@ void continue_RJPTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	samplerptr->param_status= status;
 	samplerptr->model_status = model_status;
 	samplerptr->nested_model_number = nested_model_number;
+	samplerptr->RJMCMC = true;
 	//################################################
 	//This typically isn't done, but the primary focus of annealing
 	//is to get the cold chains where they need to be.
@@ -3082,6 +3084,7 @@ void continue_RJPTMCMC_MH_internal(sampler *samplerptr,
 	samplerptr->burn_phase = burn_phase;
 
 	//samplerptr->RJMCMC=true;
+	samplerptr->RJMCMC = true;
 	samplerptr->update_RJ_width=update_RJ_width;
 	//if Fisher is not provided, Fisher and MALA steps
 	//aren't used
