@@ -1115,10 +1115,10 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	delete [] data_pure;
 	gsl_rng_free(rand);
 
-	int chain_N = 80;
-	//int chain_N = 21;
-	int max_ensemble_chain_N = 8;
-	//int max_ensemble_chain_N = 3;
+	//int chain_N = 80;
+	int chain_N = 21;
+	//int max_ensemble_chain_N = 8;
+	int max_ensemble_chain_N = 3;
 	double initial_pos[dim];	
 	double seeding_var[dim];	
 	for(int i = 0 ; i<dim; i++){
@@ -1167,7 +1167,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 5*10000;
+	int N_steps = 5*100000;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -1202,7 +1202,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//###############################################
 	int t0 = 5000;
 	int nu = 100;
-	int max_chunksize = 10000;
+	int max_chunksize = 50000;
 	bool update_RJ_width = true;
 	double **output = new double*[N_steps];
 	int **status = new int*[N_steps];
@@ -1265,16 +1265,17 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 		}
 		//proposed_params[5] =std::fabs(gsl_ran_gaussian(param->r,std)) ;
 		//proposed_params[5] =gsl_ran_gaussian(param->r,std)+mean ;
-		proposed_params[5] =gsl_ran_gamma(param->r,a,b);
-		//proposed_params[5] =gsl_rng_uniform(param->r)*(RJ_sin_tilt_range[1]-RJ_sin_tilt_range[0])+RJ_sin_tilt_range[0] ;
+		//proposed_params[5] =gsl_ran_gamma(param->r,a,b);
+		proposed_params[5] =gsl_rng_uniform(param->r)*(RJ_sin_tilt_range[1]-RJ_sin_tilt_range[0])+RJ_sin_tilt_range[0] ;
 		proposed_status[5] = 1;
 		//double gaussian_cor = 2*1./sqrt(2*M_PI*std*std) * exp(-0.5*pow_int(proposed_params[5],2)/(std*std));
-		//double log_gaussian_cor = log(2*1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(proposed_params[5],2)/(std*std));
-		//double log_gaussian_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-proposed_params[5],2)/(std*std));
-		//double log_gaussian_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-proposed_params[5],2)/(std*std));
-		//double log_gaussian_cor = log(pow(proposed_params[5],a-1.)/(gsl_sf_gamma(a)*pow(b,a) ) )-( proposed_params[5]/b);
-		double log_gaussian_cor = log(gsl_ran_gamma_pdf(proposed_params[5],a,b));
-		//*(MH_corrections) = -1*(log_gaussian_cor);
+		//double log_cor = log(2*1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(proposed_params[5],2)/(std*std));
+		//double log_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-proposed_params[5],2)/(std*std));
+		//double log_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-proposed_params[5],2)/(std*std));
+		//double log_cor = log(pow(proposed_params[5],a-1.)/(gsl_sf_gamma(a)*pow(b,a) ) )-( proposed_params[5]/b);
+		//double log_cor = log(gsl_ran_gamma_pdf(proposed_params[5],a,b));
+		double log_cor = log(1. / (RJ_sin_tilt_range[1]-RJ_sin_tilt_range[0]));
+		*(MH_corrections) = -1*(log_cor);
 	}
 	//else if (alpha >= .5 && current_dim ==6){
 	else if (current_dim ==6){
@@ -1284,11 +1285,12 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 		}
 		proposed_params[5] =0 ;
 		proposed_status[5] = 0;
-		//double log_gaussian_cor = log(2*1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(proposed_params[5],2)/(std*std));
-		//double log_gaussian_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-current_params[5],2)/(std*std));
-		//double log_gaussian_cor = log(pow(current_params[5],a-1.)/(gsl_sf_gamma(a)*pow(b,a) ) )-( current_params[5]/b);
-		double log_gaussian_cor = log(gsl_ran_gamma_pdf(current_params[5],a,b));
-		*(MH_corrections) = 1*(log_gaussian_cor);
+		//double log_cor = log(2*1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(proposed_params[5],2)/(std*std));
+		//double log_cor = log(1./sqrt(2*M_PI*std*std)) +( -0.5*pow_int(mean-current_params[5],2)/(std*std));
+		//double log_cor = log(pow(current_params[5],a-1.)/(gsl_sf_gamma(a)*pow(b,a) ) )-( current_params[5]/b);
+		//double log_cor = log(gsl_ran_gamma_pdf(current_params[5],a,b));
+		double log_cor = log(1. / (RJ_sin_tilt_range[1]-RJ_sin_tilt_range[0]));
+		*(MH_corrections) = 1*(log_cor);
 
 	}
 	else{
@@ -1304,7 +1306,7 @@ void RJ_sin_proposal(double *current_params, double *proposed_params, int *curre
 double RJ_sin_logL(double *params, int *status,int model_status,mcmc_data_interface *interface, void *parameters)
 //double RJ_sin_logL(double *params, mcmc_data_interface *interface, void *parameters)
 {
-	//return 0;
+	return 0;
 	//for(int i = 0 ; i<2; i++){
 	//	std::cout<<model_status[i]<<" ";
 	//}

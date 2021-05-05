@@ -3874,6 +3874,7 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 	void *parameters)
 {
 
+	*(MH_corrections) = 0;
 	int dimct = 0 ;
 	for(int i = 0 ; i<interface->max_dim; i++){
 		if(current_status[i] == 1){
@@ -3904,6 +3905,8 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 						proposed_param[i] = gsl_rng_uniform(user_param->r) 
 							* (user_param->mod_prior_ranges[i-min_dimension][1]-user_param->mod_prior_ranges[i-min_dimension][0]) 
 							+ user_param->mod_prior_ranges[i-min_dimension][0];
+						*(MH_corrections)-=log(1./(user_param->mod_prior_ranges[i-min_dimension][1]
+							-user_param->mod_prior_ranges[i-min_dimension][0]));
 						//proposed_param[i] = gsl_ran_gaussian(user_param->r,10);
 						break;
 					}
@@ -3920,6 +3923,8 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 					if(ct == beta){
 						proposed_status[i] = 0;
 						proposed_param[i] = 0;
+						*(MH_corrections)+=log(1./(user_param->mod_prior_ranges[i-min_dimension][1]
+							-user_param->mod_prior_ranges[i-min_dimension][0]));
 						break;
 					}
 					ct++;
@@ -3940,6 +3945,8 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 					proposed_param[i] = gsl_rng_uniform(user_param->r) 
 						* (user_param->mod_prior_ranges[i-min_dimension][1]-user_param->mod_prior_ranges[i-min_dimension][0]) 
 						+ user_param->mod_prior_ranges[i-min_dimension][0];
+					*(MH_corrections)-=log(1./(user_param->mod_prior_ranges[i-min_dimension][1]
+						-user_param->mod_prior_ranges[i-min_dimension][0]));
 					//proposed_param[i] = gsl_ran_gaussian(user_param->r,10);
 					break;
 				}
@@ -3955,6 +3962,8 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 				if(ct == beta){
 					proposed_status[i] = 0;
 					proposed_param[i] = 0;
+					*(MH_corrections)+=log(1./(user_param->mod_prior_ranges[i-min_dimension][1]
+						-user_param->mod_prior_ranges[i-min_dimension][0]));
 					break;
 				}
 				ct++;
