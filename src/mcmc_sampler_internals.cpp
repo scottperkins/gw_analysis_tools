@@ -2099,11 +2099,17 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 				}
 			}
 			if(sampler->RJMCMC){
-				checkfile<<sampler->history_status[i][0][0];
-				for (int j = 1 ; j<sampler->max_dim; j++){
-					checkfile<<" , "<<sampler->history_status[i][0][j];
-				}
-				for(int k=1; k<sampler->history_length; k++){
+				//checkfile<<sampler->history_status[i][0][0];
+				//for (int j = 1 ; j<sampler->max_dim; j++){
+				//	checkfile<<" , "<<sampler->history_status[i][0][j];
+				//}
+				//for(int k=1; k<sampler->history_length; k++){
+				//	for (int j = 0 ; j<sampler->max_dim; j++){
+
+				//		checkfile<<" , "<<sampler->history_status[i][k][j];
+				//	}
+				//}
+				for(int k=0; k<sampler->history_length; k++){
 					for (int j = 0 ; j<sampler->max_dim; j++){
 
 						checkfile<<" , "<<sampler->history_status[i][k][j];
@@ -2326,17 +2332,14 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 				std::getline(file_in,line);
 				std::stringstream lineStreamhist(line);
 				i=0;
-				while(std::getline(lineStreamhist,item,',')){	
+				while(i < samplerptr->max_dim*samplerptr->history_length){	
+					std::getline(lineStreamhist,item,','); 
 					int step = i/samplerptr->max_dim ;
 					int pos = i%samplerptr->max_dim;
 					samplerptr->history[j][step][pos] = std::stod(item);	
 					i++;
 				}
-			}
-			if(samplerptr->RJMCMC){
-				for(int j =0 ;j<samplerptr->chain_N; j++){
-					std::getline(file_in,line);
-					std::stringstream lineStreamhist(line);
+				if(samplerptr->RJMCMC){
 					i=0;
 					while(std::getline(lineStreamhist,item,',')){	
 						int step = i/samplerptr->max_dim ;
@@ -2345,8 +2348,8 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 						i++;
 					}
 				}
-
 			}
+
 			for(int j =0 ;j<samplerptr->chain_N; j++)
 				samplerptr->de_primed[j] =true;
 		}
