@@ -9,6 +9,27 @@
  * Header file for waveform specific utilites
  */
 
+
+template<class T>
+void create_coherent_GW_detection(
+	std::string *detectors,
+	int detector_N, 
+	T **frequencies, 
+	int *lengths,
+	bool reuse_WF,	
+	gen_params_base<T> *gen_params,
+	std::string generation_method,
+	std::complex<T> **responses);
+template<class T>
+void create_coherent_GW_detection_reuse_WF(
+	std::string *detectors,
+	int detector_N, 
+	T *frequencies, 
+	int lengths,
+	gen_params_base<T> *gen_params,
+	std::string generation_method,
+	std::complex<T> **responses);
+
 double data_snr(double *frequencies, 
 	int length,
 	std::complex<double> *data,

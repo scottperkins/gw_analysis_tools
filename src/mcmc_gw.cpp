@@ -2558,6 +2558,30 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	
 	//debugger_print(__FILE__,__LINE__,ll);
 	
+	
+	//#################################################################################
+	//#################################################################################
+	//double LOGL2=0;
+	//std::complex<double> **responses = new std::complex<double>*[num_detectors];	
+	//for(int i = 0 ; i<num_detectors; i++){
+	//	responses[i] = new std::complex<double>[data_length[i]];
+	//}
+	//parameters->tc = tc_ref;	
+	//create_coherent_GW_detection(detectors, num_detectors, frequencies,data_length, save_waveform, parameters, generation_method, responses);
+	//for(int i = 0 ;i<num_detectors; i++){
+	//	LOGL2 += Log_Likelihood_internal(data[i],psd[i],frequencies[i],weights[i],responses[i],data_length[i], log10F,integration_method);	
+	//}		
+	//
+	//for(int i = 0 ; i<num_detectors; i++){
+	//	delete [] responses[i];
+	//}
+	//delete [] responses;
+	//debugger_print(__FILE__,__LINE__,"FRACTIONAL DIFF: "+std::to_string((ll - LOGL2)/ll));
+	debugger_print(__FILE__,__LINE__,"ll: "+std::to_string(ll));
+	//debugger_print(__FILE__,__LINE__,"LOGL2: "+std::to_string(LOGL2));
+	//#################################################################################
+	//#################################################################################
+	
 	return ll;
 }
 /*! \brief utility to do MCMC specific transformations on the input param vector before passing to the repacking utillity

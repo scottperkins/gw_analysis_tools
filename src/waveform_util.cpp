@@ -68,6 +68,63 @@ double data_snr(double *frequencies,
 	return sqrt(inner_prod);
 
 }
+template <class T>
+void create_coherent_GW_detection(
+	std::string *detectors,
+	int detector_N, 
+	T **frequencies, 
+	int *lengths,
+	bool reuse_WF,/**< If using the same exact frequencies for each detector, we can save a lot of time by only computing the waveform once*/
+	gen_params_base<T> *gen_params,/**<tc in gen_params refers to the time of coalescence, relative to the initial time of the data stream, for the FIRST detector, the other detectors are shifted by the appropriate amount*/
+	std::string generation_method,
+	std::complex<T> **responses/**< [out] Responses for the source at each detector, same order as detectors parameter -- should be pre allocated shape [detector_N][lengths[i]] */
+	)
+{
+	if(reuse_WF){
+		create_coherent_GW_detection_reuse_WF(detectors, detector_N, frequencies[0],lengths[0], gen_params, generation_method, responses);
+	}
+	else{
+		debugger_print(__FILE__,__LINE__,"Independent WFs for each detector currently not supported!");	
+	}
+
+}
+template void create_coherent_GW_detection<double>(std::string *, int, double**, int *, bool, gen_params_base<double> *,std::string, std::complex<double> **);
+template void create_coherent_GW_detection<adouble>(std::string *, int, adouble**, int *, bool, gen_params_base<adouble> *,std::string, std::complex<adouble> **);
+
+/*Note -- this only works with equatorial coordinates*/
+template <class T>
+void create_coherent_GW_detection_reuse_WF(
+	std::string *detectors,
+	int detector_N, 
+	T *frequencies, 
+	int length,
+	gen_params_base<T> *gen_params,/**<tc in gen_params refers to the time of coalescence, relative to the initial time of the data stream, for the FIRST detector, the other detectors are shifted by the appropriate amount*/
+	std::string generation_method,
+	std::complex<T> **responses/**< [out] Responses for the source at each detector, same order as detectors parameter -- should be pre allocated shape [detector_N][length] */
+	)
+{
+	waveform_polarizations<T> wp;
+	assign_polarizations(generation_method, &wp);
+	wp.allocate_memory(length);
+	T tc_ref = gen_params->tc, tc = 0;
+	gen_params->tc=0;
+	fourier_waveform(frequencies, length, &wp,generation_method, gen_params);
+	T DTOA = 0;
+	for (int i = 0 ; i<detector_N; i++){
+		DTOA = DTOA_DETECTOR(gen_params->RA,gen_params->DEC,gen_params->gmst, detectors[0],detectors[i]);
+		tc = tc_ref-DTOA;	
+		tc*=2*M_PI;
+		fourier_detector_response_equatorial(frequencies, length,&wp, responses[i], gen_params->RA,gen_params->DEC,gen_params->psi, gen_params->gmst,(T *)NULL, gen_params->LISA_alpha0,gen_params->LISA_phi0, gen_params->theta_l, gen_params->phi_l, detectors[i]);
+		for(int j = 0 ; j<length; j++){
+			responses[i][j] *= exp(std::complex<T>(0,tc*frequencies[j]));
+		}
+	}
+	wp.deallocate_memory();
+	
+	return;
+}
+template void create_coherent_GW_detection_reuse_WF<double>(std::string *, int, double*, int , gen_params_base<double> *,std::string, std::complex<double> **);
+template void create_coherent_GW_detection_reuse_WF<adouble>(std::string *, int, adouble*, int , gen_params_base<adouble> *,std::string, std::complex<adouble> **);
 
 /*! \brief Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc
  *
@@ -3411,3 +3468,4 @@ template int fourier_detector_response_horizon<adouble>(adouble *, int, std::com
 //
 template int fourier_detector_response_equatorial<double>(double *, int, waveform_polarizations<double> *, std::complex<double> *, double, double , double, double,double *, double, double, double, double, std::string);
 template int fourier_detector_response_equatorial<adouble>(adouble *, int, waveform_polarizations<adouble> *, std::complex<adouble> *, adouble, adouble , adouble, double,adouble*, adouble, adouble, adouble, adouble,  std::string);
+//
