@@ -3735,7 +3735,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->chain_temps =new double [max_chain_N_thermo_ensemble];
 	samplerptr->chain_temps[0] = 1.;
 	samplerptr->chain_N = max_chain_N_thermo_ensemble;
-	assign_ensemble_temps(samplerptr->chain_temps, chain_N,max_chain_N_thermo_ensemble,TMAX);
+	assign_ensemble_temps(samplerptr->chain_temps, max_chain_N_thermo_ensemble,max_chain_N_thermo_ensemble,TMAX);
 	//double temp_step = pow(TMAX/1.,1./max_chain_N_thermo_ensemble);
 	//for(int i = 1; i<samplerptr->chain_N-1; i++){
 	//	samplerptr->chain_temps[i] = temp_step * samplerptr->chain_temps[i-1];
