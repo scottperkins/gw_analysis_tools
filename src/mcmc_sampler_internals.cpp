@@ -2377,6 +2377,7 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 		//check whether or not we need to update the fisher
 		omp_set_num_threads(samplerptr->num_threads);
 		#pragma omp parallel ADOLC_OPENMP
+		//#pragma omp parallel 
 		{
 		#pragma omp for 
 		for(int i=0 ; i<samplerptr->chain_N; i++){
@@ -2445,6 +2446,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 		bool valid_pos[samplerptr->chain_N];
 		omp_set_num_threads(samplerptr->num_threads);
 		#pragma omp parallel ADOLC_OPENMP
+		//#pragma omp parallel 
 		{
 		#pragma omp for 
 		for (int j=0;j<samplerptr->chain_N;j++){
@@ -2602,6 +2604,7 @@ void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_st
 		//check whether or not we need to update the fisher
 		omp_set_num_threads(samplerptr->num_threads);
 		#pragma omp parallel ADOLC_OPENMP
+		//#pragma omp parallel 
 		{
 		#pragma omp for 
 		for(int i=0 ; i<samplerptr->chain_N; i++){

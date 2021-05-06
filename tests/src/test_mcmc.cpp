@@ -1080,6 +1080,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	RJ_sin_tilt_range[1] = .2;
 	int dim = 6;
 	int N = 5000;
+	//int N = 500;
 	double injections[dim];
 	injections[0]=200;
 	//injections[0]=400;
@@ -1147,7 +1148,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 		}
 	}
 	int numthreads = 8;
-	bool pool = true;
+	bool pool = false;
 	bool show_prog = true;
 	
 	//############################################3
@@ -1167,7 +1168,7 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//}
 	//delete [] output;
 	//############################################3
-	int N_steps = 5*100000;
+	int N_steps = 5*100;
 	int max_dim = dim;
 	int min_dim = dim-1;
 	int initial_status[max_dim];
@@ -1200,9 +1201,9 @@ int mcmc_RJ_sin(int argc, char *argv[])
 	//delete [] status;
 	//##################################################	
 	//###############################################
-	int t0 = 5000;
-	int nu = 100;
-	int max_chunksize = 50000;
+	int t0 = 50;
+	int nu = 10;
+	int max_chunksize = 500;
 	bool update_RJ_width = true;
 	double **output = new double*[N_steps];
 	int **status = new int*[N_steps];
@@ -2243,8 +2244,8 @@ int mcmc_standard_test(int argc, char *argv[])
 	int dimension = 2;
 	double initial_pos[2]={1,0.};
 	double *seeding_var = NULL;
-	int N_steps = 1000;
-	int chain_N= 30;
+	int N_steps = 10;
+	int chain_N= 10;
 	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 5;
@@ -2264,7 +2265,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	//std::string LLfile = "data/mcmc_LL.csv";
 	std::string LLfile = "";
 	
-	int numThreads = 10;
+	int numThreads = 8;
 	bool pool = true;
 	bool show_progress = true;
 	
@@ -2274,10 +2275,10 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 500;
-	int nu = 100;
+	int t0 = 100;
+	int nu = 10;
 	std::string chain_distribution_scheme="double";
-	int max_chunk_size = 1000000;
+	int max_chunk_size = 10000;
 	mcmc_sampler_output sampler_output(chain_N,dimension);
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,(double**)NULL,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
 	sampler_output.create_data_dump(false,false,chainfile);

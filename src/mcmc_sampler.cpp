@@ -4514,9 +4514,9 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 		int step_log;
 		omp_set_num_threads(samplerptr->num_threads);
 		#pragma omp parallel ADOLC_OPENMP
+		//#pragma omp parallel 
 		{
 		while (k<(increment-1) ){
-			//#pragma omp for firstprivate(ADOLC_OpenMP_Handler)
 			#pragma omp for 
 			for (int j=0; j<samplerptr->chain_N; j++)
 			{
@@ -4692,7 +4692,6 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 					cutoff = samplerptr->N_steps-k-1;	
 				else cutoff = samplerptr->swp_freq;	
 			}
-			//#pragma omp for firstprivate(ADOLC_OpenMP_Handler)
 			#pragma omp for 
 			for (int j=0; j<samplerptr->chain_N; j++)
 			{
@@ -4993,8 +4992,10 @@ void mcmc_swap_threaded(int i, int j)
 	}
 	{
 		std::unique_lock<std::mutex> locki{samplerptr_global->queue_mutexes[i]};
-		std::unique_lock<std::mutex> lockj{samplerptr_global->queue_mutexes[j]};
 		samplerptr_global->waiting[i]=true;
+	}
+	{
+		std::unique_lock<std::mutex> lockj{samplerptr_global->queue_mutexes[j]};
 		samplerptr_global->waiting[j]=true;
 	}
 }

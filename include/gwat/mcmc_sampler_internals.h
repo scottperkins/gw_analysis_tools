@@ -103,7 +103,7 @@ public:
 	//it walks forward when it reaches the end)
 	int history_length=500;
 	//int history_length=5;
-	int history_update=5;
+	int history_update=2;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;
