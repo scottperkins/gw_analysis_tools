@@ -3542,7 +3542,7 @@ double RJMCMC_2WF_likelihood_wrapper(
 	void *parameters)
 {
 	//debugger_print(__FILE__,__LINE__,mcmc_mod_struct->gIMR_phii[0]);	
-	return 2;
+	//return 2;
 	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
 	int max_dimension = interface->max_dim;
