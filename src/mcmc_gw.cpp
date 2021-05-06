@@ -3542,7 +3542,7 @@ double RJMCMC_2WF_likelihood_wrapper(
 	void *parameters)
 {
 	//debugger_print(__FILE__,__LINE__,mcmc_mod_struct->gIMR_phii[0]);	
-	//return 2;
+	return 2;
 	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
 	int max_dimension = interface->max_dim;
@@ -3957,7 +3957,7 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 					proposed_param[i] = gsl_rng_uniform(user_param->r) 
 						* (user_param->mod_prior_ranges[i-min_dimension][1]-user_param->mod_prior_ranges[i-min_dimension][0]) 
 						+ user_param->mod_prior_ranges[i-min_dimension][0];
-					*(MH_corrections)-=log(1./(user_param->mod_prior_ranges[i-min_dimension][1]
+					*(MH_corrections)-=log(1./.5/(user_param->mod_prior_ranges[i-min_dimension][1]
 						-user_param->mod_prior_ranges[i-min_dimension][0]));
 					//proposed_param[i] = gsl_ran_gaussian(user_param->r,10);
 					break;
@@ -3974,7 +3974,7 @@ void RJMCMC_2WF_RJ_proposal_wrapper(
 				if(ct == beta){
 					proposed_status[i] = 0;
 					proposed_param[i] = 0;
-					*(MH_corrections)+=log(1./(user_param->mod_prior_ranges[i-min_dimension][1]
+					*(MH_corrections)+=log(.5*1./(user_param->mod_prior_ranges[i-min_dimension][1]
 						-user_param->mod_prior_ranges[i-min_dimension][0]));
 					break;
 				}
