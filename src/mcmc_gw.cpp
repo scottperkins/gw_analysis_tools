@@ -2488,80 +2488,87 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	int num_detectors
 	)
 {
-	double *phi = new double[num_detectors];
-	double *theta = new double[num_detectors];
-	//celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
-	double tc_ref, phic_ref, ll=0, delta_t;
-	double LISA_alpha0,LISA_phi0, LISA_thetal, LISA_phil;
-	double *times=NULL;
-	//#######################################################################3
-	
-	std::complex<double> *response = 
-		(std::complex<double> *)malloc(sizeof(std::complex<double>)*
-			data_length[0]);
-	double T = 1./( frequencies[1]-frequencies[0]);
-	tc_ref = T-parameters->tc;
-	double tc = tc_ref;
-	tc*=2.*M_PI;
-	parameters->tc=0;
-	waveform_polarizations<double> wp;
-	assign_polarizations(generation_method, &wp);
-	wp.allocate_memory(data_length[0]);
-	fourier_waveform(frequencies[0], data_length[0], 
-		&wp,generation_method, parameters);
-	fourier_detector_response_equatorial(frequencies[0], data_length[0], 
-		&wp, response, parameters->RA, parameters->DEC, parameters->psi,
-		parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
-	for(int i = 0 ; i<data_length[0];i++){
-		response[i]*=exp(std::complex<double>(0,tc*(frequencies[0][i])));
-	}	
-	//Referecne detector first
+	//################################################################
+	//Outdated -- remove after some time 
+	//
+	//double *phi = new double[num_detectors];
+	//double *theta = new double[num_detectors];
+	////celestial_horizon_transform(RA,DEC, gps_time, detectors[0], &phi[0], &theta[0]);
+	//double tc_ref, phic_ref, ll=0, delta_t;
+	//double LISA_alpha0,LISA_phi0, LISA_thetal, LISA_phil;
+	//double *times=NULL;
+	////#######################################################################3
+	//
+	//std::complex<double> *response = 
+	//	(std::complex<double> *)malloc(sizeof(std::complex<double>)*
+	//		data_length[0]);
+	//double T = 1./( frequencies[1]-frequencies[0]);
+	//tc_ref = T-parameters->tc;
+	//double tc = tc_ref;
+	//tc*=2.*M_PI;
+	//parameters->tc=0;
+	//waveform_polarizations<double> wp;
+	//assign_polarizations(generation_method, &wp);
+	//wp.allocate_memory(data_length[0]);
+	//fourier_waveform(frequencies[0], data_length[0], 
+	//	&wp,generation_method, parameters);
+	//fourier_detector_response_equatorial(frequencies[0], data_length[0], 
+	//	&wp, response, parameters->RA, parameters->DEC, parameters->psi,
+	//	parameters->gmst,times, LISA_alpha0, LISA_phi0, LISA_thetal, LISA_phil,detectors[0]);
+	//for(int i = 0 ; i<data_length[0];i++){
+	//	response[i]*=exp(std::complex<double>(0,tc*(frequencies[0][i])));
+	//}	
+	////Referecne detector first
 
-	ll += Log_Likelihood_internal(data[0], 
-			psd[0],
-			frequencies[0],
-			weights[0],
-			response,
-			(size_t) data_length[0],
-			log10F,
-			integration_method
-			);
-	for(int i=1; i < num_detectors; i++){
-		delta_t = DTOA_DETECTOR(parameters->RA, parameters->DEC,parameters->gmst, detectors[0], detectors[i]);
-		tc = tc_ref - delta_t;
-		fourier_detector_response_equatorial(frequencies[i], data_length[i], 
-			&wp, response, parameters->RA, parameters->DEC, 
-			parameters->psi,parameters->gmst,times, LISA_alpha0, 
-			LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
-		tc*=2.*M_PI;
-		for(int j = 0 ; j<data_length[i];j++){
-			response[j]*=exp(std::complex<double>(
-				0,tc*(frequencies[i][j])
-				));
-		}	
-	
-		ll += Log_Likelihood_internal(data[i], 
-			psd[i],
-			frequencies[i],
-			weights[i],
-			response,
-			(size_t) data_length[i],
-			log10F,
-			integration_method	
-			);
-	}
-	wp.deallocate_memory();
-	free( response);
-	
-	delete [] phi;
-	delete [] theta;
+	//ll += Log_Likelihood_internal(data[0], 
+	//		psd[0],
+	//		frequencies[0],
+	//		weights[0],
+	//		response,
+	//		(size_t) data_length[0],
+	//		log10F,
+	//		integration_method
+	//		);
+	//for(int i=1; i < num_detectors; i++){
+	//	delta_t = DTOA_DETECTOR(parameters->RA, parameters->DEC,parameters->gmst, detectors[0], detectors[i]);
+	//	tc = tc_ref - delta_t;
+	//	fourier_detector_response_equatorial(frequencies[i], data_length[i], 
+	//		&wp, response, parameters->RA, parameters->DEC, 
+	//		parameters->psi,parameters->gmst,times, LISA_alpha0, 
+	//		LISA_phi0, LISA_thetal, LISA_phil,detectors[i]);
+	//	tc*=2.*M_PI;
+	//	for(int j = 0 ; j<data_length[i];j++){
+	//		response[j]*=exp(std::complex<double>(
+	//			0,tc*(frequencies[i][j])
+	//			));
+	//	}	
+	//
+	//	ll += Log_Likelihood_internal(data[i], 
+	//		psd[i],
+	//		frequencies[i],
+	//		weights[i],
+	//		response,
+	//		(size_t) data_length[i],
+	//		log10F,
+	//		integration_method	
+	//		);
+	//}
+	//wp.deallocate_memory();
+	//free( response);
+	//
+	//delete [] phi;
+	//delete [] theta;
 	
 	//debugger_print(__FILE__,__LINE__,ll);
+	//################################################################
+	//################################################################
 	
 	
 	//#################################################################################
 	//#################################################################################
-	double LOGL2=0;
+	double T = 1./( frequencies[1]-frequencies[0]);
+	double tc_ref = T-parameters->tc;
+	double ll=0;
 	std::complex<double> **responses = new std::complex<double>*[num_detectors];	
 	for(int i = 0 ; i<num_detectors; i++){
 		responses[i] = new std::complex<double>[data_length[i]];
@@ -2569,16 +2576,13 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	parameters->tc = tc_ref;	
 	create_coherent_GW_detection(detectors, num_detectors, frequencies,data_length, save_waveform, parameters, generation_method, responses);
 	for(int i = 0 ;i<num_detectors; i++){
-		LOGL2 += Log_Likelihood_internal(data[i],psd[i],frequencies[i],weights[i],responses[i],data_length[i], log10F,integration_method);	
+		ll += Log_Likelihood_internal(data[i],psd[i],frequencies[i],weights[i],responses[i],data_length[i], log10F,integration_method);	
 	}		
 	
 	for(int i = 0 ; i<num_detectors; i++){
 		delete [] responses[i];
 	}
 	delete [] responses;
-	debugger_print(__FILE__,__LINE__,"FRACTIONAL DIFF: "+std::to_string((ll - LOGL2)/ll));
-	debugger_print(__FILE__,__LINE__,"ll: "+std::to_string(ll));
-	debugger_print(__FILE__,__LINE__,"LOGL2: "+std::to_string(LOGL2));
 	//#################################################################################
 	//#################################################################################
 	

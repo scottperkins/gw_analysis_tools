@@ -1681,7 +1681,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 
 
 	//deallocate_sampler_mem(&sampler_ann);
-	int temp_factor = 10000;
+	//int temp_factor = 10000;
+	int temp_factor = TMAX;
 	for(int i = 0 ; i<1; i++){
 		if(i >=1 ){ temp_factor = 100;}
 		std::cout<<"Annealing"<<std::endl;
@@ -2032,7 +2033,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//then make it less intense
 	//#################################################
 	//dynamic_search_length*=2;
-	int temp_factor = 10000;
+	//int temp_factor = 10000;
+	int temp_factor = TMAX;
 	for(int i = 0 ; i<1; i++){
 		if(i >=1 ){ temp_factor = 100;}
 		std::cout<<"Annealing"<<std::endl;
