@@ -1138,7 +1138,7 @@ void continue_RJPTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	int **model_status,
 	int nested_model_number,
 	int N_steps,/**< Number of new steps to take*/
-	int temp_scale_factor,
+	double temp_scale_factor,
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
 	int nu,/**< Initial amplitude of the dynamics (~100)*/
@@ -1311,7 +1311,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	std::string start_checkpoint_file,/**< File for starting checkpoint*/
 	double ***output,/**< [out] output array, dimensions: output[chain_N][N_steps][dimension]*/
 	int N_steps,/**< Number of new steps to take*/
-	int temp_scale_factor,
+	double temp_scale_factor,
 	int swp_freq,/**< frequency of swap attempts between temperatures*/
 	int t0,/**< Time constant of the decay of the chain dynamics  (~1000)*/
 	int nu,/**< Initial amplitude of the dynamics (~100)*/
@@ -1681,8 +1681,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 
 
 	//deallocate_sampler_mem(&sampler_ann);
-	//int temp_factor = 10000;
-	int temp_factor = TMAX;
+	double temp_factor = TMAX;
+	//int temp_factor = TMAX;
 	for(int i = 0 ; i<1; i++){
 		if(i >=1 ){ temp_factor = 100;}
 		std::cout<<"Annealing"<<std::endl;
@@ -2033,8 +2033,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//then make it less intense
 	//#################################################
 	//dynamic_search_length*=2;
-	//int temp_factor = 10000;
-	int temp_factor = TMAX;
+	double temp_factor = TMAX;
+	//int temp_factor = TMAX;
 	for(int i = 0 ; i<1; i++){
 		if(i >=1 ){ temp_factor = 100;}
 		std::cout<<"Annealing"<<std::endl;
