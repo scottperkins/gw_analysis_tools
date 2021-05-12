@@ -6,6 +6,8 @@
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "gIMRPhenomD.h"
+#include "IMRPhenomD_NRT.h"
+#include "IMRPhenomP_NRT.h"
 #include "ppE_utilities.h"
 #include "gIMRPhenomP.h"
 #include "util.h"
@@ -138,8 +140,14 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		{
 			gIMRPhenomD<T> gmodeld;
 			status = gmodeld.construct_waveform(frequencies, length, wp->hplus, &params);
-
+			
 		}
+		else if(local_method == "IMRPhenomD_NRT")
+		  {
+		    IMRPhenomD_NRT<T> modeldNRT;
+		    status = modeldNRT.construct_waveform(frequencies, length, wp->hplus, &params);
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_waveform(frequencies, length, wp->hplus, &params);
@@ -169,6 +177,12 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			status = gmodel.construct_waveform(frequencies, length, wp->hplus,wp->hcross, &params);
 
 		}
+		else if(local_method == "IMRPhenomPv2_NRT")
+		  {
+		    IMRPhenomPv2_NRT<T> modelNRT;
+		    status = modelNRT.construct_waveform(frequencies, length, wp->hplus, wp->hcross, &params);
+		    
+		  }
 		else{
 			IMRPhenomPv2<T> model;
 			status = model.construct_waveform(frequencies, length, wp->hplus, wp->hcross, &params);
@@ -401,6 +415,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.Nmod = parameters->Nmod;
 		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
 	}
+	else if(generation_method == "IMRPhenomD_NRT")
+	  {
+	    IMRPhenomD_NRT<double> modeldNRT;
+	    status = modeldNRT.construct_waveform(frequencies, length, waveform, &params);	
+
+	  }
 	//else if(generation_method == "IMRPhenomPv2")
 	//{
 	//	IMRPhenomPv2<double> modeld;
@@ -480,9 +500,16 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 			status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);	
 
 		}
+		else if(local_method == "IMRPhenomD_NRT")
+		  {
+		    IMRPhenomD_NRT<T> modeldNRT;
+		    status = modeldNRT.construct_amplitude(frequencies, length, amplitude, &params);
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
-			status = modeld.construct_amplitude(frequencies, length, amplitude, &params);	
+			status = modeld.construct_amplitude(frequencies, length, amplitude, &params);
+
 		}
 	}
 	cleanup_source_parameters(&params,generation_method);
@@ -674,6 +701,13 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 	}
+	else if(generation_method == "IMRPhenomD_NRT")
+	  {
+	    IMRPhenomD_NRT<T> modeldNRT;
+	    params.tidal1 = parameters->tidal1; //Is this right?!?
+	    params.tidal2 = parameters->tidal2; 
+	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);	
+	  }
 
 	return status ;
 }
@@ -727,6 +761,12 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);	
 
 		}
+		else if(local_method == "IMRPhenomD_NRT")
+		  {
+		    IMRPhenomD_NRT<T> modeldNRT;
+		    status = modeldNRT.construct_phase(frequencies, length, phase_plus, &params);	
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_phase(frequencies, length, phase_plus, &params);	
@@ -757,6 +797,12 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			status = gmodel.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
 
 		}
+		else if(local_method == "IMRPhenomPv2_NRT")
+		  {
+		    IMRPhenomPv2_NRT<T> modelNRT;
+		    status = modelNRT.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
+
+		  }
 		else{
 			IMRPhenomPv2<T> model;
 			status = model.construct_phase(frequencies, length, phase_plus_temp, phase_cross_temp, &params);
@@ -1153,6 +1199,25 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->Nmod_sigma = in->Nmod_sigma;
 			out->Nmod_beta = in->Nmod_beta;
 			out->Nmod_alpha = in->Nmod_alpha;
+	}
+	
+	if(generation_method.find("NRT") != std::string::npos){
+		
+		if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
+			out->tidal_weighted = in->tidal_weighted;
+		}
+		else if((in->tidal1 >= 0 && in->tidal2>=0) ) {
+			out->tidal1 = in->tidal1;
+			out->tidal2 = in->tidal2;
+			//arXiv 1402.5156
+			out->tidal_weighted = 8./13. * ( (1. + 7.*out->eta - 31.*out->eta*out->eta)*(out->tidal1 + out->tidal2) 
+						+ sqrt( 1. - 4.*out->eta ) * ( 1. + 9.*out->eta - 11. * out->eta*out->eta) * (out->tidal1 - out->tidal2) ) ;
+			out->delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*out->eta ) * ( 1. - 13272./1319. * out->eta + 8944./1319. * out->eta*out->eta) *
+						(out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319. 
+						* out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
+		debugger_print(__FILE__,__LINE__,out->tidal_weighted);
+		}
+		//TODO Need to modify this in case only tidal1 or tidal2 is set 
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
