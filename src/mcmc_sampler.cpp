@@ -2034,39 +2034,39 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//then make it less intense
 	//#################################################
 	//dynamic_search_length*=2;
-	double temp_factor = TMAX;
+	//double temp_factor = TMAX;
 	//int temp_factor = TMAX;
-	for(int i = 0 ; i<1; i++){
-		if(i >=1 ){ temp_factor = 100;}
-		std::cout<<"Annealing"<<std::endl;
-		sampler sampler_ann;
-		continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
-			temp_factor,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
-			numThreads, pool, internal_prog, statistics_filename, 
-			"", checkpoint_file);
-		//#########################################################################
-		//TESTING
+	//for(int i = 0 ; i<1; i++){
+	//	if(i >=1 ){ temp_factor = 100;}
+	//	std::cout<<"Annealing"<<std::endl;
+	//	sampler sampler_ann;
+	//	continue_PTMCMC_MH_simulated_annealing_internal(&sampler_ann,checkpoint_file,temp_output, dynamic_search_length, 
+	//		temp_factor,swp_freq,t0,nu,log_prior, log_likelihood, fisher, user_parameters,
+	//		numThreads, pool, internal_prog, statistics_filename, 
+	//		"", checkpoint_file);
+	//	//#########################################################################
+	//	//TESTING
 
-		int temp_pos[sampler_ann.chain_N];
-		for(int z = 0; z<sampler_ann.chain_N;z++){
-			temp_pos[z] = sampler_ann.chain_pos[z];
-			if(sampler_ann.restarted_chain[z]){
-				temp_pos[z] = sampler_ann.N_steps;
-			}
-		}
-		load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
-		sampler_output->populate_chain_temperatures(chain_temps);
+	//	int temp_pos[sampler_ann.chain_N];
+	//	for(int z = 0; z<sampler_ann.chain_N;z++){
+	//		temp_pos[z] = sampler_ann.chain_pos[z];
+	//		if(sampler_ann.restarted_chain[z]){
+	//			temp_pos[z] = sampler_ann.N_steps;
+	//		}
+	//	}
+	//	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
+	//	sampler_output->populate_chain_temperatures(chain_temps);
 
-		sampler_output->populate_initial_output(temp_output, (int ***)NULL,(int **)NULL,sampler_ann.ll_lp_output,temp_pos)	;
-		sampler_output->set_trim(0);	
-		sampler_output->update_cold_chain_list();	
-		sampler_output->calc_ac_vals(true);
-		sampler_output->count_indep_samples(true);
-		sampler_output->create_data_dump(true,false, "data/annealing_output.hdf5");
-		//#########################################################################
+	//	sampler_output->populate_initial_output(temp_output, (int ***)NULL,(int **)NULL,sampler_ann.ll_lp_output,temp_pos)	;
+	//	sampler_output->set_trim(0);	
+	//	sampler_output->update_cold_chain_list();	
+	//	sampler_output->calc_ac_vals(true);
+	//	sampler_output->count_indep_samples(true);
+	//	sampler_output->create_data_dump(true,false, "data/annealing_output.hdf5");
+	//	//#########################################################################
 
-		deallocate_sampler_mem(&sampler_ann);
-	}
+	//	deallocate_sampler_mem(&sampler_ann);
+	//}
 
 
 	//#################################################
