@@ -346,6 +346,91 @@ void mcmc_sampler_output::dealloc_logL_logP()
 	}
 }
 
+void mcmc_sampler_output::calc_ac_vals_full_ensemble(bool trim)
+{
+	debugger_print(__FILE__,__LINE__,"Not currently working! Under development");
+	if(ac_vals_full_ensemble){
+		for(int i = 0 ; i<cold_chain_number_ac_alloc; i++){
+			delete [] ac_vals_full_ensemble[i];
+		}
+		delete [] ac_vals_full_ensemble;
+	}
+	ac_vals_full_ensemble = new int*[cold_chain_number];
+	for(int i = 0 ; i<cold_chain_number; i++){
+		ac_vals_full_ensemble[i] = new int[dimension];	
+	}
+
+	int segments = 1;
+	int ***temp = new int**[cold_chain_number];
+	for(int i = 0 ; i<cold_chain_number; i++){
+		temp[i] = new int*[dimension];
+		for(int j = 0 ; j<dimension; j++){
+			temp[i][j]=new int[segments];
+		}
+	}
+	double ***temp_chains = new double**[cold_chain_number];
+	int beginning_id = 0;
+	for (int i = 0 ;i<cold_chain_number; i++){
+		int id  = cold_chain_ids[i];
+		beginning_id = 0;
+		if(trim){
+			beginning_id = trim_lengths[id];
+		}
+		temp_chains[i] = new double*[chain_lengths[id]-beginning_id];
+		for(int j = beginning_id ; j<chain_lengths[id]; j++){
+			temp_chains[i][j-beginning_id] = new double[dimension];
+			for(int k = 0 ; k<dimension  ; k++){
+				temp_chains[i][j-beginning_id][k] = output[id][j][k];
+			}
+		}
+	}
+	auto_corr_from_data_batch(temp_chains, chain_lengths[cold_chain_ids[0]]-beginning_id, dimension, cold_chain_number,temp, segments, target_correlation, threads, true);
+	
+	for(int i = 0 ;i<cold_chain_number; i++){
+		int id  = cold_chain_ids[i];
+		if(trim){
+			beginning_id = trim_lengths[id];
+		}
+		else{
+			beginning_id = 0;
+		}
+		for(int j = beginning_id ; j<chain_lengths[id]; j ++){
+			delete [] temp_chains[i][j-beginning_id];
+		}
+		delete [] temp_chains[i];
+	}
+	delete [] temp_chains;
+	temp_chains=NULL;
+	for(int i = 0 ; i<cold_chain_number; i++){
+		for(int j = 0 ; j<dimension; j++){
+			ac_vals_full_ensemble[i][j]= temp[i][j][segments-1];
+		}
+	}
+	for(int i = 0 ; i<cold_chain_number; i++){
+		for(int j = 0  ; j<dimension; j++){
+			delete [] temp[i][j];
+		}
+		delete [] temp[i];
+	}
+	delete [] temp;
+	temp = NULL;	
+
+
+	if(max_acs){
+		delete [] max_acs;
+	}
+	max_acs = new int[cold_chain_number];
+	for(int i = 0 ; i<cold_chain_number; i ++){
+		int max_ac=0;
+		for(int j = 0 ; j<dimension; j++){
+			if(ac_vals_full_ensemble[i][j]>max_ac){
+				max_ac = ac_vals_full_ensemble[i][j];	
+			}
+		}
+		max_acs[i]=max_ac;
+	}
+
+}
 void mcmc_sampler_output::calc_ac_vals(bool trim)
 {
 	if(ac_vals){

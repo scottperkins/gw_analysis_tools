@@ -45,6 +45,7 @@ public:
 		int *chain_positions);
 
 	void calc_ac_vals( bool trim);
+	void calc_ac_vals_full_ensemble( bool trim);
 	void count_indep_samples(bool trim);
 
 	int create_data_dump(bool cold_only,bool trim,std::string filename);
@@ -72,6 +73,7 @@ public:
 	int *chain_lengths=NULL;
 	int dimension;
 	int **ac_vals=NULL;
+	int **ac_vals_full_ensemble=NULL;
 	int cold_chain_number_ac_alloc;
 	double target_correlation = 0.01;
 	int threads = 4;
