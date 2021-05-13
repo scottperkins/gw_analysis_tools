@@ -35,8 +35,12 @@ double **mod_priors;
 double chirpmass_prior[2];
 double mass1_prior[2];
 double mass2_prior[2];
+double tidal1_prior[2];
+double tidal2_prior[2];
 double DL_prior[2];
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_Pv2(double *pos,  mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -177,6 +181,26 @@ int main(int argc, char *argv[])
 	std::cout<<"Range of Mass1: "<<mass1_prior[0]<<" - "<<mass1_prior[1]<<std::endl;
 	std::cout<<"Range of Mass2: "<<mass2_prior[0]<<" - "<<mass2_prior[1]<<std::endl;
 	std::cout<<"Range of DL: "<<DL_prior[0]<<" - "<<DL_prior[1]<<std::endl;
+	if(dbl_dict.find("tidal1 minimum") == dbl_dict.end()){
+		tidal1_prior[0]=1;
+		tidal1_prior[1]=500;
+	}
+	else{
+		tidal1_prior[0]=dbl_dict["tidal1 minimum"];
+		tidal1_prior[1]=dbl_dict["tidal1 maximum"];
+	}
+	if(dbl_dict.find("tidal2 minimum") == dbl_dict.end()){
+		tidal2_prior[0]=1;
+		tidal2_prior[1]=500;
+	}
+	else{
+		tidal2_prior[0]=dbl_dict["tidal2 minimum"];
+		tidal2_prior[1]=dbl_dict["tidal2 maximum"];
+	}
+	if(generation_method.find("NRT") != std::string::npos){
+		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
+		std::cout<<"Range of tidal2: "<<tidal2_prior[0]<<" - "<<tidal2_prior[1]<<std::endl;
+	}
 	
 
 	
@@ -533,6 +557,14 @@ int main(int argc, char *argv[])
 			&& dimension >= 9 ){
 			lp = &standard_log_prior_Pv2_intrinsic_mod;
 		}
+		else if((generation_method.find("IMRPhenomD_NRT") != std::string::npos) && (dimension == 6)){
+			lp = &standard_log_prior_D_intrinsic_NRT;
+
+		}
+		else if((generation_method.find("IMRPhenomD_NRT") != std::string::npos) && (dimension == 13)){
+			lp = &standard_log_prior_D_NRT;
+
+		}
 		else{
 			std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
 			return 1;
@@ -640,6 +672,15 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
+double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters)
+{
+	int dim =  interface->max_dim;
+	double a = -std::numeric_limits<double>::infinity();
+	if(pos[11]<tidal1_prior[0] || pos[11]>tidal1_prior[1]){return a;}
+	if(pos[12]<tidal2_prior[0] || pos[12]>tidal2_prior[1]){return a;}
+	return standard_log_prior_D(pos,interface, parameters);
+
+}
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
@@ -726,6 +767,15 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 		if( pos[15+i] <mod_priors[i][0] || pos[15+i] >mod_priors[i][1]){return a;}
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6];
+}
+double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters)
+{
+	int dim =  interface->max_dim;
+	double a = -std::numeric_limits<double>::infinity();
+	if(pos[4]<tidal1_prior[0] || pos[4]>tidal1_prior[1]){return a;}
+	if(pos[5]<tidal2_prior[0] || pos[5]>tidal2_prior[1]){return a;}
+	return standard_log_prior_D_intrinsic(pos,interface, parameters);
+
 }
 double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters)
 {

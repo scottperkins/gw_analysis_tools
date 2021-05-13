@@ -1893,6 +1893,20 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		
 		}
 	}
+	if(generation_method.find("NRT") != std::string::npos){
+		if(!input_params->sky_average){
+			if(generation_method.find("PhenomD") != std::string::npos){
+				parameters[11] = input_params->tidal1;
+				parameters[12] = input_params->tidal2;
+			}
+		}
+		else{
+			if(generation_method.find("PhenomD") != std::string::npos){
+				parameters[4] = input_params->tidal1;
+				parameters[5] = input_params->tidal2;
+			}
+		}
+	}
 	if( check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dimension-input_params->Nmod;
@@ -2185,6 +2199,20 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 			}	
 		}	
 
+	}
+	if(generation_method.find("NRT") != std::string::npos){
+		if(!a_params->sky_average){
+			if(generation_method.find("PhenomD") != std::string::npos){
+				a_params->tidal1 = avec_parameters[11];
+				a_params->tidal2 = avec_parameters[12];
+			}
+		}
+		else{
+			if(generation_method.find("PhenomD") != std::string::npos){
+				a_params->tidal1 = avec_parameters[4];
+				a_params->tidal2 = avec_parameters[5];
+			}
+		}
 	}
 	if( check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ){

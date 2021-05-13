@@ -1853,6 +1853,19 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=true;
 	}
+	if(dimension==6 && generation_method =="IMRPhenomD_NRT"){
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, lambda1, lambda2"<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.5;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=.1;
+			(*seeding_var)[5]=.1;
+		}
+		mcmc_intrinsic=true;
+	}
 	else if(generation_method =="SkySearch"){
 		std::cout<<"Sampling in parameters: "<<std::endl;
 		if(local_seeding){
@@ -1862,8 +1875,8 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[2]=1.;
 			(*seeding_var)[3]=1.;
 			(*seeding_var)[4]=1.;
-			(*seeding_var)[5]=1.;
-			(*seeding_var)[6]=1.;
+			(*seeding_var)[5]=20;
+			(*seeding_var)[6]=20;
 		}
 		mcmc_intrinsic=false;
 	}
@@ -1883,6 +1896,26 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[8]=.1;
 			(*seeding_var)[9]=.1;
 			(*seeding_var)[10]=.5;
+		}
+	}
+	else if(dimension==13 && generation_method =="IMRPhenomD_NRT"){
+		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
+		mcmc_intrinsic=false;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.1;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=.5;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=.1;
+			(*seeding_var)[7]=.1;
+			(*seeding_var)[8]=.1;
+			(*seeding_var)[9]=.1;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=20;
+			(*seeding_var)[12]=20;
 		}
 	}
 	else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
