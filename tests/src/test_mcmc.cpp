@@ -695,7 +695,8 @@ double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, vo
 		}
 	}
 	//double long_target = -pow(param[0]-30,2)/2 ;
-	return log(exp(return_val1) + exp(return_val2))/multi_gaussian_scale;
+	//return log(exp(return_val1) + exp(return_val2))/multi_gaussian_scale;
+	return (return_val1 + log(1+exp(return_val2/return_val1)))/multi_gaussian_scale;
 	//return (log(exp(return_val1) + exp(return_val2)+exp(long_target)))/multi_gaussian_scale;
 	//return 1;
 

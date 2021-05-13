@@ -10,7 +10,7 @@ import gwatpy.util as gpu
 from scipy.signal.windows import tukey
 from functools import partial
 
-from scipy.stats import  dirichlet,kde
+from scipy.stats import  dirichlet,kde, spearmanr
 from scipy.optimize import NonlinearConstraint,differential_evolution
 from scipy.special import hyp2f1, beta, gamma, loggamma,betaln
 import math
@@ -428,7 +428,7 @@ def plot_convergence(filename,trim=None,ac=None):
         axes[x][0,0].legend()
     return fig 
 
-def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False):
+def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False,calc_correlation=False):
     f = h5py.File(filename,'r')
     chains = list(f["MCMC_OUTPUT"].keys())
     chains_N = len(chains)
@@ -445,6 +445,9 @@ def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False):
     print("trim: ",trim_local)
     print("ac: ",ac_local)
     data = f["MCMC_OUTPUT"][chains[0]][int(trim_local)::int(ac_local),:]
+    data_correlations = []
+    if(calc_correlation):
+        data_correlations.append(data)
     for x in range(chains_N-1):
         if( "CHAIN" in chains[x+1]):
             if trim is None :
@@ -456,7 +459,32 @@ def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False):
                 for y in range(len(data[0])):
                     acs.append(emcee.autocorr.integrated_time(f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),y],tol=0)[0])
                 print(chains[x],np.amax(acs),np.argmax(acs))
-            data = np.insert(data,-1, f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:],axis=0)
+            newdat = f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:]
+            data = np.insert(data,-1, newdat,axis=0)
+            if(calc_correlation):
+                data_correlations.append(newdat)
+
+    if(calc_correlation):
+        ccmat = np.zeros((len(data_correlations),len(data_correlations)))
+        pvalmat = np.ones((len(data_correlations),len(data_correlations)))
+        for d in np.arange(len(data_correlations)):
+            for y in np.arange(d):
+                ccs = np.ones(len(data_correlations[0][0]))
+                pvals = np.ones(len(data_correlations[0][0]))
+                for dim in np.arange(len(data_correlations[0][0])):
+                    cc,pval = spearmanr(data_correlations[d][dim],data_correlations[y][dim])
+                    ccs[dim] = cc
+                    pvals[dim] = pval
+                print(d,y,np.amax(abs(ccs)),np.amin(pvals))
+                ccmat[d,y] = np.amax(abs(ccs))
+                pvalmat[d,y] =np.amin(pvals)
+        for d in np.arange(len(data_correlations[0][0])):
+            plt.plot(data_correlations[30][:,d])
+            plt.plot(data_correlations[16][:,d])
+            plt.show()
+            plt.close()
+        print("Max correlations: ",np.amax(ccmat))
+        print("Min Pvals: ",np.amin(pval))
     #print("data shape",np.shape(data))
     #data = data[::chains_N]
     return data
