@@ -460,6 +460,8 @@ def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False,calc_correlation
                     acs.append(emcee.autocorr.integrated_time(f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),y],tol=0)[0])
                 print(chains[x],np.amax(acs),np.argmax(acs))
             newdat = f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:]
+            
+            print(newdat.shape)
             data = np.insert(data,-1, newdat,axis=0)
             if(calc_correlation):
                 data_correlations.append(newdat)
@@ -479,12 +481,14 @@ def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False,calc_correlation
                 ccmat[d,y] = np.amax(abs(ccs))
                 pvalmat[d,y] =np.amin(pvals)
         for d in np.arange(len(data_correlations[0][0])):
-            plt.plot(data_correlations[30][:,d])
-            plt.plot(data_correlations[16][:,d])
+            #plt.scatter(data_correlations[46][:,d],data_correlations[0][:,d])
+            #print(np.correlate( data_correlations[46][:,d],data_correlations[0][:,d],"full"))
+            plt.plot(np.correlate( data_correlations[44][:,d],data_correlations[2][:,d],"full"))
+            #plt.plot(data_correlations[16][:,d])
             plt.show()
             plt.close()
         print("Max correlations: ",np.amax(ccmat))
-        print("Min Pvals: ",np.amin(pval))
+        print("Min Pvals: ",np.amin(pvalmat))
     #print("data shape",np.shape(data))
     #data = data[::chains_N]
     return data
