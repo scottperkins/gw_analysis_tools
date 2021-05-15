@@ -3628,7 +3628,6 @@ double RJMCMC_2WF_likelihood_wrapper(
 	}
 	
 	//######################################################################
-
 	//#########################################################################
 	gen_params_base<double> gen_params;
 	//std::string local_gen = MCMC_prep_params(param, 

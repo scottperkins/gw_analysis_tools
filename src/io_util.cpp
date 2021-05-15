@@ -538,6 +538,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 	for(int i =0; i< num_detectors ; i++){
 		read_LOSC_data_file(data_files[i],temp_data[i], &file_start, &duration, &fs);
 	}	
+	debugger_print(__FILE__,__LINE__,"Trigger time: "+std::to_string(trigger_time));
 	debugger_print(__FILE__,__LINE__,"File initial GPS: "+std::to_string(file_start));
 	debugger_print(__FILE__,__LINE__,"Data file duration: "+std::to_string(duration));
 	debugger_print(__FILE__,__LINE__,"Data file sampling frequency: "+std::to_string(fs));
@@ -580,6 +581,7 @@ void allocate_LOSC_data(std::string *data_files, /**< Vector of strings for each
 		return;
 	}
 
+	debugger_print(__FILE__,__LINE__,"Signal Duration: "+std::to_string(Tobs));
 	debugger_print(__FILE__,__LINE__,"Start,End: "+std::to_string(time_start)+","+std::to_string(time_end));
 	double **data_trimmed = allocate_2D_array(num_detectors, N_trimmed);
 	double *times_trimmed = (double *)malloc(sizeof(double)*N_trimmed);
