@@ -41,72 +41,51 @@ void IMRPhenomD_NRT<T>::assign_static_pn_phase_coeff(source_parameters<T> *sourc
   chi1_sq = chi1 * chi1;
   chi2_sq = chi2 * chi2;
 
-  /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
-  //T q0 = 0.1940;
-  //T q1 = 0.09163;
-  //T q2 = 0.04812;
-  //T q3 = -0.004286;
-  //T q4 = 0.00012450;
 
-  T q0 = 0.1940;
-  T q1 = 0.09163;
-  T q2 = 0.04812;
-  //T q3 = -0.004286; //This matches LAL. Ask Nico about which one we should use
-  T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
-  T q4 = 0.00012450;
-
-
-  T o0 = 0.003131;
-  T o1 = 2.071;
-  T o2 = -0.7152;
-  T o3 = 0.2458;
-  T o4 = -0.03309;
-  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities*/
-  if(lambda1<=0){oct1=1;quad1 = 1;}
-  else{
-  quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
-  oct1 = exp(o0 + o1*log(quad1) + o2*pow(log(quad1), 2.) + o3*pow(log(quad1), 3.) + o4*pow(log(quad1), 4.));
-  }
-  
-  if(lambda2<=0){oct2=1;quad2 = 1;}
-  else{
-  quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
-  oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
- }
+  quad1 = source_param->quad1;
+  quad2 = source_param->quad2;
+  oct1 = source_param->oct1;
+  oct2 = source_param->oct2;
   
   /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
   //2 PN contribution
   ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
   ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
-  //ssA_2PN = -50*(quad1) * X_Asq * chi1_sq;
-  //ssB_2PN = -50*(quad2) * X_Bsq * chi2_sq;
   ss_2PN = ssA_2PN + ssB_2PN;
-  //ss_2PN = 0.0;
 
   //3 PN contribution 
   ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
   ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
-  //ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 ) * X_Asq * chi1_sq;
-  //ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 ) * X_Bsq * chi2_sq;
   ss_3PN = ssA_3PN + ssB_3PN;
-  //ss_3PN = 0.0;
 
-	coeff[4]+= ss_2PN;
-	coeff[10]+= ss_3PN;
+  coeff[4]+= ss_2PN;
+  coeff[10]+= ss_3PN;
 }
 
 //##############################################################################
 //##############################################################################
 template<class T>
-T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
+T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param,useful_powers<T> *powers, char deriv)
 { 
-  T x = pow((M_PI * param->M *f), 2./3.);
+  //T x = pow((M_PI * param->M *f), 2./3.);
   
+  //T xpowers[5];
+  //for(int i = 0; i<5; i++)
+  //  {
+  //    xpowers[i] = pow(x, 1 + i/2.);
+  //  }
+  //
+  //  Same as above, but faster because now call to pow -- just need to define powers->MF2third in 
+  //  construct waveform because precalc_powers isn't called after inspiral is over
+  T x = powers->MF2third * powers->PI2third;
+  T x_3_2 = param->M*f*M_PI;
   T xpowers[5];
-  for(int i = 0; i<5; i++)
-    {
-      xpowers[i] = pow(x, 1 + i/2.);
-    }
+  xpowers[0] = x;
+  xpowers[1] = x_3_2;
+  xpowers[2] = x*x;
+  xpowers[3] = x*x_3_2;
+  xpowers[4] = x*x*x;
+	
   
   T P_NRT = 1, P_NRTdenom = 1;
   for(int i = 0; i<5; i++)
@@ -144,14 +123,15 @@ T IMRPhenomD_NRT<T>::Pade(T f, source_parameters<T> *param, char deriv)
 /* Note that this is NOT an overloaded version of phase_ins -- completely new. Only calculates the NRT phase, not the total phase_ins. It will be appended to the entire waveform later
  */
 template<class T> 
-T IMRPhenomD_NRT<T>::phase_ins_NRT(T f, source_parameters<T> *param)
+T IMRPhenomD_NRT<T>::phase_ins_NRT(T f, useful_powers<T> *powers,source_parameters<T> *param)
 {
   
   /*Note that this is just the NRT part now*/
   T phaseout;
   bool deriv = false; //tells the Pade function not to take a derivative
 
-  phaseout = - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, deriv));
+  //phaseout = - ((3./16.) * param->tidal_weighted * (39./(16. * param->eta)) * Pade(f, param, powers,deriv));
+  phaseout = param->NRT_phase_coeff * Pade(f, param, powers,deriv);
   
   return phaseout;
 }
@@ -250,14 +230,38 @@ T IMRPhenomD_NRT<T>::spin_spin(source_parameters<T> *param, double PNorder)
 }*/
 
 template<class T>
-T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
+T IMRPhenomD_NRT<T>::calculate_quad_moment(T lambda)
 {
-  T ssA_2PN, ssB_2PN, ss_2PN, ssA_3PN, ssB_3PN, ss_3PN, ssA_3p5PN, ssB_3p5PN, ss_3p5PN;
+  /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
+  T q0 = 0.1940;
+  T q1 = 0.09163;
+  T q2 = 0.04812;
+  //T q3 = -0.004286; //This matches LAL. Ask Nico about which one we should use
+  T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
+  T q4 = 0.00012450;
+  T quad = exp(q0 + q1*log(lambda) + q2*pow(log(lambda), 2.) + q3*pow(log(lambda), 3.) + q4*pow(log(lambda), 4.));
+  return quad;
+
+}
+template<class T>
+T IMRPhenomD_NRT<T>::calculate_oct_moment(T quad_moment)
+{
+  T o0 = 0.003131;
+  T o1 = 2.071;
+  T o2 = -0.7152;
+  T o3 = 0.2458;
+  T o4 = -0.03309;
+  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities. Note that this only works for lambda >= 1*/
+  T oct = exp(o0 + o1*log(quad_moment) + o2*pow(log(quad_moment), 2.) + o3*pow(log(quad_moment), 3.) + o4*pow(log(quad_moment), 4.));
+  return oct;
+}
+
+template<class T>
+void IMRPhenomD_NRT<T>::calculate_spin_coefficients_3p5(source_parameters<T> *param)
+{
+  T ssA_3p5PN, ssB_3p5PN;
   T X_A, X_Asq, chi1, chi1_sq, lambda1, quad1, oct1; 
   T X_B, X_Bsq, chi2, chi2_sq, lambda2, quad2, oct2;  
-
-  lambda1 = param->tidal1;
-  lambda2 = param->tidal2;
   
   X_A = param->mass1 / param->M;    
   X_B = param->mass2 / param->M;
@@ -268,81 +272,137 @@ T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, source_parameters<T> *param)
   X_Bsq = X_B * X_B; 
   chi1_sq = chi1 * chi1;
   chi2_sq = chi2 * chi2;
+	
+  quad1 = param->quad1;
+  quad2 = param->quad2;
+  oct1 = param->oct1;
+  oct2 = param->oct2;
 
-  /*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
-  T q0 = 0.1940;
-  T q1 = 0.09163;
-  T q2 = 0.04812;
-  //T q3 = -0.004286; //This matches LAL. Ask Nico about which one we should use
-  T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
-  T q4 = 0.00012450;
+  ssA_3p5PN = 10 * ((X_Asq + (308./3.)*X_A)*chi1 + (X_Bsq - (89/3.)*X_B)*chi2 - 40* M_PI)*(quad1 - 1.)*X_Asq*chi1_sq - 440*(oct1 - 1.)*X_Asq*X_A*chi1_sq*chi1; 
+  ssB_3p5PN = 10 * ((X_Bsq + (308./3.)*X_B)*chi2 + (X_Asq - (89/3.)*X_A)*chi1 - 40* M_PI)*(quad2 - 1.)*X_Bsq*chi2_sq - 440*(oct2 - 1.)*X_Bsq*X_B*chi2_sq*chi2;
+  param->ss_3p5PN_coeff = ssA_3p5PN + ssB_3p5PN;
 
-  T o0 = 0.003131;
-  T o1 = 2.071;
-  T o2 = -0.7152;
-  T o3 = 0.2458;
-  T o4 = -0.03309;
-  /*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities. Note that this only works for lambda >= 1*/
-  if(lambda1<=0){oct1=1;quad1 = 1;}
-  else{
-  quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
-  oct1 = exp(o0 + o1*log(quad1) + o2*pow(log(quad1), 2.) + o3*pow(log(quad1), 3.) + o4*pow(log(quad1), 4.));
-  }
-  
-  if(lambda2<=0){oct2=1;quad2 = 1;}
-  else{
-  quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
-  oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
-  }
+  return ;
+
+}
+
+template<class T>
+T IMRPhenomD_NRT<T>::phase_spin_NRT(T f, useful_powers<T> *powers,source_parameters<T> *param)
+{
+  //###########################################################################
+  //T ssA_2PN, ssB_2PN, ss_2PN, ssA_3PN, ssB_3PN, ss_3PN, ssA_3p5PN, ssB_3p5PN, ss_3p5PN;
+  //T X_A, X_Asq, chi1, chi1_sq, lambda1, quad1, oct1; 
+  //T X_B, X_Bsq, chi2, chi2_sq, lambda2, quad2, oct2;  
+
+  //lambda1 = param->tidal1;
+  //lambda2 = param->tidal2;
+  //
+  //X_A = param->mass1 / param->M;    
+  //X_B = param->mass2 / param->M;
+  //chi1 = param->spin1z;
+  //chi2 = param->spin2z;
+  //
+  //X_Asq = X_A * X_A;
+  //X_Bsq = X_B * X_B; 
+  //chi1_sq = chi1 * chi1;
+  //chi2_sq = chi2 * chi2;
+  //      
+  //quad1 = param->quad1;
+  //quad2 = param->quad2;
+  //oct1 = param->oct1;
+  //oct2 = param->oct2;
+
+  ///*Numerical coefficients from tables 1 and 2 of arXiv:1608.02582*/
+  //T q0 = 0.1940;
+  //T q1 = 0.09163;
+  //T q2 = 0.04812;
+  ////T q3 = -0.004286; //This matches LAL. Ask Nico about which one we should use
+  //T q3 = -0.004283; //note small discrepancy between this number in arXiv:1608.02582 vs arXiv:1905.06011v2 (last digit is different). 
+  //T q4 = 0.00012450;
+
+  //T o0 = 0.003131;
+  //T o1 = 2.071;
+  //T o2 = -0.7152;
+  //T o3 = 0.2458;
+  //T o4 = -0.03309;
+  ///*Equation 15 of arXiv:1608.02582 for quadrupolar and octupolar spin induced deformabilities. Note that this only works for lambda >= 1*/
+  //if(lambda1<=0){oct1=1;quad1 = 1;}
+  //else{
+  //quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
+  //oct1 = exp(o0 + o1*log(quad1) + o2*pow(log(quad1), 2.) + o3*pow(log(quad1), 3.) + o4*pow(log(quad1), 4.));
+  //}
+  //
+  //if(lambda2<=0){oct2=1;quad2 = 1;}
+  //else{
+  //quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
+  //oct2 = exp(o0 + o1*log(quad2) + o2*pow(log(quad2), 2.) + o3*pow(log(quad2), 3.) + o4*pow(log(quad2), 4.));
+  //}
 
   //std::cout<<"quad1: "<<quad1<<"\t quad2: "<<quad2<<std::endl; 
   /*Following equation 27 of NRTidal paper (arXiv:1905.06011v2)*/
   //2 PN contribution
-  ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
-  ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
+  //ssA_2PN = -50*(quad1 - 1.) * X_Asq * chi1_sq;
+  //ssB_2PN = -50*(quad2 - 1.) * X_Bsq * chi2_sq;
   //ssA_2PN = -50*(quad1) * X_Asq * chi1_sq;
   //ssB_2PN = -50*(quad2) * X_Bsq * chi2_sq;
   //ss_2PN = ssA_2PN + ssB_2PN;
-  ss_2PN = 0.0;
+  //ss_2PN = 0.0;
 
   //3 PN contribution 
-  ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
-  ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
+  //ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 - 1.) * X_Asq * chi1_sq;
+  //ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 - 1.) * X_Bsq * chi2_sq;
   //ssA_3PN = (5/84.) * (9407 + 8218 * X_A - 2016 * X_Asq)* (quad1 ) * X_Asq * chi1_sq;
   //ssB_3PN = (5/84.) * (9407 + 8218 * X_B - 2016 * X_Bsq)* (quad2 ) * X_Bsq * chi2_sq;
   //ss_3PN = ssA_3PN + ssB_3PN;
-  ss_3PN = 0.0;
+  //ss_3PN = 0.0;
 
   //3.5 PN contribution
-  ssA_3p5PN = 10 * ((X_Asq + (308./3.)*X_A)*chi1 + (X_Bsq - (89/3.)*X_B)*chi2 - 40* M_PI)*(quad1 - 1.)*X_Asq*chi1_sq - 440*(oct1 - 1.)*X_Asq*X_A*chi1_sq*chi1; 
-  ssB_3p5PN = 10 * ((X_Bsq + (308./3.)*X_B)*chi2 + (X_Asq - (89/3.)*X_A)*chi1 - 40* M_PI)*(quad2 - 1.)*X_Bsq*chi2_sq - 440*(oct2 - 1.)*X_Bsq*X_B*chi2_sq*chi2;
-  ss_3p5PN = ssA_3p5PN + ssB_3p5PN;
+  //ssA_3p5PN = 10 * ((X_Asq + (308./3.)*X_A)*chi1 + (X_Bsq - (89/3.)*X_B)*chi2 - 40* M_PI)*(quad1 - 1.)*X_Asq*chi1_sq - 440*(oct1 - 1.)*X_Asq*X_A*chi1_sq*chi1; 
+  //ssB_3p5PN = 10 * ((X_Bsq + (308./3.)*X_B)*chi2 + (X_Asq - (89/3.)*X_A)*chi1 - 40* M_PI)*(quad2 - 1.)*X_Bsq*chi2_sq - 440*(oct2 - 1.)*X_Bsq*X_B*chi2_sq*chi2;
+  //ss_3p5PN = ssA_3p5PN + ssB_3p5PN;
+  //###########################################################################
   
   T phaseout, spin_spin;
-  T x = pow((M_PI * param->M *f), 2./3.);
+  //T x = pow((M_PI * param->M *f), 2./3.);
+  T x = powers->MF2third * powers->PI2third;
+  T x_m5_2 = powers->MFminus_5third * powers->PIminus_5third;
+  T x_7_2 = powers->MF7third * powers->PI7third;
 
-  T coeff = (3./(128.* param->eta))* pow(x, -5/2.);
+  //T coeff = (3./(128.* param->eta))* pow(x, -5/2.);
+  T coeff = (3./(128.* param->eta))* x_m5_2;
 
-  spin_spin = ss_2PN * pow(x, 2.) + ss_3PN  * pow(x, 3.) + ss_3p5PN  * pow(x, 7/2.);
+  //spin_spin = ss_2PN * pow(x, 2.) + ss_3PN  * pow(x, 3.) + ss_3p5PN  * pow(x, 7/2.);
+  //spin_spin = ss_2PN * x*x+ ss_3PN  * x*x*x+ ss_3p5PN  * x_7_2;
+  spin_spin = param->ss_3p5PN_coeff  * x_7_2;
   
   phaseout = coeff*spin_spin;
   //equation 26 of arXiv:1905.06011v2
-  //std::cout<<"ss_2PN: "<<ss_2PN<<"\t ss_3PN: "<<ss_3PN<<"\t ss_3p5PN: "<<ss_3p5PN<<std::endl; 
   return phaseout; 
  
 }
 
 template<class T>
-T IMRPhenomD_NRT<T>::amp_ins_NRT(T f, source_parameters<T> *param)
+T IMRPhenomD_NRT<T>::calculate_NRT_amp_coefficient(source_parameters<T> *param)
+{
+   return -sqrt(5*M_PI*param->eta / 24.) * (9 * param->M * param->M / param->DL) * (3./16.) * param->tidal_weighted ;//x^(13/4) term -- overall factor
+
+}
+
+template<class T>
+T IMRPhenomD_NRT<T>::amp_ins_NRT(T f, useful_powers<T> *powers,source_parameters<T> *param)
 {
   /*IMRPhenomD<T> model;
   T gr_ins = model.amp_ins(f, param, pn_coeff, lambda, powers);
   T ampout = gr_ins;
   */
 
-  T x = pow((M_PI * param->M *f), 2./3.);
+  //T x = pow((M_PI * param->M *f), 2./3.);
+  T x = powers->MF2third * powers->PI2third;
+  T x2 = x*x;
+  T x4 = x2*x2;
 
-  T amp_NRT = -sqrt(5*M_PI*param->eta / 24.) * (9 * param->M * param->M / param->DL) * (3./16.) * param->tidal_weighted * pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8* pow(x, 4));
+  //T amp_NRT = -sqrt(5*M_PI*param->eta / 24.) * (9 * param->M * param->M / param->DL) * (3./16.) * param->tidal_weighted * pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8* pow(x, 4));
+  T amp_NRT = param->NRT_amp_coefficient* pow(x, 13./4.) * (1 + (449./108)*x + (22672./9.) * pow(x, 2.89) ) / (1 + 13477.8*x4);
   //has to be scaled by f^(7/6)/A0 to be consistent with the rest of GW analysis tools
   //amp_NRT = amp_NRT*powers->MF7sixth/ (param->A0*pow(param->M, 7/6.));
   //amp_NRT = amp_NRT*pow(f, 7/6.)/(param->A0);
@@ -406,6 +466,20 @@ T IMRPhenomD_NRT<T>::taper(T f, int length, source_parameters<T> *params)
 template<class T>
 int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params)
 {
+  params->NRT_phase_coeff = - (3./16.) * params->tidal_weighted * (39./(16. * params->eta));
+  if(params->tidal1<=0){params->oct1=1;params->quad1 = 1;}
+  else{
+  	params->quad1 = this->calculate_quad_moment(params->tidal1);
+  	params->oct1 = this->calculate_oct_moment(params->quad1);
+  }
+  if(params->tidal2<=0){params->oct2=1;params->quad2 = 1;}
+  else{
+  	params->quad2 = this->calculate_quad_moment(params->tidal2);
+  	params->oct2 = this->calculate_oct_moment(params->quad2);
+  }
+
+  this->calculate_spin_coefficients_3p5(params);
+  params->NRT_amp_coefficient=this->calculate_NRT_amp_coefficient(params);
   IMRPhenomD<T> model;
   //int status = model.construct_waveform(frequencies, length, waveform, params);
   T M = params-> M;
@@ -502,25 +576,30 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
 	waveform[j] = 0.0;
       }
       else{	
-	if (f<params->f1_phase)
+	//if (f<params->f1_phase)
+	//This is always needed for NRT
+	if (true)
 	  {
 	    this->precalc_powers_ins(f, M, &pows);
 	  }
 	else
 	  {
-	    pows.MFsixth= pow(M*f,1./6.);	
-	    pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+	    //pows.MFsixth= pow(M*f,1./6.);	
+	    //pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+	    //Needed for Pade function
+	    //pows.MFthird = pows.MFsixth*pows.MFsixth;
+	    //pows.MF2third = pows.MFthird*pows.MFthird;
 	  }
 	amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 	/*Append phase_ins_NRT and amp_ins_NRT to the entire waveform*/
 	{
-		T phaseNRT = this->phase_ins_NRT(f, params);
+		T phaseNRT = this->phase_ins_NRT(f,&pows,params);
 		phase += phaseNRT;
-		T phaseSpinNRT = this->phase_spin_NRT(f, params);
+		T phaseSpinNRT = this->phase_spin_NRT(f, &pows,params);
 		phase += phaseSpinNRT;
 		//I don't know why this would be minus instead of plus, but it seems to get closer to LAL's result if it's minus phaseSpinNRT
-		T ampNRT = (A0*this->amp_ins_NRT(f, params));
+		T ampNRT = (A0*this->amp_ins_NRT(f,&pows, params));
 		amp +=ampNRT;
 	}
 	//phase +=   (T)(tc*(f-f_ref) - phic);

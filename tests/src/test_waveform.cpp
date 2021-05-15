@@ -704,6 +704,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		double fplusG,fcrossG,fbG,flG,fxG,fyG;
 		XLALComputeDetAMResponse(&fplus,&fcross, LALD.response, RA,DEC,psi,gmst);
 		XLALComputeDetAMResponseExtraModes(&fplus,&fcross,&fb,&fl,&fx,&fy, LALD.response, RA,DEC,psi,gmst);
+		end = clock();
 		
 		det_res_pat<double> r_pat;
 		r_pat.Fplus = &fplusG;
@@ -722,7 +723,6 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			gsl_complex_mul(gsl_complex_rect(fplus,0.),(hptilde->data->data)[i]),
 			gsl_complex_mul(gsl_complex_rect(fcross,0.0) , (hctilde->data->data)[i]));
 		}
-		end = clock();
 		times[k][0] = (double)(end-start)/(CLOCKS_PER_SEC);
 		//std::cout<<"LAL timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
 		//###############################################################################

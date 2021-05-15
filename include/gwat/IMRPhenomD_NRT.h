@@ -14,21 +14,21 @@ template<class T>
 class IMRPhenomD_NRT: public IMRPhenomD<T>
 {
 public:
-  virtual T Pade(T f, source_parameters<T> *param, char deriv);
+  virtual T Pade(T f, source_parameters<T> *param, useful_powers<T> *powers,char deriv);
   
   //virtual T phase_ins_NRT(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda, useful_powers<T> *pow); 
   //This is NOT overloaded anymore -- completely different function than phase_ins
-  virtual T phase_ins_NRT(T f, source_parameters<T> *param);
+  virtual T phase_ins_NRT(T f,useful_powers<T> *powers, source_parameters<T> *param);
 
   //virtual T spin_spin(source_parameters<T> *param, double PNorder, int body); 
-  virtual T phase_spin_NRT(T f, source_parameters<T> *param);
+  virtual T phase_spin_NRT(T f, useful_powers<T> *powers,source_parameters<T> *param);
     
   //Probably not needed anymore, but I'll leave for now
   //virtual T Dphase_ins_NRT(T r, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda); 
 
   //virtual T amp_ins(T f, source_parameters<T> *param, T *pn_coeff,
   //lambda_parameters<T> *lambda,useful_powers<T> *pow);
-  virtual T amp_ins_NRT(T f, source_parameters<T> *param);
+  virtual T amp_ins_NRT(T f, useful_powers<T> *powers,source_parameters<T> *param);
 //virtual T Damp_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_parameters<T> *lambda);
  
   virtual int construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params);
@@ -38,6 +38,12 @@ public:
 
   virtual void assign_static_pn_phase_coeff(source_parameters<T> *source_param, T *coeff);
 
+  virtual T calculate_quad_moment(T lambda);
+  virtual T calculate_oct_moment(T lambda);
+
+  virtual void calculate_spin_coefficients_3p5(source_parameters<T> *param);
+
+  virtual T calculate_NRT_amp_coefficient(source_parameters<T> *param);
 };
 
 //##############################################################################

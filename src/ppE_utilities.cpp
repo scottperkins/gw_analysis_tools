@@ -31,6 +31,8 @@
  * NonComm -- Noncommutatitve gravity -- input beta is \Lambda^2 in units of Planck energies (dimensionless), where \sqrt(\Lambda) defines the energy scale of noncommutativity 
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
+ *
+ * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4
  */
 
 
@@ -109,6 +111,9 @@ bool check_theory_support(std::string generation_method)
 		return true;
 	}
 	if(generation_method.find("ModDispersion")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("EA_fully_restricted")!=std::string::npos){
 		return true;
 	}
 	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
@@ -195,6 +200,21 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ExtraDimension_beta(p);} ;
 		ins = true;
+	}
+	else if(generation_method.find("EA_fully_restricted_v1")!= std::string::npos){
+		//Need to pre-calculate EA variables here -- Needs to actually be in waveform_generator file..
+		//pre_calculate_EA_factors(params_in);
+		mapping->Nmod = 2;
+		mapping->bppe = new double[2];
+		mapping->bppe[0] =-7;
+		mapping->bppe[1] =-5;
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return EA_fully_restricted_phase0(p);} ;
+		mapping->beta_fns[1] = [](source_parameters<T> *p){return EA_fully_restricted_phase1(p);} ;
+		ins = true;
+		//Add this as another beta term prop to f!!!!
+		//params_in->tc += params_in->Luminosity_Distance*MPC_SEC*(1.- 1./params_in->cT_EA); //cT_EA must be dimensionless
+		//Adjust coalescence time here to account for time of arrival difference
 	}
 	else if(generation_method.find("BHEvaporation")!= std::string::npos){
 		mapping->Nmod = 1;
@@ -308,6 +328,29 @@ T PNSeries_beta(int term,source_parameters<T> *param)
 }
 template double PNSeries_beta(int ,source_parameters<double> *);
 template adouble PNSeries_beta(int , source_parameters<adouble> *);
+
+template<class T>
+T EA_fully_restricted_phase0(source_parameters<T> *p)
+{
+	T out = 0;
+	out = -3./224. * 1./p->kappa3_EA * pow(p->eta,2./5.) * p->epsilon_x_EA;
+	
+	//Minus one comes from sign choice from paper
+	return -1*out;
+}
+template double EA_fully_restricted_phase0(source_parameters<double> *);
+template adouble EA_fully_restricted_phase0(source_parameters<adouble> *);
+
+template<class T>
+T EA_fully_restricted_phase1(source_parameters<T> *p)
+{
+	T out = 0;
+	out = -3./128. * ( -2./3. * ( p->s1_EA+p->s2_EA) - 1./2. * p->c14_EA + ( p->kappa3_EA - 1.)) ;
+	//Minus one comes from sign choice from paper
+	return -1*out;
+}
+template double EA_fully_restricted_phase1(source_parameters<double> *);
+template adouble EA_fully_restricted_phase1(source_parameters<adouble> *);
 
 template<class T>
 T dCS_beta(source_parameters<T> *param)
@@ -629,4 +672,14 @@ int dispersion_lookup(double alpha)
 	}
 	return -1;
 }
+
+
+template<class T>
+void pre_calculate_EA_factors(source_parameters<T> *p)
+{
+	p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
+	
+}
+template void pre_calculate_EA_factors(source_parameters<double> *);
+template void pre_calculate_EA_factors(source_parameters<adouble> *);
 //#############################################################

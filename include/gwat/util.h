@@ -459,6 +459,13 @@ struct source_parameters
 	/*! mass-weighted tidal deformability*/
 	T tidal_weighted=-1;
 	T delta_tidal_weighted=-1;
+	T NRT_phase_coeff ; // Save for faster waveform calcs
+	T quad1;
+	T quad2;
+	T oct1;
+	T oct2;
+	T ss_3p5PN_coeff;
+	T NRT_amp_coefficient;
 
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
@@ -503,6 +510,21 @@ struct source_parameters
 	T *delta_alpha;
 	T *delta_sigma;
 	T *delta_phi;
+
+	//Einstein-Aether stuff
+	T kappa3_EA;
+	T s1_EA;
+	T s2_EA;
+	T epsilon_x_EA;
+	T c14_EA;
+	T cT_EA ;
+	T cV_EA ;
+	T cS_EA ;
+	T A1_EA;
+	T A2_EA;
+	T A3_EA;
+	T S_EA;
+
 
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);

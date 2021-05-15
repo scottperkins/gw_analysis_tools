@@ -1627,6 +1627,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 
 	//int dynamic_search_length = 2*t0;
 	int dynamic_search_length = nu*2;
+	int search_swap_freq = 2;
 	//int dynamic_search_length = 200;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, max_dimension);
 	int ***temp_status = allocate_3D_array_int(chain_N,dynamic_search_length, max_dimension);
@@ -1635,7 +1636,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 	//#####################################################################
 	RJPTMCMC_MH_internal(temp_output,temp_status, temp_model_status, nested_model_number,max_dimension, min_dimension,
 		dynamic_search_length, chain_N,  
-		initial_pos,initial_status,initial_model_status, seeding_var,ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status, chain_temps, swp_freq, 
+		initial_pos,initial_status,initial_model_status, seeding_var,ensemble_initial_pos,ensemble_initial_status,ensemble_initial_model_status, chain_temps, search_swap_freq, 
 		 log_prior, log_likelihood,fisher,RJ_proposal,user_parameters,
 		numThreads, pool,internal_prog,update_RJ_width,statistics_filename,"","","",checkpoint_file);
 	
@@ -1701,12 +1702,13 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 
 
 	while(continue_dynamic_search && dynamic_ct<2){
+		if(dynamic_ct >0){search_swap_freq = swp_freq/2;}
 		//#############################################
 		if(dynamic_ct%dynamic_temp_freq ==0){
 			std::cout<<"Temperature Relaxation"<<std::endl;
 			continue_RJPTMCMC_MH_dynamic_PT_alloc_full_ensemble_internal(
 				checkpoint_file,temp_output, temp_status,temp_model_status, nested_model_number,
-				dynamic_search_length, chain_temps, swp_freq, t0, nu,
+				dynamic_search_length, chain_temps, search_swap_freq, t0, nu,
 				log_prior, log_likelihood,fisher,RJ_proposal,
 				user_parameters,numThreads, pool,internal_prog,update_RJ_width,"","",checkpoint_file,true);
 
@@ -1718,7 +1720,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal(mcmc_sampler_output *sa
 		std::cout<<"Exploration"<<std::endl;
 		continue_RJPTMCMC_MH_internal(&sampler_temp,checkpoint_file,temp_output,
 			temp_status,temp_model_status, nested_model_number, dynamic_search_length, 
-			swp_freq,log_prior, log_likelihood, fisher, RJ_proposal,user_parameters,
+			search_swap_freq,log_prior, log_likelihood, fisher, RJ_proposal,user_parameters,
 			numThreads, pool, internal_prog, update_RJ_width, statistics_filename, 
 			"",  "","",checkpoint_file,true,true);
 		int nan_counter = 0;
