@@ -23,6 +23,10 @@ struct bayesline_sampling_struct
 	double MAX_L_AMP = 1;
 	double MIN_Q = 1e-30;
 	double MAX_Q = 1;
+	double MIN_LOGSN_AMP = 1e-30;
+	double MAX_LOGSN_AMP = 1;
+	double MIN_LOGL_AMP = 1e-30;
+	double MAX_LOGL_AMP = 1;
 };
 
 struct PSD_output
@@ -62,6 +66,7 @@ void bayesline_psd_estimation(
 	PSD_output *output
 	);
 
+void model_PSD(double *pos, int *status, int model, bayesline_sampling_struct *p, double *SN);
 void bayesline_RJ_proposal(double *current_pos, double *prop_pos,int *current_status, int *prop_status,int *current_model, int *prop_model, double *MH_correction,mcmc_data_interface *interface, void *parameters);
 double bayesline_prior(double *pos, int *status, int model, mcmc_data_interface *interface, void *parameters);
 double bayesline_likelihood(double *pos, int *status, int model, mcmc_data_interface *interface, void *parameters);

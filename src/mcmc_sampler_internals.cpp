@@ -575,6 +575,8 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		//contain a given model, we just use a gaussian step and abandon DE 
 		//for this step.
 		else{
+			int selected_dimension=0;
+			gaussian_step(sampler, current_param, proposed_param , current_status, proposed_status, current_model_status, proposed_model_status, chain_id, &selected_dimension);
 			debugger_print(__FILE__,__LINE__,"ERROR : diff ev is broken with min_dim ==0");
 		}
 		

@@ -60,20 +60,24 @@ int test_bayesline(int argc, char *argv[])
 	double start_time, duration, fs;
 	double *data_in = new double[length_in];
 	read_LOSC_data_file(input_file, data_in, &start_time, &duration, &fs);
+	double T = 4;
+	int init_id = 0;
+	int final_id = init_id + int(fs*T);
+	int temp_length=final_id - init_id;
 	
-	int length = length_in;
+	int length = temp_length;
 	double *freqs= new double[length];
 	std::complex<double> *data_stream = new std::complex<double>[length];
 	
-	double FMIN = 10;
-	double FMAX = 2048;
-	std::cout<<"Initial knots "<<(FMAX-FMIN)/10<<std::endl;
-	double T = duration;
-	FFT_data(data_in, length_in, T, freqs, data_stream);
+	double FMIN = 50;
+	//double FMAX = 2048;
+	double FMAX = 512;
+	//double FMAX = 20;
+	FFT_data(&(data_in[init_id]), temp_length, T, freqs, data_stream);
 	
 	length = 0 ; 
 	int initial_id = -1;
-	for(int i = 0 ; i<length_in ; i++){
+	for(int i = 0 ; i<temp_length ; i++){
 		if(freqs[i]>FMIN && freqs[i]<FMAX){
 			if(initial_id <0){
 				initial_id = i;
@@ -82,6 +86,7 @@ int test_bayesline(int argc, char *argv[])
 			length++;
 		}
 	}
+	std::cout<<"Length: "<<length<<std::endl;
 	double **output_RAW = new double*[length];
 	for(int i = 0 ; i<length; i++){
 		output_RAW[i] = new double[3];
@@ -97,31 +102,36 @@ int test_bayesline(int argc, char *argv[])
 	delete [] output_RAW;
 	
 
-	int N_L_MAX = 500;
+	int N_L_MAX = 20;
 	int N_L_MIN = 2;
-	int N_S_MAX = 500;
+	int N_S_MAX = 300;
 	int N_S_MIN = 2;
 
 	std::string chain_allocation("double");
 	int samples = 1e4;
-	int chain_N = 32;
+	int chain_N = 60;
 	double chain_temps[chain_N];
-	int ensemble_chain_N = 8;
+	int ensemble_chain_N = 20;
 	int swap_freq = 20;
 	int t0 = 2000;
 	int nu = 100;
 	int max_chunk_size = samples/10;
-	int threads = 3;
+	int threads = 8;
 	bool pool = true;
 	bool show_prog = true;
 	std::string chain_file("data/bayesline_output.hdf5");
 	std::string stat_file("data/bayesline_stat.txt");
 	std::string checkpoint_file("data/bayesline_checkpoint.csv");
 	PSD_output output;
+	output.SN = new double[length];
+	output.length = length;
+	output.T = T;
 	bayesline_psd_estimation(&(data_stream[initial_id]), &(freqs[initial_id]), length, T,N_L_MIN,N_L_MAX,N_S_MIN,N_S_MAX,(double*)NULL, (int*)NULL,(double*)NULL,chain_allocation, samples, chain_N, ensemble_chain_N, chain_temps, swap_freq, t0,nu,max_chunk_size, threads, pool, show_prog, chain_file, stat_file, checkpoint_file, &output);
+	write_file("data/bayesline_estimate_psd.csv",output.SN, length);
 	delete [] freqs;
 	delete [] data_stream;
 	delete [] data_in;
+	delete [] output.SN;
 	return 0 ;
 }
 int test_bayesline_LL(int argc, char *argv[])
