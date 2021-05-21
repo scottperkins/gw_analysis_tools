@@ -3794,7 +3794,6 @@ void RJMCMC_2WF_fisher_wrapper(
 	void *parameters)
 {
 
-
 	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
 	int max_dimension = interface->max_dim;

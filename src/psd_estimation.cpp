@@ -66,12 +66,12 @@ void bayesline_psd_estimation(
 		parameters[i]->MIN_SN_AMP = 1e-50;
 		parameters[i]->MAX_LOGSN_AMP = log(parameters[i]->MAX_SN_AMP);
 		parameters[i]->MIN_LOGSN_AMP = log(parameters[i]->MIN_SN_AMP);
-		parameters[i]->MAX_L_AMP = 1e-30;
+		parameters[i]->MAX_L_AMP = 1e-20;
 		parameters[i]->MIN_L_AMP = 1e-50;
 		parameters[i]->MAX_LOGL_AMP = log(parameters[i]->MAX_L_AMP);
 		parameters[i]->MIN_LOGL_AMP = log(parameters[i]->MIN_L_AMP);
-		parameters[i]->MAX_Q = 100;
-		parameters[i]->MIN_Q = 10;
+		parameters[i]->MAX_Q = 1e15;
+		parameters[i]->MIN_Q = 1e1;
 	
 	}
 	
@@ -87,9 +87,11 @@ void bayesline_psd_estimation(
 		debugger_print(__FILE__,__LINE__,"Using generic initial position");
 		initial_pos = new double[max_dim];
 		initial_status= new int[max_dim];
-		int initial_spline_locs = int((parameters[0]->MAX_FREQ - parameters[0]->MIN_FREQ)/10);
-		int initial_lorentzian_locs = 10;
-		//int initial_lorentzian_locs = 1;
+		double step_size = 10;
+		//int initial_spline_locs = int((parameters[0]->MAX_FREQ - parameters[0]->MIN_FREQ)/10);
+		int initial_spline_locs = int((parameters[0]->MAX_FREQ - parameters[0]->MIN_FREQ)/step_size);
+		//int initial_lorentzian_locs = 10;
+		int initial_lorentzian_locs = 3;
 		debugger_print(__FILE__,__LINE__,"INIT spline knots");	
 		debugger_print(__FILE__,__LINE__,initial_spline_locs);	
 		for(int i = 0 ; i<max_dim; i++){
@@ -107,7 +109,7 @@ void bayesline_psd_estimation(
 		std::cout<<ID_step<<std::endl;
 		//int window = 100;
 		for(int i = 0 ; i<initial_spline_locs; i++){
-			initial_pos[i*2+2] = parameters[0]->MIN_FREQ*(1.05)+10*i;
+			initial_pos[i*2+2] = parameters[0]->MIN_FREQ*(1.05)+step_size*i;
 			if(i == 0){
 				mean_list(&(parameters[0]->data_mod_sq[i*ID_step]), 20,&mean_PSD);	
 			}
@@ -144,7 +146,7 @@ void bayesline_psd_estimation(
 			}
 			initial_pos[2*N_S_MAX+2+i*3] = log(mean_PSD);
 			initial_pos[2*N_S_MAX+2+i*3+1] = parameters[0]->MIN_FREQ*(1.05)+int((parameters[0]->MAX_FREQ - parameters[0]->MIN_FREQ)/initial_lorentzian_locs)*i;
-			initial_pos[2*N_S_MAX+2+i*3+2] = 50;
+			initial_pos[2*N_S_MAX+2+i*3+2] = 1e5;
 			initial_status[2*N_S_MAX+2+i*3 ] = 1;
 			initial_status[2*N_S_MAX+2+i*3+1 ] = 1;
 			initial_status[2*N_S_MAX+2+i*3+2 ] = 1;
@@ -163,9 +165,12 @@ void bayesline_psd_estimation(
 	for(int j = 0 ; j<length ; j++){
 		output->SN[j] = 0;	
 	}
+	
 	for (int i =0 ; i<average_num; i++){
-		int alpha = int(gsl_rng_uniform(r)*(chain_N)/max_chain_ensemble);//Pick a cold chain
+		int alpha = int((gsl_rng_uniform(r)*chain_N)/max_chain_ensemble);//Pick a cold chain
+		int chain = alpha * max_chain_ensemble;
 		int step =int(gsl_rng_uniform(r)*(samples));// Pick a step
+	
 		double *pos= sampler_output.output[alpha][step];	
 		int *status= sampler_output.status[alpha][step];	
 		double SN[length];
@@ -193,8 +198,9 @@ void bayesline_psd_estimation(
 
 double lorentzian(double pt, double amp, double q, double f,double deltaf){
 	double z= 1;
-	if (fabs(f - pt) > deltaf){
-		z = std::exp(-(f - deltaf) / (deltaf));
+	double diff = fabs(f-pt);
+	if (diff > deltaf){
+		z = std::exp(-(diff - deltaf) / (deltaf));
 	}
 	double lorentz = z* amp* pow_int(pt,4);
 	lorentz/= ( pow_int( pt * f, 2) + q*q * pow_int(pt* pt - f * f, 2));
@@ -211,6 +217,7 @@ void lorentzian_component(double *pos, int NL, bayesline_sampling_struct *p, dou
 		q_facs[i/3] = pos[i+2];
 	}
 	for(int i = 0 ; i<length; i++){
+		SN[i] = 0 ;
 		for(int j=0; j<NL; j++){
 			SN[i] += lorentzian(pts[j],amps[j],q_facs[j], frequencies[i],pts[j]/p->deltaf_factor);
 			//SN[i] += 0;
@@ -228,7 +235,7 @@ void order_list(double *pos, int NS, double *pts, double *SNs)
 	sort(pairs, pairs+NS);
 	
 	for(int i= 0; i<NS; i++){
-		pts[i+1] = log(pairs[i].first);
+		pts[i+1] = pairs[i].first;
 		SNs[i+1] =pairs[i].second;
 		//std::cout<<exp(pts[i+1])<<" "<<exp(SNs[i+1])<<std::endl;
 	}
@@ -239,18 +246,19 @@ void smooth_component(double *pos,int NS, bayesline_sampling_struct *p,double *f
 	double pts[NS+2];
 	double SNs[NS+2];
 	order_list(pos, NS, pts, SNs);
-	pts[0] = log(frequencies[0]);
-	pts[NS+1] = log(frequencies[length-1]);
+	pts[0] = frequencies[0];
+	pts[NS+1] = frequencies[length-1];
 	SNs[0] = pos[0];
 	SNs[NS+1] = pos[1];
 	
 
 	gsl_interp_accel *acc = gsl_interp_accel_alloc();
-	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,NS+2);
+	//gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,NS+2);
+	gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear,NS+2);
 	gsl_spline_init(spline, pts, SNs, NS+2);
 	
 	for(int i = 0 ; i<length; i++){
-		SN[i] = exp(gsl_spline_eval(spline, log(frequencies[i]),acc));
+		SN[i] = exp(gsl_spline_eval(spline, frequencies[i],acc));
 		//std::cout<<frequencies[i]<<" "<<SN[i]<<std::endl;
 	}
 	
@@ -283,6 +291,7 @@ void model_PSD(double *pos, int *status, int model, bayesline_sampling_struct *p
 	lorentzian_component(&(pos[p->N_S_MAX*2+2]), NL, p, p->frequencies, p->data_length, SN_L);
 	for(int i = 0; i<p->data_length; i++){
 		SN[i] = (SN_S[i] + SN_L[i]);
+		//SN[i] = (SN_S[i] );
 	}
 
 	return;
@@ -301,9 +310,9 @@ double bayesline_likelihood(double *pos, int *status, int model, mcmc_data_inter
 	}
 	ll*=(-2./p->signal_length );
 	//debugger_print(__FILE__,__LINE__,ll);
-	//if(isnan(ll)){
-	//	return a;
-	//}
+	if(isnan(ll)){
+		return a;
+	}
 	return ll;
 }
 

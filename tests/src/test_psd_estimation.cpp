@@ -104,14 +104,14 @@ int test_bayesline(int argc, char *argv[])
 
 	int N_L_MAX = 20;
 	int N_L_MIN = 2;
-	int N_S_MAX = 300;
+	int N_S_MAX = 100;
 	int N_S_MIN = 2;
 
 	std::string chain_allocation("double");
 	int samples = 1e4;
 	int chain_N = 60;
 	double chain_temps[chain_N];
-	int ensemble_chain_N = 20;
+	int ensemble_chain_N = 15;
 	int swap_freq = 20;
 	int t0 = 2000;
 	int nu = 100;
@@ -126,8 +126,10 @@ int test_bayesline(int argc, char *argv[])
 	output.SN = new double[length];
 	output.length = length;
 	output.T = T;
+
 	bayesline_psd_estimation(&(data_stream[initial_id]), &(freqs[initial_id]), length, T,N_L_MIN,N_L_MAX,N_S_MIN,N_S_MAX,(double*)NULL, (int*)NULL,(double*)NULL,chain_allocation, samples, chain_N, ensemble_chain_N, chain_temps, swap_freq, t0,nu,max_chunk_size, threads, pool, show_prog, chain_file, stat_file, checkpoint_file, &output);
 	write_file("data/bayesline_estimate_psd.csv",output.SN, length);
+
 	delete [] freqs;
 	delete [] data_stream;
 	delete [] data_in;
