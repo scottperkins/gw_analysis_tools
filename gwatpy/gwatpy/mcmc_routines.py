@@ -117,12 +117,12 @@ rlib.MCMC_likelihood_extrinsic_pyv2.argtypes = [
 rlib.MCMC_likelihood_extrinsic_pyv2.restype=ctypes.c_double
 ##########################################################
 PhenomD_labels = [r"$\alpha$",r"$\sin\delta$", r"$\psi$",r"$\cos \iota$",r"$\phi_{ref}$",r"$t_c$",r"$\ln D_L$",r"$\ln \mathcal{M}$",r"$\eta$",r"$\chi_1$",r"$\chi_2$"]
-PhenomD_transformedv1_labels = [r"$\alpha$",r"$\sin\delta$",r"$\cos \iota$", r"$\psi$",r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_1$",r"$\chi_2$"]
-PhenomD_transformedv2_labels = [r"$\alpha$",r"$\sin\delta$",r"$\cos \iota$", r"$\psi$",r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$\chi_1$",r"$\chi_2$"]
+PhenomD_transformedv1_labels = [r"$\alpha$",r"$\sin\delta$",r"$\psi$",r"$\cos \iota$", r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$\chi_1$",r"$\chi_2$"]
+PhenomD_transformedv2_labels = [r"$\alpha$",r"$\sin\delta$",r"$\psi$",r"$\cos \iota$", r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$\chi_1$",r"$\chi_2$"]
 
 PhenomPv2_labels = [r"$\alpha$",r"$\sin\delta$", r"$\psi$",r"$\cos \iota$",r"$\phi_{ref}$",r"$t_c$",r"$\ln D_L$",r"$\ln \mathcal{M}$",r"$\eta$",r"$a_1$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
-PhenomPv2_transformedv1_labels = [r"$\alpha$",r"$\sin\delta$",r"$\cos \iota$", r"$\psi$",r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_1$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
-PhenomPv2_transformedv2_labels = [r"$\alpha$",r"$\sin\delta$",r"$\cos \iota$", r"$\psi$",r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$a_1$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
+PhenomPv2_transformedv1_labels = [r"$\alpha$",r"$\sin\delta$",r"$\psi$",r"$\cos \iota$", r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$\mathcal{M}$",r"$\eta$",r"$a_1$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
+PhenomPv2_transformedv2_labels = [r"$\alpha$",r"$\sin\delta$",r"$\psi$",r"$\cos \iota$", r"$\phi_{ref}$",r"$t_c$",r"$D_L$",r"$m_1$",r"$m_2$",r"$a_1$",r"$a_2$",r"$\cos \theta_1$",r"$\cos \theta_2$",r"$\phi_1$",r"$\phi_2$"]
 def MCMC_likelihood_extrinsic_pyv2(save_waveform, parameters, mod_struct,generation_method, frequencies, data,  psd, weights, integration_method, log10F, detectors ):
     ndet = len(data)
     length = len(data[0])

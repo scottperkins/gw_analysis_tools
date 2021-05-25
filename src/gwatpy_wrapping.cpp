@@ -13,6 +13,19 @@
 #include <bits/stdc++.h> 
 
 
+double calculate_snr_py(char * sensitivity_curve,
+	char * detector, 
+	char * generation_method,
+	gen_params_base<double> *params,
+	double *frequencies,
+	int length,
+	char* integration_method,
+	double *weights,
+	bool log10_freq)
+{
+	std::cout<<std::string(sensitivity_curve)<<" "<<std::string(detector)<<" "<<std::string(generation_method)<<std::endl;
+	return calculate_snr(std::string(sensitivity_curve),std::string(detector), std::string(generation_method), params, frequencies, length, std::string(integration_method), weights, log10_freq);
+}
 
 double gps_to_GMST_radian_py(double gps)
 {
