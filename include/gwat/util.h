@@ -511,19 +511,38 @@ struct source_parameters
 	T *delta_sigma;
 	T *delta_phi;
 
-	//Einstein-Aether stuff
-	T kappa3_EA;
-	T s1_EA;
-	T s2_EA;
-	T epsilon_x_EA;
-	T c14_EA;
-	T cT_EA ;
-	T cV_EA ;
-	T cS_EA ;
-	T A1_EA;
-	T A2_EA;
-	T A3_EA;
-	T S_EA;
+  //Einstein-Aether stuff
+  T kappa3_EA;
+  T epsilon_x_EA;
+  //speeds
+  T c1_EA;
+  T c2_EA;
+  T c3_EA;
+  T c4_EA;
+  T c13_EA;
+  T c14_EA;
+  T cminus_EA; //there must be a way to do this more concisely...
+  T cT_EA;
+  T cV_EA;
+  T cS_EA;
+  //Necessary functions of the c's
+  T alpha1_EA;
+  T alpha2_EA;
+  T Z_EA;
+  T A1_EA;
+  T A2_EA;
+  T A3_EA;
+  T B3_EA;
+  T C_EA;
+  T D_EA;
+  //Center of mass velocity of binary (normally we'll just set this to zero)
+  T V_x_EA;
+  T V_y_EA;
+  T V_z_EA; 
+  //sensitivities for NSs
+  T s1_EA;
+  T s2_EA;
+  T S_EA;
 
 
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
