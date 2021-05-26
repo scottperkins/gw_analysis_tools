@@ -11,6 +11,15 @@
 extern "C"
 {
 #endif
+double calculate_snr_py(char * sensitivity_curve,
+	char * detector, 
+	char * generation_method,
+	gen_params_base<double> *params,
+	double *frequencies,
+	int length,
+	char *integration_method,
+	double *weights,
+	bool log10_freq);
 
 double gps_to_GMST_radian_py(double gps);
 double t_0PN_py(double f, double chirpmass);
