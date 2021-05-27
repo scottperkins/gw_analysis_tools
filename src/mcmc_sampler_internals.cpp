@@ -848,6 +848,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		sampler->step_prob[chain_index][4]=.0;
 		//no fisher and de not ready
 		if(!sampler->fisher_exist && !sampler->de_primed[chain_index])//Obviously must add up to 1
+		//if(true)//Obviously must add up to 1
 		{
 			sampler->step_prob[chain_index][0]=1.;
 			sampler->step_prob[chain_index][1]=0.;

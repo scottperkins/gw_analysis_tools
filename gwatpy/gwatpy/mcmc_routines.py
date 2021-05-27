@@ -461,7 +461,6 @@ def trim_thin_file(filename,trim=None, ac=None, recalc_ac=False,calc_correlation
                 print(chains[x],np.amax(acs),np.argmax(acs))
             newdat = f["MCMC_OUTPUT"][chains[x+1]][int(trim_local)::int(ac_local),:]
             
-            print(newdat.shape)
             data = np.insert(data,-1, newdat,axis=0)
             if(calc_correlation):
                 data_correlations.append(newdat)
