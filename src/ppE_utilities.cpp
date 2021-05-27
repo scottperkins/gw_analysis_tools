@@ -35,7 +35,6 @@
  * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4
  */
 
-
 bool check_extra_polarizations(std::string generation_method)
 {
 	if(generation_method == "polarization_test_IMRPhenomD"){
