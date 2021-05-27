@@ -541,7 +541,8 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	int *eff_history_status = new int[sampler->max_dim];
 	double *eff_history_coord2 = new double[sampler->max_dim];
 	int *eff_history_status2 = new int[sampler->max_dim];
-	if(sampler->RJMCMC){
+	//if(sampler->RJMCMC){
+	if(sampler->RJMCMC && sampler->min_dim>0){
 		//Pick a history member
 		int i = (int)((sampler->history_length-1)
 			*(gsl_rng_uniform(sampler->rvec[chain_id])));
@@ -552,6 +553,18 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 				(gsl_rng_uniform(sampler->rvec[chain_id])));	
 		}while(j==i);
 
+		for(int k = 0 ; k <sampler->min_dim; k++){
+			eff_history_coord[k] = sampler->history[chain_id][i][k];
+			eff_history_coord2[k] = sampler->history[chain_id][j][k];
+			eff_history_status[k] = sampler->param_status[chain_id][i][k];
+			eff_history_status2[k] = sampler->param_status[chain_id][j][k];
+		}	
+		for(int k = sampler->min_dim ; k <sampler->max_dim; k++){
+			eff_history_coord[k] = 0;
+			eff_history_coord2[k] = 0;
+			eff_history_status[k] = sampler->param_status[chain_id][i][k];
+			eff_history_status2[k] = sampler->param_status[chain_id][j][k];
+		}	
 		//We'll almost definitely need to do some transformation to it
 
 		//Since there's no way to feasibly store a substantial 
@@ -562,22 +575,26 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		//but still has the additional dimension. This means that the extra dimensions
 		//beyond min_dim are independent, but if the affects are indeed small, the benefit 
 		//of DE should still be recovered (this is only a proposal, after all)
-		if(sampler->min_dim != 0){
-			RJ_smooth_history(sampler, current_param,current_status, i, eff_history_coord, 
-				eff_history_status,chain_id);
-			RJ_smooth_history(sampler, current_param, current_status, j, eff_history_coord2, 
-				eff_history_status2,chain_id);
-		}
+		//if(sampler->min_dim != 0){
+		//	RJ_smooth_history(sampler, current_param,current_status, i, eff_history_coord, 
+		//		eff_history_status,chain_id);
+		//	RJ_smooth_history(sampler, current_param, current_status, j, eff_history_coord2, 
+		//		eff_history_status2,chain_id);
+		//}
 		//TODO
 		//For models that are composed of discrete models (ie model A or B 
 		//and min_dim = 0), I just need to continue picking history members 
 		//until I get two that match the correct model.If two elements that 
 		//contain a given model, we just use a gaussian step and abandon DE 
 		//for this step.
-		else{
-			debugger_print(__FILE__,__LINE__,"ERROR : diff ev is broken with min_dim ==0");
-		}
+		//else{
+		//	debugger_print(__FILE__,__LINE__,"ERROR : diff ev is broken with min_dim ==0");
+		//}
 		
+	}
+	else if(sampler->RJMCMC){
+		debugger_print(__FILE__,__LINE__,"ERROR : diff ev is broken with min_dim ==0");
+			
 	}
 	//Regular PTMCMC
 	else{
@@ -601,7 +618,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	}
 
 	
-	double alpha = .1;
+	double alpha = 1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
 	if(beta<.9)
 		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1][0]);
@@ -1413,8 +1430,8 @@ void allocate_sampler_mem(sampler *sampler)
 		gsl_rng_set(sampler->rvec[i] , i+1);
 	
 		if(sampler->tune){
-			sampler->check_stepsize_freq[i] = 500;
-			//sampler->check_stepsize_freq[i] = 50;
+			//sampler->check_stepsize_freq[i] = 500;
+			sampler->check_stepsize_freq[i] = 50;
 		}
 		else{
 			sampler->check_stepsize_freq[i] = sampler->N_steps;
@@ -2120,6 +2137,10 @@ void write_checkpoint_file(sampler *sampler, std::string filename)
 			
 			checkfile<<std::endl;
 		}
+ 		checkfile<<sampler->current_hist_pos[0];
+                for(int i =1 ; i<sampler->chain_N; i++){
+                        checkfile<<" , "<<sampler->current_hist_pos[i];
+                }
 	}
 	else{
 		checkfile<<"false"<<std::endl;
@@ -2350,6 +2371,15 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 					}
 				}
 			}
+			std::getline(file_in,line);
+			std::stringstream lineStreamhist(line);
+			i=0;
+			while(std::getline(lineStreamhist,item,',')){   
+			        samplerptr->current_hist_pos[i] = std::stoi(item);
+			
+			        i++;
+			}
+
 
 			for(int j =0 ;j<samplerptr->chain_N; j++)
 				samplerptr->de_primed[j] =true;
