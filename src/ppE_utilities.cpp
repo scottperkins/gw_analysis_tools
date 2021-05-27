@@ -345,7 +345,7 @@ template<class T>
 T EA_fully_restricted_phase1(source_parameters<T> *p)
 {
 	T out = 0;
-	out = -3./128. * ( -2./3. * ( p->s1_EA+p->s2_EA) - 1./2. * p->c14_EA + ( p->kappa3_EA - 1.)) ;
+	out = -3./128. * ( -2./3. * ( p->s1_EA+p->s2_EA) - 1./2. * (p->c1_EA + p->c4_EA) + ( p->kappa3_EA - 1.)) ;
 	//Minus one comes from sign choice from paper
 	return -1*out;
 }
@@ -677,8 +677,38 @@ int dispersion_lookup(double alpha)
 template<class T>
 void pre_calculate_EA_factors(source_parameters<T> *p)
 {
-	p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
-	
+  //more convenient parameters
+  p->c13_EA = p->c1_EA + p->c3_EA;
+  p->cminus_EA = p->c1_EA - p->c3_EA;
+  p->c14_EA = p->c1_EA + p->c4_EA;
+
+  //speeds of the different polarizations
+  p->cT_EA = sqrt(1./(1. - p->c13_EA));
+  p->cV_EA = sqrt((2.*p->c1_EA - p->c13_EA*p->cminus_EA)/(2.*(1.- p->c13_EA)*p->c14_EA));
+  p->cS_EA = sqrt(((2. - p->c14_EA)*(p->c13_EA + p->c2_EA))/((2.+3.*p->c2_EA + p->c13_EA)*(1. - p->c13_EA)*p->c14_EA));
+
+  //Relevant combinations of parameters
+  p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
+  p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
+  p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
+  
+  p->A1_EA = (1./p->cT_EA) + (2*p->c14_EA*p->c13_EA*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*(2.*p->c1_EA - p->c13_EA*p->cminus_EA)*p->cV_EA) + (3.*p->c14_EA*(p->Z_EA - 1.)*(p->Z_EA - 1.))/(2.*(2. - p->c14_EA)*p->cS_EA);
+  
+  p->A2_EA = -(2.*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*pow(p->cV_EA, 3.)) - 2.*(p->Z_EA - 1.)/((2. - p->c14_EA)*pow(p->cS_EA, 3.));
+  
+  p->A3_EA = 1./(2.*p->c14_EA* pow(p->cV_EA, 5.)) + 2./(3.*p->c14_EA * (2. - p->c14_EA)*pow(p->cS_EA, 5.));
+ 
+  p->B3_EA = 1./(9.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 5.));
+  
+  p->C_EA = 4./(3.*p->c14_EA * pow(p->cV_EA, 3.)) + 4./(3.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 3.));
+  
+  p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
+
+  //The functions that are actually used to compute the phase
+  p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
+  p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
+  p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
+
 }
 template void pre_calculate_EA_factors(source_parameters<double> *);
 template void pre_calculate_EA_factors(source_parameters<adouble> *);
