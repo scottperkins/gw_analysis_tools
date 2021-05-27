@@ -101,9 +101,9 @@ public:
 	//reached, then the history is updated every 20th step, always only
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
-	int history_length=500;
+	int history_length=1000;
 	//int history_length=5;
-	int history_update=2;
+	int history_update=10;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;

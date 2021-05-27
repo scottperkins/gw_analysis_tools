@@ -1602,7 +1602,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		max_chain_N_thermo_ensemble,initial_pos,seeding_var,ensemble_initial_pos, chain_temps, 
 		swp_freq, t0, nu,max_chunk_size,chain_distribution_scheme,
 		log_prior,MCMC_likelihood_wrapper, MCMC_fisher_wrapper,(void**)user_parameters,numThreads, pool, 
-		//log_prior,MCMC_likelihood_wrapper, NULL,(void **)user_parameters,numThreads, pool, 
+		//log_prior,MCMC_likelihood_wrapper, NULL,(void**)user_parameters,numThreads, pool, 
 		show_prog,statistics_filename,
 		chain_filename, likelihood_log_filename,checkpoint_filename);
 	if(!mod_struct->fisher_weights){
