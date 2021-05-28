@@ -135,7 +135,7 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	
 	int length = 10000;
 	double freqs[length];
-	double fhigh =10* pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double fhigh =pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
 	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
 	std::cout<<flow<< " " <<fhigh<<std::endl;
 	double delta_f = (fhigh - flow)/length;

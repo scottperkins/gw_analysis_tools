@@ -32,7 +32,7 @@
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
  *
- * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4
+ * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4, tc_T (time of coalescence of for tensor mode)
  */
 
 template<class T>
