@@ -4,6 +4,7 @@
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
+#include "ppE_IMRPhenomD_NRT.h"
 #include "ppE_IMRPhenomP.h"
 #include "gIMRPhenomD.h"
 #include "IMRPhenomD_NRT.h"
@@ -136,6 +137,18 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
+		else if(local_method == "ppE_IMRPhenomD_NRT_Inspiral")
+		{
+			ppE_IMRPhenomD_NRT_Inspiral<T> ppemodeld;
+			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
+
+		}
+		else if(local_method == "ppE_IMRPhenomD_NRT_IMR")
+		{
+			ppE_IMRPhenomD_NRT_IMR<T> ppemodeld;
+			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
+
+		}
 		else if(local_method == "gIMRPhenomD")
 		{
 			gIMRPhenomD<T> gmodeld;
@@ -198,6 +211,9 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			wp->hcross[i] = c2z*tempCross-s2z*tempPlus;
 		}
 	}
+	//Catch all for any modifications not captured in ppE formalism like extra polarizations
+	extra_modifications(generation_method, parameters,&params, wp,frequencies,length);
+
 	if(check_extra_polarizations(generation_method))
 	{
 		//TESTING MUST FIX
