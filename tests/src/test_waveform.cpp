@@ -104,8 +104,8 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	params.RA = 2.;
 	params.DEC = -1.1;
 	params.f_ref = 20;
-	params.NSflag1 = false;
-	params.NSflag2 = false;
+	params.NSflag1 = true;
+	params.NSflag2 = true;
 	params.horizon_coord = false;
 	params.shift_time=true;
 	params.shift_phase=true;
@@ -121,12 +121,17 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	params.Nmod = 4;
 	//params.bppe = new double[4];
 	//params.bppe[0] = -13;
+	//params.bppe[1] = -13;
+	//params.bppe[2] = -13;
+	//params.bppe[3] = -13;
 	params.betappe = new double[4];
 	//params.betappe[0] = .001;
-	params.betappe[0] = 100;
-	params.betappe[1] = 100;
-	params.betappe[2] = 100;
-	params.betappe[3] = 100;
+	params.betappe[0] = 1e-10;
+	params.betappe[1] = 1e-10;
+	params.betappe[2] = 1e-10;
+	params.betappe[3] = 1e-10;
+	params.tidal1 = 10;
+	params.tidal2 = 10;
 	
 	int length = 10000;
 	double freqs[length];

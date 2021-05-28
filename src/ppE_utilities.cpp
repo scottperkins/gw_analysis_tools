@@ -39,15 +39,16 @@ template<class T>
 void extra_modifications(std::string generation_method,gen_params_base<T> *gp, source_parameters<T> *p, waveform_polarizations<T> *wp,T *freqs, int length)
 {
 	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+		//debugger_print(__FILE__,__LINE__,"POST");
 		source_parameters<T> temp_sp;
 		temp_sp.populate_source_parameters(gp);
-		pre_calculate_EA_factors(&temp_sp);
 		temp_sp.phiRef = gp->phiRef;
 		temp_sp.f_ref = gp->f_ref;
 		temp_sp.shift_phase = gp->shift_phase;
 		temp_sp.shift_time = gp->shift_time;
 		temp_sp.tc = gp->tc;
 		temp_sp.betappe = gp->betappe;
+		pre_calculate_EA_factors(&temp_sp);
 		return EA_fully_restricted_v1_additional_modifications(&temp_sp,wp,freqs,length);
 	}
 	return ;
@@ -723,8 +724,8 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   p->c2_EA = p->betappe[1];
   p->c3_EA = p->betappe[2];
   p->c4_EA = p->betappe[3];
-  p->s1_EA = 1;
-  p->s2_EA = 1;
+  p->s1_EA = 1e-5;
+  p->s2_EA = 1e-5;
 
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;

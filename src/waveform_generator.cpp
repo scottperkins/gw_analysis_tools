@@ -1238,19 +1238,24 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
 		assign_mapping<T>(generation_method,&mapping,in);
-		out->Nmod = mapping.Nmod;
+		out->Nmod = in->Nmod;
 		out->bppe = new double[mapping.Nmod];
 		out->betappe = new T[out->Nmod];
 		//The input beta vector might contain theory specific 
 		//parameters that happen at multiple PN orders --
 		//save the beta output and assign at the end
-		T *temp_beta = new T[out->Nmod];
+		T *temp_beta = new T[mapping.Nmod];
 		for(int i = 0 ; i<out->Nmod; i++){
-			out->bppe[i]=mapping.bppe[i];
 			out->betappe[i]=in->betappe[i];
+		}
+		for(int i = 0 ; i<mapping.Nmod; i++){
+			out->bppe[i]=mapping.bppe[i];
 			temp_beta[i]=mapping.beta_fns[i](out);
 			
 		}
+		delete[] out->betappe;
+		out->betappe = new T[mapping.Nmod];
+		out->Nmod = mapping.Nmod;
 		for(int i = 0 ; i<out->Nmod; i++){
 			out->betappe[i]=temp_beta[i];
 		}
