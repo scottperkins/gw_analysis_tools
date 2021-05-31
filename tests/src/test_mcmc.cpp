@@ -2243,10 +2243,11 @@ int mcmc_injection(int argc, char *argv[])
 int mcmc_standard_test(int argc, char *argv[])
 {
 	int dimension = 2;
-	double initial_pos[2]={1,0.};
+	//double initial_pos[2]={90,90.};
+	double initial_pos[2]={0,0.};
 	double *seeding_var = NULL;
-	int N_steps = 10;
-	int chain_N= 10;
+	int N_steps = 10000;
+	int chain_N= 300;
 	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 5;
@@ -2260,7 +2261,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	for(int i =chain_N/2+1; i < chain_N;  i ++)
 		chain_temps[i] =  chain_temps[i-1] * c;
 	std::string autocorrfile = "";
-	std::string chainfile = "data/mcmc_output.csv";
+	std::string chainfile = "data/mcmc_output.hdf5";
 	std::string statfilename = "data/mcmc_statistics.txt";
 	std::string checkpointfile = "data/mcmc_checkpoint.csv";
 	//std::string LLfile = "data/mcmc_LL.csv";
@@ -2276,7 +2277,7 @@ int mcmc_standard_test(int argc, char *argv[])
 	//deallocate_3D_array(output, chain_N, N_steps, dimension);
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
-	int t0 = 100;
+	int t0 = 1000;
 	int nu = 10;
 	std::string chain_distribution_scheme="double";
 	int max_chunk_size = 10000;
@@ -2294,11 +2295,12 @@ int mcmc_standard_test(int argc, char *argv[])
 }
 double log_test (double *c,mcmc_data_interface *interface,void *parameters)
 {
+	//return 2;
 	double x = c[0];
 	double y = c[1];
 	double prefactor = 16./(M_PI*3.);
-	double pow1 = -x*x - pow((9+4*x*x +8*y),2);
-	double pow2 = -8*x*x -8*pow(y-2,2);
+	double pow1 = -x*x - pow_int((9+4*x*x +8*y),2);
+	double pow2 = -8*x*x -8*pow_int(y-2,2);
 	return log(prefactor*(std::exp(pow1) + .5*std::exp(pow2)));
 	//return 2.;
 }
