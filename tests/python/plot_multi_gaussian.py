@@ -4,11 +4,23 @@ import corner
 import matplotlib.pyplot as plt
 import emcee
 
+def AC(data):
+    h = 0
+    N = len(data)
+    acs = np.ones(int(N))
+    mean = np.mean(data)
+    for l in np.arange(int(N)):
+        acs[l] = 1./(N-h) * np.sum( (data[h:]-mean)*(data[:N-h]-mean) )
+        h +=1
+    acs/=acs[0]
+    return acs
+
 lab=np.arange(10)
 
 
-data = gmcmc.trim_thin_file("data/gaussian_output_0_.hdf5",ac=None,trim=None,recalc_ac=True)
-print(np.std(data[:,0]))
+data = gmcmc.trim_thin_file("data/gaussian_output_0.hdf5",ac=None,trim=None,recalc_ac=True)
+dim = len(data[0])
+print("Samples: ",np.std(data[:,0]))
 L1 = len(data)
 print(len(data))
 fig = corner.corner(data,show_titles=True, labels=lab)
@@ -21,6 +33,21 @@ for x in np.arange(len(data[0])):
     plt.savefig("plots/gwat_trace_{}.pdf".format(x))
     #plt.show()
     plt.close()
+
+samples  = 1e4
+
+data = data[::int(len(data)/samples)]
+
+acs  = None
+fig, ax = plt.subplots(nrows=dim,ncols=1,figsize=[8,2*dim])
+for d in np.arange(dim):
+    acs = AC(data[:,d])
+    acacs = AC(acs)
+    ax[d].plot(acs[1:int(.9*len(acs))],label=str(d)+" AC",alpha=.7)
+    ax[d].plot(acacs[1:int(.9*len(acs))],label=str(d)+" ACAC",alpha=.7)
+    ax[d].legend()
+plt.savefig("plots/AC_gaussian.pdf")
+plt.close()
 
 #data = gmcmc.trim_thin_file("data/gaussian_output_1_small_E.hdf5",ac=None,trim=None,recalc_ac=False)
 #print(np.std(data[:,0]))

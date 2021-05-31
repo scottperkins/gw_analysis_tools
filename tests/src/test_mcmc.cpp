@@ -22,6 +22,8 @@ double *multi_gaussian_prior_mean;
 double *multi_gaussian_like_mean;
 double multi_gaussian_scale = 1.;
 
+int stupid_test(int argc, char *argv[]);
+
 void RT_ERROR_MSG();
 int test_likelihood(int argc, char *argv[]);
 int mcmc_standard_test(int argc, char *argv[]);
@@ -123,10 +125,88 @@ int main(int argc, char *argv[])
 		std::cout<<"Test chain ensemble size"<<std::endl;
 		return ensemble_size(argc,argv);
 	}
+	else if(runtime_opt == 12){
+		std::cout<<"Stupid test"<<std::endl;
+		return stupid_test(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+//########################################################################
+//########################################################################
+double stupid_test_log_prior(double *param, mcmc_data_interface *interface, void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	for(int i = 0 ; i<interface->max_dim; i++){
+		if( fabs(param[i]) > 10){ return a;}
+	}
+	return 0;
+}
+
+double stupid_test_log_likelihood(double *param, mcmc_data_interface *interface, void *parameters)
+{
+	return 2;
+
+}
+void stupid_test_fisher(double *param, double **fisher, mcmc_data_interface *interface, void *parameters)
+{
+	double return_val=0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		for(int j = 0 ; j<interface->max_dim; j++){
+			if(i == j){
+
+				fisher[i][j] = 1;
+			}
+			else{	
+				fisher[i][j] = 10;
+			}
+		}
+	}
+
+}
+
+int stupid_test(int argc, char *argv[])
+{
+	int total_samples = 2e4;
+	int dimension = 20;	
+	int chain_N = 10;
+	int max_chain_N_thermo_ensemble = 5;	
+	int N_steps = total_samples / ( (double)chain_N / max_chain_N_thermo_ensemble);
+	std::cout<<"Number of steps per chain: "<<N_steps<<std::endl;
+	double *seeding_var=NULL;
+	double chain_temps[chain_N];
+	int swp_freq = 5;
+	int t0 = 3000;
+	int nu = 100;
+	int max_chunk_size = 100000;	
+	std::string chain_distribution_scheme = "double";
+	void ** user_parameters = NULL;
+	int numthreads = 10;
+	bool pool = true;
+	bool show_prog = true;
+	std::string modifier="";
+	std::string stat_file = "data/stat_stupid_test"+modifier+".txt";
+	std::string chain_file = "data/output_stupid_test"+modifier+".hdf5";
+	std::string likelihood_file = "data/likelihood_stupid_test"+modifier+".csv";
+	std::string check_file = "data/checkpoint_stupid_test"+modifier+".csv"	;
+	mcmc_sampler_output sampler_output(chain_N, dimension) ;
+	double **output = allocate_2D_array(N_steps,dimension);
+
+
+	//double *init_pos = &multi_gaussian_like_mean[0];
+	double *init_pos = new double[dimension];
+	for(int i = 0 ;i<dimension; i++){
+		//init_pos[i] = -10;
+		init_pos[i] = 0;
+	}
+	
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, (double**)NULL,chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, stupid_test_log_prior, stupid_test_log_likelihood, stupid_test_fisher, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
+	
+	deallocate_2D_array(output, chain_N,N_steps);
+	delete [] init_pos;
+	return 0;
 }
 //########################################################################
 //########################################################################
@@ -670,14 +750,14 @@ double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, v
 	for(int i = 0 ; i<interface->max_dim; i++){
 		if( fabs(param[i]) > 10){ return a;}
 	}
-	//double return_val=0;
-	//for(int i = 0 ; i<interface->max_dim; i++){
-	//	for(int j = 0 ; j<interface->max_dim; j++){
-	//		return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
-	//	}
-	//}
-	//return return_val/multi_gaussian_scale;
-	return 0;
+	double return_val=0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		for(int j = 0 ; j<interface->max_dim; j++){
+			return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
+		}
+	}
+	return return_val/multi_gaussian_scale;
+	//return 0;
 }
 
 double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters)
@@ -714,14 +794,17 @@ void fisher_multi_gaussian(double *param, double **fisher, mcmc_data_interface *
 
 int multiple_continue(int argc, char *argv[])
 {
+	int total_samples = 2e4;
 	int dimension = 3;	
-	int N_steps = 2000;
-	int chain_N = 100;
-	int max_chain_N_thermo_ensemble = 10;	
+	
+	int chain_N = 10;
+	int max_chain_N_thermo_ensemble = 5;	
+	int N_steps = total_samples/((double)chain_N/ max_chain_N_thermo_ensemble);
+	std::cout<<"Number of steps per chain: "<<N_steps<<std::endl;
 	double *seeding_var=NULL;
 	double chain_temps[chain_N];
-	int swp_freq = 10;
-	int t0 = 2000;
+	int swp_freq = 20;
+	int t0 = 3000;
 	int nu = 100;
 	int max_chunk_size = 100000;	
 	std::string chain_distribution_scheme = "double";
@@ -730,10 +813,10 @@ int multiple_continue(int argc, char *argv[])
 	bool pool = true;
 	bool show_prog = true;
 	std::string modifier="";
-	std::string stat_file = "data/gaussian_stat_0_"+modifier+".txt";
-	std::string chain_file = "data/gaussian_output_0_"+modifier+".hdf5";
-	std::string likelihood_file = "data/gaussian_likelihood_0_"+modifier+".csv";
-	std::string check_file = "data/gaussian_checkpoint_0_"+modifier+".csv"	;
+	std::string stat_file = "data/gaussian_stat_0"+modifier+".txt";
+	std::string chain_file = "data/gaussian_output_0"+modifier+".hdf5";
+	std::string likelihood_file = "data/gaussian_likelihood_0"+modifier+".csv";
+	std::string check_file = "data/gaussian_checkpoint_0"+modifier+".csv"	;
 	mcmc_sampler_output sampler_output(chain_N, dimension) ;
 	double **output = allocate_2D_array(N_steps,dimension);
 
@@ -755,7 +838,7 @@ int multiple_continue(int argc, char *argv[])
 	//multi_gaussian_like_mean[9]=2;
 	
 	multi_gaussian_prior_mean[0]=4;
-	multi_gaussian_prior_mean[1]=2;
+	multi_gaussian_prior_mean[1]=-2;
 	multi_gaussian_prior_mean[2]=2;
 	//multi_gaussian_prior_mean[3]=1;
 	//multi_gaussian_prior_mean[4]=2;
@@ -772,7 +855,7 @@ int multiple_continue(int argc, char *argv[])
 		for(int j = 0 ; j<dimension; j++){
 			if(j == i){
 				//multi_gaussian_prior_cov[i][j] = 25*multi_gaussian_like_mean[j];
-				multi_gaussian_prior_cov[i][j] = 25;
+				multi_gaussian_prior_cov[i][j] = 7;
 				//multi_gaussian_prior_cov[i][j] = 1000;
 				multi_gaussian_like_cov[i][j] = 1;
 			}
@@ -798,8 +881,8 @@ int multiple_continue(int argc, char *argv[])
 	//double *init_pos = &multi_gaussian_like_mean[0];
 	double *init_pos = new double[dimension];
 	for(int i = 0 ;i<dimension; i++){
-		//init_pos[i] = -10;
-		init_pos[i] = -multi_gaussian_like_mean[i];
+		init_pos[i] = -.9;
+		//init_pos[i] = -multi_gaussian_like_mean[i];
 	}
 	write_file("data/multi_gaussian_prior_cov.csv",multi_gaussian_prior_cov,dimension,dimension);
 	write_file("data/multi_gaussian_like_cov.csv",multi_gaussian_like_cov,dimension,dimension);
@@ -2575,4 +2658,5 @@ void RT_ERROR_MSG()
 	std::cout<<"9 --- Test evidence calculation"<<std::endl;
 	std::cout<<"10 --- Validate evidence calculation"<<std::endl;
 	std::cout<<"11 --- Ensemble size testing"<<std::endl;
+	std::cout<<"12 --- stupid test"<<std::endl;
 }
