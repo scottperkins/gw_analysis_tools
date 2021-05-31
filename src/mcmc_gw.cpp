@@ -1854,7 +1854,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=true;
 	}
-	if(dimension==6 && generation_method =="IMRPhenomD_NRT"){
+	else if(dimension==6 && generation_method =="IMRPhenomD_NRT"){
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, lambda1, lambda2"<<std::endl;
 		if(local_seeding){
 			(*seeding_var) = new double[dimension];

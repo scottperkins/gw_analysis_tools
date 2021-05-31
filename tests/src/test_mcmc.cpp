@@ -668,16 +668,16 @@ double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, v
 {
 	double a = -std::numeric_limits<double>::infinity();
 	for(int i = 0 ; i<interface->max_dim; i++){
-		if( fabs(param[i]) > 1000){ return a;}
+		if( fabs(param[i]) > 10){ return a;}
 	}
-	double return_val=0;
-	for(int i = 0 ; i<interface->max_dim; i++){
-		for(int j = 0 ; j<interface->max_dim; j++){
-			return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
-		}
-	}
-	return return_val/multi_gaussian_scale;
-	//return 1;
+	//double return_val=0;
+	//for(int i = 0 ; i<interface->max_dim; i++){
+	//	for(int j = 0 ; j<interface->max_dim; j++){
+	//		return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
+	//	}
+	//}
+	//return return_val/multi_gaussian_scale;
+	return 0;
 }
 
 double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters)
@@ -696,7 +696,7 @@ double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, vo
 	}
 	//double long_target = -pow(param[0]-30,2)/2 ;
 	//return log(exp(return_val1) + exp(return_val2))/multi_gaussian_scale;
-	return (return_val1 + log(1+exp(return_val2/return_val1)))/multi_gaussian_scale;
+	return (return_val1 + log(1+exp(return_val2-return_val1)))/multi_gaussian_scale;
 	//return (log(exp(return_val1) + exp(return_val2)+exp(long_target)))/multi_gaussian_scale;
 	//return 1;
 
@@ -771,13 +771,14 @@ int multiple_continue(int argc, char *argv[])
 		multi_gaussian_prior_fisher[i]=new double[dimension];
 		for(int j = 0 ; j<dimension; j++){
 			if(j == i){
-				multi_gaussian_prior_cov[i][j] = 25*multi_gaussian_like_mean[j];
+				//multi_gaussian_prior_cov[i][j] = 25*multi_gaussian_like_mean[j];
+				multi_gaussian_prior_cov[i][j] = 25;
 				//multi_gaussian_prior_cov[i][j] = 1000;
 				multi_gaussian_like_cov[i][j] = 1;
 			}
 			else{
 				multi_gaussian_prior_cov[i][j] = 0;
-				multi_gaussian_like_cov[i][j] = pow(-1, j+i) * .8;
+				multi_gaussian_like_cov[i][j] = pow(-1, j+i)*.5;
 				//multi_gaussian_like_cov[i][j] = 0;
 			}
 		}

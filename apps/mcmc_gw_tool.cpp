@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
 	std::string stat_file = str_dict["output stat file"];
 	std::string check_file = str_dict["checkpoint file"];
 	int dimension = int_dict["dimension"];
+	std::cout<<"Dimension: "<<dimension<<std::endl;
 	int max_chunk_size = int_dict["Max chunk size"];
 	std::cout<<"Max chunk size: "<<max_chunk_size<<std::endl;
 	
