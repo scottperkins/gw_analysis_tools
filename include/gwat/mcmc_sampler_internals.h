@@ -37,6 +37,15 @@ class sampler
 {
 public:
 	mcmc_data_interface **interfaces;
+
+	//####################################################	
+	//Testing
+	bool block_sample = false;
+	double block_sample_prob = .5;
+	int block_num = 2;
+	int block_boundary_ids[2] = {7,11};
+	//####################################################	
+	
 	bool tune=true;
 	int types_of_steps = 5;
 	double **step_prob;
@@ -101,9 +110,9 @@ public:
 	//reached, then the history is updated every 20th step, always only
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
-	int history_length=5000;
+	int history_length=1000;
 	//int history_length=5;
-	int history_update=5;
+	int history_update=10;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;
