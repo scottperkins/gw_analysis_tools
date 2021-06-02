@@ -1,5 +1,6 @@
 #include "mcmc_gw.h"
 #include "waveform_generator.h"
+#include "ppE_utilities.h"
 #include "io_util.h"
 #include "util.h"
 #include <iostream>
@@ -41,6 +42,8 @@ double DL_prior[2];
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_Pv2(double *pos,  mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -313,7 +316,7 @@ int main(int argc, char *argv[])
 	int *gIMR_alphai = NULL;
 	double *bppe = NULL;
 	std::cout<<"Generation method: "<<generation_method<<std::endl;
-	if(generation_method.find("ppE") != std::string::npos){
+	if(generation_method.find("ppE") != std::string::npos || check_theory_support(generation_method)){
 		Nmod = int_dict["Number of modifications"];
 		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
 		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
@@ -330,49 +333,49 @@ int main(int argc, char *argv[])
 		}
 		
 	}
-	if(generation_method.find("dCS") != std::string::npos
-	|| generation_method.find("EdGB") != std::string::npos){
-		if(generation_method.find("EdGB_GHO") != std::string::npos){
-			Nmod = 2;
-			std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
-			std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
-			bppe= new double[Nmod];
-			mod_priors = new double*[Nmod];
-			bppe[0] = -7;
-			bppe[1] = -5;
-			mod_priors[0]= new double[2];
-			mod_priors[1]= new double[2];
-			mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
-			mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
-			mod_priors[1][0] = dbl_dict["ppE beta "+std::to_string(1)+" minimum"];
-			mod_priors[1][1] = dbl_dict["ppE beta "+std::to_string(1)+" maximum"];
-			std::cout<<0<<" : "<<bppe[0]<<std::endl;
-			std::cout<<"Min"<<" : "<<mod_priors[0][0]<<std::endl;
-			std::cout<<"Max"<<" : "<<mod_priors[0][1]<<std::endl;
-			std::cout<<0<<" : "<<bppe[1]<<std::endl;
-			std::cout<<"Min"<<" : "<<mod_priors[1][0]<<std::endl;
-			std::cout<<"Max"<<" : "<<mod_priors[1][1]<<std::endl;
-		
-		}
-		else{
-			Nmod = 1;
-			std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
-			std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
-			bppe= new double[Nmod];
-			mod_priors = new double*[Nmod];
-			if(generation_method.find("dCS") != std::string::npos){
-				bppe[0] = -1;
-			}
-			if(generation_method.find("EdGB") != std::string::npos){
-				bppe[0] = -7;
-			}
-			mod_priors[0]= new double[2];
-			std::cout<<0<<" : "<<bppe[0]<<std::endl;
-			mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
-			mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
-		}
-		
-	}
+	//if(generation_method.find("dCS") != std::string::npos
+	//|| generation_method.find("EdGB") != std::string::npos){
+	//	if(generation_method.find("EdGB_GHO") != std::string::npos){
+	//		Nmod = 2;
+	//		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
+	//		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
+	//		bppe= new double[Nmod];
+	//		mod_priors = new double*[Nmod];
+	//		bppe[0] = -7;
+	//		bppe[1] = -5;
+	//		mod_priors[0]= new double[2];
+	//		mod_priors[1]= new double[2];
+	//		mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
+	//		mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
+	//		mod_priors[1][0] = dbl_dict["ppE beta "+std::to_string(1)+" minimum"];
+	//		mod_priors[1][1] = dbl_dict["ppE beta "+std::to_string(1)+" maximum"];
+	//		std::cout<<0<<" : "<<bppe[0]<<std::endl;
+	//		std::cout<<"Min"<<" : "<<mod_priors[0][0]<<std::endl;
+	//		std::cout<<"Max"<<" : "<<mod_priors[0][1]<<std::endl;
+	//		std::cout<<0<<" : "<<bppe[1]<<std::endl;
+	//		std::cout<<"Min"<<" : "<<mod_priors[1][0]<<std::endl;
+	//		std::cout<<"Max"<<" : "<<mod_priors[1][1]<<std::endl;
+	//	
+	//	}
+	//	else{
+	//		Nmod = 1;
+	//		std::cout<<"Number of ppE modifications: "<<Nmod<<std::endl;
+	//		std::cout<<"ppE b parmeters: "<<Nmod<<std::endl;
+	//		bppe= new double[Nmod];
+	//		mod_priors = new double*[Nmod];
+	//		if(generation_method.find("dCS") != std::string::npos){
+	//			bppe[0] = -1;
+	//		}
+	//		if(generation_method.find("EdGB") != std::string::npos){
+	//			bppe[0] = -7;
+	//		}
+	//		mod_priors[0]= new double[2];
+	//		std::cout<<0<<" : "<<bppe[0]<<std::endl;
+	//		mod_priors[0][0] = dbl_dict["ppE beta "+std::to_string(0)+" minimum"];
+	//		mod_priors[0][1] = dbl_dict["ppE beta "+std::to_string(0)+" maximum"];
+	//	}
+	//	
+	//}
 	if(generation_method.find("gIMR") != std::string::npos){
 		gNmod_phi = int_dict["Number of phi modifications"];
 		gNmod_sigma = int_dict["Number of sigma modifications"];
@@ -429,6 +432,7 @@ int main(int argc, char *argv[])
 		}
 		
 	}
+	int total_mods = Nmod+gNmod_phi+gNmod_sigma+gNmod_beta+gNmod_alpha;
 	bool pool = true;
 	if(pool){
 		debugger_print(__FILE__,__LINE__,"POOLING");
@@ -513,62 +517,115 @@ int main(int argc, char *argv[])
 	else{
 	
 		double(*lp)(double *param, mcmc_data_interface *interface, void *parameters);
-		if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
-			lp = &standard_log_prior_D;
+		if(generation_method.find("IMRPhenomD") != std::string::npos && (dimension-total_mods) == 4){
+			if(total_mods == 0){
+				lp = &standard_log_prior_D_intrinsic;
+			}
+			else{
+				lp = &standard_log_prior_D_intrinsic_mod;
+			}
 		}
-		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 15){
-			lp = &standard_log_prior_Pv2;
+		else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && (dimension-total_mods) == 6){
+			
+			if(total_mods == 0){
+				lp = &standard_log_prior_D_intrinsic_NRT;
+			}
+			else{
+				lp = &standard_log_prior_D_intrinsic_NRT_mod;
+			}
 		}
-		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
-			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos||
-			generation_method.find("PNSeries_ppE_IMRPhenomPv2") !=std::string::npos||
-			generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || 
-			generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos ||
-			generation_method.find("EdGB_GHOv1_IMRPhenomPv2") != std::string::npos|| 
-			generation_method.find("EdGB_GHOv2_IMRPhenomPv2") != std::string::npos|| 
-			generation_method.find("EdGB_GHOv3_IMRPhenomPv2") != std::string::npos)
-			&& dimension >= 16 ){
-			lp = &standard_log_prior_Pv2_mod;
+		else if(generation_method.find("IMRPhenomD") != std::string::npos && (dimension-total_mods) == 11){
+			if(total_mods == 0){
+				lp = &standard_log_prior_D;
+			}
+			else{
+				lp = &standard_log_prior_D_mod;
+			}
 		}
-		else if( (generation_method.find("ppE_IMRPhenomD") != std::string::npos 
-			|| generation_method.find("gIMRPhenomD") != std::string::npos
-			|| generation_method.find("PNSeries_ppE_IMRPhenomD") != std::string::npos
-			|| generation_method.find("dCS_IMRPhenomD") != std::string::npos 
-			|| generation_method.find("EdGB_IMRPhenomD") != std::string::npos 
-			|| generation_method.find("EdGB_GHOv1_IMRPhenomD") != std::string::npos
-			|| generation_method.find("EdGB_GHOv2_IMRPhenomD") != std::string::npos
-			|| generation_method.find("EdGB_GHOv3_IMRPhenomD") != std::string::npos)
-			&& dimension >= 11){
-			lp = &standard_log_prior_D_mod;
+		else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && (dimension-total_mods) == 13){
+			if(total_mods == 0){
+				lp = &standard_log_prior_D_NRT;
+			}
+			else{
+				lp = &standard_log_prior_D_NRT_mod;
+			}
 		}
-		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 8){
-			lp = &standard_log_prior_Pv2_intrinsic;
+		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && (dimension-total_mods) == 8){
+			if(total_mods == 0){
+				lp = &standard_log_prior_Pv2_intrinsic;
+			}
+			else{
+				lp = &standard_log_prior_Pv2_intrinsic_mod;
+			}
 		}
-		else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
-			lp = &standard_log_prior_D_intrinsic;
-		}
-		else if((generation_method.find("ppE_IMRPhenomD") != std::string::npos 
-			|| generation_method.find("gIMRPhenomD") != std::string::npos) 
-			&& dimension >= 4){
-			lp = &standard_log_prior_D_intrinsic_mod;
-		}
-		else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
-			|| generation_method.find("gIMRPhenomPv2") !=std::string::npos)
-			&& dimension >= 9 ){
-			lp = &standard_log_prior_Pv2_intrinsic_mod;
-		}
-		else if((generation_method.find("IMRPhenomD_NRT") != std::string::npos) && (dimension == 6)){
-			lp = &standard_log_prior_D_intrinsic_NRT;
-
-		}
-		else if((generation_method.find("IMRPhenomD_NRT") != std::string::npos) && (dimension == 13)){
-			lp = &standard_log_prior_D_NRT;
-
+		else if(generation_method.find("IMRPhenomPv2") != std::string::npos && (dimension-total_mods) == 15){
+			if(total_mods == 0){
+				lp = &standard_log_prior_Pv2;
+			}
+			else{
+				lp = &standard_log_prior_Pv2_mod;
+			}
 		}
 		else{
 			std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
 			return 1;
 		}
+		//if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 11){
+		//	lp = &standard_log_prior_D;
+		//}
+		//else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 15){
+		//	lp = &standard_log_prior_Pv2;
+		//}
+		//else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
+		//	|| generation_method.find("gIMRPhenomPv2") !=std::string::npos||
+		//	generation_method.find("PNSeries_ppE_IMRPhenomPv2") !=std::string::npos||
+		//	generation_method.find("dCS_IMRPhenomPv2") != std::string::npos || 
+		//	generation_method.find("EdGB_IMRPhenomPv2") != std::string::npos ||
+		//	generation_method.find("EdGB_GHOv1_IMRPhenomPv2") != std::string::npos|| 
+		//	generation_method.find("EdGB_GHOv2_IMRPhenomPv2") != std::string::npos|| 
+		//	generation_method.find("EdGB_GHOv3_IMRPhenomPv2") != std::string::npos)
+		//	&& dimension >= 16 ){
+		//	lp = &standard_log_prior_Pv2_mod;
+		//}
+		//else if( (generation_method.find("ppE_IMRPhenomD") != std::string::npos 
+		//	|| generation_method.find("gIMRPhenomD") != std::string::npos
+		//	|| generation_method.find("PNSeries_ppE_IMRPhenomD") != std::string::npos
+		//	|| generation_method.find("dCS_IMRPhenomD") != std::string::npos 
+		//	|| generation_method.find("EdGB_IMRPhenomD") != std::string::npos 
+		//	|| generation_method.find("EdGB_GHOv1_IMRPhenomD") != std::string::npos
+		//	|| generation_method.find("EdGB_GHOv2_IMRPhenomD") != std::string::npos
+		//	|| generation_method.find("EdGB_GHOv3_IMRPhenomD") != std::string::npos)
+		//	&& dimension >= 11){
+		//	lp = &standard_log_prior_D_mod;
+		//}
+		//else if(generation_method.find("IMRPhenomPv2") != std::string::npos && dimension == 8){
+		//	lp = &standard_log_prior_Pv2_intrinsic;
+		//}
+		//else if(generation_method.find("IMRPhenomD") != std::string::npos && dimension == 4){
+		//	lp = &standard_log_prior_D_intrinsic;
+		//}
+		//else if((generation_method.find("ppE_IMRPhenomD") != std::string::npos 
+		//	|| generation_method.find("gIMRPhenomD") != std::string::npos) 
+		//	&& dimension >= 4){
+		//	lp = &standard_log_prior_D_intrinsic_mod;
+		//}
+		//else if( (generation_method.find("ppE_IMRPhenomPv2") != std::string::npos  
+		//	|| generation_method.find("gIMRPhenomPv2") !=std::string::npos)
+		//	&& dimension >= 9 ){
+		//	lp = &standard_log_prior_Pv2_intrinsic_mod;
+		//}
+		//else if((generation_method.find("IMRPhenomD_NRT") != std::string::npos) && (dimension == 6)){
+		//	lp = &standard_log_prior_D_intrinsic_NRT;
+
+		//}
+		//else if((generation_method.find("IMRPhenomD_NRT") != std::string::npos) && (dimension == 13)){
+		//	lp = &standard_log_prior_D_NRT;
+
+		//}
+		//else{
+		//	std::cout<<"ERROR -- wrong detector/dimension combination for this tool -- Check mcmc_gw for general support"<<std::endl;
+		//	return 1;
+		//}
 
 		if(continue_from_checkpoint){
 			mcmc_sampler_output sampler_output(chain_N, dimension);
@@ -670,6 +727,16 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 		if( pos[11+i] <mod_priors[i][0] || pos[11+i] >mod_priors[i][1]){return a;}
 	}
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+
+}
+double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters)
+{
+	int dim =  interface->max_dim;
+	double a = -std::numeric_limits<double>::infinity();
+	for(int i = 0 ; i<dim - 13; i++){
+		if( pos[13+i] <mod_priors[i][0] || pos[13+i] >mod_priors[i][1]){return a;}
+	}
+	return standard_log_prior_D_NRT(pos,interface, parameters);
 
 }
 double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters)
@@ -775,6 +842,16 @@ double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *inte
 	if(pos[4]<tidal1_prior[0] || pos[4]>tidal1_prior[1]){return a;}
 	if(pos[5]<tidal2_prior[0] || pos[5]>tidal2_prior[1]){return a;}
 	return standard_log_prior_D_intrinsic(pos,interface, parameters);
+
+}
+double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters)
+{
+	int dim =  interface->max_dim;
+	double a = -std::numeric_limits<double>::infinity();
+	for(int i = 0 ; i<dim - 6; i++){
+		if( pos[6+i] <mod_priors[i][0] || pos[6+i] >mod_priors[i][1]){return a;}
+	}
+	return standard_log_prior_D_intrinsic_NRT(pos,interface,parameters) ;
 
 }
 double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters)
