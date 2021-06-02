@@ -493,6 +493,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 			//phase +=   (T)(tc*(f-f_ref) - phic);
+			//debugger_print(__FILE__,__LINE__,std::real(phase));
 			phase -=   (T)(tc*(f-f_ref) + phic);
 			waveform[j] = amp * std::exp(-i * phase);
 		}

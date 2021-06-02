@@ -724,8 +724,11 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   p->c2_EA = p->betappe[1];
   p->c3_EA = p->betappe[2];
   p->c4_EA = p->betappe[3];
-  p->s1_EA = 1e-5;
+  p->s1_EA = 2e-5;
   p->s2_EA = 1e-5;
+  p->V_x_EA = 0;
+  p->V_y_EA = 0;
+  p->V_z_EA = 0;
 
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;

@@ -1843,7 +1843,6 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double **seeding_var, bool local_seeding)
 {
 	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha  + mcmc_mod_struct->ppE_Nmod);
-	debugger_print(__FILE__,__LINE__,totalmod);
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
@@ -2814,6 +2813,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 			gen_params->Nmod=mod_struct->ppE_Nmod;
 			gen_params->betappe=new double[gen_params->Nmod];
 			base = dimension - mod_struct->ppE_Nmod;
+			//debugger_print(__FILE__,__LINE__,mod_struct->ppE_Nmod);
 		}
 		else if(generation_method.find("gIMR") != std::string::npos){
 			gen_params->Nmod_phi=mod_struct->gIMR_Nmod_phi;

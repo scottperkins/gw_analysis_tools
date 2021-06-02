@@ -2214,6 +2214,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 			}
 		}
 	}
+	//debugger_print(__FILE__,__LINE__,generation_method);
 	if( check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dim - a_params->Nmod;

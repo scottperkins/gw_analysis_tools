@@ -112,30 +112,31 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	
 	params.mass1 = 1.4;
 	params.mass2 = 1.3;
-	params.tc = 0;
+	params.tc = 6;
 	params.equatorial_orientation = false;
 	params.psi = 1.;
 	params.incl_angle = M_PI/3.;
 	params.gmst=3;
 
 	params.Nmod = 4;
-	//params.bppe = new double[4];
-	//params.bppe[0] = -13;
-	//params.bppe[1] = -13;
-	//params.bppe[2] = -13;
-	//params.bppe[3] = -13;
+	params.bppe = new double[4];
+	params.bppe[0] = -13;
+	params.bppe[1] = -13;
+	params.bppe[2] = -13;
+	params.bppe[3] = -13;
 	params.betappe = new double[4];
 	//params.betappe[0] = .001;
-	params.betappe[0] = 1e-10;
-	params.betappe[1] = 1e-10;
-	params.betappe[2] = 1e-10;
-	params.betappe[3] = 1e-10;
-	params.tidal1 = 10;
-	params.tidal2 = 10;
+	params.betappe[0] = 1;
+	params.betappe[1] = 1;
+	params.betappe[2] = 1;
+	params.betappe[3] = 1;
+	//params.tidal1 = 10;
+	//params.tidal2 = 10;
 	
 	int length = 10000;
 	double freqs[length];
-	double fhigh =pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	//double fhigh =pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
+	double fhigh =4000;//pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
 	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
 	std::cout<<flow<< " " <<fhigh<<std::endl;
 	double delta_f = (fhigh - flow)/length;
@@ -147,17 +148,35 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	output[0] = new double[length];
 	output[1] = new double[length];
 
+	std::complex<double> *hplus = new std::complex<double>[length];
+	std::complex<double> *hcross = new std::complex<double>[length];
+	
+	waveform_polarizations<double> wp;
+	wp.hplus = hplus;	
+	wp.hcross = hcross;	
 
-	fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT",&params, (double*)NULL);
-	for(int i =0 ; i<length ; i++){
-		output[0][i] = std::real(responseED[i]);
-		output[1][i] = std::imag(responseED[i]);
-	}
-	write_file("data/EA_fully_restricted_v1_waveform.csv",output, 2,length);
+
+	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT",&params, (double*)NULL);
+	fourier_waveform(freqs, length, &wp, "EA_fully_restricted_v1_IMRPhenomD",&params);
+	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD",&params, (double*)NULL);
+	//std::string dets[2] = {"Hanford","Livingston"};
+	//std::complex<double> **responses= new std::complex<double>*[2];
+	//responses[0] = new std::complex<double>[length];
+	//responses[1] = new std::complex<double>[length];
+	//create_coherent_GW_detection_reuse_WF(dets, 2, freqs, length, &params, "EA_fully_restricted_v1_IMRPhenomD",responses);
+	//delete[]responses[0];
+	//delete[]responses[1];
+	//delete [] responses;
+
+	//for(int i =0 ; i<length ; i++){
+	//	output[0][i] = std::real(responseED[i]);
+	//	output[1][i] = std::imag(responseED[i]);
+	//}
+	//write_file("data/EA_fully_restricted_v1_waveform.csv",output, 2,length);
 	//################################
 	//delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
 	delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
-	return 0;
+	delete [] hplus; delete [] hcross;
 	return 0;
 }
 int time_domain_testing(int argc, char *argv[])
