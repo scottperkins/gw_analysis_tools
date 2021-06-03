@@ -68,6 +68,8 @@ public:
 	/* Isolating the ensemble means the chains can only swap with those inside their ensemble*/
 	//bool isolate_ensembles=false;
 	bool isolate_ensembles=false;
+	/*Use isolate_ensembles_cold if you want the cold chains to only swap with the next chains in their ensemble, */
+	/*but want the rest of the chains to swap with whoever*/
 	bool isolate_ensembles_cold=true;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
