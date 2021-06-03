@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
 	std::string stat_file = str_dict["output stat file"];
 	std::string check_file = str_dict["checkpoint file"];
 	int dimension = int_dict["dimension"];
+	std::cout<<"Dimension: "<<dimension<<std::endl;
 	int max_chunk_size = int_dict["Max chunk size"];
 	std::cout<<"Max chunk size: "<<max_chunk_size<<std::endl;
 	
@@ -705,6 +706,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
 	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 	return log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+	//return -.5*pow_int(pos[0]-5,2)/.01/.01-.5*pow_int(pos[1]+.9,2)/.01/.01+log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
 double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *parameters)

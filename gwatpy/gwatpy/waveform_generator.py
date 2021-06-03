@@ -35,7 +35,39 @@ rlib.fourier_detector_response_py.argtypes=\
     ctypes.POINTER(ctypes.c_double), \
     ctypes.c_char_p, ctypes.c_char_p,ctypes.c_void_p]
 rlib.fourier_detector_response_py.restype=ctypes.c_int
+
+rlib.fourier_detector_response_py.argtypes=\
+    [ctypes.POINTER(ctypes.c_double), ctypes.c_int, ctypes.POINTER(ctypes.c_double), 
+    ctypes.POINTER(ctypes.c_double), \
+    ctypes.c_char_p, ctypes.c_char_p,ctypes.c_void_p]
+rlib.fourier_detector_response_py.restype=ctypes.c_int
+
+rlib.calculate_snr_py.argtypes=\
+    [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, 
+    ctypes.c_void_p, \
+    ctypes.POINTER(ctypes.c_double), ctypes.c_int,ctypes.c_char_p, ctypes.POINTER(ctypes.c_double),ctypes.c_bool]
+rlib.calculate_snr_py.restype=ctypes.c_double
 ####################################################################
+
+def calculate_snr(SN_curve, detector, generation_method, params, frequencies, integration_method, weights, log10_freq):
+    length = len(frequencies)
+    array_type = ctypes.c_double*length
+    f = np.ascontiguousarray(frequencies, dtype=ctypes.c_double)
+    w = np.ascontiguousarray(weights, dtype=ctypes.c_double)
+    out = rlib.calculate_snr_py(
+        SN_curve.encode('utf-8'),
+        detector.encode('utf-8'),
+        generation_method.encode('utf-8'),
+        params.obj,
+        array_type(*f),
+        length,
+        integration_method.encode('utf-8'),
+        array_type(*w),
+        log10_freq);
+    return out
+        
+        
+
 
 def time_waveform_generator(times, generation_method, parameters):
     length = len(times)

@@ -1198,6 +1198,9 @@ int boundary_number(std::string method)
 {
 	if(method.find("IMRPhenomP") != std::string::npos || 
 		method.find("IMRPhenomD")!=std::string::npos){
+		if(method.find("NRT") != std::string::npos){
+			return 7;	
+		}
 		return 5;
 	}
 	return -1;
@@ -1493,6 +1496,10 @@ void assign_freq_boundaries(double *freq_boundaries,
 	gen_params_base<double> *input_params, 
 	std::string generation_method)
 {
+	for(int i = 0 ; i<boundary_num; i++){
+		freq_boundaries[i] = -1;
+		intermediate_freqs[i] = -1;
+	}
 	if(input_params->equatorial_orientation){
 		transform_orientation_coords(input_params,generation_method,"");
 	}
@@ -1508,7 +1515,24 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.cosmology=internal_params.cosmology;
 	s_param.incl_angle=internal_params.incl_angle;
 	s_param.shift_time = input_params->shift_time;
+	if(generation_method.find("NRT") != std::string::npos){
+		if((input_params->tidal1 < 0 || input_params->tidal2<0) && input_params->tidal_weighted >= 0) {
+			s_param.tidal_weighted = input_params->tidal_weighted;
+		}
+		else if((input_params->tidal1 >= 0 && input_params->tidal2>=0) ) {
+			s_param.tidal1 = input_params->tidal1;
+			s_param.tidal2 = input_params->tidal2;
+			//arXiv 1402.5156
+			s_param.tidal_weighted = 8./13. * ( (1. + 7.*s_param.eta - 31.*s_param.eta*s_param.eta)*(s_param.tidal1 + s_param.tidal2) 
+						+ sqrt( 1. - 4.*s_param.eta ) * ( 1. + 9.*s_param.eta - 11. * s_param.eta*s_param.eta) * (s_param.tidal1 - s_param.tidal2) ) ;
+			s_param.delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*s_param.eta ) * ( 1. - 13272./1319. * s_param.eta + 8944./1319. * s_param.eta*s_param.eta) *
+						(s_param.tidal1 + s_param.tidal2) + ( 1. - 15910./1319. * s_param.eta + 32850./1319. * s_param.eta*s_param.eta + 3380./1319. 
+						* s_param.eta *s_param.eta*s_param.eta)*(s_param.tidal1-s_param.tidal2));
+		}
+		
+	}
 	lambda_parameters<adouble> lambda;
+	
 	//IMRPhenomPv2<double> model;
 	//model.PhenomPv2_inplane_spin(input_params);
 	if(	(
@@ -1562,11 +1586,6 @@ void assign_freq_boundaries(double *freq_boundaries,
 			freq_boundaries[2] = fpeak;
 		}
 		freq_boundaries[4] = .2/M;//End waveform
-		//###########################################
-		intermediate_freqs[0] = freq_boundaries[0]*.9;
-		for(int i = 1 ; i<boundary_num; i++){
-			intermediate_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
-		}
 	}
 	else if(
 		generation_method.find("IMRPhenomD") != std::string::npos
@@ -1603,11 +1622,49 @@ void assign_freq_boundaries(double *freq_boundaries,
 			freq_boundaries[2] = fpeak;
 		}
 		freq_boundaries[4] = .2/M;//End waveform
-		//###########################################
-		intermediate_freqs[0] = freq_boundaries[0]*.9;
-		for(int i = 1 ; i<boundary_num; i++){
-			intermediate_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
+	}
+	if(generation_method.find("NRT") != std::string::npos){
+		adouble kappa_temp = (3./16.) * s_param.tidal_weighted;
+		double kappa = kappa_temp.value();
+
+
+		double a0 = 0.3586;
+		double n1 = 3.35411203e-2;
+		double n2 = 4.31460284e-5;
+		double d1 = 7.54224145e-2;
+		double d2 = 2.23626859e-4;
+		adouble fmerger_temp = (1./(2.*s_param.M * M_PI))* a0* sqrt(s_param.mass2 / s_param.mass1) *(1.0 + n1 * kappa + n2 * kappa * kappa)/(1.0 + d1 * kappa + d2* kappa * kappa);
+		double fmerger = fmerger_temp.value();
+		//Sort the boundaries
+		double temp_boundaries[boundary_num];
+		double temp[2] = {fmerger, fmerger*1.2};
+		int base_ct=0, NRT_ct=0;
+		for (int i = 0 ; i<boundary_num; i++){
+			if(freq_boundaries[base_ct] >0){
+				if(freq_boundaries[base_ct] < temp[NRT_ct]){
+					temp_boundaries[i] = freq_boundaries[base_ct];
+					base_ct++;
+				}
+				else{
+					temp_boundaries[i] = temp[NRT_ct];
+					NRT_ct++;
+				}
+			}
+			else{
+				temp_boundaries[i] = temp[NRT_ct];
+				NRT_ct++;
+			}
 		}
+		
+		for (int i = 0 ; i<boundary_num; i++){
+			freq_boundaries[i] = temp_boundaries[i];
+		}
+		
+	}
+	//###########################################
+	intermediate_freqs[0] = freq_boundaries[0]*.9;
+	for(int i = 1 ; i<boundary_num; i++){
+		intermediate_freqs[i] = freq_boundaries[i-1]+(double)(freq_boundaries[i]-freq_boundaries[i-1])/2.;
 	}
 	if(check_mod(generation_method)){
 		if(generation_method.find("ppE")!= std::string::npos ||
