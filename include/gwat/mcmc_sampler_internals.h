@@ -68,6 +68,7 @@ public:
 	/* Isolating the ensemble means the chains can only swap with those inside their ensemble*/
 	//bool isolate_ensembles=false;
 	bool isolate_ensembles=false;
+	bool isolate_ensembles_cold=true;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
 	/* If true, the ensembles are only allowed to PT swap with those in their ensemble, but each ensemble is allowed to propose steps with the ensemble-approach. The frequency with which two ensembles are walked forward with this proposal is 1/ensemble_rate*/
