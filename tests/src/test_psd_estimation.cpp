@@ -111,8 +111,8 @@ int test_bayesline(int argc, char *argv[])
 	int samples = 1e4;
 	int chain_N = 60;
 	double chain_temps[chain_N];
-	int ensemble_chain_N = 15;
-	int swap_freq = 20;
+	int ensemble_chain_N = 20;
+	int swap_freq = 5;
 	int t0 = 2000;
 	int nu = 100;
 	int max_chunk_size = samples/10;

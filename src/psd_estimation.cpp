@@ -290,8 +290,8 @@ void model_PSD(double *pos, int *status, int model, bayesline_sampling_struct *p
 	smooth_component(pos, NS, p, p->frequencies, p->data_length, SN_S);
 	lorentzian_component(&(pos[p->N_S_MAX*2+2]), NL, p, p->frequencies, p->data_length, SN_L);
 	for(int i = 0; i<p->data_length; i++){
-		SN[i] = (SN_S[i] + SN_L[i]);
-		//SN[i] = (SN_S[i] );
+		//SN[i] = (SN_S[i] + SN_L[i]);
+		SN[i] = (SN_S[i] );
 	}
 
 	return;
