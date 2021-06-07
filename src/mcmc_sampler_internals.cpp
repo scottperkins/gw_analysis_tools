@@ -220,74 +220,168 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 	}
 	double scaling;
 	int beta;
+	double gamma;
 	//TODO : Need to specialize this more with RJ and min_dim == 0 case
 	//look for discrete model number
 	if(!sampler->RJMCMC || sampler->min_dim ==0){
-		//beta determines direction to step in eigen directions
-		beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
-		
-		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][3][0]);
-
-		scaling = 0.0;
-		//ensure the steps aren't ridiculous
-		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-		//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
-		//##########################################################33
-		//TESTING -- Scaling for annealing
-		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
-					sampler->chain_temps[chain_index];}
-		//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
-		//##########################################################33
-		//Take step
-		for(int i =0; i< sampler->max_dim;i++)
-		{
-			proposed_param[i] = current_param[i] +
-				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
-			proposed_status[i] = current_status[i];
+		if(sampler->block_sample){
+					
+			gamma = gsl_rng_uniform(sampler->rvec[chain_index]);
 		}
-		*proposed_model_status = *current_model_status;	
+		if(sampler->block_sample && gamma<=sampler->block_sample_prob){
+			int delta = (int)((sampler->block_num)*gsl_rng_uniform(sampler->rvec[chain_index]));
+			int range = 0, init_id = 0;
+			if (delta == 0){range = sampler->block_boundary_ids[0];}
+			else{ range = sampler->block_boundary_ids[delta] - sampler->block_boundary_ids[delta-1];init_id = sampler->block_boundary_ids[delta-1];}
+			beta = (int)((range)*(gsl_rng_uniform(sampler->rvec[chain_index]))) + init_id;
+			
+			double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+						 sampler->randgauss_width[chain_index][3][0]);
+
+			scaling = 0.0;
+			//ensure the steps aren't ridiculous
+			if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+			//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+			//##########################################################33
+			//TESTING -- Scaling for annealing
+			else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+						sampler->chain_temps[chain_index];}
+			//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
+			//##########################################################33
+			//Take step
+			for(int i =0; i< sampler->max_dim;i++)
+			{
+				proposed_param[i] = current_param[i] ;
+				proposed_status[i] = current_status[i];
+			}
+			for(int i =init_id; i< init_id+range;i++)
+			{
+				proposed_param[i] = current_param[i] +
+					alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+				proposed_status[i] = current_status[i];
+			}
+			*proposed_model_status = *current_model_status;	
+
+		}
+		else{
+			//beta determines direction to step in eigen directions
+			beta = (int)((sampler->max_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+			
+			double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+						 sampler->randgauss_width[chain_index][3][0]);
+
+			scaling = 0.0;
+			//ensure the steps aren't ridiculous
+			if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+			//else if(abs(sampler->fisher_vals[chain_index][beta])>1000){scaling = 1000.;}
+			//##########################################################33
+			//TESTING -- Scaling for annealing
+			else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+						sampler->chain_temps[chain_index];}
+			//else{scaling = abs(sampler->fisher_vals[chain_index][beta]);}
+			//##########################################################33
+			//Take step
+			for(int i =0; i< sampler->max_dim;i++)
+			{
+				proposed_param[i] = current_param[i] +
+					alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+				proposed_status[i] = current_status[i];
+			}
+			*proposed_model_status = *current_model_status;	
+		}
 		
 	}
 	//If RJPTMCMC and there's a base model, use the fisher for the base model, and gaussian steps for the modifications
 	else {
-		
-		//beta determines direction to step in eigen directions
-		beta = (int)((sampler->min_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
-		
-		double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					 sampler->randgauss_width[chain_index][3][0]);
-
-		scaling = 0.0;
-		//ensure the steps aren't ridiculous
-		if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
-		//else if(abs(sampler->fisher_vals[chain_index][beta])>10000){scaling = 1000.;}
-
-		else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
-					sampler->chain_temps[chain_index];}
-		//Take step
-		for(int i =0; i< sampler->min_dim;i++)
-		{
-			proposed_param[i] = current_param[i] +
-				alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
-			proposed_status[i] = current_status[i];
+		if(sampler->block_sample){
+					
+			gamma = gsl_rng_uniform(sampler->rvec[chain_index]);
 		}
-		//Generate new step for gaussian steps, using gaussian width	
-		for(int i =sampler->min_dim; i< sampler->max_dim;i++)
-		{
-			if(current_status[i] == 1){
-				alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-					sampler->randgauss_width[chain_index][0][i]);
-				proposed_param[i] = alpha+current_param[i];
+		if(sampler->block_sample && gamma<=sampler->block_sample_prob){
+			int delta = (int)((sampler->block_num)*gsl_rng_uniform(sampler->rvec[chain_index]));
+			int range = 0, init_id = 0;
+			if (delta == 0){range = sampler->block_boundary_ids[0];}
+			else{ range = sampler->block_boundary_ids[delta] - sampler->block_boundary_ids[delta-1];init_id = sampler->block_boundary_ids[delta-1];}
+			beta = (int)((range)*(gsl_rng_uniform(sampler->rvec[chain_index]))) + init_id;
+			
+			double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+						 sampler->randgauss_width[chain_index][3][0]);
+
+			scaling = 0.0;
+			//ensure the steps aren't ridiculous
+			if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+			//else if(abs(sampler->fisher_vals[chain_index][beta])>10000){scaling = 1000.;}
+
+			else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+						sampler->chain_temps[chain_index];}
+			//Take step
+			for(int i =0; i< sampler->max_dim;i++)
+			{
+				proposed_param[i] = current_param[i];
 				proposed_status[i] = current_status[i];
 			}
-			else{
-				proposed_param[i] = 0;
+
+
+			for(int i =init_id; i< range+init_id;i++)
+			{
+				if(i < sampler->min_dim){
+					proposed_param[i] = current_param[i] +
+						alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
+					proposed_status[i] = current_status[i];
+				}
+				else{
+					if(current_status[i] == 1){
+						alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+							sampler->randgauss_width[chain_index][0][i]);
+						proposed_param[i] = alpha+current_param[i];
+						proposed_status[i] = current_status[i];
+					}
+					else{
+						proposed_param[i] = 0;
+						proposed_status[i] = current_status[i];
+					}
+				}
+			}
+			*proposed_model_status = *current_model_status;	
+		
+		}
+		else{
+			//beta determines direction to step in eigen directions
+			beta = (int)((sampler->min_dim)*(gsl_rng_uniform(sampler->rvec[chain_index])));
+			
+			double alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+						 sampler->randgauss_width[chain_index][3][0]);
+
+			scaling = 0.0;
+			//ensure the steps aren't ridiculous
+			if(abs(sampler->fisher_vals[chain_index][beta])<10){scaling = 10.;}
+			//else if(abs(sampler->fisher_vals[chain_index][beta])>10000){scaling = 1000.;}
+
+			else{scaling = abs(sampler->fisher_vals[chain_index][beta])/
+						sampler->chain_temps[chain_index];}
+			//Take step
+			for(int i =0; i< sampler->min_dim;i++)
+			{
+				proposed_param[i] = current_param[i] +
+					alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 				proposed_status[i] = current_status[i];
 			}
-		}
-		*proposed_model_status = *current_model_status;	
-		
+			//Generate new step for gaussian steps, using gaussian width	
+			for(int i =sampler->min_dim; i< sampler->max_dim;i++)
+			{
+				if(current_status[i] == 1){
+					alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+						sampler->randgauss_width[chain_index][0][i]);
+					proposed_param[i] = alpha+current_param[i];
+					proposed_status[i] = current_status[i];
+				}
+				else{
+					proposed_param[i] = 0;
+					proposed_status[i] = current_status[i];
+				}
+			}
+			*proposed_model_status = *current_model_status;	
+		}	
 	}
 	if(sampler->proper_fisher){
 		double lp =sampler->lp(proposed_param,proposed_status, *proposed_model_status,sampler->interfaces[chain_index], sampler->user_parameters[chain_index]) ;
@@ -542,7 +636,19 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	double *eff_history_coord2 = new double[sampler->max_dim];
 	int *eff_history_status2 = new int[sampler->max_dim];
 	//if(sampler->RJMCMC){
+	double gamma = 0 ;	
+	int range=sampler->max_dim, init_id=0;
+	if(sampler->block_sample){
+				
+		gamma = gsl_rng_uniform(sampler->rvec[chain_id]);
+	}
+	if(sampler->block_sample && gamma<=sampler->block_sample_prob){
+		int delta = (int)((sampler->block_num)*gsl_rng_uniform(sampler->rvec[chain_id]));
+		if (delta == 0){range = sampler->block_boundary_ids[0];}
+		else{ range = sampler->block_boundary_ids[delta] - sampler->block_boundary_ids[delta-1];init_id = sampler->block_boundary_ids[delta-1];}
+	}
 	if(sampler->RJMCMC && sampler->min_dim>0){
+
 		//Pick a history member
 		int i = (int)((sampler->history_length-1)
 			*(gsl_rng_uniform(sampler->rvec[chain_id])));
@@ -624,6 +730,11 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1][0]);
 	for (int k = 0; k<sampler->max_dim; k++)
 	{
+		proposed_param[k] = current_param[k];
+		proposed_status[k]=current_status[k];
+	}
+	for (int k = init_id; k<range+init_id; k++)
+	{
 //		proposed_param[k] = current_param[k] + alpha*
 			//(sampler->history[chain_id][i][k]-sampler->history[chain_id][j][k]);
 		if(current_status[k] == 1){
@@ -633,7 +744,7 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 		else{
 			proposed_param[k] = 0;
 		}
-		proposed_status[k]=eff_history_status[k];
+		proposed_status[k]=current_status[k];
 	}
 	*proposed_model_status = *current_model_status;	
 	delete [] eff_history_coord;
@@ -874,11 +985,22 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		}
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
+		//else if(true)
 		{
-			sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][1]=0;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.9;
+
+			//Tailor to temperature
 			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.9;
+			sampler->step_prob[chain_index][3]=.1+.8/sampler->chain_temps[chain_index];
+			double sum = sampler->step_prob[chain_index][1]	
+				+sampler->step_prob[chain_index][2]
+				+sampler->step_prob[chain_index][3];
+			sampler->step_prob[chain_index][0]=1-sum;
+
 
 		}
 		//No fisher, but de ready
@@ -888,56 +1010,104 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=.7;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
+	
 
 		}
 		//all methods available
 		else
 		{
-			sampler->step_prob[chain_index][0]=.1;
-			sampler->step_prob[chain_index][1]=.4;
+			//sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][1]=.4;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.5;
+			//Tailor to temperature
+			sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.5;
+			sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
+			double sum = sampler->step_prob[chain_index][1]	
+				+sampler->step_prob[chain_index][2]
+				+sampler->step_prob[chain_index][3];
+			sampler->step_prob[chain_index][0]=1-sum;
 		}
 	}
 	else{
 		//no fisher and de not ready
 		if(!sampler->fisher_exist && !sampler->de_primed[chain_index])//Obviously must add up to 1
 		{
-			sampler->step_prob[chain_index][0]=.8;
+			//sampler->step_prob[chain_index][1]=0.;
+			//sampler->step_prob[chain_index][2]=0;
+			//sampler->step_prob[chain_index][3]=0;
+			//sampler->step_prob[chain_index][4]=.2;
+	
 			sampler->step_prob[chain_index][1]=0.;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
-			sampler->step_prob[chain_index][4]=.2;
+			sampler->step_prob[chain_index][4]=.8-.6/sampler->chain_temps[chain_index];
+			double sum = sampler->step_prob[chain_index][1]	
+				+sampler->step_prob[chain_index][2]
+				+sampler->step_prob[chain_index][3]
+				+sampler->step_prob[chain_index][4];
+			sampler->step_prob[chain_index][0]=1.-sum;
 		}
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
 		{
-			sampler->step_prob[chain_index][0]=.1;
-			sampler->step_prob[chain_index][1]=0;
-			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.7;
-			sampler->step_prob[chain_index][4]=.2;
+			//sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][1]=0;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.7;
+			//sampler->step_prob[chain_index][4]=.2;
+
+			sampler->step_prob[chain_index][1]=0.;
+			sampler->step_prob[chain_index][2]=0;
+			sampler->step_prob[chain_index][3]=.1 +.6/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.7-.5/sampler->chain_temps[chain_index];
+			double sum = sampler->step_prob[chain_index][1]	
+				+sampler->step_prob[chain_index][2]
+				+sampler->step_prob[chain_index][3]
+				+sampler->step_prob[chain_index][4];
+			sampler->step_prob[chain_index][0]=1-sum;
 
 		}
 		//No fisher, but de ready
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
 			
-			sampler->step_prob[chain_index][0]=.1;
-			sampler->step_prob[chain_index][1]=.7;
-			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.0;
-			sampler->step_prob[chain_index][4]=.2;
+			//sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.0;
+			//sampler->step_prob[chain_index][4]=.2;
+
+			sampler->step_prob[chain_index][1]=.5+.2/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][2]=0;
+			sampler->step_prob[chain_index][3]=0;
+			sampler->step_prob[chain_index][4]=.4-.2/sampler->chain_temps[chain_index];
+			double sum = sampler->step_prob[chain_index][1]	
+				+sampler->step_prob[chain_index][2]
+				+sampler->step_prob[chain_index][3]
+				+sampler->step_prob[chain_index][4];
+			sampler->step_prob[chain_index][0]=1-sum;
 
 		}
 		//all methods available
 		else
 		{
-			sampler->step_prob[chain_index][0]=.1;
-			sampler->step_prob[chain_index][1]=.1;
-			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.6;
-			sampler->step_prob[chain_index][4]=.2;
+			//sampler->step_prob[chain_index][0]=.1;
+			//sampler->step_prob[chain_index][1]=.1;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.6;
+			//sampler->step_prob[chain_index][4]=.2;
+
+			sampler->step_prob[chain_index][1]=.2+.1/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][2]=0;
+			sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.3-.2/sampler->chain_temps[chain_index];
+			double sum = sampler->step_prob[chain_index][1]	
+				+sampler->step_prob[chain_index][2]
+				+sampler->step_prob[chain_index][3]
+				+sampler->step_prob[chain_index][4];
+			sampler->step_prob[chain_index][0]=1-sum;
 
 		}
 	}

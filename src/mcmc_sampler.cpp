@@ -22,7 +22,6 @@
 #include "adolc/adolc.h"
 //#include <adolc/adolc_openmp.h>
 
-
 //double TMAX = 10e2;
 //double TMAX = 1e8;
 double TMAX = 1e10;
@@ -85,14 +84,31 @@ bool temp_neighborhood_check(int i, int j ){
 	//std::cout<<"Comparison: "<<samplerptr->chain_temps[i]-samplerptr->chain_temps[j]<<std::endl;
 	//std::cout<<"IDS: "<<i<<" "<<j<<std::endl;
 	if(samplerptr_global->restrict_swapping){
-		if(
-		(samplerptr_global->isolate_ensembles && check_list(j,samplerptr_global->chain_neighborhoods_ids[i],samplerptr_global->chain_neighbors[i])) 
-		|| 
-		(!samplerptr_global->isolate_ensembles && check_list(samplerptr_global->chain_temps[j],samplerptr_global->chain_neighborhoods[i],samplerptr_global->chain_neighbors[i]))){
-			return true;
+		if(samplerptr_global->isolate_ensembles_cold
+		&& 
+		((fabs(samplerptr_global->chain_temps[i]-1) < 1e-10) ||(fabs(samplerptr_global->chain_temps[j]-1) < 1e-10) ) 
+		){
+			if(
+			check_list(j,samplerptr_global->chain_neighborhoods_ids[i],samplerptr_global->chain_neighbors[i])
+			){
+				return true;
+			}
+			else {
+				return false;
+			}
+
 		}
 		else{
-			return false;
+			if(
+			(samplerptr_global->isolate_ensembles && check_list(j,samplerptr_global->chain_neighborhoods_ids[i],samplerptr_global->chain_neighbors[i])) 
+			|| 
+			(!samplerptr_global->isolate_ensembles && check_list(samplerptr_global->chain_temps[j],samplerptr_global->chain_neighborhoods[i],samplerptr_global->chain_neighbors[i]))
+			){
+				return true;
+			}
+			else{
+				return false;
+			}
 		}
 	}
 	return true;
@@ -1168,6 +1184,7 @@ void continue_RJPTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	samplerptr->tune=true;
 	samplerptr->burn_phase = true;
 	samplerptr->isolate_ensembles = false;
+	samplerptr->isolate_ensembles_cold = false;
 	samplerptr->update_RJ_width=update_RJ_width;
 	samplerptr->rj = RJ_proposal;
 	samplerptr->param_status= status;
@@ -1339,6 +1356,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	samplerptr->tune=true;
 	samplerptr->burn_phase = true;
 	samplerptr->isolate_ensembles = false;
+	samplerptr->isolate_ensembles_cold = false;
 	//################################################
 	//This typically isn't done, but the primary focus of annealing
 	//is to get the cold chains where they need to be.
@@ -1899,7 +1917,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = nu;
+	int dynamic_search_length = nu*2;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	sampler sampler_temp;
@@ -3569,6 +3587,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
@@ -3747,6 +3766,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 	samplerptr->dimension =dimension;
@@ -4249,6 +4269,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 
@@ -4422,6 +4443,7 @@ void continue_PTMCMC_MH_internal(sampler *sampler_in,
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 	//if Fisher is not provided, Fisher and MALA steps
