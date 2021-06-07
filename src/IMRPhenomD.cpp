@@ -587,7 +587,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	}
 	amp = (A0 * this->build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(frequency,&lambda,params,&pows,pn_phase_coeffs));
-	phase +=   (T)(tc*(frequency-f_ref) - phic);
+	phase -=   (T)(tc*(frequency-f_ref) - phic);
 	return amp * std::exp(-i * phase);
 	}
 
@@ -725,7 +725,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 			
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		phase[j] +=   (T)(tc*(f-f_ref) - phic);
+		phase[j] -=   (T)(tc*(f-f_ref) - phic);
 		phase[j]*=(-1);
 
 	}

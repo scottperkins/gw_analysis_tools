@@ -107,13 +107,15 @@ void create_coherent_GW_detection_reuse_WF(
 	assign_polarizations(generation_method, &wp);
 	wp.allocate_memory(length);
 	T tc_ref = gen_params->tc, tc = 0;
-	gen_params->tc=0;
+	gen_params->tc=tc_ref;
 	fourier_waveform(frequencies, length, &wp,generation_method, gen_params);
 	T DTOA = 0;
 	for (int i = 0 ; i<detector_N; i++){
 		DTOA = DTOA_DETECTOR(gen_params->RA,gen_params->DEC,gen_params->gmst, detectors[0],detectors[i]);
-		tc = tc_ref-DTOA;	
+		//tc = tc_ref-DTOA;	
+		tc = -DTOA;	
 		tc*=2*M_PI;
+		//gen_params->tc = tc;
 		fourier_detector_response_equatorial(frequencies, length,&wp, responses[i], gen_params->RA,gen_params->DEC,gen_params->psi, gen_params->gmst,(T *)NULL, gen_params->LISA_alpha0,gen_params->LISA_phi0, gen_params->theta_l, gen_params->phi_l, detectors[i]);
 		for(int j = 0 ; j<length; j++){
 			responses[i][j] *= exp(std::complex<T>(0,tc*frequencies[j]));

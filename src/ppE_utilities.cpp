@@ -32,8 +32,29 @@
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
  *
- * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4
+ * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4, tc_T (time of coalescence of for tensor mode)
  */
+
+template<class T>
+void extra_modifications(std::string generation_method,gen_params_base<T> *gp, source_parameters<T> *p, waveform_polarizations<T> *wp,T *freqs, int length)
+{
+	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+		//debugger_print(__FILE__,__LINE__,"POST");
+		source_parameters<T> temp_sp;
+		temp_sp.populate_source_parameters(gp);
+		temp_sp.phiRef = gp->phiRef;
+		temp_sp.f_ref = gp->f_ref;
+		temp_sp.shift_phase = gp->shift_phase;
+		temp_sp.shift_time = gp->shift_time;
+		temp_sp.tc = gp->tc;
+		temp_sp.betappe = gp->betappe;
+		pre_calculate_EA_factors(&temp_sp);
+		return EA_fully_restricted_v1_additional_modifications(&temp_sp,wp,freqs,length);
+	}
+	return ;
+}
+template void extra_modifications(std::string, gen_params_base<double> * gp,source_parameters<double> *, waveform_polarizations<double> *,double *, int );
+template void extra_modifications(std::string, gen_params_base<adouble> * gp,source_parameters<adouble> *, waveform_polarizations<adouble> *, adouble *, int);
 
 bool check_extra_polarizations(std::string generation_method)
 {
@@ -138,6 +159,9 @@ void deallocate_mapping(theory_ppE_map<T> *mapping){
 		}
 		delete [] mapping->beta_fns_ptrs;
 	}
+	//if(mapping->add_mod_fn){
+	//	delete mapping->add_mod_fn;
+	//}
 }
 template void deallocate_mapping(theory_ppE_map<adouble> *mapping);
 template void deallocate_mapping(theory_ppE_map<double> *mapping);
@@ -211,9 +235,6 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return EA_fully_restricted_phase0(p);} ;
 		mapping->beta_fns[1] = [](source_parameters<T> *p){return EA_fully_restricted_phase1(p);} ;
 		ins = true;
-		//Add this as another beta term prop to f!!!!
-		//params_in->tc += params_in->Luminosity_Distance*MPC_SEC*(1.- 1./params_in->cT_EA); //cT_EA must be dimensionless
-		//Adjust coalescence time here to account for time of arrival difference
 	}
 	else if(generation_method.find("BHEvaporation")!= std::string::npos){
 		mapping->Nmod = 1;
@@ -292,11 +313,17 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		}
 	}
 	else if(generation_method.find("PhenomD")!=std::string::npos){
-		if(ins){
+		if(ins && generation_method.find("NRT") == std::string::npos){
 			mapping->ppE_method = "ppE_IMRPhenomD_Inspiral";
 		}
-		else{
+		else if(!ins && generation_method.find("NRT") == std::string::npos){
 			mapping->ppE_method = "ppE_IMRPhenomD_IMR";
+		}
+		else if(ins && generation_method.find("NRT") != std::string::npos){
+			mapping->ppE_method = "ppE_IMRPhenomD_NRT_Inspiral";
+		}
+		else if(!ins && generation_method.find("NRT") != std::string::npos){
+			mapping->ppE_method = "ppE_IMRPhenomD_NRT_IMR";
 		}
 
 	}
@@ -305,6 +332,21 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 template void assign_mapping(std::string,theory_ppE_map<double>*,gen_params_base<double>*);
 template void assign_mapping(std::string,theory_ppE_map<adouble>*,gen_params_base<adouble>*);
 
+
+template<class T>
+void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param, waveform_polarizations<T> *wp, T *freqs, int length)
+{
+	T dtV = param->tc*(1./param->cT_EA-1./param->cV_EA)/(1-1./param->cT_EA);
+	T dtS = param->tc*(1./param->cT_EA-1./param->cS_EA)/(1-1./param->cT_EA);
+	for(int i = 0 ; i<length; i++){
+		std::complex<T> time_shift = ((T)1. + exp(std::complex<T>(0,2*M_PI*freqs[i]*dtV)+exp(std::complex<T>(0,2*M_PI*freqs[i]*dtS))));
+		wp->hplus[i]*=time_shift;
+		wp->hcross[i]*=time_shift;
+	} 
+	return ;
+}
+template void EA_fully_restricted_v1_additional_modifications(source_parameters<double> *param, waveform_polarizations<double> *wp, double *, int);
+template void EA_fully_restricted_v1_additional_modifications(source_parameters<adouble> *param, waveform_polarizations<adouble> *wp, adouble *, int);
 
 /* \brief PNSeries conversion
  *
@@ -331,6 +373,7 @@ template adouble PNSeries_beta(int , source_parameters<adouble> *);
 template<class T>
 T EA_fully_restricted_phase0(source_parameters<T> *p)
 {
+	pre_calculate_EA_factors(p);
 	T out = 0;
 	out = -3./224. * 1./p->kappa3_EA * pow(p->eta,2./5.) * p->epsilon_x_EA;
 	
@@ -343,6 +386,7 @@ template adouble EA_fully_restricted_phase0(source_parameters<adouble> *);
 template<class T>
 T EA_fully_restricted_phase1(source_parameters<T> *p)
 {
+	pre_calculate_EA_factors(p);
 	T out = 0;
 	out = -3./128. * ( -2./3. * ( p->s1_EA+p->s2_EA) - 1./2. * (p->c1_EA + p->c4_EA) + ( p->kappa3_EA - 1.)) ;
 	//Minus one comes from sign choice from paper
@@ -676,6 +720,13 @@ int dispersion_lookup(double alpha)
 template<class T>
 void pre_calculate_EA_factors(source_parameters<T> *p)
 {
+  p->c1_EA = p->betappe[0];
+  p->c2_EA = p->betappe[1];
+  p->c3_EA = p->betappe[2];
+  p->c4_EA = p->betappe[3];
+  p->s1_EA = 1e-5;
+  p->s2_EA = 1e-5;
+
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;

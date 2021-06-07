@@ -4,6 +4,7 @@
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
 #include "ppE_IMRPhenomD.h"
+#include "ppE_IMRPhenomD_NRT.h"
 #include "ppE_IMRPhenomP.h"
 #include "gIMRPhenomD.h"
 #include "IMRPhenomD_NRT.h"
@@ -136,6 +137,18 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
+		else if(local_method == "ppE_IMRPhenomD_NRT_Inspiral")
+		{
+			ppE_IMRPhenomD_NRT_Inspiral<T> ppemodeld;
+			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
+
+		}
+		else if(local_method == "ppE_IMRPhenomD_NRT_IMR")
+		{
+			ppE_IMRPhenomD_NRT_IMR<T> ppemodeld;
+			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
+
+		}
 		else if(local_method == "gIMRPhenomD")
 		{
 			gIMRPhenomD<T> gmodeld;
@@ -198,6 +211,9 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			wp->hcross[i] = c2z*tempCross-s2z*tempPlus;
 		}
 	}
+	//Catch all for any modifications not captured in ppE formalism like extra polarizations
+	extra_modifications(generation_method, parameters,&params, wp,frequencies,length);
+
 	if(check_extra_polarizations(generation_method))
 	{
 		//TESTING MUST FIX
@@ -1222,19 +1238,24 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
 		assign_mapping<T>(generation_method,&mapping,in);
-		out->Nmod = mapping.Nmod;
+		out->Nmod = in->Nmod;
 		out->bppe = new double[mapping.Nmod];
 		out->betappe = new T[out->Nmod];
 		//The input beta vector might contain theory specific 
 		//parameters that happen at multiple PN orders --
 		//save the beta output and assign at the end
-		T *temp_beta = new T[out->Nmod];
+		T *temp_beta = new T[mapping.Nmod];
 		for(int i = 0 ; i<out->Nmod; i++){
-			out->bppe[i]=mapping.bppe[i];
 			out->betappe[i]=in->betappe[i];
+		}
+		for(int i = 0 ; i<mapping.Nmod; i++){
+			out->bppe[i]=mapping.bppe[i];
 			temp_beta[i]=mapping.beta_fns[i](out);
 			
 		}
+		delete[] out->betappe;
+		out->betappe = new T[mapping.Nmod];
+		out->Nmod = mapping.Nmod;
 		for(int i = 0 ; i<out->Nmod; i++){
 			out->betappe[i]=temp_beta[i];
 		}
