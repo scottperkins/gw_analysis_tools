@@ -14,6 +14,7 @@ LFLAGS:= -fopenmp -L../lib  -L/home/sperkins/git-repos/gw_analysis_tools/build/l
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
 LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
+#LIBS:=-lm -lgsl -lgwat 
 
 SRCDIR:=src
 ODIR:=build

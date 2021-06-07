@@ -1917,7 +1917,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = nu;
+	int dynamic_search_length = nu*2;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	sampler sampler_temp;

@@ -1299,6 +1299,9 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	//######################################################
 	int chain_N = 0;
 	int status = chain_number_from_checkpoint_file(checkpoint_file_start, &chain_N);
+
+	debugger_print(__FILE__,__LINE__,"Number of chains: "+std::to_string(chain_N));
+
 	MCMC_user_param **user_parameters=NULL;
 	user_parameters = new MCMC_user_param*[chain_N];
 	for(int i = 0 ;i<chain_N; i++){
@@ -1347,7 +1350,16 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	}
 	//######################################################
 
-
+	//###########################################################
+	double trial[11] = {1,.9,.2,.9,.2,3,7,4,.24,0,0};
+	mcmc_data_interface i;
+	i.min_dim = 11; 
+	i.max_dim = 11; 
+	i.chain_id  = 0; 
+	i.chain_number  = 11; 
+	double ll = MCMC_likelihood_wrapper(trial, &i ,user_parameters[0]);
+	debugger_print(__FILE__,__LINE__,ll);
+	//###########################################################
 	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(checkpoint_file_start,sampler_output,output,  N_steps,  
 		max_chain_N_thermo_ensemble, chain_temps, 
 		swp_freq, t0, nu, max_chunk_size,chain_distribution_scheme,
@@ -1597,6 +1609,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		//user_parameters[i]->burn_lengths = mcmc_data_length;
 	}
 	//######################################################
+	//###########################################################
+	double trial[11] = {1,.9,.2,.9,.2,3,7,4,.24,0,0};
+	mcmc_data_interface i;
+	i.min_dim = 11; 
+	i.max_dim = 11; 
+	i.chain_id  = 0; 
+	i.chain_number  = 11; 
+	double ll = MCMC_likelihood_wrapper(trial, &i ,user_parameters[0]);
+	debugger_print(__FILE__,__LINE__,ll);
+	//###########################################################
 
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
