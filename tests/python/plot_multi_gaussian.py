@@ -17,6 +17,7 @@ def AC(data):
     acs/=acs[0]
     return acs
 
+
 #############################################
 #true_cov = np.loadtxt("data/multi_gaussian_like_cov.csv",delimiter=',')
 #true_mean = np.loadtxt("data/multi_gaussian_like_mean.csv",delimiter=',')
@@ -55,10 +56,14 @@ dim = len(data[0])
 print("Samples: ",np.std(data[:,0]))
 L1 = len(data)
 print(len(data))
-fig = corner.corner(data,show_titles=True, labels=lab,bins=50, weights=np.ones(len(data))/len(data),color= colors[0])
+
+#ranges = [(-10,10) for x in np.arange(dim)]
+ranges = [(0,10),(-4,4),(-1,8),(-4,4),(-4,8),(0,8)]
+
+fig = corner.corner(data,show_titles=True, labels=lab,bins=50, weights=np.ones(len(data))/len(data),color= colors[0],range=ranges)
 
 
-fig = corner.corner(data_true,fig=fig,show_titles=True, labels=lab,bins=50, weights=np.ones(len(data_true))/len(data_true),color= colors[1])
+fig = corner.corner(data_true,fig=fig,show_titles=True, labels=lab,bins=50, weights=np.ones(len(data_true))/len(data_true),color= colors[1],range=ranges)
 
 #plt.savefig("plots/true_gaussian_mcmc.pdf")
 #plt.close()
@@ -73,7 +78,7 @@ for l in np.arange(9):
     dim = len(data[0])
     L1 = len(data)
     print("Samples: ",L1)
-    fig = corner.corner(data,show_titles=True, fig = fig,labels=lab, bins=50,weights=np.ones(len(data))/len(data),color= colors[l+1])
+    fig = corner.corner(data,show_titles=True, fig = fig,labels=lab, bins=50,weights=np.ones(len(data))/len(data),color= colors[l+1],range=ranges)
 plt.savefig("plots/gaussian_mcmc.pdf")
 plt.close()
 

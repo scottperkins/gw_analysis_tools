@@ -25,14 +25,6 @@ priors = dict()
 for i in np.arange(len(names)):
     priors[names[i]] = bilby.core.prior.MultivariateGaussian(mvg,names[i]) 
 
-#result = bilby.run_sampler(
-#    likelihood=likelihood, priors=priors, sampler='dynesty', nlive=4000,
-#    outdir=outdir, label=label)
-
-#result = bilby.run_sampler(
-#    likelihood=likelihood, priors=priors, sampler='ptemcee', nsamples = 1e3,nwalkers=200,threads=8,pos0='prior',ntemps=10,
-#    outdir=outdir, label=label)
-
 if __name__ == "__main__":
     from multiprocessing import Pool
     #with Pool(8) as p:

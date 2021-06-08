@@ -900,7 +900,8 @@ int multiple_continue(int argc, char *argv[])
 	write_file("data/multi_gaussian_like_mean.csv",multi_gaussian_like_mean,dimension);
 	write_file("data/multi_gaussian_prior_mean.csv",multi_gaussian_prior_mean,dimension);
 	
-	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, (double**)NULL,chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
+	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, (double**)NULL,chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, fisher_multi_gaussian, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N_thermo_ensemble, init_pos, seeding_var, (double**)NULL,chain_temps, swp_freq, t0, nu, max_chunk_size, chain_distribution_scheme, log_prior_multi_gaussian, log_like_multi_gaussian, NULL, user_parameters, numthreads, pool, show_prog, stat_file, chain_file, likelihood_file, check_file);
 	
 	for(int i = 1 ; i<10; i++){
 		std::string stat_file_new = "data/gaussian_stat_"+std::to_string(i)+modifier+".txt";
