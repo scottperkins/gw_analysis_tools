@@ -14,7 +14,7 @@ def calculate_constants(GWAT,LAL,freqs):
     phic = L1 - G1 - 2 * np.pi * F1*tc
     return tc, phic
     #return 0, 0
-iterations = 100
+iterations = 10
 for i in np.arange(iterations):
     data = np.loadtxt("data/response_{}.csv".format(i),delimiter=',',unpack=True)
     plt.loglog(data[0],data[1]*data[1]+data[2]*data[2],label="LAL")
