@@ -750,13 +750,13 @@ double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, v
 	for(int i = 0 ; i<interface->max_dim; i++){
 		if( fabs(param[i]) > 10){ return a;}
 	}
-	double return_val=0;
-	for(int i = 0 ; i<interface->max_dim; i++){
-		for(int j = 0 ; j<interface->max_dim; j++){
-			return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
-		}
-	}
-	return return_val/multi_gaussian_scale;
+	//double return_val=0;
+	//for(int i = 0 ; i<interface->max_dim; i++){
+	//	for(int j = 0 ; j<interface->max_dim; j++){
+	//		return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
+	//	}
+	//}
+	//return return_val/multi_gaussian_scale;
 	return 0;
 }
 

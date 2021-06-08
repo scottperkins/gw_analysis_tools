@@ -11,11 +11,12 @@
 #include <gsl/gsl_complex_math.h>
 
 
-//#define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
 	#include <lal/LALSimIMR.h>
+	#include <lal/LALSimInspiral.h>
 	#include <lal/LALConstants.h>
 	#include <lal/FrequencySeries.h>
 	#include <lal/LALAtomicDatatypes.h>
@@ -609,8 +610,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 {
 	LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;	
 	std::cout.precision(15);
-	bool P = false;
-	bool NRT = true;
+	bool P = true;
+	bool NRT = false;
+	bool gIMR = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
@@ -630,8 +632,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		else if(k%3 == 2){ DETECTOR = "Livingston";}
 		COMPLEX16FrequencySeries *hptilde=NULL;
 		COMPLEX16FrequencySeries *hctilde=NULL;
-		double alpha[17];
-		for (int j = 0 ; j<17; j++){
+		double alpha[35];
+		for (int j = 0 ; j<35; j++){
 		  //alpha[j] = 0.1; 
 		  alpha[j] = gsl_rng_uniform(r);
 		}
@@ -688,6 +690,29 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		double deltaf = (f_max-f_min)/(length-1);
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = XLALCreateDict();
+		if(gIMR){
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi0(extraParams, alpha[17]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi1(extraParams, alpha[18]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi2(extraParams, alpha[19]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi3(extraParams, alpha[20]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi4(extraParams, alpha[21]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi6(extraParams, alpha[22]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi7(extraParams, alpha[23]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi6L(extraParams, alpha[33]);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi5L(extraParams, alpha[34]);
+
+			XLALSimInspiralWaveformParamsInsertNonGRDSigma2(extraParams, alpha[24]);
+			XLALSimInspiralWaveformParamsInsertNonGRDSigma3(extraParams, alpha[25]);
+			XLALSimInspiralWaveformParamsInsertNonGRDSigma4(extraParams, alpha[26]);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha2(extraParams, alpha[27]);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha3(extraParams, alpha[28]);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha4(extraParams, alpha[29]);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha5(extraParams, alpha[30]);
+			XLALSimInspiralWaveformParamsInsertNonGRDBeta2(extraParams, alpha[31]);
+			XLALSimInspiralWaveformParamsInsertNonGRDBeta3(extraParams, alpha[32]);
+
+		}
+			
 		//alpha[15] = 0;
 		//alpha[16] = 0; 
 		//alpha[15] = 2;
@@ -835,6 +860,71 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tc = .0 ;
 		param.tidal1 =lambda1 ;
 		param.tidal2 =lambda2 ;
+		if(gIMR){
+			//Not including logarithmic terms for now
+			param.Nmod_phi = 0;	
+			param.phii = new int[9];
+			param.delta_phi = new double[9];
+			param.phii[4] = 0;	
+			param.phii[0] = 1;	
+			param.phii[1] = 2;	
+			param.phii[2] = 3;	
+			param.phii[3] = 4;	
+			param.phii[5] = 6;	
+			param.phii[6] = 7;	
+			param.phii[7] = 8;	
+			param.phii[8] = 9;	
+			param.delta_phi[4] = alpha[17];	
+			param.delta_phi[0] = alpha[18];	
+			param.delta_phi[1] = alpha[19];	
+			param.delta_phi[2] = alpha[20];	
+			param.delta_phi[3] = alpha[21];	
+			param.delta_phi[5] = alpha[22];	
+			param.delta_phi[6] = alpha[23];	
+			param.delta_phi[7] = alpha[33];	
+			param.delta_phi[8] = alpha[34];	
+			param.Nmod_sigma = 3;	
+			param.sigmai = new int[3];
+			param.delta_sigma = new double[3];
+			param.sigmai[0] = 2;	
+			param.sigmai[1] = 3;	
+			param.sigmai[2] = 4;	
+			param.delta_sigma[0] = alpha[24];	
+			param.delta_sigma[1] = alpha[25];	
+			param.delta_sigma[2] = alpha[26];	
+			param.Nmod_beta = 2;	
+			param.betai = new int[2];
+			param.delta_beta = new double[2];
+			param.betai[0] = 2;	
+			param.betai[1] = 3;	
+			param.delta_beta[0] = alpha[31];	
+			param.delta_beta[1] = alpha[32];	
+			param.Nmod_alpha = 4;	
+			param.alphai = new int[4];
+			param.delta_alpha = new double[4];
+			param.alphai[0] = 2;	
+			param.alphai[1] = 3;	
+			param.alphai[2] = 4;	
+			param.alphai[3] = 5;	
+			param.delta_alpha[0] = alpha[27];	
+			param.delta_alpha[1] = alpha[28];	
+			param.delta_alpha[2] = alpha[29];	
+			param.delta_alpha[3] = alpha[30];	
+
+			//param.delta_phi[0] = 0;	
+			//param.delta_phi[1] = 0;	
+			//param.delta_phi[2] = 0;	
+			//param.delta_phi[3] = 0;	
+			//param.delta_phi[4] = 0;	
+			//param.delta_phi[5] = 0;	
+			//param.delta_phi[6] = 0;	
+
+			//param.Nmod_phi = 1;	
+			//param.phii = new int[1];
+			//param.delta_phi = new double[1];
+			//param.phii[0] = 6;	
+			//param.delta_phi[0] = alpha[22];	
+		}
 		//std::cout<<"tidal1: "<<param.tidal1<<"\t tidal2: "<<param.tidal2<<std::endl;
 		
 		std::complex<double> *response = new std::complex<double>[length];
@@ -854,6 +944,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			else{
 				method = "IMRPhenomD";
 			}
+		}
+		if(gIMR){
+			method = "g" + method;
 		}
 		start =clock();
 
@@ -891,6 +984,16 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		delete [] phaseLAL;
 		delete [] phaseGWAT;
 		delete [] frequencies;
+		if(gIMR){
+			delete [] param.phii;
+			delete [] param.delta_phi;
+			delete [] param.sigmai;
+			delete [] param.delta_sigma;
+			delete [] param.betai;
+			delete [] param.delta_beta;
+			delete [] param.alphai;
+			delete [] param.delta_alpha;
+		}
 		XLALDestroyREAL8Sequence(freqs);
 		XLALDestroyCOMPLEX16FrequencySeries(hptilde);
 		XLALDestroyCOMPLEX16FrequencySeries(hctilde);

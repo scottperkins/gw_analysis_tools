@@ -20,7 +20,7 @@ for i in np.arange(iterations):
     plt.loglog(data[0],data[1]*data[1]+data[2]*data[2],label="LAL")
     plt.loglog(data[0],data[3]*data[3]+data[4]*data[4],label="GWAT")
 #plt.legend()
-plt.xlim([100,8000])
+#plt.xlim([100,8000])
 
 #plt.ylim([10**-35,10**-55])
 
@@ -43,16 +43,16 @@ for i in np.arange(iterations):
 #plt.axvline(x=4901.91596895426, color='k')
 #plt.axvline(x=5882.29916274512, color='k')
 
-plt.ylim([10**-7,10**-5])
+#plt.ylim([10**-7,10**-5])
 plt.savefig("plots/diff_amp.pdf")
 plt.close()
 for i in np.arange(iterations):
     data = np.loadtxt("data/response_{}.csv".format(i),delimiter=',',unpack=True)
     tc, phic = calculate_constants(data[6], data[5],data[0])
-    data[5] += 10
-    data[6] += 10
-    data[6] += 2*np.pi*data[0] * tc
-    data[6] += phic
+    #data[5] += 10
+    #data[6] += 10
+    #data[6] += 2*np.pi*data[0] * tc
+    #data[6] += phic
 #    #plt.loglog(data[0],abs(data[1]-data[3])*2/(abs(data[1])+abs(data[3])))
 #    #plt.loglog(data[0],abs(data[2]-data[4])*2/(abs(data[2])+abs(data[4])))
 #    plt.loglog(data[0],abs(data[5]-data[6])*2/(abs(data[5])+abs(data[6])))
@@ -84,10 +84,10 @@ for i in np.arange(iterations):
     data = np.loadtxt("data/response_{}.csv".format(i),delimiter=',',unpack=True)
     
     tc, phic = calculate_constants(data[6], data[5],data[0])
-    data[5] += 10
-    data[6] += 10
-    data[6] += 2*np.pi*data[0] * tc
-    data[6] += phic
+    #data[5] += 10
+    #data[6] += 10
+    #data[6] += 2*np.pi*data[0] * tc
+    #data[6] += phic
 #    #plt.loglog(data[0],abs(data[1]-data[3])*2/(abs(data[1])+abs(data[3])))
 #    #plt.loglog(data[0],abs(data[2]-data[4])*2/(abs(data[2])+abs(data[4])))
 #    plt.loglog(data[0],abs(data[5]-data[6])*2/(abs(data[5])+abs(data[6])))
@@ -102,7 +102,7 @@ for i in np.arange(iterations):
 #plt.axvline(x=4897.83826041278, color='k')
 
 plt.legend()
-plt.xlim([0,8000])
+#plt.xlim([0,8000])
 
 #plt.xlim([1600,1700])
 plt.savefig("plots/comp_phase.pdf")
