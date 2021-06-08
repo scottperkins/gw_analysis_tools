@@ -750,13 +750,13 @@ double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, v
 	for(int i = 0 ; i<interface->max_dim; i++){
 		if( fabs(param[i]) > 10){ return a;}
 	}
-	//double return_val=0;
-	//for(int i = 0 ; i<interface->max_dim; i++){
-	//	for(int j = 0 ; j<interface->max_dim; j++){
-	//		return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
-	//	}
-	//}
-	//return return_val/multi_gaussian_scale;
+	double return_val=0;
+	for(int i = 0 ; i<interface->max_dim; i++){
+		for(int j = 0 ; j<interface->max_dim; j++){
+			return_val-= (multi_gaussian_prior_mean[i]-param[i])*(multi_gaussian_prior_mean[j]-param[j])/2*multi_gaussian_prior_fisher[i][j];
+		}
+	}
+	return return_val/multi_gaussian_scale;
 	return 0;
 }
 
@@ -847,6 +847,9 @@ int multiple_continue(int argc, char *argv[])
 	multi_gaussian_prior_mean[0]=4;
 	multi_gaussian_prior_mean[1]=-2;
 	multi_gaussian_prior_mean[2]=2;
+	multi_gaussian_prior_mean[3]=-1;
+	multi_gaussian_prior_mean[4]=2;
+	multi_gaussian_prior_mean[5]=3;
 	//multi_gaussian_prior_mean[3]=1;
 	//multi_gaussian_prior_mean[4]=2;
 	//multi_gaussian_prior_mean[5]=3;
@@ -862,7 +865,7 @@ int multiple_continue(int argc, char *argv[])
 		for(int j = 0 ; j<dimension; j++){
 			if(j == i){
 				//multi_gaussian_prior_cov[i][j] = 25*multi_gaussian_like_mean[j];
-				multi_gaussian_prior_cov[i][j] = 7;
+				multi_gaussian_prior_cov[i][j] = 5;
 				//multi_gaussian_prior_cov[i][j] = 0;
 				//multi_gaussian_prior_cov[i][j] = 1000;
 				multi_gaussian_like_cov[i][j] = 1;
@@ -889,7 +892,7 @@ int multiple_continue(int argc, char *argv[])
 	//double *init_pos = &multi_gaussian_like_mean[0];
 	double *init_pos = new double[dimension];
 	for(int i = 0 ;i<dimension; i++){
-		init_pos[i] = -.9;
+		init_pos[i] = -9;
 		//init_pos[i] = -multi_gaussian_like_mean[i];
 	}
 	write_file("data/multi_gaussian_prior_cov.csv",multi_gaussian_prior_cov,dimension,dimension);

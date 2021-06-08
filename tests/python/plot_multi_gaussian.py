@@ -4,7 +4,7 @@ import corner
 import matplotlib.pyplot as plt
 import emcee
 
-colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w', 'y', 'k', 'w']
+colors = ['b', 'g', 'r', 'c', 'm', 'y', 'm', 'y', 'y', 'm', 'y']
 
 def AC(data):
     h = 0
@@ -17,14 +17,34 @@ def AC(data):
     acs/=acs[0]
     return acs
 
-true_cov = np.loadtxt("data/multi_gaussian_like_cov.csv",delimiter=',')
-true_mean = np.loadtxt("data/multi_gaussian_like_mean.csv",delimiter=',')
-print(true_mean)
-print(true_cov)
-data_true1 = np.random.multivariate_normal(true_mean,true_cov,size=int(1e4))
-data_true2 = np.random.multivariate_normal(-1*true_mean,true_cov,size=int(1e4))
-data_true = np.insert(data_true1,0,data_true2,axis=0)
+#############################################
+#true_cov = np.loadtxt("data/multi_gaussian_like_cov.csv",delimiter=',')
+#true_mean = np.loadtxt("data/multi_gaussian_like_mean.csv",delimiter=',')
+#true_cov_prior = np.loadtxt("data/multi_gaussian_prior_cov.csv",delimiter=',')
+#true_mean_prior = np.loadtxt("data/multi_gaussian_prior_mean.csv",delimiter=',')
+#print(true_mean)
+#print(true_cov)
+#
+#cov1 = np.linalg.inv((np.linalg.inv(true_cov_prior)+np.linalg.inv(true_cov)))
+##mean1 = np.dot(true_mean,np.matmul(cov1,np.linalg.inv(true_cov))) +np.dot(true_mean_prior,np.matmul(cov1,np.linalg.inv(true_cov_prior))) 
+#mean1 = np.dot(np.matmul(cov1,np.linalg.inv(true_cov)),true_mean) +np.dot(np.matmul(cov1,np.linalg.inv(true_cov_prior)),true_mean_prior) 
+#print(mean1)
+#
+##data_true1 = np.random.multivariate_normal(true_mean,true_cov,size=int(1e4))
+#data_true1 = np.random.multivariate_normal(mean1,cov1,size=int(1e4))
+#
+#mean2 = np.dot(np.matmul(cov1,np.linalg.inv(true_cov)),-1*true_mean) +np.dot(np.matmul(cov1,np.linalg.inv(true_cov_prior)),true_mean_prior) 
+#print(mean2)
+#
+##data_true2 = np.random.multivariate_normal(-1*true_mean,true_cov,size=int(1e4))
+#data_true2 = np.random.multivariate_normal(mean2,cov1,size=int(1e4))
+#
+##data_true = np.insert(data_true1,0,data_true2,axis=0)
+#data_true = np.random.multivariate_normal(mean1+mean2,cov1+cov1,size=int(1e4))
+#############################################
 
+data_true = np.loadtxt("data/bilby/multivariate_gaussian_prior_samples.txt",skiprows=1)
+print("True samples: ",len(data_true))
 lab=np.arange(10)
 
 data = gmcmc.trim_thin_file("data/gaussian_output_0.hdf5",ac=None,trim=None,recalc_ac=False)
@@ -44,26 +64,15 @@ fig = corner.corner(data_true,fig=fig,show_titles=True, labels=lab,bins=50, weig
 #plt.close()
 #exit()
 
-#means = np.array([np.mean(data[:,0]),np.mean(data[:,1]),np.mean(data[:,2])])
-#print(np.mean(data[:,0]),np.mean(data[:,1]),np.mean(data[:,2]))
-#print(np.std(abs(data[:,0])),np.std(abs(data[:,1])),np.std(abs(data[:,2])))
-#stds= np.array([np.std(data[:,0]),np.std(data[:,1]),np.std(data[:,2])])
 data_full = np.copy(data)
 
 for l in np.arange(9):
+#for l in [2]:
     data = gmcmc.trim_thin_file("data/gaussian_output_{}.hdf5".format(l+1),ac=None,trim=None,recalc_ac=False)
-    #print(np.mean(data[:,0]),np.mean(data[:,1]),np.mean(data[:,2]))
-    #mean_temp=np.array([np.mean(data[:,0]),np.mean(data[:,1]),np.mean(data[:,2])])
-    #print(np.std(data[:,0]),np.std(data[:,1]),np.std(data[:,2]))
-    #std_temp = np.array([np.std(data[:,0]),np.std(data[:,1]),np.std(data[:,2])])
-    #print((mean_temp-means)/stds)
-    #print((std_temp-stds)/stds)
     data_full = np.insert(data_full, -1, np.copy(data),axis=0)
-    #print(np.shape(data_full))
     dim = len(data[0])
-    print("Samples: ",np.std(data[:,0]))
     L1 = len(data)
-    print(len(data))
+    print("Samples: ",L1)
     fig = corner.corner(data,show_titles=True, fig = fig,labels=lab, bins=50,weights=np.ones(len(data))/len(data),color= colors[l+1])
 plt.savefig("plots/gaussian_mcmc.pdf")
 plt.close()
