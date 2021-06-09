@@ -2398,6 +2398,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
+	bool cold_chain_only_writeout = true;
 	int step_status = 0;
 	double chain_temps[chain_N];
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
@@ -2506,11 +2507,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 			init=false;
 			debugger_print(__FILE__,__LINE__,"Finished init structure");
 			debugger_print(__FILE__,__LINE__,"Creating dump");
-			//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
-			//sampler_output->create_data_dump(false,false, chain_filename);
-			sampler_output->create_data_dump(true,false, chain_filename);
+			sampler_output->create_data_dump(cold_chain_only_writeout,false, chain_filename);
 			debugger_print(__FILE__,__LINE__,"Finished Creating dump");
-			//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 		}
 		else{
 			debugger_print(__FILE__,__LINE__,"Appending structure");
@@ -2524,11 +2522,13 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 				}
 			}
 			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,temp_pos);
-			//sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
+			debugger_print(__FILE__,__LINE__,"Appending FULL data dump");
+			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
 			//###################################################
 			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
+			//debugger_print(__FILE__,__LINE__,"Appending FULL data dump");
 			//sampler_output->append_to_data_dump("data/test_full.hdf5");
 			debugger_print(__FILE__,__LINE__,"Finished appending dump");
 		}
@@ -2752,6 +2752,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool continue_burn
 	)
 {
+	bool cold_chain_only_writeout = true;
 	bool local_continue_burn = continue_burn;
 	int status = 0;
 	double chain_temps[chain_N];
@@ -2920,9 +2921,10 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 				debugger_print(__FILE__,__LINE__,"Creating dump");
 				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
 				//sampler_output->create_data_dump(false,false, chain_filename);
-				sampler_output->create_data_dump(true,false, chain_filename);
+				sampler_output->create_data_dump(cold_chain_only_writeout,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			
+				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
 
 				//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 			}
