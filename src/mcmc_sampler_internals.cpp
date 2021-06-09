@@ -365,20 +365,25 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				proposed_param[i] = current_param[i] +
 					alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 				proposed_status[i] = current_status[i];
+					//std::cout<<"Delta p "<<i<<": "<<alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
 			}
 			//Generate new step for gaussian steps, using gaussian width	
 			for(int i =sampler->min_dim; i< sampler->max_dim;i++)
 			{
-				if(current_status[i] == 1){
-					alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-						sampler->randgauss_width[chain_index][0][i]);
-					proposed_param[i] = alpha+current_param[i];
-					proposed_status[i] = current_status[i];
-				}
-				else{
-					proposed_param[i] = 0;
-					proposed_status[i] = current_status[i];
-				}
+				//if(current_status[i] == 1){
+				//	alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+				//		sampler->randgauss_width[chain_index][0][i]);
+				//	proposed_param[i] = alpha+current_param[i];
+				//	proposed_status[i] = current_status[i];
+				//	//std::cout<<"Delta p "<<i<<": "<<alpha<<std::endl;
+				//}
+				//else{
+				//	proposed_param[i] = 0;
+				//	proposed_status[i] = current_status[i];
+				//	//std::cout<<"NO STEP "<<i<<": "<<std::endl;
+				//}
+				proposed_param[i] = current_param[i];
+				proposed_status[i] = current_status[i];
 			}
 			*proposed_model_status = *current_model_status;	
 		}	
