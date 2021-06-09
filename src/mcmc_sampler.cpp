@@ -2010,11 +2010,26 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//int dynamic_search_length = 200;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
-	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
-		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
-		initial_pos, seeding_var,ensemble_initial_pos, chain_temps, search_swap_freq, t0, nu,
-		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
+	//PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
+	//	dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
+	//	initial_pos, seeding_var,ensemble_initial_pos, chain_temps, search_swap_freq, t0, nu,
+	//	chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
+	//	numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
+	//
+	//deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
+
+	if(chain_distribution_scheme == "double"){
+		assign_ensemble_temps(chain_temps, chain_N, max_chain_N_thermo_ensemble,TMAX);	
+	}
+	else{
+		debugger_print(__FILE__,__LINE__,"Ooops, only double is allowed for chain_distribution_scheme");
+	}
+	
+	PTMCMC_MH_internal(temp_output, dimension, 
+		dynamic_search_length, chain_N,  
+		initial_pos, seeding_var,ensemble_initial_pos, chain_temps, search_swap_freq, 
+		log_prior, log_likelihood,fisher,user_parameters,
+		numThreads, pool,internal_prog,"","",checkpoint_file,true,true);
 	
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
