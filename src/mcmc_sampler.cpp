@@ -2522,8 +2522,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 				}
 			}
 			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,temp_pos);
-			debugger_print(__FILE__,__LINE__,"Appending FULL data dump");
-			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
+			//debugger_print(__FILE__,__LINE__,"Appending FULL data dump");
+			//sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
 			//###################################################
 			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 			debugger_print(__FILE__,__LINE__,"Appending dump");
