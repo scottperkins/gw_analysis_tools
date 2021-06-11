@@ -24,6 +24,70 @@
  */
 
 
+
+/*! \brief Samples from a multivariate-gaussian with covariance cov and mean mean, with dimension dim and puts the output in output
+ * Taken from blogpost: https://juanitorduz.github.io/multivariate_normal/
+ */
+int mvn_sample(
+	int samples, 
+	double *mean,
+	double **cov, 
+	int dim, 
+	double **output /**< [out] Size [samples][dim]*/
+	)
+{
+	gsl_matrix *matrix = gsl_matrix_alloc(dim,dim);
+	for(int i = 0 ;i<dim ; i++){
+		for (int j = 0 ; j<dim ; j++){
+			gsl_matrix_set(matrix, i, j , cov[i][j]);
+		}
+	}
+	int status = gsl_linalg_cholesky_decomp1(matrix);
+	double **newmat = new double*[dim];
+	for(int i = 0 ; i<dim ; i++){
+		newmat[i]=new double[dim];
+		for(int j = 0 ; j < dim; j++){
+			if(j<=i){
+				newmat[i][j] = gsl_matrix_get(matrix,i,j);
+			}
+			else{
+				newmat[i][j] = 0;
+			}
+		}
+	}
+	//double test = gsl_matrix_get(matrix, row, column);
+	
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	gsl_rng * r = gsl_rng_alloc(T);	
+	double *random_nums = new double[samples*dim];
+	for (int i = 0 ; i<samples*dim ; i++){
+		random_nums[i] = gsl_ran_gaussian(r, 1);
+	}
+	
+	for(int i = 0 ; i<samples; i++){
+		for(int j =0  ; j< dim ; j ++){
+			output[i][j] = mean[j];
+			for(int k = 0 ; k<dim ; k++){
+				output[i][j]+=newmat[j][k]*random_nums[i*dim +k ];
+			}
+		}
+		
+	}
+
+	for(int i = 0 ; i<dim ; i++){
+		delete [] newmat[i];
+	}
+	delete [] newmat;
+	delete [] random_nums;
+
+	gsl_matrix_free(matrix);
+	
+	gsl_rng_free(r);
+	return 0;
+}
+
+
 /*! \brief Just a quick utility to see if an item is in a list
  *
  * Didn't want to keep rewriting this loop

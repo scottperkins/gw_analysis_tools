@@ -557,6 +557,7 @@ static source_parameters<T> populate_source_parameters_old(
 			T t_c, 
 			bool sky_average) ;
 };
+int mvn_sample(int samples, double *mean, double **cov, int dim, double **output );
 void vector_union(std::vector<double> A, std::vector<double> B, std::vector<double> *C );
 void matrix_multiply(double **A, double **B, double **C,int dim1, int dim2,int dim3);
 template<class T>

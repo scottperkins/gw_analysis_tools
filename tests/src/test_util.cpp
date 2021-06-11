@@ -3,6 +3,7 @@
 #include <gwat/util.h>
 #include <gwat/detector_util.h>
 #include <gwat/io_util.h>
+#include <gwat/mvn_sampling.h>
 
 //#define _LAL
 #ifdef _LAL
@@ -16,6 +17,7 @@ int HDF5_testing_write(int argc,char *argv[]);
 int time_delay_testing(int argc,char *argv[]);
 int matrix_multiplication(int argc,char *argv[]);
 int vector_union_test(int argc,char *argv[]);
+int mvn_testing(int argc,char *argv[]);
 int GPS_to_GMST(int argc,char *argv[]);
 void RT_ERROR_MSG();
 int main(int argc, char *argv[])
@@ -45,10 +47,46 @@ int main(int argc, char *argv[])
 	else if(runtime_opt == 5){
 		return GPS_to_GMST(argc,argv);	
 	}
+	else if(runtime_opt == 6){
+		return mvn_testing(argc,argv);	
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+int mvn_testing(int argc,char *argv[])
+{
+	int samples = 10000;
+	int dim = 5;
+	double **cov = new double*[dim];
+	double mean[dim] ;
+	for(int i = 0 ; i<dim ; i++){
+		mean[i] = 2*i;
+		cov[i] = new double[dim];
+		for(int j = 0 ; j<dim ; j++){
+			if(j == i){
+				cov[i][j] = 1*(1+j);
+
+			}
+			else{
+				cov[i][j] = pow_int(-1,(i+j))*.9*(i+j)/2;
+			}
+		}
+	}
+	
+	double **output = allocate_2D_array(samples, dim );
+	mvn_sample(samples, mean, cov, dim , output);
+	write_file("data/test_mvn.csv",output, samples, dim);
+	write_file("data/test_mvn_cov.csv",cov, dim, dim);
+	write_file("data/test_mvn_mean.csv",mean,  dim);
+	deallocate_2D_array(output,samples,dim);
+	for(int i = 0 ; i<dim ; i++){
+		delete [] cov[i];
+	}
+	delete [] cov;
+	return 0;
+
 }
 int GPS_to_GMST(int argc,char *argv[])
 {
@@ -180,4 +218,5 @@ void RT_ERROR_MSG()
 	std::cout<<"3 --- Matrix Multiplication "<<std::endl;
 	std::cout<<"4 --- Vector Union "<<std::endl;
 	std::cout<<"5 --- GPS to GMST "<<std::endl;
+	std::cout<<"6 --- MVN sampling test "<<std::endl;
 }

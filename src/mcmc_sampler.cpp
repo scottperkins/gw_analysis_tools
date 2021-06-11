@@ -2753,6 +2753,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	)
 {
 	bool cold_chain_only_writeout = true;
+	bool calc_evidence = true;
 	bool local_continue_burn = continue_burn;
 	int status = 0;
 	double chain_temps[chain_N];
@@ -2903,18 +2904,20 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			else{
 				//##############################################
 				//Evidence calculation
-				debugger_print(__FILE__,__LINE__,"Deallocating integrated likelihoods (if set)");
-				sampler_output->dealloc_integrated_likelihoods();
-				debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
-				sampler.chain_temps = &chain_temps[0];
-				integrate_likelihood(&sampler);
-				int ensemble_size= (int)(sampler.chain_N/coldchains);
-				double integrated_likelihoods[ensemble_size];
-				int integrated_likelihoods_terms[ensemble_size];
-				combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
-				sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
-				debugger_print(__FILE__,__LINE__,"Calculating evidence");
-				sampler_output->calculate_evidence();
+				if(calc_evidence){
+					debugger_print(__FILE__,__LINE__,"Deallocating integrated likelihoods (if set)");
+					sampler_output->dealloc_integrated_likelihoods();
+					debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
+					sampler.chain_temps = &chain_temps[0];
+					integrate_likelihood(&sampler);
+					int ensemble_size= (int)(sampler.chain_N/coldchains);
+					double integrated_likelihoods[ensemble_size];
+					int integrated_likelihoods_terms[ensemble_size];
+					combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+					sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+					debugger_print(__FILE__,__LINE__,"Calculating evidence");
+					sampler_output->calculate_evidence();
+				}
 				//##############################################
 				
 				relax=false;
@@ -2940,6 +2943,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 			//##############################################
 			//Evidence calculation
+			if(calc_evidence){
 			debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
 			sampler.chain_temps = &chain_temps[0];
 			integrate_likelihood(&sampler);
@@ -2950,6 +2954,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
 			debugger_print(__FILE__,__LINE__,"Calculating evidence");
 			sampler_output->calculate_evidence();
+			}
 			//##############################################
 			//else{
 			debugger_print(__FILE__,__LINE__,"Appending dump");
@@ -3095,7 +3100,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	
 	//Maybe write new stat file format
 	std::cout<<std::endl;
-	debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(sampler_output->evidence));	
+	if(calc_evidence){
+		debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(sampler_output->evidence));	
+	}
 
 	//Cleanup
 	deallocate_3D_array(temp_output, chain_N, temp_length, dimension);

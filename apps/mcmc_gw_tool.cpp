@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <string>
 #include <limits>
+#include <eigen3/Eigen/Eigen>
 
 double T_mcmc_gw_tool;
 double T_merger; 
@@ -53,6 +54,7 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *in
 double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface, void *parameters);
 double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 double chirpmass_eta_jac(double m1,double m2);
+double standard_log_prior_D_intrinsic_Jeffreys(double *pos, mcmc_data_interface *interface,void *parameters);
 double chirpmass_q_jac(double chirpmass, double q);
 double aligned_spin_prior(double chi);
 int main(int argc, char *argv[])
@@ -204,6 +206,11 @@ int main(int argc, char *argv[])
 	if(generation_method.find("NRT") != std::string::npos){
 		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
 		std::cout<<"Range of tidal2: "<<tidal2_prior[0]<<" - "<<tidal2_prior[1]<<std::endl;
+	}
+	bool jeff_prior = false;
+	if(bool_dict.find("Jefferys prior") == bool_dict.end())
+	{
+		jeff_prior = bool_dict["Jeffreys prior"];
 	}
 	
 
@@ -521,6 +528,9 @@ int main(int argc, char *argv[])
 		if(generation_method.find("IMRPhenomD") != std::string::npos && (dimension-total_mods) == 4){
 			if(total_mods == 0){
 				lp = &standard_log_prior_D_intrinsic;
+				if(jeff_prior){
+					lp = &standard_log_prior_D_intrinsic_Jeffreys;
+				}
 			}
 			else{
 				lp = &standard_log_prior_D_intrinsic_mod;
@@ -691,6 +701,18 @@ int main(int argc, char *argv[])
 		free(data[i]);
 	free(data);
 
+	if(gNmod_phi != 0){
+		delete [] gIMR_phii;
+	}
+	if(gNmod_sigma != 0){
+		delete [] gIMR_sigmai;
+	}
+	if(gNmod_beta != 0){
+		delete [] gIMR_betai;
+	}
+	if(gNmod_alpha != 0){
+		delete [] gIMR_alphai;
+	}
 	if(generation_method.find("ppE") != std::string::npos){
 		delete [] bppe;	
 		for(int i = 0 ; i<Nmod ; i++){
@@ -855,6 +877,37 @@ double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *
 	}
 	return standard_log_prior_D_intrinsic_NRT(pos,interface,parameters) ;
 
+}
+double standard_log_prior_D_intrinsic_Jeffreys(double *pos, mcmc_data_interface *interface,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	int dim = interface->max_dim;
+	double lp = standard_log_prior_D_intrinsic(pos,interface,parameters);
+	lp = 0;//Not using the numeric value of standard prior, just the range
+
+	double **fisher	= new double*[dim];
+	double *fisher1D = new double[dim*dim];
+	for(int i = 0 ; i<dim; i++){
+		fisher[i] = new double[dim];
+	}
+	MCMC_fisher_wrapper(pos, fisher, interface,parameters);
+	for(int i = 0 ; i<dim; i++){
+		for(int j = 0 ; j<dim ; j++){
+			fisher1D[i*dim + j]  = fisher[i][j];
+		}
+	}
+	Eigen::Map<Eigen::MatrixXd> m(fisher1D,dim,dim);
+		
+	double det = m.determinant();
+	for(int i = 0 ; i<dim; i++){
+		delete [] fisher[i];	
+	}
+	delete [] fisher;
+	delete [] fisher1D;
+	if(std::isnan(sqrt(det)) || std::isinf(sqrt(det))){return a;}
+	//debugger_print(__FILE__,__LINE__,sqrt(det));
+	//std::cout<<sqrt(det)<<std::endl;
+	return sqrt(det);
 }
 double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters)
 {
