@@ -797,9 +797,9 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
 
   //Kristen!! I need alpha_ppE_2T_0_EA, gb1_EA, abL_EA, and gX1_EA defined, all as members of source_parameters<T>. They're already declared in util.h
   //Functions necessary for corrections to the amplitude
-  p->alpha_ppE_2T_0_EA = -(1./2.)*(1./Sqrt[p->kappa3_EA]) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
+  p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
   p->abL_EA = 1. + 2*p->beta2_EA; 
-  p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
+  p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
   p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
   
 }

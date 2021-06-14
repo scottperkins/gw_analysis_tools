@@ -1275,8 +1275,8 @@ template<class T>
 void cleanup_source_parameters(source_parameters<T> *params,std::string generation_method)
 {
 	if(check_theory_support(generation_method)){
-		delete [] params->betappe;	
-		delete [] params->bppe;	
+		delete [] params->betappe;params->betappe=NULL;
+		delete [] params->bppe;	params->bppe=NULL;
 	}
 
 }

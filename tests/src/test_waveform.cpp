@@ -40,6 +40,7 @@ int gIMR_testing(int argc, char *argv[]);
 int polarization_testing(int argc, char *argv[]);
 int BHEvaporation_test(int argc, char *argv[]);
 int EA_fully_restricted_test(int argc, char *argv[]);
+int EA_fully_restricted_parameterization_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
 
@@ -83,12 +84,86 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 7){
 		return EA_fully_restricted_test(argc,argv);
 	}
+	if(runtime_opt == 8){
+		return EA_fully_restricted_parameterization_test(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
 
+int EA_fully_restricted_parameterization_test(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .03;
+	params.spin2[2] = .01;
+	params.spin1[1] = .0;
+	params.spin2[1] = .0;
+	params.spin1[0] = .0;
+	params.spin2[0] = .0;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = true;
+	params.NSflag2 = true;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.mass1 = 1.4;
+	params.mass2 = 1.3;
+	params.tc = 6;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	params.Nmod = 4;
+	params.bppe = new double[4];
+	//These don't matter, don't worry about them -- overwritten by prep_source_parameters
+	params.bppe[0] = -13;
+	params.bppe[1] = -13;
+	params.bppe[2] = -13;
+	params.bppe[3] = -13;
+	params.betappe = new double[4];
+	//params.betappe[0] = .001;
+	params.tidal1 = 10;
+	params.tidal2 = 10;
+
+	source_parameters<double> sp ;
+
+
+	int iterations = 100;
+	int dim = 4;// Increase for every factor you want to output
+	double **output = allocate_2D_array(iterations, dim);
+
+	for (int i = 0 ; i<iterations; i++){
+		//Make these random numbers
+		params.betappe[0] = 1; // c1
+		params.betappe[1] = 1; // c2
+		params.betappe[2] = 1; // c3
+		params.betappe[3] = 1; // c4
+		prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
+		std::cout<<sp.betappe[0]<<std::endl;
+		
+		output[i][0] = params.betappe[0];
+		output[i][1] = params.betappe[1];
+		output[i][2] = params.betappe[2];
+		output[i][3] = params.betappe[3];
+		
+		cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	}
+	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
+	deallocate_2D_array(output, iterations, dim);
+	delete [] params.betappe;
+	delete [] params.bppe;
+	return 0;
+}
 int EA_fully_restricted_test(int argc, char *argv[])
 {
 	gen_params params;	
@@ -131,8 +206,8 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	params.betappe[1] = 1;
 	params.betappe[2] = 1;
 	params.betappe[3] = 1;
-	//params.tidal1 = 10;
-	//params.tidal2 = 10;
+	params.tidal1 = 10;
+	params.tidal2 = 10;
 	
 	int length = 10000;
 	double freqs[length];
@@ -153,14 +228,14 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	//std::complex<double> *hcross = new std::complex<double>[length];
 	
 	waveform_polarizations<double> wp;
-	assign_polarizations("EA_fully_restricted_v1_IMRPhenomD",&wp);
+	assign_polarizations("EA_fully_restricted_v1_IMRPhenomD_NRT",&wp);
 	wp.allocate_memory(length);
 	//wp.hplus = hplus;	
 	//wp.hcross = hcross;	
 
 
 	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT",&params, (double*)NULL);
-	fourier_waveform(freqs, length, &wp, "EA_fully_restricted_v1_IMRPhenomD",&params);
+	fourier_waveform(freqs, length, &wp, "EA_fully_restricted_v1_IMRPhenomD_NRT",&params);
 	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD",&params, (double*)NULL);
 	//std::string dets[2] = {"Hanford","Livingston"};
 	//std::complex<double> **responses= new std::complex<double>*[2];
@@ -944,4 +1019,5 @@ void RT_ERROR_MSG()
 	std::cout<<"5 --- test BHEvaporation waveforms"<<std::endl;
 	std::cout<<"6 --- test time domain waveforms"<<std::endl;
 	std::cout<<"7 --- EA fully restricted waveform"<<std::endl;
+	std::cout<<"8 --- EA fully restricted waveform parameterization"<<std::endl;
 }
