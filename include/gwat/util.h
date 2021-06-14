@@ -528,6 +528,8 @@ struct source_parameters
   //Necessary functions of the c's
   T alpha1_EA;
   T alpha2_EA;
+  T beta1_EA;
+  T beta2_EA; 
   T Z_EA;
   T A1_EA;
   T A2_EA;
