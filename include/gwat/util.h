@@ -544,6 +544,11 @@ struct source_parameters
   T s2_EA;
   T S_EA;
 
+  T alpha_ppE_2T_0_EA = 0 ;
+  T gb1_EA = 0 ;
+  T abL_EA = 0 ;
+  T gX1_EA = 0 ;
+
 
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);

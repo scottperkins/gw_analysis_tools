@@ -49,17 +49,17 @@ int time_waveform(T *times, /**< double array of frequencies for the waveform to
 
 		}
 	}
-	if(check_extra_polarizations(generation_method))
-	{
-		//TESTING MUST FIX
-		for (int i =0;i < length; i++)
-		{
-			wp->hx[i] = wp->hplus[i];
-			wp->hy[i] = wp->hplus[i];
-			wp->hb[i] = wp->hplus[i];
-			wp->hl[i] = wp->hplus[i];
-		}
-	}
+	//if(check_extra_polarizations(generation_method))
+	//{
+	//	//TESTING MUST FIX
+	//	for (int i =0;i < length; i++)
+	//	{
+	//		wp->hx[i] = wp->hplus[i];
+	//		wp->hy[i] = wp->hplus[i];
+	//		wp->hb[i] = wp->hplus[i];
+	//		wp->hl[i] = wp->hplus[i];
+	//	}
+	//}
 	cleanup_source_parameters(&params,generation_method);
 
 	return status ;
@@ -214,17 +214,17 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	//Catch all for any modifications not captured in ppE formalism like extra polarizations
 	extra_modifications(generation_method, parameters,&params, wp,frequencies,length);
 
-	if(check_extra_polarizations(generation_method))
-	{
-		//TESTING MUST FIX
-		for (int i =0;i < length; i++)
-		{
-			wp->hx[i] = wp->hplus[i];
-			wp->hy[i] = wp->hplus[i];
-			wp->hb[i] = wp->hplus[i];
-			wp->hl[i] = wp->hplus[i];
-		}
-	}
+	//if(check_extra_polarizations(generation_method))
+	//{
+	//	//TESTING MUST FIX
+	//	for (int i =0;i < length; i++)
+	//	{
+	//		wp->hx[i] = wp->hplus[i];
+	//		wp->hy[i] = wp->hplus[i];
+	//		wp->hb[i] = wp->hplus[i];
+	//		wp->hl[i] = wp->hplus[i];
+	//	}
+	//}
 	cleanup_source_parameters(&params,generation_method);
 
 	return status ;

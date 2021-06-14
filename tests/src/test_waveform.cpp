@@ -3,6 +3,7 @@
 #include "gwat/detector_util.h"
 #include "gwat/waveform_util.h"
 #include "gwat/pn_waveform_util.h"
+#include "gwat/ppE_utilities.h"
 //#include "gwat/waveform_generator.h"
 //#include "gwat/IMRPhenomD.h"
 #include "gwat/io_util.h"
@@ -148,12 +149,14 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	output[0] = new double[length];
 	output[1] = new double[length];
 
-	std::complex<double> *hplus = new std::complex<double>[length];
-	std::complex<double> *hcross = new std::complex<double>[length];
+	//std::complex<double> *hplus = new std::complex<double>[length];
+	//std::complex<double> *hcross = new std::complex<double>[length];
 	
 	waveform_polarizations<double> wp;
-	wp.hplus = hplus;	
-	wp.hcross = hcross;	
+	assign_polarizations("EA_fully_restricted_v1_IMRPhenomD",&wp);
+	wp.allocate_memory(length);
+	//wp.hplus = hplus;	
+	//wp.hcross = hcross;	
 
 
 	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT",&params, (double*)NULL);
@@ -175,8 +178,9 @@ int EA_fully_restricted_test(int argc, char *argv[])
 	//write_file("data/EA_fully_restricted_v1_waveform.csv",output, 2,length);
 	//################################
 	//delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
-	delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
-	delete [] hplus; delete [] hcross;
+	delete[] params.betappe;delete [] params.bppe;delete [] output[0];delete [] output[1];delete [] output;
+	wp.deallocate_memory();
+	//delete [] hplus; delete [] hcross;
 	return 0;
 }
 int time_domain_testing(int argc, char *argv[])

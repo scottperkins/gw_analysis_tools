@@ -46,7 +46,7 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 		temp_sp.f_ref = gp->f_ref;
 		temp_sp.shift_phase = gp->shift_phase;
 		temp_sp.shift_time = gp->shift_time;
-		temp_sp.tc = gp->tc;
+		temp_sp.incl_angle = gp->incl_angle;
 		temp_sp.betappe = gp->betappe;
 		pre_calculate_EA_factors(&temp_sp);
 		return EA_fully_restricted_v1_additional_modifications(&temp_sp,wp,freqs,length);
@@ -59,6 +59,9 @@ template void extra_modifications(std::string, gen_params_base<adouble> * gp,sou
 bool check_extra_polarizations(std::string generation_method)
 {
 	if(generation_method == "polarization_test_IMRPhenomD"){
+		return true;
+	}
+	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
 		return true;
 	}
 	return false;
@@ -74,6 +77,14 @@ void assign_polarizations(std::string generation_method, waveform_polarizations<
 		wp->active_polarizations[3]=true;
 		wp->active_polarizations[4]=true;
 		wp->active_polarizations[5]=true;
+	}
+	else if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+		wp->active_polarizations[0]=true;
+		wp->active_polarizations[1]=true;
+		wp->active_polarizations[2]=true;
+		wp->active_polarizations[3]=true;
+		wp->active_polarizations[4]=true;
+		wp->active_polarizations[5]=false;
 	}
 	else{	
 		wp->active_polarizations[0]=true;
@@ -336,13 +347,32 @@ template void assign_mapping(std::string,theory_ppE_map<adouble>*,gen_params_bas
 template<class T>
 void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param, waveform_polarizations<T> *wp, T *freqs, int length)
 {
+	std::complex<T> *hall = new std::complex<T>[length];//Waveform common to all polarizations
+
+	T ci = cos(param->incl_angle);
+	T si = sin(param->incl_angle);
+	for(int i = 0 ; i<length; i++){
+		hall[i] = wp->hplus[i] / std::complex<T>(-1*(1+ci*ci),0) ;	
+	}
 	T dtV = param->tc*(1./param->cT_EA-1./param->cV_EA)/(1-1./param->cT_EA);
 	T dtS = param->tc*(1./param->cT_EA-1./param->cS_EA)/(1-1./param->cT_EA);
+	std::complex<T> shift_V ;
+	std::complex<T> shift_S ;
+	T u2m2=0;
 	for(int i = 0 ; i<length; i++){
-		std::complex<T> time_shift = ((T)1. + exp(std::complex<T>(0,2*M_PI*freqs[i]*dtV)+exp(std::complex<T>(0,2*M_PI*freqs[i]*dtS))));
-		wp->hplus[i]*=time_shift;
-		wp->hcross[i]*=time_shift;
+		u2m2 = pow(M_PI * param->chirpmass * freqs[i],-2./3.);
+		//std::complex<T> time_shift = ( exp(std::complex<T>(0,2*M_PI*freqs[i]*dtV)+exp(std::complex<T>(0,2*M_PI*freqs[i]*dtS))));
+		//wp->hplus[i]*=time_shift;
+		//wp->hcross[i]*=time_shift;
+		shift_V = exp(std::complex<T>(0,2*M_PI*freqs[i] *param->tc* dtV));
+		shift_S = exp(std::complex<T>(0,-2*M_PI*freqs[i] *param->tc* dtS));
+		wp->hplus[i] *= (std::complex<T>(1 + u2m2 * param->alpha_ppE_2T_0_EA,0) + shift_V + shift_S);
+		wp->hcross[i] *= (std::complex<T>(1 + u2m2 * param->alpha_ppE_2T_0_EA,0) + shift_V + shift_S);
+		wp->hb[i] = hall[i] * std::complex<T>(0.5,0) * u2m2* param->alpha_ppE_2T_0_EA* param->gb1_EA * (std::complex<T>(1,0) - param->abL_EA)*shift_S*si*si;
+		wp->hx[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * ci;
+		wp->hy[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * std::complex<T>(0,1);
 	} 
+	delete [] hall;
 	return ;
 }
 template void EA_fully_restricted_v1_additional_modifications(source_parameters<double> *param, waveform_polarizations<double> *wp, double *, int);
@@ -720,6 +750,7 @@ int dispersion_lookup(double alpha)
 template<class T>
 void pre_calculate_EA_factors(source_parameters<T> *p)
 {
+  //Kristen!! I need alpha_ppE_2T_0_EA, gb1_EA, abL_EA, and gX1_EA defined, all as members of source_parameters<T>. They're already declared in util.h
   p->c1_EA = p->betappe[0];
   p->c2_EA = p->betappe[1];
   p->c3_EA = p->betappe[2];
