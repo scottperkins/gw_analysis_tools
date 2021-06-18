@@ -25,6 +25,39 @@
 
 
 
+double gsl_LU_lndet(double **matrix, int dim)
+{
+	double lndet = 0;
+	gsl_matrix *GSLmatrix = gsl_matrix_alloc(dim, dim);
+	for(int row=0; row<dim; row++){
+		for(int column = 0 ;column<dim; column++){
+			gsl_matrix_set(GSLmatrix, row, column, matrix[row][column]);
+		}
+	}
+	gsl_permutation *p = gsl_permutation_alloc(dim);
+    	int s;
+	gsl_linalg_LU_decomp(GSLmatrix, p, &s);
+	lndet = gsl_linalg_LU_lndet(GSLmatrix);
+	gsl_matrix_free(GSLmatrix);
+	gsl_permutation_free(p);
+	return lndet;
+}
+
+int mvn_sample(
+	int samples, 
+	double *mean,
+	double **cov, 
+	int dim, 
+	double **output /**< [out] Size [samples][dim]*/
+	)
+{
+	gsl_rng_env_setup();
+	const gsl_rng_type *T = gsl_rng_default;
+	gsl_rng * r = gsl_rng_alloc(T);	
+	mvn_sample(samples, mean, cov, dim , r, output);	
+	gsl_rng_free(r);
+}
+
 /*! \brief Samples from a multivariate-gaussian with covariance cov and mean mean, with dimension dim and puts the output in output
  * Taken from blogpost: https://juanitorduz.github.io/multivariate_normal/
  */
@@ -33,6 +66,7 @@ int mvn_sample(
 	double *mean,
 	double **cov, 
 	int dim, 
+	gsl_rng *r,
 	double **output /**< [out] Size [samples][dim]*/
 	)
 {
@@ -57,9 +91,6 @@ int mvn_sample(
 	}
 	//double test = gsl_matrix_get(matrix, row, column);
 	
-	gsl_rng_env_setup();
-	const gsl_rng_type *T = gsl_rng_default;
-	gsl_rng * r = gsl_rng_alloc(T);	
 	double *random_nums = new double[samples*dim];
 	for (int i = 0 ; i<samples*dim ; i++){
 		random_nums[i] = gsl_ran_gaussian(r, 1);
@@ -83,7 +114,6 @@ int mvn_sample(
 
 	gsl_matrix_free(matrix);
 	
-	gsl_rng_free(r);
 	return 0;
 }
 

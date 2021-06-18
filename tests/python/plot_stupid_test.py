@@ -25,18 +25,18 @@ for d in np.arange(dim):
 plt.savefig("plots/stupid_test.pdf")
 plt.close()
 
-samples  = 1e4
+#samples  = 1e4
 
-data = data[::int(len(data)/samples)]
+#data = data[::int(len(data)/samples)]
 
-acs  = None
-fig, ax = plt.subplots(nrows=dim,ncols=1,figsize=[8,2*dim])
-for d in np.arange(dim):
-    acs = AC(data[:,d])
-    acacs = AC(acs)
-    ax[d].plot(acs[1:int(.9*len(acs))],label=str(d)+" AC",alpha=.7)
-    ax[d].plot(acacs[1:int(.9*len(acs))],label=str(d)+" ACAC",alpha=.7)
-    ax[d].legend()
-plt.savefig("plots/AC_stupid_test.pdf")
-plt.close()
+#acs  = None
+#fig, ax = plt.subplots(nrows=dim,ncols=1,figsize=[8,2*dim])
+#for d in np.arange(dim):
+#    acs = AC(data[:,d])
+#    acacs = AC(acs)
+#    ax[d].plot(acs[1:int(.9*len(acs))],label=str(d)+" AC",alpha=.7)
+#    ax[d].plot(acacs[1:int(.9*len(acs))],label=str(d)+" ACAC",alpha=.7)
+#    ax[d].legend()
+#plt.savefig("plots/AC_stupid_test.pdf")
+#plt.close()
 

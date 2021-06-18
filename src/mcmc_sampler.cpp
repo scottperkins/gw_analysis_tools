@@ -4627,16 +4627,24 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 					}
 					//Update step-widths to optimize acceptance ratio
 					update_step_widths(samplerptr, j);
+					if(!samplerptr->de_primed[j]) 
+					{
+						if ((samplerptr->chain_pos[j])>samplerptr->history_length)
+						{
+							samplerptr->de_primed[j]=true;
+							assign_probabilities(samplerptr,j);	
+						}
+					}
 					
 				}
-				if(!samplerptr->de_primed[j]) 
-				{
-					if ((samplerptr->chain_pos[j])>samplerptr->history_length)
-					{
-						samplerptr->de_primed[j]=true;
-						assign_probabilities(samplerptr,j);	
-					}
-				}
+				//if(!samplerptr->de_primed[j]) 
+				//{
+				//	if ((samplerptr->chain_pos[j])>samplerptr->history_length)
+				//	{
+				//		samplerptr->de_primed[j]=true;
+				//		assign_probabilities(samplerptr,j);	
+				//	}
+				//}
 			}
 			#pragma omp single
 			{
@@ -4779,8 +4787,17 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 					else{samplerptr->step_reject_ct[j]+=1;}
 					if(!samplerptr->de_primed[j])
 						update_history(samplerptr,samplerptr->output[j][k+i+1], samplerptr->param_status[j][k+i+1],j);
-					else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
+					//else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
+					else if((k+i+1)%samplerptr->history_update==0)
 						update_history(samplerptr,samplerptr->output[j][k+i+1],samplerptr->param_status[j][k+i+1], j);
+					if(!samplerptr->de_primed[j]) 
+					{
+						if ((k+i+1)>samplerptr->history_length)
+						{
+							samplerptr->de_primed[j]=true;
+							assign_probabilities(samplerptr,j);	
+						}
+					}
 					//Log LogLikelihood and LogPrior	
 					if(samplerptr->log_ll){
 						samplerptr->ll_lp_output[j][k+i+1][0]= 
@@ -4798,14 +4815,14 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 					update_step_widths(samplerptr, j);
 					
 				}
-				if(!samplerptr->de_primed[j]) 
-				{
-					if ((k+cutoff)>samplerptr->history_length)
-					{
-						samplerptr->de_primed[j]=true;
-						assign_probabilities(samplerptr,j);	
-					}
-				}
+				//if(!samplerptr->de_primed[j]) 
+				//{
+				//	if ((k+cutoff)>samplerptr->history_length)
+				//	{
+				//		samplerptr->de_primed[j]=true;
+				//		assign_probabilities(samplerptr,j);	
+				//	}
+				//}
 			}
 			#pragma omp single
 			{
@@ -4971,13 +4988,23 @@ void mcmc_step_threaded(int j)
 		{
 			success = mcmc_step(samplerptr_global, samplerptr_global->output[j][k+i], samplerptr_global->output[j][k+i+1],samplerptr_global->param_status[j][k+i],samplerptr_global->param_status[j][k+i+1],&(samplerptr_global->model_status[j][k+i]),&(samplerptr_global->model_status[j][k+i+1]),j);	
 		}
+		samplerptr_global->chain_pos[j]+=1;
 	
 		if(success==1){samplerptr_global->step_accept_ct[j]+=1;}
 		else{samplerptr_global->step_reject_ct[j]+=1;}
 		if(!samplerptr_global->de_primed[j])
 			update_history(samplerptr_global,samplerptr_global->output[j][k+i+1], samplerptr_global->param_status[j][k+i+1],j);
-		else if(samplerptr_global->chain_pos[j]%samplerptr_global->history_update==0)
+		//else if(samplerptr_global->chain_pos[j]%samplerptr_global->history_update==0)
+		else if((k+i+1)%samplerptr_global->history_update==0)
 			update_history(samplerptr_global,samplerptr_global->output[j][k+i+1], samplerptr_global->param_status[j][k+i+1],j);
+		if(!samplerptr_global->de_primed[j]) 
+		{
+			if ((k+i+1)>samplerptr_global->history_length)
+			{
+				samplerptr_global->de_primed[j]=true;
+				assign_probabilities(samplerptr_global,j);	
+			}
+		}
 		//##############################################################
 		if(samplerptr_global->log_ll){
 			samplerptr_global->ll_lp_output[j][k+i+1][0]= 
@@ -4992,15 +5019,15 @@ void mcmc_step_threaded(int j)
 		}
 		//##############################################################
 	}
-	if(!samplerptr_global->de_primed[j]) 
-	{
-		if ((k+cutoff)>samplerptr_global->history_length)
-		{
-			samplerptr_global->de_primed[j]=true;
-			assign_probabilities(samplerptr_global,j);	
-		}
-	}
-	samplerptr_global->chain_pos[j]+=cutoff;
+	//if(!samplerptr_global->de_primed[j]) 
+	//{
+	//	if ((k+cutoff)>samplerptr_global->history_length)
+	//	{
+	//		samplerptr_global->de_primed[j]=true;
+	//		assign_probabilities(samplerptr_global,j);	
+	//	}
+	//}
+	//samplerptr_global->chain_pos[j]+=cutoff;
 	//Keep track of progress of all cold chains - track the slowest
 	//Now that progress is only used for outputing progress bar, and not used
 	//for stopping criteria, just track chain 0, which should be a T=1 chain anyway

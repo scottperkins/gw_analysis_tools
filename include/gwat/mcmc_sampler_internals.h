@@ -47,7 +47,7 @@ public:
 	//####################################################	
 	
 	bool tune=true;
-	int types_of_steps = 5;
+	int types_of_steps = 6;
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
@@ -114,8 +114,9 @@ public:
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
 	int history_length=1000;
-	//int history_length=5;
+	//int history_length=5000;
 	int history_update=10;
+	//int history_update=5;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;
@@ -133,6 +134,8 @@ public:
 	int *de_last_reject_ct;
 	int *fish_last_accept_ct;
 	int *fish_last_reject_ct;
+	int *kde_last_accept_ct;
+	int *kde_last_reject_ct;
 	int *RJstep_last_accept_ct;
 	int *RJstep_last_reject_ct;
 	int **randgauss_width_number;
@@ -153,6 +156,11 @@ public:
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
 	int fisher_update_number=200;
+	double ***kde_cov=NULL;
+	double ***kde_fisher=NULL;
+	double *kde_cov_lndet;
+	int kde_cov_update_number=200;
+	int *kde_cov_update_ct=NULL;
 	//int fisher_update_number=500000;
 	//int fisher_update_number=2;
 
@@ -174,12 +182,15 @@ public:
 	int *num_de ;
 	int *num_mmala ;
 	int *num_RJstep ;
+	int *num_kde ;
 
 	double time_elapsed_cpu;
 	double time_elapsed_wall;
 	double time_elapsed_cpu_ac;
 	double time_elapsed_wall_ac;
 
+	int *kde_accept_ct;
+	int *kde_reject_ct;
 	int *fish_accept_ct;
 	int *fish_reject_ct;
 	int *de_accept_ct;
@@ -317,5 +328,7 @@ void reduce_output(int step_num, int max_dimension, double ***output_old, int **
 
 int count_cold_chains(double *temps, int chain_N);
 void assign_ensemble_temps(double *chain_temps, int chain_N,int max_chain_N_thermo_ensemble,double TMAX);
+void update_kde_cov(sampler *sampler,int chain_id);
+void kde_proposal(sampler *sampler, double *current_param,double *proposed_param, int *current_status,int *proposed_status,int *current_model_status,int *proposed_model_status,int chain_id);
 
 #endif

@@ -44,9 +44,17 @@ def AC(data):
 #data_true = np.random.multivariate_normal(mean1+mean2,cov1+cov1,size=int(1e4))
 #############################################
 
-data_true = np.loadtxt("data/bilby/multivariate_gaussian_prior_samples.txt",skiprows=1)
+#data_true = np.loadtxt("data/bilby/multivariate_gaussian_prior_samples.txt",skiprows=1)
+data_true = np.loadtxt("data/bilby/emcee_multivariate_gaussian_prior/chain.dat",skiprows=1)
+data_true = data_true[data_true[:,0] == 0,1:-2]
 print("True samples: ",len(data_true))
 lab=np.arange(10)
+ct = 0
+for x in data_true.T:
+    plt.plot(AC(x))
+    plt.savefig("plots/t{}.pdf".format(ct))
+    plt.close()
+    ct+=1
 
 data = gmcmc.trim_thin_file("data/gaussian_output_0.hdf5",ac=None,trim=None,recalc_ac=False)
 #plt.hist(abs(data[:,0]),bins=50)
@@ -57,17 +65,17 @@ print("Samples: ",np.std(data[:,0]))
 L1 = len(data)
 print(len(data))
 
-#ranges = [(-10,10) for x in np.arange(dim)]
-ranges = [(0,10),(-4,4),(-1,8),(-4,4),(-4,8),(0,8)]
+ranges = [(-10,10) for x in np.arange(dim)]
+#ranges = [(0,10),(-4,4),(-1,8),(-4,4),(-4,8),(0,8)]
 
 fig = corner.corner(data,show_titles=True, labels=lab,bins=50, weights=np.ones(len(data))/len(data),color= colors[0],range=ranges)
 
 
 fig = corner.corner(data_true,fig=fig,show_titles=True, labels=lab,bins=50, weights=np.ones(len(data_true))/len(data_true),color= colors[1],range=ranges)
 
-#plt.savefig("plots/true_gaussian_mcmc.pdf")
-#plt.close()
-#exit()
+plt.savefig("plots/true_gaussian_mcmc.pdf")
+plt.close()
+exit()
 
 data_full = np.copy(data)
 

@@ -14,6 +14,10 @@
 
 double root2 = std::sqrt(2.);
 
+void fisher_1d_test(double *c, double **fisher, mcmc_data_interface *interface, void *parameters);
+int test_1d(int argc, char *argv[]);
+double log_1d_test (double *c,mcmc_data_interface *interface,void *parameters);
+double log_1d_test_prior (double *c,mcmc_data_interface *interface,void *parameters);
 double **multi_gaussian_prior_cov;
 double **multi_gaussian_like_cov;
 double **multi_gaussian_like_fisher;
@@ -129,11 +133,89 @@ int main(int argc, char *argv[])
 		std::cout<<"Stupid test"<<std::endl;
 		return stupid_test(argc,argv);
 	}
+	else if(runtime_opt == 13){
+		std::cout<<"1D test"<<std::endl;
+		return test_1d(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
+
+int test_1d(int argc, char *argv[])
+{
+	int dimension = 1;
+	//double initial_pos[2]={90,90.};
+	double initial_pos[1]={0};
+	double *seeding_var = NULL;
+	int N_steps = 50000;
+	int chain_N= 9;
+	int max_chain_N= 3;
+	//double *initial_pos_ptr = initial_pos;
+	int swp_freq = 5;
+	//double chain_temps[chain_N] ={1,2,3,10,12};
+	double chain_temps[chain_N];
+	chain_temps[0] = 1.;
+	double c = 1.8;
+	for(int i =1; i < chain_N/2;  i ++)
+		chain_temps[i] =  chain_temps[i-1] * c;
+	chain_temps[chain_N/2] = 1;
+	for(int i =chain_N/2+1; i < chain_N;  i ++)
+		chain_temps[i] =  chain_temps[i-1] * c;
+	std::string autocorrfile = "";
+	std::string chainfile = "data/mcmc_output_1d.hdf5";
+	std::string statfilename = "data/mcmc_statistics_1d.txt";
+	std::string checkpointfile = "data/mcmc_checkpoint_1d.csv";
+	//std::string LLfile = "data/mcmc_LL.csv";
+	std::string LLfile = "";
+	
+	int numThreads = 8;
+	bool pool = true;
+	bool show_progress = true;
+	
+	//double ***output;
+	//output = allocate_3D_array( chain_N, N_steps, dimension );
+	//PTMCMC_MH(output, dimension, N_steps, chain_N, initial_pos,seeding_var,chain_temps, swp_freq, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile,autocorrfile, "",checkpointfile );	
+	//deallocate_3D_array(output, chain_N, N_steps, dimension);
+	double **output;
+	output = allocate_2D_array(  N_steps, dimension );
+	int t0 = 1000;
+	int nu = 100;
+	std::string chain_distribution_scheme="double";
+	int max_chunk_size = 10000;
+	mcmc_sampler_output sampler_output(chain_N,dimension);
+	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,(double**)NULL,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_1d_test_prior, log_1d_test,fisher_1d_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
+	//sampler_output.create_data_dump(false,false,chainfile);
+	deallocate_2D_array(output, N_steps, dimension);
+	//sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);
+	std::cout<<"ENDED"<<std::endl;
+
+
+		
+	return 0;
+
+}
+double log_1d_test (double *c,mcmc_data_interface *interface,void *parameters)
+{
+	return 2;
+	double x = c[0];
+	//return 2.;
+}
+double log_1d_test_prior (double *c,mcmc_data_interface *interface,void *parameters)
+{
+	double a = -std::numeric_limits<double>::infinity();
+	if( fabs(c[0]) > 10){ return a;}
+	//return -pow_int(c[0]-4,2)/4. -pow_int(c[1]+3,2)/6.;
+	return 0.;
+}
+
+void fisher_1d_test(double *c, double **fisher, mcmc_data_interface *interface, void *parameters)
+{
+	
+	fisher[0][0] = 1./10/10;
+	return;
+} 
 //########################################################################
 //########################################################################
 double stupid_test_log_prior(double *param, mcmc_data_interface *interface, void *parameters)
@@ -160,7 +242,7 @@ void stupid_test_fisher(double *param, double **fisher, mcmc_data_interface *int
 				fisher[i][j] = 1;
 			}
 			else{	
-				fisher[i][j] = 10;
+				fisher[i][j] = 0;
 			}
 		}
 	}
@@ -2342,8 +2424,8 @@ int mcmc_standard_test(int argc, char *argv[])
 	//double initial_pos[2]={90,90.};
 	double initial_pos[2]={0,0.};
 	double *seeding_var = NULL;
-	int N_steps = 10000;
-	int chain_N= 300;
+	int N_steps = 5000;
+	int chain_N= 30;
 	int max_chain_N= 5;
 	//double *initial_pos_ptr = initial_pos;
 	int swp_freq = 5;
@@ -2374,14 +2456,14 @@ int mcmc_standard_test(int argc, char *argv[])
 	double **output;
 	output = allocate_2D_array(  N_steps, dimension );
 	int t0 = 1000;
-	int nu = 10;
+	int nu = 100;
 	std::string chain_distribution_scheme="double";
 	int max_chunk_size = 10000;
 	mcmc_sampler_output sampler_output(chain_N,dimension);
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(&sampler_output,output, dimension, N_steps, chain_N, max_chain_N,initial_pos,seeding_var,(double**)NULL,chain_temps, swp_freq, t0,nu, max_chunk_size,chain_distribution_scheme, log_test_prior, log_test,fisher_test,(void **)NULL,numThreads, pool,show_progress, statfilename,chainfile, LLfile,checkpointfile );	
-	sampler_output.create_data_dump(false,false,chainfile);
+	//sampler_output.create_data_dump(false,false,chainfile);
 	deallocate_2D_array(output, N_steps, dimension);
-	sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);
+	//sampler_output.write_flat_thin_output( "./data/test_flat_standard",true,true);
 	std::cout<<"ENDED"<<std::endl;
 
 
@@ -2673,4 +2755,5 @@ void RT_ERROR_MSG()
 	std::cout<<"10 --- Validate evidence calculation"<<std::endl;
 	std::cout<<"11 --- Ensemble size testing"<<std::endl;
 	std::cout<<"12 --- stupid test"<<std::endl;
+	std::cout<<"13 --- 1D test"<<std::endl;
 }

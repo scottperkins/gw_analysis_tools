@@ -1,5 +1,6 @@
 import bilby 
 import numpy as np
+from emcee.moves import  GaussianMove
 
 from bilby.core.likelihood import AnalyticalMultidimensionalCovariantGaussian,\
 AnalyticalMultidimensionalBimodalCovariantGaussian
@@ -36,11 +37,16 @@ priors.update({"x{0}".format(i): bilby.core.prior.Uniform(-10, 10, "x{0}".format
 
 if __name__ == "__main__":
     from multiprocessing import Pool
+    #from multiprocess import Pool
     #with Pool(8) as p:
     #    result = bilby.run_sampler(
     #    likelihood=likelihood, priors=priors, sampler='dynesty', nlive = 1e3,
     #    outdir=outdir, label=label,pool=p)
+    with Pool(2) as p:
+        result = bilby.run_sampler(
+        likelihood=likelihood, priors=priors, sampler='emcee', nsteps=1e3,nwalkers=50,
+        outdir=outdir, label=label,moves=[(GaussianMove(1),.1)])
 
-    result = bilby.run_sampler(
-        likelihood=likelihood, priors=priors, sampler='ptemcee', nsamples = 1e3,nwalkers=20,threads=6,pos0='prior',ntemps=5,
-        outdir=outdir, label=label)
+    #result = bilby.run_sampler(
+    #    likelihood=likelihood, priors=priors, sampler='ptemcee', nsamples = 1e3,nwalkers=20,threads=6,pos0='prior',ntemps=5,
+    #    outdir=outdir, label=label)

@@ -212,9 +212,13 @@ void gen_params_base_py_destructor(gen_params_base<double> *p);
 
 int DL_from_Z_py(double z, char * COSMOLOGY, double *out);
 int calculate_chirpmass_py(double mass1, double mass2,double *out);
+int calculate_chirpmass_vectorized_py(double *mass1, double *mass2,double *out,int length);
 int calculate_eta_py(double mass1, double mass2,double *out);
+int calculate_eta_vectorized_py(double *mass1, double *mass2,double *out,int length);
 int calculate_mass1_py(double chirpmass, double eta,double *out);
+int calculate_mass1_vectorized_py(double *chirpmass, double *eta,double *out, int length);
 int calculate_mass2_py(double chirpmass, double eta,double *out);
+int calculate_mass2_vectorized_py(double *chirpmass, double *eta,double *out, int length);
 
 int get_detector_parameters(char *detector, double *LAT,double *LON, double *location, double *response_tensor);
 

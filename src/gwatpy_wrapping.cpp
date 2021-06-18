@@ -796,10 +796,24 @@ int calculate_chirpmass_py(double mass1, double mass2,double *out)
 	*out = calculate_chirpmass(mass1,mass2);
 	return 0;
 }
+int calculate_chirpmass_vectorized_py(double *mass1, double *mass2,double *out, int length)
+{
+	for(int i = 0 ; i<length ; i++){	
+		out[i] = calculate_chirpmass(mass1[i],mass2[i]);
+	}
+	return 0;
+}
 
 int calculate_eta_py(double mass1, double mass2,double *out)
 {
 	*out = calculate_eta(mass1,mass2);
+	return 0;
+}
+int calculate_eta_vectorized_py(double *mass1, double *mass2,double *out, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		out[i] = calculate_eta(mass1[i],mass2[i]);
+	}
 	return 0;
 }
 int calculate_mass1_py(double chirpmass, double eta,double *out)
@@ -807,9 +821,23 @@ int calculate_mass1_py(double chirpmass, double eta,double *out)
 	*out = calculate_mass1(chirpmass,eta);
 	return 0;
 }
+int calculate_mass1_vectorized_py(double *chirpmass, double *eta,double *out,int length)
+{
+	for(int i = 0 ; i<length; i++){
+		out[i] = calculate_mass1(chirpmass[i],eta[i]);
+	}
+	return 0;
+}
 int calculate_mass2_py(double chirpmass, double eta,double *out)
 {
 	*out = calculate_mass2(chirpmass,eta);
+	return 0;
+}
+int calculate_mass2_vectorized_py(double *chirpmass, double *eta,double *out,int length)
+{
+	for(int i = 0 ; i<length; i++){
+		out[i] = calculate_mass2(chirpmass[i],eta[i]);
+	}
 	return 0;
 }
 void populate_noise_py(double *frequencies, char * detector, double *noise_root, int length, double integration_time){
