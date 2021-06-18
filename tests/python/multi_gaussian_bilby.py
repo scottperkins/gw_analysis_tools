@@ -42,11 +42,12 @@ if __name__ == "__main__":
     #    result = bilby.run_sampler(
     #    likelihood=likelihood, priors=priors, sampler='dynesty', nlive = 1e3,
     #    outdir=outdir, label=label,pool=p)
-    with Pool(2) as p:
-        result = bilby.run_sampler(
-        likelihood=likelihood, priors=priors, sampler='emcee', nsteps=1e3,nwalkers=50,
-        outdir=outdir, label=label,moves=[(GaussianMove(1),.1)])
+    #with Pool(2) as p:
+    #    result = bilby.run_sampler(
+    #    likelihood=likelihood, priors=priors, sampler='emcee', nsteps=1e4,nwalkers=50,
+    #    outdir=outdir, label=label,moves=[(GaussianMove(1),.1)])
 
-    #result = bilby.run_sampler(
-    #    likelihood=likelihood, priors=priors, sampler='ptemcee', nsamples = 1e3,nwalkers=20,threads=6,pos0='prior',ntemps=5,
-    #    outdir=outdir, label=label)
+
+    result = bilby.run_sampler(
+        likelihood=likelihood, priors=priors, sampler='ptemcee', nsamples = 1e4,nwalkers=20,threads=6,pos0='prior',ntemps=5,
+        outdir=outdir, label=label)

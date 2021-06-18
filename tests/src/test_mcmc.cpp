@@ -844,6 +844,7 @@ double log_prior_multi_gaussian(double *param, mcmc_data_interface *interface, v
 
 double log_like_multi_gaussian(double *param, mcmc_data_interface *interface, void *parameters)
 {
+	//return 2;
 	double return_val1=0;
 	for(int i = 0 ; i<interface->max_dim; i++){
 		for(int j = 0 ; j<interface->max_dim; j++){
