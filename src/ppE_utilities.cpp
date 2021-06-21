@@ -801,6 +801,17 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   p->abL_EA = 1. + 2*p->beta2_EA; 
   p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
   p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
+  debugger_print(__FILE__,__LINE__,"EA Debugging");
+  std::cout<<"aBL "<<p->abL_EA<<std::endl;
+  std::cout<<"gb1 "<<p->gb1_EA<<std::endl;
+  std::cout<<"gX1 "<<p->gX1_EA<<std::endl;
+  std::cout<<"epsilon_x "<<p->epsilon_x_EA<<std::endl;
+  std::cout<<"S "<<p->S_EA<<std::endl;
+  std::cout<<"alpha "<<p->alpha_ppE_2T_0_EA<<std::endl;
+  std::cout<<"k3 "<<p->kappa3_EA<<std::endl;
+  std::cout<<"cT "<<p->cT_EA<<std::endl;
+  std::cout<<"cV "<<p->cV_EA<<std::endl;
+  std::cout<<"cS "<<p->cS_EA<<std::endl;
   
 }
 template void pre_calculate_EA_factors(source_parameters<double> *);

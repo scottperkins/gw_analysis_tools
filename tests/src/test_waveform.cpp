@@ -41,6 +41,7 @@ int polarization_testing(int argc, char *argv[]);
 int BHEvaporation_test(int argc, char *argv[]);
 int EA_fully_restricted_test(int argc, char *argv[]);
 int EA_fully_restricted_parameterization_test(int argc, char *argv[]);
+int EA_fully_restricted_consistency_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
 
@@ -87,12 +88,137 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 8){
 		return EA_fully_restricted_parameterization_test(argc,argv);
 	}
+	if(runtime_opt == 9){
+		return EA_fully_restricted_consistency_test(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
 
+int EA_fully_restricted_consistency_test(int argc, char *argv[])
+{
+	std::cout<<"EA CONSISTENCY TEST"<<std::endl;
+	gen_params params;	
+	params.spin1[1] = .0;
+	params.spin2[1] = .0;
+	params.spin1[0] = .0;
+	params.spin2[0] = .0;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = true;
+	params.NSflag2 = true;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.tc = 6;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	params.Nmod = 4;
+	params.bppe = new double[4];
+	//These don't matter, don't worry about them -- overwritten by prep_source_parameters
+	params.bppe[0] = -13;
+	params.bppe[1] = -13;
+	params.bppe[2] = -13;
+	params.bppe[3] = -13;
+	params.betappe = new double[4];
+	//params.betappe[0] = .001;
+
+	source_parameters<double> sp ;
+
+
+	int iterations = 1;
+	int samples = 8032;
+	double **output = allocate_2D_array(samples, 6);
+		
+
+	double FMIN = 5;
+	//double FMAX = 2048;
+	double FMAX = 100;
+	double deltaf = (FMAX-FMIN)/samples;
+
+	double *freqs= new double[samples];
+	for (int i = 0 ; i<samples; i++){
+		freqs[i] = FMIN + deltaf*i;
+	}
+
+	const gsl_rng_type *T;
+	gsl_rng *r ;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	r = gsl_rng_alloc(T);
+
+	for (int i = 0 ; i<iterations; i++){
+		//Make these random numbers
+		params.betappe[0] = 1e-1; // c1
+		params.betappe[1] = 2e-1; // c2
+		params.betappe[2] = 3e-1; // c3
+		params.betappe[3] = 4e-1; // c4
+		params.mass1 = gsl_rng_uniform(r) +1;
+		params.mass2 = gsl_rng_uniform(r) +1;
+		if(params.mass2>params.mass1){
+			double temp = params.mass2;
+			params.mass2 = params.mass1;
+			params.mass1 = temp;
+		}
+
+		params.spin1[2] = gsl_rng_uniform(r)*.05 -.025;
+		params.spin2[2] = gsl_rng_uniform(r)*.05 -.025;
+
+		params.tidal1 = gsl_rng_uniform(r)*100+5;
+		params.tidal2 = gsl_rng_uniform(r)*100+5;
+		
+		std::complex<double> *responseEA =  new std::complex<double>[samples];
+		std::complex<double> *responseGR =  new std::complex<double>[samples];
+
+		fourier_detector_response(freqs, samples, responseEA, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT", &params, (double *) NULL);
+		fourier_detector_response(freqs, samples, responseGR, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
+
+		double *phase_EA = new double[samples];
+		double *phase_GR = new double[samples];
+		double *phase_EA_unwrap = new double[samples];
+		double *phase_GR_unwrap = new double[samples];
+		for(int i = 0 ; i<samples ; i++){
+			phase_EA[i]= std::atan2(std::imag(responseEA[i]),std::real(responseEA[i]));
+			phase_GR[i]= std::atan2(std::imag(responseGR[i]),std::real(responseGR[i]));
+		}
+		unwrap_array(phase_EA, phase_EA_unwrap,samples);
+		unwrap_array(phase_GR, phase_GR_unwrap,samples);
+	
+		for(int j = 0 ; j < samples ; j++){
+			output[j][0] = std::real(responseEA[j]);
+			output[j][1] = std::imag(responseEA[j]);
+			output[j][2] = std::real(responseGR[j]);
+			output[j][3] = std::imag(responseGR[j]);
+			output[j][4] = phase_EA_unwrap[j];
+			output[j][5] = phase_GR_unwrap[j];
+		}
+		//write_file("data/EA_GR_COMP_"+std::to_string(i)+".csv", output, samples, 6);
+
+		delete [] responseEA;
+		delete [] responseGR;
+		delete [] phase_EA;
+		delete [] phase_GR;
+		delete [] phase_EA_unwrap;
+		delete [] phase_GR_unwrap;
+	}
+	gsl_rng_free(r);
+	delete [] freqs;
+	deallocate_2D_array(output, samples, 4);
+	delete [] params.betappe;
+	delete [] params.bppe;
+	return 0;
+}
 int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 {
 	gen_params params;	
@@ -1020,4 +1146,5 @@ void RT_ERROR_MSG()
 	std::cout<<"6 --- test time domain waveforms"<<std::endl;
 	std::cout<<"7 --- EA fully restricted waveform"<<std::endl;
 	std::cout<<"8 --- EA fully restricted waveform parameterization"<<std::endl;
+	std::cout<<"9 --- EA fully restricted consistency test"<<std::endl;
 }
