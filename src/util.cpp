@@ -51,9 +51,11 @@ int mvn_sample(
 	double **output /**< [out] Size [samples][dim]*/
 	)
 {
+	const gsl_rng_type *T;
+	gsl_rng * r ;
 	gsl_rng_env_setup();
-	const gsl_rng_type *T = gsl_rng_default;
-	gsl_rng * r = gsl_rng_alloc(T);	
+	T  = gsl_rng_default;
+	r= gsl_rng_alloc(T);	
 	mvn_sample(samples, mean, cov, dim , r, output);	
 	gsl_rng_free(r);
 }
