@@ -514,14 +514,20 @@ struct source_parameters
   //Einstein-Aether stuff
   T kappa3_EA;
   T epsilon_x_EA;
-  //speeds
+  //coupling constants in one parameterization
+  T ca_EA;
+  T ctheta_EA;
+  T cw_EA;
+  T csigma_EA;
+  //coupling constants in the other parameterization
   T c1_EA;
   T c2_EA;
   T c3_EA;
   T c4_EA;
   T c13_EA;
   T c14_EA;
-  T cminus_EA; //there must be a way to do this more concisely...
+  T cminus_EA;
+  //Speeds of the different polarizations
   T cT_EA;
   T cV_EA;
   T cS_EA;

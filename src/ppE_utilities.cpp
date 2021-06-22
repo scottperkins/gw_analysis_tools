@@ -750,16 +750,22 @@ int dispersion_lookup(double alpha)
 template<class T>
 void pre_calculate_EA_factors(source_parameters<T> *p)
 {
-  p->c1_EA = p->betappe[0];
-  p->c2_EA = p->betappe[1];
-  p->c3_EA = p->betappe[2];
-  p->c4_EA = p->betappe[3];
+  p->ca_EA = p->betappe[0];
+  p->ctheta_EA = p->betappe[1];
+  p->cw_EA = p->betappe[2];
+  p->csigma_EA = p->betappe[3];
   p->s1_EA = 2e-5;
   p->s2_EA = 1e-5;
   p->V_x_EA = 0;
   p->V_y_EA = 0;
   p->V_z_EA = 0;
 
+  //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where these formulas come from)
+  p->c1_EA = (p->cw_EA + p->csigma_EA)/2.;
+  p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
+  p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
+  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.; 
+  
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
@@ -795,7 +801,6 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
-  //Kristen!! I need alpha_ppE_2T_0_EA, gb1_EA, abL_EA, and gX1_EA defined, all as members of source_parameters<T>. They're already declared in util.h
   //Functions necessary for corrections to the amplitude
   p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
   p->abL_EA = 1. + 2*p->beta2_EA; 
