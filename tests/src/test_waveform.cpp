@@ -10,6 +10,7 @@
 #include <iostream>
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
+#include <gsl/gsl_rng.h>
 
 
 //#define _LAL
@@ -137,28 +138,60 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 
 	source_parameters<double> sp ;
 
-
-	int iterations = 100;
-	int dim = 4;// Increase for every factor you want to output
+	//Random number declaration and seeding
+	const gsl_rng_type *T;
+	gsl_rng *r; 
+	
+	gsl_rng_env_setup();
+	
+	T=gsl_rng_default;
+	r=gsl_rng_alloc(T);
+	gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
+	
+	int iterations = 1000; 
+	int dim = 13;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
+	double a_bound = pow(10, -4.); 
+	double theta_bound = pow(10, -3.); //Note special form for c_\theta below
+	double w_bound = 10;
+	double sigma_bound = pow(10, -15.);
+
 	for (int i = 0 ; i<iterations; i++){
-		//Make these random numbers
-		params.betappe[0] = 1; // c1
-		params.betappe[1] = 1; // c2
-		params.betappe[2] = 1; // c3
-		params.betappe[3] = 1; // c4
+	        //Uses gsl to get a random number (uniformly distributed between -i_bound and i_bound)
+	  /*	        params.betappe[0] = gsl_rng_uniform(r)*2*a_bound - a_bound; // ca
+	        params.betappe[1] = 3.*params.betappe[0]*(1 + gsl_rng_uniform(r)*2*theta_bound - theta_bound); // ctheta
+		params.betappe[2] = gsl_rng_uniform(r)*2*w_bound - w_bound; // cw
+		params.betappe[3] = gsl_rng_uniform(r)*2*sigma_bound - sigma_bound; // csigma
+	  */
+	  params.betappe[0] = gsl_rng_uniform(r)*a_bound; // ca
+	  params.betappe[1] = 3.*params.betappe[0]*(1 + gsl_rng_uniform(r)*theta_bound); // ctheta
+	  params.betappe[2] = gsl_rng_uniform(r)*w_bound; // cw
+	  params.betappe[3] = gsl_rng_uniform(r)*sigma_bound; // csigma
 		prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
-		std::cout<<sp.betappe[0]<<std::endl;
+		//std::cout<<params.betappe[0]<<"\t"<<params.betappe[1]<<"\t"<<params.betappe[2]<<"\t"<<params.betappe[3]<<std::endl;
 		
 		output[i][0] = params.betappe[0];
 		output[i][1] = params.betappe[1];
 		output[i][2] = params.betappe[2];
 		output[i][3] = params.betappe[3];
+		output[i][4] = sp.cT_EA;
+		output[i][5] = sp.cS_EA;
+		output[i][6] = sp.cV_EA;
+		output[i][7] = sp.alpha_ppE_2T_0_EA;
+		output[i][8] = sp.gb1_EA;
+		output[i][9] = sp.abL_EA;
+		output[i][10] = sp.gX1_EA;
+		output[i][11] = sp.kappa3_EA;
+		output[i][12] = sp.epsilon_x_EA;
+		
+		//std::cout<<sp.abL_EA<<std::endl; 
 		
 		cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	}
 	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
+	std::cout<<"Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
+	gsl_rng_free(r); 
 	deallocate_2D_array(output, iterations, dim);
 	delete [] params.betappe;
 	delete [] params.bppe;
