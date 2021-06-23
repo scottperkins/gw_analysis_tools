@@ -3,7 +3,6 @@
 #include <gwat/util.h>
 #include <gwat/detector_util.h>
 #include <gwat/io_util.h>
-#include <gwat/mvn_sampling.h>
 
 //#define _LAL
 #ifdef _LAL
