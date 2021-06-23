@@ -1230,17 +1230,17 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//No fisher, but de ready
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
-			sampler->step_prob[chain_index][0]=.3;
-			sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][0]=.3;
+			//sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.0;
+			//sampler->step_prob[chain_index][5]=0;
+
+			sampler->step_prob[chain_index][0]=1;
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
 			sampler->step_prob[chain_index][5]=0;
-
-			//sampler->step_prob[chain_index][0]=.3;
-			//sampler->step_prob[chain_index][1]=.4;
-			//sampler->step_prob[chain_index][2]=.0;
-			//sampler->step_prob[chain_index][3]=.0;
-			//sampler->step_prob[chain_index][5]=.3;
 	
 
 		}
@@ -1252,9 +1252,10 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][2]=.0;
 			//sampler->step_prob[chain_index][3]=.5;
 			//Tailor to temperature
-			sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][3]=.2+.5/sampler->chain_temps[chain_index];
 			//sampler->step_prob[chain_index][5]=.1;
 			sampler->step_prob[chain_index][5]=.0;
 			double sum = sampler->step_prob[chain_index][1]	
