@@ -197,7 +197,9 @@ void kde_proposal(sampler *sampler, /**< Sampler struct*/
 
 	sampler->kde_cov_update_ct[chain_id] +=1;
 	if(sampler->kde_cov_update_ct[chain_id] >= sampler->kde_cov_update_number){
-		update_kde_cov(sampler, chain_id);
+		if(sampler->kde_step){
+			update_kde_cov(sampler, chain_id);
+		}
 		sampler->kde_cov_update_ct[chain_id] = 0;
 	}
 	int beta = 0;
@@ -1283,7 +1285,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=0.;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
-			sampler->step_prob[chain_index][4]=.8-.6/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.5-.2/sampler->chain_temps[chain_index];
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3]
@@ -1322,10 +1324,21 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][3]=.0;
 			//sampler->step_prob[chain_index][4]=.2;
 
-			sampler->step_prob[chain_index][1]=.5+.2/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=.5+.2/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][2]=0;
+			//sampler->step_prob[chain_index][3]=0;
+			//sampler->step_prob[chain_index][4]=.4-.2/sampler->chain_temps[chain_index];
+			//double sum = sampler->step_prob[chain_index][1]	
+			//	+sampler->step_prob[chain_index][2]
+			//	+sampler->step_prob[chain_index][3]
+			//	+sampler->step_prob[chain_index][4];
+			//sampler->step_prob[chain_index][0]=1-sum;
+			//sampler->step_prob[chain_index][5]=0;
+
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
-			sampler->step_prob[chain_index][4]=.4-.2/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.5-.2/sampler->chain_temps[chain_index];
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3]
@@ -1343,10 +1356,21 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][3]=.6;
 			//sampler->step_prob[chain_index][4]=.2;
 
-			sampler->step_prob[chain_index][1]=.2+.1/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=.2+.1/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][2]=0;
+			//sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][4]=.3-.2/sampler->chain_temps[chain_index];
+			//double sum = sampler->step_prob[chain_index][1]	
+			//	+sampler->step_prob[chain_index][2]
+			//	+sampler->step_prob[chain_index][3]
+			//	+sampler->step_prob[chain_index][4];
+			//sampler->step_prob[chain_index][0]=1-sum;
+			//sampler->step_prob[chain_index][5]=0;
+
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=0;
-			sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
-			sampler->step_prob[chain_index][4]=.3-.2/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][3]=.1+.5/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.5-.4/sampler->chain_temps[chain_index];
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3]
@@ -1442,7 +1466,7 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	}
 	else{
 		samplerptr_dest->kde_cov_update_ct[id_dest] = samplerptr_dest->kde_cov_update_number;
-		if(samplerptr_dest->de_primed[id_dest]){
+		if(samplerptr_dest->de_primed[id_dest] && samplerptr_dest->kde_step){
 			update_kde_cov(samplerptr_dest, id_dest);	
 		}
 	}
@@ -2901,7 +2925,9 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 
 			for(int j =0 ;j<samplerptr->chain_N; j++){
 				samplerptr->de_primed[j] =true;
-				update_kde_cov(samplerptr, j);
+				if(samplerptr->kde_step){
+					update_kde_cov(samplerptr, j);
+				}
 			}
 		}
 		else{

@@ -45,6 +45,7 @@ public:
 	int block_num = 2;
 	int block_boundary_ids[2] = {7,11};
 	//####################################################	
+	bool kde_step = false;	
 	
 	bool tune=true;
 	int types_of_steps = 6;
