@@ -528,6 +528,9 @@ struct source_parameters
   T c14_EA;
   T cminus_EA;
   //Speeds of the different polarizations
+  T cTsq_EA;
+  T cVsq_EA;
+  T cSsq_EA;
   T cT_EA;
   T cV_EA;
   T cS_EA;

@@ -771,10 +771,15 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   p->cminus_EA = p->c1_EA - p->c3_EA;
   p->c14_EA = p->c1_EA + p->c4_EA;
 
+  //squared speeds of the different polarizations
+  p->cTsq_EA = 1./(1. - p->c13_EA);
+  p->cVsq_EA = (2.*p->c1_EA - p->c13_EA*p->cminus_EA)/(2.*(1.- p->c13_EA)*p->c14_EA);
+  p->cSsq_EA = ((2. - p->c14_EA)*(p->c13_EA + p->c2_EA))/((2.+3.*p->c2_EA + p->c13_EA)*(1. - p->c13_EA)*p->c14_EA);
+
   //speeds of the different polarizations
-  p->cT_EA = sqrt(1./(1. - p->c13_EA));
-  p->cV_EA = sqrt((2.*p->c1_EA - p->c13_EA*p->cminus_EA)/(2.*(1.- p->c13_EA)*p->c14_EA));
-  p->cS_EA = sqrt(((2. - p->c14_EA)*(p->c13_EA + p->c2_EA))/((2.+3.*p->c2_EA + p->c13_EA)*(1. - p->c13_EA)*p->c14_EA));
+  p->cT_EA = sqrt(p->cTsq_EA);
+  p->cV_EA = sqrt(p->cVsq_EA);
+  p->cS_EA = sqrt(p->cSsq_EA);
 
   //Relevant combinations of parameters
   p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
