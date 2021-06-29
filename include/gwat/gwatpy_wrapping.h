@@ -11,6 +11,10 @@
 extern "C"
 {
 #endif
+
+
+double match_py(  double *data1_real,double *data1_imag, double *data2_real,double *data2_imag, double *SN,double *frequencies,int length);
+
 double calculate_snr_py(char * sensitivity_curve,
 	char * detector, 
 	char * generation_method,

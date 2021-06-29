@@ -10,6 +10,8 @@
  */
 
 
+double match(  std::complex<double> *data1, std::complex<double> *data2, double *SN,double *frequencies,int length);
+
 template<class T>
 void create_coherent_GW_detection(
 	std::string *detectors,

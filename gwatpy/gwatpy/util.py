@@ -69,7 +69,34 @@ rlib.f_0PN_py.restype = ctypes.c_double
 rlib.gen_params_base_py_destructor.argtypes = [ctypes.c_void_p]
 rlib.gen_params_base_py_destructor.restype = ctypes.c_void_p
 
+
+rlib.match_py.argtypes = \
+    [ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.c_int
+]
+rlib.match_py.restype = ctypes.c_double
 ############################################################
+
+def match_py(data1, data2, SN, frequencies):
+    length = len(data1)
+    d_type = ctypes.c_double * (length) 
+    data1_real = data1.real
+    data1_imag = data1.imag
+    data1_real = np.ascontiguousarray(data1_real,dtype = ctypes.c_double)
+    data1_imag = np.ascontiguousarray(data1_imag,dtype = ctypes.c_double)
+    data2_real = data2.real
+    data2_imag = data2.imag
+    data2_real = np.ascontiguousarray(data2_real,dtype = ctypes.c_double)
+    data2_imag = np.ascontiguousarray(data2_imag,dtype = ctypes.c_double)
+    sn = np.ascontiguousarray(SN, dtype=ctypes.c_double)
+    f = np.ascontiguousarray(frequencies, dtype=ctypes.c_double)
+
+    return rlib.match_py(d_type(*(data1_real)),d_type(*(data1_imag)),d_type(*(data2_real)),d_type(*(data2_imag)),d_type(*(sn)),d_type(*(f)),length)
 
 c = 299792458.
 T_year = 31557600.

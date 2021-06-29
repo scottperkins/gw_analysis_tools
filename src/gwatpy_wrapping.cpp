@@ -13,6 +13,22 @@
 #include <bits/stdc++.h> 
 
 
+double match_py(  double *data1_real,double *data1_imag, double *data2_real,double *data2_imag, double *SN,double *frequencies,int length)
+{
+	std::complex<double> * data1 = new std::complex<double>[length];
+	std::complex<double> * data2 = new std::complex<double>[length];
+	for(int i = 0 ; i<length; i++){
+		data1[i] = std::complex<double>(data1_real[i],data1_imag[i]);
+		data2[i] = std::complex<double>(data2_real[i],data2_imag[i]);
+	}
+
+	double match_out = match(data1, data2, SN, frequencies, length);
+
+	delete [] data1;
+	delete [] data2;
+	return match_out;
+}
+
 double calculate_snr_py(char * sensitivity_curve,
 	char * detector, 
 	char * generation_method,
