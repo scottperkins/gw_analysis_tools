@@ -27,6 +27,7 @@
 
 /*! \file
  * File containing definitions for all the internal, generic mcmc subroutines
+ * TODO update the acceptance and count of KDE step
  */
 
 /*! \brief interface function between the sampler and the internal step functions
@@ -67,12 +68,17 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 		sampler->num_fish[chain_number]+=1;
 		step = 3;
 	}
-	else 
+	else if (alpha<sampler->prob_boundaries[chain_number][4])
 	{
 		RJ_step(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, &proposed_model_status, &(sampler->prop_MH_factor[chain_number]),chain_number);
 		sampler->num_RJstep[chain_number]+=1;
-		//sampler->prop_MH_factor[chain_number] = log(sampler->prop_MH_factor[chain_number]);
 		step = 4;
+	}
+	else 
+	{
+		kde_proposal(sampler, current_param, proposed_param, current_status, proposed_status,current_model_status, &proposed_model_status, chain_number);
+		sampler->num_kde[chain_number]+=1;
+		step = 5;
 	}
 	
 	double current_lp = sampler->lp(current_param, current_status,*current_model_status,sampler->interfaces[chain_number], sampler->user_parameters[chain_number]);
@@ -138,7 +144,218 @@ int mcmc_step(sampler *sampler, double *current_param, double *next_param, int *
 	}		
 	
 }
+double log_kde_evaluate(double *pos, int *status,int dim, sampler *samplerptr, int chain_id)
+{
+	double val = 0;
+	double *diff =new double[dim];
 	
+	for (int k = 0 ; k<samplerptr->history_length; k++){
+		double dot = 0;
+		for(int i = 0 ; i<dim ; i++){
+			diff[i] = pos[i] - samplerptr->history[chain_id][k][i];
+		}
+		
+		for(int i = 0 ; i<dim ; i++){
+			for(int j = 0 ; j<dim ; j++){
+				dot+= diff[i] * samplerptr->kde_fisher[chain_id][i][j] * diff[j]; 
+				//dot+= diff[i] * samplerptr->kde_cov[chain_id][i][j] * diff[j]; 
+			}
+		}
+		val+=exp(dot*(-.5));
+	}
+	double logval = log(val);
+	logval += -.5*dim * log(2*M_PI) - .5*samplerptr->kde_cov_lndet[chain_id] - log(samplerptr->history_length);
+	
+	delete [] diff;
+	return logval;
+}
+
+	
+/*! \brief KDE step from history file
+ *
+ * TODO: Right now, this assumes a diagonal covariance matrix. Maybe fix this in the future
+ */
+void kde_proposal(sampler *sampler, /**< Sampler struct*/
+		double *current_param, /**< current position in parameter space*/
+		double *proposed_param, /**< [out] Proposed position in parameter space*/
+		int *current_status,
+		int *proposed_status,
+		int *current_model_status,
+		int *proposed_model_status,
+		int chain_id
+		)
+{
+	for (int i=0;i<sampler->max_dim;i++){
+		if(current_status[i] == 1){
+			proposed_param[i] = current_param[i];
+		}
+		else{
+			proposed_param[i] = 0;
+		}
+		proposed_status[i] = current_status[i];
+	}
+
+	sampler->kde_cov_update_ct[chain_id] +=1;
+	if(sampler->kde_cov_update_ct[chain_id] >= sampler->kde_cov_update_number){
+		if(sampler->kde_step){
+			update_kde_cov(sampler, chain_id);
+		}
+		sampler->kde_cov_update_ct[chain_id] = 0;
+	}
+	int beta = 0;
+	beta = int(gsl_rng_uniform(sampler->rvec[chain_id]) * sampler->history_length);
+
+	//double alpha = sampler->randgauss_width[chain_id][5][beta];
+	if(sampler->RJMCMC){
+		for (int i=0;i<sampler->max_dim;i++){
+			if(current_status[i] == 1){
+				proposed_param[i] = current_param[i];
+			}
+			else{
+				proposed_param[i] = 0;
+			}
+			proposed_status[i] = current_status[i];
+		}
+
+	}
+	
+	else{
+		double **temp_cov = new double*[sampler->max_dim];
+		for (int i=0;i<sampler->max_dim;i++){
+			temp_cov[i]  = new double[sampler->max_dim];
+			for (int j=0;j<sampler->max_dim;j++){
+				//temp_cov[i][j] = sampler->kde_cov[chain_id][i][j]*sampler->randgauss_width[chain_id][5][0];
+				temp_cov[i][j] = sampler->kde_cov[chain_id][i][j];
+			}
+		}
+		double **temp_prop = new double*[1];
+		temp_prop[0] = new double[sampler->max_dim];
+		mvn_sample(1, sampler->history[chain_id][beta],temp_cov, sampler->max_dim, sampler->rvec[chain_id],temp_prop);
+		//for(int i = 0 ; i<sampler->max_dim; i++){
+		//	temp_prop[0][i] = gsl_ran_gaussian(sampler->rvec[chain_id], sqrt(temp_cov[i][i])) + sampler->history[chain_id][beta][i];
+		//}
+
+		for (int i=0;i<sampler->max_dim;i++){
+			delete [] temp_cov[i];
+			if(current_status[i] == 1){
+				//std::cout<<temp_prop[0][i]<<" ";
+				proposed_param[i] = temp_prop[0][i];
+			}
+			else{
+				proposed_param[i] = 0;
+			}
+			//proposed_status[i] = current_status[i];
+		}
+		//std::cout<<std::endl;
+		delete [] temp_cov;
+		delete [] temp_prop[0];
+		delete [] temp_prop;
+	}
+
+	*proposed_model_status = *current_model_status;	
+	//Need to calculate log( current_kde_eval / prop_kde_eval)
+	double log_kde_val_c = log_kde_evaluate(current_param,current_status, sampler->max_dim, sampler,chain_id);
+	double log_kde_val_p = log_kde_evaluate(proposed_param,proposed_status, sampler->max_dim, sampler,chain_id);
+	sampler->prop_MH_factor[chain_id] =log_kde_val_c - log_kde_val_p ;
+	//sampler->prop_MH_factor[chain_id] =log_kde_val_p - log_kde_val_c ;
+	return;
+}
+
+void update_kde_cov(sampler *sampler,int chain_id)
+{
+	
+	double **cov = sampler->kde_cov[chain_id];
+	int dim = sampler->max_dim;
+
+	double means[dim];
+	for(int i = 0 ; i<dim ; i++){
+		int ct = 0 ;
+		means[i]=0;
+		for(int j = 0 ; j<sampler->history_length; j++){
+			if(sampler->history_status[chain_id][j][i] == 1){
+				means[i]+=sampler->history[chain_id][j][i];
+				ct++;
+			}
+		}
+		if(ct !=0){
+			means[i]/=ct;
+		}
+	}
+	
+	for(int i = 0 ; i<dim ; i++){
+		for(int j = 0 ; j<=i; j++){
+			sampler->kde_cov[chain_id][i][j]=0;
+			int ct = 0 ;
+			for(int k = 0 ; k<sampler->history_length; k++){
+				if(sampler->history_status[chain_id][k][i] == 1 & sampler->history_status[chain_id][k][j] == 1){
+					sampler->kde_cov[chain_id][i][j]+=(sampler->history[chain_id][k][i] - means[i])*
+						(sampler->history[chain_id][k][j]-means[j]);
+					ct++;
+				}
+			}
+			if(ct != 0){
+				sampler->kde_cov[chain_id][i][j]/=ct;
+			}
+		}
+	}	
+	for(int i=0 ; i<dim; i++){
+		for(int j = i ; j<dim; j++){
+			sampler->kde_cov[chain_id][i][j] = sampler->kde_cov[chain_id][j][i];
+		}
+	}
+	//for(int i = 0 ; i<dim ; i++){
+	//	sampler->kde_cov[chain_id][i][i]=0;
+	//	int ct = 0 ;
+	//	for(int k = 0 ; k<sampler->history_length; k++){
+	//		if(sampler->history_status[chain_id][k][i] == 1){
+	//			sampler->kde_cov[chain_id][i][i]+=(sampler->history[chain_id][k][i] - means[i])*
+	//				(sampler->history[chain_id][k][i]-means[i]);
+	//			ct++;
+	//		}
+	//	}
+	//	if(ct != 0){
+	//		sampler->kde_cov[chain_id][i][i]/=ct;
+	//	}
+	//	
+	//}	
+	//############################################
+
+	for(int i=0 ; i<dim; i++){
+		for(int j = 0 ; j<dim; j++){
+			//if(i != j ){
+			//	sampler->kde_cov[chain_id][i][j] = 0;
+			//}
+			//else {
+			//	sampler->kde_cov[chain_id][i][j] *= pow_int(.9 * pow(sampler->history_length, -1./(sampler->max_dim + 4)),2);
+			//}
+			//sampler->kde_cov[chain_id][i][j] *= pow_int(.9 * pow(sampler->history_length, -1./(sampler->max_dim + 4)),2)*sampler->randgauss_width[chain_id][5][0];
+			sampler->kde_cov[chain_id][i][j] *= pow_int(.9 * pow(sampler->history_length, -1./(sampler->max_dim + 4)),2);
+			//std::cout<<sampler->kde_cov[chain_id][i][j]<<" ";
+		}
+		//std::cout<<std::endl;
+	}
+	//std::cout<<std::endl;
+	//############################################
+	//for(int i=0 ; i<dim; i++){
+	//	for(int j = 0 ; j<dim; j++){
+	//		sampler->kde_cov[chain_id][i][j] *= .9 * pow(sampler->history_length, -1./(sampler->max_dim + 4));
+	//	}
+	//}
+	gsl_LU_matrix_invert(sampler->kde_cov[chain_id], sampler->kde_fisher[chain_id], dim);
+	//update kde_cov_lndet;
+	sampler->kde_cov_lndet[chain_id] = gsl_LU_lndet(sampler->kde_cov[chain_id],dim);
+	//############################################
+
+	//for(int i=0 ; i<dim; i++){
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<sampler->kde_fisher[chain_id][i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
+	//############################################
+	
+	return;
+}
 
 /*! \brief Straight gaussian step
  *
@@ -365,20 +582,25 @@ void fisher_step(sampler *sampler, /**< Sampler struct*/
 				proposed_param[i] = current_param[i] +
 					alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i];
 				proposed_status[i] = current_status[i];
+					//std::cout<<"Delta p "<<i<<": "<<alpha/sqrt(scaling) *sampler->fisher_vecs[chain_index][beta][i]<<std::endl;
 			}
 			//Generate new step for gaussian steps, using gaussian width	
 			for(int i =sampler->min_dim; i< sampler->max_dim;i++)
 			{
-				if(current_status[i] == 1){
-					alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
-						sampler->randgauss_width[chain_index][0][i]);
-					proposed_param[i] = alpha+current_param[i];
-					proposed_status[i] = current_status[i];
-				}
-				else{
-					proposed_param[i] = 0;
-					proposed_status[i] = current_status[i];
-				}
+				//if(current_status[i] == 1){
+				//	alpha = gsl_ran_gaussian(sampler->rvec[chain_index],
+				//		sampler->randgauss_width[chain_index][0][i]);
+				//	proposed_param[i] = alpha+current_param[i];
+				//	proposed_status[i] = current_status[i];
+				//	//std::cout<<"Delta p "<<i<<": "<<alpha<<std::endl;
+				//}
+				//else{
+				//	proposed_param[i] = 0;
+				//	proposed_status[i] = current_status[i];
+				//	//std::cout<<"NO STEP "<<i<<": "<<std::endl;
+				//}
+				proposed_param[i] = current_param[i];
+				proposed_status[i] = current_status[i];
 			}
 			*proposed_model_status = *current_model_status;	
 		}	
@@ -705,11 +927,11 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	//Regular PTMCMC
 	else{
 		//First position ID
-		int i = (int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));
+		int i = (int)((sampler->history_length)*(gsl_rng_uniform(sampler->rvec[chain_id])));
 		//Second position ID
 		int j;
 		do{
-			j=(int)((sampler->history_length-1)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
+			j=(int)((sampler->history_length)*(gsl_rng_uniform(sampler->rvec[chain_id])));	
 		}while(j==i);
 
 		for(int k = 0 ; k <sampler->max_dim; k++){
@@ -726,8 +948,10 @@ void diff_ev_step(sampler *sampler, /**< Sampler struct*/
 	
 	double alpha = 1;
 	double beta = gsl_rng_uniform(sampler->rvec[chain_id]);
-	if(beta<.9)
+	if(beta<.9){
 		alpha=gsl_ran_gaussian(sampler->rvec[chain_id],sampler->randgauss_width[chain_id][1][0]);
+		//alpha=gsl_ran_gaussian(sampler->rvec[chain_id],2.38/sqrt(2.*sampler->max_dim));
+	}
 	for (int k = 0; k<sampler->max_dim; k++)
 	{
 		proposed_param[k] = current_param[k];
@@ -982,6 +1206,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=0.;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
+			sampler->step_prob[chain_index][5]=0;
 		}
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
@@ -996,6 +1221,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.1+.8/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][5]=0;
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3];
@@ -1006,10 +1232,17 @@ void assign_probabilities(sampler *sampler, int chain_index)
 		//No fisher, but de ready
 		else if (!sampler->fisher_exist && sampler->de_primed[chain_index])
 		{
-			sampler->step_prob[chain_index][0]=.3;
-			sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][0]=.3;
+			//sampler->step_prob[chain_index][1]=.7;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.0;
+			//sampler->step_prob[chain_index][5]=0;
+
+			sampler->step_prob[chain_index][0]=1;
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.0;
+			sampler->step_prob[chain_index][5]=0;
 	
 
 		}
@@ -1021,13 +1254,23 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][2]=.0;
 			//sampler->step_prob[chain_index][3]=.5;
 			//Tailor to temperature
-			sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
-			sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][3]=.2+.5/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][5]=.1;
+			sampler->step_prob[chain_index][5]=.0;
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
-				+sampler->step_prob[chain_index][3];
+				+sampler->step_prob[chain_index][3]
+				+sampler->step_prob[chain_index][5];
 			sampler->step_prob[chain_index][0]=1-sum;
+			
+			//sampler->step_prob[chain_index][0]=.0;
+			//sampler->step_prob[chain_index][1]=.0;
+			//sampler->step_prob[chain_index][2]=.0;
+			//sampler->step_prob[chain_index][3]=.0;
+			//sampler->step_prob[chain_index][5]=1;
 		}
 	}
 	else{
@@ -1042,12 +1285,13 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			sampler->step_prob[chain_index][1]=0.;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
-			sampler->step_prob[chain_index][4]=.8-.6/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.5-.2/sampler->chain_temps[chain_index];
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3]
 				+sampler->step_prob[chain_index][4];
 			sampler->step_prob[chain_index][0]=1.-sum;
+			sampler->step_prob[chain_index][5]=0;
 		}
 		//fisher available, but de not yet ready
 		else if (sampler->fisher_exist && !sampler->de_primed[chain_index])
@@ -1067,6 +1311,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
 				+sampler->step_prob[chain_index][3]
 				+sampler->step_prob[chain_index][4];
 			sampler->step_prob[chain_index][0]=1-sum;
+			sampler->step_prob[chain_index][5]=0;
 
 		}
 		//No fisher, but de ready
@@ -1079,15 +1324,27 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][3]=.0;
 			//sampler->step_prob[chain_index][4]=.2;
 
-			sampler->step_prob[chain_index][1]=.5+.2/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=.5+.2/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][2]=0;
+			//sampler->step_prob[chain_index][3]=0;
+			//sampler->step_prob[chain_index][4]=.4-.2/sampler->chain_temps[chain_index];
+			//double sum = sampler->step_prob[chain_index][1]	
+			//	+sampler->step_prob[chain_index][2]
+			//	+sampler->step_prob[chain_index][3]
+			//	+sampler->step_prob[chain_index][4];
+			//sampler->step_prob[chain_index][0]=1-sum;
+			//sampler->step_prob[chain_index][5]=0;
+
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=0;
 			sampler->step_prob[chain_index][3]=0;
-			sampler->step_prob[chain_index][4]=.4-.2/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.5-.2/sampler->chain_temps[chain_index];
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3]
 				+sampler->step_prob[chain_index][4];
 			sampler->step_prob[chain_index][0]=1-sum;
+			sampler->step_prob[chain_index][5]=0;
 
 		}
 		//all methods available
@@ -1099,15 +1356,27 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][3]=.6;
 			//sampler->step_prob[chain_index][4]=.2;
 
-			sampler->step_prob[chain_index][1]=.2+.1/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=.2+.1/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][2]=0;
+			//sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][4]=.3-.2/sampler->chain_temps[chain_index];
+			//double sum = sampler->step_prob[chain_index][1]	
+			//	+sampler->step_prob[chain_index][2]
+			//	+sampler->step_prob[chain_index][3]
+			//	+sampler->step_prob[chain_index][4];
+			//sampler->step_prob[chain_index][0]=1-sum;
+			//sampler->step_prob[chain_index][5]=0;
+
+			sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=0;
-			sampler->step_prob[chain_index][3]=.1+.4/sampler->chain_temps[chain_index];
-			sampler->step_prob[chain_index][4]=.3-.2/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][3]=.1+.5/sampler->chain_temps[chain_index];
+			sampler->step_prob[chain_index][4]=.5-.4/sampler->chain_temps[chain_index];
 			double sum = sampler->step_prob[chain_index][1]	
 				+sampler->step_prob[chain_index][2]
 				+sampler->step_prob[chain_index][3]
 				+sampler->step_prob[chain_index][4];
 			sampler->step_prob[chain_index][0]=1-sum;
+			sampler->step_prob[chain_index][5]=0;
 
 		}
 	}
@@ -1117,6 +1386,7 @@ void assign_probabilities(sampler *sampler, int chain_index)
 	sampler->prob_boundaries[chain_index][2] = sampler->step_prob[chain_index][2]+sampler->prob_boundaries[chain_index][1];
 	sampler->prob_boundaries[chain_index][3] = sampler->step_prob[chain_index][3]+sampler->prob_boundaries[chain_index][2];
 	sampler->prob_boundaries[chain_index][4] = sampler->step_prob[chain_index][4]+sampler->prob_boundaries[chain_index][3];
+	sampler->prob_boundaries[chain_index][5] = sampler->step_prob[chain_index][5]+sampler->prob_boundaries[chain_index][4];
 }	
 
 /*! \brief Copies contents of one chain to another
@@ -1181,6 +1451,25 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 			}
 		}
 	}
+	//KDE
+	if(samplerptr_source->kde_cov_update_ct[id_source] != samplerptr_source->kde_cov_update_number){
+		for (int i =0 ; i<samplerptr_source->max_dim; i++){
+			for (int j =0 ; j<samplerptr_source->max_dim; j++){
+				samplerptr_dest->kde_cov[id_dest][i][j] = 
+					samplerptr_source->kde_cov[id_source][i][j];
+				samplerptr_dest->kde_fisher[id_dest][i][j] = 
+					samplerptr_source->kde_fisher[id_source][i][j];
+			}
+		}
+		samplerptr_dest->kde_cov_update_ct[id_dest] = samplerptr_source->kde_cov_update_ct[id_source];
+		samplerptr_dest->kde_cov_lndet[id_dest] = samplerptr_source->kde_cov_lndet[id_source];
+	}
+	else{
+		samplerptr_dest->kde_cov_update_ct[id_dest] = samplerptr_dest->kde_cov_update_number;
+		if(samplerptr_dest->de_primed[id_dest] && samplerptr_dest->kde_step){
+			update_kde_cov(samplerptr_dest, id_dest);	
+		}
+	}
 
 	//Step parameters
 	samplerptr_dest->gauss_last_accept_ct[id_dest] 
@@ -1209,18 +1498,31 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 	samplerptr_dest->fish_last_reject_ct[id_dest] 
 		= samplerptr_source->fish_last_reject_ct[id_source]; 
 
+	samplerptr_dest->kde_last_accept_ct[id_dest] 
+		= samplerptr_source->kde_last_accept_ct[id_source]; 
+	samplerptr_dest->kde_last_reject_ct[id_dest] 
+		= samplerptr_source->kde_last_reject_ct[id_source]; 
+
 	samplerptr_dest->gauss_accept_ct[id_dest] 
 		= samplerptr_source->gauss_accept_ct[id_source]; 
 	samplerptr_dest->gauss_reject_ct[id_dest] 
 		= samplerptr_source->gauss_reject_ct[id_source]; 
+
 	samplerptr_dest->de_accept_ct[id_dest] 
 		= samplerptr_source->de_accept_ct[id_source]; 
 	samplerptr_dest->de_reject_ct[id_dest] 
 		= samplerptr_source->de_reject_ct[id_source]; 
+
 	samplerptr_dest->fish_accept_ct[id_dest] 
 		= samplerptr_source->fish_accept_ct[id_source]; 
 	samplerptr_dest->fish_reject_ct[id_dest] 
 		= samplerptr_source->fish_reject_ct[id_source]; 
+
+	samplerptr_dest->kde_accept_ct[id_dest] 
+		= samplerptr_source->kde_accept_ct[id_source]; 
+	samplerptr_dest->kde_reject_ct[id_dest] 
+		= samplerptr_source->kde_reject_ct[id_source]; 
+
 	samplerptr_dest->mmala_accept_ct[id_dest] 
 		= samplerptr_source->mmala_accept_ct[id_source]; 
 	samplerptr_dest->mmala_reject_ct[id_dest] 
@@ -1262,6 +1564,8 @@ void transfer_chain(sampler *samplerptr_dest,sampler *samplerptr_source, int id_
 			}
 		}
 	}
+
+
 
 	//Sampling parameters
 	samplerptr_dest->waiting[id_dest] = samplerptr_source->waiting[id_source];
@@ -1367,6 +1671,19 @@ void update_step_widths(sampler *samplerptr, int chain_id)
 			samplerptr->fish_last_accept_ct[j]=samplerptr->fish_accept_ct[j];
 			samplerptr->fish_last_reject_ct[j]=samplerptr->fish_reject_ct[j];
 		}	
+		if(samplerptr->step_prob[j][5]!= 0){
+			acc = samplerptr->kde_accept_ct[j] - samplerptr->kde_last_accept_ct[j];	
+			rej = samplerptr->kde_reject_ct[j] - samplerptr->kde_last_reject_ct[j];	
+			frac = acc / (acc + rej);
+			if(frac<samplerptr->min_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][5][0] *=.9;	
+			}
+			else if(frac>samplerptr->max_target_accept_ratio[j]){
+				samplerptr->randgauss_width[j][5][0] *=1.1;	
+			}
+			samplerptr->kde_last_accept_ct[j]=samplerptr->kde_accept_ct[j];
+			samplerptr->kde_last_reject_ct[j]=samplerptr->kde_reject_ct[j];
+		}	
 		//RJ
 		if(samplerptr->update_RJ_width){
 			if(samplerptr->step_prob[j][4]!= 0){
@@ -1407,6 +1724,8 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->current_hist_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
 	sampler->chain_pos = (int *)malloc(sizeof(int ) * sampler->chain_N);
 
+	sampler->kde_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->kde_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1423,6 +1742,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->RJstep_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->RJstep_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fisher_update_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->kde_cov_update_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->swap_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->swap_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->step_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1435,6 +1755,7 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->num_de = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->num_mmala = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->num_RJstep = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->num_kde = (int *)malloc(sizeof(int) * sampler->chain_N);
 
 	sampler->priority = (int *)malloc(sizeof(int) * sampler->chain_N);
 
@@ -1449,6 +1770,8 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->gauss_last_accept_ct_per_dim = new int*[ sampler->chain_N];
 	sampler->gauss_last_reject_ct_per_dim = new int*[ sampler->chain_N];
 
+	sampler->kde_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
+	sampler->kde_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->fish_last_reject_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
 	sampler->de_last_accept_ct = (int *)malloc(sizeof(int) * sampler->chain_N);
@@ -1502,6 +1825,20 @@ void allocate_sampler_mem(sampler *sampler)
 	}
 	//#############
 	sampler->interfaces = new mcmc_data_interface*[sampler->chain_N];
+	//#############
+	if(sampler->tune){
+		sampler->fisher_update_number = 200;
+		sampler->kde_cov_update_number = 200;
+		//sampler->fisher_update_number = 1000;
+		//sampler->fisher_update_number = 50;
+	}
+	else{
+		//sampler->fisher_update_number = 50;
+		//sampler->fisher_update_number = 1000;
+		//sampler->fisher_update_number = 5000;
+		sampler->fisher_update_number = sampler->N_steps;
+		sampler->kde_cov_update_number = sampler->N_steps;
+	}
 	//#############
 	for (i =0; i<sampler->chain_N; i++)
 	{
@@ -1563,6 +1900,8 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->prob_boundaries[i] = (double *)malloc(sizeof(double)*sampler->types_of_steps);
 		sampler->de_primed[i] = false;
 		sampler->current_hist_pos[i] = 0;
+		sampler->kde_accept_ct[i]=0;
+		sampler->kde_reject_ct[i]=0;
 		sampler->fish_accept_ct[i]=0;
 		sampler->fish_reject_ct[i]=0;
 		sampler->de_accept_ct[i]=0;
@@ -1573,7 +1912,6 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->mmala_reject_ct[i]=0;
 		sampler->RJstep_accept_ct[i]=0;
 		sampler->RJstep_reject_ct[i]=0;
-		sampler->fisher_update_ct[i] = sampler->fisher_update_number;
 		sampler->chain_pos[i]=0;
 		sampler->waiting[i]=true;
 		sampler->waiting_SWP[i]=false;
@@ -1588,6 +1926,7 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->num_de[i]=0;
 		sampler->num_mmala[i]=0;
 		sampler->num_RJstep[i]=0;
+		sampler->num_kde[i]=0;
 	
 		sampler->priority[i] = 1; //Default priority
 		sampler->restarted_chain[i]=false;
@@ -1627,6 +1966,8 @@ void allocate_sampler_mem(sampler *sampler)
 			sampler->gauss_reject_ct_per_dim[i][j]=0;
 		}
 
+		sampler->kde_last_accept_ct[i] = 0.;
+		sampler->kde_last_reject_ct[i] = 0.;
 		sampler->fish_last_accept_ct[i] = 0.;
 		sampler->fish_last_reject_ct[i] = 0.;
 		sampler->de_last_accept_ct[i] = 0.;
@@ -1644,11 +1985,13 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->randgauss_width_number[i][2] = 1;
 		sampler->randgauss_width_number[i][3] = 1;
 		sampler->randgauss_width_number[i][4] = 1;
+		sampler->randgauss_width_number[i][5] = 1;
 		sampler->randgauss_width[i][0] = new double[sampler->max_dim];
 		sampler->randgauss_width[i][1] = new double[1];
 		sampler->randgauss_width[i][2] = new double[1];
 		sampler->randgauss_width[i][3] = new double[1];
 		sampler->randgauss_width[i][4] = new double[1];
+		sampler->randgauss_width[i][5] = new double[1];
 		
 		//sampler->randgauss_width[i][0]=.01;
 		for(int j = 0 ; j<sampler->max_dim; j++){
@@ -1660,20 +2003,13 @@ void allocate_sampler_mem(sampler *sampler)
 		sampler->randgauss_width[i][3][0]=.5;
 		//For RJPTMCMC, this may not be used, but it'll be available
 		sampler->randgauss_width[i][4][0]=.5;
+		sampler->randgauss_width[i][5][0]=.5;
 
 		sampler->prop_MH_factor[i]=0;
+
+		sampler->fisher_update_ct[i] = sampler->fisher_update_number;
+		sampler->kde_cov_update_ct[i] = sampler->kde_cov_update_number;
 	}		
-	if(sampler->tune){
-		sampler->fisher_update_number = 200;
-		//sampler->fisher_update_number = 1000;
-		//sampler->fisher_update_number = 50;
-	}
-	else{
-		//sampler->fisher_update_number = 50;
-		//sampler->fisher_update_number = 1000;
-		//sampler->fisher_update_number = 5000;
-		sampler->fisher_update_number = sampler->N_steps;
-	}
 	sampler->history = allocate_3D_array(sampler->chain_N, 
 				sampler->history_length, sampler->max_dim);
 	sampler->fisher_vecs = allocate_3D_array(sampler->chain_N, 
@@ -1685,6 +2021,11 @@ void allocate_sampler_mem(sampler *sampler)
 	sampler->fisher_matrix = allocate_3D_array(sampler->chain_N, 
 				sampler->max_dim, sampler->max_dim);
 	sampler->fisher_matrix_prop = allocate_3D_array(sampler->chain_N, sampler->max_dim,sampler->max_dim);
+	sampler->kde_cov = allocate_3D_array(sampler->chain_N, 
+				sampler->max_dim, sampler->max_dim);
+	sampler->kde_fisher = allocate_3D_array(sampler->chain_N, 
+				sampler->max_dim, sampler->max_dim);
+	sampler->kde_cov_lndet = new double[sampler->chain_N];
 	
 
 	//Trouble Shooting:
@@ -1731,6 +2072,8 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->prob_boundaries); 
 	free(sampler->de_primed);
 	free(sampler->current_hist_pos);
+	free(sampler->kde_accept_ct);
+	free(sampler->kde_reject_ct);
 	free(sampler->fish_accept_ct);
 	free(sampler->fish_reject_ct);
 	free(sampler->de_accept_ct);
@@ -1750,6 +2093,7 @@ void deallocate_sampler_mem(sampler *sampler)
 	free(sampler->step_accept_ct);
 	free(sampler->step_reject_ct);
 
+	free(sampler->num_kde);
 	free(sampler->nan_counter);
 	free(sampler->num_gauss);
 	free(sampler->num_fish);
@@ -1771,8 +2115,12 @@ void deallocate_sampler_mem(sampler *sampler)
 	deallocate_2D_array(sampler->fisher_vals_prop, sampler->chain_N, sampler->max_dim);
 	deallocate_3D_array(sampler->fisher_matrix, sampler->chain_N, sampler->max_dim,sampler->max_dim);
 	deallocate_3D_array(sampler->fisher_matrix_prop, sampler->chain_N, sampler->max_dim,sampler->max_dim);
+	deallocate_3D_array(sampler->kde_cov, sampler->chain_N, sampler->max_dim, sampler->max_dim);
+	deallocate_3D_array(sampler->kde_fisher, sampler->chain_N, sampler->max_dim, sampler->max_dim);
+	delete [] sampler->kde_cov_lndet;
  
 	free(sampler->fisher_update_ct);
+	free(sampler->kde_cov_update_ct);
 	free(sampler->rvec);
 
 	free(sampler->check_stepsize_freq);
@@ -1789,6 +2137,8 @@ void deallocate_sampler_mem(sampler *sampler)
 	delete [] sampler->gauss_reject_ct_per_dim;
 	delete [] sampler->gauss_accept_ct_per_dim;
 
+	free(sampler->kde_last_accept_ct);
+	free(sampler->kde_last_reject_ct);
 	free(sampler->de_last_accept_ct);
 	free(sampler->de_last_reject_ct);
 	free(sampler->fish_last_accept_ct);
@@ -1852,6 +2202,7 @@ void update_history(sampler *sampler, double *new_params, int *new_param_status,
 	}
 	else
 	{
+		//debugger_print(__FILE__,__LINE__,"RESTART HISTORY "+std::to_string(chain_index)+" "+std::to_string(sampler->current_hist_pos[chain_index]));
 		sampler->current_hist_pos[chain_index] = 0;
 	}
 	for (int i =0; i < sampler->max_dim; i++)
@@ -1976,7 +2327,7 @@ void write_stat_file(sampler *sampler,
 		std::endl;
 	out_file<<
 		std::setw(width)<<std::left<<
-		"Probabilities of steps (Gaussian, DE, MMALA, FISHER, RJ): "<<std::endl;
+		"Probabilities of steps (Gaussian, DE, MMALA, FISHER, RJ, KDE): "<<std::endl;
 	out_file<<
 		std::setw(fifth)<<std::left<<
 		sampler->step_prob[0][0]<<
@@ -1988,6 +2339,8 @@ void write_stat_file(sampler *sampler,
 		sampler->step_prob[0][3]<<
 		std::setw(fifth)<<std::left<<
 		sampler->step_prob[0][4]<<
+		std::setw(fifth)<<std::left<<
+		sampler->step_prob[0][5]<<
 		std::endl;
 	out_file<<std::endl;
 
@@ -2006,7 +2359,8 @@ void write_stat_file(sampler *sampler,
 			sampler->de_accept_ct[i]+sampler->de_reject_ct[i]+
 			sampler->mmala_accept_ct[i]+sampler->mmala_reject_ct[i]+
 			sampler->RJstep_accept_ct[i]+sampler->RJstep_reject_ct[i]+
-			sampler->gauss_accept_ct[i]+sampler->gauss_reject_ct[i];
+			sampler->gauss_accept_ct[i]+sampler->gauss_reject_ct[i]+
+			sampler->kde_accept_ct[i] + sampler->kde_reject_ct[i];
 		swpa = sampler->swap_accept_ct[i];
 		swpt = sampler->swap_reject_ct[i] + swpa;
 		out_file<<std::setw(fourth)<<i<<
@@ -2033,10 +2387,12 @@ void write_stat_file(sampler *sampler,
 		"Fisher"<<
 		std::setw(sixth)<<std::left<<
 		"RJ"<<
+		std::setw(sixth)<<std::left<<
+		"KDE"<<
 		std::endl;
 	for (int i =0; i < sampler->chain_N; i++){	
 	 	total_step_type= sampler->num_gauss[i]+sampler->num_mmala[i]+
-				sampler->num_de[i]+sampler->num_fish[i]+sampler->num_RJstep[i];
+				sampler->num_de[i]+sampler->num_fish[i]+sampler->num_RJstep[i]+sampler->num_kde[i];
 		out_file<<
 			std::setw(sixth)<<std::left<<
 			i<<
@@ -2050,6 +2406,8 @@ void write_stat_file(sampler *sampler,
 			(double)sampler->num_fish[i]/total_step_type<<
 			std::setw(sixth)<<std::left<<
 			(double)sampler->num_RJstep[i]/total_step_type<<
+			std::setw(sixth)<<std::left<<
+			(double)sampler->num_kde[i]/total_step_type<<
 			std::endl;
 		
 	}
@@ -2107,6 +2465,7 @@ void write_stat_file(sampler *sampler,
 		std::setw(seventh)<<std::left<<"MMALA"<<
 		std::setw(seventh)<<std::left<<"Fisher"<<
 		std::setw(seventh)<<std::left<<"RJ"<<
+		std::setw(seventh)<<std::left<<"KDE"<<
 		std::setw(seventh)<<std::left<<"Total"<<
 		std::endl;
 
@@ -2117,22 +2476,26 @@ void write_stat_file(sampler *sampler,
 	double detotal ;
 	double mmtotal ;
 	double ftotal ;
+	double kdetotal ;
 	double RJtotal ;
 	double gtotal_total =0;
 	double detotal_total =0;
 	double mmtotal_total =0;
 	double ftotal_total =0;
+	double kdetotal_total =0;
 	double RJtotal_total =0;
 	double total_total =0;
 	double gacc_frac = 0;
 	double deacc_frac = 0;
 	double mmacc_frac = 0;
 	double facc_frac = 0;
+	double kdeacc_frac = 0;
 	double RJacc_frac = 0;
 	double gacc_frac_total = 0;
 	double deacc_frac_total = 0;
 	double mmacc_frac_total = 0;
 	double facc_frac_total = 0;
+	double kdeacc_frac_total = 0;
 	double RJacc_frac_total = 0;
 	double acc_frac_total = 0;
 	for (int i =0; i<sampler->chain_N;i++){
@@ -2148,6 +2511,10 @@ void write_stat_file(sampler *sampler,
 	
 		ftotal = sampler->fish_accept_ct[i]+sampler->fish_reject_ct[i];
 		facc_frac = (double)sampler->fish_accept_ct[i]/ftotal;
+
+
+		kdetotal = sampler->kde_accept_ct[i]+sampler->kde_reject_ct[i];
+		kdeacc_frac = (double)sampler->kde_accept_ct[i]/kdetotal;
 
 		RJtotal = sampler->RJstep_accept_ct[i]+sampler->RJstep_reject_ct[i];
 		RJacc_frac = (double)sampler->RJstep_accept_ct[i]/RJtotal;
@@ -2168,6 +2535,9 @@ void write_stat_file(sampler *sampler,
 		ftotal_total += ftotal;
 		facc_frac_total+=(double)sampler->fish_accept_ct[i];
 
+		kdetotal_total += kdetotal;
+		kdeacc_frac_total+=(double)sampler->kde_accept_ct[i];
+
 		RJtotal_total += RJtotal;
 		RJacc_frac_total+=(double)sampler->RJstep_accept_ct[i];
 
@@ -2180,6 +2550,7 @@ void write_stat_file(sampler *sampler,
 			std::left<<std::setw(seventh)<<mmacc_frac<<
 			std::left<<std::setw(seventh)<<facc_frac<<
 			std::left<<std::setw(seventh)<<RJacc_frac<<
+			std::left<<std::setw(seventh)<<kdeacc_frac<<
 			std::left<<std::setw(seventh)<<acc_frac<<
 			std::endl;
 	}
@@ -2190,6 +2561,7 @@ void write_stat_file(sampler *sampler,
 		std::setw(seventh)<<(double)mmacc_frac_total/(mmtotal_total)<<
 		std::setw(seventh)<<(double)facc_frac_total/(ftotal_total)<<
 		std::setw(seventh)<<(double)RJacc_frac_total/(RJtotal_total)<<
+		std::setw(seventh)<<(double)kdeacc_frac_total/(kdetotal_total)<<
 		std::setw(seventh)<<(double)acc_frac_total/(total_total)<<
 		std::endl;
 
@@ -2551,8 +2923,12 @@ void load_checkpoint_file(std::string check_file,sampler *samplerptr)
 			}
 
 
-			for(int j =0 ;j<samplerptr->chain_N; j++)
+			for(int j =0 ;j<samplerptr->chain_N; j++){
 				samplerptr->de_primed[j] =true;
+				if(samplerptr->kde_step){
+					update_kde_cov(samplerptr, j);
+				}
+			}
 		}
 		else{
 			for(int j =0 ;j<samplerptr->chain_N; j++)
@@ -2622,6 +2998,7 @@ void assign_ct_p(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 	else if(step ==2) samplerptr->mmala_accept_ct[chain_index]+=1;
 	else if(step ==3) samplerptr->fish_accept_ct[chain_index]+=1;
 	else if(step ==4) samplerptr->RJstep_accept_ct[chain_index]+=1;
+	else if(step ==5) samplerptr->kde_accept_ct[chain_index]+=1;
 }
 void assign_ct_m(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 {
@@ -2633,6 +3010,7 @@ void assign_ct_m(sampler *samplerptr, int step, int chain_index, int gauss_dim)
 	else if(step ==2) samplerptr->mmala_reject_ct[chain_index]+=1;
 	else if(step ==3) samplerptr->fish_reject_ct[chain_index]+=1;
 	else if(step ==4) samplerptr->RJstep_reject_ct[chain_index]+=1;
+	else if(step ==5) samplerptr->kde_reject_ct[chain_index]+=1;
 }
 
 void assign_initial_pos(sampler *samplerptr,double *initial_pos, int *initial_status, int initial_model_status,double **ensemble_initial_pos,int **ensemble_initial_status,int *ensemble_initial_model_status,double *seeding_var) 

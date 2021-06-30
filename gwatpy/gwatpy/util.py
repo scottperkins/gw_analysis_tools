@@ -69,7 +69,34 @@ rlib.f_0PN_py.restype = ctypes.c_double
 rlib.gen_params_base_py_destructor.argtypes = [ctypes.c_void_p]
 rlib.gen_params_base_py_destructor.restype = ctypes.c_void_p
 
+
+rlib.match_py.argtypes = \
+    [ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.POINTER(ctypes.c_double),
+    ctypes.c_int
+]
+rlib.match_py.restype = ctypes.c_double
 ############################################################
+
+def match_py(data1, data2, SN, frequencies):
+    length = len(data1)
+    d_type = ctypes.c_double * (length) 
+    data1_real = data1.real
+    data1_imag = data1.imag
+    data1_real = np.ascontiguousarray(data1_real,dtype = ctypes.c_double)
+    data1_imag = np.ascontiguousarray(data1_imag,dtype = ctypes.c_double)
+    data2_real = data2.real
+    data2_imag = data2.imag
+    data2_real = np.ascontiguousarray(data2_real,dtype = ctypes.c_double)
+    data2_imag = np.ascontiguousarray(data2_imag,dtype = ctypes.c_double)
+    sn = np.ascontiguousarray(SN, dtype=ctypes.c_double)
+    f = np.ascontiguousarray(frequencies, dtype=ctypes.c_double)
+
+    return rlib.match_py(d_type(*(data1_real)),d_type(*(data1_imag)),d_type(*(data2_real)),d_type(*(data2_imag)),d_type(*(sn)),d_type(*(f)),length)
 
 c = 299792458.
 T_year = 31557600.
@@ -79,11 +106,22 @@ MSOL_SEC = 4.925491025543575903411922162094833998e-6
 def gps_to_GMST_radian_py(gpstime):
     return rlib.gps_to_GMST_radian_py(gpstime)
 def calculate_chirpmass_py(mass1,mass2):
-    f=rlib.calculate_chirpmass_py
-    f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
-    cm = ctypes.c_double()
-    f(ctypes.c_double(mass1),ctypes.c_double(mass2),ctypes.byref(cm))
-    return(cm.value)
+    if not isinstance(mass1, (list, tuple, np.ndarray)):
+        f=rlib.calculate_chirpmass_py
+        f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
+        cm = ctypes.c_double()
+        f(ctypes.c_double(mass1),ctypes.c_double(mass2),ctypes.byref(cm))
+        return(cm.value)
+    else:
+        m1 = np.array(mass1)
+        m2 = np.array(mass2)
+        fvec=rlib.calculate_chirpmass_vectorized_py
+        fvec.argtypes=[ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+        l = len(m1)
+        d_type = l * ctypes.c_double
+        chirp = (ctypes.c_double*l)()
+        fvec(d_type(*(np.ascontiguousarray(m1,dtype=ctypes.c_double))),d_type(*(np.ascontiguousarray(m2,dtype=ctypes.c_double))),chirp,l)
+        return np.array(chirp)
 
 def t_0PN_py(f ,chirpmass):
     return rlib.t_0PN_py(f,chirpmass)
@@ -91,25 +129,58 @@ def f_0PN_py(t ,chirpmass):
     return rlib.f_0PN_py(t,chirpmass)
 
 def calculate_eta_py(mass1,mass2):
-    f=rlib.calculate_eta_py
-    f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
-    cm = ctypes.c_double()
-    f(ctypes.c_double(mass1),ctypes.c_double(mass2),ctypes.byref(cm))
-    return(cm.value)
+    if not isinstance(mass1, (list, tuple, np.ndarray)):
+        f=rlib.calculate_eta_py
+        f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
+        cm = ctypes.c_double()
+        f(ctypes.c_double(mass1),ctypes.c_double(mass2),ctypes.byref(cm))
+        return(cm.value)
+    else:
+        m1 = np.array(mass1)
+        m2 = np.array(mass2)
+        fvec=rlib.calculate_eta_vectorized_py
+        fvec.argtypes=[ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+        l = len(m1)
+        d_type = l * ctypes.c_double
+        eta = (ctypes.c_double*l)()
+        fvec(d_type(*(np.ascontiguousarray(m1,dtype=ctypes.c_double))),d_type(*(np.ascontiguousarray(m2,dtype=ctypes.c_double))),eta,l)
+        return np.array(eta)
 
 def calculate_mass1_py(chirpmass,eta):
-    f=rlib.calculate_mass1_py
-    f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
-    cm = ctypes.c_double()
-    f(ctypes.c_double(chirpmass),ctypes.c_double(eta),ctypes.byref(cm))
-    return(cm.value)
+    if not isinstance(chirpmass, (list, tuple, np.ndarray)):
+        f=rlib.calculate_mass1_py
+        f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
+        cm = ctypes.c_double()
+        f(ctypes.c_double(chirpmass),ctypes.c_double(eta),ctypes.byref(cm))
+        return(cm.value)
+    else:
+        ch = np.array(chirpmass)
+        et = np.array(eta)
+        fvec=rlib.calculate_mass1_vectorized_py
+        fvec.argtypes=[ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+        l = len(ch)
+        d_type = l * ctypes.c_double
+        mass1 = (ctypes.c_double*l)()
+        fvec(d_type(*(np.ascontiguousarray(ch,dtype=ctypes.c_double))),d_type(*(np.ascontiguousarray(et,dtype=ctypes.c_double))),mass1,l)
+        return np.array(mass1)
 
 def calculate_mass2_py(chirpmass,eta):
-    f=rlib.calculate_mass2_py
-    f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
-    cm = ctypes.c_double()
-    f(ctypes.c_double(chirpmass),ctypes.c_double(eta),ctypes.byref(cm))
-    return(cm.value)
+    if not isinstance(chirpmass, (list, tuple, np.ndarray)):
+        f=rlib.calculate_mass2_py
+        f.argtypes=[ctypes.c_double,ctypes.c_double,ctypes.POINTER(ctypes.c_double)]
+        cm = ctypes.c_double()
+        f(ctypes.c_double(chirpmass),ctypes.c_double(eta),ctypes.byref(cm))
+        return(cm.value)
+    else:
+        ch = np.array(chirpmass)
+        et = np.array(eta)
+        fvec=rlib.calculate_mass2_vectorized_py
+        fvec.argtypes=[ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double),ctypes.POINTER(ctypes.c_double), ctypes.c_int]
+        l = len(ch)
+        d_type = l * ctypes.c_double
+        mass2 = (ctypes.c_double*l)()
+        fvec(d_type(*(np.ascontiguousarray(ch,dtype=ctypes.c_double))),d_type(*(np.ascontiguousarray(et,dtype=ctypes.c_double))),mass2,l)
+        return np.array(mass2)
 
 def DL_from_Z_py(z, COSMOLOGY):
     f=rlib.DL_from_Z_py

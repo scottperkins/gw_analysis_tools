@@ -813,19 +813,19 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.Luminosity_Distance = 730;
 	//params.incl_angle = .76;
 	
-	params.mass1 = 5.7;
-	params.mass2 = 1.5;
+	params.mass1 = 5.9;
+	params.mass2 = 1.4;
 	//params.spin1[2] = .08* (params.mass1+params.mass2)/params.mass1;
-	params.spin1[2] = -.03*(1.5+5.7)/5.7;
-	params.spin2[2] = 0 ;
+	params.spin1[2] = .3;
+	params.spin2[2] = .03 ;
 	//params.spin1[1] = 0.52*sqrt(1-.51*.51)*sin(2.79);
 	//params.spin2[1] = 0.43*sqrt(1-.2*.2)*sin(2.99);
 	//params.spin1[0] = 0.52*sqrt(1-.51*.51)*cos(2.79);
 	//params.spin2[0] = 0.43*sqrt(1-.2*.2)*cos(2.99);
-	params.chip = .1;
+	params.chip = .2;
 	params.phip = 1.0;
-	params.Luminosity_Distance = 380;
-	params.incl_angle = .13;
+	params.Luminosity_Distance = 30;
+	params.incl_angle = 3*M_PI/4;
 
 	//params.mass1 = 5.0;
 	//params.mass2 = 1.4;
@@ -987,24 +987,24 @@ int dCS_EdGB(int argc, char *argv[])
 	matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
 	std::cout<<"AD:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<output_AD[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<output_AD[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
 	std::cout<<"COV AD:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<COV_AD[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<COV_AD[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	std::cout<<"Variances (90%):"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
@@ -1024,13 +1024,13 @@ int dCS_EdGB(int argc, char *argv[])
 
 	double **identity_full = allocate_2D_array(dim,dim);
 	matrix_multiply(output_AD,COV_AD,identity_full,dim,dim,dim);
-	std::cout<<"IDENTITY: "<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<identity_full[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//std::cout<<"IDENTITY: "<<std::endl;
+	//for(int i = 0 ; i<dim; i++){
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<identity_full[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	
 	deallocate_2D_array(identity_full, dim,dim);
 
@@ -1042,13 +1042,13 @@ int dCS_EdGB(int argc, char *argv[])
 	rm_fisher_dim(output_AD,dim, sub_AD_F,dim-4,ids);
 	gsl_LU_matrix_invert(sub_AD_F,COV_AD,dim-4);
 	std::cout<<"SUB COV AD:"<<std::endl;
-	for(int i = 0 ; i<dim-4; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim-4; j++){
-			std::cout<<sub_AD_F[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dim-4; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim-4; j++){
+	//		std::cout<<sub_AD_F[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	std::cout<<"Variances (90%):"<<std::endl;
 	for(int i = 0 ; i<dim-4; i++){
 		std::cout<<i<<" "<<1.64*sqrt(COV_AD[i][i])<<std::endl;
@@ -1125,23 +1125,23 @@ int dCS_EdGB(int argc, char *argv[])
 	
 	
 	std::cout<<"AD-DSA:"<<std::endl;
-	for(int i = 0 ; i<dimDSA; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dimDSA; j++){
-			std::cout<<output_ADSA[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<dimDSA; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dimDSA; j++){
+	//		std::cout<<output_ADSA[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	gsl_LU_matrix_invert(output_ADSA,COV_ADSA,dimDSA);
 	double **identity = allocate_2D_array(dimDSA,dimDSA);
 	matrix_multiply(output_ADSA,COV_ADSA,identity,dimDSA,dimDSA,dimDSA);
-	std::cout<<"IDENTITY: "<<std::endl;
-	for(int i = 0 ; i<dimDSA; i++){
-		for(int j = 0 ; j<dimDSA; j++){
-			std::cout<<identity[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//std::cout<<"IDENTITY: "<<std::endl;
+	//for(int i = 0 ; i<dimDSA; i++){
+	//	for(int j = 0 ; j<dimDSA; j++){
+	//		std::cout<<identity[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 	
 	deallocate_2D_array(identity, dimDSA,dimDSA);
 	std::cout<<"Variances (90%):"<<std::endl;
