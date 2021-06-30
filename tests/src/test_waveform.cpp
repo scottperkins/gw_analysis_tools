@@ -194,7 +194,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	    }
 	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
 	    {
-	      //Pull GR limit points out of the data set so that they don't mess with my plotting
+	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
 	      //Keep track of how many we pull
 	      num_infspeeds++;
 	      i--;
