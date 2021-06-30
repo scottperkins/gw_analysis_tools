@@ -479,7 +479,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			deallocate_2D_array(dt, dimension, length);
 		}
 		if(order>=4){
-			delete [] response_plus_plus, response_minus_minus;
+			delete [] response_plus_plus;
+			delete [] response_minus_minus;
 		}
 	}
 	if(order>= 4){

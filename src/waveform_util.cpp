@@ -32,6 +32,55 @@
  */
 
 
+/*\brief Calculates the match maximized over phic  and tc 
+ *
+ * Taken from III A of https://arxiv.org/pdf/1807.07163.pdf
+ *
+ */
+double match(  std::complex<double> *data1, std::complex<double> *data2, double *SN,double *frequencies,int length)
+{
+	std::complex<double> Gtilde ;
+	double *G= new double[length];
+	double delta_f = frequencies[1]-frequencies[0];
+
+	double norms[2] ;
+	norms[0] =  data_snr(frequencies,length,data1,data1,SN);
+	norms[1] =  data_snr(frequencies,length,data2,data2,SN);
+	std::cout<<norms[0]<<"  "<<norms[1]<<std::endl;
+	
+	fftw_complex *in, *out; 
+	fftw_plan p;
+	in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
+        out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
+        p = fftw_plan_dft_1d(length, in, out,FFTW_FORWARD, FFTW_MEASURE);
+        for (int i=0;i<length; i++)
+        {
+                Gtilde = conj(data1[i]) * data2[i] / SN[i];
+                in[i][0] = real(Gtilde);
+                in[i][1] = imag(Gtilde);
+        }
+
+        fftw_execute(p);
+
+        for (int i=0;i<length; i++)
+        {
+                G[i] = std::abs(std::complex<double>(out[i][0],out[i][1])) ;
+        }
+
+        double max = *std::max_element(G, G+length)*delta_f;
+	
+	std::cout<<norms[0]<<"  "<<norms[1]<<std::endl;
+	fftw_destroy_plan(p);
+        fftw_free(in);
+        fftw_free(out);
+	fftw_cleanup();
+
+	delete [] G;
+	
+	return 4.*max/(norms[0]*norms[1]);
+}
+
+
 struct gsl_snr_struct
 {
 	gen_params_base<double> *params;
@@ -55,8 +104,7 @@ double data_snr(double *frequencies,
 	double *psd
 	)	
 {
-	double *integrand
-			 = (double *)malloc(sizeof(double)*length);
+	double *integrand= (double *)malloc(sizeof(double)*length);
 
 	double delta_f = frequencies[1]-frequencies[0];
 
@@ -64,6 +112,7 @@ double data_snr(double *frequencies,
 	for (int i = 0; i<length;i++)
 		integrand[i] = 4.*real(conj(data[i])*response[i])/psd[i]; 
 	double inner_prod = (simpsons_sum(delta_f,length, integrand));
+	//double inner_prod = (simpsons_sum(delta_f,length, integrand));
 	free(integrand);
 	return sqrt(inner_prod);
 
