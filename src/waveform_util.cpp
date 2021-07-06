@@ -46,7 +46,6 @@ double match(  std::complex<double> *data1, std::complex<double> *data2, double 
 	double norms[2] ;
 	norms[0] =  data_snr(frequencies,length,data1,data1,SN);
 	norms[1] =  data_snr(frequencies,length,data2,data2,SN);
-	std::cout<<norms[0]<<"  "<<norms[1]<<std::endl;
 	
 	fftw_complex *in, *out; 
 	fftw_plan p;
@@ -69,7 +68,6 @@ double match(  std::complex<double> *data1, std::complex<double> *data2, double 
 
         double max = *std::max_element(G, G+length)*delta_f;
 	
-	std::cout<<norms[0]<<"  "<<norms[1]<<std::endl;
 	fftw_destroy_plan(p);
         fftw_free(in);
         fftw_free(out);
