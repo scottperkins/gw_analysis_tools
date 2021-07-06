@@ -159,13 +159,22 @@ int EA_fully_restricted_consistency_test(int argc, char *argv[])
 	gsl_rng_env_setup();
 	T = gsl_rng_default;
 	r = gsl_rng_alloc(T);
+	double *testPSD=new double[samples];
+	populate_noise(freqs, "AdLIGOMidHigh", testPSD,samples, 48);
+	for(int i = 0 ; i<samples; i++){
+		testPSD[i] *= testPSD[i];
+	}
 
 	for (int i = 0 ; i<iterations; i++){
 		//Make these random numbers
-		params.betappe[0] = 1e-1; // c1
-		params.betappe[1] = 2e-1; // c2
-		params.betappe[2] = 3e-1; // c3
-		params.betappe[3] = 4e-1; // c4
+		params.betappe[0] = 1.24e-11; 
+		params.betappe[1] = 3.72E-11; 
+		params.betappe[2] = 1.51826296; 
+		params.betappe[3] = 5.22E-16; 
+		//params.betappe[0] = 1.24e-11; 
+		//params.betappe[1] = 3.72E-11; 
+		//params.betappe[2] = 10.51826296; 
+		//params.betappe[3] = 5.22E-1; 
 		params.mass1 = gsl_rng_uniform(r) +1;
 		params.mass2 = gsl_rng_uniform(r) +1;
 		if(params.mass2>params.mass1){
@@ -184,7 +193,11 @@ int EA_fully_restricted_consistency_test(int argc, char *argv[])
 		std::complex<double> *responseGR =  new std::complex<double>[samples];
 
 		fourier_detector_response(freqs, samples, responseEA, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT", &params, (double *) NULL);
+		//fourier_detector_response(freqs, samples, responseEA, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
 		fourier_detector_response(freqs, samples, responseGR, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
+
+		double matchresponse = match(responseEA, responseGR, testPSD, freqs, samples);
+		std::cout<<"Match: "<<matchresponse<<std::endl;
 
 		double *phase_EA = new double[samples];
 		double *phase_GR = new double[samples];
@@ -205,7 +218,7 @@ int EA_fully_restricted_consistency_test(int argc, char *argv[])
 			output[j][4] = phase_EA_unwrap[j];
 			output[j][5] = phase_GR_unwrap[j];
 		}
-		//write_file("data/EA_GR_COMP_"+std::to_string(i)+".csv", output, samples, 6);
+		write_file("data/EA_GR_COMP_"+std::to_string(i)+".csv", output, samples, 6);
 
 		delete [] responseEA;
 		delete [] responseGR;
@@ -214,6 +227,7 @@ int EA_fully_restricted_consistency_test(int argc, char *argv[])
 		delete [] phase_EA_unwrap;
 		delete [] phase_GR_unwrap;
 	}
+	delete [] testPSD;
 	gsl_rng_free(r);
 	delete [] freqs;
 	deallocate_2D_array(output, samples, 4);
