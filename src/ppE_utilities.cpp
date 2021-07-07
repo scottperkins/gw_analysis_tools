@@ -354,8 +354,10 @@ void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param
 	for(int i = 0 ; i<length; i++){
 		hall[i] = wp->hplus[i] / std::complex<T>(-1*(1+ci*ci),0) ;	
 	}
-	T dtV = param->tc*(1./param->cT_EA-1./param->cV_EA)/(1-1./param->cT_EA);
-	T dtS = param->tc*(1./param->cT_EA-1./param->cS_EA)/(1-1./param->cT_EA);
+	//T dtV = param->tc*(1./param->cT_EA-1./param->cV_EA)/(1-1./param->cT_EA);
+	//T dtS = param->tc*(1./param->cT_EA-1./param->cS_EA)/(1-1./param->cT_EA);
+	T dtV = (1.- param->cT_EA/param->cV_EA);
+	T dtS = (1.- param->cT_EA/param->cS_EA);
 	std::complex<T> shift_V ;
 	std::complex<T> shift_S ;
 	T u2m2=0;
@@ -364,10 +366,12 @@ void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param
 		//std::complex<T> time_shift = ( exp(std::complex<T>(0,2*M_PI*freqs[i]*dtV)+exp(std::complex<T>(0,2*M_PI*freqs[i]*dtS))));
 		//wp->hplus[i]*=time_shift;
 		//wp->hcross[i]*=time_shift;
-		shift_V = exp(std::complex<T>(0,2*M_PI*freqs[i] *param->tc* dtV));
+		shift_V = exp(std::complex<T>(0,-2*M_PI*freqs[i] *param->tc* dtV));
 		shift_S = exp(std::complex<T>(0,-2*M_PI*freqs[i] *param->tc* dtS));
+
 		wp->hplus[i] *= (std::complex<T>(1 + u2m2 * param->alpha_ppE_2T_0_EA,0) + shift_V + shift_S);
 		wp->hcross[i] *= (std::complex<T>(1 + u2m2 * param->alpha_ppE_2T_0_EA,0) + shift_V + shift_S);
+
 		wp->hb[i] = hall[i] * std::complex<T>(0.5,0) * u2m2* param->alpha_ppE_2T_0_EA* param->gb1_EA * (std::complex<T>(1,0) - param->abL_EA)*shift_S*si*si;
 		wp->hx[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * ci;
 		wp->hy[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * std::complex<T>(0,1);
