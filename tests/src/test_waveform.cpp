@@ -11,6 +11,7 @@
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 
 //#define _LAL
@@ -289,40 +290,62 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	r=gsl_rng_alloc(T);
 	gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
 	
-	int iterations = 1000;
+	int iterations = 100000;
 	int num_bad_points = 0;
 	int num_infspeeds = 0;
-	int dim = 13;// Increase for every factor you want to output
+	int num_nan = 0;
+	int num_alpha_zero = 0;
+	int dim = 15;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
-	double a_bound = 4.; 
-	double theta_bound = 3.; 
+	//double a_bound = -4.; //(case 1)
+	double a_bound = -7.;  //(case 2)
+	double theta_bound = -3.; 
 	double w_bound = 2.;
-	double sigma_bound = 15.;
+	double sigma_bound = -15.;
 
-	double superluminal = 1 - 9*pow(10, -15.); //This ensures that c_I^2 > 1 - order(10^(-15)).
-
+	double sign[3];
+	
+	double superluminal = 1 - pow(10, -15.); //This ensures that c_I^2 > 1 - 10^(-15).
+	
 	for (int i = 0 ; i<iterations; i++){
-	  //Uses gsl to get a random number (uniformly distributed between -i_bound and i_bound)
-	  //params.betappe[0] = gsl_rng_uniform(r)*2*pow(10, -a_bound) - pow(10, - a_bound); // ca (allowing it to be negative - violates positive energy constraint)
-	  params.betappe[0] = gsl_rng_uniform(r)*pow(10, -a_bound); // ca (this parameter has to be positive because of energy constraints)
-	  params.betappe[1] = 3.*params.betappe[0]*(1 + (2*gsl_rng_uniform(r) - 1.)*pow(10, -theta_bound)); // ctheta (Note special form here)
-	  params.betappe[2] = (2*gsl_rng_uniform(r) - 1.)*pow(10, w_bound -1); // cw
-	  params.betappe[3] = (2*gsl_rng_uniform(r) - 1.)*pow(10, -sigma_bound); // csigma
-	  
-
-	  //Random numbers with more variation of order
 	  /*
-	  params.betappe[0] = gsl_rng_uniform(r)*pow(10, - (gsl_rng_uniform(r)*16. + a_bound)); // ca (this parameter has to be positive because of energy constraints)
-	  //params.betappe[1] = 3.*params.betappe[0]*(1 + gsl_rng_uniform(r)*2*pow(10, -(gsl_rng_uniform(r)*17 + theta_bound)) - pow(10, -(gsl_rng_uniform(r)*17 + theta_bound))); // ctheta
-	  params.betappe[1] = (2*gsl_rng_uniform(r) - 1.)*pow(10, -(gsl_rng_uniform(r)*17 + theta_bound)); // ctheta
-	  params.betappe[2] = (2*gsl_rng_uniform(r) - 1.)*pow(10, -(gsl_rng_uniform(r)*(20 + w_bound) - w_bound)); // cw
-	  params.betappe[3] = (2*gsl_rng_uniform(r) - 1.)*pow(10, -(gsl_rng_uniform(r)*5 + sigma_bound)); // csigma
+	  //Uses gsl to get a random number from a uniform distribution
+	  params.betappe[0] = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); // ca
+	  //ca has to be positive because of energy constraints
+	  //params.betappe[1] = 3.*params.betappe[0]*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // ctheta (in case 1)
+	  params.betappe[1] = gsl_ran_flat(r, -1., 1.)*(0.3); //c_theta (in case 2)
+	  params.betappe[2] = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); // cw
+	  params.betappe[3] = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound); // csigma
 	  */
 
-	  prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
-	  //std::cout<<params.betappe[0]<<"\t"<<params.betappe[1]<<"\t"<<params.betappe[2]<<"\t"<<params.betappe[3]<<std::endl;
+	
+	  //Uses gsl to get a random number from a uniform distribution
+	  //Magnitude uniformly distributed across different powers of 10
+	  for(int j = 0; j<3; j++)
+	    {
+	      if(gsl_ran_flat(r, -1., 1.) < 0){sign[j] = -1.;}
+	      else{sign[j] = 1.;}
+	    }
+	   
+	  params.betappe[0] = pow(10, gsl_ran_flat(r, -20., a_bound)); // ca (this parameter has to be positive because of energy constraints)
+	  //params.betappe[1] = 3.*params.betappe[0]*(1 + sign[0]*pow(10, gsl_ran_flat(r, -20, theta_bound))); // ctheta (in case 1)
+	  params.betappe[1] = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
+	  params.betappe[2] = sign[1]*pow(10, gsl_ran_flat(r, -20., w_bound)); // cw
+	  params.betappe[3] = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
+	  
 
+	  //The GR limit?
+	  /*
+	  params.betappe[0] = ;
+	  params.betappe[1] = ;
+	  params.betappe[2] = ;
+	  params.betappe[3] = ;
+	  */
+	
+	  bool excise = false;
+	  prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
+	  
 	  if(params.betappe[2] < (-params.betappe[3]/(1. - params.betappe[3])))
 	    {
 	      //Throws out points with cw < -csigma/(1 - csigma) because these violate the positive energy condition for the spin-1 mode (vector mode?)
@@ -331,22 +354,40 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      //Equation 40 of arXiv:gr-qc/0507059v3
 	      num_bad_points++;
 	      i--;
+	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
 	    }
+	   else if(isnan(sp.kappa3_EA))
+	    {
+	      num_nan++;
+	      i--;
+	      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      continue;
+	    }/*
+	  else if(isnan(sp.alpha_ppE_2T_0_EA) || isnan(sp.gb1_EA) || isnan(-1.*sp.alpha_ppE_2T_0_EA) || isnan(-1.* sp.gb1_EA))
+	    {
+	      num_nan++;
+	      //std::cout<<"alpha2T: "<<sp.alpha_ppE_2T_0_EA<<"\t gb1: "<<sp.gb1_EA<<std::endl; 
+	      i--;
+	      //excise = true;
+	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      continue;
+	      }
 	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
 	    {
-	      //Pull GR limit points out of the data set so that they don't mess with my plotting
+	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
 	      //Keep track of how many we pull
 	      num_infspeeds++;
 	      i--;
 	      continue; 
-	    }
+	      }*/
 	  else if(sp.cTsq_EA < superluminal || sp.cVsq_EA < superluminal || sp.cSsq_EA < superluminal)
 	    {
 	      //Throws out points with speeds not greater than or equal to the speed of light (these would produce Cherenkov-type radiation that is not observed)
 	      //arXiv:hep-ph/0505211
 	      num_bad_points++;
 	      i--;
+	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
 	    }
 	  else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.))
@@ -356,7 +397,8 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      num_bad_points++;
 	      i--;
 	      //std::cout<<"cT incorrect: "<<sp.cT_EA - 1<<std::endl;
-	      //I wonder why all the incorrect points it prints have the same value? 
+	      //I wonder why all the incorrect points it prints have the same value?
+	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
 	    }
 	  else if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.))
@@ -365,14 +407,23 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      //arXiv:1403.7377 and arXiv:gr-qc/0509114
 	      num_bad_points++;
 	      i--;
+	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue; 
 	    }
 
+	  if(params.betappe[0] < 0)
+	    {
+	      std::cout<<"ca less than zero!"<<std::endl; 
+	      }
 	  
+	 
 	  output[i][0] = params.betappe[0];
 	  output[i][1] = params.betappe[1];
 	  output[i][2] = params.betappe[2];
 	  output[i][3] = params.betappe[3];
+	  //output[i][4] = sp.cTsq_EA;
+	  //output[i][5] = sp.cSsq_EA;
+	  //output[i][6] = sp.cVsq_EA;
 	  output[i][4] = sp.cT_EA;
 	  output[i][5] = sp.cS_EA;
 	  output[i][6] = sp.cV_EA;
@@ -382,15 +433,23 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  output[i][10] = sp.gX1_EA;
 	  output[i][11] = sp.alpha1_EA;
 	  output[i][12] = sp.alpha2_EA;
-		
-	  //std::cout<<sp.abL_EA<<std::endl; 
-	  
+	  output[i][13] = sp.kappa3_EA;
+	  output[i][14] = sp.Z_EA;
+	  //output[i][15] = (2*params.betappe[3] - params.betappe[0]);
+			  
 	  cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	  printProgress((double)i / iterations);
 	}
 	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
-	std::cout<<"Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
+	std::cout<<"\n Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
 	std::cout<<"Threw out "<<num_bad_points<<" unphysical data points."<<std::endl;
 	std::cout<<"Found cS or cV to be infinite "<<num_infspeeds<<" times. Removed these cases from data."<<std::endl;
+	std::cout<<"Found alphaT or gb1 as NAN "<<num_nan<<" times."<<std::endl;
+	/*std::cout<<"1/inf = "<<1/INFINITY<<std::endl;
+	std::cout<<"1/0 = "<<1./0.<<std::endl;
+	std::cout<<"0/inf = "<<0/INFINITY<<std::endl;
+	std::cout<<"0/0 = "<<0./0.<<std::endl;
+	std::cout<<"inf/inf = "<<INFINITY/INFINITY<<std::endl;*/
 	gsl_rng_free(r); 
 	deallocate_2D_array(output, iterations, dim);
 	delete [] params.betappe;
