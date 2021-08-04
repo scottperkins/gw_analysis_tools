@@ -294,32 +294,31 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	int num_bad_points = 0;
 	int num_infspeeds = 0;
 	int num_nan = 0;
-	int num_alpha_zero = 0;
-	int dim = 15;// Increase for every factor you want to output
+	int num_Cherenkov = 0;
+	int dim = 13;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
-	//double a_bound = -4.; //(case 1)
-	double a_bound = -7.;  //(case 2)
-	double theta_bound = -3.; 
+	double a_bound = -4.; //(case 1)
+	//double a_bound = -7.;  //(case 2)
+	double theta_bound = -3.; //(case 1)
 	double w_bound = 2.;
 	double sigma_bound = -15.;
 
 	double sign[3];
-	
-	double superluminal = 1 - pow(10, -15.); //This ensures that c_I^2 > 1 - 10^(-15).
-	
+		
 	for (int i = 0 ; i<iterations; i++){
 	  /*
 	  //Uses gsl to get a random number from a uniform distribution
 	  params.betappe[0] = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); // ca
 	  //ca has to be positive because of energy constraints
 	  //params.betappe[1] = 3.*params.betappe[0]*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // ctheta (in case 1)
+	  //params.betappe[1] = 3.*gsl_ran_flat(r, 0., 1.)*pow(10, a_bound)*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); //testing
 	  params.betappe[1] = gsl_ran_flat(r, -1., 1.)*(0.3); //c_theta (in case 2)
 	  params.betappe[2] = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); // cw
 	  params.betappe[3] = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound); // csigma
 	  */
 
-	
+	  
 	  //Uses gsl to get a random number from a uniform distribution
 	  //Magnitude uniformly distributed across different powers of 10
 	  for(int j = 0; j<3; j++)
@@ -329,8 +328,8 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	    }
 	   
 	  params.betappe[0] = pow(10, gsl_ran_flat(r, -20., a_bound)); // ca (this parameter has to be positive because of energy constraints)
-	  //params.betappe[1] = 3.*params.betappe[0]*(1 + sign[0]*pow(10, gsl_ran_flat(r, -20, theta_bound))); // ctheta (in case 1)
-	  params.betappe[1] = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
+	  params.betappe[1] = 3.*params.betappe[0]*(1 + sign[0]*pow(10, gsl_ran_flat(r, -20, theta_bound))); // ctheta (in case 1)
+	  //params.betappe[1] = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
 	  params.betappe[2] = sign[1]*pow(10, gsl_ran_flat(r, -20., w_bound)); // cw
 	  params.betappe[3] = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
 	  
@@ -343,9 +342,8 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  params.betappe[3] = ;
 	  */
 	
-	  bool excise = false;
 	  prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
-	  
+	  	  
 	  if(params.betappe[2] < (-params.betappe[3]/(1. - params.betappe[3])))
 	    {
 	      //Throws out points with cw < -csigma/(1 - csigma) because these violate the positive energy condition for the spin-1 mode (vector mode?)
@@ -356,8 +354,25 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      i--;
 	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
+	      }
+	  else if(sp.cTsq_EA < 0 || sp.cVsq_EA < 0 || sp.cSsq_EA < 0)
+	    {
+	      //Throws out points with speeds not greater than or equal to zero (these would produce gradient instabilities or ghosts)
+	      //arXiv:gr-qc/0402005 and arXiv:1108.1835
+	      num_bad_points++;
+	      i--;
+	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      continue;
+	      }
+	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
+	    {
+	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
+	      //Keep track of how many we pull
+	      num_infspeeds++;
+	      i--;
+	      continue; 
 	    }
-	   else if(isnan(sp.kappa3_EA))
+	  else if(isnan(sp.kappa3_EA))
 	    {
 	      num_nan++;
 	      i--;
@@ -369,27 +384,12 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      num_nan++;
 	      //std::cout<<"alpha2T: "<<sp.alpha_ppE_2T_0_EA<<"\t gb1: "<<sp.gb1_EA<<std::endl; 
 	      i--;
-	      //excise = true;
 	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
 	      }
-	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
-	    {
-	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
-	      //Keep track of how many we pull
-	      num_infspeeds++;
-	      i--;
-	      continue; 
-	      }*/
-	  else if(sp.cTsq_EA < superluminal || sp.cVsq_EA < superluminal || sp.cSsq_EA < superluminal)
-	    {
-	      //Throws out points with speeds not greater than or equal to the speed of light (these would produce Cherenkov-type radiation that is not observed)
-	      //arXiv:hep-ph/0505211
-	      num_bad_points++;
-	      i--;
-	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
-	      continue;
-	    }
+	     */
+	  
+	  	  
 	  else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.))
 	    {
 	      //Throws out points that don't obey the cT constraint from GW170817 and GRB170817A
@@ -400,8 +400,9 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      //I wonder why all the incorrect points it prints have the same value?
 	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
-	    }
-	  else if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.))
+	      }
+	  
+	  if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.))
 	    {
 	      //Throws out points that do not obey observational solar system constraints on alpha1 and alpha2
 	      //arXiv:1403.7377 and arXiv:gr-qc/0509114
@@ -410,12 +411,40 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue; 
 	    }
-
-	  if(params.betappe[0] < 0)
-	    {
-	      std::cout<<"ca less than zero!"<<std::endl; 
-	      }
 	  
+	  if(sp.cV_EA < 1)
+	    {
+	      if(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA) >= 7*pow(10, -32.)) //enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
+		{
+		  num_Cherenkov++;
+		  i--;
+		  cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+		  continue;
+		}
+	    }
+	  
+	  if(sp.cS_EA < 1)
+	    {
+	      if((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA > pow(10, -22.))
+		{
+		  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/abs(sp.c14_EA) >= pow(10, -30.)) //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
+		    {
+		      num_Cherenkov++;
+		      i--;
+		      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+		      continue;
+		    }
+		}
+	      if((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA >= 3*pow(10,-19.)) //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
+		{
+		  num_Cherenkov++;
+		  i--;
+		  cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+		  continue;
+		}
+	    }
+	  
+	 
 	 
 	  output[i][0] = params.betappe[0];
 	  output[i][1] = params.betappe[1];
@@ -433,9 +462,6 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  output[i][10] = sp.gX1_EA;
 	  output[i][11] = sp.alpha1_EA;
 	  output[i][12] = sp.alpha2_EA;
-	  output[i][13] = sp.kappa3_EA;
-	  output[i][14] = sp.Z_EA;
-	  //output[i][15] = (2*params.betappe[3] - params.betappe[0]);
 			  
 	  cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	  printProgress((double)i / iterations);
@@ -444,7 +470,8 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	std::cout<<"\n Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
 	std::cout<<"Threw out "<<num_bad_points<<" unphysical data points."<<std::endl;
 	std::cout<<"Found cS or cV to be infinite "<<num_infspeeds<<" times. Removed these cases from data."<<std::endl;
-	std::cout<<"Found alphaT or gb1 as NAN "<<num_nan<<" times."<<std::endl;
+	std::cout<<"Found kappa3 as NAN "<<num_nan<<" times."<<std::endl;
+	std::cout<<"Threw out "<<num_Cherenkov<<" points because of Cherenkov constraints."<<std::endl; 
 	/*std::cout<<"1/inf = "<<1/INFINITY<<std::endl;
 	std::cout<<"1/0 = "<<1./0.<<std::endl;
 	std::cout<<"0/inf = "<<0/INFINITY<<std::endl;
