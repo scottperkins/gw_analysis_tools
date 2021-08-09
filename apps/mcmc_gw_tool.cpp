@@ -284,7 +284,8 @@ int main(int argc, char *argv[])
 	//}
 	//write_file("data/processed_data.csv",output_test,psd_length,10);
 	//deallocate_2D_array(output_test,psd_length,10);
-	
+	//
+	//exit(1);
 
 	//#############################################################
 	//#############################################################

@@ -214,6 +214,8 @@ public:
 
 	T chil = 0;
 	//###################################################
+	
+	int PNorder = 35;
 
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
@@ -444,6 +446,7 @@ struct source_parameters
 
 	T x0 = 1;
 
+	int PNorder = 35;
 	//#####################################
 	T chi1_p = 0;
 	T chi2_p = 0;

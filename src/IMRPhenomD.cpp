@@ -1364,6 +1364,10 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 		 pn_coeff[5] * pow->PI5third * pow->MF5third +
 		 pn_coeff[6] * pow->PIsquare * pow->MFsquare +
 		 pn_coeff[7] * pow->PI7third * pow->MF7third ;
+		
+	if (param->PNorder != 35){
+		/* Add higher order terms if needed*/
+	}
 
 	T phase_TF2 =  -M_PI/4. 
 		+ 3./(128.*eta) * pow->PIminus_5third * pow->MFminus_5third * pn_phase;
