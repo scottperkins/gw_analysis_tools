@@ -6,8 +6,8 @@ iterations = 13
 n_bins = 50
 half_bins = 25
 for i in np.arange(iterations):
-    #data = np.loadtxt("data/EA_parameter_MC.csv".format(i),delimiter=',',unpack=True)
-    data = np.loadtxt("plots/EA_logdist/EA_parameter_MC.csv".format(i),delimiter=',',unpack=True)
+    data = np.loadtxt("data/EA_parameter_MC.csv".format(i),delimiter=',',unpack=True)
+    #data = np.loadtxt("plots/EA_logdist/EA_parameter_MC.csv".format(i),delimiter=',',unpack=True)
 #print("ctheta min = ",np.amin(data[1]))
 #print("comega min = ", np.amin(data[2]))
 
@@ -15,7 +15,7 @@ for i in np.arange(iterations):
 #print("alpha2 max = ",np.amax(data[12]))
 #print("gX1 max = ",np.amax(data[10]))
 #print("alpha2T max = ",np.amax(data[7]))
-print("abL min = ", np.amin(data[9]))
+#print("abL min = ", np.amin(data[9]))
 """
 cwneg = []
 cwnegctheta = []
@@ -45,32 +45,26 @@ figure.savefig("plots/corner_cwneg")
 """
 
 def plot_loghist(x, bins):
-  hist, bins = np.histogram(x, bins=bins)
-  logbins = np.logspace(np.log10(bins[0]),np.log10(bins[-1]),len(bins))
-  plt.hist(x, bins=logbins)
-  plt.xscale('log')
+    hist, bins = np.histogram(x, bins=bins)
+    logbins = np.logspace(np.log10(bins[0]),np.log10(bins[-1]),len(bins))
+    plt.hist(x, bins=logbins)#, density=True)#, log=True)
+    plt.xscale('log')
 
 def plot_neg_loghist(x, bins, upper_bound):
     hist, bins = np.histogram(x, bins=bins)
     logbins = np.flip(-np.logspace(upper_bound, np.log10(abs(bins[0])), len(bins)))
-    #logbins = np.flip(-np.logspace(np.log10(abs(bins[-1])), np.log10(abs(bins[0])), len(bins)))
-    #print("logbins: ", logbins)
-    plt.hist(x, bins=logbins)
+    plt.hist(x, bins=logbins)#,density=True, log=True)
     plt.xscale('symlog', base=10, linthresh=10**upper_bound)
 
 def plot_symloghist(x, bins, posbins, negbins, bound):
     hist, bins = np.histogram(x, bins=bins)
     pos_logbins = np.logspace(bound, np.log10(bins[-1]), posbins)
     neg_logbins = np.flip(- np.logspace(bound, np.log10(abs(bins[0])), negbins))
-    #print(pos_logbins)
-    #print("negative: ", neg_logbins)
     logbins = np.concatenate((neg_logbins, pos_logbins), axis=None)
-    #print("logbins: ", logbins)
-    #logbins = np.logspace(np.log10(abs(bins[0])), np.log10(bins[-1]),len(bins))
-    plt.hist(x, bins=logbins)
+    plt.hist(x, bins=logbins)#,density=True, log=True)
     plt.xscale('symlog', base=10, linthresh=10**bound, linscale=2)
 
-"""
+
 # Plots for data drawn from a uniform distribution.
 plt.hist(data[0], n_bins)
 plt.title(r'$c_a$')
@@ -92,21 +86,20 @@ plt.title(r'$c_\sigma$')
 plt.savefig("plots/hist_csigma")
 plt.close()
 
-
 bins = np.linspace(.5,1.5,n_bins)
 plt.hist(data[4], bins=bins)
 plt.title(r'$c_T$')
 plt.savefig("plots/hist_cT")
 plt.close()
 
-
-plt.hist(data[5], n_bins)
+plot_loghist(data[5], n_bins)
+#plt.hist(data[5], n_bins)
 plt.title(r'$c_S$')
 plt.savefig("plots/hist_cS")
 plt.close()
 
-#plot_loghist(data[6], n_bins)
-plt.hist(data[6], n_bins)
+plot_loghist(data[6], n_bins)
+#plt.hist(data[6], n_bins)
 plt.title(r'$c_V$')
 plt.savefig("plots/hist_cV")
 plt.close()
@@ -133,7 +126,6 @@ plt.title(r'$g_{X1}$')
 plt.savefig("plots/hist_gX1")
 plt.close()
 
-
 #plot_neg_loghist(data[11], half_bins)
 plt.hist(data[11], n_bins)
 plt.title(r'$\alpha_1$')
@@ -144,8 +136,8 @@ plt.hist(data[12], n_bins)
 plt.title(r'$\alpha_2$')
 plt.savefig("plots/hist_alpha2")
 plt.close()
-"""
 
+"""
 # Corner plots.
 #cdata = np.hstack([data[0], data[1], data[2], data[3], data[4], data[5],
     #data[6], data[7], data[8], data[9], data[10]])
@@ -158,7 +150,7 @@ figure = corner.corner(cdata.T, labels=[r'$c_a$', r'$c_\theta$', r'$c_\omega$',
     quantiles=[0.16, 0.5, 0.84], show_titles=True, title_kwargs={"fontsize": 12})
 figure.savefig("plots/corner")
 #figure.close()
-
+"""
 """
 # Plots for data drawn from a log distribution.
 plot_loghist(data[0], n_bins)
@@ -217,7 +209,7 @@ plt.title(r'$a_{bL}$')
 plt.savefig("plots/hist_abL")
 plt.close()
 
-plot_symloghist(data[10], n_bins, 25, 25, -20.)
+plot_symloghist(data[10], n_bins, 25, 25, -26.)
 plt.title(r'$g_{X1}$')
 plt.savefig("plots/hist_gX1")
 plt.close()

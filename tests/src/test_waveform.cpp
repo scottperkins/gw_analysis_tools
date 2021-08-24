@@ -298,16 +298,16 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	int dim = 13;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
-	double a_bound = -4.; //(case 1)
-	//double a_bound = -7.;  //(case 2)
-	double theta_bound = -3.; //(case 1)
-	double w_bound = 2.;
+	//double a_bound = -4.; //(case 1)
+	double a_bound = -7.;  //(case 2)
+	//double theta_bound = -3.; //(case 1)
+	double w_bound = 1.;
 	double sigma_bound = -15.;
 
 	double sign[3];
 		
 	for (int i = 0 ; i<iterations; i++){
-	  /*
+	  
 	  //Uses gsl to get a random number from a uniform distribution
 	  params.betappe[0] = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); // ca
 	  //ca has to be positive because of energy constraints
@@ -316,9 +316,10 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  params.betappe[1] = gsl_ran_flat(r, -1., 1.)*(0.3); //c_theta (in case 2)
 	  params.betappe[2] = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); // cw
 	  params.betappe[3] = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound); // csigma
-	  */
-
 	  
+	  
+
+	  /*
 	  //Uses gsl to get a random number from a uniform distribution
 	  //Magnitude uniformly distributed across different powers of 10
 	  for(int j = 0; j<3; j++)
@@ -332,15 +333,8 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  //params.betappe[1] = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
 	  params.betappe[2] = sign[1]*pow(10, gsl_ran_flat(r, -20., w_bound)); // cw
 	  params.betappe[3] = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
-	  
-
-	  //The GR limit?
-	  /*
-	  params.betappe[0] = ;
-	  params.betappe[1] = ;
-	  params.betappe[2] = ;
-	  params.betappe[3] = ;
 	  */
+
 	
 	  prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
 	  	  
@@ -364,6 +358,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue;
 	      }
+	  /*
 	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
 	    {
 	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
@@ -371,7 +366,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      num_infspeeds++;
 	      i--;
 	      continue; 
-	    }
+	    }/*
 	  else if(isnan(sp.kappa3_EA))
 	    {
 	      num_nan++;
@@ -411,17 +406,23 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
 	      continue; 
 	    }
-	  
+	  bool violate = false;
 	  if(sp.cV_EA < 1)
 	    {
-	      if(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA) >= 7*pow(10, -32.)) //enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
+	 
+	      if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.)) //enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
 		{
 		  num_Cherenkov++;
 		  i--;
 		  cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
-		  continue;
+		  //continue;
+		  violate = true;
 		}
+	      
 	    }
+	  if(violate){
+		continue;
+	      }
 	  
 	  if(sp.cS_EA < 1)
 	    {
@@ -444,7 +445,24 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 		}
 	    }
 	  
+	  double sigma = 1.021*pow(10, -5.); 
+	  double mu = -0.563*pow(10, -5.);
+	  double prob;
 	 
+	  prob = exp(-(1./2.)*((sp.alpha1_EA - mu)*(sp.alpha1_EA - mu))/(sigma*sigma));
+	  double u = gsl_ran_flat(r, 0, 1.);
+	  //std::cout<<(sp.alpha1_EA )<<std::endl;
+	  //std::cout<<(sp.alpha1_EA - mu)/sigma<<std::endl; 
+	  //std::cout<<"u: "<<u<<"\t prob: "<<prob<<std::endl;
+	  if(u > prob)
+	    {
+	      i--;
+	      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      //std::cout<<"Point rejected"<<std::endl;
+	      continue; 
+	    }
+	  //std::cout<<"Point accepted"<<std::endl; 
+	  
 	 
 	  output[i][0] = params.betappe[0];
 	  output[i][1] = params.betappe[1];
@@ -469,14 +487,9 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
 	std::cout<<"\n Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
 	std::cout<<"Threw out "<<num_bad_points<<" unphysical data points."<<std::endl;
-	std::cout<<"Found cS or cV to be infinite "<<num_infspeeds<<" times. Removed these cases from data."<<std::endl;
-	std::cout<<"Found kappa3 as NAN "<<num_nan<<" times."<<std::endl;
+	//std::cout<<"Found cS or cV to be infinite "<<num_infspeeds<<" times. Removed these cases from data."<<std::endl;
+	//std::cout<<"Found kappa3 as NAN "<<num_nan<<" times."<<std::endl;
 	std::cout<<"Threw out "<<num_Cherenkov<<" points because of Cherenkov constraints."<<std::endl; 
-	/*std::cout<<"1/inf = "<<1/INFINITY<<std::endl;
-	std::cout<<"1/0 = "<<1./0.<<std::endl;
-	std::cout<<"0/inf = "<<0/INFINITY<<std::endl;
-	std::cout<<"0/0 = "<<0./0.<<std::endl;
-	std::cout<<"inf/inf = "<<INFINITY/INFINITY<<std::endl;*/
 	gsl_rng_free(r); 
 	deallocate_2D_array(output, iterations, dim);
 	delete [] params.betappe;

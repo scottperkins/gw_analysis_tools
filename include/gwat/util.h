@@ -550,10 +550,16 @@ struct source_parameters
   T V_x_EA;
   T V_y_EA;
   T V_z_EA; 
-  //sensitivities for NSs
+  //Sensitivities for NSs
   T s1_EA;
   T s2_EA;
   T S_EA;
+  //Binding energy to mass ratio (Omega/mass1 or Omega/mass2)
+  T O_m1_EA = 0;
+  T O_m2_EA = 0;
+  //Compactness
+  T compact1 = 0;
+  T compact2 = 0;
 
   T alpha_ppE_2T_0_EA = 0 ;
   T gb1_EA = 0 ;
