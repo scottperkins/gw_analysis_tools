@@ -14,7 +14,7 @@
 #include <gsl/gsl_randist.h>
 
 
-//#define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -1039,14 +1039,15 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 {
 	LIGOTimeGPS ligotimegps_zero = LIGOTIMEGPSZERO;	
 	std::cout.precision(15);
-	bool P = true;
-	bool NRT = false;
-	bool gIMR = true;
+	bool P = false;
+	bool NRT = true;
+	bool EA = true;
+	bool gIMR = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 10;
+	int iterations = 1;
 	double times[iterations][2];
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
@@ -1361,23 +1362,28 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
 		if(P){
-			if(NRT){
-				method = "IMRPhenomPv2_NRT";
-			}
-			else{
-				method = "IMRPhenomPv2";
-			}
+		  if(NRT){
+		    method = "IMRPhenomPv2_NRT";
+		  }
+		  else{
+		    method = "IMRPhenomPv2";
+		  }
 		}
 		else {
-			if(NRT){
-				method = "IMRPhenomD_NRT";
-			}
-			else{
-				method = "IMRPhenomD";
-			}
+		  if(NRT){
+		    if(EA){
+		      method = "EA_IMRPhenomD_NRT";
+		    }
+		    else{
+		      method = "IMRPhenomD_NRT";
+		    }
+		  }
+		  else{
+		    method = "IMRPhenomD";
+		  }
 		}
 		if(gIMR){
-			method = "g" + method;
+		  method = "g" + method;
 		}
 		start =clock();
 

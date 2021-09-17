@@ -8,6 +8,7 @@
 #include "ppE_IMRPhenomP.h"
 #include "gIMRPhenomD.h"
 #include "IMRPhenomD_NRT.h"
+#include "EA_IMRPhenomD_NRT.h"
 #include "IMRPhenomP_NRT.h"
 #include "ppE_utilities.h"
 #include "gIMRPhenomP.h"
@@ -161,6 +162,13 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		    status = modeldNRT.construct_waveform(frequencies, length, wp->hplus, &params);
 		    
 		  }
+		else if(local_method == "EA_IMRPhenomD_NRT")
+		  {
+		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
+		    status = EAmodeldNRT.EA_construct_waveform(frequencies, length, wp, &params);
+		    
+		  }
+		
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_waveform(frequencies, length, wp->hplus, &params);
@@ -522,6 +530,12 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 		    status = modeldNRT.construct_amplitude(frequencies, length, amplitude, &params);
 		    
 		  }
+		else if(local_method == "EA_IMRPhenomD_NRT")
+		  {
+		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
+		    status = EAmodeldNRT.construct_amplitude(frequencies, length, amplitude, &params);
+		    
+		  }
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_amplitude(frequencies, length, amplitude, &params);
@@ -724,7 +738,14 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	    params.tidal2 = parameters->tidal2; 
 	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);	
 	  }
-
+	else if(generation_method == "EA_IMRPhenomD_NRT")
+	  {
+	    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
+	    params.tidal1 = parameters->tidal1; 
+	    params.tidal2 = parameters->tidal2; 
+	    status = EAmodeldNRT.construct_phase(frequencies, length, phase, &params);	
+	  }
+      
 	return status ;
 }
 template int fourier_phase<double>(double *, int , double * , std::string, gen_params_base<double> *);
@@ -781,6 +802,12 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		  {
 		    IMRPhenomD_NRT<T> modeldNRT;
 		    status = modeldNRT.construct_phase(frequencies, length, phase_plus, &params);	
+		    
+		  }
+		else if(local_method == "EA_IMRPhenomD_NRT")
+		  {
+		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
+		    status = EAmodeldNRT.construct_phase(frequencies, length, phase_plus, &params);	
 		    
 		  }
 		else{

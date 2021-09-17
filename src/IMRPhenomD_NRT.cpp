@@ -12,7 +12,7 @@
 /*! \file 
  * File for the addition of tidal effects to the waveform. 
  *
- *Extends the IMRPhenomD template to include tidal effects, following the 
+ * Extends the IMRPhenomD template to include tidal effects, following the 
  * NRTidal model of arXiv:1905.06011v2. Specifically, equations 17, 18, 19, 20, 21, 24
  * and 25 were used. A Planck taper was added to the waveform following arXiv:1003.2939.
  */
@@ -548,7 +548,6 @@ int IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::compl
   }
   
   //Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
-  //This aligns more with the physical meaning of tc, but the phase is NO LONGER just
   /*Note -- to match LALSuite, this sets phiRef equal to phi_phenomD at f_ref, not phenomD_NRT
  * Arbitrary constant, not really important
  */
