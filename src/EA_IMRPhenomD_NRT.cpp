@@ -164,7 +164,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	}
 	phase -= (T)(tc*(f-f_ref) + phic);
 	waveform->hplus[j] = amp * std::exp(-i * phase);
-	waveform->hcross[j] = amp * std::exp(-i * phase);
+	waveform->hcross[j] = amp * std::exp(-i * phase - std::complex<T>(0,M_PI/2.) );
       }
       
     }
