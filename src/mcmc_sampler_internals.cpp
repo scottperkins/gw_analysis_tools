@@ -813,7 +813,8 @@ int single_chain_swap(sampler *sampler, /**< sampler structure*/
 	MH_ratio = pow;
 	//Averaging the two random numbers from each chains seed
 	//double alpha = log( (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.);
-	double alpha = (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.;
+	//double alpha = (gsl_rng_uniform(sampler->rvec[T1_index])+gsl_rng_uniform(sampler->rvec[T2_index]))/2.;
+	double alpha = gsl_rng_uniform(sampler->rvec[T1_index]);
 	MH_ratio = exp(pow);
 	if (MH_ratio<alpha)
 	{
