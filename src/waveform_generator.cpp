@@ -165,7 +165,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		  }
 		else if(local_method == "EA_IMRPhenomD_NRT")
 		  {
-			restrictedEval = false;
+		    restrictedEval = false;
 		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 		    status = EAmodeldNRT.EA_construct_waveform(frequencies, length, wp, &params);
 		    
@@ -194,22 +194,22 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		}
 		if(wp->active_polarizations[2]){
 			for (int i =0 ; i < length; i++){
-				//wp->hx[i] = ;
+				//wp->hx[i] *= sin(2 iota);
 			}
 		}
 		if(wp->active_polarizations[3]){
 			for (int i =0 ; i < length; i++){
-				//wp->hy[i] = ;
+				//wp->hy[i] *= sin(iota);
 			}
 		}
 		if(wp->active_polarizations[4]){
 			for (int i =0 ; i < length; i++){
-				//wp->hb[i] = ;
+				//wp->hb[i] *= sin^2(iota) ;
 			}
 		}
 		if(wp->active_polarizations[5]){
 			for (int i =0 ; i < length; i++){
-				//wp->hl[i] = ;
+				//wp->hl[i] *= same as hb;
 			}
 		}
 	}

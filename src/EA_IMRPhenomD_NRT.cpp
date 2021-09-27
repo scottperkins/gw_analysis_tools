@@ -18,25 +18,169 @@
  */
 
 template<class T>
-T EA_IMRPhenomD_NRT<T>::EA_phase_ins(T f, useful_powers<T> *powers, source_parameters<T> *param)
+void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
+{
+  p->ca_EA = p->betappe[0];
+  p->ctheta_EA = p->betappe[1];
+  p->cw_EA = p->betappe[2];
+  p->csigma_EA = p->betappe[3];
+  p->s1_EA = 2e-5;
+  p->s2_EA = 1e-5;
+  p->V_x_EA = 0;
+  p->V_y_EA = 0;
+  p->V_z_EA = 0;
+  
+  //Redefining the mass parameter to Mbar
+  p->chirpmass *= (1 - p->s1_EA)*(1 - p->s2_EA);
+
+  //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where these formulas come from)
+  p->c1_EA = (p->cw_EA + p->csigma_EA)/2.;
+  p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
+  p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
+  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.; 
+  
+  //more convenient parameters
+  p->c13_EA = p->c1_EA + p->c3_EA;
+  p->cminus_EA = p->c1_EA - p->c3_EA;
+  p->c14_EA = p->c1_EA + p->c4_EA;
+
+  //squared speeds of the different polarizations
+  p->cTsq_EA = 1./(1. - p->c13_EA);
+  p->cVsq_EA = (2.*p->c1_EA - p->c13_EA*p->cminus_EA)/(2.*(1.- p->c13_EA)*p->c14_EA);
+  p->cSsq_EA = ((2. - p->c14_EA)*(p->c13_EA + p->c2_EA))/((2.+3.*p->c2_EA + p->c13_EA)*(1. - p->c13_EA)*p->c14_EA);
+
+  //speeds of the different polarizations
+  p->cT_EA = sqrt(p->cTsq_EA);
+  p->cV_EA = sqrt(p->cVsq_EA);
+  p->cS_EA = sqrt(p->cSsq_EA);
+
+  //Relevant combinations of parameters
+  p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
+  p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
+  p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
+  /* TODO: Put in if/else statements here in case these values are NAN */
+  
+  p->beta1_EA = -2.* p->c13_EA / p->cV_EA; 
+  p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA); 
+  
+  
+  p->A1_EA = (1./p->cT_EA) + (2*p->c14_EA*p->c13_EA*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*(2.*p->c1_EA - p->c13_EA*p->cminus_EA)*p->cV_EA) + (3.*p->c14_EA*(p->Z_EA - 1.)*(p->Z_EA - 1.))/(2.*(2. - p->c14_EA)*p->cS_EA);
+  
+  p->A2_EA = -(2.*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*pow(p->cV_EA, 3.)) - 2.*(p->Z_EA - 1.)/((2. - p->c14_EA)*pow(p->cS_EA, 3.));
+  
+  p->A3_EA = 1./(2.*p->c14_EA* pow(p->cV_EA, 5.)) + 2./(3.*p->c14_EA * (2. - p->c14_EA)*pow(p->cS_EA, 5.));
+ 
+  p->B3_EA = 1./(9.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 5.));
+  
+  p->C_EA = 4./(3.*p->c14_EA * pow(p->cV_EA, 3.)) + 4./(3.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 3.));
+  
+  p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
+
+  /*
+  //Sensitivities
+  p->compact1 = 1.; //FIX
+  p->compact2 = 1.; //FIX
+  
+  p->O_m1_EA = (-5./7.)*p->compact1 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact1, 3.);
+  p->O_m2_EA = (-5./7.)*p->compact2 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact2, 3.);
+  
+  p->s1_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m1_EA)
+    +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m1_EA*p->O_m1_EA)
+    + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m1_EA, 3.));
+
+    p->s2_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m2_EA)
+    +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m2_EA*p->O_m2_EA)
+    + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m2_EA, 3.));
+  */
+  
+  //The functions that are actually used to compute the phase
+  p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
+  p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
+  p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
+  /* TODO: Put in if/else statements here in case these values are NAN */
+
+  //Functions necessary for corrections to the amplitude
+  p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
+  p->abL_EA = 1. + 2*p->beta2_EA; 
+  p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
+  p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
+  //debugger_print(__FILE__,__LINE__,"EA Debugging");
+  //std::cout<<"aBL "<<p->abL_EA<<std::endl;
+  //std::cout<<"gb1 "<<p->gb1_EA<<std::endl;
+  //std::cout<<"gX1 "<<p->gX1_EA<<std::endl;
+  //std::cout<<"epsilon_x "<<p->epsilon_x_EA<<std::endl;
+  //std::cout<<"S "<<p->S_EA<<std::endl;
+  //std::cout<<"alpha "<<p->alpha_ppE_2T_0_EA<<std::endl;
+  //std::cout<<"k3 "<<p->kappa3_EA<<std::endl;
+  //std::cout<<"cT "<<p->cT_EA<<std::endl;
+  //std::cout<<"cV "<<p->cV_EA<<std::endl;
+  //std::cout<<"cS "<<p->cS_EA<<std::endl;
+  
+}
+//template void pre_calculate_EA_factors(source_parameters<double> *);
+//template void pre_calculate_EA_factors(source_parameters<adouble> *);
+//#############################################################
+
+
+template<class T>
+T EA_IMRPhenomD_NRT<T>::EA_phase_ins(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
   T phaseout;
-  phaseout = 0; //temporary assignment while developing
+  T EA_phase, GR_phase;
+  /* Here EA_phase is the leading order contribution to the l=2 mode of the
+   * Einstein Aether phase and GR_phase is the leading order contribution to 
+   * the l=2 mode of the phase in GR. We will need to subtract GR_phase off so 
+   * that we are not double counting terms that were already added in 
+   * IMRPhenomD. Note that I have not included three terms which obviously
+   * cancel (I didn't see the point in adding and immediately subtracting them).
+   * These terms are 2Pi f t_c - 2 Phi(t_c) - Pi/4. 
+   */
+  
+  EA_phase = (3./64.)*(((1 - p->s1_EA)*(1 - p->s2_EA))/(2 - p->c14_EA))*(1/p->kappa3_EA)*(powers->MFminus_5third*powers->PIminus_5third)*(1 - (4./7.)*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
+  GR_phase = (3./128.)*(powers->MFminus_5third*powers->PIminus_5third);
+  
+  phaseout = EA_phase - GR_phase; //The correction due to EA theory.
   return phaseout; 
 }
 
 template<class T>
-T EA_IMRPhenomD_NRT<T>::EA_amp_ins(T f, useful_powers<T> *powers, source_parameters<T> *param)
+T EA_IMRPhenomD_NRT<T>::EA_amp_ins(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
   T ampout;
-  ampout = 0; //temporary assignment while developing
+  T EA_amp, GR_amp;
+    /* Here EA_amp is the leading order contribution to the l=2 mode of the
+   * Einstein Aether amplitude and GR_amp is the leading order contribution to 
+   * the l=2 mode of the amplitude in GR. We will need to divide EA_amp by 
+   * GR_amp so that we are not double counting terms that were already 
+   * accounted for in IMRPhenomD. 
+   */
+
+  //EA_amp = (1./4.)*sqrt(5.*M_PI/48.)*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA))) * (1./p->DL)*p->chirpmass*p->chirpmass*(1./sqrt(p->kappa3_EA))*(1./(powers->MF7sixth*sqrt(powers->PI7third)))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
+  
+  ampout = (1./2.*sqrt(2.))*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA)))*(1./sqrt(p->kappa3_EA))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
+  
   return ampout; 
 }
 
 template<class T>
 int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params)
 {
-  std::cout<<"Used EA_construct_waveform. Print statement in line 39 of EA_IMRPhenomD_NRT.cpp"<<std::endl; 
+
+  this->pre_calculate_EA_factors(params);
+
+  /*TODO*/
+  /*The input mass should be unbarred*/
+  /*Calcualte sensitivites with unbarred quantities using C = G_N M / R^2 c^2*/
+  /*Unbarred to barred */
+  T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ; 
+  params->M *=calG;
+  params->chirpmass *=calG;
+  params->delta_mass *=calG;
+  params->mass1*=calG;
+  params->mass2*=calG;
+
+  
+  //std::cout<<"Used EA_construct_waveform. Print statement in line 39 of EA_IMRPhenomD_NRT.cpp"<<std::endl; 
   //IMRPhenomD_NRT<T> model;
   params->NRT_phase_coeff = - (3./16.) * params->tidal_weighted * (39./(16. * params->eta));
   if(params->tidal1<=0){params->oct1=1;params->quad1 = 1;}
@@ -162,9 +306,23 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	  T EAamp = (A0*this->EA_amp_ins(f,&pows, params));
 	  amp += EAamp; 
 	}
+	/*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
+	//Right now these are just the terms for the l=2 mode
+	std::complex<T> hx, hy, hb, hl;
+	hx = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
+	hy = std::complex<T>(2.,0)*hx*std::complex<T>(0,1);
+	hb = (2./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
+	hl = params->abL_EA*hb; 
+	
+	
 	phase -= (T)(tc*(f-f_ref) + phic);
 	waveform->hplus[j] = amp * std::exp(-i * phase);
-	waveform->hcross[j] = amp * std::exp(-i * phase - std::complex<T>(0,M_PI/2.) );
+	//waveform->hcross[j] = amp * std::exp(-i * phase - std::complex<T>(0,M_PI/2.) );
+	waveform->hcross[j] = amp * std::exp(-i * phase);
+	waveform->hx[j] = amp * hx * std::exp(-i * phase);
+	waveform->hy[j] = amp * hy * std::exp(-i * phase);
+	waveform->hb[j] = amp * hb * std::exp(-i * phase);
+	waveform->hl[j] = amp * hl * std::exp(-i * phase);
       }
       
     }
@@ -174,6 +332,10 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
     {
       waveform->hplus[i] = waveform->hplus[i] * std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
       waveform->hcross[i] = waveform->hcross[i] * std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
+      waveform->hx[i] = waveform->hx[i] * std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
+      waveform->hy[i] = waveform->hy[i] * std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
+      waveform->hb[i] = waveform->hb[i] * std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
+      waveform->hl[i] = waveform->hl[i] * std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
     }
   
   return 1; 
