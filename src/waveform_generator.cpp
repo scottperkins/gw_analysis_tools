@@ -126,6 +126,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	if(local_method.find("IMRPhenomD")!=std::string::npos)
 	{
 		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		std::complex<T> si = std::complex<T>(sin(params.incl_angle),0);
+		std::complex<T> s2i = std::complex<T>(sin(2*params.incl_angle),0);
 		bool restrictedEval = true;
 		if(local_method == "ppE_IMRPhenomD_Inspiral")
 		{
@@ -165,7 +167,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		  }
 		else if(local_method == "EA_IMRPhenomD_NRT")
 		  {
-			restrictedEval = false;
+		    restrictedEval = false;
 		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 		    status = EAmodeldNRT.EA_construct_waveform(frequencies, length, wp, &params);
 		    
@@ -194,22 +196,22 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		}
 		if(wp->active_polarizations[2]){
 			for (int i =0 ; i < length; i++){
-				//wp->hx[i] = ;
+			  wp->hx[i] *= s2i; 
 			}
 		}
 		if(wp->active_polarizations[3]){
 			for (int i =0 ; i < length; i++){
-				//wp->hy[i] = ;
+				wp->hy[i] *= si;
 			}
 		}
 		if(wp->active_polarizations[4]){
 			for (int i =0 ; i < length; i++){
-				//wp->hb[i] = ;
+				wp->hb[i] *= si*si;
 			}
 		}
 		if(wp->active_polarizations[5]){
 			for (int i =0 ; i < length; i++){
-				//wp->hl[i] = ;
+				wp->hl[i] *= si*si;
 			}
 		}
 	}
@@ -1296,6 +1298,10 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		//debugger_print(__FILE__,__LINE__,out->tidal_weighted);
 		}
 		//TODO Need to modify this in case only tidal1 or tidal2 is set 
+	}
+	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
+	  /* Map beta ppE to source params ppE and b ppE to source params ppE*/
+	  /*Or commit to having dedicated EA parameters*/
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;

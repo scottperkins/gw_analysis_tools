@@ -335,8 +335,8 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  params.betappe[3] = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
 	  */
 
-	
-	  prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
+	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
+	  //prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
 	  	  
 	  if(params.betappe[2] < (-params.betappe[3]/(1. - params.betappe[3])))
 	    {
@@ -1050,6 +1050,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	int iterations = 1;
 	double times[iterations][2];
 	//###############################################################################
+	int rows = 100000;
+	int cols = 13; 
+	double **input = allocate_2D_array(rows, cols);
+	if(EA){
+	  //Need some random coupling constants that obey all known physical constraints for testing purposes. 
+	  read_file("data/uniform/case1/EA_parameter_MC2.csv", input, rows, cols);
+	}
+	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
 		int d  ;
 		if(k%3 == 0 ) {d = 2;}
@@ -1154,7 +1162,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		/*if (alpha[15]<alpha[16]){
 		  lambda1= 100*fabs(alpha[15]) ;
 		      lambda2	= 100*fabs(alpha[16]) ;
-
+		    
 		}
 		else{
 		  lambda1= 100*fabs(alpha[16]) ;
@@ -1250,7 +1258,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		r_pat.active_polarizations = &pol_arr[0];
 		
 		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &r_pat);
-		std::cout<<"Fractional error on F+/Fx/Fx/Fy/Fb/Fl: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<(fx-fxG)/fx<<" "<<(fy-fyG)/fy<<" "<<(fb-fbG)/fb<<" "<<(fl-flG)/fl<<" "<<std::endl;
+		//std::cout<<"Fractional error on F+/Fx/Fx/Fy/Fb/Fl: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<(fx-fxG)/fx<<" "<<(fy-fyG)/fy<<" "<<(fb-fbG)/fb<<" "<<(fl-flG)/fl<<" "<<std::endl;
 		for(int i = 0 ; i<length ; i++){
 			(det->data->data)[i]=gsl_complex_add(
 			gsl_complex_mul(gsl_complex_rect(fplus,0.),(hptilde->data->data)[i]),
@@ -1292,6 +1300,24 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tc = .0 ;
 		param.tidal1 =lambda1 ;
 		param.tidal2 =lambda2 ;
+		//std::cout<<input[k][0]<<"\t"<<input[k][1]<<"\t"<<input[k][2]<<"\t"<<input[k][3]<<std::endl; 
+		if(EA){
+		  param.Nmod = 4;
+		  param.bppe = new double[4];
+		  //These don't matter, don't worry about them -- overwritten by prep_source_parameters
+		  param.bppe[0] = -13;
+		  param.bppe[1] = -13;
+		  param.bppe[2] = -13;
+		  param.bppe[3] = -13;
+		  param.betappe = new double[4];
+		  param.betappe[0] = input[k][0]; //ca
+		  param.betappe[1] = input[k][1]; //ctheta
+		  param.betappe[2] = input[k][2]; //cw
+		  param.betappe[3] = input[k][3]; //csigma
+		  //source_parameters<double> sp; 
+		  //prep_source_parameters(&sp, &param,"EA_IMRPhenomD_NRT");
+		  //std::cout<<sp.betappe[0]<<std::endl; 
+		}
 		if(gIMR){
 			//Not including logarithmic terms for now
 			param.Nmod_phi = 7;	
@@ -1435,6 +1461,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		XLALDestroyCOMPLEX16FrequencySeries(hptilde);
 		XLALDestroyCOMPLEX16FrequencySeries(hctilde);
 		XLALDestroyCOMPLEX16FrequencySeries(det);
+
+		printProgress((double)k / iterations);
 	}
 	double lal_sum = 0 ;
 	double gwat_sum = 0 ;

@@ -38,7 +38,7 @@
 template<class T>
 void extra_modifications(std::string generation_method,gen_params_base<T> *gp, source_parameters<T> *p, waveform_polarizations<T> *wp,T *freqs, int length)
 {
-	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+  /*	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
 		//debugger_print(__FILE__,__LINE__,"POST");
 		source_parameters<T> temp_sp;
 		temp_sp.populate_source_parameters(gp);
@@ -51,6 +51,7 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 		pre_calculate_EA_factors(&temp_sp);
 		return EA_fully_restricted_v1_additional_modifications(&temp_sp,wp,freqs,length);
 	}
+  */
 	return ;
 }
 template void extra_modifications(std::string, gen_params_base<double> * gp,source_parameters<double> *, waveform_polarizations<double> *,double *, int );
@@ -61,7 +62,8 @@ bool check_extra_polarizations(std::string generation_method)
 	if(generation_method == "polarization_test_IMRPhenomD"){
 		return true;
 	}
-	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+	//if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 		return true;
 	}
 	return false;
@@ -78,13 +80,14 @@ void assign_polarizations(std::string generation_method, waveform_polarizations<
 		wp->active_polarizations[4]=true;
 		wp->active_polarizations[5]=true;
 	}
-	else if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+	//else if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 		wp->active_polarizations[0]=true;
 		wp->active_polarizations[1]=true;
 		wp->active_polarizations[2]=true;
 		wp->active_polarizations[3]=true;
 		wp->active_polarizations[4]=true;
-		wp->active_polarizations[5]=false;
+		wp->active_polarizations[5]=true;
 	}
 	else{	
 		wp->active_polarizations[0]=true;
@@ -144,8 +147,9 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("ModDispersion")!=std::string::npos){
 		return true;
 	}
-	if(generation_method.find("EA_fully_restricted")!=std::string::npos){
-		return true;
+	//if(generation_method.find("EA_fully_restricted")!=std::string::npos){
+	if(generation_method.find("EA_IMRPhenomD_NRT")!=std::string::npos){
+	        return true;
 	}
 	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
 		return true;
@@ -235,7 +239,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ExtraDimension_beta(p);} ;
 		ins = true;
 	}
-	else if(generation_method.find("EA_fully_restricted_v1")!= std::string::npos){
+	//else if(generation_method.find("EA_fully_restricted_v1")!= std::string::npos){
+	/*else if(generation_method.find("EA_IMRPhenomD_NRT")!= std::string::npos){
 		//Need to pre-calculate EA variables here -- Needs to actually be in waveform_generator file..
 		//pre_calculate_EA_factors(params_in);
 		mapping->Nmod = 2;
@@ -246,7 +251,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return EA_fully_restricted_phase0(p);} ;
 		mapping->beta_fns[1] = [](source_parameters<T> *p){return EA_fully_restricted_phase1(p);} ;
 		ins = true;
-	}
+		}*/
 	else if(generation_method.find("BHEvaporation")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
