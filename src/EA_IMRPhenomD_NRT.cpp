@@ -20,16 +20,18 @@
 template<class T>
 void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 {
-  /*
   p->ca_EA = p->betappe[0];
   p->ctheta_EA = p->betappe[1];
   p->cw_EA = p->betappe[2];
   p->csigma_EA = p->betappe[3];
-  */
+  
+  /*Hard coding numbers to try and find a seg fault
   p->ca_EA = 5.09E-06;
   p->ctheta_EA = 1.53E-05;
   p->cw_EA = 66.0692241;
   p->csigma_EA = -9.06E-16;
+  */
+  
   p->s1_EA = 2e-5;
   p->s2_EA = 1e-5;
   p->V_x_EA = 0;
@@ -337,6 +339,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	waveform->hy[j] = amp*hy*std::exp(-i * (phase + EAphaseV));
 	waveform->hb[j] = amp*hb*std::exp(-i * (phase + EAphaseS));
 	waveform->hl[j] = amp*hl*std::exp(-i * (phase + EAphaseS));
+	
       }
       
     }

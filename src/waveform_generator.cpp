@@ -1299,6 +1299,10 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		}
 		//TODO Need to modify this in case only tidal1 or tidal2 is set 
 	}
+	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
+	  /* Map beta ppE to source params ppE and b ppE to source params ppE*/
+	  /*Or commit to having dedicated EA parameters*/
+	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
 		assign_mapping<T>(generation_method,&mapping,in);
