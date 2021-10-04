@@ -1047,15 +1047,15 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 1;
+	int iterations = 500;
 	double times[iterations][2];
 	//###############################################################################
-	int rows = 100000;
-	int cols = 13; 
+	int rows = 500;
+	int cols = 4; 
 	double **input = allocate_2D_array(rows, cols);
 	if(EA){
 	  //Need some random coupling constants that obey all known physical constraints for testing purposes. 
-	  read_file("data/uniform/case1/EA_parameter_MC2.csv", input, rows, cols);
+	  read_file("data/uniform/case1/EA_coupling_constants.csv", input, rows, cols);
 	}
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
@@ -1475,7 +1475,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		gwat_sum +=times[i][1];
 
 	}
-	std::cout<<"Average LAL time: "<<lal_sum / iterations<<std::endl;
+	std::cout<<"\n"<<"Average LAL time: "<<lal_sum / iterations<<std::endl;
 	std::cout<<"Average GWAT time: "<<gwat_sum / iterations<<std::endl;
 	gsl_rng_free(r);
 	return 1; 
