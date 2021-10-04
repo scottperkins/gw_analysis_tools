@@ -1050,6 +1050,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	int iterations = 1;
 	double times[iterations][2];
 	//###############################################################################
+	int rows = 100000;
+	int cols = 13; 
+	double **input = allocate_2D_array(rows, cols);
+	if(EA){
+	  //Need some random coupling constants that obey all known physical constraints for testing purposes. 
+	  read_file("data/uniform/case1/EA_parameter_MC2.csv", input, rows, cols);
+	}
+	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
 		int d  ;
 		if(k%3 == 0 ) {d = 2;}
@@ -1154,7 +1162,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		/*if (alpha[15]<alpha[16]){
 		  lambda1= 100*fabs(alpha[15]) ;
 		      lambda2	= 100*fabs(alpha[16]) ;
-
+		    
 		}
 		else{
 		  lambda1= 100*fabs(alpha[16]) ;
@@ -1292,6 +1300,19 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tc = .0 ;
 		param.tidal1 =lambda1 ;
 		param.tidal2 =lambda2 ;
+		/*if(EA){
+		  param.Nmod = 4;
+		  param.bppe = new double[4];
+		  param.bppe[0] = -13;
+		  param.bppe[1] = -13;
+		  param.bppe[2] = -13;
+		  param.bppe[3] = -13;
+		  param.betappe = new double[4];
+		  param.betappe[0] = input[k][0]; //ca
+		  param.betappe[1] = input[k][1]; //ctheta
+		  param.betappe[2] = input[k][2]; //cw
+		  param.betappe[3] = input[k][3]; //csigma
+		  }*/
 		if(gIMR){
 			//Not including logarithmic terms for now
 			param.Nmod_phi = 7;	

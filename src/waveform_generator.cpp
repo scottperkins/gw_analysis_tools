@@ -126,6 +126,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	if(local_method.find("IMRPhenomD")!=std::string::npos)
 	{
 		std::complex<T> ci = std::complex<T>(cos(params.incl_angle),0);
+		std::complex<T> si = std::complex<T>(sin(params.incl_angle),0);
+		std::complex<T> s2i = std::complex<T>(sin(2*params.incl_angle),0);
 		bool restrictedEval = true;
 		if(local_method == "ppE_IMRPhenomD_Inspiral")
 		{
@@ -194,22 +196,22 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		}
 		if(wp->active_polarizations[2]){
 			for (int i =0 ; i < length; i++){
-				//wp->hx[i] *= sin(2 iota);
+			  wp->hx[i] *= s2i; 
 			}
 		}
 		if(wp->active_polarizations[3]){
 			for (int i =0 ; i < length; i++){
-				//wp->hy[i] *= sin(iota);
+				wp->hy[i] *= si;
 			}
 		}
 		if(wp->active_polarizations[4]){
 			for (int i =0 ; i < length; i++){
-				//wp->hb[i] *= sin^2(iota) ;
+				wp->hb[i] *= si*si;
 			}
 		}
 		if(wp->active_polarizations[5]){
 			for (int i =0 ; i < length; i++){
-				//wp->hl[i] *= same as hb;
+				wp->hl[i] *= si*si;
 			}
 		}
 	}
