@@ -1302,18 +1302,22 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tidal2 =lambda2 ;
 		//std::cout<<input[k][0]<<"\t"<<input[k][1]<<"\t"<<input[k][2]<<"\t"<<input[k][3]<<std::endl; 
 		if(EA){
-		  param.Nmod = 4;
-		  param.bppe = new double[4];
+		  //param.Nmod = 4;
+		  //param.bppe = new double[4];
 		  //These don't matter, don't worry about them -- overwritten by prep_source_parameters
-		  param.bppe[0] = -13;
-		  param.bppe[1] = -13;
-		  param.bppe[2] = -13;
-		  param.bppe[3] = -13;
-		  param.betappe = new double[4];
-		  param.betappe[0] = input[k][0]; //ca
-		  param.betappe[1] = input[k][1]; //ctheta
-		  param.betappe[2] = input[k][2]; //cw
-		  param.betappe[3] = input[k][3]; //csigma
+		  //param.bppe[0] = -13;
+		  //param.bppe[1] = -13;
+		  //param.bppe[2] = -13;
+		  //param.bppe[3] = -13;
+		  //param.betappe = new double[4];
+		  //param.betappe[0] = input[k][0]; //ca
+		  //param.betappe[1] = input[k][1]; //ctheta
+		  //param.betappe[2] = input[k][2]; //cw
+		  //param.betappe[3] = input[k][3]; //csigma
+		  param.ca_EA = input[k][0]; //ca
+		  param.ctheta_EA = input[k][1]; //ctheta
+		  param.cw_EA = input[k][2]; //cw
+		  param.csigma_EA = input[k][3]; //csigma
 		  //source_parameters<double> sp; 
 		  //prep_source_parameters(&sp, &param,"EA_IMRPhenomD_NRT");
 		  //std::cout<<sp.betappe[0]<<std::endl; 

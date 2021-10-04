@@ -29,6 +29,9 @@ public:
 	void allocate_memory(int length);
 	void deallocate_memory();
 };
+template<class T>
+void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp);
+bool check_extra_polarizations(std::string generation_method);
 
 template<class T>
 int time_waveform(T *times, 

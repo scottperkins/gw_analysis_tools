@@ -1302,6 +1302,10 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 	  /* Map beta ppE to source params ppE and b ppE to source params ppE*/
 	  /*Or commit to having dedicated EA parameters*/
+		out->ca_EA = in->ca_EA;
+		out->ctheta_EA = in->ctheta_EA;
+		out->cw_EA = in->cw_EA;
+		out->csigma_EA = in->csigma_EA;
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
@@ -1408,5 +1412,51 @@ void waveform_polarizations<T>::deallocate_memory()
 }	
 template void waveform_polarizations<double>::deallocate_memory();
 template void waveform_polarizations<adouble>::deallocate_memory();
+
+bool check_extra_polarizations(std::string generation_method)
+{
+	if(generation_method == "polarization_test_IMRPhenomD"){
+		return true;
+	}
+	//if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
+		return true;
+	}
+	return false;
+}
+
+template<class T>
+void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp)
+{
+	if(generation_method == "polarization_test_IMRPhenomD"){
+		wp->active_polarizations[0]=true;
+		wp->active_polarizations[1]=true;
+		wp->active_polarizations[2]=true;
+		wp->active_polarizations[3]=true;
+		wp->active_polarizations[4]=true;
+		wp->active_polarizations[5]=true;
+	}
+	//else if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
+		wp->active_polarizations[0]=true;
+		wp->active_polarizations[1]=true;
+		wp->active_polarizations[2]=true;
+		wp->active_polarizations[3]=true;
+		wp->active_polarizations[4]=true;
+		wp->active_polarizations[5]=true;
+	}
+	else{	
+		wp->active_polarizations[0]=true;
+		wp->active_polarizations[1]=true;
+		wp->active_polarizations[2]=false;
+		wp->active_polarizations[3]=false;
+		wp->active_polarizations[4]=false;
+		wp->active_polarizations[5]=false;
+	}
+	return ;
+}
+template void assign_polarizations<double>(std::string generation_method, waveform_polarizations<double> *wp);
+template void assign_polarizations<adouble>(std::string generation_method, waveform_polarizations<adouble> *wp);
+
 
 

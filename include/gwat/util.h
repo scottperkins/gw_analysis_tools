@@ -214,6 +214,12 @@ public:
 
 	T chil = 0;
 	//###################################################
+	//coupling constants in one parameterization for Einstein Aether
+	T ca_EA;
+	T ctheta_EA;
+	T cw_EA;
+	T csigma_EA;
+	//###################################################
 
 	gsl_spline *Z_DL_spline_ptr=NULL;
 

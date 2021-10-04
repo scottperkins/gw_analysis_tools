@@ -10,9 +10,6 @@ template <class T>
 using beta_fn = std::function<T(source_parameters<T> *)>;
 
 
-template<class T>
-void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp);
-bool check_extra_polarizations(std::string generation_method);
 
 template<class T>
 struct theory_ppE_map{

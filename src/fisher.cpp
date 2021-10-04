@@ -1915,6 +1915,12 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 				parameters[base+i] = input_params->betappe[i];
 			}
 		}
+		else if(generation_method.find("EA") != std::string::npos ){
+			parameters[dimension- 4 ] = input_params->ca_EA;
+			parameters[dimension- 3 ] = input_params->ctheta_EA;
+			parameters[dimension- 2 ] = input_params->cw_EA;
+			parameters[dimension- 1 ] = input_params->csigma_EA;
+		}
 		//else if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
 		else if( check_theory_support(generation_method)){
@@ -2225,7 +2231,13 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}
 		//if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
-		if( check_theory_support(generation_method)){
+		else if(generation_method.find("EA") != std::string::npos ){
+			a_params->ca_EA = avec_parameters[dim- 4 ] ;
+			a_params->ctheta_EA = avec_parameters[dim- 3 ] ;
+			a_params->cw_EA = avec_parameters[dim- 2 ] ;
+			a_params->csigma_EA = avec_parameters[dim- 1 ] ;
+		}
+		else if( check_theory_support(generation_method)){
 			int base = dim - a_params->Nmod;
 			for(int i= 0 ; i<a_params->Nmod; i++){
 				a_params->betappe[i] = avec_parameters[base+i];

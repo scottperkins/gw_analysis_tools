@@ -57,51 +57,6 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 template void extra_modifications(std::string, gen_params_base<double> * gp,source_parameters<double> *, waveform_polarizations<double> *,double *, int );
 template void extra_modifications(std::string, gen_params_base<adouble> * gp,source_parameters<adouble> *, waveform_polarizations<adouble> *, adouble *, int);
 
-bool check_extra_polarizations(std::string generation_method)
-{
-	if(generation_method == "polarization_test_IMRPhenomD"){
-		return true;
-	}
-	//if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
-	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
-		return true;
-	}
-	return false;
-}
-
-template<class T>
-void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp)
-{
-	if(generation_method == "polarization_test_IMRPhenomD"){
-		wp->active_polarizations[0]=true;
-		wp->active_polarizations[1]=true;
-		wp->active_polarizations[2]=true;
-		wp->active_polarizations[3]=true;
-		wp->active_polarizations[4]=true;
-		wp->active_polarizations[5]=true;
-	}
-	//else if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
-	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
-		wp->active_polarizations[0]=true;
-		wp->active_polarizations[1]=true;
-		wp->active_polarizations[2]=true;
-		wp->active_polarizations[3]=true;
-		wp->active_polarizations[4]=true;
-		wp->active_polarizations[5]=true;
-	}
-	else{	
-		wp->active_polarizations[0]=true;
-		wp->active_polarizations[1]=true;
-		wp->active_polarizations[2]=false;
-		wp->active_polarizations[3]=false;
-		wp->active_polarizations[4]=false;
-		wp->active_polarizations[5]=false;
-	}
-	return ;
-}
-template void assign_polarizations<double>(std::string generation_method, waveform_polarizations<double> *wp);
-template void assign_polarizations<adouble>(std::string generation_method, waveform_polarizations<adouble> *wp);
-
 
 bool check_mod(std::string generation_method)
 {
@@ -148,9 +103,9 @@ bool check_theory_support(std::string generation_method)
 		return true;
 	}
 	//if(generation_method.find("EA_fully_restricted")!=std::string::npos){
-	if(generation_method.find("EA_IMRPhenomD_NRT")!=std::string::npos){
-	        return true;
-	}
+	//if(generation_method.find("EA_IMRPhenomD_NRT")!=std::string::npos){
+	//        return true;
+	//}
 	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
 		return true;
 	}

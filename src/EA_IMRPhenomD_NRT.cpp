@@ -20,10 +20,11 @@
 template<class T>
 void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 {
-  p->ca_EA = p->betappe[0];
-  p->ctheta_EA = p->betappe[1];
-  p->cw_EA = p->betappe[2];
-  p->csigma_EA = p->betappe[3];
+  //p->ca_EA = p->betappe[0];
+  //p->ctheta_EA = p->betappe[1];
+  //p->cw_EA = p->betappe[2];
+  //p->csigma_EA = p->betappe[3];
+  //std::cout<<p->ca_EA<<" "<<p->ctheta_EA<<" "<<p->cw_EA<<" "<<p->csigma_EA<<std::endl;
   
   /*Hard coding numbers to try and find a seg fault
   p->ca_EA = 5.09E-06;
