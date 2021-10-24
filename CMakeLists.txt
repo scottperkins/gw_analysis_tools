@@ -60,6 +60,12 @@ find_package(FFTW3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
 
+###############################################################
+
+SET(PTRJMCMC_INCLUDE_DIR "/Users/sperkins/git-repos/PTRJMCMC/build/install/include")
+SET(PTRJMCMC_LIBRARIES "/Users/sperkins/git-repos/PTRJMCMC/build/install/lib/libptrjmcmc.dylib")
+###############################################################
+
 
 #Library
 add_subdirectory("${CMAKE_SOURCE_DIR}/src")
