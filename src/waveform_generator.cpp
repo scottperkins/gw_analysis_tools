@@ -1282,22 +1282,56 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	}
 	
 	if(generation_method.find("NRT") != std::string::npos){
-		
-		if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
-			out->tidal_weighted = in->tidal_weighted;
+	  if(in->tidal_s >=0)
+	    {
+	      /* The binary love relations are used here to compute lambda_a 
+	       * as a function of lambda_s (following equations 11-13 of 
+	       * arXiv:1903.03909). These relations were fit for Neutron stars,
+	       * so the relevant coefficients/fit parameters are in 
+	       * IMRPhenomD_NRT.h.
+	       */
+	      T q, Q, F; 
+	      q = in->mass2 / in->mass1; 
+	      Q = pow(q, 10./(3. - n_binLove));
+	      F = (1. - Q)/(1. + Q); 
+
+	      T num = 1;
+	      T denom = 1;
+	      T q_pow[2], lambda_pow[3];
+	      q_pow[0] = q;
+	      q_pow[1] = q*q; 
+	      lambda_pow[0] = pow(in->tidal_s, -1./5.);
+	      lambda_pow[1] = lambda_pow[0] * lambda_pow[0]; 
+	      lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
+	      for(int i = 0; i<3; i++)
+		{
+		  for(int j = 0; j<2; j++)
+		    {
+		      num += b_binLove[i][j]*q_pow[j]*lambda_pow[i];
+		      denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i]; 
+		    }
 		}
-		else if((in->tidal1 >= 0 && in->tidal2>=0) ) {
-			out->tidal1 = in->tidal1;
-			out->tidal2 = in->tidal2;
-			//arXiv 1402.5156
-			out->tidal_weighted = 8./13. * ( (1. + 7.*out->eta - 31.*out->eta*out->eta)*(out->tidal1 + out->tidal2) 
-						+ sqrt( 1. - 4.*out->eta ) * ( 1. + 9.*out->eta - 11. * out->eta*out->eta) * (out->tidal1 - out->tidal2) ) ;
-			out->delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*out->eta ) * ( 1. - 13272./1319. * out->eta + 8944./1319. * out->eta*out->eta) *
-						(out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319. 
-						* out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
+	      
+	      in->tidal_a = F * (num / denom) * in->tidal_s;
+	      
+	      out->tidal1 = in->tidal_s - in->tidal_a;
+	      out->tidal2 = in->tidal_s + in->tidal_a; 
+	    }
+	  if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
+	    out->tidal_weighted = in->tidal_weighted;
+	  }
+	  else if((in->tidal1 >= 0 && in->tidal2>=0) ) {
+	    out->tidal1 = in->tidal1;
+	    out->tidal2 = in->tidal2;
+	    //arXiv 1402.5156
+	    out->tidal_weighted = 8./13. * ( (1. + 7.*out->eta - 31.*out->eta*out->eta)*(out->tidal1 + out->tidal2) 
+					     + sqrt( 1. - 4.*out->eta ) * ( 1. + 9.*out->eta - 11. * out->eta*out->eta) * (out->tidal1 - out->tidal2) ) ;
+	    
+	    out->delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*out->eta ) * ( 1. - 13272./1319. * out->eta + 8944./1319. * out->eta*out->eta) *
+						  (out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319. 
+										  * out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
 		//debugger_print(__FILE__,__LINE__,out->tidal_weighted);
 		}
-		//TODO Need to modify this in case only tidal1 or tidal2 is set 
 	}
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 	  /* Map beta ppE to source params ppE and b ppE to source params ppE*/
@@ -1306,6 +1340,8 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		out->ctheta_EA = in->ctheta_EA;
 		out->cw_EA = in->cw_EA;
 		out->csigma_EA = in->csigma_EA;
+		EA_IMRPhenomD_NRT<T> EAmodeldNRT;
+		EAmodeldNRT.pre_calculate_EA_factors(out); 
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;

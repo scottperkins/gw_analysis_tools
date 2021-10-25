@@ -18,31 +18,133 @@
  */
 
 template<class T>
+T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> *p)
+{
+  T lambda, compact, OmRatio, s;
+  /* The tidal deformability (love number), compactness, binding energy (Omega)
+   * to mass ratio, and sensitivity. 
+   */
+
+  if(body == 1)
+    {
+     lambda = p->tidal1; 
+    }
+  else
+    {
+      lambda = p->tidal2; 
+    }
+  
+  /* Compactness computed using C-Love relation from arXiv:1903.03909,
+   * equation 8, values in table 1.
+   */
+  T a[3] = {-919.6,330.3,-857.2};
+  T b[3] = {-383.5,192.5,-811.1};
+
+  // Useful Powers
+  T lambda_pow[3];
+  lambda_pow[0] = pow(lambda, - 1./5.);
+  lambda_pow[1] = lambda_pow[0] * lambda_pow[0]; 
+  lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
+  T K, num, denom; 
+  K = 0.2496;  
+  num = 1 + a[0]*lambda_pow[0] + a[1]*lambda_pow[1] + a[2]*lambda_pow[2];
+  denom = 1 + b[0]*lambda_pow[0] + b[1]*lambda_pow[1] + b[2]*lambda_pow[2];
+  
+  compact = K * lambda_pow[0] * (num/denom);
+  
+  if(body == 1)
+    {
+      p->compact1 = compact; 
+    }
+  else
+    {
+      p->compact2 = compact; 
+    }
+  /* Calculation of sensitivities taken from arXiv:2104.04596v1
+   * Equation 80 of that paper was inverted to get binding energy to mass ratio 
+   * as a function of compactness. 
+   * Equation 81 was used to compute sensitivity as a function of the binding 
+   * energy to mass ratio. 
+   */
+  OmRatio = (-5./7.)*compact - ((18275.*p->alpha1_EA)/168168.)*pow(compact, 3.);
+
+  T coeff1, coeff2, coeff3;
+  coeff1 =  ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.);
+  coeff2 = ((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA));
+  coeff3 = (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA)));
+  
+  s = coeff1 * (OmRatio) + coeff2 * (OmRatio*OmRatio) + coeff3 * (pow(OmRatio, 3.));
+
+  return s; 
+}
+
+template<>
+void EA_IMRPhenomD_NRT<double>::EA_check_nan(bool EA_nan_error_message, source_parameters<double> *p)
+{
+  if(EA_nan_error_message)
+    {
+      if(isnan(p->alpha1_EA))
+	{
+	  std::cout<<"WARNING: alpha1_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->alpha2_EA))
+	{
+	  std::cout<<"WARNING: alpha2_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->Z_EA))
+	{
+	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->kappa3_EA))
+	{
+	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->epsilon_x_EA))
+	{
+	  std::cout<<"WARNING: epsilon_x_EA is NAN"<<std::endl; 
+	}
+    }
+}
+
+
+template<>
+void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(bool EA_nan_error_message, source_parameters<adouble> *p)
+{
+  if(EA_nan_error_message)
+    {
+      if(isnan(p->alpha1_EA.value()))
+	{
+	  std::cout<<"WARNING: alpha1_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->alpha2_EA.value()))
+	{
+	  std::cout<<"WARNING: alpha2_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->Z_EA.value()))
+	{
+	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->kappa3_EA.value()))
+	{
+	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl; 
+	}
+      if(isnan(p->epsilon_x_EA.value()))
+	{
+	  std::cout<<"WARNING: epsilon_x_EA is NAN"<<std::endl; 
+	}
+    }
+}
+
+template<class T>
 void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 {
-  //p->ca_EA = p->betappe[0];
-  //p->ctheta_EA = p->betappe[1];
-  //p->cw_EA = p->betappe[2];
-  //p->csigma_EA = p->betappe[3];
-  //std::cout<<p->ca_EA<<" "<<p->ctheta_EA<<" "<<p->cw_EA<<" "<<p->csigma_EA<<std::endl;
-  
-  /*Hard coding numbers to try and find a seg fault
-  p->ca_EA = 5.09E-06;
-  p->ctheta_EA = 1.53E-05;
-  p->cw_EA = 66.0692241;
-  p->csigma_EA = -9.06E-16;
-  */
-  
   p->s1_EA = 2e-5;
   p->s2_EA = 1e-5;
   p->V_x_EA = 0;
   p->V_y_EA = 0;
   p->V_z_EA = 0;
-  
-  //Redefining the mass parameter to Mbar
-  p->chirpmass *= (1 - p->s1_EA)*(1 - p->s2_EA);
 
-  //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where these formulas come from)
+  //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where many of these formulas come from)
   p->c1_EA = (p->cw_EA + p->csigma_EA)/2.;
   p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
   p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
@@ -85,34 +187,27 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   
   p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
 
-  /*
-  //Sensitivities
-  p->compact1 = 1.; //FIX
-  p->compact2 = 1.; //FIX
-  
-  p->O_m1_EA = (-5./7.)*p->compact1 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact1, 3.);
-  p->O_m2_EA = (-5./7.)*p->compact2 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact2, 3.);
-  
-  p->s1_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m1_EA)
-    +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m1_EA*p->O_m1_EA)
-    + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m1_EA, 3.));
-
-    p->s2_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m2_EA)
-    +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m2_EA*p->O_m2_EA)
-    + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m2_EA, 3.));
-  */
+  //Get sensitivities
+  p->s1_EA = calculate_EA_sensitivity(1, p);
+  p->s2_EA = calculate_EA_sensitivity(2, p); 
   
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
-  /* TODO: Put in if/else statements here in case these values are NAN */
 
-  //Functions necessary for corrections to the amplitude
+  bool EA_nan_error_message = true; 
+  EA_check_nan(EA_nan_error_message, p);
+
+  
+  //Functions necessary for corrections to the amplitude.
+  //WE AREN'T USING ANY OF THESE NOW?!?
+  /*
   p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
   p->abL_EA = 1. + 2*p->beta2_EA; 
   p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
   p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
+  */
   //debugger_print(__FILE__,__LINE__,"EA Debugging");
   //std::cout<<"aBL "<<p->abL_EA<<std::endl;
   //std::cout<<"gb1 "<<p->gb1_EA<<std::endl;
@@ -175,7 +270,9 @@ template<class T>
 int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params)
 {
 
-  this->pre_calculate_EA_factors(params);
+  //this->pre_calculate_EA_factors(params);
+  //pre_calculate_EA_factors is now being called in prep_source_parameters and
+  //we don't want to call it twice-> don't need to call it here
 
   /*TODO*/
   /*The input mass should be unbarred*/
@@ -190,7 +287,6 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 
   
   //std::cout<<"Used EA_construct_waveform. Print statement in line 39 of EA_IMRPhenomD_NRT.cpp"<<std::endl; 
-  //IMRPhenomD_NRT<T> model;
   params->NRT_phase_coeff = - (3./16.) * params->tidal_weighted * (39./(16. * params->eta));
   if(params->tidal1<=0){params->oct1=1;params->quad1 = 1;}
   else{

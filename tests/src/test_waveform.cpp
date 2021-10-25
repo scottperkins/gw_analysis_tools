@@ -146,8 +146,8 @@ int EA_fully_restricted_consistency_test(int argc, char *argv[])
 		
 
 	double FMIN = 5;
-	//double FMAX = 2048;
-	double FMAX = 100;
+	double FMAX = 4096;
+	//double FMAX = 100;
 	double deltaf = (FMAX-FMIN)/samples;
 
 	double *freqs= new double[samples];
@@ -258,25 +258,11 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	params.shift_time=true;
 	params.shift_phase=true;
 	
-	params.mass1 = 1.4;
-	params.mass2 = 1.3;
 	params.tc = 6;
 	params.equatorial_orientation = false;
 	params.psi = 1.;
 	params.incl_angle = M_PI/3.;
 	params.gmst=3;
-
-	params.Nmod = 4;
-	params.bppe = new double[4];
-	//These don't matter, don't worry about them -- overwritten by prep_source_parameters
-	params.bppe[0] = -13;
-	params.bppe[1] = -13;
-	params.bppe[2] = -13;
-	params.bppe[3] = -13;
-	params.betappe = new double[4];
-	//params.betappe[0] = .001;
-	params.tidal1 = 10;
-	params.tidal2 = 10;
 
 	source_parameters<double> sp ;
 
@@ -290,63 +276,134 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	r=gsl_rng_alloc(T);
 	gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
 	
-	int iterations = 100000;
+	int iterations = 1000;
 	int num_bad_points = 0;
-	int num_infspeeds = 0;
-	int num_nan = 0;
+	//int num_infspeeds = 0;
+	//int num_nan = 0;
 	int num_Cherenkov = 0;
-	int dim = 13;// Increase for every factor you want to output
+	int dim = 8;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
-	//double a_bound = -4.; //(case 1)
-	double a_bound = -7.;  //(case 2)
-	//double theta_bound = -3.; //(case 1)
+	double a_bound = -4.; //(case 1)
+	//double a_bound = -7.;  //(case 2)
+	double theta_bound = -3.; //(case 1)
 	double w_bound = 1.;
 	double sigma_bound = -15.;
 
 	double sign[3];
 		
 	for (int i = 0 ; i<iterations; i++){
-	  
-	  //Uses gsl to get a random number from a uniform distribution
-	  params.betappe[0] = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); // ca
+	  /*
+	  /* Uses gsl to get a random number from a uniform distribution */
+	  params.ca_EA = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); 
 	  //ca has to be positive because of energy constraints
-	  //params.betappe[1] = 3.*params.betappe[0]*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // ctheta (in case 1)
-	  //params.betappe[1] = 3.*gsl_ran_flat(r, 0., 1.)*pow(10, a_bound)*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); //testing
-	  params.betappe[1] = gsl_ran_flat(r, -1., 1.)*(0.3); //c_theta (in case 2)
-	  params.betappe[2] = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); // cw
-	  params.betappe[3] = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound); // csigma
-	  
+	  params.ctheta_EA = 3.*params.ca_EA*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // (in case 1)
+	  //params.ctheta_EA = gsl_ran_flat(r, -1., 1.)*(0.3); // (in case 2)
+	  params.cw_EA = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); 
+	  params.csigma_EA = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound);
 	  
 
+	  /* A set of coupling constants that satisfies all the physical 
+	   * constraints. Used to show that for a particular set of coupling
+	   * constants, sensitivity as a function of compactness is a straight
+	   * line.
+	   */
 	  /*
-	  //Uses gsl to get a random number from a uniform distribution
-	  //Magnitude uniformly distributed across different powers of 10
+	  params.ca_EA = 4.14481675252318*pow(10, -6.);
+	  params.ctheta_EA = 0.0000124377596215569;
+	  params.cw_EA = 6.31563819944859;
+	  params.csigma_EA = 2.81323367729783*pow(10,-16);
+	  */
+	  
+	  /* Uses gsl to get a random number from a uniform distribution
+	   * Magnitude uniformly distributed across different powers of 10
+	   */
+	  /*
 	  for(int j = 0; j<3; j++)
 	    {
 	      if(gsl_ran_flat(r, -1., 1.) < 0){sign[j] = -1.;}
 	      else{sign[j] = 1.;}
 	    }
 	   
-	  params.betappe[0] = pow(10, gsl_ran_flat(r, -20., a_bound)); // ca (this parameter has to be positive because of energy constraints)
-	  params.betappe[1] = 3.*params.betappe[0]*(1 + sign[0]*pow(10, gsl_ran_flat(r, -20, theta_bound))); // ctheta (in case 1)
-	  //params.betappe[1] = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
-	  params.betappe[2] = sign[1]*pow(10, gsl_ran_flat(r, -20., w_bound)); // cw
-	  params.betappe[3] = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
+	    params.ca_EA = pow(10, gsl_ran_flat(r, -20., a_bound)); // ca (this parameter has to be positive because of energy constraints)
+	    params.ctheta_EA = 3.*params.ca_EA*(1 + sign[0]*pow(10, gsl_ran_flat(r, -20, theta_bound))); // ctheta (in case 1)
+	    //params.ctheta_EA = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
+	    params.cw_EA = sign[1]*pow(10, gsl_ran_flat(r, -20., w_bound)); // cw
+	    params.csigma_EA = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
 	  */
 
+	  //Generating random masses
+	  double alpha[2];
+	  for (int j = 0 ; j<2; j++){
+	    //alpha[j] = 0.1; 
+	    alpha[j] = gsl_rng_uniform(r);
+	  }
+	  double tempm1,tempm2 ;
+	  tempm1 = 1+1*alpha[0];
+	  tempm2 = 1+1*alpha[1];
+ 
+	  REAL8 m1_SI;
+	  REAL8 m2_SI;
+	  if(tempm1>tempm2){
+	    m1_SI= tempm1*LAL_MSUN_SI;
+	    m2_SI= tempm2*LAL_MSUN_SI;
+	  }
+	  else{
+	    m1_SI= tempm2*LAL_MSUN_SI;
+	    m2_SI= tempm1*LAL_MSUN_SI;
+	  }
+	  /*
+	  //Using masses to get a specific q
+	  //For testing of binary love relations only 
+	  	    
+	  // Test with q = 0.5 
+	  m1_SI = 2.* LAL_MSUN_SI;
+	  m2_SI = LAL_MSUN_SI;
+
+	  // Test with q = 0.75 
+	  m1_SI = 4.* LAL_MSUN_SI;
+	  m2_SI = 3.*LAL_MSUN_SI;
+	  
+	  // Test with q = 0.9 
+	  m1_SI = LAL_MSUN_SI;
+	  m2_SI = 0.9*LAL_MSUN_SI;
+	  */
+
+	  params.mass1 = m1_SI;
+	  params.mass2 = m2_SI;
+
+	  //std::cout<<"q = "<<params.mass2 / params.mass1<<std::endl;
+	  
+	  /* Sample tidal deformability uniform in log space from 1 to 10^4 for
+	   * comparison of compactness as a function of tidal deformability
+	   * with plots in arXiv:1903.03909 
+	   * Sample from 1 to 10^? for comparison of sensitivity as a function 
+	   * of compactness with plots in arXiv:2104.04596v1
+	   */
+	  // REAL8 lambda1 = pow(10, gsl_ran_flat(r, 0, 4)); 
+	  //REAL8 lambda2 = pow(10, gsl_ran_flat(r, 0, 4));
+	  REAL8 lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
+	  REAL8 lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  params.tidal1 = lambda1;
+	  params.tidal2 = lambda2;
+
+	  /* For binary Love relation tests*/
+	  REAL8 lambdas = pow(10, gsl_ran_flat(r, 1, 4)); 
+	  params.tidal_s = lambdas;
+	  
 	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
-	  //prep_source_parameters(&sp, &params,"EA_fully_restricted_v1_IMRPhenomD_NRT");//This should also run pre_calculate_EA_factors
+	  //This also runs pre_calculate_EA_factors
 	  	  
-	  if(params.betappe[2] < (-params.betappe[3]/(1. - params.betappe[3])))
+	  if(params.cw_EA < (-params.csigma_EA/(1. - params.csigma_EA)))
 	    {
 	      //Throws out points with cw < -csigma/(1 - csigma) because these violate the positive energy condition for the spin-1 mode (vector mode?)
 	      //Note that the positive energy condition for the spin-2 modes is always satisfied and for the spin-0 mode is satisfied by requiring
 	      //ca > 0 which is done when drawing random values of ca.
 	      //Equation 40 of arXiv:gr-qc/0507059v3
 	      num_bad_points++;
+	      //std::cout<<"check energy condition"<<std::endl; 
 	      i--;
-	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue;
 	      }
 	  else if(sp.cTsq_EA < 0 || sp.cVsq_EA < 0 || sp.cSsq_EA < 0)
@@ -355,7 +412,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      //arXiv:gr-qc/0402005 and arXiv:1108.1835
 	      num_bad_points++;
 	      i--;
-	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue;
 	      }
 	  /*
@@ -393,7 +450,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      i--;
 	      //std::cout<<"cT incorrect: "<<sp.cT_EA - 1<<std::endl;
 	      //I wonder why all the incorrect points it prints have the same value?
-	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue;
 	      }
 	  
@@ -403,7 +460,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	      //arXiv:1403.7377 and arXiv:gr-qc/0509114
 	      num_bad_points++;
 	      i--;
-	      cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue; 
 	    }
 	  bool violate = false;
@@ -414,7 +471,7 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 		{
 		  num_Cherenkov++;
 		  i--;
-		  cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+		  cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
 		  //continue;
 		  violate = true;
 		}
@@ -426,21 +483,21 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  
 	  if(sp.cS_EA < 1)
 	    {
-	      if((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA > pow(10, -22.))
+	      if(abs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
 		{
 		  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/abs(sp.c14_EA) >= pow(10, -30.)) //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
 		    {
 		      num_Cherenkov++;
 		      i--;
-		      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+		      cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
 		      continue;
 		    }
 		}
-	      if((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA >= 3*pow(10,-19.)) //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
+	      if(abs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)) //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
 		{
 		  num_Cherenkov++;
 		  i--;
-		  cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+		  cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
 		  continue;
 		}
 	    }
@@ -457,20 +514,29 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  if(u > prob)
 	    {
 	      i--;
-	      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
 	      //std::cout<<"Point rejected"<<std::endl;
 	      continue; 
 	    }
 	  //std::cout<<"Point accepted"<<std::endl; 
 	  
 	 
-	  output[i][0] = params.betappe[0];
-	  output[i][1] = params.betappe[1];
-	  output[i][2] = params.betappe[2];
-	  output[i][3] = params.betappe[3];
-	  //output[i][4] = sp.cTsq_EA;
-	  //output[i][5] = sp.cSsq_EA;
-	  //output[i][6] = sp.cVsq_EA;
+	  output[i][0] = sp.ca_EA;
+	  output[i][1] = sp.ctheta_EA;
+	  output[i][2] = sp.cw_EA;
+	  output[i][3] = sp.csigma_EA;
+	  output[i][4] = sp.mass1;
+	  output[i][5] = sp.mass2;
+	  output[i][6] = params.tidal_s;
+	  output[i][7] = params.tidal_a; 
+
+	  /*output[i][6] = sp.tidal1;
+	  output[i][7] = sp.tidal2;
+	  output[i][8] = sp.compact1;
+	  output[i][9] = sp.compact2;
+	  output[i][10] = sp.s1_EA;
+	  output[i][11] = sp.s2_EA; 
+	  /*
 	  output[i][4] = sp.cT_EA;
 	  output[i][5] = sp.cS_EA;
 	  output[i][6] = sp.cV_EA;
@@ -480,8 +546,9 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  output[i][10] = sp.gX1_EA;
 	  output[i][11] = sp.alpha1_EA;
 	  output[i][12] = sp.alpha2_EA;
+	  */
 			  
-	  cleanup_source_parameters(&sp,"EA_fully_restricted_v1_IMRPhenomD_NRT");
+	  cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	  printProgress((double)i / iterations);
 	}
 	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
@@ -1041,13 +1108,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	std::cout.precision(15);
 	bool P = false;
 	bool NRT = true;
+	bool tidalsym = true; 
 	bool EA = true;
 	bool gIMR = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 500;
+	int iterations = 10;
 	double times[iterations][2];
 	//###############################################################################
 	int rows = 500;
@@ -1056,7 +1124,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	if(EA){
 	  //Need some random coupling constants that obey all known physical constraints for testing purposes. 
 	  read_file("data/uniform/case1/EA_coupling_constants.csv", input, rows, cols);
-	}
+	}	
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
 		int d  ;
@@ -1115,6 +1183,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			 m1_SI= tempm2*LAL_MSUN_SI;
 			 m2_SI= tempm1*LAL_MSUN_SI;
 		}
+		
 		const REAL8 distance = 100e23 + 100e24*alpha[12] ;
 		REAL8 alpha0 ;
 		const REAL8 phiRef = 2*M_PI * alpha[13];
@@ -1152,23 +1221,27 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			XLALSimInspiralWaveformParamsInsertNonGRDBeta3(extraParams, 2*alpha[32]-1);
 
 		}
-			
-		//alpha[15] = 0;
-		//alpha[16] = 0; 
-		//alpha[15] = 2;
-		//alpha[16] = .8;
-		REAL8 lambda1 = 100*fabs(alpha[15]) + 1.; //this prevents tidal deformability from being less than 1
-		REAL8 lambda2 = 100*fabs(alpha[16]) + 1.;
-		/*if (alpha[15]<alpha[16]){
-		  lambda1= 100*fabs(alpha[15]) ;
-		      lambda2	= 100*fabs(alpha[16]) ;
-		    
-		}
-		else{
-		  lambda1= 100*fabs(alpha[16]) ;
-		      lambda2	= 100*fabs(alpha[15]) ;
-		      }*/
-		//std::cout<<"TIDAL LOVE NUMBERS: "<<lambda1<<" "<<lambda2<<std::endl;
+		//I can set tidal_s here, but I need to call prep source params so that lambda1 and lambda2 get set before the LAL suite version of NRT calculates corrections from lambda1 and lambda 2 immediately below this.
+
+		gen_params param;
+		source_parameters<double> sp;
+		REAL8 lambda1 = 0;
+		REAL8 lambda2 = 0;
+		REAL8 lambdas = 0; 
+		if(tidalsym)
+		  {
+		    REAL8 lambdas = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 4));
+		    param.tidal_s = lambdas; 
+		    prep_source_parameters(&sp, &param,"IMRPhenomD_NRT");
+		    lambda1 = sp.tidal1;
+		    lambda2 = sp.tidal2;
+		  }
+		else
+		  {
+		    lambda1 = 100*fabs(alpha[15]) + 1.; //this prevents tidal deformability from being less than 1
+		    lambda2 = 100*fabs(alpha[16]) + 1.;
+		  }
+		
 		NRTidal_version_type NRT_v=NRTidalv2_V;
 
 		double q0 = 0.1940;
@@ -1179,9 +1252,6 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 
 		double quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
 		double quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
-		//double quad1 = 1;
-		//double quad2 = 1;
-	        //std::cout<<"quad1: "<<quad1<<"\t quad2: "<<quad2<<std::endl; 
 
 		
 
@@ -1267,7 +1337,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		times[k][0] = (double)(end-start)/(CLOCKS_PER_SEC);
 		//std::cout<<"LAL timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
 		//###############################################################################
-		gen_params param;
+		//gen_params param;
+		//Had to move this up so we could access things inside the structure earlier (had to call prep_source_parameters to compute lambda1 and lambda2)
 		param.mass1 = m1_SI/LAL_MSUN_SI;	
 		param.mass2 = m2_SI/LAL_MSUN_SI;
 		//std::cout<<"mass1: "<<param.mass1<<std::endl;
@@ -1302,25 +1373,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tidal2 =lambda2 ;
 		//std::cout<<input[k][0]<<"\t"<<input[k][1]<<"\t"<<input[k][2]<<"\t"<<input[k][3]<<std::endl; 
 		if(EA){
-		  //param.Nmod = 4;
-		  //param.bppe = new double[4];
-		  //These don't matter, don't worry about them -- overwritten by prep_source_parameters
-		  //param.bppe[0] = -13;
-		  //param.bppe[1] = -13;
-		  //param.bppe[2] = -13;
-		  //param.bppe[3] = -13;
-		  //param.betappe = new double[4];
-		  //param.betappe[0] = input[k][0]; //ca
-		  //param.betappe[1] = input[k][1]; //ctheta
-		  //param.betappe[2] = input[k][2]; //cw
-		  //param.betappe[3] = input[k][3]; //csigma
 		  param.ca_EA = input[k][0]; //ca
 		  param.ctheta_EA = input[k][1]; //ctheta
 		  param.cw_EA = input[k][2]; //cw
 		  param.csigma_EA = input[k][3]; //csigma
-		  //source_parameters<double> sp; 
-		  //prep_source_parameters(&sp, &param,"EA_IMRPhenomD_NRT");
-		  //std::cout<<sp.betappe[0]<<std::endl; 
 		}
 		if(gIMR){
 			//Not including logarithmic terms for now
@@ -1442,7 +1498,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			output[i][5] = phaseLAL[i];
 			output[i][6] = phaseGWAT[i];
 		}
-		//std::cout<<output[0][1]<<"\t"<< output[0][2]<<"\t"<<output[0][3]<<"\t"<<output[0][4]<<std::endl; 
+		 
 		write_file("data/response_"+std::to_string(k)+".csv",output,length,7);
 		deallocate_2D_array(output,length,7);
 		delete [] response;
@@ -1465,9 +1521,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		XLALDestroyCOMPLEX16FrequencySeries(hptilde);
 		XLALDestroyCOMPLEX16FrequencySeries(hctilde);
 		XLALDestroyCOMPLEX16FrequencySeries(det);
-
+		
 		printProgress((double)k / iterations);
 	}
+	
 	double lal_sum = 0 ;
 	double gwat_sum = 0 ;
 	for(int i = 0 ; i<iterations; i++){

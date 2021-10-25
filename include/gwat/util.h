@@ -109,6 +109,10 @@ public:
         T tidal1=-1;
         /*! tidal deformability of the smaller component*/
         T tidal2=-1;
+	/*! symmetric tidal deformability*/
+	T tidal_s=-1;
+	/*! antisymmetric tidal deformability*/
+	T tidal_a=-1; 
 	T tidal_weighted=-1;
 	T delta_tidal_weighted=-1;
 
@@ -560,9 +564,7 @@ struct source_parameters
   T s1_EA;
   T s2_EA;
   T S_EA;
-  //Binding energy to mass ratio (Omega/mass1 or Omega/mass2)
-  T O_m1_EA = 0;
-  T O_m2_EA = 0;
+  
   //Compactness
   T compact1 = 0;
   T compact2 = 0;

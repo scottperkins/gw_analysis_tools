@@ -9,8 +9,12 @@ template<class T>
 class EA_IMRPhenomD_NRT: public IMRPhenomD_NRT<T>
 {
 public:
-  virtual void pre_calculate_EA_factors(source_parameters<T> *p);
+  virtual T calculate_EA_sensitivity(int body, source_parameters<T> *p);
+
+  virtual void EA_check_nan(bool EA_nan_error_message, source_parameters<T> *p);
   
+  virtual void pre_calculate_EA_factors(source_parameters<T> *p);
+
   virtual T EA_phase_ins(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
   virtual T EA_amp_ins(T f, useful_powers<T> *powers, source_parameters<T> *p);
