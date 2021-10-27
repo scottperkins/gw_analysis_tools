@@ -39,8 +39,11 @@ double mass1_prior[2];
 double mass2_prior[2];
 double tidal1_prior[2];
 double tidal2_prior[2];
+double tidal_s_prior[2];
+bool tidal_love=true;
 double DL_prior[2];
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
+double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters);
 double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -187,6 +190,15 @@ int main(int argc, char *argv[])
 	std::cout<<"Range of Mass1: "<<mass1_prior[0]<<" - "<<mass1_prior[1]<<std::endl;
 	std::cout<<"Range of Mass2: "<<mass2_prior[0]<<" - "<<mass2_prior[1]<<std::endl;
 	std::cout<<"Range of DL: "<<DL_prior[0]<<" - "<<DL_prior[1]<<std::endl;
+
+	if(dbl_dict.find("tidal_s minimum") == dbl_dict.end()){
+		tidal_s_prior[0]=1;
+		tidal_s_prior[1]=500;
+	}
+	else{
+		tidal_s_prior[0]=dbl_dict["tidal_s minimum"];
+		tidal_s_prior[1]=dbl_dict["tidal_s maximum"];
+	}
 	if(dbl_dict.find("tidal1 minimum") == dbl_dict.end()){
 		tidal1_prior[0]=1;
 		tidal1_prior[1]=500;
@@ -206,11 +218,17 @@ int main(int argc, char *argv[])
 	if(generation_method.find("NRT") != std::string::npos){
 		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
 		std::cout<<"Range of tidal2: "<<tidal2_prior[0]<<" - "<<tidal2_prior[1]<<std::endl;
+		std::cout<<"Range of tidal_s: "<<tidal_s_prior[0]<<" - "<<tidal_s_prior[1]<<std::endl;
 	}
 	bool jeff_prior = false;
 	if(bool_dict.find("Jefferys prior") == bool_dict.end())
 	{
 		jeff_prior = bool_dict["Jeffreys prior"];
+	}
+	tidal_love = true;
+	if(bool_dict.find("Tidal love relation") == bool_dict.end())
+	{
+		tidal_love = bool_dict["Tidal love relation"];
 	}
 	
 
@@ -341,6 +359,22 @@ int main(int argc, char *argv[])
 		}
 		
 	}
+	//else if(generation_method.find("EA") != std::string::npos){
+	//	mod_priors = new double*[4];
+	//	mod_priors[0]= new double[2];
+	//	mod_priors[0][0] = dbl_dict["EA c_sigma minimum"];
+	//	mod_priors[0][1] = dbl_dict["EA c_sigma maximum"];
+	//	mod_priors[1]= new double[2];
+	//	mod_priors[1][0] = dbl_dict["EA c_theta minimum"];
+	//	mod_priors[1][1] = dbl_dict["EA c_theta maximum"];
+	//	mod_priors[2]= new double[2];
+	//	mod_priors[2][0] = dbl_dict["EA c_omega minimum"];
+	//	mod_priors[2][1] = dbl_dict["EA c_omega maximum"];
+	//	mod_priors[3]= new double[2];
+	//	mod_priors[3][0] = dbl_dict["EA c_a minimum"];
+	//	mod_priors[3][1] = dbl_dict["EA c_a maximum"];
+
+	//}
 	//if(generation_method.find("dCS") != std::string::npos
 	//|| generation_method.find("EdGB") != std::string::npos){
 	//	if(generation_method.find("EdGB_GHO") != std::string::npos){
@@ -441,6 +475,7 @@ int main(int argc, char *argv[])
 		
 	}
 	int total_mods = Nmod+gNmod_phi+gNmod_sigma+gNmod_beta+gNmod_alpha;
+	if(generation_method.find("EA") != std::string::npos){total_mods+=4;}
 	bool pool = true;
 	if(pool){
 		debugger_print(__FILE__,__LINE__,"POOLING");
@@ -450,6 +485,7 @@ int main(int argc, char *argv[])
 	}
 	bool show_progress = true;
 	MCMC_modification_struct mod_struct;
+	mod_struct.tidal_love = tidal_love;
 	mod_struct.ppE_Nmod = Nmod;
 	mod_struct.bppe = bppe;
 	mod_struct.gIMR_Nmod_phi = gNmod_phi;
@@ -536,10 +572,13 @@ int main(int argc, char *argv[])
 				lp = &standard_log_prior_D_intrinsic_mod;
 			}
 		}
-		else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && (dimension-total_mods) == 6){
+		else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && ( (dimension-total_mods) == 6 || (dimension-total_mods) == 5)){
 			
 			if(total_mods == 0){
 				lp = &standard_log_prior_D_intrinsic_NRT;
+			}
+			else if(generation_method.find("EA") !=std::string::npos){
+				lp = NULL;
 			}
 			else{
 				lp = &standard_log_prior_D_intrinsic_NRT_mod;
@@ -553,9 +592,12 @@ int main(int argc, char *argv[])
 				lp = &standard_log_prior_D_mod;
 			}
 		}
-		else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && (dimension-total_mods) == 13){
+		else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && ( (dimension-total_mods) == 13 || (dimension-total_mods) == 12)){
 			if(total_mods == 0){
 				lp = &standard_log_prior_D_NRT;
+			}
+			else if(generation_method.find("EA") !=std::string::npos){
+				lp = &standard_log_prior_D_NRT_EA;
 			}
 			else{
 				lp = &standard_log_prior_D_NRT_mod;
@@ -720,6 +762,13 @@ int main(int argc, char *argv[])
 		}
 		delete [] mod_priors;
 	}
+	else if(generation_method.find("EA") !=std::string::npos){
+		for(int i = 0 ; i<4 ; i++){
+			delete [] mod_priors[i] ;
+		}
+		delete [] mod_priors;
+
+	}
 	
 	return 0;
 
@@ -752,6 +801,34 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
+double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters)
+{
+	int dim =  interface->max_dim;
+	double a = -std::numeric_limits<double>::infinity();
+	double CA_MIN= 1e-15;
+	double CA_MAX = 1e-1;
+	double CTHETA_MIN= 1e-15;
+	double CTHETA_MAX = 1e-1;
+	double COMEGA_MIN= 1e-15;
+	double COMEGA_MAX = 1e-1;
+	double CSIGMA_MIN= 1e-15;
+	double CSIGMA_MAX = 1e-1;
+	if(tidal_love){
+		if( pos[12] <CA_MIN|| pos[12] >CA_MAX){return a;}
+		if( pos[13] <CTHETA_MIN || pos[13] >CTHETA_MAX){return a;}
+		if( pos[14] <COMEGA_MIN || pos[14] >COMEGA_MAX){return a;}
+		if( pos[15] <CSIGMA_MIN || pos[15] >CSIGMA_MAX){return a;}
+	}
+	else{
+		if( pos[13] <CA_MIN || pos[13] >CA_MAX){return a;}
+		if( pos[14] <CTHETA_MIN || pos[14] >CTHETA_MAX){return a;}
+		if( pos[15] <COMEGA_MIN || pos[15] >COMEGA_MAX){return a;}
+		if( pos[16] <CSIGMA_MIN || pos[16] >CSIGMA_MAX){return a;}
+
+	}
+	return standard_log_prior_D_NRT(pos,interface, parameters);
+
+}
 double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
@@ -766,8 +843,13 @@ double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void
 {
 	int dim =  interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
-	if(pos[11]<tidal1_prior[0] || pos[11]>tidal1_prior[1]){return a;}
-	if(pos[12]<tidal2_prior[0] || pos[12]>tidal2_prior[1]){return a;}
+	if(tidal_love){
+		if(pos[11]<tidal_s_prior[0] || pos[11]>tidal_s_prior[1]){return a;}
+	}
+	else{
+		if(pos[11]<tidal1_prior[0] || pos[11]>tidal1_prior[1]){return a;}
+		if(pos[12]<tidal2_prior[0] || pos[12]>tidal2_prior[1]){return a;}
+	}
 	return standard_log_prior_D(pos,interface, parameters);
 
 }
@@ -863,8 +945,14 @@ double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *inte
 {
 	int dim =  interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
-	if(pos[4]<tidal1_prior[0] || pos[4]>tidal1_prior[1]){return a;}
-	if(pos[5]<tidal2_prior[0] || pos[5]>tidal2_prior[1]){return a;}
+
+	if(tidal_love){
+		if(pos[4]<tidal_s_prior[0] || pos[4]>tidal_s_prior[1]){return a;}
+	}
+	else{
+		if(pos[4]<tidal1_prior[0] || pos[4]>tidal1_prior[1]){return a;}
+		if(pos[5]<tidal2_prior[0] || pos[5]>tidal2_prior[1]){return a;}
+	}
 	return standard_log_prior_D_intrinsic(pos,interface, parameters);
 
 }

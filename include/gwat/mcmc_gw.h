@@ -63,6 +63,8 @@ struct MCMC_modification_struct
 	bool NSflag1 =false;
 	bool NSflag2 =false;
 
+	bool tidal_love = true;
+
 	/* Whether to use Gauss-Legendre Quadrature for the LIKELIHOOD
  * 		If using GLQ, provide the weights vector for the integration */
 	bool GAUSS_QUAD=false;

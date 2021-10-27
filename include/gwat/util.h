@@ -114,6 +114,7 @@ public:
 	/*! antisymmetric tidal deformability*/
 	T tidal_a=-1; 
 	T tidal_weighted=-1;
+	bool tidal_love = true;
 	T delta_tidal_weighted=-1;
 
 	//Polarization angle

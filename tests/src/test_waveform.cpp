@@ -14,7 +14,7 @@
 #include <gsl/gsl_randist.h>
 
 
-#define _LAL
+//#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -342,15 +342,19 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  tempm1 = 1+1*alpha[0];
 	  tempm2 = 1+1*alpha[1];
  
-	  REAL8 m1_SI;
-	  REAL8 m2_SI;
+	  //REAL8 m1_SI;
+	  //REAL8 m2_SI;
+	  double m1_SI;
+	  double m2_SI;
+	  params.mass1 = m1_SI;
+	  params.mass2 = m2_SI;
 	  if(tempm1>tempm2){
-	    m1_SI= tempm1*LAL_MSUN_SI;
-	    m2_SI= tempm2*LAL_MSUN_SI;
+	    params.mass1= tempm1;
+	    params.mass2= tempm2;
 	  }
 	  else{
-	    m1_SI= tempm2*LAL_MSUN_SI;
-	    m2_SI= tempm1*LAL_MSUN_SI;
+	    params.mass1= tempm2;
+	    params.mass2= tempm1;
 	  }
 	  /*
 	  //Using masses to get a specific q
@@ -369,8 +373,6 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	  m2_SI = 0.9*LAL_MSUN_SI;
 	  */
 
-	  params.mass1 = m1_SI;
-	  params.mass2 = m2_SI;
 
 	  //std::cout<<"q = "<<params.mass2 / params.mass1<<std::endl;
 	  
@@ -382,13 +384,15 @@ int EA_fully_restricted_parameterization_test(int argc, char *argv[])
 	   */
 	  // REAL8 lambda1 = pow(10, gsl_ran_flat(r, 0, 4)); 
 	  //REAL8 lambda2 = pow(10, gsl_ran_flat(r, 0, 4));
-	  REAL8 lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
-	  REAL8 lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  //REAL8 lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
+	  //REAL8 lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  double lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
+	  double lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
 	  params.tidal1 = lambda1;
 	  params.tidal2 = lambda2;
 
 	  /* For binary Love relation tests*/
-	  REAL8 lambdas = pow(10, gsl_ran_flat(r, 1, 4)); 
+	  double lambdas = pow(10, gsl_ran_flat(r, 1, 4)); 
 	  params.tidal_s = lambdas;
 	  
 	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");

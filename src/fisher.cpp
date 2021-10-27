@@ -976,9 +976,22 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
 		*N_src_params = 6+1;	
 	}
+	if(generation_method.find("NRT")!=std::string::npos){
+		if(params->tidal_love){
+			*N_src_params+=1;
+		}
+		else{
+			*N_src_params+=2;
+		}
+	}
 	if(check_mod(generation_method))
 	{
-		*N_src_params += params->Nmod;
+		if(generation_method.find("EA") == std::string::npos){
+			*N_src_params += params->Nmod;
+		}
+		else{
+			*N_src_params+=4;	
+		}
 	}
 }
 /*! \brief **DEPRECATED**
@@ -1012,8 +1025,17 @@ void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_
 		gr_param_dim = 7;
 	}
 	if(check_mod(generation_method)){
-		for(int i = 0; i<params->Nmod;i++){
-			src_params[gr_dim+i]=gr_param_dim+i;
+
+		if(generation_method.find("EA") == std::string::npos){
+			for(int i = 0; i<params->Nmod;i++){
+				src_params[gr_dim+i]=gr_param_dim+i;
+			}
+		}
+		else{
+			for(int i = 0; i<4;i++){
+				src_params[gr_dim+i]=gr_param_dim+i;
+			}
+
 		}
 	}
 }
@@ -1896,15 +1918,25 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 	}
 	if(generation_method.find("NRT") != std::string::npos){
 		if(!input_params->sky_average){
-			if(generation_method.find("PhenomD") != std::string::npos){
-				parameters[11] = input_params->tidal1;
-				parameters[12] = input_params->tidal2;
+			if(generation_method.find("PhenomD") != std::string::npos ){
+				if( (input_params->tidal_love)){
+					parameters[11] = input_params->tidal_s;
+				}
+				else{
+					parameters[11] = input_params->tidal1;
+					parameters[12] = input_params->tidal2;
+				}
 			}
 		}
 		else{
 			if(generation_method.find("PhenomD") != std::string::npos){
-				parameters[4] = input_params->tidal1;
-				parameters[5] = input_params->tidal2;
+				if( (input_params->tidal_love)){
+					parameters[4] = input_params->tidal_s;
+				}
+				else{
+					parameters[4] = input_params->tidal1;
+					parameters[5] = input_params->tidal2;
+				}
 			}
 		}
 	}
@@ -2210,14 +2242,24 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	if(generation_method.find("NRT") != std::string::npos){
 		if(!a_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos){
-				a_params->tidal1 = avec_parameters[11];
-				a_params->tidal2 = avec_parameters[12];
+				if( (a_params->tidal_love)){
+					a_params->tidal_s = avec_parameters[11];
+				}
+				else{
+					a_params->tidal1 = avec_parameters[11];
+					a_params->tidal2 = avec_parameters[12];
+				}
 			}
 		}
 		else{
 			if(generation_method.find("PhenomD") != std::string::npos){
-				a_params->tidal1 = avec_parameters[4];
-				a_params->tidal2 = avec_parameters[5];
+				if( (a_params->tidal_love)){
+					a_params->tidal_s = avec_parameters[4];
+				}
+				else{
+					a_params->tidal1 = avec_parameters[4];
+					a_params->tidal2 = avec_parameters[5];
+				}
 			}
 		}
 	}
@@ -2295,6 +2337,7 @@ template<class T>
 void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
 {
 	waveform_params->sky_average = input_params->sky_average;
+	waveform_params->tidal_love = input_params->tidal_love;
 	waveform_params->f_ref = input_params->f_ref;
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->horizon_coord = input_params->horizon_coord;
@@ -3313,6 +3356,14 @@ void ppE_theory_transformation_jac(
 		}
 		else{
 			base_dim = 11;
+		}
+	}
+	if(new_method.find("NRT") != std::string::npos){
+		if(param->tidal_love){
+			base_dim+=1;
+		}
+		else{
+			base_dim+=2;
 		}
 	}
 	double **derivatives = new double*[dimension-base_dim];
