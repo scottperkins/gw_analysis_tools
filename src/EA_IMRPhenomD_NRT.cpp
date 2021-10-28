@@ -202,7 +202,6 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
-	std::cout<<p->A1_EA<<" "<<p->S_EA<<" "<<p->s1_EA<<" "<<p->s2_EA<<" "<<p->A2_EA<<" "<<p->A3_EA<<std::endl;
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
@@ -279,7 +278,7 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins(T f, useful_powers<T> *powers, source_paramet
 template<class T>
 int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params)
 {
-
+	//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->csigma_EA<<" "<<params->cw_EA<<" "<<params->ca_EA<<" "<<params->ctheta_EA<<std::endl;
   //this->pre_calculate_EA_factors(params);
   //pre_calculate_EA_factors is now being called in prep_source_parameters and
   //we don't want to call it twice-> don't need to call it here

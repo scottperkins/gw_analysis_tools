@@ -126,12 +126,14 @@ int EA_consistency_test(int argc, char *argv[])
 	params.psi = 1.;
 	params.incl_angle = M_PI/3.;
 	params.gmst=3;
+	params.tidal_love = true;
 
 	source_parameters<double> sp ;
 
 
 	int iterations = 1;
-	int samples = 8032;
+	int samples = 2*8032;
+	//int samples = 32000;
 	double **output = allocate_2D_array(samples, 6);
 		
 
@@ -159,23 +161,23 @@ int EA_consistency_test(int argc, char *argv[])
 	for (int i = 0 ; i<iterations; i++){
 	  
 	  //Small values of coupling constants
-	  params.ca_EA = 1.0E-30; 
-	  params.ctheta_EA = 2E-30; 
-	  params.cw_EA = 2E-30; 
-	  params.csigma_EA = 1.0E-30;
-	  /*
+	  //params.ca_EA = 1.0E-30; 
+	  //params.ctheta_EA = 2E-30; 
+	  //params.cw_EA = 2E-30; 
+	  //params.csigma_EA = 1.0E-30;
+	  
 	  //Large values of coupling constants
-	  params.ca_EA = 1.0E-5; 
-	  params.ctheta_EA = 3.0E-5; 
-	  params.cw_EA = 1.0E-2; 
-	  params.csigma_EA = 5.0E-16; 
+	  //params.ca_EA = 1.0E-5; 
+	  //params.ctheta_EA = 3.0E-5; 
+	  //params.cw_EA = 1.0E-2; 
+	  //params.csigma_EA = 5.0E-16; 
 	  
 	  //Unrealistic, large values of coupling constants
 	  params.ca_EA = 1; 
 	  params.ctheta_EA = 3; 
 	  params.cw_EA = 10; 
 	  params.csigma_EA = 5E-2;
-	  */
+	  
 	  
 	  params.mass1 = gsl_rng_uniform(r) +1;
 	  params.mass2 = gsl_rng_uniform(r) +1;

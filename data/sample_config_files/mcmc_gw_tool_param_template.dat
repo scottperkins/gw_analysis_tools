@@ -114,7 +114,15 @@
 [int] Number of alpha modifications = 0
 [int] delta alpha 0 i = -1
 
+[dbl] tidal1 minimum = 100
+[dbl] tidal1 maximum = 100
+[dbl] tidal2 minimum = 100
+[dbl] tidal2 maximum = 100
+[dbl] tidal_s minimum = 100
+[dbl] tidal_s maximum = 100
+
 [bool] NS Flag 0 = false
 [bool] NS Flag 1 = false
 [int] Max chunk size = 1000000
 [bool] Jeffreys prior = false
+[bool] Tidal love relation = true
