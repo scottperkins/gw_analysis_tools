@@ -672,17 +672,18 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	source_parameters<T> params;
 	//params = params.populate_source_parameters(parameters);
-	params.populate_source_parameters(parameters);
-	params.f_ref = parameters->f_ref;
-	params.phiRef = parameters->phiRef;
-	params.cosmology = parameters->cosmology;
-	params.shift_time = parameters->shift_time;
-	params.shift_phase = parameters->shift_phase;
-	params.NSflag1 = parameters->NSflag1;
-	params.NSflag2 = parameters->NSflag2;
-	params.dep_postmerger = parameters->dep_postmerger;
+	std::string local_method = prep_source_parameters(&params, parameters,generation_method);
+	//params.populate_source_parameters(parameters);
+	//params.f_ref = parameters->f_ref;
+	//params.phiRef = parameters->phiRef;
+	//params.cosmology = parameters->cosmology;
+	//params.shift_time = parameters->shift_time;
+	//params.shift_phase = parameters->shift_phase;
+	//params.NSflag1 = parameters->NSflag1;
+	//params.NSflag2 = parameters->NSflag2;
+	//params.dep_postmerger = parameters->dep_postmerger;
 
-	if(generation_method == "IMRPhenomD")
+	if(local_method == "IMRPhenomD")
 	{
 		IMRPhenomD<T> modeld;
 		status = modeld.construct_phase(frequencies, length, phase, &params);	
@@ -690,7 +691,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 	}
-	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
+	else if(local_method == "ppE_IMRPhenomD_Inspiral")
 	{
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
@@ -737,7 +738,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		parameters->betappe[i] = temp[i];
 	//}
-	else if(generation_method == "ppE_IMRPhenomD_IMR")
+	else if(local_method == "ppE_IMRPhenomD_IMR")
 	{
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
@@ -748,7 +749,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 	}
-	else if(generation_method == "gIMRPhenomD")
+	else if(local_method == "gIMRPhenomD")
 	{
 		gIMRPhenomD<T> gmodeld;
 		params.delta_phi = parameters->delta_phi;
@@ -768,14 +769,14 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 				phase[i]*= (T)(-1.);
 		}
 	}
-	else if(generation_method == "IMRPhenomD_NRT")
+	else if(local_method == "IMRPhenomD_NRT")
 	  {
 	    IMRPhenomD_NRT<T> modeldNRT;
 	    params.tidal1 = parameters->tidal1; //Is this right?!?
 	    params.tidal2 = parameters->tidal2; 
 	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);	
 	  }
-	else if(generation_method == "EA_IMRPhenomD_NRT")
+	else if(local_method == "EA_IMRPhenomD_NRT")
 	  {
 	    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 	    params.tidal1 = parameters->tidal1; 
@@ -1282,7 +1283,8 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	}
 	
 	if(generation_method.find("NRT") != std::string::npos){
-	  if(in->tidal_s >=0)
+	  //if(in->tidal_s >=0)
+	  if(in->tidal_love )
 	    {
 	      /* The binary love relations are used here to compute lambda_a 
 	       * as a function of lambda_s (following equations 11-13 of 

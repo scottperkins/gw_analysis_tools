@@ -34,6 +34,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
       lambda = p->tidal2; 
     }
   
+	//std::cout<<"lambda "<<lambda<<std::endl;
   /* Compactness computed using C-Love relation from arXiv:1903.03909,
    * equation 8, values in table 1.
    */
@@ -51,6 +52,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   denom = 1 + b[0]*lambda_pow[0] + b[1]*lambda_pow[1] + b[2]*lambda_pow[2];
   
   compact = K * lambda_pow[0] * (num/denom);
+	//std::cout<<"Compactness: "<<compact<<std::endl;
   
   if(body == 1)
     {
@@ -73,7 +75,14 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   coeff2 = ((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA));
   coeff3 = (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA)));
   
+	//std::cout<<"alpha1: "<<p->alpha1_EA<<std::endl;
+	//std::cout<<"alpha2: "<<p->alpha2_EA<<std::endl;
+	//std::cout<<"Coeff1: "<<coeff1<<std::endl;
+	//std::cout<<"Coeff2: "<<coeff2<<std::endl;
+	//std::cout<<"Coeff3: "<<coeff3<<std::endl;
+	//std::cout<<"OmRatio: "<<OmRatio<<std::endl;
   s = coeff1 * (OmRatio) + coeff2 * (OmRatio*OmRatio) + coeff3 * (pow(OmRatio, 3.));
+	//std::cout<<"s "<<s<<std::endl;
 
   return s; 
 }
@@ -268,7 +277,7 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parame
 template<class T>
 int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params)
 {
-
+	//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->csigma_EA<<" "<<params->cw_EA<<" "<<params->ca_EA<<" "<<params->ctheta_EA<<std::endl;
   //this->pre_calculate_EA_factors(params);
   //pre_calculate_EA_factors is now being called in prep_source_parameters and
   //we don't want to call it twice-> don't need to call it here

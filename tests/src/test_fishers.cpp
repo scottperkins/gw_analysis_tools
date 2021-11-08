@@ -182,8 +182,10 @@ int test_MCMC_fisher(int argc, char *argv[])
 	//params.incl_angle = acos(.75);
 	params.incl_angle = M_PI/2;
 
-	params.NSflag1 = false;
-	params.NSflag2 =false;
+	params.NSflag1 = true;
+	params.NSflag2 =true;
+	params.tidal_s = 10;
+	params.tidal_love = true;
 
 	params.phiRef = .0;
 	params.RA = .234;
@@ -203,6 +205,7 @@ int test_MCMC_fisher(int argc, char *argv[])
 	params.psi = 1.;
 	params.gmst = 2.;
 	params.sky_average = false;
+	//params.sky_average=true;
 	params.Nmod = 0;
 
 
@@ -233,7 +236,8 @@ int test_MCMC_fisher(int argc, char *argv[])
 	}
 
 
-	int dim = 11;
+	int dim = 12;
+	//int dim = 5;
 	double **output =NULL;
 	output= allocate_2D_array(dim,dim);
 	double **output_temp = allocate_2D_array(dim,dim);
@@ -244,7 +248,7 @@ int test_MCMC_fisher(int argc, char *argv[])
 			output_temp[i][j]= 0;
 		}
 	}
-	std::string method = "MCMC_IMRPhenomD";
+	std::string method = "MCMC_IMRPhenomD_NRT";
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 	for(int i = 0 ;i < Ndetect; i++){
 		//fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_temp, dim, &params, "SIMPSONS",(double*)NULL,false, psd[i],NULL,NULL);

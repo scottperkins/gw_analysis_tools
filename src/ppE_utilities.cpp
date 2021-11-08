@@ -68,6 +68,10 @@ bool check_mod(std::string generation_method)
 	{
 		return true;
 	}
+	if(generation_method.find("EA") != std::string::npos)
+	{
+		return true;
+	}
 	if(check_theory_support(generation_method)){
 		return true;
 	}

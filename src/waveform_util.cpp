@@ -43,15 +43,18 @@ double match(  std::complex<double> *data1, std::complex<double> *data2, double 
 	double *G= new double[length];
 	double delta_f = frequencies[1]-frequencies[0];
 
-	double norms[2] ;
+	double norms[3] ;
 	norms[0] =  data_snr(frequencies,length,data1,data1,SN);
 	norms[1] =  data_snr(frequencies,length,data2,data2,SN);
+
+	//norms[2] =  data_snr(frequencies,length,data1,data2,SN);
+	//return norms[2]*norms[2]/norms[1]/norms[0];
 	
 	fftw_complex *in, *out; 
 	fftw_plan p;
 	in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
         out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
-        p = fftw_plan_dft_1d(length, in, out,FFTW_FORWARD, FFTW_MEASURE);
+        p = fftw_plan_dft_1d(length, in, out,FFTW_BACKWARD, FFTW_MEASURE);
         for (int i=0;i<length; i++)
         {
                 Gtilde = conj(data1[i]) * data2[i] / SN[i];
@@ -63,10 +66,16 @@ double match(  std::complex<double> *data1, std::complex<double> *data2, double 
 
         for (int i=0;i<length; i++)
         {
-                G[i] = std::abs(std::complex<double>(out[i][0],out[i][1])) ;
+                //G[i] = std::abs(std::complex<double>(out[i][0],out[i][1])) ;
+                G[i] = sqrt(out[i][0]*out[i][0]+out[i][1]*out[i][1]) ;
         }
+	double max = G[0];
+	for(int i= 0 ; i<length; i++){
+		if(G[i]>max){max = G[i];}
+	}
+	max*=delta_f;
 
-        double max = *std::max_element(G, G+length)*delta_f;
+        //double max = (*std::max_element(G, G+length))*delta_f;
 	
 	fftw_destroy_plan(p);
         fftw_free(in);

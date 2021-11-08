@@ -1866,6 +1866,7 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double **seeding_var, bool local_seeding)
 {
 	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha  + mcmc_mod_struct->ppE_Nmod);
+	if(generation_method.find("EA") != std::string::npos){totalmod+=4;}
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
@@ -1885,7 +1886,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=true;
 	} 
-	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 6)
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 6)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
 		for(int i =0; i<totalmod; i++){
@@ -1902,6 +1903,26 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[5]=10;
 			for(int i = 0  ;i <totalmod; i++){
 				(*seeding_var)[i+6] = 1;
+			}
+		}
+		mcmc_intrinsic=true;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 5)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal_s";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.5;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+5] = 1;
 			}
 		}
 		mcmc_intrinsic=true;
@@ -1979,6 +2000,34 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[12]=10;
 			for(int i = 0  ;i <totalmod; i++){
 				(*seeding_var)[i+13] = 1;
+			}
+		}
+		mcmc_intrinsic=false;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
+	{
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal_s"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.1;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=.5;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=.1;
+			(*seeding_var)[7]=.1;
+			(*seeding_var)[8]=.1;
+			(*seeding_var)[9]=.1;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=10;
+			//(*seeding_var)[12]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+12] = 1;
 			}
 		}
 		mcmc_intrinsic=false;
@@ -2805,6 +2854,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 {
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
+	gen_params->tidal_love = mod_struct->tidal_love;
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
