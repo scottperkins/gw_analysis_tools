@@ -169,7 +169,6 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
   p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
-  /* TODO: Put in if/else statements here in case these values are NAN */
   
   p->beta1_EA = -2.* p->c13_EA / p->cV_EA; 
   p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA); 
@@ -227,7 +226,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 
 
 template<class T>
-T EA_IMRPhenomD_NRT<T>::EA_phase_ins(T f, useful_powers<T> *powers, source_parameters<T> *p)
+T EA_IMRPhenomD_NRT<T>::EA_phase_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
   T phaseout;
   T EA_phase, GR_phase;
@@ -248,7 +247,7 @@ T EA_IMRPhenomD_NRT<T>::EA_phase_ins(T f, useful_powers<T> *powers, source_param
 }
 
 template<class T>
-T EA_IMRPhenomD_NRT<T>::EA_amp_ins(T f, useful_powers<T> *powers, source_parameters<T> *p)
+T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
   T ampout;
   //T EA_amp, GR_amp;
@@ -406,18 +405,18 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	}
 	/*Append EA correction to the entire waveform*/
 	{
-	  T EAphase = this->EA_phase_ins(f, &pows, params);
-	  phase += EAphase;
-	  T EAamp = (A0*this->EA_amp_ins(f,&pows, params));
-	  amp += EAamp; 
+	  T EAphase2 = this->EA_phase_ins2(f, &pows, params);
+	  phase += EAphase2;
+	  T EAamp2 = (A0*this->EA_amp_ins2(f,&pows, params));
+	  amp += EAamp2; 
 	}
 	/*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
 	//Right now these are just the terms for the l=2 mode
-	std::complex<T> hx, hy, hb, hl;
-	hx = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
-	hy = std::complex<T>(2.,0)*hx*std::complex<T>(0,1);
-	hb = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
-	hl = params->abL_EA*hb; 
+	std::complex<T> hx2, hy2, hb2, hl2;
+	hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
+	hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,1);
+	hb2 = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
+	hl2 = params->abL_EA*hb2; 
 
 	/* The phase correction which depends on the speed of the
 	 * different polarizations.
@@ -432,10 +431,10 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	phase -= (T)(tc*(f-f_ref) + phic);
 	waveform->hplus[j] = amp*std::exp(-i * (phase + EAphaseT));
 	waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT));
-	waveform->hx[j] = amp*hx*std::exp(-i * (phase + EAphaseV));
-	waveform->hy[j] = amp*hy*std::exp(-i * (phase + EAphaseV));
-	waveform->hb[j] = amp*hb*std::exp(-i * (phase + EAphaseS));
-	waveform->hl[j] = amp*hl*std::exp(-i * (phase + EAphaseS));
+	waveform->hx[j] = amp*hx2*std::exp(-i * (phase + EAphaseV));
+	waveform->hy[j] = amp*hy2*std::exp(-i * (phase + EAphaseV));
+	waveform->hb[j] = amp*hb2*std::exp(-i * (phase + EAphaseS));
+	waveform->hl[j] = amp*hl2*std::exp(-i * (phase + EAphaseS));
 	
       }
       

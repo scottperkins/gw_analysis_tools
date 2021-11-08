@@ -15,9 +15,9 @@ public:
   
   virtual void pre_calculate_EA_factors(source_parameters<T> *p);
 
-  virtual T EA_phase_ins(T f, useful_powers<T> *powers, source_parameters<T> *p);
+  virtual T EA_phase_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
-  virtual T EA_amp_ins(T f, useful_powers<T> *powers, source_parameters<T> *p);
+  virtual T EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
   virtual int EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params); 
 

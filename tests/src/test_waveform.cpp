@@ -43,7 +43,7 @@ int gIMR_testing(int argc, char *argv[]);
 int polarization_testing(int argc, char *argv[]);
 int BHEvaporation_test(int argc, char *argv[]);
 int EA_fully_restricted_test(int argc, char *argv[]);
-int EA_fully_restricted_parameterization_test(int argc, char *argv[]);
+int EA_parameterization_test(int argc, char *argv[]);
 int EA_consistency_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 		return EA_fully_restricted_test(argc,argv);
 	}
 	if(runtime_opt == 8){
-		return EA_fully_restricted_parameterization_test(argc,argv);
+		return EA_parameterization_test(argc,argv);
 	}
 	if(runtime_opt == 9){
 		return EA_consistency_test(argc,argv);
@@ -131,7 +131,7 @@ int EA_consistency_test(int argc, char *argv[])
 
 
 	int iterations = 1;
-	int samples = 8032;
+	int samples = 2*8032;
 	double **output = allocate_2D_array(samples, 6);
 		
 
@@ -240,7 +240,7 @@ int EA_consistency_test(int argc, char *argv[])
 	delete [] params.bppe;
 	return 0;
 }
-int EA_fully_restricted_parameterization_test(int argc, char *argv[])
+int EA_parameterization_test(int argc, char *argv[])
 {
 	gen_params params;	
 	params.spin1[2] = .03;
