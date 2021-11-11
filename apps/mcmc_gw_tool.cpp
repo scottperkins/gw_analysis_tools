@@ -215,20 +215,21 @@ int main(int argc, char *argv[])
 		tidal2_prior[0]=dbl_dict["tidal2 minimum"];
 		tidal2_prior[1]=dbl_dict["tidal2 maximum"];
 	}
+	tidal_love = true;
+	if(bool_dict.find("Tidal love relation") != bool_dict.end())
+	{
+		tidal_love = bool_dict["Tidal love relation"];
+	}
 	if(generation_method.find("NRT") != std::string::npos){
 		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
 		std::cout<<"Range of tidal2: "<<tidal2_prior[0]<<" - "<<tidal2_prior[1]<<std::endl;
 		std::cout<<"Range of tidal_s: "<<tidal_s_prior[0]<<" - "<<tidal_s_prior[1]<<std::endl;
+		std::cout<<"Using tidal-love relations: "<<tidal_love<<std::endl;
 	}
 	bool jeff_prior = false;
 	if(bool_dict.find("Jefferys prior") == bool_dict.end())
 	{
 		jeff_prior = bool_dict["Jeffreys prior"];
-	}
-	tidal_love = true;
-	if(bool_dict.find("Tidal love relation") == bool_dict.end())
-	{
-		tidal_love = bool_dict["Tidal love relation"];
 	}
 	
 
