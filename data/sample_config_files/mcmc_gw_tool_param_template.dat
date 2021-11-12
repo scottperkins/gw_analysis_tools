@@ -77,6 +77,12 @@
 #Optional prior ranges for Mass2 
 [dbl] Mass2 minimum = 10
 [dbl] Mass2 maximum = 80
+#Spin magnitude prior walls
+[dbl] Spin1 minimum = -1
+[dbl] Spin1 maximum = 1
+#Spin magnitude prior walls
+[dbl] Spin2 minimum = -1
+[dbl] Spin2 maximum = 1
 #Optional prior ranges for Luminosity Distance 
 [dbl] Luminosity distance minimum = 10
 [dbl] Luminosity distance maximum = 1000

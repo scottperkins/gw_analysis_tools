@@ -37,6 +37,8 @@ double **mod_priors;
 double chirpmass_prior[2];
 double mass1_prior[2];
 double mass2_prior[2];
+double spin1_prior[2];
+double spin2_prior[2];
 double tidal1_prior[2];
 double tidal2_prior[2];
 double tidal_s_prior[2];
@@ -179,6 +181,22 @@ int main(int argc, char *argv[])
 		mass2_prior[0]=dbl_dict["Mass2 minimum"];
 		mass2_prior[1]=dbl_dict["Mass2 maximum"];
 	}
+	if(dbl_dict.find("Spin1 minimum") == dbl_dict.end()){
+		spin1_prior[0]=-1;
+		spin1_prior[1]=1;
+	}
+	else{
+		spin1_prior[0]=dbl_dict["Spin1 minimum"];
+		spin1_prior[1]=dbl_dict["Spin1 maximum"];
+	}
+	if(dbl_dict.find("Spin2 minimum") == dbl_dict.end()){
+		spin2_prior[0]=-1;
+		spin2_prior[1]=1;
+	}
+	else{
+		spin2_prior[0]=dbl_dict["Spin2 minimum"];
+		spin2_prior[1]=dbl_dict["Spin2 maximum"];
+	}
 	if(dbl_dict.find("Luminosity distance minimum") == dbl_dict.end()){
 		DL_prior[0]=10;
 		DL_prior[1]=5000;
@@ -190,6 +208,15 @@ int main(int argc, char *argv[])
 	std::cout<<"Range of Mass1: "<<mass1_prior[0]<<" - "<<mass1_prior[1]<<std::endl;
 	std::cout<<"Range of Mass2: "<<mass2_prior[0]<<" - "<<mass2_prior[1]<<std::endl;
 	std::cout<<"Range of DL: "<<DL_prior[0]<<" - "<<DL_prior[1]<<std::endl;
+	if(generation_method.find("IMRPhenomPv2") != std::string::npos ){
+		std::cout<<"Range of Spin1: "<<0<<" - "<<spin1_prior[1]<<std::endl;
+		std::cout<<"Range of Spin2: "<<0<<" - "<<spin2_prior[1]<<std::endl;
+	}
+	else{
+		std::cout<<"Range of Spin1: "<<spin1_prior[0]<<" - "<<spin1_prior[1]<<std::endl;
+		std::cout<<"Range of Spin2: "<<spin2_prior[0]<<" - "<<spin2_prior[1]<<std::endl;
+
+	}
 
 	if(dbl_dict.find("tidal_s minimum") == dbl_dict.end()){
 		tidal_s_prior[0]=1;
@@ -794,8 +821,8 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if( pos[5] < (T_merger - .1) || pos[5] > (T_merger + .1)) { return a; }
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
-	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	if ((pos[9])<spin1_prior[0] || (pos[9])>spin1_prior[1]){return a;}//chi1 
+	if ((pos[10])<spin2_prior[0] || (pos[10])>spin2_prior[1]){return a;}//chi2
 	for(int i = 0 ; i<dim - 11; i++){
 		if( pos[11+i] <mod_priors[i][0] || pos[11+i] >mod_priors[i][1]){return a;}
 	}
@@ -874,8 +901,8 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if( pos[5] < (T_merger - .1) || pos[5] > (T_merger + .1)) { return a; }
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
-	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	if ((pos[9])<spin1_prior[0] || (pos[9])>spin1_prior[1]){return a;}//chi1 
+	if ((pos[10])<spin2_prior[0] || (pos[10])>spin2_prior[1]){return a;}//chi2
 	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 	return log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 	//return -.5*pow_int(pos[0]-5,2)/.01/.01-.5*pow_int(pos[1]+.9,2)/.01/.01+log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
@@ -902,8 +929,8 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if( pos[5] < (T_merger - .1) || pos[5] > (T_merger + .1)) { return a; }
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
-	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
+	if ((pos[9])<0 || (pos[9])>spin1_prior[1]){return a;}//a1 
+	if ((pos[10])<0 || (pos[10])>spin2_prior[1]){return a;}//a2
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
@@ -931,8 +958,8 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
 	if( pos[5] < (T_merger - .1) || pos[5] > (T_merger + .1)) { return a; }
 	if (std::exp(pos[6])<DL_prior[0] || std::exp(pos[6])>DL_prior[1]){return a;}//DL
-	if ((pos[9])<0 || (pos[9])>.95){return a;}//a1 
-	if ((pos[10])<0 || (pos[10])>.95){return a;}//a2
+	if ((pos[9])<0 || (pos[9])>spin1_prior[1]){return a;}//a1 
+	if ((pos[10])<0 || (pos[10])>spin2_prior[1]){return a;}//a2
 	if ((pos[11])<-1 || (pos[11])>1){return a;}//theta1
 	if ((pos[12])<-1 || (pos[12])>1){return a;}//theta2
 	if ((pos[13])<0 || (pos[13])>2*M_PI){return a;}//phip
@@ -1011,8 +1038,8 @@ double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interfac
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
-	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
-	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	if ((pos[2])<spin1_prior[0] || (pos[2])>spin1_prior[1]){return a;}//chi1 
+	if ((pos[3])<spin2_prior[0] || (pos[3])>spin2_prior[1]){return a;}//chi2
 	//else {return log(chirpmass_eta_jac(chirp,eta)) ;}
 	else {return log(aligned_spin_prior(pos[2]))+log(aligned_spin_prior(pos[3])) + log(chirpmass_eta_jac(chirp,eta));} 
 
@@ -1031,8 +1058,8 @@ double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *inte
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
-	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
-	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	if ((pos[2])<spin1_prior[0] || (pos[2])>spin1_prior[1]){return a;}//chi1 
+	if ((pos[3])<spin2_prior[0] || (pos[3])>spin2_prior[1]){return a;}//chi2
 	for(int i = 0 ; i<dim - 4; i++){
 		if( pos[4+i] <mod_priors[i][0] || pos[4+i] >mod_priors[i][1]){return a;}
 	}
@@ -1053,8 +1080,8 @@ double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interf
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
-	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
-	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
+	if ((pos[2])<0 || (pos[2])>spin1_prior[1]){return a;}//chi1 
+	if ((pos[3])<0 || (pos[3])>spin2_prior[1]){return a;}//chi2
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
@@ -1075,8 +1102,8 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *in
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
-	if ((pos[2])<0 || (pos[2])>.95){return a;}//chi1 
-	if ((pos[3])<0 || (pos[3])>.95){return a;}//chi2
+	if ((pos[2])<0 || (pos[2])>spin1_prior[1]){return a;}//chi1 
+	if ((pos[3])<0 || (pos[3])>spin2_prior[1]){return a;}//chi2
 	if ((pos[4])<-1 || (pos[4])>1){return a;}//chi1 
 	if ((pos[5])<-1 || (pos[5])>1){return a;}//chi2
 	if ((pos[6])<0 || (pos[6])>2*M_PI){return a;}//chi2
