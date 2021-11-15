@@ -44,6 +44,7 @@ double tidal2_prior[2];
 double tidal_s_prior[2];
 bool tidal_love=true;
 double DL_prior[2];
+bool tidal_love_boundary_violation(double q,double lambda_s);
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters);
 double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -867,12 +868,28 @@ double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,
 	return standard_log_prior_D_NRT(pos,interface, parameters);
 
 }
+
+bool tidal_love_boundary_violation(double q,double lambda_s)
+{
+	//Relation from XXXX.XXXXX fit as rough threshhold for the 
+	//validity of the tidal_s-tidal_a-q relation
+	//Fit in log(lambda_s) - q space
+	if(  q< 1.2321 - .124616*log(lambda_s)){return true;}
+	
+	return false;
+}
 double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
+	double chirp = exp(pos[7]);
+	double m1 = calculate_mass1(chirp,pos[8]);
+	double m2 = calculate_mass2(chirp,pos[8]);
+	double q = m2/m1;//<1
 	if(tidal_love){
 		if(pos[11]<tidal_s_prior[0] || pos[11]>tidal_s_prior[1]){return a;}
+		if(tidal_love_boundary_violation(q,pos[11])){return a;}
+		
 	}
 	else{
 		if(pos[11]<tidal1_prior[0] || pos[11]>tidal1_prior[1]){return a;}
@@ -974,8 +991,13 @@ double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *inte
 	int dim =  interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
 
+	double chirp = exp(pos[0]);
+	double m1 = calculate_mass1(chirp,pos[1]);
+	double m2 = calculate_mass2(chirp,pos[1]);
+	double q = m2/m1;//<1
 	if(tidal_love){
 		if(pos[4]<tidal_s_prior[0] || pos[4]>tidal_s_prior[1]){return a;}
+		if(tidal_love_boundary_violation(q,pos[4])){return a;}
 	}
 	else{
 		if(pos[4]<tidal1_prior[0] || pos[4]>tidal1_prior[1]){return a;}
