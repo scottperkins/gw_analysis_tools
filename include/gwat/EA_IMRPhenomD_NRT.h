@@ -12,19 +12,23 @@ public:
   virtual T calculate_EA_sensitivity(int body, source_parameters<T> *p);
 
   virtual void EA_check_nan(bool EA_nan_error_message, source_parameters<T> *p);
-  
+
   virtual void pre_calculate_EA_factors(source_parameters<T> *p);
+
+  virtual T EA_phase_ins1(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
   virtual T EA_phase_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
+  virtual T EA_amp_ins1(T f, useful_powers<T> *powers, source_parameters<T> *p);
+
   virtual T EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
-  virtual int EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params); 
+  virtual int EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params);
 
   virtual int construct_phase(T *frequencies, int length, T *phase, source_parameters<T> *params);
-  
+
   virtual int construct_amplitude(T *frequencies, int length, T *amplitude, source_parameters<T> *params);
-  
+
   virtual int construct_waveform(T *frequencies, int length, std::complex<T> *waveform, source_parameters<T> *params);
 };
 
