@@ -239,7 +239,7 @@ T EA_IMRPhenomD_NRT<T>::EA_phase_ins1(T f, useful_powers<T> *powers, source_para
 
   T EA_phase;
 
-  //did not include the terms that cancel -- 2*pi*f*t_c - phi(t_c) - pi/4
+  //did not include the terms that are in construct_waveform -- 2*pi*f*t_c - phi(t_c) - pi/4
   EA_phase = (3./128.) * (((1 - p->s1_EA) * (1 - p->s2_EA)) / (2 - p->c14_EA)) * (1 / p->kappa3_EA) * (pow(2, -5./3.) * powers->MFminus_5third * powers->PIminus_5third) * (1 - ((4./7.) * (1/ (pow(2, 2./3.) * powers->MF2third * powers->PI2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
   //GR_phase = (3./256.) * (powers->MFminus_5third * powers->PIminus_5third * pow(2, -5./3.));
 
@@ -489,7 +489,9 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         //amp1 and phase1 don't have GR or NRT components
         std::complex<T> phase1, amp1;
         phase1 = this->EA_phase_ins1(f, &pows, params);
-        amp1 = (A0 * this->EA_amp_ins1(f, &pows, params));
+        amp1 = this->EA_amp_ins1(f, &pows, params);
+
+        phase1 -= (T)(tc*(f-f_ref) + phic);
 
         //compute polarization coefficients (without iota dependence)
         //for hb1, it wouldn't let me multiply by 2i in the same line
