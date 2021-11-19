@@ -132,3 +132,7 @@
 [int] Max chunk size = 1000000
 [bool] Jeffreys prior = false
 [bool] Tidal love relation = true
+[dbl] RA minimum = 0
+[dbl] RA maximum = 6.28319
+[dbl] Sin(DEC) minimum = -1
+[dbl] Sin(DEC) maximum = 1
