@@ -160,10 +160,10 @@ int EA_consistency_test(int argc, char *argv[])
 	for (int i = 0 ; i<iterations; i++){
 	  
 	  //Small values of coupling constants
-	  //params.ca_EA = 1.0E-30; 
-	  //params.ctheta_EA = 2E-30; 
-	  //params.cw_EA = 2E-30; 
-	  //params.csigma_EA = 1.0E-30;
+	  params.ca_EA = 1.0E-30; 
+	  params.ctheta_EA = 2E-30; 
+	  params.cw_EA = 2E-30; 
+	  params.csigma_EA = 1.0E-30;
 	  
 	  //Large values of coupling constants
 	  //params.ca_EA = 1.0E-5; 
@@ -172,10 +172,10 @@ int EA_consistency_test(int argc, char *argv[])
 	  //params.csigma_EA = 5.0E-16; 
 	  
 	  //Unrealistic, large values of coupling constants
-	  params.ca_EA = 1; 
-	  params.ctheta_EA = 3; 
-	  params.cw_EA = 10; 
-	  params.csigma_EA = 5E-2;
+	  //params.ca_EA = 1; 
+	  //params.ctheta_EA = 2; 
+	  //params.cw_EA = 10; 
+	  //params.csigma_EA = 5E-2;
 	  
 	  
 	  params.mass1 = gsl_rng_uniform(r) +1;

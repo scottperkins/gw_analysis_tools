@@ -19,8 +19,8 @@
 using namespace std;
 
 /*!\file
- *File that handles the construction of the (2,2) waveform as described by IMRPhenomD by Khan et. al. 
- * 
+ *File that handles the construction of the (2,2) waveform as described by IMRPhenomD by Khan et. al.
+ *
  * Builds a waveform for given DETECTOR FRAME parameters
  */
 
@@ -38,7 +38,7 @@ int time_waveform(T *times, /**< double array of frequencies for the waveform to
 
 
 	source_parameters<T> params;
-	
+
 	std::string local_method = prep_source_parameters(&params, parameters,generation_method);
 	if(local_method.find("Taylor")!=std::string::npos)
 	{
@@ -70,7 +70,7 @@ int time_waveform(T *times, /**< double array of frequencies for the waveform to
 
 /*!\brief Function to produce the plus/cross polarizations of an quasi-circular binary
  *
- * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * By using the structure parameter, the function is allowed to be more flexible in using different
  * method of waveform generation - not all methods use the same parameters
  *
  * This puts the responsibility on the user to pass the necessary parameters
@@ -79,7 +79,7 @@ int time_waveform(T *times, /**< double array of frequencies for the waveform to
  * *NEED TO OUTLINE OPTIONS FOR EACH METHOD IN DEPTH*
  *
  *
- * NEW PHASE OPTIONS for 
+ * NEW PHASE OPTIONS for
  *
  * PHENOMD ONLY:
  *
@@ -87,13 +87,13 @@ int time_waveform(T *times, /**< double array of frequencies for the waveform to
  *
  * If Phic is unassigned, a reference phase AND a reference frequency are looked for.If no options are found, both are set to 0.
  *
- * If tc is assigned, it is used. 
+ * If tc is assigned, it is used.
  *
- * If tc is unassigned, the waveform is shifted so the merger happens at 0. 
+ * If tc is unassigned, the waveform is shifted so the merger happens at 0.
  *
  * PhenomPv2:
  *
- * PhiRef and f_ref are required, phic is not an option. 
+ * PhiRef and f_ref are required, phic is not an option.
  *
  * tc, if specified, is used with the use of interpolation. If not, tc is set such that coalescence happens at t=0
  */
@@ -112,7 +112,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	bool NSflag2 = parameters->NSflag2;
 
 
-	/*Eventually, this will be where NS specific quantities are defined*/	
+	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
 	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
@@ -121,7 +121,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
 	source_parameters<T> params;
 	//params = params.populate_source_parameters(parameters);
-	
+
 	std::string local_method = prep_source_parameters(&params, parameters,generation_method);
 	if(local_method.find("IMRPhenomD")!=std::string::npos)
 	{
@@ -157,22 +157,22 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		{
 			gIMRPhenomD<T> gmodeld;
 			status = gmodeld.construct_waveform(frequencies, length, wp->hplus, &params);
-			
+
 		}
 		else if(local_method == "IMRPhenomD_NRT")
 		  {
 		    IMRPhenomD_NRT<T> modeldNRT;
 		    status = modeldNRT.construct_waveform(frequencies, length, wp->hplus, &params);
-		    
+
 		  }
 		else if(local_method == "EA_IMRPhenomD_NRT")
 		  {
 		    restrictedEval = false;
 		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 		    status = EAmodeldNRT.EA_construct_waveform(frequencies, length, wp, &params);
-		    
+
 		  }
-		
+
 		else{
 			IMRPhenomD<T> modeld;
 			status = modeld.construct_waveform(frequencies, length, wp->hplus, &params);
@@ -196,7 +196,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		}
 		if(wp->active_polarizations[2]){
 			for (int i =0 ; i < length; i++){
-			  wp->hx[i] *= s2i; 
+			  wp->hx[i] *= s2i;
 			}
 		}
 		if(wp->active_polarizations[3]){
@@ -239,7 +239,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		  {
 		    IMRPhenomPv2_NRT<T> modelNRT;
 		    status = modelNRT.construct_waveform(frequencies, length, wp->hplus, wp->hcross, &params);
-		    
+
 		  }
 		else{
 			IMRPhenomPv2<T> model;
@@ -250,8 +250,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		std::complex<T> s2z = std::complex<T>(sin(2.*params.zeta_polariz));
 		for (int i =0;i < length; i++)
 		{
-			tempPlus = wp->hplus[i];	
-			tempCross = wp->hcross[i];	
+			tempPlus = wp->hplus[i];
+			tempCross = wp->hcross[i];
 			wp->hplus[i] = c2z*tempPlus+s2z*tempCross;
 			wp->hcross[i] = c2z*tempCross-s2z*tempPlus;
 		}
@@ -382,7 +382,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 
 /*!\brief Function to produce the (2,2) mode of an quasi-circular binary
  *
- * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * By using the structure parameter, the function is allowed to be more flexible in using different
  * method of waveform generation - not all methods use the same parameters
  *
  */
@@ -393,12 +393,12 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 			gen_params *parameters/**<structure containing all the source parameters*/
 			)
 {
-	
+
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
-	/*Eventually, this will be where NS specific quantities are defined*/	
+	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
 	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
@@ -429,7 +429,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	if(generation_method == "IMRPhenomD")
 	{
 		IMRPhenomD<double> modeld;
-		status = modeld.construct_waveform(frequencies, length, waveform, &params);	
+		status = modeld.construct_waveform(frequencies, length, waveform, &params);
 	}
 	else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	{
@@ -437,7 +437,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
-		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);
 	}
 	//else if(generation_method == "_dCS_IMRPhenomD")
 	//{
@@ -450,7 +450,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	//	double temp[params.Nmod] ;
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		temp[i] = params.betappe[i];
-	//	status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+	//	status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		parameters->betappe[i] = temp[i];
 	//}
@@ -464,7 +464,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 	//	double temp[params.Nmod] ;
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		temp[i] = params.betappe[i];
-	//	status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+	//	status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		parameters->betappe[i] = temp[i];
 	//}
@@ -474,19 +474,19 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 		params.betappe = parameters->betappe;
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
-		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);	
+		status = ppemodeld.construct_waveform(frequencies, length, waveform, &params);
 	}
 	else if(generation_method == "IMRPhenomD_NRT")
 	  {
 	    IMRPhenomD_NRT<double> modeldNRT;
-	    status = modeldNRT.construct_waveform(frequencies, length, waveform, &params);	
+	    status = modeldNRT.construct_waveform(frequencies, length, waveform, &params);
 
 	  }
 	//else if(generation_method == "IMRPhenomPv2")
 	//{
 	//	IMRPhenomPv2<double> modeld;
-	//	//Initialize Pv2 specific params	
-	//	status = modeld.construct_waveform(frequencies, length, waveform, &params);	
+	//	//Initialize Pv2 specific params
+	//	status = modeld.construct_waveform(frequencies, length, waveform, &params);
 	//}
 
 	return status ;
@@ -513,7 +513,7 @@ int fourier_waveform(double *frequencies, /**< double array of frequencies for t
 
 /*!\brief Function to produce the amplitude of the (2,2) mode of an quasi-circular binary
  *
- * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * By using the structure parameter, the function is allowed to be more flexible in using different
  * method of waveform generation - not all methods use the same parameters
  */
 template<class T>
@@ -528,7 +528,7 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
-	/*Eventually, this will be where NS specific quantities are defined*/	
+	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
 	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
@@ -546,32 +546,32 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 		if(local_method == "ppE_IMRPhenomD_Inspiral")
 		{
 			ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-			status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+			status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);
 
 		}
 		else if(local_method == "ppE_IMRPhenomD_IMR")
 		{
 			ppE_IMRPhenomD_IMR<T> ppemodeld;
-			status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+			status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);
 
 		}
 		else if(local_method == "gIMRPhenomD")
 		{
 			gIMRPhenomD<T> gmodeld;
-			status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+			status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);
 
 		}
 		else if(local_method == "IMRPhenomD_NRT")
 		  {
 		    IMRPhenomD_NRT<T> modeldNRT;
 		    status = modeldNRT.construct_amplitude(frequencies, length, amplitude, &params);
-		    
+
 		  }
 		else if(local_method == "EA_IMRPhenomD_NRT")
 		  {
 		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 		    status = EAmodeldNRT.construct_amplitude(frequencies, length, amplitude, &params);
-		    
+
 		  }
 		else{
 			IMRPhenomD<T> modeld;
@@ -596,7 +596,7 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	//if(generation_method == "IMRPhenomD")
 	//{
 	//	IMRPhenomD<T> modeld;
-	//	status = modeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	//	status = modeld.construct_amplitude(frequencies, length, amplitude, &params);
 	//}
 	//else if(generation_method == "ppE_IMRPhenomD_Inspiral")
 	//{
@@ -604,17 +604,17 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	//	params.Nmod = parameters->Nmod;
 	//	params.betappe = parameters->betappe;
 	//	ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);
 	//}
 	//else if(generation_method == "_dCS_IMRPhenomD")
 	//{
 	//	dCS_IMRPhenomD<T> ppemodeld;
-	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);
 	//}
 	//else if(generation_method == "EdGB_IMRPhenomD")
 	//{
 	//	EdGB_IMRPhenomD<T> ppemodeld;
-	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);
 	//}
 	//else if(generation_method == "ppE_IMRPhenomD_IMR")
 	//{
@@ -622,7 +622,7 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	//	params.Nmod = parameters->Nmod;
 	//	params.betappe = parameters->betappe;
 	//	ppE_IMRPhenomD_IMR<T> ppemodeld;
-	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	//	status = ppemodeld.construct_amplitude(frequencies, length, amplitude, &params);
 	//}
 	//else if(generation_method == "gIMRPhenomD")
 	//{
@@ -639,7 +639,7 @@ int fourier_amplitude(T *frequencies, /**< double array of frequencies for the w
 	//	params.Nmod_sigma = parameters->Nmod_sigma;
 	//	params.Nmod_beta = parameters->Nmod_beta;
 	//	params.Nmod_alpha = parameters->Nmod_alpha;
-	//	status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);	
+	//	status = gmodeld.construct_amplitude(frequencies, length, amplitude, &params);
 	//}
 
 	return status ;
@@ -648,7 +648,7 @@ template int fourier_amplitude<double>(double *, int , double * ,std::string, ge
 template int fourier_amplitude<adouble>(adouble *, int , adouble * ,std::string, gen_params_base<adouble> *);
 /*!\brief Function to produce the phase of the (2,2) mode of an quasi-circular binary
  *
- * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * By using the structure parameter, the function is allowed to be more flexible in using different
  * method of waveform generation - not all methods use the same parameters
  */
 template<class T>
@@ -663,7 +663,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
-	/*Eventually, this will be where NS specific quantities are defined*/	
+	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
 	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
@@ -686,7 +686,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	if(local_method == "IMRPhenomD")
 	{
 		IMRPhenomD<T> modeld;
-		status = modeld.construct_phase(frequencies, length, phase, &params);	
+		status = modeld.construct_phase(frequencies, length, phase, &params);
 		for(int i = 0 ; i<length; i++){
 				phase[i]*= (T)(-1.);
 		}
@@ -697,7 +697,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		status = ppemodeld.construct_phase(frequencies, length, phase, &params);
 		for(int i = 0 ; i<length; i++){
 				phase[i]*= (T)(-1.);
 		}
@@ -713,11 +713,11 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		temp[i] = params.betappe[i];
 	//	dCS_IMRPhenomD<T> ppemodeld;
-	//	status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+	//	status = ppemodeld.construct_phase(frequencies, length, phase, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//			phase[i]*= (T)(-1.);
 	//	}
-	//	
+	//
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		parameters->betappe[i] = temp[i];
 	//}
@@ -731,7 +731,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		temp[i] = params.betappe[i];
 	//	EdGB_IMRPhenomD<T> ppemodeld;
-	//	status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+	//	status = ppemodeld.construct_phase(frequencies, length, phase, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//			phase[i]*= (T)(-1.);
 	//	}
@@ -744,7 +744,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.bppe = parameters->bppe;
 		params.Nmod = parameters->Nmod;
 		ppE_IMRPhenomD_IMR<T> ppemodeld;
-		status = ppemodeld.construct_phase(frequencies, length, phase, &params);	
+		status = ppemodeld.construct_phase(frequencies, length, phase, &params);
 		for(int i = 0 ; i<length; i++){
 				phase[i]*= (T)(-1.);
 		}
@@ -764,7 +764,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		params.Nmod_sigma = parameters->Nmod_sigma;
 		params.Nmod_beta = parameters->Nmod_beta;
 		params.Nmod_alpha = parameters->Nmod_alpha;
-		status = gmodeld.construct_phase(frequencies, length, phase, &params);	
+		status = gmodeld.construct_phase(frequencies, length, phase, &params);
 		for(int i = 0 ; i<length; i++){
 				phase[i]*= (T)(-1.);
 		}
@@ -773,24 +773,24 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	  {
 	    IMRPhenomD_NRT<T> modeldNRT;
 	    params.tidal1 = parameters->tidal1; //Is this right?!?
-	    params.tidal2 = parameters->tidal2; 
-	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);	
+	    params.tidal2 = parameters->tidal2;
+	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);
 	  }
 	else if(local_method == "EA_IMRPhenomD_NRT")
 	  {
 	    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
-	    params.tidal1 = parameters->tidal1; 
-	    params.tidal2 = parameters->tidal2; 
-	    status = EAmodeldNRT.construct_phase(frequencies, length, phase, &params);	
+	    params.tidal1 = parameters->tidal1;
+	    params.tidal2 = parameters->tidal2;
+	    status = EAmodeldNRT.construct_phase(frequencies, length, phase, &params);
 	  }
-      
+
 	return status ;
 }
 template int fourier_phase<double>(double *, int , double * , std::string, gen_params_base<double> *);
 template int fourier_phase<adouble>(adouble *, int , adouble * , std::string,gen_params_base<adouble> *);
 /*!\brief Function to produce the phase of the plus and cross mode of a quasi-circular binary
  *
- * By using the structure parameter, the function is allowed to be more flexible in using different 
+ * By using the structure parameter, the function is allowed to be more flexible in using different
  * method of waveform generation - not all methods use the same parameters
  */
 template<class T>
@@ -806,7 +806,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
-	/*Eventually, this will be where NS specific quantities are defined*/	
+	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
 	//	cout<<"NS waveforms still under develpment - BH only"<<endl;
@@ -821,36 +821,36 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 		if(local_method == "ppE_IMRPhenomD_Inspiral")
 		{
 			ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-			status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+			status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);
 
 		}
 		else if(local_method == "ppE_IMRPhenomD_IMR")
 		{
 			ppE_IMRPhenomD_IMR<T> ppemodeld;
-			status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+			status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);
 
 		}
 		else if(local_method == "gIMRPhenomD")
 		{
 			gIMRPhenomD<T> gmodeld;
-			status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);	
+			status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);
 
 		}
 		else if(local_method == "IMRPhenomD_NRT")
 		  {
 		    IMRPhenomD_NRT<T> modeldNRT;
-		    status = modeldNRT.construct_phase(frequencies, length, phase_plus, &params);	
-		    
+		    status = modeldNRT.construct_phase(frequencies, length, phase_plus, &params);
+
 		  }
 		else if(local_method == "EA_IMRPhenomD_NRT")
 		  {
 		    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
-		    status = EAmodeldNRT.construct_phase(frequencies, length, phase_plus, &params);	
-		    
+		    status = EAmodeldNRT.construct_phase(frequencies, length, phase_plus, &params);
+
 		  }
 		else{
 			IMRPhenomD<T> modeld;
-			status = modeld.construct_phase(frequencies, length, phase_plus, &params);	
+			status = modeld.construct_phase(frequencies, length, phase_plus, &params);
 		}
 		for(int i = 0 ; i<length; i++){
 			phase_cross[i] = phase_plus[i]+ M_PI/2.;
@@ -917,7 +917,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//if(generation_method == "IMRPhenomD")
 	//{
 	//	IMRPhenomD<T> modeld;
-	//	status = modeld.construct_phase(frequencies, length, phase_plus, &params);	
+	//	status = modeld.construct_phase(frequencies, length, phase_plus, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//		phase_cross[i] = phase_plus[i]+ M_PI/2.;
 	//		//phase_plus[i]*= (T)(-1.);
@@ -930,7 +930,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	params.bppe = parameters->bppe;
 	//	params.Nmod = parameters->Nmod;
 	//	ppE_IMRPhenomD_Inspiral<T> ppemodeld;
-	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//		//phase_plus[i]*= (T)(-1.);
 	//		phase_cross[i] = phase_plus[i]+ M_PI/2.;
@@ -947,12 +947,12 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		temp[i] = params.betappe[i];
 	//	dCS_IMRPhenomD<T> ppemodeld;
-	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//		//phase_plus[i]*= (T)(-1.);
 	//		phase_cross[i] = phase_plus[i]+ M_PI/2.;
 	//	}
-	//	
+	//
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		parameters->betappe[i] = temp[i];
 	//}
@@ -966,7 +966,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	for( int i = 0; i < params.Nmod; i++)
 	//		temp[i] = params.betappe[i];
 	//	EdGB_IMRPhenomD<T> ppemodeld;
-	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//		//phase_plus[i]*= (T)(-1.);
 	//		phase_cross[i] = phase_plus[i]+ M_PI/2.;
@@ -981,7 +981,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	params.bppe = parameters->bppe;
 	//	params.Nmod = parameters->Nmod;
 	//	ppE_IMRPhenomD_IMR<T> ppemodeld;
-	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);	
+	//	status = ppemodeld.construct_phase(frequencies, length, phase_plus, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//		//phase_plus[i]*= (T)(-1.);
 	//		phase_cross[i] = phase_plus[i]+ M_PI/2.;
@@ -1006,7 +1006,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	params.Nmod_beta = parameters->Nmod_beta;
 	//	params.Nmod_alpha = parameters->Nmod_alpha;
 	//	gIMRPhenomD<T> gmodeld;
-	//	status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);	
+	//	status = gmodeld.construct_phase(frequencies, length, phase_plus, &params);
 	//	for(int i = 0 ; i<length; i++){
 	//		//phase_plus[i]*= (T)(-1.);
 	//		phase_cross[i] = phase_plus[i]+ M_PI/2.;
@@ -1154,7 +1154,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	//########################################
 
 	//	ppE_IMRPhenomPv2_Inspiral<T> model;
-	//	//Initialize Pv2 specific params	
+	//	//Initialize Pv2 specific params
 
 	//	//########################################
 	//	if((parameters->chip +1)>DOUBLE_COMP_THRESH){
@@ -1192,7 +1192,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	//	//########################################
 
 	//	ppE_IMRPhenomPv2_Inspiral<T> model;
-	//	//Initialize Pv2 specific params	
+	//	//Initialize Pv2 specific params
 
 	//	//########################################
 	//	if((parameters->chip +1)>DOUBLE_COMP_THRESH){
@@ -1249,6 +1249,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	out->NSflag1 = in->NSflag1;
 	out->NSflag2 = in->NSflag2;
 	out->dep_postmerger = in->dep_postmerger;
+	out->include_l1 = in->include_l1;
 	if(generation_method.find("Pv2")!=std::string::npos){
 		IMRPhenomPv2<T> model;
 		if((in->chip +1)>DOUBLE_COMP_THRESH){
@@ -1281,43 +1282,43 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->Nmod_beta = in->Nmod_beta;
 			out->Nmod_alpha = in->Nmod_alpha;
 	}
-	
+
 	if(generation_method.find("NRT") != std::string::npos){
 	  //if(in->tidal_s >=0)
 	  if(in->tidal_love )
 	    {
-	      /* The binary love relations are used here to compute lambda_a 
-	       * as a function of lambda_s (following equations 11-13 of 
+	      /* The binary love relations are used here to compute lambda_a
+	       * as a function of lambda_s (following equations 11-13 of
 	       * arXiv:1903.03909). These relations were fit for Neutron stars,
-	       * so the relevant coefficients/fit parameters are in 
+	       * so the relevant coefficients/fit parameters are in
 	       * IMRPhenomD_NRT.h.
 	       */
-	      T q, Q, F; 
-	      q = in->mass2 / in->mass1; 
+	      T q, Q, F;
+	      q = in->mass2 / in->mass1;
 	      Q = pow(q, 10./(3. - n_binLove));
-	      F = (1. - Q)/(1. + Q); 
+	      F = (1. - Q)/(1. + Q);
 
 	      T num = 1;
 	      T denom = 1;
 	      T q_pow[2], lambda_pow[3];
 	      q_pow[0] = q;
-	      q_pow[1] = q*q; 
+	      q_pow[1] = q*q;
 	      lambda_pow[0] = pow(in->tidal_s, -1./5.);
-	      lambda_pow[1] = lambda_pow[0] * lambda_pow[0]; 
+	      lambda_pow[1] = lambda_pow[0] * lambda_pow[0];
 	      lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
 	      for(int i = 0; i<3; i++)
 		{
 		  for(int j = 0; j<2; j++)
 		    {
 		      num += b_binLove[i][j]*q_pow[j]*lambda_pow[i];
-		      denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i]; 
+		      denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i];
 		    }
 		}
-	      
+
 	      in->tidal_a = F * (num / denom) * in->tidal_s;
-	      
+
 	      out->tidal1 = in->tidal_s - in->tidal_a;
-	      out->tidal2 = in->tidal_s + in->tidal_a; 
+	      out->tidal2 = in->tidal_s + in->tidal_a;
 	    }
 	  if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
 	    out->tidal_weighted = in->tidal_weighted;
@@ -1326,11 +1327,11 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	    out->tidal1 = in->tidal1;
 	    out->tidal2 = in->tidal2;
 	    //arXiv 1402.5156
-	    out->tidal_weighted = 8./13. * ( (1. + 7.*out->eta - 31.*out->eta*out->eta)*(out->tidal1 + out->tidal2) 
+	    out->tidal_weighted = 8./13. * ( (1. + 7.*out->eta - 31.*out->eta*out->eta)*(out->tidal1 + out->tidal2)
 					     + sqrt( 1. - 4.*out->eta ) * ( 1. + 9.*out->eta - 11. * out->eta*out->eta) * (out->tidal1 - out->tidal2) ) ;
-	    
+
 	    out->delta_tidal_weighted = 1./2. * ( sqrt( 1. - 4.*out->eta ) * ( 1. - 13272./1319. * out->eta + 8944./1319. * out->eta*out->eta) *
-						  (out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319. 
+						  (out->tidal1 + out->tidal2) + ( 1. - 15910./1319. * out->eta + 32850./1319. * out->eta*out->eta + 3380./1319.
 										  * out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
 		//debugger_print(__FILE__,__LINE__,out->tidal_weighted);
 		}
@@ -1343,7 +1344,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		out->cw_EA = in->cw_EA;
 		out->csigma_EA = in->csigma_EA;
 		EA_IMRPhenomD_NRT<T> EAmodeldNRT;
-		EAmodeldNRT.pre_calculate_EA_factors(out); 
+		EAmodeldNRT.pre_calculate_EA_factors(out);
 	}
 	if(check_theory_support(generation_method)){
 		theory_ppE_map<T> mapping;
@@ -1351,7 +1352,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		out->Nmod = in->Nmod;
 		out->bppe = new double[mapping.Nmod];
 		out->betappe = new T[out->Nmod];
-		//The input beta vector might contain theory specific 
+		//The input beta vector might contain theory specific
 		//parameters that happen at multiple PN orders --
 		//save the beta output and assign at the end
 		T *temp_beta = new T[mapping.Nmod];
@@ -1361,7 +1362,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		for(int i = 0 ; i<mapping.Nmod; i++){
 			out->bppe[i]=mapping.bppe[i];
 			temp_beta[i]=mapping.beta_fns[i](out);
-			
+
 		}
 		delete[] out->betappe;
 		out->betappe = new T[mapping.Nmod];
@@ -1393,61 +1394,61 @@ void cleanup_source_parameters(source_parameters<T> *params,std::string generati
 template void cleanup_source_parameters(source_parameters<adouble> *,std::string );
 template void cleanup_source_parameters(source_parameters<double> *,std::string );
 
-template<class T>	
+template<class T>
 void waveform_polarizations<T>::allocate_memory(int length)
 {
 	if(this->active_polarizations[0]){
 		this->hplus = new std::complex<T>[length];
-	}	
+	}
 	if(this->active_polarizations[1]){
 		this->hcross = new std::complex<T>[length];
-	}	
+	}
 	if(this->active_polarizations[2]){
 		this->hx = new std::complex<T>[length];
-	}	
+	}
 	if(this->active_polarizations[3]){
 		this->hy = new std::complex<T>[length];
-	}	
+	}
 	if(this->active_polarizations[4]){
 		this->hb = new std::complex<T>[length];
-	}	
+	}
 	if(this->active_polarizations[5]){
 		this->hl = new std::complex<T>[length];
-	}	
-	return;	
-}	
+	}
+	return;
+}
 template void waveform_polarizations<double>::allocate_memory(int length);
 template void waveform_polarizations<adouble>::allocate_memory(int length);
-	
-template<class T>	
+
+template<class T>
 void waveform_polarizations<T>::deallocate_memory()
 {
 	if(this->hplus){
 		delete [] this->hplus;
 		this->hplus = NULL;
-	}	
+	}
 	if(this->hcross){
 		delete [] this->hcross;
 		this->hcross = NULL;
-	}	
+	}
 	if(this->hx){
 		delete [] this->hx;
 		this->hx = NULL;
-	}	
+	}
 	if(this->hy){
 		delete [] this->hy;
 		this->hy = NULL;
-	}	
+	}
 	if(this->hb){
 		delete [] this->hb;
 		this->hb = NULL;
-	}	
+	}
 	if(this->hl){
 		delete [] this->hl;
 		this->hl = NULL;
-	}	
-	return;	
-}	
+	}
+	return;
+}
 template void waveform_polarizations<double>::deallocate_memory();
 template void waveform_polarizations<adouble>::deallocate_memory();
 
@@ -1483,7 +1484,7 @@ void assign_polarizations(std::string generation_method, waveform_polarizations<
 		wp->active_polarizations[4]=true;
 		wp->active_polarizations[5]=true;
 	}
-	else{	
+	else{
 		wp->active_polarizations[0]=true;
 		wp->active_polarizations[1]=true;
 		wp->active_polarizations[2]=false;
@@ -1495,6 +1496,3 @@ void assign_polarizations(std::string generation_method, waveform_polarizations<
 }
 template void assign_polarizations<double>(std::string generation_method, waveform_polarizations<double> *wp);
 template void assign_polarizations<adouble>(std::string generation_method, waveform_polarizations<adouble> *wp);
-
-
-

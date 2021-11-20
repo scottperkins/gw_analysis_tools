@@ -10,9 +10,9 @@
 #include <complex>
 #include "util.h"
 
-/*! \file 
- * File for the construction of waveforms in Einstein AEther theory, 
- * specifically for neutron stars. Tidal effects are included. 
+/*! \file
+ * File for the construction of waveforms in Einstein AEther theory,
+ * specifically for neutron stars. Tidal effects are included.
  *
  * Add relevant references.
  */
@@ -22,18 +22,18 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
 {
   T lambda, compact, OmRatio, s;
   /* The tidal deformability (love number), compactness, binding energy (Omega)
-   * to mass ratio, and sensitivity. 
+   * to mass ratio, and sensitivity.
    */
 
   if(body == 1)
     {
-     lambda = p->tidal1; 
+     lambda = p->tidal1;
     }
   else
     {
-      lambda = p->tidal2; 
+      lambda = p->tidal2;
     }
-  
+
 	//std::cout<<"lambda "<<lambda<<std::endl;
   /* Compactness computed using C-Love relation from arXiv:1903.03909,
    * equation 8, values in table 1.
@@ -44,29 +44,29 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   // Useful Powers
   T lambda_pow[3];
   lambda_pow[0] = pow(lambda, - 1./5.);
-  lambda_pow[1] = lambda_pow[0] * lambda_pow[0]; 
+  lambda_pow[1] = lambda_pow[0] * lambda_pow[0];
   lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
-  T K, num, denom; 
-  K = 0.2496;  
+  T K, num, denom;
+  K = 0.2496;
   num = 1 + a[0]*lambda_pow[0] + a[1]*lambda_pow[1] + a[2]*lambda_pow[2];
   denom = 1 + b[0]*lambda_pow[0] + b[1]*lambda_pow[1] + b[2]*lambda_pow[2];
-  
+
   compact = K * lambda_pow[0] * (num/denom);
 	//std::cout<<"Compactness: "<<compact<<std::endl;
-  
+
   if(body == 1)
     {
-      p->compact1 = compact; 
+      p->compact1 = compact;
     }
   else
     {
-      p->compact2 = compact; 
+      p->compact2 = compact;
     }
   /* Calculation of sensitivities taken from arXiv:2104.04596v1
-   * Equation 80 of that paper was inverted to get binding energy to mass ratio 
-   * as a function of compactness. 
-   * Equation 81 was used to compute sensitivity as a function of the binding 
-   * energy to mass ratio. 
+   * Equation 80 of that paper was inverted to get binding energy to mass ratio
+   * as a function of compactness.
+   * Equation 81 was used to compute sensitivity as a function of the binding
+   * energy to mass ratio.
    */
   OmRatio = (-5./7.)*compact - ((18275.*p->alpha1_EA)/168168.)*pow(compact, 3.);
 
@@ -74,7 +74,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   coeff1 =  ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.);
   coeff2 = ((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA));
   coeff3 = (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA)));
-  
+
 	//std::cout<<"alpha1: "<<p->alpha1_EA<<std::endl;
 	//std::cout<<"alpha2: "<<p->alpha2_EA<<std::endl;
 	//std::cout<<"Coeff1: "<<coeff1<<std::endl;
@@ -84,7 +84,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   s = coeff1 * (OmRatio) + coeff2 * (OmRatio*OmRatio) + coeff3 * (pow(OmRatio, 3.));
 	//std::cout<<"s "<<s<<std::endl;
 
-  return s; 
+  return s;
 }
 
 template<>
@@ -94,23 +94,23 @@ void EA_IMRPhenomD_NRT<double>::EA_check_nan(bool EA_nan_error_message, source_p
     {
       if(isnan(p->alpha1_EA))
 	{
-	  std::cout<<"WARNING: alpha1_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: alpha1_EA is NAN"<<std::endl;
 	}
       if(isnan(p->alpha2_EA))
 	{
-	  std::cout<<"WARNING: alpha2_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: alpha2_EA is NAN"<<std::endl;
 	}
       if(isnan(p->Z_EA))
 	{
-	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl;
 	}
       if(isnan(p->kappa3_EA))
 	{
-	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl;
 	}
       if(isnan(p->epsilon_x_EA))
 	{
-	  std::cout<<"WARNING: epsilon_x_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: epsilon_x_EA is NAN"<<std::endl;
 	}
     }
 }
@@ -123,23 +123,23 @@ void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(bool EA_nan_error_message, source_
     {
       if(isnan(p->alpha1_EA.value()))
 	{
-	  std::cout<<"WARNING: alpha1_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: alpha1_EA is NAN"<<std::endl;
 	}
       if(isnan(p->alpha2_EA.value()))
 	{
-	  std::cout<<"WARNING: alpha2_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: alpha2_EA is NAN"<<std::endl;
 	}
       if(isnan(p->Z_EA.value()))
 	{
-	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl;
 	}
       if(isnan(p->kappa3_EA.value()))
 	{
-	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl;
 	}
       if(isnan(p->epsilon_x_EA.value()))
 	{
-	  std::cout<<"WARNING: epsilon_x_EA is NAN"<<std::endl; 
+	  std::cout<<"WARNING: epsilon_x_EA is NAN"<<std::endl;
 	}
     }
 }
@@ -157,8 +157,8 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->c1_EA = (p->cw_EA + p->csigma_EA)/2.;
   p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
   p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
-  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.; 
-  
+  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.;
+
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
@@ -178,43 +178,43 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
   p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
-  
-  p->beta1_EA = -2.* p->c13_EA / p->cV_EA; 
-  p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA); 
-  
-  
+
+  p->beta1_EA = -2.* p->c13_EA / p->cV_EA;
+  p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA);
+
+
   p->A1_EA = (1./p->cT_EA) + (2*p->c14_EA*p->c13_EA*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*(2.*p->c1_EA - p->c13_EA*p->cminus_EA)*p->cV_EA) + (3.*p->c14_EA*(p->Z_EA - 1.)*(p->Z_EA - 1.))/(2.*(2. - p->c14_EA)*p->cS_EA);
-  
+
   p->A2_EA = -(2.*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*pow(p->cV_EA, 3.)) - 2.*(p->Z_EA - 1.)/((2. - p->c14_EA)*pow(p->cS_EA, 3.));
-  
+
   p->A3_EA = 1./(2.*p->c14_EA* pow(p->cV_EA, 5.)) + 2./(3.*p->c14_EA * (2. - p->c14_EA)*pow(p->cS_EA, 5.));
- 
+
   p->B3_EA = 1./(9.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 5.));
-  
+
   p->C_EA = 4./(3.*p->c14_EA * pow(p->cV_EA, 3.)) + 4./(3.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 3.));
-  
+
   p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
 
   //Get sensitivities
   p->s1_EA = calculate_EA_sensitivity(1, p);
-  p->s2_EA = calculate_EA_sensitivity(2, p); 
-  
+  p->s2_EA = calculate_EA_sensitivity(2, p);
+
   //The functions that are actually used to compute the phase
-  p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
+  p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M);
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
-  bool EA_nan_error_message = true; 
+  bool EA_nan_error_message = true;
   EA_check_nan(EA_nan_error_message, p);
 
-  
+
   //Functions necessary for corrections to the amplitude.
   //WE AREN'T USING ANY OF THESE NOW?!?
   /*
   p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
-  p->abL_EA = 1. + 2*p->beta2_EA; 
+  p->abL_EA = 1. + 2*p->beta2_EA;
   p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
-  p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
+  p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA));
   */
   //debugger_print(__FILE__,__LINE__,"EA Debugging");
   //std::cout<<"aBL "<<p->abL_EA<<std::endl;
@@ -227,11 +227,24 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   //std::cout<<"cT "<<p->cT_EA<<std::endl;
   //std::cout<<"cV "<<p->cV_EA<<std::endl;
   //std::cout<<"cS "<<p->cS_EA<<std::endl;
-  
+
 }
 //template void pre_calculate_EA_factors(source_parameters<double> *);
 //template void pre_calculate_EA_factors(source_parameters<adouble> *);
 //#############################################################
+
+
+template<class T>
+T EA_IMRPhenomD_NRT<T>::EA_phase_ins1(T f, useful_powers<T> *powers, source_parameters<T> *p) {
+
+  T EA_phase;
+
+  //did not include the terms that are in construct_waveform -- 2*pi*f*t_c - phi(t_c) - pi/4
+  EA_phase = (3./128.) * (((1 - p->s1_EA) * (1 - p->s2_EA)) / (2 - p->c14_EA)) * (1 / p->kappa3_EA) * (pow(2, -5./3.) * powers->MFminus_5third * powers->PIminus_5third) * (1 - ((4./7.) * (1/ (pow(2, 2./3.) * powers->MF2third * powers->PI2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
+  //GR_phase = (3./256.) * (powers->MFminus_5third * powers->PIminus_5third * pow(2, -5./3.));
+
+  return EA_phase;
+}
 
 
 template<class T>
@@ -240,19 +253,29 @@ T EA_IMRPhenomD_NRT<T>::EA_phase_ins2(T f, useful_powers<T> *powers, source_para
   T phaseout;
   T EA_phase, GR_phase;
   /* Here EA_phase is the leading order contribution to the l=2 mode of the
-   * Einstein Aether phase (for all polarizations) and GR_phase is the leading 
-   * order contribution to the l=2 mode of the phase in GR. We will need to 
+   * Einstein Aether phase (for all polarizations) and GR_phase is the leading
+   * order contribution to the l=2 mode of the phase in GR. We will need to
    * subtract GR_phase off so that we are not double counting terms that were
-   * already added in IMRPhenomD. Note that I have not included three terms 
+   * already added in IMRPhenomD. Note that I have not included three terms
    * which obviously cancel.
-   * These terms are 2Pi f t_c - 2 Phi(t_c) - Pi/4. 
+   * These terms are 2Pi f t_c - 2 Phi(t_c) - Pi/4.
    */
-  
+
   EA_phase = (3./64.)*(((1 - p->s1_EA)*(1 - p->s2_EA))/(2 - p->c14_EA))*(1/p->kappa3_EA)*(powers->MFminus_5third*powers->PIminus_5third)*(1 - (4./7.)*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
   GR_phase = (3./128.)*(powers->MFminus_5third*powers->PIminus_5third);
-  
+
   phaseout = EA_phase - GR_phase; //The correction due to EA theory. This correction applies equally to all polarizations.
-  return phaseout; 
+  return phaseout;
+}
+
+template<class T>
+T EA_IMRPhenomD_NRT<T>::EA_amp_ins1(T f, useful_powers<T> *powers, source_parameters<T> *p) {
+
+  T EA_amp;
+
+  EA_amp = - (1./4.) * sqrt(5. * M_PI / 48.) * sqrt((2. - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))) * (1. / p->DL) * (p->s1_EA - p->s2_EA) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * pow(p->eta, 1./5.) * (1. / sqrt(powers->PIcube * powers->MFcube)) * (1. - ((1./2.) * (1. / (pow(2, 2./3.) * powers->PI2third * powers->MF2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
+
+  return EA_amp;
 }
 
 template<class T>
@@ -261,17 +284,15 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parame
   T ampout;
   //T EA_amp, GR_amp;
     /* Here EA_amp is the leading order contribution to the l=2 mode of the
-   * Einstein Aether amplitude and GR_amp is the leading order contribution to 
-   * the l=2 mode of the amplitude in GR. We will need to divide EA_amp by 
-   * GR_amp so that we are not double counting terms that were already 
-   * accounted for in IMRPhenomD. 
+   * Einstein Aether amplitude and GR_amp is the leading order contribution to
+   * the l=2 mode of the amplitude in GR. We will need to divide EA_amp by
+   * GR_amp so that we are not double counting terms that were already
+   * accounted for in IMRPhenomD.
    */
 
-  //EA_amp = (1./4.)*sqrt(5.*M_PI/48.)*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA))) * (1./p->DL)*p->chirpmass*p->chirpmass*(1./sqrt(p->kappa3_EA))*(1./(powers->MF7sixth*sqrt(powers->PI7third)))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
-  
   ampout = (1./sqrt(2.))*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA)))*(1./sqrt(p->kappa3_EA))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
-  
-  return ampout; 
+
+  return ampout;
 }
 
 template<class T>
@@ -286,23 +307,31 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
   /*The input mass should be unbarred*/
   /*Calcualte sensitivites with unbarred quantities using C = G_N M / R^2 c^2*/
   /*Unbarred to barred */
-  T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ; 
+  T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
   params->M *=calG;
   params->chirpmass *=calG;
   params->delta_mass *=calG;
   params->mass1*=calG;
   params->mass2*=calG;
 
-  
-  //std::cout<<"Used EA_construct_waveform. Print statement in line 39 of EA_IMRPhenomD_NRT.cpp"<<std::endl; 
+
+  //std::cout<<"Used EA_construct_waveform. Print statement in line 39 of EA_IMRPhenomD_NRT.cpp"<<std::endl;
   params->NRT_phase_coeff = - (3./16.) * params->tidal_weighted * (39./(16. * params->eta));
-  if(params->tidal1<=0){params->oct1=1;params->quad1 = 1;}
-  else{
+
+  if(params->tidal1<=0) {
+    params->oct1=1;params->quad1 = 1;
+  }
+
+  else {
     params->quad1 = this->calculate_quad_moment(params->tidal1);
     params->oct1 = this->calculate_oct_moment(params->quad1);
   }
-  if(params->tidal2<=0){params->oct2=1;params->quad2 = 1;}
-  else{
+
+  if(params->tidal2<=0) {
+    params->oct2=1;params->quad2 = 1;
+  }
+
+  else {
     params->quad2 = this->calculate_quad_moment(params->tidal2);
     params->oct2 = this->calculate_oct_moment(params->quad2);
   }
@@ -319,7 +348,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
   this->post_merger_variables(params);
   params->f1_phase = 0.018/(params->M);
   params->f2_phase = params->fRD/2.;
-  
+
   params->f1 = 0.014/(params->M);
   params->f3 = this->fpeak(params, &lambda);
 
@@ -329,131 +358,165 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
   T deltas[6];
   T pn_amp_coeffs[7];
   T pn_phase_coeffs[12];
-  
+
   this->assign_pn_amplitude_coeff(params, pn_amp_coeffs);
-  this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);	
-  
+  this->assign_static_pn_phase_coeff(params, pn_phase_coeffs);
+
   this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
   this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
   //################################################################
   //Calculate phase and coalescence time variables
   T phic, f_ref, tc, phi_shift, tc_shift;
-  /*Note -- to match LALSuite, this sets phiRef equal to phi_phenomD at f_ref, 
+  /*Note -- to match LALSuite, this sets phiRef equal to phi_phenomD at f_ref,
    * not phenomD_NRT. Arbitrary constant, not really important
    */
-  if(params->shift_phase ){
+  if(params->shift_phase ) {
     f_ref = params->f_ref;
     this->precalc_powers_ins(f_ref, M, &pows);
     phi_shift = (this->build_phase(f_ref,&lambda,params,&pows,pn_phase_coeffs));
     phic = 2*params->phiRef + phi_shift;
   }
+
   //If phic is specified, ignore f_ref phiRef and use phic
-  else{
+  else {
     f_ref = 0;
     phic = params->phiRef;
   }
-  
+
   //Assign shift: first shift so coalescence happens at t=0, then shift from there according to tc
   /*Note -- to match LALSuite, this sets phiRef equal to phi_phenomD at f_ref, not phenomD_NRT
  * Arbitrary constant, not really important
  */
-  if(params->shift_time){
+  if(params->shift_time) {
     T alpha1_offset = this->assign_lambda_param_element(params,14);
     tc_shift = this->Dphase_mr(params->f3, params, &lambda)+(-lambda.alpha[1]+alpha1_offset)*params->M/params->eta;
   }
-  else{
+
+  else {
     tc_shift=0;
   }
+
   tc = 2*M_PI*params->tc + tc_shift;
 
- T A0 = params->A0* pow(M,7./6.);
-  
+  T A0 = params->A0* pow(M,7./6.);
+
   T f;
   std::complex<T> amp, phase;
   std::complex<T> i;
   i = std::complex<T> (0,1.);
   T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
-  for (size_t j =0; j< length; j++)
-    {
-      f = frequencies[j];
-      if(f>fcut){
-	amp = 0.0;
-	waveform->hplus[j] = 0.0;
-	waveform->hcross[j] = 0.0;
-	waveform->hx[j] = 0.0;
-	waveform->hy[j] = 0.0;
-	waveform->hb[j] = 0.0;
-	waveform->hl[j] = 0.0;
-      }
-      else{	
-	//if (f<params->f1_phase)
-	//This is always needed for NRT
-	if (true)
-	  {
-	    this->precalc_powers_ins(f, M, &pows);
-	  }
-	else
-	  {
-	    //pows.MFsixth= pow(M*f,1./6.);	
-	    //pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
-	    //Needed for Pade function
-	    //pows.MFthird = pows.MFsixth*pows.MFsixth;
-	    //pows.MF2third = pows.MFthird*pows.MFthird;
-	  }
-	amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
-	phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-	/*Append phase_ins_NRT and amp_ins_NRT to the entire waveform*/
-	{
-	  T phaseNRT = this->phase_ins_NRT(f,&pows,params);
-	  phase += phaseNRT;
-	  T phaseSpinNRT = this->phase_spin_NRT(f, &pows,params);
-	  phase += phaseSpinNRT;
-	  T ampNRT = (A0*this->amp_ins_NRT(f,&pows, params));
-	  amp +=ampNRT;
-	}
-	/*Append EA correction to the entire waveform*/
-	{
-	  T EAphase2 = this->EA_phase_ins2(f, &pows, params);
-	  phase += EAphase2;
-	  T EAamp2 = (A0*this->EA_amp_ins2(f,&pows, params));
-	  amp += EAamp2; 
-	}
-	/*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
-	//Right now these are just the terms for the l=2 mode
-	std::complex<T> hx2, hy2, hb2, hl2;
-	hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
-	hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,1);
-	hb2 = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
-	hl2 = params->abL_EA*hb2; 
 
-	/* The phase correction which depends on the speed of the
-	 * different polarizations.
-	 */
-	T phaseTVScoeff, EAphaseT, EAphaseV, EAphaseS;
-	phaseTVScoeff = 2*M_PI*(f-f_ref)*params->DL;
-	EAphaseT = phaseTVScoeff*(1.-(1./params->cT_EA));
-	EAphaseV = phaseTVScoeff*(1.-(1./params->cV_EA));
-	EAphaseS = phaseTVScoeff*(1.-(1./params->cS_EA));
-	
-	
-	phase -= (T)(tc*(f-f_ref) + phic);
-	waveform->hplus[j] = amp*std::exp(-i * (phase + EAphaseT));
-	waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT));
-	waveform->hx[j] = amp*hx2*std::exp(-i * (phase + EAphaseV));
-	waveform->hy[j] = amp*hy2*std::exp(-i * (phase + EAphaseV));
-	waveform->hb[j] = amp*hb2*std::exp(-i * (phase + EAphaseS));
-	waveform->hl[j] = amp*hl2*std::exp(-i * (phase + EAphaseS));
-	
-      }
-      
+  for (size_t j =0; j< length; j++) {
+
+    f = frequencies[j];
+
+    if(f>fcut){
+
+      amp = 0.0;
+	    waveform->hplus[j] = 0.0;
+	    waveform->hcross[j] = 0.0;
+	    waveform->hx[j] = 0.0;
+	    waveform->hy[j] = 0.0;
+	    waveform->hb[j] = 0.0;
+	    waveform->hl[j] = 0.0;
+
     }
-	
-  //###################################### The next part applies the taper.  
+
+    else {
+      //if (f<params->f1_phase)
+      //This is always needed for NRT
+      if (true) {
+        this->precalc_powers_ins(f, M, &pows);
+      }
+
+      else {
+        //pows.MFsixth= pow(M*f,1./6.);
+	      //pows.MF7sixth= pow_int(pows.MFsixth,7);//*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth*pows.MFsixth;
+	      //Needed for Pade function
+	      //pows.MFthird = pows.MFsixth*pows.MFsixth;
+	      //pows.MF2third = pows.MFthird*pows.MFthird;
+      }
+
+      amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
+      phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+      /*Append phase_ins_NRT and amp_ins_NRT to the entire waveform*/
+
+      {
+        T phaseNRT = this->phase_ins_NRT(f,&pows,params);
+        phase += phaseNRT;
+        T phaseSpinNRT = this->phase_spin_NRT(f, &pows,params);
+        phase += phaseSpinNRT;
+        T ampNRT = (A0*this->amp_ins_NRT(f,&pows, params));
+        amp +=ampNRT;
+      }
+
+      /*Append EA correction to the entire waveform*/
+      {
+        T EAphase2 = this->EA_phase_ins2(f, &pows, params);
+        phase += EAphase2;
+        T EAamp2 = (A0*this->EA_amp_ins2(f,&pows, params));
+        amp += EAamp2;
+      }
+
+      /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
+      //Right now these are just the terms for the l=2 mode
+      std::complex<T> hx2, hy2, hb2, hl2;
+      hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
+      hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,1);
+      hb2 = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
+      hl2 = params->abL_EA*hb2;
+
+      /* The phase correction which depends on the speed of the
+	    * different polarizations.
+	    */
+      T phaseTVScoeff, EAphaseT, EAphaseV, EAphaseS;
+	    phaseTVScoeff = 2*M_PI*(f-f_ref)*params->DL;
+	    EAphaseT = phaseTVScoeff*(1.-(1./params->cT_EA));
+	    EAphaseV = phaseTVScoeff*(1.-(1./params->cV_EA));
+	    EAphaseS = phaseTVScoeff*(1.-(1./params->cS_EA));
+
+      phase -= (T)(tc*(f-f_ref) + phic);
+      waveform->hplus[j] = amp*std::exp(-i * (phase + EAphaseT));
+      waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT));
+      waveform->hx[j] = amp*hx2*std::exp(-i * (phase + EAphaseV));
+      waveform->hy[j] = amp*hy2*std::exp(-i * (phase + EAphaseV));
+      waveform->hb[j] = amp*hb2*std::exp(-i * (phase + EAphaseS));
+      waveform->hl[j] = amp*hl2*std::exp(-i * (phase + EAphaseS));
+
+      if (params->include_l1 == true) {
+
+        //amp1 and phase1 don't have GR or NRT components
+        std::complex<T> phase1, amp1;
+        phase1 = this->EA_phase_ins1(f, &pows, params);
+        amp1 = this->EA_amp_ins1(f, &pows, params);
+
+        phase1 -= (T)(tc*(f-f_ref) + phic);
+
+        //compute polarization coefficients (without iota dependence)
+        //for hb1, it wouldn't let me multiply by 2i in the same line
+        std::complex<T> hx1, hy1, hb1, hl1;
+        hy1 = -1. * params->beta1_EA / ((2. * params->c1_EA) - (params->c13_EA * params->cminus_EA));
+        hx1 = std::complex<T>(0,-1.) * hy1;
+        hb1 = 1 / ((2. - params->c14_EA) * params->cS_EA);
+        hb1 *= std::complex<T>(0,2.);
+        hl1 = params->abL_EA * hb1;
+
+        waveform->hx[j] += (amp1 * hx1 * std::exp(-i * (phase1 + EAphaseV)));
+        waveform->hy[j] += (amp1 * hy1 * std::exp(-i * (phase1 + EAphaseV)));
+        waveform->hb[j] += (amp1 * hb1 * std::exp(-i * (phase1 + EAphaseS)));
+        waveform->hl[j] += (amp1 * hl1 * std::exp(-i * (phase1 + EAphaseS)));
+      }
+
+    }
+
+  }
+
+  //###################################### The next part applies the taper.
   for(int i = 0; i<length; i++)
     {
       std::complex<T> Taper = std::complex<T>((T)(1.0) - this->taper(frequencies[i], length, params),0);
-      
+
       waveform->hplus[i] = waveform->hplus[i] * Taper;
       waveform->hcross[i] = waveform->hcross[i] * Taper;
       waveform->hx[i] = waveform->hx[i] * Taper;
@@ -461,16 +524,16 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
       waveform->hb[i] = waveform->hb[i] * Taper;
       waveform->hl[i] = waveform->hl[i] * Taper;
     }
-  
-  return 1; 
+
+  return 1;
 }
 
-/* Below, the construct_phase, construct_amplitude, and 
- * construct_waveform functions are overloaded with the earlier 
- * versions from parent classes. Because they will not have the 
- * correct arguments and we had to define new functions, these 
+/* Below, the construct_phase, construct_amplitude, and
+ * construct_waveform functions are overloaded with the earlier
+ * versions from parent classes. Because they will not have the
+ * correct arguments and we had to define new functions, these
  * simply call the original and warn the user that they have not been
- * updated for Einstein AEther theory. 
+ * updated for Einstein AEther theory.
  */
 
 template<class T>
@@ -496,8 +559,8 @@ int EA_IMRPhenomD_NRT<T>::construct_waveform(T *frequencies, int length, std::co
 {
   IMRPhenomD_NRT<T> model;
   model.construct_waveform(frequencies, length, waveform, params);
-  std::cout<<"WARNING: code is using IMRPhenomD_NRT version of construct_waveform function. Not EA version. Search code for call to construct_waveform function and change to EA_construct_waveform."<<std::endl; 
-  return 1; 
+  std::cout<<"WARNING: code is using IMRPhenomD_NRT version of construct_waveform function. Not EA version. Search code for call to construct_waveform function and change to EA_construct_waveform."<<std::endl;
+  return 1;
 }
 
 template class EA_IMRPhenomD_NRT<double>;
