@@ -43,6 +43,17 @@ T dCS_beta(source_parameters<T> *param);
 template<class T>
 T dCS_phase_factor(source_parameters<T> *param);
 
+//#####################################################
+template<class T>
+T EdGB_HO_0PN_beta( source_parameters<T> *param);
+
+template<class T>
+T EdGB_HO_1PN_beta( source_parameters<T> *param);
+
+template<class T>
+T EdGB_HO_2PN_beta( source_parameters<T> *param);
+//#####################################################
+
 template<class T>
 T EdGB_beta( source_parameters<T> *param);
 
