@@ -13,6 +13,33 @@
 #include <bits/stdc++.h> 
 
 
+void detector_response_equatorial_py(char *detector,
+	double ra,
+	double dec,
+	double psi,
+	double gmst,
+	bool *active_polarizations,
+	double *response_functions/*!<< 6 dim output vector*/
+	)
+{
+	for(int i = 0 ; i<6; i++){
+		response_functions[i]=0;
+	}
+	det_res_pat<double> r_pat;
+	r_pat.Fplus = &(response_functions[0]);
+	r_pat.Fcross = &(response_functions[1]);
+	r_pat.Fx = &(response_functions[2]);
+	r_pat.Fy = &(response_functions[3]);
+	r_pat.Fb = &(response_functions[4]);
+	r_pat.Fl = &(response_functions[5]);
+	r_pat.active_polarizations = active_polarizations;
+	
+	detector_response_functions_equatorial(std::string(detector), ra, dec, psi, gmst, &r_pat);
+	
+	return ;
+
+}
+
 double match_py(  double *data1_real,double *data1_imag, double *data2_real,double *data2_imag, double *SN,double *frequencies,int length)
 {
 	std::complex<double> * data1 = new std::complex<double>[length];

@@ -15,6 +15,27 @@ rlib.DTOA_DETECTOR_py.argtypes = \
 rlib.DTOA_DETECTOR_py.restype = ctypes.c_double
 ###############################################
 
+
+rlib.detector_response_equatorial_py.argtypes = \
+    [ctypes.c_char_p,
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.c_double,
+    ctypes.POINTER(ctypes.c_bool),
+    ctypes.POINTER(ctypes.c_double)
+]
+rlib.detector_response_equatorial_py.restype = ctypes.c_void_p
+
+def detector_response_equatorial_py(detector, ra,dec, psi,gmst, active_polarizations):
+    response_functions = (ctypes.c_double*6)()
+    d_type = ctypes.c_double * (6)
+    b_type = ctypes.c_bool *(6)
+    
+    rlib.detector_response_equatorial_py(detector.encode('utf-8'),ra, dec,psi,  gmst, b_type(*(np.ascontiguousarray(active_polarizations,dtype=ctypes.c_bool))), response_functions)
+    return np.array(response_functions)
+
+
 def DTOA_DETECTOR_py( RA, DEC, GMST_rad, detector1, detector2):
     returnval = rlib.DTOA_DETECTOR_py(
         RA,

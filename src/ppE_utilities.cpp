@@ -85,6 +85,12 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("EdGB")!=std::string::npos){
 		return true;
 	}
+	if(generation_method.find("EdGB_HO")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("EdGB_HO_LO")!=std::string::npos){
+		return true;
+	}
 	if(generation_method.find("EdGB_GHO")!=std::string::npos){
 		return true;
 	}
@@ -154,7 +160,25 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		ins = true;
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
-		if(generation_method.find("EdGB_GHOv1")!= std::string::npos){
+		if(generation_method.find("EdGB_HO")!= std::string::npos){
+			mapping->Nmod = 3;
+			mapping->bppe = new double[3];
+			mapping->bppe[0] =-7;
+			mapping->bppe[1] =-5;
+			mapping->bppe[2] =-3;
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_HO_0PN_beta(p);} ;
+			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_HO_1PN_beta(p);} ;
+			mapping->beta_fns[2] = [](source_parameters<T> *p){return EdGB_HO_2PN_beta(p);} ;
+		}
+		if(generation_method.find("EdGB_HO_LO")!= std::string::npos){
+			mapping->Nmod = 1;
+			mapping->bppe = new double[1];
+			mapping->bppe[0] =-7;
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_HO_0PN_beta(p);} ;
+		}
+		else if(generation_method.find("EdGB_GHOv1")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
@@ -163,7 +187,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav1(p);} ;
 		}
-		if(generation_method.find("EdGB_GHOv2")!= std::string::npos){
+		else if(generation_method.find("EdGB_GHOv2")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
@@ -172,7 +196,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav2(p);} ;
 		}
-		if(generation_method.find("EdGB_GHOv3")!= std::string::npos){
+		else if(generation_method.find("EdGB_GHOv3")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
@@ -449,6 +473,50 @@ T dCS_phase_factor(source_parameters<T> *param)
 template double dCS_phase_factor(source_parameters<double> *);
 template adouble dCS_phase_factor(source_parameters<adouble> *);
 
+//###############################################################
+template<class T>
+T EdGB_HO_0PN_beta( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T alphaSq = 16.*M_PI*param->betappe[0];
+	//T alphaSq = param->betappe[0];
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  -5.*alphaSq/pow_int(unredshiftedM,4) / 7168. / pow(param->eta,18./5.) *( 4 *param->eta -1)  ;
+	return out;
+} 
+
+template<class T>
+T EdGB_HO_1PN_beta( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T alphaSq = 16.*M_PI*param->betappe[0];
+	//T alphaSq = param->betappe[0];
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  -5.*alphaSq/pow_int(unredshiftedM,4) / 688128. / pow_int(param->eta,4) *( 685. - 3916*param->eta + 2016* param->eta * param->eta)  ;
+	return out;
+} 
+
+template<class T>
+T EdGB_HO_2PN_beta( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T alphaSq = 16.*M_PI*param->betappe[0];
+	//T alphaSq = param->betappe[0];
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  5.*alphaSq/pow_int(unredshiftedM,4) / 387072. / pow(param->eta,22./5.) *pow_int( 1- 2. * param->eta,2)*(995. + 952.*param->eta)  ;
+	return out;
+} 
+
+//###############################################################
 template<class T>
 T EdGB_beta( source_parameters<T> *param)
 {

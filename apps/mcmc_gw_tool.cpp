@@ -9,6 +9,7 @@
 #include <limits>
 #include <eigen3/Eigen/Eigen>
 
+
 double T_mcmc_gw_tool;
 double T_merger; 
 /*! \file 
@@ -42,6 +43,8 @@ double spin2_prior[2];
 double tidal1_prior[2];
 double tidal2_prior[2];
 double tidal_s_prior[2];
+double RA_bounds[2];
+double sinDEC_bounds[2];
 bool tidal_love=true;
 double DL_prior[2];
 bool tidal_love_boundary_violation(double q,double lambda_s);
@@ -278,6 +281,27 @@ int main(int argc, char *argv[])
 		post_merger_duration = dbl_dict["Post merger signal duration"];
 	}
 	std::cout<<"Poster merger signal duration: "<<post_merger_duration<<std::endl;
+	if( dbl_dict.find("RA minimum") != dbl_dict.end() && dbl_dict.find("RA maximum") != dbl_dict.end()){
+		RA_bounds[0] = dbl_dict["RA minimum"];
+		RA_bounds[1] = dbl_dict["RA maximum"];
+		std::cout<<"RA bounds: "<<RA_bounds[0]<<" "<<RA_bounds[1]<<std::endl;
+	}
+	else{
+		RA_bounds[0] = 0;
+		RA_bounds[1] = 2*M_PI;
+
+	}
+	if( dbl_dict.find("Sin(DEC) minimum") != dbl_dict.end() && dbl_dict.find("Sin(DEC) maximum") != dbl_dict.end()){
+		sinDEC_bounds[0] = dbl_dict["Sin(DEC) minimum"];
+		sinDEC_bounds[1] = dbl_dict["Sin(DEC) maximum"];
+		std::cout<<"Sin(DEC) bounds: "<<sinDEC_bounds[0]<<" "<<sinDEC_bounds[1]<<std::endl;
+	}
+	else{
+		sinDEC_bounds[0] = -1;
+		sinDEC_bounds[1] = 1;
+
+	}
+	
 
 	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time,post_merger_duration, data, psd, freqs);
 	//########################################################################
@@ -802,6 +826,7 @@ int main(int argc, char *argv[])
 	return 0;
 
 }
+
 double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
 	int dim =  interface->max_dim;
@@ -815,8 +840,8 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
-	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[0])<RA_bounds[0] || (pos[0])>RA_bounds[1]){ return a;}//RA
+	if ((pos[1])<sinDEC_bounds[0] || (pos[1])>sinDEC_bounds[1]){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
@@ -911,8 +936,8 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if(m1<mass1_prior[0] || m1>mass1_prior[1]){return a;}
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//###########
-	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[0])<RA_bounds[0] || (pos[0])>RA_bounds[1]){ return a;}//RA
+	if ((pos[1])<sinDEC_bounds[0] || (pos[1])>sinDEC_bounds[1]){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
@@ -939,8 +964,8 @@ double standard_log_prior_Pv2(double *pos, mcmc_data_interface *interface,void *
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//####################
 
-	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[0])<RA_bounds[0] || (pos[0])>RA_bounds[1]){ return a;}//RA
+	if ((pos[1])<sinDEC_bounds[0] || (pos[1])>sinDEC_bounds[1]){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
@@ -968,8 +993,8 @@ double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,vo
 	if(m2<mass2_prior[0] || m2>mass2_prior[1]){return a;}
 	//####################
 
-	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[0])<RA_bounds[0] || (pos[0])>RA_bounds[1]){ return a;}//RA
+	if ((pos[1])<sinDEC_bounds[0] || (pos[1])>sinDEC_bounds[1]){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
@@ -1140,8 +1165,8 @@ double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *in
 double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface, void *parameters){
 
 	double a = -std::numeric_limits<double>::infinity();
-	if ((pos[0])<0 || (pos[0])>2*M_PI){return a;}//RA
-	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[0])<RA_bounds[0] || (pos[0])>RA_bounds[1]){ return a;}//RA
+	if ((pos[1])<sinDEC_bounds[0] || (pos[1])>sinDEC_bounds[1]){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//PhiRef
