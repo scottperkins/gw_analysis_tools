@@ -237,13 +237,15 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 template<class T>
 T EA_IMRPhenomD_NRT<T>::EA_phase_ins1(T f, useful_powers<T> *powers, source_parameters<T> *p) {
 
-  T EA_phase;
+  T EA_phase, GR_phase, phase_out;
 
-  //did not include the terms that are in construct_waveform -- 2*pi*f*t_c - phi(t_c) - pi/4
+  //did not include the terms that cancel (theya are added later in construct_waveform) -- 2*pi*f*t_c - phi(t_c) - pi/4
   EA_phase = (3./128.) * (((1 - p->s1_EA) * (1 - p->s2_EA)) / (2 - p->c14_EA)) * (1 / p->kappa3_EA) * (pow(2, -5./3.) * powers->MFminus_5third * powers->PIminus_5third) * (1 - ((4./7.) * (1/ (pow(2, 2./3.) * powers->MF2third * powers->PI2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
-  //GR_phase = (3./256.) * (powers->MFminus_5third * powers->PIminus_5third * pow(2, -5./3.));
+  GR_phase = (3./256.) * (powers->MFminus_5third * powers->PIminus_5third * pow(2, -5./3.));
 
-  return EA_phase;
+  phase_out = EA_phase - GR_phase;
+
+  return phase_out;
 }
 
 
@@ -273,7 +275,7 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins1(T f, useful_powers<T> *powers, source_parame
 
   T EA_amp;
 
-  EA_amp = - (1./4.) * sqrt(5. * M_PI / 48.) * sqrt((2. - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))) * (1. / p->DL) * (p->s1_EA - p->s2_EA) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * pow(p->eta, 1./5.) * (1. / sqrt(powers->PIcube * powers->MFcube)) * (1. - ((1./2.) * (1. / (pow(2, 2./3.) * powers->PI2third * powers->MF2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
+  EA_amp = (-1./4.) * sqrt(5. * M_PI / 48.) * sqrt((2. - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))) * (1. / p->DL) * (p->s1_EA - p->s2_EA) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * pow(p->eta, 1./5.) * (1. / sqrt(powers->PIcube * powers->MFcube)) * (1. - ((1./2.) * (1. / (pow(2, 2./3.) * powers->PI2third * powers->MF2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
 
   return EA_amp;
 }
@@ -282,12 +284,12 @@ template<class T>
 T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
   T ampout;
-  //T EA_amp, GR_amp;
-    /* Here EA_amp is the leading order contribution to the l=2 mode of the
-   * Einstein Aether amplitude and GR_amp is the leading order contribution to
-   * the l=2 mode of the amplitude in GR. We will need to divide EA_amp by
-   * GR_amp so that we are not double counting terms that were already
-   * accounted for in IMRPhenomD.
+  // T EA_amp, GR_amp;
+  /* Here EA_amp is the leading order contribution to the l=2 mode of the
+   * Einstein Aether amplitude and GR_amp is the leading order contributio
+   * to the l=2 mode of the amplitude in GR. We will need to subtract 
+   * GR_amp off so that we are not double counting terms that were
+   * already added in IMRPhenomD.
    */
 
   ampout = (1./sqrt(2.))*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA)))*(1./sqrt(p->kappa3_EA))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
@@ -486,9 +488,24 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 
       if (params->include_l1 == true) {
 
-        //amp1 and phase1 don't have GR or NRT components
         std::complex<T> phase1, amp1;
-        phase1 = this->EA_phase_ins1(f, &pows, params);
+        T f1;
+
+        f1 = f / 2;
+
+        //add the GR phase for l=1 mode
+        phase1 = this->build_phase(f1,&lambda,params,&pows,pn_phase_coeffs);
+
+        //calculate and add the NRT phase corrections for the l=1 mode
+        T phaseNRT1 = this->phase_ins_NRT(f1,&pows,params);
+        phase1 += phaseNRT1;
+        T phaseSpinNRT1 = this->phase_spin_NRT(f1, &pows,params);
+        phase += phaseSpinNRT1;
+
+        //calculate and add the EA phase corrections for l=1 mode
+        phase1 += this->EA_phase_ins1(f, &pows, params);
+
+        //add the EA amp for l=1 mode (there are no NRT or GR corrections to the l=1 amp)
         amp1 = this->EA_amp_ins1(f, &pows, params);
 
         phase1 -= (T)(tc*(f-f_ref) + phic);
