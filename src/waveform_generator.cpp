@@ -1317,8 +1317,8 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 
 	      in->tidal_a = F * (num / denom) * in->tidal_s;
 
-	      out->tidal1 = in->tidal_s - in->tidal_a;
-	      out->tidal2 = in->tidal_s + in->tidal_a;
+	      out->tidal1 = in->tidal_s + in->tidal_a;
+	      out->tidal2 = in->tidal_s - in->tidal_a;
 	    }
 	  if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
 	    out->tidal_weighted = in->tidal_weighted;
