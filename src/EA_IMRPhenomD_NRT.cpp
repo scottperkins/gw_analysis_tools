@@ -294,6 +294,17 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parame
 
   ampout = (1./sqrt(2.))*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA)))*(1./sqrt(p->kappa3_EA))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
 
+  /*
+  T EA_amp, GR_amp, amp_out;
+
+  EA_amp = (-1./2.) * sqrt(5. * M_PI / 48) * sqrt((2 - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))) * (1. / p->DL) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * (1. / sqrt(powers->PI7third * powers->MF7third)) * (1. - ((1. / 2.) * (1. / (powers->PI2third * powers->MF2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
+  GR_amp = (-1./2.) * sqrt(5. * M_PI / 24) * (1. / p->DL) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * (1. / sqrt(powers->PI7third * powers->MF7third));
+
+  amp_out = EA_amo - GR_amp;
+
+  return amp_out;
+  */
+
   return ampout;
 }
 
