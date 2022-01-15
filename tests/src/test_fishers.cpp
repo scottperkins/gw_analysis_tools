@@ -866,11 +866,24 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.phii[0]=4;
 	//params.delta_phi=new double[1];
 	//params.delta_phi[0]=0;
+	
+	
+	
+	//params.Nmod = 2;
+	//params.betappe = new double[2];
+	//params.bppe = new double[2];
+	////params.betappe[0] = pow_int(8*1000./(c),4);
+	//params.betappe[0] =1e-30;
+	//params.betappe[1] =0;
+	////params.betappe[0] =1;
+	//params.bppe[0] = -7;
+	//params.bppe[1] = -5;
+	
 	params.Nmod = 1;
 	params.betappe = new double[1];
 	params.bppe = new double[1];
 	//params.betappe[0] = pow_int(8*1000./(c),4);
-	params.betappe[0] =0;
+	params.betappe[0] =1e-30;
 	//params.betappe[0] =1;
 	params.bppe[0] = -7;
 	
@@ -903,10 +916,12 @@ int dCS_EdGB(int argc, char *argv[])
 		}
 	}
 
-	std::string method = "dCS_IMRPhenomPv2";
+	//std::string method = "dCS_IMRPhenomPv2";
 	//std::string method = "ppE_IMRPhenomPv2_IMR";
 	//std::string method = "gIMRPhenomPv2";
 	//std::string method = "EdGB_IMRPhenomPv2";
+	std::string method = "EdGB_HO_IMRPhenomPv2";
+	//std::string method = "EdGB_GHOv1_IMRPhenomPv2";
 	
 
 	//source_parameters<double> sp;
@@ -922,6 +937,10 @@ int dCS_EdGB(int argc, char *argv[])
 	int dim = 14;
 	int dimD = 12;
 	int dimDSA = 8;
+
+	//int dim = 15;
+	//int dimD = 13;
+	//int dimDSA = 9;
 
 	double **jac_spins = allocate_2D_array(dim,dim);
 	for (int i = 0 ;i<dim; i++){
@@ -1021,8 +1040,14 @@ int dCS_EdGB(int argc, char *argv[])
 	else{
 		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
 	}
-	std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
+	if(method.find("GHO") == std::string::npos){
+		std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-1][dim-1],1./8.)*3.e5<<std::endl;
+	}
+	else{
+		std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-2][dim-2],1./8.)*3.e5<<std::endl;
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-2][dim-2],1./8.)*3.e5<<std::endl;
+	}
 	std::cout<<std::endl;
 
 
@@ -1065,8 +1090,14 @@ int dCS_EdGB(int argc, char *argv[])
 	else{
 		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
 	}
-	std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+	if(method.find("GHO") == std::string::npos){
+		std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+	}
+	else{
+		std::cout<<"(delta alpha^2)^(1/4) (KM) (90%): "<<1.64*pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<pow(COV_AD[dim-5][dim-5],1./8.)*3.e5<<std::endl;
+	}
 	std::cout<<std::endl;
 	deallocate_2D_array(sub_AD_F,dim-4,dim-4);
 
@@ -1075,10 +1106,12 @@ int dCS_EdGB(int argc, char *argv[])
 
 
 
-	method = "dCS_IMRPhenomD";
+	//method = "dCS_IMRPhenomD";
 	//method = "ppE_IMRPhenomD_IMR";
 	//method = "gIMRPhenomD";
 	//method = "EdGB_IMRPhenomD";
+	method = "EdGB_HO_IMRPhenomD";
+	//method = "EdGB_GHOv1_IMRPhenomD";
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD2_temp, dimD, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dimD; k++){
@@ -1113,7 +1146,12 @@ int dCS_EdGB(int argc, char *argv[])
 	else{
 		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
 	}
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD2[dimD-1][dimD-1],1./8.)*3.e5<<std::endl;
+	if(method.find("GHO") == std::string::npos){
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD2[dimD-1][dimD-1],1./8.)*3.e5<<std::endl;
+	}
+	else{
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_AD2[dimD-2][dimD-2],1./8.)*3.e5<<std::endl;
+	}
 	std::cout<<std::endl;
 
 	params.sky_average = true;
@@ -1160,7 +1198,13 @@ int dCS_EdGB(int argc, char *argv[])
 	else{
 		std::cout<<"Cutoff:"<<params.mass2*.5*1.5<<std::endl;
 	}
-	std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_ADSA[dimDSA-1][dimDSA-1],1./8.)*3.e5<<std::endl;
+	if(method.find("GHO") == std::string::npos){
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_ADSA[dimDSA-1][dimDSA-1],1./8.)*3.e5<<std::endl;
+	}
+	else{
+		std::cout<<"(delta alpha^2)^(1/4) (KM): "<<1.64*pow(COV_ADSA[dimDSA-2][dimDSA-2],1./8.)*3.e5<<std::endl;
+
+	}
 	std::cout<<std::endl;
 	std::cout<<"SNR (SA): "<<sqrt(output_ADSA[0][0])<<std::endl;
 

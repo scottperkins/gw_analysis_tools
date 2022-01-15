@@ -284,12 +284,12 @@ template<class T>
 T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
   T ampout;
-  //T EA_amp, GR_amp;
-    /* Here EA_amp is the leading order contribution to the l=2 mode of the
-   * Einstein Aether amplitude and GR_amp is the leading order contribution to
-   * the l=2 mode of the amplitude in GR. We will need to divide EA_amp by
-   * GR_amp so that we are not double counting terms that were already
-   * accounted for in IMRPhenomD.
+  // T EA_amp, GR_amp;
+  /* Here EA_amp is the leading order contribution to the l=2 mode of the
+   * Einstein Aether amplitude and GR_amp is the leading order contributio
+   * to the l=2 mode of the amplitude in GR. We will need to subtract 
+   * GR_amp off so that we are not double counting terms that were
+   * already added in IMRPhenomD.
    */
 
   ampout = (1./sqrt(2.))*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA)))*(1./sqrt(p->kappa3_EA))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);

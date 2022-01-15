@@ -12,6 +12,14 @@ extern "C"
 {
 #endif
 
+void detector_response_equatorial_py(char *detector,
+	double ra,
+	double dec,
+	double psi,
+	double gmst,
+	bool *active_polarizations,
+	double *response_functions
+	);
 
 double match_py(  double *data1_real,double *data1_imag, double *data2_real,double *data2_imag, double *SN,double *frequencies,int length);
 
