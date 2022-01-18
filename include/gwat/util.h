@@ -114,7 +114,12 @@ public:
 	/*! antisymmetric tidal deformability*/
 	T tidal_a=-1;
 	T tidal_weighted=-1;
+        /*! Boolean flag indicating binary love relations should be used*/  
 	bool tidal_love = true;
+        /*! Boolean flag indicating error marginalization over residual EoS 
+        * dependence in binary love relations should be performed. 
+        */
+        bool tidal_love_error = true; 
 	T delta_tidal_weighted=-1;
 
 	//Polarization angle

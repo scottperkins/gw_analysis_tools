@@ -104,6 +104,9 @@ int fourier_phase(T *frequencies,
 			gen_params_base<T> *parameters
 			);
 
+double tidal_error(double tidal_s, double tidal_a, double q);
+adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q);
+
 template<class T>
 std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method);
 template<class T>

@@ -15,6 +15,7 @@
 #include "util.h"
 #include <complex>
 #include <time.h>
+#include <gsl/gsl_randist.h>
 #include <adolc/adouble.h>
 using namespace std;
 
@@ -1232,6 +1233,45 @@ template int fourier_phase<adouble>(adouble *, int, adouble *,adouble *, std::st
 template int time_waveform<double>(double *, int, waveform_polarizations<double> *wp, std::string, gen_params_base<double> *);
 template int time_waveform<adouble>(adouble *, int, waveform_polarizations<adouble> *wp, std::string, gen_params_base<adouble> *);
 
+double tidal_error(double tidal_s, double tidal_a, double q){
+  		  /* Performing error marginalization over residual EoS 
+		   * dependence of the binary Love relations (following 
+		   * equations 15-22 of arXiv:1903.03909. The relevant 
+		   * coefficients/fit parameters are in IMRPhenomD_NRT.h. 
+		   */
+		  double error, error_mean, error_variance, sigma_L, sigma_q;
+		  double lambda_pow_new[3];
+		  lambda_pow_new[0] = pow(tidal_s, 1./2.);
+		  lambda_pow_new[1] = lambda_pow_new[0]*tidal_s;
+		  lambda_pow_new[2] = lambda_pow_new[1]*tidal_s; 
+		  error_mean = (mu_binLove[0]*tidal_s + mu_binLove[1] + mu_binLove[2]*q*q + mu_binLove[3]*q + mu_binLove[4])/2.;
+		  sigma_L = sigma_binLove[0]*lambda_pow_new[2] + sigma_binLove[1]*lambda_pow_new[1] + sigma_binLove[2]*tidal_s + sigma_binLove[3]*lambda_pow_new[0] + sigma_binLove[4];
+		  sigma_q = sigma_binLove[5]*q*q*q + sigma_binLove[6]*q*q + sigma_binLove[7]*q + sigma_binLove[8]; 
+		  error_variance = sqrt(sigma_L*sigma_L + sigma_q*sigma_q); 
+
+		  //Random number declaration and seeding
+		  const gsl_rng_type *t;
+		  gsl_rng *r; 
+		  
+		  gsl_rng_env_setup();
+		  
+		  t=gsl_rng_default;
+		  r=gsl_rng_alloc(t);
+		  gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
+		  //Now get a random point from the normal distribution with mean (error_mean) and variance (error_variance).
+		  //This will be added to the binary love relation.
+		  
+		  error = error_mean + gsl_ran_gaussian(r, error_variance);
+
+		  tidal_a += error;
+		  return tidal_a; 
+}
+
+adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q)
+{
+  std::cout<<"Note that error marginalization over the EoS for the binary love relations is not supported for Fishers and is not being performed."<<std::endl; 
+  return tidal_a;
+}
 
 template<class T>
 std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method){
@@ -1316,6 +1356,11 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		}
 
 	      in->tidal_a = F * (num / denom) * in->tidal_s;
+
+	      if(in->tidal_love_error)
+		{
+		  in->tidal_a = tidal_error(in->tidal_s, in->tidal_a, q);
+		}
 
 	      out->tidal1 = in->tidal_s + in->tidal_a;
 	      out->tidal2 = in->tidal_s - in->tidal_a;

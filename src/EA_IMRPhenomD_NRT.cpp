@@ -239,7 +239,7 @@ T EA_IMRPhenomD_NRT<T>::EA_phase_ins1(T f, useful_powers<T> *powers, source_para
 
   T EA_phase, GR_phase, phase_out;
 
-  //did not include the terms that cancel (theya are added later in construct_waveform) -- 2*pi*f*t_c - phi(t_c) - pi/4
+  //did not include the terms that cancel (they are added later in construct_waveform) -- 2*pi*f*t_c - phi(t_c) - pi/4
   EA_phase = (3./128.) * (((1 - p->s1_EA) * (1 - p->s2_EA)) / (2 - p->c14_EA)) * (1 / p->kappa3_EA) * (pow(2, -5./3.) * powers->MFminus_5third * powers->PIminus_5third) * (1 - ((4./7.) * (1/ (pow(2, 2./3.) * powers->MF2third * powers->PI2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
   GR_phase = (3./256.) * (powers->MFminus_5third * powers->PIminus_5third * pow(2, -5./3.));
 
