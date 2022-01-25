@@ -3,6 +3,7 @@
 #include <gwat/io_util.h>
 #include <gwat/mcmc_sampler.h>
 #include <gwat/mcmc_gw.h>
+#include <gwat/mcmc_gw_extended.h>
 #include <gwat/detector_util.h>
 #include <gwat/util.h>
 #include <gwat/waveform_util.h>
@@ -72,6 +73,15 @@ struct RJ_sin_param
 	int N;
 	gsl_rng *r;
 };
+
+
+#include <ptrjmcmc/PtrjmcmcSampler.h>
+#include <ptrjmcmc/dataUtilities.h>
+
+int test_ptrjmcmc_integration(int argc, char *argv[]);
+double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *pos, int chainID, ptrjmcmc::PtrjmcmcSampler  *sampler, void *userParameters);
+
+
 int main(int argc, char *argv[])
 {
 	std::cout<<"TESTING MCMC CALCULATIONS"<<std::endl;
@@ -137,11 +147,215 @@ int main(int argc, char *argv[])
 		std::cout<<"1D test"<<std::endl;
 		return test_1d(argc,argv);
 	}
+	else if(runtime_opt == 14){
+		std::cout<<"PTRJMCMC sampler testing -- GW injection"<<std::endl;
+		return test_ptrjmcmc_integration(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
 }
+
+int test_ptrjmcmc_integration(int argc, char *argv[])
+{
+	gen_params injection;
+	injection.mass1 = 36.4;
+	injection.mass2 = 29.3;
+	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
+	double eta = calculate_eta(injection.mass1,injection.mass2);
+	double q = injection.mass2/injection.mass1;
+	injection.Luminosity_Distance =500;
+	injection.psi = .2;
+	injection.phiRef = 2.;
+	injection.f_ref = 20.;
+	injection.RA = .275;
+	injection.DEC = -.44;
+	injection.spin1[2] = .3;
+	injection.spin2[2] = .2;
+	injection.spin1[1] = .5;
+	injection.spin2[1] = -.5;
+	injection.spin1[0] = .01;
+	injection.spin2[0] = -.01;
+	injection.incl_angle = .51;
+	double gps = 1126259462.4;
+	injection.gmst = gps_to_GMST_radian(gps);
+	std::cout<<"GMST: "<<injection.gmst<<std::endl;
+	injection.equatorial_orientation = false;
+	injection.horizon_coord = false;
+	injection.shift_time = true;
+	injection.shift_phase = true;
+
+	IMRPhenomPv2<double> model;
+	injection.chip = model.PhenomPv2_inplane_spin(&injection);
+	injection.phip = 1;
+
+
+	//injection.Nmod = 1;
+	//injection.bppe = new double[1];
+	//injection.betappe = new double[1];
+	//injection.bppe[0] = -1;
+	//injection.betappe[0] = 0;
+	
+	int detect_number = 4;
+	std::string detectors[4] = {"Hanford","Livingston","Virgo","Kagra"};
+	std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
+	std::string injection_method = "IMRPhenomD";
+	double fmin = 10;
+	double fmax =512;
+	T_mcmc_gw_tool= 4;
+	int length = 10;
+	double **psd;
+	double **freq;
+	double **weights;
+	std::complex<double> **data ;
+	double tc_ref=0;
+	tc_ref = T_mcmc_gw_tool*(1-3./4.);
+	//double tc_ref = T_mcmc_gw_tool*(3./4.);
+	double deltaf = 1./T_mcmc_gw_tool;
+	length = (fmax-fmin)/deltaf;
+	data = new std::complex<double>*[detect_number];
+	psd = new double*[detect_number];
+	freq = new double*[detect_number];
+	double total_snr = 0;
+	double tc=0;
+	injection.tc = 0;
+	for(int i = 0 ; i<detect_number; i++){
+		data[i]= new std::complex<double>[length];
+		psd[i]= new double[length];
+		freq[i]= new double[length];
+		for(int j =0 ; j<length; j++){
+			freq[i][j] = fmin + j*deltaf;
+		}
+		populate_noise(freq[i],SN[i],psd[i],length);
+		for(int j =0 ; j<length; j++){
+			psd[i][j] *= psd[i][j];
+		}
+		double deltat = DTOA_DETECTOR(injection.RA,injection.DEC,injection.gmst,detectors[0],detectors[i]);
+		//injection.tc = tc_ref + deltat;
+		tc = tc_ref - deltat;
+		tc*=2*M_PI;
+		fourier_detector_response(freq[i],length, data[i],detectors[i],injection_method, &injection, (double *)NULL);
+		for(int j = 0 ; j<length; j++){
+			data[i][j]*=exp(std::complex<double>(0,tc*freq[i][j]));
+		}
+		total_snr += pow_int( calculate_snr_internal(psd[i],data[i],freq[i],length, "SIMPSONS",(double*) NULL, false), 2);
+	}
+	injection.tc=tc_ref;
+	std::cout<<"NETWORK SNR of injection: "<<sqrt(total_snr)<<std::endl;
+
+	int data_lengths[detect_number];
+	for(int i = 0 ; i<detect_number; i++){
+		data_lengths[i]=length;	
+	}
+	//################################################################
+	//################################################################
+	//################################################################
+	//################################################################
+	int dim = 4;
+	std::string recovery_method = "IMRPhenomD";
+	int ensembleSize = 8;
+	int ensembleN = 2;
+	
+	double spin1sph[3];
+	double spin2sph[3];
+	transform_cart_sph(injection.spin1,spin1sph);
+	transform_cart_sph(injection.spin2,spin2sph);
+
+	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
+	double initial_position[dim]= {log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
+
+	write_file("data/injections_PTRJMCMC.csv",initial_position,dim);
+
+	ptrjmcmc::positionInfo *initialPosition = new ptrjmcmc::positionInfo(dim,false);
+	for(int i = 0  ;  i<dim; i++){
+		initialPosition->parameters[i] = initial_position[i];
+	}
+
+	double **priorRanges = new double*[dim];
+	for(int i = 0 ; i<dim; i++){priorRanges[i] = new double[2];}
+	priorRanges[0][0] = 0;
+	priorRanges[0][1] = 10;
+
+	priorRanges[1][0] = 0.01;
+	priorRanges[1][1] = .25;
+
+	priorRanges[2][0] = -1;
+	priorRanges[2][1] = 1;
+
+	priorRanges[3][0] = -1;
+	priorRanges[3][1] = 1;
+
+
+
+	int swapProb = .1;
+	int threads = 1;
+	bool pool = false;
+	std::string outputDir = "data/";
+	std::string outputMoniker = "PTRJMCMC_GW_injection";
+	MCMC_modification_struct mod_struct;
+	mod_struct.ppE_Nmod = 0;
+	
+	int samples = 100;
+	double burnIterations = 10000;
+	double priorIterations = 1000;
+	int max_chunk_size = 1e6;
+
+	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
+		dim, samples, ensembleSize, ensembleN, initialPosition, (ptrjmcmc::positionInfo **)nullptr, swapProb, burnIterations, priorIterations, true, max_chunk_size, &(priorRanges[0]), test_ptrjmcmc_integration_log_prior, threads, pool, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, outputDir, outputMoniker);
+	samplerObj->data->writeStatFile(outputDir+outputMoniker+"Stat.csv");
+	samplerObj->priorData->writeStatFile(outputDir+outputMoniker+"PriorStat.csv");
+	delete initialPosition;
+
+	delete samplerObj;
+	for(int i = 0 ; i<dim ; i++){
+		delete [] priorRanges[i];
+	}
+	delete [] priorRanges;
+	
+	for(int i = 0 ; i<detect_number; i++){
+		delete [] freq[i];	
+		delete [] psd[i];	
+		delete [] data[i];	
+	}
+	delete [] injection.bppe;
+	delete [] injection.betappe;
+	delete [] freq;
+	delete [] psd;
+	delete [] data;
+
+	return 0;
+}
+double aligned_spin_prior(double chi){
+	double a=0.0039132 , b= 3.95381;
+	return a * exp(-b * abs(chi));	
+}
+double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int chainID, ptrjmcmc::PtrjmcmcSampler  *sampler, void *userParameters)
+{
+	int dim = sampler->maxDim;
+	double pos[dim];
+	for(int i = 0 ; i<dim; i++){
+		pos[i] = posInfo->parameters[i];
+	}
+	
+	double a = -std::numeric_limits<double>::infinity();
+	//###########
+	double chirp = exp(pos[0]);
+	double eta = pos[1];
+	if (eta<.0 || eta>.25){return a;}//eta
+	double m1 = calculate_mass1(chirp,eta );
+	double m2 = calculate_mass2(chirp,eta );
+	if(m1<1 || m1>40){return a;}
+	if(m2<1 || m2>40){return a;}
+	//###########
+	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+	//else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+	return log(aligned_spin_prior(pos[2]))+log(aligned_spin_prior(pos[3])) + log(chirpmass_eta_jac(chirp,eta));
+
+}
+
+
 
 int test_1d(int argc, char *argv[])
 {
@@ -2757,4 +2971,5 @@ void RT_ERROR_MSG()
 	std::cout<<"11 --- Ensemble size testing"<<std::endl;
 	std::cout<<"12 --- stupid test"<<std::endl;
 	std::cout<<"13 --- 1D test"<<std::endl;
+	std::cout<<"14 --- PTRJMCMC GW injection test"<<std::endl;
 }
