@@ -55,14 +55,40 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(mcmc_sampler_output *sampler_
 	std::string checkpoint_filename
 	)
 {
-	std::mutex fisher_mutex;
-
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
 	for (int i =0;i<num_detectors;i++)
 	{	
 		allocate_FFTW_mem_forward(&plans[i] , data_length[i]);
 	}
+
+	std::mutex fisher_mutex;
+
+//##########################################################
+//##########################################################
+	mcmcVariables mcmcVar ;
+	mcmcVar.mcmc_noise = noise_psd;
+	mcmcVar.mcmc_init_pos = initial_pos;
+	mcmcVar.mcmc_frequencies = frequencies;
+	mcmcVar.mcmc_data = data;
+	mcmcVar.mcmc_data_length = data_length;
+	mcmcVar.mcmc_detectors = detectors;
+	mcmcVar.mcmc_generation_method = generation_method;
+	mcmcVar.mcmc_fftw_plans = plans;
+	mcmcVar.mcmc_num_detectors = num_detectors;
+	mcmcVar.mcmc_gps_time = gps_time;
+	mcmcVar.mcmc_gmst = gps_to_GMST_radian(gps_time);
+	mcmcVar.mcmc_mod_struct = mod_struct;
+	mcmcVar.mcmc_save_waveform = true;
+
+
+
+//##########################################################
+//##########################################################
+
+
+
+
 	mcmc_noise = noise_psd;	
 	mcmc_init_pos = initial_pos;
 	mcmc_frequencies = frequencies;
@@ -83,12 +109,12 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(mcmc_sampler_output *sampler_
 	//To save time, intrinsic waveforms can be saved between detectors, if the 
 	//frequencies are all the same
 	mcmc_save_waveform = true;
-	for(int i =1 ;i<mcmc_num_detectors; i++){
-		if( mcmc_data_length[i] != mcmc_data_length[0] ||
-			mcmc_frequencies[i][0]!= mcmc_frequencies[0][0] ||
-			mcmc_frequencies[i][mcmc_data_length[i]-1] 
-				!= mcmc_frequencies[0][mcmc_data_length[0]-1]){
-			mcmc_save_waveform= false;
+	for(int i =1 ;i<mcmcVar.mcmc_num_detectors; i++){
+		if( mcmcVar.mcmc_data_length[i] != mcmcVar.mcmc_data_length[0] ||
+			mcmcVar.mcmc_frequencies[i][0]!= mcmcVar.mcmc_frequencies[0][0] ||
+			mcmcVar.mcmc_frequencies[i][mcmcVar.mcmc_data_length[i]-1] 
+				!= mcmcVar.mcmc_frequencies[0][mcmcVar.mcmc_data_length[0]-1]){
+			mcmcVar.mcmc_save_waveform= false;
 		}
 			
 	}
@@ -105,27 +131,27 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(mcmc_sampler_output *sampler_
 	PTMCMC_method_specific_prep(generation_method, dimension, seeding_var_ptr, local_seeding);
 	
 	//######################################################
-	int T = (int)(1./(mcmc_frequencies[0][1]-mcmc_frequencies[0][0]));
+	int T = (int)(1./(mcmcVar.mcmc_frequencies[0][1]-mcmcVar.mcmc_frequencies[0][0]));
 	debugger_print(__FILE__,__LINE__,T);
 	int burn_factor = T/4; //Take all sources to 4 seconds
 	debugger_print(__FILE__,__LINE__,burn_factor);
-	std::complex<double> **burn_data = new std::complex<double>*[mcmc_num_detectors];
-	double **burn_freqs = new double*[mcmc_num_detectors];
-	double **burn_noise = new double*[mcmc_num_detectors];
-	int *burn_lengths = new int[mcmc_num_detectors];
-	fftw_outline *burn_plans= new fftw_outline[num_detectors];
-	for(int j = 0; j<mcmc_num_detectors; j++){
-		burn_lengths[j] = mcmc_data_length[j]/burn_factor;
+	std::complex<double> **burn_data = new std::complex<double>*[mcmcVar.mcmc_num_detectors];
+	double **burn_freqs = new double*[mcmcVar.mcmc_num_detectors];
+	double **burn_noise = new double*[mcmcVar.mcmc_num_detectors];
+	int *burn_lengths = new int[mcmcVar.mcmc_num_detectors];
+	fftw_outline *burn_plans= new fftw_outline[mcmcVar.mcmc_num_detectors];
+	for(int j = 0; j<mcmcVar.mcmc_num_detectors; j++){
+		burn_lengths[j] = mcmcVar.mcmc_data_length[j]/burn_factor;
 		burn_data[j]= new std::complex<double>[burn_lengths[j]];
 		burn_freqs[j]= new double[burn_lengths[j]];
 		burn_noise[j]= new double[burn_lengths[j]];
 		allocate_FFTW_mem_forward(&burn_plans[j], burn_lengths[j]);
 		int ct = 0;
-		for( int k = 0 ; k<mcmc_data_length[j]; k++){
+		for( int k = 0 ; k<mcmcVar.mcmc_data_length[j]; k++){
 			if(k%burn_factor==0 && ct<burn_lengths[j]){
-				burn_data[j][ct] = mcmc_data[j][k];
-				burn_freqs[j][ct] = mcmc_frequencies[j][k];
-				burn_noise[j][ct] = mcmc_noise[j][k];
+				burn_data[j][ct] = mcmcVar.mcmc_data[j][k];
+				burn_freqs[j][ct] = mcmcVar.mcmc_frequencies[j][k];
+				burn_noise[j][ct] = mcmcVar.mcmc_noise[j][k];
 				ct++;
 			}
 		}
@@ -207,6 +233,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(mcmc_sampler_output *sampler_
 
 		user_parameters[i]->mod_struct = mod_struct;
 
+		
 		//user_parameters[i]->burn_freqs = mcmc_frequencies;
 		//user_parameters[i]->burn_data = mcmc_data;
 		//user_parameters[i]->burn_noise = mcmc_noise;

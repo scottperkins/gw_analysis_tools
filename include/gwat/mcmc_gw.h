@@ -595,5 +595,14 @@ void pack_local_mod_structure(mcmc_data_interface *interface,
 	MCMC_modification_struct *full_struct, 
 	MCMC_modification_struct *local_struct );
 
+void MCMC_fisher_transformations(
+	double *param, 
+	double **fisher, 
+	int dimension,
+	std::string generation_method,
+	bool intrinsic,
+	mcmc_data_interface *interface, 
+	MCMC_modification_struct *mod_struct,
+	void *parameters);
 
 #endif
