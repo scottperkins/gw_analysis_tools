@@ -119,7 +119,7 @@ public:
         /*! Boolean flag indicating error marginalization over residual EoS 
         * dependence in binary love relations should be performed. 
         */
-        bool tidal_love_error = true; 
+        bool tidal_love_error = false; 
 	T delta_tidal_weighted=-1;
 
 	//Polarization angle
@@ -230,7 +230,7 @@ public:
 	T cw_EA;
 	T csigma_EA;
 	//###################################################
-bool include_l1=true;
+        bool include_l1=true;
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;

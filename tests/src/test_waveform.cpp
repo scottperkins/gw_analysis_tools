@@ -14,7 +14,7 @@
 #include <gsl/gsl_randist.h>
 
 
-//#define _LAL
+#define _LAL
 #ifdef _LAL
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
@@ -342,15 +342,21 @@ int EA_parameterization_test(int argc, char *argv[])
 	    alpha[j] = gsl_rng_uniform(r);
 	  }
 	  double tempm1,tempm2 ;
-	  tempm1 = 1+1*alpha[0];
-	  tempm2 = 1+1*alpha[1];
- 
+	  //tempm1 = 1+1*alpha[0];
+	  //tempm2 = 1+1*alpha[1];
+	  //Setting masses to get a specific q
+	  /* For q=0.5, use m1=2, m2=1, for q=0.75 use m1=4, m2=3, for q=0.9 use m1=1, m2=.9 */
+	  tempm1 = 2.;
+	  tempm2 = 1.;
+	  
+	  /*
 	  //REAL8 m1_SI;
 	  //REAL8 m2_SI;
 	  double m1_SI;
 	  double m2_SI;
 	  params.mass1 = m1_SI;
-	  params.mass2 = m2_SI;
+	  params.mass2 = m2_SI;*/
+	  
 	  if(tempm1>tempm2){
 	    params.mass1= tempm1;
 	    params.mass2= tempm2;
@@ -359,23 +365,6 @@ int EA_parameterization_test(int argc, char *argv[])
 	    params.mass1= tempm2;
 	    params.mass2= tempm1;
 	  }
-	  /*
-	  //Using masses to get a specific q
-	  //For testing of binary love relations only 
-	  	    
-	  // Test with q = 0.5 
-	  m1_SI = 2.* LAL_MSUN_SI;
-	  m2_SI = LAL_MSUN_SI;
-
-	  // Test with q = 0.75 
-	  m1_SI = 4.* LAL_MSUN_SI;
-	  m2_SI = 3.*LAL_MSUN_SI;
-	  
-	  // Test with q = 0.9 
-	  m1_SI = LAL_MSUN_SI;
-	  m2_SI = 0.9*LAL_MSUN_SI;
-	  */
-
 
 	  //std::cout<<"q = "<<params.mass2 / params.mass1<<std::endl;
 	  
@@ -400,6 +389,8 @@ int EA_parameterization_test(int argc, char *argv[])
 	  
 	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
 	  //This also runs pre_calculate_EA_factors
+
+	  double new_lambdaa = tidal_error(params.tidal_s, params.tidal_a, params.mass2/params.mass1); 
 	  	  
 	  if(params.cw_EA < (-params.csigma_EA/(1. - params.csigma_EA)))
 	    {
@@ -522,7 +513,9 @@ int EA_parameterization_test(int argc, char *argv[])
 	  output[i][4] = sp.mass1;
 	  output[i][5] = sp.mass2;
 	  output[i][6] = params.tidal_s;
-	  output[i][7] = params.tidal_a; 
+	  output[i][7] = new_lambdaa;
+	  //output[i][7] = params.tidal_a;
+	  //output[i][8] = new_lambdaa; 
 
 	  /*output[i][6] = sp.tidal1;
 	  output[i][7] = sp.tidal2;
