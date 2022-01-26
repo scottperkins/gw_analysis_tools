@@ -254,8 +254,6 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	//################################################################
 	int dim = 4;
 	std::string recovery_method = "IMRPhenomD";
-	int ensembleSize = 8;
-	int ensembleN = 2;
 	
 	double spin1sph[3];
 	double spin2sph[3];
@@ -288,7 +286,9 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 
 
 
-	int swapProb = .1;
+	int ensembleSize = 8;
+	int ensembleN = 3;
+	int swapProb = .2;
 	int threads = 1;
 	bool pool = false;
 	std::string outputDir = "data/";
@@ -298,7 +298,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	
 	int samples = 100;
 	double burnIterations = 10000;
-	double priorIterations = 1000;
+	double priorIterations = 0;
 	int max_chunk_size = 1e6;
 
 	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
