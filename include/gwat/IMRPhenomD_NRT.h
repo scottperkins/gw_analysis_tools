@@ -71,6 +71,6 @@ const double c_binLove[3][2] = {{-15.25,15.37}, {37.33,-43.20}, {-29.93,35.18}};
  * coefficients are used in equations 19-22 of that paper.
  */
 const double mu_binLove[5] = {3.509*pow(10,-3.), 9.351*pow(10,-1.), -18.07, 27.56, -10.10};
-const double sigma_binLove[9] = {-2.074*pow(10,-7.), -1.492*pow(10,-3.), -4.891*pow(10,-2.), 8.207*pow(10,-1.), -1.308, -63.76, 11.14, 75.25, -23.69}; 
+const double sigma_binLove[9] = {-2.074*pow(10,-7.), 1.492*pow(10,-3.), -4.891*pow(10,-2.), 8.207*pow(10,-1.), -1.308, -63.76, 11.14, 75.25, -23.69}; 
 
 #endif

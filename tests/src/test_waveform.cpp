@@ -344,10 +344,15 @@ int EA_parameterization_test(int argc, char *argv[])
 	  double tempm1,tempm2 ;
 	  //tempm1 = 1+1*alpha[0];
 	  //tempm2 = 1+1*alpha[1];
+	  
 	  //Setting masses to get a specific q
 	  /* For q=0.5, use m1=2, m2=1, for q=0.75 use m1=4, m2=3, for q=0.9 use m1=1, m2=.9 */
 	  tempm1 = 2.;
 	  tempm2 = 1.;
+	  //tempm1 = 4.;
+	  //tempm2 = 3.;
+	  //tempm1 = 1.;
+	  //tempm2 = 0.9;
 	  
 	  /*
 	  //REAL8 m1_SI;
@@ -378,14 +383,19 @@ int EA_parameterization_test(int argc, char *argv[])
 	  //REAL8 lambda2 = pow(10, gsl_ran_flat(r, 0, 4));
 	  //REAL8 lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
 	  //REAL8 lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  /*
 	  double lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
 	  double lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
 	  params.tidal1 = lambda1;
 	  params.tidal2 = lambda2;
+	  */
 
 	  /* For binary Love relation tests*/
+	  do{
 	  double lambdas = pow(10, gsl_ran_flat(r, 1, 4)); 
 	  params.tidal_s = lambdas;
+	  }
+	  while((params.mass2/params.mass1) < 1.2321 - .124616*log(params.tidal_s));
 	  
 	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
 	  //This also runs pre_calculate_EA_factors
