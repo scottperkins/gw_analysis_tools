@@ -171,12 +171,12 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	injection.f_ref = 20.;
 	injection.RA = .275;
 	injection.DEC = -.44;
-	injection.spin1[2] = .3;
-	injection.spin2[2] = .2;
-	injection.spin1[1] = .5;
-	injection.spin2[1] = -.5;
-	injection.spin1[0] = .01;
-	injection.spin2[0] = -.01;
+	injection.spin1[2] = .0;
+	injection.spin2[2] = .0;
+	injection.spin1[1] = .0;
+	injection.spin2[1] = -.0;
+	injection.spin1[0] = .00;
+	injection.spin2[0] = -.00;
 	injection.incl_angle = .51;
 	double gps = 1126259462.4;
 	injection.gmst = gps_to_GMST_radian(gps);
@@ -252,7 +252,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	//################################################################
 	//################################################################
 	//################################################################
-	int dim = 4;
+	int dim = 11;
 	std::string recovery_method = "IMRPhenomD";
 	
 	double spin1sph[3];
@@ -260,8 +260,8 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	transform_cart_sph(injection.spin1,spin1sph);
 	transform_cart_sph(injection.spin2,spin2sph);
 
-	//double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
-	double initial_position[dim]= {log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
+	double initial_position[dim]= {injection.RA, sin(injection.DEC),injection.psi, cos(injection.incl_angle), injection.phiRef, T_mcmc_gw_tool-tc_ref, log(injection.Luminosity_Distance),log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
+	//double initial_position[dim]= {log(chirpmass), eta, injection.spin1[2],injection.spin2[2]};
 
 	write_file("data/injections_PTRJMCMC.csv",initial_position,dim);
 
@@ -272,24 +272,46 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 
 	double **priorRanges = new double*[dim];
 	for(int i = 0 ; i<dim; i++){priorRanges[i] = new double[2];}
+
 	priorRanges[0][0] = 0;
-	priorRanges[0][1] = 10;
+	priorRanges[0][1] = 2*M_PI;
 
-	priorRanges[1][0] = 0.01;
-	priorRanges[1][1] = .25;
+	priorRanges[1][0] = -1;
+	priorRanges[1][1] = 1;
 
-	priorRanges[2][0] = -1;
-	priorRanges[2][1] = 1;
+	priorRanges[2][0] = 0;
+	priorRanges[2][1] = M_PI;
 
 	priorRanges[3][0] = -1;
 	priorRanges[3][1] = 1;
+
+	priorRanges[4][0] = 0;
+	priorRanges[4][1] = 2*M_PI;
+
+	priorRanges[5][0] = 2;
+	priorRanges[5][1] = 4;
+
+	priorRanges[6][0] = 0;
+	priorRanges[6][1] = 6;
+
+	priorRanges[7][0] = 0;
+	priorRanges[7][1] = 10;
+
+	priorRanges[8][0] = 0.01;
+	priorRanges[8][1] = .25;
+
+	priorRanges[9][0] = -1;
+	priorRanges[9][1] = 1;
+
+	priorRanges[10][0] = -1;
+	priorRanges[10][1] = 1;
 
 
 
 	int ensembleSize = 8;
 	int ensembleN = 3;
 	int swapProb = .2;
-	int threads = 1;
+	int threads = 8;
 	bool pool = false;
 	std::string outputDir = "data/";
 	std::string outputMoniker = "PTRJMCMC_GW_injection";
@@ -298,13 +320,15 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	
 	int samples = 100;
 	double burnIterations = 10000;
-	double priorIterations = 0;
+	double priorIterations = 1000;
 	int max_chunk_size = 1e6;
 
 	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		dim, samples, ensembleSize, ensembleN, initialPosition, (ptrjmcmc::positionInfo **)nullptr, swapProb, burnIterations, priorIterations, true, max_chunk_size, &(priorRanges[0]), test_ptrjmcmc_integration_log_prior, threads, pool, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, outputDir, outputMoniker);
 	samplerObj->data->writeStatFile(outputDir+outputMoniker+"Stat.csv");
-	samplerObj->priorData->writeStatFile(outputDir+outputMoniker+"PriorStat.csv");
+	if(priorIterations>0){
+		samplerObj->priorData->writeStatFile(outputDir+outputMoniker+"PriorStat.csv");
+	}
 	delete initialPosition;
 
 	delete samplerObj;
@@ -330,7 +354,42 @@ double aligned_spin_prior(double chi){
 	double a=0.0039132 , b= 3.95381;
 	return a * exp(-b * abs(chi));	
 }
+
 double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int chainID, ptrjmcmc::PtrjmcmcSampler  *sampler, void *userParameters)
+{
+	int dim = sampler->maxDim;
+	double pos[dim];
+	for(int i = 0 ; i<dim; i++){
+		pos[i] = posInfo->parameters[i];
+	}
+	double a = -std::numeric_limits<double>::infinity();
+	//###########
+	double chirp = exp(pos[7]);
+	double eta = pos[8];
+	if (eta<.0 || eta>.25){return a;}//eta
+	double m1 = calculate_mass1(chirp,eta );
+	double m2 = calculate_mass2(chirp,eta );
+	if(m1<1 || m1>50){return a;}
+	if(m2<1 || m2>50){return a;}
+	//###########
+	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
+	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
+	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
+	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
+	if( pos[5] < (3 - .1) || pos[5] > (3 + .1)) { return a; }
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>600){return a;}//DL
+	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
+	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
+	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+	return log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+	//return -.5*pow_int(pos[0]-5,2)/.01/.01-.5*pow_int(pos[1]+.9,2)/.01/.01+log(aligned_spin_prior(pos[9]))+log(aligned_spin_prior(pos[10])) + log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
+
+
+}
+
+
+double test_ptrjmcmc_integration_log_prior_aligned(ptrjmcmc::positionInfo *posInfo, int chainID, ptrjmcmc::PtrjmcmcSampler  *sampler, void *userParameters)
 {
 	int dim = sampler->maxDim;
 	double pos[dim];
