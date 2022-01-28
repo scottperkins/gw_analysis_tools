@@ -25,6 +25,12 @@ for chain in dataFile["MCMC_OUTPUT"].keys():
 data = np.array(data)
 data[:,7] = np.exp(data[:,7])
 data[:,6] = np.exp(data[:,6])
+ct=0
+for d in data.T:
+    plt.plot(d)
+    plt.savefig("plots/trace_{}.pdf".format(ct))
+    plt.close()
+    ct+=1
 #plt.hist(data,bins=50,histtype='stepfilled')
 fig = corner(data)
 dim = len(data[0])

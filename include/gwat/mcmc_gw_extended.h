@@ -44,6 +44,7 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	ptrjmcmc::positionInfo **initialEnsemble,
 	double swapProb,
 	int burnIterations,
+	int burnPriorIterations,
 	int priorIterations,
 	bool writePriorData,
 	int max_chunk_size,

@@ -160,25 +160,25 @@ int main(int argc, char *argv[])
 int test_ptrjmcmc_integration(int argc, char *argv[])
 {
 	gen_params injection;
-	injection.mass1 = 36.4;
-	injection.mass2 = 29.3;
+	injection.mass1 = 8.4;
+	injection.mass2 = 7.3;
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
 	double eta = calculate_eta(injection.mass1,injection.mass2);
 	double q = injection.mass2/injection.mass1;
-	injection.Luminosity_Distance =500;
+	injection.Luminosity_Distance =1200;
 	injection.psi = .2;
 	injection.phiRef = 2.;
 	injection.f_ref = 20.;
-	injection.RA = .275;
-	injection.DEC = -.44;
+	injection.RA = 3.5;
+	injection.DEC = -.8;
 	injection.spin1[2] = .0;
 	injection.spin2[2] = .0;
 	injection.spin1[1] = .0;
 	injection.spin2[1] = -.0;
 	injection.spin1[0] = .00;
 	injection.spin2[0] = -.00;
-	injection.incl_angle = .51;
-	double gps = 1126259462.4;
+	injection.incl_angle = -.91;
+	double gps = 1135136350.6;
 	injection.gmst = gps_to_GMST_radian(gps);
 	std::cout<<"GMST: "<<injection.gmst<<std::endl;
 	injection.equatorial_orientation = false;
@@ -291,11 +291,11 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	priorRanges[5][0] = 2;
 	priorRanges[5][1] = 4;
 
-	priorRanges[6][0] = 0;
-	priorRanges[6][1] = 6;
+	priorRanges[6][0] = std::log(10);
+	priorRanges[6][1] = std::log(5000);
 
-	priorRanges[7][0] = 0;
-	priorRanges[7][1] = 10;
+	priorRanges[7][0] = std::log(1);
+	priorRanges[7][1] = std::log(40);
 
 	priorRanges[8][0] = 0.01;
 	priorRanges[8][1] = .25;
@@ -309,7 +309,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 
 
 	int ensembleSize = 8;
-	int ensembleN = 3;
+	int ensembleN = 5;
 	int swapProb = .2;
 	int threads = 8;
 	bool pool = false;
@@ -318,13 +318,14 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	MCMC_modification_struct mod_struct;
 	mod_struct.ppE_Nmod = 0;
 	
-	int samples = 100;
-	double burnIterations = 10000;
-	double priorIterations = 1000;
+	int samples = 500;
+	double burnIterations = 50000;
+	double burnPriorIterations = 0;
+	double priorIterations = 5000;
 	int max_chunk_size = 1e6;
 
 	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
-		dim, samples, ensembleSize, ensembleN, initialPosition, (ptrjmcmc::positionInfo **)nullptr, swapProb, burnIterations, priorIterations, true, max_chunk_size, &(priorRanges[0]), test_ptrjmcmc_integration_log_prior, threads, pool, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, outputDir, outputMoniker);
+		dim, samples, ensembleSize, ensembleN, initialPosition, (ptrjmcmc::positionInfo **)nullptr, swapProb, burnIterations, burnPriorIterations,priorIterations, true, max_chunk_size, &(priorRanges[0]), test_ptrjmcmc_integration_log_prior, threads, pool, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, outputDir, outputMoniker);
 	samplerObj->data->writeStatFile(outputDir+outputMoniker+"Stat.csv");
 	if(priorIterations>0){
 		samplerObj->priorData->writeStatFile(outputDir+outputMoniker+"PriorStat.csv");
@@ -369,8 +370,8 @@ double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int 
 	if (eta<.0 || eta>.25){return a;}//eta
 	double m1 = calculate_mass1(chirp,eta );
 	double m2 = calculate_mass2(chirp,eta );
-	if(m1<1 || m1>50){return a;}
-	if(m2<1 || m2>50){return a;}
+	if(m1<1 || m1>20){return a;}
+	if(m2<1 || m2>20){return a;}
 	//###########
 	if ((pos[0])<0 || (pos[0])>2*M_PI){ return a;}//RA
 	if ((pos[1])<-1 || (pos[1])>1){return a;}//sinDEC
@@ -378,7 +379,7 @@ double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int 
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if( pos[5] < (3 - .1) || pos[5] > (3 + .1)) { return a; }
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>600){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>5000){return a;}//DL
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
 	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
@@ -2849,7 +2850,7 @@ double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *pa
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if ((pos[5])<T_mcmc_gw_tool*3./4.-.1 || (pos[5])>T_mcmc_gw_tool*3./4.+.1){return a;}//tc
 	//if ((pos[5])<0 || (pos[5])>T_mcmc_gw_tool){return a;}//tc
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>800){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>5000){return a;}//DL
 	//if (std::exp(pos[7])<.01 || std::exp(pos[7])>5 ){return a;}//chirpmass
 	//if (pos[7]<.01 || pos[7]>14 ){return a;}//chirpmass
 	//if (pos[7]<.1 || pos[7]>10 ){return a;}//chirpmass
