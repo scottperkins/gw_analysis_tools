@@ -2065,6 +2065,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	else{
 		std::cout<<
 			"Input parameters not valid, please check that input is compatible with the supported methods - dimension combinations"<<std::endl;
+		std::cout<<"Using: "<<generation_method<<" "<<dimension<<std::endl;
 		exit(1);
 	}
 	//if(dimension==4 && generation_method =="IMRPhenomD"){

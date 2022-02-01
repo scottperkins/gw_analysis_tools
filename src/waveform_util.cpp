@@ -1694,29 +1694,22 @@ void assign_freq_boundaries(double *freq_boundaries,
 		adouble fmerger_temp = (1./(2.*s_param.M * M_PI))* a0* sqrt(s_param.mass2 / s_param.mass1) *(1.0 + n1 * kappa + n2 * kappa * kappa)/(1.0 + d1 * kappa + d2* kappa * kappa);
 		double fmerger = fmerger_temp.value();
 		//Sort the boundaries
-		double temp_boundaries[boundary_num];
+		std::vector<double> temp_boundaries(boundary_num);
 		double temp[2] = {fmerger, fmerger*1.2};
-		int base_ct=0, NRT_ct=0;
-		for (int i = 0 ; i<boundary_num; i++){
-			if(freq_boundaries[base_ct] >0){
-				if(freq_boundaries[base_ct] < temp[NRT_ct]){
-					temp_boundaries[i] = freq_boundaries[base_ct];
-					base_ct++;
-				}
-				else{
-					temp_boundaries[i] = temp[NRT_ct];
-					NRT_ct++;
-				}
-			}
-			else{
-				temp_boundaries[i] = temp[NRT_ct];
-				NRT_ct++;
-			}
-		}
-		
-		for (int i = 0 ; i<boundary_num; i++){
+		for(int i =0 ;i<2; i++){
+			temp_boundaries[i] = temp[i];
+		}		
+		for(int i =2 ;i<boundary_num; i++){
+			temp_boundaries[i] = freq_boundaries[i-2];
+		}		
+		std::sort(temp_boundaries.begin(),temp_boundaries.end());
+		for(int i =0 ;i<boundary_num; i++){
 			freq_boundaries[i] = temp_boundaries[i];
 		}
+		
+		//for (int i = 0 ; i<boundary_num; i++){
+		//	std::cout<<i<<" "<<temp_boundaries[i]<<std::endl;
+		//}
 		
 	}
 	//###########################################
