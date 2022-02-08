@@ -312,7 +312,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	int ensembleN = 5;
 	int swapProb = .2;
 	int threads = 8;
-	bool pool = false;
+	bool pool = true;
 	std::string outputDir = "data/";
 	std::string outputMoniker = "PTRJMCMC_GW_injection";
 	MCMC_modification_struct mod_struct;
@@ -320,7 +320,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	
 	int samples = 500;
 	double burnIterations = 50000;
-	double burnPriorIterations = 0;
+	double burnPriorIterations = 1000;
 	double priorIterations = 5000;
 	int max_chunk_size = 1e6;
 
