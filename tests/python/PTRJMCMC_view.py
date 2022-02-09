@@ -18,6 +18,7 @@ for chain in dataFile["MCMC_OUTPUT"].keys():
     if "CHAIN" in chain:
         if first:
             data = np.array(dataFile["MCMC_OUTPUT"][chain])[::ACs[ct]]
+            #data = np.array(dataFile["MCMC_OUTPUT"][chain])[::100]
             first = False
         else:
             data = np.insert(data,len(data), np.array(dataFile["MCMC_OUTPUT"][chain])[::ACs[ct]],axis=0)
