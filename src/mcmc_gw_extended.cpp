@@ -260,9 +260,10 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	
 	propProb[0] = 0.1;
 	propProb[1] = 0.2;
-	propProb[2] = 0.2;
-	propProb[3] = 0.5;
+	propProb[2] = 0.0;
+	propProb[3] = 0.7;
 
+	std::cout<<sampler->ensembleN<<" "<<sampler->ensembleSize<<" "<<sampler->maxDim<<std::endl;
 	ptrjmcmc::gaussianProposalVariables *gpv = new ptrjmcmc::gaussianProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
 	ptrjmcmc::KDEProposalVariables *kdepv = new ptrjmcmc::KDEProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
 	ptrjmcmc::FisherProposalVariables *fpv = new ptrjmcmc::FisherProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, MCMC_fisher_wrapper_v2,   sampler->userParameters,  100);

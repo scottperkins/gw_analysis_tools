@@ -165,7 +165,8 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
 	double eta = calculate_eta(injection.mass1,injection.mass2);
 	double q = injection.mass2/injection.mass1;
-	injection.Luminosity_Distance =1200;
+	//injection.Luminosity_Distance =1200;
+	injection.Luminosity_Distance =300;
 	injection.psi = .2;
 	injection.phiRef = 2.;
 	injection.f_ref = 20.;
@@ -292,7 +293,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	priorRanges[5][1] = 4;
 
 	priorRanges[6][0] = std::log(10);
-	priorRanges[6][1] = std::log(2000);
+	priorRanges[6][1] = std::log(500);
 
 	priorRanges[7][0] = std::log(1);
 	priorRanges[7][1] = std::log(40);
@@ -311,7 +312,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	int ensembleSize = 8;
 	int ensembleN = 5;
 	int swapProb = .2;
-	int threads = 6;
+	int threads = 10;
 	bool pool = true;
 	std::string outputDir = "data/";
 	std::string outputMoniker = "PTRJMCMC_GW_injection";
@@ -319,7 +320,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	mod_struct.ppE_Nmod = 0;
 	
 	int samples = 5000;
-	double burnIterations = 10000;
+	double burnIterations = 20000;
 	double burnPriorIterations = 100;
 	double priorIterations = 100;
 	int max_chunk_size = 1e6;
@@ -379,7 +380,7 @@ double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int 
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if( pos[5] < (3 - .1) || pos[5] > (3 + .1)) { return a; }
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>2000){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>500){return a;}//DL
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
 	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
