@@ -319,9 +319,9 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	mod_struct.ppE_Nmod = 0;
 	
 	int samples = 500;
-	double burnIterations = 50000;
+	double burnIterations = 10000;
 	double burnPriorIterations = 0;
-	double priorIterations = 5000;
+	double priorIterations = 1000;
 	int max_chunk_size = 1e6;
 
 	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
