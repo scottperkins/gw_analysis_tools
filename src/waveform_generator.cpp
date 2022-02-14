@@ -1269,6 +1269,7 @@ double tidal_error(double tidal_s, double tidal_a, double q){
 		  gsl_rng_free(r);
 
 		  tidal_a += error;
+		  //std::cout<<"Error flag is set correctly and tidal love error is being calculated."<<std::endl; //print for testing purposes
 	       
 		  return tidal_a;
 }

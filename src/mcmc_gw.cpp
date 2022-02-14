@@ -2855,6 +2855,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
 	gen_params->tidal_love = mod_struct->tidal_love;
+	gen_params->tidal_love_error = mod_struct->tidal_love_error; 
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
