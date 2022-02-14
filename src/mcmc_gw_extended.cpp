@@ -258,10 +258,10 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	propArray[2] = ptrjmcmc::KDEProposal;
 	propArray[3] = ptrjmcmc::FisherProposal;
 	
-	propProb[0] = 0.1;
-	propProb[1] = 0.2;
-	propProb[2] = 0.0;
-	propProb[3] = 0.7;
+	propProb[0] = 0.05;
+	propProb[1] = 0.3;
+	propProb[2] = 0.05;
+	propProb[3] = 0.6;
 
 	std::cout<<sampler->ensembleN<<" "<<sampler->ensembleSize<<" "<<sampler->maxDim<<std::endl;
 	ptrjmcmc::gaussianProposalVariables *gpv = new ptrjmcmc::gaussianProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
@@ -581,8 +581,8 @@ std::string MCMC_prep_params_v2(double *param, double *temp_params, gen_params_b
 
 double MCMC_likelihood_wrapper_v2(ptrjmcmc::positionInfo *pos, int chainID, ptrjmcmc::PtrjmcmcSampler *sampler ,void *userParameters)
 {
-	mcmcVariables *mcmcVar = (mcmcVariables *)userParameters;
 	//return 2;
+	mcmcVariables *mcmcVar = (mcmcVariables *)userParameters;
 	//MCMC_user_param *user_param = (MCMC_user_param *)userParameters;
 
 	int dimension = sampler->maxDim;

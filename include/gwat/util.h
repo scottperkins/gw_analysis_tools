@@ -19,7 +19,8 @@ const double gamma_E = 0.5772156649015328606065120900824024310421;
 /*!Speed of light m/s*/
 const double c = 299792458.;
 /*!Gravitational constant in m**3/(s**2 SolMass)*/
-const double G =6.674e-11*(1.98855e30);
+//const double G =6.67430e-11*(1.98855e30);
+const double G =6.67430e-11*(1.988409902147041637325262574352366540e30);
 /*! G/c**3 seconds per solar mass*/
 //const double MSOL_SEC =492549095.e-14; 
 //const double MSOL_SEC =492549095.e-14; 

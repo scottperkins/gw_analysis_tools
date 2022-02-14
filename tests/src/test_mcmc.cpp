@@ -203,9 +203,9 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	std::string SN[4] = {"AdLIGODesign","AdLIGODesign","AdLIGODesign","KAGRA_pess"};
 	std::string injection_method = "IMRPhenomD";
 	double fmin = 10;
-	double fmax =512;
+	double fmax =1024;
 	T_mcmc_gw_tool= 4;
-	int length = 10;
+	int length ;
 	double **psd;
 	double **freq;
 	double **weights;
@@ -240,7 +240,9 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 		for(int j = 0 ; j<length; j++){
 			data[i][j]*=exp(std::complex<double>(0,tc*freq[i][j]));
 		}
-		total_snr += pow_int( calculate_snr_internal(psd[i],data[i],freq[i],length, "SIMPSONS",(double*) NULL, false), 2);
+		double snr =  calculate_snr_internal(psd[i],data[i],freq[i],length, "SIMPSONS",(double*) NULL, false);
+		std::cout<<detectors[i]<<" "<<snr<<std::endl;
+		total_snr += pow_int(snr,2);
 	}
 	injection.tc=tc_ref;
 	std::cout<<"NETWORK SNR of injection: "<<sqrt(total_snr)<<std::endl;
@@ -293,7 +295,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	priorRanges[5][1] = 4;
 
 	priorRanges[6][0] = std::log(10);
-	priorRanges[6][1] = std::log(500);
+	priorRanges[6][1] = std::log(2000);
 
 	priorRanges[7][0] = std::log(1);
 	priorRanges[7][1] = std::log(40);
@@ -309,20 +311,24 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 
 
 
-	int ensembleSize = 8;
+	int ensembleSize = 15;
 	int ensembleN = 5;
-	int swapProb = .2;
-	int threads = 10;
+	int swapProb = .1;
+	int threads = 7;
 	bool pool = true;
 	std::string outputDir = "data/";
 	std::string outputMoniker = "PTRJMCMC_GW_injection";
 	MCMC_modification_struct mod_struct;
 	mod_struct.ppE_Nmod = 0;
 	
-	int samples = 5000;
-	double burnIterations = 20000;
-	double burnPriorIterations = 100;
-	double priorIterations = 100;
+	int samples = 1000;
+	//int samples = 100;
+	double burnIterations = 40000;
+	//double burnIterations = 100;
+	double burnPriorIterations = 0;
+	//double burnPriorIterations = 0;
+	double priorIterations =0 ;
+	//double priorIterations =0 ;
 	int max_chunk_size = 1e6;
 
 	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
@@ -380,7 +386,7 @@ double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int 
 	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if( pos[5] < (3 - .1) || pos[5] > (3 + .1)) { return a; }
-	if (std::exp(pos[6])<10 || std::exp(pos[6])>500){return a;}//DL
+	if (std::exp(pos[6])<10 || std::exp(pos[6])>2000){return a;}//DL
 	if ((pos[9])<-.95 || (pos[9])>.95){return a;}//chi1 
 	if ((pos[10])<-.95 || (pos[10])>.95){return a;}//chi2
 	//return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
@@ -391,30 +397,30 @@ double test_ptrjmcmc_integration_log_prior(ptrjmcmc::positionInfo *posInfo, int 
 }
 
 
-double test_ptrjmcmc_integration_log_prior_aligned(ptrjmcmc::positionInfo *posInfo, int chainID, ptrjmcmc::PtrjmcmcSampler  *sampler, void *userParameters)
-{
-	int dim = sampler->maxDim;
-	double pos[dim];
-	for(int i = 0 ; i<dim; i++){
-		pos[i] = posInfo->parameters[i];
-	}
-	
-	double a = -std::numeric_limits<double>::infinity();
-	//###########
-	double chirp = exp(pos[0]);
-	double eta = pos[1];
-	if (eta<.0 || eta>.25){return a;}//eta
-	double m1 = calculate_mass1(chirp,eta );
-	double m2 = calculate_mass2(chirp,eta );
-	if(m1<1 || m1>40){return a;}
-	if(m2<1 || m2>40){return a;}
-	//###########
-	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
-	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
-	//else {return log(chirpmass_eta_jac(chirp,eta)) ;}
-	return log(aligned_spin_prior(pos[2]))+log(aligned_spin_prior(pos[3])) + log(chirpmass_eta_jac(chirp,eta));
-
-}
+//double test_ptrjmcmc_integration_log_prior_aligned(ptrjmcmc::positionInfo *posInfo, int chainID, ptrjmcmc::PtrjmcmcSampler  *sampler, void *userParameters)
+//{
+//	int dim = sampler->maxDim;
+//	double pos[dim];
+//	for(int i = 0 ; i<dim; i++){
+//		pos[i] = posInfo->parameters[i];
+//	}
+//	
+//	double a = -std::numeric_limits<double>::infinity();
+//	//###########
+//	double chirp = exp(pos[0]);
+//	double eta = pos[1];
+//	if (eta<.0 || eta>.25){return a;}//eta
+//	double m1 = calculate_mass1(chirp,eta );
+//	double m2 = calculate_mass2(chirp,eta );
+//	if(m1<1 || m1>40){return a;}
+//	if(m2<1 || m2>40){return a;}
+//	//###########
+//	if ((pos[2])<-.95 || (pos[2])>.95){return a;}//chi1 
+//	if ((pos[3])<-.95 || (pos[3])>.95){return a;}//chi2
+//	//else {return log(chirpmass_eta_jac(chirp,eta)) ;}
+//	return log(aligned_spin_prior(pos[2]))+log(aligned_spin_prior(pos[3])) + log(chirpmass_eta_jac(chirp,eta));
+//
+//}
 
 
 

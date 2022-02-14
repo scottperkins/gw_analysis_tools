@@ -52,25 +52,25 @@ plt.savefig("plots/PTRJMCMC_sampler.pdf")
 plt.close()
 
 
-dataFile = h5py.File("data/PTRJMCMC_GW_injectionPrior_output.hdf5",'r')
-first=True
-data = None
-ct = 0
-for chain in dataFile["MCMC_OUTPUT"].keys():
-    if "CHAIN" in chain:
-        if first:
-            data = np.array(dataFile["MCMC_OUTPUT"][chain])
-            first = False
-        else:
-            data = np.insert(data,len(data), np.array(dataFile["MCMC_OUTPUT"][chain]),axis=0)
-    ct+=1
-data = np.array(data)
-data[:,7] = np.exp(data[:,7])
-data[:,6] = np.exp(data[:,6])
-#plt.hist(data,bins=50,histtype='stepfilled')
-fig = corner(data)
-
-plt.savefig("plots/PTRJMCMC_sampler_prior.pdf")
-plt.close()
-
+#dataFile = h5py.File("data/PTRJMCMC_GW_injectionPrior_output.hdf5",'r')
+#first=True
+#data = None
+#ct = 0
+#for chain in dataFile["MCMC_OUTPUT"].keys():
+#    if "CHAIN" in chain:
+#        if first:
+#            data = np.array(dataFile["MCMC_OUTPUT"][chain])
+#            first = False
+#        else:
+#            data = np.insert(data,len(data), np.array(dataFile["MCMC_OUTPUT"][chain]),axis=0)
+#    ct+=1
+#data = np.array(data)
+#data[:,7] = np.exp(data[:,7])
+#data[:,6] = np.exp(data[:,6])
+##plt.hist(data,bins=50,histtype='stepfilled')
+#fig = corner(data)
+#
+#plt.savefig("plots/PTRJMCMC_sampler_prior.pdf")
+#plt.close()
+#
 
