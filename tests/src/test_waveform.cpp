@@ -286,7 +286,7 @@ int EA_parameterization_test(int argc, char *argv[])
 	//int num_infspeeds = 0;
 	//int num_nan = 0;
 	int num_Cherenkov = 0;
-	int dim = 8;// Increase for every factor you want to output
+	int dim = 9;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
 	double a_bound = -4.; //(case 1)
@@ -523,9 +523,9 @@ int EA_parameterization_test(int argc, char *argv[])
 	  output[i][4] = sp.mass1;
 	  output[i][5] = sp.mass2;
 	  output[i][6] = params.tidal_s;
-	  output[i][7] = new_lambdaa;
-	  //output[i][7] = params.tidal_a;
-	  //output[i][8] = new_lambdaa; 
+	  //output[i][7] = new_lambdaa;
+	  output[i][7] = params.tidal_a;
+	  output[i][8] = new_lambdaa; 
 
 	  /*output[i][6] = sp.tidal1;
 	  output[i][7] = sp.tidal2;
