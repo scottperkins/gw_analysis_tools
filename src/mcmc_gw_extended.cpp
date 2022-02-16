@@ -263,6 +263,11 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	propProb[2] = 0.05;
 	propProb[3] = 0.6;
 
+	//propProb[0] = 0.1;
+	//propProb[1] = 0.0;
+	//propProb[2] = 0.0;
+	//propProb[3] = 0.9;
+
 	std::cout<<sampler->ensembleN<<" "<<sampler->ensembleSize<<" "<<sampler->maxDim<<std::endl;
 	ptrjmcmc::gaussianProposalVariables *gpv = new ptrjmcmc::gaussianProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
 	ptrjmcmc::KDEProposalVariables *kdepv = new ptrjmcmc::KDEProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
