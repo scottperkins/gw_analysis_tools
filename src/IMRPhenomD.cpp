@@ -836,6 +836,11 @@ void IMRPhenomD<T>::assign_lambda_param(source_parameters<T> *source_param, lamb
 		lambda->beta[i+1] = this->assign_lambda_param_element(source_param, i+11);
 	for (int i=0;i<5; i++)
 		lambda->alpha[i+1] = this->assign_lambda_param_element(source_param, i+14);
+
+
+	//DO NOT LEAVE IN
+	//WAVEFORM SYSTEMATICS TESTING
+	//lambda->sigma[4] = 0;
 }
 
 /*!\brief Calculate the lambda parameters from Khan et al for element i
