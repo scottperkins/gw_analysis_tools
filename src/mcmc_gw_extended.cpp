@@ -239,6 +239,9 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->priorRanges = priorRanges;
 	sampler->initialPosition = initialPosition;
 
+	//Testing
+	sampler->coldOnlyStorage = false;
+
 	mcmcVariables **mcmcVarVec  = new mcmcVariables*[chainN];
 	for(int i = 0 ; i<chainN; i++){
 		mcmcVarVec[i] = &mcmcVar;
@@ -262,6 +265,10 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	propProb[1] = 0.3;
 	propProb[2] = 0.05;
 	propProb[3] = 0.6;
+	//propProb[0] = 0.05;
+	//propProb[1] = 0.3;
+	//propProb[2] = 0.65;
+	//propProb[3] = 0.0;
 
 	//propProb[0] = 0.1;
 	//propProb[1] = 0.0;
@@ -269,13 +276,18 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	//propProb[3] = 0.9;
 
 	std::cout<<sampler->ensembleN<<" "<<sampler->ensembleSize<<" "<<sampler->maxDim<<std::endl;
+
 	ptrjmcmc::gaussianProposalVariables *gpv = new ptrjmcmc::gaussianProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
-	ptrjmcmc::KDEProposalVariables *kdepv = new ptrjmcmc::KDEProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
+
+	//ptrjmcmc::KDEProposalVariables *kdepv = new ptrjmcmc::KDEProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
+	ptrjmcmc::KDEProposalVariables kdepv(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim);
+
 	ptrjmcmc::FisherProposalVariables *fpv = new ptrjmcmc::FisherProposalVariables(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, MCMC_fisher_wrapper_v2,   sampler->userParameters,  100);
 
 	proposalFnVariables[0] = (void *)gpv;
 	proposalFnVariables[1] = (void *)nullptr;
-	proposalFnVariables[2] = (void *)kdepv;
+	proposalFnVariables[2] = (void *)&kdepv;
+	//proposalFnVariables[2] = (void *)nullptr;
 	proposalFnVariables[3] = (void *)fpv;
 
 
@@ -318,7 +330,7 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	//#################################################
 	delete propData;
 	delete gpv;
-	delete kdepv;
+	//delete kdepv;
 	delete fpv;
 	for(int i = 0 ; i<num_detectors; i++){
 		delete [] burn_data[i];

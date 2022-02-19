@@ -314,7 +314,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	int ensembleSize = 15;
 	int ensembleN = 5;
 	int swapProb = .1;
-	int threads = 7;
+	int threads = 10;
 	bool pool = true;
 	std::string outputDir = "data/";
 	std::string outputMoniker = "PTRJMCMC_GW_injection";
@@ -323,7 +323,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 	
 	int samples = 1000;
 	//int samples = 100;
-	double burnIterations = 40000;
+	double burnIterations = 10000;
 	//double burnIterations = 100;
 	double burnPriorIterations = 0;
 	//double burnPriorIterations = 0;
@@ -333,7 +333,7 @@ int test_ptrjmcmc_integration(int argc, char *argv[])
 
 	ptrjmcmc::PtrjmcmcSampler * samplerObj = PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		dim, samples, ensembleSize, ensembleN, initialPosition, (ptrjmcmc::positionInfo **)nullptr, swapProb, burnIterations, burnPriorIterations,priorIterations, true, max_chunk_size, &(priorRanges[0]), test_ptrjmcmc_integration_log_prior, threads, pool, detect_number, data, psd, freq, data_lengths, gps, detectors, &mod_struct, recovery_method, outputDir, outputMoniker);
-	samplerObj->data->writeStatFile(outputDir+outputMoniker+"Stat.csv");
+	//samplerObj->data->writeStatFile(outputDir+outputMoniker+"Stat.csv");
 	if(priorIterations>0){
 		samplerObj->priorData->writeStatFile(outputDir+outputMoniker+"PriorStat.csv");
 	}
