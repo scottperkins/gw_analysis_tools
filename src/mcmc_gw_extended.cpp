@@ -261,14 +261,14 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	propArray[2] = ptrjmcmc::KDEProposal;
 	propArray[3] = ptrjmcmc::FisherProposal;
 	
-	propProb[0] = 0.05;
-	propProb[1] = 0.3;
-	propProb[2] = 0.05;
-	propProb[3] = 0.6;
 	//propProb[0] = 0.05;
 	//propProb[1] = 0.3;
-	//propProb[2] = 0.65;
-	//propProb[3] = 0.0;
+	//propProb[2] = 0.05;
+	//propProb[3] = 0.6;
+	propProb[0] = 0.05;
+	propProb[1] = 0.25;
+	propProb[2] = 0.0;
+	propProb[3] = 0.7;
 
 	//propProb[0] = 0.1;
 	//propProb[1] = 0.0;
