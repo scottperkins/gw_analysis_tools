@@ -95,6 +95,7 @@ int test_EA_fisher(int argc, char *argv[])
 
 
 	//#######################################
+	//EA parameters
 	//#######################################
 	params.ca_EA = 1e-30;
 	params.ctheta_EA = 2e-30;
@@ -105,20 +106,22 @@ int test_EA_fisher(int argc, char *argv[])
 	
 	
 
+	//#######################################
+	//#######################################
+	//Detector characteristics
 	double fmin = 5;
 	double fmax = 2048;
 	double T = 16;
-
 	params.tc = 3.*T/4.;
+
 	int length = 1000;
 	double *frequency = new double[length];
 	int Ndetect = 3;
-	//int Ndetect = 2;
 	double **psd = new double*[Ndetect];
-	//std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
+	//Noise curves to use
 	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
-	//std::string SN[3] = {"CE1","AdLIGOMidHigh","AdVIRGOPlus1"};
 	
+	//Calculate freq/weight array (using gauss-legendre quadrature)
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
 	for(int i = 0 ; i<length; i++){
@@ -127,18 +130,24 @@ int test_EA_fisher(int argc, char *argv[])
 	for(int i = 0 ; i<Ndetect; i++){
 		psd[i]= new double[length];
 		populate_noise(frequency, SN[i],psd[i], length, 48);
-		//populate_noise(frequency, "LISA_CONF",psd, length, 12);
 		for(int j = 0 ; j<length; j++){
 			psd[i][j]*=psd[i][j];	
 		}
 	}
 
 	
+	//Set detector names
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 		
+	//###############################################
+	//Dimension and model
+	//###############################################
 	int dim = 16;
 	std::string method = "EA_IMRPhenomD_NRT";
 
+	//###############################################
+	//Allocate output
+	//###############################################
 	double **output_AD = allocate_2D_array(dim,dim);
 	double **output_AD_temp = allocate_2D_array(dim,dim);
 	double **COV_AD = allocate_2D_array(dim,dim);
@@ -152,6 +161,9 @@ int test_EA_fisher(int argc, char *argv[])
 
 	double snr; 
 
+	//###############################################
+	//Calculate Fishers
+	//###############################################
 	for(int i = 0 ;i < Ndetect; i++){
 		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 		for(int k = 0 ; k<dim; k++){
@@ -170,15 +182,20 @@ int test_EA_fisher(int argc, char *argv[])
 	output_AD[dim-1][dim-1]+= 1./sigma/sigma;
 	//####################################
 	
+
+	//###############################################
+	//Invert and print -- uncomment to see full cov or fisher
+	//###############################################
+	
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	std::cout<<"AD Fisher:"<<std::endl;
-	for(int i = 0 ; i<dim; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dim; j++){
-			std::cout<<output_AD[i][j]<<" ";
-		}
-		std::cout<<std::endl;
-	}
+	//std::cout<<"AD Fisher:"<<std::endl;
+	//for(int i = 0 ; i<dim; i++){
+	//	std::cout<<i<<" ";
+	//	for(int j = 0 ; j<dim; j++){
+	//		std::cout<<output_AD[i][j]<<" ";
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
@@ -196,6 +213,9 @@ int test_EA_fisher(int argc, char *argv[])
 	}
 
 
+	//###############################################
+	//Prints cov.Fisher, which should be the identity (since cov = fisher^-1)
+	//###############################################
 	//double **identity_full = allocate_2D_array(dim,dim);
 	//matrix_multiply(output_AD,COV_AD,identity_full,dim,dim,dim);
 	//std::cout<<"IDENTITY: "<<std::endl;
