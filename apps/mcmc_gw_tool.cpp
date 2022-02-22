@@ -224,7 +224,7 @@ int main(int argc, char *argv[])
 
 	if(dbl_dict.find("tidal_s minimum") == dbl_dict.end()){
 		tidal_s_prior[0]=1;
-		tidal_s_prior[1]=500;
+		tidal_s_prior[2]=5000;
 	}
 	else{
 		tidal_s_prior[0]=dbl_dict["tidal_s minimum"];
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 	}
 	if(dbl_dict.find("tidal1 minimum") == dbl_dict.end()){
 		tidal1_prior[0]=1;
-		tidal1_prior[1]=500;
+		tidal1_prior[1]=5000;
 	}
 	else{
 		tidal1_prior[0]=dbl_dict["tidal1 minimum"];
@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 	}
 	if(dbl_dict.find("tidal2 minimum") == dbl_dict.end()){
 		tidal2_prior[0]=1;
-		tidal2_prior[1]=500;
+		tidal2_prior[1]=5000;
 	}
 	else{
 		tidal2_prior[0]=dbl_dict["tidal2 minimum"];
@@ -251,11 +251,18 @@ int main(int argc, char *argv[])
 	{
 		tidal_love = bool_dict["Tidal love relation"];
 	}
+	bool tidal_love_error = false;
+	if(bool_dict.find("Tidal love error marginalization") != bool_dict.end())
+	{
+		tidal_love_error = bool_dict["Tidal love error marginalization"];
+	}
 	if(generation_method.find("NRT") != std::string::npos){
 		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
 		std::cout<<"Range of tidal2: "<<tidal2_prior[0]<<" - "<<tidal2_prior[1]<<std::endl;
 		std::cout<<"Range of tidal_s: "<<tidal_s_prior[0]<<" - "<<tidal_s_prior[1]<<std::endl;
 		std::cout<<"Using tidal-love relations: "<<tidal_love<<std::endl;
+		std::cout<<"Using tidal-love error marginalization: "<<tidal_love_error<<std::endl;
+				
 	}
 	bool jeff_prior = false;
 	if(bool_dict.find("Jefferys prior") == bool_dict.end())
@@ -539,6 +546,7 @@ int main(int argc, char *argv[])
 	bool show_progress = true;
 	MCMC_modification_struct mod_struct;
 	mod_struct.tidal_love = tidal_love;
+	mod_struct.tidal_love_error = tidal_love_error;	
 	mod_struct.ppE_Nmod = Nmod;
 	mod_struct.bppe = bppe;
 	mod_struct.gIMR_Nmod_phi = gNmod_phi;
@@ -896,7 +904,7 @@ double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,
 
 bool tidal_love_boundary_violation(double q,double lambda_s)
 {
-	//Relation from XXXX.XXXXX fit as rough threshhold for the 
+	//Relation from 1903.03909v7 fit as rough threshhold for the 
 	//validity of the tidal_s-tidal_a-q relation
 	//Fit in log(lambda_s) - q space
 	if(  q< 1.2321 - .124616*log(lambda_s)){return true;}

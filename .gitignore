@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Python files
+*.pyc
+
+# Test Files
+tests/data/*

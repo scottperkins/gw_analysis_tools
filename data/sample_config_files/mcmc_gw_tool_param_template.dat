@@ -106,6 +106,8 @@
 [dbl] tidal_s maximum = 1000
 #Whether to use love relations to reduce tidal 1/2 to just tidal_s
 [bool] Tidal love relation = true
+#Whether to marginalize over different EoSs when using binary love (arXiv:1903.03909 section IV.A)
+[bool] Tidal love error marginalization = true
 
 #NS flag for object 1
 [bool] NS Flag 0 = false
