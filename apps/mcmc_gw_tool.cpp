@@ -3,6 +3,7 @@
 #include "ppE_utilities.h"
 #include "io_util.h"
 #include "util.h"
+#include "EA_IMRPhenomD_NRT.h"
 #include <iostream>
 #include <unordered_map>
 #include <string>
@@ -43,6 +44,7 @@ double spin2_prior[2];
 double tidal1_prior[2];
 double tidal2_prior[2];
 double tidal_s_prior[2];
+double EA_prior[8];
 double RA_bounds[2];
 double sinDEC_bounds[2];
 bool tidal_love=true;
@@ -50,6 +52,7 @@ double DL_prior[2];
 bool tidal_love_boundary_violation(double q,double lambda_s);
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters);
+double EA_current_constraints(double *pos, mcmc_data_interface *interface, void *parameters);
 double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
 double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -269,8 +272,46 @@ int main(int argc, char *argv[])
 	{
 		jeff_prior = bool_dict["Jeffreys prior"];
 	}
-	
-
+       
+	//Einstein AEther priors
+	if(generation_method.find("EA") != std::string::npos){
+	  if(dbl_dict.find("EA c_a minimum") == dbl_dict.end()){
+	    EA_prior[0]=0;
+	    EA_prior[1]=pow(10,-4.);
+	  }
+	  else{
+	    EA_prior[0]=dbl_dict["EA c_a minimum"];
+	    EA_prior[1]=dbl_dict["EA c_a maximum"];
+	  }
+	  if(dbl_dict.find("EA c_theta minimum") == dbl_dict.end()){
+	    EA_prior[2]=0;
+	    EA_prior[3]=pow(10,-4.);
+	  }
+	  else{
+	    EA_prior[2]=dbl_dict["EA c_theta minimum"];
+	    EA_prior[3]=dbl_dict["EA c_theta maximum"];
+	  }
+	  if(dbl_dict.find("EA c_w minimum") == dbl_dict.end()){
+	    EA_prior[4]=-10;
+	    EA_prior[5]=10;
+	  }
+	  else{
+	    EA_prior[4]=dbl_dict["EA c_w minimum"];
+	    EA_prior[5]=dbl_dict["EA c_w maximum"];
+	  }
+	  if(dbl_dict.find("EA c_sigma minimum") == dbl_dict.end()){
+	    EA_prior[6]=-pow(10,-15.);
+	    EA_prior[7]=pow(10,-15.);
+	  }
+	  else{
+	    EA_prior[6]=dbl_dict["EA c_sigma minimum"];
+	    EA_prior[7]=dbl_dict["EA c_sigma maximum"];
+	  }
+	  std::cout<<"Range of EA c_a: "<<EA_prior[0]<<" - "<<EA_prior[1]<<std::endl;
+	  std::cout<<"Range of EA c_theta: "<<EA_prior[2]<<" - "<<EA_prior[3]<<std::endl;
+	  std::cout<<"Range of EA c_w: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
+	  std::cout<<"Range of EA c_sigma: "<<EA_prior[6]<<" - "<<EA_prior[7]<<std::endl;
+	}
 	
 	int psd_length ;
 	count_lines_LOSC_PSD_file(psd_file, &psd_length);
@@ -863,32 +904,139 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 
 }
+double EA_current_constraints(double *pos, mcmc_data_interface *interface, void *parameters)
+{
+  int dim =  interface->max_dim;
+  double a = -std::numeric_limits<double>::infinity();
+
+  source_parameters<double> sp;
+  double lnChirpmass = pos[7];//ln(M_sol)
+  double eta = pos[8];
+  
+  sp.mass1 = calculate_mass1(std::exp(lnChirpmass)*MSOL_SEC,eta);
+  sp.mass2 = calculate_mass2(std::exp(lnChirpmass)*MSOL_SEC,eta);
+  sp.M = sp.mass1 + sp.mass2;
+  
+  if(tidal_love){
+    sp.ca_EA = pos[12]; //ca
+    sp.ctheta_EA = pos[13]; //ctheta
+    sp.cw_EA = pos[14]; //cw
+    sp.csigma_EA = pos[15]; //csigma
+  }
+  else{
+    sp.ca_EA = pos[13]; //ca
+    sp.ctheta_EA = pos[14]; //ctheta
+    sp.cw_EA = pos[15]; //cw
+    sp.csigma_EA = pos[16]; //csigma  
+  }
+  
+  EA_IMRPhenomD_NRT<double> model;
+  model.pre_calculate_EA_factors(&sp);
+  //std::cout<<"cT_EA="<<sp.cT_EA<<std::endl; 
+  
+  if(sp.cw_EA < (-sp.csigma_EA/(1. - sp.csigma_EA))){return a;}
+  /* Throws out points with cw < -csigma/(1 - csigma) because these violate 
+   * the positive energy condition for the spin-1 mode (vector mode).
+   * Note that the positive energy condition for the spin-2 modes is always 
+   * satisfied and for the spin-0 mode is satisfied by requiring ca > 0 which 
+   * is done when drawing random values of ca. See equation 40 of 
+   * arXiv:gr-qc/0507059v3
+   */
+  else if(sp.cTsq_EA < 0 || sp.cVsq_EA < 0 || sp.cSsq_EA < 0){return a;}
+  /* Throws out points with speeds not greater than or equal to zero (these 
+   * would produce gradient instabilities or ghosts)
+   * arXiv:gr-qc/0402005 and arXiv:1108.1835
+   */
+
+  /*
+    else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
+    {
+    //Pull infinite speed points out of the data set so that they don't mess with my plotting
+    //Keep track of how many we pull?
+    return a; 
+    }
+    else if(isnan(sp.kappa3_EA))
+    {
+    return a; 
+    }
+  */	  
+  else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.)){return a;}
+  /* Throws out points that don't obey the cT constraint from GW170817 and GRB170817A
+   * arXiv:1710.05834
+   */	  
+  if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.)){return a;}
+  /* Throws out points that do not obey observational solar system constraints on 
+   * alpha1 and alpha2
+   * arXiv:1403.7377 and arXiv:gr-qc/0509114
+   */
+  bool violate = false;
+  if(sp.cV_EA < 1)
+    {
+      if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.))
+	//enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
+	{
+	  violate = true;
+	}
+	      
+    }
+  if(violate){return a;}
+	  
+  if(sp.cS_EA < 1)
+    {
+      if(abs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
+	{
+	  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/abs(sp.c14_EA) >= pow(10, -30.)){return a;}
+	  //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
+	}
+      if(abs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
+      //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
+
+    }
+  /*
+  //Random number declaration and seeding
+  const gsl_rng_type *T;
+  gsl_rng *r; 
+  
+  gsl_rng_env_setup();
+  
+  T=gsl_rng_default;
+  r=gsl_rng_alloc(T);
+  gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
+  double sigma = 1.021*pow(10, -5.); 
+  double mu = -0.563*pow(10, -5.);
+  double prob;
+  
+  prob = exp(-(1./2.)*((sp.alpha1_EA - mu)*(sp.alpha1_EA - mu))/(sigma*sigma));
+	  double u = gsl_ran_flat(r, 0, 1.);
+	  if(u > prob)
+	    {
+	      return a;
+	    }
+  */
+  
+  return 0;
+}
 double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters)
 {
 	int dim =  interface->max_dim;
 	double a = -std::numeric_limits<double>::infinity();
-	double CA_MIN= 1e-15;
-	double CA_MAX = 1e-1;
-	double CTHETA_MIN= 1e-15;
-	double CTHETA_MAX = 1e-1;
-	double COMEGA_MIN= 1e-15;
-	double COMEGA_MAX = 1e-1;
-	double CSIGMA_MIN= 1e-15;
-	double CSIGMA_MAX = 1e-1;
+
 	if(tidal_love){
-		if( pos[12] <CA_MIN|| pos[12] >CA_MAX){return a;}
-		if( pos[13] <CTHETA_MIN || pos[13] >CTHETA_MAX){return a;}
-		if( pos[14] <COMEGA_MIN || pos[14] >COMEGA_MAX){return a;}
-		if( pos[15] <CSIGMA_MIN || pos[15] >CSIGMA_MAX){return a;}
+	  if( pos[12] <EA_prior[0] || pos[12] >EA_prior[1]){return a;} //ca
+	  if( pos[13] <EA_prior[2] || pos[13] >EA_prior[3]){return a;} //ctheta
+	  if( pos[14] <EA_prior[4] || pos[14] >EA_prior[5]){return a;} //cw
+	  if( pos[15] <EA_prior[6] || pos[15] >EA_prior[7]){return a;} //csigma
 	}
 	else{
-		if( pos[13] <CA_MIN || pos[13] >CA_MAX){return a;}
-		if( pos[14] <CTHETA_MIN || pos[14] >CTHETA_MAX){return a;}
-		if( pos[15] <COMEGA_MIN || pos[15] >COMEGA_MAX){return a;}
-		if( pos[16] <CSIGMA_MIN || pos[16] >CSIGMA_MAX){return a;}
-
+	  if( pos[13] <EA_prior[0] || pos[13] >EA_prior[1]){return a;} //ca
+	  if( pos[14] <EA_prior[2] || pos[14] >EA_prior[3]){return a;} //ctheta
+	  if( pos[15] <EA_prior[4] || pos[15] >EA_prior[5]){return a;} //cw
+	  if( pos[16] <EA_prior[6] || pos[16] >EA_prior[7]){return a;} //csigma
 	}
-	return standard_log_prior_D_NRT(pos,interface, parameters);
+	
+	double EA_constraints =  EA_current_constraints(pos, interface, parameters); 
+
+	return EA_constraints + standard_log_prior_D_NRT(pos,interface, parameters);
 
 }
 double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters)

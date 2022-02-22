@@ -332,7 +332,7 @@ template void assign_mapping(std::string,theory_ppE_map<double>*,gen_params_base
 template void assign_mapping(std::string,theory_ppE_map<adouble>*,gen_params_base<adouble>*);
 
 
-template<class T>
+/*template<class T>
 void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param, waveform_polarizations<T> *wp, T *freqs, int length)
 {
 	std::complex<T> *hall = new std::complex<T>[length];//Waveform common to all polarizations
@@ -369,6 +369,7 @@ void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param
 }
 template void EA_fully_restricted_v1_additional_modifications(source_parameters<double> *param, waveform_polarizations<double> *wp, double *, int);
 template void EA_fully_restricted_v1_additional_modifications(source_parameters<adouble> *param, waveform_polarizations<adouble> *wp, adouble *, int);
+*/
 
 /* \brief PNSeries conversion
  *
@@ -391,7 +392,7 @@ T PNSeries_beta(int term,source_parameters<T> *param)
 }
 template double PNSeries_beta(int ,source_parameters<double> *);
 template adouble PNSeries_beta(int , source_parameters<adouble> *);
-
+/*
 template<class T>
 T EA_fully_restricted_phase0(source_parameters<T> *p)
 {
@@ -416,7 +417,7 @@ T EA_fully_restricted_phase1(source_parameters<T> *p)
 }
 template double EA_fully_restricted_phase1(source_parameters<double> *);
 template adouble EA_fully_restricted_phase1(source_parameters<adouble> *);
-
+*/
 template<class T>
 T dCS_beta(source_parameters<T> *param)
 {
@@ -782,7 +783,7 @@ int dispersion_lookup(double alpha)
 	return -1;
 }
 
-
+/*
 template<class T>
 void pre_calculate_EA_factors(source_parameters<T> *p)
 {
@@ -853,7 +854,7 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
     +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m2_EA*p->O_m2_EA)
     + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m2_EA, 3.));
   */
-  
+/*
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
@@ -879,4 +880,5 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
 }
 template void pre_calculate_EA_factors(source_parameters<double> *);
 template void pre_calculate_EA_factors(source_parameters<adouble> *);
+*/
 //#############################################################
