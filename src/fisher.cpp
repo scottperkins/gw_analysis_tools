@@ -2338,6 +2338,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 {
 	waveform_params->sky_average = input_params->sky_average;
 	waveform_params->tidal_love = input_params->tidal_love;
+	waveform_params->tidal_love_error = input_params->tidal_love_error;
 	waveform_params->f_ref = input_params->f_ref;
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->horizon_coord = input_params->horizon_coord;
