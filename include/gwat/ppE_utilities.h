@@ -84,11 +84,11 @@ T DipRad_beta( source_parameters<T> *param);
 template<class T>
 T NonComm_beta( source_parameters<T> *param);
 
-template<class T>
+/*template<class T>
 T EA_fully_restricted_phase0(source_parameters<T> *p);
 template<class T>
 T EA_fully_restricted_phase1(source_parameters<T> *p);
-
+*/
 template<class T>
 T ModDispersion_beta( source_parameters<T> *param);
 int dispersion_lookup(double alpha);
@@ -97,10 +97,10 @@ T cosmology_interpolation_function_MD(T x, double *coeffs, int interp_degree);
 template <class T>
 T DL_from_Z_MD(T Z, double alpha);
 
-template<class T>
-void pre_calculate_EA_factors(source_parameters<T> *p);
+//template<class T>
+//void pre_calculate_EA_factors(source_parameters<T> *p);
 
-template<class T>
-void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param, waveform_polarizations<T> *wp);
+//template<class T>
+//void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param, waveform_polarizations<T> *wp);
 
 #endif

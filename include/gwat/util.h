@@ -581,7 +581,7 @@ struct source_parameters
   T abL_EA = 0 ;
   T gX1_EA = 0 ;
 
-bool include_l1=true;
+bool include_l1=false;
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(

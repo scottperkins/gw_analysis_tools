@@ -1452,6 +1452,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	)
 {
 	std::mutex fisher_mutex;
+	std::cout<<"Waveform Approximant: "<<generation_method<<std::endl;
+	std::cout<<"Dimension: "<<dimension<<std::endl;
 
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
@@ -3133,6 +3135,7 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 
 		}
 	}
+	std::cout<<"Likelihood; "<<ll<<std::endl;
 	return ll;
 
 }

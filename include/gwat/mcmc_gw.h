@@ -63,7 +63,7 @@ struct MCMC_modification_struct
 	bool NSflag1 =false;
 	bool NSflag2 =false;
 
-	bool tidal_love = true;
+	bool tidal_love = true; 
         bool tidal_love_error = false;
   
 	/* Whether to use Gauss-Legendre Quadrature for the LIKELIHOOD
