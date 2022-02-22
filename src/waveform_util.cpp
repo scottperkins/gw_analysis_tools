@@ -7,6 +7,7 @@
 #include "IMRPhenomD.h"
 #include "gIMRPhenomD.h"
 #include "gIMRPhenomP.h"
+#include "IMRPhenomD_NRT.h"
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "ppE_utilities.h"
@@ -1574,6 +1575,48 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.incl_angle=internal_params.incl_angle;
 	s_param.shift_time = input_params->shift_time;
 	if(generation_method.find("NRT") != std::string::npos){
+		//Copied directly from prep_source_parameters 
+		//Not ideal..
+		if(input_params->tidal_love){
+			/* The binary love relations are used here to compute lambda_a
+	      		 * as a function of lambda_s (following equations 11-13 of
+	      		 * arXiv:1903.03909). These relations were fit for Neutron stars,
+	      		 * so the relevant coefficients/fit parameters are in
+	      		 * IMRPhenomD_NRT.h.
+	      		 */
+	      		double q, Q, F;
+	      		q = input_params->mass2 / input_params->mass1;
+	      		Q = pow(q, 10./(3. - n_binLove));
+	      		F = (1. - Q)/(1. + Q);
+
+	      		double num = 1;
+	      		double denom = 1;
+	      		double q_pow[2], lambda_pow[3];
+	      		q_pow[0] = q;
+	      		q_pow[1] = q*q;
+	      		lambda_pow[0] = pow(input_params->tidal_s, -1./5.);
+	      		lambda_pow[1] = lambda_pow[0] * lambda_pow[0];
+	      		lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
+	      		for(int i = 0; i<3; i++)
+	      		  {
+	      		    for(int j = 0; j<2; j++)
+	      		      {
+	      		        num += b_binLove[i][j]*q_pow[j]*lambda_pow[i];
+	      		        denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i];
+	      		      }
+	      		  }
+
+	      		input_params->tidal_a = F * (num / denom) * input_params->tidal_s;
+
+
+	      		s_param.tidal1 = input_params->tidal_s + input_params->tidal_a;
+	      		s_param.tidal2 = input_params->tidal_s - input_params->tidal_a;
+	      		
+	      		//Gotta copy these over so that the next two lines run..
+	      		input_params->tidal1= input_params->tidal_s + input_params->tidal_a;
+	      		input_params->tidal2= input_params->tidal_s - input_params->tidal_a;
+
+		}
 		if((input_params->tidal1 < 0 || input_params->tidal2<0) && input_params->tidal_weighted >= 0) {
 			s_param.tidal_weighted = input_params->tidal_weighted;
 		}
