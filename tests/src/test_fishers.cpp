@@ -175,27 +175,38 @@ int test_EA_fisher(int argc, char *argv[])
 
 	//####################################
 	//Add prior
-	double sigma = 1e-20;
-	output_AD[dim-4][dim-4]+= 1./sigma/sigma;
-	output_AD[dim-3][dim-3]+= 1./sigma/sigma;
-	output_AD[dim-2][dim-2]+= 1./sigma/sigma;
-	output_AD[dim-1][dim-1]+= 1./sigma/sigma;
+	double sigma_a = 1e-8;
+	double sigma_theta = 1e-4;
+	double sigma_omega = 1e-1;
+	double sigma_sigma = 1e-15;
+
+	output_AD[dim-4][dim-4]+= 1./sigma_a/sigma_a;
+	output_AD[dim-3][dim-3]+= 1./sigma_theta/sigma_theta;
+	output_AD[dim-2][dim-2]+= 1./sigma_omega/sigma_omega;
+	output_AD[dim-1][dim-1]+= 1./sigma_sigma/sigma_sigma;
 	//####################################
-	
+	for(int i = 0 ; i <4; i++){
+	  for(int j = 0 ; j<dim; j++){
+	    if(i!=j){
+	      output_AD[dim-1-i][dim-1-j] = 0;
+	    }
+	  }
+	}
 
 	//###############################################
 	//Invert and print -- uncomment to see full cov or fisher
 	//###############################################
 	
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	//std::cout<<"AD Fisher:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<output_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	std::cout<<"AD Fisher:"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+		std::cout<<i<<" ";
+		for(int j = 0 ; j<dim; j++){
+			std::cout<<output_AD[i][j]<<" ";
+		}
+		std::cout<<std::endl;
+	}
+	std::cout<<"TEST"<<std::endl;
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
