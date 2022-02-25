@@ -3136,7 +3136,7 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 
 		}
 	}
-	std::cout<<"Likelihood; "<<ll<<std::endl;
+	//std::cout<<"Likelihood; "<<ll<<std::endl;
 	return ll;
 
 }

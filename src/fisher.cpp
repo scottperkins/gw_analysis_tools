@@ -322,6 +322,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		double **dt=NULL;
 		bool corr_time;
 		int local_dimension=dimension;
+		double DTOA = 0;
 		if(detector=="LISA"){
 			times = new double[length];
 			corr_time = false;
@@ -334,6 +335,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			response_minus_minus= new std::complex<double>[length];
 		}
 		for (int i =0; i<local_dimension; i++){
+			DTOA = 0;
 			for( int j =0;j<local_dimension;j++){
 				param_p[j] = parameters_vec[j] ;
 				param_m[j] = parameters_vec[j] ;
@@ -349,14 +351,15 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				param_mm[i] = parameters_vec[i] -2 *epsilon;
 			}
 			repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
-			if(detector=="LISA"){
-				//correct time needs to stay false for now
-				//time_phase_corrected(times, length,frequencies,  &waveform_params, local_gen_method, corr_time);
-				//map_extrinsic_angles(&waveform_params);
-			}
-			else if(reference_detector != detector){
-				waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
-			}
+			//if(detector=="LISA"){
+			//	//correct time needs to stay false for now
+			//	//time_phase_corrected(times, length,frequencies,  &waveform_params, local_gen_method, corr_time);
+			//	//map_extrinsic_angles(&waveform_params);
+			//}
+			//else if(reference_detector != detector){
+			//	waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//	//DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//}
 			fourier_detector_response(frequencies, 
 				length,
 				response_plus,
@@ -364,14 +367,21 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				local_gen_method,
 				&waveform_params,
 				times);	
+			if(reference_detector != detector){
+				DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+				for(int l = 0 ; l<length; l++){
+					response_plus[l] *= exp(std::complex<double>(0,DTOA*frequencies[l]));
+				}
+			}
 
 			repack_parameters(param_m, &waveform_params, gen_method, dimension, parameters);
-			if(detector=="LISA"){
-				//map_extrinsic_angles(&waveform_params);
-			}
-			else if(reference_detector != detector){
-				waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
-			}
+			//if(detector=="LISA"){
+			//	//map_extrinsic_angles(&waveform_params);
+			//}
+			//else if(reference_detector != detector){
+			//	waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//	//DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//}
 			fourier_detector_response(frequencies, 
 				length,
 				response_minus,
@@ -379,6 +389,12 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				local_gen_method,
 				&waveform_params,
 				times);	
+			if(reference_detector != detector){
+				DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+				for(int l = 0 ; l<length; l++){
+					response_minus[l] *= exp(std::complex<double>(0,DTOA*frequencies[l]));
+				}
+			}
 			if(order>=4){
 				repack_parameters(param_pp, &waveform_params, gen_method, dimension, parameters);
 				if(detector=="LISA"){
@@ -872,8 +888,10 @@ void calculate_derivatives_autodiff(double *frequency,
 			//MCMC, which works with real data
 			adouble tc;
 			if(detector != "LISA" && detector != reference_detector){
-				tc = 2*M_PI*(-a_parameters.tc - DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
-				a_parameters.tc = 0;
+				//CHANGED SIGN FOR TC !!!!!!
+				//tc = -2*M_PI*(-a_parameters.tc - DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
+				tc = -2*M_PI*(DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
+				//a_parameters.tc = 0;
 				//a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
 			}
 			int status  = fourier_detector_response(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
