@@ -18,7 +18,11 @@
  *
  * PNSeries_ppE_*_Inspiral -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) -- for inspiral only
  *
- * PNSeries_ppE_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
+ * PNSeries_ppE_*_IMR -- Creates a ppE waveform, but with the expansion parameter of (pi M f)^1/3 instead of (pi Mc f)^1/3 -- IMR
+ *
+ * PNSeries_ppE_*_Inspiral -- Creates a ppE waveform, but with the expansion parameter of (pi M f)^1/3 instead of (pi Mc f)^1/3 -- Inspiral
+ *
+ * ppEAlt_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
  *
  * ExtraDimension -- input beta l^2 in seconds^2
  * 
@@ -139,6 +143,10 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
 		return true;
 	}
+	if(generation_method.find("ppEAlt")!=std::string::npos){
+		return true;
+	}
+
 	if(generation_method.find("polarization_test")!=std::string::npos){
 		return true;
 	}
@@ -300,6 +308,27 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		}
 			
 	}
+	else if(generation_method.find("ppEAlt")!= std::string::npos){
+		mapping->Nmod = params_in->Nmod;
+		mapping->bppe = new double[params_in->Nmod];
+		for(int i = 0 ; i<params_in->Nmod; i++){
+			mapping->bppe[i] =params_in->bppe[i];
+		}
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod]; 
+		for(int i = 0 ; i<params_in->Nmod; i++){
+			auto lam = new std::function<T(source_parameters<T> *)>( [i](source_parameters<T> *p){ return ppEAlt_beta(i,p);} );
+			mapping->beta_fns_ptrs[i] = lam;
+			mapping->beta_fns[i] = *(lam); 
+		}
+		if(generation_method.find("Inspiral")!= std::string::npos){
+			ins = true;
+		}
+		else{
+			ins = false;
+		}
+			
+	}
 	else if(generation_method.find("polarization_test")!= std::string::npos){
 		mapping->Nmod = params_in->Nmod;
 		ins = true;
@@ -347,6 +376,28 @@ void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param
 }
 template void EA_fully_restricted_v1_additional_modifications(source_parameters<double> *param, waveform_polarizations<double> *wp, double *, int);
 template void EA_fully_restricted_v1_additional_modifications(source_parameters<adouble> *param, waveform_polarizations<adouble> *wp, adouble *, int);
+
+/* \brief ppEAlt conversion
+ *
+ * The basis is M f and not \mathcal{M} f, so there's a conversion to account for using ppE waveforms
+ */
+template<class T>
+T ppEAlt_beta(int term,source_parameters<T> *param)
+{
+	T out = 0;
+	T chirpmass = calculate_chirpmass(param->mass1,param->mass2);
+	T total_m = param->mass1 + param->mass2;
+	
+	if(term == 0 ){
+		out = param->betappe[0] * pow(total_m/chirpmass,param->bppe[0]/3.);
+	}
+	else {
+		out = param->betappe[term]* pow(total_m/chirpmass,param->bppe[term]/3.);
+	}
+	return out;
+}
+template double ppEAlt_beta(int ,source_parameters<double> *);
+template adouble ppEAlt_beta(int , source_parameters<adouble> *);
 
 /* \brief PNSeries conversion
  *

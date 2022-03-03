@@ -40,6 +40,8 @@ void deallocate_mapping(theory_ppE_map<T> *mapping);
 template<class T>
 T PNSeries_beta(int term,source_parameters<T> *param);
 
+template<class T>
+T ppEAlt_beta(int term,source_parameters<T> *param);
 
 template<class T>
 T dCS_beta(source_parameters<T> *param);
