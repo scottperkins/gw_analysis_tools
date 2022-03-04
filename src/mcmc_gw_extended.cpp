@@ -240,7 +240,8 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->initialPosition = initialPosition;
 
 	//Testing
-	sampler->coldOnlyStorage = false;
+	//sampler->coldOnlyStorage = false;
+	sampler->coldOnlyStorage = true;
 
 	mcmcVariables **mcmcVarVec  = new mcmcVariables*[chainN];
 	for(int i = 0 ; i<chainN; i++){

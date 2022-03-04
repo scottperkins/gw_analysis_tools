@@ -495,7 +495,6 @@ void dynamic_temperature_full_ensemble_internal(sampler *samplerptr,
 	//step equilibrium_check_freq
 	//for(int i =0; i<N_steps/samplerptr->swp_freq; i++){
 	int steps  = samplerptr->swp_freq;
-	std::cout<<steps<<std::endl;
 	samplerptr->swap_rate = 0;
 	//while(t<(N_steps - samplerptr->swp_freq)){
 	while(t<(N_steps - steps)){
