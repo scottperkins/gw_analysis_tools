@@ -42,7 +42,6 @@ int tc_comparison(int argc, char *argv[]);
 int gIMR_testing(int argc, char *argv[]);
 int polarization_testing(int argc, char *argv[]);
 int BHEvaporation_test(int argc, char *argv[]);
-int EA_fully_restricted_test(int argc, char *argv[]);
 int EA_parameterization_test(int argc, char *argv[]);
 int EA_consistency_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
@@ -86,12 +85,9 @@ int main(int argc, char *argv[])
 		return time_domain_testing(argc,argv);
 	}
 	if(runtime_opt == 7){
-		return EA_fully_restricted_test(argc,argv);
-	}
-	if(runtime_opt == 8){
 		return EA_parameterization_test(argc,argv);
 	}
-	if(runtime_opt == 9){
+	if(runtime_opt == 8){
 		return EA_consistency_test(argc,argv);
 	}
 	else{
@@ -286,7 +282,7 @@ int EA_parameterization_test(int argc, char *argv[])
 	//int num_infspeeds = 0;
 	//int num_nan = 0;
 	int num_Cherenkov = 0;
-	int dim = 9;// Increase for every factor you want to output
+	int dim = 8;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
 	double a_bound = -4.; //(case 1)
@@ -396,11 +392,14 @@ int EA_parameterization_test(int argc, char *argv[])
 	  params.tidal_s = lambdas;
 	  }
 	  while((params.mass2/params.mass1) < 1.2321 - .124616*log(params.tidal_s));
+	  params.tidal_love_error = true; 
 	  
 	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
 	  //This also runs pre_calculate_EA_factors
+	  //std::cout<<"tidal_s = "<<params.tidal_s<<"  tidal_a = "<<params.tidal_a<<std::endl;
+	  //cstd::cout<<"tidal_1 = "<<sp.tidal1<<"  tidal_2 = "<<sp.tidal2<<std::endl;
 
-	  double new_lambdaa = tidal_error(params.tidal_s, params.tidal_a, params.mass2/params.mass1); 
+	  //double new_lambdaa = tidal_error(params.tidal_s, params.tidal_a, params.mass2/params.mass1); 
 	  	  
 	  if(params.cw_EA < (-params.csigma_EA/(1. - params.csigma_EA)))
 	    {
@@ -525,7 +524,7 @@ int EA_parameterization_test(int argc, char *argv[])
 	  output[i][6] = params.tidal_s;
 	  //output[i][7] = new_lambdaa;
 	  output[i][7] = params.tidal_a;
-	  output[i][8] = new_lambdaa; 
+	  //output[i][8] = new_lambdaa; 
 
 	  /*output[i][6] = sp.tidal1;
 	  output[i][7] = sp.tidal2;
@@ -556,100 +555,7 @@ int EA_parameterization_test(int argc, char *argv[])
 	delete [] params.bppe;
 	return 0;
 }
-int EA_fully_restricted_test(int argc, char *argv[])
-{
-	gen_params params;	
-	params.spin1[2] = .3;
-	params.spin2[2] = .1;
-	params.spin1[1] = .3;
-	params.spin2[1] = .1;
-	params.spin1[0] = .3;
-	params.spin2[0] = .1;
-	//params.chip = .07;
-	//params.phip = 0.1;
-	params.Luminosity_Distance = 100;
-	params.phiRef = 1;
-	params.RA = 2.;
-	params.DEC = -1.1;
-	params.f_ref = 20;
-	params.NSflag1 = true;
-	params.NSflag2 = true;
-	params.horizon_coord = false;
-	params.shift_time=true;
-	params.shift_phase=true;
-	
-	params.mass1 = 1.4;
-	params.mass2 = 1.3;
-	params.tc = 6;
-	params.equatorial_orientation = false;
-	params.psi = 1.;
-	params.incl_angle = M_PI/3.;
-	params.gmst=3;
 
-	params.Nmod = 4;
-	params.bppe = new double[4];
-	params.bppe[0] = -13;
-	params.bppe[1] = -13;
-	params.bppe[2] = -13;
-	params.bppe[3] = -13;
-	params.betappe = new double[4];
-	//params.betappe[0] = .001;
-	params.betappe[0] = 1;
-	params.betappe[1] = 1;
-	params.betappe[2] = 1;
-	params.betappe[3] = 1;
-	params.tidal1 = 10;
-	params.tidal2 = 10;
-	
-	int length = 10000;
-	double freqs[length];
-	//double fhigh =pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
-	double fhigh =4000;//pow(6,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
-	double flow = pow(100,-3./2)/(M_PI * (params.mass1+params.mass2)*MSOL_SEC);
-	std::cout<<flow<< " " <<fhigh<<std::endl;
-	double delta_f = (fhigh - flow)/length;
-	for(int i = 0 ; i<length; i++){
-		freqs[i] = flow + delta_f*i;
-	}
-	//	std::complex<double> responseED[length];
-	double **output = new double*[2];
-	output[0] = new double[length];
-	output[1] = new double[length];
-
-	//std::complex<double> *hplus = new std::complex<double>[length];
-	//std::complex<double> *hcross = new std::complex<double>[length];
-	
-	waveform_polarizations<double> wp;
-	assign_polarizations("EA_fully_restricted_v1_IMRPhenomD_NRT",&wp);
-	wp.allocate_memory(length);
-	//wp.hplus = hplus;	
-	//wp.hcross = hcross;	
-
-
-	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD_NRT",&params, (double*)NULL);
-	fourier_waveform(freqs, length, &wp, "EA_fully_restricted_v1_IMRPhenomD_NRT",&params);
-	//fourier_detector_response(freqs, length, responseED, "Hanford", "EA_fully_restricted_v1_IMRPhenomD",&params, (double*)NULL);
-	//std::string dets[2] = {"Hanford","Livingston"};
-	//std::complex<double> **responses= new std::complex<double>*[2];
-	//responses[0] = new std::complex<double>[length];
-	//responses[1] = new std::complex<double>[length];
-	//create_coherent_GW_detection_reuse_WF(dets, 2, freqs, length, &params, "EA_fully_restricted_v1_IMRPhenomD",responses);
-	//delete[]responses[0];
-	//delete[]responses[1];
-	//delete [] responses;
-
-	//for(int i =0 ; i<length ; i++){
-	//	output[0][i] = std::real(responseED[i]);
-	//	output[1][i] = std::imag(responseED[i]);
-	//}
-	//write_file("data/EA_fully_restricted_v1_waveform.csv",output, 2,length);
-	//################################
-	//delete [] params.bppe; delete[] params.betappe;delete [] output[0];delete [] output[1];delete [] output;
-	delete[] params.betappe;delete [] params.bppe;delete [] output[0];delete [] output[1];delete [] output;
-	wp.deallocate_memory();
-	//delete [] hplus; delete [] hcross;
-	return 0;
-}
 int time_domain_testing(int argc, char *argv[])
 {
 
@@ -1101,14 +1007,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	std::cout.precision(15);
 	bool P = false;
 	bool NRT = true;
-	bool tidalsym = true; 
+	bool tidalsym = false; 
 	bool EA = true;
 	bool gIMR = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 10;
+	int iterations = 1;
 	double times[iterations][2];
 	//###############################################################################
 	int rows = 500;
@@ -1525,6 +1431,10 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	std::cout<<"\n"<<"Average LAL time: "<<lal_sum / iterations<<std::endl;
 	std::cout<<"Average GWAT time: "<<gwat_sum / iterations<<std::endl;
 	gsl_rng_free(r);
+	if(input){
+	  deallocate_2D_array(input, rows,cols);
+	  input=nullptr;
+	}
 	return 1; 
 }
 #endif
@@ -1539,7 +1449,6 @@ void RT_ERROR_MSG()
 	std::cout<<"4 --- test polarizations waveforms"<<std::endl;
 	std::cout<<"5 --- test BHEvaporation waveforms"<<std::endl;
 	std::cout<<"6 --- test time domain waveforms"<<std::endl;
-	std::cout<<"7 --- EA fully restricted waveform"<<std::endl;
-	std::cout<<"8 --- EA fully restricted waveform parameterization"<<std::endl;
-	std::cout<<"9 --- EA fully restricted consistency test"<<std::endl;
+	std::cout<<"7 --- EA waveform parameterization test"<<std::endl;
+	std::cout<<"8 --- EA consistency test"<<std::endl;
 }

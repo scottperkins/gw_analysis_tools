@@ -2594,6 +2594,21 @@ void MCMC_fisher_transformations(
 			fisher[i][base] *= factor;
 		}
 	}
+	if(generation_method.find("EA") != std::string::npos){
+	  for(int i = 0 ; i <4; i++){
+	    for(int j = 0 ; j<dimension; j++){
+	      if(i!=j){
+	      fisher[dimension-1-i][dimension-1-j] = 0;
+	      fisher[dimension-1-j][dimension-1-i] = 0;
+
+	      }
+	      if(i==j){
+		fisher[dimension-1-i][dimension-1-j] = 1;
+	      }
+	    }
+	  }
+	}
+	
 	return;
 
 }
@@ -2930,6 +2945,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 }
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
+  //double start = omp_get_wtime();
 	//return 2;
 	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
@@ -3136,7 +3152,15 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 
 		}
 	}
-	//std::cout<<"Likelihood; "<<ll<<std::endl;
+	//std::cout<<"LL time for eval: "<<(double)(omp_get_wtime() -start)<<std::endl;
+	std::cout<<"Likelihood: "<<ll<<std::endl;
+	if(isnan(ll)){
+		std::cout<<"NAN"<<std::endl;
+		for(int i = 0 ; i<dimension; i++){
+			std::cout<<param[i]<<", ";
+		}
+		std::cout<<std::endl;
+	}
 	return ll;
 
 }

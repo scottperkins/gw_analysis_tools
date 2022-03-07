@@ -8,6 +8,7 @@
 #include <cmath>
 #include <complex>
 #include "util.h"
+#include <gsl/gsl_randist.h>
 
 /*! \file 
  * File for the addition of tidal effects to the waveform. 
@@ -15,8 +16,110 @@
  * Extends the IMRPhenomD template to include tidal effects, following the 
  * NRTidal model of arXiv:1905.06011v2. Specifically, equations 17, 18, 19, 20, 21, 24
  * and 25 were used. A Planck taper was added to the waveform following arXiv:1003.2939.
+ * 
+ * Also included in this file, binary love relations and error marginalization 
+ * over different equations of state. 
  */
 
+double tidal_error(double tidal_s, double tidal_a, double q){
+  /* Performing error marginalization over residual EoS 
+   * dependence of the binary Love relations (following 
+   * equations 15-22 of arXiv:1903.03909). The relevant 
+   * coefficients/fit parameters are in IMRPhenomD_NRT.h. 
+   */
+  double error, error_mean, error_standardDev, sigma_L, sigma_q;
+  double lambda_pow_new[3];
+  double q_sq = q*q;
+  
+  lambda_pow_new[0] = pow(tidal_s, 1./2.);
+  lambda_pow_new[1] = lambda_pow_new[0]*tidal_s;
+  lambda_pow_new[2] = lambda_pow_new[1]*tidal_s; 
+  //error_mean = (mu_binLove[0]*tidal_s + mu_binLove[1] + mu_binLove[2]*q*q + mu_binLove[3]*q + mu_binLove[4])/2.; //definition given in arXiv:1903.03909
+  /*
+    sigma_L = sigma_binLove[0]*lambda_pow_new[2] + sigma_binLove[1]*lambda_pow_new[1] + sigma_binLove[2]*tidal_s + sigma_binLove[3]*lambda_pow_new[0] + sigma_binLove[4];
+    sigma_q = sigma_binLove[5]*q*q*q + sigma_binLove[6]*q*q + sigma_binLove[7]*q + sigma_binLove[8]; 
+    error_standardDev = sqrt(sigma_L*sigma_L + sigma_q*sigma_q); 
+    //Definition given in arXiv:1903.03909
+    */
+
+  //Using the new formulation and coefficients we found
+  error_mean = bL_error[0] + bL_error[1]*q + bL_error[2]*q_sq + bL_error[3]*tidal_s + bL_error[4]*q*tidal_s + bL_error[5]*q_sq*tidal_s + bL_error[6]*q*tidal_s*tidal_s;
+  sigma_q = bL_error[7] + bL_error[8]*q + bL_error[9]*q_sq + bL_error[10]*q*q_sq;
+  sigma_L = bL_error[11]*lambda_pow_new[2] + bL_error[12]*lambda_pow_new[1] + bL_error[13]*tidal_s + bL_error[14]*lambda_pow_new[0];
+  error_standardDev = sigma_q + sigma_L + bL_error[15]*lambda_pow_new[0]*q + bL_error[16]*q_sq*lambda_pow_new[0] + bL_error[17]*q*tidal_s;
+		  
+  //Random number declaration and seeding
+  const gsl_rng_type *t;
+  gsl_rng *r;
+  
+  double seed = omp_get_wtime();
+  gsl_rng_env_setup();
+  
+  t=gsl_rng_default;
+  r=gsl_rng_alloc(t);
+  gsl_rng_set(r, ( seed-( (int)seed) )*pow(10, 6.) ); //seeding the random number generator with time
+		  
+  //Now get a random point from the normal distribution with mean (error_mean) and variance (error_variance).
+  //This will be added to the binary love relation.
+		  
+  error = error_mean + gsl_ran_gaussian(r, error_standardDev);
+  gsl_rng_free(r);
+  
+  tidal_a += error;
+  //std::cout<<"Error flag is set correctly and tidal love error is being calculated."<<std::endl; //print for testing purposes
+	       
+  return tidal_a;
+}
+
+adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q)
+{
+  std::cout<<"Note that error marginalization over the EoS for the binary love relations is not supported for Fishers and is not being performed."<<std::endl; 
+  return tidal_a;
+}
+
+template<class T>
+void IMRPhenomD_NRT<T>::binary_love_relation(T tidal_s, bool tidal_love_error, source_parameters<T> *sp)
+{
+  /* The binary love relations are used here to compute lambda_a
+   * as a function of lambda_s (following equations 11-13 of
+   * arXiv:1903.03909). These relations were fit for Neutron stars,
+   * so the relevant coefficients/fit parameters are in
+   * IMRPhenomD_NRT.h.
+   */
+  T tidal_a = -1;
+      
+  T q, Q, F;
+  q = sp->mass2 / sp->mass1;
+  Q = pow(q, 10./(3. - n_binLove));
+  F = (1. - Q)/(1. + Q);
+      
+  T num = 1;
+  T denom = 1;
+  T q_pow[2], lambda_pow[3];
+  q_pow[0] = q;
+  q_pow[1] = q*q;
+  lambda_pow[0] = pow(tidal_s, -1./5.);
+  lambda_pow[1] = lambda_pow[0] * lambda_pow[0];
+  lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
+  for(int i = 0; i<3; i++)
+    {
+      for(int j = 0; j<2; j++)
+	{
+	  num += b_binLove[i][j]*q_pow[j]*lambda_pow[i];
+	  denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i];
+	}
+    }
+  
+  tidal_a = F * (num / denom) * tidal_s;
+  
+  if(tidal_love_error)
+    {
+      tidal_a = tidal_error(tidal_s, tidal_a, q);
+    }
+    
+  sp->tidal1 = tidal_s + tidal_a;
+  sp->tidal2 = tidal_s - tidal_a;      
+}
 
 template<class T>
 void IMRPhenomD_NRT<T>::assign_static_pn_phase_coeff(source_parameters<T> *source_param, T *coeff)

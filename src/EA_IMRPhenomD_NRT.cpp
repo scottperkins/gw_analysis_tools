@@ -9,6 +9,7 @@
 #include <cmath>
 #include <complex>
 #include "util.h"
+#include <stdio.h>
 
 /*! \file
  * File for the construction of waveforms in Einstein AEther theory,
@@ -74,15 +75,24 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   coeff1 =  ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.);
   coeff2 = ((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA));
   coeff3 = (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA)));
-
-	//std::cout<<"alpha1: "<<p->alpha1_EA<<std::endl;
-	//std::cout<<"alpha2: "<<p->alpha2_EA<<std::endl;
-	//std::cout<<"Coeff1: "<<coeff1<<std::endl;
-	//std::cout<<"Coeff2: "<<coeff2<<std::endl;
-	//std::cout<<"Coeff3: "<<coeff3<<std::endl;
-	//std::cout<<"OmRatio: "<<OmRatio<<std::endl;
+  
   s = coeff1 * (OmRatio) + coeff2 * (OmRatio*OmRatio) + coeff3 * (pow(OmRatio, 3.));
-	//std::cout<<"s "<<s<<std::endl;
+  //if(p->c14_EA < pow(10, -32.)){
+  /* std::cout<<"c1: "<<p->c1_EA<<", c14: "<<p->c14_EA<<", c13: "<<p->c13_EA<<", cminus: "<<p->cminus_EA<<std::endl;
+      
+      std::cout<<"alpha1: "<<p->alpha1_EA<<std::endl;
+      std::cout<<"alpha2: "<<p->alpha2_EA<<std::endl;
+      std::cout<<"Coeff1: "<<coeff1<<std::endl;
+      std::cout<<"Coeff2: "<<coeff2<<std::endl;
+      std::cout<<"Coeff3: "<<coeff3<<std::endl;
+      std::cout<<"tidal1: "<<p->tidal1<<", tidal2: "<<p->tidal2<<std::endl;
+      std::cout<<"lambda: "<<lambda<<std::endl; 
+      std::cout<<"lambda^(-1/5): "<<lambda_pow[0]<<std::endl; 
+      std::cout<<"compact: "<<compact<<std::endl; 
+      std::cout<<"OmRatio: "<<OmRatio<<std::endl;
+      std::cout<<"s "<<s<<std::endl;*/
+      // }
+  //if(p->c14_EA < pow(10, -32.)){std::cout<<"s "<<s<<std::endl;}
 
   return s;
 }
@@ -147,8 +157,8 @@ void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(bool EA_nan_error_message, source_
 template<class T>
 void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 {
-  p->s1_EA = 2e-5;
-  p->s2_EA = 1e-5;
+  //p->s1_EA = 2e-5;
+  //p->s2_EA = 1e-5;
   p->V_x_EA = 0;
   p->V_y_EA = 0;
   p->V_z_EA = 0;
@@ -160,9 +170,12 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.;
 
   //more convenient parameters
-  p->c13_EA = p->c1_EA + p->c3_EA;
+  /*p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
-  p->c14_EA = p->c1_EA + p->c4_EA;
+  p->c14_EA = p->c1_EA + p->c4_EA;*/
+  p->c13_EA = p->csigma_EA;
+  p->c14_EA = p->ca_EA;
+  p->cminus_EA = p->cw_EA; 
 
   //squared speeds of the different polarizations
   p->cTsq_EA = 1./(1. - p->c13_EA);
@@ -198,10 +211,10 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   //Get sensitivities
   p->s1_EA = calculate_EA_sensitivity(1, p);
   p->s2_EA = calculate_EA_sensitivity(2, p);
-
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M);
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
+
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
   //bool EA_nan_error_message = true;
@@ -230,6 +243,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   //std::cout<<"cV "<<p->cV_EA<<std::endl;
   //std::cout<<"cS "<<p->cS_EA<<std::endl;
 
+    
 }
 //template void pre_calculate_EA_factors(source_parameters<double> *);
 //template void pre_calculate_EA_factors(source_parameters<adouble> *);

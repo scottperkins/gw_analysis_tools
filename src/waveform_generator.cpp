@@ -1234,13 +1234,13 @@ template int fourier_phase<adouble>(adouble *, int, adouble *,adouble *, std::st
 template int time_waveform<double>(double *, int, waveform_polarizations<double> *wp, std::string, gen_params_base<double> *);
 template int time_waveform<adouble>(adouble *, int, waveform_polarizations<adouble> *wp, std::string, gen_params_base<adouble> *);
 
-double tidal_error(double tidal_s, double tidal_a, double q){
+//double tidal_error(double tidal_s, double tidal_a, double q){
   		  /* Performing error marginalization over residual EoS 
 		   * dependence of the binary Love relations (following 
 		   * equations 15-22 of arXiv:1903.03909). The relevant 
 		   * coefficients/fit parameters are in IMRPhenomD_NRT.h. 
 		   */
-		  double error, error_mean, error_standardDev, sigma_L, sigma_q;
+/*		  double error, error_mean, error_standardDev, sigma_L, sigma_q;
 		  double lambda_pow_new[3];
 		  double q_sq = q*q;
 		  
@@ -1256,7 +1256,7 @@ double tidal_error(double tidal_s, double tidal_a, double q){
 		  */
 
 		  //Using the new formulation and coefficients we found
-		  error_mean = bL_error[0] + bL_error[1]*q + bL_error[2]*q_sq + bL_error[3]*tidal_s + bL_error[4]*q*tidal_s + bL_error[5]*q_sq*tidal_s + bL_error[6]*q*tidal_s*tidal_s;
+/*		  error_mean = bL_error[0] + bL_error[1]*q + bL_error[2]*q_sq + bL_error[3]*tidal_s + bL_error[4]*q*tidal_s + bL_error[5]*q_sq*tidal_s + bL_error[6]*q*tidal_s*tidal_s;
 		  sigma_q = bL_error[7] + bL_error[8]*q + bL_error[9]*q_sq + bL_error[10]*q*q_sq;
 		  sigma_L = bL_error[11]*lambda_pow_new[2] + bL_error[12]*lambda_pow_new[1] + bL_error[13]*tidal_s + bL_error[14]*lambda_pow_new[0];
 		  error_standardDev = sigma_q + sigma_L + bL_error[15]*lambda_pow_new[0]*q + bL_error[16]*q_sq*lambda_pow_new[0] + bL_error[17]*q*tidal_s;
@@ -1282,13 +1282,13 @@ double tidal_error(double tidal_s, double tidal_a, double q){
 		  //std::cout<<"Error flag is set correctly and tidal love error is being calculated."<<std::endl; //print for testing purposes
 	       
 		  return tidal_a;
-}
+		  }*/
 
-adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q)
+/*adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q)
 {
   std::cout<<"Note that error marginalization over the EoS for the binary love relations is not supported for Fishers and is not being performed."<<std::endl; 
   return tidal_a;
-}
+  }*/
 
 template<class T>
 std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method){
@@ -1344,47 +1344,13 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	  //if(in->tidal_s >=0)
 	  if(in->tidal_love )
 	    {
-	      /* The binary love relations are used here to compute lambda_a
-	       * as a function of lambda_s (following equations 11-13 of
-	       * arXiv:1903.03909). These relations were fit for Neutron stars,
-	       * so the relevant coefficients/fit parameters are in
-	       * IMRPhenomD_NRT.h.
-	       */
-	      T q, Q, F;
-	      q = in->mass2 / in->mass1;
-	      Q = pow(q, 10./(3. - n_binLove));
-	      F = (1. - Q)/(1. + Q);
-
-	      T num = 1;
-	      T denom = 1;
-	      T q_pow[2], lambda_pow[3];
-	      q_pow[0] = q;
-	      q_pow[1] = q*q;
-	      lambda_pow[0] = pow(in->tidal_s, -1./5.);
-	      lambda_pow[1] = lambda_pow[0] * lambda_pow[0];
-	      lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
-	      for(int i = 0; i<3; i++)
-		{
-		  for(int j = 0; j<2; j++)
-		    {
-		      num += b_binLove[i][j]*q_pow[j]*lambda_pow[i];
-		      denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i];
-		    }
-		}
-
-	      in->tidal_a = F * (num / denom) * in->tidal_s;
-
-	      if(in->tidal_love_error)
-		{
-		  in->tidal_a = tidal_error(in->tidal_s, in->tidal_a, q);
-		}
-
-	      out->tidal1 = in->tidal_s + in->tidal_a;
-	      out->tidal2 = in->tidal_s - in->tidal_a;
-	      
-	      //Gotta copy these over so that the next two lines run..
-	      in->tidal1= out->tidal1;
+	      IMRPhenomD_NRT<T> modelNRT; 
+	      modelNRT.binary_love_relation(in->tidal_s, in->tidal_love_error, out);
+	      in->tidal1= out->tidal1; //copying into the gen params struct
 	      in->tidal2= out->tidal2;
+	      
+	      in->tidal_a = (in->tidal1 - in->tidal2)/2.; 
+
 	    }
 	  if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
 	    out->tidal_weighted = in->tidal_weighted;
@@ -1523,7 +1489,6 @@ bool check_extra_polarizations(std::string generation_method)
 	if(generation_method == "polarization_test_IMRPhenomD"){
 		return true;
 	}
-	//if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 		return true;
 	}
@@ -1541,7 +1506,6 @@ void assign_polarizations(std::string generation_method, waveform_polarizations<
 		wp->active_polarizations[4]=true;
 		wp->active_polarizations[5]=true;
 	}
-	//else if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
 	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 		wp->active_polarizations[0]=true;
 		wp->active_polarizations[1]=true;
