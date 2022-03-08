@@ -59,12 +59,16 @@ find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 ###############################################################
 
 SET(PTRJMCMC_INCLUDE_DIR "/Users/sperkins/git-repos/PTRJMCMC/build/install/include")
 SET(PTRJMCMC_LIBRARIES "/Users/sperkins/git-repos/PTRJMCMC/build/install/lib/libptrjmcmc.dylib")
 ###############################################################
+
+set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${PTRJMCMC_INCLUDE_DIR}" )
+set(LIB_DIRS "${HDF5_LIBRARIES};OpenMP::OpenMP_CXX;${ADOLC_LIBRARIES};${FFTW3_LIBRARIES};${GSL_LIBRARIES};m;${PTRJMCMC_LIBRARIES}")
 
 
 #Library
