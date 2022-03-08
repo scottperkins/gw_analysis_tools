@@ -2947,222 +2947,222 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
 {
   //double start = omp_get_wtime();
 	//return 2;
-	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
+  MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
-	int dimension = interface->max_dim;
-	double ll = 0;
-	double *temp_params = new double[dimension];
-	//#########################################################################
-	gen_params_base<double> gen_params;
-	std::string local_gen = MCMC_prep_params(param, 
-		temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
-	//#########################################################################
-	//#########################################################################
+  int dimension = interface->max_dim;
+  double ll = 0;
+  double *temp_params = new double[dimension];
+  //#########################################################################
+  gen_params_base<double> gen_params;
+  std::string local_gen = MCMC_prep_params(param, 
+					   temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
+  //#########################################################################
+  //#########################################################################
 
-	//repack_non_parameters(temp_params, &gen_params, 
-		//"MCMC_"+mcmc_generation_method, dimension, NULL);
-	repack_parameters(temp_params, &gen_params, 
-		"MCMC_"+mcmc_generation_method, dimension, NULL);
-	//#########################################################################
-	//#########################################################################
-	//return 1;
-	std::complex<double> **local_data = mcmc_data;
-	double **local_freqs = mcmc_frequencies;
-	double **local_noise = mcmc_noise;
-	double **local_weights = user_param->weights;
-	int *local_lengths = mcmc_data_length;
-	fftw_outline *local_plans = mcmc_fftw_plans;
-	std::string local_integration_method="SIMPSONS";
-	//if(interface->burn_phase && user_param->burn_data){
-	if(false){
-		local_data = user_param->burn_data;
-		local_freqs = user_param->burn_freqs;
-		local_noise = user_param->burn_noise;
-		local_lengths = user_param->burn_lengths;
-		local_plans = user_param->burn_plans;
-	}
-	if(user_param->GAUSS_QUAD){
-		local_integration_method="GAUSSLEG";
-	}
-	if(mcmc_intrinsic){
-		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
-			if(!mcmc_save_waveform){
-				for(int i=0; i < mcmc_num_detectors; i++){
-					gen_params.theta=0;	
-					gen_params.phi=0;	
-					gen_params.psi=0;	
-					gen_params.phiRef = 1;
-					gen_params.f_ref = 10;
-					gen_params.incl_angle=0;	
-					gen_params.tc =1;
-					std::complex<double> *response =
-						(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[i]);
-					fourier_detector_response_horizon(local_freqs[i], local_lengths[i], response, mcmc_detectors[i], local_gen, &gen_params);
-					ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
-							local_noise[i],
-							local_freqs[i],
-							response,
-							(size_t) local_lengths[i],
-							&local_plans[i]
-							);
-					//ll += maximized_Log_Likelihood(mcmc_data[i], 
-					//		mcmc_noise[i],
-					//		mcmc_frequencies[i],
-					//		(size_t) mcmc_data_length[i],
-					//		&gen_params,
-					//		mcmc_detectors[i],
-					//		local_gen,
-					//		&mcmc_fftw_plans[i]
-					//		);
-					free(response);
+  //repack_non_parameters(temp_params, &gen_params, 
+  //"MCMC_"+mcmc_generation_method, dimension, NULL);
+  repack_parameters(temp_params, &gen_params, 
+		    "MCMC_"+mcmc_generation_method, dimension, NULL);
+  //#########################################################################
+  //#########################################################################
+  //return 1;
+  std::complex<double> **local_data = mcmc_data;
+  double **local_freqs = mcmc_frequencies;
+  double **local_noise = mcmc_noise;
+  double **local_weights = user_param->weights;
+  int *local_lengths = mcmc_data_length;
+  fftw_outline *local_plans = mcmc_fftw_plans;
+  std::string local_integration_method="SIMPSONS";
+  //if(interface->burn_phase && user_param->burn_data){
+  if(false){
+    local_data = user_param->burn_data;
+    local_freqs = user_param->burn_freqs;
+    local_noise = user_param->burn_noise;
+    local_lengths = user_param->burn_lengths;
+    local_plans = user_param->burn_plans;
+  }
+  if(user_param->GAUSS_QUAD){
+    local_integration_method="GAUSSLEG";
+  }
+  if(mcmc_intrinsic){
+    if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
+      if(!mcmc_save_waveform){
+	for(int i=0; i < mcmc_num_detectors; i++){
+	  gen_params.theta=0;	
+	  gen_params.phi=0;	
+	  gen_params.psi=0;	
+	  gen_params.phiRef = 1;
+	  gen_params.f_ref = 10;
+	  gen_params.incl_angle=0;	
+	  gen_params.tc =1;
+	  std::complex<double> *response =
+	    (std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[i]);
+	  fourier_detector_response_horizon(local_freqs[i], local_lengths[i], response, mcmc_detectors[i], local_gen, &gen_params);
+	  ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
+							       local_noise[i],
+							       local_freqs[i],
+							       response,
+							       (size_t) local_lengths[i],
+							       &local_plans[i]
+							       );
+	  //ll += maximized_Log_Likelihood(mcmc_data[i], 
+	  //		mcmc_noise[i],
+	  //		mcmc_frequencies[i],
+	  //		(size_t) mcmc_data_length[i],
+	  //		&gen_params,
+	  //		mcmc_detectors[i],
+	  //		local_gen,
+	  //		&mcmc_fftw_plans[i]
+	  //		);
+	  free(response);
 				}
-			}
-			else{
-				gen_params.theta=0;	
-				gen_params.phi=0;	
-				gen_params.psi=0;	
-				gen_params.phiRef = 1;
-				gen_params.f_ref = 10;
-				gen_params.incl_angle=0;	
-				gen_params.tc =1;
-				std::complex<double> *response =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
-				fourier_detector_response_horizon(local_freqs[0], local_lengths[0], response, mcmc_detectors[0], local_gen, &gen_params);
-				//std::complex<double> *hc =
-				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
-				//std::complex<double> *hp =
-				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
-				//fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
-				for(int i=0; i < mcmc_num_detectors; i++){
-					ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
-							local_noise[i],
-							local_freqs[i],
-							response,
-							(size_t) local_lengths[i],
-							&local_plans[i]
-							);
-					//ll += maximized_Log_Likelihood(mcmc_data[i], 
-					//		mcmc_noise[i],
-					//		mcmc_frequencies[i],
-					//		(size_t) mcmc_data_length[i],
-					//		&gen_params,
-					//		mcmc_detectors[i],
-					//		local_gen,
-					//		&mcmc_fftw_plans[i]
-					//		);
-					//ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
-					//		mcmc_noise[i],
-					//		mcmc_frequencies[i],
-					//		hp,
-					//		hc,
-					//		(size_t) mcmc_data_length[i],
-					//		&mcmc_fftw_plans[i]
-					//		);
-				}
-				free(response);
-				//free(hp);
-				//free(hc);
-
-			}
-
-		}
-		else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
-			//if(!mcmc_save_waveform){
-			if(false){
-			}
-			else{
-				gen_params.theta=0;	
-				gen_params.phi=0;	
-				gen_params.psi=0;	
-				gen_params.phiRef = 1;
-				gen_params.f_ref = 20;
-				gen_params.incl_angle=0;	
-				gen_params.tc =1;
-				waveform_polarizations<double> wp;
-				assign_polarizations(mcmc_generation_method,&wp);
-				wp.allocate_memory(local_lengths[0]);
-				fourier_waveform(local_freqs[0],local_lengths[0], &wp, local_gen, &gen_params);
-				for(int i=0; i < mcmc_num_detectors; i++){
-					ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
-							local_noise[i],
-							local_freqs[i],
-							wp.hplus,
-							wp.hcross,
-							(size_t) local_lengths[i],
-							&local_plans[i]
-							);
-				}
-				wp.deallocate_memory();
-			}
-
-		}
+      }
+      else{
+	gen_params.theta=0;	
+	gen_params.phi=0;	
+	gen_params.psi=0;	
+	gen_params.phiRef = 1;
+	gen_params.f_ref = 10;
+	gen_params.incl_angle=0;	
+	gen_params.tc =1;
+	std::complex<double> *response =
+	  (std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
+	fourier_detector_response_horizon(local_freqs[0], local_lengths[0], response, mcmc_detectors[0], local_gen, &gen_params);
+	//std::complex<double> *hc =
+	//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+	//std::complex<double> *hp =
+	//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+	//fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
+	for(int i=0; i < mcmc_num_detectors; i++){
+	  ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
+							       local_noise[i],
+							       local_freqs[i],
+							       response,
+							       (size_t) local_lengths[i],
+							       &local_plans[i]
+							       );
+	  //ll += maximized_Log_Likelihood(mcmc_data[i], 
+	  //		mcmc_noise[i],
+	  //		mcmc_frequencies[i],
+	  //		(size_t) mcmc_data_length[i],
+	  //		&gen_params,
+	  //		mcmc_detectors[i],
+	  //		local_gen,
+	  //		&mcmc_fftw_plans[i]
+	  //		);
+	  //ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
+	  //		mcmc_noise[i],
+	  //		mcmc_frequencies[i],
+	  //		hp,
+	  //		hc,
+	  //		(size_t) mcmc_data_length[i],
+	  //		&mcmc_fftw_plans[i]
+	  //		);
 	}
-	else{
-		double RA = gen_params.RA;
-		double DEC = gen_params.DEC;
-		double PSI = gen_params.psi;
-		//if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
-		
-		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
-			&gen_params,local_gen, local_lengths, 
-			local_freqs, local_data, local_noise, local_weights, local_integration_method, user_param->log10F,mcmc_detectors, 
-			 mcmc_num_detectors);
-		//ll=2;
+	free(response);
+	//free(hp);
+	//free(hc);
+	
+      }
 
-		//ll = Log_Likelihood(mcmc_data[0], 
-		//		mcmc_noise[0],
-		//		mcmc_frequencies[0],
-		//		mcmc_data_length[0],
-		//		&gen_params,
-		//		mcmc_detectors[0],
-		//		local_gen,
-		//		&mcmc_fftw_plans[0]
-		//		);
-
-		//}
-		//else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
-
-		//}
+    }
+    else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+      //if(!mcmc_save_waveform){
+      if(false){
+      }
+      else{
+	gen_params.theta=0;	
+	gen_params.phi=0;	
+	gen_params.psi=0;	
+	gen_params.phiRef = 1;
+	gen_params.f_ref = 20;
+	gen_params.incl_angle=0;	
+	gen_params.tc =1;
+	waveform_polarizations<double> wp;
+	assign_polarizations(mcmc_generation_method,&wp);
+	wp.allocate_memory(local_lengths[0]);
+	fourier_waveform(local_freqs[0],local_lengths[0], &wp, local_gen, &gen_params);
+	for(int i=0; i < mcmc_num_detectors; i++){
+	  ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
+								 local_noise[i],
+								 local_freqs[i],
+								 wp.hplus,
+								 wp.hcross,
+								 (size_t) local_lengths[i],
+								 &local_plans[i]
+								 );
 	}
-	//Cleanup
-	delete [] temp_params;
-	if(check_mod(local_gen)){
-		//if( local_gen.find("ppE") != std::string::npos ||
-		//	local_gen.find("dCS") != std::string::npos ||
-		//	local_gen.find("EdGB") != std::string::npos){
-		//	delete [] gen_params.betappe;
-		//}
-		if( local_gen.find("ppE") != std::string::npos ||
-			check_theory_support(local_gen)){
-			delete [] gen_params.betappe;
-		}
-		else if( local_gen.find("gIMR") != std::string::npos){
-			if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
-				delete [] gen_params.delta_phi;
-			}
-			if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
-				delete [] gen_params.delta_sigma;
-			}
-			if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
-				delete [] gen_params.delta_beta;
-			}
-			if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
-				delete [] gen_params.delta_alpha;
-			}
-
-		}
-	}
-	//std::cout<<"LL time for eval: "<<(double)(omp_get_wtime() -start)<<std::endl;
-	std::cout<<"Likelihood: "<<ll<<std::endl;
-	if(isnan(ll)){
-		std::cout<<"NAN"<<std::endl;
-		for(int i = 0 ; i<dimension; i++){
-			std::cout<<param[i]<<", ";
-		}
-		std::cout<<std::endl;
-	}
-	return ll;
-
+	wp.deallocate_memory();
+      }
+      
+    }
+  }
+  else{
+    double RA = gen_params.RA;
+    double DEC = gen_params.DEC;
+    double PSI = gen_params.psi;
+    //if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
+    
+    ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
+				    &gen_params,local_gen, local_lengths, 
+				    local_freqs, local_data, local_noise, local_weights, local_integration_method, user_param->log10F,mcmc_detectors, 
+				    mcmc_num_detectors);
+    //ll=2;
+    
+    //ll = Log_Likelihood(mcmc_data[0], 
+    //		mcmc_noise[0],
+    //		mcmc_frequencies[0],
+    //		mcmc_data_length[0],
+    //		&gen_params,
+    //		mcmc_detectors[0],
+    //		local_gen,
+    //		&mcmc_fftw_plans[0]
+    //		);
+    
+    //}
+    //else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+    
+    //}
+  }
+  //Cleanup
+  delete [] temp_params;
+  if(check_mod(local_gen)){
+    //if( local_gen.find("ppE") != std::string::npos ||
+    //	local_gen.find("dCS") != std::string::npos ||
+    //	local_gen.find("EdGB") != std::string::npos){
+    //	delete [] gen_params.betappe;
+    //}
+    if( local_gen.find("ppE") != std::string::npos ||
+	check_theory_support(local_gen)){
+      delete [] gen_params.betappe;
+    }
+    else if( local_gen.find("gIMR") != std::string::npos){
+      if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
+	delete [] gen_params.delta_phi;
+      }
+      if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
+	delete [] gen_params.delta_sigma;
+      }
+      if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
+	delete [] gen_params.delta_beta;
+      }
+      if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
+	delete [] gen_params.delta_alpha;
+      }
+      
+    }
+  }
+  //std::cout<<"LL time for eval: "<<(double)(omp_get_wtime() -start)<<std::endl;
+  //std::cout<<"Likelihood: "<<ll<<std::endl;
+  if(isnan(ll)){
+    std::cout<<"NAN"<<std::endl;
+    for(int i = 0 ; i<dimension; i++){
+      std::cout<<param[i]<<", ";
+    }
+    std::cout<<std::endl;
+  }
+  return ll;
+  
 }
 //######################################################################################
 //######################################################################################

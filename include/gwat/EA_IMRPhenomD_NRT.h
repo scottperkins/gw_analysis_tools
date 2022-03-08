@@ -11,7 +11,7 @@ class EA_IMRPhenomD_NRT: public IMRPhenomD_NRT<T>
 public:
   virtual T calculate_EA_sensitivity(int body, source_parameters<T> *p);
 
-  virtual void EA_check_nan(bool EA_nan_error_message, source_parameters<T> *p);
+  virtual void EA_check_nan(source_parameters<T> *p);
 
   virtual void pre_calculate_EA_factors(source_parameters<T> *p);
 
@@ -22,6 +22,8 @@ public:
   virtual T EA_amp_ins1(T f, useful_powers<T> *powers, source_parameters<T> *p);
 
   virtual T EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p);
+  //virtual double EA_amp_ins2(double f, useful_powers<double> *powers, source_parameters<double> *p);
+  //virtual adouble EA_amp_ins2(adouble f, useful_powers<adouble> *powers, source_parameters<adouble> *p);
 
   virtual int EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params);
 

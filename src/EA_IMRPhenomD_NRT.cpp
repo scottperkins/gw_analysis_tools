@@ -98,9 +98,9 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
 }
 
 template<>
-void EA_IMRPhenomD_NRT<double>::EA_check_nan(bool EA_nan_error_message, source_parameters<double> *p)
+void EA_IMRPhenomD_NRT<double>::EA_check_nan(source_parameters<double> *p)
 {
-  if(EA_nan_error_message)
+  if(p->EA_nan_error_message)
     {
       if(isnan(p->alpha1_EA))
 	{
@@ -127,9 +127,9 @@ void EA_IMRPhenomD_NRT<double>::EA_check_nan(bool EA_nan_error_message, source_p
 
 
 template<>
-void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(bool EA_nan_error_message, source_parameters<adouble> *p)
+void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(source_parameters<adouble> *p)
 {
-  if(EA_nan_error_message)
+  if(p->EA_nan_error_message)
     {
       if(isnan(p->alpha1_EA.value()))
 	{
@@ -217,10 +217,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
-  //bool EA_nan_error_message = true;
-  bool EA_nan_error_message = false;
-
-  EA_check_nan(EA_nan_error_message, p);
+  EA_check_nan(p);
 
 
   //Functions necessary for corrections to the amplitude.
@@ -268,7 +265,7 @@ T EA_IMRPhenomD_NRT<T>::EA_phase_ins1(T f, useful_powers<T> *powers, source_para
 template<class T>
 T EA_IMRPhenomD_NRT<T>::EA_phase_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
-  T phaseout;
+  T phase_out;
   T EA_phase, GR_phase;
   /* Here EA_phase is the leading order contribution to the l=2 mode of the
    * Einstein Aether phase (for all polarizations) and GR_phase is the leading
@@ -282,8 +279,8 @@ T EA_IMRPhenomD_NRT<T>::EA_phase_ins2(T f, useful_powers<T> *powers, source_para
   EA_phase = (3./64.)*(((1 - p->s1_EA)*(1 - p->s2_EA))/(2 - p->c14_EA))*(1/p->kappa3_EA)*(powers->MFminus_5third*powers->PIminus_5third)*(1 - (4./7.)*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
   GR_phase = (3./128.)*(powers->MFminus_5third*powers->PIminus_5third);
 
-  phaseout = EA_phase - GR_phase; //The correction due to EA theory. This correction applies equally to all polarizations.
-  return phaseout;
+  phase_out = EA_phase - GR_phase; //The correction due to EA theory. This correction applies equally to all polarizations.
+  return phase_out;
 }
 
 template<class T>
@@ -297,31 +294,30 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins1(T f, useful_powers<T> *powers, source_parame
 }
 
 template<class T>
+//template<>
+//double EA_IMRPhenomD_NRT<double>::EA_amp_ins2(double f, useful_powers<double> *powers, source_parameters<double> *p)
 T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parameters<T> *p)
 {
-  T ampout;
-  // T EA_amp, GR_amp;
   /* Here EA_amp is the leading order contribution to the l=2 mode of the
    * Einstein Aether amplitude and GR_amp is the leading order contributio
    * to the l=2 mode of the amplitude in GR. We will need to subtract 
    * GR_amp off so that we are not double counting terms that were
    * already added in IMRPhenomD.
    */
-
-  ampout = (1./sqrt(2.))*sqrt((2. - p->c14_EA)/((1. - p->s1_EA)*(1. - p->s2_EA)))*(1./sqrt(p->kappa3_EA))*(1. - .5*(1./(powers->MF2third*powers->PI2third))*pow(p->eta, 2./5.)*p->epsilon_x_EA);
-
-  /*
   T EA_amp, GR_amp, amp_out;
 
   EA_amp = (-1./2.) * sqrt(5. * M_PI / 48) * sqrt((2 - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))) * (1. / p->DL) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * (1. / sqrt(powers->PI7third * powers->MF7third)) * (1. - ((1. / 2.) * (1. / (powers->PI2third * powers->MF2third)) * pow(p->eta, 2./5.) * p->epsilon_x_EA));
-  GR_amp = (-1./2.) * sqrt(5. * M_PI / 24) * (1. / p->DL) * p->chirpmass * p->chirpmass * (1. / sqrt(p->kappa3_EA)) * (1. / sqrt(powers->PI7third * powers->MF7third));
+  GR_amp = (-1./2.) * sqrt(5. * M_PI / 24) * (1. / p->DL) * p->chirpmass * p->chirpmass * (1. / sqrt(powers->PI7third * powers->MF7third));
 
-  amp_out = EA_amo - GR_amp;
+  amp_out = EA_amp - GR_amp;
+  //std::cout<<"EA amp = "<<EA_amp<<", GR_amp = "<<GR_amp<<", amp_out = "<<amp_out<<std::endl;
+  /*if(isnan(amp_out)){
+    std::cout<<"EA amp = "<<EA_amp<<", kappa3 = "<<p->kappa3_EA<<", prefactor = "<<(2 - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))<<std::endl;
+    }*/
+  //EA_IMRPhenomD_NRT<T> model;
+  //this->EA_check_nan(true, p);
 
   return amp_out;
-  */
-
-  return ampout;
 }
 
 template<class T>

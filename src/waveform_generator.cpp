@@ -1234,62 +1234,6 @@ template int fourier_phase<adouble>(adouble *, int, adouble *,adouble *, std::st
 template int time_waveform<double>(double *, int, waveform_polarizations<double> *wp, std::string, gen_params_base<double> *);
 template int time_waveform<adouble>(adouble *, int, waveform_polarizations<adouble> *wp, std::string, gen_params_base<adouble> *);
 
-//double tidal_error(double tidal_s, double tidal_a, double q){
-  		  /* Performing error marginalization over residual EoS 
-		   * dependence of the binary Love relations (following 
-		   * equations 15-22 of arXiv:1903.03909). The relevant 
-		   * coefficients/fit parameters are in IMRPhenomD_NRT.h. 
-		   */
-/*		  double error, error_mean, error_standardDev, sigma_L, sigma_q;
-		  double lambda_pow_new[3];
-		  double q_sq = q*q;
-		  
-		  lambda_pow_new[0] = pow(tidal_s, 1./2.);
-		  lambda_pow_new[1] = lambda_pow_new[0]*tidal_s;
-		  lambda_pow_new[2] = lambda_pow_new[1]*tidal_s; 
-		  //error_mean = (mu_binLove[0]*tidal_s + mu_binLove[1] + mu_binLove[2]*q*q + mu_binLove[3]*q + mu_binLove[4])/2.; //definition given in arXiv:1903.03909
-		  /*
-		    sigma_L = sigma_binLove[0]*lambda_pow_new[2] + sigma_binLove[1]*lambda_pow_new[1] + sigma_binLove[2]*tidal_s + sigma_binLove[3]*lambda_pow_new[0] + sigma_binLove[4];
-		    sigma_q = sigma_binLove[5]*q*q*q + sigma_binLove[6]*q*q + sigma_binLove[7]*q + sigma_binLove[8]; 
-		    error_standardDev = sqrt(sigma_L*sigma_L + sigma_q*sigma_q); 
-		    //Definition given in arXiv:1903.03909
-		  */
-
-		  //Using the new formulation and coefficients we found
-/*		  error_mean = bL_error[0] + bL_error[1]*q + bL_error[2]*q_sq + bL_error[3]*tidal_s + bL_error[4]*q*tidal_s + bL_error[5]*q_sq*tidal_s + bL_error[6]*q*tidal_s*tidal_s;
-		  sigma_q = bL_error[7] + bL_error[8]*q + bL_error[9]*q_sq + bL_error[10]*q*q_sq;
-		  sigma_L = bL_error[11]*lambda_pow_new[2] + bL_error[12]*lambda_pow_new[1] + bL_error[13]*tidal_s + bL_error[14]*lambda_pow_new[0];
-		  error_standardDev = sigma_q + sigma_L + bL_error[15]*lambda_pow_new[0]*q + bL_error[16]*q_sq*lambda_pow_new[0] + bL_error[17]*q*tidal_s;
-		  
-		  //Random number declaration and seeding
-		  const gsl_rng_type *t;
-		  gsl_rng *r;
-
-		  double seed = omp_get_wtime();
-		  gsl_rng_env_setup();
-		  
-		  t=gsl_rng_default;
-		  r=gsl_rng_alloc(t);
-		  gsl_rng_set(r, ( seed-( (int)seed) )*pow(10, 6.) ); //seeding the random number generator with time
-		  
-		  //Now get a random point from the normal distribution with mean (error_mean) and variance (error_variance).
-		  //This will be added to the binary love relation.
-		  
-		  error = error_mean + gsl_ran_gaussian(r, error_standardDev);
-		  gsl_rng_free(r);
-
-		  tidal_a += error;
-		  //std::cout<<"Error flag is set correctly and tidal love error is being calculated."<<std::endl; //print for testing purposes
-	       
-		  return tidal_a;
-		  }*/
-
-/*adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q)
-{
-  std::cout<<"Note that error marginalization over the EoS for the binary love relations is not supported for Fishers and is not being performed."<<std::endl; 
-  return tidal_a;
-  }*/
-
 template<class T>
 std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method){
 	std::string local_method = generation_method;
