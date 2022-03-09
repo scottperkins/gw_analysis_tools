@@ -2295,8 +2295,8 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 			a_params->ca_EA = avec_parameters[dim- 4 ] ;
 			a_params->ctheta_EA = avec_parameters[dim- 3 ] ;
 			a_params->cw_EA = avec_parameters[dim- 2 ] ;
-			a_params->csigma_EA = avec_parameters[dim- 1 ] ;
-			//a_params->csigma_EA = 0 ;
+			//a_params->csigma_EA = avec_parameters[dim- 1 ] ;
+			a_params->csigma_EA = 0 ;
 		}
 		else if( check_theory_support(generation_method)){
 			int base = dim - a_params->Nmod;

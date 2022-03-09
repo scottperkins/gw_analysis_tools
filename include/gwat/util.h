@@ -582,7 +582,7 @@ struct source_parameters
   T gX1_EA = 0 ;
 
   bool include_l1=false;
-  bool EA_nan_error_message = true; 
+  bool EA_nan_error_message = false; 
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(

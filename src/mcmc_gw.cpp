@@ -2603,7 +2603,7 @@ void MCMC_fisher_transformations(
 
 	      }
 	      if(i==j){
-		fisher[dimension-1-i][dimension-1-j] = 1;
+		fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -10.);
 	      }
 	    }
 	  }
