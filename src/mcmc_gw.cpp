@@ -1868,7 +1868,8 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double **seeding_var, bool local_seeding)
 {
 	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha  + mcmc_mod_struct->ppE_Nmod);
-	if(generation_method.find("EA") != std::string::npos){totalmod+=4;}
+	//if(generation_method.find("EA") != std::string::npos){totalmod+=4;}
+	if(generation_method.find("EA") != std::string::npos){totalmod+=3;}
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
@@ -2595,7 +2596,8 @@ void MCMC_fisher_transformations(
 		}
 	}
 	if(generation_method.find("EA") != std::string::npos){
-	  for(int i = 0 ; i <4; i++){
+	  //for(int i = 0 ; i <4; i++){
+	  for(int i = 0 ; i <3; i++){
 	    for(int j = 0 ; j<dimension; j++){
 	      if(i!=j){
 	      fisher[dimension-1-i][dimension-1-j] = 0;
