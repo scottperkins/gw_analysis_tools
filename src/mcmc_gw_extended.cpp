@@ -291,9 +291,21 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	//proposalFnVariables[2] = (void *)nullptr;
 	proposalFnVariables[3] = (void *)fpv;
 
+	ptrjmcmc::proposalFnWriteCheckpoint *writeCheckpointFns = new ptrjmcmc::proposalFnWriteCheckpoint[proposalFnN];
+	writeCheckpointFns[0] = ptrjmcmc::gaussianProposalWriteCheckpoint;
+	writeCheckpointFns[1] = nullptr;
+	writeCheckpointFns[2] = nullptr;
+	writeCheckpointFns[3] = nullptr;
+
+	ptrjmcmc::proposalFnLoadCheckpoint *loadCheckpointFns = new ptrjmcmc::proposalFnLoadCheckpoint[proposalFnN];
+	loadCheckpointFns[0] = ptrjmcmc::gaussianProposalLoadCheckpoint;
+	loadCheckpointFns[1] = nullptr;
+	loadCheckpointFns[2] = nullptr;
+	loadCheckpointFns[3] = nullptr;
 
 
-	ptrjmcmc::proposalFnData *propData = new ptrjmcmc::proposalFnData(proposalFnN, propArray, propProb,proposalFnVariables);
+
+	ptrjmcmc::proposalFnData *propData = new ptrjmcmc::proposalFnData(proposalFnN, propArray, propProb,proposalFnVariables,writeCheckpointFns,loadCheckpointFns);
 
 	sampler->proposalFns = propData;
 	//##########################################################
@@ -302,6 +314,8 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	sampler->sample();
 
+	delete [] writeCheckpointFns;
+	delete [] loadCheckpointFns;
 
 
 	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 

@@ -63,8 +63,8 @@ find_package(nlohmann_json REQUIRED)
 
 ###############################################################
 
-SET(PTRJMCMC_INCLUDE_DIR "/Users/sperkins/git-repos/PTRJMCMC/build/install/include")
-SET(PTRJMCMC_LIBRARIES "/Users/sperkins/git-repos/PTRJMCMC/build/install/lib/libptrjmcmc.dylib")
+SET(PTRJMCMC_INCLUDE_DIR "/home/sperkins/git-repos/PTRJMCMC/build/install/include")
+SET(PTRJMCMC_LIBRARIES "/home/sperkins/git-repos/PTRJMCMC/build/install/lib/libptrjmcmc.so")
 ###############################################################
 
 set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${PTRJMCMC_INCLUDE_DIR}" )
