@@ -256,20 +256,47 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	int proposalFnN = 4;
 	ptrjmcmc::proposalFn propArray[proposalFnN];
 	void *proposalFnVariables[proposalFnN];	
-	float propProb[proposalFnN];	
 	propArray[0] = ptrjmcmc::gaussianProposal;
 	propArray[1] = ptrjmcmc::differentialEvolutionProposal;
 	propArray[2] = ptrjmcmc::KDEProposal;
 	propArray[3] = ptrjmcmc::FisherProposal;
+
+	//Rough estimate of the temperatures
+	double betaTemp[sampler->ensembleSize];
+	betaTemp[0] = 1;
+	betaTemp[sampler->ensembleSize-1] = 0;
+	double deltaBeta = pow((1e2),1./sampler->ensembleSize);
+	for(int i = 1 ; i<sampler->ensembleSize-1; i++){
+		betaTemp[i] = betaTemp[i-1]/deltaBeta;
+	}
+
+	float **propProb = new float*[chainN];	
+	for(int i = 0 ; i<chainN; i++){
+		int ensemble = i / sampler->ensembleN;
+		//std::cout<<ensemble<<std::endl;
+		//std::cout<<betaTemp[ensemble]<<std::endl;
+		propProb[i] = new float[proposalFnN];	
+		propProb[i][2] = 0.0;
+
+		//propProb[i][0] = 0.05;
+		//propProb[i][1] = 0.25;
+		//propProb[i][3] = 0.7;
+		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
+		propProb[i][3] = 0.25 + .45*( betaTemp[ensemble]); //.7 to .25
+
+		propProb[i][0] = 1. - propProb[i][3] - propProb[i][1]- propProb[i][2];
+		//std::cout<<propProb[i][0]<<" "<<propProb[i][1]<<" "<<propProb[i][3]<<std::endl;
+
+	}
 	
 	//propProb[0] = 0.05;
 	//propProb[1] = 0.3;
 	//propProb[2] = 0.05;
 	//propProb[3] = 0.6;
-	propProb[0] = 0.05;
-	propProb[1] = 0.25;
-	propProb[2] = 0.0;
-	propProb[3] = 0.7;
+	//propProb[0] = 0.05;
+	//propProb[1] = 0.25;
+	//propProb[2] = 0.0;
+	//propProb[3] = 0.7;
 
 	//propProb[0] = 0.1;
 	//propProb[1] = 0.0;
@@ -305,7 +332,7 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 
 
-	ptrjmcmc::proposalFnData *propData = new ptrjmcmc::proposalFnData(proposalFnN, propArray, propProb,proposalFnVariables,writeCheckpointFns,loadCheckpointFns);
+	ptrjmcmc::proposalFnData *propData = new ptrjmcmc::proposalFnData(chainN,proposalFnN, propArray,proposalFnVariables, (float *)nullptr, propProb,writeCheckpointFns,loadCheckpointFns);
 
 	sampler->proposalFns = propData;
 	//##########################################################
@@ -316,6 +343,11 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	delete [] writeCheckpointFns;
 	delete [] loadCheckpointFns;
+
+	for(int i =0 ; i<chainN ; i++){
+		delete [] propProb[i];
+	}
+	delete [] propProb;
 
 
 	//PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
