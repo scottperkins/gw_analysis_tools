@@ -152,8 +152,9 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-	//double epsilon = 1e-5;
-	double epsilon = 1e-5;
+  	double epsilon = 1e-8;
+
+  //double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
@@ -176,7 +177,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	//for(int i = 0 ; i<dimension; i++){
 	//	std::cout<<parameters_vec[i]<<std::endl;
 	//}
-	
+
 	if(parameters->sky_average && local_gen_method.find("IMRPhenomD")!=std::string::npos)
 	{
 		double *amplitude_plus = new double[length];
@@ -288,6 +289,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
 					phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
+		  
 					response_deriv[i][l] = amplitude_deriv - 
 						std::complex<double>(0,1)*phase_deriv*amplitude[l];
 				}
@@ -439,6 +441,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					response_deriv[i][l] = 
 						(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(12.*epsilon);
+					//std::cout<<"order = 4, response_plus_plus = "<<response_plus_plus[l]<<", response_minus_minus"<<response_minus_minus[l]<<std::endl; 
 				}
 			}
 				
@@ -2575,6 +2578,11 @@ void calculate_fisher_elements(double *frequency,
 				//Jacobian for integrating in logspace
 				if(log10_f){
 					integrand[i]*=(frequency[i])*LOG10;
+				}
+				if(i == 8){
+				  //std::cout<<"response_deriv[j][8]"<<response_deriv[j][8]<< std::endl;
+				  //std::cout<<"response_deriv[k][8]"<<response_deriv[k][8]<< std::endl;
+				  //std::cout<<"integrand[8]"<<integrand[8]<< std::endl;
 				}
 			}
 			if(integration_method =="GAUSSLEG"){

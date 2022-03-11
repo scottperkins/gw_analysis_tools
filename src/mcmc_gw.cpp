@@ -23,6 +23,8 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include "IMRPhenomD_NRT.h" //For testing purposes only! Remove later.
+#include "EA_IMRPhenomD_NRT.h" //For testing purposes only! Remove later.
 
 /*! \file 
  * Routines for implementation in MCMC algorithms specific to GW CBC analysis
@@ -2597,6 +2599,7 @@ void MCMC_fisher_transformations(
 	}
 	if(generation_method.find("EA") != std::string::npos){
 	  //for(int i = 0 ; i <4; i++){
+	  //std::cout<<"enforcing Fisher prior"<<std::endl; 
 	  for(int i = 0 ; i <3; i++){
 	    for(int j = 0 ; j<dimension; j++){
 	      if(i!=j){
@@ -2605,12 +2608,25 @@ void MCMC_fisher_transformations(
 
 	      }
 	      if(i==j){
-		fisher[dimension-1-i][dimension-1-j] = 1;
+		fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -10.);
 	      }
 	    }
 	  }
 	}
-	
+	/*if(isnan(fabs(fisher[8][8]))){
+	  for(int i = 0 ; i<dimension; i++){
+	    std::cout<<i<<" ";
+	    for(int j = 0 ; j<dimension; j++){
+	      std::cout<<std::setprecision(5)<<fisher[i][j]<<" ";
+	    }
+	    std::cout<<std::endl;
+	  }
+	  }*/
+	//std::cout<<"eta nan?:"<<fisher[8][8]<<std::endl; 
+	/*if(isnan(fabs(fisher[8][8])))
+	  {
+	    std::cout<<"eta nan problem"<<std::endl; 
+	    }*/
 	return;
 
 }
@@ -2698,6 +2714,32 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	
 	MCMC_fisher_transformations(temp_params, output,dimension,local_gen,mcmc_intrinsic,
 		interface,mcmc_mod_struct, parameters);
+
+	/*if(isnan(fabs(output[8][8]))){
+	  source_parameters<double> sp;
+	  sp.mass1 = params.mass1;
+	  sp.mass2 = params.mass2;
+	  sp.M = sp.mass1 + sp.mass2;
+	  IMRPhenomD_NRT<double> modelNRT;
+	  modelNRT.binary_love_relation(params.tidal_s, params.tidal_love_error, &sp);
+	  sp.ca_EA = params.ca_EA; 
+	  sp.ctheta_EA = params.ctheta_EA;
+	  sp.cw_EA = params.cw_EA;
+	  sp.csigma_EA = params.csigma_EA;
+	  sp.EA_nan_error_message = false;
+	  EA_IMRPhenomD_NRT<double> modelEA;
+	  modelEA.pre_calculate_EA_factors(&sp);	  
+
+	  std::cout<<"ca:"<<sp.ca_EA<<", ctheta:"<<sp.ctheta_EA<<", comega:"<<sp.cw_EA<<", csigma:"<<sp.csigma_EA<<std::endl;
+	  std::cout<<"cS:"<<sp.cS_EA<<", cV:"<<sp.cV_EA<<", cT:"<<sp.cT_EA<<std::endl;
+	  std::cout<<"alpha1:"<<sp.alpha1_EA<<", alpha2:"<<sp.alpha2_EA<<std::endl; 
+	  std::cout<<"s1:"<<sp.s1_EA<<"  s2:"<<sp.s1_EA<<std::endl;
+	  std::cout<<"A1: "<<sp.A1_EA<<",  A2:"<<sp.A2_EA<<std::endl;
+	  std::cout<<"A3:"<<sp.A3_EA<<",  S:"<<sp.S_EA<<std::endl;
+	  std::cout<<"kappa3:"<<sp.kappa3_EA<<std::endl;
+	  std::cout<<" "<<std::endl; 
+	  }*/
+	
 	deallocate_2D_array(temp_out, dimension,dimension);
 	//////////////////////////////////////////////
 	//if(!interface->burn_phase)

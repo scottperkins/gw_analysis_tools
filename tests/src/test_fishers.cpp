@@ -98,9 +98,12 @@ int test_EA_fisher(int argc, char *argv[])
 	//#######################################
 	//EA parameters
 	//#######################################
-	params.ca_EA = 1e-4;
-	params.ctheta_EA = 2e-4;
-	params.cw_EA = 1e0;
+	params.ca_EA = 5.01510850153863e-07; 
+	params.ctheta_EA = 1.50544346457309e-06; 
+	params.cw_EA = 5.11795863509178; 
+	//params.ca_EA = 1e-7;
+	//params.ctheta_EA = 2e-7;
+	//params.cw_EA = 2e-7;
 	//params.csigma_EA = 1e-30;
 	//#######################################
 	//#######################################
@@ -217,20 +220,20 @@ int test_EA_fisher(int argc, char *argv[])
 	//output_AD[dim-2][dim-2]+= 1./sigma_omega/sigma_omega;
 	//output_AD[dim-1][dim-1]+= 1./sigma_sigma/sigma_sigma;
 	//####################################
-	//for(int i = 0 ; i <3; i++){
+	for(int i = 0 ; i <3; i++){
 	//  //	  for(int j = 0 ; j<4; j++){
-	//  for(int j = 0 ; j<dim; j++){
-	//    if(i!=j){
-	//      output_AD[dim-1-i][dim-1-j] = 0;
-	//      output_AD[dim-1-j][dim-1-i] = 0;
-	//    }
-	//  }
-	//  /*for(int j = 0 ; j<dim; j++){
-	//    if(i!=j){
-	//      output_AD[dim-1-j][dim-1-i] = 0; 
-	//    }
-	//    }*/
-	//}
+	  for(int j = 0 ; j<dim; j++){
+	    if(i!=j){
+	      output_AD[dim-1-i][dim-1-j] = 0;
+	      output_AD[dim-1-j][dim-1-i] = 0;
+	    }
+	  }
+	  for(int j = 0 ; j<dim; j++){
+	    if(i!=j){
+	      output_AD[dim-1-j][dim-1-i] = 0; 
+	    }
+	  }
+	}
 
 	//###############################################
 	//Invert and print -- uncomment to see full cov or fisher
