@@ -156,13 +156,13 @@ public:
 	//accounting for the changing fisher (doesn't cancel in MH ratio)
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
-	int fisher_update_number=200;
+	//int fisher_update_number=200;
 	double ***kde_cov=NULL;
 	double ***kde_fisher=NULL;
 	double *kde_cov_lndet;
 	int kde_cov_update_number=200;
 	int *kde_cov_update_ct=NULL;
-	//int fisher_update_number=500000;
+	int fisher_update_number=5000000;
 	//int fisher_update_number=2;
 
 	//log_prior lp;

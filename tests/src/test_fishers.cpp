@@ -98,10 +98,13 @@ int test_EA_fisher(int argc, char *argv[])
 	//#######################################
 	//EA parameters
 	//#######################################
-	params.ca_EA = 1e-30;
-	params.ctheta_EA = 2e-30;
-	params.cw_EA = 2e-30;
-	params.csigma_EA = 1e-30;
+	params.ca_EA = 5.01510850153863e-07; 
+	params.ctheta_EA = 1.50544346457309e-06; 
+	params.cw_EA = 5.11795863509178; 
+	//params.ca_EA = 1e-7;
+	//params.ctheta_EA = 2e-7;
+	//params.cw_EA = 2e-7;
+	//params.csigma_EA = 1e-30;
 	//#######################################
 	//#######################################
 	
@@ -143,7 +146,7 @@ int test_EA_fisher(int argc, char *argv[])
 	//###############################################
 	//Dimension and model
 	//###############################################
-	int dim = 16;
+	int dim = 15;
 	std::string method = "EA_IMRPhenomD_NRT";
 
 	//###############################################
@@ -176,29 +179,29 @@ int test_EA_fisher(int argc, char *argv[])
 
 	//####################################
 	//Add prior
-	double sigma_a = 1e-8;
-	double sigma_theta = 1e-4;
-	double sigma_omega = 1e-5;
-	double sigma_sigma = 1e-15;
+	//double sigma_a = 1e-8;
+	//double sigma_theta = 1e-4;
+	//double sigma_omega = 1e-5;
+	//double sigma_sigma = 1e-15;
 
 	//output_AD[dim-4][dim-4]+= 1./sigma_a/sigma_a;
 	//output_AD[dim-3][dim-3]+= 1./sigma_theta/sigma_theta;
 	//output_AD[dim-2][dim-2]+= 1./sigma_omega/sigma_omega;
 	//output_AD[dim-1][dim-1]+= 1./sigma_sigma/sigma_sigma;
 	//####################################
-	for(int i = 0 ; i <4; i++){
-	  //	  for(int j = 0 ; j<4; j++){
+	for(int i = 0 ; i <3; i++){
+	//  //	  for(int j = 0 ; j<4; j++){
 	  for(int j = 0 ; j<dim; j++){
 	    if(i!=j){
 	      output_AD[dim-1-i][dim-1-j] = 0;
 	      output_AD[dim-1-j][dim-1-i] = 0;
 	    }
 	  }
-	  /*for(int j = 0 ; j<dim; j++){
+	  for(int j = 0 ; j<dim; j++){
 	    if(i!=j){
 	      output_AD[dim-1-j][dim-1-i] = 0; 
 	    }
-	    }*/
+	  }
 	}
 
 	//###############################################
