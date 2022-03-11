@@ -98,9 +98,9 @@ int test_EA_fisher(int argc, char *argv[])
 	//#######################################
 	//EA parameters
 	//#######################################
-	params.ca_EA = 1e-7;
-	params.ctheta_EA = 2e-7;
-	params.cw_EA = 2e-7;
+	params.ca_EA = 1e-4;
+	params.ctheta_EA = 2e-4;
+	params.cw_EA = 1e0;
 	//params.csigma_EA = 1e-30;
 	//#######################################
 	//#######################################
@@ -115,7 +115,7 @@ int test_EA_fisher(int argc, char *argv[])
 	double T = 16;
 	params.tc = 3.*T/4.;
 
-	int length = 1000;
+	int length = 2000;
 	double *frequency = new double[length];
 	int Ndetect = 3;
 	double **psd = new double*[Ndetect];
@@ -123,11 +123,24 @@ int test_EA_fisher(int argc, char *argv[])
 	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
 	
 	//Calculate freq/weight array (using gauss-legendre quadrature)
+	bool AD = false;
+	bool GL = false;
 	double *weights = new double[length];
-	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
-	for(int i = 0 ; i<length; i++){
-		frequency[i] = pow(10,frequency[i]);	
+	if(AD && GL){
+	//if(false){
+		gauleg(log10(fmin), log10(fmax),frequency,weights,length);
+		for(int i = 0 ; i<length; i++){
+			frequency[i] = pow(10,frequency[i]);	
+		}
 	}
+	else{
+		double deltaF = (fmax-fmin)/length;	
+		for(int i = 0 ; i<length; i++){
+			frequency[i] = fmin + deltaF*i;
+		}
+	}
+	
+
 	for(int i = 0 ; i<Ndetect; i++){
 		psd[i]= new double[length];
 		populate_noise(frequency, SN[i],psd[i], length, 48);
@@ -161,18 +174,36 @@ int test_EA_fisher(int argc, char *argv[])
 
 
 	double snr; 
+	double total_snr = 0;
 
 	//###############################################
 	//Calculate Fishers
 	//###############################################
 	for(int i = 0 ;i < Ndetect; i++){
-		fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
-		for(int k = 0 ; k<dim; k++){
-			for(int j = 0 ; j<dim; j++){
-				output_AD[k][j]+= output_AD_temp[k][j];
+		if(AD){
+			if(GL){
+				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "GAUSSLEG", weights, true), 2);
+				fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
+			}
+			else{
+				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
+				fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "SIMPSONS",weights,false, psd[i],NULL,NULL);
 			}
 		}
+		else{
+				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
+			fisher_numerical(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, 2,NULL,NULL, psd[i]);
+		}
+		for(int k = 0 ; k<dim; k++){
+			//std::cout<<i<<": "<<std::endl;
+			for(int j = 0 ; j<dim; j++){
+				output_AD[k][j]+= output_AD_temp[k][j];
+				//std::cout<<std::setprecision(5)<<output_AD[i][j]<<" ";
+			}
+			//std::cout<<std::endl;
+		}
 	}
+	std::cout<<"Total SNR: "<<sqrt(total_snr)<<std::endl;
 
 	//####################################
 	//Add prior
@@ -206,7 +237,7 @@ int test_EA_fisher(int argc, char *argv[])
 	//###############################################
 	
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	std::cout<<"AD Fisher:"<<std::endl;
+	//std::cout<<"AD Fisher:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
 		for(int j = 0 ; j<dim; j++){
@@ -214,7 +245,6 @@ int test_EA_fisher(int argc, char *argv[])
 		}
 		std::cout<<std::endl;
 	}
-	std::cout<<"TEST"<<std::endl;
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);

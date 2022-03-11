@@ -13,8 +13,8 @@ LFLAGS:= -fopenmp -L../lib  -L/home/sperkins/git-repos/gw_analysis_tools/build/l
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation -lhdf5 -lhdf5_cpp
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
-LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
-#LIBS:=-lm -lgsl -lgwat 
+#LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
+LIBS:=-lm -lgsl -lgwat 
 
 SRCDIR:=src
 ODIR:=build

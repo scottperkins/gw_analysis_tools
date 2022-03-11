@@ -152,6 +152,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
+	//double epsilon = 1e-5;
 	double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
