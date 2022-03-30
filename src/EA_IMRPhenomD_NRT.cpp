@@ -168,7 +168,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   if(p->alpha_param){
     //std::cout<<"Using alpha parameterization, computing ca & ctheta"<<std::endl;
     p->ca_EA = -p->alpha1_EA/4.;
-    p->ctheta_EA = (0.75*p->alpha1_EA*p->alpha1_EA)/((8. + p->alpha1_EA)*(p->alpha2_EA - 0.5*p->alpha1_EA) + 3.*p->alpha1_EA);
+    p->ctheta_EA = (0.75*p->alpha1_EA*p->alpha1_EA)/(8.*p->alpha2_EA + p->alpha1_EA*(p->alpha2_EA - 0.5*p->alpha1_EA - 1.));
   }
  
   //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where many of these formulas come from)
