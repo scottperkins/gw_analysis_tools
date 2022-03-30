@@ -157,9 +157,9 @@ void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(source_parameters<adouble> *p)
 template<class T>
 void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 {
-  p->V_x_EA = 0;
-  p->V_y_EA = 0;
-  p->V_z_EA = 0;
+  p->V_x_EA = 0.;
+  p->V_y_EA = 0.;
+  p->V_z_EA = 0.;
 
   //p->alpha_param = true;
   
