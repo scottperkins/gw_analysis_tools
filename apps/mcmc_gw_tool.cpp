@@ -259,6 +259,11 @@ int main(int argc, char *argv[])
 	{
 		tidal_love_error = bool_dict["Tidal love error marginalization"];
 	}
+	bool alpha_param = false;
+	if(bool_dict.find("Alpha parameterization") != bool_dict.end())
+	{
+	        alpha_param = bool_dict["Alpha parameterization"];
+	}
 	if(generation_method.find("NRT") != std::string::npos){
 		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
 		std::cout<<"Range of tidal2: "<<tidal2_prior[0]<<" - "<<tidal2_prior[1]<<std::endl;
@@ -266,6 +271,9 @@ int main(int argc, char *argv[])
 		std::cout<<"Using tidal-love relations: "<<tidal_love<<std::endl;
 		std::cout<<"Using tidal-love error marginalization: "<<tidal_love_error<<std::endl;
 				
+	}
+	if(generation_method.find("EA") != std::string::npos){
+	  std::cout<<"Using alpha parameterization: "<<alpha_param<<std::endl; 
 	}
 	bool jeff_prior = false;
 	if(bool_dict.find("Jefferys prior") == bool_dict.end())
@@ -587,7 +595,8 @@ int main(int argc, char *argv[])
 	bool show_progress = true;
 	MCMC_modification_struct mod_struct;
 	mod_struct.tidal_love = tidal_love;
-	mod_struct.tidal_love_error = tidal_love_error;	
+	mod_struct.tidal_love_error = tidal_love_error;
+	mod_struct.alpha_param = alpha_param; 
 	mod_struct.ppE_Nmod = Nmod;
 	mod_struct.bppe = bppe;
 	mod_struct.gIMR_Nmod_phi = gNmod_phi;

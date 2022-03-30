@@ -162,7 +162,7 @@ public:
 	double *kde_cov_lndet;
 	int kde_cov_update_number=200;
 	int *kde_cov_update_ct=NULL;
-	int fisher_update_number=5000000;
+  int fisher_update_number=5000000;//TODO: remove before merge. Note with this setting Fishers will NOT update
 	//int fisher_update_number=2;
 
 	//log_prior lp;

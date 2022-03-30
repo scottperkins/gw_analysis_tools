@@ -2917,7 +2917,8 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
 	gen_params->tidal_love = mod_struct->tidal_love;
-	gen_params->tidal_love_error = mod_struct->tidal_love_error; 
+	gen_params->tidal_love_error = mod_struct->tidal_love_error;
+	gen_params->alpha_param = mod_struct->alpha_param;
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
@@ -2990,7 +2991,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
   //double start = omp_get_wtime();
-	//return 2;
+  //return 2;
   MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
   int dimension = interface->max_dim;
@@ -3197,6 +3198,7 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
     }
   }
   //std::cout<<"LL time for eval: "<<(double)(omp_get_wtime() -start)<<std::endl;
+
   //std::cout<<"Likelihood: "<<ll<<std::endl;
   if(isnan(ll)){
     std::cout<<"NAN"<<std::endl;
