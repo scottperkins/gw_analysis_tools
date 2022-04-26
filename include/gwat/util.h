@@ -233,6 +233,7 @@ public:
         //coupling constants in another parameterization for Einstein Aether
         T alpha1_EA;
         T alpha2_EA;
+        T alpha3_EA;
         bool alpha_param = true; 
 	//###################################################
         bool include_l1=false;
@@ -560,6 +561,7 @@ struct source_parameters
   //Necessary functions of the c's
   T alpha1_EA;
   T alpha2_EA;
+  T alpha3_EA;
   T beta1_EA;
 
   T beta2_EA;

@@ -1979,12 +1979,13 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		  if(input_params->alpha_param){
 		    parameters[dimension- 3 ] = input_params->alpha1_EA;
 		    parameters[dimension- 2 ] = input_params->alpha2_EA;
+		    parameters[dimension- 1 ] = input_params->alpha3_EA;
 		  }
 		  else{
 		    parameters[dimension- 3 ] = input_params->ca_EA;
 		    parameters[dimension- 2 ] = input_params->ctheta_EA;
+		    parameters[dimension- 1 ] = input_params->cw_EA;
 		  }
-		  parameters[dimension- 1 ] = input_params->cw_EA;
 		}
 		//else if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
@@ -2315,12 +2316,14 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		  if(a_params->alpha_param){
 		    a_params->alpha1_EA = avec_parameters[dim- 3 ];
 		    a_params->alpha2_EA = avec_parameters[dim- 2 ];
+		    a_params->alpha3_EA = avec_parameters[dim- 1 ] ;
 		  }
 		  else{
 		    a_params->ca_EA = avec_parameters[dim- 3 ] ;
 		    a_params->ctheta_EA = avec_parameters[dim- 2 ] ;
+		    a_params->cw_EA = avec_parameters[dim- 1 ] ;
 		  }
-		  a_params->cw_EA = avec_parameters[dim- 1 ] ;
+		 
 		  a_params->csigma_EA = 0 ;
 		}
 		else if( check_theory_support(generation_method)){

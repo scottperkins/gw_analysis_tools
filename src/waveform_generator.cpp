@@ -1317,12 +1317,13 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	  if(in->alpha_param){
 	        out->alpha1_EA = in->alpha1_EA;
 		out->alpha2_EA = in->alpha2_EA;
+		out->alpha3_EA = in->alpha3_EA; 
 	  }
 	  else{ 
 		out->ca_EA = in->ca_EA;
 		out->ctheta_EA = in->ctheta_EA;
-	  }
 		out->cw_EA = in->cw_EA;
+	  }
 		out->csigma_EA = in->csigma_EA;
 		EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 		EAmodeldNRT.pre_calculate_EA_factors(out);

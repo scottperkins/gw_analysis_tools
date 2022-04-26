@@ -70,7 +70,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
    * energy to mass ratio.
    */
   OmRatio = (-5./7.)*compact - ((18275.*p->alpha1_EA)/168168.)*pow(compact, 3.);
-
+  //std::cout<<"compactness = "<<compact<<std::endl; 
   T coeff1, coeff2, coeff3;
   coeff1 =  ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.);
   coeff2 = ((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA));
@@ -169,6 +169,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     //std::cout<<"Using alpha parameterization, computing ca & ctheta"<<std::endl;
     p->ca_EA = -p->alpha1_EA/4.;
     p->ctheta_EA = (0.75*p->alpha1_EA*p->alpha1_EA)/(8.*p->alpha2_EA + p->alpha1_EA*(p->alpha2_EA - 0.5*p->alpha1_EA - 1.));
+    p->cw_EA = (1 - p->alpha3_EA)/p->alpha3_EA; 
   }
  
   //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where many of these formulas come from)
@@ -202,6 +203,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     //std::cout<<"Not using alpha parameterization, computing alphas"<<std::endl;
     p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
     p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
+    p->alpha3_EA = 1./(1. + p->cw_EA); 
   }
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
 
