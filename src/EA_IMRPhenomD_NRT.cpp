@@ -509,7 +509,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 
       phase -= (T)(tc*(f-f_ref) + phic);
       waveform->hplus[j] = amp*std::exp(-i * (phase + EAphaseT));
-      waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT));
+      waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT)); //To match the convention with the other waveforms, this should be -i, not +i? 
       waveform->hx[j] = amp*hx2*std::exp(-i * (phase + EAphaseV));
       waveform->hy[j] = amp*hy2*std::exp(-i * (phase + EAphaseV));
       waveform->hb[j] = amp*hb2*std::exp(-i * (phase + EAphaseS));

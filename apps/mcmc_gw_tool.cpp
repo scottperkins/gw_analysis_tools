@@ -44,10 +44,12 @@ double spin2_prior[2];
 double tidal1_prior[2];
 double tidal2_prior[2];
 double tidal_s_prior[2];
-double EA_prior[8];
+double EA_prior[6];
 double RA_bounds[2];
 double sinDEC_bounds[2];
 bool tidal_love=true;
+bool tidal_love_error;
+bool alpha_param; 
 double DL_prior[2];
 bool tidal_love_boundary_violation(double q,double lambda_s);
 double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -254,15 +256,10 @@ int main(int argc, char *argv[])
 	{
 		tidal_love = bool_dict["Tidal love relation"];
 	}
-	bool tidal_love_error = false;
+	tidal_love_error = false;
 	if(bool_dict.find("Tidal love error marginalization") != bool_dict.end())
 	{
 		tidal_love_error = bool_dict["Tidal love error marginalization"];
-	}
-	bool alpha_param = false;
-	if(bool_dict.find("Alpha parameterization") != bool_dict.end())
-	{
-	        alpha_param = bool_dict["Alpha parameterization"];
 	}
 	if(generation_method.find("NRT") != std::string::npos){
 		std::cout<<"Range of tidal1: "<<tidal1_prior[0]<<" - "<<tidal1_prior[1]<<std::endl;
@@ -272,53 +269,90 @@ int main(int argc, char *argv[])
 		std::cout<<"Using tidal-love error marginalization: "<<tidal_love_error<<std::endl;
 				
 	}
-	if(generation_method.find("EA") != std::string::npos){
-	  std::cout<<"Using alpha parameterization: "<<alpha_param<<std::endl; 
-	}
 	bool jeff_prior = false;
 	if(bool_dict.find("Jefferys prior") == bool_dict.end())
 	{
 		jeff_prior = bool_dict["Jeffreys prior"];
 	}
-       
+	//Einstein AEther parameterization
+       	alpha_param = true;
+	if(bool_dict.find("alpha parameterization") != bool_dict.end())
+	{
+	        alpha_param = bool_dict["alpha parameterization"];
+	}
 	//Einstein AEther priors
 	if(generation_method.find("EA") != std::string::npos){
-	  if(dbl_dict.find("EA c_a minimum") == dbl_dict.end()){
-	    EA_prior[0]=0;
-	    EA_prior[1]=pow(10,-4.);
+	  std::cout<<"Using alpha parameterization: "<<alpha_param<<std::endl;
+	  if(alpha_param){
+	    if(dbl_dict.find("EA alpha_1 minimum") ==dbl_dict.end()){
+	      EA_prior[0]=-.06;
+	      EA_prior[1]=.06; 
+	    }
+	    else{
+	      EA_prior[0]=dbl_dict["EA alpha_1 minimum"];
+	      EA_prior[1]=dbl_dict["EA alpha_1 maximum"]; 
+	    }
+	    if(dbl_dict.find("EA alpha_2 minimum") ==dbl_dict.end()){
+	      EA_prior[2]=-.003;
+	      EA_prior[3]=.003; 
+	    }
+	    else{
+	      EA_prior[2]=dbl_dict["EA alpha_2 minimum"];
+	      EA_prior[3]=dbl_dict["EA alpha_2 maximum"]; 
+	    }
+	    if(dbl_dict.find("EA alpha_3 minimum") ==dbl_dict.end()){
+	      EA_prior[4]=-1.;
+	      EA_prior[5]=1.; 
+	    }
+	    else{
+	      EA_prior[4]=dbl_dict["EA alpha_3 minimum"];
+	      EA_prior[5]=dbl_dict["EA alpha_3 maximum"]; 
+	    }
+	    std::cout<<"Range of EA alpha1: "<<EA_prior[0]<<" - "<<EA_prior[1]<<std::endl;
+	    std::cout<<"Range of EA alpha2: "<<EA_prior[2]<<" - "<<EA_prior[3]<<std::endl;
+	    std::cout<<"Range of EA alpha3: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
 	  }
 	  else{
-	    EA_prior[0]=dbl_dict["EA c_a minimum"];
-	    EA_prior[1]=dbl_dict["EA c_a maximum"];
+	    if(dbl_dict.find("EA c_a minimum") == dbl_dict.end()){
+	      EA_prior[0]=0;
+	      EA_prior[1]=pow(10,-4.);
+	    }
+	    else{
+	      EA_prior[0]=dbl_dict["EA c_a minimum"];
+	      EA_prior[1]=dbl_dict["EA c_a maximum"];
+	    }
+	    if(dbl_dict.find("EA c_theta minimum") == dbl_dict.end()){
+	      EA_prior[2]=0;
+	      EA_prior[3]=pow(10,-4.);
+	    }
+	    else{
+	      EA_prior[2]=dbl_dict["EA c_theta minimum"];
+	      EA_prior[3]=dbl_dict["EA c_theta maximum"];
+	    }
+	    if(dbl_dict.find("EA c_w minimum") == dbl_dict.end()){
+	      EA_prior[4]=-10;
+	      EA_prior[5]=10;
+	    }
+	    else{
+	      EA_prior[4]=dbl_dict["EA c_w minimum"];
+	      EA_prior[5]=dbl_dict["EA c_w maximum"];
+	    }
+	  
+	    /*
+	      if(dbl_dict.find("EA c_sigma minimum") == dbl_dict.end()){
+	      EA_prior[6]=-pow(10,-15.);
+	      EA_prior[7]=pow(10,-15.);
+	      }
+	      else{
+	      EA_prior[6]=dbl_dict["EA c_sigma minimum"];
+	      EA_prior[7]=dbl_dict["EA c_sigma maximum"];
+	      }
+	    */
+	    std::cout<<"Range of EA c_a: "<<EA_prior[0]<<" - "<<EA_prior[1]<<std::endl;
+	    std::cout<<"Range of EA c_theta: "<<EA_prior[2]<<" - "<<EA_prior[3]<<std::endl;
+	    std::cout<<"Range of EA c_w: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
+	    //std::cout<<"Range of EA c_sigma: "<<EA_prior[6]<<" - "<<EA_prior[7]<<std::endl;
 	  }
-	  if(dbl_dict.find("EA c_theta minimum") == dbl_dict.end()){
-	    EA_prior[2]=0;
-	    EA_prior[3]=pow(10,-4.);
-	  }
-	  else{
-	    EA_prior[2]=dbl_dict["EA c_theta minimum"];
-	    EA_prior[3]=dbl_dict["EA c_theta maximum"];
-	  }
-	  if(dbl_dict.find("EA c_w minimum") == dbl_dict.end()){
-	    EA_prior[4]=-10;
-	    EA_prior[5]=10;
-	  }
-	  else{
-	    EA_prior[4]=dbl_dict["EA c_w minimum"];
-	    EA_prior[5]=dbl_dict["EA c_w maximum"];
-	  }
-	  if(dbl_dict.find("EA c_sigma minimum") == dbl_dict.end()){
-	    EA_prior[6]=-pow(10,-15.);
-	    EA_prior[7]=pow(10,-15.);
-	  }
-	  else{
-	    EA_prior[6]=dbl_dict["EA c_sigma minimum"];
-	    EA_prior[7]=dbl_dict["EA c_sigma maximum"];
-	  }
-	  std::cout<<"Range of EA c_a: "<<EA_prior[0]<<" - "<<EA_prior[1]<<std::endl;
-	  std::cout<<"Range of EA c_theta: "<<EA_prior[2]<<" - "<<EA_prior[3]<<std::endl;
-	  std::cout<<"Range of EA c_w: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
-	  std::cout<<"Range of EA c_sigma: "<<EA_prior[6]<<" - "<<EA_prior[7]<<std::endl;
 	}
 	
 	int psd_length ;
@@ -584,7 +618,7 @@ int main(int argc, char *argv[])
 		
 	}
 	int total_mods = Nmod+gNmod_phi+gNmod_sigma+gNmod_beta+gNmod_alpha;
-	if(generation_method.find("EA") != std::string::npos){total_mods+=4;}
+	if(generation_method.find("EA") != std::string::npos){total_mods+=3;}
 	bool pool = true;
 	if(pool){
 		debugger_print(__FILE__,__LINE__,"POOLING");
@@ -670,7 +704,7 @@ int main(int argc, char *argv[])
 		delete [] initial_position[0]; delete [] initial_position;
 	}
 	else{
-	
+	  std::cout<<"dimension - total_mods="<<dimension-total_mods<<std::endl;
 		double(*lp)(double *param, mcmc_data_interface *interface, void *parameters);
 		if(generation_method.find("IMRPhenomD") != std::string::npos && (dimension-total_mods) == 4){
 			if(total_mods == 0){
@@ -915,6 +949,8 @@ double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void
 }
 double EA_current_constraints(double *pos, mcmc_data_interface *interface, void *parameters)
 {
+  //std::cout<<"Checking EA_constraints"<<std::endl; 
+
   int dim =  interface->max_dim;
   double a = -std::numeric_limits<double>::infinity();
 
@@ -925,59 +961,80 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
   sp.mass1 = calculate_mass1(std::exp(lnChirpmass)*MSOL_SEC,eta);
   sp.mass2 = calculate_mass2(std::exp(lnChirpmass)*MSOL_SEC,eta);
   sp.M = sp.mass1 + sp.mass2;
+  sp.alpha_param = alpha_param;
+  
+  //Setting tidal1 and tidal2 from tidal_s
+  if(tidal_love)
+    {
+      IMRPhenomD_NRT<double> modelNRT;
+      modelNRT.binary_love_relation(pos[11], tidal_love_error, &sp);
+    }
+  sp.csigma_EA = 0;
   
   if(tidal_love){
-    sp.ca_EA = pos[12]; //ca
-    sp.ctheta_EA = pos[13]; //ctheta
-    sp.cw_EA = pos[14]; //cw
-    sp.csigma_EA = pos[15]; //csigma
+    if(alpha_param){
+      sp.alpha1_EA = pos[12]; //alpha1
+      sp.alpha2_EA = pos[13]; //alpha2
+      sp.alpha3_EA = pos[14]; //alpha3
+    }
+    else{
+      sp.ca_EA = pos[12]; //ca
+      sp.ctheta_EA = pos[13]; //ctheta
+      sp.cw_EA = pos[14]; //cw
+    }
   }
   else{
-    sp.ca_EA = pos[13]; //ca
-    sp.ctheta_EA = pos[14]; //ctheta
-    sp.cw_EA = pos[15]; //cw
-    sp.csigma_EA = pos[16]; //csigma  
+    if(alpha_param){
+      sp.alpha1_EA = pos[13]; //alpha1
+      sp.alpha2_EA = pos[14]; //alpha2
+      sp.alpha3_EA = pos[15]; //alpha3
+    }
+    else{
+      sp.ca_EA = pos[13]; //ca
+      sp.ctheta_EA = pos[14]; //ctheta
+      sp.cw_EA = pos[15]; //cw
+    }
   }
-  
+  sp.EA_nan_error_message = false;
   EA_IMRPhenomD_NRT<double> model;
   model.pre_calculate_EA_factors(&sp);
-  //std::cout<<"cT_EA="<<sp.cT_EA<<std::endl; 
-  
+
+  if(fabs(sp.c14_EA - sp.ca_EA)/(fabs(sp.c14_EA) + fabs(sp.ca_EA)) > pow(10, -10.)){std::cout<<"ca and c14 DO NOT MATCH"<<std::endl;}
+
+  if(sp.ca_EA < 0){return a;}
+  /* Throws out points with ca < 0 because these violate 
+   * the positive energy condition for the spin-0 mode (scalar mode).   
+   * See equation 40 of arXiv:gr-qc/0507059v3.
+   */
   if(sp.cw_EA < (-sp.csigma_EA/(1. - sp.csigma_EA))){return a;}
   /* Throws out points with cw < -csigma/(1 - csigma) because these violate 
    * the positive energy condition for the spin-1 mode (vector mode).
    * Note that the positive energy condition for the spin-2 modes is always 
-   * satisfied and for the spin-0 mode is satisfied by requiring ca > 0 which 
-   * is done when drawing random values of ca. See equation 40 of 
-   * arXiv:gr-qc/0507059v3
+   * satisfied. See equation 40 of arXiv:gr-qc/0507059v3.
    */
-  else if(sp.cTsq_EA < 0 || sp.cVsq_EA < 0 || sp.cSsq_EA < 0){return a;}
+  //std::cout<<"EA constraints test 1"<<std::endl; 
+  if(sp.cTsq_EA < 0 || sp.cVsq_EA < 0 || sp.cSsq_EA < 0){return a;}
   /* Throws out points with speeds not greater than or equal to zero (these 
    * would produce gradient instabilities or ghosts)
    * arXiv:gr-qc/0402005 and arXiv:1108.1835
    */
+  //std::cout<<"EA constraints test 2"<<std::endl; 
+  
+  if(isnan(sp.kappa3_EA))
+    {
+      //std::cout<<"kappa3:"<<sp.kappa3_EA<<std::endl; 
+      return a; 
+      }
+  //std::cout<<"EA constraints test 3"<<std::endl; 
 
-  /*
-    else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
-    {
-    //Pull infinite speed points out of the data set so that they don't mess with my plotting
-    //Keep track of how many we pull?
-    return a; 
-    }
-    else if(isnan(sp.kappa3_EA))
-    {
-    return a; 
-    }
-  */	  
-  else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.)){return a;}
-  /* Throws out points that don't obey the cT constraint from GW170817 and GRB170817A
-   * arXiv:1710.05834
-   */	  
-  if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.)){return a;}
+
+  //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > pow(10, -7.)){return a;}
   /* Throws out points that do not obey observational solar system constraints on 
    * alpha1 and alpha2
    * arXiv:1403.7377 and arXiv:gr-qc/0509114
    */
+  //std::cout<<"EA constraints test 5"<<std::endl; 
+   
   bool violate = false;
   if(sp.cV_EA < 1)
     {
@@ -989,64 +1046,60 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
 	      
     }
   if(violate){return a;}
-	  
+  //std::cout<<"EA constraints test 6"<<std::endl; 
+  
   if(sp.cS_EA < 1)
     {
-      if(abs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
+      if(fabs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
 	{
-	  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/abs(sp.c14_EA) >= pow(10, -30.)){return a;}
+	  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/fabs(sp.c14_EA) >= pow(10, -30.)){return a;}
 	  //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
 	}
-      if(abs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
+      //std::cout<<"EA constraints test 7"<<std::endl; 
+      if(fabs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
       //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
 
-    }
+      }
+  
+
+  //std::cout<<"Made it to end of EA constraints"<<std::endl;
   /*
-  //Random number declaration and seeding
-  const gsl_rng_type *T;
-  gsl_rng *r; 
-  
-  gsl_rng_env_setup();
-  
-  T=gsl_rng_default;
-  r=gsl_rng_alloc(T);
-  gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
+  //Enforcing gaussian prior on alpha1 from binary pulsar and triple systems. 
+  //arXiv:2104.04596
   double sigma = 1.021*pow(10, -5.); 
   double mu = -0.563*pow(10, -5.);
   double prob;
   
   prob = exp(-(1./2.)*((sp.alpha1_EA - mu)*(sp.alpha1_EA - mu))/(sigma*sigma));
-	  double u = gsl_ran_flat(r, 0, 1.);
-	  if(u > prob)
-	    {
-	      return a;
-	    }
   */
+
+  sp.EA_nan_error_message = true;
+  model.EA_check_nan(&sp);
   
-  return 0;
+  //return log(prob); //Use if enforcing gaussian on alpha1
+  return 0; 
 }
 double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters)
 {
-	int dim =  interface->max_dim;
-	double a = -std::numeric_limits<double>::infinity();
-
-	if(tidal_love){
-	  if( pos[12] <EA_prior[0] || pos[12] >EA_prior[1]){return a;} //ca
-	  if( pos[13] <EA_prior[2] || pos[13] >EA_prior[3]){return a;} //ctheta
-	  if( pos[14] <EA_prior[4] || pos[14] >EA_prior[5]){return a;} //cw
-	  if( pos[15] <EA_prior[6] || pos[15] >EA_prior[7]){return a;} //csigma
-	}
-	else{
-	  if( pos[13] <EA_prior[0] || pos[13] >EA_prior[1]){return a;} //ca
-	  if( pos[14] <EA_prior[2] || pos[14] >EA_prior[3]){return a;} //ctheta
-	  if( pos[15] <EA_prior[4] || pos[15] >EA_prior[5]){return a;} //cw
-	  if( pos[16] <EA_prior[6] || pos[16] >EA_prior[7]){return a;} //csigma
-	}
-	
-	double EA_constraints =  EA_current_constraints(pos, interface, parameters); 
-
-	return EA_constraints + standard_log_prior_D_NRT(pos,interface, parameters);
-
+  int dim =  interface->max_dim;
+  double a = -std::numeric_limits<double>::infinity();
+  if(tidal_love){
+    if(pos[12]<EA_prior[0] || pos[12]>EA_prior[1]){return a;} //ca or alpha1
+    if(pos[13]<EA_prior[2] || pos[13]>EA_prior[3]){return a;} //ctheta or alpha2
+    if(pos[14]<EA_prior[4] || pos[14]>EA_prior[5]){return a;} //cw or alpha3
+  }
+  else{
+    if(pos[13]<EA_prior[0] || pos[13]>EA_prior[1]){return a;} //ca or alpha1
+    if(pos[14]<EA_prior[2] || pos[14]>EA_prior[3]){return a;} //ctheta or alpha2
+    if(pos[15]<EA_prior[4] || pos[15]>EA_prior[5]){return a;} //cw or alpha3
+  }
+  
+  double NS = standard_log_prior_D_NRT(pos,interface, parameters);
+  if(NS == a){return a;}
+  double EA_constraints =  EA_current_constraints(pos, interface, parameters);
+  if (EA_constraints ==a){return a;}
+  
+  return EA_constraints + NS;
 }
 double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters)
 {
