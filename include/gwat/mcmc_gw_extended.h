@@ -3,8 +3,8 @@
 
 #include "util.h"
 #include "mcmc_gw.h"
-#include <ptrjmcmc/PtrjmcmcSampler.h>
-#include <ptrjmcmc/dataUtilities.h>
+#include <bayesship/bayesshipSampler.h>
+#include <bayesship/dataUtilities.h>
 
 struct mcmcVariables 
 {
@@ -33,15 +33,15 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 
 std::string MCMC_prep_params_v2(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method, MCMC_modification_struct *mod_struct, bool intrinsic, double gmst);
 
-double MCMC_likelihood_wrapper_v2(ptrjmcmc::positionInfo *pos, int chainID, ptrjmcmc::PtrjmcmcSampler *sampler ,void *userParameters);
+//double MCMC_likelihood_wrapper_v2(bayesship::positionInfo *pos, int chainID, bayesship::bayesshipSampler *sampler ,void *userParameters);
 
-ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
+bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	int dimension,
 	int independentSamples,
 	int ensembleSize,
 	int ensembleN,
-	ptrjmcmc::positionInfo *initialPosition,
-	ptrjmcmc::positionInfo **initialEnsemble,
+	bayesship::positionInfo *initialPosition,
+	bayesship::positionInfo **initialEnsemble,
 	double swapProb,
 	int burnIterations,
 	int burnPriorIterations,
@@ -49,7 +49,7 @@ ptrjmcmc::PtrjmcmcSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	bool writePriorData,
 	int max_chunk_size,
 	double **priorRanges,
-	double(*log_prior)(ptrjmcmc::positionInfo *pos, int chainID,ptrjmcmc::PtrjmcmcSampler *sampler, void *userParameters),
+	double(*log_prior)(bayesship::positionInfo *pos, int chainID,bayesship::bayesshipSampler *sampler, void *userParameters),
 	int numThreads,
 	bool pool,
 	int num_detectors,
