@@ -1313,11 +1313,17 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		}
 	}
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
-	  /* Map beta ppE to source params ppE and b ppE to source params ppE*/
-	  /*Or commit to having dedicated EA parameters*/
+	  out->alpha_param = in->alpha_param;
+	  if(in->alpha_param){
+	        out->alpha1_EA = in->alpha1_EA;
+		out->alpha2_EA = in->alpha2_EA;
+		out->alpha3_EA = in->alpha3_EA; 
+	  }
+	  else{ 
 		out->ca_EA = in->ca_EA;
 		out->ctheta_EA = in->ctheta_EA;
 		out->cw_EA = in->cw_EA;
+	  }
 		out->csigma_EA = in->csigma_EA;
 		EA_IMRPhenomD_NRT<T> EAmodeldNRT;
 		EAmodeldNRT.pre_calculate_EA_factors(out);

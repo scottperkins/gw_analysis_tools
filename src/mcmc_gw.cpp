@@ -2678,7 +2678,14 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	if(user_param->fisher_GAUSS_QUAD){
 		local_integration_method = "GAUSSLEG";
 	}
-	double **temp_out = allocate_2D_array(dimension,dimension);
+	std::string local_gen_method = mcmc_generation_method;
+	int local_dimension = dimension;  
+	if(local_gen_method.find("EA") != std::string::npos)
+	  {
+	    local_gen_method = "IMRPhenomD_NRT";
+	    local_dimension -= 3;
+	  }
+	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
 	for(int i =0 ; i <mcmc_num_detectors; i++){
 		
 		//Use AD 
@@ -2689,17 +2696,17 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 			//	"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
 			//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmc_noise[i]);
 			fisher_autodiff(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,local_dimension, 
 				(gen_params *)(&params),  local_integration_method,local_weights[i],true,local_noise[i]);
 		}
 		else{
 			fisher_numerical(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,local_dimension, 
 				&params, mcmc_deriv_order, NULL, NULL, local_noise[i]);
 
 		}
-		for(int j =0; j<dimension; j++){
-			for(int k =0; k<dimension; k++)
+		for(int j =0; j<local_dimension; j++){
+			for(int k =0; k<local_dimension; k++)
 			{
 				output[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k]))
@@ -2714,7 +2721,6 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	
 	MCMC_fisher_transformations(temp_params, output,dimension,local_gen,mcmc_intrinsic,
 		interface,mcmc_mod_struct, parameters);
-
 	/*if(isnan(fabs(output[8][8]))){
 	  source_parameters<double> sp;
 	  sp.mass1 = params.mass1;
@@ -2740,7 +2746,7 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	  std::cout<<" "<<std::endl; 
 	  }*/
 	
-	deallocate_2D_array(temp_out, dimension,dimension);
+	deallocate_2D_array(temp_out, local_dimension,local_dimension);
 	//////////////////////////////////////////////
 	//if(!interface->burn_phase)
 	//{
@@ -2917,7 +2923,8 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
 	gen_params->tidal_love = mod_struct->tidal_love;
-	gen_params->tidal_love_error = mod_struct->tidal_love_error; 
+	gen_params->tidal_love_error = mod_struct->tidal_love_error;
+	gen_params->alpha_param = mod_struct->alpha_param;
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
@@ -2990,7 +2997,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
   //double start = omp_get_wtime();
-	//return 2;
+  //return 2;
   MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
   int dimension = interface->max_dim;
@@ -3197,6 +3204,7 @@ double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,vo
     }
   }
   //std::cout<<"LL time for eval: "<<(double)(omp_get_wtime() -start)<<std::endl;
+
   //std::cout<<"Likelihood: "<<ll<<std::endl;
   if(isnan(ll)){
     std::cout<<"NAN"<<std::endl;

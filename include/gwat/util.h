@@ -229,6 +229,12 @@ public:
 	T ctheta_EA;
 	T cw_EA;
 	T csigma_EA;
+  	//###################################################
+        //coupling constants in another parameterization for Einstein Aether
+        T alpha1_EA;
+        T alpha2_EA;
+        T alpha3_EA;
+        bool alpha_param = true; 
 	//###################################################
         bool include_l1=false;
 	gsl_spline *Z_DL_spline_ptr=NULL;
@@ -551,10 +557,13 @@ struct source_parameters
   T cT_EA;
   T cV_EA;
   T cS_EA;
+  
   //Necessary functions of the c's
   T alpha1_EA;
   T alpha2_EA;
+  T alpha3_EA;
   T beta1_EA;
+
   T beta2_EA;
   T Z_EA;
   T A1_EA;
@@ -581,8 +590,9 @@ struct source_parameters
   T abL_EA = 0 ;
   T gX1_EA = 0 ;
 
-  bool include_l1=false;
-  bool EA_nan_error_message = false; 
+  bool include_l1=false; //include l = 1 mode or not
+  bool EA_nan_error_message = false; //check for nans --default must be false!
+  bool alpha_param = true; //use alpha parameterization of EA theory
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(

@@ -1976,9 +1976,16 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 			//parameters[dimension- 3 ] = input_params->ctheta_EA;
 			//parameters[dimension- 2 ] = input_params->cw_EA;
 			//parameters[dimension- 1 ] = input_params->csigma_EA;
-			parameters[dimension- 3 ] = input_params->ca_EA;
-			parameters[dimension- 2 ] = input_params->ctheta_EA;
-			parameters[dimension- 1 ] = input_params->cw_EA;
+		  if(input_params->alpha_param){
+		    parameters[dimension- 3 ] = input_params->alpha1_EA;
+		    parameters[dimension- 2 ] = input_params->alpha2_EA;
+		    parameters[dimension- 1 ] = input_params->alpha3_EA;
+		  }
+		  else{
+		    parameters[dimension- 3 ] = input_params->ca_EA;
+		    parameters[dimension- 2 ] = input_params->ctheta_EA;
+		    parameters[dimension- 1 ] = input_params->cw_EA;
+		  }
 		}
 		//else if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
@@ -2301,14 +2308,23 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		//if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
 		else if(generation_method.find("EA") != std::string::npos ){
-			//a_params->ca_EA = avec_parameters[dim- 4 ] ;
-			//a_params->ctheta_EA = avec_parameters[dim- 3 ] ;
-			//a_params->cw_EA = avec_parameters[dim- 2 ] ;
-			//a_params->csigma_EA = avec_parameters[dim- 1 ] ;
-			a_params->ca_EA = avec_parameters[dim- 3 ] ;
-			a_params->ctheta_EA = avec_parameters[dim- 2 ] ;
-			a_params->cw_EA = avec_parameters[dim- 1 ] ;
-			a_params->csigma_EA = 0 ;
+		  //Remnant from running the code with 16 dimensions
+		  //a_params->ca_EA = avec_parameters[dim- 4 ] ;
+		  //a_params->ctheta_EA = avec_parameters[dim- 3 ] ;
+		  //a_params->cw_EA = avec_parameters[dim- 2 ] ;
+		  //a_params->csigma_EA = avec_parameters[dim- 1 ] ;
+		  if(a_params->alpha_param){
+		    a_params->alpha1_EA = avec_parameters[dim- 3 ];
+		    a_params->alpha2_EA = avec_parameters[dim- 2 ];
+		    a_params->alpha3_EA = avec_parameters[dim- 1 ] ;
+		  }
+		  else{
+		    a_params->ca_EA = avec_parameters[dim- 3 ] ;
+		    a_params->ctheta_EA = avec_parameters[dim- 2 ] ;
+		    a_params->cw_EA = avec_parameters[dim- 1 ] ;
+		  }
+		 
+		  a_params->csigma_EA = 0 ;
 		}
 		else if( check_theory_support(generation_method)){
 			int base = dim - a_params->Nmod;
@@ -2370,6 +2386,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->sky_average = input_params->sky_average;
 	waveform_params->tidal_love = input_params->tidal_love;
 	waveform_params->tidal_love_error = input_params->tidal_love_error;
+	waveform_params->alpha_param = input_params->alpha_param;
 	waveform_params->f_ref = input_params->f_ref;
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->horizon_coord = input_params->horizon_coord;
