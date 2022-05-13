@@ -2788,7 +2788,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool init = true;
 	bool relax = true;
 	double ac_save;
-	int max_search_iterations = 3;
+	int max_search_iterations = 0;
 	int search_iterations_ct = 0;
 	int spct=0;
 	while(status<N_steps){
