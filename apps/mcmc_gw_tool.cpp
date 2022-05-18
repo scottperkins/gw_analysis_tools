@@ -285,16 +285,16 @@ int main(int argc, char *argv[])
 	  std::cout<<"Using alpha parameterization: "<<alpha_param<<std::endl;
 	  if(alpha_param){
 	    if(dbl_dict.find("EA alpha_1 minimum") ==dbl_dict.end()){
-	      EA_prior[0]=-.06;
-	      EA_prior[1]=.06; 
+	      EA_prior[0]= -1.;
+	      EA_prior[1]= 1.; 
 	    }
 	    else{
 	      EA_prior[0]=dbl_dict["EA alpha_1 minimum"];
 	      EA_prior[1]=dbl_dict["EA alpha_1 maximum"]; 
 	    }
 	    if(dbl_dict.find("EA alpha_2 minimum") ==dbl_dict.end()){
-	      EA_prior[2]=-.003;
-	      EA_prior[3]=.003; 
+	      EA_prior[2]=-.1;
+	      EA_prior[3]=.1; 
 	    }
 	    else{
 	      EA_prior[2]=dbl_dict["EA alpha_2 minimum"];
@@ -999,8 +999,6 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
   EA_IMRPhenomD_NRT<double> model;
   model.pre_calculate_EA_factors(&sp);
 
-  if(fabs(sp.c14_EA - sp.ca_EA)/(fabs(sp.c14_EA) + fabs(sp.ca_EA)) > pow(10, -10.)){std::cout<<"ca and c14 DO NOT MATCH"<<std::endl;}
-
   if(sp.ca_EA < 0){return a;}
   /* Throws out points with ca < 0 because these violate 
    * the positive energy condition for the spin-0 mode (scalar mode).   
@@ -1034,33 +1032,36 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
    * arXiv:1403.7377 and arXiv:gr-qc/0509114
    */
   //std::cout<<"EA constraints test 5"<<std::endl; 
-   
-  bool violate = false;
-  if(sp.cV_EA < 1)
-    {
-      if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.))
-	//enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
-	{
-	  violate = true;
-	}
+ 
+  bool Cherenkov = false; 
+  if(Cherenkov)
+  {
+  	bool violate = false;
+  	if(sp.cV_EA < 1)
+  	  {
+      		if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.))
+		//enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
+		{
+	  	  violate = true;
+		}
 	      
-    }
-  if(violate){return a;}
-  //std::cout<<"EA constraints test 6"<<std::endl; 
+	    }
+	  if(violate){return a;}
+	  //std::cout<<"EA constraints test 6"<<std::endl; 
   
-  if(sp.cS_EA < 1)
-    {
-      if(fabs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
-	{
-	  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/fabs(sp.c14_EA) >= pow(10, -30.)){return a;}
-	  //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
-	}
-      //std::cout<<"EA constraints test 7"<<std::endl; 
-      if(fabs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
-      //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
-
-      }
-  
+	  if(sp.cS_EA < 1)
+	    {
+	      if(fabs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
+		{
+		  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/fabs(sp.c14_EA) >= pow(10, -30.)){return a;}
+		  //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
+		}
+	      //std::cout<<"EA constraints test 7"<<std::endl; 
+	      if(fabs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
+	      //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
+	
+	    }
+  } 
 
   //std::cout<<"Made it to end of EA constraints"<<std::endl;
   /*
