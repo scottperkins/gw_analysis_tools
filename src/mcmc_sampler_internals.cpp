@@ -1255,8 +1255,8 @@ void assign_probabilities(sampler *sampler, int chain_index)
 			//sampler->step_prob[chain_index][2]=.0;
 			//sampler->step_prob[chain_index][3]=.5;
 			//Tailor to temperature
-			//sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
-			sampler->step_prob[chain_index][1]=0;
+			sampler->step_prob[chain_index][1]=.7-.4/sampler->chain_temps[chain_index];
+			//sampler->step_prob[chain_index][1]=0;
 			sampler->step_prob[chain_index][2]=.0;
 			sampler->step_prob[chain_index][3]=.2+.5/sampler->chain_temps[chain_index];
 			//sampler->step_prob[chain_index][5]=.1;
