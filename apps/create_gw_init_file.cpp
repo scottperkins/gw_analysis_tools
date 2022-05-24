@@ -1,10 +1,10 @@
 #include <iostream>
-#include <gwat/util.h>
-#include <gwat/fisher.h>
-#include <gwat/io_util.h>
-#include <gwat/mcmc_gw.h>
-#include <gwat/mcmc_sampler_internals.h>
-#include <gwat/ppE_utilities.h>
+#include "util.h"
+#include "fisher.h"
+#include "io_util.h"
+#include "mcmc_gw.h"
+#include "mcmc_sampler_internals.h"
+#include "ppE_utilities.h"
 
 
 int main(int argc, char *argv[])

@@ -3,18 +3,18 @@ import matplotlib.pyplot as plt
 #import gwatpy.gwatpy_plot as gp ; gp.set()
 
 def calculate_constants(GWAT,LAL,freqs):
-    G1 = GWAT[0] 
-    L1 = LAL[0] 
+    G1 = GWAT[0]
+    L1 = LAL[0]
     F1 = freqs[0]
-    G2 = GWAT[5] 
-    L2 = LAL[5] 
+    G2 = GWAT[5]
+    L2 = LAL[5]
     F2 = freqs[5]
     #print(G1,G2,L1,L2,F1,F2)
     tc = (L2 - G2 - (L1 - G1))/ ( 2 *np.pi *(F2-F1))
     phic = L1 - G1 - 2 * np.pi * F1*tc
     return tc, phic
     #return 0, 0
-iterations = 10
+iterations = 1
 for i in np.arange(iterations):
     data = np.loadtxt("data/response_{}.csv".format(i),delimiter=',',unpack=True)
     plt.loglog(data[0],data[1]*data[1]+data[2]*data[2],label="LAL")
@@ -29,7 +29,7 @@ for i in np.arange(iterations):
 #plt.axvline(x=5882.29916274512, color='k')
 
 #plt.ylim([10**-75,10**-49])
-
+plt.tight_layout()
 plt.savefig("plots/comp_amp.pdf")
 plt.close()
 for i in np.arange(iterations):
@@ -44,6 +44,7 @@ for i in np.arange(iterations):
 #plt.axvline(x=5882.29916274512, color='k')
 
 #plt.ylim([10**-7,10**-5])
+plt.tight_layout()
 plt.savefig("plots/diff_amp.pdf")
 plt.close()
 for i in np.arange(iterations):
@@ -78,11 +79,12 @@ for i in np.arange(iterations):
 
 #plt.axvline(x=5000, color='r')
 #plt.xlim([1600,1700])
+plt.tight_layout()
 plt.savefig("plots/diff_phase.pdf")
 plt.close()
 for i in np.arange(iterations):
     data = np.loadtxt("data/response_{}.csv".format(i),delimiter=',',unpack=True)
-    
+
     tc, phic = calculate_constants(data[6], data[5],data[0])
     #data[5] += 10
     #data[6] += 10
@@ -105,6 +107,6 @@ plt.legend()
 #plt.xlim([0,8000])
 
 #plt.xlim([1600,1700])
+plt.tight_layout()
 plt.savefig("plots/comp_phase.pdf")
 plt.close()
-

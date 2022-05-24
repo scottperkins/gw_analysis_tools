@@ -152,7 +152,9 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-	double epsilon = 1e-5;
+  	double epsilon = 1e-8;
+
+  //double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
 	bool log_factors[dimension];
@@ -175,7 +177,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	//for(int i = 0 ; i<dimension; i++){
 	//	std::cout<<parameters_vec[i]<<std::endl;
 	//}
-	
+
 	if(parameters->sky_average && local_gen_method.find("IMRPhenomD")!=std::string::npos)
 	{
 		double *amplitude_plus = new double[length];
@@ -287,6 +289,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
 					phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
+		  
 					response_deriv[i][l] = amplitude_deriv - 
 						std::complex<double>(0,1)*phase_deriv*amplitude[l];
 				}
@@ -322,6 +325,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 		double **dt=NULL;
 		bool corr_time;
 		int local_dimension=dimension;
+		double DTOA = 0;
 		if(detector=="LISA"){
 			times = new double[length];
 			corr_time = false;
@@ -334,6 +338,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			response_minus_minus= new std::complex<double>[length];
 		}
 		for (int i =0; i<local_dimension; i++){
+			DTOA = 0;
 			for( int j =0;j<local_dimension;j++){
 				param_p[j] = parameters_vec[j] ;
 				param_m[j] = parameters_vec[j] ;
@@ -349,14 +354,15 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				param_mm[i] = parameters_vec[i] -2 *epsilon;
 			}
 			repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
-			if(detector=="LISA"){
-				//correct time needs to stay false for now
-				//time_phase_corrected(times, length,frequencies,  &waveform_params, local_gen_method, corr_time);
-				//map_extrinsic_angles(&waveform_params);
-			}
-			else if(reference_detector != detector){
-				waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
-			}
+			//if(detector=="LISA"){
+			//	//correct time needs to stay false for now
+			//	//time_phase_corrected(times, length,frequencies,  &waveform_params, local_gen_method, corr_time);
+			//	//map_extrinsic_angles(&waveform_params);
+			//}
+			//else if(reference_detector != detector){
+			//	waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//	//DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//}
 			fourier_detector_response(frequencies, 
 				length,
 				response_plus,
@@ -364,14 +370,21 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				local_gen_method,
 				&waveform_params,
 				times);	
+			if(reference_detector != detector){
+				DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+				for(int l = 0 ; l<length; l++){
+					response_plus[l] *= exp(std::complex<double>(0,DTOA*frequencies[l]));
+				}
+			}
 
 			repack_parameters(param_m, &waveform_params, gen_method, dimension, parameters);
-			if(detector=="LISA"){
-				//map_extrinsic_angles(&waveform_params);
-			}
-			else if(reference_detector != detector){
-				waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
-			}
+			//if(detector=="LISA"){
+			//	//map_extrinsic_angles(&waveform_params);
+			//}
+			//else if(reference_detector != detector){
+			//	waveform_params.tc -= DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//	//DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+			//}
 			fourier_detector_response(frequencies, 
 				length,
 				response_minus,
@@ -379,6 +392,12 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				local_gen_method,
 				&waveform_params,
 				times);	
+			if(reference_detector != detector){
+				DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
+				for(int l = 0 ; l<length; l++){
+					response_minus[l] *= exp(std::complex<double>(0,DTOA*frequencies[l]));
+				}
+			}
 			if(order>=4){
 				repack_parameters(param_pp, &waveform_params, gen_method, dimension, parameters);
 				if(detector=="LISA"){
@@ -422,6 +441,7 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					response_deriv[i][l] = 
 						(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(12.*epsilon);
+					//std::cout<<"order = 4, response_plus_plus = "<<response_plus_plus[l]<<", response_minus_minus"<<response_minus_minus[l]<<std::endl; 
 				}
 			}
 				
@@ -872,8 +892,10 @@ void calculate_derivatives_autodiff(double *frequency,
 			//MCMC, which works with real data
 			adouble tc;
 			if(detector != "LISA" && detector != reference_detector){
-				tc = 2*M_PI*(-a_parameters.tc - DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
-				a_parameters.tc = 0;
+				//CHANGED SIGN FOR TC !!!!!!
+				//tc = -2*M_PI*(-a_parameters.tc - DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
+				tc = -2*M_PI*(DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector));
+				//a_parameters.tc = 0;
 				//a_parameters.tc -= DTOA_DETECTOR(a_parameters.RA,a_parameters.DEC,a_parameters.gmst, reference_detector,detector);
 			}
 			int status  = fourier_detector_response(&afreq, 1, &a_response, detector, local_gen_method, &a_parameters, &time);
@@ -976,9 +998,23 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
 		*N_src_params = 6+1;	
 	}
+	if(generation_method.find("NRT")!=std::string::npos){
+		if(params->tidal_love){
+			*N_src_params+=1;
+		}
+		else{
+			*N_src_params+=2;
+		}
+	}
 	if(check_mod(generation_method))
 	{
-		*N_src_params += params->Nmod;
+		if(generation_method.find("EA") == std::string::npos){
+			*N_src_params += params->Nmod;
+		}
+		else{
+			//*N_src_params+=4;	
+			*N_src_params+=3;	
+		}
 	}
 }
 /*! \brief **DEPRECATED**
@@ -1012,8 +1048,18 @@ void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_
 		gr_param_dim = 7;
 	}
 	if(check_mod(generation_method)){
-		for(int i = 0; i<params->Nmod;i++){
-			src_params[gr_dim+i]=gr_param_dim+i;
+
+		if(generation_method.find("EA") == std::string::npos){
+			for(int i = 0; i<params->Nmod;i++){
+				src_params[gr_dim+i]=gr_param_dim+i;
+			}
+		}
+		else{
+			//for(int i = 0; i<4;i++){
+			for(int i = 0; i<3;i++){
+				src_params[gr_dim+i]=gr_param_dim+i;
+			}
+
 		}
 	}
 }
@@ -1896,15 +1942,25 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 	}
 	if(generation_method.find("NRT") != std::string::npos){
 		if(!input_params->sky_average){
-			if(generation_method.find("PhenomD") != std::string::npos){
-				parameters[11] = input_params->tidal1;
-				parameters[12] = input_params->tidal2;
+			if(generation_method.find("PhenomD") != std::string::npos ){
+				if( (input_params->tidal_love)){
+					parameters[11] = input_params->tidal_s;
+				}
+				else{
+					parameters[11] = input_params->tidal1;
+					parameters[12] = input_params->tidal2;
+				}
 			}
 		}
 		else{
 			if(generation_method.find("PhenomD") != std::string::npos){
-				parameters[4] = input_params->tidal1;
-				parameters[5] = input_params->tidal2;
+				if( (input_params->tidal_love)){
+					parameters[4] = input_params->tidal_s;
+				}
+				else{
+					parameters[4] = input_params->tidal1;
+					parameters[5] = input_params->tidal2;
+				}
 			}
 		}
 	}
@@ -1914,6 +1970,22 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 			for(int i = 0 ;i<input_params->Nmod; i++){
 				parameters[base+i] = input_params->betappe[i];
 			}
+		}
+		else if(generation_method.find("EA") != std::string::npos ){
+			//parameters[dimension- 4 ] = input_params->ca_EA;
+			//parameters[dimension- 3 ] = input_params->ctheta_EA;
+			//parameters[dimension- 2 ] = input_params->cw_EA;
+			//parameters[dimension- 1 ] = input_params->csigma_EA;
+		  if(input_params->alpha_param){
+		    parameters[dimension- 3 ] = input_params->alpha1_EA;
+		    parameters[dimension- 2 ] = input_params->alpha2_EA;
+		    parameters[dimension- 1 ] = input_params->alpha3_EA;
+		  }
+		  else{
+		    parameters[dimension- 3 ] = input_params->ca_EA;
+		    parameters[dimension- 2 ] = input_params->ctheta_EA;
+		    parameters[dimension- 1 ] = input_params->cw_EA;
+		  }
 		}
 		//else if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
@@ -2204,17 +2276,28 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 	if(generation_method.find("NRT") != std::string::npos){
 		if(!a_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos){
-				a_params->tidal1 = avec_parameters[11];
-				a_params->tidal2 = avec_parameters[12];
+				if( (a_params->tidal_love)){
+					a_params->tidal_s = avec_parameters[11];
+				}
+				else{
+					a_params->tidal1 = avec_parameters[11];
+					a_params->tidal2 = avec_parameters[12];
+				}
 			}
 		}
 		else{
 			if(generation_method.find("PhenomD") != std::string::npos){
-				a_params->tidal1 = avec_parameters[4];
-				a_params->tidal2 = avec_parameters[5];
+				if( (a_params->tidal_love)){
+					a_params->tidal_s = avec_parameters[4];
+				}
+				else{
+					a_params->tidal1 = avec_parameters[4];
+					a_params->tidal2 = avec_parameters[5];
+				}
 			}
 		}
 	}
+	//debugger_print(__FILE__,__LINE__,generation_method);
 	if( check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dim - a_params->Nmod;
@@ -2224,7 +2307,26 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}
 		//if( generation_method.find("dCS") !=std::string::npos ||
 		//	generation_method.find("EdGB") != std::string::npos){
-		if( check_theory_support(generation_method)){
+		else if(generation_method.find("EA") != std::string::npos ){
+		  //Remnant from running the code with 16 dimensions
+		  //a_params->ca_EA = avec_parameters[dim- 4 ] ;
+		  //a_params->ctheta_EA = avec_parameters[dim- 3 ] ;
+		  //a_params->cw_EA = avec_parameters[dim- 2 ] ;
+		  //a_params->csigma_EA = avec_parameters[dim- 1 ] ;
+		  if(a_params->alpha_param){
+		    a_params->alpha1_EA = avec_parameters[dim- 3 ];
+		    a_params->alpha2_EA = avec_parameters[dim- 2 ];
+		    a_params->alpha3_EA = avec_parameters[dim- 1 ] ;
+		  }
+		  else{
+		    a_params->ca_EA = avec_parameters[dim- 3 ] ;
+		    a_params->ctheta_EA = avec_parameters[dim- 2 ] ;
+		    a_params->cw_EA = avec_parameters[dim- 1 ] ;
+		  }
+		 
+		  a_params->csigma_EA = 0 ;
+		}
+		else if( check_theory_support(generation_method)){
 			int base = dim - a_params->Nmod;
 			for(int i= 0 ; i<a_params->Nmod; i++){
 				a_params->betappe[i] = avec_parameters[base+i];
@@ -2282,6 +2384,9 @@ template<class T>
 void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_params_base<double> *input_params, std::string gen_method)
 {
 	waveform_params->sky_average = input_params->sky_average;
+	waveform_params->tidal_love = input_params->tidal_love;
+	waveform_params->tidal_love_error = input_params->tidal_love_error;
+	waveform_params->alpha_param = input_params->alpha_param;
 	waveform_params->f_ref = input_params->f_ref;
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->horizon_coord = input_params->horizon_coord;
@@ -2490,6 +2595,11 @@ void calculate_fisher_elements(double *frequency,
 				//Jacobian for integrating in logspace
 				if(log10_f){
 					integrand[i]*=(frequency[i])*LOG10;
+				}
+				if(i == 8){
+				  //std::cout<<"response_deriv[j][8]"<<response_deriv[j][8]<< std::endl;
+				  //std::cout<<"response_deriv[k][8]"<<response_deriv[k][8]<< std::endl;
+				  //std::cout<<"integrand[8]"<<integrand[8]<< std::endl;
 				}
 			}
 			if(integration_method =="GAUSSLEG"){
@@ -3300,6 +3410,14 @@ void ppE_theory_transformation_jac(
 		}
 		else{
 			base_dim = 11;
+		}
+	}
+	if(new_method.find("NRT") != std::string::npos){
+		if(param->tidal_love){
+			base_dim+=1;
+		}
+		else{
+			base_dim+=2;
 		}
 	}
 	double **derivatives = new double*[dimension-base_dim];

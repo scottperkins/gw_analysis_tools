@@ -162,8 +162,6 @@ public:
 	double *kde_cov_lndet;
 	int kde_cov_update_number=200;
 	int *kde_cov_update_ct=NULL;
-	//int fisher_update_number=500000;
-	//int fisher_update_number=2;
 
 	//log_prior lp;
 	//log_likelihood ll;
