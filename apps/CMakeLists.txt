@@ -25,6 +25,14 @@ target_include_directories( mcmc_gw_tool PUBLIC "${INCLUDE_DIRS}")
 #target_include_directories( mcmc_gw_tool PUBLIC "${PROJECT_SOURCE_DIR}/include")
 #target_include_directories( mcmc_gw_tool PUBLIC "${OpenMP_INCLUDE_DIR}" "${ADOLC_INCLUDE_DIR}" "${HDF5_INCLUDE_DIR}" "${FFTW3_INCLUDE_DIR}" "${GSL_INCLUDE_DIR}" "${Eigen3_INCLUDE_DIR}" "${PTRJMCMC_INCLUDE_DIR}")
 
+add_executable(mcmc_gw_tool_v2 "mcmc_gw_tool_v2.cpp")
+set_target_properties(mcmc_gw_tool_v2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+target_link_libraries(mcmc_gw_tool_v2 PUBLIC gwat)
+target_link_libraries( mcmc_gw_tool_v2 PUBLIC "${LIB_DIRS}")
+target_include_directories( mcmc_gw_tool_v2 PUBLIC "${INCLUDE_DIRS}")
+
+
+
 add_executable(rjmcmc_gw_tool_2wf "rjmcmc_gw_tool_2wf.cpp")
 set_target_properties(rjmcmc_gw_tool_2wf PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 target_link_libraries(rjmcmc_gw_tool_2wf PUBLIC gwat)
@@ -54,6 +62,7 @@ target_include_directories( autocorr_tool PUBLIC "${INCLUDE_DIRS}")
 
 install(TARGETS waveform_tool DESTINATION bin)
 install(TARGETS mcmc_gw_tool DESTINATION bin)
+install(TARGETS mcmc_gw_tool_v2 DESTINATION bin)
 install(TARGETS rjmcmc_gw_tool_2wf DESTINATION bin)
 install(TARGETS autocorr_tool DESTINATION bin)
 install(TARGETS fisher_tool DESTINATION bin)
