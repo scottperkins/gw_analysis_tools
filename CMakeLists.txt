@@ -63,8 +63,10 @@ find_package(nlohmann_json REQUIRED)
 
 ###############################################################
 
-SET(BAYESSHIP_INCLUDE_DIR "/Users/sperkins/git-repos/BayesShip/build/install/include")
-SET(BAYESSHIP_LIBRARIES "/Users/sperkins/git-repos/BayesShip/build/install/lib/libbayesship.dylib")
+#SET(BAYESSHIP_INCLUDE_DIR "/Users/sperkins/git-repos/BayesShip/build/install/include")
+#SET(BAYESSHIP_LIBRARIES "/Users/sperkins/git-repos/BayesShip/build/install/lib/libbayesship.dylib")
+SET(BAYESSHIP_INCLUDE_DIR "/bayesshipBuild/install/include")
+SET(BAYESSHIP_LIBRARIES "/bayesshipBuild/install/lib/libbayesship.so")
 ###############################################################
 
 set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${BAYESSHIP_INCLUDE_DIR}" )

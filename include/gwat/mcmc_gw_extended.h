@@ -27,6 +27,7 @@ struct mcmcVariables
 	int mcmc_deriv_order = 4;
 	bool mcmc_log_beta = false;
 	MCMC_user_param *user_parameters = nullptr;	
+	double maxDim;
 };
 
 void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension,double **seeding_var, bool local_seeding, bool *intrinsic,MCMC_modification_struct *mod_struct);
