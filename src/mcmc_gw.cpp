@@ -2613,8 +2613,8 @@ void MCMC_fisher_transformations(
 		}*/
 	    }
 	  }
-	  fisher[dimension-3][dimension-3] = 1./pow(10, -4.);
-	  fisher[dimension-2][dimension-2] = 1./pow(10, -6.);
+	  fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	  fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
 	  fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
 	}
 	/*if(isnan(fabs(fisher[8][8]))){
