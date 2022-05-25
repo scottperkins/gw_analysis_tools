@@ -189,17 +189,17 @@ int main(int argc, char *argv[])
 	std::cout<<"Max chunk size: "<<max_chunk_size<<std::endl;
 	
 	std::string initial_position_file="", initial_checkpoint_file="",initial_ensemble_position_file="";
-	int chain_N;
+	int chainN;
 	bool continue_from_checkpoint=false;
 
 	if(str_dict.find("initial position file") != str_dict.end()){
 		initial_position_file = str_dict["initial position file"];
-		std::cout<<"Chain number: "<<chain_N<<std::endl;
+		std::cout<<"Chain number: "<<chainN<<std::endl;
 		std::cout<<"Initial position file: "<<initial_position_file<<std::endl;
 	}
 	if (str_dict.find("initial ensemble position file") != str_dict.end()){
 		initial_ensemble_position_file = str_dict["initial ensemble position file"];
-		std::cout<<"Chain number: "<<chain_N<<std::endl;
+		std::cout<<"Chain number: "<<chainN<<std::endl;
 		std::cout<<"Initial ensemble position file: "<<initial_ensemble_position_file<<std::endl;
 	}
 	if ( initial_position_file =="" && initial_ensemble_position_file ==""){
@@ -506,7 +506,7 @@ int main(int argc, char *argv[])
 	//########################################################################
 	double **output;
 	output = allocate_2D_array(samples, dimension );
-	double chain_temps[chain_N];
+	double chain_temps[chainN];
 	
 	int Nmod = 0;
 	int gNmod_phi = 0;
@@ -726,9 +726,9 @@ int main(int argc, char *argv[])
 	//
 	//	double *seeding_var = NULL;
 	//	double **ensemble_initial_position=NULL;
-	//	mcmc_sampler_output sampler_output(chain_N, dimension);
-	//	SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chain_N, 
-	//			max_thermo_chain_N, initial_position[0],seeding_var,ensemble_initial_position,chain_temps, 
+	//	mcmc_sampler_output sampler_output(chainN, dimension);
+	//	SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(&sampler_output,output, dimension, samples, chainN, 
+	//			max_thermo_chainN, initial_position[0],seeding_var,ensemble_initial_position,chain_temps, 
 	//			swap_freq, t0, nu,max_chunk_size,allocation_scheme, 
 	//			standard_log_prior_skysearch,threads, pool,show_progress,detector_N, 
 	//			data, psd,freqs, data_lengths,gps_time, detectors,Nmod, bppe,
@@ -880,18 +880,18 @@ int main(int argc, char *argv[])
 			for(int i = 0 ; i<chainN; i++){
 				ensembleInitialPosition[i] = new bayesship::positionInfo(dimension,false);
 			}
-			ensemble_initial_position = new double*[chain_N];
-			for(int i = 0 ; i<chain_N; i++){
+			ensemble_initial_position = new double*[chainN];
+			for(int i = 0 ; i<chainN; i++){
 				ensemble_initial_position[i] = new double[dimension];
 			}
-			read_file(initial_ensemble_position_file, ensemble_initial_position,chain_N,dimension);
+			read_file(initial_ensemble_position_file, ensemble_initial_position,chainN,dimension);
 
 			for(int j = 0 ; j<chainN; j++){
 				for(int i = 0 ; i<dimension; i++){
 					ensembleInitialPosition[j]->parameters[i] = ensemble_initial_position[j][i];
 				}
 			}
-			//for(int i = 0 ; i<chain_N; i++){
+			//for(int i = 0 ; i<chainN; i++){
 			//	for(int j = 0 ; j<dimension; j++){
 			//		std::cout<<ensemble_initial_position[i][j]<<" ";
 			//	}	
@@ -910,7 +910,7 @@ int main(int argc, char *argv[])
 		delete logp;
 		delete [] initial_position[0]; delete [] initial_position;
 		if(initial_ensemble_position_file != ""){
-			for(int i = 0 ; i<chain_N; i++){
+			for(int i = 0 ; i<chainN; i++){
 				delete [] ensemble_initial_position[i]; 
 			}
 			delete [] ensemble_initial_position;
@@ -919,7 +919,7 @@ int main(int argc, char *argv[])
 			delete initialPosition;
 		}
 		if(ensembleInitialPosition){
-			for(int i = 0 ; i<chain_N; i++){
+			for(int i = 0 ; i<chainN; i++){
 				delete ensembleInitialPosition[i];
 			}
 			delete [] ensembleInitialPosition;
