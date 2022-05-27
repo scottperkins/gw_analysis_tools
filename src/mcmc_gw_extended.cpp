@@ -536,16 +536,16 @@ public:
 				delete [] gen_params.betappe;
 			}
 			else if( local_gen.find("gIMR") != std::string::npos){
-				if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
+				if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_phi !=0){
 					delete [] gen_params.delta_phi;
 				}
-				if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
+				if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
 					delete [] gen_params.delta_sigma;
 				}
-				if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
+				if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_beta !=0){
 					delete [] gen_params.delta_beta;
 				}
-				if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
+				if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
 					delete [] gen_params.delta_alpha;
 				}
 	
@@ -665,10 +665,10 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	}
 
 
-	std::cout<<"Base:"<<std::endl;
-	RJPTMCMC_method_specific_prep_v2(generation_method, minDim,  &(mcmcVarRJ.mcmc_intrinsic), mcmcVarRJ.mcmc_mod_struct);
-	std::cout<<"Extending up to:"<<std::endl;
-	RJPTMCMC_method_specific_prep_v2(generation_method_extended, maxDim,  &(mcmcVarRJ.mcmc_intrinsic), mcmcVarRJ.mcmc_mod_struct);
+	//std::cout<<"Base:"<<std::endl;
+	RJPTMCMC_method_specific_prep_v2(generation_method, maxDim,  &(mcmcVarRJ.mcmc_intrinsic), mcmcVarRJ.mcmc_mod_struct);
+	//std::cout<<"Extending up to:"<<std::endl;
+	//RJPTMCMC_method_specific_prep_v2(generation_method_extended, maxDim,  &(mcmcVarRJ.mcmc_intrinsic), mcmcVarRJ.mcmc_mod_struct);
 	
 	//######################################################
 	int T = (int)(1./(mcmcVarRJ.mcmc_frequencies[0][1]-mcmcVarRJ.mcmc_frequencies[0][0]));
@@ -795,12 +795,12 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 4;
+	int proposalFnN = 3;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
 	propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
 	propArray[2] = new bayesship::KDEProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, false );
-	propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+	//propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
 
 	//Rough estimate of the temperatures
 	double betaTemp[sampler->ensembleSize];
@@ -821,13 +821,14 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
 		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		propProb[i][3] = 0.25 + .45*( betaTemp[ensemble]); //.7 to .25
+		//propProb[i][3] = 0.25 + .45*( betaTemp[ensemble]); //.7 to .25
 
 
 		//propProb[i][1] = 0; //.25 to .7
 		//propProb[i][3] = 0.3 + .45*( betaTemp[ensemble]); //.7 to .25
 
-		propProb[i][0] = 1. - propProb[i][3] - propProb[i][1]- propProb[i][2];
+		propProb[i][0] = 1.  - propProb[i][1]- propProb[i][2];
+		//propProb[i][0] = 1. - propProb[i][3] - propProb[i][1]- propProb[i][2];
 		//std::cout<<propProb[i][0]<<" "<<propProb[i][1]<<" "<<propProb[i][3]<<std::endl;
 
 	}
@@ -898,7 +899,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	delete propData->proposals[0];
 	delete propData->proposals[1];
 	delete propData->proposals[2];
-	delete propData->proposals[3];
+	//delete propData->proposals[3];
 	delete propData;
 	delete [] propArray;
 	for(int i = 0 ; i<num_detectors; i++){
@@ -1670,8 +1671,8 @@ void MCMC_fisher_wrapper_v2(bayesship::positionInfo *pos,   double **output, voi
 	}
 	//#########################################################################
 	gen_params_base<double> params;
-	std::string local_gen = MCMC_prep_params(param, 
-		temp_params,&params, dimension, mcmcVar->mcmc_generation_method,mcmcVar->mcmc_mod_struct);
+	std::string local_gen = MCMC_prep_params_v2(param, 
+		temp_params,&params, dimension, mcmcVar->mcmc_generation_method,mcmcVar->mcmc_mod_struct, mcmcVar->mcmc_intrinsic,mcmcVar->mcmc_gmst );
 	//#########################################################################
 	//#########################################################################
 	repack_parameters(temp_params, &params, 

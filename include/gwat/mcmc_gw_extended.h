@@ -92,4 +92,36 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputDir,
 	std::string outputFileMoniker);
 
+bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
+	int minDim,
+	int maxDim,
+	int independentSamples,
+	int ensembleSize,
+	int ensembleN,
+	bayesship::positionInfo *initialPosition,
+	bayesship::positionInfo **initialEnsemble,
+	double swapProb,
+	int burnIterations,
+	int burnPriorIterations,
+	int priorIterations,
+	bool writePriorData,
+	int max_chunk_size,
+	double **priorRanges,
+	bayesship::probabilityFn *log_prior,
+	int numThreads,
+	bool pool,
+	int num_detectors,
+	std::complex<double> **data,
+	double **noise_psd,
+	double **frequencies,
+	int *data_length,
+	double gps_time,
+	std::string *detectors,
+	MCMC_modification_struct *mod_struct,
+	std::string generation_method,
+	std::string generation_method_extended,
+	std::string outputDir,
+	std::string outputFileMoniker
+	);
+
 #endif
