@@ -29,8 +29,34 @@ struct mcmcVariables
 	MCMC_user_param *user_parameters = nullptr;	
 	double maxDim;
 };
+struct mcmcVariablesRJ
+{
+	double **mcmc_noise=nullptr;
+	double *mcmc_init_pos=nullptr;
+	std::complex<double> **mcmc_data=nullptr;
+	double **mcmc_frequencies=nullptr;
+	std::string *mcmc_detectors=nullptr;
+	std::string mcmc_generation_method="";
+	std::string mcmc_generation_method_extended="";
+	int *mcmc_data_length = nullptr;
+	fftw_outline *mcmc_fftw_plans=nullptr;
+	int mcmc_num_detectors  ;
+	double mcmc_gps_time = 0;
+	double mcmc_gmst = 0;
+	int mcmc_max_dim;
+	int mcmc_min_dim;
+	MCMC_modification_struct *mcmc_mod_struct=nullptr;
+	bool mcmc_save_waveform=true;	
+	bool mcmc_intrinsic=false;	
+	int mcmc_deriv_order = 4;
+	bool mcmc_log_beta = false;
+	MCMC_user_param *user_parameters = nullptr;	
+	int maxDim;
+	int minDim;
+};
 
-void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension,double **seeding_var, bool local_seeding, bool *intrinsic,MCMC_modification_struct *mod_struct);
+void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension, bool *intrinsic,MCMC_modification_struct *mod_struct);
+void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimension, bool *intrinsic,MCMC_modification_struct *mod_struct);
 
 std::string MCMC_prep_params_v2(double *param, double *temp_params, gen_params_base<double> *gen_params, int dimension, std::string generation_method, MCMC_modification_struct *mod_struct, bool intrinsic, double gmst);
 
