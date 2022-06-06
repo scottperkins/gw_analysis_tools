@@ -66,6 +66,8 @@ struct MCMC_modification_struct
 	bool tidal_love = true; 
         bool tidal_love_error = false;
         bool alpha_param = true;
+        bool EA_region1 = false;
+        bool EA_region2 = false; 
   
 	/* Whether to use Gauss-Legendre Quadrature for the LIKELIHOOD
  * 		If using GLQ, provide the weights vector for the integration */

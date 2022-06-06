@@ -1314,15 +1314,29 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	}
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 	  out->alpha_param = in->alpha_param;
+	  out->EA_region1 = in->EA_region1;
+	  out->EA_region2 = in->EA_region2; 
 	  if(in->alpha_param){
 	        out->alpha1_EA = in->alpha1_EA;
 		out->alpha2_EA = in->alpha2_EA;
 		out->alpha3_EA = in->alpha3_EA; 
 	  }
-	  else{ 
+	  else{
+	    if(in->EA_region1){
+	      out->ca_EA = in->ca_EA;
+	      out->ctheta_EA = 3* in->ca_EA;
+	      out->cw_EA = in->cw_EA; 
+	    }
+	    if(in->EA_region2){
+	      out->ca_EA = 0;
+	      out->ctheta_EA = in->ctheta_EA;
+	      out->cw_EA = in->cw_EA;
+	    }
+	    else{
 		out->ca_EA = in->ca_EA;
 		out->ctheta_EA = in->ctheta_EA;
 		out->cw_EA = in->cw_EA;
+	    }
 	  }
 		out->csigma_EA = in->csigma_EA;
 		EA_IMRPhenomD_NRT<T> EAmodeldNRT;
