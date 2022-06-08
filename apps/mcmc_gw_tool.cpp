@@ -999,8 +999,8 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
   EA_IMRPhenomD_NRT<double> model;
   model.pre_calculate_EA_factors(&sp);
 
-  if(sp.ca_EA < 0){return a;}
-  /* Throws out points with ca < 0 because these violate 
+  if(sp.ca_EA < 0 || sp.ca_EA > 2.){return a;}
+  /* Throws out points with ca < 0 or ca > 2 because these violate 
    * the positive energy condition for the spin-0 mode (scalar mode).   
    * See equation 40 of arXiv:gr-qc/0507059v3.
    */
@@ -1025,6 +1025,10 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
       }
   //std::cout<<"EA constraints test 3"<<std::endl; 
 
+  if(fabs(sp.ctheta_EA) > 0.3){return a;}
+  /*
+   * Throws out points that violate Big Bang Nucleosynthesis constraints. arXiv:hep-th/0407149v3 
+   */
 
   //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > pow(10, -7.)){return a;}
   /* Throws out points that do not obey observational solar system constraints on 
@@ -1033,7 +1037,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
    */
   //std::cout<<"EA constraints test 5"<<std::endl; 
  
-  bool Cherenkov = false; 
+  bool Cherenkov = false;
   if(Cherenkov)
   {
   	bool violate = false;
