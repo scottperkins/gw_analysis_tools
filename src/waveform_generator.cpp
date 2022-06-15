@@ -113,7 +113,11 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
-
+	bool PVProp = false;
+	if(generation_method.find("PVProp") != std::string::npos)
+	{
+		PVProp = true;
+	}
 	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
@@ -189,10 +193,38 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 				wp->hplus[i] = wp->hplus[i];
 			}
 		}
+/*		if(PVProp){
+		// if dCS parity violating propogation
+			T alphasq = parameters->betappe[0] ;
+			T thetadot = parameters->betappe[1] ;
+
+			T z = Z_from_DL(params.DL/MPC_SEC,params.cosmology);
+			const double pi = 3.14159265358979323846;
+
+			T deltaph = sqrt(alphasq) * thetadot * z * pi;
+
+
+			debugger_print(__FILE__,__LINE__,"dcS Propagation effects");
+			debugger_print(__FILE__,__LINE__,alphasq);
+			debugger_print(__FILE__,__LINE__,thetadot);
+			debugger_print(__FILE__,__LINE__,deltaph);
+
+
+			for (int i =0 ; i < length; i++){
+			//	wp->hcross[i] = wp->hcross[i] + thetadot * sqrt(alphasq) * z * frequencies[i] * wp->hplus[i];
+			//	wp->hplus[i] = wp->hplus[i] - thetadot * sqrt(alphasq) * z * frequencies[i] * wp->hcross[i];
+			// LJ: set G=1 until I figure out what is happening with the units
+			T pref = -64 * 1 * deltaph * frequencies[i];
+				wp->hcross[i] = wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i];
+				wp->hplus[i] = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i];
+			}
+			debugger_print(__FILE__,__LINE__,std::real(wp->hplus[0]));
+		} */
+
 		/*! Handle the inclination angle dependence*/
 		/*! Iota is weird, because it's a extrinsic parameter, but one that has dependence on frequency (potentially)*/
 		/*! I think it should be handled separately because of complications like LISA response, etc*/
-		for (int i =0 ; i < length; i++){
+	/*	for (int i =0 ; i < length; i++){
 			wp->hcross[i] *= ci;
 			wp->hplus[i] *= std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
@@ -200,7 +232,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			for (int i =0 ; i < length; i++){
 			  wp->hx[i] *= s2i;
 			}
-		}
+		}*/
 		if(wp->active_polarizations[3]){
 			for (int i =0 ; i < length; i++){
 				wp->hy[i] *= si;
@@ -1251,6 +1283,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	out->NSflag2 = in->NSflag2;
 	out->dep_postmerger = in->dep_postmerger;
 	out->include_l1 = in->include_l1;
+
 	if(generation_method.find("Pv2")!=std::string::npos){
 		IMRPhenomPv2<T> model;
 		if((in->chip +1)>DOUBLE_COMP_THRESH){
@@ -1262,6 +1295,23 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 		}
 		else {
 			model.PhenomPv2_Param_Transform(out);
+		}
+	}
+	if(generation_method.find("PVProp") != std::string::npos){
+		out->Nmod = in->Nmod;
+		out->betappe = in->betappe;
+		out->bppe = in->bppe;
+		if(generation_method.find("PhenomD_NRT") != std::string::npos)
+		{
+			local_method = "IMRPhenomD_NRT";
+		}
+		else if(generation_method.find("PhenomD") != std::string::npos)
+		{
+			local_method = "IMRPhenomD";
+		}
+		else if(generation_method.find("PhenomPv2") != std::string::npos)
+		{
+			local_method = "IMRPhenomPv2";
 		}
 	}
 	if(generation_method.find("ppE") != std::string::npos){
@@ -1288,12 +1338,12 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	  //if(in->tidal_s >=0)
 	  if(in->tidal_love )
 	    {
-	      IMRPhenomD_NRT<T> modelNRT; 
+	      IMRPhenomD_NRT<T> modelNRT;
 	      modelNRT.binary_love_relation(in->tidal_s, in->tidal_love_error, out);
 	      in->tidal1= out->tidal1; //copying into the gen params struct
 	      in->tidal2= out->tidal2;
-	      
-	      in->tidal_a = (in->tidal1 - in->tidal2)/2.; 
+
+	      in->tidal_a = (in->tidal1 - in->tidal2)/2.;
 
 	    }
 	  if((in->tidal1 < 0 || in->tidal2<0) && in->tidal_weighted >= 0) {
@@ -1315,17 +1365,17 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 	  out->alpha_param = in->alpha_param;
 	  out->EA_region1 = in->EA_region1;
-	  out->EA_region2 = in->EA_region2; 
+	  out->EA_region2 = in->EA_region2;
 	  if(in->alpha_param){
 	        out->alpha1_EA = in->alpha1_EA;
 		out->alpha2_EA = in->alpha2_EA;
-		out->alpha3_EA = in->alpha3_EA; 
+		out->alpha3_EA = in->alpha3_EA;
 	  }
 	  else{
 	    if(in->EA_region1){
 	      out->ca_EA = in->ca_EA;
 	      out->ctheta_EA = 3* in->ca_EA;
-	      out->cw_EA = in->cw_EA; 
+	      out->cw_EA = in->cw_EA;
 	    }
 	    if(in->EA_region2){
 	      out->ca_EA = 0;

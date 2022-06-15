@@ -7,13 +7,13 @@
  * Supported theories:
  *
  * dCS -- input beta is \alpha^2 in seconds^4
- * 
+ *
  * EdGB -- input beta is \alpha^2 in seconds^4
- * 
+ *
  * EdGB_GHOv1 -- EdGB Generic Higher Order version 1-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
  *
  * EdGB_GHOv2 -- EdGB Generic Higher Order version 2-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
- * 
+ *
  * EdGB_GHOv3 -- EdGB Generic Higher Order version 3-- input beta is \alpha^2 in seconds^4 and \gamma, which is dimensionless
  *
  * PNSeries_ppE_*_Inspiral -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) -- for inspiral only
@@ -21,14 +21,14 @@
  * PNSeries_ppE_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
  *
  * ExtraDimension -- input beta l^2 in seconds^2
- * 
+ *
  * BHEvaporation -- input dm / dt (dimensionless)
  *
  * TVG -- Time varying G -- input beta is \dot{G}_{z} in Hz
  *
  * DipRad -- Generic Dipole Radiation -- input beta is \delta \dot{E} (dimensionless)
  *
- * NonComm -- Noncommutatitve gravity -- input beta is \Lambda^2 in units of Planck energies (dimensionless), where \sqrt(\Lambda) defines the energy scale of noncommutativity 
+ * NonComm -- Noncommutatitve gravity -- input beta is \Lambda^2 in units of Planck energies (dimensionless), where \sqrt(\Lambda) defines the energy scale of noncommutativity
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
  *
@@ -52,6 +52,23 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 		return EA_fully_restricted_v1_additional_modifications(&temp_sp,wp,freqs,length);
 	}
   */
+		if(generation_method.find("PVProp") != std::string::npos){
+			T alphasq = gp->betappe[0] ;
+			T thetadot = gp->betappe[1] ;
+			T DL = p->DL;
+			T Z= Z_from_DL(DL/MPC_SEC,gp->cosmology);
+			debugger_print(__FILE__,__LINE__,Z);
+			//const double pi = 3.14159265358979323846;
+
+			T deltaph = sqrt(alphasq) * thetadot * Z;
+			debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
+				for (int i =0 ; i < length; i++){
+					//LJ: Setting G=1 until I figure out units
+					T pref = -32 * 1 * deltaph * freqs[i];
+						wp->hcross[i] = wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i];
+						wp->hplus[i] = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i];
+					}
+				}
 	return ;
 }
 template void extra_modifications(std::string, gen_params_base<double> * gp,source_parameters<double> *, waveform_polarizations<double> *,double *, int );
@@ -80,6 +97,9 @@ bool check_mod(std::string generation_method)
 bool check_theory_support(std::string generation_method)
 {
 	if(generation_method.find("dCS")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("PVProp")!=std::string::npos){
 		return true;
 	}
 	if(generation_method.find("EdGB")!=std::string::npos){
@@ -123,7 +143,7 @@ bool check_theory_support(std::string generation_method)
 		return true;
 	}
 	return false;
-} 
+}
 template<class T>
 void deallocate_mapping(theory_ppE_map<T> *mapping){
 	if(mapping->bppe){
@@ -132,7 +152,7 @@ void deallocate_mapping(theory_ppE_map<T> *mapping){
 	if(mapping->beta_fns){
 		delete [] mapping->beta_fns;
 	}
-	//Only used for a select few theories 
+	//Only used for a select few theories
 	if(mapping->beta_fns_ptrs){
 		for(int i = 0 ;i < mapping->Nmod; i++){
 			delete mapping->beta_fns_ptrs[i];
@@ -154,9 +174,19 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 	if(generation_method.find("dCS")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->bppe[0] = -1;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return dCS_beta(p);} ;
+		ins = true;
+	}
+	else if(generation_method.find("PVProp")!= std::string::npos){
+		mapping->Nmod = 2;
+		mapping->bppe = new double[2];
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
+		mapping->bppe[0] = -1;
+		mapping->bppe[1] = -1;
+		mapping->beta_fns[0] = [](source_parameters<T> *p){return 0;} ;
+		mapping->beta_fns[1] = [](source_parameters<T> *p){return 0;} ;
 		ins = true;
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
@@ -166,7 +196,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
 			mapping->bppe[2] =-3;
-			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_HO_0PN_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_HO_1PN_beta(p);} ;
 			mapping->beta_fns[2] = [](source_parameters<T> *p){return EdGB_HO_2PN_beta(p);} ;
@@ -175,7 +205,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->Nmod = 1;
 			mapping->bppe = new double[1];
 			mapping->bppe[0] =-7;
-			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_HO_0PN_beta(p);} ;
 		}
 		else if(generation_method.find("EdGB_GHOv1")!= std::string::npos){
@@ -183,7 +213,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
-			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav1(p);} ;
 		}
@@ -192,7 +222,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
-			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav2(p);} ;
 		}
@@ -201,7 +231,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
 			mapping->bppe[1] =-5;
-			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav3(p);} ;
 		}
@@ -209,7 +239,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->Nmod = 1;
 			mapping->bppe = new double[1];
 			mapping->bppe[0] =-7;
-			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 		}
 		ins = true;
@@ -218,7 +248,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ExtraDimension_beta(p);} ;
 		ins = true;
 	}
@@ -230,7 +260,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->bppe = new double[2];
 		mapping->bppe[0] =-7;
 		mapping->bppe[1] =-5;
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return EA_fully_restricted_phase0(p);} ;
 		mapping->beta_fns[1] = [](source_parameters<T> *p){return EA_fully_restricted_phase1(p);} ;
 		ins = true;
@@ -239,7 +269,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return BHEvaporation_beta(p);} ;
 		ins = true;
 	}
@@ -247,7 +277,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-13;
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return TVG_beta(p);} ;
 		ins = true;
 	}
@@ -255,28 +285,28 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-7;
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return DipRad_beta(p);} ;
 		ins = true;
-			
+
 	}
 	else if(generation_method.find("NonComm")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =-1;
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return NonComm_beta(p);} ;
 		ins = true;
-			
+
 	}
 	else if(generation_method.find("ModDispersion")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
 		mapping->bppe[0] =params_in->bppe[0];
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ModDispersion_beta(p);} ;
 		ins = false;
-			
+
 	}
 	else if(generation_method.find("PNSeries")!= std::string::npos){
 		mapping->Nmod = params_in->Nmod;
@@ -284,12 +314,12 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		for(int i = 0 ; i<params_in->Nmod; i++){
 			mapping->bppe[i] =params_in->bppe[i];
 		}
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
+		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod];
 		for(int i = 0 ; i<params_in->Nmod; i++){
 			auto lam = new std::function<T(source_parameters<T> *)>( [i](source_parameters<T> *p){ return PNSeries_beta(i,p);} );
 			mapping->beta_fns_ptrs[i] = lam;
-			mapping->beta_fns[i] = *(lam); 
+			mapping->beta_fns[i] = *(lam);
 		}
 		if(generation_method.find("Inspiral")!= std::string::npos){
 			ins = true;
@@ -297,7 +327,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		else{
 			ins = false;
 		}
-			
+
 	}
 	else if(generation_method.find("polarization_test")!= std::string::npos){
 		mapping->Nmod = params_in->Nmod;
@@ -340,7 +370,7 @@ void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param
 	T ci = cos(param->incl_angle);
 	T si = sin(param->incl_angle);
 	for(int i = 0 ; i<length; i++){
-		hall[i] = wp->hplus[i] / std::complex<T>(-1*(1+ci*ci),0) ;	
+		hall[i] = wp->hplus[i] / std::complex<T>(-1*(1+ci*ci),0) ;
 	}
 	//T dtV = param->tc*(1./param->cT_EA-1./param->cV_EA)/(1-1./param->cT_EA);
 	//T dtS = param->tc*(1./param->cT_EA-1./param->cS_EA)/(1-1./param->cT_EA);
@@ -363,7 +393,7 @@ void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param
 		wp->hb[i] = hall[i] * std::complex<T>(0.5,0) * u2m2* param->alpha_ppE_2T_0_EA* param->gb1_EA * (std::complex<T>(1,0) - param->abL_EA)*shift_S*si*si;
 		wp->hx[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * ci;
 		wp->hy[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * std::complex<T>(0,1);
-	} 
+	}
 	delete [] hall;
 	return ;
 }
@@ -381,7 +411,7 @@ T PNSeries_beta(int term,source_parameters<T> *param)
 	T out = 0;
 	T chirpmass = calculate_chirpmass(param->mass1,param->mass2);
 	T total_m = param->mass1 + param->mass2;
-	
+
 	if(term == 0 ){
 		out = param->betappe[0] * pow(total_m/chirpmass,param->bppe[0]/3.);
 	}
@@ -399,7 +429,7 @@ T EA_fully_restricted_phase0(source_parameters<T> *p)
 	pre_calculate_EA_factors(p);
 	T out = 0;
 	out = -3./224. * 1./p->kappa3_EA * pow(p->eta,2./5.) * p->epsilon_x_EA;
-	
+
 	//Minus one comes from sign choice from paper
 	return -1*out;
 }
@@ -421,7 +451,7 @@ template adouble EA_fully_restricted_phase1(source_parameters<adouble> *);
 template<class T>
 T dCS_beta(source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -436,9 +466,9 @@ template<class T>
 T dCS_phase_factor(source_parameters<T> *param)
 {
 	T g=0;
- 	T M = param->M;	
- 	T chirpmass = param->chirpmass;	
- 	T eta = param->eta;	
+ 	T M = param->M;
+ 	T chirpmass = param->chirpmass;
+ 	T eta = param->eta;
 	T coeff1 = -5./8192.;
 	T coeff2 = 15075./114688.;
 	T m1 = calculate_mass1(chirpmass,eta);
@@ -448,24 +478,24 @@ T dCS_phase_factor(source_parameters<T> *param)
 	T chi2 = param->chi_s-param->chi_a;
 	T s1temp = 2.+2.*pow_int(chi1,4) - 2.*sqrt((1.-chi1*chi1)) - chi1*chi1 * ((3. - 2.*sqrt(1.-chi1*chi1)));
 	T s2temp = 2.+2.*pow_int(chi2,4) - 2.*sqrt((1.-chi2*chi2)) - chi2*chi2 * ((3. - 2.*sqrt(1.-chi2*chi2)));
-	
+
 	T s1  ;
 	T s2  ;
 	if( fabs(chi1) <DOUBLE_COMP_THRESH){
-		s1 = 0;		
+		s1 = 0;
 	}
 	else{
 		s1  = s1temp/(2.*chi1*chi1*chi1);
 	}
 	if( fabs(chi2) <DOUBLE_COMP_THRESH){
-		s2 = 0;		
+		s2 = 0;
 	}
 	else{
 		s2  = s2temp/(2.*chi2*chi2*chi2);
 	}
 	//Neutron stars don't source scalar charge
-	if(param->NSflag1){s1 =0;}	
-	if(param->NSflag2){s2 =0;}	
+	if(param->NSflag1){s1 =0;}
+	if(param->NSflag2){s2 =0;}
 	g+=coeff1/(pow(eta,14./5.)) * pow((m1*s2 - m2 * s1),2.)/(m*m);
 	g+=coeff2/(pow(eta,14./5.)) * (m2*m2* chi1*chi1 - 350./201. * m1*m2*chi1*chi2 + m1*m1 * chi2*chi2)/(m*m);
 
@@ -478,7 +508,7 @@ template adouble dCS_phase_factor(source_parameters<adouble> *);
 template<class T>
 T EdGB_HO_0PN_beta( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -487,12 +517,12 @@ T EdGB_HO_0PN_beta( source_parameters<T> *param)
 	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
 	T out =  -5.*alphaSq/pow_int(unredshiftedM,4) / 7168. / pow(param->eta,18./5.) *( 4 *param->eta -1)  ;
 	return out;
-} 
+}
 
 template<class T>
 T EdGB_HO_1PN_beta( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -501,12 +531,12 @@ T EdGB_HO_1PN_beta( source_parameters<T> *param)
 	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
 	T out =  -5.*alphaSq/pow_int(unredshiftedM,4) / 688128. / pow_int(param->eta,4) *( 685. - 3916*param->eta + 2016* param->eta * param->eta)  ;
 	return out;
-} 
+}
 
 template<class T>
 T EdGB_HO_2PN_beta( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -515,13 +545,13 @@ T EdGB_HO_2PN_beta( source_parameters<T> *param)
 	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
 	T out =  5.*alphaSq/pow_int(unredshiftedM,4) / 387072. / pow(param->eta,22./5.) *pow_int( 1- 2. * param->eta,2)*(995. + 952.*param->eta)  ;
 	return out;
-} 
+}
 
 //###############################################################
 template<class T>
 T EdGB_beta( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -529,7 +559,7 @@ T EdGB_beta( source_parameters<T> *param)
 	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
 	T out =  16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
 	return out;
-} 
+}
 template adouble EdGB_beta(source_parameters<adouble> *);
 template double EdGB_beta(source_parameters<double> *);
 
@@ -537,9 +567,9 @@ template double EdGB_beta(source_parameters<double> *);
 template<class T>
 T EdGB_phase_factor( source_parameters<T> *param)
 {
- 	T M = param->M;	
- 	T chirpmass = param->chirpmass;	
- 	T eta = param->eta;	
+ 	T M = param->M;
+ 	T chirpmass = param->chirpmass;
+ 	T eta = param->eta;
 	T m1 = calculate_mass1(chirpmass, eta);
 	T m2 = calculate_mass2(chirpmass, eta);
 	T chi1 = param->chi_s + param->chi_a;
@@ -549,42 +579,42 @@ T EdGB_phase_factor( source_parameters<T> *param)
 	T s1;
         T s2;
 	if( fabs(chi1) <DOUBLE_COMP_THRESH){
-		s1 = 0;		
+		s1 = 0;
 	}
 	else{
 		s1  = temp1/(chi1*chi1);
 	}
 	if( fabs(chi2) <DOUBLE_COMP_THRESH){
-		s2 = 0;		
+		s2 = 0;
 	}
 	else{
 		s2  = temp2/(chi2*chi2);
 	}
-	if(param->NSflag1){debugger_print(__FILE__,__LINE__,"NS 1");s1 =0;}	
-	if(param->NSflag2){s2 =0;}	
+	if(param->NSflag1){debugger_print(__FILE__,__LINE__,"NS 1");s1 =0;}
+	if(param->NSflag2){s2 =0;}
 	return (-5./7168.)* pow_int((m1*m1 * s2 - m2*m2 * s1),2) / (pow_int(M,4) * pow(eta,(18./5)));
-} 
+}
 template adouble EdGB_phase_factor(source_parameters<adouble> *);
 template double EdGB_phase_factor(source_parameters<double> *);
 
 template<class T>
 T EdGB_GHO_betav1( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
 	T phase_mod = param->betappe[0];
 	T generic_mod = param->betappe[1];
 	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * generic_mod;
-} 
+}
 template adouble EdGB_GHO_betav1(source_parameters<adouble> *);
 template double EdGB_GHO_betav1(source_parameters<double> *);
 
 template<class T>
 T EdGB_GHO_betav2( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -592,14 +622,14 @@ T EdGB_GHO_betav2( source_parameters<T> *param)
 	T generic_mod = param->betappe[1];
 	T phase_factor = EdGB_phase_factor(param);
 	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) *phase_factor* generic_mod;
-} 
+}
 template adouble EdGB_GHO_betav2(source_parameters<adouble> *);
 template double EdGB_GHO_betav2(source_parameters<double> *);
 
 template<class T>
 T EdGB_GHO_betav3( source_parameters<T> *param)
 {
- 	T M = param->M;	
+ 	T M = param->M;
 	T DL = param->DL;
 	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
 	T unredshiftedM = M/(1.+Z);
@@ -608,7 +638,7 @@ T EdGB_GHO_betav3( source_parameters<T> *param)
 	T phase_factor = EdGB_phase_factor(param);
 	T phase_GR_1PN = (3715./756. + 55. * param->eta / 9.);
 	return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * generic_mod* phase_factor*phase_GR_1PN;
-} 
+}
 template adouble EdGB_GHO_betav3(source_parameters<adouble> *);
 template double EdGB_GHO_betav3(source_parameters<double> *);
 
@@ -621,25 +651,25 @@ T ExtraDimension_beta( source_parameters<T> *param)
 	T ten_mircometer = 10.e-6 / c; //10 micrometers in seconds
 	T m1dot = -2.8e-7 * pow_int(MSOL_SEC * (1+Z)/ param->mass1,2)* ED_length_sq /pow_int( ten_mircometer, 2) *MSOL_SEC/T_year;
 	T m2dot = -2.8e-7 * pow_int(MSOL_SEC* (1+Z)/ param->mass2,2)* ED_length_sq/pow_int( ten_mircometer, 2) *MSOL_SEC/T_year;
-	T beta = (m1dot + m2dot) * (25. / 851968.) * 
-		( ( 3. - 26.*param->eta + 34. * param->eta*param->eta) / 
+	T beta = (m1dot + m2dot) * (25. / 851968.) *
+		( ( 3. - 26.*param->eta + 34. * param->eta*param->eta) /
 		( pow(param->eta, 2./5.) * ( 1- 2*param->eta)) );
 
 	return beta;
-} 
+}
 template adouble ExtraDimension_beta(source_parameters<adouble> *);
 template double ExtraDimension_beta(source_parameters<double> *);
-	
+
 template<class T>
 T BHEvaporation_beta( source_parameters<T> *param)
 {
 	T mdot = param->betappe[0]; //evaporation rate -- dimensionless
-	T beta = (mdot) * (25. / 851968.) * 
-		( ( 3. - 26.*param->eta + 34. * param->eta*param->eta) / 
+	T beta = (mdot) * (25. / 851968.) *
+		( ( 3. - 26.*param->eta + 34. * param->eta*param->eta) /
 		( pow(param->eta, 2./5.) * ( 1- 2*param->eta)) );
 
 	return beta;
-} 
+}
 template adouble BHEvaporation_beta(source_parameters<adouble> *);
 template double BHEvaporation_beta(source_parameters<double> *);
 
@@ -651,7 +681,7 @@ T TVG_beta( source_parameters<T> *param)
 	T Gdot = param->betappe[0];
 	T beta = ( -25. / 65526. ) * ( Gdot * param->chirpmass/(1+Z)) ;
 	return beta;
-} 
+}
 template adouble TVG_beta(source_parameters<adouble> *);
 template double TVG_beta(source_parameters<double> *);
 
@@ -661,7 +691,7 @@ T DipRad_beta( source_parameters<T> *param)
 	T deltaEdot =param->betappe[0];
 	T beta = ( -3. / 224. ) * pow(param->eta,2./5.) * deltaEdot;
 	return beta;
-} 
+}
 template adouble DipRad_beta(source_parameters<adouble> *);
 template double DipRad_beta(source_parameters<double> *);
 
@@ -671,7 +701,7 @@ T NonComm_beta( source_parameters<T> *param)
 	T Lambda_sq = param->betappe[0];
 	T beta = ( -75. / 256. ) * pow(param->eta,-4./5.) * ( 2.*param->eta - 1.) * Lambda_sq;
 	return beta;
-} 
+}
 template adouble NonComm_beta(source_parameters<adouble> *);
 template double NonComm_beta(source_parameters<double> *);
 
@@ -708,15 +738,15 @@ T ModDispersion_beta( source_parameters<T> *param)
 	double alpha = (param->bppe[0]+3.)/3.;
 	T Z= Z_from_DL(param->DL/MPC_SEC,param->cosmology);
 	T Dalpha = DL_from_Z_MD(Z,alpha)*MPC_SEC;
-	//T lambdaA = h_planck* pow(param->betappe[0],1./(alpha-2));	
-	//T beta = ( pow(M_PI,2.-alpha) / (1.-alpha) ) 
-	//	* ( Dalpha / pow(param->betappe[0],2.-alpha) ) 
+	//T lambdaA = h_planck* pow(param->betappe[0],1./(alpha-2));
+	//T beta = ( pow(M_PI,2.-alpha) / (1.-alpha) )
+	//	* ( Dalpha / pow(param->betappe[0],2.-alpha) )
 	//	* ( pow(param->chirpmass,1.-alpha) / pow(1+Z, 1.-alpha) ) ;
-	T beta = ( pow(M_PI,2.-alpha) / (1.-alpha) ) 
-		* ( Dalpha * param->betappe[0]/pow(h_planck, 2.-alpha) ) 
+	T beta = ( pow(M_PI,2.-alpha) / (1.-alpha) )
+		* ( Dalpha * param->betappe[0]/pow(h_planck, 2.-alpha) )
 		* ( pow(param->chirpmass,1.-alpha) / pow(1+Z, 1.-alpha) ) ;
 	return beta;
-} 
+}
 template adouble ModDispersion_beta(source_parameters<adouble> *);
 template double ModDispersion_beta(source_parameters<double> *);
 
@@ -729,7 +759,7 @@ template double ModDispersion_beta(source_parameters<double> *);
  * Supported alphas include 0,.5,1,1.5,2,2.5,3,3.5,4
  *
  * See https://arxiv.org/abs/1110.2720 for full definitions
- * 
+ *
  */
 template <class T>
 T DL_from_Z_MD(T Z, double alpha)
@@ -751,8 +781,8 @@ T DL_from_Z_MD(T Z, double alpha)
 			dl =  cosmology_interpolation_function_MD(Z,coeffs, interp_deg);
 			delete[] coeffs;
 			return dl;
-			
-		}	
+
+		}
 	}
 	return -1;
 }
@@ -801,8 +831,8 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   p->c1_EA = (p->cw_EA + p->csigma_EA)/2.;
   p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
   p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
-  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.; 
-  
+  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.;
+
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
@@ -821,31 +851,31 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   //Relevant combinations of parameters
   p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
   p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
-  p->beta1_EA = -2.* p->c13_EA / p->cV_EA; 
-  p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA); 
-  
+  p->beta1_EA = -2.* p->c13_EA / p->cV_EA;
+  p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA);
+
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
-  
+
   p->A1_EA = (1./p->cT_EA) + (2*p->c14_EA*p->c13_EA*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*(2.*p->c1_EA - p->c13_EA*p->cminus_EA)*p->cV_EA) + (3.*p->c14_EA*(p->Z_EA - 1.)*(p->Z_EA - 1.))/(2.*(2. - p->c14_EA)*p->cS_EA);
-  
+
   p->A2_EA = -(2.*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*pow(p->cV_EA, 3.)) - 2.*(p->Z_EA - 1.)/((2. - p->c14_EA)*pow(p->cS_EA, 3.));
-  
+
   p->A3_EA = 1./(2.*p->c14_EA* pow(p->cV_EA, 5.)) + 2./(3.*p->c14_EA * (2. - p->c14_EA)*pow(p->cS_EA, 5.));
- 
+
   p->B3_EA = 1./(9.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 5.));
-  
+
   p->C_EA = 4./(3.*p->c14_EA * pow(p->cV_EA, 3.)) + 4./(3.*p->c14_EA*(2. - p->c14_EA)*pow(p->cS_EA, 3.));
-  
+
   p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
 
   /*
   //Sensitivities
   p->compact1 = 1.; //FIX
   p->compact2 = 1.; //FIX
-  
+
   p->O_m1_EA = (-5./7.)*p->compact1 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact1, 3.);
   p->O_m2_EA = (-5./7.)*p->compact2 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact2, 3.);
-  
+
   p->s1_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m1_EA)
     +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m1_EA*p->O_m1_EA)
     + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m1_EA, 3.));
@@ -856,15 +886,15 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   */
 /*
   //The functions that are actually used to compute the phase
-  p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
+  p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M);
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
   //Functions necessary for corrections to the amplitude
   p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
-  p->abL_EA = 1. + 2*p->beta2_EA; 
+  p->abL_EA = 1. + 2*p->beta2_EA;
   p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
-  p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
+  p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA));
   //debugger_print(__FILE__,__LINE__,"EA Debugging");
   //std::cout<<"aBL "<<p->abL_EA<<std::endl;
   //std::cout<<"gb1 "<<p->gb1_EA<<std::endl;
@@ -876,7 +906,7 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   //std::cout<<"cT "<<p->cT_EA<<std::endl;
   //std::cout<<"cV "<<p->cV_EA<<std::endl;
   //std::cout<<"cS "<<p->cS_EA<<std::endl;
-  
+
 }
 template void pre_calculate_EA_factors(source_parameters<double> *);
 template void pre_calculate_EA_factors(source_parameters<adouble> *);
