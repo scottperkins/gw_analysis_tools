@@ -59,6 +59,21 @@ find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(nlohmann_json REQUIRED)
+
+###############################################################
+
+#SET(BAYESSHIP_INCLUDE_DIR "/Users/sperkins/git-repos/BayesShip/build/install/include")
+#SET(BAYESSHIP_LIBRARIES "/Users/sperkins/git-repos/BayesShip/build/install/lib/libbayesship.dylib")
+#SET(BAYESSHIP_INCLUDE_DIR "/bayesshipBuild/install/include")
+#SET(BAYESSHIP_LIBRARIES "/bayesshipBuild/install/lib/libbayesship.so")
+SET(BAYESSHIP_INCLUDE_DIR "/usr/local/include")
+SET(BAYESSHIP_LIBRARIES "/usr/local/lib/libbayesship.so")
+###############################################################
+
+#set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${BAYESSHIP_INCLUDE_DIR}" )
+set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${PROJECT_SOURCE_DIR}/include;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${BAYESSHIP_INCLUDE_DIR}" )
+set(LIB_DIRS "${HDF5_LIBRARIES};OpenMP::OpenMP_CXX;${ADOLC_LIBRARIES};${FFTW3_LIBRARIES};${GSL_LIBRARIES};m;${BAYESSHIP_LIBRARIES}")
 
 
 #Library
