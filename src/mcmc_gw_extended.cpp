@@ -19,6 +19,7 @@
 void MCMC_fisher_wrapper_v2(bayesship::positionInfo *pos,   double **output, void *userParameters);
 
 
+void MCMC_fisher_wrapper_RJ_v2(bayesship::positionInfo *pos,   double **output, std::vector<int> block, void *userParameters);
 
 void pack_local_mod_structure_v2(bayesship::bayesshipSampler *sampler,
 	double *param,
@@ -120,9 +121,11 @@ public:
 		for(int i = 0 ; i<maxDim;i++){
 			if(pos->status[i]){
 				temp_params[ct] = pos->parameters[i];
+				//std::cout<<temp_params[ct]<<",";
 				ct+=1;
 			}
 		}
+		//std::cout<<std::endl;
 		bool wfExtended=false;
 		std::string gen_meth = mcmcVarRJ->mcmc_generation_method;
 		if(dim > minDim){wfExtended=true;gen_meth=mcmcVarRJ->mcmc_generation_method_extended;}
@@ -331,6 +334,7 @@ public:
 	
 			}
 		}
+		//debugger_print(__FILE__,__LINE__,ll);
 		return ll;
 	
 	}
@@ -766,7 +770,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->RJ = true;
 	ll->sampler = sampler;
 
-	sampler->independentSamples = independentSamples;
+	sampler->iterations = independentSamples;
 	sampler->outputDir = outputDir;
 	sampler->outputFileMoniker = outputFileMoniker;
 	sampler->burnIterations = burnIterations;
@@ -781,6 +785,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->ensembleN = ensembleN;
 	sampler->priorRanges = priorRanges;
 	sampler->initialPosition = initialPosition;
+	sampler->ignoreExistingCheckpoint = true;
 
 	//Testing
 	//sampler->coldOnlyStorage = false;
@@ -795,12 +800,17 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 3;
+	int proposalFnN = 5;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
 	propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
 	propArray[2] = new bayesship::KDEProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, false );
-	//propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+	propArray[3] = new bayesship::randomLayerRJProposal(sampler, .5);
+
+
+	std::vector<std::vector<int>> blocks = {{0,1,2,3,4,5,6,7,8,9,10}};
+	std::vector<int> blockProb = {1};
+	propArray[4] = new bayesship::gibbsFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_v2,   sampler->userParameters,  100,sampler,blocks, blockProb );
 
 	//Rough estimate of the temperatures
 	double betaTemp[sampler->ensembleSize];
@@ -821,14 +831,25 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
 		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		//propProb[i][3] = 0.25 + .45*( betaTemp[ensemble]); //.7 to .25
+		propProb[i][3] = 0.2 - .1*( betaTemp[ensemble]); //.1 to .2
+		//propProb[i][4] = 0.05 + .5*( betaTemp[ensemble]); //.6 to .1
+		propProb[i][4] = 0;
 
 
 		//propProb[i][1] = 0; //.25 to .7
 		//propProb[i][3] = 0.3 + .45*( betaTemp[ensemble]); //.7 to .25
 
-		propProb[i][0] = 1.  - propProb[i][1]- propProb[i][2];
-		//propProb[i][0] = 1. - propProb[i][3] - propProb[i][1]- propProb[i][2];
+		//propProb[i][0] = 1.  - propProb[i][1]- propProb[i][2];
+		
+		propProb[i][0] = 1. ;
+		
+		for(int j = 1 ;j < proposalFnN; j++){
+			propProb[i][0] -= propProb[i][j];
+		}
+		for(int j = 0 ;j < proposalFnN; j++){
+			std::cout<<propProb[i][j]<<", ";
+		}
+		std::cout<<"\n";
 		//std::cout<<propProb[i][0]<<" "<<propProb[i][1]<<" "<<propProb[i][3]<<std::endl;
 
 	}
@@ -899,7 +920,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	delete propData->proposals[0];
 	delete propData->proposals[1];
 	delete propData->proposals[2];
-	//delete propData->proposals[3];
+	delete propData->proposals[3];
 	delete propData;
 	delete [] propArray;
 	for(int i = 0 ; i<num_detectors; i++){
@@ -1658,6 +1679,131 @@ void MCMC_fisher_transformations_v2(
 }
 
 
+void MCMC_fisher_wrapper_RJ_v2(bayesship::positionInfo *pos,   double **output, std::vector<int> block, void *userParameters)
+{
+	mcmcVariablesRJ *mcmcVarRJ= (mcmcVariablesRJ *)userParameters;
+	
+
+//##########################################################
+//##########################################################
+	mcmcVariables mcmcVar ;
+	mcmcVar.mcmc_noise = mcmcVarRJ->mcmc_noise;
+	//mcmcVar.mcmc_init_pos = initial_pos;
+	mcmcVar.mcmc_frequencies = mcmcVarRJ->mcmc_frequencies;
+	mcmcVar.mcmc_data = mcmcVarRJ->mcmc_data;
+	mcmcVar.mcmc_data_length = mcmcVarRJ->mcmc_data_length;
+	mcmcVar.mcmc_detectors = mcmcVarRJ->mcmc_detectors;
+	mcmcVar.mcmc_generation_method = mcmcVarRJ->mcmc_generation_method;
+	mcmcVar.mcmc_fftw_plans = mcmcVarRJ->mcmc_fftw_plans;
+	mcmcVar.mcmc_num_detectors = mcmcVarRJ->mcmc_num_detectors;
+	mcmcVar.mcmc_gps_time = mcmcVarRJ->mcmc_gps_time;
+	mcmcVar.mcmc_gmst = gps_to_GMST_radian(mcmcVarRJ->mcmc_gps_time);
+	mcmcVar.mcmc_mod_struct = mcmcVarRJ->mcmc_mod_struct;
+	mcmcVar.mcmc_save_waveform = true;
+	mcmcVar.maxDim = mcmcVarRJ->minDim;
+
+
+
+//##########################################################
+//##########################################################
+
+
+	//######################################################
+	int T = (int)(1./(mcmcVar.mcmc_frequencies[0][1]-mcmcVar.mcmc_frequencies[0][0]));
+	int burn_factor = T/4; //Take all sources to 4 seconds
+	std::complex<double> **burn_data = new std::complex<double>*[mcmcVar.mcmc_num_detectors];
+	double **burn_freqs = new double*[mcmcVar.mcmc_num_detectors];
+	double **burn_noise = new double*[mcmcVar.mcmc_num_detectors];
+	int *burn_lengths = new int[mcmcVar.mcmc_num_detectors];
+	fftw_outline *burn_plans= new fftw_outline[mcmcVar.mcmc_num_detectors];
+	for(int j = 0; j<mcmcVar.mcmc_num_detectors; j++){
+		burn_lengths[j] = mcmcVar.mcmc_data_length[j]/burn_factor;
+		burn_data[j]= new std::complex<double>[burn_lengths[j]];
+		burn_freqs[j]= new double[burn_lengths[j]];
+		burn_noise[j]= new double[burn_lengths[j]];
+		allocate_FFTW_mem_forward(&burn_plans[j], burn_lengths[j]);
+		int ct = 0;
+		for( int k = 0 ; k<mcmcVar.mcmc_data_length[j]; k++){
+			if(k%burn_factor==0 && ct<burn_lengths[j]){
+				burn_data[j][ct] = mcmcVar.mcmc_data[j][k];
+				burn_freqs[j][ct] = mcmcVar.mcmc_frequencies[j][k];
+				burn_noise[j][ct] = mcmcVar.mcmc_noise[j][k];
+				ct++;
+			}
+		}
+	}
+
+	MCMC_user_param *user_parameter=NULL;
+	user_parameter = new MCMC_user_param;
+	
+	user_parameter->burn_data = burn_data;
+	user_parameter->burn_freqs = burn_freqs;
+	user_parameter->burn_noise = burn_noise;
+	user_parameter->burn_lengths = burn_lengths;
+	user_parameter->burn_plans=burn_plans;
+
+	//user_parameters[i]->mFish= &fisher_mutex;
+	user_parameter->GAUSS_QUAD= mcmcVarRJ->mcmc_mod_struct->GAUSS_QUAD;
+	user_parameter->log10F = mcmcVarRJ->mcmc_mod_struct->log10F;
+
+	if(mcmcVarRJ->mcmc_mod_struct->weights){
+		user_parameter->weights = mcmcVarRJ->mcmc_mod_struct->weights;			
+	}
+	else{
+		user_parameter->weights = new double*[mcmcVarRJ->mcmc_num_detectors];			
+		for(int j = 0 ; j<mcmcVarRJ->mcmc_num_detectors; j++){
+			user_parameter->weights[j]=NULL;
+		}
+	}
+
+	user_parameter->fisher_GAUSS_QUAD = mcmcVarRJ->mcmc_mod_struct->fisher_GAUSS_QUAD;
+	user_parameter->fisher_log10F = mcmcVarRJ->mcmc_mod_struct->fisher_log10F;
+	user_parameter->fisher_freq= mcmcVarRJ->mcmc_mod_struct->fisher_freq;
+	if(mcmcVarRJ->mcmc_mod_struct->fisher_weights){
+		user_parameter->fisher_weights= mcmcVarRJ->mcmc_mod_struct->fisher_weights;
+	}
+	else{
+		user_parameter->fisher_weights = new double*[mcmcVarRJ->mcmc_num_detectors];
+		for(int j = 0 ; j<mcmcVarRJ->mcmc_num_detectors; j++){
+			user_parameter->fisher_weights[j]=NULL;
+		}
+	}	
+	user_parameter->fisher_PSD= mcmcVarRJ->mcmc_mod_struct->fisher_PSD;
+	user_parameter->fisher_length= mcmcVarRJ->mcmc_mod_struct->fisher_length;
+
+
+	user_parameter->mod_struct = mcmcVarRJ->mcmc_mod_struct;
+		
+	mcmcVar.user_parameters = user_parameter;
+
+	
+	//user_parameters[i]->burn_freqs = mcmc_frequencies;
+	//user_parameters[i]->burn_data = mcmc_data;
+	//user_parameters[i]->burn_noise = mcmc_noise;
+	//user_parameters[i]->burn_lengths = mcmc_data_length;
+	
+	
+
+
+
+	MCMC_fisher_wrapper_v2(pos,   output, (void*)&mcmcVar);
+
+	//#################################################
+	for(int i = 0 ; i<mcmcVarRJ->mcmc_num_detectors; i++){
+		delete [] burn_data[i];
+		delete [] burn_freqs[i];
+		delete [] burn_noise[i];
+		deallocate_FFTW_mem(&burn_plans[i]);
+	}
+	delete [] burn_data;
+	delete [] burn_lengths;
+	delete [] burn_noise;
+	delete [] burn_freqs;
+	delete [] burn_plans;
+	delete user_parameter;
+		
+	return ;
+}
 
 void MCMC_fisher_wrapper_v2(bayesship::positionInfo *pos,   double **output, void *userParameters)
 {
