@@ -63,6 +63,8 @@
 #Initial ensemble position
 [str] initial ensemble position file = /path/to/initial/ensemble/position/file/ensemble_position.csv
 
+[bool] ignore existing checkpoint = true
+
 #############################################################
 #GW prior options
 #Only mass priors are strictly necessary, all others depend on the model being used
