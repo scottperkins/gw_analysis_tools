@@ -63,6 +63,9 @@
 #Initial ensemble position
 [str] initial ensemble position file = /path/to/initial/ensemble/position/file/ensemble_position.csv
 
+#Whether to ignore existing checkpoint files with the name Moniker and in directory output directory. 
+#If true, these files are overwritten if they exist
+#If false, those files are read in and the sampler starts from those checkpoints
 [bool] ignore existing checkpoint = true
 
 #############################################################
