@@ -1872,14 +1872,14 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha  + mcmc_mod_struct->ppE_Nmod);
 	//if(generation_method.find("EA") != std::string::npos){totalmod+=4;}
 	if(generation_method.find("EA") != std::string::npos){
-	  if(mcmc_mod_struct->EA_region1 || mcmc_mod_struct->EA_region2)
+	  /*if(mcmc_mod_struct->EA_region1 || mcmc_mod_struct->EA_region2)
 	    {
 	      totalmod+=2;
 	    }
 	  else
-	    {
+	  {*/
 	      totalmod+=3;
-	    }
+	      //}
 	}
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
@@ -2608,23 +2608,19 @@ void MCMC_fisher_transformations(
 	}
 	if(generation_method.find("EA") != std::string::npos){
 	  //for(int i = 0 ; i <4; i++){
-	  if(mod_struct->EA_region1 || mod_struct->EA_region2){
+	  /*if(mod_struct->EA_region1 || mod_struct->EA_region2){
 	    for(int i = 0 ; i <2; i++){
 	      for(int j = 0 ; j<dimension; j++){
 		if(i!=j){
 		  fisher[dimension-1-i][dimension-1-j] = 0;
 		  fisher[dimension-1-j][dimension-1-i] = 0;
 		}
-		/*
-		  if(i==j){
-		  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
-		  }*/
 	      }
 	    }
-	    fisher[dimension-2][dimension-2] = 1./pow(10, -2.);
-	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	    fisher[dimension-1][dimension-1] = 1./pow(10, -4.);
 	  }
-	  else{
+	  else{*/
 	    for(int i = 0 ; i <3; i++){
 	      for(int j = 0 ; j<dimension; j++){
 		if(i!=j){
@@ -2640,7 +2636,6 @@ void MCMC_fisher_transformations(
 	    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
 	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
 	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
-	  }
 	}
 	/*if(isnan(fabs(fisher[8][8]))){
 	  for(int i = 0 ; i<dimension; i++){
@@ -2712,13 +2707,13 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	if(local_gen_method.find("EA") != std::string::npos)
 	  {
 	    local_gen_method = "IMRPhenomD_NRT";
-	    if(mcmc_mod_struct->EA_region1 || mcmc_mod_struct->EA_region2)
+	    /*if(mcmc_mod_struct->EA_region1 || mcmc_mod_struct->EA_region2)
 	      {
 		local_dimension -=2; 
 	      }
-	    else{
+	      else{*/
 	    local_dimension -= 3;
-	    }
+	    //}
 	  }
 	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
 	for(int i =0 ; i <mcmc_num_detectors; i++){
@@ -2937,7 +2932,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->tidal_love_error = mod_struct->tidal_love_error;
 	gen_params->alpha_param = mod_struct->alpha_param;
 	gen_params->EA_region1 = mod_struct->EA_region1; 
-	gen_params->EA_region2 = mod_struct->EA_region2; 
+	//gen_params->EA_region2 = mod_struct->EA_region2; 
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;

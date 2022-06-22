@@ -181,10 +181,10 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
 
   if(p->EA_region1){
     //std::cout<<"Sampling in region 1 of parameter space"<<std::endl;
-    p->ctheta_EA = 3*p->ca_EA; 
+    p->ctheta_EA = 3.*p->ca_EA*(1. + p->delta_ctheta_EA); 
     //region of parameter space with ctheta = 3ca. Don't sample on ctheta
   }
-
+  /*
   if(p->EA_region2){
     //std::cout<<"Sampling in region 2 of parameter space"<<std::endl;
     p->ca_EA = 0;
@@ -194,7 +194,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     p->kappa3_EA = 1;
     p->epsilon_x_EA = 0;
     //region of parameter space with ca = 0. Don't sample on ca. In this limit, Z -> 1 and the sensitivities ->0
-  }
+    }*/
   
   //If using alpha parameterization, must first define ca and ctheta in terms
   //of the alphas 
@@ -210,14 +210,15 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
   p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
   p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.;
-
+  //std::cout<<"c1: "<<p->c1_EA<<"c2: "<<p->c2_EA<<"c3: "<<p->c3_EA<<"c4: "<<p->c4_EA<<std::endl; 
+  
   //more convenient parameters
   /*p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
   p->c14_EA = p->c1_EA + p->c4_EA;*/
   p->c13_EA = p->csigma_EA;
   p->c14_EA = p->ca_EA;
-  p->cminus_EA = p->cw_EA; 
+  p->cminus_EA = p->cw_EA;
 
   //squared speeds of the different polarizations
   p->cTsq_EA = 1./(1. - p->c13_EA);
@@ -238,9 +239,8 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
     p->alpha3_EA = 1./(1. + p->cw_EA); 
   }
-  if(!p->EA_region2){
-    p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
-  }
+  
+  p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
 
   p->beta1_EA = -2.* p->c13_EA / p->cV_EA;
   p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA);
@@ -259,16 +259,14 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
 
   //Get sensitivities
-  if(!p->EA_region2){
-    p->s1_EA = calculate_EA_sensitivity(1, p);
-    p->s2_EA = calculate_EA_sensitivity(2, p);
-  }
+  p->s1_EA = calculate_EA_sensitivity(1, p);
+  p->s2_EA = calculate_EA_sensitivity(2, p);
+  
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M);
-  if(!p->EA_region2){
-    p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
-    p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
-  }
+  p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
+  p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
+  
 
   EA_check_nan(p);
 
