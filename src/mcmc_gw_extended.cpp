@@ -94,6 +94,32 @@ void pack_local_mod_structure_v2(bayesship::bayesshipSampler *sampler,
 			}
 		}
 	}
+	else if(waveform_extended.find("ppE") != std::string::npos){
+		int dimct = 0 ;
+		local_struct->ppE_Nmod=0;
+		for(int i = 0 ; i<sampler->maxDim; i++){
+			if(status[i] == 1){
+				dimct++;
+			}
+
+			if( i >= sampler->minDim){
+				if(status[i] == 1 ){
+					local_struct->ppE_Nmod++;
+				}
+			}
+		}
+		if(dimct != sampler->minDim){
+			local_struct->bppe = new double[local_struct->ppE_Nmod];
+			
+			int ct_ppe = 0 ;
+			for(int i =sampler->minDim ; i<sampler->maxDim; i++){
+				if(status[i] == 1){
+					local_struct->bppe[ct_ppe] = full_struct->bppe[i-sampler->minDim];
+					ct_ppe++;
+				}
+			}
+		}
+	}
 
 	return;
 }
@@ -317,6 +343,7 @@ public:
 			if( local_gen.find("ppE") != std::string::npos ||
 				check_theory_support(local_gen)){
 				delete [] gen_params.betappe;
+				delete [] mod_struct_local.bppe;
 			}
 			else if( local_gen.find("gIMR") != std::string::npos){
 				if(mod_struct_local.gIMR_Nmod_phi !=0){
@@ -344,6 +371,124 @@ public:
 	}
 };
 
+class ppEFisherRJVariables
+{
+public:
+	double *bppe=nullptr;
+	int fisherDim;
+	double **fisher=nullptr;
+	int detectN;
+	double **psds=nullptr;
+	double **freqs=nullptr;
+	int length;
+	ppEFisherRJVariables(double *bppe, double **psds, double **freqs,int detectN,int fisherDim,int length)
+	{
+		this->detectN = detectN;
+		this->fisherDim = fisherDim;
+		this->length = length;
+		this->bppe = new double[fisherDim];
+		for(int i = 0 ; i<fisherDim; i++){
+			this->bppe[i] = bppe[i];
+		}
+		this->psds = new double*[detectN];
+		for(int i = 0 ; i<detectN; i++){
+			this->psds[i] = new double[length];
+			for(int j = 0 ; j<length; j++){
+				this->psds[i][j]  = psds[i][j];
+			}
+		}
+		this->freqs = new double*[detectN];
+		for(int i = 0 ; i<detectN; i++){
+			this->freqs[i] = new double[length];
+			for(int j = 0 ; j<length; j++){
+				this->freqs[i][j]  = freqs[i][j];
+			}
+		}
+	
+	
+		this->fisher = new double*[fisherDim];
+		for(int i = 0 ; i<fisherDim ; i++){
+			this->fisher[i] = new double[fisherDim];
+			for(int j = 0 ; j<fisherDim ; j++){
+				this->fisher[i][j] = 0;
+			}
+		}
+	
+	
+		//Calculate the actual fisher
+		double *integrand = new double[length];
+		for(int l = 0 ; l< detectN;l++){
+			for(int i = 0 ; i < fisherDim; i++){
+				for(int j = 0 ; j <= i; j++){
+					for(int k = 0 ; k<length; k++){
+						integrand[k] = ( pow(freqs[l][k], bppe[i]/3.+bppe[j]/3. -7/3.)/psds[l][k] );
+						integrand[k]*=4.* (M_PI/30.) * pow(M_PI, -7./3. + bppe[i]/3. + bppe[j]/3.);
+					}
+					fisher[i][j] += simpsons_sum(freqs[l][1]-freqs[l][0], length, integrand);
+				}
+			}	
+		}
+		for(int i = 0 ; i < fisherDim; i++){
+			for(int j = 0 ; j <= i; j++){
+				fisher[j][i] = fisher[i][j];
+			}
+		}	
+		//std::cout<<"Fisher: "<<std::endl;
+		//for(int i = 0 ; i < fisherDim; i++){
+		//	for(int j = 0 ; j <fisherDim; j++){
+		//		std::cout<<fisher[i][j] <<" , ";
+		//	}
+		//	std::cout<<std::endl;
+		//}	
+		
+		
+	
+		delete [] integrand;
+	};
+		~ppEFisherRJVariables(){
+			if(bppe){
+				delete [] bppe;	
+				bppe = nullptr;
+			}
+			if(fisher){
+				for(int i = 0 ; i<fisherDim ; i++){	
+					delete [] fisher[i];	
+				}
+				delete [] fisher;	
+				fisher = nullptr;
+			}
+			if(psds){
+				for(int i = 0 ; i<detectN ; i++){	
+					delete [] psds[i];	
+				}
+				delete [] psds;	
+				psds = nullptr;
+			}
+			if(freqs){
+				for(int i = 0 ; i<detectN ; i++){	
+					delete [] freqs[i];	
+				}
+				delete [] freqs;	
+				freqs = nullptr;
+			}
+		};
+	};
+
+
+
+
+void MCMC_fisher_wrapper_RJ_ppE(bayesship::positionInfo *pos,   double **output, std::vector<int> block, void *userParameters)
+{
+	double chirp = std::exp(pos->parameters[7])*MSOL_SEC;
+	double DL = std::exp(pos->parameters[6])*MPC_SEC;
+	ppEFisherRJVariables *p = (ppEFisherRJVariables *) userParameters;
+	for(int i = 0 ; i<p->fisherDim ; i++){
+		for(int j = 0 ; j<p->fisherDim; j++){
+			output[i][j] = p->fisher[i][j] * pow(chirp, 4. - 7./3. + p->bppe[i]/3. + p->bppe[j]/3.)/DL/DL;
+		}
+	}
+	return;
+}
 
 class MCMC_likelihood_wrapper_v2: public bayesship::probabilityFn
 {
@@ -806,7 +951,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 5;
+	int proposalFnN = 6;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
 	propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
@@ -814,9 +959,26 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	propArray[3] = new bayesship::randomLayerRJProposal(sampler, .5);
 
 
+	//################################################
 	std::vector<std::vector<int>> blocks = {{0,1,2,3,4,5,6,7,8,9,10}};
-	std::vector<int> blockProb = {1};
+	std::vector<double> blockProb = {1};
 	propArray[4] = new bayesship::gibbsFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_v2,   sampler->userParameters,  100,sampler,blocks, blockProb );
+
+	//################################################
+	std::vector<std::vector<int>> blocks2 = std::vector<std::vector<int>>(1);
+	blocks2[0] = std::vector<int>(maxDim-minDim);
+	for(int i = 0 ; i<maxDim-minDim; i++){
+		blocks2[0][i] = minDim + i;
+	}
+	std::vector<double> blockProb2 = {1};
+	ppEFisherRJVariables *ppEFisherObj = new ppEFisherRJVariables(mod_struct->bppe, mcmcVarRJ.mcmc_noise,mcmcVarRJ.mcmc_frequencies, mcmcVarRJ.mcmc_num_detectors, maxDim-minDim, mcmcVarRJ.mcmc_data_length[0]);
+	ppEFisherRJVariables **ppEFisherObjs = new ppEFisherRJVariables*[chainN];
+	for(int i = 0 ; i<chainN ;i++){
+		ppEFisherObjs[i] = ppEFisherObj;
+	}
+	
+	propArray[5] = new bayesship::gibbsFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_ppE,   (void**)ppEFisherObjs,  100,sampler,blocks2, blockProb2 );
+
 
 	//Rough estimate of the temperatures
 	double betaTemp[sampler->ensembleSize];
@@ -836,10 +998,11 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][0] = 0.05;
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
-		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		propProb[i][3] = 0.2 - .1*( betaTemp[ensemble]); //.1 to .2
+		propProb[i][1] = .6 - 0.45*( betaTemp[ensemble]); //.15 to .7
+		propProb[i][3] = 0.15 - .1*( betaTemp[ensemble]); //.05 to .2
 		//propProb[i][3] = 0; //.1 to .2
-		propProb[i][4] = 0.05 + .5*( betaTemp[ensemble]); //.6 to .1
+		propProb[i][4] = 0.05 + .4*( betaTemp[ensemble]); //.45 to .05
+		propProb[i][5] = 0.05 + .2*( betaTemp[ensemble]); //.25 to .05
 		//propProb[i][4] = 0;
 
 
@@ -924,11 +1087,11 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	for (int i =0;i<num_detectors;i++)
 		deallocate_FFTW_mem(&plans[i]);
 	//#################################################
-	delete propData->proposals[0];
-	delete propData->proposals[1];
-	delete propData->proposals[2];
-	delete propData->proposals[3];
-	delete propData->proposals[4];
+	for(int i = 0 ; i<proposalFnN; i++){
+		delete propData->proposals[i];
+	}
+	delete [] ppEFisherObjs;
+	delete ppEFisherObj;
 	delete propData;
 	delete [] propArray;
 	for(int i = 0 ; i<num_detectors; i++){
