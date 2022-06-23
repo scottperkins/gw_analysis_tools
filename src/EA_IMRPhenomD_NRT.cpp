@@ -184,17 +184,6 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     p->ctheta_EA = 3.*p->ca_EA*(1. + p->delta_ctheta_EA); 
     //region of parameter space with ctheta = 3ca. Don't sample on ctheta
   }
-  /*
-  if(p->EA_region2){
-    //std::cout<<"Sampling in region 2 of parameter space"<<std::endl;
-    p->ca_EA = 0;
-    p->Z_EA = 1.;
-    p->s1_EA = 0;
-    p->s2_EA = 0;
-    p->kappa3_EA = 1;
-    p->epsilon_x_EA = 0;
-    //region of parameter space with ca = 0. Don't sample on ca. In this limit, Z -> 1 and the sensitivities ->0
-    }*/
   
   //If using alpha parameterization, must first define ca and ctheta in terms
   //of the alphas 
@@ -202,7 +191,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     //std::cout<<"Using alpha parameterization, computing ca & ctheta"<<std::endl;
     p->ca_EA = -p->alpha1_EA/4.;
     p->ctheta_EA = (0.75*p->alpha1_EA*p->alpha1_EA)/(8.*p->alpha2_EA + p->alpha1_EA*(p->alpha2_EA - 0.5*p->alpha1_EA - 1.));
-    p->cw_EA = (1 - p->alpha3_EA)/p->alpha3_EA; 
+    p->cw_EA = (1 - p->cbarw_EA)/p->cbarw_EA; 
   }
  
   //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where many of these formulas come from)
@@ -237,7 +226,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     //std::cout<<"Not using alpha parameterization, computing alphas"<<std::endl;
     p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
     p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
-    p->alpha3_EA = 1./(1. + p->cw_EA); 
+    p->cbarw_EA = 1./(1. + p->cw_EA); 
   }
   
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));

@@ -300,17 +300,17 @@ int main(int argc, char *argv[])
 	      EA_prior[2]=dbl_dict["EA alpha_2 minimum"];
 	      EA_prior[3]=dbl_dict["EA alpha_2 maximum"]; 
 	    }
-	    if(dbl_dict.find("EA alpha_3 minimum") ==dbl_dict.end()){
+	    if(dbl_dict.find("EA cbar_w minimum") ==dbl_dict.end()){
 	      EA_prior[4]=-1.;
 	      EA_prior[5]=1.; 
 	    }
 	    else{
-	      EA_prior[4]=dbl_dict["EA alpha_3 minimum"];
-	      EA_prior[5]=dbl_dict["EA alpha_3 maximum"]; 
+	      EA_prior[4]=dbl_dict["EA cbar_w minimum"];
+	      EA_prior[5]=dbl_dict["EA cbar_w maximum"]; 
 	    }
 	    std::cout<<"Range of EA alpha1: "<<EA_prior[0]<<" - "<<EA_prior[1]<<std::endl;
 	    std::cout<<"Range of EA alpha2: "<<EA_prior[2]<<" - "<<EA_prior[3]<<std::endl;
-	    std::cout<<"Range of EA alpha3: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
+	    std::cout<<"Range of EA cbarw: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
 	  }
 	  else{
 	    if(dbl_dict.find("EA c_a minimum") == dbl_dict.end()){
@@ -975,7 +975,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
     if(alpha_param){
       sp.alpha1_EA = pos[12]; //alpha1
       sp.alpha2_EA = pos[13]; //alpha2
-      sp.alpha3_EA = pos[14]; //alpha3
+      sp.cbarw_EA = pos[14]; //cbarw
     }
     else{
       sp.ca_EA = pos[12]; //ca
@@ -987,7 +987,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
     if(alpha_param){
       sp.alpha1_EA = pos[13]; //alpha1
       sp.alpha2_EA = pos[14]; //alpha2
-      sp.alpha3_EA = pos[15]; //alpha3
+      sp.cbarw_EA = pos[15]; //cbarw
     }
     else{
       sp.ca_EA = pos[13]; //ca
@@ -1091,12 +1091,12 @@ double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, 
   if(tidal_love){
     if(pos[12]<EA_prior[0] || pos[12]>EA_prior[1]){return a;} //ca or alpha1
     if(pos[13]<EA_prior[2] || pos[13]>EA_prior[3]){return a;} //ctheta or alpha2
-    if(pos[14]<EA_prior[4] || pos[14]>EA_prior[5]){return a;} //cw or alpha3
+    if(pos[14]<EA_prior[4] || pos[14]>EA_prior[5]){return a;} //cw or cbarw
   }
   else{
     if(pos[13]<EA_prior[0] || pos[13]>EA_prior[1]){return a;} //ca or alpha1
     if(pos[14]<EA_prior[2] || pos[14]>EA_prior[3]){return a;} //ctheta or alpha2
-    if(pos[15]<EA_prior[4] || pos[15]>EA_prior[5]){return a;} //cw or alpha3
+    if(pos[15]<EA_prior[4] || pos[15]>EA_prior[5]){return a;} //cw or cbarw
   }
   
   double NS = standard_log_prior_D_NRT(pos,interface, parameters);

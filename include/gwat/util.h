@@ -230,13 +230,12 @@ public:
 	T cw_EA;
 	T csigma_EA;
         bool EA_region1 = false; //region of parameter space with ctheta = 3ca(1+delta_ctheta)
-        //bool EA_region2 = false; //region of parameter space with ca = 0
         T delta_ctheta_EA; 
   	//###################################################
         //coupling constants in another parameterization for Einstein Aether
         T alpha1_EA;
         T alpha2_EA;
-        T alpha3_EA;
+        T cbarw_EA;
         bool alpha_param = true; 
 	//###################################################
         bool include_l1=false;
@@ -564,7 +563,7 @@ struct source_parameters
   //Necessary functions of the c's
   T alpha1_EA;
   T alpha2_EA;
-  T alpha3_EA;
+  T cbarw_EA;
   T beta1_EA;
 
   T beta2_EA;
@@ -598,7 +597,6 @@ struct source_parameters
   bool alpha_param = true; //use alpha parameterization of EA theory
   bool EA_region1 = false; //region of parameter space with ctheta = 3ca(1+deltactheta)
   T delta_ctheta_EA = 0;
-  //bool EA_region2 = false; //region of parameter space with ca = 0
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(
