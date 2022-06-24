@@ -171,6 +171,14 @@ public:
 			//"MCMC_"+mcmc_generation_method, dimension, NULL);
 		repack_parameters(temp_params, &gen_params, 
 			"MCMC_"+gen_meth, dim, NULL);
+		//if(gen_params.Nmod !=0){
+		//	std::cout<<gen_params.Nmod<<" "<<local_gen<<std::endl;
+		//	for(int i = 0 ; i<gen_params.Nmod; i++){
+		//		std::cout<<" "<<gen_params.bppe[i]<<" "<<gen_params.betappe[i];
+		//	}
+		//	std::cout<<std::endl;
+		//	
+		//}
 		//#########################################################################
 		//#########################################################################
 		//return 1;
