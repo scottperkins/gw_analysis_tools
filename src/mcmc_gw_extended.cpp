@@ -430,7 +430,7 @@ public:
 				for(int j = 0 ; j <= i; j++){
 					for(int k = 0 ; k<length; k++){
 						integrand[k] = ( pow(freqs[l][k], bppe[i]/3.+bppe[j]/3. -7/3.)/psds[l][k] );
-						integrand[k]*=4.* (M_PI/30.) * pow(M_PI, -7./3. + bppe[i]/3. + bppe[j]/3.);
+						integrand[k]*=(2./15.) * pow(M_PI, -4./3. + bppe[i]/3. + bppe[j]/3.);
 					}
 					fisher[i][j] += simpsons_sum(freqs[l][1]-freqs[l][0], length, integrand);
 				}
@@ -492,7 +492,7 @@ void MCMC_fisher_wrapper_RJ_ppE(bayesship::positionInfo *pos,   double **output,
 	ppEFisherRJVariables *p = (ppEFisherRJVariables *) userParameters;
 	for(int i = 0 ; i<p->fisherDim ; i++){
 		for(int j = 0 ; j<p->fisherDim; j++){
-			output[i][j] = p->fisher[i][j] * pow(chirp, 4. - 7./3. + p->bppe[i]/3. + p->bppe[j]/3.)/DL/DL;
+			output[i][j] = p->fisher[i][j] * pow(chirp, 4.- 7./3. + p->bppe[i]/3. + p->bppe[j]/3.)/DL/DL;
 		}
 	}
 	return;
