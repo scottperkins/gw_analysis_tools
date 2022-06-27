@@ -755,7 +755,8 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string generation_method_extended,
 	std::string outputDir,
 	std::string outputFileMoniker,
-	bool ignoreExistingCheckpoint
+	bool ignoreExistingCheckpoint,
+	bool coldChainStorageOnly
 	)
 {
 	int chainN = ensembleSize*ensembleN;
@@ -947,8 +948,8 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->ignoreExistingCheckpoint = ignoreExistingCheckpoint;
 
 	//Testing
-	//sampler->coldOnlyStorage = false;
-	sampler->coldOnlyStorage = true;
+	sampler->coldOnlyStorage = coldChainStorageOnly;
+	//sampler->coldOnlyStorage = true;
 
 	mcmcVariablesRJ **mcmcVarVec  = new mcmcVariablesRJ*[chainN];
 	for(int i = 0 ; i<chainN; i++){
@@ -1162,7 +1163,8 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string generation_method,
 	std::string outputDir,
 	std::string outputFileMoniker,
-	bool ignoreExistingCheckpoint
+	bool ignoreExistingCheckpoint,
+	bool coldChainStorageOnly
 	)
 {
 	int chainN = ensembleSize*ensembleN;
@@ -1348,7 +1350,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//Testing
 	//sampler->coldOnlyStorage = false;
-	sampler->coldOnlyStorage = true;
+	sampler->coldOnlyStorage = coldChainStorageOnly;
 
 	mcmcVariables **mcmcVarVec  = new mcmcVariables*[chainN];
 	for(int i = 0 ; i<chainN; i++){
