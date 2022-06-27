@@ -356,6 +356,10 @@ int main(int argc, char *argv[])
 	if(bool_dict.find("ignore existing checkpoint") != bool_dict.end()){
 		ignoreExistingCheckpoint = bool_dict["ignore existing checkpoint"];
 	}
+	bool coldChainStorageOnly = true;
+	if(bool_dict.find("cold chain storage only") != bool_dict.end()){
+		coldChainStorageOnly = bool_dict["cold chain storage only"];
+	}
 	
 	int psd_length ;
 	count_lines_LOSC_PSD_file(psd_file, &psd_length);
@@ -705,7 +709,7 @@ int main(int argc, char *argv[])
 			 burnIterations, burnPriorIterations,priorIterations, writePriorData,max_chunk_size, (double **)nullptr,
 			logp,threads, pool,detector_N, 
 			data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
-			generation_method,outputDir, outputMoniker,ignoreExistingCheckpoint);	
+			generation_method,outputDir, outputMoniker,ignoreExistingCheckpoint,coldChainStorageOnly);	
 	delete logp;
 	delete [] initial_position[0]; delete [] initial_position;
 	if(initial_ensemble_position_file != ""){
