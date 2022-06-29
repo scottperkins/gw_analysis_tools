@@ -495,6 +495,13 @@ void MCMC_fisher_wrapper_RJ_ppE(bayesship::positionInfo *pos,   double **output,
 			output[i][j] = p->fisher[i][j] * pow(chirp, 4.- 7./3. + p->bppe[i]/3. + p->bppe[j]/3.)/DL/DL;
 		}
 	}
+	//std::cout<<"Fisher: "<<std::endl;
+	//for(int i = 0 ; i < p->fisherDim; i++){
+	//	for(int j = 0 ; j <p->fisherDim; j++){
+	//		std::cout<<output[i][j] <<" , ";
+	//	}
+	//	std::cout<<std::endl;
+	//}	
 	return;
 }
 
@@ -971,7 +978,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	//################################################
 	std::vector<std::vector<int>> blocks = {{0,1,2,3,4,5,6,7,8,9,10}};
 	std::vector<double> blockProb = {1};
-	propArray[4] = new bayesship::gibbsFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_v2,   sampler->userParameters,  100,sampler,blocks, blockProb );
+	propArray[4] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_v2,   sampler->userParameters,  100,sampler,blocks, blockProb );
 
 	//################################################
 	std::vector<std::vector<int>> blocks2 = std::vector<std::vector<int>>(1);
@@ -986,7 +993,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		ppEFisherObjs[i] = ppEFisherObj;
 	}
 	
-	propArray[5] = new bayesship::gibbsFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_ppE,   (void**)ppEFisherObjs,  100,sampler,blocks2, blockProb2 );
+	propArray[5] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_RJ_ppE,   (void**)ppEFisherObjs,  100,sampler,blocks2, blockProb2 );
 
 
 	//Rough estimate of the temperatures
@@ -1004,14 +1011,20 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		propProb[i] = new double[proposalFnN];	
 		propProb[i][2] = 0.0;
 
+		propProb[i][1] = .6 - 0.45*( betaTemp[ensemble]); //.15 to .7
+		propProb[i][3] = 0.15 - .1*( betaTemp[ensemble]); //.05 to .2
+		propProb[i][4] = 0.05 + .4*( betaTemp[ensemble]); //.45 to .05
+		propProb[i][5] = 0.05 + .2*( betaTemp[ensemble]); //.25 to .05
+		//std::cout<<"TESTING FISHER"<<std::endl;
+		//propProb[i][1] = 0.0;
+		//propProb[i][3] = 0.0;
+		//propProb[i][4] = 0.0;
+		//propProb[i][5] = 1.0;
+
 		//propProb[i][0] = 0.05;
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
-		propProb[i][1] = .6 - 0.45*( betaTemp[ensemble]); //.15 to .7
-		propProb[i][3] = 0.15 - .1*( betaTemp[ensemble]); //.05 to .2
 		//propProb[i][3] = 0; //.1 to .2
-		propProb[i][4] = 0.05 + .4*( betaTemp[ensemble]); //.45 to .05
-		propProb[i][5] = 0.05 + .2*( betaTemp[ensemble]); //.25 to .05
 		//propProb[i][4] = 0;
 
 
