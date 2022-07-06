@@ -18,6 +18,7 @@
 
 void MCMC_fisher_wrapper_v2(bayesship::positionInfo *pos,   double **output, void *userParameters);
 
+void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std::vector<int> ids, void *userParameters);
 
 void MCMC_fisher_wrapper_RJ_v2(bayesship::positionInfo *pos,   double **output, std::vector<int> block, void *userParameters);
 
@@ -1374,12 +1375,24 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 4;
+	int proposalFnN = 5;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
 	propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
 	propArray[2] = new bayesship::KDEProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, false );
 	propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+
+	//################################################
+	std::vector<std::vector<int>> blocks = {
+					{0,1,2,3,4,5,6},
+					{7,8,9,10}};
+	std::vector<double> blockProb = {.5,.5};
+	//std::vector<std::vector<int>> blocks = {
+	//				{7,8,9,10}};
+	//std::vector<double> blockProb = {1};
+	propArray[4] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
+
+	//################################################
 
 	//Rough estimate of the temperatures
 	double betaTemp[sampler->ensembleSize];
@@ -1400,13 +1413,14 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
 		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		propProb[i][3] = 0.25 + .45*( betaTemp[ensemble]); //.7 to .25
+		propProb[i][3] = 0.15 + .25*( betaTemp[ensemble]); //.4 to .15
+		propProb[i][4] = 0.1 + .2*( betaTemp[ensemble]); //.3 to .1
 
 
 		//propProb[i][1] = 0; //.25 to .7
 		//propProb[i][3] = 0.3 + .45*( betaTemp[ensemble]); //.7 to .25
 
-		propProb[i][0] = 1. - propProb[i][3] - propProb[i][1]- propProb[i][2];
+		propProb[i][0] = 1.- propProb[i][4] - propProb[i][3] - propProb[i][1]- propProb[i][2];
 		//std::cout<<propProb[i][0]<<" "<<propProb[i][1]<<" "<<propProb[i][3]<<std::endl;
 
 	}
@@ -1555,6 +1569,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	delete propData->proposals[1];
 	delete propData->proposals[2];
 	delete propData->proposals[3];
+	delete propData->proposals[4];
 	delete propData;
 	delete [] propArray;
 	for(int i = 0 ; i<num_detectors; i++){
@@ -2001,6 +2016,178 @@ void MCMC_fisher_wrapper_RJ_v2(bayesship::positionInfo *pos,   double **output, 
 	//delete user_parameter;
 		
 	return ;
+}
+
+void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std::vector<int> ids, void *userParameters)
+{
+	mcmcVariables *mcmcVar= (mcmcVariables *)userParameters;
+
+
+	int dimension = mcmcVar->maxDim;
+	double **tempOutput= allocate_2D_array(dimension, dimension);
+	double **tempCov= allocate_2D_array(dimension, dimension);
+	double *temp_params = new double[dimension];
+	double param[dimension];
+	for(int i = 0 ; i<dimension; i++){	
+		param[i] = pos->parameters[i];
+	}
+	//#########################################################################
+	gen_params_base<double> params;
+	std::string local_gen = MCMC_prep_params_v2(param, 
+		temp_params,&params, dimension, mcmcVar->mcmc_generation_method,mcmcVar->mcmc_mod_struct, mcmcVar->mcmc_intrinsic,mcmcVar->mcmc_gmst );
+	//#########################################################################
+	//#########################################################################
+	repack_parameters(temp_params, &params, 
+		"MCMC_"+mcmcVar->mcmc_generation_method, dimension, NULL);
+	//std::cout<<temp_params[11]<<" "<<temp_params[12]<<std::endl;
+	//repack_parameters(mcmc_init_pos, &params, 
+	//	"MCMC_"+mcmc_generation_method, dimension, NULL);
+	//#########################################################################
+	//#########################################################################
+	//std::cout<<"INCL angle fisher: "<<params.incl_angle<<std::endl;
+	for(int j =0; j<dimension; j++){
+		for(int k =0; k<dimension; k++)
+		{
+			tempOutput[j][k] =0;
+		}
+	} 
+	double **local_freq=mcmcVar->mcmc_frequencies;
+	double **local_noise=mcmcVar->mcmc_noise;
+	double **local_weights=mcmcVar->user_parameters->weights;
+	int *local_lengths= mcmcVar->mcmc_data_length;
+	std::string local_integration_method = "SIMPSONS";
+	bool local_log10F = mcmcVar->user_parameters->fisher_log10F;
+	if(mcmcVar->user_parameters->fisher_freq){
+		local_freq = mcmcVar->user_parameters->fisher_freq;
+	}
+	if(mcmcVar->user_parameters->fisher_PSD){
+		local_noise = mcmcVar->user_parameters->fisher_PSD;
+	}
+	if(mcmcVar->user_parameters->fisher_length){
+		local_lengths = mcmcVar->user_parameters->fisher_length;
+	}
+	if(mcmcVar->user_parameters->fisher_weights){
+		local_weights = mcmcVar->user_parameters->fisher_weights;
+	}
+	if(mcmcVar->user_parameters->fisher_GAUSS_QUAD){
+		local_integration_method = "GAUSSLEG";
+	}
+	double **temp_out = allocate_2D_array(dimension,dimension);
+	for(int i =0 ; i <mcmcVar->mcmc_num_detectors; i++){
+		
+		//Use AD 
+		if(mcmcVar->user_parameters->fisher_AD)
+		{	
+			std::unique_lock<std::mutex> lock{*(mcmcVar->user_parameters->mFish)};
+			//fisher_autodiff(mcmcVar->mcmc_frequencies[i], mcmcVar->mcmc_data_length[i],
+			//	"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+			//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmcVar->mcmc_noise[i]);
+			fisher_autodiff(local_freq[i], local_lengths[i],
+				"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+				(gen_params *)(&params),  local_integration_method,local_weights[i],true,local_noise[i]);
+		}
+		else{
+			fisher_numerical(local_freq[i], local_lengths[i],
+				"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+				&params, 4, NULL, NULL, local_noise[i]);
+
+		}
+		for(int j =0; j<dimension; j++){
+			for(int k =0; k<dimension; k++)
+			{
+				tempOutput[j][k] +=temp_out[j][k];
+				//if(std::isnan(output[j][k]))
+				//{
+				//      std::cout<<j<<" "<<k<<" "<<temp_out[j][k]<<std::endl;
+				//}
+			}
+		} 
+	}
+	//Add prior information to fisher
+	//if(mcmcVar->mcmc_generation_method.find("Pv2") && !mcmcVar->mcmc_intrinsic){
+	
+	MCMC_fisher_transformations_v2(temp_params, tempOutput,dimension,local_gen,mcmcVar->mcmc_intrinsic,
+		mcmcVar->mcmc_mod_struct);
+	deallocate_2D_array(temp_out, dimension,dimension);
+
+	if(
+	std::find(ids.begin(), ids.end(), 0) != ids.end() && 
+	std::find(ids.begin(), ids.end(), 1) != ids.end() && 
+	std::find(ids.begin(), ids.end(), 2) != ids.end() &&  
+	std::find(ids.begin(), ids.end(), 3) != ids.end() &&
+	std::find(ids.begin(), ids.end(), 4) != ids.end() &&
+	std::find(ids.begin(), ids.end(), 5) != ids.end() &&
+	std::find(ids.begin(), ids.end(), 6) != ids.end() 
+	){
+		for(int i = 0 ; i<7; i++){
+			for(int j = 0 ; j<7; j++){
+				output[i][j] = tempOutput[i][j];	
+			}
+		}
+	}
+	else if(
+	std::find(ids.begin(), ids.end(), 7) != ids.end() && 
+	std::find(ids.begin(), ids.end(), 8) != ids.end() && 
+	std::find(ids.begin(), ids.end(), 9) != ids.end() && 
+	std::find(ids.begin(), ids.end(), 10) != ids.end() 
+	){
+		for(int i = 0 ; i<ids.size(); i++){
+			for(int j = 0 ; j<ids.size(); j++){
+				output[i][j] = tempOutput[i+7][j+7];	
+			}
+		}
+	}
+	//////////////////////////////////////////////
+	//if(!interface->burn_phase)
+	//{
+	//	debugger_print(__FILE__,__LINE__,"Fisher MCMC");
+	//	double **cov = allocate_2D_array( dimension,dimension);
+	//	gsl_cholesky_matrix_invert(output, cov, dimension);
+	//	for(int i = 0 ; i<dimension; i++){
+	//		std::cout<<sqrt(cov[i][i])<<" ";	
+	//		//for(int j = 0 ; j<dimension; j++){
+	//		//	std::cout<<cov[i][j]<<" ";	
+	//		//}
+	//		//std::cout<<std::endl;	
+	//		
+	//	}
+	//	std::cout<<std::endl;	
+	//	deallocate_2D_array(cov, dimension,dimension);
+	//}
+	//////////////////////////////////////////////
+
+	//Cleanup
+	delete [] temp_params;
+	deallocate_2D_array(tempOutput, dimension, dimension);
+	deallocate_2D_array(tempCov, dimension, dimension);
+	if(check_mod(local_gen)){
+		//if(local_gen.find("ppE") != std::string::npos ||
+		//	local_gen.find("dCS")!=std::string::npos||
+		//	local_gen.find("EdGB")!=std::string::npos){
+		//	delete [] params.betappe;
+		//}
+		if(local_gen.find("ppE") != std::string::npos ||
+			check_theory_support(local_gen)){
+			delete [] params.betappe;
+		}
+		else if( local_gen.find("gIMR") != std::string::npos){
+			if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_phi !=0){
+				delete [] params.delta_phi;
+			}
+			if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
+				delete [] params.delta_sigma;
+			}
+			if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_beta !=0){
+				delete [] params.delta_beta;
+			}
+			if(mcmcVar->mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
+				delete [] params.delta_alpha;
+			}
+
+		}
+	}
+
+
 }
 
 void MCMC_fisher_wrapper_v2(bayesship::positionInfo *pos,   double **output, void *userParameters)
