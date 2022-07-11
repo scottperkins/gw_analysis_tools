@@ -1375,22 +1375,59 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 5;
+	int proposalFnN = 4;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
-	propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
+	//propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
+	if(mcmcVar.mcmc_intrinsic){
+		propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
+	}
+	else{
+		std::vector<std::vector<int>> blocksDiff = std::vector<std::vector<int>>(3);	
+		for(int i = 0 ; i<7; i++){
+			blocksDiff[0].push_back(i);
+		}
+		for(int i = 7 ; i<sampler->maxDim; i++){
+			blocksDiff[1].push_back(i);
+		}
+		for(int i = 0 ; i<sampler->maxDim; i++){
+			blocksDiff[2].push_back(i);
+		}
+		std::vector<double> blocksProbDiff = {0.3,0.3,.4};
+		propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
+	}
 	propArray[2] = new bayesship::KDEProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, false );
-	propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+	//propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+	if(mcmcVar.mcmc_intrinsic){
+		propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+	}
+	else{
+		std::vector<std::vector<int>> blocks = std::vector<std::vector<int>>(3);
+		for(int i = 0 ; i<7; i++){
+			blocks[0].push_back(i);
+		}
+		for(int i = 7 ; i<sampler->maxDim; i++){
+			blocks[1].push_back(i);
+		}
+		for(int i = 0 ; i<sampler->maxDim; i++){
+			blocks[2].push_back(i);
+		}
+		std::vector<double> blockProb = {.3,.3,.4};
+		//std::vector<std::vector<int>> blocks = {
+		//				{7,8,9,10}};
+		//std::vector<double> blockProb = {1};
+		propArray[3] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
+	}
 
 	//################################################
-	std::vector<std::vector<int>> blocks = {
-					{0,1,2,3,4,5,6},
-					{7,8,9,10}};
-	std::vector<double> blockProb = {.5,.5};
 	//std::vector<std::vector<int>> blocks = {
+	//				{0,1,2,3,4,5,6},
 	//				{7,8,9,10}};
-	//std::vector<double> blockProb = {1};
-	propArray[4] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
+	//std::vector<double> blockProb = {.5,.5};
+	////std::vector<std::vector<int>> blocks = {
+	////				{7,8,9,10}};
+	////std::vector<double> blockProb = {1};
+	//propArray[4] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
 
 	//################################################
 
@@ -1413,14 +1450,28 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
 		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		propProb[i][3] = 0.15 + .25*( betaTemp[ensemble]); //.4 to .15
-		propProb[i][4] = 0.1 + .2*( betaTemp[ensemble]); //.3 to .1
+		propProb[i][3] = 0.15 + .55*( betaTemp[ensemble]); //.7 to .15
+		//propProb[i][4] = 0.1 + .2*( betaTemp[ensemble]); //.3 to .1
 
 
 		//propProb[i][1] = 0; //.25 to .7
 		//propProb[i][3] = 0.3 + .45*( betaTemp[ensemble]); //.7 to .25
 
-		propProb[i][0] = 1.- propProb[i][4] - propProb[i][3] - propProb[i][1]- propProb[i][2];
+		//propProb[i][0] = 1.- propProb[i][4] - propProb[i][3] - propProb[i][1]- propProb[i][2];
+		propProb[i][0] = 0.05;
+		
+		double sum = 0 ;
+		for(int j = 0 ; j<proposalFnN; j++){
+			sum+=propProb[i][j];	
+		}
+		for(int j = 0 ; j<proposalFnN; j++){
+			propProb[i][j]/=sum;
+		}
+		for(int j = 0 ; j<proposalFnN; j++){
+			std::cout<<propProb[i][j]<<", ";
+		}
+		std::cout<<"\n";
+	
 		//std::cout<<propProb[i][0]<<" "<<propProb[i][1]<<" "<<propProb[i][3]<<std::endl;
 
 	}
@@ -2110,7 +2161,14 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 		mcmcVar->mcmc_mod_struct);
 	deallocate_2D_array(temp_out, dimension,dimension);
 
-	if(
+	if(ids.size() == dimension){
+		for(int i = 0 ; i<dimension; i++){
+			for(int j = 0 ; j<dimension; j++){
+				output[i][j] = tempOutput[i][j];	
+			}
+		}
+	}
+	else if(
 	std::find(ids.begin(), ids.end(), 0) != ids.end() && 
 	std::find(ids.begin(), ids.end(), 1) != ids.end() && 
 	std::find(ids.begin(), ids.end(), 2) != ids.end() &&  
