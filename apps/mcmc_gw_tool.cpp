@@ -1025,7 +1025,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
       }
   //std::cout<<"EA constraints test 3"<<std::endl; 
 
-  if(fabs(sp.ctheta_EA) > 0.3){return a;}
+  if(sp.ctheta_EA < 0 || (sp.ctheta_EA + (8*sp.ca_EA/7)) > (2/7)){return a;}
   /*
    * Throws out points that violate Big Bang Nucleosynthesis constraints. arXiv:hep-th/0407149v3 
    */
