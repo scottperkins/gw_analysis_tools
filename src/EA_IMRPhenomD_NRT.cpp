@@ -519,7 +519,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
       //Right now these are just the terms for the l=2 mode
       std::complex<T> hx2, hy2, hb2, hl2;
       hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
-      hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,1);
+      hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,-1);
       hb2 = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
       hl2 = params->abL_EA*hb2;
 
@@ -533,12 +533,12 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	    EAphaseS = phaseTVScoeff*(1.-(1./params->cS_EA));
 
       phase -= (T)(tc*(f-f_ref) + phic);
-      waveform->hplus[j] = amp*std::exp(-i * (phase + EAphaseT));
-      waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT)); //To match the convention with the other waveforms, this should be -i, not +i? 
-      waveform->hx[j] = amp*hx2*std::exp(-i * (phase + EAphaseV));
-      waveform->hy[j] = amp*hy2*std::exp(-i * (phase + EAphaseV));
-      waveform->hb[j] = amp*hb2*std::exp(-i * (phase + EAphaseS));
-      waveform->hl[j] = amp*hl2*std::exp(-i * (phase + EAphaseS));
+      waveform->hplus[j] = amp*std::exp(-i * (phase - EAphaseT));
+      waveform->hcross[j] = amp*std::complex<T>(0,-1)* std::exp(-i * (phase - EAphaseT));
+      waveform->hx[j] = amp*hx2*std::exp(-i * (phase - EAphaseV));
+      waveform->hy[j] = amp*hy2*std::exp(-i * (phase - EAphaseV));
+      waveform->hb[j] = amp*hb2*std::exp(-i * (phase - EAphaseS));
+      waveform->hl[j] = amp*hl2*std::exp(-i * (phase - EAphaseS));
 
       if (params->include_l1 == true) {
 
@@ -568,15 +568,15 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         //for hb1, it wouldn't let me multiply by 2i in the same line
         std::complex<T> hx1, hy1, hb1, hl1;
         hy1 = -1. * params->beta1_EA / ((2. * params->c1_EA) - (params->c13_EA * params->cminus_EA));
-        hx1 = std::complex<T>(0,-1.) * hy1;
+        hx1 = std::complex<T>(0,1.) * hy1;
         hb1 = 1 / ((2. - params->c14_EA) * params->cS_EA);
-        hb1 *= std::complex<T>(0,2.);
+        hb1 *= std::complex<T>(0,-2.);
         hl1 = params->abL_EA * hb1;
 
-        waveform->hx[j] += (amp1 * hx1 * std::exp(-i * (phase1 + EAphaseV)));
-        waveform->hy[j] += (amp1 * hy1 * std::exp(-i * (phase1 + EAphaseV)));
-        waveform->hb[j] += (amp1 * hb1 * std::exp(-i * (phase1 + EAphaseS)));
-        waveform->hl[j] += (amp1 * hl1 * std::exp(-i * (phase1 + EAphaseS)));
+        waveform->hx[j] += (amp1 * hx1 * std::exp(-i * (phase1 - EAphaseV)));
+        waveform->hy[j] += (amp1 * hy1 * std::exp(-i * (phase1 - EAphaseV)));
+        waveform->hb[j] += (amp1 * hb1 * std::exp(-i * (phase1 - EAphaseS)));
+        waveform->hl[j] += (amp1 * hl1 * std::exp(-i * (phase1 - EAphaseS)));
       }
 
     }
