@@ -1030,7 +1030,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
    * Throws out points that violate Big Bang Nucleosynthesis constraints. arXiv:hep-th/0407149v3 
    */
 
-  //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > pow(10, -7.)){return a;}
+  //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > 4.*pow(10, -7.)){return a;}
   /* Throws out points that do not obey observational solar system constraints on 
    * alpha1 and alpha2
    * arXiv:1403.7377 and arXiv:gr-qc/0509114
