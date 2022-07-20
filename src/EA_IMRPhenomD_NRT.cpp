@@ -354,10 +354,9 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parame
 template<class T>
 int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params)
 {
-	//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->csigma_EA<<" "<<params->cw_EA<<" "<<params->ca_EA<<" "<<params->ctheta_EA<<std::endl;
   //this->pre_calculate_EA_factors(params);
   //pre_calculate_EA_factors is now being called in prep_source_parameters and
-  //we don't want to call it twice-> don't need to call it here
+  //we don't want to call it twice-> don't need to call it here. Note that it is being called before we switch to a barred mass, so the sensitivities (which are calculated in that function) are being calculated with the unbarred version as they should be. And the amplitude and phase of the waveform are being calculated with the barred version of the mass, as they should be because they are calculated after we switch.
 
   /*TODO*/
   /*The input mass should be unbarred*/
@@ -516,7 +515,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
       }
 
       /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
-      //Right now these are just the terms for the l=2 mode
+      //These are just the terms for the l=2 mode
       std::complex<T> hx2, hy2, hb2, hl2;
       hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
       hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,-1);
