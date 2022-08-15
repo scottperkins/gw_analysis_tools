@@ -10,7 +10,7 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_rng.h>
 //#define adouble double
-/*! \file 
+/*! \file
  *General utilities (functions and structures) independent of modelling method
  */
 
@@ -21,12 +21,12 @@ const double c = 299792458.;
 /*!Gravitational constant in m**3/(s**2 SolMass)*/
 const double G =6.674e-11*(1.98855e30);
 /*! G/c**3 seconds per solar mass*/
-//const double MSOL_SEC =492549095.e-14; 
-//const double MSOL_SEC =492549095.e-14; 
+//const double MSOL_SEC =492549095.e-14;
+//const double MSOL_SEC =492549095.e-14;
 const double MSOL_SEC =4.925491025543575903411922162094833998e-6 ;
 /*!consts.kpc.to('m')*1000/c Mpc in sec*/
-//const double MPC_SEC = 3085677581.e13/c; 
-const double MPC_SEC = 3.085677581491367278913937957796471611e22/c; 
+//const double MPC_SEC = 3085677581.e13/c;
+const double MPC_SEC = 3.085677581491367278913937957796471611e22/c;
 /*!1 year in seconds -- ie seconds/year */
 const double T_year = 31557600.;
 /*!1 day in seconds*/
@@ -54,7 +54,7 @@ const double DOUBLE_COMP_THRESH = 1e-10;
 //const double c = GSL_CONST_MKSA_SPEED_OF_LIGHT;
 //const double G =GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT;
 //const double MSOL_SEC = GSL_CONST_MKSA_SOLAR_MASS*(GSL_CONST_MKSA_GRAVITATIONAL_CONSTANT/(c*c*c));
-//const double MPC_SEC = GSL_CONST_MKSA_PARSEC*1e6/c; 
+//const double MPC_SEC = GSL_CONST_MKSA_PARSEC*1e6/c;
 
 struct fftw_outline
 {
@@ -79,9 +79,9 @@ struct sph_harm
 };
 
 /*!\struct
- * \brief Structure for interfacing with the libraries 
- * 
- * Structure to interface with the libraries - Units are in solar masses and mpc 
+ * \brief Structure for interfacing with the libraries
+ *
+ * Structure to interface with the libraries - Units are in solar masses and mpc
  *  contains the generation parameters including source parameters and theory parameters
  *
  *  *NOTE* not all the members of this structure need to be assigned for usage. In fact, some are reduntant. It's up to the user to determine what fields require an assignment. (Sorry)
@@ -90,7 +90,7 @@ struct sph_harm
 template<class T>
 class gen_params_base
 {
-public:	
+public:
 	T x0 = 1;
 	std::string cosmology="PLANCK15";
 	/*!mass of the larger body in Solar Masses*/
@@ -141,12 +141,12 @@ public:
 	bool NSflag1=false;
 	bool NSflag2=false;
 
-	
+
 	/*! Flag to force the use of deprecated postmerger calculations -- ADOLC friendly*/
 	bool dep_postmerger = false;
 	/*! Reference frequency for PhenomPv2*/
 	T f_ref=0;
-	
+
 	/*! Shift time detemines if times are shifted so coalescence is more accurately*/
 	bool shift_time = true;
 	/*! Shift time detemines if phic or phiRef is used*/
@@ -218,12 +218,12 @@ public:
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
-		
+
 	void print_properties()
 	{
 		std::cout<<"Source Properties: "<<std::endl;
-		std::cout<<"mass1 | mass2 | DL: "<<this->mass1<<" | "<<this->mass2<<" | "<<this->Luminosity_Distance<<std::endl;	
-		std::cout<<"spin1 | spin2: "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<" | "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<std::endl;	
+		std::cout<<"mass1 | mass2 | DL: "<<this->mass1<<" | "<<this->mass2<<" | "<<this->Luminosity_Distance<<std::endl;
+		std::cout<<"spin1 | spin2: "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<" | "<<"["<<this->spin1[0]<<", "<< this->spin1[1]<<", "<<this->spin1[2]<< "]"<<std::endl;
 		std::cout<<"psi | iota | RA | DEC | gmst: "<<this->psi<<" | "<<this->incl_angle<<" | "<<this->RA<<" | "<<this->DEC<<" | "<<this->gmst<<std::endl;
 		std::cout<<"f_ref | shift_time | shift_phase: " <<this->f_ref<<" | "<<this->shift_time<<" | "<<this->shift_phase<<std::endl;
 		std::cout<<"tc | phiRef: " <<this->tc<<" | "<<this->phiRef<<std::endl;
@@ -350,7 +350,7 @@ struct useful_powers
 	double PIminus_5third;
 };
 
-/*!\struct 
+/*!\struct
  * \brief For internal data transfers
  *
  * Structure to facililate parameter tranfers - All dimensionful quantities are in seconds
@@ -364,7 +364,7 @@ struct source_parameters
 	T mass2;
 	/*! Total mass*/
 	T M;
-	/*Mass ratio*/	
+	/*Mass ratio*/
 	T q;
 	/*! z-Spin component of the larger body*/
 	T spin1z;
@@ -398,9 +398,9 @@ struct source_parameters
 	T fRD;
 	/*!Dampening frequency after merger*/
 	T fdamp;
-	/*! Transition Frequency 1 for the amplitude*/	
+	/*! Transition Frequency 1 for the amplitude*/
 	T f1;
-	/*! Transition Frequency 2 for the amplitude*/	
+	/*! Transition Frequency 2 for the amplitude*/
 	T f3;
 	/*! Transition frequency 1 for the phase*/
 	T f1_phase;
@@ -408,13 +408,13 @@ struct source_parameters
 	T f2_phase;
 	/*! Coalescence time*/
 	T tc;
-	/*overall amplitude factor*/	
+	/*overall amplitude factor*/
 	T A0;
 	/*! Shift time detemines if phic or phiRef is used*/
 	bool shift_phase = true;
 	/*! Flag to force the use of deprecated postmerger calculations -- ADOLC friendly*/
 	bool dep_postmerger = false;
-	
+
 	bool NSflag1;
 	bool NSflag2;
 	//############################################
@@ -422,18 +422,18 @@ struct source_parameters
 	T s ;
 
 	T chil;
-	
+
 	T chip;
 
 	//Azimuthal angle of chip in plane
 	T phip = -1;
 
 	T f_ref=0;
-	
+
 	T phi_aligned;
 
 	T incl_angle;
-	
+
 	T phiRef;
 
 	T alpha0;
@@ -475,14 +475,17 @@ struct source_parameters
 	double *appe;
 	T *alphappe;
 
-	/*! Number of modifications to phase*/	
+	/*! Number of modifications to phase*/
 	int Nmod;
-	
+
+	/*! Number of modifications to amplitude*/
+//	int Nmod_amp;
+
 	//Spherical polar angles for the sky location relative to the detector in question
 	T phi;
 
 	T theta;
-	
+
 	T SP;
 
 	T SL;
@@ -495,7 +498,7 @@ struct source_parameters
 	gsl_spline *Z_DL_spline_ptr=NULL;
 
 	gsl_interp_accel *Z_DL_accel_ptr=NULL;
-	
+
 	std::string cosmology;
 	//gIMR quantities
 	int Nmod_beta=0;
@@ -538,7 +541,7 @@ struct source_parameters
   //Center of mass velocity of binary (normally we'll just set this to zero)
   T V_x_EA;
   T V_y_EA;
-  T V_z_EA; 
+  T V_z_EA;
   //sensitivities for NSs
   T s1_EA;
   T s2_EA;
@@ -548,13 +551,13 @@ struct source_parameters
 //static source_parameters<T> populate_source_parameters(gen_params_base<T> *param_in);
 void populate_source_parameters(gen_params_base<T> *param_in);
 static source_parameters<T> populate_source_parameters_old(
-			T mass1, 
-			T mass2, 
-			T Luminosity_Distance, 
+			T mass1,
+			T mass2,
+			T Luminosity_Distance,
 			T *spin1,
-			T *spin2, 
+			T *spin2,
 			T phi_c,
-			T t_c, 
+			T t_c,
 			bool sky_average) ;
 };
 void vector_union(std::vector<double> A, std::vector<double> B, std::vector<double> *C );
@@ -659,13 +662,13 @@ adouble calculate_chirpmass(adouble mass1, adouble mass2);
 
 double calculate_mass1(double chirpmass, double eta);
 adouble calculate_mass1(adouble chirpmass, adouble eta);
-	
+
 double calculate_mass2(double chirpmass, double eta);
 adouble calculate_mass2(adouble chirpmass, adouble eta);
 
 double calculate_mass1_Mcq(double chirpmass, double q);
 adouble calculate_mass1_Mcq(adouble chirpmass, adouble q);
-	
+
 double calculate_mass2_Mcq(double chirpmass, double q);
 adouble calculate_mass2_Mcq(adouble chirpmass, adouble q);
 
@@ -695,7 +698,7 @@ void unwrap_array(T *in, T *out, int len) ;
  * This version is faster than the general version, as it has half the function calls
  *
  * Something may be wrong with this function - had an overall offset for real data that was
- * fixed by using the simpsons rule - not sure if this was because of a boost in accuracy or 
+ * fixed by using the simpsons rule - not sure if this was because of a boost in accuracy or
  * because something is off with the trapezoidal sum
  */
 template <class T>

@@ -130,16 +130,16 @@ std::string strip_path(std::string input)
 
 /*! \brief Newton Raphson method for a function of one dimension
  *
- * f_on_fprime is a function pointer that should assign the value result = f(x) / f'(x) 
- * 
+ * f_on_fprime is a function pointer that should assign the value result = f(x) / f'(x)
+ *
  * param are just an extra needed parameters
- * 	
+ *
  * return values:
  *
  * 	0 -- success
  *
  * 	1 -- Bad value for derivative
- * 	
+ *
  * 	2 -- max iterations reached
  */
 int newton_raphson_method_1d(void(*f_on_fprime)(double x, double *func, double *func_prime,void *param),double initial_guess,double tolerance ,int max_iterations,void *parameters, double *solution)
@@ -150,8 +150,8 @@ int newton_raphson_method_1d(void(*f_on_fprime)(double x, double *func, double *
 	{
 		x0=x1;
 		f_on_fprime(x0,&func,&func_prime,parameters);
-		if(fabs(func_prime)>1e-12  && 
-			!isnan(func) && 
+		if(fabs(func_prime)>1e-12  &&
+			!isnan(func) &&
 			!isnan(func_prime))
 		{
 			x1 = x0 - func/func_prime;
@@ -165,7 +165,7 @@ int newton_raphson_method_1d(void(*f_on_fprime)(double x, double *func, double *
 	}while( fabs(x1 - x0) >tolerance && i<max_iterations);
 
 	if(i==max_iterations){ *solution=x0; return 2;}
-	*solution = x1;	
+	*solution = x1;
 	return 0;
 }
 
@@ -190,7 +190,7 @@ void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL
 	int i =0,j=0;
 	if(data_table){
 		while(std::getline(data_table,line)){
-			std::stringstream lineStream(line);	
+			std::stringstream lineStream(line);
 			std::string item;
 			while(std::getline(lineStream, item, ','))
 			{
@@ -240,7 +240,7 @@ double Z_from_DL_interp(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *
 	//	std::cout<<DL<<std::endl;
 	//	std::cout<<DLtemp<<std::endl;
 	//}
-	
+
 	Z = gsl_spline_eval(Z_DL_spline_ptr, DLtemp, Z_DL_accel_ptr);
 	return Z;
 
@@ -253,7 +253,7 @@ double Z_from_DL_interp(double DL,gsl_interp_accel *Z_DL_accel_ptr, gsl_spline *
  * Based on Astropy.cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.cosmology's definitions (http://docs.astropy.org/en/stable/cosmology/) and used scipy.optimize to fit to a power series, stepping in half powers of DL. These coefficients are then output to a header file (D_Z_config.h) which are used here to calculate redshift. Custom cosmologies etc can easily be acheived by editing the python script D_Z_config.py, the c++ functions do not need modification. They use whatever data is available in the header file.
  *
  * 5 cosmological models are available (this argument must be spelled exactly, although case insensitive):
- * 
+ *
  * PLANCK15, PLANCK13, WMAP9, WMAP7, WMAP5
  */
 double Z_from_DL(double DL, std::string cosmology)
@@ -277,11 +277,11 @@ double Z_from_DL(double DL, std::string cosmology)
 			z =  cosmology_interpolation_function(DL,coeffs, interp_deg);
 			delete[] coeffs;
 			return z;
-			
-		}	
+
+		}
 	}
 	return -1;
-	
+
 }
 /*! \brief Calculates the redshift given the luminosity distance
  * adouble version for ADOL-C implementation
@@ -307,11 +307,11 @@ adouble Z_from_DL(adouble DL, std::string cosmology)
 			z =  cosmology_interpolation_function(DL,coeffs, interp_deg);
 			delete[] coeffs;
 			return z;
-			
-		}	
+
+		}
 	}
 	return -1;
-	
+
 }
 
 /*! \brief Calculates the luminosity distance given the redshift
@@ -319,7 +319,7 @@ adouble Z_from_DL(adouble DL, std::string cosmology)
  * Based on Astropy.cosmology calculations -- see python script in the ./data folder of the project -- numerically calculated given astropy.cosmology's definitions (http://docs.astropy.org/en/stable/cosmology/) and used scipy.optimize to fit to a power series, stepping in half powers of Z. These coefficients are then output to a header file (D_Z_config.h) which are used here to calculate distance. Custom cosmologies etc can easily be acheived by editing the python script D_Z_config.py, the c++ functions do not need modification. They use whatever data is available in the header file. If the functional form of the fitting function changes, these functions DO need to change.
  *
  * 5 cosmological models are available (this argument must be spelled exactly):
- * 
+ *
  * PLANCK15, PLANCK13, WMAP9, WMAP7, WMAP5
  */
 double DL_from_Z(double Z, std::string cosmology)
@@ -346,8 +346,8 @@ double DL_from_Z(double Z, std::string cosmology)
 			dl =  cosmology_interpolation_function(Z,coeffs, interp_deg);
 			delete[] coeffs;
 			return dl;
-			
-		}	
+
+		}
 	}
 	return -1;
 }
@@ -375,13 +375,13 @@ adouble DL_from_Z(adouble Z, std::string cosmology)
 			dl =  cosmology_interpolation_function(Z,coeffs, interp_deg);
 			delete[] coeffs;
 			return dl;
-			
-		}	
+
+		}
 	}
 	return -1;
 }
 
-/*! \brief Rough threshold for when to truncate waveforms for neutron stars 
+/*! \brief Rough threshold for when to truncate waveforms for neutron stars
  *
  * 24 km separation
  */
@@ -391,7 +391,7 @@ T fcontact(T M_detector, /**< Detector frame total mass in seconds*/
 	std::string cosmology/**< Cosmology to use for getting the redshift from dl*/
 	)
 {
-	T z = Z_from_DL(DL/MPC_SEC,cosmology);	
+	T z = Z_from_DL(DL/MPC_SEC,cosmology);
 	T Rcontact = 24./3.e5;
 	return (1./M_PI)*(sqrt(M_detector/(1.+z)/pow_int(Rcontact,3)));
 }
@@ -406,7 +406,7 @@ double cosmology_interpolation_function(double x,double *coeffs, int interp_degr
 {
 	double sum=coeffs[0];
 	double rootx = std::sqrt(x);
-		
+
 	for(int i =1; i<interp_degree;i++){
 		sum+= coeffs[i]*pow_int(rootx,i);
 	}
@@ -420,7 +420,7 @@ adouble cosmology_interpolation_function(adouble x,double *coeffs, int interp_de
 {
 	adouble sum=coeffs[0];
 	adouble rootx = sqrt(x);
-		
+
 	for(int i =1; i<interp_degree;i++){
 		sum+= coeffs[i]*pow_int(rootx,i);
 	}
@@ -446,7 +446,7 @@ int cosmology_lookup(std::string cosmology)
 double powerlaw_from_uniform(double x0, double x1, double power, double uniform_random_number)
 {
 	return pow( (pow(x1, power+1) - pow(x0,power+1) )*uniform_random_number + pow(x0, power+1) , 1./(power+1));
-} 
+}
 
 /*! \brief Calculates a random number from the Maxwell-Boltzmann distribution using 3 gaussian random numbers
  *
@@ -463,7 +463,7 @@ double gsl_maxwell_boltzmann_distribution(double sigma, gsl_rng *r)
 	double v2=gsl_ran_gaussian(r, sigma);
 	double v3=gsl_ran_gaussian(r, sigma);
 	return sqrt(v1*v1 + v2*v2 + v3*v3);
-} 
+}
 
 template <class T>
 T copysign_internal(T val, T sign)
@@ -531,7 +531,7 @@ void vector_union(std::vector<double> A, std::vector<double> B, std::vector<doub
 	}
 }
 
-/*! \brief SHOULDN'T BE USED FOR DOUBLESCustom list-interesction implementation for sorted lists 
+/*! \brief SHOULDN'T BE USED FOR DOUBLESCustom list-interesction implementation for sorted lists
  *
  * Uses pointers for efficiency -- NOT COPIED -- used std library for that
  *
@@ -540,7 +540,7 @@ void vector_union(std::vector<double> A, std::vector<double> B, std::vector<doub
  * Takes the length of C and puts it in lenC
  *
  * C should have allocated memory for at least as large as the smallest list
- * 	
+ *
  * WILL NOT work in-place, A, B, and C must be separate
  */
 template<class T>
@@ -572,7 +572,7 @@ void list_intersect_ptrs(T **A, int lenA,T **B, int lenB, T **C, int *lenC)
 //template void list_intersect_ptrs<double>(double**,int,double**,int,double**,int *);
 //template void list_intersect_ptrs<adouble>(adouble**,int,adouble**,int,adouble**,int *);
 template void list_intersect_ptrs<int>(int**,int,int**,int,int**,int *);
-/*! \brief Custom list-interesction implementation for sorted lists 
+/*! \brief Custom list-interesction implementation for sorted lists
  *
  * Uses pointers for efficiency -- NOT COPIED -- used std library for that
  *
@@ -581,7 +581,7 @@ template void list_intersect_ptrs<int>(int**,int,int**,int,int**,int *);
  * Takes the length of C and puts it in lenC
  *
  * C should have allocated memory for at least as large as the smallest list
- * 	
+ *
  * WILL NOT work in-place, A, B, and C must be separate
  */
 template<class T>
@@ -615,7 +615,7 @@ void list_intersect(T *A, int lenA,T *B, int lenB, T **C, int *lenC)
 template void list_intersect<double>(double*,int,double*,int,double**,int *);
 //template void list_intersect<adouble>(adouble*,int,adouble*,int,adouble**,int *);
 //template void list_intersect<int>(int*,int,int*,int,int**,int *);
-/*! \brief Custom list-interesction implementation for sorted lists 
+/*! \brief Custom list-interesction implementation for sorted lists
  *
  * Uses pointers for efficiency -- NOT COPIED -- used std library for that
  *
@@ -624,7 +624,7 @@ template void list_intersect<double>(double*,int,double*,int,double**,int *);
  * Takes the length of C and puts it in lenC
  *
  * C should have allocated memory for at least as large as the smallest list
- * 	
+ *
  * WILL NOT work in-place, A, B, and C must be separate
  */
 template<class T>
@@ -741,10 +741,10 @@ void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 	gsl_linalg_LU_decomp(matrix, p, &s);
 	gsl_matrix *inv = gsl_matrix_alloc(dim, dim);
 	gsl_linalg_LU_invert(matrix, p, inv);
-    
+
 	gsl_permutation_free(p);
-	
-	
+
+
 	for(int row=0; row<dim; row++){
 		for(int column = 0 ;column<dim; column++){
 			inverse[row][column] = gsl_matrix_get(inv,row,column);
@@ -752,8 +752,8 @@ void gsl_LU_matrix_invert(T **input, T **inverse, int dim)
 	}
 	gsl_matrix_free(matrix);
 	gsl_matrix_free(inv);
-	
-    
+
+
 }
 template void gsl_LU_matrix_invert<double>(double **, double**, int );
 
@@ -765,13 +765,13 @@ int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 			gsl_matrix_set(matrix, row, column, input[row][column]);
 		}
 	}
-	
+
 	gsl_permutation *p = gsl_permutation_alloc(dim);
 	gsl_matrix *inv = gsl_matrix_alloc(dim, dim);
 	int status =gsl_linalg_pcholesky_decomp(matrix,p);
 	status = gsl_linalg_pcholesky_invert(matrix,p,inv);
 	gsl_permutation_free(p);
-	
+
 	bool failed=false;
 	if(status != 0 ){
 		failed = true;
@@ -795,8 +795,8 @@ int gsl_cholesky_matrix_invert(double **input, double **inverse, int dim)
 	gsl_matrix_free(inv);
 	if(failed){return 1;}
 	return 0;
-	
-    
+
+
 }
 
 /*! \brief Normalize the Fisher matrix before inversion to try and tame singularity issues:
@@ -818,12 +818,12 @@ int normalized_gsl_cholesky_matrix_invert(double **input, double **inverse, int 
 			A[i][j] = input[i][j] / sqrt(input[i][i] * input[j][j]);
 		}
 	}
-	if (status ==0){ 
+	if (status ==0){
 		std::cout<<"Error: Product of diagonal elements in Fisher normalization are negative"<<std::endl;
 		return status;
 	}
 	status = gsl_cholesky_matrix_invert(A, out, dim);
-	
+
 	for (int i = 0 ; i<dim; i++){
 		for(int j = 0 ; j< dim; j++){
 			inverse[i][j] = out[i][j]/ sqrt(input[i][i] * input[j][j]);
@@ -834,7 +834,7 @@ int normalized_gsl_cholesky_matrix_invert(double **input, double **inverse, int 
 	delete [] A;
 	delete [] out;
 	return status;
-	
+
 }
 
 /*! \brief map the error on RA and DEC to error on solid angle \Omega
@@ -866,8 +866,8 @@ void printProgress (double percentage)
  */
 void allocate_FFTW_mem_forward(fftw_outline *plan, int length)
 {
-	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
-	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
+	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
 	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_FORWARD, FFTW_MEASURE);
 }
 /*! \brief Allocate memory for FFTW3 methods used in a lot of inner products --INVERSE
@@ -875,8 +875,8 @@ void allocate_FFTW_mem_forward(fftw_outline *plan, int length)
  */
 void allocate_FFTW_mem_reverse(fftw_outline *plan, int length)
 {
-	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
-	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);	
+	plan->in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
+	plan->out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
 	plan->p = fftw_plan_dft_1d(length, plan->in, plan->out,FFTW_BACKWARD, FFTW_MEASURE);
 }
 /*!\brief deallocates the memory used for FFTW routines
@@ -891,7 +891,7 @@ void deallocate_FFTW_mem(fftw_outline *plan)
 
 /*! \brief Builds the structure that shuttles source parameters between functions -updated version to incorporate structure argument
  *
- * Populates the structure that is passed to all generation methods - contains all relavent source parameters 
+ * Populates the structure that is passed to all generation methods - contains all relavent source parameters
  *
  * Template type of source parameters and gen_parameters must match
  *
@@ -899,7 +899,7 @@ void deallocate_FFTW_mem(fftw_outline *plan)
 template <class T>
 void source_parameters<T>::populate_source_parameters(
 			gen_params_base<T> *param_in
-			) 
+			)
 {
 
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
@@ -915,8 +915,8 @@ void source_parameters<T>::populate_source_parameters(
 	this->chi_a = (1./2)*(this->spin1z-this->spin2z);
 	//params.chirpmass = (adouble)calculate_chirpmass((double)params.mass1.value(),(double)params.mass2.value());
 	this->chirpmass = calculate_chirpmass(this->mass1,this->mass2);
-	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());	
-	this->eta = calculate_eta(this->mass1,this->mass2);	
+	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());
+	this->eta = calculate_eta(this->mass1,this->mass2);
 	this->M = this->mass1 + this->mass2;
 	this->chi_eff = (this->mass1*(this->spin1z)+ this->mass2*(this->spin2z))/(this->M);
 	this->chi_pn = this->chi_eff - (38*this->eta/113)*(2*this->chi_s);
@@ -932,7 +932,7 @@ void source_parameters<T>::populate_source_parameters(
 //template <class T>
 //source_parameters<T> source_parameters<T>::populate_source_parameters(
 //			gen_params_base<T> *param_in
-//			) 
+//			)
 //{
 //
 //	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
@@ -949,8 +949,8 @@ void source_parameters<T>::populate_source_parameters(
 //	params.chi_a = (1./2)*(params.spin1z-params.spin2z);
 //	//params.chirpmass = (adouble)calculate_chirpmass((double)params.mass1.value(),(double)params.mass2.value());
 //	params.chirpmass = calculate_chirpmass(params.mass1,params.mass2);
-//	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());	
-//	params.eta = calculate_eta(params.mass1,params.mass2);	
+//	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());
+//	params.eta = calculate_eta(params.mass1,params.mass2);
 //	params.M = params.mass1 + params.mass2;
 //	params.chi_eff = (params.mass1*(params.spin1z)+ params.mass2*(params.spin2z))/(params.M);
 //	params.chi_pn = params.chi_eff - (38*params.eta/113)*(2*params.chi_s);
@@ -1061,7 +1061,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> **par
 	(*param_out)->phi_j_ecl = param_in->phi_j_ecl;
 	(*param_out)->precess_reduced_flag = param_in->precess_reduced_flag;
 	(*param_out)->dep_postmerger = param_in->dep_postmerger;
-	
+
 }
 /*! \brief Simple utility to copy the members of param_in to param_out, for whatever types those are.
  *
@@ -1162,7 +1162,7 @@ void transform_parameters(gen_params_base<T> *param_in, gen_params_base<U> *para
 	param_out->phi_j_ecl = param_in->phi_j_ecl;
 	param_out->precess_reduced_flag = param_in->precess_reduced_flag;
 	param_out->dep_postmerger = param_in->dep_postmerger;
-	
+
 }
 template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> *);
 template void transform_parameters<double,adouble>(gen_params_base<double> *, gen_params_base<adouble> **);
@@ -1182,7 +1182,7 @@ T A0_from_DL(T chirpmass, T DL, bool sky_average)
 }
 template double A0_from_DL<double>(double , double , bool);
 template adouble A0_from_DL<adouble>(adouble , adouble , bool);
-/*! \brief Transforms between amplitude factor A0 and chirpmass to DL 
+/*! \brief Transforms between amplitude factor A0 and chirpmass to DL
  *
  * All quantities in seconds
  */
@@ -1198,21 +1198,21 @@ T DL_from_A0(T chirpmass, T A0, bool sky_average)
 }
 template double DL_from_A0<double>(double , double , bool);
 template adouble DL_from_A0<adouble>(adouble , adouble , bool);
-/*! \brief Builds the structure that shuttles source parameters between functions- outdated in favor of structure argument 
+/*! \brief Builds the structure that shuttles source parameters between functions- outdated in favor of structure argument
  *
- * Populates the structure that is passed to all generation methods - contains all relavent source parameters 
+ * Populates the structure that is passed to all generation methods - contains all relavent source parameters
  */
 template <class T>
 source_parameters<T> source_parameters<T>::populate_source_parameters_old(
-			T mass1, /**< mass of the larger body - in Solar Masses*/ 
+			T mass1, /**< mass of the larger body - in Solar Masses*/
 			T mass2, /**< mass of the smaller body - in Solar Masses*/
-			T Luminosity_Distance,/**< Luminosity Distance in Mpc*/ 
+			T Luminosity_Distance,/**< Luminosity Distance in Mpc*/
 			T *spin1,/** spin vector of the larger body  {sx,sy,sz}*/
 			T *spin2, /** spin vector of the smaller body  {sx,sy,sz}*/
 			T phi_c,/** coalescence phase*/
 			T t_c ,/** coalescence time*/
 			bool sky_average
-			) 
+			)
 {
 
 	/* Convert all dimensionful quantities to seconds and build all needed source quantities once*/
@@ -1229,8 +1229,8 @@ source_parameters<T> source_parameters<T>::populate_source_parameters_old(
 	params.chi_a = (1./2)*(params.spin1z-params.spin2z);
 	//params.chirpmass = (adouble)calculate_chirpmass((double)params.mass1.value(),(double)params.mass2.value());
 	params.chirpmass = calculate_chirpmass(params.mass1,params.mass2);
-	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());	
-	params.eta = calculate_eta(params.mass1,params.mass2);	
+	//params.eta = (adouble)calculate_eta((double)params.mass1.value(),(double)params.mass2.value());
+	params.eta = calculate_eta(params.mass1,params.mass2);
 	params.M = params.mass1 + params.mass2;
 	params.chi_eff = (params.mass1*(params.spin1z)+ params.mass2*(params.spin2z))/(params.M);
 	params.chi_pn = params.chi_eff - (38*params.eta/113)*(2*params.chi_s);
@@ -1255,7 +1255,7 @@ source_parameters<T> source_parameters<T>::populate_source_parameters_old(
  *
  * Polarization angle is defined as:
  *
- *  tan \psi = ( J.z - (J.N)(z.N) ) / (N.(Jxz)) 
+ *  tan \psi = ( J.z - (J.N)(z.N) ) / (N.(Jxz))
  *
  *  Where z is the axis of rotation of earth (equatorial z), and N is the line of sight to the source (direction of propagation is -N)
  *
@@ -1283,7 +1283,7 @@ template void terr_pol_iota_from_equat_sph<double>(double, double, double, doubl
 template void terr_pol_iota_from_equat_sph<adouble>(adouble, adouble, adouble, adouble, adouble *, adouble*);
 
 
-/*! \brief transform spherical angles from equatorial to ecliptic 
+/*! \brief transform spherical angles from equatorial to ecliptic
  *
  *
  * Rotation about the vernal equinox (x-hat in both coordinate systems) by the axial tilt or obliquity
@@ -1309,7 +1309,7 @@ void ecl_from_eq(T theta_eq, /**<Equatorial spherical polar angle */
 	T sdec = sin(DEC);
 	T ce = cos(AXIAL_TILT);
 	T se = sin(AXIAL_TILT);
-	
+
 	lambda = atan2(sra*ce + sdec/cdec * se, cra);
 	beta = asin(sdec*ce - cdec* se*sra);
 	*theta_ecl =M_PI/2. - beta ;
@@ -1323,14 +1323,14 @@ template void ecl_from_eq<adouble>( adouble , adouble, adouble *, adouble*);
  * Needs the equatorial vectors for the line of sight and the spin angular momentum
  *
  * Needs the inclination angle and the reference phase
- * 
- * Works by constructing a third vector from the cross product of the two others, in both frames. This defines a family of 3 vectors 
+ *
+ * Works by constructing a third vector from the cross product of the two others, in both frames. This defines a family of 3 vectors
  * that can uniquely determine a rotation matrix from source frame to equatorial, which was done analytically in mathematica ( see the nb anglenb.nb)
  *
  * K = LxN
  *
  * A = {LSF,NSF, KSF}
- * 
+ *
  * B={LEQ,NEQ,KEQ}
  *
  * B = R.A
@@ -1374,9 +1374,9 @@ void equatorial_from_SF(T *SFvec,/**< Input, source frame vector, as defined by 
 	//EQvec_test[1] = (pow_int(cp,2)*Jzn*si*spl*stl + cp*(-(cpl*cts*Jyn*stl) - ci*Jxn*spl*stl + cps*ctl*Jyn*sts + Jxn*sps*sts) + sp*(cpl*cts*Jxn*stl - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl - cps*ctl*Jxn*sts + Jyn*sps*sts))/si;
 	//EQvec_test[2] = (cp*cts*Jxn + pow_int(cp,2)*ctl*Jzn*si - ci*ctl*(cp*Jxn + Jyn*sp) + cp*Jyn*(-(cps*spl) + cpl*sps)*stl*sts + sp*(cts*Jyn + ctl*Jzn*si*sp + Jxn*(cps*spl - cpl*sps)*stl*sts))/si;
 
-	EQvec[0]=(pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl - cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts) + 
+	EQvec[0]=(pow_int(cp,2)*cpl*Jzn*si*stl - ci*cpl*(cp*Jxn + Jyn*sp)*stl - cp*(cts*Jyn*spl*stl + cps*Jxn*sts - ctl*Jyn*sps*sts) +
      sp*(cpl*Jzn*si*sp*stl + cts*Jxn*spl*stl - (cps*Jyn + ctl*Jxn*sps)*sts))/si;
-	EQvec[1] = (pow_int(cp,2)*Jzn*si*spl*stl + sp*(-(cpl*cts*Jxn*stl) - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl + cps*ctl*Jxn*sts - Jyn*sps*sts) + 
+	EQvec[1] = (pow_int(cp,2)*Jzn*si*spl*stl + sp*(-(cpl*cts*Jxn*stl) - ci*Jyn*spl*stl + Jzn*si*sp*spl*stl + cps*ctl*Jxn*sts - Jyn*sps*sts) +
      cp*(cpl*cts*Jyn*stl - ci*Jxn*spl*stl - (cps*ctl*Jyn + Jxn*sps)*sts))/si;
 	EQvec[2] = (ctl*Jzn*si - Jxn*(ci*cp*ctl + cp*cts + sp*(cps*spl - cpl*sps)*stl*sts) - Jyn*(ci*ctl*sp + cts*sp + cp*(-(cps*spl) + cpl*sps)*stl*sts))/si ;
 	//std::cout<<EQvec[0]-EQvec_test[0]<<std::endl;
@@ -1511,13 +1511,13 @@ adouble pow_int(adouble base, int power)
 		return 1./prod;
 }
 
-/*! \brief Fucntion that just returns the cuberoot 
+/*! \brief Fucntion that just returns the cuberoot
  */
 double cbrt_internal(double base)
 {
 	return cbrt(base);
 }
-/*! \brief Fucntion that just returns the cuberoot 
+/*! \brief Fucntion that just returns the cuberoot
  * ADOL-C doesn't have the cbrt function (which is faster),
  * so have to use the power function
  */
@@ -1527,7 +1527,7 @@ adouble cbrt_internal(adouble base)
 }
 
 /*! \brief Utility to malloc 2D array
- * 
+ *
  */
 double** allocate_2D_array( int dim1, int dim2)
 {
@@ -1549,7 +1549,7 @@ int** allocate_2D_array_int( int dim1, int dim2)
 }
 
 /*! \brief Utility to free malloc'd 2D array
- * 
+ *
  */
 void deallocate_2D_array(double **array, int dim1, int dim2)
 {
@@ -1568,7 +1568,7 @@ void deallocate_2D_array(int **array, int dim1, int dim2)
 	free(array);
 }
 /*! \brief Utility to malloc 3D array
- * 
+ *
  */
 double*** allocate_3D_array( int dim1, int dim2, int dim3)
 {
@@ -1597,7 +1597,7 @@ int*** allocate_3D_array_int( int dim1, int dim2, int dim3)
 	return array;
 }
 /*! \brief Utility to free malloc'd 2D array
- * 
+ *
  */
 void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
 {
@@ -1611,7 +1611,7 @@ void deallocate_3D_array(double ***array, int dim1, int dim2, int dim3)
 	free(array);
 }
 /*! \brief Utility to free malloc'd 2D array
- * 
+ *
  */
 void deallocate_3D_array(int ***array, int dim1, int dim2, int dim3)
 {
@@ -1655,7 +1655,7 @@ void tukey_window(double *window,
 			//window[i] = 0.5*(1 + cos(M_PI * ( (2. * i)/(alpha * length) - 2./alpha + 1) ) );
 			//window[i] = 0.5*(1 - cos(M_PI * ( (2. * i)/(alpha * length) ) ) );
 		}
-	}	
+	}
 
 }
 
@@ -1677,11 +1677,11 @@ void celestial_horizon_transform(T RA, /**< Right acsension (rad)*/
 	//NEED TRANSFORM FROM GPS TO SIDEREAL
 	T GMST = gps_to_GMST(gps_time);
 	//###############################
-	
+
 	//std::cout<<"GMST: "<<GMST<<std::endl;
 	T LMST = GMST + (LONG*180./M_PI)/15.; //Local mean sidereal in hours
 	T H = (LMST - (RA*180./M_PI)/15.)*15.*M_PI/180.;//Local hour angle in rad
-	
+
 	T alt = asin( sin(DEC) * sin(LAT) + cos(DEC) * cos(LAT) *cos(H) );//alt in rad
 	T a =  acos( (sin(DEC) - sin(alt)*sin(LAT) )/ (cos(alt)*cos(LAT))) ; //azimuth in rad
 	T azimuth ;
@@ -1703,7 +1703,7 @@ T gps_to_GMST(T gps_time)
 	T JD = gps_to_JD(gps_time);
 	T JD0;
 	T H;
-	//if((JD - floor(JD)) >.5){ 
+	//if((JD - floor(JD)) >.5){
 	//	JD0 = floor(JD)+.5;//Julian date of the previous midnight
 	//	H = (JD - JD0)*24;//Hours past midnight (in hours)
 	//}
@@ -1766,13 +1766,13 @@ template adouble gps_to_JD<adouble>(adouble);
  */
 void decimal_to_HMS(double decimal, int *hour, int *min, double *second)
 {
- 	*hour = (int)floor(decimal);	
+ 	*hour = (int)floor(decimal);
   	*min = (int)floor((decimal-*hour)*60);
  	*second = ((decimal-*hour)*60 - *min)*60;
 }
 
 /*! \brief utility to transform a vector from cartesian to spherical (radian)
- * 	
+ *
  * order:
  *
  * cart: x, y, z
@@ -1818,7 +1818,7 @@ void transform_sph_cart(T *sphvec, T *cartvec)
 template void transform_sph_cart<double>(double*, double*);
 template void transform_sph_cart<adouble>(adouble*, adouble*);
 
-/*! \brief Unwrap angles from arctan 
+/*! \brief Unwrap angles from arctan
  *
  * Stolen from stack exchange.. https://stackoverflow.com/questions/15634400/continous-angles-in-c-eq-unwrap-function-in-matlab
  *
@@ -1865,21 +1865,21 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
   std::complex<T> ans = std::complex<T>(0.0,0.0);
 
   /* sanity checks ... */
-  //if ( l < abs(s) ) 
+  //if ( l < abs(s) )
   //{
   //  XLALPrintError("XLAL Error - %s: Invalid mode s=%d, l=%d, m=%d - require |s| <= l\n", __func__, s, l, m );
   //  XLAL_ERROR_VAL(0, XLAL_EINVAL);
   //}
-  //if ( l < abs(m) ) 
+  //if ( l < abs(m) )
   //{
   //  XLALPrintError("XLAL Error - %s: Invalid mode s=%d, l=%d, m=%d - require |m| <= l\n", __func__, s, l, m );
   //  XLAL_ERROR_VAL(0, XLAL_EINVAL);
   //}
-  if ( s == -2 ) 
+  if ( s == -2 )
   {
-    if ( l == 2 ) 
+    if ( l == 2 )
     {
-      switch ( m ) 
+      switch ( m )
       {
         case -2:
           fac = sqrt( 5.0 / ( 64.0 * M_PI ) ) * ( 1.0 - cos( theta ))*( 1.0 - cos( theta ));
@@ -1905,9 +1905,9 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
         //  break;
       } /*  switch (m) */
     }  /* l==2*/
-    else if ( l == 3 ) 
+    else if ( l == 3 )
     {
-      switch ( m ) 
+      switch ( m )
       {
         case -3:
           fac = sqrt(21.0/(2.0*M_PI))*cos(theta/2.0)*pow(sin(theta/2.0),5.0);
@@ -1939,9 +1939,9 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
         //  break;
       }
     }   /* l==3 */
-    else if ( l == 4 ) 
+    else if ( l == 4 )
     {
-      switch ( m ) 
+      switch ( m )
       {
         case -4:
           fac = 3.0*sqrt(7.0/M_PI)*pow(cos(theta/2.0),2.0)*pow(sin(theta/2.0),6.0);
@@ -1977,9 +1977,9 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
         //  break;
       }
     }    /* l==4 */
-    else if ( l == 5 ) 
+    else if ( l == 5 )
     {
-      switch ( m ) 
+      switch ( m )
       {
         case -5:
           fac = sqrt(330.0/M_PI)*pow(cos(theta/2.0),3.0)*pow(sin(theta/2.0),7.0);
@@ -2031,38 +2031,38 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
           fac = (sqrt(2145./M_PI)*pow(cos(theta/2.0),3)*(1. + 3.*cos(theta))*pow(sin(theta/2.0),7))/2.0;
           break;
         case -4:
-          fac = (sqrt(195./(2.0*M_PI))*pow(cos(theta/2.0),2)*(35. + 44.*cos(theta) 
+          fac = (sqrt(195./(2.0*M_PI))*pow(cos(theta/2.0),2)*(35. + 44.*cos(theta)
           + 33.*cos(2.*theta))*pow(sin(theta/2.0),6))/8.0;
           break;
         case -3:
-          fac = (3.*sqrt(13./M_PI)*cos(theta/2.0)*(98. + 185.*cos(theta) + 110.*cos(2*theta) 
+          fac = (3.*sqrt(13./M_PI)*cos(theta/2.0)*(98. + 185.*cos(theta) + 110.*cos(2*theta)
           + 55.*cos(3.*theta))*pow(sin(theta/2.0),5))/32.0;
           break;
         case -2:
-          fac = (sqrt(13./M_PI)*(1709. + 3096.*cos(theta) + 2340.*cos(2.*theta) + 1320.*cos(3.*theta) 
+          fac = (sqrt(13./M_PI)*(1709. + 3096.*cos(theta) + 2340.*cos(2.*theta) + 1320.*cos(3.*theta)
           + 495.*cos(4.*theta))*pow(sin(theta/2.0),4))/256.0;
           break;
         case -1:
-          fac = (sqrt(65./(2.0*M_PI))*cos(theta/2.0)*(161. + 252.*cos(theta) + 252.*cos(2.*theta) 
+          fac = (sqrt(65./(2.0*M_PI))*cos(theta/2.0)*(161. + 252.*cos(theta) + 252.*cos(2.*theta)
           + 132.*cos(3.*theta) + 99.*cos(4.*theta))*pow(sin(theta/2.0),3))/64.0;
           break;
         case 0:
           fac = (sqrt(1365./M_PI)*(35. + 60.*cos(2.*theta) + 33.*cos(4.*theta))*pow(sin(theta),2))/512.0;
           break;
         case 1:
-          fac = (sqrt(65./(2.0*M_PI))*pow(cos(theta/2.0),3)*(161. - 252.*cos(theta) + 252.*cos(2.*theta) 
+          fac = (sqrt(65./(2.0*M_PI))*pow(cos(theta/2.0),3)*(161. - 252.*cos(theta) + 252.*cos(2.*theta)
           - 132.*cos(3.*theta) + 99.*cos(4.*theta))*sin(theta/2.0))/64.0;
           break;
         case 2:
-          fac = (sqrt(13./M_PI)*pow(cos(theta/2.0),4)*(1709. - 3096.*cos(theta) + 2340.*cos(2.*theta) 
+          fac = (sqrt(13./M_PI)*pow(cos(theta/2.0),4)*(1709. - 3096.*cos(theta) + 2340.*cos(2.*theta)
           - 1320*cos(3*theta) + 495*cos(4*theta)))/256.0;
           break;
         case 3:
-          fac = (-3.*sqrt(13./M_PI)*pow(cos(theta/2.0),5)*(-98. + 185.*cos(theta) - 110.*cos(2*theta) 
+          fac = (-3.*sqrt(13./M_PI)*pow(cos(theta/2.0),5)*(-98. + 185.*cos(theta) - 110.*cos(2*theta)
           + 55.*cos(3.*theta))*sin(theta/2.0))/32.0;
           break;
         case 4:
-          fac = (sqrt(195./(2.0*M_PI))*pow(cos(theta/2.0),6)*(35. - 44.*cos(theta) 
+          fac = (sqrt(195./(2.0*M_PI))*pow(cos(theta/2.0),6)*(35. - 44.*cos(theta)
           + 33.*cos(2*theta))*pow(sin(theta/2.0),2))/8.0;
           break;
         case 5:
@@ -2088,47 +2088,47 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
           fac = (sqrt(2145./M_PI)*pow(cos(theta/2.0),4)*(2. + 7.*cos(theta))*pow(sin(theta/2.0),8))/2.0;
           break;
         case -5:
-          fac = (sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),3)*(93. + 104.*cos(theta) 
+          fac = (sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),3)*(93. + 104.*cos(theta)
           + 91.*cos(2.*theta))*pow(sin(theta/2.0),7))/8.0;
           break;
         case -4:
-          fac = (sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),2)*(140. + 285.*cos(theta) 
+          fac = (sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),2)*(140. + 285.*cos(theta)
           + 156.*cos(2.*theta) + 91.*cos(3.*theta))*pow(sin(theta/2.0),6))/16.0;
           break;
         case -3:
-          fac = (sqrt(15./(2.0*M_PI))*cos(theta/2.0)*(3115. + 5456.*cos(theta) + 4268.*cos(2.*theta) 
+          fac = (sqrt(15./(2.0*M_PI))*cos(theta/2.0)*(3115. + 5456.*cos(theta) + 4268.*cos(2.*theta)
           + 2288.*cos(3.*theta) + 1001.*cos(4.*theta))*pow(sin(theta/2.0),5))/128.0;
           break;
         case -2:
-          fac = (sqrt(15./M_PI)*(5220. + 9810.*cos(theta) + 7920.*cos(2.*theta) + 5445.*cos(3.*theta) 
+          fac = (sqrt(15./M_PI)*(5220. + 9810.*cos(theta) + 7920.*cos(2.*theta) + 5445.*cos(3.*theta)
           + 2860.*cos(4.*theta) + 1001.*cos(5.*theta))*pow(sin(theta/2.0),4))/512.0;
           break;
         case -1:
-          fac = (3.*sqrt(5./(2.0*M_PI))*cos(theta/2.0)*(1890. + 4130.*cos(theta) + 3080.*cos(2.*theta) 
+          fac = (3.*sqrt(5./(2.0*M_PI))*cos(theta/2.0)*(1890. + 4130.*cos(theta) + 3080.*cos(2.*theta)
           + 2805.*cos(3.*theta) + 1430.*cos(4.*theta) + 1001.*cos(5*theta))*pow(sin(theta/2.0),3))/512.0;
           break;
         case 0:
-          fac = (3.*sqrt(35./M_PI)*cos(theta)*(109. + 132.*cos(2.*theta) 
+          fac = (3.*sqrt(35./M_PI)*cos(theta)*(109. + 132.*cos(2.*theta)
           + 143.*cos(4.*theta))*pow(sin(theta),2))/512.0;
           break;
         case 1:
-          fac = (3.*sqrt(5./(2.0*M_PI))*pow(cos(theta/2.0),3)*(-1890. + 4130.*cos(theta) - 3080.*cos(2.*theta) 
+          fac = (3.*sqrt(5./(2.0*M_PI))*pow(cos(theta/2.0),3)*(-1890. + 4130.*cos(theta) - 3080.*cos(2.*theta)
           + 2805.*cos(3.*theta) - 1430.*cos(4.*theta) + 1001.*cos(5.*theta))*sin(theta/2.0))/512.0;
           break;
         case 2:
-          fac = (sqrt(15./M_PI)*pow(cos(theta/2.0),4)*(-5220. + 9810.*cos(theta) - 7920.*cos(2.*theta) 
+          fac = (sqrt(15./M_PI)*pow(cos(theta/2.0),4)*(-5220. + 9810.*cos(theta) - 7920.*cos(2.*theta)
           + 5445.*cos(3.*theta) - 2860.*cos(4.*theta) + 1001.*cos(5.*theta)))/512.0;
           break;
         case 3:
-          fac = -(sqrt(15./(2.0*M_PI))*pow(cos(theta/2.0),5)*(3115. - 5456.*cos(theta) + 4268.*cos(2.*theta) 
+          fac = -(sqrt(15./(2.0*M_PI))*pow(cos(theta/2.0),5)*(3115. - 5456.*cos(theta) + 4268.*cos(2.*theta)
           - 2288.*cos(3.*theta) + 1001.*cos(4.*theta))*sin(theta/2.0))/128.0;
-          break;  
+          break;
         case 4:
-          fac = (sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),6)*(-140. + 285.*cos(theta) - 156.*cos(2*theta) 
+          fac = (sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),6)*(-140. + 285.*cos(theta) - 156.*cos(2*theta)
           + 91.*cos(3.*theta))*pow(sin(theta/2.0),2))/16.0;
           break;
         case 5:
-          fac = -(sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),7)*(93. - 104.*cos(theta) 
+          fac = -(sqrt(165./(2.0*M_PI))*pow(cos(theta/2.0),7)*(93. - 104.*cos(theta)
           + 91.*cos(2.*theta))*pow(sin(theta/2.0),3))/8.0;
           break;
         case 6:
@@ -2158,47 +2158,47 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
           *sin(M_PI/4.0 - theta/2.0)*sin(M_PI/4.0 + theta/2.0)*pow(sin(theta/2.0),8);
           break;
         case -5:
-          fac = (sqrt(12155./(2.0*M_PI))*pow(cos(theta/2.0),3)*(19. + 42.*cos(theta) 
+          fac = (sqrt(12155./(2.0*M_PI))*pow(cos(theta/2.0),3)*(19. + 42.*cos(theta)
           + 21.*cos(2.*theta) + 14.*cos(3.*theta))*pow(sin(theta/2.0),7))/8.0;
           break;
         case -4:
-          fac = (sqrt(935./(2.0*M_PI))*pow(cos(theta/2.0),2)*(265. + 442.*cos(theta) + 364.*cos(2.*theta) 
+          fac = (sqrt(935./(2.0*M_PI))*pow(cos(theta/2.0),2)*(265. + 442.*cos(theta) + 364.*cos(2.*theta)
           + 182.*cos(3.*theta) + 91.*cos(4.*theta))*pow(sin(theta/2.0),6))/32.0;
           break;
         case -3:
-          fac = (sqrt(561./(2.0*M_PI))*cos(theta/2.0)*(869. + 1660.*cos(theta) + 1300.*cos(2.*theta) 
+          fac = (sqrt(561./(2.0*M_PI))*cos(theta/2.0)*(869. + 1660.*cos(theta) + 1300.*cos(2.*theta)
           + 910.*cos(3.*theta) + 455.*cos(4.*theta) + 182.*cos(5.*theta))*pow(sin(theta/2.0),5))/128.0;
           break;
         case -2:
-          fac = (sqrt(17./M_PI)*(7626. + 14454.*cos(theta) + 12375.*cos(2.*theta) + 9295.*cos(3.*theta) 
+          fac = (sqrt(17./M_PI)*(7626. + 14454.*cos(theta) + 12375.*cos(2.*theta) + 9295.*cos(3.*theta)
           + 6006.*cos(4.*theta) + 3003.*cos(5.*theta) + 1001.*cos(6.*theta))*pow(sin(theta/2.0),4))/512.0;
           break;
         case -1:
-          fac = (sqrt(595./(2.0*M_PI))*cos(theta/2.0)*(798. + 1386.*cos(theta) + 1386.*cos(2.*theta) 
+          fac = (sqrt(595./(2.0*M_PI))*cos(theta/2.0)*(798. + 1386.*cos(theta) + 1386.*cos(2.*theta)
           + 1001.*cos(3.*theta) + 858.*cos(4.*theta) + 429.*cos(5.*theta) + 286.*cos(6.*theta))*pow(sin(theta/2.0),3))/512.0;
           break;
         case 0:
-          fac = (3.*sqrt(595./M_PI)*(210. + 385.*cos(2.*theta) + 286.*cos(4.*theta) 
+          fac = (3.*sqrt(595./M_PI)*(210. + 385.*cos(2.*theta) + 286.*cos(4.*theta)
           + 143.*cos(6.*theta))*pow(sin(theta),2))/4096.0;
           break;
         case 1:
-          fac = (sqrt(595./(2.0*M_PI))*pow(cos(theta/2.0),3)*(798. - 1386.*cos(theta) + 1386.*cos(2.*theta) 
+          fac = (sqrt(595./(2.0*M_PI))*pow(cos(theta/2.0),3)*(798. - 1386.*cos(theta) + 1386.*cos(2.*theta)
           - 1001.*cos(3.*theta) + 858.*cos(4.*theta) - 429.*cos(5.*theta) + 286.*cos(6.*theta))*sin(theta/2.0))/512.0;
           break;
         case 2:
-          fac = (sqrt(17./M_PI)*pow(cos(theta/2.0),4)*(7626. - 14454.*cos(theta) + 12375.*cos(2.*theta) 
+          fac = (sqrt(17./M_PI)*pow(cos(theta/2.0),4)*(7626. - 14454.*cos(theta) + 12375.*cos(2.*theta)
           - 9295.*cos(3.*theta) + 6006.*cos(4.*theta) - 3003.*cos(5.*theta) + 1001.*cos(6.*theta)))/512.0;
           break;
         case 3:
-          fac = -(sqrt(561./(2.0*M_PI))*pow(cos(theta/2.0),5)*(-869. + 1660.*cos(theta) - 1300.*cos(2.*theta) 
+          fac = -(sqrt(561./(2.0*M_PI))*pow(cos(theta/2.0),5)*(-869. + 1660.*cos(theta) - 1300.*cos(2.*theta)
           + 910.*cos(3.*theta) - 455.*cos(4.*theta) + 182.*cos(5.*theta))*sin(theta/2.0))/128.0;
           break;
         case 4:
-          fac = (sqrt(935./(2.0*M_PI))*pow(cos(theta/2.0),6)*(265. - 442.*cos(theta) + 364.*cos(2.*theta) 
+          fac = (sqrt(935./(2.0*M_PI))*pow(cos(theta/2.0),6)*(265. - 442.*cos(theta) + 364.*cos(2.*theta)
           - 182.*cos(3.*theta) + 91.*cos(4.*theta))*pow(sin(theta/2.0),2))/32.0;
           break;
         case 5:
-          fac = -(sqrt(12155./(2.0*M_PI))*pow(cos(theta/2.0),7)*(-19. + 42.*cos(theta) - 21.*cos(2.*theta) 
+          fac = -(sqrt(12155./(2.0*M_PI))*pow(cos(theta/2.0),7)*(-19. + 42.*cos(theta) - 21.*cos(2.*theta)
           + 14.*cos(3.*theta))*pow(sin(theta/2.0),3))/8.0;
           break;
         case 6:
@@ -2217,13 +2217,13 @@ std::complex<T> XLALSpinWeightedSphericalHarmonic(
         //  break;
       }
     } /* l==8 */
-    //else 
+    //else
     //{
     //  XLALPrintError("XLAL Error - %s: Unsupported mode l=%d (only l in [2,8] implemented)\n", __func__, l);
     //  XLAL_ERROR_VAL(0, XLAL_EINVAL);
     //}
   }
-  //else 
+  //else
   //{
   //  XLALPrintError("XLAL Error - %s: Unsupported mode s=%d (only s=-2 implemented)\n", __func__, s);
   //  XLAL_ERROR_VAL(0, XLAL_EINVAL);
