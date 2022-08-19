@@ -196,6 +196,12 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			wp->hcross[i] *= ci;
 			wp->hplus[i] *= std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
+		/*! Iota dependence for the extra four polarizations that 
+		 * don't exist within GR is handled in the specific waveform 
+		 * template file. For instance, for Einstein AEther, it is in 
+		 * the EA_IMRPhenomD_NRT.cpp file. 
+		 */
+		/*
 		if(wp->active_polarizations[2]){
 			for (int i =0 ; i < length; i++){
 			  wp->hx[i] *= s2i;
@@ -214,8 +220,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		if(wp->active_polarizations[5]){
 			for (int i =0 ; i < length; i++){
 				wp->hl[i] *= si*si;
-			}
-		}
+			}	
+		}*/
 	}
 	else if(local_method.find("IMRPhenomPv2")!=std::string::npos)
 	{

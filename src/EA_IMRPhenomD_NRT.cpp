@@ -514,14 +514,25 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         amp += EAamp2;
       }
 
-      /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
+      /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */  
       //These are just the terms for the l=2 mode
       std::complex<T> hx2, hy2, hb2, hl2;
+      
       hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
       hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,-1);
       hb2 = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
       hl2 = params->abL_EA*hb2;
 
+      //Adding iota dependence 
+      std::complex<T> ci = std::complex<T>(cos(params->incl_angle),0);
+      std::complex<T> si = std::complex<T>(sin(params->incl_angle),0);
+      std::complex<T> s2i = std::complex<T>(sin(2*params->incl_angle),0);
+
+      hx2 *= s2i;
+      hy2 *= si;
+      hb2 *= si*si;
+      hl2 *= si*si;
+      
       /* The phase correction which depends on the speed of the
 	    * different polarizations.
 	    */
@@ -571,6 +582,11 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         hb1 = 1 / ((2. - params->c14_EA) * params->cS_EA);
         hb1 *= std::complex<T>(0,-2.);
         hl1 = params->abL_EA * hb1;
+
+	hx1 *= ci;	
+	hb1 *= si;
+	hl1 *= si; 
+	
 
         waveform->hx[j] += (amp1 * hx1 * std::exp(-i * (phase1 - EAphaseV)));
         waveform->hy[j] += (amp1 * hy1 * std::exp(-i * (phase1 - EAphaseV)));
