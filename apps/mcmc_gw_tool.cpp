@@ -1037,7 +1037,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
    */
   //std::cout<<"EA constraints test 5"<<std::endl; 
  
-  bool Cherenkov = false;
+  bool Cherenkov = true;
   if(Cherenkov)
   {
   	bool violate = false;
