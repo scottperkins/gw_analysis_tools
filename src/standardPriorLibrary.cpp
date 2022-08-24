@@ -60,7 +60,7 @@ double EA_current_constraints(bayesship::positionInfo *position,  priorData *PD)
     if(PD->alpha_param){
       sp.alpha1_EA = pos[12]; //alpha1
       sp.alpha2_EA = pos[13]; //alpha2
-      sp.alpha3_EA = pos[14]; //alpha3
+      sp.cbarw_EA = pos[14]; //cbarw
     }
     else{
       sp.ca_EA = pos[12]; //ca
@@ -72,7 +72,7 @@ double EA_current_constraints(bayesship::positionInfo *position,  priorData *PD)
     if(PD->alpha_param){
       sp.alpha1_EA = pos[13]; //alpha1
       sp.alpha2_EA = pos[14]; //alpha2
-      sp.alpha3_EA = pos[15]; //alpha3
+      sp.cbarw_EA = pos[15]; //cbarw
     }
     else{
       sp.ca_EA = pos[13]; //ca
@@ -173,12 +173,12 @@ double logPriorStandard_D_NRT_EA::eval(bayesship::positionInfo *position, int ch
 	if(PD->tidal_love){
 	  if(pos[12]<PD->EA_prior[0] || pos[12]>PD->EA_prior[1]){return a;} //ca or alpha1
 	  if(pos[13]<PD->EA_prior[2] || pos[13]>PD->EA_prior[3]){return a;} //ctheta or alpha2
-	  if(pos[14]<PD->EA_prior[4] || pos[14]>PD->EA_prior[5]){return a;} //cw or alpha3
+	  if(pos[14]<PD->EA_prior[4] || pos[14]>PD->EA_prior[5]){return a;} //cw or cbarw
 	}
 	else{
 	  if(pos[13]<PD->EA_prior[0] || pos[13]>PD->EA_prior[1]){return a;} //ca or alpha1
 	  if(pos[14]<PD->EA_prior[2] || pos[14]>PD->EA_prior[3]){return a;} //ctheta or alpha2
-	  if(pos[15]<PD->EA_prior[4] || pos[15]>PD->EA_prior[5]){return a;} //cw or alpha3
+	  if(pos[15]<PD->EA_prior[4] || pos[15]>PD->EA_prior[5]){return a;} //cw or cbarw
 	}
 	
 	double NS = logPriorStandard_D_NRT::eval(position,chainID);
