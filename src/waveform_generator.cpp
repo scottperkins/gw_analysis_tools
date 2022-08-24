@@ -196,6 +196,12 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			wp->hcross[i] *= ci;
 			wp->hplus[i] *= std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
+		/*! Iota dependence for the extra four polarizations that 
+		 * don't exist within GR is handled in the specific waveform 
+		 * template file. For instance, for Einstein AEther, it is in 
+		 * the EA_IMRPhenomD_NRT.cpp file. 
+		 */
+		/*
 		if(wp->active_polarizations[2]){
 			for (int i =0 ; i < length; i++){
 			  wp->hx[i] *= s2i;
@@ -214,8 +220,8 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		if(wp->active_polarizations[5]){
 			for (int i =0 ; i < length; i++){
 				wp->hl[i] *= si*si;
-			}
-		}
+			}	
+		}*/
 	}
 	else if(local_method.find("IMRPhenomPv2")!=std::string::npos)
 	{
@@ -1314,15 +1320,23 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 	}
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 	  out->alpha_param = in->alpha_param;
+	  out->EA_region1 = in->EA_region1;
 	  if(in->alpha_param){
 	        out->alpha1_EA = in->alpha1_EA;
 		out->alpha2_EA = in->alpha2_EA;
-		out->alpha3_EA = in->alpha3_EA; 
+		out->cbarw_EA = in->cbarw_EA; 
 	  }
-	  else{ 
+	  else{
+	    if(in->EA_region1){
+	      out->ca_EA = in->ca_EA;
+	      out->ctheta_EA = 3.* in->ca_EA*(1. + in->delta_ctheta_EA);
+	      out->cw_EA = in->cw_EA; 
+	    }
+	    else{
 		out->ca_EA = in->ca_EA;
 		out->ctheta_EA = in->ctheta_EA;
 		out->cw_EA = in->cw_EA;
+	    }
 	  }
 		out->csigma_EA = in->csigma_EA;
 		EA_IMRPhenomD_NRT<T> EAmodeldNRT;

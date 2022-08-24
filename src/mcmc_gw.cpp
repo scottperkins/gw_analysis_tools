@@ -1871,7 +1871,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 {
 	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha  + mcmc_mod_struct->ppE_Nmod);
 	//if(generation_method.find("EA") != std::string::npos){totalmod+=4;}
-	if(generation_method.find("EA") != std::string::npos){totalmod+=3;}
+	if(generation_method.find("EA") != std::string::npos){
+	        totalmod+=3;
+	}
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
@@ -2599,19 +2601,21 @@ void MCMC_fisher_transformations(
 	}
 	if(generation_method.find("EA") != std::string::npos){
 	  //for(int i = 0 ; i <4; i++){
-	  //std::cout<<"enforcing Fisher prior"<<std::endl; 
-	  for(int i = 0 ; i <3; i++){
-	    for(int j = 0 ; j<dimension; j++){
-	      if(i!=j){
-	      fisher[dimension-1-i][dimension-1-j] = 0;
-	      fisher[dimension-1-j][dimension-1-i] = 0;
-
-	      }
-	      if(i==j){
-		fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -10.);
+	    for(int i = 0 ; i <3; i++){
+	      for(int j = 0 ; j<dimension; j++){
+		if(i!=j){
+		  fisher[dimension-1-i][dimension-1-j] = 0;
+		  fisher[dimension-1-j][dimension-1-i] = 0;
+		}
+		/*
+		  if(i==j){
+		  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
+		  }*/
 	      }
 	    }
-	  }
+	    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
 	}
 	/*if(isnan(fabs(fisher[8][8]))){
 	  for(int i = 0 ; i<dimension; i++){
@@ -2721,30 +2725,6 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	
 	MCMC_fisher_transformations(temp_params, output,dimension,local_gen,mcmc_intrinsic,
 		interface,mcmc_mod_struct, parameters);
-	/*if(isnan(fabs(output[8][8]))){
-	  source_parameters<double> sp;
-	  sp.mass1 = params.mass1;
-	  sp.mass2 = params.mass2;
-	  sp.M = sp.mass1 + sp.mass2;
-	  IMRPhenomD_NRT<double> modelNRT;
-	  modelNRT.binary_love_relation(params.tidal_s, params.tidal_love_error, &sp);
-	  sp.ca_EA = params.ca_EA; 
-	  sp.ctheta_EA = params.ctheta_EA;
-	  sp.cw_EA = params.cw_EA;
-	  sp.csigma_EA = params.csigma_EA;
-	  sp.EA_nan_error_message = false;
-	  EA_IMRPhenomD_NRT<double> modelEA;
-	  modelEA.pre_calculate_EA_factors(&sp);	  
-
-	  std::cout<<"ca:"<<sp.ca_EA<<", ctheta:"<<sp.ctheta_EA<<", comega:"<<sp.cw_EA<<", csigma:"<<sp.csigma_EA<<std::endl;
-	  std::cout<<"cS:"<<sp.cS_EA<<", cV:"<<sp.cV_EA<<", cT:"<<sp.cT_EA<<std::endl;
-	  std::cout<<"alpha1:"<<sp.alpha1_EA<<", alpha2:"<<sp.alpha2_EA<<std::endl; 
-	  std::cout<<"s1:"<<sp.s1_EA<<"  s2:"<<sp.s1_EA<<std::endl;
-	  std::cout<<"A1: "<<sp.A1_EA<<",  A2:"<<sp.A2_EA<<std::endl;
-	  std::cout<<"A3:"<<sp.A3_EA<<",  S:"<<sp.S_EA<<std::endl;
-	  std::cout<<"kappa3:"<<sp.kappa3_EA<<std::endl;
-	  std::cout<<" "<<std::endl; 
-	  }*/
 	
 	deallocate_2D_array(temp_out, local_dimension,local_dimension);
 	//////////////////////////////////////////////
@@ -2925,6 +2905,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 	gen_params->tidal_love = mod_struct->tidal_love;
 	gen_params->tidal_love_error = mod_struct->tidal_love_error;
 	gen_params->alpha_param = mod_struct->alpha_param;
+	gen_params->EA_region1 = mod_struct->EA_region1; 
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
@@ -2997,7 +2978,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
   //double start = omp_get_wtime();
-  //return 2;
+  return 2;
   MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
   int dimension = interface->max_dim;

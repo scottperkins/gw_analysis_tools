@@ -114,6 +114,14 @@ void EA_IMRPhenomD_NRT<double>::EA_check_nan(source_parameters<double> *p)
 	{
 	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl;
 	}
+      if(isnan(p->s1_EA))
+	{
+	  std::cout<<"WARNING: s1_EA is NAN"<<std::endl;
+	}
+      if(isnan(p->s2_EA))
+	{
+	  std::cout<<"WARNING: s1_EA is NAN"<<std::endl;
+	}
       if(isnan(p->kappa3_EA))
 	{
 	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl;
@@ -143,6 +151,14 @@ void EA_IMRPhenomD_NRT<adouble>::EA_check_nan(source_parameters<adouble> *p)
 	{
 	  std::cout<<"WARNING: Z_EA is NAN"<<std::endl;
 	}
+      if(isnan(p->s1_EA.value()))
+	{
+	  std::cout<<"WARNING: s1_EA is NAN"<<std::endl;
+	}
+      if(isnan(p->s2_EA.value()))
+	{
+	  std::cout<<"WARNING: s2_EA is NAN"<<std::endl;
+	}
       if(isnan(p->kappa3_EA.value()))
 	{
 	  std::cout<<"WARNING: kappa3_EA is NAN"<<std::endl;
@@ -162,6 +178,12 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->V_z_EA = 0.;
 
   //p->alpha_param = true;
+
+  if(p->EA_region1){
+    //std::cout<<"Sampling in region 1 of parameter space"<<std::endl;
+    p->ctheta_EA = 3.*p->ca_EA*(1. + p->delta_ctheta_EA); 
+    //region of parameter space with ctheta = 3ca. Don't sample on ctheta
+  }
   
   //If using alpha parameterization, must first define ca and ctheta in terms
   //of the alphas 
@@ -169,7 +191,7 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     //std::cout<<"Using alpha parameterization, computing ca & ctheta"<<std::endl;
     p->ca_EA = -p->alpha1_EA/4.;
     p->ctheta_EA = (0.75*p->alpha1_EA*p->alpha1_EA)/(8.*p->alpha2_EA + p->alpha1_EA*(p->alpha2_EA - 0.5*p->alpha1_EA - 1.));
-    p->cw_EA = (1 - p->alpha3_EA)/p->alpha3_EA; 
+    p->cw_EA = (1 - p->cbarw_EA)/p->cbarw_EA; 
   }
  
   //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where many of these formulas come from)
@@ -177,14 +199,15 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
   p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
   p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.;
-
+  //std::cout<<"c1: "<<p->c1_EA<<"c2: "<<p->c2_EA<<"c3: "<<p->c3_EA<<"c4: "<<p->c4_EA<<std::endl; 
+  
   //more convenient parameters
   /*p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
   p->c14_EA = p->c1_EA + p->c4_EA;*/
   p->c13_EA = p->csigma_EA;
   p->c14_EA = p->ca_EA;
-  p->cminus_EA = p->cw_EA; 
+  p->cminus_EA = p->cw_EA;
 
   //squared speeds of the different polarizations
   p->cTsq_EA = 1./(1. - p->c13_EA);
@@ -203,8 +226,9 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
     //std::cout<<"Not using alpha parameterization, computing alphas"<<std::endl;
     p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
     p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
-    p->alpha3_EA = 1./(1. + p->cw_EA); 
+    p->cbarw_EA = 1./(1. + p->cw_EA); 
   }
+  
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
 
   p->beta1_EA = -2.* p->c13_EA / p->cV_EA;
@@ -226,11 +250,12 @@ void EA_IMRPhenomD_NRT<T>::pre_calculate_EA_factors(source_parameters<T> *p)
   //Get sensitivities
   p->s1_EA = calculate_EA_sensitivity(1, p);
   p->s2_EA = calculate_EA_sensitivity(2, p);
+  
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M);
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
-
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
+  
 
   EA_check_nan(p);
 
@@ -329,10 +354,9 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parame
 template<class T>
 int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, waveform_polarizations<T> *waveform, source_parameters<T> *params)
 {
-	//std::cout<<params->mass1<<" "<<params->mass2<<" "<<params->csigma_EA<<" "<<params->cw_EA<<" "<<params->ca_EA<<" "<<params->ctheta_EA<<std::endl;
   //this->pre_calculate_EA_factors(params);
   //pre_calculate_EA_factors is now being called in prep_source_parameters and
-  //we don't want to call it twice-> don't need to call it here
+  //we don't want to call it twice-> don't need to call it here. Note that it is being called before we switch to a barred mass, so the sensitivities (which are calculated in that function) are being calculated with the unbarred version as they should be. And the amplitude and phase of the waveform are being calculated with the barred version of the mass, as they should be because they are calculated after we switch.
 
   /*TODO*/
   /*The input mass should be unbarred*/
@@ -490,14 +514,25 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         amp += EAamp2;
       }
 
-      /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */
-      //Right now these are just the terms for the l=2 mode
+      /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */  
+      //These are just the terms for the l=2 mode
       std::complex<T> hx2, hy2, hb2, hl2;
+      
       hx2 = (params->beta1_EA /((2.*params->c1_EA - params->c13_EA*params->cminus_EA)*2*params->cV_EA))*(params->S_EA - (params->c13_EA/(1. - params->c13_EA)));
-      hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,1);
+      hy2 = std::complex<T>(2.,0)*hx2*std::complex<T>(0,-1);
       hb2 = (1./(2.-params->c14_EA))*(3.*params->c14_EA*(params->Z_EA - 1.) - (2.*params->S_EA/params->cSsq_EA));
       hl2 = params->abL_EA*hb2;
 
+      //Adding iota dependence 
+      std::complex<T> ci = std::complex<T>(cos(params->incl_angle),0);
+      std::complex<T> si = std::complex<T>(sin(params->incl_angle),0);
+      std::complex<T> s2i = std::complex<T>(sin(2*params->incl_angle),0);
+
+      hx2 *= s2i;
+      hy2 *= si;
+      hb2 *= si*si;
+      hl2 *= si*si;
+      
       /* The phase correction which depends on the speed of the
 	    * different polarizations.
 	    */
@@ -508,12 +543,12 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
 	    EAphaseS = phaseTVScoeff*(1.-(1./params->cS_EA));
 
       phase -= (T)(tc*(f-f_ref) + phic);
-      waveform->hplus[j] = amp*std::exp(-i * (phase + EAphaseT));
-      waveform->hcross[j] = amp*std::complex<T>(0,1)* std::exp(-i * (phase + EAphaseT)); //To match the convention with the other waveforms, this should be -i, not +i? 
-      waveform->hx[j] = amp*hx2*std::exp(-i * (phase + EAphaseV));
-      waveform->hy[j] = amp*hy2*std::exp(-i * (phase + EAphaseV));
-      waveform->hb[j] = amp*hb2*std::exp(-i * (phase + EAphaseS));
-      waveform->hl[j] = amp*hl2*std::exp(-i * (phase + EAphaseS));
+      waveform->hplus[j] = amp*std::exp(-i * (phase - EAphaseT));
+      waveform->hcross[j] = amp*std::complex<T>(0,-1)* std::exp(-i * (phase - EAphaseT));
+      waveform->hx[j] = amp*hx2*std::exp(-i * (phase - EAphaseV));
+      waveform->hy[j] = amp*hy2*std::exp(-i * (phase - EAphaseV));
+      waveform->hb[j] = amp*hb2*std::exp(-i * (phase - EAphaseS));
+      waveform->hl[j] = amp*hl2*std::exp(-i * (phase - EAphaseS));
 
       if (params->include_l1 == true) {
 
@@ -543,15 +578,20 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         //for hb1, it wouldn't let me multiply by 2i in the same line
         std::complex<T> hx1, hy1, hb1, hl1;
         hy1 = -1. * params->beta1_EA / ((2. * params->c1_EA) - (params->c13_EA * params->cminus_EA));
-        hx1 = std::complex<T>(0,-1.) * hy1;
+        hx1 = std::complex<T>(0,1.) * hy1;
         hb1 = 1 / ((2. - params->c14_EA) * params->cS_EA);
-        hb1 *= std::complex<T>(0,2.);
+        hb1 *= std::complex<T>(0,-2.);
         hl1 = params->abL_EA * hb1;
 
-        waveform->hx[j] += (amp1 * hx1 * std::exp(-i * (phase1 + EAphaseV)));
-        waveform->hy[j] += (amp1 * hy1 * std::exp(-i * (phase1 + EAphaseV)));
-        waveform->hb[j] += (amp1 * hb1 * std::exp(-i * (phase1 + EAphaseS)));
-        waveform->hl[j] += (amp1 * hl1 * std::exp(-i * (phase1 + EAphaseS)));
+	hx1 *= ci;	
+	hb1 *= si;
+	hl1 *= si; 
+	
+
+        waveform->hx[j] += (amp1 * hx1 * std::exp(-i * (phase1 - EAphaseV)));
+        waveform->hy[j] += (amp1 * hy1 * std::exp(-i * (phase1 - EAphaseV)));
+        waveform->hb[j] += (amp1 * hb1 * std::exp(-i * (phase1 - EAphaseS)));
+        waveform->hl[j] += (amp1 * hl1 * std::exp(-i * (phase1 - EAphaseS)));
       }
 
     }

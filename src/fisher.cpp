@@ -1012,8 +1012,8 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 			*N_src_params += params->Nmod;
 		}
 		else{
-			//*N_src_params+=4;	
-			*N_src_params+=3;	
+		    //*N_src_params+=4;	
+		    *N_src_params+=3; 
 		}
 	}
 }
@@ -1979,12 +1979,19 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		  if(input_params->alpha_param){
 		    parameters[dimension- 3 ] = input_params->alpha1_EA;
 		    parameters[dimension- 2 ] = input_params->alpha2_EA;
-		    parameters[dimension- 1 ] = input_params->alpha3_EA;
+		    parameters[dimension- 1 ] = input_params->cbarw_EA;
 		  }
 		  else{
-		    parameters[dimension- 3 ] = input_params->ca_EA;
-		    parameters[dimension- 2 ] = input_params->ctheta_EA;
-		    parameters[dimension- 1 ] = input_params->cw_EA;
+		    if(input_params->EA_region1){ //ctheta = 3c_a(1+delta_ctheta). Sample on ca, delta_ctheta, cw
+		      parameters[dimension- 3 ] = input_params->ca_EA;
+		      parameters[dimension- 2 ] = input_params->delta_ctheta_EA;
+		      parameters[dimension- 1 ] = input_params->cw_EA;
+		    }
+		    else{
+		      parameters[dimension- 3 ] = input_params->ca_EA;
+		      parameters[dimension- 2 ] = input_params->ctheta_EA;
+		      parameters[dimension- 1 ] = input_params->cw_EA;
+		    }
 		  }
 		}
 		//else if( generation_method.find("dCS") !=std::string::npos ||
@@ -2316,12 +2323,19 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		  if(a_params->alpha_param){
 		    a_params->alpha1_EA = avec_parameters[dim- 3 ];
 		    a_params->alpha2_EA = avec_parameters[dim- 2 ];
-		    a_params->alpha3_EA = avec_parameters[dim- 1 ] ;
+		    a_params->cbarw_EA = avec_parameters[dim- 1 ] ;
 		  }
 		  else{
-		    a_params->ca_EA = avec_parameters[dim- 3 ] ;
-		    a_params->ctheta_EA = avec_parameters[dim- 2 ] ;
-		    a_params->cw_EA = avec_parameters[dim- 1 ] ;
+		    if(a_params->EA_region1){ //ctheta = 3ca(1 + delta_ctheta). Sample on ca, delta_ctheta, cw
+		      a_params->ca_EA = avec_parameters[dim- 3 ] ;
+		      a_params->delta_ctheta_EA = avec_parameters[dim- 2 ]; 
+		      a_params->cw_EA = avec_parameters[dim- 1 ] ;
+		    }
+		    else{
+		      a_params->ca_EA = avec_parameters[dim- 3 ] ;
+		      a_params->ctheta_EA = avec_parameters[dim- 2 ] ;
+		      a_params->cw_EA = avec_parameters[dim- 1 ] ;
+		    }
 		  }
 		 
 		  a_params->csigma_EA = 0 ;
@@ -2387,6 +2401,7 @@ void repack_non_parameter_options(gen_params_base<T> *waveform_params, gen_param
 	waveform_params->tidal_love = input_params->tidal_love;
 	waveform_params->tidal_love_error = input_params->tidal_love_error;
 	waveform_params->alpha_param = input_params->alpha_param;
+	waveform_params->EA_region1 = input_params->EA_region1;
 	waveform_params->f_ref = input_params->f_ref;
 	waveform_params->gmst = input_params->gmst;
 	waveform_params->horizon_coord = input_params->horizon_coord;

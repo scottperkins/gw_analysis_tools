@@ -285,32 +285,32 @@ int main(int argc, char *argv[])
 	  std::cout<<"Using alpha parameterization: "<<alpha_param<<std::endl;
 	  if(alpha_param){
 	    if(dbl_dict.find("EA alpha_1 minimum") ==dbl_dict.end()){
-	      EA_prior[0]=-.06;
-	      EA_prior[1]=.06; 
+	      EA_prior[0]= -1.;
+	      EA_prior[1]= 1.; 
 	    }
 	    else{
 	      EA_prior[0]=dbl_dict["EA alpha_1 minimum"];
 	      EA_prior[1]=dbl_dict["EA alpha_1 maximum"]; 
 	    }
 	    if(dbl_dict.find("EA alpha_2 minimum") ==dbl_dict.end()){
-	      EA_prior[2]=-.003;
-	      EA_prior[3]=.003; 
+	      EA_prior[2]=-.1;
+	      EA_prior[3]=.1; 
 	    }
 	    else{
 	      EA_prior[2]=dbl_dict["EA alpha_2 minimum"];
 	      EA_prior[3]=dbl_dict["EA alpha_2 maximum"]; 
 	    }
-	    if(dbl_dict.find("EA alpha_3 minimum") ==dbl_dict.end()){
+	    if(dbl_dict.find("EA cbar_w minimum") ==dbl_dict.end()){
 	      EA_prior[4]=-1.;
 	      EA_prior[5]=1.; 
 	    }
 	    else{
-	      EA_prior[4]=dbl_dict["EA alpha_3 minimum"];
-	      EA_prior[5]=dbl_dict["EA alpha_3 maximum"]; 
+	      EA_prior[4]=dbl_dict["EA cbar_w minimum"];
+	      EA_prior[5]=dbl_dict["EA cbar_w maximum"]; 
 	    }
 	    std::cout<<"Range of EA alpha1: "<<EA_prior[0]<<" - "<<EA_prior[1]<<std::endl;
 	    std::cout<<"Range of EA alpha2: "<<EA_prior[2]<<" - "<<EA_prior[3]<<std::endl;
-	    std::cout<<"Range of EA alpha3: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
+	    std::cout<<"Range of EA cbarw: "<<EA_prior[4]<<" - "<<EA_prior[5]<<std::endl;
 	  }
 	  else{
 	    if(dbl_dict.find("EA c_a minimum") == dbl_dict.end()){
@@ -976,7 +976,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
     if(alpha_param){
       sp.alpha1_EA = pos[12]; //alpha1
       sp.alpha2_EA = pos[13]; //alpha2
-      sp.alpha3_EA = pos[14]; //alpha3
+      sp.cbarw_EA = pos[14]; //cbarw
     }
     else{
       sp.ca_EA = pos[12]; //ca
@@ -988,7 +988,7 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
     if(alpha_param){
       sp.alpha1_EA = pos[13]; //alpha1
       sp.alpha2_EA = pos[14]; //alpha2
-      sp.alpha3_EA = pos[15]; //alpha3
+      sp.cbarw_EA = pos[15]; //cbarw
     }
     else{
       sp.ca_EA = pos[13]; //ca
@@ -1000,10 +1000,8 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
   EA_IMRPhenomD_NRT<double> model;
   model.pre_calculate_EA_factors(&sp);
 
-  if(fabs(sp.c14_EA - sp.ca_EA)/(fabs(sp.c14_EA) + fabs(sp.ca_EA)) > pow(10, -10.)){std::cout<<"ca and c14 DO NOT MATCH"<<std::endl;}
-
-  if(sp.ca_EA < 0){return a;}
-  /* Throws out points with ca < 0 because these violate 
+  if(sp.ca_EA < 0 || sp.ca_EA > 2.){return a;}
+  /* Throws out points with ca < 0 or ca > 2 because these violate 
    * the positive energy condition for the spin-0 mode (scalar mode).   
    * See equation 40 of arXiv:gr-qc/0507059v3.
    */
@@ -1028,40 +1026,47 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
       }
   //std::cout<<"EA constraints test 3"<<std::endl; 
 
+  if(sp.ctheta_EA < 0 || (sp.ctheta_EA + (8.*sp.ca_EA/7)) > (2./7.)){return a;}
+  /*
+   * Throws out points that violate Big Bang Nucleosynthesis constraints. arXiv:hep-th/0407149v3 
+   */
 
-  //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > pow(10, -7.)){return a;}
+  //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > 4.*pow(10, -7.)){return a;}
   /* Throws out points that do not obey observational solar system constraints on 
    * alpha1 and alpha2
    * arXiv:1403.7377 and arXiv:gr-qc/0509114
    */
   //std::cout<<"EA constraints test 5"<<std::endl; 
-   
-  bool violate = false;
-  if(sp.cV_EA < 1)
-    {
-      if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.))
-	//enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
-	{
-	  violate = true;
-	}
+ 
+  bool Cherenkov = true;
+  if(Cherenkov)
+  {
+  	bool violate = false;
+  	if(sp.cV_EA < 1)
+  	  {
+      		if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.))
+		//enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
+		{
+	  	  violate = true;
+		}
 	      
-    }
-  if(violate){return a;}
-  //std::cout<<"EA constraints test 6"<<std::endl; 
+	    }
+	  if(violate){return a;}
+	  //std::cout<<"EA constraints test 6"<<std::endl; 
   
-  if(sp.cS_EA < 1)
-    {
-      if(fabs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
-	{
-	  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/fabs(sp.c14_EA) >= pow(10, -30.)){return a;}
-	  //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
-	}
-      //std::cout<<"EA constraints test 7"<<std::endl; 
-      if(fabs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
-      //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
-
-      }
-  
+	  if(sp.cS_EA < 1)
+	    {
+	      if(fabs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
+		{
+		  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/fabs(sp.c14_EA) >= pow(10, -30.)){return a;}
+		  //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
+		}
+	      //std::cout<<"EA constraints test 7"<<std::endl; 
+	      if(fabs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)){return a;}
+	      //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
+	
+	    }
+  } 
 
   //std::cout<<"Made it to end of EA constraints"<<std::endl;
   /*
@@ -1087,12 +1092,12 @@ double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, 
   if(tidal_love){
     if(pos[12]<EA_prior[0] || pos[12]>EA_prior[1]){return a;} //ca or alpha1
     if(pos[13]<EA_prior[2] || pos[13]>EA_prior[3]){return a;} //ctheta or alpha2
-    if(pos[14]<EA_prior[4] || pos[14]>EA_prior[5]){return a;} //cw or alpha3
+    if(pos[14]<EA_prior[4] || pos[14]>EA_prior[5]){return a;} //cw or cbarw
   }
   else{
     if(pos[13]<EA_prior[0] || pos[13]>EA_prior[1]){return a;} //ca or alpha1
     if(pos[14]<EA_prior[2] || pos[14]>EA_prior[3]){return a;} //ctheta or alpha2
-    if(pos[15]<EA_prior[4] || pos[15]>EA_prior[5]){return a;} //cw or alpha3
+    if(pos[15]<EA_prior[4] || pos[15]>EA_prior[5]){return a;} //cw or cbarw
   }
   
   double NS = standard_log_prior_D_NRT(pos,interface, parameters);
