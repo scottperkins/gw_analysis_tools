@@ -135,6 +135,7 @@ double EA_current_constraints(bayesship::positionInfo *position,  priorData *PD)
   
   if(sp.cS_EA < 1)
     {
+	//Here
       if(fabs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
 	{
 	  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/fabs(sp.c14_EA) >= pow(10, -30.)){return a;}
@@ -161,6 +162,7 @@ double EA_current_constraints(bayesship::positionInfo *position,  priorData *PD)
   sp.EA_nan_error_message = true;
   model.EA_check_nan(&sp);
   
+  //std::cout<<"Checking EA_constraints"<<std::endl; 
   //return log(prob); //Use if enforcing gaussian on alpha1
   return 0; 
 }
