@@ -63,6 +63,15 @@
 #Initial ensemble position
 [str] initial ensemble position file = /path/to/initial/ensemble/position/file/ensemble_position.csv
 
+#Whether to ignore existing checkpoint files with the name Moniker and in directory output directory. 
+#If true, these files are overwritten if they exist
+#If false, those files are read in and the sampler starts from those checkpoints
+[bool] ignore existing checkpoint = true
+
+# Whether to store only the cold chains (sampling from the true distribution) (true) or to save all the chains
+# (many of which are not sampling from the true distribution) (false). Setting to false can be useful for debugging.
+[bool] cold chain storage only = true
+
 #############################################################
 #GW prior options
 #Only mass priors are strictly necessary, all others depend on the model being used

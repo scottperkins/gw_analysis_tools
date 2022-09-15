@@ -74,7 +74,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	int burnPriorIterations,
 	int priorIterations,
 	bool writePriorData,
-	int max_chunk_size,
+	int batchSize,
 	double **priorRanges,
 	//double(*log_prior)(bayesship::positionInfo *pos, int chainID,bayesship::bayesshipSampler *sampler, void *userParameters),
 	bayesship::probabilityFn *lp,
@@ -90,7 +90,9 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	MCMC_modification_struct *mod_struct,
 	std::string generation_method,
 	std::string outputDir,
-	std::string outputFileMoniker);
+	std::string outputFileMoniker, 
+	bool ignoreExistingCheckpoint,
+	bool coldChainStorageOnly);
 
 bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	int minDim,
@@ -105,7 +107,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	int burnPriorIterations,
 	int priorIterations,
 	bool writePriorData,
-	int max_chunk_size,
+	int batchSize,
 	double **priorRanges,
 	bayesship::probabilityFn *log_prior,
 	int numThreads,
@@ -121,7 +123,8 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string generation_method,
 	std::string generation_method_extended,
 	std::string outputDir,
-	std::string outputFileMoniker
-	);
+	std::string outputFileMoniker,
+	bool ignoreExistingCheckpoint,
+	bool coldChainStorageOnly);
 
 #endif

@@ -174,15 +174,15 @@
 #EA specific options
 #############################################################
 #Determine which parameterization of EA theory to use.
-[bool] Alpha parameterization = true
+[bool] alpha parameterization = true
 #Priors for the 3 EA coupling constants in alpha parameterization.
 #If not specified, default values used.
-[dbl] EA alpha_1 minimum = -0.06
-[dbl] EA alpha_1 maximum = 0.06
-[dbl] EA alpha_2 minimum = -0.003
-[dbl] EA alpha_2 maximum = 0.003
-[dbl] EA alpha_3 minimum = -1
-[dbl] EA alpha_3 maximum = 1
+[dbl] EA alpha_1 minimum = -0.25
+[dbl] EA alpha_1 maximum = 0.25
+[dbl] EA alpha_2 minimum = -0.025
+[dbl] EA alpha_2 maximum = 0.025
+[dbl] EA cbar_w minimum = -1.
+[dbl] EA cbar_w maximum = 1.
 
 #Priors for the 3 EA coupling constants. If not specified, default values used.
 #Upper and lower limits for coupling to acceleration
@@ -192,6 +192,6 @@
 [dbl] EA c_theta minimum = -.001 
 [dbl] EA c_theta maximum = .001
 #Upper and lower limits for coupling to vorticity
-[dbl] EA c_w minimum = -10
-[dbl] EA c_w maximum = 10
+[dbl] EA c_w minimum = -10.
+[dbl] EA c_w maximum = 10.
 #The shear parameter, c_sigma, is set to zero so no prior needed

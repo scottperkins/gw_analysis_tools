@@ -47,12 +47,12 @@
 //double tidal1_prior[2];
 //double tidal2_prior[2];
 //double tidal_s_prior[2];
-//double EA_prior[6];
+double EA_prior[6];
 //double RA_bounds[2];
 //double sinDEC_bounds[2];
 //bool tidal_love=true;
 //bool tidal_love_error;
-//bool alpha_param; 
+bool alpha_param; 
 //double DL_prior[2];
 //bool tidal_love_boundary_violation(double q,double lambda_s);
 //double standard_log_prior_D(double *pos, mcmc_data_interface *interface,void *parameters);
@@ -282,32 +282,32 @@ int main(int argc, char *argv[])
 	  std::cout<<"Using alpha parameterization: "<<PD.alpha_param<<std::endl;
 	  if(PD.alpha_param){
 	    if(dbl_dict.find("EA alpha_1 minimum") ==dbl_dict.end()){
-	      PD.EA_prior[0]=-.06;
-	      PD.EA_prior[1]=.06; 
+	      PD.EA_prior[0]= -1.;
+	      PD.EA_prior[1]= 1.; 
 	    }
 	    else{
 	      PD.EA_prior[0]=dbl_dict["EA alpha_1 minimum"];
 	      PD.EA_prior[1]=dbl_dict["EA alpha_1 maximum"]; 
 	    }
 	    if(dbl_dict.find("EA alpha_2 minimum") ==dbl_dict.end()){
-	      PD.EA_prior[2]=-.003;
-	      PD.EA_prior[3]=.003; 
+	      PD.EA_prior[2]=-.1;
+	      PD.EA_prior[3]=.1; 
 	    }
 	    else{
 	      PD.EA_prior[2]=dbl_dict["EA alpha_2 minimum"];
 	      PD.EA_prior[3]=dbl_dict["EA alpha_2 maximum"]; 
 	    }
-	    if(dbl_dict.find("EA alpha_3 minimum") ==dbl_dict.end()){
+	    if(dbl_dict.find("EA cbar_w minimum") ==dbl_dict.end()){
 	      PD.EA_prior[4]=-1.;
 	      PD.EA_prior[5]=1.; 
 	    }
 	    else{
-	      PD.EA_prior[4]=dbl_dict["EA alpha_3 minimum"];
-	      PD.EA_prior[5]=dbl_dict["EA alpha_3 maximum"]; 
+	      PD.EA_prior[4]=dbl_dict["EA cbar_w minimum"];
+	      PD.EA_prior[5]=dbl_dict["EA cbar_w maximum"]; 
 	    }
 	    std::cout<<"Range of EA alpha1: "<<PD.EA_prior[0]<<" - "<<PD.EA_prior[1]<<std::endl;
 	    std::cout<<"Range of EA alpha2: "<<PD.EA_prior[2]<<" - "<<PD.EA_prior[3]<<std::endl;
-	    std::cout<<"Range of EA alpha3: "<<PD.EA_prior[4]<<" - "<<PD.EA_prior[5]<<std::endl;
+	    std::cout<<"Range of EA cbarw: "<<PD.EA_prior[4]<<" - "<<PD.EA_prior[5]<<std::endl;
 	  }
 	  else{
 	    if(dbl_dict.find("EA c_a minimum") == dbl_dict.end()){
@@ -321,35 +321,17 @@ int main(int argc, char *argv[])
 	    if(dbl_dict.find("EA c_theta minimum") == dbl_dict.end()){
 	      PD.EA_prior[2]=0;
 	      PD.EA_prior[3]=pow(10,-4.);
-	    }
-	    else{
-	      PD.EA_prior[2]=dbl_dict["EA c_theta minimum"];
-	      PD.EA_prior[3]=dbl_dict["EA c_theta maximum"];
-	    }
-	    if(dbl_dict.find("EA c_w minimum") == dbl_dict.end()){
-	      PD.EA_prior[4]=-10;
-	      PD.EA_prior[5]=10;
-	    }
-	    else{
-	      PD.EA_prior[4]=dbl_dict["EA c_w minimum"];
-	      PD.EA_prior[5]=dbl_dict["EA c_w maximum"];
-	    }
-	  
-	    /*
-	      if(dbl_dict.find("EA c_sigma minimum") == dbl_dict.end()){
-	      EA_prior[6]=-pow(10,-15.);
-	      EA_prior[7]=pow(10,-15.);
-	      }
-	      else{
-	      EA_prior[6]=dbl_dict["EA c_sigma minimum"];
-	      EA_prior[7]=dbl_dict["EA c_sigma maximum"];
-	      }
-	    */
-	    std::cout<<"Range of EA c_a: "<<PD.EA_prior[0]<<" - "<<PD.EA_prior[1]<<std::endl;
-	    std::cout<<"Range of EA c_theta: "<<PD.EA_prior[2]<<" - "<<PD.EA_prior[3]<<std::endl;
-	    std::cout<<"Range of EA c_w: "<<PD.EA_prior[4]<<" - "<<PD.EA_prior[5]<<std::endl;
-	    //std::cout<<"Range of EA c_sigma: "<<EA_prior[6]<<" - "<<EA_prior[7]<<std::endl;
-	  }
+		}
+	}
+	}
+
+	bool ignoreExistingCheckpoint = false;
+	if(bool_dict.find("ignore existing checkpoint") != bool_dict.end()){
+		ignoreExistingCheckpoint = bool_dict["ignore existing checkpoint"];
+	}
+	bool coldChainStorageOnly = true;
+	if(bool_dict.find("cold chain storage only") != bool_dict.end()){
+		coldChainStorageOnly = bool_dict["cold chain storage only"];
 	}
 	
 	int psd_length ;
@@ -700,7 +682,7 @@ int main(int argc, char *argv[])
 			 burnIterations, burnPriorIterations,priorIterations, writePriorData,max_chunk_size, (double **)nullptr,
 			logp,threads, pool,detector_N, 
 			data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
-			generation_method,outputDir, outputMoniker);	
+			generation_method,outputDir, outputMoniker,ignoreExistingCheckpoint,coldChainStorageOnly);	
 	delete logp;
 	delete [] initial_position[0]; delete [] initial_position;
 	if(initial_ensemble_position_file != ""){
