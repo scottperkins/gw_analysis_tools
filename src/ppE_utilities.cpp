@@ -57,18 +57,18 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 	}
   */
 		if(generation_method.find("PVProp") != std::string::npos){
+			//LJ: writing this such as to constrain the quantity (alpha*thetadot/kappa). Set alphasq = 1 and vary quantity thetadot
 			T alphasq = gp->betappe[0] ;
-			T thetadot = gp->betappe[1] ;
+			//T thetadot = gp->betappe[1] ;
 			T DL = p->DL;
 			T Z= Z_from_DL(DL/MPC_SEC,gp->cosmology);
-			debugger_print(__FILE__,__LINE__,Z);
-			//const double pi = 3.14159265358979323846;
+		//	debugger_print(__FILE__,__LINE__,Z);
+			const double pi = 3.14159265358979323846;
 
-			T deltaph = sqrt(alphasq) * thetadot * Z;
-			debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
+			T deltaph = alphasq * Z;
+			//debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
 				for (int i =0 ; i < length; i++){
-					//LJ: Setting G=1 until I figure out units
-					T pref = -32 * 1 * deltaph * freqs[i];
+					T pref = -8 * pi * deltaph * freqs[i];
 						wp->hcross[i] = wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i];
 						wp->hplus[i] = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i];
 					}
@@ -188,13 +188,13 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		ins = true;
 	}
 	else if(generation_method.find("PVProp")!= std::string::npos){
-		mapping->Nmod = 2;
-		mapping->bppe = new double[2];
+		mapping->Nmod = 1;
+		mapping->bppe = new double[1];
 		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
 		mapping->bppe[0] = -1;
-		mapping->bppe[1] = -1;
+		//mapping->bppe[1] = -1;
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return 0;} ;
-		mapping->beta_fns[1] = [](source_parameters<T> *p){return 0;} ;
+	//	mapping->beta_fns[1] = [](source_parameters<T> *p){return 0;} ;
 		ins = true;
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
@@ -343,12 +343,12 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		for(int i = 0 ; i<params_in->Nmod; i++){
 			mapping->bppe[i] =params_in->bppe[i];
 		}
-		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
-		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod]; 
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod];
+		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod];
 		for(int i = 0 ; i<params_in->Nmod; i++){
 			auto lam = new std::function<T(source_parameters<T> *)>( [i](source_parameters<T> *p){ return ppEAlt_beta(i,p);} );
 			mapping->beta_fns_ptrs[i] = lam;
-			mapping->beta_fns[i] = *(lam); 
+			mapping->beta_fns[i] = *(lam);
 		}
 		if(generation_method.find("Inspiral")!= std::string::npos){
 			ins = true;
@@ -356,7 +356,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		else{
 			ins = false;
 		}
-			
+
 	}
 	else if(generation_method.find("polarization_test")!= std::string::npos){
 		mapping->Nmod = params_in->Nmod;
@@ -440,7 +440,7 @@ T ppEAlt_beta(int term,source_parameters<T> *param)
 	T out = 0;
 	T chirpmass = calculate_chirpmass(param->mass1,param->mass2);
 	T total_m = param->mass1 + param->mass2;
-	
+
 	if(term == 0 ){
 		out = param->betappe[0] * pow(total_m/chirpmass,param->bppe[0]/3.);
 	}

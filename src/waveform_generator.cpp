@@ -113,11 +113,14 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;
 
+	/*
 	bool PVProp = false;
 	if(generation_method.find("PVProp") != std::string::npos)
 	{
 		PVProp = true;
 	}
+	*/
+
 	/*Eventually, this will be where NS specific quantities are defined*/
 	//if (NSflag1 || NSflag2)
 	//{
@@ -1297,6 +1300,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			model.PhenomPv2_Param_Transform(out);
 		}
 	}
+	/*
 	if(generation_method.find("PVProp") != std::string::npos){
 		out->Nmod = in->Nmod;
 		out->betappe = in->betappe;
@@ -1314,6 +1318,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			local_method = "IMRPhenomPv2";
 		}
 	}
+	*/
 	if(generation_method.find("ppE") != std::string::npos){
 		out->Nmod = in->Nmod;
 		out->betappe = in->betappe;
