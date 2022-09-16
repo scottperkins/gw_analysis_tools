@@ -604,6 +604,7 @@ int main(int argc, char *argv[])
 	//}
 	else if(generation_method.find("IMRPhenomD") != std::string::npos && (dimension-total_mods) == 11){
 		if(total_mods == 0){
+			std::cout<<"Using standard all-sky IMRPhenomD prior"<<std::endl;
 			logp = new logPriorStandard_D(&PD);
 		}
 		//else{
@@ -612,13 +613,16 @@ int main(int argc, char *argv[])
 	}
 	else if(generation_method.find("IMRPhenomD_NRT") != std::string::npos && ( (dimension-total_mods) == 13 || (dimension-total_mods) == 12)){
 		if(total_mods == 0){
+			std::cout<<"Using standard all-sky IMRPhenomD/NRT prior"<<std::endl;
 			logp = new logPriorStandard_D_NRT(&PD);
 		}
 		else if(generation_method.find("EA") !=std::string::npos){
+			std::cout<<"Using standard all-sky IMRPhenomD/NRT/EA prior"<<std::endl;
 			logp = new logPriorStandard_D_NRT_EA(&PD);
 		}
 		else if(generation_method.find("ppE") != std::string::npos || generation_method.find("ppE") != std::string::npos || check_theory_support(generation_method)){
-			lp = &standard_log_prior_D_NRT_mod;
+			std::cout<<"Using standard all-sky IMRPhenomD/NRT/Mod prior"<<std::endl;
+			logp = new logPriorStandard_D_NRT_mod(&PD);
 		}
 	}
 	//else if(generation_method.find("IMRPhenomPv2") != std::string::npos && (dimension-total_mods) == 8){
