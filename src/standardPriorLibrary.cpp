@@ -167,6 +167,24 @@ double EA_current_constraints(bayesship::positionInfo *position,  priorData *PD)
   return 0; 
 }
 
+double logPriorStandard_D_NRT_mod::eval(bayesship::positionInfo *position, int chainID)
+{
+	int dim =  position->dimension;
+	double *pos =  position->parameters;
+	double a = -std::numeric_limits<double>::infinity();
+	int initial_nongr_id = 12;
+	if(! PD->tidal_love){
+		initial_nongr_id = 13;
+	}
+	for (int i = initial_nongr_id ; i<dim; i++){
+		if(pos[i]<PD->mod_priors[i-initial_nongr_id][0] || pos[i]>PD->mod_priors[i-initial_nongr_id][1]){return a;} 
+	}
+	
+	double NS = logPriorStandard_D_NRT::eval(position,chainID);
+	std::cout<<NS<<std::endl;
+	return  NS;
+}
+
 double logPriorStandard_D_NRT_EA::eval(bayesship::positionInfo *position, int chainID)
 {
 	int dim =  position->dimension;

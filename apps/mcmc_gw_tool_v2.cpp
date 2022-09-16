@@ -617,9 +617,9 @@ int main(int argc, char *argv[])
 		else if(generation_method.find("EA") !=std::string::npos){
 			logp = new logPriorStandard_D_NRT_EA(&PD);
 		}
-		//else{
-		//	lp = &standard_log_prior_D_NRT_mod;
-		//}
+		else if(generation_method.find("ppE") != std::string::npos || generation_method.find("ppE") != std::string::npos || check_theory_support(generation_method)){
+			lp = &standard_log_prior_D_NRT_mod;
+		}
 	}
 	//else if(generation_method.find("IMRPhenomPv2") != std::string::npos && (dimension-total_mods) == 8){
 	//	if(total_mods == 0){
