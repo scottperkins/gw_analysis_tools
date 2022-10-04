@@ -181,7 +181,7 @@ double logPriorStandard_D_NRT_mod::eval(bayesship::positionInfo *position, int c
 	}
 	
 	double NS = logPriorStandard_D_NRT::eval(position,chainID);
-	std::cout<<NS<<std::endl;
+	//std::cout<<NS<<std::endl;
 	return  NS;
 }
 
