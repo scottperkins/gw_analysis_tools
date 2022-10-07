@@ -227,7 +227,7 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 		/*! Handle the inclination angle dependence*/
 		/*! Iota is weird, because it's a extrinsic parameter, but one that has dependence on frequency (potentially)*/
 		/*! I think it should be handled separately because of complications like LISA response, etc*/
-	/*	for (int i =0 ; i < length; i++){
+		for (int i =0 ; i < length; i++){
 			wp->hcross[i] *= ci;
 			wp->hplus[i] *= std::complex<T>(.5,0) *(std::complex<T>(1,0)+ci*ci);
 		}
