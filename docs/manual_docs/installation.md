@@ -21,29 +21,37 @@ To install this software library, you'll need to do the following steps:
 
 \* means the library is very common and is probably available through system package managers (apt/yum/etc) or through HPC infrastructure
 
-[^1]: On systems where you have admin privileges, I would install everything in ``/usr/local'' unless there's good reason not to. For systems where you don't have admin privileges or if you want to keep the software isolated, I typically put a directory called ``.local'' into my home directory, and install everything there.
+[^1]: On systems where you have admin privileges, I would install everything in "/usr/local" unless there's good reason not to. For systems where you don't have admin privileges or if you want to keep the software isolated, I typically put a directory called ".local" into my home directory, and install everything there.
 
 ## Install library
 
 1. Download the source code from github.
 2. Make a directory called ``build'' in the source directory. 
 3. Move into ``build/'' and run:
+
 ```bash
 cmake .. 
 ```
+
 4. If you need to modify compile settings (like turning on debugger flags or changing the install prefix), run:
+
 ```bash
-ccmake ..
+ccmake .. 
 ```
+
 Save it and rerun 
+
 ```bash
 cmake .. 
-````
+```
+
 5. Finally, run 
+
 ```bash
 make 
 make install
-````
+```
+
 
 
 

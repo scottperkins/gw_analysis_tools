@@ -91,8 +91,10 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		double integration_time /**< Integration time in months (only important for LISA_conf*/
 		)
 {
-	std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported/";
+	//std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported/";
+	std::string currently_supported_dir = std::string(GWAT_SHARE_DIR)+"noise_data/";
 	//std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported_raw/";
+	std::cout<<currently_supported_dir<<std::endl;
 	if(check_list(detector, (std::string *)analytic_PSD_models,analytic_PSD_models_N)){
 		if(detector == "aLIGO_analytic")
 		{
@@ -1385,7 +1387,9 @@ double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	for(int i=0 ; i<data_length; i ++){
 		temp[i]=new double[2];
 	}
-	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_three.csv", temp, data_length,2);
+	//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_three.csv", temp, data_length,2);
+	read_file( std::string(GWAT_SHARE_DIR)+"detection_probability_tables/Pw_three.csv", temp, data_length,2);
+	;
 	for(int i=0 ; i<data_length; i ++){
 		omegas[i] = temp[i][0];	
 		pomega_numerical[i] = temp[i][1];	
@@ -1424,7 +1428,8 @@ double p_single_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	for(int i=0 ; i<data_length; i ++){
 		temp[i]=new double[2];
 	}
-	read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_single.csv", temp, data_length,2);
+	//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_single.csv", temp, data_length,2);
+	read_file(std::string(GWAT_SHARE_DIR)+"detection_probability_tables/Pw_single.csv", temp, data_length,2);
 	for(int i=0 ; i<data_length; i ++){
 		omegas[i] = temp[i][0];	
 		pomega_numerical[i] = temp[i][1];	

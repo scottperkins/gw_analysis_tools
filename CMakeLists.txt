@@ -27,6 +27,8 @@ set (GWAT_VERSION_MAJOR 1)
 set (GWAT_VERSION_MINOR 0)
 
 set (GWAT_ROOT_DIRECTORY "${PROJECT_SOURCE_DIR}/")
+set (GWAT_INSTALL_DIRECTORY "${CMAKE_INSTALL_PREFIX}/")
+message("${GWAT_INSTALL_DIRECTORY}")
 
 
  
@@ -98,6 +100,9 @@ endif()
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 #include_directories("${PROJECT_BINARY_DIR}")
+
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/data")
 
 install(FILES ${HEADER_LIST} DESTINATION "include/gwat")
 install(FILES "${CMAKE_BINARY_DIR}/include/gwat/GWATConfig.h" DESTINATION "include/gwat")
