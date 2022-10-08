@@ -280,7 +280,8 @@ void initiate_LumD_Z_interp(gsl_interp_accel **Z_DL_accel_ptr, gsl_spline **Z_DL
 	*Z_DL_accel_ptr = gsl_interp_accel_alloc();
 	*Z_DL_spline_ptr = gsl_spline_alloc(gsl_interp_cspline,npts);
 	std::fstream data_table;
-	data_table.open(std::string(GWAT_ROOT_DIRECTORY)+"/data/Cosmology_data/tabulated_LumD_Z.csv",std::ios::in);
+	//data_table.open(std::string(GWAT_ROOT_DIRECTORY)+"/data/Cosmology_data/tabulated_LumD_Z.csv",std::ios::in);
+	data_table.open(std::string("GWAT_SHARE_DIR")+"Cosmology_data/tabulated_LumD_Z.csv",std::ios::in);
 	std::vector<std::string> row;
 	std::string line, word, temp;
 	int i =0,j=0;
