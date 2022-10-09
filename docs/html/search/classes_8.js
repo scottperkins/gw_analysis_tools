@@ -1,7 +1,8 @@
 var searchData=
 [
-  ['mcmc_5fmodification_5fstruct',['MCMC_modification_struct',['../dd/da5/structMCMC__modification__struct.html',1,'']]],
-  ['mcmc_5fsampler_5foutput',['mcmc_sampler_output',['../d4/dd1/classmcmc__sampler__output.html',1,'']]],
-  ['mcr_5fjob',['mcr_job',['../dc/da9/structmcr__job.html',1,'']]],
-  ['mcr_5fsampler',['mcr_sampler',['../d1/df3/classmcr__sampler.html',1,'']]]
+  ['lambda_5fparameters',['lambda_parameters',['../d5/d92/structlambda__parameters.html',1,'']]],
+  ['logpriorstandard_5fd',['logPriorStandard_D',['../d3/d66/classlogPriorStandard__D.html',1,'']]],
+  ['logpriorstandard_5fd_5fnrt',['logPriorStandard_D_NRT',['../d7/dfb/classlogPriorStandard__D__NRT.html',1,'']]],
+  ['logpriorstandard_5fd_5fnrt_5fea',['logPriorStandard_D_NRT_EA',['../dc/d25/classlogPriorStandard__D__NRT__EA.html',1,'']]],
+  ['logpriorstandard_5fd_5fnrt_5fmod',['logPriorStandard_D_NRT_mod',['../dd/d4e/classlogPriorStandard__D__NRT__mod.html',1,'']]]
 ];

@@ -67,14 +67,38 @@ $(function() {
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="../../d5/dac/mcmc__sampler__internals_8h_source.html">mcmc_sampler_internals.h</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for sampler:</div>
+<div class="dyncontent">
+<div class="center"><img src="../../d1/df2/classsampler__coll__graph.png" border="0" usemap="#sampler_coll__map" alt="Collaboration graph"/></div>
+<!-- MAP 0 -->
+<center><span class="legend">[<a href="../../graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:a3de68ccea867dc479079ea29e5c523d9"><td class="memItemLeft" align="right" valign="top"><a id="a3de68ccea867dc479079ea29e5c523d9"></a>
+<a class="el" href="../../d6/d96/classmcmc__data__interface.html">mcmc_data_interface</a> **&#160;</td><td class="memItemRight" valign="bottom"><b>interfaces</b></td></tr>
+<tr class="separator:a3de68ccea867dc479079ea29e5c523d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27b98d82415186416b15fc539b040c05"><td class="memItemLeft" align="right" valign="top"><a id="a27b98d82415186416b15fc539b040c05"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>block_sample</b> = false</td></tr>
+<tr class="separator:a27b98d82415186416b15fc539b040c05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8919cecf337db0128a3ad43961a1a75f"><td class="memItemLeft" align="right" valign="top"><a id="a8919cecf337db0128a3ad43961a1a75f"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>block_sample_prob</b> = .5</td></tr>
+<tr class="separator:a8919cecf337db0128a3ad43961a1a75f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaf86bcd6a162eb961750a1af6cc722d"><td class="memItemLeft" align="right" valign="top"><a id="aeaf86bcd6a162eb961750a1af6cc722d"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>block_num</b> = 2</td></tr>
+<tr class="separator:aeaf86bcd6a162eb961750a1af6cc722d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a874bbe656afb897b4c7c31afaf5e581b"><td class="memItemLeft" align="right" valign="top"><a id="a874bbe656afb897b4c7c31afaf5e581b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>block_boundary_ids</b> [2] = {7,11}</td></tr>
+<tr class="separator:a874bbe656afb897b4c7c31afaf5e581b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb77c07ce79609af94712e4d887b389a"><td class="memItemLeft" align="right" valign="top"><a id="adb77c07ce79609af94712e4d887b389a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>kde_step</b> = false</td></tr>
+<tr class="separator:adb77c07ce79609af94712e4d887b389a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a332154646380d81754c91b9ae85f753f"><td class="memItemLeft" align="right" valign="top"><a id="a332154646380d81754c91b9ae85f753f"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>tune</b> =true</td></tr>
 <tr class="separator:a332154646380d81754c91b9ae85f753f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a556351f7c28b8577e5e7f8106ae626"><td class="memItemLeft" align="right" valign="top"><a id="a0a556351f7c28b8577e5e7f8106ae626"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>types_of_steps</b> = 5</td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>types_of_steps</b> = 6</td></tr>
 <tr class="separator:a0a556351f7c28b8577e5e7f8106ae626"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5970eec37aea2dc10223ef31668bc2c8"><td class="memItemLeft" align="right" valign="top"><a id="a5970eec37aea2dc10223ef31668bc2c8"></a>
 double **&#160;</td><td class="memItemRight" valign="bottom"><b>step_prob</b></td></tr>
@@ -85,9 +109,66 @@ double **&#160;</td><td class="memItemRight" valign="bottom"><b>prob_boundaries<
 <tr class="memitem:aeab13d23abfd6582959f82201306bbd9"><td class="memItemLeft" align="right" valign="top"><a id="aeab13d23abfd6582959f82201306bbd9"></a>
 double *&#160;</td><td class="memItemRight" valign="bottom"><b>chain_temps</b></td></tr>
 <tr class="separator:aeab13d23abfd6582959f82201306bbd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f761b80964f5c915983e912c9698ac6"><td class="memItemLeft" align="right" valign="top"><a id="a2f761b80964f5c915983e912c9698ac6"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>swap_partners</b></td></tr>
+<tr class="separator:a2f761b80964f5c915983e912c9698ac6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64ce44c681ce38d4bd837b9b9a560f7f"><td class="memItemLeft" align="right" valign="top"><a id="a64ce44c681ce38d4bd837b9b9a560f7f"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>swap_accepts</b></td></tr>
+<tr class="separator:a64ce44c681ce38d4bd837b9b9a560f7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a030457717d7479f5aff85803eee35aa7"><td class="memItemLeft" align="right" valign="top"><a id="a030457717d7479f5aff85803eee35aa7"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>random_swaps</b> = true</td></tr>
+<tr class="separator:a030457717d7479f5aff85803eee35aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16fcdb1e12b8486c6da549c21f990b19"><td class="memItemLeft" align="right" valign="top"><a id="a16fcdb1e12b8486c6da549c21f990b19"></a>
+double **&#160;</td><td class="memItemRight" valign="bottom"><b>chain_neighborhoods</b></td></tr>
+<tr class="separator:a16fcdb1e12b8486c6da549c21f990b19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac562defaddba249d2912c528f01a7d88"><td class="memItemLeft" align="right" valign="top"><a id="ac562defaddba249d2912c528f01a7d88"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>chain_neighbors</b></td></tr>
+<tr class="separator:ac562defaddba249d2912c528f01a7d88"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a220a9371b24bb377be151d791a864cf5"><td class="memItemLeft" align="right" valign="top"><a id="a220a9371b24bb377be151d791a864cf5"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>chain_neighborhoods_ids</b></td></tr>
+<tr class="separator:a220a9371b24bb377be151d791a864cf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0324199d14ba0bffbc551ca3d107b559"><td class="memItemLeft" align="right" valign="top"><a id="a0324199d14ba0bffbc551ca3d107b559"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>chain_neighbors_ids</b></td></tr>
+<tr class="separator:a0324199d14ba0bffbc551ca3d107b559"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a46c134f1e028251d0a3f37e942fe8ed0"><td class="memItemLeft" align="right" valign="top"><a id="a46c134f1e028251d0a3f37e942fe8ed0"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>chain_radius</b> =2</td></tr>
+<tr class="separator:a46c134f1e028251d0a3f37e942fe8ed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5add44308153c924fe7ae799e3437f7"><td class="memItemLeft" align="right" valign="top"><a id="ab5add44308153c924fe7ae799e3437f7"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>restrict_swapping</b> =true</td></tr>
+<tr class="separator:ab5add44308153c924fe7ae799e3437f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac34514a11560daafb0e958e2d6727d6c"><td class="memItemLeft" align="right" valign="top"><a id="ac34514a11560daafb0e958e2d6727d6c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isolate_ensembles</b> =false</td></tr>
+<tr class="separator:ac34514a11560daafb0e958e2d6727d6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae154d217360d3fad1e1b9af479c4f3bc"><td class="memItemLeft" align="right" valign="top"><a id="ae154d217360d3fad1e1b9af479c4f3bc"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isolate_ensembles_cold</b> =true</td></tr>
+<tr class="separator:ae154d217360d3fad1e1b9af479c4f3bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a003094001711f3d03f55a7e62b1b2203"><td class="memItemLeft" align="right" valign="top"><a id="a003094001711f3d03f55a7e62b1b2203"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>swap_rate</b> =1./2.</td></tr>
+<tr class="separator:a003094001711f3d03f55a7e62b1b2203"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a863a55bece0766a8bf550959a02f521a"><td class="memItemLeft" align="right" valign="top"><a id="a863a55bece0766a8bf550959a02f521a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>burn_phase</b> =false</td></tr>
+<tr class="separator:a863a55bece0766a8bf550959a02f521a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cf6b3cd8ed7468de94d14fa0d2dac5a"><td class="memItemLeft" align="right" valign="top"><a id="a3cf6b3cd8ed7468de94d14fa0d2dac5a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>ensemble_proposal</b> =true</td></tr>
+<tr class="separator:a3cf6b3cd8ed7468de94d14fa0d2dac5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac952e86ec3c4988003ba12439789a1eb"><td class="memItemLeft" align="right" valign="top"><a id="ac952e86ec3c4988003ba12439789a1eb"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>ensemble_proposal_rate</b> = 0.25</td></tr>
+<tr class="separator:ac952e86ec3c4988003ba12439789a1eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c1dbafb718330ae59774c2e5bbd6d6f"><td class="memItemLeft" align="right" valign="top"><a id="a8c1dbafb718330ae59774c2e5bbd6d6f"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>ensemble_prop_a</b> = 1.</td></tr>
+<tr class="separator:a8c1dbafb718330ae59774c2e5bbd6d6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a962e2016c8c5304d84731b34d603b221"><td class="memItemLeft" align="right" valign="top"><a id="a962e2016c8c5304d84731b34d603b221"></a>
 bool *&#160;</td><td class="memItemRight" valign="bottom"><b>waiting</b></td></tr>
 <tr class="separator:a962e2016c8c5304d84731b34d603b221"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70176eca1ace5406f4565cb756d16388"><td class="memItemLeft" align="right" valign="top"><a id="a70176eca1ace5406f4565cb756d16388"></a>
+bool *&#160;</td><td class="memItemRight" valign="bottom"><b>restarted_chain</b></td></tr>
+<tr class="separator:a70176eca1ace5406f4565cb756d16388"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3eba95ee9b527831b842059ab82228ba"><td class="memItemLeft" align="right" valign="top"><a id="a3eba95ee9b527831b842059ab82228ba"></a>
+bool *&#160;</td><td class="memItemRight" valign="bottom"><b>waiting_SWP</b></td></tr>
+<tr class="separator:a3eba95ee9b527831b842059ab82228ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad43b25e54b1da28e4f6c729887b2a1ee"><td class="memItemLeft" align="right" valign="top"><a id="ad43b25e54b1da28e4f6c729887b2a1ee"></a>
+std::mutex *&#160;</td><td class="memItemRight" valign="bottom"><b>queue_mutexes</b></td></tr>
+<tr class="separator:ad43b25e54b1da28e4f6c729887b2a1ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d6b552c3e3f330fabdfdab1d214bb0c"><td class="memItemLeft" align="right" valign="top"><a id="a8d6b552c3e3f330fabdfdab1d214bb0c"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>chain_pos</b></td></tr>
 <tr class="separator:a8d6b552c3e3f330fabdfdab1d214bb0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -115,6 +196,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>max_dim</b></td></tr>
 <tr class="memitem:a6b85548a4adacf726b317954111aa681"><td class="memItemLeft" align="right" valign="top"><a id="a6b85548a4adacf726b317954111aa681"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_exist</b></td></tr>
 <tr class="separator:a6b85548a4adacf726b317954111aa681"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f740ef7f8608a9e46b3b1849553c81a"><td class="memItemLeft" align="right" valign="top"><a id="a2f740ef7f8608a9e46b3b1849553c81a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>proper_fisher</b> =false</td></tr>
+<tr class="separator:a2f740ef7f8608a9e46b3b1849553c81a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd39963f4ab1bc2730c1dc13cfc1869e"><td class="memItemLeft" align="right" valign="top"><a id="acd39963f4ab1bc2730c1dc13cfc1869e"></a>
 bool *&#160;</td><td class="memItemRight" valign="bottom"><b>de_primed</b></td></tr>
 <tr class="separator:acd39963f4ab1bc2730c1dc13cfc1869e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,10 +233,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>show_progress</b></td
 int&#160;</td><td class="memItemRight" valign="bottom"><b>num_threads</b></td></tr>
 <tr class="separator:a0d3c87df5d138ce4cd2286d55a54eb04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a19172e2dd561a1d2d77fb4557f8dfff1"><td class="memItemLeft" align="right" valign="top"><a id="a19172e2dd561a1d2d77fb4557f8dfff1"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>history_length</b> =500</td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>history_length</b> =1000</td></tr>
 <tr class="separator:a19172e2dd561a1d2d77fb4557f8dfff1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8c91af39ee6b6342becfb78b6bfc260"><td class="memItemLeft" align="right" valign="top"><a id="ae8c91af39ee6b6342becfb78b6bfc260"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>history_update</b> =5</td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>history_update</b> =10</td></tr>
 <tr class="separator:ae8c91af39ee6b6342becfb78b6bfc260"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfa5da34ec3c754245fbb4bef9b3c14d"><td class="memItemLeft" align="right" valign="top"><a id="adfa5da34ec3c754245fbb4bef9b3c14d"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>current_hist_pos</b></td></tr>
@@ -181,6 +265,12 @@ int *&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_last_accept_ct
 <tr class="memitem:ad27db60c348826ea2305b045dee2601b"><td class="memItemLeft" align="right" valign="top"><a id="ad27db60c348826ea2305b045dee2601b"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_last_reject_ct</b></td></tr>
 <tr class="separator:ad27db60c348826ea2305b045dee2601b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93ce948f2c86d981d9a0f3637fafec0d"><td class="memItemLeft" align="right" valign="top"><a id="a93ce948f2c86d981d9a0f3637fafec0d"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_last_accept_ct_per_dim</b></td></tr>
+<tr class="separator:a93ce948f2c86d981d9a0f3637fafec0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7e13283a46a508d49a9e558ee6b94de"><td class="memItemLeft" align="right" valign="top"><a id="aa7e13283a46a508d49a9e558ee6b94de"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_last_reject_ct_per_dim</b></td></tr>
+<tr class="separator:aa7e13283a46a508d49a9e558ee6b94de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6326cc16d308d4d487df39bad968fb9a"><td class="memItemLeft" align="right" valign="top"><a id="a6326cc16d308d4d487df39bad968fb9a"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>de_last_accept_ct</b></td></tr>
 <tr class="separator:a6326cc16d308d4d487df39bad968fb9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -193,33 +283,42 @@ int *&#160;</td><td class="memItemRight" valign="bottom"><b>fish_last_accept_ct<
 <tr class="memitem:a9b2cbb8f29358160bbc16bbddb640e57"><td class="memItemLeft" align="right" valign="top"><a id="a9b2cbb8f29358160bbc16bbddb640e57"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>fish_last_reject_ct</b></td></tr>
 <tr class="separator:a9b2cbb8f29358160bbc16bbddb640e57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6d304ec4b13f21bb1c240570058da76"><td class="memItemLeft" align="right" valign="top"><a id="ab6d304ec4b13f21bb1c240570058da76"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>kde_last_accept_ct</b></td></tr>
+<tr class="separator:ab6d304ec4b13f21bb1c240570058da76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fda0709f2d7d528c8123c0b39e7322d"><td class="memItemLeft" align="right" valign="top"><a id="a0fda0709f2d7d528c8123c0b39e7322d"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>kde_last_reject_ct</b></td></tr>
+<tr class="separator:a0fda0709f2d7d528c8123c0b39e7322d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8682f3a38e907010a8a21a9a19207bc4"><td class="memItemLeft" align="right" valign="top"><a id="a8682f3a38e907010a8a21a9a19207bc4"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>RJstep_last_accept_ct</b></td></tr>
 <tr class="separator:a8682f3a38e907010a8a21a9a19207bc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09859b32798ffd6cf39492bf89245cb4"><td class="memItemLeft" align="right" valign="top"><a id="a09859b32798ffd6cf39492bf89245cb4"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>RJstep_last_reject_ct</b></td></tr>
 <tr class="separator:a09859b32798ffd6cf39492bf89245cb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acbbf9bdc68bd3089e06e4575813aaf1b"><td class="memItemLeft" align="right" valign="top"><a id="acbbf9bdc68bd3089e06e4575813aaf1b"></a>
-double **&#160;</td><td class="memItemRight" valign="bottom"><b>randgauss_width</b></td></tr>
-<tr class="separator:acbbf9bdc68bd3089e06e4575813aaf1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7b7b5962c0fcc85444a6996bb61696f"><td class="memItemLeft" align="right" valign="top"><a id="ad7b7b5962c0fcc85444a6996bb61696f"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>randgauss_width_number</b></td></tr>
+<tr class="separator:ad7b7b5962c0fcc85444a6996bb61696f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14dbb59713266380a34c2678011114fc"><td class="memItemLeft" align="right" valign="top"><a id="a14dbb59713266380a34c2678011114fc"></a>
+double ***&#160;</td><td class="memItemRight" valign="bottom"><b>randgauss_width</b></td></tr>
+<tr class="separator:a14dbb59713266380a34c2678011114fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbaa3b490977775308c0fa26870a8486"><td class="memItemLeft" align="right" valign="top"><a id="afbaa3b490977775308c0fa26870a8486"></a>
 double ***&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_vecs</b></td></tr>
 <tr class="separator:afbaa3b490977775308c0fa26870a8486"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a969aca461dc9adc844cd4f27b0896f47"><td class="memItemLeft" align="right" valign="top"><a id="a969aca461dc9adc844cd4f27b0896f47"></a>
 double **&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_vals</b></td></tr>
 <tr class="separator:a969aca461dc9adc844cd4f27b0896f47"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca7467144c29b5087a22b355a01ab6b1"><td class="memItemLeft" align="right" valign="top"><a id="aca7467144c29b5087a22b355a01ab6b1"></a>
-double ***&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_vecs_prev</b></td></tr>
-<tr class="separator:aca7467144c29b5087a22b355a01ab6b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15cd44bab3ae8239b5d0160f0b57bf13"><td class="memItemLeft" align="right" valign="top"><a id="a15cd44bab3ae8239b5d0160f0b57bf13"></a>
-double **&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_vals_prev</b></td></tr>
-<tr class="separator:a15cd44bab3ae8239b5d0160f0b57bf13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27a14b978b6a778fcd8334decaac96dd"><td class="memItemLeft" align="right" valign="top"><a id="a27a14b978b6a778fcd8334decaac96dd"></a>
+double ***&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_vecs_prop</b></td></tr>
+<tr class="separator:a27a14b978b6a778fcd8334decaac96dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a599a21ecebe44ee1fac36f014f18a9"><td class="memItemLeft" align="right" valign="top"><a id="a0a599a21ecebe44ee1fac36f014f18a9"></a>
+double **&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_vals_prop</b></td></tr>
+<tr class="separator:a0a599a21ecebe44ee1fac36f014f18a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1df1d497bc3246954239e3a329895eb"><td class="memItemLeft" align="right" valign="top"><a id="ab1df1d497bc3246954239e3a329895eb"></a>
 double ***&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_matrix</b></td></tr>
 <tr class="separator:ab1df1d497bc3246954239e3a329895eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9776e8d0eb832b5349646cb36d94e557"><td class="memItemLeft" align="right" valign="top"><a id="a9776e8d0eb832b5349646cb36d94e557"></a>
-double ***&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_matrix_prev</b></td></tr>
-<tr class="separator:a9776e8d0eb832b5349646cb36d94e557"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab15e984b75c49f72e0b01e2ef9426d20"><td class="memItemLeft" align="right" valign="top"><a id="ab15e984b75c49f72e0b01e2ef9426d20"></a>
+double ***&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_matrix_prop</b></td></tr>
+<tr class="separator:ab15e984b75c49f72e0b01e2ef9426d20"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a25b58420d2d8c60815fb61acfcffa592"><td class="memItemLeft" align="right" valign="top"><a id="a25b58420d2d8c60815fb61acfcffa592"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_update_ct</b></td></tr>
 <tr class="separator:a25b58420d2d8c60815fb61acfcffa592"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -229,15 +328,30 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>prop_MH_factor</b
 <tr class="memitem:adde6b998ef7c4d48b5a756f80331561d"><td class="memItemLeft" align="right" valign="top"><a id="adde6b998ef7c4d48b5a756f80331561d"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>fisher_update_number</b> =200</td></tr>
 <tr class="separator:adde6b998ef7c4d48b5a756f80331561d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:affedf8c47ced1bbdc376de88b35ba28a"><td class="memItemLeft" align="right" valign="top"><a id="affedf8c47ced1bbdc376de88b35ba28a"></a>
-std::function&lt; double(double *, int *, int, int, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>lp</b></td></tr>
-<tr class="separator:affedf8c47ced1bbdc376de88b35ba28a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6a003c885a619de231f55a480fd1e53"><td class="memItemLeft" align="right" valign="top"><a id="ac6a003c885a619de231f55a480fd1e53"></a>
-std::function&lt; double(double *, int *, int, int, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ll</b></td></tr>
-<tr class="separator:ac6a003c885a619de231f55a480fd1e53"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae0ea86e523a3e4d54b5870ec36ee3a7c"><td class="memItemLeft" align="right" valign="top"><a id="ae0ea86e523a3e4d54b5870ec36ee3a7c"></a>
-std::function&lt; void(double *, int *, int, double **, int, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>fish</b></td></tr>
-<tr class="separator:ae0ea86e523a3e4d54b5870ec36ee3a7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaac7ba62e74fbbc32922faf93454ce4"><td class="memItemLeft" align="right" valign="top"><a id="acaac7ba62e74fbbc32922faf93454ce4"></a>
+double ***&#160;</td><td class="memItemRight" valign="bottom"><b>kde_cov</b> =NULL</td></tr>
+<tr class="separator:acaac7ba62e74fbbc32922faf93454ce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f72279517160d2c5432b41b0ebcd7bd"><td class="memItemLeft" align="right" valign="top"><a id="a2f72279517160d2c5432b41b0ebcd7bd"></a>
+double ***&#160;</td><td class="memItemRight" valign="bottom"><b>kde_fisher</b> =NULL</td></tr>
+<tr class="separator:a2f72279517160d2c5432b41b0ebcd7bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55ba876e9a2365f93ca9e5d3338ce24f"><td class="memItemLeft" align="right" valign="top"><a id="a55ba876e9a2365f93ca9e5d3338ce24f"></a>
+double *&#160;</td><td class="memItemRight" valign="bottom"><b>kde_cov_lndet</b></td></tr>
+<tr class="separator:a55ba876e9a2365f93ca9e5d3338ce24f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d691391b0b394290f497bc2fb27c910"><td class="memItemLeft" align="right" valign="top"><a id="a0d691391b0b394290f497bc2fb27c910"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>kde_cov_update_number</b> =200</td></tr>
+<tr class="separator:a0d691391b0b394290f497bc2fb27c910"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a349b249db557288527b73c08bfa3d208"><td class="memItemLeft" align="right" valign="top"><a id="a349b249db557288527b73c08bfa3d208"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>kde_cov_update_ct</b> =NULL</td></tr>
+<tr class="separator:a349b249db557288527b73c08bfa3d208"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0221d8113584825b1a5420b8bbc4a099"><td class="memItemLeft" align="right" valign="top"><a id="a0221d8113584825b1a5420b8bbc4a099"></a>
+std::function&lt; double(double *, int *, int,<a class="el" href="../../d6/d96/classmcmc__data__interface.html">mcmc_data_interface</a> *, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>lp</b></td></tr>
+<tr class="separator:a0221d8113584825b1a5420b8bbc4a099"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c3acd78289d85769e5dfa8ce07ae238"><td class="memItemLeft" align="right" valign="top"><a id="a1c3acd78289d85769e5dfa8ce07ae238"></a>
+std::function&lt; double(double *, int *, int,<a class="el" href="../../d6/d96/classmcmc__data__interface.html">mcmc_data_interface</a> *, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ll</b></td></tr>
+<tr class="separator:a1c3acd78289d85769e5dfa8ce07ae238"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1299587bc35b3466a5e33fd1b09a406"><td class="memItemLeft" align="right" valign="top"><a id="aa1299587bc35b3466a5e33fd1b09a406"></a>
+std::function&lt; void(double *, int *, int,double **, <a class="el" href="../../d6/d96/classmcmc__data__interface.html">mcmc_data_interface</a> *, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>fish</b></td></tr>
+<tr class="separator:aa1299587bc35b3466a5e33fd1b09a406"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a123399eb4393f9708c01789ffc5aa308"><td class="memItemLeft" align="right" valign="top"><a id="a123399eb4393f9708c01789ffc5aa308"></a>
 void **&#160;</td><td class="memItemRight" valign="bottom"><b>user_parameters</b> =NULL</td></tr>
 <tr class="separator:a123399eb4393f9708c01789ffc5aa308"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -265,6 +379,9 @@ int *&#160;</td><td class="memItemRight" valign="bottom"><b>num_mmala</b></td></
 <tr class="memitem:a7b934ed8a7b185ad220cf4e0fa419c40"><td class="memItemLeft" align="right" valign="top"><a id="a7b934ed8a7b185ad220cf4e0fa419c40"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>num_RJstep</b></td></tr>
 <tr class="separator:a7b934ed8a7b185ad220cf4e0fa419c40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a12b15c418a40749a87c96f120b6f3abe"><td class="memItemLeft" align="right" valign="top"><a id="a12b15c418a40749a87c96f120b6f3abe"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>num_kde</b></td></tr>
+<tr class="separator:a12b15c418a40749a87c96f120b6f3abe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50568d956eeb78cc429cfd991f0b9d00"><td class="memItemLeft" align="right" valign="top"><a id="a50568d956eeb78cc429cfd991f0b9d00"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>time_elapsed_cpu</b></td></tr>
 <tr class="separator:a50568d956eeb78cc429cfd991f0b9d00"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -277,6 +394,12 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>time_elapsed_cpu_ac
 <tr class="memitem:a34e5def2ae898e19d183a2099f5332e5"><td class="memItemLeft" align="right" valign="top"><a id="a34e5def2ae898e19d183a2099f5332e5"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>time_elapsed_wall_ac</b></td></tr>
 <tr class="separator:a34e5def2ae898e19d183a2099f5332e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8876f6edcf14da9e8d090150a422c73"><td class="memItemLeft" align="right" valign="top"><a id="ae8876f6edcf14da9e8d090150a422c73"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>kde_accept_ct</b></td></tr>
+<tr class="separator:ae8876f6edcf14da9e8d090150a422c73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29597de471e010fcaeb17a4fec5b7b5d"><td class="memItemLeft" align="right" valign="top"><a id="a29597de471e010fcaeb17a4fec5b7b5d"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>kde_reject_ct</b></td></tr>
+<tr class="separator:a29597de471e010fcaeb17a4fec5b7b5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30af5faec6c465a22f57326ea1eb03f8"><td class="memItemLeft" align="right" valign="top"><a id="a30af5faec6c465a22f57326ea1eb03f8"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>fish_accept_ct</b></td></tr>
 <tr class="separator:a30af5faec6c465a22f57326ea1eb03f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -295,6 +418,12 @@ int *&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_accept_ct</b><
 <tr class="memitem:a48b82a051edaff63c138005dc63d92c6"><td class="memItemLeft" align="right" valign="top"><a id="a48b82a051edaff63c138005dc63d92c6"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_reject_ct</b></td></tr>
 <tr class="separator:a48b82a051edaff63c138005dc63d92c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a386078c26cc5d38ef8d347408739a1ba"><td class="memItemLeft" align="right" valign="top"><a id="a386078c26cc5d38ef8d347408739a1ba"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_accept_ct_per_dim</b></td></tr>
+<tr class="separator:a386078c26cc5d38ef8d347408739a1ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a188682400969c24b5f49210c14aeb679"><td class="memItemLeft" align="right" valign="top"><a id="a188682400969c24b5f49210c14aeb679"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>gauss_reject_ct_per_dim</b></td></tr>
+<tr class="separator:a188682400969c24b5f49210c14aeb679"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81162d7bc3335c9c63521ffffbf099d0"><td class="memItemLeft" align="right" valign="top"><a id="a81162d7bc3335c9c63521ffffbf099d0"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>mmala_accept_ct</b></td></tr>
 <tr class="separator:a81162d7bc3335c9c63521ffffbf099d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -319,6 +448,12 @@ int *&#160;</td><td class="memItemRight" valign="bottom"><b>step_accept_ct</b></
 <tr class="memitem:a1fba018ed13db917b7a9245fa8d544a0"><td class="memItemLeft" align="right" valign="top"><a id="a1fba018ed13db917b7a9245fa8d544a0"></a>
 int *&#160;</td><td class="memItemRight" valign="bottom"><b>step_reject_ct</b></td></tr>
 <tr class="separator:a1fba018ed13db917b7a9245fa8d544a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebc5353febfa61c25da61216179b4958"><td class="memItemLeft" align="right" valign="top"><a id="aebc5353febfa61c25da61216179b4958"></a>
+double *&#160;</td><td class="memItemRight" valign="bottom"><b>thermodynamic_integrated_likelihood</b></td></tr>
+<tr class="separator:aebc5353febfa61c25da61216179b4958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a229fc1e46fb8e6c99283b514ab280403"><td class="memItemLeft" align="right" valign="top"><a id="a229fc1e46fb8e6c99283b514ab280403"></a>
+int *&#160;</td><td class="memItemRight" valign="bottom"><b>thermodynamic_integrated_likelihood_terms</b></td></tr>
+<tr class="separator:a229fc1e46fb8e6c99283b514ab280403"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a400f96a645f947ac424700db5f0f0939"><td class="memItemLeft" align="right" valign="top"><a id="a400f96a645f947ac424700db5f0f0939"></a>
 double ***&#160;</td><td class="memItemRight" valign="bottom"><b>ll_lp_output</b></td></tr>
 <tr class="separator:a400f96a645f947ac424700db5f0f0939"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -334,23 +469,32 @@ int *&#160;</td><td class="memItemRight" valign="bottom"><b>A</b></td></tr>
 <tr class="memitem:afdcb7687d4e6f6d818795b916f2912cf"><td class="memItemLeft" align="right" valign="top"><a id="afdcb7687d4e6f6d818795b916f2912cf"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>PT_alloc</b> =false</td></tr>
 <tr class="separator:afdcb7687d4e6f6d818795b916f2912cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb3099184aaf673adc074a776a1dbaee"><td class="memItemLeft" align="right" valign="top"><a id="acb3099184aaf673adc074a776a1dbaee"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>linear_swapping</b> =true</td></tr>
+<tr class="separator:acb3099184aaf673adc074a776a1dbaee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa04bac8a01666df1e63f66106978fc0e"><td class="memItemLeft" align="right" valign="top"><a id="aa04bac8a01666df1e63f66106978fc0e"></a>
 int ***&#160;</td><td class="memItemRight" valign="bottom"><b>param_status</b></td></tr>
 <tr class="separator:aa04bac8a01666df1e63f66106978fc0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c09c38f1ffd39f3c919d2d261b2e8b2"><td class="memItemLeft" align="right" valign="top"><a id="a7c09c38f1ffd39f3c919d2d261b2e8b2"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>RJMCMC</b> =false</td></tr>
 <tr class="separator:a7c09c38f1ffd39f3c919d2d261b2e8b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae3db23d73eaaaab8ea75d2ccb0165b7a"><td class="memItemLeft" align="right" valign="top"><a id="ae3db23d73eaaaab8ea75d2ccb0165b7a"></a>
-std::function&lt; void(double *, double *, int *, int *, int, int, int, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>rj</b></td></tr>
-<tr class="separator:ae3db23d73eaaaab8ea75d2ccb0165b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a319323d9202deee92fc441cba31f5740"><td class="memItemLeft" align="right" valign="top"><a id="a319323d9202deee92fc441cba31f5740"></a>
+std::function&lt; void(double *, double *, int *, int *, int *, int *, double *, <a class="el" href="../../d6/d96/classmcmc__data__interface.html">mcmc_data_interface</a> *, void *)&gt;&#160;</td><td class="memItemRight" valign="bottom"><b>rj</b></td></tr>
+<tr class="separator:a319323d9202deee92fc441cba31f5740"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a687c0eee8242674ec836e6b3986fe1c4"><td class="memItemLeft" align="right" valign="top"><a id="a687c0eee8242674ec836e6b3986fe1c4"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>update_RJ_width</b> =true</td></tr>
 <tr class="separator:a687c0eee8242674ec836e6b3986fe1c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab6033798e7893a8c10f6105782462957"><td class="memItemLeft" align="right" valign="top"><a id="ab6033798e7893a8c10f6105782462957"></a>
+int **&#160;</td><td class="memItemRight" valign="bottom"><b>model_status</b> = NULL</td></tr>
+<tr class="separator:ab6033798e7893a8c10f6105782462957"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaddc96693ac3987dbcfc0bfcdb3d3ec"><td class="memItemLeft" align="right" valign="top"><a id="aeaddc96693ac3987dbcfc0bfcdb3d3ec"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>nested_model_number</b> = 0</td></tr>
+<tr class="separator:aeaddc96693ac3987dbcfc0bfcdb3d3ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Class storing everything that defines an instance of the sampler </p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/sperkins/git-repos/gw_analysis_tools/include/gwat/<a class="el" href="../../d5/dac/mcmc__sampler__internals_8h_source.html">mcmc_sampler_internals.h</a></li>
+<li><a class="el" href="../../d5/dac/mcmc__sampler__internals_8h_source.html">mcmc_sampler_internals.h</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->
