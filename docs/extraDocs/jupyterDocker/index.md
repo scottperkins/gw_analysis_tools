@@ -1,11 +1,3 @@
----
-author:
-	- Scott Perkins
-date: 2022-10-07
-title: "Hosting Jupyter Servers in Docker Containers"
----
-[Back](../index.html)
----
 
 Hosting jupyter servers in Docker containers can be extremely useful, ~~as this typically doesn't involve logging into the container at all,~~[^1] and you can just connect to your server in a browser.
 
