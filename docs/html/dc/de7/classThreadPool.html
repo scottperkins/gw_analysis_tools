@@ -71,18 +71,48 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a9db95eb853b96e4fc832514226b4ada3"><td class="memItemLeft" align="right" valign="top"><a id="a9db95eb853b96e4fc832514226b4ada3"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ThreadPool</b> (std::size_t numThreads)</td></tr>
 <tr class="separator:a9db95eb853b96e4fc832514226b4ada3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5668e14f51d040d3017da2e0df8df99f"><td class="memItemLeft" align="right" valign="top"><a id="a5668e14f51d040d3017da2e0df8df99f"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>queue_length</b> ()</td></tr>
+<tr class="separator:a5668e14f51d040d3017da2e0df8df99f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af330bc84a5eabc49dd4790e5879ebab2"><td class="memItemLeft" align="right" valign="top"><a id="af330bc84a5eabc49dd4790e5879ebab2"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>queue_swap_length</b> ()</td></tr>
+<tr class="separator:af330bc84a5eabc49dd4790e5879ebab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb555646fc89d7fa475e1e907f308118"><td class="memItemLeft" align="right" valign="top"><a id="acb555646fc89d7fa475e1e907f308118"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>queue_swap_element</b> (int i)</td></tr>
+<tr class="separator:acb555646fc89d7fa475e1e907f308118"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad225fa20b46b0ff0a0b97445310e4196"><td class="memItemLeft" align="right" valign="top"><a id="ad225fa20b46b0ff0a0b97445310e4196"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>queue_pairs_length</b> ()</td></tr>
+<tr class="separator:ad225fa20b46b0ff0a0b97445310e4196"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbf85eec6d088b068301338e470a9723"><td class="memItemLeft" align="right" valign="top"><a id="adbf85eec6d088b068301338e470a9723"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>enqueue</b> (int i)</td></tr>
 <tr class="separator:adbf85eec6d088b068301338e470a9723"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a994fe1f721ed7275391d16089b4a7d08"><td class="memItemLeft" align="right" valign="top"><a id="a994fe1f721ed7275391d16089b4a7d08"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>step_queue_empty</b> ()</td></tr>
+<tr class="separator:a994fe1f721ed7275391d16089b4a7d08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8af0db8ce31440feb6921bf13e185d2b"><td class="memItemLeft" align="right" valign="top"><a id="a8af0db8ce31440feb6921bf13e185d2b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>step_queue_pop</b> ()</td></tr>
+<tr class="separator:a8af0db8ce31440feb6921bf13e185d2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa12ba56f5f860454c6d50d74a81e254a"><td class="memItemLeft" align="right" valign="top"><a id="aa12ba56f5f860454c6d50d74a81e254a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>swap_pop</b> ()</td></tr>
+<tr class="separator:aa12ba56f5f860454c6d50d74a81e254a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68826d3070757ae2089f1d4d5cdde966"><td class="memItemLeft" align="right" valign="top"><a id="a68826d3070757ae2089f1d4d5cdde966"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>pair_pop</b> ()</td></tr>
+<tr class="separator:a68826d3070757ae2089f1d4d5cdde966"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd64225bd86aa5cf7a7889c75413167e"><td class="memItemLeft" align="right" valign="top"><a id="acd64225bd86aa5cf7a7889c75413167e"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>enqueue_swap</b> (int i)</td></tr>
 <tr class="separator:acd64225bd86aa5cf7a7889c75413167e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61bfe9c7c5b4743ff1f1a20548f26327"><td class="memItemLeft" align="right" valign="top"><a id="a61bfe9c7c5b4743ff1f1a20548f26327"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>match_swap_pairs</b> (int i)</td></tr>
+<tr class="separator:a61bfe9c7c5b4743ff1f1a20548f26327"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72adf6209254ae9e21504313a518b6ee"><td class="memItemLeft" align="right" valign="top"><a id="a72adf6209254ae9e21504313a518b6ee"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>flush_swap_queue</b> ()</td></tr>
+<tr class="separator:a72adf6209254ae9e21504313a518b6ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab85f3bf5998e7bd213326dab9895504d"><td class="memItemLeft" align="right" valign="top"><a id="ab85f3bf5998e7bd213326dab9895504d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>public_stop</b> ()</td></tr>
 <tr class="separator:ab85f3bf5998e7bd213326dab9895504d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/sperkins/git-repos/gw_analysis_tools/src/<a class="el" href="../../d6/dd4/mcmc__sampler_8cpp.html">mcmc_sampler.cpp</a></li>
+<li><a class="el" href="../../d6/dd4/mcmc__sampler_8cpp.html">mcmc_sampler.cpp</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

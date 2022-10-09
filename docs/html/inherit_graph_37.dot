@@ -1,0 +1,7 @@
+digraph "Graphical Class Hierarchy"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir="LR";
+  Node0 [label="threaded_ac_jobs_fft",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$d3/d8e/classthreaded__ac__jobs__fft.html",tooltip="Class to contain spectral method jobs. "];
+}

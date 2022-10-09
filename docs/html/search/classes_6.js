@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['imrphenomd',['IMRPhenomD',['../d2/d3d/classIMRPhenomD.html',1,'']]],
-  ['imrphenompv2',['IMRPhenomPv2',['../d5/dc6/classIMRPhenomPv2.html',1,'']]]
+  ['helper_5fparams',['helper_params',['../d4/d7b/structhelper__params.html',1,'']]]
 ];

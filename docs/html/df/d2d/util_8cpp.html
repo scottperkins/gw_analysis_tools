@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>GW Analysis Tools: /home/sperkins/git-repos/gw_analysis_tools/src/util.cpp File Reference</title>
+<title>GW Analysis Tools: util.cpp File Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -58,7 +58,7 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="../../dir_43e0a1f539e00dcfa1a6bc4d4fee4fc2.html">home</a></li><li class="navelem"><a class="el" href="../../dir_05763022fa33e3065e9809939cf9166c.html">sperkins</a></li><li class="navelem"><a class="el" href="../../dir_bc1834953964e345887f25430c2e94dd.html">git-repos</a></li><li class="navelem"><a class="el" href="../../dir_e06a4dc853c92bbcc61892af6ebfd7a2.html">gw_analysis_tools</a></li><li class="navelem"><a class="el" href="../../dir_1da235ee0321c9aa3fa0bef392be1357.html">src</a></li>  </ul>
+<li class="navelem"><a class="el" href="../../dir_2c182482f19e61a686e206393a2f1187.html">gw_analysis_tools</a></li><li class="navelem"><a class="el" href="../../dir_9a37d7f8dbcaf32ecae6a8c00cd3ff0c.html">src</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
@@ -89,15 +89,32 @@ $(function() {
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for util.cpp:</div>
 <div class="dyncontent">
-<div class="center"><img src="../../dd/d53/util_8cpp__incl.png" border="0" usemap="#_2home_2sperkins_2git-repos_2gw__analysis__tools_2src_2util_8cpp" alt=""/></div>
-<map name="_2home_2sperkins_2git-repos_2gw__analysis__tools_2src_2util_8cpp" id="_2home_2sperkins_2git-repos_2gw__analysis__tools_2src_2util_8cpp">
-<area shape="rect" id="node2" href="../../d8/d3c/util_8h.html" title="util.h" alt="" coords="370,109,421,136"/>
-<area shape="rect" id="node12" href="../../df/d2b/D__Z__Config_8h.html" title="D_Z_Config.h" alt="" coords="783,109,885,136"/>
-</map>
+<div class="center"><img src="../../dd/d53/util_8cpp__incl.png" border="0" usemap="#util_8cpp" alt=""/></div>
+<!-- MAP 0 -->
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ac16b65702a62eb46bc54c817d6fb83f9"><td class="memItemLeft" align="right" valign="top"><a id="ac16b65702a62eb46bc54c817d6fb83f9"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>gsl_LU_lndet</b> (double **matrix, int dim)</td></tr>
+<tr class="separator:ac16b65702a62eb46bc54c817d6fb83f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4351866bba668c0b3b869ea242d1ddd"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#aa4351866bba668c0b3b869ea242d1ddd">mvn_sample</a> (int samples, double *mean, double **cov, int dim, double **output)</td></tr>
+<tr class="separator:aa4351866bba668c0b3b869ea242d1ddd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c101c323b224010c894cc8e1b90d57f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a1c101c323b224010c894cc8e1b90d57f">mvn_sample</a> (int samples, double *mean, double **cov, int dim, gsl_rng *r, double **output)</td></tr>
+<tr class="memdesc:a1c101c323b224010c894cc8e1b90d57f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Samples from a multivariate-gaussian with covariance cov and mean mean, with dimension dim and puts the output in output Taken from blogpost: <a href="https://juanitorduz.github.io/multivariate_normal/">https://juanitorduz.github.io/multivariate_normal/</a>.  <a href="#a1c101c323b224010c894cc8e1b90d57f">More...</a><br /></td></tr>
+<tr class="separator:a1c101c323b224010c894cc8e1b90d57f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7fa9c0c5b0651c57a06f72d33e616aa"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:ae7fa9c0c5b0651c57a06f72d33e616aa"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#ae7fa9c0c5b0651c57a06f72d33e616aa">check_list</a> (int j, int *list, int length)</td></tr>
+<tr class="memdesc:ae7fa9c0c5b0651c57a06f72d33e616aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Just a quick utility to see if an item is in a list.  <a href="#ae7fa9c0c5b0651c57a06f72d33e616aa">More...</a><br /></td></tr>
+<tr class="separator:ae7fa9c0c5b0651c57a06f72d33e616aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba7681dc472883486d537e2367161089"><td class="memTemplParams" colspan="2"><a id="aba7681dc472883486d537e2367161089"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:aba7681dc472883486d537e2367161089"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>check_list</b> (std::string j, std::string *list, int length)</td></tr>
+<tr class="separator:aba7681dc472883486d537e2367161089"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe312a5d2dc5422b85bf620f99fdb0cb"><td class="memTemplParams" colspan="2"><a id="abe312a5d2dc5422b85bf620f99fdb0cb"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:abe312a5d2dc5422b85bf620f99fdb0cb"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><b>check_list</b> (double j, double *list, int length)</td></tr>
+<tr class="separator:abe312a5d2dc5422b85bf620f99fdb0cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a918c1d3fafe5813a817cbc04fb3a3850"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a918c1d3fafe5813a817cbc04fb3a3850">matrix_multiply</a> (double **A, double **B, double **C, int dim1, int dim2, int dim3)</td></tr>
 <tr class="memdesc:a918c1d3fafe5813a817cbc04fb3a3850"><td class="mdescLeft">&#160;</td><td class="mdescRight">Matrix multiplication.  <a href="#a918c1d3fafe5813a817cbc04fb3a3850">More...</a><br /></td></tr>
 <tr class="separator:a918c1d3fafe5813a817cbc04fb3a3850"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -109,6 +126,10 @@ template&lt;&gt; </td></tr>
 template&lt;&gt; </td></tr>
 <tr class="memitem:ac52d561dbfb1f3194ede61439953fd2d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>debugger_print</b> (const char *file, const int line, const char *message)</td></tr>
 <tr class="separator:ac52d561dbfb1f3194ede61439953fd2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f6dfe1de40c19763e816aeb52c964f5"><td class="memTemplParams" colspan="2"><a id="a9f6dfe1de40c19763e816aeb52c964f5"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a9f6dfe1de40c19763e816aeb52c964f5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>debugger_print</b> (const char *file, const int line, char *message)</td></tr>
+<tr class="separator:a9f6dfe1de40c19763e816aeb52c964f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af164bc1305923ef7233d8777cf8171fa"><td class="memTemplParams" colspan="2"><a id="af164bc1305923ef7233d8777cf8171fa"></a>
 template&lt;&gt; </td></tr>
 <tr class="memitem:af164bc1305923ef7233d8777cf8171fa"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>debugger_print</b> (const char *file, const int line, int message)</td></tr>
@@ -192,16 +213,13 @@ template adouble&#160;</td><td class="memItemRight" valign="bottom"><b>copysign_
 <tr class="memitem:aa3b3e1ddc0801e2dcfa09d5683936817"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#aa3b3e1ddc0801e2dcfa09d5683936817">rm_fisher_dim</a> (double **input, int full_dim, double **output, int reduced_dim, int *removed_dims)</td></tr>
 <tr class="memdesc:aa3b3e1ddc0801e2dcfa09d5683936817"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a dimension from a matrix (made with fishers in mind, but this is general)  <a href="#aa3b3e1ddc0801e2dcfa09d5683936817">More...</a><br /></td></tr>
 <tr class="separator:aa3b3e1ddc0801e2dcfa09d5683936817"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a139992818028af23fffd9f573f5c8814"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a139992818028af23fffd9f573f5c8814">vector_union</a> (std::vector&lt; double &gt; A, std::vector&lt; double &gt; B, std::vector&lt; double &gt; *C)</td></tr>
+<tr class="memdesc:a139992818028af23fffd9f573f5c8814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds union of two lists which have been pre-sorted. Returns the union, also sorted.  <a href="#a139992818028af23fffd9f573f5c8814">More...</a><br /></td></tr>
+<tr class="separator:a139992818028af23fffd9f573f5c8814"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9d0768e0355feef9d4d9681e6eed27b4"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a9d0768e0355feef9d4d9681e6eed27b4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a9d0768e0355feef9d4d9681e6eed27b4">list_intersect_ptrs</a> (T **A, int lenA, T **B, int lenB, T **C, int *lenC)</td></tr>
-<tr class="memdesc:a9d0768e0355feef9d4d9681e6eed27b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Custom list-interesction implementation for sorted lists.  <a href="#a9d0768e0355feef9d4d9681e6eed27b4">More...</a><br /></td></tr>
+<tr class="memdesc:a9d0768e0355feef9d4d9681e6eed27b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">SHOULDN'T BE USED FOR DOUBLESCustom list-interesction implementation for sorted lists.  <a href="#a9d0768e0355feef9d4d9681e6eed27b4">More...</a><br /></td></tr>
 <tr class="separator:a9d0768e0355feef9d4d9681e6eed27b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27374164e2005c1ca170f7586817e66a"><td class="memItemLeft" align="right" valign="top"><a id="a27374164e2005c1ca170f7586817e66a"></a>
-template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_ptrs&lt; double &gt;</b> (double **, int, double **, int, double **, int *)</td></tr>
-<tr class="separator:a27374164e2005c1ca170f7586817e66a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60d139eb80a03e095f710aa1c887af39"><td class="memItemLeft" align="right" valign="top"><a id="a60d139eb80a03e095f710aa1c887af39"></a>
-template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_ptrs&lt; adouble &gt;</b> (adouble **, int, adouble **, int, adouble **, int *)</td></tr>
-<tr class="separator:a60d139eb80a03e095f710aa1c887af39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a456f6392ae12f52dcf78b4fea952940a"><td class="memItemLeft" align="right" valign="top"><a id="a456f6392ae12f52dcf78b4fea952940a"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_ptrs&lt; int &gt;</b> (int **, int, int **, int, int **, int *)</td></tr>
 <tr class="separator:a456f6392ae12f52dcf78b4fea952940a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,22 +230,10 @@ template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_interse
 <tr class="memitem:a599977e7f7dc2531edd0c6685926e4b8"><td class="memItemLeft" align="right" valign="top"><a id="a599977e7f7dc2531edd0c6685926e4b8"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect&lt; double &gt;</b> (double *, int, double *, int, double **, int *)</td></tr>
 <tr class="separator:a599977e7f7dc2531edd0c6685926e4b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acf288d7230f786abf3b98eab3bf1b451"><td class="memItemLeft" align="right" valign="top"><a id="acf288d7230f786abf3b98eab3bf1b451"></a>
-template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect&lt; adouble &gt;</b> (adouble *, int, adouble *, int, adouble **, int *)</td></tr>
-<tr class="separator:acf288d7230f786abf3b98eab3bf1b451"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79c2688dc6d09b4aee47618cd5340819"><td class="memItemLeft" align="right" valign="top"><a id="a79c2688dc6d09b4aee47618cd5340819"></a>
-template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect&lt; int &gt;</b> (int *, int, int *, int, int **, int *)</td></tr>
-<tr class="separator:a79c2688dc6d09b4aee47618cd5340819"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a52ba97982df939cea3191098152fbbb2"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:a52ba97982df939cea3191098152fbbb2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a52ba97982df939cea3191098152fbbb2">list_intersect_value</a> (T *A, int lenA, T *B, int lenB, T *C, int *lenC)</td></tr>
 <tr class="memdesc:a52ba97982df939cea3191098152fbbb2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Custom list-interesction implementation for sorted lists.  <a href="#a52ba97982df939cea3191098152fbbb2">More...</a><br /></td></tr>
 <tr class="separator:a52ba97982df939cea3191098152fbbb2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6595995bb36502886b5790314ab1c855"><td class="memItemLeft" align="right" valign="top"><a id="a6595995bb36502886b5790314ab1c855"></a>
-template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_value&lt; double &gt;</b> (double *, int, double *, int, double *, int *)</td></tr>
-<tr class="separator:a6595995bb36502886b5790314ab1c855"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adac1189401a0dbb723d0e2aac2316bc7"><td class="memItemLeft" align="right" valign="top"><a id="adac1189401a0dbb723d0e2aac2316bc7"></a>
-template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_value&lt; adouble &gt;</b> (adouble *, int, adouble *, int, adouble *, int *)</td></tr>
-<tr class="separator:adac1189401a0dbb723d0e2aac2316bc7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56ca227b8f67a76bb2d163d7367e1b46"><td class="memItemLeft" align="right" valign="top"><a id="a56ca227b8f67a76bb2d163d7367e1b46"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>list_intersect_value&lt; int &gt;</b> (int *, int, int *, int, int *, int *)</td></tr>
 <tr class="separator:a56ca227b8f67a76bb2d163d7367e1b46"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -263,29 +269,13 @@ template void&#160;</td><td class="memItemRight" valign="bottom"><b>variance_lis
 <tr class="memitem:aeb4fa13bbdfa288408f0f146a6614f44"><td class="memItemLeft" align="right" valign="top"><a id="aeb4fa13bbdfa288408f0f146a6614f44"></a>
 template void&#160;</td><td class="memItemRight" valign="bottom"><b>variance_list&lt; int, adouble &gt;</b> (int *, int, adouble *)</td></tr>
 <tr class="separator:aeb4fa13bbdfa288408f0f146a6614f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9631c2bd8b5493af4df2528a44886fc6"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:a9631c2bd8b5493af4df2528a44886fc6"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a9631c2bd8b5493af4df2528a44886fc6">check_list</a> (T j, T *list, int length)</td></tr>
-<tr class="memdesc:a9631c2bd8b5493af4df2528a44886fc6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Just a quick utility to see if an item is in a list.  <a href="#a9631c2bd8b5493af4df2528a44886fc6">More...</a><br /></td></tr>
-<tr class="separator:a9631c2bd8b5493af4df2528a44886fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a29532c684375047abca8ad29d2290c"><td class="memItemLeft" align="right" valign="top"><a id="a7a29532c684375047abca8ad29d2290c"></a>
-template bool&#160;</td><td class="memItemRight" valign="bottom"><b>check_list&lt; int &gt;</b> (int, int *, int)</td></tr>
-<tr class="separator:a7a29532c684375047abca8ad29d2290c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abcd981405b40454bda795d30ce1fc180"><td class="memItemLeft" align="right" valign="top"><a id="abcd981405b40454bda795d30ce1fc180"></a>
-template bool&#160;</td><td class="memItemRight" valign="bottom"><b>check_list&lt; double &gt;</b> (double, double *, int)</td></tr>
-<tr class="separator:abcd981405b40454bda795d30ce1fc180"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4f8da3b695ecff6a5d37dc1f360b5cbc"><td class="memItemLeft" align="right" valign="top"><a id="a4f8da3b695ecff6a5d37dc1f360b5cbc"></a>
-template bool&#160;</td><td class="memItemRight" valign="bottom"><b>check_list&lt; std::string &gt;</b> (std::string, std::string *, int)</td></tr>
-<tr class="separator:a4f8da3b695ecff6a5d37dc1f360b5cbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af81850392cb5ff136ea8d334952844e0"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:af81850392cb5ff136ea8d334952844e0"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#af81850392cb5ff136ea8d334952844e0">check_list_id</a> (T j, T *list, int length)</td></tr>
-<tr class="memdesc:af81850392cb5ff136ea8d334952844e0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Just a quick utility to see if an item is in a list.  <a href="#af81850392cb5ff136ea8d334952844e0">More...</a><br /></td></tr>
-<tr class="separator:af81850392cb5ff136ea8d334952844e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81db2a61b2881d4fe2b7fd12800e077e"><td class="memItemLeft" align="right" valign="top"><a id="a81db2a61b2881d4fe2b7fd12800e077e"></a>
-template int&#160;</td><td class="memItemRight" valign="bottom"><b>check_list_id&lt; int &gt;</b> (int, int *, int)</td></tr>
-<tr class="separator:a81db2a61b2881d4fe2b7fd12800e077e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66acb2ab31057167bc82b7031e7a7b0b"><td class="memItemLeft" align="right" valign="top"><a id="a66acb2ab31057167bc82b7031e7a7b0b"></a>
-template int&#160;</td><td class="memItemRight" valign="bottom"><b>check_list_id&lt; double &gt;</b> (double, double *, int)</td></tr>
-<tr class="separator:a66acb2ab31057167bc82b7031e7a7b0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb291321dee3d3ae3e1834a5ccbbc006"><td class="memTemplParams" colspan="2">template&lt;&gt; </td></tr>
+<tr class="memitem:aeb291321dee3d3ae3e1834a5ccbbc006"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#aeb291321dee3d3ae3e1834a5ccbbc006">check_list_id</a> (int j, int *list, int length)</td></tr>
+<tr class="memdesc:aeb291321dee3d3ae3e1834a5ccbbc006"><td class="mdescLeft">&#160;</td><td class="mdescRight">Just a quick utility to see if an item is in a list.  <a href="#aeb291321dee3d3ae3e1834a5ccbbc006">More...</a><br /></td></tr>
+<tr class="separator:aeb291321dee3d3ae3e1834a5ccbbc006"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeef8addb40e9069e4c3cd34126faf16b"><td class="memItemLeft" align="right" valign="top"><a id="aeef8addb40e9069e4c3cd34126faf16b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>check_list_id</b> (double j, double *list, int length)</td></tr>
+<tr class="separator:aeef8addb40e9069e4c3cd34126faf16b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11145d2a037fa94ed58393c6f9b7eb6d"><td class="memTemplParams" colspan="2"><a id="a11145d2a037fa94ed58393c6f9b7eb6d"></a>
 template&lt;class T &gt; </td></tr>
 <tr class="memitem:a11145d2a037fa94ed58393c6f9b7eb6d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gsl_LU_matrix_invert</b> (T **input, T **inverse, int dim)</td></tr>
@@ -406,6 +396,18 @@ adouble&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_mass1</b
 <tr class="memitem:adb85ce9fbb2e3a438dd41a35c38a3237"><td class="memItemLeft" align="right" valign="top"><a id="adb85ce9fbb2e3a438dd41a35c38a3237"></a>
 adouble&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_mass2</b> (adouble chirpmass, adouble eta)</td></tr>
 <tr class="separator:adb85ce9fbb2e3a438dd41a35c38a3237"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a888a9fa1b2ade494d8e933782ff80dfe"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a888a9fa1b2ade494d8e933782ff80dfe">calculate_mass1_Mcq</a> (double chirpmass, double q)</td></tr>
+<tr class="memdesc:a888a9fa1b2ade494d8e933782ff80dfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the larger mass given a chirp mass and asymmetric mass ratio.  <a href="#a888a9fa1b2ade494d8e933782ff80dfe">More...</a><br /></td></tr>
+<tr class="separator:a888a9fa1b2ade494d8e933782ff80dfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab011148666d4d27e4489a2d57a40419"><td class="memItemLeft" align="right" valign="top"><a id="aab011148666d4d27e4489a2d57a40419"></a>
+adouble&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_mass1_Mcq</b> (adouble chirpmass, adouble q)</td></tr>
+<tr class="separator:aab011148666d4d27e4489a2d57a40419"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab6830a77bff79cda4371fa2f9d3c97e"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#aab6830a77bff79cda4371fa2f9d3c97e">calculate_mass2_Mcq</a> (double chirpmass, double q)</td></tr>
+<tr class="memdesc:aab6830a77bff79cda4371fa2f9d3c97e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the smaller mass given a chirp mass and asymmetric mass ratio.  <a href="#aab6830a77bff79cda4371fa2f9d3c97e">More...</a><br /></td></tr>
+<tr class="separator:aab6830a77bff79cda4371fa2f9d3c97e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1b9406351d1a583c36cffc8f3df340a"><td class="memItemLeft" align="right" valign="top"><a id="ad1b9406351d1a583c36cffc8f3df340a"></a>
+adouble&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_mass2_Mcq</b> (adouble chirpmass, adouble q)</td></tr>
+<tr class="separator:ad1b9406351d1a583c36cffc8f3df340a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae40cc3f267c33745a8a2485638d5db55"><td class="memItemLeft" align="right" valign="top"><a id="ae40cc3f267c33745a8a2485638d5db55"></a>
 long&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#ae40cc3f267c33745a8a2485638d5db55">factorial</a> (long num)</td></tr>
 <tr class="memdesc:ae40cc3f267c33745a8a2485638d5db55"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local function to calculate a factorial. <br /></td></tr>
@@ -448,6 +450,9 @@ int ***&#160;</td><td class="memItemRight" valign="bottom"><b>allocate_3D_array_
 <tr class="memitem:a002ad8ebbc188a3131bdc4ae82ac99ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#a002ad8ebbc188a3131bdc4ae82ac99ca">deallocate_3D_array</a> (int ***array, int dim1, int dim2, int dim3)</td></tr>
 <tr class="memdesc:a002ad8ebbc188a3131bdc4ae82ac99ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility to free malloc'd 2D array.  <a href="#a002ad8ebbc188a3131bdc4ae82ac99ca">More...</a><br /></td></tr>
 <tr class="separator:a002ad8ebbc188a3131bdc4ae82ac99ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c7112c0647eba3f134d659cd97d4c97"><td class="memItemLeft" align="right" valign="top"><a id="a5c7112c0647eba3f134d659cd97d4c97"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>hann_window</b> (double *window, int length)</td></tr>
+<tr class="separator:a5c7112c0647eba3f134d659cd97d4c97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adcfd6e3f070e3c9bdae4a7cd03570f67"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d2d/util_8cpp.html#adcfd6e3f070e3c9bdae4a7cd03570f67">tukey_window</a> (double *window, int length, double alpha)</td></tr>
 <tr class="memdesc:adcfd6e3f070e3c9bdae4a7cd03570f67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tukey window function for FFTs.  <a href="#adcfd6e3f070e3c9bdae4a7cd03570f67">More...</a><br /></td></tr>
 <tr class="separator:adcfd6e3f070e3c9bdae4a7cd03570f67"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -710,6 +715,37 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="a888a9fa1b2ade494d8e933782ff80dfe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a888a9fa1b2ade494d8e933782ff80dfe">&#9670;&nbsp;</a></span>calculate_mass1_Mcq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double calculate_mass1_Mcq </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>chirpmass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>q</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates the larger mass given a chirp mass and asymmetric mass ratio. </p>
+<p>Units of the output match the units of the input chirp mass </p>
+
+</div>
+</div>
 <a id="a5f62f4a7c1011180080d72e0032cef1b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5f62f4a7c1011180080d72e0032cef1b">&#9670;&nbsp;</a></span>calculate_mass2()</h2>
 
@@ -737,6 +773,37 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 
 <p>Calculates the smaller mass given a chirp mass and symmetric mass ratio. </p>
+<p>Units of the output match the units of the input chirp mass </p>
+
+</div>
+</div>
+<a id="aab6830a77bff79cda4371fa2f9d3c97e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aab6830a77bff79cda4371fa2f9d3c97e">&#9670;&nbsp;</a></span>calculate_mass2_Mcq()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double calculate_mass2_Mcq </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>chirpmass</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>q</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates the smaller mass given a chirp mass and asymmetric mass ratio. </p>
 <p>Units of the output match the units of the input chirp mass </p>
 
 </div>
@@ -816,24 +883,24 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="a9631c2bd8b5493af4df2528a44886fc6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9631c2bd8b5493af4df2528a44886fc6">&#9670;&nbsp;</a></span>check_list()</h2>
+<a id="ae7fa9c0c5b0651c57a06f72d33e616aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae7fa9c0c5b0651c57a06f72d33e616aa">&#9670;&nbsp;</a></span>check_list()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T &gt; </div>
+template&lt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">bool check_list </td>
           <td>(</td>
-          <td class="paramtype">T&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>j</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">T *&#160;</td>
+          <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>list</em>, </td>
         </tr>
         <tr>
@@ -855,24 +922,24 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
-<a id="af81850392cb5ff136ea8d334952844e0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af81850392cb5ff136ea8d334952844e0">&#9670;&nbsp;</a></span>check_list_id()</h2>
+<a id="aeb291321dee3d3ae3e1834a5ccbbc006"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb291321dee3d3ae3e1834a5ccbbc006">&#9670;&nbsp;</a></span>check_list_id()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T &gt; </div>
+template&lt;&gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">int check_list_id </td>
           <td>(</td>
-          <td class="paramtype">T&#160;</td>
+          <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>j</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">T *&#160;</td>
+          <td class="paramtype">int *&#160;</td>
           <td class="paramname"><em>list</em>, </td>
         </tr>
         <tr>
@@ -1538,7 +1605,7 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>Custom list-interesction implementation for sorted lists. </p>
+<p>SHOULDN'T BE USED FOR DOUBLESCustom list-interesction implementation for sorted lists. </p>
 <p>Uses pointers for efficiency &ndash; NOT COPIED &ndash; used std library for that</p>
 <p>Takes A and B and puts the intersection in C &ndash; C = A /\ B</p>
 <p>Takes the length of C and puts it in lenC</p>
@@ -1661,6 +1728,118 @@ template&lt;class T &gt; </div>
 <p>Matrix multiplication. </p>
 <p>Takes A &ndash; [dim1,dim2], B &ndash; [dim2,dim3], and produces C &ndash; [dim1,dim3]</p>
 <p>Arrays should be pre-allocated </p>
+
+</div>
+</div>
+<a id="aa4351866bba668c0b3b869ea242d1ddd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa4351866bba668c0b3b869ea242d1ddd">&#9670;&nbsp;</a></span>mvn_sample() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mvn_sample </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>mean</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&#160;</td>
+          <td class="paramname"><em>cov</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dim</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Size [samples][dim] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1c101c323b224010c894cc8e1b90d57f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1c101c323b224010c894cc8e1b90d57f">&#9670;&nbsp;</a></span>mvn_sample() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int mvn_sample </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>samples</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *&#160;</td>
+          <td class="paramname"><em>mean</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&#160;</td>
+          <td class="paramname"><em>cov</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>dim</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">gsl_rng *&#160;</td>
+          <td class="paramname"><em>r</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double **&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Samples from a multivariate-gaussian with covariance cov and mean mean, with dimension dim and puts the output in output Taken from blogpost: <a href="https://juanitorduz.github.io/multivariate_normal/">https://juanitorduz.github.io/multivariate_normal/</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Size [samples][dim] </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2237,6 +2416,43 @@ template&lt;class T &gt; </div>
 <p>Unwrap angles from arctan. </p>
 <p>Stolen from stack exchange.. <a href="https://stackoverflow.com/questions/15634400/continous-angles-in-c-eq-unwrap-function-in-matlab">https://stackoverflow.com/questions/15634400/continous-angles-in-c-eq-unwrap-function-in-matlab</a></p>
 <p>Modified </p>
+
+</div>
+</div>
+<a id="a139992818028af23fffd9f573f5c8814"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a139992818028af23fffd9f573f5c8814">&#9670;&nbsp;</a></span>vector_union()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void vector_union </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt;&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt;&#160;</td>
+          <td class="paramname"><em>B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; *&#160;</td>
+          <td class="paramname"><em>C</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Finds union of two lists which have been pre-sorted. Returns the union, also sorted. </p>
+<p>Allocates memory for C, needs to be deallocated </p>
 
 </div>
 </div>

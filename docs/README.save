@@ -1,0 +1,124 @@
+/*! \file
+
+*/
+
+/*! \mainpage Gravitational Waves Analysis Tools
+
+A suite of analysis tools useful for gravitational wave science. All code is written in C++, with some of the interface classes wrapped in Cython to allow for python-access.
+
+\section compat Compatibility
+
+Known to work with gcc/g++-7
+
+Known to work with gcc/g++-9
+
+DOES NOT WORK WITH gcc/g++-10 (tested on macOS)
+
+(optional) nvcc -- known to work with v9.1 of CUDA 
+
+Need GSL-2.6 or higher
+
+\section external_libs Required Software
+
+Required non-standard C libraries:
+FFTW3
+ADOL-C -- (must be compiled with OpenMP option)
+GSL
+(optional) CUDA
+HDF5
+
+Required non-standard packages for documentation:
+(optional) Doxygen
+
+CMAKE
+
+\section dev Current Development
+NOTE: currently using static parameters to share data between threads for mcmc_gw.cpp. This could cause issues when running multiple samplers at the same time. Investigating further.
+
+To do: 
+
+Change MCMC_MH to use the more general threadPool class instead of a custom threadpool, incorporate job class and comparator
+
+\section installation Installation
+For proper compilation, update or create the enviornment variables CPATH, LIBRARY_PATH,and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries. 
+
+Also, the PYTHONPATH environment variables must point to $(PROJECT_DIR)/gw_analysis_tools_py/src because I can't figure how to get this shit to work.
+
+In the root directory of the project, run 'make' to compile source files, create the library file and create the cython modules, and create the documentation.
+
+To just create C++/C files, run 'make c'.
+
+Run 'make test' to build a test program that will create an executable.
+
+\section functionality Supported Functionality 
+
+\subsection cmdtools Command Line Tools
+
+bin/mcmc_gw_tool -- executable that takes in a parameter file and runs an MCMC on LOSC data for parameter estimation -- See mcmc_gw_tool.cpp for documentation
+
+\subsection wave_gen Waveform Generation
+IMRPhenomD, IMRPhenomPv2
+
+\subsection mod_grav Modified Gravity
+ppE_IMRPhenomD_Inspiral ppE_IMRPhenomD_IMR ppE_IMRPhenomPv2_Inspiral ppE_IMRPhenomPv2_IMR 
+
+\subsection fisher Fisher Analysis
+utilizes the above waveform templates
+
+\subsection mcmc MCMC Routines
+Has a generic MCMC sampler, MCMC_MH, that utilizes gaussian steps, differential evolution steps, and Fisher informed steps. Includes wrapping MCMC_MH_GW for GW specific sampling, currently only for one detector. 
+
+Includes log likelihood caclulation for implementation in other samplers.
+
+Red flags to look for when using the sampler: Chains of equal temperatures with drastically different swap acceptance -- for cold chains especially, this could mean the chain is in a very different part of parameter space than the true maximum. Look at log likelihood and prior values. (Currently under investigation) -- Known to not have good exploration, so make your initial state as close to the true values as possible. If strange artifacts show up in chains, look to likelihood and prior values. Could be bad exploration for initial run. May want to run short runs to try and find the global max before running a long run.
+
+\section usage Usage
+
+\subsection var Environment variables
+The environment variable PYTHONPATH should include the directory \$(PROJECT_DIR)
+
+\subsection include Include
+To include header files, use -I\$(PROJECT_DIRECTORY)/include
+
+\subsection link Link
+To link object files, use -L\$(PROJECT_DIRECTORY)/lib -lgwat (the -L command is un-needed if you add $(PROJECT_DIRECTORY)/lib to the environment variable CPATH)
+
+For dynamic linking, the following environment variables for Linux (MacOs) should be updated to include $(PROJECT_DIRECTORY)/lib -- LD_LIBRARY_PATH (DYLD_LIBRARY_PATH)
+
+For Cuda code: use -lcuda -lcudart 
+
+For Cuda, may need to link to /usr/local/cuda/lib64/ (or wherever this library is on your machine)
+
+\subsection py Python Importable Code
+
+Two modules currently available:
+
+\subsubsection mcmcpy gw_analysis_tools_py.mcmc_routines_ext
+	
+mcmc_routines_ext.pyx wraps the log_likelihood functions in mcmc_routines.cpp
+
+\subsubsection wavegenpy gw_analysis_tools_py.waveform_generator_ext
+
+waveform_generator_ext.pyx wraps the fourier_waveform function in waveform_generator.cpp
+
+Also contains the SNR calculation function
+
+\subsubsection adding_waveforms Custom Waveforms
+
+If adding waveforms and to have full accesibility:
+
+Create class, using other waveforms as template -- need interface to create full waveform (plus,cross polarization), and amplitude/phase
+
+Add the option as a waveform to waveform_generation.cpp, including the header file at the top of the waveform_generation.cpp file
+
+Add option to check_mod in util.h if applicable.
+
+For Fishers and MCMC -- write the class as a template with double and adouble types for all variables. Add the option to unpack_parameters, repack_parameters, and repack_non_parameters. Add `MCMC_'' if using MCMC-specific version separate from the fisher version.
+
+
+
+
+\author Scott Perkins
+
+Contact: scottep3@illinois.edu
+*/

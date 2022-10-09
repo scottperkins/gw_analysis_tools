@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['_7emcr_5fsampler',['~mcr_sampler',['../d1/df3/classmcr__sampler.html#af1dc1bfe87a15819731e8082751ae224',1,'mcr_sampler']]],
-  ['_7ethreadpool',['~threadPool',['../d9/d72/classthreadPool.html#abf95d0e451e758582920dc8ddf8a0602',1,'threadPool']]]
+  ['x',['X',['../dc/d7e/classTaylorT2.html#a40a3df28156b3ad4a9d9855ac287f96c',1,'TaylorT2']]],
+  ['xlalspinweightedsphericalharmonic',['XLALSpinWeightedSphericalHarmonic',['../df/d2d/util_8cpp.html#af9aa77c0f12435f4c7e9f13dba8ca1f8',1,'XLALSpinWeightedSphericalHarmonic(T theta, T phi, int s, int l, int m):&#160;util.cpp'],['../d8/d3c/util_8h.html#af9aa77c0f12435f4c7e9f13dba8ca1f8',1,'XLALSpinWeightedSphericalHarmonic(T theta, T phi, int s, int l, int m):&#160;util.cpp']]]
 ];
