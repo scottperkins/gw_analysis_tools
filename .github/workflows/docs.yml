@@ -21,6 +21,7 @@ jobs:
         && pip3 install sphinx-rtd-theme
         && pip3 install breathe
         && pip3 install sphinx-sitemap
+        && pip3 install myst-parser
     - name: Checkout repo
       uses: actions/checkout@1.0.0
     - name: Build docs
