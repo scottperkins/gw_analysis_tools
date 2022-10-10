@@ -5,9 +5,9 @@ on:
   #  branches-ignore:
   #    - '**'
   push:
-    branches: [ docs ]
+    branches: [ master ]
   pull_request:
-    branches: [ docs ]
+    branches: [ master ]
 
 jobs:
   build:
