@@ -3,12 +3,15 @@
 #include "gwat/detector_util.h"
 #include "gwat/waveform_util.h"
 #include "gwat/pn_waveform_util.h"
+#include "gwat/ppE_utilities.h"
 //#include "gwat/waveform_generator.h"
 //#include "gwat/IMRPhenomD.h"
 #include "gwat/io_util.h"
 #include <iostream>
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 
 #define _LAL
@@ -16,6 +19,7 @@
 	#include <lal/LALSimulation.h>
 	#include <lal/LALDatatypes.h>
 	#include <lal/LALSimIMR.h>
+	#include <lal/LALSimInspiral.h>
 	#include <lal/LALConstants.h>
 	#include <lal/FrequencySeries.h>
 	#include <lal/LALAtomicDatatypes.h>
@@ -38,6 +42,8 @@ int tc_comparison(int argc, char *argv[]);
 int gIMR_testing(int argc, char *argv[]);
 int polarization_testing(int argc, char *argv[]);
 int BHEvaporation_test(int argc, char *argv[]);
+int EA_parameterization_test(int argc, char *argv[]);
+int EA_consistency_test(int argc, char *argv[]);
 void RT_ERROR_MSG();
 const double MPC_M=3.08567758128e22;
 
@@ -78,10 +84,476 @@ int main(int argc, char *argv[])
 	if(runtime_opt == 6){
 		return time_domain_testing(argc,argv);
 	}
+	if(runtime_opt == 7){
+		return EA_parameterization_test(argc,argv);
+	}
+	if(runtime_opt == 8){
+		return EA_consistency_test(argc,argv);
+	}
 	else{
 		RT_ERROR_MSG();
 		return 1;
 	}
+}
+
+int EA_consistency_test(int argc, char *argv[])
+{
+	std::cout<<"EA CONSISTENCY TEST"<<std::endl;
+	gen_params params;	
+	params.spin1[1] = .0;
+	params.spin2[1] = .0;
+	params.spin1[0] = .0;
+	params.spin2[0] = .0;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = true;
+	params.NSflag2 = true;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.tc = 6;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+	params.tidal_love = true;
+
+	source_parameters<double> sp ;
+
+
+	int iterations = 1;
+	int samples = 2*8032;
+	double **output = allocate_2D_array(samples, 6);
+		
+
+	double FMIN = 5;
+	double FMAX = 4096;
+	//double FMAX = 100;
+	double deltaf = (FMAX-FMIN)/samples;
+
+	double *freqs= new double[samples];
+	for (int i = 0 ; i<samples; i++){
+		freqs[i] = FMIN + deltaf*i;
+	}
+
+	const gsl_rng_type *T;
+	gsl_rng *r ;
+	gsl_rng_env_setup();
+	T = gsl_rng_default;
+	r = gsl_rng_alloc(T);
+	double *testPSD=new double[samples];
+	populate_noise(freqs, "AdLIGOMidHigh", testPSD,samples, 48);
+	for(int i = 0 ; i<samples; i++){
+		testPSD[i] *= testPSD[i];
+	}
+
+	for (int i = 0 ; i<iterations; i++){
+	  
+	  //Small values of coupling constants
+	  params.ca_EA = 1.0E-30; 
+	  params.ctheta_EA = 2E-30; 
+	  params.cw_EA = 2E-30; 
+	  params.csigma_EA = 1.0E-30;
+	  
+	  //Large values of coupling constants
+	  //params.ca_EA = 1.0E-5; 
+	  //params.ctheta_EA = 3.0E-5; 
+	  //params.cw_EA = 1.0E-2; 
+	  //params.csigma_EA = 5.0E-16; 
+	  
+	  //Unrealistic, large values of coupling constants
+	  //params.ca_EA = 1; 
+	  //params.ctheta_EA = 2; 
+	  //params.cw_EA = 10; 
+	  //params.csigma_EA = 5E-2;
+	  
+	  
+	  params.mass1 = gsl_rng_uniform(r) +1;
+	  params.mass2 = gsl_rng_uniform(r) +1;
+	  if(params.mass2>params.mass1){
+	    double temp = params.mass2;
+	    params.mass2 = params.mass1;
+	    params.mass1 = temp;
+	  }
+
+	  params.spin1[2] = gsl_rng_uniform(r)*.05 -.025;
+	  params.spin2[2] = gsl_rng_uniform(r)*.05 -.025;
+
+	  params.tidal_s = gsl_rng_uniform(r)*1000+5; 
+	  //params.tidal1 = gsl_rng_uniform(r)*100+5;
+	  //params.tidal2 = gsl_rng_uniform(r)*100+5;
+		
+	  std::complex<double> *responseEA =  new std::complex<double>[samples];
+	  std::complex<double> *responseGR =  new std::complex<double>[samples];
+
+	  fourier_detector_response(freqs, samples, responseEA, "Hanford", "EA_IMRPhenomD_NRT", &params, (double *) NULL);
+	  //fourier_detector_response(freqs, samples, responseEA, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
+	  fourier_detector_response(freqs, samples, responseGR, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
+
+	  double matchresponse = match(responseEA, responseGR, testPSD, freqs, samples);
+	  //double matchresponse = match(responseGR, responseGR, testPSD, freqs, samples); //Sending in the same waveform to test match function
+
+	  std::cout<<"Match: "<<matchresponse<<std::endl;
+
+	  double *phase_EA = new double[samples];
+	  double *phase_GR = new double[samples];
+	  double *phase_EA_unwrap = new double[samples];
+	  double *phase_GR_unwrap = new double[samples];
+	  for(int i = 0 ; i<samples ; i++){
+	    phase_EA[i]= std::atan2(std::imag(responseEA[i]),std::real(responseEA[i]));
+	    phase_GR[i]= std::atan2(std::imag(responseGR[i]),std::real(responseGR[i]));
+	  }
+	  unwrap_array(phase_EA, phase_EA_unwrap,samples);
+	  unwrap_array(phase_GR, phase_GR_unwrap,samples);
+	
+	  for(int j = 0 ; j < samples ; j++){
+	    output[j][0] = std::real(responseEA[j]);
+	    output[j][1] = std::imag(responseEA[j]);
+	    output[j][2] = std::real(responseGR[j]);
+	    output[j][3] = std::imag(responseGR[j]);
+	    output[j][4] = phase_EA_unwrap[j];
+	    output[j][5] = phase_GR_unwrap[j];
+	  }
+	  write_file("data/EA_GR_COMP_"+std::to_string(i)+".csv", output, samples, 6);
+
+	  delete [] responseEA;
+	  delete [] responseGR;
+	  delete [] phase_EA;
+	  delete [] phase_GR;
+	  delete [] phase_EA_unwrap;
+	  delete [] phase_GR_unwrap;
+	}
+	delete [] testPSD;
+	gsl_rng_free(r);
+	delete [] freqs;
+	deallocate_2D_array(output, samples, 4);
+	delete [] params.betappe;
+	delete [] params.bppe;
+	return 0;
+}
+int EA_parameterization_test(int argc, char *argv[])
+{
+	gen_params params;	
+	params.spin1[2] = .03;
+	params.spin2[2] = .01;
+	params.spin1[1] = .0;
+	params.spin2[1] = .0;
+	params.spin1[0] = .0;
+	params.spin2[0] = .0;
+	//params.chip = .07;
+	//params.phip = 0.1;
+	params.Luminosity_Distance = 100;
+	params.phiRef = 1;
+	params.RA = 2.;
+	params.DEC = -1.1;
+	params.f_ref = 20;
+	params.NSflag1 = true;
+	params.NSflag2 = true;
+	params.horizon_coord = false;
+	params.shift_time=true;
+	params.shift_phase=true;
+	
+	params.tc = 6;
+	params.equatorial_orientation = false;
+	params.psi = 1.;
+	params.incl_angle = M_PI/3.;
+	params.gmst=3;
+
+	source_parameters<double> sp ;
+
+	//Random number declaration and seeding
+	const gsl_rng_type *T;
+	gsl_rng *r; 
+	
+	gsl_rng_env_setup();
+	
+	T=gsl_rng_default;
+	r=gsl_rng_alloc(T);
+	gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
+	
+	int iterations = 1000;
+	int num_bad_points = 0;
+	//int num_infspeeds = 0;
+	//int num_nan = 0;
+	int num_Cherenkov = 0;
+	int dim = 8;// Increase for every factor you want to output
+	double **output = allocate_2D_array(iterations, dim);
+
+	double a_bound = -4.; //(case 1)
+	//double a_bound = -7.;  //(case 2)
+	double theta_bound = -3.; //(case 1)
+	double w_bound = 1.;
+	double sigma_bound = -15.;
+		
+	for (int i = 0 ; i<iterations; i++){
+	  /* Uses gsl to get a random number from a uniform distribution */
+	  params.ca_EA = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); 
+	  //ca has to be positive because of energy constraints
+	  params.ctheta_EA = 3.*params.ca_EA*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // (in case 1)
+	  //params.ctheta_EA = gsl_ran_flat(r, -1., 1.)*(0.3); // (in case 2)
+	  params.cw_EA = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); 
+	  params.csigma_EA = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound);
+	  
+
+	  /* A set of coupling constants that satisfies all the physical 
+	   * constraints. Used to show that for a particular set of coupling
+	   * constants, sensitivity as a function of compactness is a straight
+	   * line.
+	   */
+	  /*
+	  params.ca_EA = 4.14481675252318*pow(10, -6.);
+	  params.ctheta_EA = 0.0000124377596215569;
+	  params.cw_EA = 6.31563819944859;
+	  params.csigma_EA = 2.81323367729783*pow(10,-16);
+	  */
+	  
+	  /* Uses gsl to get a random number from a uniform distribution
+	   * Magnitude uniformly distributed across different powers of 10
+	   */
+	  /*
+	  double sign[3];
+	  for(int j = 0; j<3; j++)
+	    {
+	      if(gsl_ran_flat(r, -1., 1.) < 0){sign[j] = -1.;}
+	      else{sign[j] = 1.;}
+	    }
+	   
+	    params.ca_EA = pow(10, gsl_ran_flat(r, -20., a_bound)); // ca (this parameter has to be positive because of energy constraints)
+	    params.ctheta_EA = 3.*params.ca_EA*(1 + sign[0]*pow(10, gsl_ran_flat(r, -20, theta_bound))); // ctheta (in case 1)
+	    //params.ctheta_EA = sign[0]*3*pow(10, gsl_ran_flat(r, -20., -1)); // ctheta (in case 2)
+	    params.cw_EA = sign[1]*pow(10, gsl_ran_flat(r, -20., w_bound)); // cw
+	    params.csigma_EA = sign[2]*pow(10, gsl_ran_flat(r, -20., sigma_bound)); // csigma
+	  */
+
+	  //Generating random masses
+	  double alpha[2];
+	  for (int j = 0 ; j<2; j++){
+	    //alpha[j] = 0.1; 
+	    alpha[j] = gsl_rng_uniform(r);
+	  }
+	  double tempm1,tempm2 ;
+	  //tempm1 = 1+1*alpha[0];
+	  //tempm2 = 1+1*alpha[1];
+	  
+	  //Setting masses to get a specific q
+	  /* For q=0.5, use m1=2, m2=1, for q=0.75 use m1=4, m2=3, for q=0.9 use m1=1, m2=.9 */
+	  tempm1 = 2.;
+	  tempm2 = 1.;
+	  //tempm1 = 4.;
+	  //tempm2 = 3.;
+	  //tempm1 = 1.;
+	  //tempm2 = 0.9;
+	  
+	  /*
+	  //REAL8 m1_SI;
+	  //REAL8 m2_SI;
+	  double m1_SI;
+	  double m2_SI;
+	  params.mass1 = m1_SI;
+	  params.mass2 = m2_SI;*/
+	  
+	  if(tempm1>tempm2){
+	    params.mass1= tempm1;
+	    params.mass2= tempm2;
+	  }
+	  else{
+	    params.mass1= tempm2;
+	    params.mass2= tempm1;
+	  }
+
+	  //std::cout<<"q = "<<params.mass2 / params.mass1<<std::endl;
+	  
+	  /* Sample tidal deformability uniform in log space from 1 to 10^4 for
+	   * comparison of compactness as a function of tidal deformability
+	   * with plots in arXiv:1903.03909 
+	   * Sample from 1 to 10^? for comparison of sensitivity as a function 
+	   * of compactness with plots in arXiv:2104.04596v1
+	   */
+	  // REAL8 lambda1 = pow(10, gsl_ran_flat(r, 0, 4)); 
+	  //REAL8 lambda2 = pow(10, gsl_ran_flat(r, 0, 4));
+	  //REAL8 lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
+	  //REAL8 lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  /*
+	  double lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
+	  double lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  params.tidal1 = lambda1;
+	  params.tidal2 = lambda2;
+	  */
+
+	  /* For binary Love relation tests*/
+	  do{
+	  double lambdas = pow(10, gsl_ran_flat(r, 1, 4)); 
+	  params.tidal_s = lambdas;
+	  }
+	  while((params.mass2/params.mass1) < 1.2321 - .124616*log(params.tidal_s));
+	  params.tidal_love_error = true; 
+	  
+	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
+	  //This also runs pre_calculate_EA_factors
+	  //std::cout<<"tidal_s = "<<params.tidal_s<<"  tidal_a = "<<params.tidal_a<<std::endl;
+	  //cstd::cout<<"tidal_1 = "<<sp.tidal1<<"  tidal_2 = "<<sp.tidal2<<std::endl;
+
+	  //double new_lambdaa = tidal_error(params.tidal_s, params.tidal_a, params.mass2/params.mass1); 
+	  	  
+	  if(params.cw_EA < (-params.csigma_EA/(1. - params.csigma_EA)))
+	    {
+	      //Throws out points with cw < -csigma/(1 - csigma) because these violate the positive energy condition for the spin-1 mode (vector mode?)
+	      //Note that the positive energy condition for the spin-2 modes is always satisfied and for the spin-0 mode is satisfied by requiring
+	      //ca > 0 which is done when drawing random values of ca.
+	      //Equation 40 of arXiv:gr-qc/0507059v3
+	      num_bad_points++;
+	      //std::cout<<"check energy condition"<<std::endl; 
+	      i--;
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	      continue;
+	      }
+	  else if(sp.cTsq_EA < 0 || sp.cVsq_EA < 0 || sp.cSsq_EA < 0)
+	    {
+	      //Throws out points with speeds not greater than or equal to zero (these would produce gradient instabilities or ghosts)
+	      //arXiv:gr-qc/0402005 and arXiv:1108.1835
+	      num_bad_points++;
+	      i--;
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	      continue;
+	      }
+	  /*
+	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
+	    {
+	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
+	      //Keep track of how many we pull
+	      num_infspeeds++;
+	      i--;
+	      continue; 
+	    }
+	  else if(isnan(sp.kappa3_EA))
+	    {
+	      num_nan++;
+	      i--;
+	      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      continue;
+	    }
+	  */
+	  
+	  	  
+	  else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.))
+	    {
+	      //Throws out points that don't obey the cT constraint from GW170817 and GRB170817A
+	      //arXiv:1710.05834
+	      num_bad_points++;
+	      i--;
+	      //std::cout<<"cT incorrect: "<<sp.cT_EA - 1<<std::endl;
+	      //I wonder why all the incorrect points it prints have the same value?
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	      continue;
+	      }
+	  
+	  if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.))
+	    {
+	      //Throws out points that do not obey observational solar system constraints on alpha1 and alpha2
+	      //arXiv:1403.7377 and arXiv:gr-qc/0509114
+	      num_bad_points++;
+	      i--;
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	      continue; 
+	    }
+	  bool violate = false;
+	  if(sp.cV_EA < 1)
+	    {
+	 
+	      if(abs(sp.c13_EA * sp.c13_EA *(sp.c1_EA * sp.c1_EA + 2*sp.c1_EA*sp.c3_EA + sp.c3_EA * sp.c3_EA - 2*sp.c4_EA)/(2*sp.c1_EA*sp.c1_EA)) >= 7*pow(10, -32.)) //enforcing constraint from Eq. 4.7 of arXiv:hep-ph/0505211
+		{
+		  num_Cherenkov++;
+		  i--;
+		  cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
+		  //continue;
+		  violate = true;
+		}
+	      
+	    }
+	  if(violate){
+		continue;
+	      }
+	  
+	  if(sp.cS_EA < 1)
+	    {
+	      if(abs((sp.c2_EA + sp.c3_EA - sp.c4_EA)/sp.c1_EA) > pow(10, -22.))
+		{
+		  if((sp.c3_EA - sp.c4_EA)*(sp.c3_EA - sp.c4_EA)/abs(sp.c14_EA) >= pow(10, -30.)) //enforcing constraint from Eq.4.15 of arXiv:hep-ph/0505211
+		    {
+		      num_Cherenkov++;
+		      i--;
+		      cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
+		      continue;
+		    }
+		}
+	      if(abs((sp.c4_EA - sp.c2_EA - sp.c3_EA)/sp.c1_EA) >= 3*pow(10,-19.)) //enforcing constraint from Eq.5.14 of arXiv:hep-ph/0505211
+		{
+		  num_Cherenkov++;
+		  i--;
+		  cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
+		  continue;
+		}
+	    }
+	  
+	  double sigma = 1.021*pow(10, -5.); 
+	  double mu = -0.563*pow(10, -5.);
+	  double prob;
+	 
+	  prob = exp(-(1./2.)*((sp.alpha1_EA - mu)*(sp.alpha1_EA - mu))/(sigma*sigma));
+	  double u = gsl_ran_flat(r, 0, 1.);
+	  if(u > prob)
+	    {
+	      i--;
+	      cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
+	      continue; 
+	    }
+	  
+	 
+	  output[i][0] = sp.ca_EA;
+	  output[i][1] = sp.ctheta_EA;
+	  output[i][2] = sp.cw_EA;
+	  output[i][3] = sp.csigma_EA;
+	  output[i][4] = sp.mass1;
+	  output[i][5] = sp.mass2;
+	  output[i][6] = params.tidal_s;
+	  //output[i][7] = new_lambdaa;
+	  output[i][7] = params.tidal_a;
+	  //output[i][8] = new_lambdaa; 
+
+	  /*output[i][6] = sp.tidal1;
+	  output[i][7] = sp.tidal2;
+	  output[i][8] = sp.compact1;
+	  output[i][9] = sp.compact2;
+	  output[i][10] = sp.s1_EA;
+	  output[i][11] = sp.s2_EA; 
+	  
+	  output[i][4] = sp.cT_EA;
+	  output[i][5] = sp.cS_EA;
+	  output[i][6] = sp.cV_EA;
+	  output[i][7] = sp.alpha1_EA;
+	  output[i][8] = sp.alpha2_EA;
+	  */
+			  
+	  cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	  printProgress((double)i / iterations);
+	}
+	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
+	std::cout<<"\n Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
+	std::cout<<"Threw out "<<num_bad_points<<" unphysical data points."<<std::endl;
+	//std::cout<<"Found cS or cV to be infinite "<<num_infspeeds<<" times. Removed these cases from data."<<std::endl;
+	//std::cout<<"Found kappa3 as NAN "<<num_nan<<" times."<<std::endl;
+	std::cout<<"Threw out "<<num_Cherenkov<<" points because of Cherenkov constraints."<<std::endl; 
+	gsl_rng_free(r); 
+	deallocate_2D_array(output, iterations, dim);
+	delete [] params.betappe;
+	delete [] params.bppe;
+	return 0;
 }
 
 int time_domain_testing(int argc, char *argv[])
@@ -535,12 +1007,23 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	std::cout.precision(15);
 	bool P = false;
 	bool NRT = true;
+	bool tidalsym = false; 
+	bool EA = true;
+	bool gIMR = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 100;
+	int iterations = 1;
 	double times[iterations][2];
+	//###############################################################################
+	int rows = 500;
+	int cols = 4; 
+	double **input = allocate_2D_array(rows, cols);
+	if(EA){
+	  //Need some random coupling constants that obey all known physical constraints for testing purposes. 
+	  read_file("data/uniform/case1/EA_coupling_constants.csv", input, rows, cols);
+	}	
 	//###############################################################################
 	for(int k = 0 ; k<iterations ; k++){
 		int d  ;
@@ -554,17 +1037,19 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		else if(k%3 == 2){ DETECTOR = "Livingston";}
 		COMPLEX16FrequencySeries *hptilde=NULL;
 		COMPLEX16FrequencySeries *hctilde=NULL;
-		double alpha[17];
-		for (int j = 0 ; j<17; j++){
+		double alpha[35];
+		for (int j = 0 ; j<35; j++){
 		  //alpha[j] = 0.1; 
 		  alpha[j] = gsl_rng_uniform(r);
 		}
-		const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
-		const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6; 
+		//const REAL8 s1x = -.1+alpha[0]*.2, s1y=-.2+alpha[1]*.3,s1z=-.4+alpha[2]*.6;
+		//const REAL8 s2x = -.1+alpha[3]*.2, s2y=-.2+alpha[4]*.3,s2z=-.4+alpha[5]*.6; 
 		//const REAL8 s1x = 0, s1y=0,s1z=-.4+alpha[2]*.6;
 		//const REAL8 s2x = 0, s2y=0,s2z=-.4+alpha[5]*.6;
 		//const REAL8 s1x = 0.0, s1y=0.0,s1z=0.0;
 		//const REAL8 s2x =0.0, s2y=0.0,s2z=0.0;
+		const REAL8 s1x = 0.1, s1y=0.0,s1z=0.0;
+		const REAL8 s2x =0.1, s2y=0.0,s2z=0.0;
 		//const REAL8 incl = M_PI/5.;
 		const REAL8 incl = M_PI * alpha[6];
 		double RA = 2*M_PI * alpha[7];
@@ -597,6 +1082,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			 m1_SI= tempm2*LAL_MSUN_SI;
 			 m2_SI= tempm1*LAL_MSUN_SI;
 		}
+		
 		const REAL8 distance = 100e23 + 100e24*alpha[12] ;
 		REAL8 alpha0 ;
 		const REAL8 phiRef = 2*M_PI * alpha[13];
@@ -612,22 +1098,49 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		double deltaf = (f_max-f_min)/(length-1);
 		IMRPhenomP_version_type  version = IMRPhenomPv2_V;
 		LALDict *extraParams = XLALCreateDict();
-		//alpha[15] = 0;
-		//alpha[16] = 0; 
-		//alpha[15] = 2;
-		//alpha[16] = .8;
-		REAL8 lambda1 = 100*fabs(alpha[15]) + 1.; //this prevents tidal deformability from being less than 1
-		REAL8 lambda2 = 100*fabs(alpha[16]) + 1.;
-		/*if (alpha[15]<alpha[16]){
-		  lambda1= 100*fabs(alpha[15]) ;
-		      lambda2	= 100*fabs(alpha[16]) ;
+		if(gIMR){
+			XLALSimInspiralWaveformParamsInsertNonGRDChi0(extraParams,2* alpha[17]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDChi1(extraParams, 2*alpha[18]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDChi2(extraParams, 2*alpha[19]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDChi3(extraParams, 2*alpha[20]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDChi4(extraParams, 2*alpha[21]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDChi6(extraParams, 2*alpha[22]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDChi7(extraParams, 2*alpha[23]-1);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi5L(extraParams, 2*alpha[33]-1);
+			//XLALSimInspiralWaveformParamsInsertNonGRDChi6L(extraParams, 2*alpha[34]-1);
+
+			XLALSimInspiralWaveformParamsInsertNonGRDSigma2(extraParams, 2*alpha[24]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDSigma3(extraParams, 2*alpha[25]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDSigma4(extraParams, 2*alpha[26]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha2(extraParams, 2*alpha[27]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha3(extraParams, 2*alpha[28]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha4(extraParams, 2*alpha[29]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDAlpha5(extraParams, 2*alpha[30]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDBeta2(extraParams, 2*alpha[31]-1);
+			XLALSimInspiralWaveformParamsInsertNonGRDBeta3(extraParams, 2*alpha[32]-1);
 
 		}
-		else{
-		  lambda1= 100*fabs(alpha[16]) ;
-		      lambda2	= 100*fabs(alpha[15]) ;
-		      }*/
-		//std::cout<<"TIDAL LOVE NUMBERS: "<<lambda1<<" "<<lambda2<<std::endl;
+
+		gen_params param;
+		source_parameters<double> sp;
+		REAL8 lambda1 = 0;
+		REAL8 lambda2 = 0;
+		REAL8 lambdas = 0; 
+		if(tidalsym) //Setting lambdas
+		  {
+		    lambdas = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 4));
+		    param.tidal_s = lambdas; 
+		    prep_source_parameters(&sp, &param,"IMRPhenomD_NRT");
+		    lambda1 = sp.tidal1;
+		    lambda2 = sp.tidal2;
+		  }
+		else //Setting lambda1 and lambda2 directly
+		  {
+		    lambda1 = 100*fabs(alpha[15]) + 1.;
+		    //this prevents tidal deformability from being less than 1
+		    lambda2 = 100*fabs(alpha[16]) + 1.;
+		  }
+		
 		NRTidal_version_type NRT_v=NRTidalv2_V;
 
 		double q0 = 0.1940;
@@ -638,9 +1151,6 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 
 		double quad1 = exp(q0 + q1*log(lambda1) + q2*pow(log(lambda1), 2.) + q3*pow(log(lambda1), 3.) + q4*pow(log(lambda1), 4.));
 		double quad2 = exp(q0 + q1*log(lambda2) + q2*pow(log(lambda2), 2.) + q3*pow(log(lambda2), 3.) + q4*pow(log(lambda2), 4.));
-		//double quad1 = 1;
-		//double quad2 = 1;
-	        //std::cout<<"quad1: "<<quad1<<"\t quad2: "<<quad2<<std::endl; 
 
 		
 
@@ -717,7 +1227,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		r_pat.active_polarizations = &pol_arr[0];
 		
 		detector_response_functions_equatorial(DETECTOR,RA,DEC,psi,gmst, &r_pat);
-		std::cout<<"Fractional error on F+/Fx/Fx/Fy/Fb/Fl: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<(fx-fxG)/fx<<" "<<(fy-fyG)/fy<<" "<<(fb-fbG)/fb<<" "<<(fl-flG)/fl<<" "<<std::endl;
+		//std::cout<<"Fractional error on F+/Fx/Fx/Fy/Fb/Fl: "<<(fplus-fplusG)/fplus<<" "<<(fcross-fcrossG)/fcross<<(fx-fxG)/fx<<" "<<(fy-fyG)/fy<<" "<<(fb-fbG)/fb<<" "<<(fl-flG)/fl<<" "<<std::endl;
 		for(int i = 0 ; i<length ; i++){
 			(det->data->data)[i]=gsl_complex_add(
 			gsl_complex_mul(gsl_complex_rect(fplus,0.),(hptilde->data->data)[i]),
@@ -726,7 +1236,8 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		times[k][0] = (double)(end-start)/(CLOCKS_PER_SEC);
 		//std::cout<<"LAL timing: "<<(double)(end-start)/(CLOCKS_PER_SEC)<<std::endl;
 		//###############################################################################
-		gen_params param;
+		//gen_params param;
+		//Had to move this up so we could access things inside the structure earlier (had to call prep_source_parameters to compute lambda1 and lambda2)
 		param.mass1 = m1_SI/LAL_MSUN_SI;	
 		param.mass2 = m2_SI/LAL_MSUN_SI;
 		//std::cout<<"mass1: "<<param.mass1<<std::endl;
@@ -742,8 +1253,6 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.spin2[0] = s2x;
 		param.spin2[1] = s2y;
 		param.spin2[2] = s2z;
-		//std::cout<<"spin1[0]: "<<param.spin1[0]<<"\t spin1[1]:"<<param.spin1[1]<<"\t spin2[2]:"<<param.spin1[2]<<std::endl; 
-		//std::cout<<"spin2[0]: "<<param.spin2[0]<<"\t spin2[1]:"<<param.spin2[1]<<"\t spin2[2]:"<<param.spin2[2]<<std::endl; 
 
 		param.NSflag1=false;
 		param.NSflag2=false;
@@ -759,25 +1268,104 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tc = .0 ;
 		param.tidal1 =lambda1 ;
 		param.tidal2 =lambda2 ;
+		if(EA){
+		  param.ca_EA = input[k][0]; //ca
+		  param.ctheta_EA = input[k][1]; //ctheta
+		  param.cw_EA = input[k][2]; //cw
+		  param.csigma_EA = input[k][3]; //csigma
+		}
+		if(gIMR){
+			//Not including logarithmic terms for now
+			param.Nmod_phi = 7;	
+			param.phii = new int[9];
+			param.delta_phi = new double[9];
+			param.phii[0] = 0;	
+			param.phii[1] = 1;	
+			param.phii[2] = 2;	
+			param.phii[3] = 3;	
+			param.phii[4] = 4;	
+			param.phii[5] = 6;	
+			param.phii[6] = 7;	
+			param.phii[7] = 8;	
+			param.phii[8] = 9;	
+			param.delta_phi[0] = 2*alpha[17]-1;	
+			param.delta_phi[1] = 2*alpha[18]-1;	
+			param.delta_phi[2] = 2*alpha[19]-1;	
+			param.delta_phi[3] = 2*alpha[20]-1;	
+			param.delta_phi[4] = 2*alpha[21]-1;	
+			param.delta_phi[5] = 2*alpha[22]-1;	
+			param.delta_phi[6] = 2*alpha[23]-1;	
+			param.delta_phi[7] = 2*alpha[33]-1;	
+			param.delta_phi[8] = 2*alpha[34]-1;	
+			param.Nmod_sigma = 3;	
+			param.sigmai = new int[3];
+			param.delta_sigma = new double[3];
+			param.sigmai[0] = 2;	
+			param.sigmai[1] = 3;	
+			param.sigmai[2] = 4;	
+			param.delta_sigma[0] = 2*alpha[24]-1;	
+			param.delta_sigma[1] = 2*alpha[25]-1;	
+			param.delta_sigma[2] = 2*alpha[26]-1;	
+			param.Nmod_beta = 2;	
+			param.betai = new int[2];
+			param.delta_beta = new double[2];
+			param.betai[0] = 2;	
+			param.betai[1] = 3;	
+			param.delta_beta[0] = 2*alpha[31]-1;	
+			param.delta_beta[1] = 2*alpha[32]-1;	
+			param.Nmod_alpha = 4;	
+			param.alphai = new int[4];
+			param.delta_alpha = new double[4];
+			param.alphai[0] = 2;	
+			param.alphai[1] = 3;	
+			param.alphai[2] = 4;	
+			param.alphai[3] = 5;	
+			param.delta_alpha[0] = 2*alpha[27]-1;	
+			param.delta_alpha[1] = 2*alpha[28]-1;	
+			param.delta_alpha[2] = 2*alpha[29]-1;	
+			param.delta_alpha[3] = 2*alpha[30]-1;	
+
+			//param.delta_phi[0] = 0;	
+			//param.delta_phi[1] = 0;	
+			//param.delta_phi[2] = 0;	
+			//param.delta_phi[3] = 0;	
+			//param.delta_phi[4] = 0;	
+			//param.delta_phi[5] = 0;	
+			//param.delta_phi[6] = 0;	
+
+			//param.Nmod_phi = 1;	
+			//param.phii = new int[1];
+			//param.delta_phi = new double[1];
+			//param.phii[0] = 6;	
+			//param.delta_phi[0] = alpha[22];	
+		}
 		//std::cout<<"tidal1: "<<param.tidal1<<"\t tidal2: "<<param.tidal2<<std::endl;
 		
 		std::complex<double> *response = new std::complex<double>[length];
 		std::string method ;
 		if(P){
-			if(NRT){
-				method = "IMRPhenomPv2_NRT";
-			}
-			else{
-				method = "IMRPhenomPv2";
-			}
+		  if(NRT){
+		    method = "IMRPhenomPv2_NRT";
+		  }
+		  else{
+		    method = "IMRPhenomPv2";
+		  }
 		}
 		else {
-			if(NRT){
-				method = "IMRPhenomD_NRT";
-			}
-			else{
-				method = "IMRPhenomD";
-			}
+		  if(NRT){
+		    if(EA){
+		      method = "EA_IMRPhenomD_NRT";
+		    }
+		    else{
+		      method = "IMRPhenomD_NRT";
+		    }
+		  }
+		  else{
+		    method = "IMRPhenomD";
+		  }
+		}
+		if(gIMR){
+		  method = "g" + method;
 		}
 		start =clock();
 
@@ -806,7 +1394,7 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 			output[i][5] = phaseLAL[i];
 			output[i][6] = phaseGWAT[i];
 		}
-		//std::cout<<output[0][1]<<"\t"<< output[0][2]<<"\t"<<output[0][3]<<"\t"<<output[0][4]<<std::endl; 
+		 
 		write_file("data/response_"+std::to_string(k)+".csv",output,length,7);
 		deallocate_2D_array(output,length,7);
 		delete [] response;
@@ -815,11 +1403,24 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		delete [] phaseLAL;
 		delete [] phaseGWAT;
 		delete [] frequencies;
+		if(gIMR){
+			delete [] param.phii;
+			delete [] param.delta_phi;
+			delete [] param.sigmai;
+			delete [] param.delta_sigma;
+			delete [] param.betai;
+			delete [] param.delta_beta;
+			delete [] param.alphai;
+			delete [] param.delta_alpha;
+		}
 		XLALDestroyREAL8Sequence(freqs);
 		XLALDestroyCOMPLEX16FrequencySeries(hptilde);
 		XLALDestroyCOMPLEX16FrequencySeries(hctilde);
 		XLALDestroyCOMPLEX16FrequencySeries(det);
+		
+		printProgress((double)k / iterations);
 	}
+	
 	double lal_sum = 0 ;
 	double gwat_sum = 0 ;
 	for(int i = 0 ; i<iterations; i++){
@@ -827,9 +1428,13 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		gwat_sum +=times[i][1];
 
 	}
-	std::cout<<"Average LAL time: "<<lal_sum / iterations<<std::endl;
+	std::cout<<"\n"<<"Average LAL time: "<<lal_sum / iterations<<std::endl;
 	std::cout<<"Average GWAT time: "<<gwat_sum / iterations<<std::endl;
 	gsl_rng_free(r);
+	if(input){
+	  deallocate_2D_array(input, rows,cols);
+	  input=nullptr;
+	}
 	return 1; 
 }
 #endif
@@ -844,4 +1449,6 @@ void RT_ERROR_MSG()
 	std::cout<<"4 --- test polarizations waveforms"<<std::endl;
 	std::cout<<"5 --- test BHEvaporation waveforms"<<std::endl;
 	std::cout<<"6 --- test time domain waveforms"<<std::endl;
+	std::cout<<"7 --- EA waveform parameterization test"<<std::endl;
+	std::cout<<"8 --- EA consistency test"<<std::endl;
 }

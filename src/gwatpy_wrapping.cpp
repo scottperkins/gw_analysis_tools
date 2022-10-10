@@ -13,6 +13,49 @@
 #include <bits/stdc++.h> 
 
 
+void detector_response_equatorial_py(char *detector,
+	double ra,
+	double dec,
+	double psi,
+	double gmst,
+	bool *active_polarizations,
+	double *response_functions/*!<< 6 dim output vector*/
+	)
+{
+	for(int i = 0 ; i<6; i++){
+		response_functions[i]=0;
+	}
+	det_res_pat<double> r_pat;
+	r_pat.Fplus = &(response_functions[0]);
+	r_pat.Fcross = &(response_functions[1]);
+	r_pat.Fx = &(response_functions[2]);
+	r_pat.Fy = &(response_functions[3]);
+	r_pat.Fb = &(response_functions[4]);
+	r_pat.Fl = &(response_functions[5]);
+	r_pat.active_polarizations = active_polarizations;
+	
+	detector_response_functions_equatorial(std::string(detector), ra, dec, psi, gmst, &r_pat);
+	
+	return ;
+
+}
+
+double match_py(  double *data1_real,double *data1_imag, double *data2_real,double *data2_imag, double *SN,double *frequencies,int length)
+{
+	std::complex<double> * data1 = new std::complex<double>[length];
+	std::complex<double> * data2 = new std::complex<double>[length];
+	for(int i = 0 ; i<length; i++){
+		data1[i] = std::complex<double>(data1_real[i],data1_imag[i]);
+		data2[i] = std::complex<double>(data2_real[i],data2_imag[i]);
+	}
+
+	double match_out = match(data1, data2, SN, frequencies, length);
+
+	delete [] data1;
+	delete [] data2;
+	return match_out;
+}
+
 double calculate_snr_py(char * sensitivity_curve,
 	char * detector, 
 	char * generation_method,
@@ -796,10 +839,24 @@ int calculate_chirpmass_py(double mass1, double mass2,double *out)
 	*out = calculate_chirpmass(mass1,mass2);
 	return 0;
 }
+int calculate_chirpmass_vectorized_py(double *mass1, double *mass2,double *out, int length)
+{
+	for(int i = 0 ; i<length ; i++){	
+		out[i] = calculate_chirpmass(mass1[i],mass2[i]);
+	}
+	return 0;
+}
 
 int calculate_eta_py(double mass1, double mass2,double *out)
 {
 	*out = calculate_eta(mass1,mass2);
+	return 0;
+}
+int calculate_eta_vectorized_py(double *mass1, double *mass2,double *out, int length)
+{
+	for(int i = 0 ; i<length; i++){
+		out[i] = calculate_eta(mass1[i],mass2[i]);
+	}
 	return 0;
 }
 int calculate_mass1_py(double chirpmass, double eta,double *out)
@@ -807,9 +864,23 @@ int calculate_mass1_py(double chirpmass, double eta,double *out)
 	*out = calculate_mass1(chirpmass,eta);
 	return 0;
 }
+int calculate_mass1_vectorized_py(double *chirpmass, double *eta,double *out,int length)
+{
+	for(int i = 0 ; i<length; i++){
+		out[i] = calculate_mass1(chirpmass[i],eta[i]);
+	}
+	return 0;
+}
 int calculate_mass2_py(double chirpmass, double eta,double *out)
 {
 	*out = calculate_mass2(chirpmass,eta);
+	return 0;
+}
+int calculate_mass2_vectorized_py(double *chirpmass, double *eta,double *out,int length)
+{
+	for(int i = 0 ; i<length; i++){
+		out[i] = calculate_mass2(chirpmass[i],eta[i]);
+	}
 	return 0;
 }
 void populate_noise_py(double *frequencies, char * detector, double *noise_root, int length, double integration_time){

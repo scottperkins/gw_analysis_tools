@@ -7,6 +7,7 @@
 #include "IMRPhenomD.h"
 #include "gIMRPhenomD.h"
 #include "gIMRPhenomP.h"
+#include "IMRPhenomD_NRT.h"
 #include "ppE_IMRPhenomD.h"
 #include "ppE_IMRPhenomP.h"
 #include "ppE_utilities.h"
@@ -32,6 +33,62 @@
  */
 
 
+/*\brief Calculates the match maximized over phic  and tc 
+ *
+ * Taken from III A of https://arxiv.org/pdf/1807.07163.pdf
+ *
+ */
+double match(  std::complex<double> *data1, std::complex<double> *data2, double *SN,double *frequencies,int length)
+{
+	std::complex<double> Gtilde ;
+	double *G= new double[length];
+	double delta_f = frequencies[1]-frequencies[0];
+
+	double norms[3] ;
+	norms[0] =  data_snr(frequencies,length,data1,data1,SN);
+	norms[1] =  data_snr(frequencies,length,data2,data2,SN);
+
+	//norms[2] =  data_snr(frequencies,length,data1,data2,SN);
+	//return norms[2]*norms[2]/norms[1]/norms[0];
+	
+	fftw_complex *in, *out; 
+	fftw_plan p;
+	in = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
+        out = (fftw_complex*)fftw_malloc(sizeof(fftw_complex) * length);
+        p = fftw_plan_dft_1d(length, in, out,FFTW_BACKWARD, FFTW_MEASURE);
+        for (int i=0;i<length; i++)
+        {
+                Gtilde = conj(data1[i]) * data2[i] / SN[i];
+                in[i][0] = real(Gtilde);
+                in[i][1] = imag(Gtilde);
+        }
+
+        fftw_execute(p);
+
+        for (int i=0;i<length; i++)
+        {
+                //G[i] = std::abs(std::complex<double>(out[i][0],out[i][1])) ;
+                G[i] = sqrt(out[i][0]*out[i][0]+out[i][1]*out[i][1]) ;
+        }
+	double max = G[0];
+	for(int i= 0 ; i<length; i++){
+		if(G[i]>max){max = G[i];}
+	}
+	max*=delta_f;
+
+        //double max = (*std::max_element(G, G+length))*delta_f;
+	
+	fftw_destroy_plan(p);
+        fftw_free(in);
+        fftw_free(out);
+	fftw_cleanup();
+
+	delete [] G;
+	
+	return 4.*max/(norms[0]*norms[1]);
+}
+
+
 struct gsl_snr_struct
 {
 	gen_params_base<double> *params;
@@ -55,8 +112,7 @@ double data_snr(double *frequencies,
 	double *psd
 	)	
 {
-	double *integrand
-			 = (double *)malloc(sizeof(double)*length);
+	double *integrand= (double *)malloc(sizeof(double)*length);
 
 	double delta_f = frequencies[1]-frequencies[0];
 
@@ -64,6 +120,7 @@ double data_snr(double *frequencies,
 	for (int i = 0; i<length;i++)
 		integrand[i] = 4.*real(conj(data[i])*response[i])/psd[i]; 
 	double inner_prod = (simpsons_sum(delta_f,length, integrand));
+	//double inner_prod = (simpsons_sum(delta_f,length, integrand));
 	free(integrand);
 	return sqrt(inner_prod);
 
@@ -107,13 +164,15 @@ void create_coherent_GW_detection_reuse_WF(
 	assign_polarizations(generation_method, &wp);
 	wp.allocate_memory(length);
 	T tc_ref = gen_params->tc, tc = 0;
-	gen_params->tc=0;
+	gen_params->tc=tc_ref;
 	fourier_waveform(frequencies, length, &wp,generation_method, gen_params);
 	T DTOA = 0;
 	for (int i = 0 ; i<detector_N; i++){
 		DTOA = DTOA_DETECTOR(gen_params->RA,gen_params->DEC,gen_params->gmst, detectors[0],detectors[i]);
-		tc = tc_ref-DTOA;	
+		//tc = tc_ref-DTOA;	
+		tc = -DTOA;	
 		tc*=2*M_PI;
+		//gen_params->tc = tc;
 		fourier_detector_response_equatorial(frequencies, length,&wp, responses[i], gen_params->RA,gen_params->DEC,gen_params->psi, gen_params->gmst,(T *)NULL, gen_params->LISA_alpha0,gen_params->LISA_phi0, gen_params->theta_l, gen_params->phi_l, detectors[i]);
 		for(int j = 0 ; j<length; j++){
 			responses[i][j] *= exp(std::complex<T>(0,tc*frequencies[j]));
@@ -1516,6 +1575,48 @@ void assign_freq_boundaries(double *freq_boundaries,
 	s_param.incl_angle=internal_params.incl_angle;
 	s_param.shift_time = input_params->shift_time;
 	if(generation_method.find("NRT") != std::string::npos){
+		//Copied directly from prep_source_parameters 
+		//Not ideal..
+		if(input_params->tidal_love){
+			/* The binary love relations are used here to compute lambda_a
+	      		 * as a function of lambda_s (following equations 11-13 of
+	      		 * arXiv:1903.03909). These relations were fit for Neutron stars,
+	      		 * so the relevant coefficients/fit parameters are in
+	      		 * IMRPhenomD_NRT.h.
+	      		 */
+	      		double q, Q, F;
+	      		q = input_params->mass2 / input_params->mass1;
+	      		Q = pow(q, 10./(3. - n_binLove));
+	      		F = (1. - Q)/(1. + Q);
+
+	      		double num = 1;
+	      		double denom = 1;
+	      		double q_pow[2], lambda_pow[3];
+	      		q_pow[0] = q;
+	      		q_pow[1] = q*q;
+	      		lambda_pow[0] = pow(input_params->tidal_s, -1./5.);
+	      		lambda_pow[1] = lambda_pow[0] * lambda_pow[0];
+	      		lambda_pow[2] = lambda_pow[0] * lambda_pow[1];
+	      		for(int i = 0; i<3; i++)
+	      		  {
+	      		    for(int j = 0; j<2; j++)
+	      		      {
+	      		        num += b_binLove[i][j]*q_pow[j]*lambda_pow[i];
+	      		        denom += c_binLove[i][j]*q_pow[j]*lambda_pow[i];
+	      		      }
+	      		  }
+
+	      		input_params->tidal_a = F * (num / denom) * input_params->tidal_s;
+
+
+	      		s_param.tidal1 = input_params->tidal_s + input_params->tidal_a;
+	      		s_param.tidal2 = input_params->tidal_s - input_params->tidal_a;
+	      		
+	      		//Gotta copy these over so that the next two lines run..
+	      		input_params->tidal1= input_params->tidal_s + input_params->tidal_a;
+	      		input_params->tidal2= input_params->tidal_s - input_params->tidal_a;
+
+		}
 		if((input_params->tidal1 < 0 || input_params->tidal2<0) && input_params->tidal_weighted >= 0) {
 			s_param.tidal_weighted = input_params->tidal_weighted;
 		}
@@ -1636,29 +1737,22 @@ void assign_freq_boundaries(double *freq_boundaries,
 		adouble fmerger_temp = (1./(2.*s_param.M * M_PI))* a0* sqrt(s_param.mass2 / s_param.mass1) *(1.0 + n1 * kappa + n2 * kappa * kappa)/(1.0 + d1 * kappa + d2* kappa * kappa);
 		double fmerger = fmerger_temp.value();
 		//Sort the boundaries
-		double temp_boundaries[boundary_num];
+		std::vector<double> temp_boundaries(boundary_num);
 		double temp[2] = {fmerger, fmerger*1.2};
-		int base_ct=0, NRT_ct=0;
-		for (int i = 0 ; i<boundary_num; i++){
-			if(freq_boundaries[base_ct] >0){
-				if(freq_boundaries[base_ct] < temp[NRT_ct]){
-					temp_boundaries[i] = freq_boundaries[base_ct];
-					base_ct++;
-				}
-				else{
-					temp_boundaries[i] = temp[NRT_ct];
-					NRT_ct++;
-				}
-			}
-			else{
-				temp_boundaries[i] = temp[NRT_ct];
-				NRT_ct++;
-			}
-		}
-		
-		for (int i = 0 ; i<boundary_num; i++){
+		for(int i =0 ;i<2; i++){
+			temp_boundaries[i] = temp[i];
+		}		
+		for(int i =2 ;i<boundary_num; i++){
+			temp_boundaries[i] = freq_boundaries[i-2];
+		}		
+		std::sort(temp_boundaries.begin(),temp_boundaries.end());
+		for(int i =0 ;i<boundary_num; i++){
 			freq_boundaries[i] = temp_boundaries[i];
 		}
+		
+		//for (int i = 0 ; i<boundary_num; i++){
+		//	std::cout<<i<<" "<<temp_boundaries[i]<<std::endl;
+		//}
 		
 	}
 	//###########################################

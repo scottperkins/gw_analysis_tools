@@ -37,8 +37,18 @@ class sampler
 {
 public:
 	mcmc_data_interface **interfaces;
+
+	//####################################################	
+	//Testing
+	bool block_sample = false;
+	double block_sample_prob = .5;
+	int block_num = 2;
+	int block_boundary_ids[2] = {7,11};
+	//####################################################	
+	bool kde_step = false;	
+	
 	bool tune=true;
-	int types_of_steps = 5;
+	int types_of_steps = 6;
 	double **step_prob;
 	double **prob_boundaries;
 	double *chain_temps;
@@ -59,6 +69,9 @@ public:
 	/* Isolating the ensemble means the chains can only swap with those inside their ensemble*/
 	//bool isolate_ensembles=false;
 	bool isolate_ensembles=false;
+	/*Use isolate_ensembles_cold if you want the cold chains to only swap with the next chains in their ensemble, */
+	/*but want the rest of the chains to swap with whoever*/
+	bool isolate_ensembles_cold=true;
 	double swap_rate=1./2.;
 	bool burn_phase=false;
 	/* If true, the ensembles are only allowed to PT swap with those in their ensemble, but each ensemble is allowed to propose steps with the ensemble-approach. The frequency with which two ensembles are walked forward with this proposal is 1/ensemble_rate*/
@@ -102,8 +115,9 @@ public:
 	//keeping history of length history_length (overwrites the list as 
 	//it walks forward when it reaches the end)
 	int history_length=1000;
-	//int history_length=5;
+	//int history_length=5000;
 	int history_update=10;
+	//int history_update=5;
 	int *current_hist_pos;
 	double ***history;
 	int ***history_status;
@@ -121,6 +135,8 @@ public:
 	int *de_last_reject_ct;
 	int *fish_last_accept_ct;
 	int *fish_last_reject_ct;
+	int *kde_last_accept_ct;
+	int *kde_last_reject_ct;
 	int *RJstep_last_accept_ct;
 	int *RJstep_last_reject_ct;
 	int **randgauss_width_number;
@@ -141,8 +157,11 @@ public:
 	//but if the number is high enough, detailed balance is approximately 
 	//kept without calculating second fisher
 	int fisher_update_number=200;
-	//int fisher_update_number=500000;
-	//int fisher_update_number=2;
+	double ***kde_cov=NULL;
+	double ***kde_fisher=NULL;
+	double *kde_cov_lndet;
+	int kde_cov_update_number=200;
+	int *kde_cov_update_ct=NULL;
 
 	//log_prior lp;
 	//log_likelihood ll;
@@ -162,12 +181,15 @@ public:
 	int *num_de ;
 	int *num_mmala ;
 	int *num_RJstep ;
+	int *num_kde ;
 
 	double time_elapsed_cpu;
 	double time_elapsed_wall;
 	double time_elapsed_cpu_ac;
 	double time_elapsed_wall_ac;
 
+	int *kde_accept_ct;
+	int *kde_reject_ct;
 	int *fish_accept_ct;
 	int *fish_reject_ct;
 	int *de_accept_ct;
@@ -305,5 +327,7 @@ void reduce_output(int step_num, int max_dimension, double ***output_old, int **
 
 int count_cold_chains(double *temps, int chain_N);
 void assign_ensemble_temps(double *chain_temps, int chain_N,int max_chain_N_thermo_ensemble,double TMAX);
+void update_kde_cov(sampler *sampler,int chain_id);
+void kde_proposal(sampler *sampler, double *current_param,double *proposed_param, int *current_status,int *proposed_status,int *current_model_status,int *proposed_model_status,int chain_id);
 
 #endif

@@ -27,6 +27,8 @@ set (GWAT_VERSION_MAJOR 1)
 set (GWAT_VERSION_MINOR 0)
 
 set (GWAT_ROOT_DIRECTORY "${PROJECT_SOURCE_DIR}/")
+set (GWAT_INSTALL_DIRECTORY "${CMAKE_INSTALL_PREFIX}/")
+message("${GWAT_INSTALL_DIRECTORY}")
 
 
  
@@ -59,6 +61,21 @@ find_package(OpenMP REQUIRED)
 find_package(FFTW3 REQUIRED)
 find_package(GSL REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(nlohmann_json REQUIRED)
+
+###############################################################
+
+#SET(BAYESSHIP_INCLUDE_DIR "/Users/sperkins/git-repos/BayesShip/build/install/include")
+#SET(BAYESSHIP_LIBRARIES "/Users/sperkins/git-repos/BayesShip/build/install/lib/libbayesship.dylib")
+#SET(BAYESSHIP_INCLUDE_DIR "/bayesshipBuild/install/include")
+#SET(BAYESSHIP_LIBRARIES "/bayesshipBuild/install/lib/libbayesship.so")
+SET(BAYESSHIP_INCLUDE_DIR "/usr/local/include")
+SET(BAYESSHIP_LIBRARIES "/usr/local/lib/libbayesship.so")
+###############################################################
+
+#set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${BAYESSHIP_INCLUDE_DIR}" )
+set(INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include/gwat;${PROJECT_SOURCE_DIR}/include;${OpenMP_INCLUDE_DIR};${ADOLC_INCLUDE_DIR};${HDF5_INCLUDE_DIR};${FFTW3_INCLUDE_DIR};${GSL_INCLUDE_DIR};${BAYESSHIP_INCLUDE_DIR}" )
+set(LIB_DIRS "${HDF5_LIBRARIES};OpenMP::OpenMP_CXX;${ADOLC_LIBRARIES};${FFTW3_LIBRARIES};${GSL_LIBRARIES};m;${BAYESSHIP_LIBRARIES}")
 
 
 #Library
@@ -83,6 +100,9 @@ endif()
 # add the binary tree to the search path for include files
 # so that we will find TutorialConfig.h
 #include_directories("${PROJECT_BINARY_DIR}")
+
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/data")
 
 install(FILES ${HEADER_LIST} DESTINATION "include/gwat")
 install(FILES "${CMAKE_BINARY_DIR}/include/gwat/GWATConfig.h" DESTINATION "include/gwat")

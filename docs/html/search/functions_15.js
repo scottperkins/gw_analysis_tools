@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['xlalspinweightedsphericalharmonic',['XLALSpinWeightedSphericalHarmonic',['../df/d2d/util_8cpp.html#af9aa77c0f12435f4c7e9f13dba8ca1f8',1,'XLALSpinWeightedSphericalHarmonic(T theta, T phi, int s, int l, int m):&#160;util.cpp'],['../d8/d3c/util_8h.html#af9aa77c0f12435f4c7e9f13dba8ca1f8',1,'XLALSpinWeightedSphericalHarmonic(T theta, T phi, int s, int l, int m):&#160;util.cpp']]]
+  ['vector_5funion',['vector_union',['../df/d2d/util_8cpp.html#a139992818028af23fffd9f573f5c8814',1,'vector_union(std::vector&lt; double &gt; A, std::vector&lt; double &gt; B, std::vector&lt; double &gt; *C):&#160;util.cpp'],['../d8/d3c/util_8h.html#a139992818028af23fffd9f573f5c8814',1,'vector_union(std::vector&lt; double &gt; A, std::vector&lt; double &gt; B, std::vector&lt; double &gt; *C):&#160;util.cpp']]]
 ];

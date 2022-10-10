@@ -1,0 +1,200 @@
+#############################################################
+#Detector/data/model options
+#############################################################
+#Number of detectors
+[int] detector number = 2
+#Name of the detectors
+[str] detector name 0 = Hanford
+[str] detector name 1 = Livingston
+#GPS time of the trigger
+[dbl] gps = 1126259462.4
+#File path to the PSD file -- these should be in the standard LVC format  
+#N_detectors + 1 columns [frequency, PSD1,...PSDN] with one comment line at the top
+[str] PSD filepath = /Path/To/PSD/file/PSDFile.txt
+#File path to each data file
+[str] data file 0 = /Path/To/data/file0/dataFile.txt
+[str] data file 1 = /Path/To/data/file2/dataFile.txt
+#Length of data in seconds -- this is given by the data file, as packaged by LVC
+[dbl] data length = 32
+#Generation method 
+[str] generation method = SkySearch
+#Dimension of the parameter space
+[int] dimension =7
+#Amount of time (in seconds) to include post trigger
+[dbl] Post merger signal duration = 2
+
+#############################################################
+#Generic sampler options
+#############################################################
+#Number of ~uncorrelated samples to take per cold chain. Total number of uncorrelated samples should be N_{cold chains} x samples
+[int] independent samples = 5000
+#Maximum number of chains per thermodynamic ensemble 
+[int] ensemble size = 10
+#Number of ensembles to use
+[int] ensemble number = 3
+#Dynamic chain allocation parameter t0 -- see arXiv:1501.05823 for details
+#Total number of burn in steps for prior exploration
+[int] prior burn iterations = 1000
+#Total number of raw steps per chain for prior exploration
+[int] prior iterations = 1000
+# Boolean to write prior data to file or not *if* sampling from prior
+[bool] write prior data = true
+#Total number of burn in steps for posterior exploration
+[int] burn iterations = 1000
+#Swap frequency between chains in steps --> this is an average quantity. Every 2 steps, a chain is allowed to swap with chance 1/(swap frequency)
+[double] swap probability = .1
+#Number of threads to use
+[int] thread number = 10
+#Maximum number of raw steps to take before checkpointing -- only used in cases of extremely poor convergence
+[int] Max chunk size = 1000000
+# Directory to put output in
+[str] output directory = /path/to/output/
+# file name moniker
+[str] output moniker = mcmc_run
+
+#############################################################
+#How to start sampler -- USE ONLY ONE OPTION
+#############################################################
+#Fresh start  -- single position
+#Initial position file
+[str] initial position file = /path/to/initial/position/file/sample_initial_position.csv
+
+#Fresh start  -- ensemble position position -- one row per chain
+#Initial ensemble position
+[str] initial ensemble position file = /path/to/initial/ensemble/position/file/ensemble_position.csv
+
+#Whether to ignore existing checkpoint files with the name Moniker and in directory output directory. 
+#If true, these files are overwritten if they exist
+#If false, those files are read in and the sampler starts from those checkpoints
+[bool] ignore existing checkpoint = true
+
+# Whether to store only the cold chains (sampling from the true distribution) (true) or to save all the chains
+# (many of which are not sampling from the true distribution) (false). Setting to false can be useful for debugging.
+[bool] cold chain storage only = true
+
+#############################################################
+#GW prior options
+#Only mass priors are strictly necessary, all others depend on the model being used
+#############################################################
+#Upper and lower limits for mass 1 in solar masses
+[dbl] Mass1 minimum = 10
+[dbl] Mass1 maximum = 80
+#Upper and lower limits for mass 2 in solar masses
+[dbl] Mass2 minimum = 10
+[dbl] Mass2 maximum = 80
+#Spin magnitude prior boundary for source 1 (Do not go beyond |1|)
+[dbl] Spin1 minimum = -1
+[dbl] Spin1 maximum = 1
+#Spin magnitude prior boundary for source 2 (Do not go beyond |1|)
+[dbl] Spin2 minimum = -1
+[dbl] Spin2 maximum = 1
+#prior range for luminosity distance in MPC
+[dbl] Luminosity distance minimum = 10
+[dbl] Luminosity distance maximum = 1000
+#Optional priors on sky location, RA (radians) and Sin(DEC) 
+[dbl] RA minimum = 0
+[dbl] RA maximum = 6.28319
+[dbl] Sin(DEC) minimum = -1
+[dbl] Sin(DEC) maximum = 1
+
+#Tidal parameters  -- use tidal 1/2 OR use tidal_s with tidal_love
+#Range of prior on tidal parameter for object 1
+[dbl] tidal1 minimum = 1
+[dbl] tidal1 maximum = 1000
+#Range of prior on tidal parameter for object 2
+[dbl] tidal2 minimum = 1
+[dbl] tidal2 maximum = 1000
+#Range of prior on the symmetric tidal parameter
+[dbl] tidal_s minimum = 1
+[dbl] tidal_s maximum = 1000
+#Whether to use love relations to reduce tidal 1/2 to just tidal_s
+[bool] Tidal love relation = true
+#Whether to marginalize over different EoSs when using binary love (arXiv:1903.03909 section IV.A)
+[bool] Tidal love error marginalization = true
+
+#NS flag for object 1
+[bool] NS Flag 0 = false
+#NS flag for object 2
+[bool] NS Flag 1 = false
+
+#Experimental flag to try to use the Jeffreys prior -- not supported  -- keep to false
+[bool] Jeffreys prior = false
+
+#############################################################
+#Testing GR options
+#############################################################
+
+#############################################################
+#ppE specific options
+#############################################################
+#Number of modifications -- only for ppE waveforms
+[int] Number of modifications = 2
+#Power parameter from ppE -- one per modification
+[dbl] ppE b 0 = -1
+[dbl] ppE b 1 = 1
+#Edges of ppE beta prior -- one per modification
+[dbl] ppE beta 0 minimum = -10
+[dbl] ppE beta 0 maximum = 10
+[dbl] ppE beta 1 minimum = -10
+[dbl] ppE beta 1 maximum = 10
+
+#############################################################
+#gIMR specific options##
+#############################################################
+#Number of delta phi modifications 
+[int] Number of phi modifications = 1
+#delta phi modifications
+[int] delta phi 0 i = 4
+#Edges of delta phi prior -- one per mod
+[dbl] delta phi 0 minimum = -10
+[dbl] delta phi 0 maximum = 10
+
+#Number of delta sigma modifications 
+[int] Number of sigma modifications = 1
+#delta sigma modifications
+[int] delta sigma 0 i = 1
+#Edges of delta sigma prior -- one per mod
+[dbl] delta sigma 0 minimum = -10
+[dbl] delta sigma 0 maximum = 10
+
+#Number of delta beta modifications 
+[int] Number of beta modifications = 1
+#delta beta modifications
+[int] delta beta 0 i = 1
+#Edges of delta beta prior -- one per mod
+[dbl] delta beta 0 minimum = -10
+[dbl] delta beta 0 maximum = 10
+
+#Number of delta alpha modifications 
+[int] Number of alpha modifications = 1
+#delta alpha modifications
+[int] delta alpha 0 i = 1
+#Edges of delta alpha prior -- one per mod
+[dbl] delta alpha 0 minimum = -10
+[dbl] delta alpha 0 maximum = 10
+
+#############################################################
+#EA specific options
+#############################################################
+#Determine which parameterization of EA theory to use.
+[bool] Alpha parameterization = true
+#Priors for the 3 EA coupling constants in alpha parameterization.
+#If not specified, default values used.
+[dbl] EA alpha_1 minimum = -0.06
+[dbl] EA alpha_1 maximum = 0.06
+[dbl] EA alpha_2 minimum = -0.003
+[dbl] EA alpha_2 maximum = 0.003
+[dbl] EA alpha_3 minimum = -1
+[dbl] EA alpha_3 maximum = 1
+
+#Priors for the 3 EA coupling constants. If not specified, default values used.
+#Upper and lower limits for coupling to acceleration
+[dbl] EA c_a minimum = 0
+[dbl] EA c_a maximum = .0001 
+#Upper and lower limits for coupling to expansion
+[dbl] EA c_theta minimum = -.001 
+[dbl] EA c_theta maximum = .001
+#Upper and lower limits for coupling to vorticity
+[dbl] EA c_w minimum = -10
+[dbl] EA c_w maximum = 10
+#The shear parameter, c_sigma, is set to zero so no prior needed

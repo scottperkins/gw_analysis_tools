@@ -1,119 +1,197 @@
+#############################################################
+#Detector/data/model options
+#############################################################
 #Number of detectors
 [int] detector number = 2
 #Name of the detectors
 [str] detector name 0 = Hanford
 [str] detector name 1 = Livingston
-#[str] detector name 2 = Virgo
 #GPS time of the trigger
 [dbl] gps = 1126259462.4
-#[dbl] gps = 1180922494.5
-#[dbl] gps = 1185389807.3
-#[dbl] gps = 1135136350.6
-#[dbl] gps = 1186741861.5
-#File path to the PSD file
-[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW150914/GWTC1_GW150914_PSDs.dat.txt
-#[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW170729/GWTC1_GW170729_PSDs.dat.txt
-#[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW151226/GWTC1_GW151226_PSDs.dat.txt
-#[str] PSD filepath = /Users/sperkins/Downloads/LOSC_data/GW170814/GWTC1_GW170814_PSDs.dat
-#[str] PSD filepath = /home/sperkins/Downloads/LOSC_data/GW170608/GWTC1_GW170608_PSDs.dat.txt  
+#File path to the PSD file -- these should be in the standard LVC format  
+#N_detectors + 1 columns [frequency, PSD1,...PSDN] with one comment line at the top
+[str] PSD filepath = /Path/To/PSD/file/PSDFile.txt
 #File path to each data file
-[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt
-[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt
-#[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW170729/H-H1_GWOSC_4KHZ_R1-1185389792-32.txt
-#[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW170729/L-L1_GWOSC_4KHZ_R1-1185389792-32.txt
-#[str] data file 2 = /home/sperkins/Downloads/LOSC_data/GW170729/V-V1_GWOSC_4KHZ_R1-1185389792-32.txt
-#[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW170814/H-H1_GWOSC_4KHZ_R1-1186741846-32.txt
-#[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW170814/L-L1_GWOSC_4KHZ_R1-1186741846-32.txt
-#[str] data file 2 = /Users/sperkins/Downloads/LOSC_data/GW170814/V-V1_GWOSC_4KHZ_R1-1186741846-32.txt
-#[str] data file 0 = /home/sperkins/Downloads/LOSC_data/GW170608/H-H1_GWOSC_4KHZ_R1-1180922479-32.txt
-#[str] data file 1 = /home/sperkins/Downloads/LOSC_data/GW170608/L-L1_GWOSC_4KHZ_R1-1180922479-32.txt
-#[str] data file 0 = /Users/sperkins/Downloads/LOSC_data/GW151226/H-H1_GWOSC_4KHZ_R1-1135136335-32.txt
-#[str] data file 1 = /Users/sperkins/Downloads/LOSC_data/GW151226/L-L1_GWOSC_4KHZ_R1-1135136335-32.txt
-#Length of data in seconds
+[str] data file 0 = /Path/To/data/file0/dataFile.txt
+[str] data file 1 = /Path/To/data/file2/dataFile.txt
+#Length of data in seconds -- this is given by the data file, as packaged by LVC
 [dbl] data length = 32
 #Generation method 
 [str] generation method = SkySearch
-#Number of ~uncorrelated samples to take
+#Dimension of the parameter space
+[int] dimension =7
+#Amount of time (in seconds) to include post trigger
+[dbl] Post merger signal duration = 2
+
+#############################################################
+#Generic sampler options
+#############################################################
+#Number of ~uncorrelated samples to take per cold chain. Total number of uncorrelated samples should be N_{cold chains} x samples
 [int] samples = 5000
-#Maximum number of chains per thermodynamic ensemble
+#Maximum number of chains per thermodynamic ensemble 
 [int] max thermo chain number = 10
-#Dynamic chain allocation parameter t0 -- approximately how many steps chains are allowed to move
+#TOTAL number of chains -- chain number *MUST* integer divisible by max thermo chain number
+[int] chain number = 10
+#Dynamic chain allocation parameter t0 -- see arXiv:1501.05823 for details
+#Total number of burn in steps is currently 2*4*t0 
+#-- 2 phases of temperature optimization (2 t0 per phase) and 2 phases of proposal optimization (2 t0 each)
 [int] t0=1000
-#Dynamic chain allocation parameter nu -- approximately how many steps swapping effects are averaged over
+#Dynamic chain allocation parameter nu -- approximately how many steps swapping effects are averaged over -- see arXiv:1501.05823 for details
 [int] nu=100
-#Chain allocation -- how to place the rest of the chains after thermodynamic equilibrium is reached
+#Chain allocation -- how to place the rest of the chains after thermodynamic equilibrium is reached 
+#-- currently, only double is officially supported
 [str] allocation scheme  = double
-#Swap frequency between chains in steps
+#Swap frequency between chains in steps --> this is an average quantity. Every 2 steps, a chain is allowed to swap with chance 1/(swap frequency)
 [int] swap frequency = 3
 #Number of threads to use
 [int] thread number = 10
+#Maximum number of raw steps to take before checkpointing -- only used in cases of extremely poor convergence
+[int] Max chunk size = 1000000
 #Output data file -- will be csv
-[str] output data file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test2.csv
+[str] output data file = /path/to/output/output.hdf5
 #Output statistics file -- will be txt
-[str] output stat file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test_stat2.txt
-#Amount of time (in seconds) to include post trigger
-[dbl] Post merger signal duration = 2
+[str] output stat file = /path/to/output/stat.txt
+#Checkpoint file for checkpoint current run -- csv file
+[str] checkpoint file = /path/to/checkpoint/file/checkpoint.csv
+
 #############################################################
-#Dimension of the parameter space
-[int] dimension =7
-#[int] dimension = 11
-#Number of chains
-[int] chain number = 10
+#How to start sampler -- USE ONLY ONE OPTION
+#############################################################
+#Fresh start  -- single position
 #Initial position file
-[str] initial position file = /Users/sperkins/git-repos/gw_analysis_tools/data/sample_config_files/sample_init_pos.csv
-#[str] initial position file = /home/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos_D.csv
-#[str] initial position file = /home/sperkins/git-repos/gw_analysis_tools/data/sample_init_pos_Pv2_int170608.csv
-#Checkpoint file -- csv file
-[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/build/data/test_checkpoint2.csv
+[str] initial position file = /path/to/initial/position/file/sample_initial_position.csv
+
+#Fresh start  -- ensemble position position -- one row per chain
+#Initial ensemble position
+[str] initial ensemble position file = /path/to/initial/ensemble/position/file/ensemble_position.csv
+
+#Start from checkpoint file 
+#Initial checkpoint  file 
+[str] initial checkpoint file = /path/to/initial/checkpoint/file/checkpoint_initial.csv
+
 #############################################################
-#OUTDATED -- removed soon 
-#Optional prior ranges for Chirpmass
-[dbl] Chirpmass minimum = 20
-[dbl] Chirpmass maximum = 90
+#GW prior options
+#Only mass priors are strictly necessary, all others depend on the model being used
 #############################################################
-#Optional prior ranges for Mass1
+#Upper and lower limits for mass 1 in solar masses
 [dbl] Mass1 minimum = 10
 [dbl] Mass1 maximum = 80
-#Optional prior ranges for Mass2 
+#Upper and lower limits for mass 2 in solar masses
 [dbl] Mass2 minimum = 10
 [dbl] Mass2 maximum = 80
-#Optional prior ranges for Luminosity Distance 
+#Spin magnitude prior boundary for source 1 (Do not go beyond |1|)
+[dbl] Spin1 minimum = -1
+[dbl] Spin1 maximum = 1
+#Spin magnitude prior boundary for source 2 (Do not go beyond |1|)
+[dbl] Spin2 minimum = -1
+[dbl] Spin2 maximum = 1
+#prior range for luminosity distance in MPC
 [dbl] Luminosity distance minimum = 10
 [dbl] Luminosity distance maximum = 1000
-##Initial checkpoint  file
-#[str] initial checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
-#Checkpoint file -- csv file
-#[str] checkpoint file = /Users/sperkins/git-repos/gw_analysis_tools/testing/data/test_checkpoint2.csv
+#Optional priors on sky location, RA (radians) and Sin(DEC) 
+[dbl] RA minimum = 0
+[dbl] RA maximum = 6.28319
+[dbl] Sin(DEC) minimum = -1
+[dbl] Sin(DEC) maximum = 1
+
+#Tidal parameters  -- use tidal 1/2 OR use tidal_s with tidal_love
+#Range of prior on tidal parameter for object 1
+[dbl] tidal1 minimum = 1
+[dbl] tidal1 maximum = 1000
+#Range of prior on tidal parameter for object 2
+[dbl] tidal2 minimum = 1
+[dbl] tidal2 maximum = 1000
+#Range of prior on the symmetric tidal parameter
+[dbl] tidal_s minimum = 1
+[dbl] tidal_s maximum = 1000
+#Whether to use love relations to reduce tidal 1/2 to just tidal_s
+[bool] Tidal love relation = true
+#Whether to marginalize over different EoSs when using binary love (arXiv:1903.03909 section IV.A)
+[bool] Tidal love error marginalization = true
+
+#NS flag for object 1
+[bool] NS Flag 0 = false
+#NS flag for object 2
+[bool] NS Flag 1 = false
+
+#Experimental flag to try to use the Jeffreys prior -- not supported  -- keep to false
+[bool] Jeffreys prior = false
 
 #############################################################
-##ppE specific options##
+#Testing GR options
+#############################################################
+
+#############################################################
+#ppE specific options
 #############################################################
 #Number of modifications -- only for ppE waveforms
-[int] Number of modifications = 1
+[int] Number of modifications = 2
 #Power parameter from ppE -- one per modification
 [dbl] ppE b 0 = -1
-#Edges of ppE beta prior
+[dbl] ppE b 1 = 1
+#Edges of ppE beta prior -- one per modification
 [dbl] ppE beta 0 minimum = -10
 [dbl] ppE beta 0 maximum = 10
+[dbl] ppE beta 1 minimum = -10
+[dbl] ppE beta 1 maximum = 10
 
 #############################################################
-##gIMR specific options##
+#gIMR specific options##
 #############################################################
-#Number of modifications -- only for ppE and gIMR waveforms
+#Number of delta phi modifications 
 [int] Number of phi modifications = 1
-#Power parameter from ppE -- one per modification
+#delta phi modifications
 [int] delta phi 0 i = 4
-#Edges of ppE beta prior
+#Edges of delta phi prior -- one per mod
 [dbl] delta phi 0 minimum = -10
 [dbl] delta phi 0 maximum = 10
-#Number of modifications -- only for ppE and gIMR waveforms
-[int] Number of sigma modifications = 0
-[int] delta sigma 0 i = -1
-[int] Number of beta modifications = 0
-[int] delta beta 0 i = -1
-[int] Number of alpha modifications = 0
-[int] delta alpha 0 i = -1
 
-[bool] NS Flag 0 = false
-[bool] NS Flag 1 = false
-[int] Max chunk size = 1000000
+#Number of delta sigma modifications 
+[int] Number of sigma modifications = 1
+#delta sigma modifications
+[int] delta sigma 0 i = 1
+#Edges of delta sigma prior -- one per mod
+[dbl] delta sigma 0 minimum = -10
+[dbl] delta sigma 0 maximum = 10
+
+#Number of delta beta modifications 
+[int] Number of beta modifications = 1
+#delta beta modifications
+[int] delta beta 0 i = 1
+#Edges of delta beta prior -- one per mod
+[dbl] delta beta 0 minimum = -10
+[dbl] delta beta 0 maximum = 10
+
+#Number of delta alpha modifications 
+[int] Number of alpha modifications = 1
+#delta alpha modifications
+[int] delta alpha 0 i = 1
+#Edges of delta alpha prior -- one per mod
+[dbl] delta alpha 0 minimum = -10
+[dbl] delta alpha 0 maximum = 10
+
+#############################################################
+#EA specific options
+#############################################################
+#Determine which parameterization of EA theory to use.
+[bool] alpha parameterization = true
+#Priors for the 3 EA coupling constants in alpha parameterization.
+#If not specified, default values used.
+[dbl] EA alpha_1 minimum = -0.25
+[dbl] EA alpha_1 maximum = 0.25
+[dbl] EA alpha_2 minimum = -0.025
+[dbl] EA alpha_2 maximum = 0.025
+[dbl] EA cbar_w minimum = -1.
+[dbl] EA cbar_w maximum = 1.
+
+#Priors for the 3 EA coupling constants. If not specified, default values used.
+#Upper and lower limits for coupling to acceleration
+[dbl] EA c_a minimum = 0
+[dbl] EA c_a maximum = .0001 
+#Upper and lower limits for coupling to expansion
+[dbl] EA c_theta minimum = -.001 
+[dbl] EA c_theta maximum = .001
+#Upper and lower limits for coupling to vorticity
+[dbl] EA c_w minimum = -10.
+[dbl] EA c_w maximum = 10.
+#The shear parameter, c_sigma, is set to zero so no prior needed

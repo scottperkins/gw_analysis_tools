@@ -63,6 +63,11 @@ struct MCMC_modification_struct
 	bool NSflag1 =false;
 	bool NSflag2 =false;
 
+	bool tidal_love = true; 
+        bool tidal_love_error = false;
+        bool alpha_param = true;
+        bool EA_region1 = false; 
+  
 	/* Whether to use Gauss-Legendre Quadrature for the LIKELIHOOD
  * 		If using GLQ, provide the weights vector for the integration */
 	bool GAUSS_QUAD=false;
@@ -595,5 +600,14 @@ void pack_local_mod_structure(mcmc_data_interface *interface,
 	MCMC_modification_struct *full_struct, 
 	MCMC_modification_struct *local_struct );
 
+void MCMC_fisher_transformations(
+	double *param, 
+	double **fisher, 
+	int dimension,
+	std::string generation_method,
+	bool intrinsic,
+	mcmc_data_interface *interface, 
+	MCMC_modification_struct *mod_struct,
+	void *parameters);
 
 #endif

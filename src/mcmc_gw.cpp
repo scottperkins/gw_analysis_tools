@@ -23,6 +23,8 @@
 #include <mutex>
 #include <thread>
 #include <condition_variable>
+#include "IMRPhenomD_NRT.h" //For testing purposes only! Remove later.
+#include "EA_IMRPhenomD_NRT.h" //For testing purposes only! Remove later.
 
 /*! \file 
  * Routines for implementation in MCMC algorithms specific to GW CBC analysis
@@ -862,6 +864,7 @@ double Log_Likelihood_internal(std::complex<double> *data,
 	free(integrand);
 	//std::cout<<HH<<" "<<DH<<" "<<-0.5*(HH- 2*DH)<<std::endl;
 	return -0.5*(HH- 2*DH);
+	//return -2*(HH- 2*DH);
 }
 
 
@@ -1298,6 +1301,9 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	//######################################################
 	int chain_N = 0;
 	int status = chain_number_from_checkpoint_file(checkpoint_file_start, &chain_N);
+
+	debugger_print(__FILE__,__LINE__,"Number of chains: "+std::to_string(chain_N));
+
 	MCMC_user_param **user_parameters=NULL;
 	user_parameters = new MCMC_user_param*[chain_N];
 	for(int i = 0 ;i<chain_N; i++){
@@ -1346,7 +1352,16 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(std::string checkpoint_
 	}
 	//######################################################
 
-
+	//###########################################################
+	//double trial[11] = {1,.9,.2,.9,.2,3,7,4,.24,0,0};
+	//mcmc_data_interface i;
+	//i.min_dim = 11; 
+	//i.max_dim = 11; 
+	//i.chain_id  = 0; 
+	//i.chain_number  = 11; 
+	//double ll = MCMC_likelihood_wrapper(trial, &i ,user_parameters[0]);
+	//debugger_print(__FILE__,__LINE__,ll);
+	//###########################################################
 	continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated(checkpoint_file_start,sampler_output,output,  N_steps,  
 		max_chain_N_thermo_ensemble, chain_temps, 
 		swp_freq, t0, nu, max_chunk_size,chain_distribution_scheme,
@@ -1439,6 +1454,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 	)
 {
 	std::mutex fisher_mutex;
+	std::cout<<"Waveform Approximant: "<<generation_method<<std::endl;
+	std::cout<<"Dimension: "<<dimension<<std::endl;
 
 	//Create fftw plan for each detector (length of data stream may be different)
 	fftw_outline *plans= (fftw_outline *)malloc(sizeof(fftw_outline)*num_detectors);
@@ -1596,6 +1613,16 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_out
 		//user_parameters[i]->burn_lengths = mcmc_data_length;
 	}
 	//######################################################
+	//###########################################################
+	//double trial[11] = {1,.9,.2,.9,.2,3,7,4,.24,0,0};
+	//mcmc_data_interface i;
+	//i.min_dim = 11; 
+	//i.max_dim = 11; 
+	//i.chain_id  = 0; 
+	//i.chain_number  = 11; 
+	//double ll = MCMC_likelihood_wrapper(trial, &i ,user_parameters[0]);
+	//debugger_print(__FILE__,__LINE__,ll);
+	//###########################################################
 
 
 	PTMCMC_MH_dynamic_PT_alloc_uncorrelated(sampler_output,output, dimension, N_steps, chain_N, 
@@ -1842,19 +1869,78 @@ void continue_PTMCMC_MH_GW(std::string start_checkpoint_file,
  */
 void PTMCMC_method_specific_prep(std::string generation_method, int dimension,double **seeding_var, bool local_seeding)
 {
-	if(dimension==4 && generation_method =="IMRPhenomD"){
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
+	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha  + mcmc_mod_struct->ppE_Nmod);
+	//if(generation_method.find("EA") != std::string::npos){totalmod+=4;}
+	if(generation_method.find("EA") != std::string::npos){
+	        totalmod+=3;
+	}
+	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
 		if(local_seeding){
 			(*seeding_var) = new double[dimension];
 			(*seeding_var)[0]=.5;
 			(*seeding_var)[1]=.1;
 			(*seeding_var)[2]=.1;
 			(*seeding_var)[3]=.1;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+4] = 1;
+			}
 		}
 		mcmc_intrinsic=true;
-	}
-	if(dimension==6 && generation_method =="IMRPhenomD_NRT"){
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, lambda1, lambda2"<<std::endl;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 6)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.5;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=10;
+			(*seeding_var)[5]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+6] = 1;
+			}
+		}
+		mcmc_intrinsic=true;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 5)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal_s";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.5;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+5] = 1;
+			}
+		}
+		mcmc_intrinsic=true;
+	} 
+	else if(generation_method.find("PhenomPv2") != std::string::npos && (dimension - totalmod) == 8)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2, tilt1, tilt2, phi1, phi2";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
 		if(local_seeding){
 			(*seeding_var) = new double[dimension];
 			(*seeding_var)[0]=.5;
@@ -1863,26 +1949,21 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[3]=.1;
 			(*seeding_var)[4]=.1;
 			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=.1;
+			(*seeding_var)[7]=.1;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+8] = 1;
+			}
 		}
 		mcmc_intrinsic=true;
-	}
-	else if(generation_method =="SkySearch"){
-		std::cout<<"Sampling in parameters: "<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1;
-			(*seeding_var)[1]=.3;
-			(*seeding_var)[2]=1.;
-			(*seeding_var)[3]=1.;
-			(*seeding_var)[4]=1.;
-			(*seeding_var)[5]=20;
-			(*seeding_var)[6]=20;
+	} 
+	else if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 11)
+	{
+		std::cout<<"Sampling in parameters: RA, sin DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
 		}
-		mcmc_intrinsic=false;
-	}
-	else if(dimension==11 && generation_method =="IMRPhenomD"){
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
-		mcmc_intrinsic=false;
+		std::cout<<std::endl;
 		if(local_seeding){
 			(*seeding_var) = new double[dimension];
 			(*seeding_var)[0]=.1;
@@ -1896,11 +1977,19 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[8]=.1;
 			(*seeding_var)[9]=.1;
 			(*seeding_var)[10]=.5;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+11] = 1;
+			}
 		}
-	}
-	else if(dimension==13 && generation_method =="IMRPhenomD_NRT"){
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
 		mcmc_intrinsic=false;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
+	{
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
 		if(local_seeding){
 			(*seeding_var) = new double[dimension];
 			(*seeding_var)[0]=.1;
@@ -1914,145 +2003,49 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[8]=.1;
 			(*seeding_var)[9]=.1;
 			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=20;
-			(*seeding_var)[12]=20;
+			(*seeding_var)[11]=10;
+			(*seeding_var)[12]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+13] = 1;
+			}
 		}
-	}
-	else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
-		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.5;
-			(*seeding_var)[2]=1;
-			(*seeding_var)[3]=1;
-			(*seeding_var)[4]=1;
-			(*seeding_var)[5]=.1;
-			(*seeding_var)[6]=1;
-			(*seeding_var)[7]=1.;
-			(*seeding_var)[8]=.3;
-			(*seeding_var)[9]=.5;
-			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=1;
-		}
-	}
-	//Sampling parameter is root alpha in km
-	else if(dimension==12 && generation_method =="EdGB_IMRPhenomD"){
-		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.5;
-			(*seeding_var)[2]=1;
-			(*seeding_var)[3]=1;
-			(*seeding_var)[4]=1;
-			(*seeding_var)[5]=.1;
-			(*seeding_var)[6]=1;
-			(*seeding_var)[7]=1.;
-			(*seeding_var)[8]=.3;
-			(*seeding_var)[9]=.5;
-			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=1;
-		}
-	}
-	else if(dimension==13 && 
-		(generation_method =="EdGB_GHOv1_IMRPhenomD" || generation_method =="EdGB_GHOv2_IMRPhenomD" || generation_method =="EdGB_GHOv3_IMRPhenomD" )){
-		mcmc_mod_struct->ppE_Nmod = 2;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km), gamma (generic 1PN term)"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.5;
-			(*seeding_var)[2]=1;
-			(*seeding_var)[3]=1;
-			(*seeding_var)[4]=1;
-			(*seeding_var)[5]=.1;
-			(*seeding_var)[6]=1;
-			(*seeding_var)[7]=1.;
-			(*seeding_var)[8]=.3;
-			(*seeding_var)[9]=.5;
-			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=1;
-			(*seeding_var)[12]=1;
-		}
-	}
-	else if(dimension==16 && generation_method =="dCS_IMRPhenomPv2"){
-		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.5;
-			(*seeding_var)[2]=1;
-			(*seeding_var)[3]=1;
-			(*seeding_var)[4]=1;
-			(*seeding_var)[5]=.1;
-			(*seeding_var)[6]=1;
-			(*seeding_var)[7]=1.;
-			(*seeding_var)[8]=.3;
-			(*seeding_var)[9]=.5;
-			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=1.;
-			(*seeding_var)[12]=1.;
-			(*seeding_var)[13]=1.;
-			(*seeding_var)[14]=1.;
-			(*seeding_var)[15]=1.;
-		}
-	}
-	//Sampling parameter is root alpha in km
-	else if(dimension==16 && generation_method =="EdGB_IMRPhenomPv2"){
-		mcmc_mod_struct->ppE_Nmod = 1;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.5;
-			(*seeding_var)[2]=1;
-			(*seeding_var)[3]=1;
-			(*seeding_var)[4]=1;
-			(*seeding_var)[5]=.1;
-			(*seeding_var)[6]=1;
-			(*seeding_var)[7]=1.;
-			(*seeding_var)[8]=.3;
-			(*seeding_var)[9]=.5;
-			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=1.;
-			(*seeding_var)[12]=1.;
-			(*seeding_var)[13]=1.;
-			(*seeding_var)[14]=1.;
-			(*seeding_var)[15]=1.;
-		}
-	}
-	else if(dimension==17 && 
-		(generation_method =="EdGB_GHOv1_IMRPhenomPv2" || generation_method =="EdGB_GHOv2_IMRPhenomPv2" || generation_method =="EdGB_GHOv3_IMRPhenomPv2" )){
-		mcmc_mod_struct->ppE_Nmod = 2;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.5;
-			(*seeding_var)[2]=1;
-			(*seeding_var)[3]=1;
-			(*seeding_var)[4]=1;
-			(*seeding_var)[5]=.1;
-			(*seeding_var)[6]=1;
-			(*seeding_var)[7]=1.;
-			(*seeding_var)[8]=.3;
-			(*seeding_var)[9]=.5;
-			(*seeding_var)[10]=.5;
-			(*seeding_var)[11]=1.;
-			(*seeding_var)[12]=1.;
-			(*seeding_var)[13]=1.;
-			(*seeding_var)[14]=1.;
-			(*seeding_var)[15]=1.;
-			(*seeding_var)[16]=1.;
-		}
-	}
-	else if(dimension==15 && generation_method =="IMRPhenomPv2"){
 		mcmc_intrinsic=false;
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
+	{
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal_s"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.1;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=.5;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=.1;
+			(*seeding_var)[7]=.1;
+			(*seeding_var)[8]=.1;
+			(*seeding_var)[9]=.1;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=10;
+			//(*seeding_var)[12]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+12] = 1;
+			}
+		}
+		mcmc_intrinsic=false;
+	} 
+	else if(generation_method.find("PhenomPv2") != std::string::npos && (dimension - totalmod) == 15)
+	{
+		std::cout<<"Sampling in parameters: RA, sin DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
 		if(local_seeding){
 			(*seeding_var) = new double[dimension];
 			(*seeding_var)[0]=1.;
@@ -2070,242 +2063,482 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 			(*seeding_var)[12]=1.;
 			(*seeding_var)[13]=1.;
 			(*seeding_var)[14]=1.;
-		}
-	}
-	else if(dimension==8 && generation_method =="IMRPhenomPv2"){
-		mcmc_intrinsic=true;
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
-		if(local_seeding){
-			(*seeding_var) = new double[dimension];
-			(*seeding_var)[0]=1.;
-			(*seeding_var)[1]=.3;
-			(*seeding_var)[2]=1.;
-			(*seeding_var)[3]=1.;
-			(*seeding_var)[4]=1.;
-			(*seeding_var)[5]=1.;
-			(*seeding_var)[6]=1.;
-			(*seeding_var)[7]=1.;
-		}
-	}
-	else if( generation_method == "ppE_IMRPhenomPv2_Inspiral"
-		|| generation_method == "ppE_IMRPhenomPv2_IMR"
-		|| generation_method == "PNSeries_ppE_IMRPhenomPv2_IMR"
-		|| generation_method == "PNSeries_ppE_IMRPhenomPv2_Inspiral"
-		){
-		if(dimension-mcmc_mod_struct->ppE_Nmod == 15){
-			
-		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
-			for(int i =0; i<mcmc_Nmod; i++){
-				std::cout<<", beta"<<i;
-			}
-			std::cout<<endl;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.5;
-				(*seeding_var)[2]=1;
-				(*seeding_var)[3]=1;
-				(*seeding_var)[4]=1;
-				(*seeding_var)[5]=.1;
-				(*seeding_var)[6]=1;
-				(*seeding_var)[7]=1.;
-				(*seeding_var)[8]=.3;
-				(*seeding_var)[9]=.5;
-				(*seeding_var)[10]=.5;
-				(*seeding_var)[11]=1.;
-				(*seeding_var)[12]=1.;
-				(*seeding_var)[13]=1.;
-				(*seeding_var)[14]=1.;
-				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					(*seeding_var)[15 + i]=2;
-				}
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+15] = 1;
 			}
 		}
-		if(dimension-mcmc_mod_struct->ppE_Nmod == 8){
-			mcmc_intrinsic=true;
-			std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
-			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
-				std::cout<<", beta"<<i;
-			}
-			std::cout<<endl;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.3;
-				(*seeding_var)[2]=1.;
-				(*seeding_var)[3]=1.;
-				(*seeding_var)[4]=1.;
-				(*seeding_var)[5]=1.;
-				(*seeding_var)[6]=1.;
-				(*seeding_var)[7]=1.;
-				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					(*seeding_var)[8 + i]=2;
-				}
-			}
-		}
-
-	}
-	else if(generation_method == "gIMRPhenomPv2" 
-		){
-		int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
-		if(dimension-totalmod == 15){
-			
-			mcmc_intrinsic=false;
-			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
-			for(int i =0; i<totalmod; i++){
-				std::cout<<", mod "<<i;
-			}
-			std::cout<<endl;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.5;
-				(*seeding_var)[2]=1;
-				(*seeding_var)[3]=1;
-				(*seeding_var)[4]=1;
-				(*seeding_var)[5]=.1;
-				(*seeding_var)[6]=1;
-				(*seeding_var)[7]=1.;
-				(*seeding_var)[8]=.3;
-				(*seeding_var)[9]=.5;
-				(*seeding_var)[10]=.5;
-				(*seeding_var)[11]=1.;
-				(*seeding_var)[12]=1.;
-				(*seeding_var)[13]=1.;
-				(*seeding_var)[14]=1.;
-				for(int i =0; i< totalmod;i++){
-					(*seeding_var)[15 + i]=2;
-				}
-			}
-		}
-		else{
-			mcmc_intrinsic=true;
-			std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
-			for(int i =0; i<totalmod; i++){
-				std::cout<<", mod "<<i;
-			}
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.3;
-				(*seeding_var)[2]=1.;
-				(*seeding_var)[3]=1.;
-				(*seeding_var)[4]=1.;
-				(*seeding_var)[5]=1.;
-				(*seeding_var)[6]=1.;
-				(*seeding_var)[7]=1.;
-				for(int i =0; i< totalmod;i++){
-					(*seeding_var)[8 + i]=2;
-				}
-			}
-		}
-
-	}
-	else if(generation_method == "gIMRPhenomD" 
-		){
-		int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
-		if(dimension-totalmod == 4){
-			std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
-			
-			mcmc_intrinsic=true;
-			for(int i =0; i<totalmod; i++){
-				std::cout<<", beta"<<i;
-			}
-			
-			std::cout<<endl;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.3;
-				(*seeding_var)[2]=1;
-				(*seeding_var)[3]=1;
-				for(int i =0; i< totalmod;i++){
-					(*seeding_var)[4 + i]=2;
-				}
-			}
-		}
-		else{
-			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
-			mcmc_intrinsic=false;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.5;
-				(*seeding_var)[2]=1;
-				(*seeding_var)[3]=1;
-				(*seeding_var)[4]=1;
-				(*seeding_var)[5]=.1;
-				(*seeding_var)[6]=1;
-				(*seeding_var)[7]=1.;
-				(*seeding_var)[8]=.3;
-				(*seeding_var)[9]=.5;
-				(*seeding_var)[10]=.5;
-				for(int i =0; i< totalmod;i++){
-					(*seeding_var)[11 + i]=2;
-				}
-			}
-		}
-
-	}
-	else if(generation_method == "ppE_IMRPhenomD_Inspiral"
-		|| generation_method == "ppE_IMRPhenomD_IMR"
-		|| generation_method == "PNSeries_ppE_IMRPhenomD_IMR"
-		|| generation_method == "PNSeries_ppE_IMRPhenomD_Inspiral"
-		){
-		if(dimension-mcmc_mod_struct->ppE_Nmod == 11){
-			
-			std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
-			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
-				std::cout<<", beta"<<i;
-			}
-			std::cout<<endl;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=1.;
-				(*seeding_var)[1]=.5;
-				(*seeding_var)[2]=1;
-				(*seeding_var)[3]=1;
-				(*seeding_var)[4]=1;
-				(*seeding_var)[5]=.1;
-				(*seeding_var)[6]=1;
-				(*seeding_var)[7]=1.;
-				(*seeding_var)[8]=.3;
-				(*seeding_var)[9]=.5;
-				(*seeding_var)[10]=.5;
-				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					(*seeding_var)[11 + i]=2;
-				}
-			}
-		}
-		if(dimension-mcmc_mod_struct->ppE_Nmod == 4){
-			mcmc_intrinsic=true;
-			std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
-			for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
-				std::cout<<", beta"<<i;
-			}
-			std::cout<<endl;
-			if(local_seeding){
-				(*seeding_var) = new double[dimension];
-				(*seeding_var)[0]=.1;
-				(*seeding_var)[1]=.1;
-				(*seeding_var)[2]=.1;
-				(*seeding_var)[3]=1;
-				(*seeding_var)[4]=.5;
-				(*seeding_var)[5]=.1;
-				(*seeding_var)[6]=.1;
-				(*seeding_var)[7]=.1;
-				for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
-					(*seeding_var)[8 + i]=2;
-				}
-			}
-		}
-
-	}
+		mcmc_intrinsic=false;
+	} 
 	else{
 		std::cout<<
 			"Input parameters not valid, please check that input is compatible with the supported methods - dimension combinations"<<std::endl;
+		std::cout<<"Using: "<<generation_method<<" "<<dimension<<std::endl;
 		exit(1);
 	}
+	//if(dimension==4 && generation_method =="IMRPhenomD"){
+	//	std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=.5;
+	//		(*seeding_var)[1]=.1;
+	//		(*seeding_var)[2]=.1;
+	//		(*seeding_var)[3]=.1;
+	//	}
+	//	mcmc_intrinsic=true;
+	//}
+	//else if(dimension==6 && generation_method =="IMRPhenomD_NRT"){
+	//	std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, lambda1, lambda2"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=.5;
+	//		(*seeding_var)[1]=.1;
+	//		(*seeding_var)[2]=.1;
+	//		(*seeding_var)[3]=.1;
+	//		(*seeding_var)[4]=.1;
+	//		(*seeding_var)[5]=.1;
+	//	}
+	//	mcmc_intrinsic=true;
+	//}
+	//else if(generation_method =="SkySearch"){
+	//	std::cout<<"Sampling in parameters: "<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1;
+	//		(*seeding_var)[1]=.3;
+	//		(*seeding_var)[2]=1.;
+	//		(*seeding_var)[3]=1.;
+	//		(*seeding_var)[4]=1.;
+	//		(*seeding_var)[5]=20;
+	//		(*seeding_var)[6]=20;
+	//	}
+	//	mcmc_intrinsic=false;
+	//}
+	//else if(dimension==11 && generation_method =="IMRPhenomD"){
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
+	//	mcmc_intrinsic=false;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=.1;
+	//		(*seeding_var)[1]=.1;
+	//		(*seeding_var)[2]=.1;
+	//		(*seeding_var)[3]=.1;
+	//		(*seeding_var)[4]=.5;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=.1;
+	//		(*seeding_var)[7]=.1;
+	//		(*seeding_var)[8]=.1;
+	//		(*seeding_var)[9]=.1;
+	//		(*seeding_var)[10]=.5;
+	//	}
+	//}
+	//else if(dimension==13 && generation_method =="IMRPhenomD_NRT"){
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2"<<std::endl;
+	//	mcmc_intrinsic=false;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=.1;
+	//		(*seeding_var)[1]=.1;
+	//		(*seeding_var)[2]=.1;
+	//		(*seeding_var)[3]=.1;
+	//		(*seeding_var)[4]=.5;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=.1;
+	//		(*seeding_var)[7]=.1;
+	//		(*seeding_var)[8]=.1;
+	//		(*seeding_var)[9]=.1;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=20;
+	//		(*seeding_var)[12]=20;
+	//	}
+	//}
+	//else if(dimension==12 && generation_method =="dCS_IMRPhenomD"){
+	//	mcmc_mod_struct->ppE_Nmod = 1;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1;
+	//	}
+	//}
+	////Sampling parameter is root alpha in km
+	//else if(dimension==12 && generation_method =="EdGB_IMRPhenomD"){
+	//	mcmc_mod_struct->ppE_Nmod = 1;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km)"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1;
+	//	}
+	//}
+	//else if(dimension==13 && 
+	//	(generation_method =="EdGB_GHOv1_IMRPhenomD" || generation_method =="EdGB_GHOv2_IMRPhenomD" || generation_method =="EdGB_GHOv3_IMRPhenomD" )){
+	//	mcmc_mod_struct->ppE_Nmod = 2;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, sqrt(alpha) (km), gamma (generic 1PN term)"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1;
+	//		(*seeding_var)[12]=1;
+	//	}
+	//}
+	//else if(dimension==16 && generation_method =="dCS_IMRPhenomPv2"){
+	//	mcmc_mod_struct->ppE_Nmod = 1;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1.;
+	//		(*seeding_var)[12]=1.;
+	//		(*seeding_var)[13]=1.;
+	//		(*seeding_var)[14]=1.;
+	//		(*seeding_var)[15]=1.;
+	//	}
+	//}
+	////Sampling parameter is root alpha in km
+	//else if(dimension==16 && generation_method =="EdGB_IMRPhenomPv2"){
+	//	mcmc_mod_struct->ppE_Nmod = 1;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1.;
+	//		(*seeding_var)[12]=1.;
+	//		(*seeding_var)[13]=1.;
+	//		(*seeding_var)[14]=1.;
+	//		(*seeding_var)[15]=1.;
+	//	}
+	//}
+	//else if(dimension==17 && 
+	//	(generation_method =="EdGB_GHOv1_IMRPhenomPv2" || generation_method =="EdGB_GHOv2_IMRPhenomPv2" || generation_method =="EdGB_GHOv3_IMRPhenomPv2" )){
+	//	mcmc_mod_struct->ppE_Nmod = 2;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2, sqrt(alpha) (km)"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1.;
+	//		(*seeding_var)[12]=1.;
+	//		(*seeding_var)[13]=1.;
+	//		(*seeding_var)[14]=1.;
+	//		(*seeding_var)[15]=1.;
+	//		(*seeding_var)[16]=1.;
+	//	}
+	//}
+	//else if(dimension==15 && generation_method =="IMRPhenomPv2"){
+	//	mcmc_intrinsic=false;
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.5;
+	//		(*seeding_var)[2]=1;
+	//		(*seeding_var)[3]=1;
+	//		(*seeding_var)[4]=1;
+	//		(*seeding_var)[5]=.1;
+	//		(*seeding_var)[6]=1;
+	//		(*seeding_var)[7]=1.;
+	//		(*seeding_var)[8]=.3;
+	//		(*seeding_var)[9]=.5;
+	//		(*seeding_var)[10]=.5;
+	//		(*seeding_var)[11]=1.;
+	//		(*seeding_var)[12]=1.;
+	//		(*seeding_var)[13]=1.;
+	//		(*seeding_var)[14]=1.;
+	//	}
+	//}
+	//else if(dimension==8 && generation_method =="IMRPhenomPv2"){
+	//	mcmc_intrinsic=true;
+	//	std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
+	//	if(local_seeding){
+	//		(*seeding_var) = new double[dimension];
+	//		(*seeding_var)[0]=1.;
+	//		(*seeding_var)[1]=.3;
+	//		(*seeding_var)[2]=1.;
+	//		(*seeding_var)[3]=1.;
+	//		(*seeding_var)[4]=1.;
+	//		(*seeding_var)[5]=1.;
+	//		(*seeding_var)[6]=1.;
+	//		(*seeding_var)[7]=1.;
+	//	}
+	//}
+	//else if( generation_method == "ppE_IMRPhenomPv2_Inspiral"
+	//	|| generation_method == "ppE_IMRPhenomPv2_IMR"
+	//	|| generation_method == "PNSeries_ppE_IMRPhenomPv2_IMR"
+	//	|| generation_method == "PNSeries_ppE_IMRPhenomPv2_Inspiral"
+	//	){
+	//	if(dimension-mcmc_mod_struct->ppE_Nmod == 15){
+	//		
+	//	std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
+	//		for(int i =0; i<mcmc_Nmod; i++){
+	//			std::cout<<", beta"<<i;
+	//		}
+	//		std::cout<<endl;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.5;
+	//			(*seeding_var)[2]=1;
+	//			(*seeding_var)[3]=1;
+	//			(*seeding_var)[4]=1;
+	//			(*seeding_var)[5]=.1;
+	//			(*seeding_var)[6]=1;
+	//			(*seeding_var)[7]=1.;
+	//			(*seeding_var)[8]=.3;
+	//			(*seeding_var)[9]=.5;
+	//			(*seeding_var)[10]=.5;
+	//			(*seeding_var)[11]=1.;
+	//			(*seeding_var)[12]=1.;
+	//			(*seeding_var)[13]=1.;
+	//			(*seeding_var)[14]=1.;
+	//			for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
+	//				(*seeding_var)[15 + i]=2;
+	//			}
+	//		}
+	//	}
+	//	if(dimension-mcmc_mod_struct->ppE_Nmod == 8){
+	//		mcmc_intrinsic=true;
+	//		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
+	//		for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
+	//			std::cout<<", beta"<<i;
+	//		}
+	//		std::cout<<endl;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.3;
+	//			(*seeding_var)[2]=1.;
+	//			(*seeding_var)[3]=1.;
+	//			(*seeding_var)[4]=1.;
+	//			(*seeding_var)[5]=1.;
+	//			(*seeding_var)[6]=1.;
+	//			(*seeding_var)[7]=1.;
+	//			for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
+	//				(*seeding_var)[8 + i]=2;
+	//			}
+	//		}
+	//	}
+
+	//}
+	//else if(generation_method == "gIMRPhenomPv2" 
+	//	){
+	//	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
+	//	if(dimension-totalmod == 15){
+	//		
+	//		mcmc_intrinsic=false;
+	//		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
+	//		for(int i =0; i<totalmod; i++){
+	//			std::cout<<", mod "<<i;
+	//		}
+	//		std::cout<<endl;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.5;
+	//			(*seeding_var)[2]=1;
+	//			(*seeding_var)[3]=1;
+	//			(*seeding_var)[4]=1;
+	//			(*seeding_var)[5]=.1;
+	//			(*seeding_var)[6]=1;
+	//			(*seeding_var)[7]=1.;
+	//			(*seeding_var)[8]=.3;
+	//			(*seeding_var)[9]=.5;
+	//			(*seeding_var)[10]=.5;
+	//			(*seeding_var)[11]=1.;
+	//			(*seeding_var)[12]=1.;
+	//			(*seeding_var)[13]=1.;
+	//			(*seeding_var)[14]=1.;
+	//			for(int i =0; i< totalmod;i++){
+	//				(*seeding_var)[15 + i]=2;
+	//			}
+	//		}
+	//	}
+	//	else{
+	//		mcmc_intrinsic=true;
+	//		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2";
+	//		for(int i =0; i<totalmod; i++){
+	//			std::cout<<", mod "<<i;
+	//		}
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.3;
+	//			(*seeding_var)[2]=1.;
+	//			(*seeding_var)[3]=1.;
+	//			(*seeding_var)[4]=1.;
+	//			(*seeding_var)[5]=1.;
+	//			(*seeding_var)[6]=1.;
+	//			(*seeding_var)[7]=1.;
+	//			for(int i =0; i< totalmod;i++){
+	//				(*seeding_var)[8 + i]=2;
+	//			}
+	//		}
+	//	}
+
+	//}
+	//else if(generation_method == "gIMRPhenomD" 
+	//	){
+	//	int totalmod = (mcmc_mod_struct->gIMR_Nmod_phi + mcmc_mod_struct->gIMR_Nmod_sigma + mcmc_mod_struct->gIMR_Nmod_beta + mcmc_mod_struct->gIMR_Nmod_alpha );
+	//	if(dimension-totalmod == 4){
+	//		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
+	//		
+	//		mcmc_intrinsic=true;
+	//		for(int i =0; i<totalmod; i++){
+	//			std::cout<<", beta"<<i;
+	//		}
+	//		
+	//		std::cout<<endl;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.3;
+	//			(*seeding_var)[2]=1;
+	//			(*seeding_var)[3]=1;
+	//			for(int i =0; i< totalmod;i++){
+	//				(*seeding_var)[4 + i]=2;
+	//			}
+	//		}
+	//	}
+	//	else{
+	//		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
+	//		mcmc_intrinsic=false;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.5;
+	//			(*seeding_var)[2]=1;
+	//			(*seeding_var)[3]=1;
+	//			(*seeding_var)[4]=1;
+	//			(*seeding_var)[5]=.1;
+	//			(*seeding_var)[6]=1;
+	//			(*seeding_var)[7]=1.;
+	//			(*seeding_var)[8]=.3;
+	//			(*seeding_var)[9]=.5;
+	//			(*seeding_var)[10]=.5;
+	//			for(int i =0; i< totalmod;i++){
+	//				(*seeding_var)[11 + i]=2;
+	//			}
+	//		}
+	//	}
+
+	//}
+	//else if(generation_method == "ppE_IMRPhenomD_Inspiral"
+	//	|| generation_method == "ppE_IMRPhenomD_IMR"
+	//	|| generation_method == "PNSeries_ppE_IMRPhenomD_IMR"
+	//	|| generation_method == "PNSeries_ppE_IMRPhenomD_Inspiral"
+	//	){
+	//	if(dimension-mcmc_mod_struct->ppE_Nmod == 11){
+	//		
+	//		std::cout<<"Sampling in parameters: RA, DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2";
+	//		for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
+	//			std::cout<<", beta"<<i;
+	//		}
+	//		std::cout<<endl;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=1.;
+	//			(*seeding_var)[1]=.5;
+	//			(*seeding_var)[2]=1;
+	//			(*seeding_var)[3]=1;
+	//			(*seeding_var)[4]=1;
+	//			(*seeding_var)[5]=.1;
+	//			(*seeding_var)[6]=1;
+	//			(*seeding_var)[7]=1.;
+	//			(*seeding_var)[8]=.3;
+	//			(*seeding_var)[9]=.5;
+	//			(*seeding_var)[10]=.5;
+	//			for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
+	//				(*seeding_var)[11 + i]=2;
+	//			}
+	//		}
+	//	}
+	//	if(dimension-mcmc_mod_struct->ppE_Nmod == 4){
+	//		mcmc_intrinsic=true;
+	//		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
+	//		for(int i =0; i<mcmc_mod_struct->ppE_Nmod; i++){
+	//			std::cout<<", beta"<<i;
+	//		}
+	//		std::cout<<endl;
+	//		if(local_seeding){
+	//			(*seeding_var) = new double[dimension];
+	//			(*seeding_var)[0]=.1;
+	//			(*seeding_var)[1]=.1;
+	//			(*seeding_var)[2]=.1;
+	//			(*seeding_var)[3]=1;
+	//			(*seeding_var)[4]=.5;
+	//			(*seeding_var)[5]=.1;
+	//			(*seeding_var)[6]=.1;
+	//			(*seeding_var)[7]=.1;
+	//			for(int i =0; i< mcmc_mod_struct->ppE_Nmod;i++){
+	//				(*seeding_var)[8 + i]=2;
+	//			}
+	//		}
+	//	}
+
+	//}
+	//else{
+	//	std::cout<<
+	//		"Input parameters not valid, please check that input is compatible with the supported methods - dimension combinations"<<std::endl;
+	//	exit(1);
+	//}
 }
 
 
@@ -2366,6 +2599,38 @@ void MCMC_fisher_transformations(
 			fisher[i][base] *= factor;
 		}
 	}
+	if(generation_method.find("EA") != std::string::npos){
+	  //for(int i = 0 ; i <4; i++){
+	    for(int i = 0 ; i <3; i++){
+	      for(int j = 0 ; j<dimension; j++){
+		if(i!=j){
+		  fisher[dimension-1-i][dimension-1-j] = 0;
+		  fisher[dimension-1-j][dimension-1-i] = 0;
+		}
+		/*
+		  if(i==j){
+		  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
+		  }*/
+	      }
+	    }
+	    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	}
+	/*if(isnan(fabs(fisher[8][8]))){
+	  for(int i = 0 ; i<dimension; i++){
+	    std::cout<<i<<" ";
+	    for(int j = 0 ; j<dimension; j++){
+	      std::cout<<std::setprecision(5)<<fisher[i][j]<<" ";
+	    }
+	    std::cout<<std::endl;
+	  }
+	  }*/
+	//std::cout<<"eta nan?:"<<fisher[8][8]<<std::endl; 
+	/*if(isnan(fabs(fisher[8][8])))
+	  {
+	    std::cout<<"eta nan problem"<<std::endl; 
+	    }*/
 	return;
 
 }
@@ -2417,7 +2682,14 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	if(user_param->fisher_GAUSS_QUAD){
 		local_integration_method = "GAUSSLEG";
 	}
-	double **temp_out = allocate_2D_array(dimension,dimension);
+	std::string local_gen_method = mcmc_generation_method;
+	int local_dimension = dimension;  
+	if(local_gen_method.find("EA") != std::string::npos)
+	  {
+	    local_gen_method = "IMRPhenomD_NRT";
+	    local_dimension -= 3;
+	  }
+	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
 	for(int i =0 ; i <mcmc_num_detectors; i++){
 		
 		//Use AD 
@@ -2428,17 +2700,17 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 			//	"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
 			//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmc_noise[i]);
 			fisher_autodiff(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,local_dimension, 
 				(gen_params *)(&params),  local_integration_method,local_weights[i],true,local_noise[i]);
 		}
 		else{
 			fisher_numerical(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmc_generation_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmc_detectors[i],mcmc_detectors[0],temp_out,local_dimension, 
 				&params, mcmc_deriv_order, NULL, NULL, local_noise[i]);
 
 		}
-		for(int j =0; j<dimension; j++){
-			for(int k =0; k<dimension; k++)
+		for(int j =0; j<local_dimension; j++){
+			for(int k =0; k<local_dimension; k++)
 			{
 				output[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k]))
@@ -2453,7 +2725,8 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	
 	MCMC_fisher_transformations(temp_params, output,dimension,local_gen,mcmc_intrinsic,
 		interface,mcmc_mod_struct, parameters);
-	deallocate_2D_array(temp_out, dimension,dimension);
+	
+	deallocate_2D_array(temp_out, local_dimension,local_dimension);
 	//////////////////////////////////////////////
 	//if(!interface->burn_phase)
 	//{
@@ -2629,6 +2902,10 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 {
 	if(mcmc_intrinsic) gen_params->sky_average = true;
 	else gen_params->sky_average = false;
+	gen_params->tidal_love = mod_struct->tidal_love;
+	gen_params->tidal_love_error = mod_struct->tidal_love_error;
+	gen_params->alpha_param = mod_struct->alpha_param;
+	gen_params->EA_region1 = mod_struct->EA_region1; 
 	gen_params->f_ref = 20;
 	gen_params->shift_time = true;
 	gen_params->shift_phase = true;
@@ -2660,6 +2937,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 			gen_params->Nmod=mod_struct->ppE_Nmod;
 			gen_params->betappe=new double[gen_params->Nmod];
 			base = dimension - mod_struct->ppE_Nmod;
+			//debugger_print(__FILE__,__LINE__,mod_struct->ppE_Nmod);
 		}
 		else if(generation_method.find("gIMR") != std::string::npos){
 			gen_params->Nmod_phi=mod_struct->gIMR_Nmod_phi;
@@ -2699,214 +2977,225 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 }
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
-	//return 2;
-	MCMC_user_param *user_param = (MCMC_user_param *)parameters;
+  //double start = omp_get_wtime();
+  return 2;
+  MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
-	int dimension = interface->max_dim;
-	double ll = 0;
-	double *temp_params = new double[dimension];
-	//#########################################################################
-	gen_params_base<double> gen_params;
-	std::string local_gen = MCMC_prep_params(param, 
-		temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
-	//#########################################################################
-	//#########################################################################
+  int dimension = interface->max_dim;
+  double ll = 0;
+  double *temp_params = new double[dimension];
+  //#########################################################################
+  gen_params_base<double> gen_params;
+  std::string local_gen = MCMC_prep_params(param, 
+					   temp_params,&gen_params, dimension, mcmc_generation_method,mcmc_mod_struct);
+  //#########################################################################
+  //#########################################################################
 
-	//repack_non_parameters(temp_params, &gen_params, 
-		//"MCMC_"+mcmc_generation_method, dimension, NULL);
-	repack_parameters(temp_params, &gen_params, 
-		"MCMC_"+mcmc_generation_method, dimension, NULL);
-	//#########################################################################
-	//#########################################################################
-	//return 1;
-	std::complex<double> **local_data = mcmc_data;
-	double **local_freqs = mcmc_frequencies;
-	double **local_noise = mcmc_noise;
-	double **local_weights = user_param->weights;
-	int *local_lengths = mcmc_data_length;
-	fftw_outline *local_plans = mcmc_fftw_plans;
-	std::string local_integration_method="SIMPSONS";
-	//if(interface->burn_phase && user_param->burn_data){
-	if(false){
-		local_data = user_param->burn_data;
-		local_freqs = user_param->burn_freqs;
-		local_noise = user_param->burn_noise;
-		local_lengths = user_param->burn_lengths;
-		local_plans = user_param->burn_plans;
-	}
-	if(user_param->GAUSS_QUAD){
-		local_integration_method="GAUSSLEG";
-	}
-	if(mcmc_intrinsic){
-		if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
-			if(!mcmc_save_waveform){
-				for(int i=0; i < mcmc_num_detectors; i++){
-					gen_params.theta=0;	
-					gen_params.phi=0;	
-					gen_params.psi=0;	
-					gen_params.phiRef = 1;
-					gen_params.f_ref = 10;
-					gen_params.incl_angle=0;	
-					gen_params.tc =1;
-					std::complex<double> *response =
-						(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[i]);
-					fourier_detector_response_horizon(local_freqs[i], local_lengths[i], response, mcmc_detectors[i], local_gen, &gen_params);
-					ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
-							local_noise[i],
-							local_freqs[i],
-							response,
-							(size_t) local_lengths[i],
-							&local_plans[i]
-							);
-					//ll += maximized_Log_Likelihood(mcmc_data[i], 
-					//		mcmc_noise[i],
-					//		mcmc_frequencies[i],
-					//		(size_t) mcmc_data_length[i],
-					//		&gen_params,
-					//		mcmc_detectors[i],
-					//		local_gen,
-					//		&mcmc_fftw_plans[i]
-					//		);
-					free(response);
+  //repack_non_parameters(temp_params, &gen_params, 
+  //"MCMC_"+mcmc_generation_method, dimension, NULL);
+  repack_parameters(temp_params, &gen_params, 
+		    "MCMC_"+mcmc_generation_method, dimension, NULL);
+  //#########################################################################
+  //#########################################################################
+  //return 1;
+  std::complex<double> **local_data = mcmc_data;
+  double **local_freqs = mcmc_frequencies;
+  double **local_noise = mcmc_noise;
+  double **local_weights = user_param->weights;
+  int *local_lengths = mcmc_data_length;
+  fftw_outline *local_plans = mcmc_fftw_plans;
+  std::string local_integration_method="SIMPSONS";
+  //if(interface->burn_phase && user_param->burn_data){
+  if(false){
+    local_data = user_param->burn_data;
+    local_freqs = user_param->burn_freqs;
+    local_noise = user_param->burn_noise;
+    local_lengths = user_param->burn_lengths;
+    local_plans = user_param->burn_plans;
+  }
+  if(user_param->GAUSS_QUAD){
+    local_integration_method="GAUSSLEG";
+  }
+  if(mcmc_intrinsic){
+    if(mcmc_generation_method.find("IMRPhenomD") != std::string::npos){
+      if(!mcmc_save_waveform){
+	for(int i=0; i < mcmc_num_detectors; i++){
+	  gen_params.theta=0;	
+	  gen_params.phi=0;	
+	  gen_params.psi=0;	
+	  gen_params.phiRef = 1;
+	  gen_params.f_ref = 10;
+	  gen_params.incl_angle=0;	
+	  gen_params.tc =1;
+	  std::complex<double> *response =
+	    (std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[i]);
+	  fourier_detector_response_horizon(local_freqs[i], local_lengths[i], response, mcmc_detectors[i], local_gen, &gen_params);
+	  ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
+							       local_noise[i],
+							       local_freqs[i],
+							       response,
+							       (size_t) local_lengths[i],
+							       &local_plans[i]
+							       );
+	  //ll += maximized_Log_Likelihood(mcmc_data[i], 
+	  //		mcmc_noise[i],
+	  //		mcmc_frequencies[i],
+	  //		(size_t) mcmc_data_length[i],
+	  //		&gen_params,
+	  //		mcmc_detectors[i],
+	  //		local_gen,
+	  //		&mcmc_fftw_plans[i]
+	  //		);
+	  free(response);
 				}
-			}
-			else{
-				gen_params.theta=0;	
-				gen_params.phi=0;	
-				gen_params.psi=0;	
-				gen_params.phiRef = 1;
-				gen_params.f_ref = 10;
-				gen_params.incl_angle=0;	
-				gen_params.tc =1;
-				std::complex<double> *response =
-					(std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
-				fourier_detector_response_horizon(local_freqs[0], local_lengths[0], response, mcmc_detectors[0], local_gen, &gen_params);
-				//std::complex<double> *hc =
-				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
-				//std::complex<double> *hp =
-				//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
-				//fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
-				for(int i=0; i < mcmc_num_detectors; i++){
-					ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
-							local_noise[i],
-							local_freqs[i],
-							response,
-							(size_t) local_lengths[i],
-							&local_plans[i]
-							);
-					//ll += maximized_Log_Likelihood(mcmc_data[i], 
-					//		mcmc_noise[i],
-					//		mcmc_frequencies[i],
-					//		(size_t) mcmc_data_length[i],
-					//		&gen_params,
-					//		mcmc_detectors[i],
-					//		local_gen,
-					//		&mcmc_fftw_plans[i]
-					//		);
-					//ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
-					//		mcmc_noise[i],
-					//		mcmc_frequencies[i],
-					//		hp,
-					//		hc,
-					//		(size_t) mcmc_data_length[i],
-					//		&mcmc_fftw_plans[i]
-					//		);
-				}
-				free(response);
-				//free(hp);
-				//free(hc);
-
-			}
-
-		}
-		else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
-			//if(!mcmc_save_waveform){
-			if(false){
-			}
-			else{
-				gen_params.theta=0;	
-				gen_params.phi=0;	
-				gen_params.psi=0;	
-				gen_params.phiRef = 1;
-				gen_params.f_ref = 20;
-				gen_params.incl_angle=0;	
-				gen_params.tc =1;
-				waveform_polarizations<double> wp;
-				assign_polarizations(mcmc_generation_method,&wp);
-				wp.allocate_memory(local_lengths[0]);
-				fourier_waveform(local_freqs[0],local_lengths[0], &wp, local_gen, &gen_params);
-				for(int i=0; i < mcmc_num_detectors; i++){
-					ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
-							local_noise[i],
-							local_freqs[i],
-							wp.hplus,
-							wp.hcross,
-							(size_t) local_lengths[i],
-							&local_plans[i]
-							);
-				}
-				wp.deallocate_memory();
-			}
-
-		}
+      }
+      else{
+	gen_params.theta=0;	
+	gen_params.phi=0;	
+	gen_params.psi=0;	
+	gen_params.phiRef = 1;
+	gen_params.f_ref = 10;
+	gen_params.incl_angle=0;	
+	gen_params.tc =1;
+	std::complex<double> *response =
+	  (std::complex<double> *) malloc(sizeof(std::complex<double>) * local_lengths[0]);
+	fourier_detector_response_horizon(local_freqs[0], local_lengths[0], response, mcmc_detectors[0], local_gen, &gen_params);
+	//std::complex<double> *hc =
+	//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+	//std::complex<double> *hp =
+	//	(std::complex<double> *) malloc(sizeof(std::complex<double>) * mcmc_data_length[0]);
+	//fourier_waveform(mcmc_frequencies[0], mcmc_data_length[0], hp,hc, local_gen, &gen_params);
+	for(int i=0; i < mcmc_num_detectors; i++){
+	  ll += maximized_Log_Likelihood_aligned_spin_internal(local_data[i], 
+							       local_noise[i],
+							       local_freqs[i],
+							       response,
+							       (size_t) local_lengths[i],
+							       &local_plans[i]
+							       );
+	  //ll += maximized_Log_Likelihood(mcmc_data[i], 
+	  //		mcmc_noise[i],
+	  //		mcmc_frequencies[i],
+	  //		(size_t) mcmc_data_length[i],
+	  //		&gen_params,
+	  //		mcmc_detectors[i],
+	  //		local_gen,
+	  //		&mcmc_fftw_plans[i]
+	  //		);
+	  //ll += maximized_Log_Likelihood_unaligned_spin_internal(mcmc_data[i], 
+	  //		mcmc_noise[i],
+	  //		mcmc_frequencies[i],
+	  //		hp,
+	  //		hc,
+	  //		(size_t) mcmc_data_length[i],
+	  //		&mcmc_fftw_plans[i]
+	  //		);
 	}
-	else{
-		double RA = gen_params.RA;
-		double DEC = gen_params.DEC;
-		double PSI = gen_params.psi;
-		//if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
-		
-		ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
-			&gen_params,local_gen, local_lengths, 
-			local_freqs, local_data, local_noise, local_weights, local_integration_method, user_param->log10F,mcmc_detectors, 
-			 mcmc_num_detectors);
-		//ll=2;
+	free(response);
+	//free(hp);
+	//free(hc);
+	
+      }
 
-		//ll = Log_Likelihood(mcmc_data[0], 
-		//		mcmc_noise[0],
-		//		mcmc_frequencies[0],
-		//		mcmc_data_length[0],
-		//		&gen_params,
-		//		mcmc_detectors[0],
-		//		local_gen,
-		//		&mcmc_fftw_plans[0]
-		//		);
-
-		//}
-		//else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
-
-		//}
+    }
+    else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+      //if(!mcmc_save_waveform){
+      if(false){
+      }
+      else{
+	gen_params.theta=0;	
+	gen_params.phi=0;	
+	gen_params.psi=0;	
+	gen_params.phiRef = 1;
+	gen_params.f_ref = 20;
+	gen_params.incl_angle=0;	
+	gen_params.tc =1;
+	waveform_polarizations<double> wp;
+	assign_polarizations(mcmc_generation_method,&wp);
+	wp.allocate_memory(local_lengths[0]);
+	fourier_waveform(local_freqs[0],local_lengths[0], &wp, local_gen, &gen_params);
+	for(int i=0; i < mcmc_num_detectors; i++){
+	  ll += maximized_Log_Likelihood_unaligned_spin_internal(local_data[i], 
+								 local_noise[i],
+								 local_freqs[i],
+								 wp.hplus,
+								 wp.hcross,
+								 (size_t) local_lengths[i],
+								 &local_plans[i]
+								 );
 	}
-	//Cleanup
-	delete [] temp_params;
-	if(check_mod(local_gen)){
-		//if( local_gen.find("ppE") != std::string::npos ||
-		//	local_gen.find("dCS") != std::string::npos ||
-		//	local_gen.find("EdGB") != std::string::npos){
-		//	delete [] gen_params.betappe;
-		//}
-		if( local_gen.find("ppE") != std::string::npos ||
-			check_theory_support(local_gen)){
-			delete [] gen_params.betappe;
-		}
-		else if( local_gen.find("gIMR") != std::string::npos){
-			if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
-				delete [] gen_params.delta_phi;
-			}
-			if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
-				delete [] gen_params.delta_sigma;
-			}
-			if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
-				delete [] gen_params.delta_beta;
-			}
-			if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
-				delete [] gen_params.delta_alpha;
-			}
+	wp.deallocate_memory();
+      }
+      
+    }
+  }
+  else{
+    double RA = gen_params.RA;
+    double DEC = gen_params.DEC;
+    double PSI = gen_params.psi;
+    //if(mcmc_generation_method.find("IMRPhenomD") != std::string:npos){
+    
+    ll =  MCMC_likelihood_extrinsic(mcmc_save_waveform, 
+				    &gen_params,local_gen, local_lengths, 
+				    local_freqs, local_data, local_noise, local_weights, local_integration_method, user_param->log10F,mcmc_detectors, 
+				    mcmc_num_detectors);
+    //ll=2;
+    
+    //ll = Log_Likelihood(mcmc_data[0], 
+    //		mcmc_noise[0],
+    //		mcmc_frequencies[0],
+    //		mcmc_data_length[0],
+    //		&gen_params,
+    //		mcmc_detectors[0],
+    //		local_gen,
+    //		&mcmc_fftw_plans[0]
+    //		);
+    
+    //}
+    //else if(mcmc_generation_method.find("IMRPhenomP")!=std::string::npos){
+    
+    //}
+  }
+  //Cleanup
+  delete [] temp_params;
+  if(check_mod(local_gen)){
+    //if( local_gen.find("ppE") != std::string::npos ||
+    //	local_gen.find("dCS") != std::string::npos ||
+    //	local_gen.find("EdGB") != std::string::npos){
+    //	delete [] gen_params.betappe;
+    //}
+    if( local_gen.find("ppE") != std::string::npos ||
+	check_theory_support(local_gen)){
+      delete [] gen_params.betappe;
+    }
+    else if( local_gen.find("gIMR") != std::string::npos){
+      if(mcmc_mod_struct ->gIMR_Nmod_phi !=0){
+	delete [] gen_params.delta_phi;
+      }
+      if(mcmc_mod_struct ->gIMR_Nmod_sigma !=0){
+	delete [] gen_params.delta_sigma;
+      }
+      if(mcmc_mod_struct ->gIMR_Nmod_beta !=0){
+	delete [] gen_params.delta_beta;
+      }
+      if(mcmc_mod_struct ->gIMR_Nmod_alpha !=0){
+	delete [] gen_params.delta_alpha;
+      }
+      
+    }
+  }
+  //std::cout<<"LL time for eval: "<<(double)(omp_get_wtime() -start)<<std::endl;
 
-		}
-	}
-	return ll;
-
+  //std::cout<<"Likelihood: "<<ll<<std::endl;
+  if(isnan(ll)){
+    std::cout<<"NAN"<<std::endl;
+    for(int i = 0 ; i<dimension; i++){
+      std::cout<<param[i]<<", ";
+    }
+    std::cout<<std::endl;
+  }
+  return ll;
+  
 }
 //######################################################################################
 //######################################################################################

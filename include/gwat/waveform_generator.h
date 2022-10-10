@@ -29,6 +29,9 @@ public:
 	void allocate_memory(int length);
 	void deallocate_memory();
 };
+template<class T>
+void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp);
+bool check_extra_polarizations(std::string generation_method);
 
 template<class T>
 int time_waveform(T *times, 
@@ -100,6 +103,9 @@ int fourier_phase(T *frequencies,
 			std::string generation_method,
 			gen_params_base<T> *parameters
 			);
+
+//double tidal_error(double tidal_s, double tidal_a, double q);
+//adouble tidal_error(adouble tidal_s, adouble tidal_a, adouble q);
 
 template<class T>
 std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T> *in,std::string generation_method);

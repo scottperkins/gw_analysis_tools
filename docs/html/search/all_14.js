@@ -1,4 +1,10 @@
 var searchData=
 [
-  ['virgo_5fd',['Virgo_D',['../da/d7a/detector__util_8h.html#ab3f9eb7bf2b7778fd56ed0a48ddaf423',1,'detector_util.h']]]
+  ['unpack_5fparameters',['unpack_parameters',['../db/dd7/fisher_8cpp.html#abc06575e6f7b404a56d9c5fa8041ddf5',1,'unpack_parameters(double *parameters, gen_params_base&lt; double &gt; *input_params, std::string generation_method, int dimension, bool *log_factors):&#160;fisher.cpp'],['../d1/dbc/fisher_8h.html#abc06575e6f7b404a56d9c5fa8041ddf5',1,'unpack_parameters(double *parameters, gen_params_base&lt; double &gt; *input_params, std::string generation_method, int dimension, bool *log_factors):&#160;fisher.cpp']]],
+  ['unwrap_5farray',['unwrap_array',['../df/d2d/util_8cpp.html#a036fae37c6732da48e01ccc1331542d4',1,'unwrap_array(T *in, T *out, int len):&#160;util.cpp'],['../d8/d3c/util_8h.html#a036fae37c6732da48e01ccc1331542d4',1,'unwrap_array(T *in, T *out, int len):&#160;util.cpp']]],
+  ['update_5fstep_5fwidths',['update_step_widths',['../d9/dfd/mcmc__sampler__internals_8cpp.html#a9d87fd050fbed74c4b5deabbc806f9ed',1,'update_step_widths(sampler *samplerptr, int chain_id):&#160;mcmc_sampler_internals.cpp'],['../d5/dac/mcmc__sampler__internals_8h.html#a9d87fd050fbed74c4b5deabbc806f9ed',1,'update_step_widths(sampler *samplerptr, int chain_id):&#160;mcmc_sampler_internals.cpp']]],
+  ['update_5ftemperatures',['update_temperatures',['../d9/dfd/mcmc__sampler__internals_8cpp.html#ae0ec0745c85caad31c473a608aef5782',1,'update_temperatures(sampler *samplerptr, int t0, int nu, int t):&#160;mcmc_sampler_internals.cpp'],['../d5/dac/mcmc__sampler__internals_8h.html#ae0ec0745c85caad31c473a608aef5782',1,'update_temperatures(sampler *samplerptr, int t0, int nu, int t):&#160;mcmc_sampler_internals.cpp']]],
+  ['useful_5fpowers',['useful_powers',['../df/d37/structuseful__powers.html',1,'']]],
+  ['util_2ecpp',['util.cpp',['../df/d2d/util_8cpp.html',1,'']]],
+  ['util_2eh',['util.h',['../d8/d3c/util_8h.html',1,'']]]
 ];

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.13"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>GW Analysis Tools: Gravitational Waves Analysis Tools</title>
+<title>GW Analysis Tools: Main Page</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -59,84 +59,59 @@ $(function() {
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Gravitational Waves Analysis Tools </div>  </div>
+<div class="title">GW Analysis Tools Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>A suite of analysis tools useful for gravitational wave science. All code is written in C++, with some of the interface classes wrapped in Cython to allow for python-access.</p>
-<h1><a class="anchor" id="compat"></a>
-Compatibility</h1>
-<p>Known to work with gcc/g++-7</p>
-<p>Known to work with gcc/g++-9</p>
-<p>(optional) nvcc &ndash; known to work with v9.1 of CUDA</p>
-<p>Need GSL-2.6 or higher</p>
-<h1><a class="anchor" id="external_libs"></a>
-Required Software</h1>
-<p>Required non-standard C libraries: FFTW3 ADOL-C &ndash; (must be compiled with OpenMP option) GSL (optional) CUDA HDF5</p>
-<p>Required non-standard packages for documentation: (optional) Doxygen</p>
-<p>CMAKE</p>
-<h1><a class="anchor" id="dev"></a>
-Current Development</h1>
-<p>NOTE: currently using static parameters to share data between threads for <a class="el" href="de/dbe/mcmc__gw_8cpp.html">mcmc_gw.cpp</a>. This could cause issues when running multiple samplers at the same time. Investigating further.</p>
-<p>To do:</p>
-<p>Change MCMC_MH to use the more general <a class="el" href="d9/d72/classthreadPool.html" title="Class for creating a pool of threads to asynchronously distribute work. ">threadPool</a> class instead of a custom threadpool, incorporate job class and comparator</p>
-<h1><a class="anchor" id="installation"></a>
-Installation</h1>
-<p>For proper compilation, update or create the enviornment variables CPATH, LIBRARY_PATH,and LD_LIBRARY_PATH, which should point to header files and lib files, respectively. Specifically, these variables should point to the above libraries.</p>
-<p>Also, the PYTHONPATH environment variables must point to /gw_analysis_tools_py/src because I can't figure how to get this shit to work.</p>
-<p>In the root directory of the project, run 'make' to compile source files, create the library file and create the cython modules, and create the documentation.</p>
-<p>To just create C++/C files, run 'make c'.</p>
-<p>Run 'make test' to build a test program that will create an executable.</p>
-<h1><a class="anchor" id="functionality"></a>
-Supported Functionality</h1>
-<h2><a class="anchor" id="cmdtools"></a>
-Command Line Tools</h2>
-<p>bin/mcmc_gw_tool &ndash; executable that takes in a parameter file and runs an MCMC on LOSC data for parameter estimation &ndash; See mcmc_gw_tool.cpp for documentation</p>
-<h2><a class="anchor" id="wave_gen"></a>
-Waveform Generation</h2>
-<p><a class="el" href="d2/d3d/classIMRPhenomD.html">IMRPhenomD</a>, <a class="el" href="d5/dc6/classIMRPhenomPv2.html">IMRPhenomPv2</a></p>
-<h2><a class="anchor" id="mod_grav"></a>
-Modified Gravity</h2>
-<p><a class="el" href="d7/d38/classppE__IMRPhenomD__Inspiral.html">ppE_IMRPhenomD_Inspiral</a> <a class="el" href="d6/d55/classppE__IMRPhenomD__IMR.html">ppE_IMRPhenomD_IMR</a> <a class="el" href="d1/df8/classppE__IMRPhenomPv2__Inspiral.html">ppE_IMRPhenomPv2_Inspiral</a> <a class="el" href="da/dbc/classppE__IMRPhenomPv2__IMR.html">ppE_IMRPhenomPv2_IMR</a></p>
-<h2><a class="anchor" id="fisher"></a>
-Fisher Analysis</h2>
-<p>utilizes the above waveform templates</p>
-<h2><a class="anchor" id="mcmc"></a>
-MCMC Routines</h2>
-<p>Has a generic MCMC sampler, MCMC_MH, that utilizes gaussian steps, differential evolution steps, and Fisher informed steps. Includes wrapping MCMC_MH_GW for GW specific sampling, currently only for one detector.</p>
-<p>Includes log likelihood caclulation for implementation in other samplers.</p>
-<h1><a class="anchor" id="usage"></a>
-Usage</h1>
-<h2><a class="anchor" id="var"></a>
-Environment variables</h2>
-<p>The environment variable PYTHONPATH should include the directory $(PROJECT_DIR)</p>
-<h2><a class="anchor" id="include"></a>
-Include</h2>
-<p>To include header files, use -I$(PROJECT_DIRECTORY)/include</p>
-<h2><a class="anchor" id="link"></a>
-Link</h2>
-<p>To link object files, use -L$(PROJECT_DIRECTORY)/lib -lgwat (the -L command is un-needed if you add /lib to the environment variable CPATH)</p>
-<p>For dynamic linking, the following environment variables for Linux (MacOs) should be updated to include /lib &ndash; LD_LIBRARY_PATH (DYLD_LIBRARY_PATH)</p>
-<p>For Cuda code: use -lcuda -lcudart</p>
-<p>For Cuda, may need to link to /usr/local/cuda/lib64/ (or wherever this library is on your machine)</p>
-<h2><a class="anchor" id="py"></a>
-Python Importable Code</h2>
-<p>Two modules currently available:</p>
-<h3><a class="anchor" id="mcmcpy"></a>
-gw_analysis_tools_py.mcmc_routines_ext</h3>
-<p>mcmc_routines_ext.pyx wraps the log_likelihood functions in mcmc_routines.cpp</p>
-<h3><a class="anchor" id="wavegenpy"></a>
-gw_analysis_tools_py.waveform_generator_ext</h3>
-<p>waveform_generator_ext.pyx wraps the fourier_waveform function in <a class="el" href="dc/dd2/waveform__generator_8cpp.html">waveform_generator.cpp</a></p>
-<p>Also contains the SNR calculation function</p>
-<h3><a class="anchor" id="adding_waveforms"></a>
-Custom Waveforms</h3>
-<p>If adding waveforms and to have full accesibility:</p>
-<p>Create class, using other waveforms as template &ndash; need interface to create full waveform (plus,cross polarization), and amplitude/phase</p>
-<p>Add the option as a waveform to waveform_generation.cpp, including the header file at the top of the waveform_generation.cpp file</p>
-<p>Add option to check_mod in <a class="el" href="d8/d3c/util_8h.html">util.h</a> if applicable.</p>
-<p>For Fishers and MCMC &ndash; write the class as a template with double and adouble types for all variables. Add the option to unpack_parameters, repack_parameters, and repack_non_parameters. Add `MCMC_'' if using MCMC-specific version separate from the fisher version.</p>
-<dl class="section author"><dt>Author</dt><dd>Scott Perkins</dd></dl>
-<p>Contact: <a href="#" onclick="location.href='mai'+'lto:'+'sco'+'tt'+'ep3'+'@i'+'lli'+'no'+'is.'+'ed'+'u'; return false;">scott<span style="display: none;">.nosp@m.</span>ep3@<span style="display: none;">.nosp@m.</span>illin<span style="display: none;">.nosp@m.</span>ois.<span style="display: none;">.nosp@m.</span>edu</a> </p>
+<div class="textblock"><p>A suite of tools useful for doing statistical studies on gravitational wave science, including routines useful in MCMC studies, wave template generation, Fisher analysis, etc. Written in C++.</p>
+<h1>Installation</h1>
+<p>You can manually install this software directly on the computer of interest, or you can run this through docker containers.</p>
+<h2>Manual Installation</h2>
+<h3>Install dependencies [^1]</h3>
+<ol type="1">
+<li>CMake *</li>
+<li>FFTW3 *</li>
+<li>GSL *</li>
+<li>OpenMP *</li>
+<li>Eigen3 *</li>
+<li>adol-c - Not as common, so probably will need to install from source. Use the appropriate openmp flag if that's desired</li>
+<li>HDF5 - Not as common. Might be available on certain systems, but will need to compile with gcc (not clang). This is a headache, but things won't compile properly if HDF5 is not compiled with the same compiler as GWAT</li>
+<li>BayesShip - Another package from me. Download from git and follow install instructions</li>
+</ol>
+<ul>
+<li>means the library is very common and is probably available through system package managers (apt/yum/etc) or through HPC infrastructure</li>
+</ul>
+<p>[^1]: On systems where you have admin privileges, I would install everything in "/usr/local" unless there's good reason not to. For systems where you don't have admin privileges or if you want to keep the software isolated, I typically put a directory called ".local" into my home directory, and install everything there.</p>
+<h3>Install library</h3>
+<ol type="1">
+<li>Download the source code from github.</li>
+<li>Make a directory called <code>build'' in the source directory.</code></li>
+<li><code>Move into</code>build/'' and run:</li>
+</ol>
+<div class="fragment"><div class="line">cmake .. </div></div><!-- fragment --><ol type="1">
+<li>If you need to modify compile settings (like turning on debugger flags or changing the install prefix), run:</li>
+</ol>
+<div class="fragment"><div class="line">ccmake .. </div></div><!-- fragment --><p>Save it and rerun</p>
+<div class="fragment"><div class="line">cmake .. </div></div><!-- fragment --><ol type="1">
+<li>Finally, run</li>
+</ol>
+<div class="fragment"><div class="line">make </div><div class="line">make install</div></div><!-- fragment --><h2>Docker Usage</h2>
+<p>Several public images with this software already installed are maintained on DockerHub:</p>
+<ol type="1">
+<li>scottperkins/mcmc_dev<ul>
+<li>An image with the mcmc_dev branch of GWAT installed. <em>This should be the default option for new users</em></li>
+</ul>
+</li>
+<li>scottperkins/parityviolation<ul>
+<li>An image with the parityViolation branch of GWAT installed</li>
+</ul>
+</li>
+<li>scottperkins/gwat.jupyter<ul>
+<li>An image with mcmc_dev branch of GWAT installed and automatically launches a jupyter server on port 8989.</li>
+<li>Useful for doing post-MCMC analysis, as there are python wrappers that unpack the data installed on this image</li>
+<li>For usage notes on this, see jupyter notes </li>
+</ul>
+</li>
+</ol>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

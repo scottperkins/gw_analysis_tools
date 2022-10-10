@@ -493,6 +493,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
 			//phase +=   (T)(tc*(f-f_ref) - phic);
+			//debugger_print(__FILE__,__LINE__,std::real(phase));
 			phase -=   (T)(tc*(f-f_ref) + phic);
 			waveform[j] = amp * std::exp(-i * phase);
 		}
@@ -587,7 +588,7 @@ std::complex<T> IMRPhenomD<T>::construct_waveform(T frequency, /**< T array of f
 	}
 	amp = (A0 * this->build_amp(frequency,&lambda,params,&pows,pn_amp_coeffs,deltas));
 	phase = (this->build_phase(frequency,&lambda,params,&pows,pn_phase_coeffs));
-	phase +=   (T)(tc*(frequency-f_ref) - phic);
+	phase -=   (T)(tc*(frequency-f_ref) - phic);
 	return amp * std::exp(-i * phase);
 	}
 
@@ -725,7 +726,7 @@ int IMRPhenomD<T>::construct_phase(T *frequencies, /**< T array of frequencies t
 			
 		}
 		phase[j] =( this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
-		phase[j] +=   (T)(tc*(f-f_ref) - phic);
+		phase[j] -=   (T)(tc*(f-f_ref) - phic);
 		phase[j]*=(-1);
 
 	}
@@ -836,6 +837,11 @@ void IMRPhenomD<T>::assign_lambda_param(source_parameters<T> *source_param, lamb
 		lambda->beta[i+1] = this->assign_lambda_param_element(source_param, i+11);
 	for (int i=0;i<5; i++)
 		lambda->alpha[i+1] = this->assign_lambda_param_element(source_param, i+14);
+
+
+	//DO NOT LEAVE IN
+	//WAVEFORM SYSTEMATICS TESTING
+	//lambda->sigma[4] = 0;
 }
 
 /*!\brief Calculate the lambda parameters from Khan et al for element i
@@ -1364,6 +1370,10 @@ T IMRPhenomD<T>::phase_ins(T f, source_parameters<T> *param, T *pn_coeff,
 		 pn_coeff[5] * pow->PI5third * pow->MF5third +
 		 pn_coeff[6] * pow->PIsquare * pow->MFsquare +
 		 pn_coeff[7] * pow->PI7third * pow->MF7third ;
+		
+	if (param->PNorder != 35){
+		/* Add higher order terms if needed*/
+	}
 
 	T phase_TF2 =  -M_PI/4. 
 		+ 3./(128.*eta) * pow->PIminus_5third * pow->MFminus_5third * pn_phase;

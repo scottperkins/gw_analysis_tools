@@ -72,7 +72,7 @@ void gIMRPhenomD<T>::assign_lambda_param(source_parameters<T> *source_param,
 		}
 	}
 	if(source_param->Nmod_alpha != 0){
-		for(int i = 2 ; i<5; i++){
+		for(int i = 2 ; i<6; i++){
 			int id = check_list_id(i, source_param->alphai, source_param->Nmod_alpha);
 			if(id != -1){
 				lambda->alpha[i]*=(1. + source_param->delta_alpha[id]);	

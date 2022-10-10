@@ -22,7 +22,6 @@
 #include "adolc/adolc.h"
 //#include <adolc/adolc_openmp.h>
 
-
 //double TMAX = 10e2;
 //double TMAX = 1e8;
 double TMAX = 1e10;
@@ -85,14 +84,31 @@ bool temp_neighborhood_check(int i, int j ){
 	//std::cout<<"Comparison: "<<samplerptr->chain_temps[i]-samplerptr->chain_temps[j]<<std::endl;
 	//std::cout<<"IDS: "<<i<<" "<<j<<std::endl;
 	if(samplerptr_global->restrict_swapping){
-		if(
-		(samplerptr_global->isolate_ensembles && check_list(j,samplerptr_global->chain_neighborhoods_ids[i],samplerptr_global->chain_neighbors[i])) 
-		|| 
-		(!samplerptr_global->isolate_ensembles && check_list(samplerptr_global->chain_temps[j],samplerptr_global->chain_neighborhoods[i],samplerptr_global->chain_neighbors[i]))){
-			return true;
+		if(samplerptr_global->isolate_ensembles_cold
+		&& 
+		((fabs(samplerptr_global->chain_temps[i]-1) < 1e-10) ||(fabs(samplerptr_global->chain_temps[j]-1) < 1e-10) ) 
+		){
+			if(
+			check_list(j,samplerptr_global->chain_neighborhoods_ids[i],samplerptr_global->chain_neighbors[i])
+			){
+				return true;
+			}
+			else {
+				return false;
+			}
+
 		}
 		else{
-			return false;
+			if(
+			(samplerptr_global->isolate_ensembles && check_list(j,samplerptr_global->chain_neighborhoods_ids[i],samplerptr_global->chain_neighbors[i])) 
+			|| 
+			(!samplerptr_global->isolate_ensembles && check_list(samplerptr_global->chain_temps[j],samplerptr_global->chain_neighborhoods[i],samplerptr_global->chain_neighbors[i]))
+			){
+				return true;
+			}
+			else{
+				return false;
+			}
 		}
 	}
 	return true;
@@ -1168,6 +1184,7 @@ void continue_RJPTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	samplerptr->tune=true;
 	samplerptr->burn_phase = true;
 	samplerptr->isolate_ensembles = false;
+	samplerptr->isolate_ensembles_cold = false;
 	samplerptr->update_RJ_width=update_RJ_width;
 	samplerptr->rj = RJ_proposal;
 	samplerptr->param_status= status;
@@ -1339,6 +1356,7 @@ void continue_PTMCMC_MH_simulated_annealing_internal(sampler *sampler_in,
 	samplerptr->tune=true;
 	samplerptr->burn_phase = true;
 	samplerptr->isolate_ensembles = false;
+	samplerptr->isolate_ensembles_cold = false;
 	//################################################
 	//This typically isn't done, but the primary focus of annealing
 	//is to get the cold chains where they need to be.
@@ -1899,7 +1917,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(std::string check
 	wstart = omp_get_wtime();
 	bool internal_prog=false;
 
-	int dynamic_search_length = nu;
+	int dynamic_search_length = nu*2;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
 	sampler sampler_temp;
@@ -1992,11 +2010,26 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal(mcmc_sampler_output *sampl
 	//int dynamic_search_length = 200;
 	double ***temp_output = allocate_3D_array(chain_N,dynamic_search_length, dimension);
 	//#####################################################################
-	PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
-		dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
-		initial_pos, seeding_var,ensemble_initial_pos, chain_temps, search_swap_freq, t0, nu,
-		chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
-		numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
+	//PTMCMC_MH_dynamic_PT_alloc_internal(temp_output, dimension, 
+	//	dynamic_search_length, chain_N, max_chain_N_thermo_ensemble, 
+	//	initial_pos, seeding_var,ensemble_initial_pos, chain_temps, search_swap_freq, t0, nu,
+	//	chain_distribution_scheme, log_prior, log_likelihood,fisher,user_parameters,
+	//	numThreads, pool,internal_prog,true,"","",checkpoint_file,true);
+	//
+	//deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
+
+	if(chain_distribution_scheme == "double"){
+		assign_ensemble_temps(chain_temps, chain_N, max_chain_N_thermo_ensemble,TMAX);	
+	}
+	else{
+		debugger_print(__FILE__,__LINE__,"Ooops, only double is allowed for chain_distribution_scheme");
+	}
+	
+	PTMCMC_MH_internal(temp_output, dimension, 
+		dynamic_search_length, chain_N,  
+		initial_pos, seeding_var,ensemble_initial_pos, chain_temps, search_swap_freq, 
+		log_prior, log_likelihood,fisher,user_parameters,
+		numThreads, pool,internal_prog,"","",checkpoint_file,true,true);
 	
 	deallocate_3D_array(temp_output, chain_N, dynamic_search_length, dimension);
 
@@ -2365,6 +2398,7 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 	std::string checkpoint_file/**< Filename to output data for checkpoint, if empty string, not saved*/
 	)
 {
+	bool cold_chain_only_writeout = true;
 	int step_status = 0;
 	double chain_temps[chain_N];
 	load_temps_checkpoint_file(checkpoint_file, chain_temps, chain_N);
@@ -2473,11 +2507,8 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 			init=false;
 			debugger_print(__FILE__,__LINE__,"Finished init structure");
 			debugger_print(__FILE__,__LINE__,"Creating dump");
-			//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
-			//sampler_output->create_data_dump(false,false, chain_filename);
-			sampler_output->create_data_dump(true,false, chain_filename);
+			sampler_output->create_data_dump(cold_chain_only_writeout,false, chain_filename);
 			debugger_print(__FILE__,__LINE__,"Finished Creating dump");
-			//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 		}
 		else{
 			debugger_print(__FILE__,__LINE__,"Appending structure");
@@ -2491,11 +2522,13 @@ void RJPTMCMC_MH_dynamic_PT_alloc_comprehensive_internal_driver(mcmc_sampler_out
 				}
 			}
 			sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,temp_pos);
+			//debugger_print(__FILE__,__LINE__,"Appending FULL data dump");
 			//sampler_output->append_to_output(temp_output,temp_status,temp_model_status,sampler.ll_lp_output,sampler.chain_pos);
 			//###################################################
 			debugger_print(__FILE__,__LINE__,"Finished appending structure");
 			debugger_print(__FILE__,__LINE__,"Appending dump");
 			sampler_output->append_to_data_dump(chain_filename);
+			//debugger_print(__FILE__,__LINE__,"Appending FULL data dump");
 			//sampler_output->append_to_data_dump("data/test_full.hdf5");
 			debugger_print(__FILE__,__LINE__,"Finished appending dump");
 		}
@@ -2719,6 +2752,8 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool continue_burn
 	)
 {
+	bool cold_chain_only_writeout = true;
+	bool calc_evidence = true;
 	bool local_continue_burn = continue_burn;
 	int status = 0;
 	double chain_temps[chain_N];
@@ -2753,7 +2788,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	bool init = true;
 	bool relax = true;
 	double ac_save;
-	int max_search_iterations = 3;
+	int max_search_iterations = 0;
 	int search_iterations_ct = 0;
 	int spct=0;
 	while(status<N_steps){
@@ -2869,27 +2904,30 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			else{
 				//##############################################
 				//Evidence calculation
-				debugger_print(__FILE__,__LINE__,"Deallocating integrated likelihoods (if set)");
-				sampler_output->dealloc_integrated_likelihoods();
-				debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
-				sampler.chain_temps = &chain_temps[0];
-				integrate_likelihood(&sampler);
-				int ensemble_size= (int)(sampler.chain_N/coldchains);
-				double integrated_likelihoods[ensemble_size];
-				int integrated_likelihoods_terms[ensemble_size];
-				combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
-				sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
-				debugger_print(__FILE__,__LINE__,"Calculating evidence");
-				sampler_output->calculate_evidence();
+				if(calc_evidence){
+					debugger_print(__FILE__,__LINE__,"Deallocating integrated likelihoods (if set)");
+					sampler_output->dealloc_integrated_likelihoods();
+					debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
+					sampler.chain_temps = &chain_temps[0];
+					integrate_likelihood(&sampler);
+					int ensemble_size= (int)(sampler.chain_N/coldchains);
+					double integrated_likelihoods[ensemble_size];
+					int integrated_likelihoods_terms[ensemble_size];
+					combine_chain_evidence(&sampler, integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+					sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
+					debugger_print(__FILE__,__LINE__,"Calculating evidence");
+					sampler_output->calculate_evidence();
+				}
 				//##############################################
 				
 				relax=false;
 				debugger_print(__FILE__,__LINE__,"Creating dump");
 				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
 				//sampler_output->create_data_dump(false,false, chain_filename);
-				sampler_output->create_data_dump(true,false, chain_filename);
+				sampler_output->create_data_dump(cold_chain_only_writeout,false, chain_filename);
 				debugger_print(__FILE__,__LINE__,"Finished Creating dump");
 			
+				//debugger_print(__FILE__,__LINE__,"Creating FULL data dump");
 
 				//sampler_output->create_data_dump(false,false, "data/test_full.hdf5");
 			}
@@ -2905,6 +2943,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 
 			//##############################################
 			//Evidence calculation
+			if(calc_evidence){
 			debugger_print(__FILE__,__LINE__,"Appending integrated likelihoods");
 			sampler.chain_temps = &chain_temps[0];
 			integrate_likelihood(&sampler);
@@ -2915,6 +2954,7 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 			sampler_output->append_integrated_likelihoods(integrated_likelihoods, integrated_likelihoods_terms, ensemble_size);
 			debugger_print(__FILE__,__LINE__,"Calculating evidence");
 			sampler_output->calculate_evidence();
+			}
 			//##############################################
 			//else{
 			debugger_print(__FILE__,__LINE__,"Appending dump");
@@ -3060,7 +3100,9 @@ void PTMCMC_MH_dynamic_PT_alloc_uncorrelated_internal_driver(mcmc_sampler_output
 	
 	//Maybe write new stat file format
 	std::cout<<std::endl;
-	debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(sampler_output->evidence));	
+	if(calc_evidence){
+		debugger_print(__FILE__,__LINE__,"Evidence: "+std::to_string(sampler_output->evidence));	
+	}
 
 	//Cleanup
 	deallocate_3D_array(temp_output, chain_N, temp_length, dimension);
@@ -3569,6 +3611,7 @@ void continue_PTMCMC_MH_dynamic_PT_alloc_internal(std::string checkpoint_file_st
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 	load_checkpoint_file(checkpoint_file_start,samplerptr);
@@ -3747,6 +3790,7 @@ void PTMCMC_MH_dynamic_PT_alloc_internal(double ***output, /**< [out] Output cha
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 	samplerptr->dimension =dimension;
@@ -4249,6 +4293,7 @@ void PTMCMC_MH_internal(	double ***output, /**< [out] Output chains, shape is do
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 
@@ -4422,6 +4467,7 @@ void continue_PTMCMC_MH_internal(sampler *sampler_in,
 	samplerptr->burn_phase = burn_phase;
 	if(burn_phase){
 		samplerptr->isolate_ensembles=false;	
+		samplerptr->isolate_ensembles_cold = false;
 	}
 
 	//if Fisher is not provided, Fisher and MALA steps
@@ -4581,16 +4627,24 @@ void PTMCMC_MH_step_incremental(sampler *samplerptr, int increment)
 					}
 					//Update step-widths to optimize acceptance ratio
 					update_step_widths(samplerptr, j);
+					if(!samplerptr->de_primed[j]) 
+					{
+						if ((samplerptr->chain_pos[j])>samplerptr->history_length)
+						{
+							samplerptr->de_primed[j]=true;
+							assign_probabilities(samplerptr,j);	
+						}
+					}
 					
 				}
-				if(!samplerptr->de_primed[j]) 
-				{
-					if ((samplerptr->chain_pos[j])>samplerptr->history_length)
-					{
-						samplerptr->de_primed[j]=true;
-						assign_probabilities(samplerptr,j);	
-					}
-				}
+				//if(!samplerptr->de_primed[j]) 
+				//{
+				//	if ((samplerptr->chain_pos[j])>samplerptr->history_length)
+				//	{
+				//		samplerptr->de_primed[j]=true;
+				//		assign_probabilities(samplerptr,j);	
+				//	}
+				//}
 			}
 			#pragma omp single
 			{
@@ -4733,8 +4787,17 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 					else{samplerptr->step_reject_ct[j]+=1;}
 					if(!samplerptr->de_primed[j])
 						update_history(samplerptr,samplerptr->output[j][k+i+1], samplerptr->param_status[j][k+i+1],j);
-					else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
+					//else if(samplerptr->chain_pos[j]%samplerptr->history_update==0)
+					else if((k+i+1)%samplerptr->history_update==0)
 						update_history(samplerptr,samplerptr->output[j][k+i+1],samplerptr->param_status[j][k+i+1], j);
+					if(!samplerptr->de_primed[j]) 
+					{
+						if ((k+i+1)>samplerptr->history_length)
+						{
+							samplerptr->de_primed[j]=true;
+							assign_probabilities(samplerptr,j);	
+						}
+					}
 					//Log LogLikelihood and LogPrior	
 					if(samplerptr->log_ll){
 						samplerptr->ll_lp_output[j][k+i+1][0]= 
@@ -4752,14 +4815,14 @@ void PTMCMC_MH_loop(sampler *samplerptr)
 					update_step_widths(samplerptr, j);
 					
 				}
-				if(!samplerptr->de_primed[j]) 
-				{
-					if ((k+cutoff)>samplerptr->history_length)
-					{
-						samplerptr->de_primed[j]=true;
-						assign_probabilities(samplerptr,j);	
-					}
-				}
+				//if(!samplerptr->de_primed[j]) 
+				//{
+				//	if ((k+cutoff)>samplerptr->history_length)
+				//	{
+				//		samplerptr->de_primed[j]=true;
+				//		assign_probabilities(samplerptr,j);	
+				//	}
+				//}
 			}
 			#pragma omp single
 			{
@@ -4925,13 +4988,23 @@ void mcmc_step_threaded(int j)
 		{
 			success = mcmc_step(samplerptr_global, samplerptr_global->output[j][k+i], samplerptr_global->output[j][k+i+1],samplerptr_global->param_status[j][k+i],samplerptr_global->param_status[j][k+i+1],&(samplerptr_global->model_status[j][k+i]),&(samplerptr_global->model_status[j][k+i+1]),j);	
 		}
+		samplerptr_global->chain_pos[j]+=1;
 	
 		if(success==1){samplerptr_global->step_accept_ct[j]+=1;}
 		else{samplerptr_global->step_reject_ct[j]+=1;}
 		if(!samplerptr_global->de_primed[j])
 			update_history(samplerptr_global,samplerptr_global->output[j][k+i+1], samplerptr_global->param_status[j][k+i+1],j);
-		else if(samplerptr_global->chain_pos[j]%samplerptr_global->history_update==0)
+		//else if(samplerptr_global->chain_pos[j]%samplerptr_global->history_update==0)
+		else if((k+i+1)%samplerptr_global->history_update==0)
 			update_history(samplerptr_global,samplerptr_global->output[j][k+i+1], samplerptr_global->param_status[j][k+i+1],j);
+		if(!samplerptr_global->de_primed[j]) 
+		{
+			if ((k+i+1)>samplerptr_global->history_length)
+			{
+				samplerptr_global->de_primed[j]=true;
+				assign_probabilities(samplerptr_global,j);	
+			}
+		}
 		//##############################################################
 		if(samplerptr_global->log_ll){
 			samplerptr_global->ll_lp_output[j][k+i+1][0]= 
@@ -4946,15 +5019,15 @@ void mcmc_step_threaded(int j)
 		}
 		//##############################################################
 	}
-	if(!samplerptr_global->de_primed[j]) 
-	{
-		if ((k+cutoff)>samplerptr_global->history_length)
-		{
-			samplerptr_global->de_primed[j]=true;
-			assign_probabilities(samplerptr_global,j);	
-		}
-	}
-	samplerptr_global->chain_pos[j]+=cutoff;
+	//if(!samplerptr_global->de_primed[j]) 
+	//{
+	//	if ((k+cutoff)>samplerptr_global->history_length)
+	//	{
+	//		samplerptr_global->de_primed[j]=true;
+	//		assign_probabilities(samplerptr_global,j);	
+	//	}
+	//}
+	//samplerptr_global->chain_pos[j]+=cutoff;
 	//Keep track of progress of all cold chains - track the slowest
 	//Now that progress is only used for outputing progress bar, and not used
 	//for stopping criteria, just track chain 0, which should be a T=1 chain anyway

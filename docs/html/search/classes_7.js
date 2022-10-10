@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['lambda_5fparameters',['lambda_parameters',['../d5/d92/structlambda__parameters.html',1,'']]]
+  ['imrphenomd',['IMRPhenomD',['../d2/d3d/classIMRPhenomD.html',1,'']]],
+  ['imrphenomd_5fnrt',['IMRPhenomD_NRT',['../d2/d0d/classIMRPhenomD__NRT.html',1,'']]],
+  ['imrphenompv2',['IMRPhenomPv2',['../d5/dc6/classIMRPhenomPv2.html',1,'']]],
+  ['imrphenompv2_5fnrt',['IMRPhenomPv2_NRT',['../dd/dea/classIMRPhenomPv2__NRT.html',1,'']]]
 ];

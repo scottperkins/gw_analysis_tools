@@ -18,7 +18,11 @@
  *
  * PNSeries_ppE_*_Inspiral -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) -- for inspiral only
  *
- * PNSeries_ppE_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
+ * PNSeries_ppE_*_IMR -- Creates a ppE waveform, but with the expansion parameter of (pi M f)^1/3 instead of (pi Mc f)^1/3 -- IMR
+ *
+ * PNSeries_ppE_*_Inspiral -- Creates a ppE waveform, but with the expansion parameter of (pi M f)^1/3 instead of (pi Mc f)^1/3 -- Inspiral
+ *
+ * ppEAlt_*_IMR -- creates a series of generic modifications that take the form betappe[0]* ( u^(bppe[0]/3) + betappe[1] * u^(bppe[1]/3) . . .) for full IMR
  *
  * ExtraDimension -- input beta l^2 in seconds^2
  * 
@@ -32,41 +36,30 @@
  *
  * ModDispersion -- Modified Dispersion -- input beta is A_alpha (eV^(2-alpha))
  *
- * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4
+ * EA_fully_restricted_v1 -- Einstein-Aether neglecting other polarizations, higher harmonics, and amplitude corrections  -- input betas are c1, c2, c3, c4, tc_T (time of coalescence of for tensor mode)
  */
 
-
-bool check_extra_polarizations(std::string generation_method)
-{
-	if(generation_method == "polarization_test_IMRPhenomD"){
-		return true;
-	}
-	return false;
-}
-
 template<class T>
-void assign_polarizations(std::string generation_method, waveform_polarizations<T> *wp)
+void extra_modifications(std::string generation_method,gen_params_base<T> *gp, source_parameters<T> *p, waveform_polarizations<T> *wp,T *freqs, int length)
 {
-	if(generation_method == "polarization_test_IMRPhenomD"){
-		wp->active_polarizations[0]=true;
-		wp->active_polarizations[1]=true;
-		wp->active_polarizations[2]=true;
-		wp->active_polarizations[3]=true;
-		wp->active_polarizations[4]=true;
-		wp->active_polarizations[5]=true;
+  /*	if(generation_method.find("EA_fully_restricted_v1") != std::string::npos){
+		//debugger_print(__FILE__,__LINE__,"POST");
+		source_parameters<T> temp_sp;
+		temp_sp.populate_source_parameters(gp);
+		temp_sp.phiRef = gp->phiRef;
+		temp_sp.f_ref = gp->f_ref;
+		temp_sp.shift_phase = gp->shift_phase;
+		temp_sp.shift_time = gp->shift_time;
+		temp_sp.incl_angle = gp->incl_angle;
+		temp_sp.betappe = gp->betappe;
+		pre_calculate_EA_factors(&temp_sp);
+		return EA_fully_restricted_v1_additional_modifications(&temp_sp,wp,freqs,length);
 	}
-	else{	
-		wp->active_polarizations[0]=true;
-		wp->active_polarizations[1]=true;
-		wp->active_polarizations[2]=false;
-		wp->active_polarizations[3]=false;
-		wp->active_polarizations[4]=false;
-		wp->active_polarizations[5]=false;
-	}
+  */
 	return ;
 }
-template void assign_polarizations<double>(std::string generation_method, waveform_polarizations<double> *wp);
-template void assign_polarizations<adouble>(std::string generation_method, waveform_polarizations<adouble> *wp);
+template void extra_modifications(std::string, gen_params_base<double> * gp,source_parameters<double> *, waveform_polarizations<double> *,double *, int );
+template void extra_modifications(std::string, gen_params_base<adouble> * gp,source_parameters<adouble> *, waveform_polarizations<adouble> *, adouble *, int);
 
 
 bool check_mod(std::string generation_method)
@@ -76,6 +69,10 @@ bool check_mod(std::string generation_method)
 		return true;
 	}
 	if(generation_method.find("gIMR") != std::string::npos)
+	{
+		return true;
+	}
+	if(generation_method.find("EA") != std::string::npos)
 	{
 		return true;
 	}
@@ -90,6 +87,12 @@ bool check_theory_support(std::string generation_method)
 		return true;
 	}
 	if(generation_method.find("EdGB")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("EdGB_HO")!=std::string::npos){
+		return true;
+	}
+	if(generation_method.find("EdGB_HO_LO")!=std::string::npos){
 		return true;
 	}
 	if(generation_method.find("EdGB_GHO")!=std::string::npos){
@@ -113,12 +116,17 @@ bool check_theory_support(std::string generation_method)
 	if(generation_method.find("ModDispersion")!=std::string::npos){
 		return true;
 	}
-	if(generation_method.find("EA_fully_restricted")!=std::string::npos){
-		return true;
-	}
+	//if(generation_method.find("EA_fully_restricted")!=std::string::npos){
+	//if(generation_method.find("EA_IMRPhenomD_NRT")!=std::string::npos){
+	//        return true;
+	//}
 	if(generation_method.find("PNSeries_ppE")!=std::string::npos){
 		return true;
 	}
+	if(generation_method.find("ppEAlt")!=std::string::npos){
+		return true;
+	}
+
 	if(generation_method.find("polarization_test")!=std::string::npos){
 		return true;
 	}
@@ -139,6 +147,9 @@ void deallocate_mapping(theory_ppE_map<T> *mapping){
 		}
 		delete [] mapping->beta_fns_ptrs;
 	}
+	//if(mapping->add_mod_fn){
+	//	delete mapping->add_mod_fn;
+	//}
 }
 template void deallocate_mapping(theory_ppE_map<adouble> *mapping);
 template void deallocate_mapping(theory_ppE_map<double> *mapping);
@@ -157,7 +168,25 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		ins = true;
 	}
 	else if(generation_method.find("EdGB")!= std::string::npos){
-		if(generation_method.find("EdGB_GHOv1")!= std::string::npos){
+		if(generation_method.find("EdGB_HO")!= std::string::npos){
+			mapping->Nmod = 3;
+			mapping->bppe = new double[3];
+			mapping->bppe[0] =-7;
+			mapping->bppe[1] =-5;
+			mapping->bppe[2] =-3;
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_HO_0PN_beta(p);} ;
+			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_HO_1PN_beta(p);} ;
+			mapping->beta_fns[2] = [](source_parameters<T> *p){return EdGB_HO_2PN_beta(p);} ;
+		}
+		if(generation_method.find("EdGB_HO_LO")!= std::string::npos){
+			mapping->Nmod = 1;
+			mapping->bppe = new double[1];
+			mapping->bppe[0] =-7;
+			mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_HO_0PN_beta(p);} ;
+		}
+		else if(generation_method.find("EdGB_GHOv1")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
@@ -166,7 +195,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav1(p);} ;
 		}
-		if(generation_method.find("EdGB_GHOv2")!= std::string::npos){
+		else if(generation_method.find("EdGB_GHOv2")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
@@ -175,7 +204,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->beta_fns[0] = [](source_parameters<T> *p){return EdGB_beta(p);} ;
 			mapping->beta_fns[1] = [](source_parameters<T> *p){return EdGB_GHO_betav2(p);} ;
 		}
-		if(generation_method.find("EdGB_GHOv3")!= std::string::npos){
+		else if(generation_method.find("EdGB_GHOv3")!= std::string::npos){
 			mapping->Nmod = 2;
 			mapping->bppe = new double[2];
 			mapping->bppe[0] =-7;
@@ -201,7 +230,8 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return ExtraDimension_beta(p);} ;
 		ins = true;
 	}
-	else if(generation_method.find("EA_fully_restricted_v1")!= std::string::npos){
+	//else if(generation_method.find("EA_fully_restricted_v1")!= std::string::npos){
+	/*else if(generation_method.find("EA_IMRPhenomD_NRT")!= std::string::npos){
 		//Need to pre-calculate EA variables here -- Needs to actually be in waveform_generator file..
 		//pre_calculate_EA_factors(params_in);
 		mapping->Nmod = 2;
@@ -212,10 +242,7 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		mapping->beta_fns[0] = [](source_parameters<T> *p){return EA_fully_restricted_phase0(p);} ;
 		mapping->beta_fns[1] = [](source_parameters<T> *p){return EA_fully_restricted_phase1(p);} ;
 		ins = true;
-		//Add this as another beta term prop to f!!!!
-		//params_in->tc += params_in->Luminosity_Distance*MPC_SEC*(1.- 1./params_in->cT_EA); //cT_EA must be dimensionless
-		//Adjust coalescence time here to account for time of arrival difference
-	}
+		}*/
 	else if(generation_method.find("BHEvaporation")!= std::string::npos){
 		mapping->Nmod = 1;
 		mapping->bppe = new double[1];
@@ -280,6 +307,27 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		}
 			
 	}
+	else if(generation_method.find("ppEAlt")!= std::string::npos){
+		mapping->Nmod = params_in->Nmod;
+		mapping->bppe = new double[params_in->Nmod];
+		for(int i = 0 ; i<params_in->Nmod; i++){
+			mapping->bppe[i] =params_in->bppe[i];
+		}
+		mapping->beta_fns = new beta_fn<T>[mapping->Nmod]; 
+		mapping->beta_fns_ptrs = new beta_fn<T>*[mapping->Nmod]; 
+		for(int i = 0 ; i<params_in->Nmod; i++){
+			auto lam = new std::function<T(source_parameters<T> *)>( [i](source_parameters<T> *p){ return ppEAlt_beta(i,p);} );
+			mapping->beta_fns_ptrs[i] = lam;
+			mapping->beta_fns[i] = *(lam); 
+		}
+		if(generation_method.find("Inspiral")!= std::string::npos){
+			ins = true;
+		}
+		else{
+			ins = false;
+		}
+			
+	}
 	else if(generation_method.find("polarization_test")!= std::string::npos){
 		mapping->Nmod = params_in->Nmod;
 		ins = true;
@@ -293,11 +341,17 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 		}
 	}
 	else if(generation_method.find("PhenomD")!=std::string::npos){
-		if(ins){
+		if(ins && generation_method.find("NRT") == std::string::npos){
 			mapping->ppE_method = "ppE_IMRPhenomD_Inspiral";
 		}
-		else{
+		else if(!ins && generation_method.find("NRT") == std::string::npos){
 			mapping->ppE_method = "ppE_IMRPhenomD_IMR";
+		}
+		else if(ins && generation_method.find("NRT") != std::string::npos){
+			mapping->ppE_method = "ppE_IMRPhenomD_NRT_Inspiral";
+		}
+		else if(!ins && generation_method.find("NRT") != std::string::npos){
+			mapping->ppE_method = "ppE_IMRPhenomD_NRT_IMR";
 		}
 
 	}
@@ -306,6 +360,67 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 template void assign_mapping(std::string,theory_ppE_map<double>*,gen_params_base<double>*);
 template void assign_mapping(std::string,theory_ppE_map<adouble>*,gen_params_base<adouble>*);
 
+
+/*template<class T>
+void EA_fully_restricted_v1_additional_modifications(source_parameters<T> *param, waveform_polarizations<T> *wp, T *freqs, int length)
+{
+	std::complex<T> *hall = new std::complex<T>[length];//Waveform common to all polarizations
+
+	T ci = cos(param->incl_angle);
+	T si = sin(param->incl_angle);
+	for(int i = 0 ; i<length; i++){
+		hall[i] = wp->hplus[i] / std::complex<T>(-1*(1+ci*ci),0) ;	
+	}
+	//T dtV = param->tc*(1./param->cT_EA-1./param->cV_EA)/(1-1./param->cT_EA);
+	//T dtS = param->tc*(1./param->cT_EA-1./param->cS_EA)/(1-1./param->cT_EA);
+	T dtV = (1.- param->cT_EA/param->cV_EA);
+	T dtS = (1.- param->cT_EA/param->cS_EA);
+	std::complex<T> shift_V ;
+	std::complex<T> shift_S ;
+	T u2m2=0;
+	for(int i = 0 ; i<length; i++){
+		u2m2 = pow(M_PI * param->chirpmass * freqs[i],-2./3.);
+		//std::complex<T> time_shift = ( exp(std::complex<T>(0,2*M_PI*freqs[i]*dtV)+exp(std::complex<T>(0,2*M_PI*freqs[i]*dtS))));
+		//wp->hplus[i]*=time_shift;
+		//wp->hcross[i]*=time_shift;
+		shift_V = exp(std::complex<T>(0,-2*M_PI*freqs[i] *param->tc* dtV));
+		shift_S = exp(std::complex<T>(0,-2*M_PI*freqs[i] *param->tc* dtS));
+
+		wp->hplus[i] *= (std::complex<T>(1 + u2m2 * param->alpha_ppE_2T_0_EA,0) + shift_V + shift_S);
+		wp->hcross[i] *= (std::complex<T>(1 + u2m2 * param->alpha_ppE_2T_0_EA,0) + shift_V + shift_S);
+
+		wp->hb[i] = hall[i] * std::complex<T>(0.5,0) * u2m2* param->alpha_ppE_2T_0_EA* param->gb1_EA * (std::complex<T>(1,0) - param->abL_EA)*shift_S*si*si;
+		wp->hx[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * ci;
+		wp->hy[i] = hall[i] *u2m2 * param->alpha_ppE_2T_0_EA*param->gX1_EA * si * shift_V * std::complex<T>(0,1);
+	} 
+	delete [] hall;
+	return ;
+}
+template void EA_fully_restricted_v1_additional_modifications(source_parameters<double> *param, waveform_polarizations<double> *wp, double *, int);
+template void EA_fully_restricted_v1_additional_modifications(source_parameters<adouble> *param, waveform_polarizations<adouble> *wp, adouble *, int);
+*/
+
+/* \brief ppEAlt conversion
+ *
+ * The basis is M f and not \mathcal{M} f, so there's a conversion to account for using ppE waveforms
+ */
+template<class T>
+T ppEAlt_beta(int term,source_parameters<T> *param)
+{
+	T out = 0;
+	T chirpmass = calculate_chirpmass(param->mass1,param->mass2);
+	T total_m = param->mass1 + param->mass2;
+	
+	if(term == 0 ){
+		out = param->betappe[0] * pow(total_m/chirpmass,param->bppe[0]/3.);
+	}
+	else {
+		out = param->betappe[term]* pow(total_m/chirpmass,param->bppe[term]/3.);
+	}
+	return out;
+}
+template double ppEAlt_beta(int ,source_parameters<double> *);
+template adouble ppEAlt_beta(int , source_parameters<adouble> *);
 
 /* \brief PNSeries conversion
  *
@@ -328,10 +443,11 @@ T PNSeries_beta(int term,source_parameters<T> *param)
 }
 template double PNSeries_beta(int ,source_parameters<double> *);
 template adouble PNSeries_beta(int , source_parameters<adouble> *);
-
+/*
 template<class T>
 T EA_fully_restricted_phase0(source_parameters<T> *p)
 {
+	pre_calculate_EA_factors(p);
 	T out = 0;
 	out = -3./224. * 1./p->kappa3_EA * pow(p->eta,2./5.) * p->epsilon_x_EA;
 	
@@ -344,6 +460,7 @@ template adouble EA_fully_restricted_phase0(source_parameters<adouble> *);
 template<class T>
 T EA_fully_restricted_phase1(source_parameters<T> *p)
 {
+	pre_calculate_EA_factors(p);
 	T out = 0;
 	out = -3./128. * ( -2./3. * ( p->s1_EA+p->s2_EA) - 1./2. * (p->c1_EA + p->c4_EA) + ( p->kappa3_EA - 1.)) ;
 	//Minus one comes from sign choice from paper
@@ -351,7 +468,7 @@ T EA_fully_restricted_phase1(source_parameters<T> *p)
 }
 template double EA_fully_restricted_phase1(source_parameters<double> *);
 template adouble EA_fully_restricted_phase1(source_parameters<adouble> *);
-
+*/
 template<class T>
 T dCS_beta(source_parameters<T> *param)
 {
@@ -408,6 +525,50 @@ T dCS_phase_factor(source_parameters<T> *param)
 template double dCS_phase_factor(source_parameters<double> *);
 template adouble dCS_phase_factor(source_parameters<adouble> *);
 
+//###############################################################
+template<class T>
+T EdGB_HO_0PN_beta( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T alphaSq = 16.*M_PI*param->betappe[0];
+	//T alphaSq = param->betappe[0];
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  -5.*alphaSq/pow_int(unredshiftedM,4) / 7168. / pow(param->eta,18./5.) *( 4 *param->eta -1)  ;
+	return out;
+} 
+
+template<class T>
+T EdGB_HO_1PN_beta( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T alphaSq = 16.*M_PI*param->betappe[0];
+	//T alphaSq = param->betappe[0];
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  -5.*alphaSq/pow_int(unredshiftedM,4) / 688128. / pow_int(param->eta,4) *( 685. - 3916*param->eta + 2016* param->eta * param->eta)  ;
+	return out;
+} 
+
+template<class T>
+T EdGB_HO_2PN_beta( source_parameters<T> *param)
+{
+ 	T M = param->M;	
+	T DL = param->DL;
+	T Z= Z_from_DL(DL/MPC_SEC,param->cosmology);
+	T unredshiftedM = M/(1.+Z);
+	T alphaSq = 16.*M_PI*param->betappe[0];
+	//T alphaSq = param->betappe[0];
+	//return 16.*M_PI*phase_mod/(pow_int(unredshiftedM,4)) * EdGB_phase_factor(param);
+	T out =  5.*alphaSq/pow_int(unredshiftedM,4) / 387072. / pow(param->eta,22./5.) *pow_int( 1- 2. * param->eta,2)*(995. + 952.*param->eta)  ;
+	return out;
+} 
+
+//###############################################################
 template<class T>
 T EdGB_beta( source_parameters<T> *param)
 {
@@ -673,23 +834,47 @@ int dispersion_lookup(double alpha)
 	return -1;
 }
 
-
+/*
 template<class T>
 void pre_calculate_EA_factors(source_parameters<T> *p)
 {
+  p->ca_EA = p->betappe[0];
+  p->ctheta_EA = p->betappe[1];
+  p->cw_EA = p->betappe[2];
+  p->csigma_EA = p->betappe[3];
+  p->s1_EA = 2e-5;
+  p->s2_EA = 1e-5;
+  p->V_x_EA = 0;
+  p->V_y_EA = 0;
+  p->V_z_EA = 0;
+
+  //Transforming to the parameters used in arXiv:1911.10278v2 (because that is where these formulas come from)
+  p->c1_EA = (p->cw_EA + p->csigma_EA)/2.;
+  p->c2_EA = (p->ctheta_EA - p->csigma_EA)/3.;
+  p->c3_EA = (p->csigma_EA - p->cw_EA)/2.;
+  p->c4_EA = p->ca_EA - (p->csigma_EA + p->cw_EA)/2.; 
+  
   //more convenient parameters
   p->c13_EA = p->c1_EA + p->c3_EA;
   p->cminus_EA = p->c1_EA - p->c3_EA;
   p->c14_EA = p->c1_EA + p->c4_EA;
 
+  //squared speeds of the different polarizations
+  p->cTsq_EA = 1./(1. - p->c13_EA);
+  p->cVsq_EA = (2.*p->c1_EA - p->c13_EA*p->cminus_EA)/(2.*(1.- p->c13_EA)*p->c14_EA);
+  p->cSsq_EA = ((2. - p->c14_EA)*(p->c13_EA + p->c2_EA))/((2.+3.*p->c2_EA + p->c13_EA)*(1. - p->c13_EA)*p->c14_EA);
+
   //speeds of the different polarizations
-  p->cT_EA = sqrt(1./(1. - p->c13_EA));
-  p->cV_EA = sqrt((2.*p->c1_EA - p->c13_EA*p->cminus_EA)/(2.*(1.- p->c13_EA)*p->c14_EA));
-  p->cS_EA = sqrt(((2. - p->c14_EA)*(p->c13_EA + p->c2_EA))/((2.+3.*p->c2_EA + p->c13_EA)*(1. - p->c13_EA)*p->c14_EA));
+  p->cT_EA = sqrt(p->cTsq_EA);
+  p->cV_EA = sqrt(p->cVsq_EA);
+  p->cS_EA = sqrt(p->cSsq_EA);
 
   //Relevant combinations of parameters
   p->alpha1_EA = -8.*(p->c1_EA*p->c14_EA - p->cminus_EA*p->c13_EA)/(2.*p->c1_EA - p->cminus_EA*p->c13_EA);
   p->alpha2_EA = (1./2.)*p->alpha1_EA + ((p->c14_EA - 2.*p->c13_EA)*(3.*p->c2_EA + p->c13_EA + p->c14_EA))/((p->c2_EA + p->c13_EA)*(2. - p->c14_EA));
+  p->beta1_EA = -2.* p->c13_EA / p->cV_EA; 
+  p->beta2_EA = (p->c14_EA - 2.* p->c13_EA)/(2.*p->c14_EA * (1 - p->c13_EA) * p->cS_EA * p->cS_EA); 
+  
   p->Z_EA = ((p->alpha1_EA - 2.*p->alpha2_EA)*(1. - p->c13_EA)) / (3.*(2.*p->c13_EA - p->c14_EA));
   
   p->A1_EA = (1./p->cT_EA) + (2*p->c14_EA*p->c13_EA*p->c13_EA)/((2.*p->c1_EA - p->c13_EA*p->cminus_EA)*(2.*p->c1_EA - p->c13_EA*p->cminus_EA)*p->cV_EA) + (3.*p->c14_EA*(p->Z_EA - 1.)*(p->Z_EA - 1.))/(2.*(2. - p->c14_EA)*p->cS_EA);
@@ -704,12 +889,47 @@ void pre_calculate_EA_factors(source_parameters<T> *p)
   
   p->D_EA = 1./(6.*p->c14_EA * pow(p->cV_EA, 5.));
 
+  /*
+  //Sensitivities
+  p->compact1 = 1.; //FIX
+  p->compact2 = 1.; //FIX
+  
+  p->O_m1_EA = (-5./7.)*p->compact1 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact1, 3.);
+  p->O_m2_EA = (-5./7.)*p->compact2 - ((18275.*p->alpha1_EA)/168168.)*pow(p->compact2, 3.);
+  
+  p->s1_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m1_EA)
+    +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m1_EA*p->O_m1_EA)
+    + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m1_EA, 3.));
+
+    p->s2_EA = ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.) * (p->O_m2_EA)
+    +((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA)) * (p->O_m2_EA*p->O_m2_EA)
+    + (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA))) * (pow(p->O_m2_EA, 3.));
+  */
+/*
   //The functions that are actually used to compute the phase
   p->S_EA = p->s1_EA*(p->mass2/p->M) + p->s2_EA*(p->mass1/p->M); 
   p->kappa3_EA = p->A1_EA + p->S_EA * p->A2_EA + p->S_EA*p->S_EA * p->A3_EA;
   p->epsilon_x_EA = (((p->s1_EA - p->s2_EA)*(p->s1_EA - p->s2_EA))/(32.*p->kappa3_EA))*((21.*p->A3_EA + 90.*p->B3_EA + 5.*p->D_EA)*(p->V_x_EA*p->V_x_EA + p->V_y_EA*p->V_y_EA + p->V_z_EA*p->V_z_EA) - (3.*p->A3_EA + 90.*p->B3_EA - 5.*p->D_EA)*p->V_z_EA*p->V_z_EA + 5.*p->C_EA);
 
+  //Functions necessary for corrections to the amplitude
+  p->alpha_ppE_2T_0_EA = -(1./2.)*(1./sqrt(p->kappa3_EA)) * pow(p->eta, 2./5.) * p->epsilon_x_EA;
+  p->abL_EA = 1. + 2*p->beta2_EA; 
+  p->gb1_EA = (2./(2. - p->c14_EA)) * (-3. *p->c14_EA * (p->Z_EA - 1) * p->cS_EA * p->cS_EA + 2.*p->S_EA)/(p->cS_EA * p->cS_EA);
+  p->gX1_EA = - (p->beta1_EA)/(2*p->c1_EA - p->c13_EA*p->cminus_EA) * (1./p->cV_EA) * (p->S_EA - p->c13_EA/(1 - p->c13_EA)); 
+  //debugger_print(__FILE__,__LINE__,"EA Debugging");
+  //std::cout<<"aBL "<<p->abL_EA<<std::endl;
+  //std::cout<<"gb1 "<<p->gb1_EA<<std::endl;
+  //std::cout<<"gX1 "<<p->gX1_EA<<std::endl;
+  //std::cout<<"epsilon_x "<<p->epsilon_x_EA<<std::endl;
+  //std::cout<<"S "<<p->S_EA<<std::endl;
+  //std::cout<<"alpha "<<p->alpha_ppE_2T_0_EA<<std::endl;
+  //std::cout<<"k3 "<<p->kappa3_EA<<std::endl;
+  //std::cout<<"cT "<<p->cT_EA<<std::endl;
+  //std::cout<<"cV "<<p->cV_EA<<std::endl;
+  //std::cout<<"cS "<<p->cS_EA<<std::endl;
+  
 }
 template void pre_calculate_EA_factors(source_parameters<double> *);
 template void pre_calculate_EA_factors(source_parameters<adouble> *);
+*/
 //#############################################################
