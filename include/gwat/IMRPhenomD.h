@@ -5,16 +5,20 @@
 #include <complex>
 #include "util.h"
 
-/*! \file 
- * Header file for utilities
- */
+///*! \file 
+// * Header file for utilities
+// */
+//
+///*! \struct
+// * Structure to facilitate IMRPhenomD parameter transfers
+// */
 
-/*! \struct
- * Structure to facilitate IMRPhenomD parameter transfers
- */
+
+
 template <class T>
 struct lambda_parameters
 {
+
 	T rho[4];
 	T v2;
 	T gamma[4];
