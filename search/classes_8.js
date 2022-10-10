@@ -1,11 +1,7 @@
 var searchData=
 [
-  ['mcmc_5fdata_5finterface_0',['mcmc_data_interface',['../classmcmc__data__interface.html',1,'']]],
-  ['mcmc_5fmodification_5fstruct_1',['MCMC_modification_struct',['../structMCMC__modification__struct.html',1,'']]],
-  ['mcmc_5fsampler_5foutput_2',['mcmc_sampler_output',['../classmcmc__sampler__output.html',1,'']]],
-  ['mcmc_5fuser_5fparam_3',['MCMC_user_param',['../structMCMC__user__param.html',1,'']]],
-  ['mcmcvariables_4',['mcmcVariables',['../structmcmcVariables.html',1,'']]],
-  ['mcmcvariablesrj_5',['mcmcVariablesRJ',['../structmcmcVariablesRJ.html',1,'']]],
-  ['mcr_5fjob_6',['mcr_job',['../structmcr__job.html',1,'']]],
-  ['mcr_5fsampler_7',['mcr_sampler',['../classmcr__sampler.html',1,'']]]
+  ['logpriorstandard_5fd_0',['logPriorStandard_D',['../classlogPriorStandard__D.html',1,'']]],
+  ['logpriorstandard_5fd_5fnrt_1',['logPriorStandard_D_NRT',['../classlogPriorStandard__D__NRT.html',1,'']]],
+  ['logpriorstandard_5fd_5fnrt_5fea_2',['logPriorStandard_D_NRT_EA',['../classlogPriorStandard__D__NRT__EA.html',1,'']]],
+  ['logpriorstandard_5fd_5fnrt_5fmod_3',['logPriorStandard_D_NRT_mod',['../classlogPriorStandard__D__NRT__mod.html',1,'']]]
 ];

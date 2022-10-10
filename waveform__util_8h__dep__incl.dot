@@ -7,4 +7,25 @@ digraph "/Users/runner/work/gw_analysis_tools/gw_analysis_tools/include/gwat/wav
   Node1 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/waveform_util.h",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
   Node2 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/ppE_utilities.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$ppE__utilities_8h.html",tooltip=" "];
+  Node2 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/fisher.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$fisher_8cpp.html",tooltip=" "];
+  Node2 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/gwatpy\l_wrapping.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$gwatpy__wrapping_8cpp.html",tooltip=" "];
+  Node2 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node5 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/mcmc\l_gw.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw_8cpp.html",tooltip=" "];
+  Node2 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node6 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/mcmc\l_gw_extended.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw__extended_8cpp.html",tooltip=" "];
+  Node2 -> Node7 [dir="back",color="steelblue1",style="solid"];
+  Node7 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/ppE\l_utilities.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$ppE__utilities_8cpp.html",tooltip=" "];
+  Node2 -> Node8 [dir="back",color="steelblue1",style="solid"];
+  Node8 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/standard\lPriorLibrary.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$standardPriorLibrary_8cpp.html",tooltip=" "];
+  Node2 -> Node9 [dir="back",color="steelblue1",style="solid"];
+  Node9 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/waveform\l_generator.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$waveform__generator_8cpp.html",tooltip=" "];
+  Node2 -> Node10 [dir="back",color="steelblue1",style="solid"];
+  Node10 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/waveform\l_util.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$waveform__util_8cpp.html",tooltip=" "];
+  Node1 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node1 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node1 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node1 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node1 -> Node10 [dir="back",color="steelblue1",style="solid"];
 }

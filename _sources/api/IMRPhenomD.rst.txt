@@ -1,7 +1,7 @@
-.. _api_IMRPhenomD:
+.. _api_imrphenomd:
 
 IMRPhenomD
-===
+==========
 
 .. doxygenfile:: IMRPhenomD.h
-   :project: GW Analysis Tools
+	:project: GW Analysis Tools

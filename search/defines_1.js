@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['threads_5fper_5fblock_0',['THREADS_PER_BLOCK',['../autocorrelation__cuda_8h.html#a869bf6501bf4809f3de1db59ef2dd914',1,'autocorrelation_cuda.h']]]
+  ['omp_0',['omp',['../IMRPhenomD_8cpp.html#a71a771d0580911cb2c5fe43e369c744a',1,'omp():&#160;IMRPhenomD.cpp'],['../mcmc__sampler_8cpp.html#a71a771d0580911cb2c5fe43e369c744a',1,'omp():&#160;mcmc_sampler.cpp'],['../mcmc__sampler__internals_8cpp.html#a71a771d0580911cb2c5fe43e369c744a',1,'omp():&#160;mcmc_sampler_internals.cpp'],['../TaylorT2_8cpp.html#a71a771d0580911cb2c5fe43e369c744a',1,'omp():&#160;TaylorT2.cpp']]]
 ];

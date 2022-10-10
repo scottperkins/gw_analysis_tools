@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D_Z_Config_modified_dispersion &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="EA_IMRPhenomD_NRT" href="EA_IMRPhenomD_NRT.html" />
+    <link rel="prev" title="D_Z_Config" href="D_Z_Config.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config.html">D_Z_Config</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">D_Z_Config_modified_dispersion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_IMRPhenomD_NRT.html">EA_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD.html">IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD_NRT.html">IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP.html">IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP_NRT.html">IMRPhenomP_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QNM_data.html">QNM_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TaylorT2.html">TaylorT2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation.html">autocorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation_cuda.html">autocorrelation_cuda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector_util.html">detector_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fisher.html">fisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomD.html">gIMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomP.html">gIMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwatpy_wrapping.html">gwatpy_wrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_util.html">io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mc_reject.html">mc_reject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw.html">mcmc_gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw_extended.html">mcmc_gw_extended</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_io_util.html">mcmc_io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler.html">mcmc_sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler_internals.html">mcmc_sampler_internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ortho_basis.html">ortho_basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pn_waveform_util.html">pn_waveform_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD.html">ppE_IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD_NRT.html">ppE_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threadPool.html">threadPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_util.html">waveform_util</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li>D_Z_Config_modified_dispersion</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/D_Z_Config_modified_dispersion.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="d-z-config-modified-dispersion">
+<span id="api-d-z-config-modified-dispersion"></span><h1>D_Z_Config_modified_dispersion<a class="headerlink" href="#d-z-config-modified-dispersion" title="Permalink to this heading"></a></h1>
+<p><ul class="simple">
+<li><p>Header file for the cosmological interpolation </p></li>
+</ul>
+</p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-variables">Variables</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv415MD_alphas_names">
+<span id="_CPPv315MD_alphas_names"></span><span id="_CPPv215MD_alphas_names"></span><span id="MD_alphas_names__cCPA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1a6df779d12e292884fc48bb66b81ebdfc"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">MD_alphas_names</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="s"><span class="pre">&quot;alpha_0&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_0.5&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_1&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_1.5&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_2&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_2.5&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_3&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_3.5&quot;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;alpha_4&quot;</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv415MD_alphas_names" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv49MD_alphas">
+<span id="_CPPv39MD_alphas"></span><span id="_CPPv29MD_alphas"></span><span id="MD_alphas__doubleCA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1ad10a58978be4bbc326b400cf2d622c84"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MD_alphas</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">0.5</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1.5</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2.5</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3.5</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv49MD_alphas" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv413num_MD_alphas">
+<span id="_CPPv313num_MD_alphas"></span><span id="_CPPv213num_MD_alphas"></span><span id="num_MD_alphas__iC"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1a9794d57814a055c504b7557e5486cc6f"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">num_MD_alphas</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">9</span></span><a class="headerlink" href="#_CPPv413num_MD_alphas" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv415num_MD_segments">
+<span id="_CPPv315num_MD_segments"></span><span id="_CPPv215num_MD_segments"></span><span id="num_MD_segments__iCA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1acb8c9cd56367d55e8dd807069632f09c"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">num_MD_segments</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv415num_MD_segments" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv416interp_MD_degree">
+<span id="_CPPv316interp_MD_degree"></span><span id="_CPPv216interp_MD_degree"></span><span id="interp_MD_degree__iCA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1a67bf90c3d892efa498a7fe052e190e0e"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">interp_MD_degree</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv416interp_MD_degree" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv415MD_boundaries_Z">
+<span id="_CPPv315MD_boundaries_Z"></span><span id="_CPPv215MD_boundaries_Z"></span><span id="MD_boundaries_Z__doubleCAA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1a304a2f856f40bf7d8e51f4d003719fdd"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MD_boundaries_Z</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv415MD_boundaries_Z" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv415MD_boundaries_D">
+<span id="_CPPv315MD_boundaries_D"></span><span id="_CPPv215MD_boundaries_D"></span><span id="MD_boundaries_D__doubleCAA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1a710ec053f0f01c694830cf7614cbf5fd"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MD_boundaries_D</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv415MD_boundaries_D" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv415MD_COEFF_VEC_ZD">
+<span id="_CPPv315MD_COEFF_VEC_ZD"></span><span id="_CPPv215MD_COEFF_VEC_ZD"></span><span id="MD_COEFF_VEC_ZD__doubleCAAA"></span><span class="target" id="D__Z__Config__modified__dispersion_8h_1a06145dd781566cdfb9f5f3e074329707"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MD_COEFF_VEC_ZD</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">17</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv415MD_COEFF_VEC_ZD" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="D_Z_Config.html" class="btn btn-neutral float-left" title="D_Z_Config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="EA_IMRPhenomD_NRT.html" class="btn btn-neutral float-right" title="EA_IMRPhenomD_NRT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

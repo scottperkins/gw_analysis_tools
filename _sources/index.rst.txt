@@ -7,9 +7,12 @@ Welcome to GW Analysis Tools's documentation!
 =============================================
 
 .. toctree::
+        :maxdepth: 2
 
-   :maxdepth: 2
-   :caption: Contents:
+        :caption: Contents:
+
+.. include:: ../README.md
+        :parser: myst_parser.sphinx_
 
 Indices and tables
 ==================
@@ -22,8 +25,11 @@ Table of Contents
 ^^^^^^^^^^^^^^^^^ 
 
 .. toctree::    
+        :maxdepth: 2
 
-   :maxdepth: 2
-   self
-   api/index
+        self
+        installation/installation
+        api/index
 
+
+Note: these docs followed `this tutorial <https://medium.com/practical-coding/c-documentation-with-doxygen-cmake-sphinx-breathe-for-those-of-use-who-are-totally-lost-7d555386fe13>`_

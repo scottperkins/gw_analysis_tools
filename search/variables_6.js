@@ -1,7 +1,7 @@
 var searchData=
 [
   ['g_0',['G',['../util_8h.html#ab97e4616d23ed4c2961295010c1afc3c',1,'util.h']]],
-  ['gamma_1',['gamma',['../structlambda__parameters.html#a49db18626c20bd43f25c5c760679ac2a',1,'lambda_parameters']]],
+  ['g_5fparam_1',['g_param',['../structTbm__struct.html#a0b21b03bcf053b95703e2a661af68fb4',1,'Tbm_struct']]],
   ['gamma_5fe_2',['gamma_E',['../util_8h.html#ae35ccfea47f0da0a31cf1d13c80f3c58',1,'util.h']]],
   ['gauss_5faccept_5fct_3',['gauss_accept_ct',['../classsampler.html#abde12f5d60ae128516addbd3c2812fb0',1,'sampler']]],
   ['gauss_5faccept_5fct_5fper_5fdim_4',['gauss_accept_ct_per_dim',['../classsampler.html#a386078c26cc5d38ef8d347408739a1ba',1,'sampler']]],
@@ -14,7 +14,7 @@ var searchData=
   ['gauss_5freject_5fct_5fper_5fdim_11',['gauss_reject_ct_per_dim',['../classsampler.html#a188682400969c24b5f49210c14aeb679',1,'sampler']]],
   ['gb1_5fea_12',['gb1_EA',['../structsource__parameters.html#a3cd9089a1a7b2130ae04364b1946f691',1,'source_parameters']]],
   ['gen_5fparams_5fin_13',['gen_params_in',['../structgsl__subroutine.html#aada6e2a926c6cc128411365dcd4586b9',1,'gsl_subroutine']]],
-  ['generation_5fmethod_14',['generation_method',['../structgsl__subroutine.html#a6366a126a6cf98adba59e0a803c152f4',1,'gsl_subroutine']]],
+  ['generation_5fmethod_14',['generation_method',['../structgsl__subroutine.html#a6366a126a6cf98adba59e0a803c152f4',1,'gsl_subroutine::generation_method()'],['../structgsl__snr__struct.html#a0bb473cdde3594f18d424fcb09eabee2',1,'gsl_snr_struct::generation_method()']]],
   ['gimr_5falphai_15',['gIMR_alphai',['../structMCMC__modification__struct.html#a166ef1fceb7c1ad41767dc71ff8142ef',1,'MCMC_modification_struct']]],
   ['gimr_5fbetai_16',['gIMR_betai',['../structMCMC__modification__struct.html#ab43b12675b47cf62ac67f1208286ab03',1,'MCMC_modification_struct']]],
   ['gimr_5fnmod_5falpha_17',['gIMR_Nmod_alpha',['../structMCMC__modification__struct.html#a69f6668a9ff00ec44de7af48989423d4',1,'MCMC_modification_struct']]],

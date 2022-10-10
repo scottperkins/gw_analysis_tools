@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaylorT2 &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="autocorrelation" href="autocorrelation.html" />
+    <link rel="prev" title="QNM_data" href="QNM_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config.html">D_Z_Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config_modified_dispersion.html">D_Z_Config_modified_dispersion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_IMRPhenomD_NRT.html">EA_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD.html">IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD_NRT.html">IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP.html">IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP_NRT.html">IMRPhenomP_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QNM_data.html">QNM_data</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TaylorT2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation.html">autocorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation_cuda.html">autocorrelation_cuda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector_util.html">detector_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fisher.html">fisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomD.html">gIMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomP.html">gIMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwatpy_wrapping.html">gwatpy_wrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_util.html">io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mc_reject.html">mc_reject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw.html">mcmc_gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw_extended.html">mcmc_gw_extended</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_io_util.html">mcmc_io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler.html">mcmc_sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler_internals.html">mcmc_sampler_internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ortho_basis.html">ortho_basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pn_waveform_util.html">pn_waveform_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD.html">ppE_IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD_NRT.html">ppE_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threadPool.html">threadPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_util.html">waveform_util</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li>TaylorT2</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/TaylorT2.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="taylort2">
+<span id="api-taylort2"></span><h1>TaylorT2<a class="headerlink" href="#taylort2" title="Permalink to this heading"></a></h1>
+<p>Header file for utilities </p>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0E8TaylorT2">
+<span id="_CPPv3I0E8TaylorT2"></span><span id="_CPPv2I0E8TaylorT2"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classTaylorT2"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TaylorT2</span></span></span><a class="headerlink" href="#_CPPv4I0E8TaylorT2" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;TaylorT2.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE">
+<span id="_CPPv3N8TaylorT218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE"></span><span id="_CPPv2N8TaylorT218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE"></span><span id="TaylorT2::construct_waveform__TP.i.std::complex:T:P.std::complex:T:P.source_parameters:T:P"></span><span class="target" id="classTaylorT2_1aeea453c2ebdad52c0135b22ed5691cb4"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">construct_waveform</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">times</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hplus</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hcross</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Constructs the waveform as outlined by. </p>
+<p>arguments: array of frequencies, length of that array, a complex array for the output waveform, and a <a class="reference internal" href="util.html#structsource__parameters"><span class="std std-ref">source_parameters</span></a> structure </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>times</strong> – T array of frequencies the waveform is to be evaluated at </p></li>
+<li><p><strong>length</strong> – integer length of the array of frequencies and the waveform </p></li>
+<li><p><strong>hplus</strong> – complex T array for the waveform to be output </p></li>
+<li><p><strong>hcross</strong> – complex T array for the waveform to be output </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT25THETAE1TP17source_parametersI1TE">
+<span id="_CPPv3N8TaylorT25THETAE1TP17source_parametersI1TE"></span><span id="_CPPv2N8TaylorT25THETAE1TP17source_parametersI1TE"></span><span id="TaylorT2::THETA__T.source_parameters:T:P"></span><span class="target" id="classTaylorT2_1ac2c129618ba018a78c0005226bfce225"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">THETA</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">time</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT25THETAE1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Theta function from 315 1310.1528. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT21XE1TP17source_parametersI1TE">
+<span id="_CPPv3N8TaylorT21XE1TP17source_parametersI1TE"></span><span id="_CPPv2N8TaylorT21XE1TP17source_parametersI1TE"></span><span id="TaylorT2::X__T.source_parameters:T:P"></span><span class="target" id="classTaylorT2_1a40a3df28156b3ad4a9d9855ac287f96c"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">X</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">theta</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT21XE1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>x function from 316 1310.1528 </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT23PHIE1TP17source_parametersI1TE">
+<span id="_CPPv3N8TaylorT23PHIE1TP17source_parametersI1TE"></span><span id="_CPPv2N8TaylorT23PHIE1TP17source_parametersI1TE"></span><span id="TaylorT2::PHI__T.source_parameters:T:P"></span><span class="target" id="classTaylorT2_1a86043dddc96c05ad7e5c243b5920a3f8"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PHI</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">theta</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT23PHIE1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>phi function from 318 1310.1528 </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT25GAMMAE1TP17source_parametersI1TE">
+<span id="_CPPv3N8TaylorT25GAMMAE1TP17source_parametersI1TE"></span><span id="_CPPv2N8TaylorT25GAMMAE1TP17source_parametersI1TE"></span><span id="TaylorT2::GAMMA__T.source_parameters:T:P"></span><span class="target" id="classTaylorT2_1a53e5480dfcb5a75e96a35260ad70d57d"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GAMMA</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT25GAMMAE1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT25M_ADME1TP17source_parametersI1TE">
+<span id="_CPPv3N8TaylorT25M_ADME1TP17source_parametersI1TE"></span><span id="_CPPv2N8TaylorT25M_ADME1TP17source_parametersI1TE"></span><span id="TaylorT2::M_ADM__T.source_parameters:T:P"></span><span class="target" id="classTaylorT2_1a94aaeb643b58244d9f3a189cd1b02493"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">M_ADM</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">gamma</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT25M_ADME1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N8TaylorT210contract_HE1T1TP17source_parametersI1TEPNSt7complexI1TEEPNSt7complexI1TEE">
+<span id="_CPPv3N8TaylorT210contract_HE1T1TP17source_parametersI1TEPNSt7complexI1TEEPNSt7complexI1TEE"></span><span id="_CPPv2N8TaylorT210contract_HE1T1TP17source_parametersI1TEPNSt7complexI1TEEPNSt7complexI1TEE"></span><span id="TaylorT2::contract_H__T.T.source_parameters:T:P.std::complex:T:P.std::complex:T:P"></span><span class="target" id="classTaylorT2_1a3633174aa8705c985c44393ac2d4a2a2"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">contract_H</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span>, <a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">psi</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hplus</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E8TaylorT2" title="TaylorT2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hcross</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N8TaylorT210contract_HE1T1TP17source_parametersI1TEPNSt7complexI1TEEPNSt7complexI1TEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="QNM_data.html" class="btn btn-neutral float-left" title="QNM_data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="autocorrelation.html" class="btn btn-neutral float-right" title="autocorrelation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

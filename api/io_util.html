@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>io_util &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="mc_reject" href="mc_reject.html" />
+    <link rel="prev" title="gwatpy_wrapping" href="gwatpy_wrapping.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config.html">D_Z_Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config_modified_dispersion.html">D_Z_Config_modified_dispersion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_IMRPhenomD_NRT.html">EA_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD.html">IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD_NRT.html">IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP.html">IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP_NRT.html">IMRPhenomP_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QNM_data.html">QNM_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TaylorT2.html">TaylorT2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation.html">autocorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation_cuda.html">autocorrelation_cuda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector_util.html">detector_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fisher.html">fisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomD.html">gIMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomP.html">gIMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwatpy_wrapping.html">gwatpy_wrapping</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mc_reject.html">mc_reject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw.html">mcmc_gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw_extended.html">mcmc_gw_extended</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_io_util.html">mcmc_io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler.html">mcmc_sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler_internals.html">mcmc_sampler_internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ortho_basis.html">ortho_basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pn_waveform_util.html">pn_waveform_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD.html">ppE_IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD_NRT.html">ppE_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threadPool.html">threadPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_util.html">waveform_util</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li>io_util</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/io_util.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="io-util">
+<span id="api-io-util"></span><h1>io_util<a class="headerlink" href="#io-util" title="Permalink to this heading"></a></h1>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420unpack_input_io_fileNSt6stringEPNSt13unordered_mapINSt6stringEiEEPNSt13unordered_mapINSt6stringENSt6stringEEEPNSt13unordered_mapINSt6stringEdEEPNSt13unordered_mapINSt6stringEfEEPNSt13unordered_mapINSt6stringEbEE">
+<span id="_CPPv320unpack_input_io_fileNSt6stringEPNSt13unordered_mapINSt6stringEiEEPNSt13unordered_mapINSt6stringENSt6stringEEEPNSt13unordered_mapINSt6stringEdEEPNSt13unordered_mapINSt6stringEfEEPNSt13unordered_mapINSt6stringEbEE"></span><span id="_CPPv220unpack_input_io_fileNSt6stringEPNSt13unordered_mapINSt6stringEiEEPNSt13unordered_mapINSt6stringENSt6stringEEEPNSt13unordered_mapINSt6stringEdEEPNSt13unordered_mapINSt6stringEfEEPNSt13unordered_mapINSt6stringEbEE"></span><span id="unpack_input_io_file__ss.std::unordered_map:ss.i:P.std::unordered_map:ss.ss:P.std::unordered_map:ss.double:P.std::unordered_map:ss.float:P.std::unordered_map:ss.b:P"></span><span class="target" id="io__util_8h_1ae64c41a8d5a46054427d281f7febf234"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">unpack_input_io_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">input_param_file</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input_param_dict_int</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input_param_dict_str</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input_param_dict_dbl</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input_param_dict_flt</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input_param_dict_bool</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420unpack_input_io_fileNSt6stringEPNSt13unordered_mapINSt6stringEiEEPNSt13unordered_mapINSt6stringENSt6stringEEEPNSt13unordered_mapINSt6stringEdEEPNSt13unordered_mapINSt6stringEfEEPNSt13unordered_mapINSt6stringEbEE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413find_datatypeNSt6stringE">
+<span id="_CPPv313find_datatypeNSt6stringE"></span><span id="_CPPv213find_datatypeNSt6stringE"></span><span id="find_datatype__ss"></span><span class="target" id="io__util_8h_1a627ac895351aa8f4c26a2565cf1769d0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">find_datatype</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413find_datatypeNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Takes in the shorthand for primitive datatypes in c++ and returns code based on type. </p>
+<p>Returns: <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">Not</span><span class="w"> </span><span class="n">found</span><span class="w"></span>
+
+<span class="mi">1</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+
+<span class="mi">2</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">string</span><span class="w"></span>
+
+<span class="mi">3</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">double</span><span class="w"></span>
+
+<span class="mi">4</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">float</span><span class="w"></span>
+
+<span class="mi">5</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
+</pre></div>
+</div>
+ </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv44trimNSt6stringE">
+<span id="_CPPv34trimNSt6stringE"></span><span id="_CPPv24trimNSt6stringE"></span><span id="trim__ss"></span><span class="target" id="io__util_8h_1a9b855aac79a01bc69b093a4ee12bb688"></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trim</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv44trimNSt6stringE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49read_fileNSt6stringEPPdii">
+<span id="_CPPv39read_fileNSt6stringEPPdii"></span><span id="_CPPv29read_fileNSt6stringEPPdii"></span><span id="read_file__ss.doublePP.i.i"></span><span class="target" id="io__util_8h_1aad742282a09bb261d21080e8874578ba"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rows</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cols</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49read_fileNSt6stringEPPdii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to read in data. </p>
+<p>Takes filename, and assigns to output[rows][cols]</p>
+<p>File must be comma separated doubles </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
+<li><p><strong>output</strong> – [out] array to store output, dimensions rowsXcols </p></li>
+<li><p><strong>rows</strong> – first dimension </p></li>
+<li><p><strong>cols</strong> – second dimension </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49read_fileNSt6stringEPPiii">
+<span id="_CPPv39read_fileNSt6stringEPPiii"></span><span id="_CPPv29read_fileNSt6stringEPPiii"></span><span id="read_file__ss.iPP.i.i"></span><span class="target" id="io__util_8h_1abed5d6708a7adc8cd37ca0d578730b17"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rows</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cols</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49read_fileNSt6stringEPPiii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to read in data. </p>
+<p>Takes filename, and assigns to output[rows][cols]</p>
+<p>File must be comma separated doubles</p>
+<p>integer version </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
+<li><p><strong>output</strong> – [out] array to store output, dimensions rowsXcols </p></li>
+<li><p><strong>rows</strong> – first dimension </p></li>
+<li><p><strong>cols</strong> – second dimension </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49read_fileNSt6stringEPd">
+<span id="_CPPv39read_fileNSt6stringEPd"></span><span id="_CPPv29read_fileNSt6stringEPd"></span><span id="read_file__ss.doubleP"></span><span class="target" id="io__util_8h_1a788a44b839a09910024159d9d10764d0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49read_fileNSt6stringEPd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to read in data (single dimension vector) </p>
+<p>Takes filename, and assigns to output[i*rows + cols]</p>
+<p>Output vector must be long enough, no check is done for the length</p>
+<p>File must be comma separated doubles </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
+<li><p><strong>output</strong> – [out] output array, assumed to have the proper length of total items </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv49read_fileNSt6stringEPi">
+<span id="_CPPv39read_fileNSt6stringEPi"></span><span id="_CPPv29read_fileNSt6stringEPi"></span><span id="read_file__ss.iP"></span><span class="target" id="io__util_8h_1a6add7454e404e8305cd6695b0cff428e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49read_fileNSt6stringEPi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to read in data (single dimension vector) </p>
+<p>Takes filename, and assigns to output[i*rows + cols]</p>
+<p>Output vector must be long enough, no check is done for the length</p>
+<p>File must be comma separated doubles</p>
+<p>Int version </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
+<li><p><strong>output</strong> – [out] output array, assumed to have the proper length of total items </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410write_fileNSt6stringEPPdii">
+<span id="_CPPv310write_fileNSt6stringEPPdii"></span><span id="_CPPv210write_fileNSt6stringEPPdii"></span><span id="write_file__ss.doublePP.i.i"></span><span class="target" id="io__util_8h_1a8cb10f1eb5598be2a3aa53dcc2ebe844"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rows</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cols</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410write_fileNSt6stringEPPdii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to write 2D array to file. </p>
+<p>Grid of data, comma separated</p>
+<p>Grid has rows rows and cols columns </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
+<li><p><strong>input</strong> – Input 2D array pointer array[rows][cols] </p></li>
+<li><p><strong>rows</strong> – First dimension of array </p></li>
+<li><p><strong>cols</strong> – second dimension of array </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410write_fileNSt6stringEPPiii">
+<span id="_CPPv310write_fileNSt6stringEPPiii"></span><span id="_CPPv210write_fileNSt6stringEPPiii"></span><span id="write_file__ss.iPP.i.i"></span><span class="target" id="io__util_8h_1a4b7b68907ec287799769dd0a1ff0b427"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rows</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cols</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410write_fileNSt6stringEPPiii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to write 2D array to file. </p>
+<p>Grid of data, comma separated</p>
+<p>Grid has rows rows and cols columns</p>
+<p>integer version </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
+<li><p><strong>input</strong> – Input 2D array pointer array[rows][cols] </p></li>
+<li><p><strong>rows</strong> – First dimension of array </p></li>
+<li><p><strong>cols</strong> – second dimension of array </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410write_fileNSt6stringEPdi">
+<span id="_CPPv310write_fileNSt6stringEPdi"></span><span id="_CPPv210write_fileNSt6stringEPdi"></span><span id="write_file__ss.doubleP.i"></span><span class="target" id="io__util_8h_1a2364e735eddfa67c1317f6ebc64565f3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410write_fileNSt6stringEPdi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to write 1D array to file. </p>
+<p>Single column of data </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
+<li><p><strong>input</strong> – input 1D array pointer array[length] </p></li>
+<li><p><strong>length</strong> – length of array </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv410write_fileNSt6stringEPii">
+<span id="_CPPv310write_fileNSt6stringEPii"></span><span id="_CPPv210write_fileNSt6stringEPii"></span><span id="write_file__ss.iP.i"></span><span class="target" id="io__util_8h_1ab6683e37f11111fe729fe0fd304c5651"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">input</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410write_fileNSt6stringEPii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Utility to write 1D array to file. </p>
+<p>Single column of data</p>
+<p>integer version </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
+<li><p><strong>input</strong> – input 1D array pointer array[length] </p></li>
+<li><p><strong>length</strong> – length of array </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419read_LOSC_data_fileNSt6stringEPdPdPdPd">
+<span id="_CPPv319read_LOSC_data_fileNSt6stringEPdPdPdPd"></span><span id="_CPPv219read_LOSC_data_fileNSt6stringEPdPdPdPd"></span><span id="read_LOSC_data_file__ss.doubleP.doubleP.doubleP.doubleP"></span><span class="target" id="io__util_8h_1abbb4e70ddc93c8995739b3a481bbf3a6"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_LOSC_data_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data_start_time</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">duration</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419read_LOSC_data_fileNSt6stringEPdPdPdPd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read data file from LIGO Open Science Center. </p>
+<p>Convenience function for cutting off the first few lines of text </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – input filename </p></li>
+<li><p><strong>output</strong> – [out] Output data </p></li>
+<li><p><strong>data_start_time</strong> – [out] GPS start time of the data in file </p></li>
+<li><p><strong>duration</strong> – [out] Duration of the signal </p></li>
+<li><p><strong>fs</strong> – [out] Sampling frequency of the data </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418read_LOSC_PSD_fileNSt6stringEPPdii">
+<span id="_CPPv318read_LOSC_PSD_fileNSt6stringEPPdii"></span><span id="_CPPv218read_LOSC_PSD_fileNSt6stringEPPdii"></span><span id="read_LOSC_PSD_file__ss.doublePP.i.i"></span><span class="target" id="io__util_8h_1a089aa96b136d368b0c740c416811c39d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">read_LOSC_PSD_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rows</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cols</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418read_LOSC_PSD_fileNSt6stringEPPdii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read PSD file from LIGO Open Science Center. </p>
+<p>Convenience function for cutting off the first few lines of text </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418allocate_LOSC_dataPNSt6stringENSt6stringEiiiddPPNSt7complexIdEEPPdPPd">
+<span id="_CPPv318allocate_LOSC_dataPNSt6stringENSt6stringEiiiddPPNSt7complexIdEEPPdPPd"></span><span id="_CPPv218allocate_LOSC_dataPNSt6stringENSt6stringEiiiddPPNSt7complexIdEEPPdPPd"></span><span id="allocate_LOSC_data__ssP.ss.i.i.i.double.double.std::complex:double:PP.doublePP.doublePP"></span><span class="target" id="io__util_8h_1a14aa2355d5c5975b49c30dfc57b7bde1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">allocate_LOSC_data</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data_files</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">psd_file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_detectors</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">psd_length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">data_file_length</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">trigger_time</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">post_merger_duration</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">psds</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">freqs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418allocate_LOSC_dataPNSt6stringENSt6stringEiiiddPPNSt7complexIdEEPPdPPd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Prepare data for MCMC directly from LIGO Open Science Center. </p>
+<p>Trims data for Tobs (determined by PSD file) 3/4*Tobs in front of trigger, and 1/4*Tobs behind or max 2 seconds on the end</p>
+<p>Currently, default to sampling frequency and observation time set by PSD &amp;#8212; cannot be customized</p>
+<p>Output is in order of PSD columns &amp;#8212; string vector of detectos MUST match order of PSD cols</p>
+<p>Output shapes&amp;#8212; <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">psds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span><span class="w">  </span>
+
+<span class="w">    </span><span class="n">freqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span><span class="w"></span>
+</pre></div>
+</div>
+ Total observation time = 1/( freq[i] - freq[i-1]) (from PSD file)</p>
+<p>Sampling frequency fs = max frequency from PSD file</p>
+<p>ALLOCATES MEMORY &amp;#8212; must be freed to prevent memory leak </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_files</strong> – Vector of strings for each detector file from LOSC </p></li>
+<li><p><strong>psd_file</strong> – String of psd file from LOSC </p></li>
+<li><p><strong>num_detectors</strong> – Number of detectors to use </p></li>
+<li><p><strong>psd_length</strong> – Length of the PSD file (number of rows of DATA) </p></li>
+<li><p><strong>data_file_length</strong> – Length of the data file (number of rows of DATA) </p></li>
+<li><p><strong>trigger_time</strong> – Time for the signal trigger (GPS) </p></li>
+<li><p><strong>post_merger_duration</strong> – Time after trigger to end the data </p></li>
+<li><p><strong>data</strong> – [out] Output array of data for each detector </p></li>
+<li><p><strong>psds</strong> – [out] Output array of psds for each detector </p></li>
+<li><p><strong>freqs</strong> – [out] Output array of freqs for each detector </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414free_LOSC_dataPPNSt7complexIdEEPPdPPdii">
+<span id="_CPPv314free_LOSC_dataPPNSt7complexIdEEPPdPPdii"></span><span id="_CPPv214free_LOSC_dataPPNSt7complexIdEEPPdPPdii"></span><span id="free_LOSC_data__std::complex:double:PP.doublePP.doublePP.i.i"></span><span class="target" id="io__util_8h_1a3196bd767443186731edcfc84e43ac93"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">free_LOSC_data</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">psds</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">freqs</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_detectors</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414free_LOSC_dataPPNSt7complexIdEEPPdPPdii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>/brief Free data allocated by prep_LOSC_data function </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv421count_lines_data_fileNSt6stringEPi">
+<span id="_CPPv321count_lines_data_fileNSt6stringEPi"></span><span id="_CPPv221count_lines_data_fileNSt6stringEPi"></span><span id="count_lines_data_file__ss.iP"></span><span class="target" id="io__util_8h_1aabb38ec649dc87bca9ddd9ddd1baea78"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">count_lines_data_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421count_lines_data_fileNSt6stringEPi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Takes in data file and returns the number of data elements in file. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425count_lines_LOSC_PSD_fileNSt6stringEPi">
+<span id="_CPPv325count_lines_LOSC_PSD_fileNSt6stringEPi"></span><span id="_CPPv225count_lines_LOSC_PSD_fileNSt6stringEPi"></span><span id="count_lines_LOSC_PSD_file__ss.iP"></span><span class="target" id="io__util_8h_1aaf15f8db5f36caf636d88f41e29b17be"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">count_lines_LOSC_PSD_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425count_lines_LOSC_PSD_fileNSt6stringEPi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Takes in LOSC PSD file and returns the number of data elements in file. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv426count_lines_LOSC_data_fileNSt6stringEPi">
+<span id="_CPPv326count_lines_LOSC_data_fileNSt6stringEPi"></span><span id="_CPPv226count_lines_LOSC_data_fileNSt6stringEPi"></span><span id="count_lines_LOSC_data_file__ss.iP"></span><span class="target" id="io__util_8h_1a2d2ec12ff7cb75ea68ec4139513bab4c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">count_lines_LOSC_data_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv426count_lines_LOSC_data_fileNSt6stringEPi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Takes in LOSC data file and returns the number of data elements in file. </p>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="gwatpy_wrapping.html" class="btn btn-neutral float-left" title="gwatpy_wrapping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mc_reject.html" class="btn btn-neutral float-right" title="mc_reject" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

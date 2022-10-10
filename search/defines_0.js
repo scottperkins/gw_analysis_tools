@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['pbstr_0',['PBSTR',['../util_8h.html#a93f03159397f25c687840129b18c972d',1,'util.h']]],
-  ['pbwidth_1',['PBWIDTH',['../util_8h.html#a69793e71975c25754a8236df29896e15',1,'util.h']]]
+  ['max_5fserial_0',['MAX_SERIAL',['../autocorrelation_8cpp.html#a997bd514ed5e4f822888206a11fc8065',1,'autocorrelation.cpp']]]
 ];

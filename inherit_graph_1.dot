@@ -7,11 +7,15 @@ digraph "Graphical Class Hierarchy"
   rankdir="LR";
   Node0 [label="bayesship::probabilityFn",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
   Node0 -> Node1 [dir="back",color="steelblue1",style="solid"];
-  Node1 [label="logPriorStandard_D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D.html",tooltip=" "];
-  Node1 -> Node2 [dir="back",color="steelblue1",style="solid"];
-  Node2 [label="logPriorStandard_D_NRT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT.html",tooltip=" "];
-  Node2 -> Node3 [dir="back",color="steelblue1",style="solid"];
-  Node3 [label="logPriorStandard_D\l_NRT_EA",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__EA.html",tooltip=" "];
-  Node2 -> Node4 [dir="back",color="steelblue1",style="solid"];
-  Node4 [label="logPriorStandard_D\l_NRT_mod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__mod.html",tooltip=" "];
+  Node1 [label="MCMC_likelihood_wrapper_v2",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classMCMC__likelihood__wrapper__v2.html",tooltip=" "];
+  Node0 -> Node2 [dir="back",color="steelblue1",style="solid"];
+  Node2 [label="MCMC_likelihood_wrapper\l_v2_RJ",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classMCMC__likelihood__wrapper__v2__RJ.html",tooltip=" "];
+  Node0 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node3 [label="logPriorStandard_D",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D.html",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="logPriorStandard_D_NRT",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT.html",tooltip=" "];
+  Node4 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node5 [label="logPriorStandard_D\l_NRT_EA",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__EA.html",tooltip=" "];
+  Node4 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node6 [label="logPriorStandard_D\l_NRT_mod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__mod.html",tooltip=" "];
 }

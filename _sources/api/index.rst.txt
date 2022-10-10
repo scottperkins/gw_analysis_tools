@@ -1,10 +1,10 @@
-.. _api:
+.. _api_funcs:
 
 API
 ===
 
 .. toctree::    
-
-   :maxdepth: 2
-   :glob:
-    *
+        :maxdepth: 2
+        :glob:
+        
+        *

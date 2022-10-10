@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMRPhenomP &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IMRPhenomP_NRT" href="IMRPhenomP_NRT.html" />
+    <link rel="prev" title="IMRPhenomD_NRT" href="IMRPhenomD_NRT.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config.html">D_Z_Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config_modified_dispersion.html">D_Z_Config_modified_dispersion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_IMRPhenomD_NRT.html">EA_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD.html">IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD_NRT.html">IMRPhenomD_NRT</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP_NRT.html">IMRPhenomP_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QNM_data.html">QNM_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TaylorT2.html">TaylorT2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation.html">autocorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation_cuda.html">autocorrelation_cuda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector_util.html">detector_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fisher.html">fisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomD.html">gIMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomP.html">gIMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwatpy_wrapping.html">gwatpy_wrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_util.html">io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mc_reject.html">mc_reject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw.html">mcmc_gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw_extended.html">mcmc_gw_extended</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_io_util.html">mcmc_io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler.html">mcmc_sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler_internals.html">mcmc_sampler_internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ortho_basis.html">ortho_basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pn_waveform_util.html">pn_waveform_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD.html">ppE_IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD_NRT.html">ppE_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threadPool.html">threadPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_util.html">waveform_util</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li>IMRPhenomP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/IMRPhenomP.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="imrphenomp">
+<span id="api-imrphenomp"></span><h1>IMRPhenomP<a class="headerlink" href="#imrphenomp" title="Permalink to this heading"></a></h1>
+<p>Header file for IMRPhenomP functions</p>
+<p>Currently, only Pv2 is supported.</p>
+<p>Wrapped around IMRPhenomD </p>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4I0E12alpha_coeffs">
+<span id="_CPPv3I0E12alpha_coeffs"></span><span id="_CPPv2I0E12alpha_coeffs"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="structalpha__coeffs"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">alpha_coeffs</span></span></span><a class="headerlink" href="#_CPPv4I0E12alpha_coeffs" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;IMRPhenomP.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12alpha_coeffs6coeff1E">
+<span id="_CPPv3N12alpha_coeffs6coeff1E"></span><span id="_CPPv2N12alpha_coeffs6coeff1E"></span><span id="alpha_coeffs::coeff1__T"></span><span class="target" id="structalpha__coeffs_1a356cb953dd9baa5e858a64c4217617f7"></span><a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff1</span></span></span><a class="headerlink" href="#_CPPv4N12alpha_coeffs6coeff1E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12alpha_coeffs6coeff2E">
+<span id="_CPPv3N12alpha_coeffs6coeff2E"></span><span id="_CPPv2N12alpha_coeffs6coeff2E"></span><span id="alpha_coeffs::coeff2__T"></span><span class="target" id="structalpha__coeffs_1af4bf78d9cff31f15e4b73a2ca85d2b0c"></span><a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff2</span></span></span><a class="headerlink" href="#_CPPv4N12alpha_coeffs6coeff2E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12alpha_coeffs6coeff3E">
+<span id="_CPPv3N12alpha_coeffs6coeff3E"></span><span id="_CPPv2N12alpha_coeffs6coeff3E"></span><span id="alpha_coeffs::coeff3__T"></span><span class="target" id="structalpha__coeffs_1aad90fdea4b3981b943372a557af03fae"></span><a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff3</span></span></span><a class="headerlink" href="#_CPPv4N12alpha_coeffs6coeff3E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12alpha_coeffs6coeff4E">
+<span id="_CPPv3N12alpha_coeffs6coeff4E"></span><span id="_CPPv2N12alpha_coeffs6coeff4E"></span><span id="alpha_coeffs::coeff4__T"></span><span class="target" id="structalpha__coeffs_1a899084d8794fc723c1ddc1bea7a12c88"></span><a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff4</span></span></span><a class="headerlink" href="#_CPPv4N12alpha_coeffs6coeff4E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N12alpha_coeffs6coeff5E">
+<span id="_CPPv3N12alpha_coeffs6coeff5E"></span><span id="_CPPv2N12alpha_coeffs6coeff5E"></span><span id="alpha_coeffs::coeff5__T"></span><span class="target" id="structalpha__coeffs_1a3ab4a5c15d8025b3f88ba05cb234d966"></span><a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff5</span></span></span><a class="headerlink" href="#_CPPv4N12alpha_coeffs6coeff5E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4I0E14epsilon_coeffs">
+<span id="_CPPv3I0E14epsilon_coeffs"></span><span id="_CPPv2I0E14epsilon_coeffs"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="structepsilon__coeffs"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">epsilon_coeffs</span></span></span><a class="headerlink" href="#_CPPv4I0E14epsilon_coeffs" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;IMRPhenomP.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N14epsilon_coeffs6coeff1E">
+<span id="_CPPv3N14epsilon_coeffs6coeff1E"></span><span id="_CPPv2N14epsilon_coeffs6coeff1E"></span><span id="epsilon_coeffs::coeff1__T"></span><span class="target" id="structepsilon__coeffs_1ab9a930ed682c80d2febd0380480f1eb3"></span><a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff1</span></span></span><a class="headerlink" href="#_CPPv4N14epsilon_coeffs6coeff1E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N14epsilon_coeffs6coeff2E">
+<span id="_CPPv3N14epsilon_coeffs6coeff2E"></span><span id="_CPPv2N14epsilon_coeffs6coeff2E"></span><span id="epsilon_coeffs::coeff2__T"></span><span class="target" id="structepsilon__coeffs_1a9ddc676353116186e8abde43522164c5"></span><a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff2</span></span></span><a class="headerlink" href="#_CPPv4N14epsilon_coeffs6coeff2E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N14epsilon_coeffs6coeff3E">
+<span id="_CPPv3N14epsilon_coeffs6coeff3E"></span><span id="_CPPv2N14epsilon_coeffs6coeff3E"></span><span id="epsilon_coeffs::coeff3__T"></span><span class="target" id="structepsilon__coeffs_1aaaf9c13966c4550d9370d7529eaadfe6"></span><a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff3</span></span></span><a class="headerlink" href="#_CPPv4N14epsilon_coeffs6coeff3E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N14epsilon_coeffs6coeff4E">
+<span id="_CPPv3N14epsilon_coeffs6coeff4E"></span><span id="_CPPv2N14epsilon_coeffs6coeff4E"></span><span id="epsilon_coeffs::coeff4__T"></span><span class="target" id="structepsilon__coeffs_1a87a3c5420d7d0b435fe4e68ee3534b5c"></span><a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff4</span></span></span><a class="headerlink" href="#_CPPv4N14epsilon_coeffs6coeff4E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N14epsilon_coeffs6coeff5E">
+<span id="_CPPv3N14epsilon_coeffs6coeff5E"></span><span id="_CPPv2N14epsilon_coeffs6coeff5E"></span><span id="epsilon_coeffs::coeff5__T"></span><span class="target" id="structepsilon__coeffs_1a37f73b1cd1872b4bb54ac86582c5f26b"></span><a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">coeff5</span></span></span><a class="headerlink" href="#_CPPv4N14epsilon_coeffs6coeff5E" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0E12IMRPhenomPv2">
+<span id="_CPPv3I0E12IMRPhenomPv2"></span><span id="_CPPv2I0E12IMRPhenomPv2"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classIMRPhenomPv2"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IMRPhenomPv2</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">IMRPhenomD</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4I0E12IMRPhenomPv2" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;IMRPhenomP.h&gt;</em></div>
+<p>Subclassed by <a class="reference internal" href="IMRPhenomP_NRT.html#classIMRPhenomPv2__NRT"><span class="std std-ref">IMRPhenomPv2_NRT&lt; T &gt;</span></a>, <a class="reference internal" href="gIMRPhenomP.html#classgIMRPhenomPv2"><span class="std std-ref">gIMRPhenomPv2&lt; T &gt;</span></a>, <a class="reference internal" href="ppE_IMRPhenomP.html#classppE__IMRPhenomPv2__Inspiral"><span class="std std-ref">ppE_IMRPhenomPv2_Inspiral&lt; T &gt;</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv25alphaE1T1T1T1T">
+<span id="_CPPv3N12IMRPhenomPv25alphaE1T1T1T1T"></span><span id="_CPPv2N12IMRPhenomPv25alphaE1T1T1T1T"></span><span id="IMRPhenomPv2::alpha__T.T.T.T"></span><span class="target" id="classIMRPhenomPv2_1ae3a484c9f30a94cde0fd996e164e1f7d"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">alpha</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">omega</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">q</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chi2l</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chi2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv25alphaE1T1T1T1T" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv27epsilonE1T1T1T1T">
+<span id="_CPPv3N12IMRPhenomPv27epsilonE1T1T1T1T"></span><span id="_CPPv2N12IMRPhenomPv27epsilonE1T1T1T1T"></span><span id="IMRPhenomPv2::epsilon__T.T.T.T"></span><span class="target" id="classIMRPhenomPv2_1a5fff973809492fa59aff6d7d44a2b37a"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">epsilon</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">omega</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">q</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chi2l</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chi2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv27epsilonE1T1T1T1T" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv222calculate_euler_coeffsEP12alpha_coeffsI1TEP14epsilon_coeffsI1TEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv222calculate_euler_coeffsEP12alpha_coeffsI1TEP14epsilon_coeffsI1TEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv222calculate_euler_coeffsEP12alpha_coeffsI1TEP14epsilon_coeffsI1TEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::calculate_euler_coeffs__alpha_coeffs:T:P.epsilon_coeffs:T:P.source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1afc0f88c773f46ab060482bc530f60115"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calculate_euler_coeffs</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs"><span class="n"><span class="pre">alpha_coeffs</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">acoeffs</span></span>, <a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs"><span class="n"><span class="pre">epsilon_coeffs</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ecoeffs</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv222calculate_euler_coeffsEP12alpha_coeffsI1TEP14epsilon_coeffsI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Pre calculate euler angle coefficients. </p>
+<p>Straight up stolen from LALsuite </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv21dEiii1T">
+<span id="_CPPv3N12IMRPhenomPv21dEiii1T"></span><span id="_CPPv2N12IMRPhenomPv21dEiii1T"></span><span id="IMRPhenomPv2::d__i.i.i.T"></span><span class="target" id="classIMRPhenomPv2_1a61b485a13745066477875a4b192dd940"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">d</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">l</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mp</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">s</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv21dEiii1T" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv225PhenomPv2_JSF_from_paramsEP15gen_params_baseI1TEP1T">
+<span id="_CPPv3N12IMRPhenomPv225PhenomPv2_JSF_from_paramsEP15gen_params_baseI1TEP1T"></span><span id="_CPPv2N12IMRPhenomPv225PhenomPv2_JSF_from_paramsEP15gen_params_baseI1TEP1T"></span><span id="IMRPhenomPv2::PhenomPv2_JSF_from_params__gen_params_base:T:P.TP"></span><span class="target" id="classIMRPhenomPv2_1a9c81435792ee35948b3e7b3438c1ef1e"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PhenomPv2_JSF_from_params</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E15gen_params_base" title="gen_params_base"><span class="n"><span class="pre">gen_params_base</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">JSF</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv225PhenomPv2_JSF_from_paramsEP15gen_params_baseI1TEP1T" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Calculate the unit vector in the direction of the total angular momentum. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::construct_waveform__TP.i.std::complex:T:P.std::complex:T:P.source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1af147bf8756311a9386b3f9bcdefa7dd5"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">construct_waveform</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">frequencies</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">waveform_plus</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">waveform_cross</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv218construct_waveformEP1TiPNSt7complexI1TEEPNSt7complexI1TEEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Constructs the waveform for <a class="reference internal" href="#classIMRPhenomPv2"><span class="std std-ref">IMRPhenomPv2</span></a> - uses IMRPhenomD, then twists up. </p>
+<p>arguments: array of frequencies, length of that array, a complex array for the output waveform, and a <a class="reference internal" href="util.html#structsource__parameters"><span class="std std-ref">source_parameters</span></a> structure </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frequencies</strong> – T array of frequencies the waveform is to be evaluated at </p></li>
+<li><p><strong>length</strong> – integer length of the array of frequencies and the waveform </p></li>
+<li><p><strong>waveform_plus</strong> – complex T array for the plus polariaztion waveform to be output </p></li>
+<li><p><strong>waveform_cross</strong> – complex T array for the cross polarization waveform to be output </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv215construct_phaseEP1TiP1TP1TP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv215construct_phaseEP1TiP1TP1TP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv215construct_phaseEP1TiP1TP1TP17source_parametersI1TE"></span><span id="IMRPhenomPv2::construct_phase__TP.i.TP.TP.source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1a05877c187dedd47f2479939907b4b2e9"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">construct_phase</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">frequencies</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phase_plus</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phase_cross</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv215construct_phaseEP1TiP1TP1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Constructs the phase for <a class="reference internal" href="#classIMRPhenomPv2"><span class="std std-ref">IMRPhenomPv2</span></a> - uses IMRPhenomD, then twists up. </p>
+<p>arguments: array of frequencies, length of that array, a complex array for the output waveform, and a <a class="reference internal" href="util.html#structsource__parameters"><span class="std std-ref">source_parameters</span></a> structure </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frequencies</strong> – T array of frequencies the waveform is to be evaluated at </p></li>
+<li><p><strong>length</strong> – integer length of the array of frequencies and the waveform </p></li>
+<li><p><strong>phase_plus</strong> – complex T array for the plus polariaztion waveform to be output </p></li>
+<li><p><strong>phase_cross</strong> – complex T array for the cross polarization waveform to be output </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv220calculate_time_shiftEP17source_parametersI1TEP13useful_powersI1TEP1TP17lambda_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv220calculate_time_shiftEP17source_parametersI1TEP13useful_powersI1TEP1TP17lambda_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv220calculate_time_shiftEP17source_parametersI1TEP13useful_powersI1TEP1TP17lambda_parametersI1TE"></span><span id="IMRPhenomPv2::calculate_time_shift__source_parameters:T:P.useful_powers:T:P.TP.lambda_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1a326eaa63c365113abfa37830f0a0f42f"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calculate_time_shift</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pows</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pn_phase_coeffs</span></span>, <span class="n"><span class="pre">lambda_parameters</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">lambda</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv220calculate_time_shiftEP17source_parametersI1TEP13useful_powersI1TEP1TP17lambda_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv27WignerDEAL5E_1TAL5E_1TP13useful_powersI1TEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv27WignerDEAL5E_1TAL5E_1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv27WignerDEA5_1TA5_1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::WignerD__TA.TA.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1abd66fb1738b26466d28d8f4050d4207c"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">WignerD</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">d2</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dm2</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pows</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv27WignerDEAL5E_1TAL5E_1TP13useful_powersI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv217calculate_twistupE1TPNSt7complexI1TEEPNSt7complexI1TEEAL5E_1TAL5E_1TP8sph_harmI1TE">
+<span id="_CPPv3N12IMRPhenomPv217calculate_twistupE1TPNSt7complexI1TEEPNSt7complexI1TEEAL5E_1TAL5E_1TP8sph_harmI1TE"></span><span id="_CPPv2N12IMRPhenomPv217calculate_twistupE1TPNSt7complexI1TEEPNSt7complexI1TEEA5_1TA5_1TP8sph_harmI1TE"></span><span id="IMRPhenomPv2::calculate_twistup__T.std::complex:T:P.std::complex:T:P.TA.TA.sph_harm:T:P"></span><span class="target" id="classIMRPhenomPv2_1a2f7dc5cbc5451036e15b7eaa3e170f96"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calculate_twistup</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">alpha</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hp_factor</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">hc_factor</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">d2</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">dm2</span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">5</span></span><span class="p"><span class="pre">]</span></span>, <a class="reference internal" href="#_CPPv4N12IMRPhenomPv217calculate_twistupE1TPNSt7complexI1TEEPNSt7complexI1TEEAL5E_1TAL5E_1TP8sph_harmI1TE" title="IMRPhenomPv2::calculate_twistup::sph_harm"><span class="n"><span class="pre">sph_harm</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">sph_harm</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv217calculate_twistupE1TPNSt7complexI1TEEPNSt7complexI1TEEAL5E_1TAL5E_1TP8sph_harmI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv222calculate_euler_anglesEP1TP1TP13useful_powersI1TEP12alpha_coeffsI1TEP14epsilon_coeffsI1TE">
+<span id="_CPPv3N12IMRPhenomPv222calculate_euler_anglesEP1TP1TP13useful_powersI1TEP12alpha_coeffsI1TEP14epsilon_coeffsI1TE"></span><span id="_CPPv2N12IMRPhenomPv222calculate_euler_anglesEP1TP1TP13useful_powersI1TEP12alpha_coeffsI1TEP14epsilon_coeffsI1TE"></span><span id="IMRPhenomPv2::calculate_euler_angles__TP.TP.useful_powers:T:P.alpha_coeffs:T:P.epsilon_coeffs:T:P"></span><span class="target" id="classIMRPhenomPv2_1aba929d7ceebe4ddbfd13088c1ac0596b"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calculate_euler_angles</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">alpha</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pows</span></span>, <a class="reference internal" href="#_CPPv4I0E12alpha_coeffs" title="alpha_coeffs"><span class="n"><span class="pre">alpha_coeffs</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">acoeffs</span></span>, <a class="reference internal" href="#_CPPv4I0E14epsilon_coeffs" title="epsilon_coeffs"><span class="n"><span class="pre">epsilon_coeffs</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ecoeffs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv222calculate_euler_anglesEP1TP1TP13useful_powersI1TEP12alpha_coeffsI1TEP14epsilon_coeffsI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv222PhenomPv2_inplane_spinEP15gen_params_baseI1TE">
+<span id="_CPPv3N12IMRPhenomPv222PhenomPv2_inplane_spinEP15gen_params_baseI1TE"></span><span id="_CPPv2N12IMRPhenomPv222PhenomPv2_inplane_spinEP15gen_params_baseI1TE"></span><span id="IMRPhenomPv2::PhenomPv2_inplane_spin__gen_params_base:T:P"></span><span class="target" id="classIMRPhenomPv2_1a3ac01e83cf58d5fe70056afd66e9d7fe"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PhenomPv2_inplane_spin</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E15gen_params_base" title="gen_params_base"><span class="n"><span class="pre">gen_params_base</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv222PhenomPv2_inplane_spinEP15gen_params_baseI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv225PhenomPv2_Param_TransformEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv225PhenomPv2_Param_TransformEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv225PhenomPv2_Param_TransformEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::PhenomPv2_Param_Transform__source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1ae8f253a1feebc43995dd5d052c856e05"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PhenomPv2_Param_Transform</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv225PhenomPv2_Param_TransformEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>/Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters</p>
+<p>Pretty much stolen verbatim from lalsuite </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv227PhenomPv2_Param_Transform_JEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv227PhenomPv2_Param_Transform_JEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv227PhenomPv2_Param_Transform_JEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::PhenomPv2_Param_Transform_J__source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1a684f1bbc22773a72e8000de61c1b6def"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PhenomPv2_Param_Transform_J</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv227PhenomPv2_Param_Transform_JEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>/Brief Parameter transformtion to precalculate needed parameters for PhenomP from source parameters &amp;#8212; assumed inclination of total angular momentum J is given, not orbital angular momentum (in source frame (Lhat == zhat)</p>
+<p>Pretty much stolen verbatim from lalsuite </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv233PhenomPv2_Param_Transform_reducedEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv233PhenomPv2_Param_Transform_reducedEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv233PhenomPv2_Param_Transform_reducedEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::PhenomPv2_Param_Transform_reduced__source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1a09917aef3521bd8e3b8d8516930077a0"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PhenomPv2_Param_Transform_reduced</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv233PhenomPv2_Param_Transform_reducedEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>/Brief Parameter transformation to pre-calculate needed parameters for PhenomP from source parameters</p>
+<p>Pretty much stolen verbatim from lalsuite </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv24L2PNE1TP13useful_powersI1TE">
+<span id="_CPPv3N12IMRPhenomPv24L2PNE1TP13useful_powersI1TE"></span><span id="_CPPv2N12IMRPhenomPv24L2PNE1TP13useful_powersI1TE"></span><span id="IMRPhenomPv2::L2PN__T.useful_powers:T:P"></span><span class="target" id="classIMRPhenomPv2_1a5e64520f828d29beccdf5b1e5e18582c"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">L2PN</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">eta</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">pow</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv24L2PNE1TP13useful_powersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv250FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BHE1T1T1T1T1T">
+<span id="_CPPv3N12IMRPhenomPv250FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BHE1T1T1T1T1T"></span><span id="_CPPv2N12IMRPhenomPv250FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BHE1T1T1T1T1T"></span><span id="IMRPhenomPv2::FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BH__T.T.T.T.T"></span><span class="target" id="classIMRPhenomPv2_1a36cbd07ab5b8c1663c7f8c8e75cf4e74"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BH</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">m1</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">m2</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chi1_l</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chi2_l</span></span>, <a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">chip</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv250FinalSpinIMRPhenomD_all_in_plane_spin_on_larger_BHE1T1T1T1T1T" title="Permalink to this definition"></a><br /></dt>
+<dd><p><ul class="simple">
+<li><p>Wrapper for final-spin formula based on:<ul>
+<li><p>- IMRPhenomD’s FinalSpin0815() for aligned spins.<ul>
+<li><p><ul>
+<li><p>We use their convention m1&gt;m2<ul>
+<li><p>and put <strong>all in-plane spin on the larger BH</strong>.<ul>
+<li><p><ul>
+<li><p>In the aligned limit return the FinalSpin0815 value. </p></li>
+</ul>
+</p></li>
+</ul>
+</p></li>
+</ul>
+</p></li>
+</ul>
+</p></li>
+</ul>
+</p></li>
+</ul>
+</p></li>
+</ul>
+</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>m1</strong> – Mass of companion 1 (solar masses) </p></li>
+<li><p><strong>m2</strong> – Mass of companion 2 (solar masses) </p></li>
+<li><p><strong>chi1_l</strong> – Aligned spin of BH 1 </p></li>
+<li><p><strong>chi2_l</strong> – Aligned spin of BH 2 </p></li>
+<li><p><strong>chip</strong> – Dimensionless spin in the orbital plane </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N12IMRPhenomPv210final_spinEP17source_parametersI1TE">
+<span id="_CPPv3N12IMRPhenomPv210final_spinEP17source_parametersI1TE"></span><span id="_CPPv2N12IMRPhenomPv210final_spinEP17source_parametersI1TE"></span><span id="IMRPhenomPv2::final_spin__source_parameters:T:P"></span><span class="target" id="classIMRPhenomPv2_1a3d37a40e4d1bce6ca673e6b30e64fe67"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">final_spin</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E12IMRPhenomPv2" title="IMRPhenomPv2::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12IMRPhenomPv210final_spinEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="IMRPhenomD_NRT.html" class="btn btn-neutral float-left" title="IMRPhenomD_NRT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="IMRPhenomP_NRT.html" class="btn btn-neutral float-right" title="IMRPhenomP_NRT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

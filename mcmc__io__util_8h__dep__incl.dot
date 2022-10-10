@@ -9,9 +9,24 @@ digraph "/Users/runner/work/gw_analysis_tools/gw_analysis_tools/include/gwat/mcm
   Node2 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/mcmc_sampler.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__sampler_8h.html",tooltip=" "];
   Node2 -> Node3 [dir="back",color="steelblue1",style="solid"];
   Node3 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/gwatpy_wrapping.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$gwatpy__wrapping_8h.html",tooltip=" "];
+  Node3 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node4 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/gwatpy\l_wrapping.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$gwatpy__wrapping_8cpp.html",tooltip=" "];
+  Node2 -> Node5 [dir="back",color="steelblue1",style="solid"];
+  Node5 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/mcmc_gw.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw_8h.html",tooltip=" "];
+  Node5 -> Node3 [dir="back",color="steelblue1",style="solid"];
+  Node5 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node6 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/mcmc_gw_extended.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw__extended_8h.html",tooltip=" "];
+  Node6 -> Node7 [dir="back",color="steelblue1",style="solid"];
+  Node7 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/mcmc\l_gw_extended.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw__extended_8cpp.html",tooltip=" "];
+  Node5 -> Node4 [dir="back",color="steelblue1",style="solid"];
+  Node5 -> Node8 [dir="back",color="steelblue1",style="solid"];
+  Node8 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/mcmc\l_gw.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw_8cpp.html",tooltip=" "];
+  Node5 -> Node7 [dir="back",color="steelblue1",style="solid"];
   Node2 -> Node4 [dir="back",color="steelblue1",style="solid"];
-  Node4 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/mcmc_gw.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw_8h.html",tooltip=" "];
-  Node4 -> Node3 [dir="back",color="steelblue1",style="solid"];
-  Node4 -> Node5 [dir="back",color="steelblue1",style="solid"];
-  Node5 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/include\l/gwat/mcmc_gw_extended.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__gw__extended_8h.html",tooltip=" "];
+  Node2 -> Node8 [dir="back",color="steelblue1",style="solid"];
+  Node2 -> Node9 [dir="back",color="steelblue1",style="solid"];
+  Node9 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/mcmc\l_sampler.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__sampler_8cpp.html",tooltip=" "];
+  Node1 -> Node10 [dir="back",color="steelblue1",style="solid"];
+  Node10 [label="/Users/runner/work\l/gw_analysis_tools/gw\l_analysis_tools/src/mcmc\l_io_util.cpp",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$mcmc__io__util_8cpp.html",tooltip=" "];
+  Node1 -> Node9 [dir="back",color="steelblue1",style="solid"];
 }

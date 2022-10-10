@@ -10,5 +10,5 @@ digraph "ppE_IMRPhenomPv2_IMR&lt; T &gt;"
   Node3 -> Node2 [dir="back",color="steelblue1",style="solid"];
   Node3 [label="IMRPhenomPv2\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classIMRPhenomPv2.html",tooltip=" "];
   Node4 -> Node3 [dir="back",color="steelblue1",style="solid"];
-  Node4 [label="IMRPhenomD\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classIMRPhenomD.html",tooltip=" "];
+  Node4 [label="IMRPhenomD\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",tooltip=" "];
 }

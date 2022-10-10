@@ -8,5 +8,5 @@ digraph "ppE_IMRPhenomD_IMR&lt; T &gt;"
   Node2 -> Node1 [dir="back",color="steelblue1",style="solid"];
   Node2 [label="ppE_IMRPhenomD_Inspiral\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classppE__IMRPhenomD__Inspiral.html",tooltip=" "];
   Node3 -> Node2 [dir="back",color="steelblue1",style="solid"];
-  Node3 [label="IMRPhenomD\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classIMRPhenomD.html",tooltip=" "];
+  Node3 [label="IMRPhenomD\< T \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",tooltip=" "];
 }

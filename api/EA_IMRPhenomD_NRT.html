@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EA_IMRPhenomD_NRT &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IMRPhenomD" href="IMRPhenomD.html" />
+    <link rel="prev" title="D_Z_Config_modified_dispersion" href="D_Z_Config_modified_dispersion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config.html">D_Z_Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config_modified_dispersion.html">D_Z_Config_modified_dispersion</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">EA_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD.html">IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD_NRT.html">IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP.html">IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP_NRT.html">IMRPhenomP_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QNM_data.html">QNM_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TaylorT2.html">TaylorT2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation.html">autocorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation_cuda.html">autocorrelation_cuda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector_util.html">detector_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fisher.html">fisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomD.html">gIMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomP.html">gIMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwatpy_wrapping.html">gwatpy_wrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_util.html">io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mc_reject.html">mc_reject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw.html">mcmc_gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw_extended.html">mcmc_gw_extended</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_io_util.html">mcmc_io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler.html">mcmc_sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler_internals.html">mcmc_sampler_internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ortho_basis.html">ortho_basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pn_waveform_util.html">pn_waveform_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD.html">ppE_IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD_NRT.html">ppE_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threadPool.html">threadPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_util.html">waveform_util</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li>EA_IMRPhenomD_NRT</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/EA_IMRPhenomD_NRT.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="ea-imrphenomd-nrt">
+<span id="api-ea-imrphenomd-nrt"></span><h1>EA_IMRPhenomD_NRT<a class="headerlink" href="#ea-imrphenomd-nrt" title="Permalink to this heading"></a></h1>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0E17EA_IMRPhenomD_NRT">
+<span id="_CPPv3I0E17EA_IMRPhenomD_NRT"></span><span id="_CPPv2I0E17EA_IMRPhenomD_NRT"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classEA__IMRPhenomD__NRT"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_IMRPhenomD_NRT</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="IMRPhenomD_NRT.html#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT"><span class="n"><span class="pre">IMRPhenomD_NRT</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;EA_IMRPhenomD_NRT.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT24calculate_EA_sensitivityEiP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT24calculate_EA_sensitivityEiP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT24calculate_EA_sensitivityEiP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::calculate_EA_sensitivity__i.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1a38433bb45993678656a32c32339b2b57"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">calculate_EA_sensitivity</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">body</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT24calculate_EA_sensitivityEiP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT12EA_check_nanEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT12EA_check_nanEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT12EA_check_nanEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::EA_check_nan__source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1aec650b440b34840bd4177961bfabafc9"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_check_nan</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT12EA_check_nanEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT24pre_calculate_EA_factorsEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT24pre_calculate_EA_factorsEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT24pre_calculate_EA_factorsEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::pre_calculate_EA_factors__source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1a79cc74d96e2cf879e24e4d8b2b7324c0"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">pre_calculate_EA_factors</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT24pre_calculate_EA_factorsEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT13EA_phase_ins1E1TP13useful_powersI1TEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT13EA_phase_ins1E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT13EA_phase_ins1E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::EA_phase_ins1__T.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1ad9590662ee8c49892f9007d12fe5b5f4"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_phase_ins1</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">f</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">powers</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT13EA_phase_ins1E1TP13useful_powersI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT13EA_phase_ins2E1TP13useful_powersI1TEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT13EA_phase_ins2E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT13EA_phase_ins2E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::EA_phase_ins2__T.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1a0c4002b3dafe8e0036d5d3b6b687fdf7"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_phase_ins2</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">f</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">powers</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT13EA_phase_ins2E1TP13useful_powersI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT11EA_amp_ins1E1TP13useful_powersI1TEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT11EA_amp_ins1E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT11EA_amp_ins1E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::EA_amp_ins1__T.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1afae7339e7f45b410298395627f514d3e"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_amp_ins1</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">f</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">powers</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT11EA_amp_ins1E1TP13useful_powersI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT11EA_amp_ins2E1TP13useful_powersI1TEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT11EA_amp_ins2E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT11EA_amp_ins2E1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::EA_amp_ins2__T.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1a7f6b7e7dde09dfe2eec76dd88949a360"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_amp_ins2</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">f</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">powers</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT11EA_amp_ins2E1TP13useful_powersI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT21EA_construct_waveformEP1TiP22waveform_polarizationsI1TEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT21EA_construct_waveformEP1TiP22waveform_polarizationsI1TEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT21EA_construct_waveformEP1TiP22waveform_polarizationsI1TEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::EA_construct_waveform__TP.i.waveform_polarizations:T:P.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1a7c11bddcb7a81d220e04bdf12b25b367"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_construct_waveform</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">frequencies</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="waveform_generator.html#_CPPv4I0E22waveform_polarizations" title="waveform_polarizations"><span class="n"><span class="pre">waveform_polarizations</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">waveform</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT21EA_construct_waveformEP1TiP22waveform_polarizationsI1TEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT15construct_phaseEP1TiP1TP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT15construct_phaseEP1TiP1TP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT15construct_phaseEP1TiP1TP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::construct_phase__TP.i.TP.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1affc448353d6a4bea099dacc7b19850f1"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">construct_phase</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">frequencies</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">phase</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT15construct_phaseEP1TiP1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT19construct_amplitudeEP1TiP1TP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT19construct_amplitudeEP1TiP1TP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT19construct_amplitudeEP1TiP1TP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::construct_amplitude__TP.i.TP.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1ae258ae2683b5d6cc58b0ac4b990248ae"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">construct_amplitude</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">frequencies</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">amplitude</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT19construct_amplitudeEP1TiP1TP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17EA_IMRPhenomD_NRT18construct_waveformEP1TiPNSt7complexI1TEEP17source_parametersI1TE">
+<span id="_CPPv3N17EA_IMRPhenomD_NRT18construct_waveformEP1TiPNSt7complexI1TEEP17source_parametersI1TE"></span><span id="_CPPv2N17EA_IMRPhenomD_NRT18construct_waveformEP1TiPNSt7complexI1TEEP17source_parametersI1TE"></span><span id="EA_IMRPhenomD_NRT::construct_waveform__TP.i.std::complex:T:P.source_parameters:T:P"></span><span class="target" id="classEA__IMRPhenomD__NRT_1a5d0dafd72815a4a560f81af2b3640c9d"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">construct_waveform</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">frequencies</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">waveform</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E17EA_IMRPhenomD_NRT" title="EA_IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17EA_IMRPhenomD_NRT18construct_waveformEP1TiPNSt7complexI1TEEP17source_parametersI1TE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="D_Z_Config_modified_dispersion.html" class="btn btn-neutral float-left" title="D_Z_Config_modified_dispersion" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="IMRPhenomD.html" class="btn btn-neutral float-right" title="IMRPhenomD" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

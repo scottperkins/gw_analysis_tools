@@ -86,6 +86,11 @@ Include dependency graph for fisher.h:</div>
 <div class="dyncontent">
 <div class="center"><img src="fisher_8h__incl.png" border="0" usemap="#a_2Users_2runner_2work_2gw__analysis__tools_2gw__analysis__tools_2include_2gwat_2fisher_8h" alt=""/></div>
 </div>
+</div><div class="textblock"><div class="dynheader">
+This graph shows which files directly or indirectly include this file:</div>
+<div class="dyncontent">
+<div class="center"><img src="fisher_8h__dep__incl.png" border="0" usemap="#a_2Users_2runner_2work_2gw__analysis__tools_2gw__analysis__tools_2include_2gwat_2fisher_8hdep" alt=""/></div>
+</div>
 </div>
 <p><a href="fisher_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -105,10 +110,12 @@ Functions</h2></td></tr>
 <tr class="memitem:a06005d743a31e704ea51c2e1b2f7d69b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a06005d743a31e704ea51c2e1b2f7d69b">prep_gsl_subroutine</a> (<a class="el" href="structgsl__subroutine.html">gsl_subroutine</a> *params_packed)</td></tr>
 <tr class="separator:a06005d743a31e704ea51c2e1b2f7d69b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5876f7d588393b2d1975a5ad78fa08bf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a5876f7d588393b2d1975a5ad78fa08bf">fisher_numerical</a> (double *frequency, int length, string generation_method, string detector, string reference_detector, double **output, int dimension, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *parameters, int order, int *amp_tapes=NULL, int *phase_tapes=NULL, double *noise=NULL)</td></tr>
+<tr class="memdesc:a5876f7d588393b2d1975a5ad78fa08bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the fisher matrix for the given arguments.  <a href="fisher_8h.html#a5876f7d588393b2d1975a5ad78fa08bf">More...</a><br /></td></tr>
 <tr class="separator:a5876f7d588393b2d1975a5ad78fa08bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1e1f85b3af98f868772ea95d47d33c0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ad1e1f85b3af98f868772ea95d47d33c0">calculate_fisher_elements</a> (double *frequency, int length, int dimension, std::complex&lt; double &gt; **response_deriv, double **output, double *psd, std::string integration_method, double *weights, bool log10_f)</td></tr>
 <tr class="separator:ad1e1f85b3af98f868772ea95d47d33c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adabed0003b88c9a4ffdc4035862219a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#adabed0003b88c9a4ffdc4035862219a4">calculate_fisher_elements_batch</a> (double *frequency, int length, int base_dimension, int full_dimension, std::complex&lt; double &gt; **response_deriv, double **output, double *psd, std::string integration_method, double *weights, bool log10_f)</td></tr>
+<tr class="memdesc:adabed0003b88c9a4ffdc4035862219a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Subroutine to calculate fisher elements for a subset of the fisher.  <a href="fisher_8h.html#adabed0003b88c9a4ffdc4035862219a4">More...</a><br /></td></tr>
 <tr class="separator:adabed0003b88c9a4ffdc4035862219a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d646ad4dd21d74ed91df1080f5c61c7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a8d646ad4dd21d74ed91df1080f5c61c7">calculate_derivatives</a> (std::complex&lt; double &gt; **response_deriv, double *frequencies, int length, int dimension, string detector, string reference_detector, string gen_method, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *parameters, int order)</td></tr>
 <tr class="separator:a8d646ad4dd21d74ed91df1080f5c61c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -125,50 +132,68 @@ Functions</h2></td></tr>
 <tr class="memitem:a15b0abe98fd48389109099d6ac58c9a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a15b0abe98fd48389109099d6ac58c9a6">construct_waveform_derivative</a> (double *frequency, int length, int dimension, std::complex&lt; double &gt; **waveform_deriv, <a class="el" href="structsource__parameters.html">source_parameters</a>&lt; double &gt; *input_params, int *waveform_tapes)</td></tr>
 <tr class="separator:a15b0abe98fd48389109099d6ac58c9a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aada6ef4bab65e527ed6ba7e40fbcf309"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#aada6ef4bab65e527ed6ba7e40fbcf309">calculate_derivatives_autodiff</a> (double *frequency, int length, int dimension, std::string generation_method, <a class="el" href="classgen__params.html">gen_params</a> *parameters, std::complex&lt; double &gt; **waveform_deriv, int *waveform_tapes, std::string detector, bool autodiff_time_deriv, std::string reference_detector)</td></tr>
+<tr class="memdesc:aada6ef4bab65e527ed6ba7e40fbcf309"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the derivatives of the detector response using automatic differentiation.  <a href="fisher_8h.html#aada6ef4bab65e527ed6ba7e40fbcf309">More...</a><br /></td></tr>
 <tr class="separator:aada6ef4bab65e527ed6ba7e40fbcf309"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab3566a9d2c5776b7769f1452bf3f80f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ab3566a9d2c5776b7769f1452bf3f80f3">time_phase_corrected_derivative_autodiff_full_hess</a> (double **dt, int length, double *frequencies, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, std::string generation_method, int dimension, bool correct_time)</td></tr>
+<tr class="memdesc:ab3566a9d2c5776b7769f1452bf3f80f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase.  <a href="fisher_8h.html#ab3566a9d2c5776b7769f1452bf3f80f3">More...</a><br /></td></tr>
 <tr class="separator:ab3566a9d2c5776b7769f1452bf3f80f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae6b5ad58c5308a1311a93a58f2169e40"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ae6b5ad58c5308a1311a93a58f2169e40">time_phase_corrected_derivative_autodiff</a> (double **dt, int length, double *frequencies, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, std::string generation_method, int dimension, bool correct_time)</td></tr>
+<tr class="memdesc:ae6b5ad58c5308a1311a93a58f2169e40"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase.  <a href="fisher_8h.html#ae6b5ad58c5308a1311a93a58f2169e40">More...</a><br /></td></tr>
 <tr class="separator:ae6b5ad58c5308a1311a93a58f2169e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a430217adb3e9baf50041ab7fbbd9b2b9"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:a430217adb3e9baf50041ab7fbbd9b2b9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a430217adb3e9baf50041ab7fbbd9b2b9">time_phase_corrected_derivative_numerical</a> (T **dt, int length, T *frequencies, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *params, std::string generation_method, int dimension, bool correct_time)</td></tr>
+<tr class="memitem:a430217adb3e9baf50041ab7fbbd9b2b9"><td class="memTemplParams" colspan="2">template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </td></tr>
+<tr class="memitem:a430217adb3e9baf50041ab7fbbd9b2b9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a430217adb3e9baf50041ab7fbbd9b2b9">time_phase_corrected_derivative_numerical</a> (<a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> **dt, int length, <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> *frequencies, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *params, std::string generation_method, int dimension, bool correct_time)</td></tr>
+<tr class="memdesc:a430217adb3e9baf50041ab7fbbd9b2b9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase &ndash; numerical.  <a href="fisher_8h.html#a430217adb3e9baf50041ab7fbbd9b2b9">More...</a><br /></td></tr>
 <tr class="separator:a430217adb3e9baf50041ab7fbbd9b2b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98ccb5fbfa7dde9dc8d7fb1f38ef5e16"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a98ccb5fbfa7dde9dc8d7fb1f38ef5e16">time_phase_corrected_derivative_autodiff_numerical</a> (double **dt, int length, double *frequencies, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *params, std::string generation_method, int dimension, bool correct_time)</td></tr>
+<tr class="memdesc:a98ccb5fbfa7dde9dc8d7fb1f38ef5e16"><td class="mdescLeft">&#160;</td><td class="mdescRight">Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase.  <a href="fisher_8h.html#a98ccb5fbfa7dde9dc8d7fb1f38ef5e16">More...</a><br /></td></tr>
 <tr class="separator:a98ccb5fbfa7dde9dc8d7fb1f38ef5e16"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad64b3163d121d715a0eaa22a039ffbe1"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ad64b3163d121d715a0eaa22a039ffbe1">local_generation_method</a> (std::string generation_method)</td></tr>
+<tr class="memdesc:ad64b3163d121d715a0eaa22a039ffbe1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utility for mapping generation method string to one accepted by the waveform_generation routines.  <a href="fisher_8h.html#ad64b3163d121d715a0eaa22a039ffbe1">More...</a><br /></td></tr>
 <tr class="separator:ad64b3163d121d715a0eaa22a039ffbe1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a889b2789fdd2c018b72544a3ad05c921"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a889b2789fdd2c018b72544a3ad05c921">prep_fisher_calculation</a> (double *parameters, bool *, double *, double *, int, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string generation_method, int dim)</td></tr>
 <tr class="separator:a889b2789fdd2c018b72544a3ad05c921"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af071af4a0f6f8ab05c1cdc76a275cd49"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#af071af4a0f6f8ab05c1cdc76a275cd49">detect_adjust_parameters</a> (double *freq_boundaries, double *grad_freqs, int *boundary_num, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string generation_method, std::string detector, int dim)</td></tr>
+<tr class="memdesc:af071af4a0f6f8ab05c1cdc76a275cd49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adjust parameters for detector specific configurations (namely, LISA introduces extra transitions that needs to be accounted for)  <a href="fisher_8h.html#af071af4a0f6f8ab05c1cdc76a275cd49">More...</a><br /></td></tr>
 <tr class="separator:af071af4a0f6f8ab05c1cdc76a275cd49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abc06575e6f7b404a56d9c5fa8041ddf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#abc06575e6f7b404a56d9c5fa8041ddf5">unpack_parameters</a> (double *parameters, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string generation_method, int dimension, bool *log_factors)</td></tr>
+<tr class="memdesc:abc06575e6f7b404a56d9c5fa8041ddf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unpacks the input <a class="el" href="classgen__params.html" title="convience wrapper for the gen_params_base class">gen_params</a> object into a double array for use with the fisher routines.  <a href="fisher_8h.html#abc06575e6f7b404a56d9c5fa8041ddf5">More...</a><br /></td></tr>
 <tr class="separator:abc06575e6f7b404a56d9c5fa8041ddf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9abf5e34ebefb45c534eacd8c6d408b"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:ae9abf5e34ebefb45c534eacd8c6d408b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ae9abf5e34ebefb45c534eacd8c6d408b">repack_parameters</a> (T *avec_parameters, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *a_params, std::string generation_method, int dim, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *original_params)</td></tr>
+<tr class="memitem:ae9abf5e34ebefb45c534eacd8c6d408b"><td class="memTemplParams" colspan="2">template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </td></tr>
+<tr class="memitem:ae9abf5e34ebefb45c534eacd8c6d408b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ae9abf5e34ebefb45c534eacd8c6d408b">repack_parameters</a> (<a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> *avec_parameters, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *a_params, std::string generation_method, int dim, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *original_params)</td></tr>
+<tr class="memdesc:ae9abf5e34ebefb45c534eacd8c6d408b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Repack the parameters from an adouble vector to a gen_params_base&lt;adouble&gt; object and freqeuncy.  <a href="fisher_8h.html#ae9abf5e34ebefb45c534eacd8c6d408b">More...</a><br /></td></tr>
 <tr class="separator:ae9abf5e34ebefb45c534eacd8c6d408b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92eebd80a98aa7fb1872bb8700702f77"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:a92eebd80a98aa7fb1872bb8700702f77"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a92eebd80a98aa7fb1872bb8700702f77">repack_non_parameter_options</a> (<a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *waveform_params, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string gen_method)</td></tr>
+<tr class="memitem:a92eebd80a98aa7fb1872bb8700702f77"><td class="memTemplParams" colspan="2">template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </td></tr>
+<tr class="memitem:a92eebd80a98aa7fb1872bb8700702f77"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a92eebd80a98aa7fb1872bb8700702f77">repack_non_parameter_options</a> (<a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *waveform_params, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string gen_method)</td></tr>
+<tr class="memdesc:a92eebd80a98aa7fb1872bb8700702f77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Utilitiy to transfer non-parameter options from one <a class="el" href="classgen__params.html" title="convience wrapper for the gen_params_base class">gen_params</a> structure to another.  <a href="fisher_8h.html#a92eebd80a98aa7fb1872bb8700702f77">More...</a><br /></td></tr>
 <tr class="separator:a92eebd80a98aa7fb1872bb8700702f77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaf636e94d93a8afa6e1849af23147f11"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
-<tr class="memitem:aaf636e94d93a8afa6e1849af23147f11"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#aaf636e94d93a8afa6e1849af23147f11">deallocate_non_param_options</a> (<a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *waveform_params, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string gen_method)</td></tr>
+<tr class="memitem:aaf636e94d93a8afa6e1849af23147f11"><td class="memTemplParams" colspan="2">template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </td></tr>
+<tr class="memitem:aaf636e94d93a8afa6e1849af23147f11"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="fisher_8h.html#aaf636e94d93a8afa6e1849af23147f11">deallocate_non_param_options</a> (<a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *waveform_params, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *input_params, std::string gen_method)</td></tr>
 <tr class="separator:aaf636e94d93a8afa6e1849af23147f11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0483f09b0c7a53ae7b65d3dff7385697"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a0483f09b0c7a53ae7b65d3dff7385697">calculate_integrand_autodiff_gsl_subroutine</a> (double frequency, void *params_in)</td></tr>
+<tr class="memdesc:a0483f09b0c7a53ae7b65d3dff7385697"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the derivatives of the detector response using automatic differentiation &ndash; one frequency for gsl_integration.  <a href="fisher_8h.html#a0483f09b0c7a53ae7b65d3dff7385697">More...</a><br /></td></tr>
 <tr class="separator:a0483f09b0c7a53ae7b65d3dff7385697"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae23818b708bd1961b9d9ed4ee12f2a0e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ae23818b708bd1961b9d9ed4ee12f2a0e">fisher_autodiff_gsl_integration</a> (double *frequency_bounds, string generation_method, string sensitivity_curve, string detector, string reference_detector, double **output, double **error, int dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, double abserr, double relerr)</td></tr>
+<tr class="memdesc:ae23818b708bd1961b9d9ed4ee12f2a0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine that implements GSL numerical integration to calculate the Fishers.  <a href="fisher_8h.html#ae23818b708bd1961b9d9ed4ee12f2a0e">More...</a><br /></td></tr>
 <tr class="separator:ae23818b708bd1961b9d9ed4ee12f2a0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace3fac58dae5d96f60549e6633287998"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ace3fac58dae5d96f60549e6633287998">fisher_autodiff_gsl_integration</a> (double *frequency_bounds, string generation_method, string sensitivity_curve, string detector, string reference_detector, double **output, double **error, int dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, double abserr, double relerr, std::string error_log, bool logerr)</td></tr>
+<tr class="memdesc:ace3fac58dae5d96f60549e6633287998"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine that implements GSL numerical integration to calculate the Fishers.  <a href="fisher_8h.html#ace3fac58dae5d96f60549e6633287998">More...</a><br /></td></tr>
 <tr class="separator:ace3fac58dae5d96f60549e6633287998"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a727aa66ee384240bfb2e4a468ead9aee"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a727aa66ee384240bfb2e4a468ead9aee">fisher_autodiff_gsl_integration_batch_mod</a> (double *frequency_bounds, string generation_method, string sensitivity_curve, string detector, string reference_detector, double **output, double **error, int base_dimension, int full_dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, double abserr, double relerr)</td></tr>
+<tr class="memdesc:a727aa66ee384240bfb2e4a468ead9aee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine that implements GSL numerical integration to calculate the Fishers &ndash; batch modifications version.  <a href="fisher_8h.html#a727aa66ee384240bfb2e4a468ead9aee">More...</a><br /></td></tr>
 <tr class="separator:a727aa66ee384240bfb2e4a468ead9aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4ad894f2812dba4ff39a142c66210d9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ae4ad894f2812dba4ff39a142c66210d9">fisher_autodiff_gsl_integration_batch_mod</a> (double *frequency_bounds, string generation_method, string sensitivity_curve, string detector, string reference_detector, double **output, double **error, int base_dimension, int full_dimension, <a class="el" href="classgen__params.html">gen_params</a> *parameters, double abserr, double relerr, std::string error_log, bool logerr)</td></tr>
+<tr class="memdesc:ae4ad894f2812dba4ff39a142c66210d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Routine that implements GSL numerical integration to calculate the Fishers &ndash; batch modifications version.  <a href="fisher_8h.html#ae4ad894f2812dba4ff39a142c66210d9">More...</a><br /></td></tr>
 <tr class="separator:ae4ad894f2812dba4ff39a142c66210d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b73a325268c3d52e99f93aba2aba60e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a8b73a325268c3d52e99f93aba2aba60e">ppE_theory_fisher_transformation</a> (std::string original_method, std::string new_method, int dimension, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *param, double **old_fisher, double **new_fisher)</td></tr>
+<tr class="memdesc:a8b73a325268c3d52e99f93aba2aba60e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a generic ppE Fisher matrix to a theory specific Fisher matrix.  <a href="fisher_8h.html#a8b73a325268c3d52e99f93aba2aba60e">More...</a><br /></td></tr>
 <tr class="separator:a8b73a325268c3d52e99f93aba2aba60e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac17390e3cb481a816a3e619a4f3f680a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ac17390e3cb481a816a3e619a4f3f680a">ppE_theory_transformation_jac</a> (std::string original_method, std::string new_method, int dimension, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *param, double **jac)</td></tr>
+<tr class="memdesc:ac17390e3cb481a816a3e619a4f3f680a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the jacobian matrix going from ppE to a specific theory.  <a href="fisher_8h.html#ac17390e3cb481a816a3e619a4f3f680a">More...</a><br /></td></tr>
 <tr class="separator:ac17390e3cb481a816a3e619a4f3f680a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ad1ade356b3dcec5f3f94df5dbdc991"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#a6ad1ade356b3dcec5f3f94df5dbdc991">ppE_theory_fisher_transformation_calculate_derivatives</a> (std::string original_method, std::string new_method, int dimension, int base_dim, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *param, double **derivatives)</td></tr>
 <tr class="separator:a6ad1ade356b3dcec5f3f94df5dbdc991"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac47e3de572425bad945ddd38d0dfa9d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="fisher_8h.html#ac47e3de572425bad945ddd38d0dfa9d7">ppE_theory_covariance_transformation</a> (std::string original_method, std::string new_method, int dimension, <a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; double &gt; *param, double **old_cov, double **new_cov)</td></tr>
+<tr class="memdesc:ac47e3de572425bad945ddd38d0dfa9d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a generic ppE covariance matrix to a theory specific covariance matrix.  <a href="fisher_8h.html#ac47e3de572425bad945ddd38d0dfa9d7">More...</a><br /></td></tr>
 <tr class="separator:ac47e3de572425bad945ddd38d0dfa9d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -316,6 +341,12 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Calculates the derivatives of the detector response using automatic differentiation. </p>
+<p >Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference</p>
+<p >Higher dimensional fishers actually could be faster</p>
+<p >NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 &ndash; the +1(+2) are for the frequency deriv(time deriv)</p>
+<p >autodiff_time_deriv indicates if the time derivatives for space detectors should be done, either with the full autodiff hessian (slow) or with the numerical approximation (autodiff then numerical) </p>
+
 </div>
 </div>
 <a id="ad1e1f85b3af98f868772ea95d47d33c0" name="ad1e1f85b3af98f868772ea95d47d33c0"></a>
@@ -462,6 +493,10 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
+<p>Subroutine to calculate fisher elements for a subset of the fisher. </p>
+<p >Skips elements that have dimensions (i,j) for i!=j &amp;&amp; i&gt;base_dim &amp;&amp; j&gt;base_dim</p>
+<p >Sets non-computed elements to zero </p>
+
 </div>
 </div>
 <a id="a0483f09b0c7a53ae7b65d3dff7385697" name="a0483f09b0c7a53ae7b65d3dff7385697"></a>
@@ -489,6 +524,11 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Calculates the derivatives of the detector response using automatic differentiation &ndash; one frequency for gsl_integration. </p>
+<p >Possibly slower than the numerical derivative, but not susceptible to truncation error from finite difference</p>
+<p >Higher dimensional fishers actually could be faster</p>
+<p >NOTE: dimension parameter ALWAYS refers to the dimension of the fisher (ie the length of the source parameter vector), even though the derivatives are computed wrt dimension +1 or dimension + 2 &ndash; the +1(+2) are for the frequency deriv(time deriv) </p>
 
 </div>
 </div>
@@ -550,12 +590,12 @@ Functions</h2></td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T &gt; </div>
+template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void deallocate_non_param_options </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *&#160;</td>
+          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *&#160;</td>
           <td class="paramname"><em>waveform_params</em>, </td>
         </tr>
         <tr>
@@ -635,6 +675,9 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Adjust parameters for detector specific configurations (namely, LISA introduces extra transitions that needs to be accounted for) </p>
+<p >This is kept separate to improve the modularity of the code. Waveform specific parameters are taken care of in prep_fisher_calculation and detector specific parameters are taken care of here. </p>
 
 </div>
 </div>
@@ -1012,6 +1055,30 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Routine that implements GSL numerical integration to calculate the Fishers. </p>
+<p >This can be faster than brute force calculations in fisher_autodiff, but that depends</p>
+<p >Trade offs:</p>
+<p >Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.</p>
+<p >However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements</p>
+<p >Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are `&lsquo;as good as they need to be&rsquo;' to calculate the fisher</p>
+<p >Implements (GSL_INTEG_GAUSS15) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">frequency_bounds</td><td>Bounds of integration in fourier space</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">generation_method</td><td>Method of waveform generation</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">sensitivity_curve</td><td>Sensitivity curve to be used for the PSD &ndash; MUST BE ANALYTIC</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">reference_detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output Fisher &ndash; must be preallocated &ndash; shape [dimension][dimension]</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">error</td><td>Estimated error, as specified by GSL's integration &ndash; must be preallocated &ndash; shape [dimension][dimension]</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">dimension</td><td>Dimension of the Fisher</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">parameters</td><td>Generation parameters specifying source parameters and waveform options</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">abserr</td><td>Target absolute error (0 if this should be ignored &ndash; ONE type of error must be specified)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">relerr</td><td>Target relative error (0 if this should be ignored &ndash; ONE type of error must be specified) </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="ace3fac58dae5d96f60549e6633287998" name="ace3fac58dae5d96f60549e6633287998"></a>
@@ -1106,6 +1173,33 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Routine that implements GSL numerical integration to calculate the Fishers. </p>
+<p >This can be faster than brute force calculations in fisher_autodiff, but that depends</p>
+<p >Trade offs:</p>
+<p >Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.</p>
+<p >However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements</p>
+<p >Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are `&lsquo;as good as they need to be&rsquo;' to calculate the fisher</p>
+<p >Implements (GSL_INTEG_GAUSS15)</p>
+<p >Now includes option to log error instead of ending program for certain types of errors </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">frequency_bounds</td><td>Bounds of integration in fourier space</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">generation_method</td><td>Method of waveform generation</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">sensitivity_curve</td><td>Sensitivity curve to be used for the PSD &ndash; MUST BE ANALYTIC</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">reference_detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output Fisher &ndash; must be preallocated &ndash; shape [dimension][dimension]</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">error</td><td>Estimated error, as specified by GSL's integration &ndash; must be preallocated &ndash; shape [dimension][dimension]</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">dimension</td><td>Dimension of the Fisher</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">parameters</td><td>Generation parameters specifying source parameters and waveform options</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">abserr</td><td>Target absolute error (0 if this should be ignored &ndash; ONE type of error must be specified)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">relerr</td><td>Target relative error (0 if this should be ignored &ndash; ONE type of error must be specified)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">error_log</td><td>File to write non-critical error codes to (roundoff error)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">logerr</td><td>Whether or not to end program with certain error codes, or to log them and continue </td></tr>
+  </table>
+  </dd>
+</dl>
+
 </div>
 </div>
 <a id="a727aa66ee384240bfb2e4a468ead9aee" name="a727aa66ee384240bfb2e4a468ead9aee"></a>
@@ -1193,6 +1287,33 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Routine that implements GSL numerical integration to calculate the Fishers &ndash; batch modifications version. </p>
+<p >Calculates Fisher for multiple modifications at a time, neglecting covariance between modifications (set to 0 in Fisher)</p>
+<p >Modifications MUST BE evaluated at 0 for this routine to calculate correct results</p>
+<p >This can be faster than brute force calculations in fisher_autodiff, but that depends</p>
+<p >Trade offs:</p>
+<p >Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.</p>
+<p >However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements</p>
+<p >Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are `&lsquo;as good as they need to be&rsquo;' to calculate the fisher</p>
+<p >Implements (GSL_INTEG_GAUSS15) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">frequency_bounds</td><td>Bounds of integration in fourier space</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">generation_method</td><td>Method of waveform generation</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">sensitivity_curve</td><td>Sensitivity curve to be used for the PSD &ndash; MUST BE ANALYTIC</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">reference_detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output Fisher &ndash; must be preallocated &ndash; shape [full_dimension][full_dimension]</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">error</td><td>Estimated error, as specified by GSL's integration &ndash; must be preallocated &ndash; shape [full_dimension][full_dimension]</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">base_dimension</td><td>Dimension of base model (ie GR dimension)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">full_dimension</td><td>Full dimension (GR dimension + Nmod)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">parameters</td><td>Generation parameters specifying source parameters and waveform options</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">abserr</td><td>Target absolute error (0 if this should be ignored &ndash; ONE type of error must be specified)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">relerr</td><td>Target relative error (0 if this should be ignored &ndash; ONE type of error must be specified) </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1293,6 +1414,36 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Routine that implements GSL numerical integration to calculate the Fishers &ndash; batch modifications version. </p>
+<p >Calculates Fisher for multiple modifications at a time, neglecting covariance between modifications (set to 0 in Fisher)</p>
+<p >Modifications MUST BE evaluated at 0 for this routine to calculate correct results</p>
+<p >This can be faster than brute force calculations in fisher_autodiff, but that depends</p>
+<p >Trade offs:</p>
+<p >Every element is calculated independently, so no information is retained between elements. In the brute force calculation, there is information reused.</p>
+<p >However, time can be saved by spending less time on trivial elements (identically 0 elements, etc) and better spent on complicated elements</p>
+<p >Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are `&lsquo;as good as they need to be&rsquo;' to calculate the fisher</p>
+<p >Implements (GSL_INTEG_GAUSS15)</p>
+<p >Now includes option to log error instead of ending program for certain types of errors </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir"></td><td class="paramname">frequency_bounds</td><td>Bounds of integration in fourier space</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">generation_method</td><td>Method of waveform generation</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">sensitivity_curve</td><td>Sensitivity curve to be used for the PSD &ndash; MUST BE ANALYTIC</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">reference_detector</td><td>Detector to use for the response function</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">output</td><td>Output Fisher &ndash; must be preallocated &ndash; shape [full_dimension][full_dimension]</td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">error</td><td>Estimated error, as specified by GSL's integration &ndash; must be preallocated &ndash; shape [full_dimension][full_dimension]</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">base_dimension</td><td>Dimension of base model (ie GR dimension)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">full_dimension</td><td>Full dimension (GR dimension + Nmod)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">parameters</td><td>Generation parameters specifying source parameters and waveform options</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">abserr</td><td>Target absolute error (0 if this should be ignored &ndash; ONE type of error must be specified)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">relerr</td><td>Target relative error (0 if this should be ignored &ndash; ONE type of error must be specified)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">error_log</td><td>File to write non-critical error codes to (roundoff error)</td></tr>
+    <tr><td class="paramdir"></td><td class="paramname">logerr</td><td>Whether or not to end program with certain error codes, or to log them and continue </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1448,19 +1599,19 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>amp_tapes</em> = <code>NULL</code>, </td>
+          <td class="paramname"><em>amp_tapes</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>phase_tapes</em> = <code>NULL</code>, </td>
+          <td class="paramname"><em>phase_tapes</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double *&#160;</td>
-          <td class="paramname"><em>noise</em> = <code>NULL</code>&#160;</td>
+          <td class="paramname"><em>noise</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1469,6 +1620,20 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Calculates the fisher matrix for the given arguments. </p>
+<p >Utilizes numerical derivatives &ndash; non-skyaveraged supports up to 4th order finite difference (sky averaged supports second order only)</p>
+<p >NOT SAFE FOR LISA YET &ndash; see hessian of phase for time derivative </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">length</td><td>if 0, standard frequency range for the detector is used</td></tr>
+    <tr><td class="paramname">output</td><td>double [dimension][dimension]</td></tr>
+    <tr><td class="paramname">order</td><td>Order of the numerical derivative (2 or 4)*</td></tr>
+    <tr><td class="paramname">amp_tapes</td><td>if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method &ndash; if using numerical derivatives or speed isn't that important, just set to NULL</td></tr>
+    <tr><td class="paramname">phase_tapes</td><td>if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -1487,6 +1652,9 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Utility for mapping generation method string to one accepted by the waveform_generation routines. </p>
+<p >Certain combinations of parameters are labeled by generation method strings not under the waveform_generation routines, so a transformation is needed </p>
 
 </div>
 </div>
@@ -1598,6 +1766,10 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Transform a generic ppE covariance matrix to a theory specific covariance matrix. </p>
+<p >See <a class="el" href="ppE__utilities_8cpp.html">ppE_utilities.cpp</a> for a list of supported theories.</p>
+<p >The covariance matrix is defined as (\Gamma)^-1 where, \Gamma is the Fisher matrix </p>
+
 </div>
 </div>
 <a id="a8b73a325268c3d52e99f93aba2aba60e" name="a8b73a325268c3d52e99f93aba2aba60e"></a>
@@ -1649,6 +1821,10 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Transform a generic ppE Fisher matrix to a theory specific Fisher matrix. </p>
+<p >See <a class="el" href="ppE__utilities_8cpp.html">ppE_utilities.cpp</a> for a list of supported theories.</p>
+<p >The beta value in the input parameter structure must be the value of the theory-specific parameter, ie \alpha_dCS^2 and not \beta_2PN </p>
 
 </div>
 </div>
@@ -1748,6 +1924,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Calculates the jacobian matrix going from ppE to a specific theory. </p>
+<p >d \theta_i / d \theta_j where \theta_i is the ppE parameterrs, and \theta_j are the theory specific parameters </p>
+
 </div>
 </div>
 <a id="a889b2789fdd2c018b72544a3ad05c921" name="a889b2789fdd2c018b72544a3ad05c921"></a>
@@ -1838,12 +2017,12 @@ template&lt;class T &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T &gt; </div>
+template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void repack_non_parameter_options </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *&#160;</td>
+          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *&#160;</td>
           <td class="paramname"><em>waveform_params</em>, </td>
         </tr>
         <tr>
@@ -1866,6 +2045,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Utilitiy to transfer non-parameter options from one <a class="el" href="classgen__params.html" title="convience wrapper for the gen_params_base class">gen_params</a> structure to another. </p>
+<p >If ppE waveform ALLOCATES MEMORY &ndash; MUST be deallocated </p>
+
 </div>
 </div>
 <a id="ae9abf5e34ebefb45c534eacd8c6d408b" name="ae9abf5e34ebefb45c534eacd8c6d408b"></a>
@@ -1874,18 +2056,18 @@ template&lt;class T &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T &gt; </div>
+template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void repack_parameters </td>
           <td>(</td>
-          <td class="paramtype">T *&#160;</td>
+          <td class="paramtype"><a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> *&#160;</td>
           <td class="paramname"><em>avec_parameters</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *&#160;</td>
+          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *&#160;</td>
           <td class="paramname"><em>a_params</em>, </td>
         </tr>
         <tr>
@@ -1913,6 +2095,9 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Repack the parameters from an adouble vector to a gen_params_base&lt;adouble&gt; object and freqeuncy. </p>
+<p >This is one of the places where the generation-method/dimension/sky_average specific modifications should go </p>
 
 </div>
 </div>
@@ -2026,6 +2211,10 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase. </p>
+<p >If specific derivatives need to taken, take this routine as a template and write it yourself.</p>
+<p >The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters) </p>
+
 </div>
 </div>
 <a id="ab3566a9d2c5776b7769f1452bf3f80f3" name="ab3566a9d2c5776b7769f1452bf3f80f3"></a>
@@ -2083,6 +2272,13 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase. </p>
+<p >If specific derivatives need to taken, take this routine as a template and write it yourself.</p>
+<p >The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)</p>
+<p >Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase</p>
+<p >If specific derivatives need to taken, take this routine as a template and write it yourself.</p>
+<p >The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters) </p>
 
 </div>
 </div>
@@ -2142,6 +2338,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
+<p>Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase. </p>
+<p >If specific derivatives need to taken, take this routine as a template and write it yourself.</p>
+<p >The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the source parameters)</p>
+<p >This takes the autodiff derivative wrt source parameters, and a numerical derivative for the frequency </p>
+
 </div>
 </div>
 <a id="a430217adb3e9baf50041ab7fbbd9b2b9" name="a430217adb3e9baf50041ab7fbbd9b2b9"></a>
@@ -2150,12 +2351,12 @@ template&lt;class T &gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class T &gt; </div>
+template&lt;class <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; </div>
       <table class="memname">
         <tr>
           <td class="memname">void time_phase_corrected_derivative_numerical </td>
           <td>(</td>
-          <td class="paramtype">T **&#160;</td>
+          <td class="paramtype"><a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> **&#160;</td>
           <td class="paramname"><em>dt</em>, </td>
         </tr>
         <tr>
@@ -2167,13 +2368,13 @@ template&lt;class T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">T *&#160;</td>
+          <td class="paramtype"><a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> *&#160;</td>
           <td class="paramname"><em>frequencies</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; T &gt; *&#160;</td>
+          <td class="paramtype"><a class="el" href="classgen__params__base.html">gen_params_base</a>&lt; <a class="el" href="mcmc__sampler_8cpp.html#aef1cd57f3e1037b1fb2d9cfcb3dbec2a">T</a> &gt; *&#160;</td>
           <td class="paramname"><em>params</em>, </td>
         </tr>
         <tr>
@@ -2201,6 +2402,11 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Computes the derivative of the phase w.r.t. source parameters AS DEFINED BY FISHER FILE &ndash; hessian of the phase &ndash; numerical. </p>
+<p >IN PROGRESS &ndash; DO NOT USE</p>
+<p >If specific derivatives need to taken, take this routine as a template and write it yourself.</p>
+<p >The dt array has shape [dimension+1][length] (dimension + 1 for the frequency derivative, so dimension should only include the (full) source parameters) </p>
 
 </div>
 </div>
@@ -2247,6 +2453,8 @@ template&lt;class T &gt; </div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>Unpacks the input <a class="el" href="classgen__params.html" title="convience wrapper for the gen_params_base class">gen_params</a> object into a double array for use with the fisher routines. </p>
 
 </div>
 </div>

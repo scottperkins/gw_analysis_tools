@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>autocorrelation &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="autocorrelation_cuda" href="autocorrelation_cuda.html" />
+    <link rel="prev" title="TaylorT2" href="TaylorT2.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config.html">D_Z_Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="D_Z_Config_modified_dispersion.html">D_Z_Config_modified_dispersion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EA_IMRPhenomD_NRT.html">EA_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD.html">IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomD_NRT.html">IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP.html">IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="IMRPhenomP_NRT.html">IMRPhenomP_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="QNM_data.html">QNM_data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="TaylorT2.html">TaylorT2</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">autocorrelation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autocorrelation_cuda.html">autocorrelation_cuda</a></li>
+<li class="toctree-l2"><a class="reference internal" href="detector_util.html">detector_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fisher.html">fisher</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomD.html">gIMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gIMRPhenomP.html">gIMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gwatpy_wrapping.html">gwatpy_wrapping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="io_util.html">io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mc_reject.html">mc_reject</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw.html">mcmc_gw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_gw_extended.html">mcmc_gw_extended</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_io_util.html">mcmc_io_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler.html">mcmc_sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mcmc_sampler_internals.html">mcmc_sampler_internals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ortho_basis.html">ortho_basis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pn_waveform_util.html">pn_waveform_util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD.html">ppE_IMRPhenomD</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomD_NRT.html">ppE_IMRPhenomD_NRT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="threadPool.html">threadPool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
+<li class="toctree-l2"><a class="reference internal" href="waveform_util.html">waveform_util</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">API</a> &raquo;</li>
+      <li>autocorrelation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/autocorrelation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="autocorrelation">
+<span id="api-autocorrelation"></span><h1>autocorrelation<a class="headerlink" href="#autocorrelation" title="Permalink to this heading"></a></h1>
+<p>Autocorrelation header file </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv435write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiiidib">
+<span id="_CPPv335write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiiidib"></span><span id="_CPPv235write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiiidib"></span><span id="write_auto_corr_file_from_data_file__ss.ss.i.i.i.double.i.b"></span><span class="target" id="autocorrelation_8h_1ad6715011761c1397d215f817654c96b3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_auto_corr_file_from_data_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">autocorr_filename</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">datafile</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_segments</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">target_corr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_threads</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cumulative</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv435write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiiidib" title="Permalink to this definition"></a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> – length of input data </p></li>
+<li><p><strong>dimension</strong> – dimension of data </p></li>
+<li><p><strong>num_segments</strong> – number of segements to compute the auto-corr length </p></li>
+<li><p><strong>target_corr</strong> – Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr) </p></li>
+<li><p><strong>num_threads</strong> – Total number of threads to use </p></li>
+<li><p><strong>cumulative</strong> – Boolean to calculate the autocorrelation cumulatively </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv430write_auto_corr_file_from_dataNSt6stringEPPdiiidib">
+<span id="_CPPv330write_auto_corr_file_from_dataNSt6stringEPPdiiidib"></span><span id="_CPPv230write_auto_corr_file_from_dataNSt6stringEPPdiiidib"></span><span id="write_auto_corr_file_from_data__ss.doublePP.i.i.i.double.i.b"></span><span class="target" id="autocorrelation_8h_1ae925ee63b98024b9832ef2a72c6bca2d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_auto_corr_file_from_data</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">autocorr_filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_segments</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">target_corr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_threads</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cumulative</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv430write_auto_corr_file_from_dataNSt6stringEPPdiiidib" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Writes the autocorrelation file from a data array. </p>
+<p>First row is the starting index of that segment</p>
+<p>Second row is the length of that segment</p>
+<p>If cumulative, the ac is calculated in the following format:</p>
+<p>|—-&amp;#8212;|</p>
+<p>|———–&amp;#8212;|</p>
+<p>|———————-&amp;#8212;|</p>
+<p>…</p>
+<p>Else, the ac is calculated as :</p>
+<p>|—-&amp;#8212;| <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="o">|------|</span><span class="w"></span>
+
+<span class="w">            </span><span class="o">|--------|</span><span class="w"></span>
+</pre></div>
+</div>
+ … </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>autocorr_filename</strong> – Name of the file to write the autocorrelation to </p></li>
+<li><p><strong>data</strong> – Input chains </p></li>
+<li><p><strong>length</strong> – length of input data </p></li>
+<li><p><strong>dimension</strong> – dimension of data </p></li>
+<li><p><strong>num_segments</strong> – number of segements to compute the auto-corr length </p></li>
+<li><p><strong>target_corr</strong> – Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr) </p></li>
+<li><p><strong>num_threads</strong> – Total number of threads to use </p></li>
+<li><p><strong>cumulative</strong> – Boolean to calculate the autocorrelation cumulatively </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425auto_corr_from_data_batchPPPdiiiPPPiidib">
+<span id="_CPPv325auto_corr_from_data_batchPPPdiiiPPPiidib"></span><span id="_CPPv225auto_corr_from_data_batchPPPdiiiPPPiidib"></span><span id="auto_corr_from_data_batch__doublePPP.i.i.i.iPPP.i.double.i.b"></span><span class="target" id="autocorrelation_8h_1ab9812ba50775fc8453e7b4df14cafca0"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_corr_from_data_batch</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chain_N</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_segments</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">target_corr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_threads</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cumulative</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425auto_corr_from_data_batchPPPdiiiPPPiidib" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Calculates the autocorrelation length for a set of data for a number of segments for each dimension &amp;#8212; completely host code, utilitizes FFTW3 for longer chuncks of the chains &amp;#8212; Batch version for multiple chains at a time. </p>
+<p>Takes in the data from a sampler, shape data[chain_N][N_steps][dimension]</p>
+<p>Outputs lags that correspond to the target_corr &amp;#8212; shape output[chain_N][dimension][num_segments]</p>
+<p>If cumulative, the ac is calculated in the following format:</p>
+<p>|—-&amp;#8212;|</p>
+<p>|———–&amp;#8212;|</p>
+<p>|———————-&amp;#8212;|</p>
+<p>…</p>
+<p>Else, the ac is calculated as :</p>
+<p>|—-&amp;#8212;| <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="o">|------|</span><span class="w"></span>
+
+<span class="w">            </span><span class="o">|--------|</span><span class="w"></span>
+</pre></div>
+</div>
+ … </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Input data </p></li>
+<li><p><strong>length</strong> – length of input data </p></li>
+<li><p><strong>dimension</strong> – dimension of data </p></li>
+<li><p><strong>output</strong> – [out] array that stores the auto-corr lengths &amp;#8212; array[num_segments] </p></li>
+<li><p><strong>num_segments</strong> – number of segements to compute the auto-corr length </p></li>
+<li><p><strong>target_corr</strong> – Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr) </p></li>
+<li><p><strong>num_threads</strong> – Total number of threads to use </p></li>
+<li><p><strong>cumulative</strong> – Boolean to calculate the autocorrelation cumulatively </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419auto_corr_from_dataPPdiiPPiidib">
+<span id="_CPPv319auto_corr_from_dataPPdiiPPiidib"></span><span id="_CPPv219auto_corr_from_dataPPdiiPPiidib"></span><span id="auto_corr_from_data__doublePP.i.i.iPP.i.double.i.b"></span><span class="target" id="autocorrelation_8h_1a393fd6777961493a09c5c0923b185d3d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_corr_from_data</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_segments</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">target_corr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_threads</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cumulative</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419auto_corr_from_dataPPdiiPPiidib" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Calculates the autocorrelation length for a set of data for a number of segments for each dimension &amp;#8212; completely host code, utilitizes FFTW3 for longer chuncks of the chains. </p>
+<p>Takes in the data from a sampler, shape data[N_steps][dimension]</p>
+<p>Outputs lags that correspond to the target_corr &amp;#8212; shape output[dimension][num_segments]</p>
+<p>If cumulative, the ac is calculated in the following format:</p>
+<p>|—-&amp;#8212;|</p>
+<p>|———–&amp;#8212;|</p>
+<p>|———————-&amp;#8212;|</p>
+<p>…</p>
+<p>Else, the ac is calculated as :</p>
+<p>|—-&amp;#8212;| <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="o">|------|</span><span class="w"></span>
+
+<span class="w">            </span><span class="o">|--------|</span><span class="w"></span>
+</pre></div>
+</div>
+ … </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Input data </p></li>
+<li><p><strong>length</strong> – length of input data </p></li>
+<li><p><strong>dimension</strong> – dimension of data </p></li>
+<li><p><strong>output</strong> – [out] array that stores the auto-corr lengths &amp;#8212; array[num_segments] </p></li>
+<li><p><strong>num_segments</strong> – number of segements to compute the auto-corr length </p></li>
+<li><p><strong>target_corr</strong> – Autocorrelation for which the autocorrelation length is defined (lag of autocorrelation for which it equals the target_corr) </p></li>
+<li><p><strong>num_threads</strong> – Total number of threads to use </p></li>
+<li><p><strong>cumulative</strong> – Boolean to calculate the autocorrelation cumulatively </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420threaded_ac_spectrali20threaded_ac_jobs_fft">
+<span id="_CPPv320threaded_ac_spectrali20threaded_ac_jobs_fft"></span><span id="_CPPv220threaded_ac_spectrali20threaded_ac_jobs_fft"></span><span id="threaded_ac_spectral__i.threaded_ac_jobs_fft"></span><span class="target" id="autocorrelation_8h_1a94af5456a8ff9599890ad79deb2101e1"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">threaded_ac_spectral</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">thread</span></span>, <a class="reference internal" href="#_CPPv420threaded_ac_jobs_fft" title="threaded_ac_jobs_fft"><span class="n"><span class="pre">threaded_ac_jobs_fft</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420threaded_ac_spectrali20threaded_ac_jobs_fft" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Internal routine to calculate an spectral autocorrelation job. </p>
+<p>Allows for a more efficient use of the threadPool class </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418threaded_ac_seriali23threaded_ac_jobs_serial">
+<span id="_CPPv318threaded_ac_seriali23threaded_ac_jobs_serial"></span><span id="_CPPv218threaded_ac_seriali23threaded_ac_jobs_serial"></span><span id="threaded_ac_serial__i.threaded_ac_jobs_serial"></span><span class="target" id="autocorrelation_8h_1a45c4e43aab21b064274576841fd9f439"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">threaded_ac_serial</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">thread</span></span>, <a class="reference internal" href="#_CPPv423threaded_ac_jobs_serial" title="threaded_ac_jobs_serial"><span class="n"><span class="pre">threaded_ac_jobs_serial</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">job</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418threaded_ac_seriali23threaded_ac_jobs_serial" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Internal routine to calculate a serial autocorrelation job. </p>
+<p>Allows for a more efficient use of the threadPool class </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423auto_correlation_serialPdiid">
+<span id="_CPPv323auto_correlation_serialPdiid"></span><span id="_CPPv223auto_correlation_serialPdiid"></span><span id="auto_correlation_serial__doubleP.i.i.double"></span><span class="target" id="autocorrelation_8h_1a0e07c16caec7cc0be12258458c96d364"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_serial</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">target</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423auto_correlation_serialPdiid" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Calculates the autocorrelation of a chain with the brute force method. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr</strong> – input array </p></li>
+<li><p><strong>length</strong> – Length of input array </p></li>
+<li><p><strong>start</strong> – starting index (probably 0) </p></li>
+<li><p><strong>target</strong> – Target autocorrelation for which `length’ is defined </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv434auto_correlation_spectral_windowedPdiiPdP12fftw_outlineP12fftw_outline">
+<span id="_CPPv334auto_correlation_spectral_windowedPdiiPdP12fftw_outlineP12fftw_outline"></span><span id="_CPPv234auto_correlation_spectral_windowedPdiiPdP12fftw_outlineP12fftw_outline"></span><span id="auto_correlation_spectral_windowed__doubleP.i.i.doubleP.fftw_outlineP.fftw_outlineP"></span><span class="target" id="autocorrelation_8h_1a4f01d673d0dc0c0ccdbb2fcc10589713"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_spectral_windowed</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">chain</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">autocorr</span></span>, <a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">plan_forw</span></span>, <a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">plan_rev</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv434auto_correlation_spectral_windowedPdiiPdP12fftw_outlineP12fftw_outline" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Autocorrelation calculation following EMCEE’s implementation. </p>
+<p>Incorporates a windowing function to reduce noise in the estimate of Tau </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv422autocorrelation_windowPdii">
+<span id="_CPPv322autocorrelation_windowPdii"></span><span id="_CPPv222autocorrelation_windowPdii"></span><span id="autocorrelation_window__doubleP.i.i"></span><span class="target" id="autocorrelation_8h_1aeb4d208cd00d03d4c6b8305139c31ff8"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">autocorrelation_window</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">tau</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">c</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422autocorrelation_windowPdii" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425auto_correlation_spectralPdiPdP12fftw_outlineP12fftw_outline">
+<span id="_CPPv325auto_correlation_spectralPdiPdP12fftw_outlineP12fftw_outline"></span><span id="_CPPv225auto_correlation_spectralPdiPdP12fftw_outlineP12fftw_outline"></span><span id="auto_correlation_spectral__doubleP.i.doubleP.fftw_outlineP.fftw_outlineP"></span><span class="target" id="autocorrelation_8h_1ab2b46532c9a5857bc08a5b7af33c19d2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_spectral</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">chain</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">autocorr</span></span>, <a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">plan_forw</span></span>, <a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">plan_rev</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425auto_correlation_spectralPdiPdP12fftw_outlineP12fftw_outline" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Wrapper function for convience &amp;#8212; assumes the data array starts at 0. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425auto_correlation_spectralPdiiPdP12fftw_outlineP12fftw_outline">
+<span id="_CPPv325auto_correlation_spectralPdiiPdP12fftw_outlineP12fftw_outline"></span><span id="_CPPv225auto_correlation_spectralPdiiPdP12fftw_outlineP12fftw_outline"></span><span id="auto_correlation_spectral__doubleP.i.i.doubleP.fftw_outlineP.fftw_outlineP"></span><span class="target" id="autocorrelation_8h_1a495b7476fb13c79c22c6785ca5c37e9c"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_spectral</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">chain</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">autocorr</span></span>, <a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">plan_forw</span></span>, <a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">plan_rev</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425auto_correlation_spectralPdiiPdP12fftw_outlineP12fftw_outline" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Faster approximation of the autocorrelation of a chain. Implements FFT/IFFT &amp;#8212; accepts FFTW plan as argument for plan reuse and multi-threaded applications. </p>
+<p>Based on the Wiener-Khinchin Theorem.</p>
+<p>Algorithm used from <a class="reference external" href="https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/">https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/</a></p>
+<p><em>NOTE</em> the length used in initializing the fftw plans should be L = pow(2, std::ceil( std::log2(length) ) ) &amp;#8212; the plans are padded so the total length is a power of two</p>
+<p>Option to provide starting index for multi-dimension arrays in collapsed to one dimension</p>
+<p>length is the length of the segment to be analyzed, not necessarily the dimension of the chain </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425auto_correlation_spectralPdiPd">
+<span id="_CPPv325auto_correlation_spectralPdiPd"></span><span id="_CPPv225auto_correlation_spectralPdiPd"></span><span id="auto_correlation_spectral__doubleP.i.doubleP"></span><span class="target" id="autocorrelation_8h_1af5ffdd85c751c9128af46d0459bb4687"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_spectral</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">chain</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">autocorr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425auto_correlation_spectralPdiPd" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Faster approximation of the autocorrelation of a chain. Implements FFT/IFFT. </p>
+<p>Based on the Wiener-Khinchin Theorem.</p>
+<p>Algorithm used from <a class="reference external" href="https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/">https://lingpipe-blog.com/2012/06/08/autocorrelation-fft-kiss-eigen/</a> </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416auto_correlationPdid">
+<span id="_CPPv316auto_correlationPdid"></span><span id="_CPPv216auto_correlationPdid"></span><span id="auto_correlation__doubleP.i.double"></span><span class="target" id="autocorrelation_8h_1ab1cc0e008417e22feb67c596f9d84391"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tolerance</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416auto_correlationPdid" title="Permalink to this definition"></a><br /></dt>
+<dd><p>OUTDATED &amp;#8212; numerically finds autocorrelation length &amp;#8212; not reliable. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv427auto_correlation_serial_oldPdi">
+<span id="_CPPv327auto_correlation_serial_oldPdi"></span><span id="_CPPv227auto_correlation_serial_oldPdi"></span><span id="auto_correlation_serial_old__doubleP.i"></span><span class="target" id="autocorrelation_8h_1ad21465a6ab600a7776dd763e2f8dd577"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_serial_old</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv427auto_correlation_serial_oldPdi" title="Permalink to this definition"></a><br /></dt>
+<dd><p>OUTDATED Calculates the autocorrelation &amp;#8212; less general version. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv428auto_correlation_grid_searchPdiiid">
+<span id="_CPPv328auto_correlation_grid_searchPdiiid"></span><span id="_CPPv228auto_correlation_grid_searchPdiiid"></span><span id="auto_correlation_grid_search__doubleP.i.i.i.double"></span><span class="target" id="autocorrelation_8h_1acdff562d907293edd8fe8a9e9037e0be"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_grid_search</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">box_num</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">10</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">final_length</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">50</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">target_length</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">.01</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv428auto_correlation_grid_searchPdiiid" title="Permalink to this definition"></a><br /></dt>
+<dd><p>OUTDATED &amp;#8212; Grid search method of computing the autocorrelation &amp;#8212; unreliable. </p>
+<p>Hopefully more reliable than the box-search method, which can sometimes get caught in a recursive loop when the stepsize isn’t tuned, but also faster than the basic linear, serial search </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr</strong> – Input array to use for autocorrelation </p></li>
+<li><p><strong>length</strong> – Length of input array </p></li>
+<li><p><strong>box_num</strong> – number of boxes to use for each iteration, default is 10 </p></li>
+<li><p><strong>final_length</strong> – number of elements per box at which the grid search ends and the serial calculation begins </p></li>
+<li><p><strong>target_length</strong> – target correlation that corresponds to the returned lag </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425auto_correlation_internalPdiid">
+<span id="_CPPv325auto_correlation_internalPdiid"></span><span id="_CPPv225auto_correlation_internalPdiid"></span><span id="auto_correlation_internal__doubleP.i.i.double"></span><span class="target" id="autocorrelation_8h_1aee6b6cec0369e5a89823512fde296792"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_correlation_internal</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">arr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">lag</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ave</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425auto_correlation_internalPdiid" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Internal function to compute the auto correlation for a given lag. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv428auto_corr_intervals_outdatedPdiPdid">
+<span id="_CPPv328auto_corr_intervals_outdatedPdiPdid"></span><span id="_CPPv228auto_corr_intervals_outdatedPdiPdid"></span><span id="auto_corr_intervals_outdated__doubleP.i.doubleP.i.double"></span><span class="target" id="autocorrelation_8h_1a59cc7470885bbc68e5c9a7725fb237d9"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">auto_corr_intervals_outdated</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_segments</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">accuracy</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv428auto_corr_intervals_outdatedPdiPdid" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Function that computes the autocorrelation length on an array of data at set intervals to help determine convergence. </p>
+<p>outdated version &amp;#8212; new version uses FFTs </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Input data </p></li>
+<li><p><strong>length</strong> – length of input data </p></li>
+<li><p><strong>output</strong> – [out] array that stores the auto-corr lengths &amp;#8212; array[num_segments] </p></li>
+<li><p><strong>num_segments</strong> – number of segements to compute the auto-corr length </p></li>
+<li><p><strong>accuracy</strong> – longer chains are computed numerically, this specifies the tolerance </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv430write_auto_corr_file_from_dataNSt6stringEPPdiii">
+<span id="_CPPv330write_auto_corr_file_from_dataNSt6stringEPPdiii"></span><span id="_CPPv230write_auto_corr_file_from_dataNSt6stringEPPdiii"></span><span id="write_auto_corr_file_from_data__ss.doublePP.i.i.i"></span><span class="target" id="autocorrelation_8h_1af9cfa7c28d17c0fc56c4277ca11fcff5"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_auto_corr_file_from_data</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">autocorr_filename</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">intervals</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">N_steps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv430write_auto_corr_file_from_dataNSt6stringEPPdiii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>OUTDATED &amp;#8212; writes autocorrelation lengths for a data array, but only with the serial method and only for a target correlation of .01. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv435write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiii">
+<span id="_CPPv335write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiii"></span><span id="_CPPv235write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiii"></span><span id="write_auto_corr_file_from_data_file__ss.ss.i.i.i"></span><span class="target" id="autocorrelation_8h_1a4454fd7377be44ed756be6c0d25a46f2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">write_auto_corr_file_from_data_file</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">autocorr_filename</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">output_file</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">intervals</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dimension</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">N_steps</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv435write_auto_corr_file_from_data_fileNSt6stringENSt6stringEiii" title="Permalink to this definition"></a><br /></dt>
+<dd><p>OUTDATED &amp;#8212; writes autocorrelation lengths for a data file, but only with the serial method and only for a target correlation of .01. </p>
+</dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv420threaded_ac_jobs_fft">
+<span id="_CPPv320threaded_ac_jobs_fft"></span><span id="_CPPv220threaded_ac_jobs_fft"></span><span id="threaded_ac_jobs_fft"></span><span class="target" id="classthreaded__ac__jobs__fft"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">threaded_ac_jobs_fft</span></span></span><a class="headerlink" href="#_CPPv420threaded_ac_jobs_fft" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;autocorrelation.h&gt;</em></div>
+<p>Class to contain spectral method jobs. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft4dataE">
+<span id="_CPPv3N20threaded_ac_jobs_fft4dataE"></span><span id="_CPPv2N20threaded_ac_jobs_fft4dataE"></span><span id="threaded_ac_jobs_fft::data__doublePP"></span><span class="target" id="classthreaded__ac__jobs__fft_1ac4b3840c07d3dbd3f6d84371ec31e514"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">data</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft4dataE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft6lengthE">
+<span id="_CPPv3N20threaded_ac_jobs_fft6lengthE"></span><span id="_CPPv2N20threaded_ac_jobs_fft6lengthE"></span><span id="threaded_ac_jobs_fft::length__iP"></span><span class="target" id="classthreaded__ac__jobs__fft_1ad2c291ac1d43caab4e0c311653526d78"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">length</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft6lengthE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; Data to use &amp;#8212; full chain </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft5startE">
+<span id="_CPPv3N20threaded_ac_jobs_fft5startE"></span><span id="_CPPv2N20threaded_ac_jobs_fft5startE"></span><span id="threaded_ac_jobs_fft::start__iP"></span><span class="target" id="classthreaded__ac__jobs__fft_1ab53d18101cba2f6e8894076aec04e033"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">start</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft5startE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; length of total data </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft3endE">
+<span id="_CPPv3N20threaded_ac_jobs_fft3endE"></span><span id="_CPPv2N20threaded_ac_jobs_fft3endE"></span><span id="threaded_ac_jobs_fft::end__iP"></span><span class="target" id="classthreaded__ac__jobs__fft_1a86501045468f92ae2c49b34cffe1aea3"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">end</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft3endE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; start index </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft9dimensionE">
+<span id="_CPPv3N20threaded_ac_jobs_fft9dimensionE"></span><span id="_CPPv2N20threaded_ac_jobs_fft9dimensionE"></span><span id="threaded_ac_jobs_fft::dimension__i"></span><span class="target" id="classthreaded__ac__jobs__fft_1a9bf661425ff94cfa740827b2e2affd18"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dimension</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft9dimensionE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; end index </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft11planforwardE">
+<span id="_CPPv3N20threaded_ac_jobs_fft11planforwardE"></span><span id="_CPPv2N20threaded_ac_jobs_fft11planforwardE"></span><span id="threaded_ac_jobs_fft::planforward__fftw_outlineP"></span><span class="target" id="classthreaded__ac__jobs__fft_1ac862074b94a8a1403f355110bf428cfc"></span><a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">planforward</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft11planforwardE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; dimension being analyzed </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft11planreverseE">
+<span id="_CPPv3N20threaded_ac_jobs_fft11planreverseE"></span><span id="_CPPv2N20threaded_ac_jobs_fft11planreverseE"></span><span id="threaded_ac_jobs_fft::planreverse__fftw_outlineP"></span><span class="target" id="classthreaded__ac__jobs__fft_1a9f821f5df06f0dd6b223444759143c0e"></span><a class="reference internal" href="util.html#_CPPv412fftw_outline" title="fftw_outline"><span class="n"><span class="pre">fftw_outline</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">planreverse</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft11planreverseE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>fftw plan to use for spectral method </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft3lagE">
+<span id="_CPPv3N20threaded_ac_jobs_fft3lagE"></span><span id="_CPPv2N20threaded_ac_jobs_fft3lagE"></span><span id="threaded_ac_jobs_fft::lag__iP"></span><span class="target" id="classthreaded__ac__jobs__fft_1a98153770612f6a063018be6a43cb6320"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">lag</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft3lagE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>fftw plan to use for spectral method </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N20threaded_ac_jobs_fft6targetE">
+<span id="_CPPv3N20threaded_ac_jobs_fft6targetE"></span><span id="_CPPv2N20threaded_ac_jobs_fft6targetE"></span><span id="threaded_ac_jobs_fft::target__doubleP"></span><span class="target" id="classthreaded__ac__jobs__fft_1a3a7fa6df5c4af8bce5820c483598fc9e"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">target</span></span></span><a class="headerlink" href="#_CPPv4N20threaded_ac_jobs_fft6targetE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>READ AND WRITE &amp;#8212; final lag </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv423threaded_ac_jobs_serial">
+<span id="_CPPv323threaded_ac_jobs_serial"></span><span id="_CPPv223threaded_ac_jobs_serial"></span><span id="threaded_ac_jobs_serial"></span><span class="target" id="classthreaded__ac__jobs__serial"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">threaded_ac_jobs_serial</span></span></span><a class="headerlink" href="#_CPPv423threaded_ac_jobs_serial" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;autocorrelation.h&gt;</em></div>
+<p>Class to contain serial method jobs. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial4dataE">
+<span id="_CPPv3N23threaded_ac_jobs_serial4dataE"></span><span id="_CPPv2N23threaded_ac_jobs_serial4dataE"></span><span id="threaded_ac_jobs_serial::data__doublePP"></span><span class="target" id="classthreaded__ac__jobs__serial_1acfc487b367aa6bd91dfd51a5994b89ee"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">data</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial4dataE" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial6lengthE">
+<span id="_CPPv3N23threaded_ac_jobs_serial6lengthE"></span><span id="_CPPv2N23threaded_ac_jobs_serial6lengthE"></span><span id="threaded_ac_jobs_serial::length__iP"></span><span class="target" id="classthreaded__ac__jobs__serial_1ae6153a4df9771175723ec04d7eec03b4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">length</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial6lengthE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; Data to use &amp;#8212; full chain </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial5startE">
+<span id="_CPPv3N23threaded_ac_jobs_serial5startE"></span><span id="_CPPv2N23threaded_ac_jobs_serial5startE"></span><span id="threaded_ac_jobs_serial::start__iP"></span><span class="target" id="classthreaded__ac__jobs__serial_1a358a286626c91db48b779ee0a1be7201"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">start</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial5startE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; length of total data </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial3endE">
+<span id="_CPPv3N23threaded_ac_jobs_serial3endE"></span><span id="_CPPv2N23threaded_ac_jobs_serial3endE"></span><span id="threaded_ac_jobs_serial::end__iP"></span><span class="target" id="classthreaded__ac__jobs__serial_1afcb4978468003aae945aa2a63681b86e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">end</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial3endE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; start index </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial9dimensionE">
+<span id="_CPPv3N23threaded_ac_jobs_serial9dimensionE"></span><span id="_CPPv2N23threaded_ac_jobs_serial9dimensionE"></span><span id="threaded_ac_jobs_serial::dimension__i"></span><span class="target" id="classthreaded__ac__jobs__serial_1a5ecfde8b822ea61788c90739a1a3929c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">dimension</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial9dimensionE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; end index </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial3lagE">
+<span id="_CPPv3N23threaded_ac_jobs_serial3lagE"></span><span id="_CPPv2N23threaded_ac_jobs_serial3lagE"></span><span id="threaded_ac_jobs_serial::lag__iP"></span><span class="target" id="classthreaded__ac__jobs__serial_1a6a149a8f7f02ed82c6ade734208acc0a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">lag</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial3lagE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Read only &amp;#8212; dimension being analyzed </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N23threaded_ac_jobs_serial6targetE">
+<span id="_CPPv3N23threaded_ac_jobs_serial6targetE"></span><span id="_CPPv2N23threaded_ac_jobs_serial6targetE"></span><span id="threaded_ac_jobs_serial::target__doubleP"></span><span class="target" id="classthreaded__ac__jobs__serial_1a0a870c7ac95ad680d3bc8ca80f1df9f3"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">target</span></span></span><a class="headerlink" href="#_CPPv4N23threaded_ac_jobs_serial6targetE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>READ AND WRITE &amp;#8212; final lag </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv417comparator_ac_fft">
+<span id="_CPPv317comparator_ac_fft"></span><span id="_CPPv217comparator_ac_fft"></span><span id="comparator_ac_fft"></span><span class="target" id="classcomparator__ac__fft"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">comparator_ac_fft</span></span></span><a class="headerlink" href="#_CPPv417comparator_ac_fft" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;autocorrelation.h&gt;</em></div>
+<p>comparator to sort ac-jobs </p>
+<p>Starts with the longest jobs, then works down the list </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N17comparator_ac_fftclE20threaded_ac_jobs_fft20threaded_ac_jobs_fft">
+<span id="_CPPv3N17comparator_ac_fftclE20threaded_ac_jobs_fft20threaded_ac_jobs_fft"></span><span id="_CPPv2N17comparator_ac_fftclE20threaded_ac_jobs_fft20threaded_ac_jobs_fft"></span><span id="comparator_ac_fft::call-operator__threaded_ac_jobs_fft.threaded_ac_jobs_fft"></span><span class="target" id="classcomparator__ac__fft_1aec7693de9d131bcdf98019ca4f6c5fd5"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv420threaded_ac_jobs_fft" title="threaded_ac_jobs_fft"><span class="n"><span class="pre">threaded_ac_jobs_fft</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">t</span></span>, <a class="reference internal" href="#_CPPv420threaded_ac_jobs_fft" title="threaded_ac_jobs_fft"><span class="n"><span class="pre">threaded_ac_jobs_fft</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">k</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N17comparator_ac_fftclE20threaded_ac_jobs_fft20threaded_ac_jobs_fft" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv420comparator_ac_serial">
+<span id="_CPPv320comparator_ac_serial"></span><span id="_CPPv220comparator_ac_serial"></span><span id="comparator_ac_serial"></span><span class="target" id="classcomparator__ac__serial"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">comparator_ac_serial</span></span></span><a class="headerlink" href="#_CPPv420comparator_ac_serial" title="Permalink to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;autocorrelation.h&gt;</em></div>
+<p>comparator to sort ac-jobs </p>
+<p>Starts with the longest jobs, then works down the list </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N20comparator_ac_serialclE23threaded_ac_jobs_serial23threaded_ac_jobs_serial">
+<span id="_CPPv3N20comparator_ac_serialclE23threaded_ac_jobs_serial23threaded_ac_jobs_serial"></span><span id="_CPPv2N20comparator_ac_serialclE23threaded_ac_jobs_serial23threaded_ac_jobs_serial"></span><span id="comparator_ac_serial::call-operator__threaded_ac_jobs_serial.threaded_ac_jobs_serial"></span><span class="target" id="classcomparator__ac__serial_1a327791aa1b3ee7fc9aa47145c6d22557"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv423threaded_ac_jobs_serial" title="threaded_ac_jobs_serial"><span class="n"><span class="pre">threaded_ac_jobs_serial</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">t</span></span>, <a class="reference internal" href="#_CPPv423threaded_ac_jobs_serial" title="threaded_ac_jobs_serial"><span class="n"><span class="pre">threaded_ac_jobs_serial</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">k</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N20comparator_ac_serialclE23threaded_ac_jobs_serial23threaded_ac_jobs_serial" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="TaylorT2.html" class="btn btn-neutral float-left" title="TaylorT2" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="autocorrelation_cuda.html" class="btn btn-neutral float-right" title="autocorrelation_cuda" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
