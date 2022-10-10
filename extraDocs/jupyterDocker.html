@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dockerfiles &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Dockerfiles</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/extraDocs/jupyterDocker.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>Hosting jupyter servers in Docker containers can be extremely useful, ~~as this typically doesn’t involve logging into the container at all,~~[^1] and you can just connect to your server in a browser.</p>
+<p>[1] Can’t figure this out right now</p>
+<section id="dockerfiles">
+<h1>Dockerfiles<a class="headerlink" href="#dockerfiles" title="Permalink to this heading"></a></h1>
+<p>A typical docker file for this purpose looks like</p>
+<div class="highlight-docker notranslate"><div class="highlight"><pre><span></span>FROM debian:latest # or whatever base image you want
+
+RUN pip3 install --upgrade pip
+RUN pip3 install jupyter jupyterlab #plus whatever else
+
+CMD [&quot;jupyter-lab&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;, &quot;--ip=0.0.0.0&quot;, &quot;--port=8989&quot;] # The port doesn&#39;t have to be the same, just some random port not in use
+</pre></div>
+</div>
+</section>
+<section id="running-container">
+<h1>Running container<a class="headerlink" href="#running-container" title="Permalink to this heading"></a></h1>
+<p>Now, with image in hand, navigate to the directory of interest and run the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -d --rm -p <span class="m">8989</span>:8989 -v <span class="k">$(</span>PWD<span class="k">)</span>:/opt/project scottperkins/gwat.jupyter
+</pre></div>
+</div>
+<p>where the port matches the port used in the image (at least the second one) and the “/opt/project” directory is whatever you want to call it (directory inside the container). The image (scottperkins/gwat.jupyter) is obviously the image of the container you want to run</p>
+</section>
+<section id="logging-in">
+<h1>Logging in<a class="headerlink" href="#logging-in" title="Permalink to this heading"></a></h1>
+<p>For now, you have to log into the container with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it &lt;container-id&gt; bash
+</pre></div>
+</div>
+<p>Then, inside the container, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter server list
+</pre></div>
+</div>
+<p>Go to localhost:8989 in a browser and copy the token from the docker container to log in.</p>
+<p>You’re in! Now you can exit out of the interactive session of the container if you want.</p>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
