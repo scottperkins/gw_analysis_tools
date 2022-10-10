@@ -68,8 +68,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <p>Hosting jupyter servers in Docker containers can be extremely useful, ~~as this typically doesn’t involve logging into the container at all,~~[^1] and you can just connect to your server in a browser.</p>
-<p>[1] Can’t figure this out right now</p>
+  <p>Hosting jupyter servers in Docker containers can be extremely useful, ~~as this typically doesn’t involve logging into the container at all,~~<a class="footnote-reference brackets" href="#id2" id="id1">1</a> and you can just connect to your server in a browser.</p>
 <section id="dockerfiles">
 <h1>Dockerfiles<a class="headerlink" href="#dockerfiles" title="Permalink to this heading"></a></h1>
 <p>A typical docker file for this purpose looks like</p>
@@ -102,6 +101,12 @@ CMD [&quot;jupyter-lab&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;
 </div>
 <p>Go to localhost:8989 in a browser and copy the token from the docker container to log in.</p>
 <p>You’re in! Now you can exit out of the interactive session of the container if you want.</p>
+<hr class="footnotes docutils" />
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Can’t figure this out right now</p>
+</dd>
+</dl>
 </section>
 
 

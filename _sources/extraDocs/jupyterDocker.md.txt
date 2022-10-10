@@ -1,7 +1,7 @@
 
 Hosting jupyter servers in Docker containers can be extremely useful, ~~as this typically doesn't involve logging into the container at all,~~[^1] and you can just connect to your server in a browser.
 
-[1] Can't figure this out right now
+[^1]: Can't figure this out right now
 
 # Dockerfiles
 
