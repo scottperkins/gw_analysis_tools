@@ -1996,6 +1996,12 @@ void MCMC_fisher_transformations_v2(
 		}
 	}
 
+	if(generation_method.find("EA") != std::string::npos){
+		fisher[dimension-3][dimension-3] += 1./pow(10, -2.);
+		fisher[dimension-2][dimension-2] += 1./pow(10, -4.);
+		fisher[dimension-1][dimension-1] += 1./pow(10, -1.);
+	}
+
 	//if(generation_method.find("EA") != std::string::npos){
 	//  //for(int i = 0 ; i <4; i++){
 	//    for(int i = 0 ; i <3; i++){
