@@ -1871,6 +1871,11 @@ std::string MCMC_prep_params_v2(double *param, double *temp_params, gen_params_b
 	gen_params->equatorial_orientation=false;
 	gen_params->horizon_coord=false;
 
+	gen_params->tidal_love = mod_struct->tidal_love;
+	gen_params->tidal_love_error = mod_struct->tidal_love_error;
+	gen_params->alpha_param = mod_struct->alpha_param;
+	gen_params->EA_region1 = mod_struct->EA_region1; 
+
 	gen_params->NSflag1 = mod_struct->NSflag1;
 	gen_params->NSflag2 = mod_struct->NSflag2;
 	//gen_params->NSflag1 = false;
@@ -1990,6 +1995,25 @@ void MCMC_fisher_transformations_v2(
 			fisher[i][base] *= factor;
 		}
 	}
+
+	//if(generation_method.find("EA") != std::string::npos){
+	//  //for(int i = 0 ; i <4; i++){
+	//    for(int i = 0 ; i <3; i++){
+	//      for(int j = 0 ; j<dimension; j++){
+	//	if(i!=j){
+	//	  fisher[dimension-1-i][dimension-1-j] = 0;
+	//	  fisher[dimension-1-j][dimension-1-i] = 0;
+	//	}
+	//	/*
+	//	  if(i==j){
+	//	  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
+	//	  }*/
+	//      }
+	//    }
+	//    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	//    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	//    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	//}
 	return;
 
 }
@@ -2135,7 +2159,16 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 	if(mcmcVar->user_parameters->fisher_GAUSS_QUAD){
 		local_integration_method = "GAUSSLEG";
 	}
-	double **temp_out = allocate_2D_array(dimension,dimension);
+
+	std::string local_gen_method = mcmcVar->mcmc_generation_method;
+	int local_dimension = dimension;  
+	//if(local_gen_method.find("EA") != std::string::npos)
+	//  {
+	//    local_gen_method = "IMRPhenomD_NRT";
+	//    local_dimension -= 3;
+	//  }
+	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
+	//double **temp_out = allocate_2D_array(dimension,dimension);
 	for(int i =0 ; i <mcmcVar->mcmc_num_detectors; i++){
 		
 		//Use AD 
@@ -2146,17 +2179,17 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 			//	"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
 			//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmcVar->mcmc_noise[i]);
 			fisher_autodiff(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,local_dimension, 
 				(gen_params *)(&params),  local_integration_method,local_weights[i],true,local_noise[i]);
 		}
 		else{
 			fisher_numerical(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,local_dimension, 
 				&params, 4, NULL, NULL, local_noise[i]);
 
 		}
-		for(int j =0; j<dimension; j++){
-			for(int k =0; k<dimension; k++)
+		for(int j =0; j<local_dimension; j++){
+			for(int k =0; k<local_dimension; k++)
 			{
 				tempOutput[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k]))
@@ -2171,7 +2204,7 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 	
 	MCMC_fisher_transformations_v2(temp_params, tempOutput,dimension,local_gen,mcmcVar->mcmc_intrinsic,
 		mcmcVar->mcmc_mod_struct);
-	deallocate_2D_array(temp_out, dimension,dimension);
+	deallocate_2D_array(temp_out, local_dimension,local_dimension);
 
 	//Try marginalizing over other parameters, otherwise just use subfisher without marginalizing
 	int status = invertFisherBlock(tempOutput, output, dimension, ids);
@@ -2182,6 +2215,12 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 			}
 		}
 
+	}
+	for(int i = 0 ; i<ids.size(); i++){
+		for(int j = 0 ; j<ids.size(); j++){
+			std::cout<<output[i][j] <<", ";	
+		}
+		std::cout<<std::endl;
 	}
 
 	//if(ids.size() == dimension){
