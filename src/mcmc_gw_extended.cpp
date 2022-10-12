@@ -2216,12 +2216,12 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 		}
 
 	}
-	for(int i = 0 ; i<ids.size(); i++){
-		for(int j = 0 ; j<ids.size(); j++){
-			std::cout<<output[i][j] <<", ";	
-		}
-		std::cout<<std::endl;
-	}
+	//for(int i = 0 ; i<ids.size(); i++){
+	//	for(int j = 0 ; j<ids.size(); j++){
+	//		std::cout<<output[i][j] <<", ";	
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	//if(ids.size() == dimension){
 	//	for(int i = 0 ; i<dimension; i++){
