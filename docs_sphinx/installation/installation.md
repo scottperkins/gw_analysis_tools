@@ -1,4 +1,4 @@
-# Installation Methods
+# Installation 
 
 There are currently two ways to install this software library: by compiling the source code directly on your computer or by using Docker containers.
 
@@ -66,7 +66,7 @@ Several public images with this software already installed are maintained on Doc
 
 	- Useful for doing post-MCMC analysis, as there are python wrappers that unpack the data installed on this image
 
-	- For usage notes on this, see [jupyter notes](../extraDocs/jupyterDocker.md)
+	- For usage notes on this, see [jupyter notes](../tutorials/jupyterDocker.md)
 
 
 
