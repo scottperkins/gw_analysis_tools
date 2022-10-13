@@ -662,7 +662,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	if(initial_ensemble_position_file != ""){
-		bayesship::positionInfo **ensembleInitialPosition = new bayesship::positionInfo*[chainN];
+		ensembleInitialPosition = new bayesship::positionInfo*[chainN];
 		for(int i = 0 ; i<chainN; i++){
 			ensembleInitialPosition[i] = new bayesship::positionInfo(dimension,false);
 		}
