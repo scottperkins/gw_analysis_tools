@@ -1998,30 +1998,30 @@ void MCMC_fisher_transformations_v2(
 		}
 	}
 
-	if(generation_method.find("EA") != std::string::npos){
-		fisher[dimension-3][dimension-3] += 1./pow(10, -2.);
-		fisher[dimension-2][dimension-2] += 1./pow(10, -4.);
-		fisher[dimension-1][dimension-1] += 1./pow(10, -1.);
-	}
-
 	//if(generation_method.find("EA") != std::string::npos){
-	//  //for(int i = 0 ; i <4; i++){
-	//    for(int i = 0 ; i <3; i++){
-	//      for(int j = 0 ; j<dimension; j++){
-	//	if(i!=j){
-	//	  fisher[dimension-1-i][dimension-1-j] = 0;
-	//	  fisher[dimension-1-j][dimension-1-i] = 0;
-	//	}
-	//	/*
-	//	  if(i==j){
-	//	  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
-	//	  }*/
-	//      }
-	//    }
-	//    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
-	//    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
-	//    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	//	fisher[dimension-3][dimension-3] += 1./pow(10, -2.);
+	//	fisher[dimension-2][dimension-2] += 1./pow(10, -4.);
+	//	fisher[dimension-1][dimension-1] += 1./pow(10, -1.);
 	//}
+
+	if(generation_method.find("EA") != std::string::npos){
+	  //for(int i = 0 ; i <4; i++){
+	    for(int i = 0 ; i <3; i++){
+	      for(int j = 0 ; j<dimension; j++){
+		if(i!=j){
+		  fisher[dimension-1-i][dimension-1-j] = 0;
+		  fisher[dimension-1-j][dimension-1-i] = 0;
+		}
+		/*
+		  if(i==j){
+		  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
+		  }*/
+	      }
+	    }
+	    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	}
 	return;
 
 }
@@ -2170,11 +2170,11 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 
 	std::string local_gen_method = mcmcVar->mcmc_generation_method;
 	int local_dimension = dimension;  
-	//if(local_gen_method.find("EA") != std::string::npos)
-	//  {
-	//    local_gen_method = "IMRPhenomD_NRT";
-	//    local_dimension -= 3;
-	//  }
+	if(local_gen_method.find("EA") != std::string::npos)
+	  {
+	    local_gen_method = "IMRPhenomD_NRT";
+	    local_dimension -= 3;
+	  }
 	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
 	//double **temp_out = allocate_2D_array(dimension,dimension);
 	for(int i =0 ; i <mcmcVar->mcmc_num_detectors; i++){
