@@ -96,6 +96,8 @@
 [dbl] RA maximum = 6.28319
 [dbl] Sin(DEC) minimum = -1
 [dbl] Sin(DEC) maximum = 1
+[dbl] Cos(iota) minimum = -1
+[dbl] Cos(iota) maximum = 1
 
 #Tidal parameters  -- use tidal 1/2 OR use tidal_s with tidal_love
 #Range of prior on tidal parameter for object 1

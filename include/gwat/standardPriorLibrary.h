@@ -18,6 +18,7 @@ struct priorData
 	double EA_prior[6];
 	double RA_bounds[2];
 	double sinDEC_bounds[2];
+	double cosIota_bounds[2];
 	bool tidal_love=true;
 	bool tidal_love_error;
 	bool alpha_param; 

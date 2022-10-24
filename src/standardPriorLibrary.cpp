@@ -249,7 +249,7 @@ double logPriorStandard_D::eval(bayesship::positionInfo *position, int chainID)
 	if ((pos[0])<PD->RA_bounds[0] || (pos[0])>PD->RA_bounds[1]){ return a;}//RA
 	if ((pos[1])<PD->sinDEC_bounds[0] || (pos[1])>PD->sinDEC_bounds[1]){return a;}//sinDEC
 	if ((pos[2])<0 || (pos[2])>M_PI){return a;}//PSI
-	if ((pos[3])<-1 || (pos[3])>1){return a;}//cos \iota
+	if ((pos[3])<PD->cosIota_bounds[0] || (pos[3])>PD->cosIota_bounds[1]){ return a;}//RA
 	if ((pos[4])<0 || (pos[4])>2*M_PI){return a;}//phiRef
 	if( pos[5] < (PD->T_merger - .1) || pos[5] > (PD->T_merger + .1)) { return a; }
 	if (std::exp(pos[6])<PD->DL_prior[0] || std::exp(pos[6])>PD->DL_prior[1]){return a;}//DL

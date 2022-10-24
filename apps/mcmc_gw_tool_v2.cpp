@@ -370,6 +370,16 @@ int main(int argc, char *argv[])
 		PD.sinDEC_bounds[1] = 1;
 
 	}
+	if( dbl_dict.find("Cos(iota) minimum") != dbl_dict.end() && dbl_dict.find("Cos(iota) maximum") != dbl_dict.end()){
+		PD.cosIota_bounds[0] = dbl_dict["Cos(iota) minimum"];
+		PD.cosIota_bounds[1] = dbl_dict["Cos(iota) maximum"];
+		std::cout<<"Cos(iota) bounds: "<<PD.cosIota_bounds[0]<<" "<<PD.cosIota_bounds[1]<<std::endl;
+	}
+	else{
+		PD.cosIota_bounds[0] = -1;
+		PD.cosIota_bounds[1] = 1;
+
+	}
 	
 
 	allocate_LOSC_data(detector_files, psd_file, detector_N, psd_length, data_length, gps_time,post_merger_duration, data, psd, freqs);
