@@ -768,6 +768,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputDir,
 	std::string outputFileMoniker,
 	bool ignoreExistingCheckpoint,
+	bool restrictSwapTemperatures,
 	bool coldChainStorageOnly
 	)
 {
@@ -959,6 +960,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->initialPosition = initialPosition;
 	sampler->initialPositionEnsemble = initialEnsemble;
 	sampler->ignoreExistingCheckpoint = ignoreExistingCheckpoint;
+	sampler->restrictSwapTemperatures = restrictSwapTemperatures;
 
 	//Testing
 	sampler->coldOnlyStorage = coldChainStorageOnly;
@@ -1232,6 +1234,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputDir,
 	std::string outputFileMoniker,
 	bool ignoreExistingCheckpoint,
+	bool restrictSwapTemperatures,
 	bool coldChainStorageOnly
 	)
 {
@@ -1416,6 +1419,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->initialPosition = initialPosition;
 	sampler->initialPositionEnsemble = initialEnsemble;
 	sampler->ignoreExistingCheckpoint = ignoreExistingCheckpoint;
+	sampler->restrictSwapTemperatures = restrictSwapTemperatures;
 
 	//Testing
 	//sampler->coldOnlyStorage = false;

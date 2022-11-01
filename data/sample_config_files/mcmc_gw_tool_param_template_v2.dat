@@ -68,6 +68,9 @@
 #If false, those files are read in and the sampler starts from those checkpoints
 [bool] ignore existing checkpoint = true
 
+# Restrict swapping to chains with adjacent temperatures (true) or allow unrestricted swapping with the entire ensemble (false)
+[bool] restrict swap temperatures = false
+
 # Whether to store only the cold chains (sampling from the true distribution) (true) or to save all the chains
 # (many of which are not sampling from the true distribution) (false). Setting to false can be useful for debugging.
 [bool] cold chain storage only = true
