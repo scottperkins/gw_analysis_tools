@@ -724,6 +724,9 @@ public:
 	
 			}
 		}
+		if ( isnan(ll)){
+			return bayesship::limitInf;
+		}
 		return ll;
 	
 	}
