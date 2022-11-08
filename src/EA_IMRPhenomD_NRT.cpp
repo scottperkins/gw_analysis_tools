@@ -52,9 +52,10 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   num = 1 + a[0]*lambda_pow[0] + a[1]*lambda_pow[1] + a[2]*lambda_pow[2];
   denom = 1 + b[0]*lambda_pow[0] + b[1]*lambda_pow[1] + b[2]*lambda_pow[2];
 
+  //compact = p->compact1; //artifact from testing with specific values of C
   compact = K * lambda_pow[0] * (num/denom);
 	//std::cout<<"Compactness: "<<compact<<std::endl;
-
+  
   if(body == 1)
     {
       p->compact1 = compact;
@@ -63,6 +64,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
     {
       p->compact2 = compact;
     }
+  
   /* Calculation of sensitivities taken from arXiv:2104.04596v1
    * Equation 80 of that paper was inverted to get binding energy to mass ratio
    * as a function of compactness.
@@ -72,11 +74,22 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   OmRatio = (-5./7.)*compact - ((18275.*p->alpha1_EA)/168168.)*pow(compact, 3.);
   //std::cout<<"compactness = "<<compact<<std::endl; 
   T coeff1, coeff2, coeff3;
+   
   coeff1 =  ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.);
   coeff2 = ((573.*pow(p->alpha1_EA, 3.) + p->alpha1_EA*p->alpha1_EA*(67669. - 764.*p->alpha2_EA) + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(9.*p->alpha2_EA - 2632.))/(25740.*p->alpha1_EA));
   coeff3 = (1./(656370000.*p->cw_EA*p->alpha1_EA*p->alpha1_EA))*(-4.*p->alpha1_EA*p->alpha1_EA*(p->alpha1_EA + 8.)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(1970100.*pow(p->alpha1_EA,5.) - 13995878400.*pow(p->alpha2_EA, 3.) - 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) - 5.*pow(p->alpha1_EA, 4.)*(19548109. + 788040.*p->alpha2_EA) - 16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA) + pow(p->alpha1_EA,3.)*(2699192440. - 309701434.*p->alpha2_EA + 5974000.*p->alpha2_EA*p->alpha2_EA)));
   
   s = coeff1 * (OmRatio) + coeff2 * (OmRatio*OmRatio) + coeff3 * (pow(OmRatio, 3.));
+  
+  /*
+  //Coded s(C) directly from eqn.79 of arXiv:2104.04596v1 for comparison purposes. This gives exactly the same answer as what was used above (a good sign obviously)
+  coeff1 = (5./21.)*(-3*p->alpha1_EA + 2*p->alpha2_EA);
+  coeff2 = (5./(252252.*p->alpha1_EA))*(573.*pow(p->alpha1_EA, 3.) + (67669. - 746.*p->alpha2_EA)*p->alpha1_EA*p->alpha1_EA + 96416.*p->alpha2_EA*p->alpha2_EA + 68.*p->alpha1_EA*p->alpha2_EA*(-2632.+9.*p->alpha2_EA));
+  coeff3 = 1./(1801079280.*p->cw_EA*p->alpha1_EA*p->alpha1_EA)*(16.*p->alpha1_EA*p->alpha1_EA*(8+p->alpha1_EA)*(36773030.*p->alpha1_EA*p->alpha1_EA - 39543679.*p->alpha1_EA*p->alpha2_EA + 11403314.*p->alpha2_EA*p->alpha2_EA) + p->cw_EA*(-1970100.*pow(p->alpha1_EA, 5.) + 13995878400.*pow(p->alpha2_EA, 3.) + 640.*p->alpha1_EA*p->alpha2_EA*p->alpha2_EA*(-49528371. + 345040.*p->alpha2_EA) + 5*pow(p->alpha1_EA, 4.)*(-19596941. + 788040.*p->alpha2_EA) + pow(p->alpha1_EA, 3.)*(-2699192440. + 440184934.*p->alpha2_EA - 5974000.*p->alpha2_EA*p->alpha2_EA)*(16.*p->alpha1_EA*p->alpha1_EA*p->alpha2_EA*(1294533212. - 29152855.*p->alpha2_EA + 212350.*p->alpha2_EA*p->alpha2_EA)))); 
+
+  s = coeff1 * (compact) + coeff2 * (compact*compact) + coeff3 * (pow(compact, 3.));
+  */
+  
   //if(p->c14_EA < pow(10, -32.)){
   /* std::cout<<"c1: "<<p->c1_EA<<", c14: "<<p->c14_EA<<", c13: "<<p->c13_EA<<", cminus: "<<p->cminus_EA<<std::endl;
       
@@ -362,7 +375,8 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
   /*The input mass should be unbarred*/
   /*Calcualte sensitivites with unbarred quantities using C = G_N M / R^2 c^2*/
   /*Unbarred to barred */
-  T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
+  // T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
+  T calG = 1.; 
   params->M *=calG;
   params->chirpmass *=calG;
   params->delta_mass *=calG;
@@ -514,7 +528,7 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
         amp += EAamp2;
       }
 
-      /*Compute coefficients specific to the different polarizations without the iota dependence (iota is handled in waveform_generator.cpp) */  
+      /*Compute coefficients specific to the different polarizations */  
       //These are just the terms for the l=2 mode
       std::complex<T> hx2, hy2, hb2, hl2;
       
@@ -532,6 +546,8 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
       hy2 *= si;
       hb2 *= si*si;
       hl2 *= si*si;
+
+      //Note that the iota dependence for the plus and cross modes is handled in the waveform_generator.cpp file!
       
       /* The phase correction which depends on the speed of the
 	    * different polarizations.
