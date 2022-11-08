@@ -2978,7 +2978,7 @@ std::string MCMC_prep_params(double *param, double *temp_params, gen_params_base
 double MCMC_likelihood_wrapper(double *param, mcmc_data_interface *interface ,void *parameters)
 {
   //double start = omp_get_wtime();
-  return 2;
+  //return 2;
   MCMC_user_param *user_param = (MCMC_user_param *)parameters;
 
   int dimension = interface->max_dim;

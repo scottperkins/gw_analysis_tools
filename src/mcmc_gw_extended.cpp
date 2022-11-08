@@ -1444,23 +1444,23 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	if(mcmcVar.mcmc_intrinsic){
 		propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
 	}
-	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos ){
-		std::vector<std::vector<int>> blocksDiff = std::vector<std::vector<int>>(4);	
-		for(int i = 0 ; i<7; i++){
-			blocksDiff[0].push_back(i);
-		}
-		for(int i = 7 ; i<sampler->maxDim; i++){
-			blocksDiff[1].push_back(i);
-		}
-		for(int i = 0 ; i<sampler->maxDim; i++){
-			blocksDiff[2].push_back(i);
-		}
-		blocksDiff[3].push_back(7);
-		blocksDiff[3].push_back(12);
-		std::vector<double> blocksProbDiff = {0.25,0.25,.25,.25};
-		propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
+	//else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos ){
+	//	std::vector<std::vector<int>> blocksDiff = std::vector<std::vector<int>>(4);	
+	//	for(int i = 0 ; i<7; i++){
+	//		blocksDiff[0].push_back(i);
+	//	}
+	//	for(int i = 7 ; i<sampler->maxDim; i++){
+	//		blocksDiff[1].push_back(i);
+	//	}
+	//	for(int i = 0 ; i<sampler->maxDim; i++){
+	//		blocksDiff[2].push_back(i);
+	//	}
+	//	blocksDiff[3].push_back(7);
+	//	blocksDiff[3].push_back(12);
+	//	std::vector<double> blocksProbDiff = {0.25,0.25,.25,.25};
+	//	propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
 
-	}
+	//}
 	else{
 		std::vector<std::vector<int>> blocksDiff = std::vector<std::vector<int>>(3);	
 		for(int i = 0 ; i<7; i++){
@@ -1480,26 +1480,26 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	if(mcmcVar.mcmc_intrinsic){
 		propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
 	}
-	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos ){
-		std::vector<std::vector<int>> blocks = std::vector<std::vector<int>>(4);
-		for(int i = 0 ; i<7; i++){
-			blocks[0].push_back(i);
-		}
-		for(int i = 7 ; i<sampler->maxDim; i++){
-			blocks[1].push_back(i);
-		}
-		for(int i = 0 ; i<sampler->maxDim; i++){
-			blocks[2].push_back(i);
-		}
-		blocks[3].push_back(7);
-		blocks[3].push_back(12);
-		std::vector<double> blockProb = {.25,.25,.25,.25};
-		//std::vector<std::vector<int>> blocks = {
-		//				{7,8,9,10}};
-		//std::vector<double> blockProb = {1};
-		propArray[3] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
+	//else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos ){
+	//	std::vector<std::vector<int>> blocks = std::vector<std::vector<int>>(4);
+	//	for(int i = 0 ; i<7; i++){
+	//		blocks[0].push_back(i);
+	//	}
+	//	for(int i = 7 ; i<sampler->maxDim; i++){
+	//		blocks[1].push_back(i);
+	//	}
+	//	for(int i = 0 ; i<sampler->maxDim; i++){
+	//		blocks[2].push_back(i);
+	//	}
+	//	blocks[3].push_back(7);
+	//	blocks[3].push_back(12);
+	//	std::vector<double> blockProb = {.25,.25,.25,.25};
+	//	//std::vector<std::vector<int>> blocks = {
+	//	//				{7,8,9,10}};
+	//	//std::vector<double> blockProb = {1};
+	//	propArray[3] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
 
-	}
+	//}
 	else{
 		std::vector<std::vector<int>> blocks = std::vector<std::vector<int>>(3);
 		for(int i = 0 ; i<7; i++){
@@ -2048,24 +2048,24 @@ void MCMC_fisher_transformations_v2(
 	//	fisher[dimension-1][dimension-1] += 1./pow(10, -1.);
 	//}
 
-	if(generation_method.find("EA") != std::string::npos){
-	  //for(int i = 0 ; i <4; i++){
-	    for(int i = 0 ; i <3; i++){
-	      for(int j = 0 ; j<dimension; j++){
-		if(i!=j){
-		  fisher[dimension-1-i][dimension-1-j] = 0;
-		  fisher[dimension-1-j][dimension-1-i] = 0;
-		}
-		/*
-		  if(i==j){
-		  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
-		  }*/
-	      }
-	    }
-	    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
-	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
-	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
-	}
+	//if(generation_method.find("EA") != std::string::npos){
+	//  //for(int i = 0 ; i <4; i++){
+	//    for(int i = 0 ; i <3; i++){
+	//      for(int j = 0 ; j<dimension; j++){
+	//	if(i!=j){
+	//	  fisher[dimension-1-i][dimension-1-j] = 0;
+	//	  fisher[dimension-1-j][dimension-1-i] = 0;
+	//	}
+	//	/*
+	//	  if(i==j){
+	//	  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
+	//	  }*/
+	//      }
+	//    }
+	//    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	//    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	//    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	//}
 	return;
 
 }
@@ -2214,11 +2214,11 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 
 	std::string local_gen_method = mcmcVar->mcmc_generation_method;
 	int local_dimension = dimension;  
-	if(local_gen_method.find("EA") != std::string::npos && ids.size() != 2)
-	  {
-	    	local_gen_method = "IMRPhenomD_NRT";
-	    	local_dimension -= 3;
-	  }
+	//if(local_gen_method.find("EA") != std::string::npos && ids.size() != 2)
+	//  {
+	//    	local_gen_method = "IMRPhenomD_NRT";
+	//    	local_dimension -= 3;
+	//  }
 	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
 	//double **temp_out = allocate_2D_array(dimension,dimension);
 	for(int i =0 ; i <mcmcVar->mcmc_num_detectors; i++){
@@ -2254,7 +2254,8 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 	//Add prior information to fisher
 	//if(mcmcVar->mcmc_generation_method.find("Pv2") && !mcmcVar->mcmc_intrinsic){
 	
-	if(local_gen_method.find("EA") != std::string::npos && ids.size() == 2){
+	//if(local_gen_method.find("EA") != std::string::npos && ids.size() == 2){
+	if(false){
 		MCMC_fisher_transformations_v2(temp_params, tempOutput,dimension,"IMRPhenomD_NRT",mcmcVar->mcmc_intrinsic,
 			mcmcVar->mcmc_mod_struct);
 	    	tempOutput[dimension-3][dimension-3] = 1./pow(10, -2.);

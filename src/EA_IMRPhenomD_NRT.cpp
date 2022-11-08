@@ -362,7 +362,8 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
   /*The input mass should be unbarred*/
   /*Calcualte sensitivites with unbarred quantities using C = G_N M / R^2 c^2*/
   /*Unbarred to barred */
-  T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
+  //T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
+  T calG = 1;//(1 - params->s1_EA)*(1 - params->s2_EA) ;
   params->M *=calG;
   params->chirpmass *=calG;
   params->delta_mass *=calG;
