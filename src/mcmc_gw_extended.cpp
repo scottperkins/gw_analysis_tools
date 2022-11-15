@@ -727,6 +727,7 @@ public:
 		if ( isnan(ll)){
 			return bayesship::limitInf;
 		}
+		//std::cout<<ll<<std::endl;
 		return ll;
 	
 	}
@@ -1719,7 +1720,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	delete propData->proposals[1];
 	delete propData->proposals[2];
 	delete propData->proposals[3];
-	delete propData->proposals[4];
+	//delete propData->proposals[4];
 	delete propData;
 	delete [] propArray;
 	for(int i = 0 ; i<num_detectors; i++){
