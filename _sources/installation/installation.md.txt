@@ -13,7 +13,7 @@ There are currently two ways to install this software library: by compiling the 
 5. Eigen3 \*
 6. adol-c - Not as common, so probably will need to install from source. Use the appropriate openmp flag if that's desired 
 7. HDF5 - Not as common. Might be available on certain systems, but will need to compile with gcc (not clang). This is a headache, but things won't compile properly if HDF5 is not compiled with the same compiler as GWAT
-8. BayesShip - Another package from me. Download from git and follow install instructions
+8. [BayesShip](https://scottperkins.github.io/BayesShip) - Another package from me. Download from git and follow install instructions
 
 \* means the library is very common and is probably available through system package managers (apt/yum/etc) or through HPC infrastructure
 
