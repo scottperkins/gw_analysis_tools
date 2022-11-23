@@ -1438,7 +1438,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 4;
+	int proposalFnN = 5;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
 	//propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
@@ -1460,6 +1460,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		blocksDiff[3].push_back(12);
 		std::vector<double> blocksProbDiff = {0.25,0.25,.25,.25};
 		propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
+		propArray[4] = new bayesship::GMMProposal( sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, blocksDiff,blocksProbDiff, 10, 10, 10, 1e-10, false, sampler->maxDim*100);
 
 	}
 	else{
@@ -1475,6 +1476,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		}
 		std::vector<double> blocksProbDiff = {0.3,0.3,.4};
 		propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
+		propArray[4] = new bayesship::GMMProposal( sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, blocksDiff,blocksProbDiff, 10, 10, 10, 1e-10, false, sampler->maxDim*100);
 	}
 	propArray[2] = new bayesship::KDEProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, false );
 	//propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
@@ -1549,8 +1551,9 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][0] = 0.05;
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
-		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		propProb[i][3] = 0.15 + .55*( betaTemp[ensemble]); //.7 to .15
+		propProb[i][1] = .4 - 0.15*( betaTemp[ensemble]); //.25 to .7
+		propProb[i][3] = 0.05 + .55*( betaTemp[ensemble]); //.7 to .15
+		propProb[i][4] = 0.1 + .05*( betaTemp[ensemble]); //.7 to .15
 		//propProb[i][4] = 0.1 + .2*( betaTemp[ensemble]); //.3 to .1
 
 
@@ -1761,7 +1764,7 @@ void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimensi
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 6)
 	{
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, ln tidal1,  ln tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1788,7 +1791,7 @@ void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimensi
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal1, ln tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1797,7 +1800,7 @@ void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimensi
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal_s"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal_s"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1840,7 +1843,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 6)
 	{
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, ln tidal1,  ln tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1867,7 +1870,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal1, ln tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1876,7 +1879,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal_s"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal_s"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -2047,6 +2050,9 @@ void MCMC_fisher_transformations_v2(
 		fisher[dimension-3][dimension-3] += 1./pow(10, -2.);
 		fisher[dimension-2][dimension-2] += 1./pow(10, -4.);
 		fisher[dimension-1][dimension-1] += 1./pow(10, -1.);
+		//std::cout<<fisher[7][12]<<std::endl;
+		//fisher[7][12] = -1.15341564e+05;
+		//fisher[12][7] = -1.15341564e+05;
 	}
 
 	//if(generation_method.find("EA") != std::string::npos){

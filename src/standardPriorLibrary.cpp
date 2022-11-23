@@ -358,16 +358,20 @@ double logPriorStandard_D_NRT::eval(bayesship::positionInfo *position, int chain
 	double m1 = calculate_mass1(chirp,pos[8]);
 	double m2 = calculate_mass2(chirp,pos[8]);
 	double q = m2/m1;//<1
+	double factor = 0;
 	if(PD->tidal_love){
-		if(pos[11]<PD->tidal_s_prior[0] || pos[11]>PD->tidal_s_prior[1]){return a;}
-		if(tidal_love_boundary_violation(q,pos[11])){return a;}
+		if(exp(pos[11])<PD->tidal_s_prior[0] || exp(pos[11])>PD->tidal_s_prior[1]){return a;}
+		if(tidal_love_boundary_violation(q,exp(pos[11]))){return a;}
+		factor += pos[11];
 
 	}
 	else{
-		if(pos[11]<PD->tidal1_prior[0] || pos[11]>PD->tidal1_prior[1]){return a;}
-		if(pos[12]<PD->tidal2_prior[0] || pos[12]>PD->tidal2_prior[1]){return a;}
+		if(exp(pos[11])<PD->tidal1_prior[0] || exp(pos[11])>PD->tidal1_prior[1]){return a;}
+		if(exp(pos[12])<PD->tidal2_prior[0] || exp(pos[12])>PD->tidal2_prior[1]){return a;}
+		factor += pos[11];
+		factor += pos[12];
 	}
-	return logPriorStandard_D::eval(position, chainID);
+	return logPriorStandard_D::eval(position, chainID) +factor ;
 
 }
 
