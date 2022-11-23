@@ -116,9 +116,13 @@ void IMRPhenomD_NRT<T>::binary_love_relation(T tidal_s, bool tidal_love_error, s
     {
       tidal_a = tidal_error(tidal_s, tidal_a, q);
     }
-    
+  /* This matches the definition in arXiv:1512.02639, but that paper used the opposite mass convention (m1 < m2) from our code.
   sp->tidal1 = tidal_s + tidal_a;
-  sp->tidal2 = tidal_s - tidal_a;      
+  sp->tidal2 = tidal_s - tidal_a;
+  */
+  // This matches the definition in arXiv:1903.03909 which is what we are following here (is consistent with all our conventions)
+  sp->tidal1 = tidal_s - tidal_a;
+  sp->tidal2 = tidal_s + tidal_a;
 }
 
 template<class T>

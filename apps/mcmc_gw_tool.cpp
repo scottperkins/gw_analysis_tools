@@ -445,8 +445,7 @@ int main(int argc, char *argv[])
 	//}
 	//write_file("data/processed_data.csv",output_test,psd_length,10);
 	//deallocate_2D_array(output_test,psd_length,10);
-	//
-	//exit(1);
+	
 
 	//#############################################################
 	//#############################################################
@@ -1031,6 +1030,8 @@ double EA_current_constraints(double *pos, mcmc_data_interface *interface, void 
    * Throws out points that violate Big Bang Nucleosynthesis constraints. arXiv:hep-th/0407149v3 
    */
 
+  if(sp.s1_EA >=1 || sp.s2_EA >=1){return a;}
+  
   //if(fabs(sp.alpha1_EA) > pow(10, -4.) || fabs(sp.alpha2_EA) > 4.*pow(10, -7.)){return a;}
   /* Throws out points that do not obey observational solar system constraints on 
    * alpha1 and alpha2
