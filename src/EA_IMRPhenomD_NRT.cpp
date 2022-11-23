@@ -25,7 +25,7 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
   /* The tidal deformability (love number), compactness, binding energy (Omega)
    * to mass ratio, and sensitivity.
    */
-
+  //std::cout<<"body #"<<body<<std::endl; 
   if(body == 1)
     {
      lambda = p->tidal1;
@@ -35,7 +35,6 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
       lambda = p->tidal2;
     }
 
-	//std::cout<<"lambda "<<lambda<<std::endl;
   /* Compactness computed using C-Love relation from arXiv:1903.03909,
    * equation 8, values in table 1.
    */
@@ -72,7 +71,10 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
    * energy to mass ratio.
    */
   OmRatio = (-5./7.)*compact - ((18275.*p->alpha1_EA)/168168.)*pow(compact, 3.);
-  //std::cout<<"compactness = "<<compact<<std::endl; 
+
+  //std::cout<<" compactness = "<<compact<<", OmRatio = "<<OmRatio<<std::endl;
+  //std::cout<<" compactness = "<<compact<<", OmRatio = "<<OmRatio<<std::endl;
+   
   T coeff1, coeff2, coeff3;
    
   coeff1 =  ((3.*p->alpha1_EA + 2.*p->alpha2_EA)/3.);
@@ -106,7 +108,9 @@ T EA_IMRPhenomD_NRT<T>::calculate_EA_sensitivity(int body, source_parameters<T> 
       std::cout<<"s "<<s<<std::endl;*/
       // }
   //if(p->c14_EA < pow(10, -32.)){std::cout<<"s "<<s<<std::endl;}
-
+  /*if(s > 1){
+    std::cout<<"sensitivity = "<<s<<", coeff1 = "<<coeff1<<", coeff2 = "<<coeff2<<", coeff3 = "<<coeff3<<std::endl;
+    }*/
   return s;
 }
 
@@ -354,10 +358,6 @@ T EA_IMRPhenomD_NRT<T>::EA_amp_ins2(T f, useful_powers<T> *powers, source_parame
   GR_amp = (-1./2.) * sqrt(5. * M_PI / 24) * (1. / p->DL) * p->chirpmass * p->chirpmass * (1. / sqrt(powers->PI7third * powers->MF7third));
 
   amp_out = EA_amp - GR_amp;
-  //std::cout<<"EA amp = "<<EA_amp<<", GR_amp = "<<GR_amp<<", amp_out = "<<amp_out<<std::endl;
-  /*if(isnan(amp_out)){
-    std::cout<<"EA amp = "<<EA_amp<<", kappa3 = "<<p->kappa3_EA<<", prefactor = "<<(2 - p->c14_EA) / ((1. - p->s1_EA) * (1. - p->s2_EA))<<std::endl;
-    }*/
   //EA_IMRPhenomD_NRT<T> model;
   //this->EA_check_nan(true, p);
 
@@ -375,16 +375,19 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
   /*The input mass should be unbarred*/
   /*Calcualte sensitivites with unbarred quantities using C = G_N M / R^2 c^2*/
   /*Unbarred to barred */
-  // T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
-  T calG = 1.; 
+  //T calG = (1 - params->s1_EA)*(1 - params->s2_EA) ;
+  T calG = 1.;
+  //std::cout<<"Before transformation:"<<std::endl; 
+  //std::cout<<"M = "<<params->M<<", chirpmass = "<<params->chirpmass<<", eta = "<<params->eta<<std::endl; 
   params->M *=calG;
   params->chirpmass *=calG;
   params->delta_mass *=calG;
   params->mass1*=calG;
   params->mass2*=calG;
-
-
-  //std::cout<<"Used EA_construct_waveform. Print statement in line 39 of EA_IMRPhenomD_NRT.cpp"<<std::endl;
+  // std::cout<<"After transformation:"<<std::endl; 
+  //std::cout<<"M = "<<params->M<<", chirpmass = "<<params->chirpmass<<", eta = "<<params->eta<<std::endl;
+  
+  //std::cout<<"Used EA_construct_waveform. Print statement in line 393 of EA_IMRPhenomD_NRT.cpp"<<std::endl;
   params->NRT_phase_coeff = - (3./16.) * params->tidal_weighted * (39./(16. * params->eta));
 
   if(params->tidal1<=0) {
@@ -481,7 +484,6 @@ int EA_IMRPhenomD_NRT<T>::EA_construct_waveform(T *frequencies, int length, wave
     f = frequencies[j];
 
     if(f>fcut){
-
       amp = 0.0;
 	    waveform->hplus[j] = 0.0;
 	    waveform->hcross[j] = 0.0;
