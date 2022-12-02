@@ -59,6 +59,7 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 		if(generation_method.find("PVProp") != std::string::npos){
 			//LJ: writing this such as to constrain the quantity (alpha*thetadot/kappa). Set alphasq = 1 and vary quantity thetadot
 			T alphasq = gp->betappe[0] ;
+			T nu = gp-> betappe[1];
 			//T thetadot = gp->betappe[1] ;
 			T DL = p->DL;
 			T Z= Z_from_DL(DL/MPC_SEC,gp->cosmology);
@@ -66,11 +67,12 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 			const double pi = 3.14159265358979323846;
 
 			T deltaph = alphasq * Z;
+			T vbpref = nu * Z;
 			//debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
 				for (int i =0 ; i < length; i++){
 					T pref = -8 * pi * deltaph * freqs[i];
-						wp->hcross[i] = wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i];
-						wp->hplus[i] = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i];
+						wp->hcross[i] = wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] +  vbpref * wp->hplus[i] ;
+						wp->hplus[i] = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - vbpref * wp->hcross[i];
 					}
 				}
 	return ;
