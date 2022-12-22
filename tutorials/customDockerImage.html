@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing Custom Docker Images: Example Workflows &mdash; GW Analysis Tools  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Dockerfiles with Jupyter" href="jupyterDocker.html" />
+    <link rel="prev" title="Contributing to the project" href="contributing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the project</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Writing Custom Docker Images: Example Workflows</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#developing-in-a-docker-container">Developing in a Docker container</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#writing-a-standalone-docker-image">Writing a standalone Docker image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="jupyterDocker.html">Dockerfiles with Jupyter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="singularity.html">Running with Singularity</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GW Analysis Tools</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Writing Custom Docker Images: Example Workflows</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorials/customDockerImage.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-custom-docker-images-example-workflows">
+<h1>Writing Custom Docker Images: Example Workflows<a class="headerlink" href="#writing-custom-docker-images-example-workflows" title="Permalink to this heading"></a></h1>
+<section id="developing-in-a-docker-container">
+<h2>Developing in a Docker container<a class="headerlink" href="#developing-in-a-docker-container" title="Permalink to this heading"></a></h2>
+<p>In the process of writing this C++ library, the authors have embraced Docker containers as a flexible way to portably modify and run this library, both for production on scientific HPC clusters and on local computers for development.
+This is by no means a necessity, but an example of this workflow is shown below for the benefit of those running into compatibility/portability issues.
+This is, of course, no long term solution and no replacement for developing reproducible workflows, but can be a helpful mitigation effort to not slow down the science.</p>
+<p>The goal of this example is to show how one might develop the software library (modify the source code, compile it, and run tests) by using a Docker container.
+To do this, we will use the publicly maintained base image, “scottperkins/gw.base.deps”, hosted on DockerHub by the principle developer.
+Note, there are publicly maintained pre-compiled images to use on DockerHub, but we will be making our own image to allow for developing the source code.</p>
+<p>For this example, we will assume the user is in a directory with the following structure, where “BayesShip” represents any necessary dependency not included in the image “scottperkins/gw.base.deps”.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">other</span><span class="o">-</span><span class="n">project</span><span class="o">-</span><span class="n">code</span><span class="o">/</span><span class="w"></span>
+</pre></div>
+</div>
+<p>We will assume the user is in the “root-directory” to begin with.</p>
+<ol class="arabic simple">
+<li><p>Download the source code from the repository</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull &lt;git-repo-name&gt;
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Make any desired changes to the source code.</p></li>
+<li><p>Write a docker-compose.yml file, following the following template and save it in “root-directory”,</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>version: <span class="s2">&quot;3&quot;</span>
+services:
+  project:
+    container_name: &lt;name&gt;
+    image: scottperkins/gw.base.deps
+    ports:
+        - <span class="s2">&quot;8081:8081&quot;</span>
+    tty: <span class="nb">true</span>
+    stdin_open: <span class="nb">true</span>
+    volumes:
+        - <span class="nv">$PWD</span>/BayesShip:/opt/BayesShip
+        - <span class="nv">$PWD</span>/gw_analysis_tools/:/opt/gw_analysis_tools
+        - <span class="nv">$PWD</span>/other-project-code/:/opt/other-project-code
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>We now expect the following file structure, and that the user is in “root-directory”:</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">gw_analysis_tools</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">other</span><span class="o">-</span><span class="n">project</span><span class="o">-</span><span class="n">code</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Build the image with the following command</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li><p>Now, one can login to the running container with</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it &lt;name&gt; bash
+</pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Inside the container, one can install any additional dependencies one needs, like python packages and other software libraries through the usual managers, like pip/apt/yum/etc.</p></li>
+<li><p>For clarity, the install location for any compiled software should generally be on non-mounted volumes, but this is up to the discretion of the developer.</p></li>
+<li><p>If the necessary libraries and executables have been installed in the container (not in mounted volumes), then one can save the image file with</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker save myimage:latest <span class="p">|</span> gzip &gt; myimage_latest.tar.gz
+</pre></div>
+</div>
+</section>
+<section id="writing-a-standalone-docker-image">
+<span id="custom-docker-standalone"></span><h2>Writing a standalone Docker image<a class="headerlink" href="#writing-a-standalone-docker-image" title="Permalink to this heading"></a></h2>
+<p>This example is focused on the use case where one wants to use this software on a scientific HPC cluster where singularity might be used.
+One method of doing this is to first create a Docker image, outlined below.
+For this example, we will assume the user is in a directory with the following structure, where “BayesShip” represents any necessary dependency not included in the image “scottperkins/gw.base.deps”.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
+</pre></div>
+</div>
+<p>We will assume the user is in the “root-directory” to begin with.</p>
+<ol class="arabic simple">
+<li><p>Download the source code from the repository</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull &lt;git-repo-name&gt;
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Make any desired changes to the source code.</p></li>
+<li><p>Write a Dockerfile, following the following template and save it in “root-directory”,</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FROM scottperkins/gw.base.deps:latest <span class="c1"># Pull the image from the online repository with all the dependencies pre-installed</span>
+
+
+<span class="c1"># Install any other dependencies (like custom repositories)</span>
+RUN mkdir /opt/BayesShip <span class="c1"># Make the directory for the source code *in the container*</span>
+RUN mkdir /opt/BayesShip/build <span class="c1"># Make a build directory</span>
+COPY BayesShip/ /opt/BayesShip/ <span class="c1"># Copy all source files into the container</span>
+WORKDIR /opt/BayesShip/build/ <span class="c1"># Make the current working directory the build directory</span>
+RUN cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local ../ <span class="c1"># Configure the installation</span>
+RUN make -j <span class="m">4</span> install <span class="c1"># Compile and install the library</span>
+
+<span class="c1"># Install the main source code</span>
+RUN mkdir /opt/gw_analysis_tools
+RUN mkdir /opt/gw_analysis_tools/build
+COPY gw_analysis_tools/ /opt/gw_analysis_tools/
+WORKDIR /opt/gw_analysis_tools/build/
+RUN cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local ../
+RUN make -j <span class="m">4</span> 
+RUN make install 
+WORKDIR /
+
+<span class="c1"># Remove the source files *from the container* in case one wants to host the image on DockerHub (removing the source files allows for maintaining privacy of the source code until public)</span>
+RUN rm -r /opt/gw_analysis_tools/
+RUN rm -r /opt/BayesShip/
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li><p>We now expect the following file structure, and that the user is in “root-directory”:</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------</span><span class="n">gw_analysis_tools</span><span class="o">/</span><span class="w"></span>
+<span class="o">|-------&lt;</span><span class="n">Dockerfile</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span><span class="w"></span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li><p>Build the image with the following command</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -f &lt;Dockerfile-name&gt; -t &lt;tag&gt; .
+</pre></div>
+</div>
+<p>If the user wants to host on DockerHub, the &lt;tag&gt; name should be &lt;DockerHub-ID&gt;/&lt;tag-name&gt;.
+6. If desired, the user can now push the image to DockerHub (which is <em>generally</em> public):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker push &lt;tag&gt;
+</pre></div>
+</div>
+<ol class="arabic simple" start="7">
+<li><p>Now one can save the image file with</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker save myimage:latest <span class="p">|</span> gzip &gt; myimage_latest.tar.gz
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing to the project" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="jupyterDocker.html" class="btn btn-neutral float-right" title="Dockerfiles with Jupyter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Scott Ellis Perkins.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
