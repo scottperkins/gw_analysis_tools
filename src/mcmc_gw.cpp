@@ -2598,7 +2598,7 @@ void MCMC_fisher_transformations(
 			fisher[base][i] *= factor ;
 			fisher[i][base] *= factor;
 		}
-	}
+	}/*
 	if(generation_method.find("EA") != std::string::npos){
 	  //for(int i = 0 ; i <4; i++){
 	    for(int i = 0 ; i <3; i++){
@@ -2610,13 +2610,13 @@ void MCMC_fisher_transformations(
 		/*
 		  if(i==j){
 		  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
-		  }*/
+		  }
 	      }
 	    }
 	    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
 	    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
 	    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
-	}
+	}*/
 	/*if(isnan(fabs(fisher[8][8]))){
 	  for(int i = 0 ; i<dimension; i++){
 	    std::cout<<i<<" ";
@@ -2684,11 +2684,11 @@ void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *i
 	}
 	std::string local_gen_method = mcmc_generation_method;
 	int local_dimension = dimension;  
-	if(local_gen_method.find("EA") != std::string::npos)
+	/*if(local_gen_method.find("EA") != std::string::npos)
 	  {
 	    local_gen_method = "IMRPhenomD_NRT";
 	    local_dimension -= 3;
-	  }
+	    }*/
 	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
 	for(int i =0 ; i <mcmc_num_detectors; i++){
 		
