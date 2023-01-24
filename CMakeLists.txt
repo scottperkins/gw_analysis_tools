@@ -95,7 +95,7 @@ endif()
 find_package(Doxygen)
 if(DOCS AND DOXYGEN_FOUND)
 	#add_subdirectory(docs)	
-	add_subdirectory(docs_doxygen)	
+	#add_subdirectory(docs_doxygen)	
 endif()
  
 # add the binary tree to the search path for include files
