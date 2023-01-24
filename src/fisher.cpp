@@ -1944,22 +1944,42 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		if(!input_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos ){
 				if( (input_params->tidal_love)){
-					parameters[11] = input_params->tidal_s;
+					log_factors[11] = false;
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[11] = true;//tidal_s
+					}
+					parameters[11] = log(input_params->tidal_s);
 				}
 				else{
-					parameters[11] = input_params->tidal1;
-					parameters[12] = input_params->tidal2;
+					log_factors[11] = false;
+					log_factors[12] = false;
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[11] = true;//tidal_1
+						log_factors[12] = true;//tidal_2
+					}
+					parameters[11] = log(input_params->tidal1);
+					parameters[12] = log(input_params->tidal2);
 				}
 			}
 		}
 		else{
 			if(generation_method.find("PhenomD") != std::string::npos){
 				if( (input_params->tidal_love)){
-					parameters[4] = input_params->tidal_s;
+					log_factors[4] = false;
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[4] = true;//tidal_s
+					}
+					parameters[4] = log(input_params->tidal_s);
 				}
 				else{
-					parameters[4] = input_params->tidal1;
-					parameters[5] = input_params->tidal2;
+					log_factors[4] = false;
+					log_factors[5] = false;
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[4] = true;//tidal_1
+						log_factors[5] = true;//tidal_2
+					}
+					parameters[4] = log(input_params->tidal1);
+					parameters[5] = log(input_params->tidal2);
 				}
 			}
 		}
@@ -2284,22 +2304,22 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		if(!a_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos){
 				if( (a_params->tidal_love)){
-					a_params->tidal_s = avec_parameters[11];
+					a_params->tidal_s = exp(avec_parameters[11]);
 				}
 				else{
-					a_params->tidal1 = avec_parameters[11];
-					a_params->tidal2 = avec_parameters[12];
+					a_params->tidal1 = exp(avec_parameters[11]);
+					a_params->tidal2 = exp(avec_parameters[12]);
 				}
 			}
 		}
 		else{
 			if(generation_method.find("PhenomD") != std::string::npos){
 				if( (a_params->tidal_love)){
-					a_params->tidal_s = avec_parameters[4];
+					a_params->tidal_s = exp(avec_parameters[4]);
 				}
 				else{
-					a_params->tidal1 = avec_parameters[4];
-					a_params->tidal2 = avec_parameters[5];
+					a_params->tidal1 = exp(avec_parameters[4]);
+					a_params->tidal2 = exp(avec_parameters[5]);
 				}
 			}
 		}

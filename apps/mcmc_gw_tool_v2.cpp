@@ -59,19 +59,19 @@ bool alpha_param;
 //double standard_log_prior_D_NRT_EA(double *pos, mcmc_data_interface *interface, void *parameters);
 //double EA_current_constraints(double *pos, mcmc_data_interface *interface, void *parameters);
 //double standard_log_prior_D_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_Pv2(double *pos,  mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters);
-double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface, void *parameters);
-double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_intrinsic_NRT(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_intrinsic_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_NRT_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_Pv2(double *pos,  mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_Pv2_intrinsic(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_Pv2_intrinsic_mod(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_skysearch(double *pos, mcmc_data_interface *interface, void *parameters);
+//double standard_log_prior_Pv2_mod(double *pos, mcmc_data_interface *interface,void *parameters);
 //double chirpmass_eta_jac(double m1,double m2);
-double standard_log_prior_D_intrinsic_Jeffreys(double *pos, mcmc_data_interface *interface,void *parameters);
+//double standard_log_prior_D_intrinsic_Jeffreys(double *pos, mcmc_data_interface *interface,void *parameters);
 //double chirpmass_q_jac(double chirpmass, double q);
 //double aligned_spin_prior(double chi);
 
@@ -323,6 +323,10 @@ int main(int argc, char *argv[])
 	      PD.EA_prior[3]=pow(10,-4.);
 		}
 	}
+	}
+	bool restrictSwapTemperatures = false;
+	if(bool_dict.find("restrict swap temperatures") != bool_dict.end()){
+		restrictSwapTemperatures = bool_dict["restrict swap temperatures"];
 	}
 
 	bool ignoreExistingCheckpoint = false;
@@ -662,7 +666,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	if(initial_ensemble_position_file != ""){
-		bayesship::positionInfo **ensembleInitialPosition = new bayesship::positionInfo*[chainN];
+		ensembleInitialPosition = new bayesship::positionInfo*[chainN];
 		for(int i = 0 ; i<chainN; i++){
 			ensembleInitialPosition[i] = new bayesship::positionInfo(dimension,false);
 		}
@@ -686,7 +690,7 @@ int main(int argc, char *argv[])
 			 burnIterations, burnPriorIterations,priorIterations, writePriorData,max_chunk_size, (double **)nullptr,
 			logp,threads, pool,detector_N, 
 			data, psd,freqs, data_lengths,gps_time, detectors,&mod_struct,
-			generation_method,outputDir, outputMoniker,ignoreExistingCheckpoint,coldChainStorageOnly);	
+			generation_method,outputDir, outputMoniker,ignoreExistingCheckpoint,restrictSwapTemperatures,coldChainStorageOnly);	
 	delete logp;
 	delete [] initial_position[0]; delete [] initial_position;
 	if(initial_ensemble_position_file != ""){

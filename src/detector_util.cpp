@@ -94,7 +94,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	//std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported/";
 	std::string currently_supported_dir = std::string(GWAT_SHARE_DIR)+"noise_data/";
 	//std::string currently_supported_dir = std::string(GWAT_ROOT_DIRECTORY)+"data/noise_data/currently_supported_raw/";
-	std::cout<<currently_supported_dir<<std::endl;
+	//std::cout<<currently_supported_dir<<std::endl;
 	if(check_list(detector, (std::string *)analytic_PSD_models,analytic_PSD_models_N)){
 		if(detector == "aLIGO_analytic")
 		{

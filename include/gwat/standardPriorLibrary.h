@@ -65,6 +65,13 @@ public:
 	virtual double eval(bayesship::positionInfo *position, int chainID);
 };
 
+class logPriorStandard_D_mod: public logPriorStandard_D
+{
+public:
+	logPriorStandard_D_mod(priorData *PD): logPriorStandard_D(PD){this->PD = PD;};
+	virtual double eval(bayesship::positionInfo *position, int chainID);
+};
+
 class logPriorStandard_D_NRT_mod: public logPriorStandard_D_NRT
 {
 public:

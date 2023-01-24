@@ -724,6 +724,10 @@ public:
 	
 			}
 		}
+		if ( isnan(ll)){
+			return bayesship::limitInf;
+		}
+		//std::cout<<ll<<std::endl;
 		return ll;
 	
 	}
@@ -768,6 +772,7 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputDir,
 	std::string outputFileMoniker,
 	bool ignoreExistingCheckpoint,
+	bool restrictSwapTemperatures,
 	bool coldChainStorageOnly
 	)
 {
@@ -957,7 +962,9 @@ bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->ensembleN = ensembleN;
 	sampler->priorRanges = priorRanges;
 	sampler->initialPosition = initialPosition;
+	sampler->initialPositionEnsemble = initialEnsemble;
 	sampler->ignoreExistingCheckpoint = ignoreExistingCheckpoint;
+	sampler->restrictSwapTemperatures = restrictSwapTemperatures;
 
 	//Testing
 	sampler->coldOnlyStorage = coldChainStorageOnly;
@@ -1231,6 +1238,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputDir,
 	std::string outputFileMoniker,
 	bool ignoreExistingCheckpoint,
+	bool restrictSwapTemperatures,
 	bool coldChainStorageOnly
 	)
 {
@@ -1413,7 +1421,9 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	sampler->ensembleN = ensembleN;
 	sampler->priorRanges = priorRanges;
 	sampler->initialPosition = initialPosition;
+	sampler->initialPositionEnsemble = initialEnsemble;
 	sampler->ignoreExistingCheckpoint = ignoreExistingCheckpoint;
+	sampler->restrictSwapTemperatures = restrictSwapTemperatures;
 
 	//Testing
 	//sampler->coldOnlyStorage = false;
@@ -1428,12 +1438,30 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 
 	//##########################################################
 	
-	int proposalFnN = 4;
+	int proposalFnN = 5;
 	bayesship::proposal **propArray = new bayesship::proposal*[proposalFnN];
 	propArray[0] = new bayesship::gaussianProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler);
 	//propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
 	if(mcmcVar.mcmc_intrinsic){
 		propArray[1] = new bayesship::differentialEvolutionProposal(sampler);
+	}
+	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos ){
+		std::vector<std::vector<int>> blocksDiff = std::vector<std::vector<int>>(4);	
+		for(int i = 0 ; i<7; i++){
+			blocksDiff[0].push_back(i);
+		}
+		for(int i = 7 ; i<sampler->maxDim; i++){
+			blocksDiff[1].push_back(i);
+		}
+		for(int i = 0 ; i<sampler->maxDim; i++){
+			blocksDiff[2].push_back(i);
+		}
+		blocksDiff[3].push_back(7);
+		blocksDiff[3].push_back(12);
+		std::vector<double> blocksProbDiff = {0.25,0.25,.25,.25};
+		propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
+		propArray[4] = new bayesship::GMMProposal( sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, blocksDiff,blocksProbDiff, 10, 10, 10, 1e-10, false, sampler->maxDim*100);
+
 	}
 	else{
 		std::vector<std::vector<int>> blocksDiff = std::vector<std::vector<int>>(3);	
@@ -1448,11 +1476,32 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		}
 		std::vector<double> blocksProbDiff = {0.3,0.3,.4};
 		propArray[1] = new bayesship::blockDifferentialEvolutionProposal(sampler, blocksDiff,blocksProbDiff);
+		propArray[4] = new bayesship::GMMProposal( sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, blocksDiff,blocksProbDiff, 10, 10, 10, 1e-10, false, sampler->maxDim*100);
 	}
 	propArray[2] = new bayesship::KDEProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, sampler, false );
 	//propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
 	if(mcmcVar.mcmc_intrinsic){
 		propArray[3] = new bayesship::fisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->maxDim, &MCMC_fisher_wrapper_v2,   sampler->userParameters,  100,sampler);
+	}
+	else if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos ){
+		std::vector<std::vector<int>> blocks = std::vector<std::vector<int>>(4);
+		for(int i = 0 ; i<7; i++){
+			blocks[0].push_back(i);
+		}
+		for(int i = 7 ; i<sampler->maxDim; i++){
+			blocks[1].push_back(i);
+		}
+		for(int i = 0 ; i<sampler->maxDim; i++){
+			blocks[2].push_back(i);
+		}
+		blocks[3].push_back(7);
+		blocks[3].push_back(12);
+		std::vector<double> blockProb = {.25,.25,.25,.25};
+		//std::vector<std::vector<int>> blocks = {
+		//				{7,8,9,10}};
+		//std::vector<double> blockProb = {1};
+		propArray[3] = new bayesship::blockFisherProposal(sampler->ensembleN*sampler->ensembleSize, sampler->minDim, &MCMC_fisher_wrapper_v3,   sampler->userParameters,  100,sampler,blocks, blockProb );
+
 	}
 	else{
 		std::vector<std::vector<int>> blocks = std::vector<std::vector<int>>(3);
@@ -1502,8 +1551,9 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		//propProb[i][0] = 0.05;
 		//propProb[i][1] = 0.25;
 		//propProb[i][3] = 0.7;
-		propProb[i][1] = .7 - 0.45*( betaTemp[ensemble]); //.25 to .7
-		propProb[i][3] = 0.15 + .55*( betaTemp[ensemble]); //.7 to .15
+		propProb[i][1] = .4 - 0.15*( betaTemp[ensemble]); //.25 to .7
+		propProb[i][3] = 0.05 + .55*( betaTemp[ensemble]); //.7 to .15
+		propProb[i][4] = 0.1 + .05*( betaTemp[ensemble]); //.7 to .15
 		//propProb[i][4] = 0.1 + .2*( betaTemp[ensemble]); //.3 to .1
 
 
@@ -1673,7 +1723,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	delete propData->proposals[1];
 	delete propData->proposals[2];
 	delete propData->proposals[3];
-	delete propData->proposals[4];
+	//delete propData->proposals[4];
 	delete propData;
 	delete [] propArray;
 	for(int i = 0 ; i<num_detectors; i++){
@@ -1714,7 +1764,7 @@ void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimensi
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 6)
 	{
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, ln tidal1,  ln tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1741,7 +1791,7 @@ void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimensi
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal1, ln tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1750,7 +1800,7 @@ void RJPTMCMC_method_specific_prep_v2(std::string generation_method, int dimensi
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal_s"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal_s"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1793,7 +1843,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 6)
 	{
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, ln tidal1,  ln tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1820,7 +1870,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal1, ln tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1829,7 +1879,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal_s"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal_s"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1870,6 +1920,11 @@ std::string MCMC_prep_params_v2(double *param, double *temp_params, gen_params_b
 	gen_params->gmst = gmst;
 	gen_params->equatorial_orientation=false;
 	gen_params->horizon_coord=false;
+
+	gen_params->tidal_love = mod_struct->tidal_love;
+	gen_params->tidal_love_error = mod_struct->tidal_love_error;
+	gen_params->alpha_param = mod_struct->alpha_param;
+	gen_params->EA_region1 = mod_struct->EA_region1; 
 
 	gen_params->NSflag1 = mod_struct->NSflag1;
 	gen_params->NSflag2 = mod_struct->NSflag2;
@@ -1990,6 +2045,34 @@ void MCMC_fisher_transformations_v2(
 			fisher[i][base] *= factor;
 		}
 	}
+
+	if(generation_method.find("EA") != std::string::npos){
+		fisher[dimension-3][dimension-3] += 1./pow(10, -2.);
+		fisher[dimension-2][dimension-2] += 1./pow(10, -4.);
+		fisher[dimension-1][dimension-1] += 1./pow(10, -1.);
+		//std::cout<<fisher[7][12]<<std::endl;
+		//fisher[7][12] = -1.15341564e+05;
+		//fisher[12][7] = -1.15341564e+05;
+	}
+
+	//if(generation_method.find("EA") != std::string::npos){
+	//  //for(int i = 0 ; i <4; i++){
+	//    for(int i = 0 ; i <3; i++){
+	//      for(int j = 0 ; j<dimension; j++){
+	//	if(i!=j){
+	//	  fisher[dimension-1-i][dimension-1-j] = 0;
+	//	  fisher[dimension-1-j][dimension-1-i] = 0;
+	//	}
+	//	/*
+	//	  if(i==j){
+	//	  fisher[dimension-1-i][dimension-1-j] = 1./pow(10, -6.);
+	//	  }*/
+	//      }
+	//    }
+	//    fisher[dimension-3][dimension-3] = 1./pow(10, -2.);
+	//    fisher[dimension-2][dimension-2] = 1./pow(10, -4.);
+	//    fisher[dimension-1][dimension-1] = 1./pow(10, -2.);
+	//}
 	return;
 
 }
@@ -2135,7 +2218,16 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 	if(mcmcVar->user_parameters->fisher_GAUSS_QUAD){
 		local_integration_method = "GAUSSLEG";
 	}
-	double **temp_out = allocate_2D_array(dimension,dimension);
+
+	std::string local_gen_method = mcmcVar->mcmc_generation_method;
+	int local_dimension = dimension;  
+	//if(local_gen_method.find("EA") != std::string::npos && ids.size() != 2)
+	//  {
+	//    	local_gen_method = "IMRPhenomD_NRT";
+	//    	local_dimension -= 3;
+	//  }
+	double **temp_out = allocate_2D_array(local_dimension,local_dimension);
+	//double **temp_out = allocate_2D_array(dimension,dimension);
 	for(int i =0 ; i <mcmcVar->mcmc_num_detectors; i++){
 		
 		//Use AD 
@@ -2146,17 +2238,17 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 			//	"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
 			//	(gen_params *)(&params),  "SIMPSONS",(double *)NULL,false,mcmcVar->mcmc_noise[i]);
 			fisher_autodiff(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,local_dimension, 
 				(gen_params *)(&params),  local_integration_method,local_weights[i],true,local_noise[i]);
 		}
 		else{
 			fisher_numerical(local_freq[i], local_lengths[i],
-				"MCMC_"+mcmcVar->mcmc_generation_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,dimension, 
+				"MCMC_"+local_gen_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,local_dimension, 
 				&params, 4, NULL, NULL, local_noise[i]);
 
 		}
-		for(int j =0; j<dimension; j++){
-			for(int k =0; k<dimension; k++)
+		for(int j =0; j<local_dimension; j++){
+			for(int k =0; k<local_dimension; k++)
 			{
 				tempOutput[j][k] +=temp_out[j][k];
 				//if(std::isnan(output[j][k]))
@@ -2169,9 +2261,17 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 	//Add prior information to fisher
 	//if(mcmcVar->mcmc_generation_method.find("Pv2") && !mcmcVar->mcmc_intrinsic){
 	
-	MCMC_fisher_transformations_v2(temp_params, tempOutput,dimension,local_gen,mcmcVar->mcmc_intrinsic,
-		mcmcVar->mcmc_mod_struct);
-	deallocate_2D_array(temp_out, dimension,dimension);
+	//if(local_gen_method.find("EA") != std::string::npos && ids.size() == 2){
+	if(false){
+		MCMC_fisher_transformations_v2(temp_params, tempOutput,dimension,"IMRPhenomD_NRT",mcmcVar->mcmc_intrinsic,
+			mcmcVar->mcmc_mod_struct);
+	    	tempOutput[dimension-3][dimension-3] = 1./pow(10, -2.);
+	}
+	else{
+		MCMC_fisher_transformations_v2(temp_params, tempOutput,dimension,local_gen,mcmcVar->mcmc_intrinsic,
+			mcmcVar->mcmc_mod_struct);
+	}
+	deallocate_2D_array(temp_out, local_dimension,local_dimension);
 
 	//Try marginalizing over other parameters, otherwise just use subfisher without marginalizing
 	int status = invertFisherBlock(tempOutput, output, dimension, ids);
@@ -2183,6 +2283,22 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 		}
 
 	}
+	//if(local_gen_method.find("EA") != std::string::npos && ids.size() == 2){
+	//	for(int j =0; j<ids.size(); j++){
+	//		for(int k =0; k<ids.size(); k++)
+	//		{
+	//			std::cout<<output[j][k]<<", ";
+	//		}
+	//		std::cout<<std::endl;
+	//	} 
+	//	std::cout<<std::endl;
+	//}
+	//for(int i = 0 ; i<ids.size(); i++){
+	//	for(int j = 0 ; j<ids.size(); j++){
+	//		std::cout<<output[i][j] <<", ";	
+	//	}
+	//	std::cout<<std::endl;
+	//}
 
 	//if(ids.size() == dimension){
 	//	for(int i = 0 ; i<dimension; i++){
