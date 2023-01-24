@@ -13,4 +13,6 @@ digraph "logPriorStandard_D"
   Node4 [label="logPriorStandard_D\l_NRT_EA",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__EA.html",tooltip=" "];
   Node3 -> Node5 [dir="back",color="steelblue1",style="solid"];
   Node5 [label="logPriorStandard_D\l_NRT_mod",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__mod.html",tooltip=" "];
+  Node1 -> Node6 [dir="back",color="steelblue1",style="solid"];
+  Node6 [label="logPriorStandard_D_mod",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__mod.html",tooltip=" "];
 }

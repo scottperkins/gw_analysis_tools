@@ -122,17 +122,17 @@
 <dt class="sig sig-object cpp" id="_CPPv413find_datatypeNSt6stringE">
 <span id="_CPPv313find_datatypeNSt6stringE"></span><span id="_CPPv213find_datatypeNSt6stringE"></span><span id="find_datatype__ss"></span><span class="target" id="io__util_8h_1a627ac895351aa8f4c26a2565cf1769d0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">find_datatype</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">type</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413find_datatypeNSt6stringE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Takes in the shorthand for primitive datatypes in c++ and returns code based on type. </p>
-<p>Returns: <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">Not</span><span class="w"> </span><span class="n">found</span><span class="w"></span>
+<p>Returns: <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="mi">0</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">Not</span><span class="w"> </span><span class="n">found</span>
 
-<span class="mi">1</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">int</span><span class="w"></span>
+<span class="mi">1</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">int</span>
 
-<span class="mi">2</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">string</span><span class="w"></span>
+<span class="mi">2</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="n">string</span>
 
-<span class="mi">3</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">double</span><span class="w"></span>
+<span class="mi">3</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">double</span>
 
-<span class="mi">4</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">float</span><span class="w"></span>
+<span class="mi">4</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">float</span>
 
-<span class="mi">5</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">bool</span><span class="w"></span>
+<span class="mi">5</span><span class="w"> </span><span class="o">--</span><span class="w"> </span><span class="kt">bool</span>
 </pre></div>
 </div>
  </p>
@@ -317,11 +317,11 @@
 <p>Trims data for Tobs (determined by PSD file) 3/4*Tobs in front of trigger, and 1/4*Tobs behind or max 2 seconds on the end</p>
 <p>Currently, default to sampling frequency and observation time set by PSD &amp;#8212; cannot be customized</p>
 <p>Output is in order of PSD columns &amp;#8212; string vector of detectos MUST match order of PSD cols</p>
-<p>Output shapes&amp;#8212; <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">psds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span><span class="w"></span>
+<p>Output shapes&amp;#8212; <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">psds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span>
 
 <span class="w">    </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span><span class="w">  </span>
 
-<span class="w">    </span><span class="n">freqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="n">freqs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="n">num_detectors</span><span class="p">][</span><span class="n">psd_length</span><span class="p">]</span>
 </pre></div>
 </div>
  Total observation time = 1/( freq[i] - freq[i-1]) (from PSD file)</p>

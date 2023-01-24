@@ -18,4 +18,6 @@ digraph "Graphical Class Hierarchy"
   Node5 [label="logPriorStandard_D\l_NRT_EA",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__EA.html",tooltip=" "];
   Node4 -> Node6 [dir="back",color="steelblue1",style="solid"];
   Node6 [label="logPriorStandard_D\l_NRT_mod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__NRT__mod.html",tooltip=" "];
+  Node3 -> Node7 [dir="back",color="steelblue1",style="solid"];
+  Node7 [label="logPriorStandard_D_mod",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$classlogPriorStandard__D__mod.html",tooltip=" "];
 }

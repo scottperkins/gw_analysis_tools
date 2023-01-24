@@ -97,7 +97,7 @@ CMD [&quot;jupyter-lab&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;
 <section id="running-container">
 <h2>Running container<a class="headerlink" href="#running-container" title="Permalink to this heading"></a></h2>
 <p>Now, with image in hand, navigate to the directory of interest and run the following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -d --rm -p &lt;port-ID&gt;:&lt;port-ID&gt; -v <span class="k">$(</span>PWD<span class="k">)</span>:/container/dir/path &lt;image-ID&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--rm<span class="w"> </span>-p<span class="w"> </span>&lt;port-ID&gt;:&lt;port-ID&gt;<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span>PWD<span class="k">)</span>:/container/dir/path<span class="w"> </span>&lt;image-ID&gt;
 </pre></div>
 </div>
 <p>where the &lt;port-ID&gt; matches the port used in the image (at least the second one) and the “/container/dir/path” directory is whatever you want to call it (directory inside the container). The image (&lt;image-ID&gt;) is obviously the image you want to run (e.g. scottperkins/gwat.jupyter)</p>
@@ -105,11 +105,11 @@ CMD [&quot;jupyter-lab&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;
 <section id="logging-in">
 <h2>Logging in<a class="headerlink" href="#logging-in" title="Permalink to this heading"></a></h2>
 <p>For now, you have to log into the container with</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it &lt;container-id&gt; bash
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;container-id&gt;<span class="w"> </span>bash
 </pre></div>
 </div>
 <p>Then, inside the container, run</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter server list
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupyter<span class="w"> </span>server<span class="w"> </span>list
 </pre></div>
 </div>
 <p>Go to localhost:&lt;port-ID&gt; in a browser and copy the token from the docker container to log in.</p>

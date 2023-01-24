@@ -93,57 +93,57 @@ This is, of course, no long term solution and no replacement for developing repr
 To do this, we will use the publicly maintained base image, “scottperkins/gw.base.deps”, hosted on DockerHub by the principle developer.
 Note, there are publicly maintained pre-compiled images to use on DockerHub, but we will be making our own image to allow for developing the source code.</p>
 <p>For this example, we will assume the user is in a directory with the following structure, where “BayesShip” represents any necessary dependency not included in the image “scottperkins/gw.base.deps”.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">other</span><span class="o">-</span><span class="n">project</span><span class="o">-</span><span class="n">code</span><span class="o">/</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">other</span><span class="o">-</span><span class="n">project</span><span class="o">-</span><span class="n">code</span><span class="o">/</span>
 </pre></div>
 </div>
 <p>We will assume the user is in the “root-directory” to begin with.</p>
 <ol class="arabic simple">
 <li><p>Download the source code from the repository</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull &lt;git-repo-name&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>&lt;git-repo-name&gt;
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
 <li><p>Make any desired changes to the source code.</p></li>
 <li><p>Write a docker-compose.yml file, following the following template and save it in “root-directory”,</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>version: <span class="s2">&quot;3&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>version:<span class="w"> </span><span class="s2">&quot;3&quot;</span>
 services:
-  project:
-    container_name: &lt;name&gt;
-    image: scottperkins/gw.base.deps
-    ports:
-        - <span class="s2">&quot;8081:8081&quot;</span>
-    tty: <span class="nb">true</span>
-    stdin_open: <span class="nb">true</span>
-    volumes:
-        - <span class="nv">$PWD</span>/BayesShip:/opt/BayesShip
-        - <span class="nv">$PWD</span>/gw_analysis_tools/:/opt/gw_analysis_tools
-        - <span class="nv">$PWD</span>/other-project-code/:/opt/other-project-code
+<span class="w">  </span>project:
+<span class="w">    </span>container_name:<span class="w"> </span>&lt;name&gt;
+<span class="w">    </span>image:<span class="w"> </span>scottperkins/gw.base.deps
+<span class="w">    </span>ports:
+<span class="w">        </span>-<span class="w"> </span><span class="s2">&quot;8081:8081&quot;</span>
+<span class="w">    </span>tty:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span>stdin_open:<span class="w"> </span><span class="nb">true</span>
+<span class="w">    </span>volumes:
+<span class="w">        </span>-<span class="w"> </span><span class="nv">$PWD</span>/BayesShip:/opt/BayesShip
+<span class="w">        </span>-<span class="w"> </span><span class="nv">$PWD</span>/gw_analysis_tools/:/opt/gw_analysis_tools
+<span class="w">        </span>-<span class="w"> </span><span class="nv">$PWD</span>/other-project-code/:/opt/other-project-code
 </pre></div>
 </div>
 <ol class="arabic simple" start="4">
 <li><p>We now expect the following file structure, and that the user is in “root-directory”:</p></li>
 </ol>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">gw_analysis_tools</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">other</span><span class="o">-</span><span class="n">project</span><span class="o">-</span><span class="n">code</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">gw_analysis_tools</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">other</span><span class="o">-</span><span class="n">project</span><span class="o">-</span><span class="n">code</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">docker</span><span class="o">-</span><span class="n">compose</span><span class="p">.</span><span class="n">yml</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="5">
 <li><p>Build the image with the following command</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
 </pre></div>
 </div>
 <ol class="arabic simple" start="6">
 <li><p>Now, one can login to the running container with</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> -it &lt;name&gt; bash
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;name&gt;<span class="w"> </span>bash
 </pre></div>
 </div>
 <ol class="arabic simple" start="7">
@@ -151,7 +151,7 @@ services:
 <li><p>For clarity, the install location for any compiled software should generally be on non-mounted volumes, but this is up to the discretion of the developer.</p></li>
 <li><p>If the necessary libraries and executables have been installed in the container (not in mounted volumes), then one can save the image file with</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker save myimage:latest <span class="p">|</span> gzip &gt; myimage_latest.tar.gz
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>save<span class="w"> </span>myimage:latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>gzip<span class="w"> </span>&gt;<span class="w"> </span>myimage_latest.tar.gz
 </pre></div>
 </div>
 </section>
@@ -160,71 +160,71 @@ services:
 <p>This example is focused on the use case where one wants to use this software on a scientific HPC cluster where singularity might be used.
 One method of doing this is to first create a Docker image, outlined below.
 For this example, we will assume the user is in a directory with the following structure, where “BayesShip” represents any necessary dependency not included in the image “scottperkins/gw.base.deps”.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span>
 </pre></div>
 </div>
 <p>We will assume the user is in the “root-directory” to begin with.</p>
 <ol class="arabic simple">
 <li><p>Download the source code from the repository</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git pull &lt;git-repo-name&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>&lt;git-repo-name&gt;
 </pre></div>
 </div>
 <ol class="arabic simple" start="2">
 <li><p>Make any desired changes to the source code.</p></li>
 <li><p>Write a Dockerfile, following the following template and save it in “root-directory”,</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FROM scottperkins/gw.base.deps:latest <span class="c1"># Pull the image from the online repository with all the dependencies pre-installed</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>FROM<span class="w"> </span>scottperkins/gw.base.deps:latest<span class="w"> </span><span class="c1"># Pull the image from the online repository with all the dependencies pre-installed</span>
 
 
 <span class="c1"># Install any other dependencies (like custom repositories)</span>
-RUN mkdir /opt/BayesShip <span class="c1"># Make the directory for the source code *in the container*</span>
-RUN mkdir /opt/BayesShip/build <span class="c1"># Make a build directory</span>
-COPY BayesShip/ /opt/BayesShip/ <span class="c1"># Copy all source files into the container</span>
-WORKDIR /opt/BayesShip/build/ <span class="c1"># Make the current working directory the build directory</span>
-RUN cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local ../ <span class="c1"># Configure the installation</span>
-RUN make -j <span class="m">4</span> install <span class="c1"># Compile and install the library</span>
+RUN<span class="w"> </span>mkdir<span class="w"> </span>/opt/BayesShip<span class="w"> </span><span class="c1"># Make the directory for the source code *in the container*</span>
+RUN<span class="w"> </span>mkdir<span class="w"> </span>/opt/BayesShip/build<span class="w"> </span><span class="c1"># Make a build directory</span>
+COPY<span class="w"> </span>BayesShip/<span class="w"> </span>/opt/BayesShip/<span class="w"> </span><span class="c1"># Copy all source files into the container</span>
+WORKDIR<span class="w"> </span>/opt/BayesShip/build/<span class="w"> </span><span class="c1"># Make the current working directory the build directory</span>
+RUN<span class="w"> </span>cmake<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local<span class="w"> </span>../<span class="w"> </span><span class="c1"># Configure the installation</span>
+RUN<span class="w"> </span>make<span class="w"> </span>-j<span class="w"> </span><span class="m">4</span><span class="w"> </span>install<span class="w"> </span><span class="c1"># Compile and install the library</span>
 
 <span class="c1"># Install the main source code</span>
-RUN mkdir /opt/gw_analysis_tools
-RUN mkdir /opt/gw_analysis_tools/build
-COPY gw_analysis_tools/ /opt/gw_analysis_tools/
-WORKDIR /opt/gw_analysis_tools/build/
-RUN cmake -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local ../
-RUN make -j <span class="m">4</span> 
-RUN make install 
-WORKDIR /
+RUN<span class="w"> </span>mkdir<span class="w"> </span>/opt/gw_analysis_tools
+RUN<span class="w"> </span>mkdir<span class="w"> </span>/opt/gw_analysis_tools/build
+COPY<span class="w"> </span>gw_analysis_tools/<span class="w"> </span>/opt/gw_analysis_tools/
+WORKDIR<span class="w"> </span>/opt/gw_analysis_tools/build/
+RUN<span class="w"> </span>cmake<span class="w"> </span>-DCMAKE_INSTALL_PREFIX<span class="o">=</span>/usr/local<span class="w"> </span>../
+RUN<span class="w"> </span>make<span class="w"> </span>-j<span class="w"> </span><span class="m">4</span><span class="w"> </span>
+RUN<span class="w"> </span>make<span class="w"> </span>install<span class="w"> </span>
+WORKDIR<span class="w"> </span>/
 
 <span class="c1"># Remove the source files *from the container* in case one wants to host the image on DockerHub (removing the source files allows for maintaining privacy of the source code until public)</span>
-RUN rm -r /opt/gw_analysis_tools/
-RUN rm -r /opt/BayesShip/
+RUN<span class="w"> </span>rm<span class="w"> </span>-r<span class="w"> </span>/opt/gw_analysis_tools/
+RUN<span class="w"> </span>rm<span class="w"> </span>-r<span class="w"> </span>/opt/BayesShip/
 </pre></div>
 </div>
 <ol class="arabic simple" start="4">
 <li><p>We now expect the following file structure, and that the user is in “root-directory”:</p></li>
 </ol>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------</span><span class="n">gw_analysis_tools</span><span class="o">/</span><span class="w"></span>
-<span class="o">|-------&lt;</span><span class="n">Dockerfile</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">root</span><span class="o">-</span><span class="n">directory</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">BayesShip</span><span class="o">/</span>
+<span class="o">|-------</span><span class="n">gw_analysis_tools</span><span class="o">/</span>
+<span class="o">|-------&lt;</span><span class="n">Dockerfile</span><span class="o">-</span><span class="n">name</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <ol class="arabic simple" start="5">
 <li><p>Build the image with the following command</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker build -f &lt;Dockerfile-name&gt; -t &lt;tag&gt; .
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-f<span class="w"> </span>&lt;Dockerfile-name&gt;<span class="w"> </span>-t<span class="w"> </span>&lt;tag&gt;<span class="w"> </span>.
 </pre></div>
 </div>
 <p>If the user wants to host on DockerHub, the &lt;tag&gt; name should be &lt;DockerHub-ID&gt;/&lt;tag-name&gt;.
 6. If desired, the user can now push the image to DockerHub (which is <em>generally</em> public):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker push &lt;tag&gt;
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>push<span class="w"> </span>&lt;tag&gt;
 </pre></div>
 </div>
 <ol class="arabic simple" start="7">
 <li><p>Now one can save the image file with</p></li>
 </ol>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker save myimage:latest <span class="p">|</span> gzip &gt; myimage_latest.tar.gz
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>save<span class="w"> </span>myimage:latest<span class="w"> </span><span class="p">|</span><span class="w"> </span>gzip<span class="w"> </span>&gt;<span class="w"> </span>myimage_latest.tar.gz
 </pre></div>
 </div>
 </section>
