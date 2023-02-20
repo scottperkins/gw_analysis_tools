@@ -25,10 +25,13 @@ mkdir src
 
 # Copy in the data
 
-cp $HOME/GW-Analysis/example/injection_IMRPhenomD/runscript.sh ./
-cp $HOME/GW-Analysis/example/injection_IMRPhenomD/src/injection.cpp ./src/
-cp $HOME/GW-Analysis/example/injection_IMRPhenomD/makefile ./
-cp $HOME/GW-Analysis/example/injection_IMRPhenomD/data/injections.csv ./data/
+dir=$HOME/GW-Analysis/gw_analysis_tools/examples/injection_IMRPhenomD
+
+cp $dir/runscript.sh ./
+cp $dir/src/injection.cpp ./src/
+cp $dir/makefile ./
+cp $dir/data/injections.csv ./data/
+cp $dir/runscript_for_slurm.sh ./ 
 
 # Some people may need to put the cache in a specific place, as home directories don't always have enough space
 export SINGULARITY_CACHEDIR=$HOME/scratch/.singularity/
