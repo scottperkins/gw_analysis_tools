@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 	PD.T_merger = T_merger;
 
 	//Initialize standard prior -- see in gw_analysis_tools/src/standardPriorLibrary.cpp
-	bayesship::probabilityFn *log_prior = new logPriorStandard_D_NRT(&PD);;
+	bayesship::probabilityFn *log_prior = new logPriorStandard_D(&PD);;
 
 	//Samples, burn in parameters 	
 	int independentSamples = 10000;
