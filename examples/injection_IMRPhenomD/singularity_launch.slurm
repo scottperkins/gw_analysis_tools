@@ -27,10 +27,9 @@ mkdir src
 
 dir=$HOME/GW-Analysis/gw_analysis_tools/examples/injection_IMRPhenomD
 
-cp $dir/runscript.sh ./
 cp $dir/src/injection.cpp ./src/
 cp $dir/makefile ./
-cp $dir/data/injections.csv ./data/
+# cp $dir/data/injections.csv ./data/
 cp $dir/runscript_for_slurm.sh ./ 
 
 # Some people may need to put the cache in a specific place, as home directories don't always have enough space

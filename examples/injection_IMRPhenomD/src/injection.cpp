@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
 	//Spins
 	injection.spin1[2] = .0;
-	injection.spin2[2] = -.0;
+	injection.spin2[2] = .0;
 	injection.spin1[1] = .0;
 	injection.spin2[1] = .0;
 	injection.spin1[0] = .0;
