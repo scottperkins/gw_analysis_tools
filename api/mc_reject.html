@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mc_reject &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API</a></li>
       <li class="breadcrumb-item active">mc_reject</li>
       <li class="wy-breadcrumbs-aside">
@@ -121,7 +125,7 @@
 <p>Should not be called by the user</p>
 <p>Just made this separate from the class for now for convenience </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>job</strong> – mcr job &amp;#8212; see mc_reject.h </p>
 </dd>
 </dl>
@@ -144,7 +148,7 @@
 <p>`draw_parameters’ &amp;#8212; NULL, if default should be used. Otherwise, this should propose another parameter set</p>
 <p>param_ranges_max/min are only used if the default draw_parameter is used, otherwise can be NULL </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dimension</strong> – Dimension </p></li>
 <li><p><strong>param_ranges_max</strong> – Max allowed parameters &amp;#8212; Shape [dimension] </p></li>
@@ -163,7 +167,7 @@
 <p>`draw_parameters’ &amp;#8212; NULL, if default should be used. Otherwise, this should propose another parameter set</p>
 <p>param_ranges_max/min are only used if the default draw_parameter is used, otherwise can be NULL </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dimension</strong> – Dimension </p></li>
 <li><p><strong>param_ranges_max</strong> – Max allowed parameters &amp;#8212; Shape [dimension] </p></li>
@@ -187,7 +191,7 @@
 <span id="_CPPv3N11mcr_sampler19sample_distributionEiPPv"></span><span id="_CPPv2N11mcr_sampler19sample_distributionEiPPv"></span><span id="mcr_sampler::sample_distribution__i.voidPP"></span><span class="target" id="classmcr__sampler_1a5ba6b047e2f5cb8df12dcf593f3eb45e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sample_distribution</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">N_samples</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N11mcr_sampler19sample_distributionEiPPv" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Main driver &amp;#8212; Samples from distribution that has been associated with a sampler object. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>output</strong> – [out] Output array shape [N_samples][dimension] Caste to void ** </p>
 </dd>
 </dl>
@@ -199,7 +203,7 @@
 <dd><p>Internal routine to return one accepted sample. </p>
 <p>Should not be used directly by user &amp;#8212; couldn’t make private though </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>output</strong> – [out] Output, accepted parameter set </p></li>
 <li><p><strong>threadid</strong> – Thread id &amp;#8212; not currently used, but included for future proofing </p></li>
@@ -266,7 +270,7 @@
 <p>Assumes the parameter vector is of type double *</p>
 <p>Uses the ranges provided by the user to randomly draw samples uniformly </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>prop_params</strong> – [out] Proposed Param </p></li>
 <li><p><strong>d</strong> – Dimension of parameter space </p></li>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>detector_util &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API</a></li>
       <li class="breadcrumb-item active">detector_util</li>
       <li class="wy-breadcrumbs-aside">
@@ -183,7 +187,7 @@
 </div>
  </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frequencies</strong> – double array of frquencies (NULL) </p></li>
 <li><p><strong>detector</strong> – String to designate the detector noise curve to be used </p></li>
@@ -329,7 +333,7 @@
 <p>Need gps_time of transformation, as the horizontal coords change in time</p>
 <p>detector is used to specify the lat and long of the local frame </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>RA</strong> – in RAD </p></li>
 <li><p><strong>DEC</strong> – in RAD </p></li>
@@ -346,7 +350,7 @@
 <dd><p>Numerical derivative of the transformation. </p>
 <p>Planned for use in Fisher calculations, but not currently implemented anywhere </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>RA</strong> – in RAD </p></li>
 <li><p><strong>DEC</strong> – in RAD </p></li>
@@ -360,7 +364,7 @@
 <span id="_CPPv34DTOAddNSt6stringENSt6stringE"></span><span id="_CPPv24DTOAddNSt6stringENSt6stringE"></span><span id="DTOA__double.double.ss.ss"></span><span class="target" id="detector__util_8h_1a8f5874fbc260906fa9ea664debbe86d4"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DTOA</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">theta1</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">theta2</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">detector1</span></span>, <a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">detector2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv44DTOAddNSt6stringENSt6stringE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta1</strong> – spherical polar angle for detector 1 in RAD </p></li>
 <li><p><strong>theta2</strong> – spherical polar angle for detector 2 in RAD </p></li>
@@ -377,7 +381,7 @@
 <dd><p>/brief Analytic approximation of the radius from the center of earth to a given location</p>
 <p>Just the raidus as a function of angles, modelling an oblate spheroid </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>latitude</strong> – latitude in degrees </p></li>
 <li><p><strong>elevation</strong> – elevation in meters </p></li>
@@ -394,7 +398,7 @@
 <p>The response tensor for each of the operational detectors is precomputed in detector_util.h, but to create a new tensor, follow the outline in Anderson et al 36 PRD 63 042003 (2001) Appendix B</p>
 <p>For terrestial detectors &amp;#8212; psi is the polarization angle from a detector at earth’s center, aligned with equatorial coordinates </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>D</strong> – Detector Response tensor (3x3) </p></li>
 <li><p><strong>ra</strong> – Right ascension in rad </p></li>
@@ -412,7 +416,7 @@
 <dd><p>Wrapping of the equatorial detector response for terrestial based detectors. </p>
 <p>For ground based detectors, the antenna pattern functions are not functions of time. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>detector</strong> – Detector </p></li>
 <li><p><strong>ra</strong> – Right ascension in rad </p></li>
@@ -431,7 +435,7 @@
 <p>If terrestial detectors, it will use ra, dec, psi, and gmst</p>
 <p>If space detector, it will use ra, dec transformed to ecliptic coord, and LISA_alpha0, LISA_phi0 and theta_j_ecl, phi_j_ecl, which are the offsets for LISA and the spherical angles for the unit vector in the total angular momemntum in the ecliptic system </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>detector</strong> – Detector </p></li>
 <li><p><strong>ra</strong> – Right ascension in rad </p></li>
@@ -455,7 +459,7 @@
 <dd><p>calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors </p>
 <p>Full version, from LAL </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>RA</strong> – spherical polar angle for detector 1 in RAD </p></li>
 <li><p><strong>DEC</strong> – spherical polar angle for detector 2 in RAD </p></li>
@@ -472,7 +476,7 @@
 <span id="_CPPv3I0E25DTOA_earth_centered_coord1T1TdPKdPKd"></span><span id="_CPPv2I0E25DTOA_earth_centered_coord1T1TdPKdPKd"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="detector__util_8h_1aae34f98acb7ad6f22b3c3140dbe5d751"></span><a class="reference internal" href="#_CPPv4I0E25DTOA_earth_centered_coord1T1T1TdPKdPKd" title="DTOA_earth_centered_coord::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DTOA_earth_centered_coord</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E25DTOA_earth_centered_coord1T1T1TdPKdPKd" title="DTOA_earth_centered_coord::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">RA</span></span>, <a class="reference internal" href="#_CPPv4I0E25DTOA_earth_centered_coord1T1T1TdPKdPKd" title="DTOA_earth_centered_coord::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">DEC</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">GMST_rad</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">loc1</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">loc2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0E25DTOA_earth_centered_coord1T1T1TdPKdPKd" title="Permalink to this definition"></a><br /></dt>
 <dd><p>calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>RA</strong> – spherical polar angle for detector 1 in RAD </p></li>
 <li><p><strong>DEC</strong> – spherical polar angle for detector 2 in RAD </p></li>
@@ -518,7 +522,7 @@
 <p>Integrates using Monte Carlo integration</p>
 <p>Uniform sampling in \psi, cos(\iota), cos(\theta) , and \phi </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>omega</strong> – \omega = \rho/\rho_opt* </p></li>
 <li><p><strong>samples</strong> – number of monte carlo samples to use* </p></li>
@@ -538,7 +542,7 @@
 <p>Sampled using any supported detectors. See documentation for supported detectors</p>
 <p>Rough upper limit: HLV: 1.4 HLVK: 1.5 HLVI: 1.65 HLVKI: 1.7 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>omega</strong> – \omega = \rho/\rho_opt* </p></li>
 <li><p><strong>samples</strong> – number of monte carlo samples to use* </p></li>
@@ -558,7 +562,7 @@
 <p>Integrated over the volume which \omega’ is larger than \omega</p>
 <p>see arXiv:1405.7016 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>omega</strong> – \omega = \rho/\rho_opt* </p>
 </dd>
 </dl>
@@ -573,7 +577,7 @@
 <p>see arXiv:1405.7016</p>
 <p>Not accurate, apparently. Just use interpolation </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>omega</strong> – \omega = \rho/\rho_opt* </p>
 </dd>
 </dl>
@@ -592,7 +596,7 @@
 <p>Integrated over the volume which \omega’ is larger than \omega</p>
 <p>see arXiv:1405.7016 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>omega</strong> – \omega = \rho/\rho_opt* </p>
 </dd>
 </dl>
@@ -606,7 +610,7 @@
 <p>Integrated over the volume which \omega’ is larger than \omega</p>
 <p>see arXiv:1405.7016 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>omega</strong> – \omega = \rho/\rho_opt* </p>
 </dd>
 </dl>

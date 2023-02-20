@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Installation &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -68,7 +72,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/installation/installation.md.txt" rel="nofollow"> View page source</a>
@@ -85,7 +89,7 @@
 <section id="source-code-compilation">
 <h2>Source Code Compilation<a class="headerlink" href="#source-code-compilation" title="Permalink to this heading"></a></h2>
 <section id="install-dependencies-1">
-<h3>Install dependencies <a class="footnote-reference brackets" href="#id2" id="id1">1</a><a class="headerlink" href="#install-dependencies-1" title="Permalink to this heading"></a></h3>
+<h3>Install dependencies <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a><a class="headerlink" href="#install-dependencies-1" title="Permalink to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>CMake *</p></li>
 <li><p>FFTW3 *</p></li>
@@ -134,6 +138,7 @@ make<span class="w"> </span>install
 <li><p><a class="reference external" href="https://hub.docker.com/repository/docker/scottperkins/gwat">scottperkins/gwat</a></p>
 <ul class="simple">
 <li><p>An image with the “master” branch of GWAT installed. <em>This should be the default option for new users</em></p></li>
+<li><p>For an example minimally working example using this image, see <a class="reference internal" href="../tutorials/minimalWorkingExampleIMRPhenomD.html"><span class="doc std std-doc">here</span></a></p></li>
 </ul>
 </li>
 <li><p><a class="reference external" href="https://hub.docker.com/repository/docker/scottperkins/parityviolation">scottperkins/parityviolation</a></p>
@@ -150,11 +155,12 @@ make<span class="w"> </span>install
 </li>
 </ol>
 <hr class="footnotes docutils" />
-<dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>On systems where you have admin privileges, I would install everything in “/usr/local” unless there’s good reason not to. For systems where you don’t have admin privileges or if you want to keep the software isolated, I typically put a directory called “.local” into my home directory, and install everything there.</p>
-</dd>
-</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>On systems where you have admin privileges, I would install everything in “/usr/local” unless there’s good reason not to. For systems where you don’t have admin privileges or if you want to keep the software isolated, I typically put a directory called “.local” into my home directory, and install everything there.</p>
+</aside>
+</aside>
 </section>
 </section>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mcmc_sampler_internals &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API</a></li>
       <li class="breadcrumb-item active">mcmc_sampler_internals</li>
       <li class="wy-breadcrumbs-aside">
@@ -151,7 +155,7 @@
 <dd><p>Straight gaussian step. </p>
 <p>Change this to pick one direction </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – Sampler struct </p></li>
 <li><p><strong>current_param</strong> – current position in parameter space </p></li>
@@ -166,7 +170,7 @@
 <span id="_CPPv311fisher_stepP7samplerPdPdPiPiPiPii"></span><span id="_CPPv211fisher_stepP7samplerPdPdPiPiPiPii"></span><span id="fisher_step__samplerP.doubleP.doubleP.iP.iP.iP.iP.i"></span><span class="target" id="mcmc__sampler__internals_8h_1a02d0d2ecf1ddb20871e3a5c7d8d296e3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fisher_step</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv411fisher_stepP7samplerPdPdPiPiPiPii" title="fisher_step::sampler"><span class="n"><span class="pre">sampler</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">sampler</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">current_param</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proposed_param</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">current_status</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proposed_status</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">current_model_status</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proposed_model_status</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chain_index</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411fisher_stepP7samplerPdPdPiPiPiPii" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Fisher informed gaussian step. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – Sampler struct </p></li>
 <li><p><strong>current_param</strong> – current position in parameter space </p></li>
@@ -190,7 +194,7 @@
 <p>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</p>
 <p>NOTE: This assumes the Fisher doesn’t change between steps. The proposal ratio only accounts for the gradient of the log likelihood </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – Sampler struct </p></li>
 <li><p><strong>current_param</strong> – current position in parameter space </p></li>
@@ -207,7 +211,7 @@
 <p>Differential evolution uses the past history of the chain to inform the proposed step:</p>
 <p>Take the difference of two random, accepted previous steps and step along that with some step size, determined by a gaussian </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – Sampler struct </p></li>
 <li><p><strong>current_param</strong> – current position in parameter space </p></li>
@@ -223,7 +227,7 @@
 <dd><p>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</p>
 <p>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – Current sampler </p></li>
 <li><p><strong>current_param</strong> – Current parameters to match </p></li>
@@ -243,7 +247,7 @@
 <dd><p>RJ-proposal step for trans-dimensional MCMCs. </p>
 <p>This extra step may seem unnecessary, I’m just adding it in in case the extra flexibility is useful in the future for preprocessing of the chain before sending it to the user’s RJ_proposal </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – sampler </p></li>
 <li><p><strong>current_param</strong> – current coordinates in parameter space </p></li>
@@ -265,7 +269,7 @@
 <p>The total output file is passed, and the chains are swapped sequentially</p>
 <p>This is the routine for `Deterministic’ sampling (parallel or sequential, but not pooled) </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – sampler struct </p></li>
 <li><p><strong>output</strong> – output vector containing chains </p></li>
@@ -283,7 +287,7 @@
 <dd><p>subroutine to actually swap two chains </p>
 <p>This is the more general subroutine, which just swaps the two chains passed to the function </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – sampler structure </p></li>
 <li><p><strong>chain1</strong> – parameter position of chain that could be changed </p></li>
@@ -412,7 +416,7 @@
 <dd><p>Timescale of the PT dynamics. </p>
 <p>kappa in the the language of arXiv:1501.05823v3 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t0</strong> – Timescale of the dyanmics </p></li>
 <li><p><strong>nu</strong> – Initial amplitude (number of steps to base dynamics on) </p></li>
@@ -451,7 +455,7 @@
 <p>Allocates memory for the new sampler sampler_new -&gt; it’s the user’s responsibility to deallocate with deallocate_sampler_mem</p>
 <p>checkpoint_file_start is the file used for continue_PTMCMC like functions, and can be used if the user wants to maintain the approximate positions and histories of the ensemble of chains after the dynamic temperature allocation. If the rest of the chains should just be copies of the base ensemble, pass an empty string (“”). Since the chain distribution can change the number and distribution of chain temperatures (that’s kinda the point..), the transfer is not perfect. Cold chains are prioritized, then the rest of the chains are filled in as close as possible. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler_old</strong> – Dynamic sampler </p></li>
 <li><p><strong>chain_N_thermo_ensemble</strong> – Number of chains used in the thermodynamic ensemble </p></li>
@@ -509,7 +513,7 @@
 <dd><p>KDE step from history file. </p>
 <p>TODO: Right now, this assumes a diagonal covariance matrix. Maybe fix this in the future </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>sampler</strong> – Sampler struct </p></li>
 <li><p><strong>current_param</strong> – current position in parameter space </p></li>

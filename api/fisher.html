@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>fisher &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API</a></li>
       <li class="breadcrumb-item active">fisher</li>
       <li class="wy-breadcrumbs-aside">
@@ -140,7 +144,7 @@
 <p>Utilizes numerical derivatives &amp;#8212; non-skyaveraged supports up to 4th order finite difference (sky averaged supports second order only)</p>
 <p>NOT SAFE FOR LISA YET &amp;#8212; see hessian of phase for time derivative </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>length</strong> – if 0, standard frequency range for the detector is used </p></li>
 <li><p><strong>output</strong> – double [dimension][dimension] </p></li>
@@ -311,7 +315,7 @@
 <p>Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are `as good as they need to be’ to calculate the fisher</p>
 <p>Implements (GSL_INTEG_GAUSS15) </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frequency_bounds</strong> – Bounds of integration in fourier space </p></li>
 <li><p><strong>generation_method</strong> – Method of waveform generation </p></li>
@@ -341,7 +345,7 @@
 <p>Implements (GSL_INTEG_GAUSS15)</p>
 <p>Now includes option to log error instead of ending program for certain types of errors </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frequency_bounds</strong> – Bounds of integration in fourier space </p></li>
 <li><p><strong>generation_method</strong> – Method of waveform generation </p></li>
@@ -374,7 +378,7 @@
 <p>Does not have a direct interpretation in terms of integration time, as the scheme is adaptative. Sampling frequency and integration time are `as good as they need to be’ to calculate the fisher</p>
 <p>Implements (GSL_INTEG_GAUSS15) </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frequency_bounds</strong> – Bounds of integration in fourier space </p></li>
 <li><p><strong>generation_method</strong> – Method of waveform generation </p></li>
@@ -407,7 +411,7 @@
 <p>Implements (GSL_INTEG_GAUSS15)</p>
 <p>Now includes option to log error instead of ending program for certain types of errors </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>frequency_bounds</strong> – Bounds of integration in fourier space </p></li>
 <li><p><strong>generation_method</strong> – Method of waveform generation </p></li>

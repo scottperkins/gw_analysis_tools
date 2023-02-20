@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>util &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API</a></li>
       <li class="breadcrumb-item active">util</li>
       <li class="wy-breadcrumbs-aside">
@@ -136,7 +140,7 @@
 <dt class="sig sig-object cpp" id="_CPPv410mvn_sampleiPdPPdiPPd">
 <span id="_CPPv310mvn_sampleiPdPPdiPPd"></span><span id="_CPPv210mvn_sampleiPdPPdiPPd"></span><span id="mvn_sample__i.doubleP.doublePP.i.doublePP"></span><span class="target" id="util_8h_1aa4351866bba668c0b3b869ea242d1ddd"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mvn_sample</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">samples</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mean</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">cov</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dim</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410mvn_sampleiPdPPdiPPd" title="Permalink to this definition"></a><br /></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>output</strong> – [out] Size [samples][dim] </p>
 </dd>
 </dl>
@@ -147,7 +151,7 @@
 <span id="_CPPv310mvn_sampleiPdPPdiP7gsl_rngPPd"></span><span id="_CPPv210mvn_sampleiPdPPdiP7gsl_rngPPd"></span><span id="mvn_sample__i.doubleP.doublePP.i.gsl_rngP.doublePP"></span><span class="target" id="util_8h_1a1c101c323b224010c894cc8e1b90d57f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">mvn_sample</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">samples</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mean</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">cov</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dim</span></span>, <span class="n"><span class="pre">gsl_rng</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">r</span></span>, <span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">output</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410mvn_sampleiPdPPdiP7gsl_rngPPd" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Samples from a multivariate-gaussian with covariance cov and mean mean, with dimension dim and puts the output in output Taken from blogpost: <a class="reference external" href="https://juanitorduz.github.io/multivariate_normal/">https://juanitorduz.github.io/multivariate_normal/</a>. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>output</strong> – [out] Size [samples][dim] </p>
 </dd>
 </dl>
@@ -287,7 +291,7 @@
 <dd><p>Rough threshold for when to truncate waveforms for neutron stars. </p>
 <p>24 km separation </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>M_detector</strong> – Detector frame total mass in seconds </p></li>
 <li><p><strong>DL</strong> – Luminsosity distance in seconds </p></li>
@@ -513,7 +517,7 @@
 <p>Where z is the axis of rotation of earth (equatorial z), and N is the line of sight to the source (direction of propagation is -N)</p>
 <p>The inclination angle is between the direction of propagation and the total angular momentum </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>RA</strong> – Right ascension in rad </p></li>
 <li><p><strong>DEC</strong> – Declination in rad </p></li>
@@ -534,7 +538,7 @@
 <p>From wikipedia</p>
 <p>Compared against astropy and agrees </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta_eq</strong> – Equatorial spherical polar angle </p></li>
 <li><p><strong>phi_eq</strong> – Equatorial spherical azimuthal angle </p></li>
@@ -559,7 +563,7 @@
 <p>R = B.A^-1</p>
 <p>Verified with specific cases and with dot products with vectors before and after rotation </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>SFvec</strong> – Input, source frame vector, as defined by LAL (L = z_hat) in cartesian </p></li>
 <li><p><strong>thetal</strong> – Polar angle in equatorial coordinates of the orbital angular momentum at the reference frequency </p></li>
@@ -651,7 +655,7 @@
 <dd><p>Utility to transform from celestial coord RA and DEC to local horizon coord for detector response functions. </p>
 <p>Outputs are the spherical polar angles defined by North as 0 degrees azimuth and the normal to the earth as 0 degree polar </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>RA</strong> – Right acsension (rad) </p></li>
 <li><p><strong>DEC</strong> – Declination (rad) </p></li>
@@ -769,7 +773,7 @@
 <span id="_CPPv3I0E33XLALSpinWeightedSphericalHarmonic1T1Tiii"></span><span id="_CPPv2I0E33XLALSpinWeightedSphericalHarmonic1T1Tiii"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="util_8h_1aeceb3527509db1909d6e741f47afdb95"></span><a class="reference internal" href="fisher.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">complex</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E33XLALSpinWeightedSphericalHarmonicNSt7complexI1TEE1T1Tiii" title="XLALSpinWeightedSphericalHarmonic::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">XLALSpinWeightedSphericalHarmonic</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E33XLALSpinWeightedSphericalHarmonicNSt7complexI1TEE1T1Tiii" title="XLALSpinWeightedSphericalHarmonic::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">theta</span></span>, <a class="reference internal" href="#_CPPv4I0E33XLALSpinWeightedSphericalHarmonicNSt7complexI1TEE1T1Tiii" title="XLALSpinWeightedSphericalHarmonic::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">phi</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">s</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">l</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">m</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0E33XLALSpinWeightedSphericalHarmonicNSt7complexI1TEE1T1Tiii" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Shamelessly stolen from LALsuite </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>theta</strong> – polar angle (rad) </p></li>
 <li><p><strong>phi</strong> – azimuthal angle (rad) </p></li>
@@ -2245,7 +2249,7 @@
 <dd><p>Builds the structure that shuttles source parameters between functions- outdated in favor of structure argument. </p>
 <p>Populates the structure that is passed to all generation methods - contains all relavent source parameters </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mass1</strong> – mass of the larger body - in Solar Masses </p></li>
 <li><p><strong>mass2</strong> – mass of the smaller body - in Solar Masses </p></li>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>io_util &mdash; GW Analysis Tools  documentation</title>
@@ -30,11 +30,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> GW Analysis Tools
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GW Analysis Tools
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -97,7 +101,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a></li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="index.html">API</a></li>
       <li class="breadcrumb-item active">io_util</li>
       <li class="wy-breadcrumbs-aside">
@@ -150,7 +154,7 @@
 <p>Takes filename, and assigns to output[rows][cols]</p>
 <p>File must be comma separated doubles </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
 <li><p><strong>output</strong> – [out] array to store output, dimensions rowsXcols </p></li>
@@ -169,7 +173,7 @@
 <p>File must be comma separated doubles</p>
 <p>integer version </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
 <li><p><strong>output</strong> – [out] array to store output, dimensions rowsXcols </p></li>
@@ -188,7 +192,7 @@
 <p>Output vector must be long enough, no check is done for the length</p>
 <p>File must be comma separated doubles </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
 <li><p><strong>output</strong> – [out] output array, assumed to have the proper length of total items </p></li>
@@ -206,7 +210,7 @@
 <p>File must be comma separated doubles</p>
 <p>Int version </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – input filename, relative to execution directory </p></li>
 <li><p><strong>output</strong> – [out] output array, assumed to have the proper length of total items </p></li>
@@ -222,7 +226,7 @@
 <p>Grid of data, comma separated</p>
 <p>Grid has rows rows and cols columns </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
 <li><p><strong>input</strong> – Input 2D array pointer array[rows][cols] </p></li>
@@ -241,7 +245,7 @@
 <p>Grid has rows rows and cols columns</p>
 <p>integer version </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
 <li><p><strong>input</strong> – Input 2D array pointer array[rows][cols] </p></li>
@@ -258,7 +262,7 @@
 <dd><p>Utility to write 1D array to file. </p>
 <p>Single column of data </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
 <li><p><strong>input</strong> – input 1D array pointer array[length] </p></li>
@@ -275,7 +279,7 @@
 <p>Single column of data</p>
 <p>integer version </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – Filename of output file, relative to execution directory </p></li>
 <li><p><strong>input</strong> – input 1D array pointer array[length] </p></li>
@@ -291,7 +295,7 @@
 <dd><p>Read data file from LIGO Open Science Center. </p>
 <p>Convenience function for cutting off the first few lines of text </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – input filename </p></li>
 <li><p><strong>output</strong> – [out] Output data </p></li>
@@ -328,7 +332,7 @@
 <p>Sampling frequency fs = max frequency from PSD file</p>
 <p>ALLOCATES MEMORY &amp;#8212; must be freed to prevent memory leak </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data_files</strong> – Vector of strings for each detector file from LOSC </p></li>
 <li><p><strong>psd_file</strong> – String of psd file from LOSC </p></li>
