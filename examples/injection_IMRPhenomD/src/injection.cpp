@@ -27,8 +27,8 @@ int main(int argc, char *argv[])
 	gen_params injection;
 
 	//Masses in M_SOL, plus useful other parameters
-	injection.mass1 = 14.0;
-	injection.mass2 = 18.0;
+	injection.mass1 = 18.0;
+	injection.mass2 = 14.0;
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
 	double eta = calculate_eta(injection.mass1,injection.mass2);
 	double q = injection.mass2/injection.mass1;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 	injection.spin2[0] = .0;
 
 	//Extrinsic
-	injection.Luminosity_Distance = 63;
+	injection.Luminosity_Distance = 600;
 	injection.psi = .2;
         injection.RA = 3.42;
 	injection.DEC = -.37;
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 	int dim = 11;
 	std::string recovery_method = "IMRPhenomD";
-	int ensembleSize = 20;
+	int ensembleSize = 15;
 	int ensembleN = 5;
 	
 	//Initial Guess  -- also the exact right answer.. Perks of injections!!
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
 	//MCMC parameters
 	//Frequency of swaps -- every N steps attempt a swap
-	int swapProb = .5;
+	int swapProb = .1;
 	//Number of threads to use
 	//int threads = 64;
 	int threads = 8;
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
 	PD.spin2_prior[0] = -.1;
 	PD.spin2_prior[1] = .1;
 	PD.DL_prior[0] = 1;
-	PD.DL_prior[1] = 500;
+	PD.DL_prior[1] = 1000;
 	PD.RA_bounds[0] = 0;
 	PD.RA_bounds[1] = 2*M_PI;
 	PD.sinDEC_bounds[0] = -1;
@@ -187,15 +187,15 @@ int main(int argc, char *argv[])
 	bayesship::probabilityFn *log_prior = new logPriorStandard_D(&PD);;
 
 	//Samples, burn in parameters 	
-	int independentSamples = 10000;
-	int burnIterations = 50000;
+	int independentSamples = 1000;
+	int burnIterations = 10000;
 	int burnPriorIterations = 0;
 	int priorIterations = 0;
 	bool writePriorData = true;
 	int batchsize = 1e4;
 	std::string outputDir("data/");
-	std::string outputMoniker("EA_injection");
-	bool ignoreExistingCheckpoint = false;
+	std::string outputMoniker("GW_injection");
+	bool ignoreExistingCheckpoint = true;
 	bool  restrictSwapTemperature= false;
 	bool  coldChainStorageOnly= true;
 
