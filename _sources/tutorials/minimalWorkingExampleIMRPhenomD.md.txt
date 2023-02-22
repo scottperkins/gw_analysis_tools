@@ -44,19 +44,38 @@ The output of the code will be saved
 under `/data` (which also contains the injection parameters).
 It may take some time to run on your computer. 
 
-7. To examine the output, there are routines already packaged in `gw_analysis_tools` and `BayesShip` to unpack and process the raw data coming from the sampler. Included in the `python/` directory of this example is an example notebook that loads the data and plots a corner plot, trace plots, and some useful convergence diagnostics. To launch it, you can run 
+7. To examine the output, there are routines already packaged 
+in `gw_analysis_tools` and `BayesShip` to unpack and process the 
+raw data coming from the sampler. Included in the `python/` directory 
+of this example is an example notebook that loads the data and plots a 
+corner plot, trace plots, and some useful convergence diagnostics. 
+To launch it, you can run 
 ```
 ./jupyter_launch.sh
 ```
-from within the running container used for the sampling. This will host a jupyter kernel that can be accessed through the browser on your local computer at localhost:8989. The token is printed in the output of running the script, but can also be accessed through 
+from within the running container used for the sampling. 
+This will host a jupyter kernel that can be accessed through the browser 
+on your local computer at localhost:8989. 
+The token is printed in the output of running the script, 
+but can also be accessed through 
 ```
 jupyter server list
 ```
-Alternatively, you can run the `jupyter_docker_launch.sh` script from a terminal directly on your laptop using 
+Alternatively, you can run the `jupyter_docker_launch.sh` 
+script from a terminal directly on your laptop using 
 ```
 ./jupyter_docker_launch.sh
 ```
-which will launch a separate docker container hosted in a separate container. The server than can accessed just like the above method, but at localhost:8990 (note the different port).
+which will launch a separate docker container hosted in a separate container. 
+The server than can accessed just like the above method, 
+but at localhost:8990 (note the different port).
+
+If you are having trouble opening jupyter, remember to copy and past
+`localhost:8990` (or the other value) in your browser. The token to access
+the notebook can be found in the terminal output, e.g. 
+```
+[I 2023-02-22 20:37:09.988 ServerApp] http://e84cb84deac2:8989/lab?token=[some long string of letters and numbers: this is the token]
+```
 
 ## Running on a cluster
 
