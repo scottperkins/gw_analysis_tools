@@ -121,18 +121,32 @@ from Docker Hub.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">bash</span><span class="w"> </span><span class="n">docker_launch</span><span class="p">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-<p>You should now be in the docker image, and there should be a directory
-called <code class="docutils literal notranslate"><span class="pre">injection</span></code>. cd to that directory, and type <code class="docutils literal notranslate"><span class="pre">make</span></code> to build
-the binary.</p>
+<p>You should now be in the docker image, and you should be in a directory called <code class="docutils literal notranslate"><span class="pre">/injection/</span></code>.</p>
 <ol class="arabic simple" start="6">
-<li><p>You can run the binary by</p></li>
+<li><p>To make and run the binary, execute the following commands</p></li>
 </ol>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">injection</span><span class="p">.</span><span class="n">exe</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">make</span><span class="w"> </span>
+<span class="p">.</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">injection</span><span class="p">.</span><span class="n">exe</span>
 </pre></div>
 </div>
 <p>The output of the code will be saved
 under <code class="docutils literal notranslate"><span class="pre">/data</span></code> (which also contains the injection parameters).
 It may take some time to run on your computer.</p>
+<ol class="arabic simple" start="7">
+<li><p>To examine the output, there are routines already packaged in <code class="docutils literal notranslate"><span class="pre">gw_analysis_tools</span></code> and <code class="docutils literal notranslate"><span class="pre">BayesShip</span></code> to unpack and process the raw data coming from the sampler. Included in the <code class="docutils literal notranslate"><span class="pre">python/</span></code> directory of this example is an example notebook that loads the data and plots a corner plot, trace plots, and some useful convergence diagnostics. To launch it, you can run</p></li>
+</ol>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">jupyter_launch</span><span class="p">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>from within the running container used for the sampling. This will host a jupyter kernel that can be accessed through the browser on your local computer at localhost:8989. The token is printed in the output of running the script, but can also be accessed through</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">jupyter</span><span class="w"> </span><span class="n">server</span><span class="w"> </span><span class="n">list</span>
+</pre></div>
+</div>
+<p>Alternatively, you can run the <code class="docutils literal notranslate"><span class="pre">jupyter_docker_launch.sh</span></code> script from a terminal directly on your laptop using</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">jupyter_docker_launch</span><span class="p">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<p>which will launch a separate docker container hosted in a separate container. The server than can accessed just like the above method, but at localhost:8990 (note the different port).</p>
 </section>
 <section id="running-on-a-cluster">
 <h2>Running on a cluster<a class="headerlink" href="#running-on-a-cluster" title="Permalink to this heading"></a></h2>

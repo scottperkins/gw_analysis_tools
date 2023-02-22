@@ -33,17 +33,30 @@ from Docker Hub.
 ```
 bash docker_launch.sh
 ```
-You should now be in the docker image, and there should be a directory
-called `injection`. cd to that directory, and type `make` to build
-the binary.
+You should now be in the docker image, and you should be in a directory called `/injection/`.
 
-6. You can run the binary by
+6. To make and run the binary, execute the following commands
 ```
+make 
 ./bin/injection.exe
 ```
 The output of the code will be saved
 under `/data` (which also contains the injection parameters).
 It may take some time to run on your computer. 
+
+7. To examine the output, there are routines already packaged in `gw_analysis_tools` and `BayesShip` to unpack and process the raw data coming from the sampler. Included in the `python/` directory of this example is an example notebook that loads the data and plots a corner plot, trace plots, and some useful convergence diagnostics. To launch it, you can run 
+```
+./jupyter_launch.sh
+```
+from within the running container used for the sampling. This will host a jupyter kernel that can be accessed through the browser on your local computer at localhost:8989. The token is printed in the output of running the script, but can also be accessed through 
+```
+jupyter server list
+```
+Alternatively, you can run the `jupyter_docker_launch.sh` script from a terminal directly on your laptop using 
+```
+./jupyter_docker_launch.sh
+```
+which will launch a separate docker container hosted in a separate container. The server than can accessed just like the above method, but at localhost:8990 (note the different port).
 
 ## Running on a cluster
 
