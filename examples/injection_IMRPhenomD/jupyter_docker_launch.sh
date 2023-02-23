@@ -1,6 +1,5 @@
 #!/bin/bash
 docker run  \
-	-it \
         --platform linux/amd64 \
 	-p 8990:8989\
 	--rm \
@@ -13,5 +12,5 @@ docker run  \
         -v $(pwd)/python:/injection/python \
         -v $(pwd)/makefile:/injection/makefile \
         -v $(pwd)/jupyter_launch.sh:/injection/jupyter_launch.sh \
-	scottperkins/gwat.jupyter ./jupyter_launch.sh
+	scottperkins/gwat.jupyter 
 
