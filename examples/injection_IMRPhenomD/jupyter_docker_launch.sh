@@ -15,4 +15,3 @@ docker run  \
         -v $(pwd)/jupyter_launch.sh:/injection/jupyter_launch.sh \
 	scottperkins/gwat.jupyter ./jupyter_launch.sh
 
-echo | docker logs gw-injection-example-jupyter
