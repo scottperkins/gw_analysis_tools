@@ -51,24 +51,15 @@ of this example is an example notebook that loads the data and plots a
 corner plot, trace plots, and some useful convergence diagnostics. 
 To launch it, you can run 
 ```
-./jupyter_launch.sh
+./jupyter_docker_launch.sh
 ```
-from within the running container used for the sampling. 
-This will host a jupyter kernel that can be accessed through the browser 
-on your local computer at localhost:8989. 
-The token is printed in the output of running the script, 
-but can also be accessed through 
+from your computer or laptop to launch another docker container hosting a jupyter server.
+The server can now be accessed by typing the following URL into the browser on your computer: "localhost:8990".
+The token to login to the session is printed in the output of the script, but can also be seen at any time by running 
 ```
 jupyter server list
 ```
-Alternatively, you can run the `jupyter_docker_launch.sh` 
-script from a terminal directly on your laptop using 
-```
-./jupyter_docker_launch.sh
-```
-which will launch a separate docker container hosted in a separate container. 
-The server than can accessed just like the above method, 
-but at localhost:8990 (note the different port).
+if you login to the container through another session.
 
 If you are having trouble opening jupyter, remember to copy and past
 `localhost:8990` (or the other value) in your browser. The token to access
@@ -76,6 +67,8 @@ the notebook can be found in the terminal output, e.g.
 ```
 [I 2023-02-22 20:37:09.988 ServerApp] http://e84cb84deac2:8989/lab?token=[some long string of letters and numbers: this is the token]
 ```
+To shutdown the server, press "ctrl-c" twice in the terminal running the docker container. 
+The server will shutdown and the docker container will stop and remove itself.
 
 ## Running on a cluster
 
