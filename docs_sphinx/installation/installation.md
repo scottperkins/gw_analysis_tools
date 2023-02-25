@@ -55,6 +55,8 @@ Several public images with this software already installed are maintained on Doc
 1. [scottperkins/gwat](https://hub.docker.com/repository/docker/scottperkins/gwat)
 	
 	- An image with the "master" branch of GWAT installed. *This should be the default option for new users*
+	
+	- For an example minimally working example using this image, see [here](../tutorials/minimalWorkingExampleIMRPhenomD.md)
 
 2. [scottperkins/parityviolation](https://hub.docker.com/repository/docker/scottperkins/parityviolation)
 	
