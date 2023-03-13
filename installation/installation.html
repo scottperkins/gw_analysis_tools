@@ -12,10 +12,8 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -106,7 +104,7 @@
 <h3>Install library<a class="headerlink" href="#install-library" title="Permalink to this heading"></a></h3>
 <ol class="arabic simple">
 <li><p>Download the source code from github.</p></li>
-<li><p>Make a directory called ``build’’ in the source directory.</p></li>
+<li><p>Make a directory called ``build’’ in the root directory of gw_analysis_tools.</p></li>
 <li><p>Move into ``build/’’ and run:</p></li>
 </ol>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake<span class="w"> </span>..<span class="w"> </span>
@@ -138,7 +136,7 @@ make<span class="w"> </span>install
 <li><p><a class="reference external" href="https://hub.docker.com/repository/docker/scottperkins/gwat">scottperkins/gwat</a></p>
 <ul class="simple">
 <li><p>An image with the “master” branch of GWAT installed. <em>This should be the default option for new users</em></p></li>
-<li><p>For an example minimally working example using this image, see <a class="reference internal" href="../tutorials/minimalWorkingExampleIMRPhenomD.html"><span class="doc std std-doc">here</span></a></p></li>
+<li><p>For an example minimally working example using this image, see <a class="reference internal" href="../tutorials/minimalWorkingExampleIMRPhenomD.html"><span class="std std-doc">here</span></a></p></li>
 </ul>
 </li>
 <li><p><a class="reference external" href="https://hub.docker.com/repository/docker/scottperkins/parityviolation">scottperkins/parityviolation</a></p>
@@ -150,7 +148,7 @@ make<span class="w"> </span>install
 <ul class="simple">
 <li><p>An image with mcmc_dev branch of GWAT installed and automatically launches a jupyter server on port 8989.</p></li>
 <li><p>Useful for doing post-MCMC analysis, as there are python wrappers that unpack the data installed on this image</p></li>
-<li><p>For usage notes on this, see <a class="reference internal" href="../tutorials/jupyterDocker.html"><span class="doc std std-doc">jupyter notes</span></a></p></li>
+<li><p>For usage notes on this, see <a class="reference internal" href="../tutorials/jupyterDocker.html"><span class="std std-doc">jupyter notes</span></a></p></li>
 </ul>
 </li>
 </ol>
