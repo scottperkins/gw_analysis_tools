@@ -22,7 +22,7 @@ There are currently two ways to install this software library: by compiling the 
 ### Install library
 
 1. Download the source code from github.
-2. Make a directory called ``build'' in the source directory. 
+2. Make a directory called ``build'' in the root directory of gw_analysis_tools. 
 3. Move into ``build/'' and run:
 
 ```bash
