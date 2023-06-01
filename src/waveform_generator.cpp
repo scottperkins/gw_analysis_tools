@@ -667,6 +667,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 			gen_params_base<T> *parameters
 			)
 {
+	std::cout<<"Possible error in negative sign! Deprecated, please use the version with (+) and (x) separate"<<std::endl;
 	int status=1;
 	bool NSflag1 = parameters->NSflag1;
 	bool NSflag2 = parameters->NSflag2;

@@ -428,6 +428,7 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 	populate_noise(&f, cast_params.SN, &SN,1);
 	SN*=SN;
 	double retval =  4*std::real(std::conj(wp.hplus[0])*wp.hplus[0])/SN;
+	//std::cout<<retval<<" "<<SN<<" "<<wp.hplus[0]<<" "<<f<<std::endl;
 	wp.deallocate_memory();
 	return retval;
 }
@@ -1204,7 +1205,44 @@ void time_phase_corrected_autodiff(double *times, int length, double *frequencie
 			}
 		}
 		if(!eval){
-			times[k]=0;
+			//std::cout<<"Not EVAL "<< freq<<std::endl;
+			//New CHANGE 05-21-2023
+			//times[k]=0;
+			if(k !=0 && order==1){
+				times[k]=times[k-1]+(-frequencies[k]*frequencies[k]+frequencies[k-1]*frequencies[k-1] );
+			}
+			else if(k !=0 && order==2){
+				times[k]=times[k-1]+2*(-frequencies[k]+frequencies[k-1] );
+			}
+			else{
+				source_parameters<double> s_param;
+				//s_param = source_parameters<T>::populate_source_parameters(params);
+				s_param.populate_source_parameters(params);
+				s_param.sky_average = params->sky_average;
+				s_param.f_ref = params->f_ref;
+				s_param.phiRef = params->phiRef;
+				s_param.cosmology=params->cosmology;
+				s_param.incl_angle=params->incl_angle;
+				s_param.dep_postmerger=params->dep_postmerger;
+				IMRPhenomD<double> model;
+				lambda_parameters<double> lambda;
+				model.assign_lambda_param(&s_param,&lambda);	
+				model.post_merger_variables(&s_param);
+				double fRD = s_param.fRD;
+				double fdamp = s_param.fdamp;
+				double  fpeak = model.fpeak(&s_param , &lambda);
+				if(order==1){
+					times[k]=params->tc+(-frequencies[k]*frequencies[k]+fpeak*fpeak );
+						
+				}
+				else if(order==2){
+					times[k]=params->tc+2*(-frequencies[k]+fpeak );
+				}
+				else{
+					times[k]=0;
+				}
+			}
+				
 		}
 		eval = false;
 	}
@@ -1297,11 +1335,15 @@ void time_phase_corrected(T *times, int length, T *frequencies,gen_params_base<T
 		transform_orientation_coords(params,local_method,"");
 	}
 	if(length ==1){
-		T epsilon =1e-5;
+		T epsilon =frequencies[0]*1e-2;
 		if(order == 1){
 			T temp_f[2];
 			temp_f[0] = frequencies[0]-epsilon;
 			temp_f[1] = frequencies[0]+epsilon;
+			if(temp_f[1] > 0.2/(params->mass1 + params->mass2)/MSOL_SEC){
+				times[0] = 0 ;	
+				return;
+			}
 			T temp_deltaf = 2*epsilon;
 			//T temp_deltaf = temp_f[1]-temp_f[0];
 			T temp_phase_plus[2];
@@ -2327,7 +2369,8 @@ int Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of th
 	helper_struct.method = generation_method;
 	//Shift target time or not
 	if(relative_time){
-		helper_struct.Tbm = Tbm-params->tc;
+		//helper_struct.Tbm = Tbm-params->tc;
+		helper_struct.Tbm = Tbm+params->tc;
 	}
 	else{
 		helper_struct.Tbm = Tbm;
@@ -2335,13 +2378,16 @@ int Tbm_to_freq(gen_params_base<double> *params,/**< Generation parameters of th
 	helper_struct.ad = autodiff;
 	//Zero PN assumes the merger time is zero
 	double f0;
-	if(relative_time){
-		f0 = f_0PN(Tbm+params->tc,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
-	}
-	else{
-		f0 = f_0PN(Tbm+params->tc,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
-	}
-	
+	f0 = f_0PN(helper_struct.Tbm,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
+	//std::cout<<"Initial Guess: "<<f0<<std::endl;
+	//if(relative_time){
+	//	f0 = f_0PN(Tbm+params->tc,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
+	//	//f0 = f_0PN(Tbm-params->tc,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
+	//}
+	//else{
+	//	//f0 = f_0PN(Tbm+params->tc,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
+	//	f0 = f_0PN(Tbm,calculate_chirpmass(params->mass1,params->mass2)*MSOL_SEC);
+	//}
 	int status = newton_raphson_method_1d(&Tbm_subroutine, f0, tol, max_iterations, (void *)(&helper_struct), freq);
 	return status;
 }
@@ -3029,6 +3075,11 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		stellar_mass=false;
 	}
 	//stellar_mass=true;
+	//if(stellar_mass){
+	//	std::cout<<"Stellar Masss"<<std::endl;
+	//	
+	//}
+	//std::cout<<"Fpeak "<<fpeak<<std::endl;
 
 	
 	//Max number of iterations -- safety net
@@ -3065,6 +3116,8 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		}
 		snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
 	}
+	//std::cout<<"Initial SNR calc done"<<std::endl;
+	//std::cout<<"Initial SNR: "<<snr<<std::endl;
 	*T_obs_SNR= snr;
 	snr_prev=snr;
 	double t1 = t_mer, t2=t_mer;
@@ -3086,8 +3139,18 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			else{
 				//Much much slower
 				status1 =Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				if(status1 != 0){
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+
+				}
 				if(t_mer - T_obs > 0){
 					status2= Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					if(status2 != 0){
+						forced_PN_approx = true;
+						f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+
+					}
 					f_upper = std::min(f_upper,fmax);
 				}
 				else{
@@ -3114,6 +3177,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				status1=0;
 				status2=0;
 			}
+			
 			if(gsl_integration){
 				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			}
@@ -3157,8 +3221,18 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			else{
 				status1 = Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				if(status1 != 0){
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+
+				}
 				if(t_mer-T_obs > 0){
 					status2=Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					if(status2 != 0){
+						forced_PN_approx = true;
+						f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+
+					}
 					f_upper = std::min(f_upper,fmax);
 				}
 				else{
@@ -3242,6 +3316,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		//move t1 closer to merger until SNR is too low
 		while(snr>SNR_thresh){
 			t1/=2.;
+			//std::cout<<"t1 | T_obs: "<<t1<<" | "<<T_obs<<std::endl;
 			if(stellar_mass){
 				f_lower =  f_0PN(t1 ,chirpmass) ;
 				if(t1-T_obs > 0){
@@ -3254,14 +3329,29 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			else{
 				status1=Tbm_to_freq(params, generation_method, t1, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				
+				if(status1 != 0){
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t1, chirpmass));
+
+				}
 				if(t1-T_obs > 0){
 					status2=Tbm_to_freq(params, generation_method, t1-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					if(status2 != 0){
+						forced_PN_approx = true;
+						f_upper = (f_0PN(t1-T_obs, chirpmass));
+
+					}
 					f_upper = std::min(f_upper,fmax);
 				}
 				else{
 					f_upper =   2*fpeak;
+					//std::cout<<"Fpeak: "<<fpeak<<std::endl;
+					f_upper = std::min(f_upper,fmax);
+					//std::cout<<"Assigning f_upper: "<<f_upper<<std::endl;
 
 				}
+				//std::cout<<"f_lower | f_upper: "<<f_lower<<" | "<<f_upper<<std::endl;
 				if(f_lower<0)
 				{
 					forced_PN_approx = true;
@@ -3273,8 +3363,10 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 				if(f_lower>f_upper){
 					forced_PN_approx = true;
-					f_lower = (f_0PN(t_mer, chirpmass));
-					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+					//f_lower = (f_0PN(t_mer, chirpmass));
+					//f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+					f_lower = (f_0PN(t1, chirpmass));
+					f_upper =  std::min( f_0PN(  t1 - T_obs,chirpmass) , fmax );
 				}
 				if(status1 !=0 || status2 != 0){
 					bad_time_freq_inversion = true;
@@ -3282,6 +3374,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				status1=0;
 				status2=0;
 			}
+			//std::cout<<"Freq range: "<<f_lower<<" "<<f_upper<<std::endl;
 			if(gsl_integration){
 				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			}
@@ -3305,6 +3398,9 @@ int threshold_times_gsl(gen_params_base<double> *params,
 		while(!found_lower_root && search_ct < max_iter_search){
 			search_ct++;
 			t_mer = (t1+t2)/2.;
+
+			//std::cout<<"Merger time: "<<t_mer<<std::endl;
+			//std::cout<<"Merger time diff: "<<t_mer-T_obs<<std::endl;
 			//Find new frequency bound ids
 			if(stellar_mass){
 				f_lower =  f_0PN(t_mer ,chirpmass) ;
@@ -3317,13 +3413,26 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				}
 			}
 			else{
-				Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				status1 = Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				if(status1 != 0){
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+
+				}
+				//std::cout<<"Value checking: "<<f_lower<<std::endl;
 				if(t_mer-T_obs > 0){
-					Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					status2 = Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					if(status2 != 0){
+						forced_PN_approx = true;
+						f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+
+					}
+					//std::cout<<"Value checking: "<<f_upper<<std::endl;
 					f_upper = std::min(f_upper,fmax);
 				}
 				else{
 					f_upper =   2*fpeak;
+					//std::cout<<"Value checking: "<<f_upper<<std::endl;
 
 				}
 				if(f_lower<0)
@@ -3339,6 +3448,8 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					forced_PN_approx = true;
 					f_lower = (f_0PN(t_mer, chirpmass));
 					f_upper =  std::min( f_0PN(  t_mer - T_obs,chirpmass) , fmax );
+					//std::cout<<"Value checking (times): "<<t_mer-T_obs<<std::endl;
+					//std::cout<<"Value checking: "<<f_upper<<std::endl;
 				}
 				if(status1 !=0 || status2 != 0){
 					bad_time_freq_inversion = true;
@@ -3347,6 +3458,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 				status2=0;
 
 			}
+			//std::cout<<"YIKES: Freq range: "<<f_lower<<" "<<f_upper<<std::endl;
 			if(gsl_integration){
 				snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 			}
@@ -3414,8 +3526,19 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			else{
 				status1=Tbm_to_freq(params, generation_method, t2, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				
+				if(status1 != 0){
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t2, chirpmass));
+
+				}
 				if(t2-T_obs > 0){
 					status2=Tbm_to_freq(params, generation_method, t2-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					if(status2 != 0){
+						forced_PN_approx = true;
+						f_upper = (f_0PN(t2-T_obs, chirpmass));
+
+					}
 					f_upper = std::min(f_upper,fmax);
 				}
 				else{
@@ -3485,8 +3608,19 @@ int threshold_times_gsl(gen_params_base<double> *params,
 			}
 			else{
 				status1=Tbm_to_freq(params, generation_method, t_mer, &f_lower,tolerance,autodiff,max_iter,relative_time);
+				
+				if(status1 != 0){
+					forced_PN_approx = true;
+					f_lower = (f_0PN(t_mer, chirpmass));
+
+				}
 				if(t_mer-T_obs > 0){
 					status2=Tbm_to_freq(params, generation_method, t_mer-T_obs, &f_upper,tolerance,autodiff,max_iter,relative_time);
+					if(status2 != 0){
+						forced_PN_approx = true;
+						f_upper = (f_0PN(t_mer-T_obs, chirpmass));
+
+					}
 					f_upper = std::min(f_upper,fmax);
 				}
 				else{
@@ -3576,6 +3710,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 }
 double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_params_base<double> *params, std::string generation_method,std::string SN, gsl_integration_workspace *w, int np)
 {
+	//std::cout<<fmin<<" "<<fmax<<std::endl;
 	gsl_snr_struct helper_params;
 	helper_params.params = params;
 	helper_params.generation_method = generation_method;
