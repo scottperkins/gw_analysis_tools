@@ -21,26 +21,26 @@
  *
  * Detector names must be spelled exactly
  *
- * Detectors include: 
- * 	
+ * Detectors include:
+ *
  * 	aLIGO_analytic -- analytic approximation of the advanced LIGO sensitivity curve
  *
  * 	Hanford_O1_fitted -- Fitted function to the O1 noise curve for Hanford
- * 		
+ *
  * 	AdLIGOMidHigh -- from Emanuele Berti
  *
- * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel 
- * 		
+ * 	LISA -- LISA sensitivity curve with out sky averaging for a single channel
+ *
  * 		-- does NOT include the factor of sqrt(3)/2, which is taken care of in the response function for LISA
  *
  * 	LISA_CONF -- LISA sensitivity curve with out sky averaging for a single channel including confusion noise from the galatic white dwarf population
  *
  * 		-- does NOT include the factor of sqrt(3)/2, which is taken care of in the response function for LISA
  *
- * 	LISA_SADC -- LISA sensitivity curve with sky averaging for a dual channel 
+ * 	LISA_SADC -- LISA sensitivity curve with sky averaging for a dual channel
  *
  * 		-- does include the factor of sqrt(3)/2
- * 		
+ *
  * 		-- This DOES include the sky averaged pattern functions -- i.e. sky_average flag should NOT be used when making the waveform
  *
  * 	LISA_SADC_CONF -- LISA sensitivity curve with sky averaging for a dual channel including confusion noise from the galatic white dwarf population
@@ -79,7 +79,7 @@
  *
  * 	ET-D -- Einstein telescope with lines included. From ET website
  *
- * 	ET-D_smooth -- Einstein telescope without lines. From Emanuele 
+ * 	ET-D_smooth -- Einstein telescope without lines. From Emanuele
  *
  * 	AdLIGOVoyager -- Voyager configuration of Advanced LIGO
  *
@@ -107,7 +107,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 					noise_root[i] = aLIGO_analytic(frequencies[i]);
 				}
 			}
-			
+
 			else
 			{
 				for (int i =0; i<length;i++)
@@ -127,7 +127,7 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 					noise_root[i] = Hanford_O1_fitted(frequencies[i]);
 				}
 			}
-			
+
 			else
 			{
 				for (int i =0; i<length;i++)
@@ -260,13 +260,13 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 		double psd[dat_length];
 		double f[dat_length];
 		for(int i = 0 ;i<dat_length; i++){
-			psd[i]=data[i][1];	
-			f[i]=data[i][0];	
+			psd[i]=data[i][1];
+			f[i]=data[i][0];
 		}
 		gsl_spline_init(spline, f, psd, dat_length);
 		for(int i = 0 ; i<length; i++){
 			noise_root[i]=gsl_spline_eval(spline, frequencies[i],accel);
-		}	
+		}
 		gsl_spline_free(spline);
 		gsl_interp_accel_free(accel);
 		for(int i = 0 ; i<dat_length; i++){
@@ -277,11 +277,11 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else{
 		std::cout<<"Detector "<<detector<<" not supported"<<std::endl;
 	}
-			
-	return;	
+
+	return;
 }
 
-/*! \brief Analytic function approximating the PSD for aLIGO 
+/*! \brief Analytic function approximating the PSD for aLIGO
  *
  * CITE (Will?)
  */
@@ -309,7 +309,7 @@ double LISA_analytic(double f)
 	double S = 1./(  L*L) * ( POMS +2.*(1. + pow_int(  std::cos(f/fstar) ,2) )*(  PACC/pow_int( twopi * f, 4) ))*(1. + 6./10. * pow_int(f/fstar,2)) ;
 	return  S;
 }
-/*! \brief Analytic function approximating the PSD for LISA sensitivity curve -- this is S, not root S 
+/*! \brief Analytic function approximating the PSD for LISA sensitivity curve -- this is S, not root S
  *
  * Sky averaged -  dual channel
  *
@@ -361,11 +361,11 @@ double LISA_SC(double f, double alpha, double beta, double kappa, double gamma, 
 {
 	double A = 9.* pow_int(10.,-45);
 	double SC = A * pow(f,-7./3.) * exp( -pow(f,alpha) + beta * f * sin(kappa * f )) * ( 1. + tanh(gamma * (fk - f)));
-	
+
 	return  SC;
 }
 
-/*! \breif LISA confusion noise coefficients 
+/*! \breif LISA confusion noise coefficients
  *
  * arXiv:1803.01944 -- Table 1
  *
@@ -514,7 +514,7 @@ T right_interferometer_cross(T theta, T phi)
 	T Fcross = ct * sp2;
 	return Fcross;
 }
-/*! \brief Response function of a 90 deg interferometer 
+/*! \brief Response function of a 90 deg interferometer
  *
  * Theta and phi are local, horizontal coordinates relative to the detector
  *
@@ -535,19 +535,19 @@ void right_interferometer(det_res_pat<T> *r_pat,T theta, T phi, T psi)
 	if(r_pat->active_polarizations[2]){
 		//vector x
 		*(r_pat->Fx) = right_interferometer_x(theta,phi,psi);
-	}	
+	}
 	if(r_pat->active_polarizations[3]){
 		//vector y
 		*(r_pat->Fy) = right_interferometer_y(theta,phi,psi);
-	}	
+	}
 	if(r_pat->active_polarizations[4]){
 		//breathing
 		*(r_pat->Fb) = right_interferometer_b(theta,phi,psi);
-	}	
+	}
 	if(r_pat->active_polarizations[5]){
-		//longitudinal 
+		//longitudinal
 		*(r_pat->Fl) = right_interferometer_l(theta,phi,psi);
-	}	
+	}
 	//###############################################
 }
 
@@ -563,8 +563,8 @@ void right_interferometer(det_res_pat<T> *r_pat,T theta, T phi, T psi)
 template<class T>
 void celestial_horizon_transform(T RA, /**< in RAD*/
 		T DEC, /**< in RAD*/
-		double gps_time, 
-		std::string detector, 
+		double gps_time,
+		std::string detector,
 		T *phi, /**< in RAD*/
 		T *theta /**< in RAD*/
 		)
@@ -572,63 +572,63 @@ void celestial_horizon_transform(T RA, /**< in RAD*/
 	T LAT, LONG, azimuth_offset;
 	if (detector =="Hanford" || detector == "hanford")
 	{
-		LAT =  H_LAT;		
-		LONG =  H_LONG;		
+		LAT =  H_LAT;
+		LONG =  H_LONG;
 		azimuth_offset = H_azimuth_offset;
-		
+
 	}
 	else if (detector =="Livingston" || detector == "livingston")
 	{
-		LAT =  L_LAT;		
-		LONG =  L_LONG;		
+		LAT =  L_LAT;
+		LONG =  L_LONG;
 		azimuth_offset = L_azimuth_offset;
 
 	}
 	else if (detector =="Virgo" || detector == "virgo")
 	{
-		LAT =  V_LAT;		
-		LONG =  V_LONG;		
+		LAT =  V_LAT;
+		LONG =  V_LONG;
 		azimuth_offset = V_azimuth_offset;
 
 	}
 	else if (detector =="Kagra" || detector == "kagra")
 	{
-		LAT =  K_LAT;		
-		LONG =  K_LONG;		
+		LAT =  K_LAT;
+		LONG =  K_LONG;
 		azimuth_offset = K_azimuth_offset;
 
 	}
 	else if (detector =="Indigo" || detector == "indigo")
 	{
-		LAT =  I_LAT;		
-		LONG =  I_LONG;		
+		LAT =  I_LAT;
+		LONG =  I_LONG;
 		azimuth_offset = I_azimuth_offset;
 
 	}
 	else if (detector =="Cosmic Explorer" || detector == "cosmic explorer" || detector=="CE")
 	{
-		LAT =  CE_LAT;		
-		LONG =  CE_LONG;		
+		LAT =  CE_LAT;
+		LONG =  CE_LONG;
 		azimuth_offset = CE_azimuth_offset;
 
 	}
 	else if (detector =="Einstein Telescope 1" || detector == "einstein telescope 1" || detector=="ET1")
 	{
-		LAT =  ET1_LAT;		
-		LONG =  ET1_LONG;		
+		LAT =  ET1_LAT;
+		LONG =  ET1_LONG;
 		azimuth_offset = ET1_azimuth_offset;
 
 	}
 	else if (detector =="Einstein Telescope 2" || detector == "einstein telescope 2" || detector=="ET2")
 	{
-		LAT =  ET2_LAT;		
-		LONG =  ET2_LONG;		
+		LAT =  ET2_LAT;
+		LONG =  ET2_LONG;
 		azimuth_offset = ET2_azimuth_offset;
 	}
 	else if (detector =="Einstein Telescope 3" || detector == "einstein telescope 3" || detector=="ET3")
 	{
-		LAT =  ET2_LAT;		
-		LONG =  ET2_LONG;		
+		LAT =  ET2_LAT;
+		LONG =  ET2_LONG;
 		azimuth_offset = ET2_azimuth_offset;
 	}
 	else {
@@ -647,12 +647,12 @@ void celestial_horizon_transform(T RA, /**< in RAD*/
  */
 void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 		double DEC, /**< in RAD*/
-		double gps_time, 
-		std::string detector, 
-		double *dphi_dRA, 
-		double *dtheta_dRA, 
-		double *dphi_dDEC, 
-		double *dtheta_dDEC 
+		double gps_time,
+		std::string detector,
+		double *dphi_dRA,
+		double *dtheta_dRA,
+		double *dphi_dDEC,
+		double *dtheta_dDEC
 		)
 {
 	double phip, phim, thetap, thetam;
@@ -675,7 +675,7 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
  */
 template <class T>
 T DTOA_DETECTOR(T RA, /**< spherical polar angle for detector 1 in RAD*/
-	T DEC, /**<spherical polar angle for detector 2 in RAD*/ 
+	T DEC, /**<spherical polar angle for detector 2 in RAD*/
 	double GMST_rad,/**< Greenwich mean sidereal time of detection*/
 	std::string detector1, /**< name of detector one*/
 	std::string detector2 /**<name of detector two*/
@@ -686,76 +686,76 @@ T DTOA_DETECTOR(T RA, /**< spherical polar angle for detector 1 in RAD*/
 	//detector one
 	if(detector1 == "Hanford" || detector1 == "hanford")
 	{
-		earth_centered_location1 =H_location ;	
+		earth_centered_location1 =H_location ;
 	}
 	else if(detector1 == "Livingston" || detector1 == "livingston")
 	{
-		earth_centered_location1 =L_location ;	
+		earth_centered_location1 =L_location ;
 	}
 	else if(detector1 == "Virgo" || detector1 == "virgo")
 	{
-		earth_centered_location1 =V_location ;	
+		earth_centered_location1 =V_location ;
 	}
 	else if(detector1 == "Kagra" || detector1 == "kagra")
 	{
-		earth_centered_location1 =K_location ;	
+		earth_centered_location1 =K_location ;
 	}
 	else if(detector1 == "Indigo" || detector1 == "indigo")
 	{
-		earth_centered_location1 =I_location ;	
+		earth_centered_location1 =I_location ;
 	}
 	else if(detector1 == "Cosmic Explorer" || detector1 == "cosmic explorer" || detector1=="CE")
 	{
-		earth_centered_location1 =CE_location ;	
+		earth_centered_location1 =CE_location ;
 	}
 	else if(detector1 == "Einstein Telescope 1" || detector1 == "einstein telescope 1" || detector1=="ET1")
 	{
-		earth_centered_location1 =ET1_location ;	
+		earth_centered_location1 =ET1_location ;
 	}
 	else if(detector1 == "Einstein Telescope 2" || detector1 == "einstein telescope 2" || detector1=="ET2")
 	{
-		earth_centered_location1 =ET2_location ;	
+		earth_centered_location1 =ET2_location ;
 	}
 	else if(detector1 == "Einstein Telescope 3" || detector1 == "einstein telescope 3" || detector1=="ET3")
 	{
-		earth_centered_location1 =ET3_location ;	
+		earth_centered_location1 =ET3_location ;
 	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
-		earth_centered_location2 =H_location ;	
+		earth_centered_location2 =H_location ;
 	}
 	else if(detector2 == "Livingston" || detector2 == "livingston")
 	{
-		earth_centered_location2 =L_location ;	
+		earth_centered_location2 =L_location ;
 	}
 	else if(detector2 == "Virgo" || detector2 == "virgo")
 	{
-		earth_centered_location2 =V_location ;	
+		earth_centered_location2 =V_location ;
 	}
 	else if(detector2 == "Kagra" || detector2 == "kagra")
 	{
-		earth_centered_location2 =K_location ;	
+		earth_centered_location2 =K_location ;
 	}
 	else if(detector2 == "Indigo" || detector2 == "indigo")
 	{
-		earth_centered_location2 =I_location ;	
+		earth_centered_location2 =I_location ;
 	}
 	else if(detector2 == "Cosmic Explorer" || detector2 == "cosmic explorer" || detector2=="CE")
 	{
-		earth_centered_location2 =CE_location ;	
+		earth_centered_location2 =CE_location ;
 	}
 	else if(detector2 == "Einstein Telescope 1" || detector2 == "einstein telescope 1" || detector2=="ET1")
 	{
-		earth_centered_location2 =ET1_location ;	
+		earth_centered_location2 =ET1_location ;
 	}
 	else if(detector2 == "Einstein Telescope 2" || detector2 == "einstein telescope 2" || detector2=="ET2")
 	{
-		earth_centered_location2 =ET2_location ;	
+		earth_centered_location2 =ET2_location ;
 	}
 	else if(detector2 == "Einstein Telescope 3" || detector2 == "einstein telescope 3" || detector2=="ET3")
 	{
-		earth_centered_location2 =ET3_location ;	
+		earth_centered_location2 =ET3_location ;
 	}
 	return DTOA_earth_centered_coord(RA,DEC,GMST_rad,earth_centered_location1,earth_centered_location2);
 }
@@ -765,7 +765,7 @@ template adouble DTOA_DETECTOR<adouble>(adouble,adouble,double,std::string,std::
  */
 template <class T>
 T DTOA_earth_centered_coord(T RA, /**< spherical polar angle for detector 1 in RAD*/
-	T DEC, /**<spherical polar angle for detector 2 in RAD*/ 
+	T DEC, /**<spherical polar angle for detector 2 in RAD*/
 	double GMST_rad,/**< Greenwich mean sidereal time of detection*/
 	const double *loc1, /**< Location of the first detector in Earth centered coordinates in meters*/
 	const double *loc2 /**<Location of the second detector in Earth centered coordinates in meters*/
@@ -775,14 +775,14 @@ T DTOA_earth_centered_coord(T RA, /**< spherical polar angle for detector 1 in R
 	dx[0] = loc1[0]-loc2[0];
 	dx[1] = loc1[1]-loc2[1];
 	dx[2] = loc1[2]-loc2[2];
-	
+
 	//Direction to source
 	T hour_angle = GMST_rad - RA;
 	T ehat[3];
 	ehat[0] = cos(DEC) * cos(hour_angle);
 	ehat[1] = cos(DEC) * -sin(hour_angle);
 	ehat[2] = sin(DEC) ;
-		
+
 	return (dx[0]*ehat[0] + dx[1]*ehat[1] + dx[2]*ehat[2])/c;
 
 }
@@ -791,7 +791,7 @@ template adouble DTOA_earth_centered_coord<adouble>(adouble,adouble,double,const
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  */
 double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
-	double theta2, /**<spherical polar angle for detector 2 in RAD*/ 
+	double theta2, /**<spherical polar angle for detector 2 in RAD*/
 	std::string detector1, /**< name of detector one*/
 	std::string detector2 /**<name of detector two*/
 	)
@@ -800,76 +800,76 @@ double DTOA(double theta1, /**< spherical polar angle for detector 1 in RAD*/
 	//detector one
 	if(detector1 == "Hanford" || detector1 == "hanford")
 	{
-		R1 = H_radius;	
+		R1 = H_radius;
 	}
 	else if(detector1 == "Livingston" || detector1 == "livingston")
 	{
-		R1 = L_radius;	
+		R1 = L_radius;
 	}
 	else if(detector1 == "Virgo" || detector1 == "virgo")
 	{
-		R1 = V_radius;	
+		R1 = V_radius;
 	}
 	else if(detector1 == "Kagra" || detector1 == "kagra")
 	{
-		R1 = K_radius;	
+		R1 = K_radius;
 	}
 	else if(detector1 == "Indigo" || detector1 == "indigo")
 	{
-		R1 = I_radius;	
+		R1 = I_radius;
 	}
 	else if(detector1 == "Cosmic Explorer" || detector1 == "cosmic explorer" || detector1=="CE")
 	{
-		R1 = CE_radius;	
+		R1 = CE_radius;
 	}
 	else if(detector1 == "Einstein Telescope 1" || detector1 == "einstein telescope 1" || detector1=="ET1")
 	{
-		R1 = ET1_radius;	
+		R1 = ET1_radius;
 	}
 	else if(detector1 == "Einstein Telescope 2" || detector1 == "einstein telescope 2" || detector1=="ET2")
 	{
-		R1 = ET2_radius;	
+		R1 = ET2_radius;
 	}
 	else if(detector1 == "Einstein Telescope 3" || detector1 == "einstein telescope 3" || detector1=="ET3")
 	{
-		R1 = ET3_radius;	
+		R1 = ET3_radius;
 	}
 	//detector 2
 	if(detector2 == "Hanford" || detector2 == "hanford")
 	{
-		R2 = H_radius;	
+		R2 = H_radius;
 	}
 	else if(detector2 == "Livingston" || detector2 == "livingston")
 	{
-		R2 = L_radius;	
+		R2 = L_radius;
 	}
 	else if(detector2 == "Virgo" || detector2 == "virgo")
 	{
-		R2 = V_radius;	
+		R2 = V_radius;
 	}
 	else if(detector2 == "Kagra" || detector2 == "kagra")
 	{
-		R2 = K_radius;	
+		R2 = K_radius;
 	}
 	else if(detector2 == "Indigo" || detector2 == "indigo")
 	{
-		R2 = I_radius;	
+		R2 = I_radius;
 	}
 	else if(detector2 == "Cosmic Explorer" || detector2 == "cosmic explorer" || detector2=="CE")
 	{
-		R2 = CE_radius;	
+		R2 = CE_radius;
 	}
 	else if(detector2 == "Einstein Telescope 1" || detector2 == "einstein telescope 1" || detector2=="ET1")
 	{
-		R2 = ET1_radius;	
+		R2 = ET1_radius;
 	}
 	else if(detector2 == "Einstein Telescope 2" || detector2 == "einstein telescope 2" || detector2=="ET2")
 	{
-		R2 = ET2_radius;	
+		R2 = ET2_radius;
 	}
 	else if(detector2 == "Einstein Telescope 3" || detector2 == "einstein telescope 3" || detector2=="ET3")
 	{
-		R2 = ET3_radius;	
+		R2 = ET3_radius;
 	}
 	return (cos(theta1)*R1 - cos(theta2)*R2)/c;
 }
@@ -882,9 +882,9 @@ double radius_at_lat(double latitude, /**< latitude in degrees*/
 			double elevation /**<elevation in meters*/
 			)
 {
-	double numerator = pow(RE_equatorial*RE_equatorial * cos(latitude*M_PI/180.) ,2 ) 
+	double numerator = pow(RE_equatorial*RE_equatorial * cos(latitude*M_PI/180.) ,2 )
 			+ pow(RE_polar*RE_polar * sin(latitude*M_PI/180. ), 2);
-	double denominator = pow(RE_equatorial * cos(latitude*M_PI/180.) ,2 ) 
+	double denominator = pow(RE_equatorial * cos(latitude*M_PI/180.) ,2 )
 			+ pow(RE_polar * sin(latitude*M_PI/180. ), 2);
 	return sqrt(numerator/denominator) + elevation;
 }
@@ -910,7 +910,7 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	T X[3];
 	T Y[3];
 	T Z[3];
-	
+
 	/* Greenwich hour angle of source (radians). */
 	T gha = gmst - ra;
 	/* pre-compute trig functions */
@@ -920,14 +920,14 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	T sindec = sin(dec);
 	T cospsi = cos(psi);
 	T sinpsi = sin(psi);
-	
+
 	/* Eq. (B4) of [ABCF].  Note that dec = pi/2 - theta, and gha =
 	 * -phi where theta and phi are the standard spherical coordinates
 	 * used in that paper. */
 	X[0] = -cospsi * singha - sinpsi * cosgha * sindec;
 	X[1] = -cospsi * cosgha + sinpsi * singha * sindec;
 	X[2] =  sinpsi * cosdec;
-	
+
 	/* Eq. (B5) of [ABCF].  Note that dec = pi/2 - theta, and gha =
 	 * -phi where theta and phi are the standard spherical coordinates
 	 * used in that paper. */
@@ -943,7 +943,7 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	Z[0] = -cosdec * cosgha;
 	Z[1] = cosdec * singha;
 	Z[2] = -sindec;
-	
+
 	/* Now compute Eq. (B7) of [ABCF] for each polarization state, i.e.,
 	 * with s+=1 and sx=0 to get F+, with s+=0 and sx=1 to get Fx */
 	*(r_pat->Fplus)= 0.0;
@@ -986,28 +986,28 @@ void detector_response_functions_equatorial(double D[3][3],/**< Detector Respons
 	//	for(i = 0; i < 3; i++) {
 	//		*(r_pat->Fx) += X[i] * DZ + Z[i] * DX;
 	//	}
-	//}	
+	//}
 	//if(r_pat->active_polarizations[3]){
 	//	//vector y
 	//	*(r_pat->Fy) = 0.0;
 	//	for(i = 0; i < 3; i++) {
 	//		*(r_pat->Fy) += Y[i] * DZ + Z[i] * DY;
 	//	}
-	//}	
+	//}
 	//if(r_pat->active_polarizations[4]){
 	//	//breathing
 	//	*(r_pat->Fb) = 0.0;
 	//	for(i = 0; i < 3; i++) {
 	//		*(r_pat->Fb) += X[i] * DX + Y[i] * DY;
 	//	}
-	//}	
+	//}
 	//if(r_pat->active_polarizations[5]){
-	//	//longitudinal 
+	//	//longitudinal
 	//	*(r_pat->Fl) = 0.0;
 	//	for(i = 0; i < 3; i++) {
 	//		*(r_pat->Fl) += Z[i] * DZ;
 	//	}
-	//}	
+	//}
 	//###############################################
 
 }
@@ -1063,19 +1063,19 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 			r_pat->Fplus[i]  = LISA_response_plus_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
 			r_pat->Fcross[i]  = LISA_response_cross_time(theta_s,phi_s, theta_j_ecl,phi_j_ecl,LISA_alpha0,LISA_phi0, times[i]);
 		}
-		
+
 		if(r_pat->active_polarizations[2]){
 			//vector x
-		}	
+		}
 		if(r_pat->active_polarizations[3]){
 			//vector y
-		}	
+		}
 		if(r_pat->active_polarizations[4]){
 			//breathing
-		}	
+		}
 		if(r_pat->active_polarizations[5]){
-			//longitudinal 
-		}	
+			//longitudinal
+		}
 	}
 	//Time independent response functions
 	else{
@@ -1162,19 +1162,19 @@ void detector_response_functions_equatorial(std::string detector,/**< Detector *
 		if(r_pat->active_polarizations[2]){
 			//vector x
 			(*(r_pat->Fx))*=geometric_factor;
-		}	
+		}
 		if(r_pat->active_polarizations[3]){
 			//vector y
 			(*(r_pat->Fy))*=geometric_factor;
-		}	
+		}
 		if(r_pat->active_polarizations[4]){
 			//breathing
 			(*(r_pat->Fb))*=geometric_factor;
-		}	
+		}
 		if(r_pat->active_polarizations[5]){
-			//longitudinal 
+			//longitudinal
 			(*(r_pat->Fl))*=geometric_factor;
-		}	
+		}
 	}
 }
 
@@ -1224,7 +1224,7 @@ T LISA_response_cross_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T
 /*! \brief Utility to calculate the cumulative amplitude distribution for a single detector
  *
  * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
+ *
  * Integrated over the volume which \omega' is larger than \omega
  *
  * Integrates using Monte Carlo integration
@@ -1239,37 +1239,37 @@ double p_single_detector(double omega, /**< \omega = \rho/\rho_opt**/
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r, 1323);
-	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota, 
+	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota,
 		costheta, phi,theta,iota;
 	double twopi = 2.*M_PI;
 	double omega_squared = omega*omega;
 	double sum = 0;
 	bool active_polar[6] = {true, true, false, false, false, false};
 	for(int i= 0 ; i<samples ; i++){
-		psi = gsl_rng_uniform(r)*twopi;	
-		cosiota = gsl_rng_uniform(r)*2.-1.;	
-		costheta = gsl_rng_uniform(r)*2.-1.;	
-		phi = gsl_rng_uniform(r)*twopi;	
+		psi = gsl_rng_uniform(r)*twopi;
+		cosiota = gsl_rng_uniform(r)*2.-1.;
+		costheta = gsl_rng_uniform(r)*2.-1.;
+		phi = gsl_rng_uniform(r)*twopi;
 		iota = acos(cosiota);
 		theta = acos(costheta);
 		det_res_pat<double> r_pat;
-		
+
 		r_pat.Fplus = &Fplus;
 		r_pat.Fcross = &Fcross;
 		r_pat.active_polarizations = &active_polar[0];
 		right_interferometer(&r_pat, theta, phi, psi);
 		//Do squared to avoid the expensive sqrt function
-		omega_prime_squared =(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
+		omega_prime_squared =(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);
 		if(omega_prime_squared>omega_squared){sum++;}
-		
-	}	
+
+	}
 	gsl_rng_free(r);
 	return sum/=samples;
 }
 /*! \brief Utility to calculate the cumulative amplitude distribution for three detectors
  *
  * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
+ *
  * Integrated over the volume which \omega' is larger than \omega
  *
  * Integrates using Monte Carlo integration
@@ -1296,41 +1296,41 @@ double p_N_detector(double omega, /**< \omega = \rho/\rho_opt**/
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r, rand_seed);
-	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota, 
+	double omega_prime,omega_prime_squared,Fplus, Fcross,psi, cosiota,
 		sinDEC, RA,DEC,iota;
 	double twopi = 2.*M_PI;
 	double omega_squared = omega*omega;
 	double sum = 0;
 	det_res_pat<double> r_pat;
-	r_pat.Fplus = &Fplus;	
-	r_pat.Fcross = &Fcross;	
+	r_pat.Fplus = &Fplus;
+	r_pat.Fcross = &Fcross;
 	bool active_polar[6] = {true, true, false, false, false, false};
 	r_pat.active_polarizations = &active_polar[0];
 	for(int i= 0 ; i<samples ; i++){
-		psi = gsl_rng_uniform(r)*twopi;	
-		cosiota = gsl_rng_uniform(r)*2.-1.;	
-		sinDEC = gsl_rng_uniform(r)*2.-1.;	
-		RA = gsl_rng_uniform(r)*twopi;	
+		psi = gsl_rng_uniform(r)*twopi;
+		cosiota = gsl_rng_uniform(r)*2.-1.;
+		sinDEC = gsl_rng_uniform(r)*2.-1.;
+		RA = gsl_rng_uniform(r)*twopi;
 		iota = acos(cosiota);
 		DEC = asin(sinDEC);
 		omega_prime_squared=0;
-		for(int j = 0 ; j<N_detectors; j++){	
-				
-			detector_response_functions_equatorial(detectors[j],RA,DEC,psi,gmst, &r_pat);	
+		for(int j = 0 ; j<N_detectors; j++){
+
+			detector_response_functions_equatorial(detectors[j],RA,DEC,psi,gmst, &r_pat);
 			//right_interferometer(&Fplus, &Fcross, theta, phi, psi);
 			//Do squared to avoid the expensive sqrt function
-			omega_prime_squared +=(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);	
+			omega_prime_squared +=(pow_int( 1. +cosiota*cosiota,2)/4.* Fplus*Fplus + cosiota*cosiota*Fcross*Fcross);
 		}
 		if(omega_prime_squared>omega_squared){sum++;}
-		
-	}	
+
+	}
 	gsl_rng_free(r);
 	return sum/=samples;
 }
-/*! \brief Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit 
+/*! \brief Utility to calculate the cumulative amplitude distribution for a single detector -- Numerical Fit
  *
  * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
+ *
  * Integrated over the volume which \omega' is larger than \omega
  *
  * see arXiv:1405.7016
@@ -1340,15 +1340,15 @@ double p_single_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
 {
 	double alpha=1., a2 = 0.374222, a4 = 2.04216, a8 =-2.63948;
 	double omega_term = 1-omega/alpha;
-	return (a2 * pow_int( omega_term, 2) 
-		+ a4* pow_int(omega_term,4) 
+	return (a2 * pow_int( omega_term, 2)
+		+ a4* pow_int(omega_term,4)
 		+ a8* pow_int(omega_term,8)
 		+ (1 - a2 - a4 - a8) * pow_int(omega_term, 10));
 }
-/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- Numerical Fit 
+/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- Numerical Fit
  *
  * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
+ *
  * Integrated over the volume which \omega' is larger than \omega
  *
  * see arXiv:1405.7016
@@ -1360,15 +1360,15 @@ double p_triple_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
 {
 	double alpha=1.4, a2 =  1.19549, a4 =  1.61758, a8 =-4.87024;
 	double omega_term = 1-omega/alpha;
-	return (a2 * pow_int( omega_term, 2) 
-		+ a4* pow_int(omega_term,4) 
+	return (a2 * pow_int( omega_term, 2)
+		+ a4* pow_int(omega_term,4)
 		+ a8* pow_int(omega_term,8)
 		+ (1 - a2 - a4 - a8) * pow_int(omega_term, 10));
 }
-/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/ 
+/*! \brief Utility to calculate the cumulative amplitude distribution for triple detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/
  *
  * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
+ *
  * Integrated over the volume which \omega' is larger than \omega
  *
  * see arXiv:1405.7016
@@ -1376,7 +1376,7 @@ double p_triple_detector_fit(double omega /**< \omega = \rho/\rho_opt**/
 double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	)
 {
-	double pomega = 0;	
+	double pomega = 0;
 	int data_length = 141;
 	gsl_interp_accel *accel  = gsl_interp_accel_alloc();
 	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,data_length);
@@ -1391,10 +1391,10 @@ double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	read_file( std::string(GWAT_SHARE_DIR)+"detection_probability_tables/Pw_three.csv", temp, data_length,2);
 	;
 	for(int i=0 ; i<data_length; i ++){
-		omegas[i] = temp[i][0];	
-		pomega_numerical[i] = temp[i][1];	
+		omegas[i] = temp[i][0];
+		pomega_numerical[i] = temp[i][1];
 	}
-	
+
 	gsl_spline_init(spline, omegas, pomega_numerical,data_length);
 
 	pomega = gsl_spline_eval(spline, omega, accel);
@@ -1406,10 +1406,10 @@ double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	delete[] temp;
 	return pomega;
 }
-/*! \brief Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/ 
+/*! \brief Utility to calculate the cumulative amplitude distribution for single detector network -- interpolated data from https://pages.jh.edu/~eberti2/research/
  *
  * P(\omega) = \int_V \Theta(\omega'(\Omega, \psi, \iota)-\omega) d\Omega d\psi dcos\iota
- * 
+ *
  * Integrated over the volume which \omega' is larger than \omega
  *
  * see arXiv:1405.7016
@@ -1417,7 +1417,7 @@ double p_triple_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 double p_single_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	)
 {
-	double pomega = 0;	
+	double pomega = 0;
 	int data_length = 1001;
 	gsl_interp_accel *accel  = gsl_interp_accel_alloc();
 	gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline,data_length);
@@ -1431,10 +1431,10 @@ double p_single_detector_interp(double omega /**< \omega = \rho/\rho_opt**/
 	//read_file(std::string(GWAT_ROOT_DIRECTORY)+"data/detection_probability_tables/Pw_single.csv", temp, data_length,2);
 	read_file(std::string(GWAT_SHARE_DIR)+"detection_probability_tables/Pw_single.csv", temp, data_length,2);
 	for(int i=0 ; i<data_length; i ++){
-		omegas[i] = temp[i][0];	
-		pomega_numerical[i] = temp[i][1];	
+		omegas[i] = temp[i][0];
+		pomega_numerical[i] = temp[i][1];
 	}
-	
+
 	gsl_spline_init(spline, omegas, pomega_numerical,data_length);
 
 	pomega = gsl_spline_eval(spline, omega, accel);
@@ -1452,14 +1452,14 @@ double pdet_triple_detector_fit(double rho_thresh, double rho_opt)
 	int np = 1e3;
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(np);
 	gsl_function F;
-	double result, err; 
+	double result, err;
 	double abserr=0, relerr = 1e-5;
-	F.function = [](double omega, void * param){ return p_triple_detector_fit(omega);};	
+	F.function = [](double omega, void * param){ return p_triple_detector_fit(omega);};
 
-	int errcode = gsl_integration_qag(&F, rho_thresh/rho_opt, 1, abserr, relerr, 
+	int errcode = gsl_integration_qag(&F, rho_thresh/rho_opt, 1, abserr, relerr,
 		np, GSL_INTEG_GAUSS15, w, &result, &err);
 	gsl_integration_workspace_free(w);
-	
+
 	return result;
 }
 //###########################################################
