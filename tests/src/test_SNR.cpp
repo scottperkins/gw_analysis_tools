@@ -1,6 +1,7 @@
 #include <gwat/waveform_util.h>
 #include <gwat/ortho_basis.h>
 #include <gwat/io_util.h>
+#include <gwat/detector_util.h>
 #include <iostream>
 
 
@@ -92,10 +93,11 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 
 
 	double snr_gsl, snr_simps, snr_gl1,snr_gl2;
-	std::string noise_curve="LISA_CONF"	;
+	std::string noise_curve="AtomClockGW"	;
+	//std::string noise_curve="LISA_CONF"	;
 	std::string method= "IMRPhenomPv2";
 	std::string detector="LISA";
-	int iterations = 50;
+	int iterations = 1;
 	double **output = new double*[iterations];
 	std::cout<<"Starting loop -- finished prep"<<std::endl;
 	for(int i = 0 ; i<iterations; i++){
@@ -116,7 +118,8 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 		params.spin2[1] = .1;
 		params.spin1[0] = .2;
 		params.spin2[0] = 0;//-.4 + gsl_rng_uniform(r)*1.;
-		params.Luminosity_Distance  = 50 + gsl_rng_uniform(r)*1000;
+		//params.Luminosity_Distance  = 50 + gsl_rng_uniform(r)*1000;
+		params.Luminosity_Distance  = 50 +1000;
 		params.RA =gsl_rng_uniform(r)*2*M_PI;
 		params.DEC =-1.5 + gsl_rng_uniform(r) * M_PI;
 		params.phi_l =gsl_rng_uniform(r)*2*M_PI;
@@ -133,6 +136,18 @@ int compare_GSL_simps_gl_MBH(int argc, char *argv[])
 		for(int i = 0 ; i<length; i++){
 			freqs[i] = bounds[0] + i*deltaf;
 		}
+
+		//TESTING
+		//double freqsOut[100];
+		//double *ASD = new double[100];
+		//freqsOut[0] = 1e-5;
+		//for (int i = 1 ; i < 100; i++){
+		//	freqsOut[i] = freqsOut[i-1] * pow(1./1e-5,1./100);
+		//}
+		//populate_noise(freqsOut,noise_curve ,ASD, 100);
+		//write_file("data/snr_comp_MBH_ASD.csv",ASD,100);
+		//write_file("data/snr_comp_MBH_Freqs.csv",freqsOut,100);
+		//delete [] ASD;
 
 
 		start = clock();

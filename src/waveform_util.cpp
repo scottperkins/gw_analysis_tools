@@ -411,6 +411,29 @@ int calculate_snr_gsl(double *snr,
 	params->sky_average = SA_save;
 	return errcode;
 }
+/*! \brief Internal function to calculate the SNR integrand for sky-averaged waveforms in log10 frequency for numerical stability
+ *
+ * NOTE: Only works for GR spin aligned 
+ */
+double integrand_snr_SA_subroutine_log10(double log10f, void *subroutine_params)
+{
+	gsl_snr_struct cast_params = *(gsl_snr_struct *)subroutine_params;
+	//fourier_waveform(&f, 1,&wfp, &wfc, cast_params.generation_method, cast_params.params);
+	waveform_polarizations<double> wp;
+	assign_polarizations(cast_params.generation_method, &wp);
+	wp.allocate_memory(1);
+	double f = std::pow(10,log10f);
+	fourier_waveform(&f, 1,&wp, cast_params.generation_method, cast_params.params);
+	double SN;
+	populate_noise(&f, cast_params.SN, &SN,1);
+	SN*=SN;
+	double retval =  4*std::real(std::conj(wp.hplus[0])*wp.hplus[0] * f * LOG10)/SN;
+	//debugger_print(__FILE__,__LINE__,retval);
+	//debugger_print(__FILE__,__LINE__,SN);
+	//std::cout<<retval<<" "<<SN<<" "<<wp.hplus[0]<<" "<<f<<std::endl;
+	wp.deallocate_memory();
+	return retval;
+}
 
 /*! \brief Internal function to calculate the SNR integrand for sky-averaged waveforms
  *
@@ -428,6 +451,8 @@ double integrand_snr_SA_subroutine(double f, void *subroutine_params)
 	populate_noise(&f, cast_params.SN, &SN,1);
 	SN*=SN;
 	double retval =  4*std::real(std::conj(wp.hplus[0])*wp.hplus[0])/SN;
+	//debugger_print(__FILE__,__LINE__,retval);
+	//debugger_print(__FILE__,__LINE__,SN);
 	//std::cout<<retval<<" "<<SN<<" "<<wp.hplus[0]<<" "<<f<<std::endl;
 	wp.deallocate_memory();
 	return retval;
@@ -3051,10 +3076,10 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	
 	bool relative_time = true;
 	bool autodiff = true;	
-	//bool gsl_integration=false;
-	bool gsl_integration=true;
+	bool gsl_integration=false;
+	//bool gsl_integration=true;
 
-	int GL_length = 500;
+	int GL_length = 1000;
 	double *GL_freqs;
 	double *GL_w;
 	if(!gsl_integration){
@@ -3107,17 +3132,19 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	}
 
 	if(gsl_integration){
-		std::cout << "am I here?" << std::endl;
+		//std::cout << "am I here?" << std::endl;
 		snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 	}
 	else{
-		std::cout << "or am I here?" << std::endl;
+		//std::cout << "or am I here?" << std::endl;
 
 		gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
 		for(int k =0; k<GL_length; k++){
 			GL_freqs[k] = pow(10.,GL_freqs[k]);
 		}
 		snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+		//Correct for sky averaging factors with 
+		snr *= sqrt(10./3.)/sqrt(2./5.) ;
 	}
 	//std::cout<<"Initial SNR calc done"<<std::endl;
 	//std::cout<<"Initial SNR: "<<snr<<std::endl;
@@ -3719,10 +3746,16 @@ double snr_threshold_subroutine(double fmin, double fmax, double rel_err, gen_pa
 	helper_params.generation_method = generation_method;
 	helper_params.SN = SN;
 	gsl_function F;
-	F.function = [](double f, void *param){return integrand_snr_SA_subroutine(f,param);};
+	//F.function = [](double f, void *param){return integrand_snr_SA_subroutine(f,param);};
+	F.function = [](double f, void *param){return integrand_snr_SA_subroutine_log10(f,param);};
 	F.params = (void *)&helper_params;
 	double result, err;
-	int errcode = gsl_integration_qag(&F,fmin, fmax, 0,rel_err, np, GSL_INTEG_GAUSS15,w, &result, &err);
+	//debugger_print(__FILE__,__LINE__,"Start");
+	//int errcode = gsl_integration_qag(&F,fmin, fmax, 0,rel_err, np, GSL_INTEG_GAUSS15,w, &result, &err);
+	int errcode = gsl_integration_qag(&F,std::log10(fmin), std::log10(fmax), 0,rel_err, np, GSL_INTEG_GAUSS15,w, &result, &err);
+	size_t teval;
+	//int errcode = gsl_integration_qng(&F,fmin, fmax, 0,1e2,  &result, &err, &teval);
+	//debugger_print(__FILE__,__LINE__,errcode);
 	return sqrt(result);
 }
 
