@@ -3217,6 +3217,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					GL_freqs[k] = pow(10.,GL_freqs[k]);
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+				snr *= sqrt(10./3.)/sqrt(2./5.) ;
 			}
 			if(snr<snr_prev){bound_search=false;}	
 			else if(f_lower < fmin){ 
@@ -3301,6 +3302,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					GL_freqs[k] = pow(10.,GL_freqs[k]);
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+				snr *= sqrt(10./3.)/sqrt(2./5.) ;
 			}
 			//SNR found
 			if(snr>SNR_thresh){not_found=false;}
@@ -3414,6 +3416,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					GL_freqs[k] = pow(10.,GL_freqs[k]);
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+				snr *= sqrt(10./3.)/sqrt(2./5.) ;
 			}
 			//If hit 5 day limit, exit loop with snr less than threshold, 
 			//set lower bound to this time, and skip the rest of the search
@@ -3498,6 +3501,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					GL_freqs[k] = pow(10.,GL_freqs[k]);
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+				snr *= sqrt(10./3.)/sqrt(2./5.) ;
 			}
 			//SNR reached threshold
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_lower_root=true;threshold_times_out[0]=t_mer;}
@@ -3609,6 +3613,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					GL_freqs[k] = pow(10.,GL_freqs[k]);
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+				snr *= sqrt(10./3.)/sqrt(2./5.) ;
 			}
 			if( (fabs(t2-T_wait)/T_wait < DOUBLE_COMP_THRESH) && snr>SNR_thresh){ found_upper_root=true; threshold_times_out[1]=T_wait;break;}
 		}while(snr>SNR_thresh  );
@@ -3688,6 +3693,7 @@ int threshold_times_gsl(gen_params_base<double> *params,
 					GL_freqs[k] = pow(10.,GL_freqs[k]);
 				}
 				snr = calculate_snr(SN, "LISA",generation_method, params,GL_freqs,GL_length,"GAUSSLEG",GL_w,true);
+				snr *= sqrt(10./3.)/sqrt(2./5.) ;
 			}
 			//std::cout<<snr<<std::endl;
 			if(std::abs(snr-SNR_thresh)/SNR_thresh<tolerance ){found_upper_root=true;threshold_times_out[1]=t_mer;}
