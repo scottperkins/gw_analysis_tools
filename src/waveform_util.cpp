@@ -3107,9 +3107,12 @@ int threshold_times_gsl(gen_params_base<double> *params,
 	}
 
 	if(gsl_integration){
+		std::cout << "am I here?" << std::endl;
 		snr = snr_threshold_subroutine(	f_lower, f_upper, rel_err,params, generation_method,SN, w,np);
 	}
 	else{
+		std::cout << "or am I here?" << std::endl;
+
 		gauleg(log10(f_lower), log10(f_upper), GL_freqs, GL_w, GL_length);
 		for(int k =0; k<GL_length; k++){
 			GL_freqs[k] = pow(10.,GL_freqs[k]);

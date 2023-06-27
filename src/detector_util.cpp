@@ -164,6 +164,26 @@ void populate_noise(double *frequencies, /**< double array of frquencies (NULL)*
 	else if(check_list(detector, (std::string *)interp_PSD_models,interp_PSD_models_N)){
 		int dat_length=0;
 		std::string file;
+		if(detector=="DECIGO"){
+			dat_length = 41;
+			file = "decigo_characteristic_formatcpp.csv";
+		}
+		if(detector=="DO-Conservative"){
+			dat_length = 1001;
+			file = "decigoMueller.csv";
+		}
+		if(detector=="DO-Optimal"){
+			dat_length = 1001;
+			file = "decigo2Mueller2.csv";
+		}
+		if(detector=="ALIA"){
+			dat_length = 1001;
+			file = "alia_char_Mueller.csv";
+		}
+		if(detector=="AtomClockGW"){
+			dat_length = 602;
+			file = "AtomClockGW_v2.csv";
+		}
 		if(detector=="AdLIGOMidHigh"){
 			//dat_length = 3000;
 			dat_length = 3453;

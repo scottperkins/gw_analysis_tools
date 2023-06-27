@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	
 	//Detector properties
 	int detect_number = 3;
-	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
+	std::string detectors[3] = {"AtomClockGW","Livingston","Virgo"};
 	//Frequency array properties
 	double fmin = 10;
 	double fmax =2048;
