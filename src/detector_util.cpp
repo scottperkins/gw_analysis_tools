@@ -669,6 +669,97 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 	*dphi_dDEC = (phip-phim)/(2*epsilon);
 }
 
+/*! transfer functions with time dependence
+* taken from pyFDresponse.py
+
+*/
+template <class T>
+T EvaluateGslr(double *t,
+	double *req,
+	double **H,
+	double *k,
+	int length,
+	const double L=2.5*pow_int(10.,9)
+)
+{
+
+	double **p0 = new double*[length];
+  double **p1L = new double*[length];
+  double **p2L = new double*[length];
+  double **p3L = new double*[length];
+  double **n1 = new double*[length];
+  double **n2 = new double*[length];
+  double **n3 = new double*[length];
+	for(int i=0;i<length;i++)
+	{
+		p0[i]= new double[3];
+		p1L[i]= new double[3];
+		p2L[i]= new double[3];
+		p3L[i]= new double[3];
+		n1[i]= new double[3];
+		n2[i]= new double[3];
+		n3[i]= new double[3];
+	}
+
+	funcp0(t,p0);
+	funcp1L(t,p1L);
+	funcp2L(t,p2L);
+	funcp3L(t,p3L);
+	funcn1(t,n1);
+	funcn2(t,n2);
+	funcn3(t,n3);
+
+	double *n1Hn1 = new std::complex<double>[length];
+	double *n2Hn2 = new std::complex<double>[length];
+	double *n3Hn3 = new std::complex<double>[length];
+
+	double *kn1 = new double[length];
+	double *kn2 = new double[length];
+	double *kn3 = new double[length];
+
+	double *kp1Lp2L = new double[length];
+	double *kp2Lp3L = new double[length];
+	double *kp3Lp1L = new double[length];
+	double *kp0 = new double[length];
+
+	for(int i=0;i<length;i++)
+	{
+		// time loop
+		for(int j=0;j<3;j++)
+		{
+			// row loop
+
+			kn1[i] = n1[i][j] * k[j];
+			kn2[i] = n2[i][j] * k[j];
+			kn3[i] = n3[i][j] * k[j];
+
+			kp1Lp2L[i] = (p1L[i][j] + p2L[i][j]) * k[j];
+			kp2Lp3L[i] = (p2L[i][j] + p3L[i][j]) * k[j];
+			kp3Lp1L[i] = (p3L[i][j] + p1L[i][j]) * k[j];
+			kp0[i] = (p0[i][j]) * k[j];
+
+
+			for(int k=0;k<3;k++)
+			{
+				// column loop
+					// n1H1n1(t_i)=n1_j(t_i) * H_{jk} * n1_k(t_i)
+					n1Hn1[i] = n1[i][j] * H[j][k] * n1[i][k];
+					n2Hn2[i] = n2[i][j] * H[j][k] * n2[i][k];
+					n3Hn3[i] = n3[i][j] * H[j][k] * n3[i][k];
+			}
+
+
+
+		}
+	}
+
+
+
+
+
+
+}
+
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  *
  * Full version, from LAL
@@ -1218,7 +1309,7 @@ T LISA_response_cross_time( T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T
 	T phi_t = phi_0 + 2. * M_PI * t / T_year;
 	T alpha1 = alpha_0;
 	T out = (0.1e1 + pow(cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1, 0.2e1)) * cos((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * sin(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1))) / 0.2e1 + (cos(theta_s) / 0.2e1 - sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) * sin((T) (2 * alpha1) + 0.3141592654e1 / 0.6e1 - 0.2e1 * atan((sqrt(0.3e1) * cos(theta_s) + sin(theta_s) * cos(-phi_t + phi_s)) / sin(theta_s) / sin(-phi_t + phi_s) / 0.2e1)) * cos(0.2e1 * atan((-(cos(theta_j) * cos(theta_s) + sin(theta_j) * sin(theta_s) * cos(phi_j - phi_s)) * (-cos(theta_s) / 0.2e1 + sqrt(0.3e1) * sin(theta_s) * cos(-phi_t + phi_s) / 0.2e1) + cos(theta_j) / 0.2e1 - sqrt(0.3e1) * sin(theta_j) * cos(-phi_t + phi_j) / 0.2e1) / (sin(theta_j) * sin(theta_s) * sin(phi_j - phi_s) / 0.2e1 - sqrt(0.3e1) * cos(phi_t) * (cos(theta_j) * sin(theta_s) * sin(phi_s) - cos(theta_s) * sin(theta_j) * sin(phi_j)) / 0.2e1 - sqrt(0.3e1) * sin(phi_t) * (cos(theta_s) * sin(theta_j) * cos(phi_j) - cos(theta_j) * sin(theta_s) * cos(phi_s)) / 0.2e1)));
-	//Factor of sqrt(3)/2 for the equilateral triangle -- see Sec III B of gr-qc/9703068 
+	//Factor of sqrt(3)/2 for the equilateral triangle -- see Sec III B of gr-qc/9703068
 	return ROOT_THREE/2.*out;
 }
 /*! \brief Utility to calculate the cumulative amplitude distribution for a single detector
