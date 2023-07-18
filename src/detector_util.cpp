@@ -669,17 +669,21 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 	*dphi_dDEC = (phip-phim)/(2*epsilon);
 }
 
+double sinc_ut(double x);
+double sinc_ut(double x) {if(x == 0) return 1; else return sin(x)/x;}
+
 /*! transfer functions with time dependence
 * taken from pyFDresponse.py
 
 */
 template <class T>
 T EvaluateGslr(double *t,
-	double *req,
+	double *freq,
 	double **H,
 	double *k,
 	int length,
-	const double L=2.5*pow_int(10.,9)
+	const double L=2.5*pow_int(10.,9),
+	std::complex<double> **Gslr
 )
 {
 
@@ -700,7 +704,7 @@ T EvaluateGslr(double *t,
 		n2[i]= new double[3];
 		n3[i]= new double[3];
 	}
-
+	// Check with Scott's functions to make funcp0 etc compatible
 	funcp0(t,p0);
 	funcp1L(t,p1L);
 	funcp2L(t,p2L);
@@ -709,19 +713,32 @@ T EvaluateGslr(double *t,
 	funcn2(t,n2);
 	funcn3(t,n3);
 
-	double *n1Hn1 = new std::complex<double>[length];
-	double *n2Hn2 = new std::complex<double>[length];
-	double *n3Hn3 = new std::complex<double>[length];
+	// Need to figure out what H is
+	std::complex<double> n1Hn1;
+	std::complex<double> n2Hn2;
+	std::complex<double> n3Hn3;
 
-	double *kn1 = new double[length];
-	double *kn2 = new double[length];
-	double *kn3 = new double[length];
 
-	double *kp1Lp2L = new double[length];
-	double *kp2Lp3L = new double[length];
-	double *kp3Lp1L = new double[length];
-	double *kp0 = new double[length];
+	double kn1;
+	double kn2;
+	double kn3;
 
+	double kp1Lp2L;
+	double kp2Lp3L;
+	double kp3Lp1L;
+	double kp0;
+	double factorcexp0;
+	double prefactor;
+	double *G12 = new double[length];
+	double *G21 = new double[length];
+	double *G23 = new double[length];
+	double *G32 = new double[length];
+	double *G13 = new double[length];
+	double *G31 = new double[length];
+
+
+	std::complex<T> complex_I;
+	complex_I = std::complex<T> (0,1.);
 	for(int i=0;i<length;i++)
 	{
 		// time loop
@@ -729,29 +746,70 @@ T EvaluateGslr(double *t,
 		{
 			// row loop
 
-			kn1[i] = n1[i][j] * k[j];
-			kn2[i] = n2[i][j] * k[j];
-			kn3[i] = n3[i][j] * k[j];
+			kn1 = n1[i][j] * k[j];
+			kn2 = n2[i][j] * k[j];
+			kn3 = n3[i][j] * k[j];
 
-			kp1Lp2L[i] = (p1L[i][j] + p2L[i][j]) * k[j];
-			kp2Lp3L[i] = (p2L[i][j] + p3L[i][j]) * k[j];
-			kp3Lp1L[i] = (p3L[i][j] + p1L[i][j]) * k[j];
-			kp0[i] = (p0[i][j]) * k[j];
-
+			kp1Lp2L = (p1L[i][j] + p2L[i][j]) * k[j];
+			kp2Lp3L = (p2L[i][j] + p3L[i][j]) * k[j];
+			kp3Lp1L = (p3L[i][j] + p1L[i][j]) * k[j];
+			kp0 = (p0[i][j]) * k[j];
+			// TODO: lines 1165 of pyFDresponse.py -- main orbital delay, prefactors, and geometric factors to construct Gslr
 
 			for(int k=0;k<3;k++)
 			{
 				// column loop
 					// n1H1n1(t_i)=n1_j(t_i) * H_{jk} * n1_k(t_i)
-					n1Hn1[i] = n1[i][j] * H[j][k] * n1[i][k];
-					n2Hn2[i] = n2[i][j] * H[j][k] * n2[i][k];
-					n3Hn3[i] = n3[i][j] * H[j][k] * n3[i][k];
+					n1Hn1 = n1[i][j] * H[j][k] * n1[i][k];
+					n2Hn2 = n2[i][j] * H[j][k] * n2[i][k];
+					n3Hn3 = n3[i][j] * H[j][k] * n3[i][k];
 			}
 
 
 
 		}
+
+			// factorcexp0 = exp(1j*2*pi*f/C_SI * kp0)
+			// prefactor = pi*f*L/C_SI
+							// factorcexp12 = exp(1j*prefactor * (1.+kp1Lp2L/L))
+			        // factorcexp23 = exp(1j*prefactor * (1.+kp2Lp3L/L))
+			        // factorcexp31 = exp(1j*prefactor * (1.+kp3Lp1L/L))
+			        // factorsinc12 = sinc( prefactor * (1.-kn3))
+			        // factorsinc21 = sinc( prefactor * (1.+kn3))
+			        // factorsinc23 = sinc( prefactor * (1.-kn1))
+			        // factorsinc32 = sinc( prefactor * (1.+kn1))
+			        // factorsinc31 = sinc( prefactor * (1.-kn2))
+			        // factorsinc13 = sinc( prefactor * (1.+kn2))
+
+							// commonfac = 1j * prefactor * factorcexp0
+						  //   G12 = commonfac * n3Hn3 * factorsinc12 * factorcexp12
+						  //   G21 = commonfac * n3Hn3 * factorsinc21 * factorcexp12
+						  //   G23 = commonfac * n1Hn1 * factorsinc23 * factorcexp23
+						  //   G32 = commonfac * n1Hn1 * factorsinc32 * factorcexp23
+						  //   G31 = commonfac * n2Hn2 * factorsinc31 * factorcexp31
+						  //   G13 = commonfac * n2Hn2 * factorsinc13 * factorcexp31
+
+
+			factorcexp0 = std::exp(2*M_PI*complex_I*freq[i]/c*kp0);
+			prefactor = M_PI*freq[i]*L/c;
+
+			G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc_ut(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L));
+			G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc_ut(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L));
+			G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc_ut(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L));
+			G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc_ut(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L));
+			G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc_ut(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L));
+			G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc_ut(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L));
+
+			Gslr[0][i] = G12[i] ;
+			Gslr[1][i] = G21[i] ;
+			Gslr[2][i] = G23[i] ;
+			Gslr[3][i] = G32[i] ;
+			Gslr[4][i] = G31[i] ;
+			Gslr[5][i] = G13[i] ;
+
+
 	}
+	// end of for loop
 
 
 
