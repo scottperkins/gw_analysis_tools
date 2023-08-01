@@ -132,9 +132,6 @@ public:
 	/*! antisymmetric dissipative tidal deformability*/
 	T diss_tidal_a=-1;
 	T diss_tidal_weighted=-1;
-        /*! Boolean flag indicating binary love relations should be used*/  
-	bool tidal_love = true;
-
 
 	//Polarization angle
 	T psi =0 ;

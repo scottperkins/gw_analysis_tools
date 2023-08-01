@@ -15,6 +15,8 @@ struct priorData
 	double tidal1_prior[2];
 	double tidal2_prior[2];
 	double tidal_s_prior[2];
+	double diss_tidal1_prior[2];
+	double diss_tidal2_prior[2];
 	double EA_prior[6];
 	double RA_bounds[2];
 	double sinDEC_bounds[2];
