@@ -669,21 +669,90 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 	*dphi_dDEC = (phip-phim)/(2*epsilon);
 }
 
-double sinc_ut(double x);
-double sinc_ut(double x) {if(x == 0) return 1; else return sin(x)/x;}
+//! LISA orbit functions taken from pyFDresponse.py
 
-/*! transfer functions with time dependence
-* taken from pyFDresponse.py
+void funcp0(double *t, double **p0, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		p0[i][0] = aorbit*cos(alpha);
+		p0[i][1] = aorbit*sin(alpha);
+		p0[i][2] = 0.;
+	}
+}
 
-*/
+void funcp1L(double *t, double **p1L, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		p1L[i][0] = -aorbit*eorbit*(1.0 + sin(alpha)*sin(alpha));
+		p1L[i][1] = aorbit*eorbit*cos(alpha)*sin(alpha);
+		p1L[i][2] = -aorbit*eorbit*ROOT_THREE*cos(alpha);
+	}
+}
+
+void funcp2L(double *t, double **p2L, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		double c = cos(alpha);
+		double s = sin(alpha);
+		p2L[i][0] = aorbit*eorbit*0.5 * (ROOT_THREE*c*s + (1+s*s));
+		p2L[i][1] = aorbit*eorbit*0.5 * (-c*s - ROOT_THREE*(1+c*c));
+		p2L[i][2] = -aorbit*eorbit*ROOT_THREE*0.5 * (ROOT_THREE*s - c);
+	}
+}
+
+void funcp3L(double *t, double **p3L, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		double c = cos(alpha);
+		double s = sin(alpha);
+		p3L[i][0] = aorbit*eorbit*0.5 * (-ROOT_THREE*c*s + (1+s*s));
+		p3L[i][1] = aorbit*eorbit*0.5 * (-c*s + ROOT_THREE*(1+c*c));
+		p3L[i][2] = -aorbit*eorbit*ROOT_THREE*0.5 * (-ROOT_THREE*s-c);
+	}
+}
+
+void funcn1(double *t, double **n1, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		double c = cos(alpha);
+		double s = sin(alpha);
+		n1[i][0] = -0.5*c*s;
+		n1[i][1] = 0.5* (1.0+c*c);
+		n1[i][2] = ROOT_THREE*0.5*s;
+	}
+}
+
+void funcn2(double *t, double **n2, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		double c = cos(alpha);
+		double s = sin(alpha);
+		n2[i][0] = 0.25 * (c*s - ROOT_THREE*(1.0 + s*s));
+		n2[i][1] = 0.25 * (ROOT_THREE*c*s - (1.0+c*c));
+		n2[i][2] = -0.25 * (ROOT_THREE*s + 3.0*c);
+	}
+}
+
+void funcn3(double *t, double **n3, int length){
+	for(int i = 0; i<length; i++){
+		double alpha = Omega0*t[i];
+		double c = cos(alpha);
+		double s = sin(alpha);
+		n3[i][0] = 0.25 * (c*s + ROOT_THREE*(1.0+s*s));
+		n3[i][1] = 0.25 * (-ROOT_THREE*s*c - (1.0+c*c));
+		n3[i][2] = 0.25 * (-ROOT_THREE*s + 3.0*c);
+	}
+}
+
+
 template <class T>
 T EvaluateGslr(double *t,
 	double *freq,
 	double **H,
 	double *k,
 	int length,
-	const double L=2.5*pow_int(10.,9),
-	std::complex<double> **Gslr
+	std::complex<double> **Gslr,
+	const double L=2.5*pow_int(10.,9)
 )
 {
 
@@ -705,13 +774,13 @@ T EvaluateGslr(double *t,
 		n3[i]= new double[3];
 	}
 	// Check with Scott's functions to make funcp0 etc compatible
-	funcp0(t,p0);
-	funcp1L(t,p1L);
-	funcp2L(t,p2L);
-	funcp3L(t,p3L);
-	funcn1(t,n1);
-	funcn2(t,n2);
-	funcn3(t,n3);
+	funcp0(t,p0,length);
+	funcp1L(t,p1L,length);
+	funcp2L(t,p2L,length);
+	funcp3L(t,p3L,length);
+	funcn1(t,n1,length);
+	funcn2(t,n2,length);
+	funcn3(t,n3,length);
 
 	// Need to figure out what H is
 	std::complex<double> n1Hn1;
@@ -754,7 +823,6 @@ T EvaluateGslr(double *t,
 			kp2Lp3L = (p2L[i][j] + p3L[i][j]) * k[j];
 			kp3Lp1L = (p3L[i][j] + p1L[i][j]) * k[j];
 			kp0 = (p0[i][j]) * k[j];
-			// TODO: lines 1165 of pyFDresponse.py -- main orbital delay, prefactors, and geometric factors to construct Gslr
 
 			for(int k=0;k<3;k++)
 			{
@@ -769,36 +837,16 @@ T EvaluateGslr(double *t,
 
 		}
 
-			// factorcexp0 = exp(1j*2*pi*f/C_SI * kp0)
-			// prefactor = pi*f*L/C_SI
-							// factorcexp12 = exp(1j*prefactor * (1.+kp1Lp2L/L))
-			        // factorcexp23 = exp(1j*prefactor * (1.+kp2Lp3L/L))
-			        // factorcexp31 = exp(1j*prefactor * (1.+kp3Lp1L/L))
-			        // factorsinc12 = sinc( prefactor * (1.-kn3))
-			        // factorsinc21 = sinc( prefactor * (1.+kn3))
-			        // factorsinc23 = sinc( prefactor * (1.-kn1))
-			        // factorsinc32 = sinc( prefactor * (1.+kn1))
-			        // factorsinc31 = sinc( prefactor * (1.-kn2))
-			        // factorsinc13 = sinc( prefactor * (1.+kn2))
 
-							// commonfac = 1j * prefactor * factorcexp0
-						  //   G12 = commonfac * n3Hn3 * factorsinc12 * factorcexp12
-						  //   G21 = commonfac * n3Hn3 * factorsinc21 * factorcexp12
-						  //   G23 = commonfac * n1Hn1 * factorsinc23 * factorcexp23
-						  //   G32 = commonfac * n1Hn1 * factorsinc32 * factorcexp23
-						  //   G31 = commonfac * n2Hn2 * factorsinc31 * factorcexp31
-						  //   G13 = commonfac * n2Hn2 * factorsinc13 * factorcexp31
+			factorcexp0 = std::exp(-2*M_PI*complex_I*freq[i]/c*kp0);
+			prefactor = -M_PI*freq[i]*L/c;
 
-
-			factorcexp0 = std::exp(2*M_PI*complex_I*freq[i]/c*kp0);
-			prefactor = M_PI*freq[i]*L/c;
-
-			G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc_ut(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L));
-			G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc_ut(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L));
-			G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc_ut(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L));
-			G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc_ut(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L));
-			G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc_ut(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L));
-			G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc_ut(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L));
+			G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L));
+			G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L));
+			G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L));
+			G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L));
+			G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L));
+			G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L));
 
 			Gslr[0][i] = G12[i] ;
 			Gslr[1][i] = G21[i] ;
@@ -807,16 +855,16 @@ T EvaluateGslr(double *t,
 			Gslr[4][i] = G31[i] ;
 			Gslr[5][i] = G13[i] ;
 
+// Check overall minus sign
 
 	}
 	// end of for loop
 
 
 
-
-
-
 }
+
+
 
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
  *

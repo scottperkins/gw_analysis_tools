@@ -46,6 +46,16 @@ const double ROOT_THREE = std::sqrt(3.);
 
 const double LOG10=std::log(10.);
 
+const double f0 = 1./T_year;
+
+const double Omega0 = 2*M_PI*f0;
+
+const double aorbit = AU_SEC;
+
+const double eorbit = 2.5e9/(2*ROOT_THREE*AU_SEC);
+
+
+
 #define PBSTR "||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"
 #define PBWIDTH 60
 
@@ -115,12 +125,12 @@ public:
 	/*! antisymmetric tidal deformability*/
 	T tidal_a=-1;
 	T tidal_weighted=-1;
-        /*! Boolean flag indicating binary love relations should be used*/  
+        /*! Boolean flag indicating binary love relations should be used*/
 	bool tidal_love = true;
-        /*! Boolean flag indicating error marginalization over residual EoS 
-        * dependence in binary love relations should be performed. 
+        /*! Boolean flag indicating error marginalization over residual EoS
+        * dependence in binary love relations should be performed.
         */
-        bool tidal_love_error = false; 
+        bool tidal_love_error = false;
 	T delta_tidal_weighted=-1;
 
 	//Polarization angle
@@ -225,7 +235,7 @@ public:
 
 	T chil = 0;
 	//###################################################
-	
+
 	int PNorder = 35;
 
 	//coupling constants in one parameterization for Einstein Aether
@@ -234,13 +244,13 @@ public:
 	T cw_EA;
 	T csigma_EA;
         bool EA_region1 = false; //region of parameter space with ctheta = 3ca(1+delta_ctheta)
-        T delta_ctheta_EA; 
+        T delta_ctheta_EA;
   	//###################################################
         //coupling constants in another parameterization for Einstein Aether
         T alpha1_EA;
         T alpha2_EA;
         T cbarw_EA;
-        bool alpha_param = true; 
+        bool alpha_param = true;
 	//###################################################
         bool include_l1=false;
 	gsl_spline *Z_DL_spline_ptr=NULL;
@@ -564,7 +574,7 @@ struct source_parameters
   T cT_EA;
   T cV_EA;
   T cS_EA;
-  
+
   //Necessary functions of the c's
   T alpha1_EA;
   T alpha2_EA;
@@ -615,6 +625,9 @@ static source_parameters<T> populate_source_parameters_old(
 			bool sky_average) ;
 };
 double gsl_LU_lndet(double **matrix, int dim);
+
+double sinc(double x);
+
 int mvn_sample(int samples, double *mean, double **cov, int dim, double **output );
 int mvn_sample(int samples, double *mean, double **cov, int dim, gsl_rng *r,double **output );
 void vector_union(std::vector<double> A, std::vector<double> B, std::vector<double> *C );
