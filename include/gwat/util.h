@@ -44,6 +44,9 @@ const double h_planck = 4.135667696e-15;
 /*! Sqrt(3) comes up often, precompute it*/
 const double ROOT_THREE = std::sqrt(3.);
 
+const double ROOT_TWO = std::sqrt(2.);
+
+
 const double LOG10=std::log(10.);
 
 const double f0 = 1./T_year;
