@@ -272,6 +272,27 @@ T LISA_response_plus( source_parameters<T> *params,T theta_s, T phi_s, T theta_j
 template<class T>
 T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_j, T phi_j, T alpha_0, T phi_0, T f);
 
+
+
+template<class T>
+void funcp0(T *t, T **p0, int length);
+
+
+// template<class T>
+// void EvaluateGslr(T *t,
+// 	T *freq,
+// 	T **H,
+// 	T *k,
+// 	int length,
+// 	std::complex<T> **Gslr,
+// 	const T L=2.5*pow_int(10.,9)
+// );
+
+
+
+
+
+
 double p_single_detector(double omega, int samples);
 double p_N_detector(double omega, int samples,int N_detectors,std::string *detectors,int rand_seed);
 double p_single_detector_fit(double omega);
