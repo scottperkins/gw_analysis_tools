@@ -759,6 +759,7 @@ void EvaluateGslr(T *t,
 	T *k,
 	int length,
 	std::complex<T> **Gslr,
+	std::string approximate_tag,
 	const T L=2.5*pow_int(10.,9)
 )
 {
@@ -803,21 +804,21 @@ void EvaluateGslr(T *t,
 	T kp2Lp3L;
 	T kp3Lp1L;
 	T kp0;
-	T factorcexp0;
+	std::complex<T> factorcexp0;
 	T prefactor;
-	T *G12 = new T[length];
-	T *G21 = new T[length];
-	T *G23 = new T[length];
-	T *G32 = new T[length];
-	T *G13 = new T[length];
-	T *G31 = new T[length];
+	std::complex<T> *G12 = new std::complex<T>[length];
+	std::complex<T> *G21 = new std::complex<T>[length];
+	std::complex<T> *G23 = new std::complex<T>[length];
+	std::complex<T> *G32 = new std::complex<T>[length];
+	std::complex<T> *G13 = new std::complex<T>[length];
+	std::complex<T> *G31 = new std::complex<T>[length];
 
 
 	std::complex<T> complex_I;
 	complex_I = std::complex<T> (0,1.);
 	for(int i=0;i<length;i++)
 	{
-		// time loop
+		// time/frequency loop
 		for(int j=0;j<3;j++)
 		{
 			// row loop
@@ -844,24 +845,46 @@ void EvaluateGslr(T *t,
 
 		}
 
-
 			factorcexp0 = std::exp(-2*M_PI*complex_I*freq[i]*kp0); // kp0(unit SEC)
 			prefactor = -M_PI*freq[i]*L/c;
 
-			// kpxLpxL(unit SEC)
-			G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L*c));
-			G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L*c));
-			G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L*c));
-			G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L*c));
-			G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L*c));
-			G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L*c));
+			if (approximate_tag.find("lowf") != std::string::npos){
+				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3;
+				G21[i] = G12[i];
+				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1;
+				G32[i] = G23[i];
+				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2;
+				G13[i] = G31[i];
 
-			Gslr[0][i] = G12[i] ;
-			Gslr[1][i] = G21[i] ;
-			Gslr[2][i] = G23[i] ;
-			Gslr[3][i] = G32[i] ;
-			Gslr[4][i] = G31[i] ;
-			Gslr[5][i] = G13[i] ;
+				Gslr[0][i] = G12[i] ;
+				Gslr[1][i] = G21[i] ;
+				Gslr[2][i] = G23[i] ;
+				Gslr[3][i] = G32[i] ;
+				Gslr[4][i] = G31[i] ;
+				Gslr[5][i] = G13[i] ;
+			}
+			else if(approximate_tag.find("full") != std::string::npos){
+				// kpxLpxL(unit SEC)
+				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L*c));
+				G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L*c));
+				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L*c));
+				G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L*c));
+				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L*c));
+				G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L*c));
+
+				Gslr[0][i] = G12[i] ;
+				Gslr[1][i] = G21[i] ;
+				Gslr[2][i] = G23[i] ;
+				Gslr[3][i] = G32[i] ;
+				Gslr[4][i] = G31[i] ;
+				Gslr[5][i] = G13[i] ;
+			}
+			else{
+				std::cout << "Please provide a valid frequency approximation! Fly you fools!" << std::endl;
+				std::exit(1);
+			}
+
+
 
 // Check overall minus sign
 
@@ -883,18 +906,19 @@ void Evaluateyslr(
 	int length,
 	std::complex<T> **yslr,
 	waveform_polarizations<T> *wp,
+	std::string approximate_tag,
 	const T L=2.5*pow_int(10.,9)
 )
 {
-	T **Gplus_slr = new T*[length];
-	T **Gcross_slr = new T*[length];
+	std::complex<T> **Gplus_slr = new std::complex<T>*[length];
+	std::complex<T> **Gcross_slr = new std::complex<T>*[length];
 	for(int i=0;i<length;i++)
 	{
-		Gplus_slr[i]= new T[6];
-		Gcross_slr[i]= new T[6];
+		Gplus_slr[i]= new std::complex<T>[6];
+		Gcross_slr[i]= new std::complex<T>[6];
 	}
-	EvaluateGslr(t,freq,Hplus,k,length,Gplus_slr,L);
-	EvaluateGslr(t,freq,Hcross,k,length,Gcross_slr,L);
+	EvaluateGslr(t,freq,Hplus,k,length,Gplus_slr,approximate_tag,L);
+	EvaluateGslr(t,freq,Hcross,k,length,Gcross_slr,approximate_tag,L);
 
 	for(int i=0;i<length;i++)
 	{
@@ -934,9 +958,9 @@ const T L=2.5*pow_int(10.,9)
 
 	std::complex<T> complex_I;
 	complex_I = std::complex<T> (0,1.);
-	T **yslr = new T*[length];
+	std::complex<T> **yslr = new std::complex<T>*[length];
 	for(int i = 0; i<length; i++){
-		yslr[i] = new T[6];
+		yslr[i] = new std::complex<T>[6];
 	}
 
 
@@ -1041,23 +1065,41 @@ const T L=2.5*pow_int(10.,9)
 
 				//low frequency part hasn't been completed
 				if (approximate_tag.find("lowf") != std::string::npos){
-					prefactorA = 1.0;
-					prefactorE = 1.0;
-					prefactorT = 1.0;
 
-					// low frequency response version
-					for(int i = 0; i<length; i++){
-						// Frequency loop
-						// A channel
-						TDI_FD[i][0] = prefactorA*( (1.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][4]+yslr[i][5])
-						 - yslr[i][2] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][3] - yslr[i][1] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][0] );
-						// E channel
-						TDI_FD[i][1] = prefactorE/ROOT_THREE*( (1.0-std::exp(-2.0*complex_I*M_PI*freq[i]*L/c) )*(yslr[i][5]-yslr[i][4])
-						+ (2.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][0]-yslr[i][3]) + (1.0+2.0*std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][1]-yslr[i][2])  );
-						// T channel
-						TDI_FD[i][2] = prefactorT*ROOT_TWO/ROOT_THREE*(yslr[i][1]-yslr[i][0]+yslr[i][3]-yslr[i][2]+yslr[i][5]-yslr[i][4]);					
+					if (approximate_tag.find("rescaled") != std::string::npos){
+						// low frequency response version
+						for(int i = 0; i<length; i++){
+							// Frequency loop
+							// A channel
+							
+							TDI_FD[i][0] = 4.0*yslr[i][4] - 2.0*yslr[i][2] - 2.0*yslr[i][0];
+							// E channel
+							TDI_FD[i][1] = 2.0*ROOT_THREE*( yslr[i][0] - yslr[i][2] );
+							// T channel
+							TDI_FD[i][2] = 0.0;				
+						}
+					}
+					else{
+						// low frequency response version
+
+
+						for(int i = 0; i<length; i++){
+							// Frequency loop
+							// A channel
+							prefactorA = -ROOT_TWO*(1.0 - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c));
+							prefactorE = prefactorA;
+							prefactorT = 0.0;
+							
+							TDI_FD[i][0] = prefactorA*4.0*yslr[i][4] - 2.0*yslr[i][2] - 2.0*yslr[i][0];
+							// E channel
+							TDI_FD[i][1] = prefactorE*2.0*ROOT_THREE*( yslr[i][0] - yslr[i][2] );
+							// T channel
+							TDI_FD[i][2] = 0.0;				
+						}
 					}
 				}
+				
+
 
 	}
 	else{
@@ -1911,3 +1953,28 @@ template void detector_response_functions_equatorial<adouble>(std::string, adoub
 
 template void funcp0<double>(double *t, double **p0, int length);
 template void funcp0<adouble>(adouble *t, adouble **p0, int length);
+template void funcp1L<double>(double *t, double **p1L, int length);
+template void funcp1L<adouble>(adouble *t, adouble **p1L, int length);
+template void funcp2L<double>(double *t, double **p2L, int length);
+template void funcp2L<adouble>(adouble *t, adouble **p2L, int length);
+template void funcp3L<double>(double *t, double **p3L, int length);
+template void funcp3L<adouble>(adouble *t, adouble **p3L, int length);
+template void funcn1<double>(double *t, double **n1, int length);
+template void funcn1<adouble>(adouble *t, adouble **n1, int length);
+template void funcn2<double>(double *t, double **n2, int length);
+template void funcn2<adouble>(adouble *t, adouble **n2, int length);
+template void funcn3<double>(double *t, double **n3, int length);
+template void funcn3<adouble>(adouble *t, adouble **n3, int length);
+
+
+template void EvaluateGslr<double>(double *t, double *freq, double **H, double *k, int length, std::complex<double> **Gslr, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
+//template void EvaluateGslr<adouble>(adouble *t, adouble *freq, adouble **H, adouble *k, int length, std::complex<adouble> **Gslr, std::string approximate_tag, const adouble L=2.5*pow_int(10.,9));
+
+template void Evaluateyslr<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **yslr, waveform_polarizations<double> *wp, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
+//template void Evaluateyslr<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **yslr, waveform_polarizations<adouble> *wp, std::string approximate_tag, const adouble L=2.5*pow_int(10.,9));
+
+
+template void EvaluateTDI_FD<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **TDI_FD, waveform_polarizations<double> *wp, std::string TDI_tag, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
+//template void EvaluateTDI_FD<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **TDI_FD, waveform_polarizations<adouble> *wp, std::string TDI_tag, std::string approximate_tag, const adouble L=2.5*pow_int(10.,9));
+
+T EvaluateTDI_FD(T *t, T *freq, T **Hplus, T **Hcross, T *k, int length, std::complex<T> **TDI_FD, waveform_polarizations<T> *wp, std::string TDI_tag, std::string approximate_tag, const T L=2.5*pow_int(10.,9))
