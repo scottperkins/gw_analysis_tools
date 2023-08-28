@@ -67,12 +67,13 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 			const double pi = 3.14159265358979323846;
 
 			T deltaph = alphasq * Z;
-			T vbpref = nu * Z;
 			//debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
 				for (int i =0 ; i < length; i++){
 					T pref = -8 * pi * deltaph * freqs[i];
-						wp->hcross[i] = wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] +  vbpref * wp->hplus[i] ;
-						wp->hplus[i] = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - vbpref * wp->hcross[i];
+					double hcrossPV =  wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] + nu * log(1 + Z)* wp->hplus[i] ;
+					double hplusPV = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - nu * log(1 + Z)* wp->hcross[i];
+					wp->hcross[i] = hcrossPV;
+					wp->hplus[i] = hplusPV;
 					}
 				}
 	return ;
