@@ -629,7 +629,9 @@ static source_parameters<T> populate_source_parameters_old(
 };
 double gsl_LU_lndet(double **matrix, int dim);
 
-double sinc(double x);
+template<class T>
+T sinc(T x);
+//adouble sinc(adouble x);
 
 int mvn_sample(int samples, double *mean, double **cov, int dim, double **output );
 int mvn_sample(int samples, double *mean, double **cov, int dim, gsl_rng *r,double **output );

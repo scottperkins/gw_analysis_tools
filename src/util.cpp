@@ -22,19 +22,22 @@
  *
  * General utilities that are not necessarily specific to any part of the project at large
  */
-
-double sinc(double x)
+template <class T>
+T sinc(T x)
 {
 	if(x==0)
 	{
 		// std::cout << "hello" << std::endl;
-		return 1;
+		return 1.0;
 	}
 	else
 	{
 		return sin(x)/x;
 	}
 }
+
+template double sinc<double>(double );
+template adouble sinc<adouble>(adouble );
 
 // double sinc_ut(double x) {if(x == 0) return 1; else return sin(x)/x;}
 

@@ -905,7 +905,8 @@ void Evaluateyslr(
 	T *k,
 	int length,
 	std::complex<T> **yslr,
-	waveform_polarizations<T> *wp,
+	std::complex<T> *hplusf,
+	std::complex<T> *hcrossf,
 	std::string approximate_tag,
 	const T L=2.5*pow_int(10.,9)
 )
@@ -926,7 +927,7 @@ void Evaluateyslr(
 		for(int j=0;j<6;j++)
 		{
 			//loop over elements of Gslr
-			yslr[i][j] = Gplus_slr[i][j]*(wp->hplus[i])+Gcross_slr[i][j]*(wp->hcross[i]);
+			yslr[i][j] = Gplus_slr[i][j]*(hplusf[i])+Gcross_slr[i][j]*(hcrossf[i]);
 		}
 	}
 
@@ -942,7 +943,7 @@ void Evaluateyslr(
 
 // TDI variables
 template <class T>
-T EvaluateTDI_FD(T *t,
+void EvaluateTDI_FD(T *t,
 T *freq,
 T **Hplus,
 T **Hcross,
@@ -964,7 +965,7 @@ const T L=2.5*pow_int(10.,9)
 	}
 
 
-	Evaluateyslr(t, freq, Hplus, Hcross, k, length, yslr, &wp, L);
+	Evaluateyslr(t, freq, Hplus, Hcross, k, length, yslr, wp->hplus, wp->hcross, approximate_tag, L);
 
 	if(TDI_tag == "TDIXYZ"){
 
@@ -1013,7 +1014,7 @@ const T L=2.5*pow_int(10.,9)
 	else if(TDI_tag == "TDIAET")
 	{
 
-				T prefactorA, prefactorE, prefactorT;
+				std::complex<T> prefactorA, prefactorE, prefactorT;
 
 
 				if (approximate_tag.find("full") != std::string::npos){
@@ -1045,9 +1046,9 @@ const T L=2.5*pow_int(10.,9)
 						for(int i = 0; i<length; i++){
 							// Frequency loop
 
-							prefactorA = -(1-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)))/ROOT_TWO;
+							prefactorA = -(1.0-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)))/ROOT_TWO;
 							prefactorE = prefactorA;
-							prefactorT = -(1-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))) * (1-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)))/ROOT_TWO;
+							prefactorT = -(1.0-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))) * (1.0-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)))/ROOT_TWO;
 
 							// A channel
 							TDI_FD[i][0] = prefactorA*( (1.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][4]+yslr[i][5])
@@ -1970,11 +1971,9 @@ template void funcn3<adouble>(adouble *t, adouble **n3, int length);
 template void EvaluateGslr<double>(double *t, double *freq, double **H, double *k, int length, std::complex<double> **Gslr, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
 //template void EvaluateGslr<adouble>(adouble *t, adouble *freq, adouble **H, adouble *k, int length, std::complex<adouble> **Gslr, std::string approximate_tag, const adouble L=2.5*pow_int(10.,9));
 
-template void Evaluateyslr<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **yslr, waveform_polarizations<double> *wp, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
+template void Evaluateyslr<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **yslr, std::complex<double> *hplusf, std::complex<double> *hcrossf, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
 //template void Evaluateyslr<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **yslr, waveform_polarizations<adouble> *wp, std::string approximate_tag, const adouble L=2.5*pow_int(10.,9));
 
 
 template void EvaluateTDI_FD<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **TDI_FD, waveform_polarizations<double> *wp, std::string TDI_tag, std::string approximate_tag, const double L=2.5*pow_int(10.,9));
 //template void EvaluateTDI_FD<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **TDI_FD, waveform_polarizations<adouble> *wp, std::string TDI_tag, std::string approximate_tag, const adouble L=2.5*pow_int(10.,9));
-
-T EvaluateTDI_FD(T *t, T *freq, T **Hplus, T **Hcross, T *k, int length, std::complex<T> **TDI_FD, waveform_polarizations<T> *wp, std::string TDI_tag, std::string approximate_tag, const T L=2.5*pow_int(10.,9))
