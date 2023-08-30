@@ -1129,7 +1129,7 @@ const T L=2.5*pow_int(10.,9)
 		std::exit(1);
 	}
 	for(int i = 0; i<length; i++){
-		delete[] yslr;
+		delete[] yslr[i];
 	}
 	delete[] yslr;
 
