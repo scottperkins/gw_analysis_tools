@@ -765,12 +765,12 @@ void EvaluateGslr(T *t,
 {
 
 	T **p0 = new T*[length];
-  T **p1L = new T*[length];
-  T **p2L = new T*[length];
-  T **p3L = new T*[length];
-  T **n1 = new T*[length];
-  T **n2 = new T*[length];
-  T **n3 = new T*[length];
+	T **p1L = new T*[length];
+	T **p2L = new T*[length];
+	T **p3L = new T*[length];
+	T **n1 = new T*[length];
+	T **n2 = new T*[length];
+	T **n3 = new T*[length];
 	for(int i=0;i<length;i++)
 	{
 		p0[i]= new T[3];
@@ -794,7 +794,6 @@ void EvaluateGslr(T *t,
 	std::complex<T> n1Hn1;
 	std::complex<T> n2Hn2;
 	std::complex<T> n3Hn3;
-
 
 	T kn1;
 	T kn2;
@@ -891,8 +890,30 @@ void EvaluateGslr(T *t,
 	}
 	// end of for loop
 
-
-
+	for(int i=0;i<length;i++)
+	{
+		delete[] p0[i];
+		delete[] p1L[i];
+		delete[] p2L[i];
+		delete[] p3L[i];
+		delete[] n1[i];
+		delete[] n2[i];
+		delete[] n3[i];
+	}
+	delete[] p0;
+	delete[] p1L;
+	delete[] p2L;
+	delete[] p3L;
+	delete[] n1;
+	delete[] n2;
+	delete[] n3;
+	
+	delete[] G12;
+	delete[] G21;
+	delete[] G23;
+	delete[] G32;
+	delete[] G13;
+	delete[] G31;
 }
 
 // yslr
@@ -1107,7 +1128,10 @@ const T L=2.5*pow_int(10.,9)
 		std::cout << "Don't have such a TDI combination!" << std::endl;
 		std::exit(1);
 	}
-
+	for(int i = 0; i<length; i++){
+		delete[] yslr;
+	}
+	delete[] yslr;
 
 }
 /*! \brief calculate difference in time of arrival (DTOA) for a given source location and 2 different detectors
