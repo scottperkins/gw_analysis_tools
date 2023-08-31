@@ -671,6 +671,13 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 }
 
 //! LISA orbit functions taken from pyFDresponse.py
+// For notation see arXiv:2003.00357, although we have a few differences
+//  1. sign difference in Fourier transform
+//  2. no decomposition into spherical harmonics
+// Names for the func[...]: 
+//  1. p0: position of center of LISA (in barycenteric frame)
+//  2. p1L: position of one of the satellite (in LISA frame)
+//  3. n1: the unit vector point from satellite 2 to satellite 3 (in barycenteric frame)
 
 template<class T>
 void funcp0(T *t, T **p0, int length){
@@ -751,6 +758,9 @@ void funcn3(T *t, T **n3, int length){
 		n3[i][2] = 0.25 * (-ROOT_THREE*s + 3.0*ca);
 	}
 }
+
+// Transfer function from single link (l) from sender (s) to receiver (r)
+// (hence Gslr-- sender - link - receiver)
 
 template<class T>
 void EvaluateGslr(T *t,
@@ -962,7 +972,9 @@ void Evaluateyslr(
 
 }
 
-// TDI variables
+//
+// Evaluate Time Domain Interferometry (TDI) variables in the Frequency Domain (FD) 
+//
 template <class T>
 void EvaluateTDI_FD(T *t,
 T *freq,
