@@ -70,6 +70,8 @@ the notebook can be found in the terminal output, e.g.
 To shutdown the server, press "ctrl-c" twice in the terminal running the docker container. 
 The server will shutdown and the docker container will stop and remove itself.
 
+Alternatively, if you do not want to run docker to run the jupyter notebook, under
+
 ## Running on a cluster
 
 1. Make sure singularity is available, e.g. through `module load singularity`
