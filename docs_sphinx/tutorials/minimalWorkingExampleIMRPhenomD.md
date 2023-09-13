@@ -71,6 +71,10 @@ To shutdown the server, press "ctrl-c" twice in the terminal running the docker 
 The server will shutdown and the docker container will stop and remove itself.
 
 Alternatively, if you do not want to run docker to run the jupyter notebook, under
+`examples/data_analysis`, you'll find the necessary source code to run an example
+jupyter notebook analysis. 
+Essentially, that directory contains the source code to read from the hdf5 output the
+code produces, with the right formatting.
 
 ## Running on a cluster
 
