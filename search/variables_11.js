@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['r_0',['r',['../structMCMC__user__param.html#aba408062cb22315c367058859ae5c1e6',1,'MCMC_user_param::r()'],['../mcmc__sampler_8cpp.html#a53b3e4bb1bd287d2150b9c128e15a316',1,'r():&#160;mcmc_sampler.cpp']]],
+  ['r_0',['r',['../structMCMC__user__param.html#aba408062cb22315c367058859ae5c1e6',1,'MCMC_user_param::r'],['../mcmc__sampler_8cpp.html#a53b3e4bb1bd287d2150b9c128e15a316',1,'r:&#160;mcmc_sampler.cpp']]],
   ['r_5fstep_1',['r_step',['../classThreadPool.html#aef8d1e32694e12a27961fdca41eeb7a7',1,'ThreadPool']]],
   ['ra_2',['RA',['../classgen__params__base.html#abe5fc4017be70773feba6964cb9616e9',1,'gen_params_base']]],
   ['ra_5fbounds_3',['RA_bounds',['../structpriorData.html#ab03a0488a8099669db568adf9ba1ace0',1,'priorData']]],
@@ -18,14 +18,13 @@ var searchData=
   ['relerr_15',['relerr',['../structgsl__snr__struct.html#a482207b0a02eab575dbd3d46129780c1',1,'gsl_snr_struct']]],
   ['restarted_5fchain_16',['restarted_chain',['../classsampler.html#a70176eca1ace5406f4565cb756d16388',1,'sampler']]],
   ['restrict_5fswapping_17',['restrict_swapping',['../classsampler.html#ab5add44308153c924fe7ae799e3437f7',1,'sampler']]],
-  ['rj_18',['rj',['../classsampler.html#a319323d9202deee92fc441cba31f5740',1,'sampler']]],
-  ['rj_19',['RJ',['../classmcmc__sampler__output.html#aef308d6f21f6c87deac082cf83d94f2d',1,'mcmc_sampler_output']]],
-  ['rj_5fstep_5fwidth_20',['RJ_step_width',['../classmcmc__data__interface.html#a19c6fb490c52db2b89f9bd9db171231c',1,'mcmc_data_interface']]],
-  ['rjmcmc_21',['RJMCMC',['../classsampler.html#a7c09c38f1ffd39f3c919d2d261b2e8b2',1,'sampler']]],
-  ['rjstep_5faccept_5fct_22',['RJstep_accept_ct',['../classsampler.html#a089e514add7f6c0aeb27e092675cd264',1,'sampler']]],
-  ['rjstep_5flast_5faccept_5fct_23',['RJstep_last_accept_ct',['../classsampler.html#a8682f3a38e907010a8a21a9a19207bc4',1,'sampler']]],
-  ['rjstep_5flast_5freject_5fct_24',['RJstep_last_reject_ct',['../classsampler.html#a09859b32798ffd6cf39492bf89245cb4',1,'sampler']]],
-  ['rjstep_5freject_5fct_25',['RJstep_reject_ct',['../classsampler.html#ab973ac88d7266aae83bb6543d2ef9700',1,'sampler']]],
-  ['root_5fthree_26',['ROOT_THREE',['../util_8h.html#aeef10f63f0d33b2b400ac1948439ccfc',1,'util.h']]],
-  ['rvec_27',['rvec',['../classmcr__sampler.html#ac536a7410cfcd5265e92259c4e4d8954',1,'mcr_sampler::rvec()'],['../classsampler.html#a69e45d595b5d65c585bae324f0bc7185',1,'sampler::rvec()']]]
+  ['rj_18',['rj',['../classmcmc__sampler__output.html#aef308d6f21f6c87deac082cf83d94f2d',1,'mcmc_sampler_output::RJ'],['../classsampler.html#a319323d9202deee92fc441cba31f5740',1,'sampler::rj']]],
+  ['rj_5fstep_5fwidth_19',['RJ_step_width',['../classmcmc__data__interface.html#a19c6fb490c52db2b89f9bd9db171231c',1,'mcmc_data_interface']]],
+  ['rjmcmc_20',['RJMCMC',['../classsampler.html#a7c09c38f1ffd39f3c919d2d261b2e8b2',1,'sampler']]],
+  ['rjstep_5faccept_5fct_21',['RJstep_accept_ct',['../classsampler.html#a089e514add7f6c0aeb27e092675cd264',1,'sampler']]],
+  ['rjstep_5flast_5faccept_5fct_22',['RJstep_last_accept_ct',['../classsampler.html#a8682f3a38e907010a8a21a9a19207bc4',1,'sampler']]],
+  ['rjstep_5flast_5freject_5fct_23',['RJstep_last_reject_ct',['../classsampler.html#a09859b32798ffd6cf39492bf89245cb4',1,'sampler']]],
+  ['rjstep_5freject_5fct_24',['RJstep_reject_ct',['../classsampler.html#ab973ac88d7266aae83bb6543d2ef9700',1,'sampler']]],
+  ['root_5fthree_25',['ROOT_THREE',['../util_8h.html#aeef10f63f0d33b2b400ac1948439ccfc',1,'util.h']]],
+  ['rvec_26',['rvec',['../classsampler.html#a69e45d595b5d65c585bae324f0bc7185',1,'sampler::rvec'],['../classmcr__sampler.html#ac536a7410cfcd5265e92259c4e4d8954',1,'mcr_sampler::rvec']]]
 ];

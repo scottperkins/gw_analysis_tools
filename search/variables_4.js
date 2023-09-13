@@ -2,8 +2,8 @@ var searchData=
 [
   ['ea_5fnan_5ferror_5fmessage_0',['EA_nan_error_message',['../structsource__parameters.html#a19d11ef3bc993ee72008126dcd25a6ca',1,'source_parameters']]],
   ['ea_5fprior_1',['EA_prior',['../structpriorData.html#a361d2fede7c0cd87aa71d6b332d68759',1,'priorData']]],
-  ['ea_5fregion1_2',['EA_region1',['../structMCMC__modification__struct.html#abbec68c2f5c4531d6273a89e431f9cb8',1,'MCMC_modification_struct::EA_region1()'],['../classgen__params__base.html#ae5b71b90c4a952372821e9ce59998266',1,'gen_params_base::EA_region1()'],['../structsource__parameters.html#a6c46a237928f9ab15022c52b27a5baec',1,'source_parameters::EA_region1()']]],
-  ['end_3',['end',['../classthreaded__ac__jobs__fft.html#a86501045468f92ae2c49b34cffe1aea3',1,'threaded_ac_jobs_fft::end()'],['../classthreaded__ac__jobs__serial.html#afcb4978468003aae945aa2a63681b86e',1,'threaded_ac_jobs_serial::end()']]],
+  ['ea_5fregion1_2',['ea_region1',['../structMCMC__modification__struct.html#abbec68c2f5c4531d6273a89e431f9cb8',1,'MCMC_modification_struct::EA_region1'],['../classgen__params__base.html#ae5b71b90c4a952372821e9ce59998266',1,'gen_params_base::EA_region1'],['../structsource__parameters.html#a6c46a237928f9ab15022c52b27a5baec',1,'source_parameters::EA_region1']]],
+  ['end_3',['end',['../classthreaded__ac__jobs__fft.html#a86501045468f92ae2c49b34cffe1aea3',1,'threaded_ac_jobs_fft::end'],['../classthreaded__ac__jobs__serial.html#afcb4978468003aae945aa2a63681b86e',1,'threaded_ac_jobs_serial::end']]],
   ['ensemble_5fprop_5fa_4',['ensemble_prop_a',['../classsampler.html#a8c1dbafb718330ae59774c2e5bbd6d6f',1,'sampler']]],
   ['ensemble_5fproposal_5',['ensemble_proposal',['../classsampler.html#a3cf6b3cd8ed7468de94d14fa0d2dac5a',1,'sampler']]],
   ['ensemble_5fproposal_5frate_6',['ensemble_proposal_rate',['../classsampler.html#ac952e86ec3c4988003ba12439789a1eb',1,'sampler']]],

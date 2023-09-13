@@ -12,16 +12,16 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Dockerfiles with Jupyter" href="jupyterDocker.html" />
-    <link rel="prev" title="Contributing to the project" href="contributing.html" /> 
+    <link rel="prev" title="Contributing to the documentation" href="contributing.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,7 +47,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#contributing-to-the-project">Contributing to the project</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Writing Custom Docker Images: Example Workflows</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#developing-in-a-docker-container">Developing in a Docker container</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#writing-a-standalone-docker-image">Writing a standalone Docker image</a></li>
@@ -87,9 +88,9 @@
            <div itemprop="articleBody">
              
   <section id="writing-custom-docker-images-example-workflows">
-<h1>Writing Custom Docker Images: Example Workflows<a class="headerlink" href="#writing-custom-docker-images-example-workflows" title="Permalink to this heading"></a></h1>
+<h1>Writing Custom Docker Images: Example Workflows<a class="headerlink" href="#writing-custom-docker-images-example-workflows" title="Link to this heading"></a></h1>
 <section id="developing-in-a-docker-container">
-<h2>Developing in a Docker container<a class="headerlink" href="#developing-in-a-docker-container" title="Permalink to this heading"></a></h2>
+<h2>Developing in a Docker container<a class="headerlink" href="#developing-in-a-docker-container" title="Link to this heading"></a></h2>
 <p>In the process of writing this C++ library, the authors have embraced Docker containers as a flexible way to portably modify and run this library, both for production on scientific HPC clusters and on local computers for development.
 This is by no means a necessity, but an example of this workflow is shown below for the benefit of those running into compatibility/portability issues.
 This is, of course, no long term solution and no replacement for developing reproducible workflows, but can be a helpful mitigation effort to not slow down the science.</p>
@@ -160,7 +161,7 @@ services:
 </div>
 </section>
 <section id="writing-a-standalone-docker-image">
-<span id="custom-docker-standalone"></span><h2>Writing a standalone Docker image<a class="headerlink" href="#writing-a-standalone-docker-image" title="Permalink to this heading"></a></h2>
+<span id="custom-docker-standalone"></span><h2>Writing a standalone Docker image<a class="headerlink" href="#writing-a-standalone-docker-image" title="Link to this heading"></a></h2>
 <p>This example is focused on the use case where one wants to use this software on a scientific HPC cluster where singularity might be used.
 One method of doing this is to first create a Docker image, outlined below.
 For this example, we will assume the user is in a directory with the following structure, where “BayesShip” represents any necessary dependency not included in the image “scottperkins/gw.base.deps”.</p>
@@ -238,7 +239,7 @@ RUN<span class="w"> </span>rm<span class="w"> </span>-r<span class="w"> </span>/
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing to the project" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="contributing.html" class="btn btn-neutral float-left" title="Contributing to the documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="jupyterDocker.html" class="btn btn-neutral float-right" title="Dockerfiles with Jupyter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

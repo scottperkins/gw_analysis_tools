@@ -12,11 +12,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -47,7 +47,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#contributing-to-the-project">Contributing to the project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="customDockerImage.html">Writing Custom Docker Images: Example Workflows</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Dockerfiles with Jupyter</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#running-container">Running container</a></li>
@@ -87,19 +88,19 @@
            <div itemprop="articleBody">
              
   <section id="dockerfiles-with-jupyter">
-<h1>Dockerfiles with Jupyter<a class="headerlink" href="#dockerfiles-with-jupyter" title="Permalink to this heading"></a></h1>
+<h1>Dockerfiles with Jupyter<a class="headerlink" href="#dockerfiles-with-jupyter" title="Link to this heading"></a></h1>
 <p>Hosting jupyter servers in Docker containers can be extremely useful, ~~as this typically doesn’t involve logging into the container at all,~~<a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> and you can just connect to your server in a browser.</p>
 <p>A typical docker file for this purpose looks like</p>
-<div class="highlight-docker notranslate"><div class="highlight"><pre><span></span>FROM debian:latest # or whatever base image you want
+<div class="highlight-docker notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">debian:latest</span><span class="w"> </span><span class="c"># or whatever base image you want</span>
 
-RUN pip3 install --upgrade pip
-RUN pip3 install jupyter jupyterlab #plus whatever else
+<span class="k">RUN</span><span class="w"> </span>pip3<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pip
+<span class="k">RUN</span><span class="w"> </span>pip3<span class="w"> </span>install<span class="w"> </span>jupyter<span class="w"> </span>jupyterlab<span class="w"> </span>#plus<span class="w"> </span>whatever<span class="w"> </span><span class="k">else</span>
 
-CMD [&quot;jupyter-lab&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;, &quot;--ip=0.0.0.0&quot;, &quot;--port=8989&quot;] # The port doesn&#39;t have to be the same, just some random port not in use
+<span class="k">CMD</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;jupyter-lab&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--no-browser&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--allow-root&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--ip=0.0.0.0&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--port=8989&quot;</span><span class="p">]</span><span class="w"> </span>#<span class="w"> </span>The<span class="w"> </span>port<span class="w"> </span>doesn<span class="err">&#39;</span>t<span class="w"> </span>have<span class="w"> </span>to<span class="w"> </span>be<span class="w"> </span>the<span class="w"> </span>same,<span class="w"> </span>just<span class="w"> </span>some<span class="w"> </span>random<span class="w"> </span>port<span class="w"> </span>not<span class="w"> </span><span class="k">in</span><span class="w"> </span>use
 </pre></div>
 </div>
 <section id="running-container">
-<h2>Running container<a class="headerlink" href="#running-container" title="Permalink to this heading"></a></h2>
+<h2>Running container<a class="headerlink" href="#running-container" title="Link to this heading"></a></h2>
 <p>Now, with image in hand, navigate to the directory of interest and run the following command:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>--rm<span class="w"> </span>-p<span class="w"> </span>&lt;port-ID&gt;:&lt;port-ID&gt;<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span>PWD<span class="k">)</span>:/container/dir/path<span class="w"> </span>&lt;image-ID&gt;
 </pre></div>
@@ -107,7 +108,7 @@ CMD [&quot;jupyter-lab&quot;, &quot;--no-browser&quot;, &quot;--allow-root&quot;
 <p>where the &lt;port-ID&gt; matches the port used in the image (at least the second one) and the “/container/dir/path” directory is whatever you want to call it (directory inside the container). The image (&lt;image-ID&gt;) is obviously the image you want to run (e.g. scottperkins/gwat.jupyter)</p>
 </section>
 <section id="logging-in">
-<h2>Logging in<a class="headerlink" href="#logging-in" title="Permalink to this heading"></a></h2>
+<h2>Logging in<a class="headerlink" href="#logging-in" title="Link to this heading"></a></h2>
 <p>For now, you have to log into the container with</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-it<span class="w"> </span>&lt;container-id&gt;<span class="w"> </span>bash
 </pre></div>

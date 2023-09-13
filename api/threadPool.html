@@ -12,11 +12,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -78,7 +78,14 @@
 <li class="toctree-l2"><a class="reference internal" href="ppE_IMRPhenomP.html">ppE_IMRPhenomP</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ppE_utilities.html">ppE_utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="standardPriorLibrary.html">standardPriorLibrary</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">threadPool</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">threadPool</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv4I0E12default_comp"><code class="docutils literal notranslate"><span class="pre">default_comp</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N12default_compclE7jobtype7jobtype"><code class="docutils literal notranslate"><span class="pre">default_comp::operator()()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv410ThreadPool"><code class="docutils literal notranslate"><span class="pre">ThreadPool</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="util.html">util</a></li>
 <li class="toctree-l2"><a class="reference internal" href="waveform_generator.html">waveform_generator</a></li>
 <li class="toctree-l2"><a class="reference internal" href="waveform_generator_C.html">waveform_generator_C</a></li>
@@ -113,11 +120,11 @@
            <div itemprop="articleBody">
              
   <section id="threadpool">
-<span id="api-threadpool"></span><h1>threadPool<a class="headerlink" href="#threadpool" title="Permalink to this heading"></a></h1>
+<span id="api-threadpool"></span><h1>threadPool<a class="headerlink" href="#threadpool" title="Link to this heading"></a></h1>
 <p>Header file (declarations and definitions because of template functions) for the implementation of a generic thread pool </p>
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv4I0E12default_comp">
-<span id="_CPPv3I0E12default_comp"></span><span id="_CPPv2I0E12default_comp"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jobtype</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classdefault__comp"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">default_comp</span></span></span><a class="headerlink" href="#_CPPv4I0E12default_comp" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv3I0E12default_comp"></span><span id="_CPPv2I0E12default_comp"></span><span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jobtype</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classdefault__comp"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">default_comp</span></span></span><a class="headerlink" href="#_CPPv4I0E12default_comp" title="Link to this definition"></a><br /></dt>
 <dd><div class="docutils container">
 <em>#include &lt;threadPool.h&gt;</em></div>
 <p>Default comparator for priority_queue in threadPool &amp;#8212; no comparison. </p>
@@ -126,7 +133,7 @@
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N12default_compclE7jobtype7jobtype">
-<span id="_CPPv3N12default_compclE7jobtype7jobtype"></span><span id="_CPPv2N12default_compclE7jobtype7jobtype"></span><span id="default_comp::call-operator__jobtype.jobtype"></span><span class="target" id="classdefault__comp_1a196f2629bf071bb72fcbbd2454ca628e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12default_comp" title="default_comp::jobtype"><span class="n"><span class="pre">jobtype</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">j</span></span>, <a class="reference internal" href="#_CPPv4I0E12default_comp" title="default_comp::jobtype"><span class="n"><span class="pre">jobtype</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">k</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12default_compclE7jobtype7jobtype" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv3N12default_compclE7jobtype7jobtype"></span><span id="_CPPv2N12default_compclE7jobtype7jobtype"></span><span id="default_comp::call-operator__jobtype.jobtype"></span><span class="target" id="classdefault__comp_1a196f2629bf071bb72fcbbd2454ca628e"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">()</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E12default_comp" title="default_comp::jobtype"><span class="n"><span class="pre">jobtype</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">j</span></span>, <a class="reference internal" href="#_CPPv4I0E12default_comp" title="default_comp::jobtype"><span class="n"><span class="pre">jobtype</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">k</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N12default_compclE7jobtype7jobtype" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>
@@ -134,7 +141,7 @@
 
 <dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv410ThreadPool">
-<span id="_CPPv310ThreadPool"></span><span id="_CPPv210ThreadPool"></span><span id="ThreadPool"></span><span class="target" id="classThreadPool"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ThreadPool</span></span></span><a class="headerlink" href="#_CPPv410ThreadPool" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv310ThreadPool"></span><span id="_CPPv210ThreadPool"></span><span id="ThreadPool"></span><span class="target" id="classThreadPool"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ThreadPool</span></span></span><a class="headerlink" href="#_CPPv410ThreadPool" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </section>

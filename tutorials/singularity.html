@@ -12,11 +12,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -47,7 +47,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#contributing-to-the-project">Contributing to the project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="customDockerImage.html">Writing Custom Docker Images: Example Workflows</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jupyterDocker.html">Dockerfiles with Jupyter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="minimalWorkingExampleIMRPhenomD.html">Running with docker: two minimal working examples</a></li>
@@ -91,11 +92,11 @@
            <div itemprop="articleBody">
              
   <section id="running-with-singularity">
-<h1>Running with Singularity<a class="headerlink" href="#running-with-singularity" title="Permalink to this heading"></a></h1>
+<h1>Running with Singularity<a class="headerlink" href="#running-with-singularity" title="Link to this heading"></a></h1>
 <p>There are a few ways to run this code through a singularity container (which are much more common on scientific HPC clusters than Docker), and below is outlined an example workflow one might use (but definitely not the only way one can accomplish this).
 This example will be done in the context of running on a cluster implementing SLURM, but that can be easily modified to suit the desired environment.</p>
 <section id="via-docker">
-<h2>via Docker<a class="headerlink" href="#via-docker" title="Permalink to this heading"></a></h2>
+<h2>via Docker<a class="headerlink" href="#via-docker" title="Link to this heading"></a></h2>
 <p>The method built around Docker will utilize the maintained images on DockerHub (e.g. scottperkins/gwat and scottperkins/gw.base.deps primarily).
 If one creates one’s own <a class="reference internal" href="customDockerImage.html#custom-docker-standalone"><span class="std std-ref">docker image with custom development</span></a>, simply replace all the instances of</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker://scottperkins/gwat
@@ -106,7 +107,7 @@ If one creates one’s own <a class="reference internal" href="customDockerImage
 </pre></div>
 </div>
 <section id="run-the-pre-packaged-executables">
-<h3>Run the pre-packaged executables<a class="headerlink" href="#run-the-pre-packaged-executables" title="Permalink to this heading"></a></h3>
+<h3>Run the pre-packaged executables<a class="headerlink" href="#run-the-pre-packaged-executables" title="Link to this heading"></a></h3>
 <p>In this section, the steps to run the pre-packaged executables will be outlined.
 For example, we will show how to use the “mcmc_gw_tool_v2” executable to run on pre-downloaded (and pre-processed, if applicable) data from GWOSC.
 Assuming one is on the remote server, there should be all the necessary data,</p>
@@ -155,7 +156,7 @@ singularity<span class="w"> </span><span class="nb">exec</span><span class="w"> 
 </div>
 </section>
 <section id="compile-custom-software-linked-to-the-compiled-libraries">
-<h3>Compile custom software linked to the compiled libraries<a class="headerlink" href="#compile-custom-software-linked-to-the-compiled-libraries" title="Permalink to this heading"></a></h3>
+<h3>Compile custom software linked to the compiled libraries<a class="headerlink" href="#compile-custom-software-linked-to-the-compiled-libraries" title="Link to this heading"></a></h3>
 <p>If one wants to run custom code <em>linked</em> to the pre-compiled (or custom, self-compiled) libraries, one can follow the following steps.
 Working in the following directory structure</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">project</span><span class="o">-</span><span class="n">dir</span>
@@ -212,7 +213,7 @@ singularity<span class="w"> </span><span class="nb">exec</span><span class="w"> 
 </section>
 </section>
 <section id="via-docker-and-singularity-sandbox">
-<h2>via Docker and Singularity Sandbox<a class="headerlink" href="#via-docker-and-singularity-sandbox" title="Permalink to this heading"></a></h2>
+<h2>via Docker and Singularity Sandbox<a class="headerlink" href="#via-docker-and-singularity-sandbox" title="Link to this heading"></a></h2>
 <p>TBD</p>
 </section>
 </section>

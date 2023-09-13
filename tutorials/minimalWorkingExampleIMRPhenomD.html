@@ -12,11 +12,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -47,7 +47,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to GW Analysis Tools’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation/installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html">Contributing to the documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contributing.html#contributing-to-the-project">Contributing to the project</a></li>
 <li class="toctree-l2"><a class="reference internal" href="customDockerImage.html">Writing Custom Docker Images: Example Workflows</a></li>
 <li class="toctree-l2"><a class="reference internal" href="jupyterDocker.html">Dockerfiles with Jupyter</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Running with docker: two minimal working examples</a><ul>
@@ -87,7 +88,7 @@
            <div itemprop="articleBody">
              
   <section id="running-with-docker-two-minimal-working-examples">
-<h1>Running with docker: two minimal working examples<a class="headerlink" href="#running-with-docker-two-minimal-working-examples" title="Permalink to this heading"></a></h1>
+<h1>Running with docker: two minimal working examples<a class="headerlink" href="#running-with-docker-two-minimal-working-examples" title="Link to this heading"></a></h1>
 <p>In these two examples, we download the image
 <a class="reference external" href="https://hub.docker.com/r/scottperkins/gwat">scottperkins/gwat</a>,
 and run an example usage of <code class="docutils literal notranslate"><span class="pre">gwat</span></code> that performs parameter
@@ -97,7 +98,7 @@ using docker,
 the second shows how to do this with <code class="docutils literal notranslate"><span class="pre">singularity</span></code>, which the
 container application that runs on clusters (instead of docker).</p>
 <section id="running-on-your-local-computer">
-<h2>Running on your local computer<a class="headerlink" href="#running-on-your-local-computer" title="Permalink to this heading"></a></h2>
+<h2>Running on your local computer<a class="headerlink" href="#running-on-your-local-computer" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Assuming you already have docker desktop installed,
 start docker desktop, e.g. in the terminal type</p></li>
@@ -157,9 +158,14 @@ the notebook can be found in the terminal output, e.g.</p>
 </div>
 <p>To shutdown the server, press “ctrl-c” twice in the terminal running the docker container.
 The server will shutdown and the docker container will stop and remove itself.</p>
+<p>Alternatively, if you do not want to run docker to run the jupyter notebook, under
+<code class="docutils literal notranslate"><span class="pre">examples/data_analysis</span></code>, you’ll find the necessary source code to run an example
+jupyter notebook analysis.
+Essentially, that directory contains the source code to read from the hdf5 output the
+code produces, with the right formatting.</p>
 </section>
 <section id="running-on-a-cluster">
-<h2>Running on a cluster<a class="headerlink" href="#running-on-a-cluster" title="Permalink to this heading"></a></h2>
+<h2>Running on a cluster<a class="headerlink" href="#running-on-a-cluster" title="Link to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Make sure singularity is available, e.g. through <code class="docutils literal notranslate"><span class="pre">module</span> <span class="pre">load</span> <span class="pre">singularity</span></code></p></li>
 <li><p>As above, make and cd to directory, e.g. <code class="docutils literal notranslate"><span class="pre">GW-Analysis</span></code>.</p></li>
