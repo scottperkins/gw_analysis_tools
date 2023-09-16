@@ -309,6 +309,8 @@ double EA_current_constraints(bayesship::positionInfo *position,  priorData *PD)
 //   return 0;
 // }
 
+/*! /Brief For adding ppE priors to IMRPhenomD
+ */
 double logPriorStandard_D_mod::eval(bayesship::positionInfo *position, int chainID)
 {
 	int dim =  position->dimension;
@@ -323,6 +325,8 @@ double logPriorStandard_D_mod::eval(bayesship::positionInfo *position, int chain
 	return PhenomD;
 }
 
+/*! /Brief For adding ppE priors to IMRPhenomD_NRT
+ */
 double logPriorStandard_D_NRT_mod::eval(bayesship::positionInfo *position, int chainID)
 {
 	int dim =  position->dimension;
@@ -341,6 +345,8 @@ double logPriorStandard_D_NRT_mod::eval(bayesship::positionInfo *position, int c
 	return  NS;
 }
 
+/*! /Brief Adding Einstein-Aether (AE) priors -- more complicated as constraints are on functions of the AE parameters 
+ */
 double logPriorStandard_D_NRT_EA::eval(bayesship::positionInfo *position, int chainID)
 {
 	int dim =  position->dimension;
@@ -365,6 +371,8 @@ double logPriorStandard_D_NRT_EA::eval(bayesship::positionInfo *position, int ch
 	return EA_constraints + NS;
 }
 
+/*! /Brief Sampling on the log tidal_s (universal relations give you tidal_a) 
+ */
 double logPriorStandard_D_NRT::eval(bayesship::positionInfo *position, int chainID)
 {
 	int dim =  position->dimension;
