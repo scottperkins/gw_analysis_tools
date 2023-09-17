@@ -199,9 +199,9 @@ int main(int argc, char *argv[])
 	PD.tidal_s_prior[0] = 1;
 	PD.tidal_s_prior[1] = 5000;
 	PD.diss_tidal1_prior[0] = 0;
-	PD.diss_tidal1_prior[1] = 1000;
+	PD.diss_tidal1_prior[1] = 200;
 	PD.diss_tidal2_prior[0] = 0;
-	PD.diss_tidal2_prior[1] = 1000;
+	PD.diss_tidal2_prior[1] = 200;
 	PD.RA_bounds[0] = 0;
 	PD.RA_bounds[1] = 2*M_PI;
 	PD.sinDEC_bounds[0] = -1;
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 	PD.tidal_love_error = tidal_love_error;
 
 	//Initialize standard prior -- see in gw_analysis_tools/src/standardPriorLibrary.cpp
-	bayesship::probabilityFn *log_prior = new logPriorStandard_D_NRT(&PD);;
+	bayesship::probabilityFn *log_prior = new logPriorStandard_D_NRT_D(&PD);;
 
 	//Samples, burn in parameters 	
 	int independentSamples = 10000;

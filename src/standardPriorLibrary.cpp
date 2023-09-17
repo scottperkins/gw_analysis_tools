@@ -365,6 +365,33 @@ double logPriorStandard_D_NRT_EA::eval(bayesship::positionInfo *position, int ch
 	return EA_constraints + NS;
 }
 
+/*! \Brief Prior probability distribution for adiabatic (NRT) and dissipative (D) tides.
+ *  
+ *  Sampling from log(Xi_1) and log(Xi_2) 
+ */
+double logPriorStandard_D_NRT_D::eval(bayesship::positionInfo *position, int chainID)
+{
+	double *pos = position->parameters;
+	double a = -std::numeric_limits<double>::infinity();
+	
+	double xi_1 = pos[12];
+	double xi_2 = pos[13];
+
+        double factor = xi_1 + xi_2; // Change of coordinates: sampling from log(Xi_i)
+
+        if (xi_1 < PD->diss_tidal1_prior[0]
+        ||  xi_1 > PD->diss_tidal1_prior[1]
+        ||  xi_2 < PD->diss_tidal2_prior[0]
+        ||  xi_2 > PD->diss_tidal2_prior[1]                
+        ) {
+            return a;
+	}
+	double NS = logPriorStandard_D_NRT::eval(position,chainID);
+	if(NS == a){return a;}
+	
+        return NS + factor ;
+}
+
 double logPriorStandard_D_NRT::eval(bayesship::positionInfo *position, int chainID)
 {
 	int dim =  position->dimension;
