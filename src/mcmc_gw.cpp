@@ -1874,6 +1874,10 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	if(generation_method.find("EA") != std::string::npos){
 	        totalmod+=3;
 	}
+	// Two new parameters to search for with the dissipative tidal Love 
+        if(generation_method.find("_D") != std::string::npos){
+	        totalmod+=2;
+	}
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2";
@@ -1896,6 +1900,27 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 6)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.5;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=10;
+			(*seeding_var)[5]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+6] = 1;
+			}
+		}
+		mcmc_intrinsic=true;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 8)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2, diss_tidal1, diss_tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1986,6 +2011,34 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
 	{
 		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		if(local_seeding){
+			(*seeding_var) = new double[dimension];
+			(*seeding_var)[0]=.1;
+			(*seeding_var)[1]=.1;
+			(*seeding_var)[2]=.1;
+			(*seeding_var)[3]=.1;
+			(*seeding_var)[4]=.5;
+			(*seeding_var)[5]=.1;
+			(*seeding_var)[6]=.1;
+			(*seeding_var)[7]=.1;
+			(*seeding_var)[8]=.1;
+			(*seeding_var)[9]=.1;
+			(*seeding_var)[10]=.5;
+			(*seeding_var)[11]=10;
+			(*seeding_var)[12]=10;
+			for(int i = 0  ;i <totalmod; i++){
+				(*seeding_var)[i+13] = 1;
+			}
+		}
+		mcmc_intrinsic=false;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 15)
+	{
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2, diss_tidal1, diss_tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}

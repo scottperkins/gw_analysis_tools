@@ -15,6 +15,8 @@ struct priorData
 	double tidal1_prior[2];
 	double tidal2_prior[2];
 	double tidal_s_prior[2];
+	double diss_tidal1_prior[2];
+	double diss_tidal2_prior[2];
 	double EA_prior[6];
 	double RA_bounds[2];
 	double sinDEC_bounds[2];
@@ -51,10 +53,21 @@ public:
 	virtual double eval(bayesship::positionInfo *position, int chainID);
 };
 
+/*! \Brief Prior probability distribution for adiabatic tide 
+ */
 class logPriorStandard_D_NRT: public logPriorStandard_D
 {
 public:
 	logPriorStandard_D_NRT(priorData *PD): logPriorStandard_D(PD){this->PD = PD;};
+	virtual double eval(bayesship::positionInfo *position, int chainID);
+};
+
+/*! \Brief Prior probability distribution for adiabatic and dissipative tides 
+ */
+class logPriorStandard_D_NRT_D: public logPriorStandard_D_NRT
+{
+public:
+	logPriorStandard_D_NRT_D(priorData *PD): logPriorStandard_D_NRT(PD){this->PD = PD;};
 	virtual double eval(bayesship::positionInfo *position, int chainID);
 };
 

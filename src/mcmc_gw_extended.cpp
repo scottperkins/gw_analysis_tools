@@ -1831,6 +1831,7 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 {
 	int totalmod = (mod_struct->gIMR_Nmod_phi + mod_struct->gIMR_Nmod_sigma + mod_struct->gIMR_Nmod_beta + mod_struct->gIMR_Nmod_alpha  + mod_struct->ppE_Nmod);
 	if(generation_method.find("EA") != std::string::npos){totalmod+=3;}
+	if(generation_method.find("EA") != std::string::npos){totalmod+=2;} // two dissipative tidal dissipation numbers
 	debugger_print(__FILE__,__LINE__,totalmod);
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
 	{
@@ -1844,6 +1845,15 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 6)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, ln tidal1,  ln tidal2";
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		*intrinsic=true;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 8)
+	{
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, ln tidal1,  ln tidal2, diss_tidal1, diss_tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1877,9 +1887,27 @@ void PTMCMC_method_specific_prep_v2(std::string generation_method, int dimension
 		std::cout<<std::endl;
 		*intrinsic=false;
 	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 15)
+	{
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal1, ln tidal2, diss_tidal1, diss_tidal2"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		*intrinsic=false;
+	} 
 	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 12)
 	{
 		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal_s"<<std::endl;
+		for(int i =0; i<totalmod; i++){
+			std::cout<<", mod_"<<i;
+		}
+		std::cout<<std::endl;
+		mcmc_intrinsic=false;
+	} 
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 14)
+	{
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, ln tidal_s, diss_tidal_1, diss_tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}

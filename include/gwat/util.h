@@ -123,6 +123,16 @@ public:
         bool tidal_love_error = false; 
 	T delta_tidal_weighted=-1;
 
+	/*! dissipative tidal deformability of the larger component*/
+        T diss_tidal1=-1;
+        /*! dissipative tidal deformability of the smaller component*/
+        T diss_tidal2=-1;
+	/*! symmetric dissipative tidal deformability*/
+	T diss_tidal_s=-1;
+	/*! antisymmetric dissipative tidal deformability*/
+	T diss_tidal_a=-1;
+	T diss_tidal_weighted=-1;
+
 	//Polarization angle
 	T psi =0 ;
 	/*!*angle between angular momentum and the total momentum */
@@ -496,6 +506,15 @@ struct source_parameters
 	T oct2;
 	T ss_3p5PN_coeff;
 	T NRT_amp_coefficient;
+	
+        //######## Dissipative tidal deformability ###############
+	/*! dissipative tidal deformability of the larger component*/
+        T diss_tidal1=-1;
+        /*! dissipative tidal deformability of the smaller component*/
+        T diss_tidal2=-1;
+	/*! mass-weighted dissipative tidal deformability*/
+	T diss_tidal_weighted=-1;
+	T delta_diss_tidal_weighted=-1;
 
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/
