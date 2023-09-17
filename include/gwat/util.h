@@ -127,11 +127,8 @@ public:
         T diss_tidal1=-1;
         /*! dissipative tidal deformability of the smaller component*/
         T diss_tidal2=-1;
-	/*! symmetric dissipative tidal deformability*/
-	T diss_tidal_s=-1;
-	/*! antisymmetric dissipative tidal deformability*/
-	T diss_tidal_a=-1;
-	T diss_tidal_weighted=-1;
+	/* Weighted tidal deformability */
+        T diss_tidal_weighted=-1;
 
 	//Polarization angle
 	T psi =0 ;
@@ -514,7 +511,6 @@ struct source_parameters
         T diss_tidal2=-1;
 	/*! mass-weighted dissipative tidal deformability*/
 	T diss_tidal_weighted=-1;
-	T delta_diss_tidal_weighted=-1;
 
 	//######### ppE parameters ##############
 	/*Beta factor for ppE formalism*/

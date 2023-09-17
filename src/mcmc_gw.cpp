@@ -1875,7 +1875,7 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 	        totalmod+=3;
 	}
 	// Two new parameters to search for with the dissipative tidal Love 
-        if(generation_method.find("_D") != std::string::npos){
+        if(generation_method.find("NRT_D") != std::string::npos){
 	        totalmod+=2;
 	}
 	if(generation_method.find("PhenomD") != std::string::npos && (dimension - totalmod) == 4)
@@ -1897,9 +1897,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=true;
 	} 
-	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 6)
+	else if(generation_method.find("PhenomD_NRT_D") != std::string::npos &&   (dimension - totalmod) == 8)
 	{
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2, ln diss_tidal1, ln diss_tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -1918,9 +1918,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=true;
 	} 
-	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 8)
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos &&   (dimension - totalmod) == 6)
 	{
-		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2, diss_tidal1, diss_tidal2";
+		std::cout<<"Sampling in parameters: ln chirpmass, eta, chi1, chi2, tidal1,  tidal2";
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -2008,9 +2008,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=false;
 	} 
-	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
+	else if(generation_method.find("PhenomD_NRT_D") != std::string::npos && (dimension - totalmod) == 15)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2, ln diss_tidal1, ln diss_tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}
@@ -2036,9 +2036,9 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=false;
 	} 
-	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 15)
+	else if(generation_method.find("PhenomD_NRT") != std::string::npos && (dimension - totalmod) == 13)
 	{
-		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2, diss_tidal1, diss_tidal2"<<std::endl;
+		std::cout<<"Sampling in parameters: RA, sin  DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, chi1, chi2, tidal1, tidal2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
 			std::cout<<", mod_"<<i;
 		}

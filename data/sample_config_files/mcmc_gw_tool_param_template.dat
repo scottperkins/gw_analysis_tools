@@ -117,6 +117,14 @@
 #Experimental flag to try to use the Jeffreys prior -- not supported  -- keep to false
 [bool] Jeffreys prior = false
 
+#Dissipative tidal parameters  -- use tidal 1/2 
+#Range of prior on dissipative tidal parameter for object 1
+[dbl] diss_tidal1 minimum = 1
+[dbl] diss_tidal1 maximum = 1000
+#Range of prior on dissipative tidal parameter for object 2
+[dbl] diss_tidal2 minimum = 1
+[dbl] diss_tidal2 maximum = 1000
+
 #############################################################
 #Testing GR options
 #############################################################
