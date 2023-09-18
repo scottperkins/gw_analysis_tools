@@ -784,7 +784,7 @@ int fourier_phase(T *frequencies, /**<double array of frequencies for the wavefo
 	    params.tidal1 = parameters->tidal1; //Is this right?!?
 	    params.tidal2 = parameters->tidal2;
 	    status = modeldNRT.construct_phase(frequencies, length, phase, &params);
-	  }
+          }
 	else if(local_method == "EA_IMRPhenomD_NRT")
 	  {
 	    EA_IMRPhenomD_NRT<T> EAmodeldNRT;
@@ -1318,21 +1318,21 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 										  * out->eta *out->eta*out->eta)*(out->tidal1-out->tidal2));
 		//debugger_print(__FILE__,__LINE__,out->tidal_weighted);
 		}
-	  // Dissipative tidal deformability
-          if((in->diss_tidal1 < 0 || in->diss_tidal2<0) && in->diss_tidal_weighted >= 0) {
-	    out->diss_tidal_weighted = in->diss_tidal_weighted;
-	  }
-	  else if((in->diss_tidal1 >= 0 && in->diss_tidal2>=0) ) {
-	    out->diss_tidal1 = in->diss_tidal1;
-	    out->diss_tidal2 = in->diss_tidal2;
-	    //arXiv 2306.15633, Eqs (13b) 
-	    out->diss_tidal_weighted =  
-               (2.0*pow(out->eta,2) - 4.0*out->eta + 1.0)*0.5*(out->diss_tidal1 + out->diss_tidal2) 
-               -
-               sqrt(1.0 - 4.0*out->eta)*(1.0 - 2.0*out->eta)*0.5*(out->diss_tidal1 - out->diss_tidal2) 
-                ;
-
-	  }
+	  if(generation_method.find("NRT_D") != std::string::npos){
+              // Dissipative tidal deformability
+              if((in->diss_tidal1 < 0 || in->diss_tidal2<0) && in->diss_tidal_weighted >= 0) {
+                out->diss_tidal_weighted = in->diss_tidal_weighted;
+              }
+              else if((in->diss_tidal1 >= 0 && in->diss_tidal2>=0) ) {
+                out->diss_tidal1 = in->diss_tidal1;
+                out->diss_tidal2 = in->diss_tidal2;
+                //arXiv 2306.15633, Eqs (13b) 
+                out->diss_tidal_weighted =  
+                   (2.0*pow(out->eta,2) - 4.0*out->eta + 1.0)*0.5*(out->diss_tidal1 + out->diss_tidal2) 
+                   -
+                   sqrt(1.0 - 4.0*out->eta)*(1.0 - 2.0*out->eta)*0.5*(out->diss_tidal1 - out->diss_tidal2);
+               }
+	    }
 	}
 	if(generation_method.find("EA_IMRPhenomD_NRT") != std::string::npos){
 	  out->alpha_param = in->alpha_param;

@@ -44,6 +44,8 @@ double spin2_prior[2];
 double tidal1_prior[2];
 double tidal2_prior[2];
 double tidal_s_prior[2];
+double diss_tidal1_prior[2];
+double diss_tidal2_prior[2];
 double EA_prior[6];
 double RA_bounds[2];
 double sinDEC_bounds[2];
@@ -267,8 +269,27 @@ int main(int argc, char *argv[])
 		std::cout<<"Range of tidal_s: "<<tidal_s_prior[0]<<" - "<<tidal_s_prior[1]<<std::endl;
 		std::cout<<"Using tidal-love relations: "<<tidal_love<<std::endl;
 		std::cout<<"Using tidal-love error marginalization: "<<tidal_love_error<<std::endl;
-				
+        }
+	if(dbl_dict.find("diss_tidal1 minimum") == dbl_dict.end()){
+		diss_tidal1_prior[0]=1;
+		diss_tidal1_prior[1]=5000;
 	}
+	else{
+		diss_tidal1_prior[0]=dbl_dict["diss_tidal1 minimum"];
+		diss_tidal1_prior[1]=dbl_dict["diss_tidal1 maximum"];
+	}
+	if(dbl_dict.find("diss_tidal2 minimum") == dbl_dict.end()){
+		diss_tidal2_prior[0]=1;
+		diss_tidal2_prior[1]=5000;
+	}
+	else{
+		diss_tidal2_prior[0]=dbl_dict["diss_tidal2 minimum"];
+		diss_tidal2_prior[1]=dbl_dict["diss_tidal2 maximum"];
+	}
+	if(generation_method.find("NRT_D") != std::string::npos){
+		std::cout<<"Range of diss_tidal1: "<<diss_tidal1_prior[0]<<" - "<<diss_tidal1_prior[1]<<std::endl;
+		std::cout<<"Range of diss_tidal2: "<<diss_tidal2_prior[0]<<" - "<<diss_tidal2_prior[1]<<std::endl;
+        }
 	bool jeff_prior = false;
 	if(bool_dict.find("Jefferys prior") == bool_dict.end())
 	{

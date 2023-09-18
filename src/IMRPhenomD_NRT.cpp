@@ -245,7 +245,7 @@ T IMRPhenomD_NRT<T>::phase_ins_NRT(T f, useful_powers<T> *powers,source_paramete
   return phaseout;
 }
 
-/* This adds the dissipative tidal correction. There is no IMRPhenom correction--just the PN correction.
+/*! \Brief This adds the dissipative tidal correction. There is no IMRPhenom correction--just the PN correction.
  * See 2306.15633 
  */
 template<class T> 
