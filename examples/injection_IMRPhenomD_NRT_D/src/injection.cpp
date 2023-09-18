@@ -26,7 +26,8 @@ int main(int argc, char *argv[])
 
 	//Masses in M_SOL, plus useful other parameters
 	injection.mass1 = 1.44;
-	injection.mass2 = 1.29399; //These two together give a chirpmass of 1.188 (like in GW170817)
+	injection.mass2 = 1.0; // Testing more unequal mass ratio
+	//injection.mass2 = 1.29399; //These two together give a chirpmass of 1.188 (like in GW170817)
 	//injection.mass1 = 1.81;
 	//injection.mass2 = 1.514;
 	double chirpmass = calculate_chirpmass(injection.mass1,injection.mass2);
@@ -57,8 +58,8 @@ int main(int argc, char *argv[])
 	injection.tidal_love = true;
 	injection.tidal_s = 242;
 	
-        injection.diss_tidal1 = 100;	
-	injection.diss_tidal2 = 100;	
+        injection.diss_tidal1 = 5.0;
+	injection.diss_tidal2 = 5.0;
 	
 	//Trivial constants
 	injection.phiRef = 2.;
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 	injection.shift_phase = true;
 
 	//PhenomD_NRT injection
-	std::string injection_method = "IMRPhenomD_NRT";
+	std::string injection_method = "IMRPhenomD_NRT_D";
 	
 	//Detector properties
 	int detect_number = 3;
@@ -133,7 +134,7 @@ int main(int argc, char *argv[])
 	//###################################################################
 
 	int dim = 14;
-	std::string recovery_method = "IMRPhenomD_NRT";
+	std::string recovery_method = "IMRPhenomD_NRT_D";
 	int ensembleSize = 20;
 	int ensembleN = 5;
 	
@@ -152,9 +153,9 @@ int main(int argc, char *argv[])
 	initial_position[9]= injection.spin1[2];
 	initial_position[10]= injection.spin2[2];
 	initial_position[11]= log(injection.tidal_s);
-	initial_position[12]= injection.diss_tidal1;
-	initial_position[13]= injection.diss_tidal2;
-	  
+	initial_position[12]= log(injection.diss_tidal1);
+	initial_position[13]= log(injection.diss_tidal2);
+	 
 	//Write it out to file
 	write_file("data/injections.csv",initial_position,dim);
 
@@ -198,10 +199,10 @@ int main(int argc, char *argv[])
 	PD.DL_prior[1] = 500;
 	PD.tidal_s_prior[0] = 1;
 	PD.tidal_s_prior[1] = 5000;
-	PD.diss_tidal1_prior[0] = 0;
-	PD.diss_tidal1_prior[1] = 200;
-	PD.diss_tidal2_prior[0] = 0;
-	PD.diss_tidal2_prior[1] = 200;
+	PD.diss_tidal1_prior[0] = 1;
+	PD.diss_tidal1_prior[1] = 10;
+	PD.diss_tidal2_prior[0] = 1;
+	PD.diss_tidal2_prior[1] = 10;
 	PD.RA_bounds[0] = 0;
 	PD.RA_bounds[1] = 2*M_PI;
 	PD.sinDEC_bounds[0] = -1;
@@ -221,7 +222,7 @@ int main(int argc, char *argv[])
 	bool writePriorData = true;
 	int batchsize = 1e4;
 	std::string outputDir("data/");
-	std::string outputMoniker("EA_injection");
+	std::string outputMoniker("NRTD_injection");
 	bool ignoreExistingCheckpoint = false;
 	bool  restrictSwapTemperature= false;
 	bool  coldChainStorageOnly= true;
