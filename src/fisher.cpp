@@ -998,7 +998,15 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
 		*N_src_params = 6+1;	
 	}
-	if(generation_method.find("NRT")!=std::string::npos){
+	if(generation_method.find("NRT_D")!=std::string::npos){
+		if(params->tidal_love){
+			*N_src_params+=3;
+		}
+		else{
+			*N_src_params+=4;
+		}
+	}
+        else if(generation_method.find("NRT")!=std::string::npos){
 		if(params->tidal_love){
 			*N_src_params+=1;
 		}
@@ -1006,7 +1014,8 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 			*N_src_params+=2;
 		}
 	}
-	if(check_mod(generation_method))
+        else {/* No NRTidal or dissipative tidal terms */}
+        if(check_mod(generation_method))
 	{
 		if(generation_method.find("EA") == std::string::npos){
 			*N_src_params += params->Nmod;
@@ -1940,22 +1949,90 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		
 		}
 	}
-	if(generation_method.find("NRT") != std::string::npos){
+        if(generation_method.find("NRT_D") != std::string::npos){
 		if(!input_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos ){
 				if( (input_params->tidal_love)){
-					log_factors[11] = false;
+					log_factors[11] = false; // tidal_s
+					log_factors[12] = false; // diss_tidal1
+					log_factors[13] = false; // diss_tidal2
 					if(generation_method.find("MCMC") == std::string::npos){
-						log_factors[11] = true;//tidal_s
+						log_factors[11] = true;
+						log_factors[12] = true;
+						log_factors[13] = true;
+					}
+					parameters[11] = log(input_params->tidal_s);
+					parameters[12] = log(input_params->diss_tidal1);
+					parameters[13] = log(input_params->diss_tidal2);
+				}
+				else{
+					log_factors[11] = false; // tidal1 
+					log_factors[12] = false; // tidal2
+					log_factors[13] = false; // diss_tidal1
+					log_factors[14] = false; // diss_tidal2
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[11] = true;
+						log_factors[12] = true;
+						log_factors[13] = true;
+						log_factors[14] = true;
+					}
+					parameters[11] = log(input_params->tidal1);
+					parameters[12] = log(input_params->tidal2);
+					parameters[13] = log(input_params->diss_tidal1);
+					parameters[14] = log(input_params->diss_tidal2);
+				}
+			}
+		}
+		else{
+			if(generation_method.find("PhenomD") != std::string::npos){
+				if( (input_params->tidal_love)){
+					log_factors[4] = false; // tidal_s
+					log_factors[5] = false; // diss_tidal1
+					log_factors[6] = false; // diss_tidal2
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[4] = true;
+						log_factors[5] = true;
+						log_factors[6] = true;
+					}
+					parameters[4] = log(input_params->tidal_s);
+					parameters[5] = log(input_params->diss_tidal1);
+					parameters[6] = log(input_params->diss_tidal2);
+				}
+				else{
+					log_factors[4] = false; // tidal1 
+					log_factors[5] = false; // tidal2
+					log_factors[6] = false; // diss_tidal1
+					log_factors[7] = false; // diss_tidal2
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[4] = true;
+						log_factors[5] = true;
+						log_factors[6] = true;
+						log_factors[7] = true;
+					}
+					parameters[4] = log(input_params->tidal1);
+					parameters[5] = log(input_params->tidal2);
+					parameters[6] = log(input_params->diss_tidal1);
+					parameters[7] = log(input_params->diss_tidal2);
+				}
+			}
+		}
+	}
+        else if(generation_method.find("NRT") != std::string::npos){
+		if(!input_params->sky_average){
+			if(generation_method.find("PhenomD") != std::string::npos ){
+				if( (input_params->tidal_love)){
+					log_factors[11] = false; //tidal_s 
+					if(generation_method.find("MCMC") == std::string::npos){
+						log_factors[11] = true;
 					}
 					parameters[11] = log(input_params->tidal_s);
 				}
 				else{
-					log_factors[11] = false;
-					log_factors[12] = false;
+					log_factors[11] = false; // tidal1 
+					log_factors[12] = false; // tidal2 
 					if(generation_method.find("MCMC") == std::string::npos){
-						log_factors[11] = true;//tidal_1
-						log_factors[12] = true;//tidal_2
+						log_factors[11] = true; 
+						log_factors[12] = true; 
 					}
 					parameters[11] = log(input_params->tidal1);
 					parameters[12] = log(input_params->tidal2);
@@ -1984,7 +2061,9 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 			}
 		}
 	}
-	if( check_mod(generation_method)){
+        else { /* no NRTidal or dissipative tides */ }
+        
+        if( check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dimension-input_params->Nmod;
 			for(int i = 0 ;i<input_params->Nmod; i++){
@@ -2300,7 +2379,39 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 
 	}
-	if(generation_method.find("NRT") != std::string::npos){
+	if(generation_method.find("NRT_D") != std::string::npos){
+		if(!a_params->sky_average){
+			if(generation_method.find("PhenomD") != std::string::npos){
+				if( (a_params->tidal_love)){
+					a_params->tidal_s     = exp(avec_parameters[11]);
+					a_params->diss_tidal1 = exp(avec_parameters[12]);
+					a_params->diss_tidal2 = exp(avec_parameters[13]);
+				}
+				else{
+					a_params->tidal1      = exp(avec_parameters[11]);
+					a_params->tidal2      = exp(avec_parameters[12]);
+					a_params->diss_tidal1 = exp(avec_parameters[13]);
+					a_params->diss_tidal2 = exp(avec_parameters[14]);
+				}
+			}
+		}
+		else{
+			if(generation_method.find("PhenomD") != std::string::npos){
+				if( (a_params->tidal_love)){
+					a_params->tidal_s     = exp(avec_parameters[4]);
+					a_params->diss_tidal1 = exp(avec_parameters[5]);
+					a_params->diss_tidal2 = exp(avec_parameters[6]);
+				}
+				else{
+					a_params->tidal1      = exp(avec_parameters[4]);
+					a_params->tidal2      = exp(avec_parameters[5]);
+					a_params->diss_tidal1 = exp(avec_parameters[6]);
+					a_params->diss_tidal2 = exp(avec_parameters[7]);
+				}
+			}
+		}
+	}
+        else if(generation_method.find("NRT") != std::string::npos){
 		if(!a_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos){
 				if( (a_params->tidal_love)){
@@ -2324,7 +2435,9 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 			}
 		}
 	}
-	//debugger_print(__FILE__,__LINE__,generation_method);
+        else {/* No NRTidal or dissipative tides */}
+
+        //debugger_print(__FILE__,__LINE__,generation_method);
 	if( check_mod(generation_method)){
 		if(generation_method.find("ppE") != std::string::npos ){
 			int base = dim - a_params->Nmod;
@@ -3447,7 +3560,15 @@ void ppE_theory_transformation_jac(
 			base_dim = 11;
 		}
 	}
-	if(new_method.find("NRT") != std::string::npos){
+	if(new_method.find("NRT_D") != std::string::npos){
+		if(param->tidal_love){
+			base_dim+=3;
+		}
+		else{
+			base_dim+=4;
+		}
+	}
+        else if(new_method.find("NRT") != std::string::npos){
 		if(param->tidal_love){
 			base_dim+=1;
 		}
@@ -3455,7 +3576,9 @@ void ppE_theory_transformation_jac(
 			base_dim+=2;
 		}
 	}
-	double **derivatives = new double*[dimension-base_dim];
+        else {/* no NRTidal or dissipative tides */}
+                 
+        double **derivatives = new double*[dimension-base_dim];
 	for(int i= 0 ; i<dimension-base_dim; i++){
 		derivatives[i]=new double[dimension];
 	}
