@@ -70,11 +70,17 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 			//debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
 				for (int i =0 ; i < length; i++){
 					T pref = -8 * pi * deltaph * freqs[i];
-					std::complex<T> hcrossPV, hplusPV;	
-					//hcrossPV =  wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] + nu * log(1 + Z)* wp->hplus[i] ;
-					//hplusPV = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - nu * log(1 + Z)* wp->hcross[i];
-					hcrossPV =  wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] + std::complex<T>(nu * log(1 + Z),0)* wp->hplus[i] ;
-					hplusPV = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - std::complex<T>(nu * log(1 + Z),0)* wp->hcross[i];
+				  double hR = (wp->hplus[i] - std::complex<T>(0,1)* wp->hcross[i])/sqrt(2);
+					double hL = (wp->hplus[i] + std::complex<T>(0,1)* wp->hcross[i])/sqrt(2);
+
+					double hRPV = hR*exp(pref)*exp(std::complex<T>(0,1)*2*nu*log(1 + Z));
+					double hLPV = hL*exp(-pref)*exp(-std::complex<T>(0,1)*2*nu*log(1 + Z));
+
+					double hplusPV = (hRPV + hLPV)/sqrt(2);
+					double hcrossPV = std::complex<T>(0,1)*(hRPV - hLPV)/sqrt(2);
+
+					//double hcrossPV =  wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] + nu * log(1 + Z)* wp->hplus[i] ;
+					//double hplusPV = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - nu * log(1 + Z)* wp->hcross[i];
 					wp->hcross[i] = hcrossPV;
 					wp->hplus[i] = hplusPV;
 					}
