@@ -67,24 +67,26 @@ void extra_modifications(std::string generation_method,gen_params_base<T> *gp, s
 			const double pi = 3.14159265358979323846;
 
 			T deltaph = alphasq * Z;
+			T sqrt2 = sqrt(2.);
+			T log1Z = log(1.+Z);
 			//debugger_print(__FILE__,__LINE__,"dcS Propagation effects new");
-				for (int i =0 ; i < length; i++){
-					T pref = -8 * pi * deltaph * freqs[i];
-				  double hR = (wp->hplus[i] - std::complex<T>(0,1)* wp->hcross[i])/sqrt(2);
-					double hL = (wp->hplus[i] + std::complex<T>(0,1)* wp->hcross[i])/sqrt(2);
+			for (int i =0 ; i < length; i++){
+				T pref = -8. * pi * deltaph * freqs[i];
+			  	std::complex<T> hR = (wp->hplus[i] - std::complex<T>(0,1)* wp->hcross[i])/sqrt2;
+				std::complex<T> hL = (wp->hplus[i] + std::complex<T>(0,1)* wp->hcross[i])/sqrt2;
 
-					double hRPV = hR*exp(pref)*exp(std::complex<T>(0,1)*2*nu*log(1 + Z));
-					double hLPV = hL*exp(-pref)*exp(-std::complex<T>(0,1)*2*nu*log(1 + Z));
+				std::complex<T> hRPV = hR*std::complex<T>(exp(pref),0)*exp(std::complex<T>(0,1)*(T)2.*nu*log1Z);
+				std::complex<T> hLPV = hL*std::complex<T>(exp(pref),0)*exp(-std::complex<T>(0,1)*(T)2.*nu*log1Z);
 
-					double hplusPV = (hRPV + hLPV)/sqrt(2);
-					double hcrossPV = std::complex<T>(0,1)*(hRPV - hLPV)/sqrt(2);
+				std::complex<T> hplusPV = (hRPV + hLPV)/sqrt2;
+				std::complex<T> hcrossPV = std::complex<T>(0,1)*(hRPV - hLPV)/sqrt2;
 
-					//double hcrossPV =  wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] + nu * log(1 + Z)* wp->hplus[i] ;
-					//double hplusPV = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - nu * log(1 + Z)* wp->hcross[i];
-					wp->hcross[i] = hcrossPV;
-					wp->hplus[i] = hplusPV;
-					}
+				//double hcrossPV =  wp->hcross[i] + pref * std::complex<T>(0,1) * wp->hplus[i] + nu * log(1 + Z)* wp->hplus[i] ;
+				//double hplusPV = wp->hplus[i] - pref * std::complex<T>(0,1) *  wp->hcross[i] - nu * log(1 + Z)* wp->hcross[i];
+				wp->hcross[i] = hcrossPV;
+				wp->hplus[i] = hplusPV;
 				}
+			}
 	return ;
 }
 template void extra_modifications(std::string, gen_params_base<double> * gp,source_parameters<double> *, waveform_polarizations<double> *,double *, int );
