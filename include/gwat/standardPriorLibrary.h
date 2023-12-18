@@ -26,7 +26,12 @@ struct priorData
 	double DL_prior[2];
 	double T_mcmc_gw_tool;
 	double T_merger; 
-	
+	double a1_prior[2];
+	double a2_prior[2];
+	double ctheta1_prior[2];
+	double ctheta2_prior[2];
+	double phi1_prior[2];
+	double phi2_prior[2];	
 };
 
 bool tidal_love_boundary_violation(double q,double lambda_s);
@@ -50,6 +55,14 @@ class logPriorStandard_D: public bayesship::probabilityFn
 public:
 	priorData *PD=nullptr;
 	logPriorStandard_D(priorData *PD){this->PD = PD;};
+	virtual double eval(bayesship::positionInfo *position, int chainID);
+};
+
+class logPriorStandard_P: public bayesship::probabilityFn
+{
+public:
+	priorData *PD=nullptr;
+	logPriorStandard_P(priorData *PD){this->PD = PD;};
 	virtual double eval(bayesship::positionInfo *position, int chainID);
 };
 
