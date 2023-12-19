@@ -452,3 +452,61 @@ double logPriorStandard_P::eval(bayesship::positionInfo *position, int chainID)
 	return log(chirpmass_eta_jac(chirp,eta))+3*pos[6] ;
 	
 }
+
+double logPriorStandard_P_mod::eval(bayesship::positionInfo *position, int chainID)
+{
+	int dim =  position->dimension;
+	double *pos =  position->parameters;
+	double a = -std::numeric_limits<double>::infinity();
+	int initial_nongr_id = 15;
+	for (int i = initial_nongr_id ; i<dim; i++){
+		if(pos[i]<PD->mod_priors[i-initial_nongr_id][0] || pos[i]>PD->mod_priors[i-initial_nongr_id][1]){return a;}
+	}
+
+	double PhenomP = logPriorStandard_P::eval(position,chainID);
+	return PhenomP;
+}
+
+double logPriorStandard_P_NRT::eval(bayesship::positionInfo *position, int chainID)
+{
+	int dim =  position->dimension;
+	double *pos = position->parameters;
+	double a = -std::numeric_limits<double>::infinity();
+	double chirp = exp(pos[7]);
+	double m1 = calculate_mass1(chirp,pos[8]);
+	double m2 = calculate_mass2(chirp,pos[8]);
+	double q = m2/m1;//<1
+	double factor = 0;
+	if(PD->tidal_love){
+		if(exp(pos[15])<PD->tidal_s_prior[0] || exp(pos[15])>PD->tidal_s_prior[1]){return a;}
+		if(tidal_love_boundary_violation(q,exp(pos[11]))){return a;}
+		factor += pos[11];
+
+	}
+	else{
+		if(exp(pos[15])<PD->tidal1_prior[0] || exp(pos[15])>PD->tidal1_prior[1]){return a;}
+		if(exp(pos[16])<PD->tidal2_prior[0] || exp(pos[16])>PD->tidal2_prior[1]){return a;}
+		factor += pos[15];
+		factor += pos[16];
+	}
+	return logPriorStandard_P::eval(position, chainID) +factor ;
+
+}
+
+double logPriorStandard_P_NRT_mod::eval(bayesship::positionInfo *position, int chainID)
+{
+	int dim =  position->dimension;
+	double *pos =  position->parameters;
+	double a = -std::numeric_limits<double>::infinity();
+	int initial_nongr_id = 16;
+	if(! PD->tidal_love){
+		initial_nongr_id = 17;
+	}
+	for (int i = initial_nongr_id ; i<dim; i++){
+		if(pos[i]<PD->mod_priors[i-initial_nongr_id][0] || pos[i]>PD->mod_priors[i-initial_nongr_id][1]){return a;}
+	}
+
+	double NS = logPriorStandard_P_NRT::eval(position,chainID);
+	//std::cout<<NS<<std::endl;
+	return  NS;
+}
