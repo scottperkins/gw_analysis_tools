@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IMRPhenomD_NRT &mdash; GW Analysis Tools  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -66,6 +68,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N14IMRPhenomD_NRT4PadeE1TP17source_parametersI1TEP13useful_powersI1TEc"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT::Pade()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N14IMRPhenomD_NRT13phase_ins_NRTE1TP13useful_powersI1TEP17source_parametersI1TE"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT::phase_ins_NRT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N14IMRPhenomD_NRT15phase_ins_NRT_DE1TP13useful_powersI1TEP17source_parametersI1TE"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT::phase_ins_NRT_D()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N14IMRPhenomD_NRT14phase_spin_NRTE1TP13useful_powersI1TEP17source_parametersI1TE"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT::phase_spin_NRT()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N14IMRPhenomD_NRT11amp_ins_NRTE1TP13useful_powersI1TEP17source_parametersI1TE"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT::amp_ins_NRT()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N14IMRPhenomD_NRT18construct_waveformEP1TiPNSt7complexI1TEEP17source_parametersI1TE"><code class="docutils literal notranslate"><span class="pre">IMRPhenomD_NRT::construct_waveform()</span></code></a></li>
@@ -217,6 +220,11 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv4N14IMRPhenomD_NRT13phase_ins_NRTE1TP13useful_powersI1TEP17source_parametersI1TE">
 <span id="_CPPv3N14IMRPhenomD_NRT13phase_ins_NRTE1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N14IMRPhenomD_NRT13phase_ins_NRTE1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="IMRPhenomD_NRT::phase_ins_NRT__T.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classIMRPhenomD__NRT_1a6bd23859be4f934e5fd6b8ef6b3b92ff"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">phase_ins_NRT</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">f</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">powers</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">param</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N14IMRPhenomD_NRT13phase_ins_NRTE1TP13useful_powersI1TEP17source_parametersI1TE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N14IMRPhenomD_NRT15phase_ins_NRT_DE1TP13useful_powersI1TEP17source_parametersI1TE">
+<span id="_CPPv3N14IMRPhenomD_NRT15phase_ins_NRT_DE1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="_CPPv2N14IMRPhenomD_NRT15phase_ins_NRT_DE1TP13useful_powersI1TEP17source_parametersI1TE"></span><span id="IMRPhenomD_NRT::phase_ins_NRT_D__T.useful_powers:T:P.source_parameters:T:P"></span><span class="target" id="classIMRPhenomD__NRT_1aef78a1f9a65b4aec6d25d5f7cfc0fa9c"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">phase_ins_NRT_D</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">f</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E13useful_powers" title="useful_powers"><span class="n"><span class="pre">useful_powers</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">powers</span></span>, <a class="reference internal" href="util.html#_CPPv4I0E17source_parameters" title="source_parameters"><span class="n"><span class="pre">source_parameters</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0E14IMRPhenomD_NRT" title="IMRPhenomD_NRT::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">param</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N14IMRPhenomD_NRT15phase_ins_NRT_DE1TP13useful_powersI1TEP17source_parametersI1TE" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp function">

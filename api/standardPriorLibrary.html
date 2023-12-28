@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>standardPriorLibrary &mdash; GW Analysis Tools  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -92,6 +94,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData12tidal1_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::tidal1_prior</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData12tidal2_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::tidal2_prior</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData13tidal_s_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::tidal_s_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData17diss_tidal1_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::diss_tidal1_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData17diss_tidal2_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::diss_tidal2_prior</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData8EA_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::EA_prior</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData9RA_boundsE"><code class="docutils literal notranslate"><span class="pre">priorData::RA_bounds</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData13sinDEC_boundsE"><code class="docutils literal notranslate"><span class="pre">priorData::sinDEC_bounds</span></code></a></li>
@@ -101,12 +105,24 @@
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData8DL_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::DL_prior</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData14T_mcmc_gw_toolE"><code class="docutils literal notranslate"><span class="pre">priorData::T_mcmc_gw_tool</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData8T_mergerE"><code class="docutils literal notranslate"><span class="pre">priorData::T_merger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData8a1_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::a1_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData8a2_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::a2_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData13ctheta1_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::ctheta1_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData13ctheta2_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::ctheta2_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData10phi1_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::phi1_prior</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N9priorData10phi2_priorE"><code class="docutils literal notranslate"><span class="pre">priorData::phi2_prior</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv418logPriorStandard_D"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N18logPriorStandard_D18logPriorStandard_DEP9priorData"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D::logPriorStandard_D()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N18logPriorStandard_D4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D::eval()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N18logPriorStandard_D2PDE"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D::PD</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418logPriorStandard_P"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N18logPriorStandard_P18logPriorStandard_PEP9priorData"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P::logPriorStandard_P()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N18logPriorStandard_P4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P::eval()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N18logPriorStandard_P2PDE"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P::PD</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv422logPriorStandard_D_NRT"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D_NRT</span></code></a><ul>
@@ -124,9 +140,24 @@
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N22logPriorStandard_D_mod4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D_mod::eval()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv422logPriorStandard_P_mod"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_mod</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N22logPriorStandard_P_mod22logPriorStandard_P_modEP9priorData"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_mod::logPriorStandard_P_mod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N22logPriorStandard_P_mod4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_mod::eval()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv426logPriorStandard_D_NRT_mod"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D_NRT_mod</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N26logPriorStandard_D_NRT_mod26logPriorStandard_D_NRT_modEP9priorData"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D_NRT_mod::logPriorStandard_D_NRT_mod()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N26logPriorStandard_D_NRT_mod4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_D_NRT_mod::eval()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv422logPriorStandard_P_NRT"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_NRT</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N22logPriorStandard_P_NRT22logPriorStandard_P_NRTEP9priorData"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_NRT::logPriorStandard_P_NRT()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N22logPriorStandard_P_NRT4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_NRT::eval()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv426logPriorStandard_P_NRT_mod"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_NRT_mod</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N26logPriorStandard_P_NRT_mod26logPriorStandard_P_NRT_modEP9priorData"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_NRT_mod::logPriorStandard_P_NRT_mod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N26logPriorStandard_P_NRT_mod4evalEPN9bayesship12positionInfoEi"><code class="docutils literal notranslate"><span class="pre">logPriorStandard_P_NRT_mod::eval()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -243,6 +274,16 @@
 <dd></dd></dl>
 
 <dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData17diss_tidal1_priorE">
+<span id="_CPPv3N9priorData17diss_tidal1_priorE"></span><span id="_CPPv2N9priorData17diss_tidal1_priorE"></span><span id="priorData::diss_tidal1_prior__doubleA"></span><span class="target" id="structpriorData_1a69073c49e728386925ed0cead86a5ea1"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal1_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData17diss_tidal1_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData17diss_tidal2_priorE">
+<span id="_CPPv3N9priorData17diss_tidal2_priorE"></span><span id="_CPPv2N9priorData17diss_tidal2_priorE"></span><span id="priorData::diss_tidal2_prior__doubleA"></span><span class="target" id="structpriorData_1a03558da1235f520b6c10cb8a1e5db519"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal2_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData17diss_tidal2_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N9priorData8EA_priorE">
 <span id="_CPPv3N9priorData8EA_priorE"></span><span id="_CPPv2N9priorData8EA_priorE"></span><span id="priorData::EA_prior__doubleA"></span><span class="target" id="structpriorData_1a361d2fede7c0cd87aa71d6b332d68759"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EA_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData8EA_priorE" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
@@ -287,6 +328,36 @@
 <span id="_CPPv3N9priorData8T_mergerE"></span><span id="_CPPv2N9priorData8T_mergerE"></span><span id="priorData::T_merger__double"></span><span class="target" id="structpriorData_1a8626d8e7131f72cf40ab146c766eef1e"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T_merger</span></span></span><a class="headerlink" href="#_CPPv4N9priorData8T_mergerE" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData8a1_priorE">
+<span id="_CPPv3N9priorData8a1_priorE"></span><span id="_CPPv2N9priorData8a1_priorE"></span><span id="priorData::a1_prior__doubleA"></span><span class="target" id="structpriorData_1a64b844cfbe54c6a524a3d863f3d94309"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">a1_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData8a1_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData8a2_priorE">
+<span id="_CPPv3N9priorData8a2_priorE"></span><span id="_CPPv2N9priorData8a2_priorE"></span><span id="priorData::a2_prior__doubleA"></span><span class="target" id="structpriorData_1ac5ebb201092851faf5453093095e09c9"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">a2_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData8a2_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData13ctheta1_priorE">
+<span id="_CPPv3N9priorData13ctheta1_priorE"></span><span id="_CPPv2N9priorData13ctheta1_priorE"></span><span id="priorData::ctheta1_prior__doubleA"></span><span class="target" id="structpriorData_1a5b4af6fbc09ff2166e74916241576db7"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctheta1_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData13ctheta1_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData13ctheta2_priorE">
+<span id="_CPPv3N9priorData13ctheta2_priorE"></span><span id="_CPPv2N9priorData13ctheta2_priorE"></span><span id="priorData::ctheta2_prior__doubleA"></span><span class="target" id="structpriorData_1a07c54bc62e4ebca4a2e6083c11da83e1"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ctheta2_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData13ctheta2_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData10phi1_priorE">
+<span id="_CPPv3N9priorData10phi1_priorE"></span><span id="_CPPv2N9priorData10phi1_priorE"></span><span id="priorData::phi1_prior__doubleA"></span><span class="target" id="structpriorData_1a76c28978943499e22a43edacf25c8a6b"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">phi1_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData10phi1_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N9priorData10phi2_priorE">
+<span id="_CPPv3N9priorData10phi2_priorE"></span><span id="_CPPv2N9priorData10phi2_priorE"></span><span id="priorData::phi2_prior__doubleA"></span><span class="target" id="structpriorData_1a52f750e26b360be4e2359d19c052659d"></span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">phi2_prior</span></span></span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#_CPPv4N9priorData10phi2_priorE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
 </div>
 </dd></dl>
 
@@ -314,6 +385,35 @@
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N18logPriorStandard_D2PDE">
 <span id="_CPPv3N18logPriorStandard_D2PDE"></span><span id="_CPPv2N18logPriorStandard_D2PDE"></span><span id="logPriorStandard_D::PD__priorDataP"></span><span class="target" id="classlogPriorStandard__D_1a259ae129ea361121e4eb205b04b83fba"></span><a class="reference internal" href="#_CPPv49priorData" title="priorData"><span class="n"><span class="pre">priorData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PD</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><a class="headerlink" href="#_CPPv4N18logPriorStandard_D2PDE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv418logPriorStandard_P">
+<span id="_CPPv318logPriorStandard_P"></span><span id="_CPPv218logPriorStandard_P"></span><span id="logPriorStandard_P"></span><span class="target" id="classlogPriorStandard__P"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><span class="n"><span class="pre">bayesship</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">probabilityFn</span></span><a class="headerlink" href="#_CPPv418logPriorStandard_P" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;standardPriorLibrary.h&gt;</em></div>
+<p>Subclassed by <a class="reference internal" href="#classlogPriorStandard__P__NRT"><span class="std std-ref">logPriorStandard_P_NRT</span></a>, <a class="reference internal" href="#classlogPriorStandard__P__mod"><span class="std std-ref">logPriorStandard_P_mod</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N18logPriorStandard_P18logPriorStandard_PEP9priorData">
+<span id="_CPPv3N18logPriorStandard_P18logPriorStandard_PEP9priorData"></span><span id="_CPPv2N18logPriorStandard_P18logPriorStandard_PEP9priorData"></span><span id="logPriorStandard_P::logPriorStandard_P__priorDataP"></span><span class="target" id="classlogPriorStandard__P_1af4c16625fe2d968d9dce9f55064ed362"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv49priorData" title="priorData"><span class="n"><span class="pre">priorData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">PD</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N18logPriorStandard_P18logPriorStandard_PEP9priorData" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N18logPriorStandard_P4evalEPN9bayesship12positionInfoEi">
+<span id="_CPPv3N18logPriorStandard_P4evalEPN9bayesship12positionInfoEi"></span><span id="_CPPv2N18logPriorStandard_P4evalEPN9bayesship12positionInfoEi"></span><span id="logPriorStandard_P::eval__bayesship::positionInfoP.i"></span><span class="target" id="classlogPriorStandard__P_1a9395c9eabab548dbcc149ed4cac3b523"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eval</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">bayesship</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">positionInfo</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">position</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chainID</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N18logPriorStandard_P4evalEPN9bayesship12positionInfoEi" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N18logPriorStandard_P2PDE">
+<span id="_CPPv3N18logPriorStandard_P2PDE"></span><span id="_CPPv2N18logPriorStandard_P2PDE"></span><span id="logPriorStandard_P::PD__priorDataP"></span><span class="target" id="classlogPriorStandard__P_1ad58cbf1731002882504b359836065358"></span><a class="reference internal" href="#_CPPv49priorData" title="priorData"><span class="n"><span class="pre">priorData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">PD</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><a class="headerlink" href="#_CPPv4N18logPriorStandard_P2PDE" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>
@@ -384,6 +484,26 @@
 </dd></dl>
 
 <dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv422logPriorStandard_P_mod">
+<span id="_CPPv322logPriorStandard_P_mod"></span><span id="_CPPv222logPriorStandard_P_mod"></span><span id="logPriorStandard_P_mod"></span><span class="target" id="classlogPriorStandard__P__mod"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P_mod</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv418logPriorStandard_P" title="logPriorStandard_P"><span class="n"><span class="pre">logPriorStandard_P</span></span></a><a class="headerlink" href="#_CPPv422logPriorStandard_P_mod" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;standardPriorLibrary.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N22logPriorStandard_P_mod22logPriorStandard_P_modEP9priorData">
+<span id="_CPPv3N22logPriorStandard_P_mod22logPriorStandard_P_modEP9priorData"></span><span id="_CPPv2N22logPriorStandard_P_mod22logPriorStandard_P_modEP9priorData"></span><span id="logPriorStandard_P_mod::logPriorStandard_P_mod__priorDataP"></span><span class="target" id="classlogPriorStandard__P__mod_1a94ecefcb8921e607c4869999dbceb077"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P_mod</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv49priorData" title="priorData"><span class="n"><span class="pre">priorData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">PD</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N22logPriorStandard_P_mod22logPriorStandard_P_modEP9priorData" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N22logPriorStandard_P_mod4evalEPN9bayesship12positionInfoEi">
+<span id="_CPPv3N22logPriorStandard_P_mod4evalEPN9bayesship12positionInfoEi"></span><span id="_CPPv2N22logPriorStandard_P_mod4evalEPN9bayesship12positionInfoEi"></span><span id="logPriorStandard_P_mod::eval__bayesship::positionInfoP.i"></span><span class="target" id="classlogPriorStandard__P__mod_1aef7c18c8076be97336ac6b44b4ca9ffd"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eval</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">bayesship</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">positionInfo</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">position</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chainID</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N22logPriorStandard_P_mod4evalEPN9bayesship12positionInfoEi" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
 <dt class="sig sig-object cpp" id="_CPPv426logPriorStandard_D_NRT_mod">
 <span id="_CPPv326logPriorStandard_D_NRT_mod"></span><span id="_CPPv226logPriorStandard_D_NRT_mod"></span><span id="logPriorStandard_D_NRT_mod"></span><span class="target" id="classlogPriorStandard__D__NRT__mod"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_D_NRT_mod</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv422logPriorStandard_D_NRT" title="logPriorStandard_D_NRT"><span class="n"><span class="pre">logPriorStandard_D_NRT</span></span></a><a class="headerlink" href="#_CPPv426logPriorStandard_D_NRT_mod" title="Link to this definition"></a><br /></dt>
 <dd><div class="docutils container">
@@ -400,6 +520,47 @@
 <span id="_CPPv3N26logPriorStandard_D_NRT_mod4evalEPN9bayesship12positionInfoEi"></span><span id="_CPPv2N26logPriorStandard_D_NRT_mod4evalEPN9bayesship12positionInfoEi"></span><span id="logPriorStandard_D_NRT_mod::eval__bayesship::positionInfoP.i"></span><span class="target" id="classlogPriorStandard__D__NRT__mod_1aa55b149aba2abeb946b1f968da5b48b3"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eval</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">bayesship</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">positionInfo</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">position</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chainID</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N26logPriorStandard_D_NRT_mod4evalEPN9bayesship12positionInfoEi" title="Link to this definition"></a><br /></dt>
 <dd><p>/Brief For adding ppE priors to <a class="reference internal" href="IMRPhenomD_NRT.html#classIMRPhenomD__NRT"><span class="std std-ref">IMRPhenomD_NRT</span></a></p>
 </dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv422logPriorStandard_P_NRT">
+<span id="_CPPv322logPriorStandard_P_NRT"></span><span id="_CPPv222logPriorStandard_P_NRT"></span><span id="logPriorStandard_P_NRT"></span><span class="target" id="classlogPriorStandard__P__NRT"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P_NRT</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv418logPriorStandard_P" title="logPriorStandard_P"><span class="n"><span class="pre">logPriorStandard_P</span></span></a><a class="headerlink" href="#_CPPv422logPriorStandard_P_NRT" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;standardPriorLibrary.h&gt;</em></div>
+<p>Subclassed by <a class="reference internal" href="#classlogPriorStandard__P__NRT__mod"><span class="std std-ref">logPriorStandard_P_NRT_mod</span></a></p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N22logPriorStandard_P_NRT22logPriorStandard_P_NRTEP9priorData">
+<span id="_CPPv3N22logPriorStandard_P_NRT22logPriorStandard_P_NRTEP9priorData"></span><span id="_CPPv2N22logPriorStandard_P_NRT22logPriorStandard_P_NRTEP9priorData"></span><span id="logPriorStandard_P_NRT::logPriorStandard_P_NRT__priorDataP"></span><span class="target" id="classlogPriorStandard__P__NRT_1a0d32cb04386deb4049857930c11ebf28"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P_NRT</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv49priorData" title="priorData"><span class="n"><span class="pre">priorData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">PD</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N22logPriorStandard_P_NRT22logPriorStandard_P_NRTEP9priorData" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N22logPriorStandard_P_NRT4evalEPN9bayesship12positionInfoEi">
+<span id="_CPPv3N22logPriorStandard_P_NRT4evalEPN9bayesship12positionInfoEi"></span><span id="_CPPv2N22logPriorStandard_P_NRT4evalEPN9bayesship12positionInfoEi"></span><span id="logPriorStandard_P_NRT::eval__bayesship::positionInfoP.i"></span><span class="target" id="classlogPriorStandard__P__NRT_1ac21596db76f3c1e4b50deeaa73c91b6a"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eval</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">bayesship</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">positionInfo</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">position</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chainID</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N22logPriorStandard_P_NRT4evalEPN9bayesship12positionInfoEi" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv426logPriorStandard_P_NRT_mod">
+<span id="_CPPv326logPriorStandard_P_NRT_mod"></span><span id="_CPPv226logPriorStandard_P_NRT_mod"></span><span id="logPriorStandard_P_NRT_mod"></span><span class="target" id="classlogPriorStandard__P__NRT__mod"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P_NRT_mod</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv422logPriorStandard_P_NRT" title="logPriorStandard_P_NRT"><span class="n"><span class="pre">logPriorStandard_P_NRT</span></span></a><a class="headerlink" href="#_CPPv426logPriorStandard_P_NRT_mod" title="Link to this definition"></a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;standardPriorLibrary.h&gt;</em></div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N26logPriorStandard_P_NRT_mod26logPriorStandard_P_NRT_modEP9priorData">
+<span id="_CPPv3N26logPriorStandard_P_NRT_mod26logPriorStandard_P_NRT_modEP9priorData"></span><span id="_CPPv2N26logPriorStandard_P_NRT_mod26logPriorStandard_P_NRT_modEP9priorData"></span><span id="logPriorStandard_P_NRT_mod::logPriorStandard_P_NRT_mod__priorDataP"></span><span class="target" id="classlogPriorStandard__P__NRT__mod_1a7d1e1bac44606c2f7a31f86dbd1f49cb"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">logPriorStandard_P_NRT_mod</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv49priorData" title="priorData"><span class="n"><span class="pre">priorData</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">PD</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N26logPriorStandard_P_NRT_mod26logPriorStandard_P_NRT_modEP9priorData" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N26logPriorStandard_P_NRT_mod4evalEPN9bayesship12positionInfoEi">
+<span id="_CPPv3N26logPriorStandard_P_NRT_mod4evalEPN9bayesship12positionInfoEi"></span><span id="_CPPv2N26logPriorStandard_P_NRT_mod4evalEPN9bayesship12positionInfoEi"></span><span id="logPriorStandard_P_NRT_mod::eval__bayesship::positionInfoP.i"></span><span class="target" id="classlogPriorStandard__P__NRT__mod_1a23b0c8f5e67e2de61e2df4964f874c98"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">eval</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">bayesship</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">positionInfo</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">position</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">chainID</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N26logPriorStandard_P_NRT_mod4evalEPN9bayesship12positionInfoEi" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
 
 </div>
 </dd></dl>

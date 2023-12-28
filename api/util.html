@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>util &mdash; GW Analysis Tools  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
@@ -211,6 +213,11 @@
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base10tidal_loveE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::tidal_love</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base16tidal_love_errorE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::tidal_love_error</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base20delta_tidal_weightedE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::delta_tidal_weighted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base11diss_tidal1E"><code class="docutils literal notranslate"><span class="pre">gen_params_base::diss_tidal1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base11diss_tidal2E"><code class="docutils literal notranslate"><span class="pre">gen_params_base::diss_tidal2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base12diss_tidal_sE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::diss_tidal_s</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base12diss_tidal_aE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::diss_tidal_a</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base19diss_tidal_weightedE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::diss_tidal_weighted</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base3psiE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::psi</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base10incl_angleE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::incl_angle</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N15gen_params_base22equatorial_orientationE"><code class="docutils literal notranslate"><span class="pre">gen_params_base::equatorial_orientation</span></code></a></li>
@@ -365,6 +372,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters4oct2E"><code class="docutils literal notranslate"><span class="pre">source_parameters::oct2</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters14ss_3p5PN_coeffE"><code class="docutils literal notranslate"><span class="pre">source_parameters::ss_3p5PN_coeff</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters19NRT_amp_coefficientE"><code class="docutils literal notranslate"><span class="pre">source_parameters::NRT_amp_coefficient</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters11diss_tidal1E"><code class="docutils literal notranslate"><span class="pre">source_parameters::diss_tidal1</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters11diss_tidal2E"><code class="docutils literal notranslate"><span class="pre">source_parameters::diss_tidal2</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters19diss_tidal_weightedE"><code class="docutils literal notranslate"><span class="pre">source_parameters::diss_tidal_weighted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters25delta_diss_tidal_weightedE"><code class="docutils literal notranslate"><span class="pre">source_parameters::delta_diss_tidal_weighted</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters7betappeE"><code class="docutils literal notranslate"><span class="pre">source_parameters::betappe</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters4bppeE"><code class="docutils literal notranslate"><span class="pre">source_parameters::bppe</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#_CPPv4N17source_parameters4appeE"><code class="docutils literal notranslate"><span class="pre">source_parameters::appe</span></code></a></li>
@@ -1408,6 +1419,35 @@
 <dd></dd></dl>
 
 <dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15gen_params_base11diss_tidal1E">
+<span id="_CPPv3N15gen_params_base11diss_tidal1E"></span><span id="_CPPv2N15gen_params_base11diss_tidal1E"></span><span id="gen_params_base::diss_tidal1__T"></span><span class="target" id="classgen__params__base_1ac1a7e41af59cce5dcee933c2990029c5"></span><a class="reference internal" href="#_CPPv4I0E15gen_params_base" title="gen_params_base::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal1</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N15gen_params_base11diss_tidal1E" title="Link to this definition"></a><br /></dt>
+<dd><p>dissipative tidal deformability of the larger component </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15gen_params_base11diss_tidal2E">
+<span id="_CPPv3N15gen_params_base11diss_tidal2E"></span><span id="_CPPv2N15gen_params_base11diss_tidal2E"></span><span id="gen_params_base::diss_tidal2__T"></span><span class="target" id="classgen__params__base_1a92b1a7dd417dd63f824ca77c7bebafda"></span><a class="reference internal" href="#_CPPv4I0E15gen_params_base" title="gen_params_base::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal2</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N15gen_params_base11diss_tidal2E" title="Link to this definition"></a><br /></dt>
+<dd><p>dissipative tidal deformability of the smaller component </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15gen_params_base12diss_tidal_sE">
+<span id="_CPPv3N15gen_params_base12diss_tidal_sE"></span><span id="_CPPv2N15gen_params_base12diss_tidal_sE"></span><span id="gen_params_base::diss_tidal_s__T"></span><span class="target" id="classgen__params__base_1a4ec05db49ed6b0f6896f2acc029b9eb9"></span><a class="reference internal" href="#_CPPv4I0E15gen_params_base" title="gen_params_base::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal_s</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N15gen_params_base12diss_tidal_sE" title="Link to this definition"></a><br /></dt>
+<dd><p>symmetric dissipative tidal deformability </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15gen_params_base12diss_tidal_aE">
+<span id="_CPPv3N15gen_params_base12diss_tidal_aE"></span><span id="_CPPv2N15gen_params_base12diss_tidal_aE"></span><span id="gen_params_base::diss_tidal_a__T"></span><span class="target" id="classgen__params__base_1a8d6df7d7b97d16704bfa55af649086a3"></span><a class="reference internal" href="#_CPPv4I0E15gen_params_base" title="gen_params_base::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal_a</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N15gen_params_base12diss_tidal_aE" title="Link to this definition"></a><br /></dt>
+<dd><p>antisymmetric dissipative tidal deformability </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N15gen_params_base19diss_tidal_weightedE">
+<span id="_CPPv3N15gen_params_base19diss_tidal_weightedE"></span><span id="_CPPv2N15gen_params_base19diss_tidal_weightedE"></span><span id="gen_params_base::diss_tidal_weighted__T"></span><span class="target" id="classgen__params__base_1adf6439b217c6ef768110b6308d592201"></span><a class="reference internal" href="#_CPPv4I0E15gen_params_base" title="gen_params_base::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal_weighted</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N15gen_params_base19diss_tidal_weightedE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N15gen_params_base3psiE">
 <span id="_CPPv3N15gen_params_base3psiE"></span><span id="_CPPv2N15gen_params_base3psiE"></span><span id="gen_params_base::psi__T"></span><span class="target" id="classgen__params__base_1af1c02da522106d065ee3ebefe77a11a6"></span><a class="reference internal" href="#_CPPv4I0E15gen_params_base" title="gen_params_base::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">psi</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">0</span></span><a class="headerlink" href="#_CPPv4N15gen_params_base3psiE" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
@@ -2229,6 +2269,29 @@
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N17source_parameters19NRT_amp_coefficientE">
 <span id="_CPPv3N17source_parameters19NRT_amp_coefficientE"></span><span id="_CPPv2N17source_parameters19NRT_amp_coefficientE"></span><span id="source_parameters::NRT_amp_coefficient__T"></span><span class="target" id="structsource__parameters_1aeef4143ea14b8e365898ddbaa75356b7"></span><a class="reference internal" href="#_CPPv4I0E17source_parameters" title="source_parameters::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NRT_amp_coefficient</span></span></span><a class="headerlink" href="#_CPPv4N17source_parameters19NRT_amp_coefficientE" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N17source_parameters11diss_tidal1E">
+<span id="_CPPv3N17source_parameters11diss_tidal1E"></span><span id="_CPPv2N17source_parameters11diss_tidal1E"></span><span id="source_parameters::diss_tidal1__T"></span><span class="target" id="structsource__parameters_1a52bb9d1b68f6365d3d9940855df41533"></span><a class="reference internal" href="#_CPPv4I0E17source_parameters" title="source_parameters::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal1</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N17source_parameters11diss_tidal1E" title="Link to this definition"></a><br /></dt>
+<dd><p>dissipative tidal deformability of the larger component </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N17source_parameters11diss_tidal2E">
+<span id="_CPPv3N17source_parameters11diss_tidal2E"></span><span id="_CPPv2N17source_parameters11diss_tidal2E"></span><span id="source_parameters::diss_tidal2__T"></span><span class="target" id="structsource__parameters_1a8bee8f2771ae220db81ea6205b7f182d"></span><a class="reference internal" href="#_CPPv4I0E17source_parameters" title="source_parameters::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal2</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N17source_parameters11diss_tidal2E" title="Link to this definition"></a><br /></dt>
+<dd><p>dissipative tidal deformability of the smaller component </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N17source_parameters19diss_tidal_weightedE">
+<span id="_CPPv3N17source_parameters19diss_tidal_weightedE"></span><span id="_CPPv2N17source_parameters19diss_tidal_weightedE"></span><span id="source_parameters::diss_tidal_weighted__T"></span><span class="target" id="structsource__parameters_1a796652f63036c878035385a4ecb0e479"></span><a class="reference internal" href="#_CPPv4I0E17source_parameters" title="source_parameters::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">diss_tidal_weighted</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N17source_parameters19diss_tidal_weightedE" title="Link to this definition"></a><br /></dt>
+<dd><p>mass-weighted dissipative tidal deformability </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N17source_parameters25delta_diss_tidal_weightedE">
+<span id="_CPPv3N17source_parameters25delta_diss_tidal_weightedE"></span><span id="_CPPv2N17source_parameters25delta_diss_tidal_weightedE"></span><span id="source_parameters::delta_diss_tidal_weighted__T"></span><span class="target" id="structsource__parameters_1a2206a54e9254336015f7df532b7e0b9f"></span><a class="reference internal" href="#_CPPv4I0E17source_parameters" title="source_parameters::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">delta_diss_tidal_weighted</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><a class="headerlink" href="#_CPPv4N17source_parameters25delta_diss_tidal_weightedE" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp var">
