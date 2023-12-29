@@ -671,6 +671,13 @@ void derivative_celestial_horizon_transform(double RA, /**< in RAD*/
 }
 
 //! LISA orbit functions taken from pyFDresponse.py
+// For notation see arXiv:2003.00357, although we have a few differences
+//  1. sign difference in Fourier transform
+//  2. no decomposition into spherical harmonics
+// Names for the func[...]: 
+//  1. p0: position of center of LISA (in barycenteric frame)
+//  2. p1L: position of one of the satellite (in LISA frame)
+//  3. n1: the unit vector point from satellite 2 to satellite 3 (in barycenteric frame)
 
 template<class T>
 void funcp0(T *t, T **p0, int length){
@@ -752,6 +759,9 @@ void funcn3(T *t, T **n3, int length){
 	}
 }
 
+// Transfer function from single link (l) from sender (s) to receiver (r)
+// (hence Gslr-- sender - link - receiver)
+
 template<class T>
 void EvaluateGslr(T *t,
 	T *freq,
@@ -765,12 +775,12 @@ void EvaluateGslr(T *t,
 {
 
 	T **p0 = new T*[length];
-  T **p1L = new T*[length];
-  T **p2L = new T*[length];
-  T **p3L = new T*[length];
-  T **n1 = new T*[length];
-  T **n2 = new T*[length];
-  T **n3 = new T*[length];
+	T **p1L = new T*[length];
+	T **p2L = new T*[length];
+	T **p3L = new T*[length];
+	T **n1 = new T*[length];
+	T **n2 = new T*[length];
+	T **n3 = new T*[length];
 	for(int i=0;i<length;i++)
 	{
 		p0[i]= new T[3];
@@ -794,7 +804,6 @@ void EvaluateGslr(T *t,
 	std::complex<T> n1Hn1;
 	std::complex<T> n2Hn2;
 	std::complex<T> n3Hn3;
-
 
 	T kn1;
 	T kn2;
@@ -891,8 +900,30 @@ void EvaluateGslr(T *t,
 	}
 	// end of for loop
 
-
-
+	for(int i=0;i<length;i++)
+	{
+		delete[] p0[i];
+		delete[] p1L[i];
+		delete[] p2L[i];
+		delete[] p3L[i];
+		delete[] n1[i];
+		delete[] n2[i];
+		delete[] n3[i];
+	}
+	delete[] p0;
+	delete[] p1L;
+	delete[] p2L;
+	delete[] p3L;
+	delete[] n1;
+	delete[] n2;
+	delete[] n3;
+	
+	delete[] G12;
+	delete[] G21;
+	delete[] G23;
+	delete[] G32;
+	delete[] G13;
+	delete[] G31;
 }
 
 // yslr
@@ -941,7 +972,9 @@ void Evaluateyslr(
 
 }
 
-// TDI variables
+//
+// Evaluate Time Domain Interferometry (TDI) variables in the Frequency Domain (FD) 
+//
 template <class T>
 void EvaluateTDI_FD(T *t,
 T *freq,
@@ -1107,7 +1140,10 @@ const T L=2.5*pow_int(10.,9)
 		std::cout << "Don't have such a TDI combination! / Please add TDI_tag to detector's name! " << std::endl;
 		std::exit(1);
 	}
-
+	for(int i = 0; i<length; i++){
+		delete[] yslr[i];
+	}
+	delete[] yslr;
 
 }
 
