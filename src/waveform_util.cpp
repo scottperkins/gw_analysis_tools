@@ -168,14 +168,83 @@ void create_coherent_GW_detection_reuse_WF(
 	fourier_waveform(frequencies, length, &wp,generation_method, gen_params);
 	T DTOA = 0;
 	for (int i = 0 ; i<detector_N; i++){
-		DTOA = DTOA_DETECTOR(gen_params->RA,gen_params->DEC,gen_params->gmst, detectors[0],detectors[i]);
-		//tc = tc_ref-DTOA;	
-		tc = -DTOA;	
-		tc*=2*M_PI;
-		//gen_params->tc = tc;
-		fourier_detector_response_equatorial(frequencies, length,&wp, responses[i], gen_params->RA,gen_params->DEC,gen_params->psi, gen_params->gmst,(T *)NULL, gen_params->LISA_alpha0,gen_params->LISA_phi0, gen_params->theta_l, gen_params->phi_l, detectors[i]);
-		for(int j = 0 ; j<length; j++){
-			responses[i][j] *= exp(std::complex<T>(0,tc*frequencies[j]));
+		if(detectors[0].find("LISA")!=std::string::npos){ // This means detector_N is 1 and response[3][data_length] 
+			
+			//T function
+			T *tf = new T[length];
+			if(generation_method.find("IMRPhenomD")){
+				// Taken from IMRPhenomD.cpp construct_waveform function
+				source_parameters<T> *s_param;
+				T fdamp, fRD, fpeak;
+				//s_param = source_parameters<T>::populate_source_parameters(params);
+				s_param->populate_source_parameters(gen_params);
+				s_param->sky_average = gen_params->sky_average;
+				s_param->f_ref = gen_params->f_ref;
+				s_param->phiRef = gen_params->phiRef;
+				s_param->cosmology = gen_params->cosmology;
+				s_param->incl_angle = gen_params->incl_angle;
+				s_param->dep_postmerger = gen_params->dep_postmerger;
+
+				IMRPhenomD<T> model;
+				lambda_parameters<T> lambda;
+				T pn_phase_coeffs[12];
+				
+				model.assign_lambda_param(s_param,&lambda);	
+				model.post_merger_variables(s_param);
+				fRD = s_param->fRD;
+				fdamp = s_param->fdamp;
+				fpeak = model.fpeak(s_param , &lambda);
+
+				model.assign_static_pn_phase_coeff(s_param, pn_phase_coeffs);	
+				model.phase_connection_coefficients(s_param,&lambda,pn_phase_coeffs);
+
+				T tc_shift, tc;
+				if(s_param->shift_time){
+					T alpha1_offset = model.assign_lambda_param_element(s_param,14);
+					tc_shift = model.Dphase_mr(fpeak, s_param, &lambda)+(-lambda.alpha[1]+alpha1_offset)*s_param->M/s_param->eta;
+				}
+				else{
+					tc_shift=0;
+				}
+				tc = 2*M_PI*s_param->tc + tc_shift;
+
+
+
+				for(int j=0; j<=length; j++){
+					T f = frequencies[i];
+					if(f < 0.018/(s_param->M)){
+						tf[j] = (model.Dphase_ins(f, s_param, pn_phase_coeffs, &lambda)  - tc)/2.0/M_PI;
+					}
+					else if(f > fRD/2)
+					{
+						tf[j] = (model.Dphase_mr(f, s_param, &lambda) - tc)/2.0/M_PI;
+					}
+					else{
+						tf[j] = (model.Dphase_int(f, s_param, &lambda) - tc)/2.0/M_PI;
+					}
+				}
+
+
+			}
+			else{
+				std::cout << "time-frequency calculation is not provided!" << std::endl;
+				std::exit(1);
+			}
+
+
+			fourier_detector_response_LISA(detectors[0], frequencies, tf, length, gen_params, &wp, responses);
+
+		}
+		else{
+			DTOA = DTOA_DETECTOR(gen_params->RA,gen_params->DEC,gen_params->gmst, detectors[0],detectors[i]);
+			//tc = tc_ref-DTOA;	
+			tc = -DTOA;	
+			tc*=2*M_PI;
+			//gen_params->tc = tc;
+			fourier_detector_response_equatorial(frequencies, length,&wp, responses[i], gen_params->RA,gen_params->DEC,gen_params->psi, gen_params->gmst,(T *)NULL, gen_params->LISA_alpha0,gen_params->LISA_phi0, gen_params->theta_l, gen_params->phi_l, detectors[i]);
+			for(int j = 0 ; j<length; j++){
+				responses[i][j] *= exp(std::complex<T>(0,tc*frequencies[j]));
+			}
 		}
 	}
 	wp.deallocate_memory();

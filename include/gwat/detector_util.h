@@ -3,6 +3,7 @@
 #include <string>
 #include <complex>
 #include "util.h"
+#include "waveform_generator.h"
 /*! \file
  * Header file for all detector-specific utilities
  */
@@ -287,6 +288,18 @@ void funcp0(T *t, T **p0, int length);
 // 	std::complex<T> **Gslr,
 // 	const T L=2.5*pow_int(10.,9)
 // );
+
+
+template <class T>
+void fourier_detector_response_LISA(
+	std::string detectors, 
+	T *frequencies, 
+	T *tf,
+	int length,
+	gen_params_base<T> *gen_params/**<structure containing all the source parameters*/,
+	waveform_polarizations<T> *wp,
+	std::complex<T> **responses/**< [out] Responses for the source at each detector, same order as detectors parameter -- should be pre allocated shape [detector_N][length] */
+	);
 
 
 
