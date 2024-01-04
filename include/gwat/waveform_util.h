@@ -2,6 +2,7 @@
 #define WAVEFORM_UTIL_H
 #include "waveform_generator.h"
 #include "util.h"
+#include "detector_util.h"
 #include <string>
 #include <gsl/gsl_integration.h>
 
@@ -103,6 +104,21 @@ int calculate_snr_gsl(double *snr,
 
 double integrand_snr_SA_subroutine(double f, void *subroutine_params);
 double integrand_snr_subroutine(double f, void *subroutine_params);
+
+
+template <class T>
+int fourier_detector_response_LISA(
+	std::string detectors, 
+	T *frequencies, 
+	T *tf,
+	int length,
+	gen_params_base<T> *gen_params/**<structure containing all the source parameters*/,
+	waveform_polarizations<T> *wp,
+	std::complex<T> **responses/**< [out] Responses for the source at each detector, same order as detectors parameter -- should be pre allocated shape [detector_N][length] */
+	);
+
+
+
 template<class T>
 int fourier_detector_response_horizon(T *frequencies, 
 	int length,

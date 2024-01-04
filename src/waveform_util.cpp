@@ -234,6 +234,7 @@ void create_coherent_GW_detection_reuse_WF(
 
 			fourier_detector_response_LISA(detectors[0], frequencies, tf, length, gen_params, &wp, responses);
 
+
 		}
 		else{
 			DTOA = DTOA_DETECTOR(gen_params->RA,gen_params->DEC,gen_params->gmst, detectors[0],detectors[i]);
@@ -253,6 +254,98 @@ void create_coherent_GW_detection_reuse_WF(
 }
 template void create_coherent_GW_detection_reuse_WF<double>(std::string *, int, double*, int , gen_params_base<double> *,std::string, std::complex<double> **);
 template void create_coherent_GW_detection_reuse_WF<adouble>(std::string *, int, adouble*, int , gen_params_base<adouble> *,std::string, std::complex<adouble> **);
+
+
+
+
+
+template <class T>
+int fourier_detector_response_LISA(
+	std::string detectors, 
+	T *frequencies, 
+	T *tf,
+	int length,
+	gen_params_base<T> *gen_params,
+	waveform_polarizations<T> *wp,
+	std::complex<T> **responses
+	){
+		int status = 1;
+		// Define Hplus and Hcross
+
+		T lambdaSky = gen_params->RA;
+		T betaSky = gen_params->DEC;
+		T psi = gen_params->psi;
+
+		T **Hplus = new T*[3];
+		T **Hcross = new T*[3];
+		for(int i=0;i<3;i++)
+		{
+			Hplus[i] = new T[3];
+			Hcross[i] = new T[3];
+		}
+		Hplus[0][0] = pow(cos(psi)*sin(lambdaSky) - cos(lambdaSky)*sin(betaSky)*sin(psi),2) - pow(cos(lambdaSky)*cos(psi)*sin(betaSky) + sin(lambdaSky)*sin(psi),2);
+		Hplus[0][1] = ((-3 + cos(2*betaSky))*cos(2*psi)*sin(2*lambdaSky))/4. + cos(2*lambdaSky)*sin(betaSky)*sin(2*psi);
+		Hplus[0][2] = cos(betaSky)*(cos(lambdaSky)*cos(2*psi)*sin(betaSky) + sin(lambdaSky)*sin(2*psi));
+		Hplus[1][0] = ((-3 + cos(2*betaSky))*cos(2*psi)*sin(2*lambdaSky))/4. + cos(2*lambdaSky)*sin(betaSky)*sin(2*psi);
+		Hplus[1][1] = pow(cos(lambdaSky),2)*cos(2*psi) + sin(betaSky)*(-(cos(2*psi)*sin(betaSky)*pow(sin(lambdaSky),2)) + sin(2*lambdaSky)*sin(2*psi));
+		Hplus[1][2] = cos(betaSky)*(pow(cos(psi),2)*sin(betaSky)*sin(lambdaSky) - 2*cos(lambdaSky)*cos(psi)*sin(psi) - sin(betaSky)*sin(lambdaSky)*pow(sin(psi),2));
+		Hplus[2][0] = cos(betaSky)*(cos(lambdaSky)*cos(2*psi)*sin(betaSky) + sin(lambdaSky)*sin(2*psi));
+		Hplus[2][1] = cos(betaSky)*(pow(cos(psi),2)*sin(betaSky)*sin(lambdaSky) - 2*cos(lambdaSky)*cos(psi)*sin(psi) - sin(betaSky)*sin(lambdaSky)*pow(sin(psi),2));
+		Hplus[2][2] = -(pow(cos(betaSky),2)*cos(2*psi));
+
+		Hcross[0][0] = -2*(cos(psi)*sin(lambdaSky) - cos(lambdaSky)*sin(betaSky)*sin(psi))*(cos(lambdaSky)*cos(psi)*sin(betaSky) + sin(lambdaSky)*sin(psi));
+		Hcross[0][1] = pow(cos(lambdaSky),2)*cos(2*psi)*sin(betaSky) - cos(2*psi)*sin(betaSky)*pow(sin(lambdaSky),2) - ((-3 + cos(2*betaSky))*sin(2*lambdaSky)*sin(2*psi))/4.;
+		Hcross[0][2] = cos(betaSky)*(pow(cos(psi),2)*sin(lambdaSky) - 2*cos(lambdaSky)*cos(psi)*sin(betaSky)*sin(psi) - sin(lambdaSky)*pow(sin(psi),2));
+		Hcross[1][0] = pow(cos(lambdaSky),2)*cos(2*psi)*sin(betaSky) - cos(2*psi)*sin(betaSky)*pow(sin(lambdaSky),2) - ((-3 + cos(2*betaSky))*sin(2*lambdaSky)*sin(2*psi))/4.;
+		Hcross[1][1] = 2*(cos(psi)*sin(betaSky)*sin(lambdaSky) - cos(lambdaSky)*sin(psi))*(cos(lambdaSky)*cos(psi) + sin(betaSky)*sin(lambdaSky)*sin(psi));
+		Hcross[1][2] = -(cos(betaSky)*(cos(lambdaSky)*cos(2*psi) + sin(betaSky)*sin(lambdaSky)*sin(2*psi)));
+		Hcross[2][0] = cos(betaSky)*(pow(cos(psi),2)*sin(lambdaSky) - 2*cos(lambdaSky)*cos(psi)*sin(betaSky)*sin(psi) - sin(lambdaSky)*pow(sin(psi),2));
+		Hcross[2][1] = -(cos(betaSky)*(cos(lambdaSky)*cos(2*psi) + sin(betaSky)*sin(lambdaSky)*sin(2*psi)));
+		Hcross[2][2] = pow(cos(betaSky),2)*sin(2*psi);
+
+
+
+		// Define k
+
+		T *k = new T[3];
+		k[0] = -cos(betaSky) * cos(lambdaSky);
+		k[1] = -cos(betaSky) * sin(lambdaSky);
+		k[2] = -sin(betaSky);
+		
+
+		// EvaluateTDI_FD
+
+		// T **TDI_FD = new std::complex<T>*[length];
+		// for(int i=0; i<=length; i++){
+		// 	TDI_FD[i] = new std::complex<T>[3];
+		// }
+
+		std::string TDI_tag;
+		std::string approximate_tag;
+
+		if(detectors.find("XYZ")){
+			TDI_tag = "XYZ";
+		}
+		else{
+			TDI_tag = "AET";
+		}
+
+		T L_LISA = 2.5*pow_int(10.,9);
+		
+
+		EvaluateTDI_FD(tf, frequencies, Hplus, Hcross, k, length, responses, wp, TDI_tag, detectors, L_LISA);
+
+		return status;
+
+	}
+
+
+
+
+
+
+
+
 
 /*! \brief Utility to calculate the snr of a fourier transformed data stream while maximizing over the coalescence parameters phic and tc
  *

@@ -278,6 +278,23 @@ T LISA_response_cross( source_parameters<T> *params,T theta_s, T phi_s, T theta_
 template<class T>
 void funcp0(T *t, T **p0, int length);
 
+template<class T>
+void funcp1L(T *t, T **p1L, int length);
+
+template<class T>
+void funcp2L(T *t, T **p2L, int length);
+
+template<class T>
+void funcp3L(T *t, T **p3L, int length);
+
+template<class T>
+void funcn1(T *t, T **n1, int length);
+
+template<class T>
+void funcn2(T *t, T **n2, int length);
+
+template<class T>
+void funcn3(T *t, T **n3, int length);
 
 // template<class T>
 // void EvaluateGslr(T *t,
@@ -290,20 +307,59 @@ void funcp0(T *t, T **p0, int length);
 // );
 
 
+// template <class T>
+// int fourier_detector_response_LISA(
+// 	std::string detectors, 
+// 	T *frequencies, 
+// 	T *tf,
+// 	int length,
+// 	gen_params_base<T> *gen_params/**<structure containing all the source parameters*/,
+// 	waveform_polarizations<T> *wp,
+// 	std::complex<T> **responses/**< [out] Responses for the source at each detector, same order as detectors parameter -- should be pre allocated shape [detector_N][length] */
+// 	);
+
+
+
 template <class T>
-void fourier_detector_response_LISA(
-	std::string detectors, 
-	T *frequencies, 
-	T *tf,
+void EvaluateTDI_FD(T *t,
+T *freq,
+T **Hplus,
+T **Hcross,
+T *k,
+int length,
+std::complex<T> **TDI_FD,
+waveform_polarizations<T> *wp,
+std::string TDI_tag,
+std::string approximate_tag,
+T L
+);
+
+
+template <class T>
+void Evaluateyslr(
+	T *t,
+	T *freq,
+	T **Hplus,
+	T **Hcross,
+	T *k,
 	int length,
-	gen_params_base<T> *gen_params/**<structure containing all the source parameters*/,
-	waveform_polarizations<T> *wp,
-	std::complex<T> **responses/**< [out] Responses for the source at each detector, same order as detectors parameter -- should be pre allocated shape [detector_N][length] */
-	);
+	std::complex<T> **yslr,
+	std::complex<T> *hplusf,
+	std::complex<T> *hcrossf,
+	std::string approximate_tag,
+	T L
+);
 
-
-
-
+template<class T>
+void EvaluateGslr(T *t,
+	T *freq,
+	T **H,
+	T *k,
+	int length,
+	std::complex<T> **Gslr,
+	std::string approximate_tag,
+	T L
+);
 
 
 double p_single_detector(double omega, int samples);
