@@ -854,8 +854,9 @@ void EvaluateGslr(T *t,
 
 		}
 
-			factorcexp0 = std::exp(-2*M_PI*complex_I*freq[i]*kp0); // kp0(unit SEC)
+			factorcexp0 = std::exp((T)(-2.*M_PI)*complex_I*freq[i]*kp0); // kp0(unit SEC)
 			prefactor = -M_PI*freq[i]*L/c;
+      T ONE = 1.;
 
 			if (approximate_tag.find("lowf") != std::string::npos){
 				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3;
@@ -874,12 +875,12 @@ void EvaluateGslr(T *t,
 			}
 			else if(approximate_tag.find("full") != std::string::npos){
 				// kpxLpxL(unit SEC)
-				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L*c));
-				G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(1.+kp1Lp2L/L*c));
-				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L*c));
-				G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(1.+kp2Lp3L/L*c));
-				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L*c));
-				G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(1.+kp3Lp1L/L*c));
+				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * (T)sinc(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
+				G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * (T)sinc(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
+				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * (T)sinc(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
+				G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * (T)sinc(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
+				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * (T)sinc(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
+				G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * (T)sinc(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
 
 				Gslr[0][i] = G12[i] ;
 				Gslr[1][i] = G21[i] ;
@@ -1016,11 +1017,11 @@ T L
 			for(int i = 0; i<length; i++){
 				// Frequency loop
 				// X channel
-				TDI_FD[i][0] = prefactor*(yslr[i][1] + std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][0] - yslr[i][4] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][5]);
+				TDI_FD[i][0] = prefactor*(yslr[i][1] + std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/(T)c)*yslr[i][0] - yslr[i][4] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][5]);
 				// Y channel
-				TDI_FD[i][1] = prefactor*(yslr[i][3] + std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][2] - yslr[i][0] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][1]);
+				TDI_FD[i][1] = prefactor*(yslr[i][3] + std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/(T)c)*yslr[i][2] - yslr[i][0] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][1]);
 				// Z channel
-				TDI_FD[i][2] = prefactor*(yslr[i][5] + std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][4] - yslr[i][2] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][3]);
+				TDI_FD[i][2] = prefactor*(yslr[i][5] + std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][4] - yslr[i][2] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][3]);
 			}
 
 		}
@@ -1063,13 +1064,13 @@ T L
 						for(int i = 0; i<length; i++){
 							// Frequency loop
 							// A channel
-							TDI_FD[i][0] = prefactorA*( (1.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][4]+yslr[i][5])
-							- yslr[i][2] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][3] - yslr[i][1] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][0] );
+							TDI_FD[i][0] = prefactorA*( ((T)1.0+std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][4]+yslr[i][5])
+							- yslr[i][2] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][3] - yslr[i][1] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][0] );
 							// E channel
-							TDI_FD[i][1] = prefactorE/ROOT_THREE*( (1.0-std::exp(-2.0*complex_I*M_PI*freq[i]*L/c) )*(yslr[i][5]-yslr[i][4])
-							+ (2.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][0]-yslr[i][3]) + (1.0+2.0*std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][1]-yslr[i][2])  );
+							TDI_FD[i][1] = prefactorE/((T)ROOT_THREE)*( ((T)1.0-std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)) )*(yslr[i][5]-yslr[i][4])
+							+ ((T)2.0+std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c) ))*(yslr[i][0]-yslr[i][3]) + ((T)1.0+(T)2.0*std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][1]-yslr[i][2])  );
 							// T channel
-							TDI_FD[i][2] = prefactorT*ROOT_TWO/ROOT_THREE*(yslr[i][1]-yslr[i][0]+yslr[i][3]-yslr[i][2]+yslr[i][5]-yslr[i][4]);
+							TDI_FD[i][2] = prefactorT*(T)ROOT_TWO/((T)ROOT_THREE)*(yslr[i][1]-yslr[i][0]+yslr[i][3]-yslr[i][2]+yslr[i][5]-yslr[i][4]);
 						}
 					}
 					else{
@@ -1079,18 +1080,18 @@ T L
 						for(int i = 0; i<length; i++){
 							// Frequency loop
 
-							prefactorA = -(1.0-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)))/ROOT_TWO;
+							prefactorA = -((T)1.0-(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))))/((T)ROOT_TWO);
 							prefactorE = prefactorA;
-							prefactorT = -(1.0-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))) * (1.0-(std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)))/ROOT_TWO;
+							prefactorT = -((T)1.0-(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))) * ((T)1.0-(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))))/((T)ROOT_TWO);
 
 							// A channel
-							TDI_FD[i][0] = prefactorA*( (1.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][4]+yslr[i][5])
-							- yslr[i][2] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][3] - yslr[i][1] - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c)*yslr[i][0] );
+							TDI_FD[i][0] = prefactorA*( ((T)1.0+std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][4]+yslr[i][5])
+							- yslr[i][2] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][3] - yslr[i][1] - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))*yslr[i][0] );
 							// E channel
-							TDI_FD[i][1] = prefactorE/ROOT_THREE*( (1.0-std::exp(-2.0*complex_I*M_PI*freq[i]*L/c) )*(yslr[i][5]-yslr[i][4])
-							+ (2.0+std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][0]-yslr[i][3]) + (1.0+2.0*std::exp(-2.0*complex_I*M_PI*freq[i]*L/c))*(yslr[i][1]-yslr[i][2])  );
+							TDI_FD[i][1] = prefactorE/((T)ROOT_THREE)*( ((T)1.0-std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)) )*(yslr[i][5]-yslr[i][4])
+							+ ((T)2.0+std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][0]-yslr[i][3]) + ((T)1.0+(T)2.0*std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][1]-yslr[i][2])  );
 							// T channel
-							TDI_FD[i][2] = prefactorT*ROOT_TWO/ROOT_THREE*(yslr[i][1]-yslr[i][0]+yslr[i][3]-yslr[i][2]+yslr[i][5]-yslr[i][4]);
+							TDI_FD[i][2] = prefactorT*(T)ROOT_TWO/((T)ROOT_THREE)*(yslr[i][1]-yslr[i][0]+yslr[i][3]-yslr[i][2]+yslr[i][5]-yslr[i][4]);
 						}
 					}
 
@@ -1106,11 +1107,11 @@ T L
 							// Frequency loop
 							// A channel
 							
-							TDI_FD[i][0] = 4.0*yslr[i][4] - 2.0*yslr[i][2] - 2.0*yslr[i][0];
+							TDI_FD[i][0] = (T)4.0*yslr[i][4] - (T)2.0*yslr[i][2] - (T)2.0*yslr[i][0];
 							// E channel
-							TDI_FD[i][1] = 2.0*ROOT_THREE*( yslr[i][0] - yslr[i][2] );
+							TDI_FD[i][1] = (T)(2.0*ROOT_THREE)*( yslr[i][0] - yslr[i][2] );
 							// T channel
-							TDI_FD[i][2] = 0.0;				
+							TDI_FD[i][2] = (T)0.0;				
 						}
 					}
 					else{
@@ -1120,13 +1121,13 @@ T L
 						for(int i = 0; i<length; i++){
 							// Frequency loop
 							// A channel
-							prefactorA = -ROOT_TWO*(1.0 - std::exp(-2.0*complex_I*M_PI*freq[i]*L/c));
+							prefactorA = (T)(-ROOT_TWO)*((T)1.0 - std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)));
 							prefactorE = prefactorA;
 							prefactorT = 0.0;
 							
-							TDI_FD[i][0] = prefactorA*4.0*yslr[i][4] - 2.0*yslr[i][2] - 2.0*yslr[i][0];
+							TDI_FD[i][0] = prefactorA*(T)4.0*yslr[i][4] - (T)2.0*yslr[i][2] - (T)2.0*yslr[i][0];
 							// E channel
-							TDI_FD[i][1] = prefactorE*2.0*ROOT_THREE*( yslr[i][0] - yslr[i][2] );
+							TDI_FD[i][1] = prefactorE*(T)(2.0*ROOT_THREE)*( yslr[i][0] - yslr[i][2] );
 							// T channel
 							TDI_FD[i][2] = 0.0;				
 						}
@@ -2110,7 +2111,9 @@ template void EvaluateGslr<double>(double *t, double *freq, double **H, double *
 template void EvaluateGslr<adouble>(adouble *t, adouble *freq, adouble **H, adouble *k, int length, std::complex<adouble> **Gslr, std::string approximate_tag, adouble L);
 
 template void Evaluateyslr<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **yslr, std::complex<double> *hplusf, std::complex<double> *hcrossf, std::string approximate_tag, double L);
-template void Evaluateyslr<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **yslr, waveform_polarizations<adouble> *wp, std::string approximate_tag, adouble L);
+//Problem here
+//template void Evaluateyslr<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **yslr, waveform_polarizations<adouble> *wp, std::string approximate_tag, adouble L);
+template void Evaluateyslr<adouble>(adouble *t, adouble *freq, adouble **Hplus, adouble **Hcross, adouble *k, int length, std::complex<adouble> **yslr, std::complex<adouble> *hplusf, std::complex<adouble> *hcrossf, std::string approximate_tag, adouble L);
 
 
 template void EvaluateTDI_FD<double>(double *t, double *freq, double **Hplus, double **Hcross, double *k, int length, std::complex<double> **TDI_FD, waveform_polarizations<double> *wp, std::string TDI_tag, std::string approximate_tag, double L);
