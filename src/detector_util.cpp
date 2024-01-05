@@ -875,12 +875,12 @@ void EvaluateGslr(T *t,
 			}
 			else if(approximate_tag.find("full") != std::string::npos){
 				// kpxLpxL(unit SEC)
-				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * (T)sinc(prefactor * (1.-kn3)) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
-				G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * (T)sinc(prefactor * (1.+kn3)) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
-				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * (T)sinc(prefactor * (1.-kn1)) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
-				G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * (T)sinc(prefactor * (1.+kn1)) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
-				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * (T)sinc(prefactor * (1.-kn2)) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
-				G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * (T)sinc(prefactor * (1.+kn2)) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
+				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc((T)(prefactor * (1.-kn3))) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
+				G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc((T)(prefactor * (1.+kn3))) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
+				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc((T)(prefactor * (1.-kn1))) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
+				G32[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc((T)(prefactor * (1.+kn1))) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
+				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc((T)(prefactor * (1.-kn2))) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
+				G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc((T)(prefactor * (1.+kn2))) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
 
 				Gslr[0][i] = G12[i] ;
 				Gslr[1][i] = G21[i] ;
