@@ -20,6 +20,8 @@ using namespace std;
 #endif
 
 
+#include <fstream>
+
 
 //double log_64 = 1.80617997398;//log base 10...
 double log_64 = 4.15888308336;
@@ -473,6 +475,13 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 	std::complex<T> i;
 	i = std::complex<T> (0,1.);
 	T fcut = .2/M; //Cutoff frequency for IMRPhenomD - all higher frequencies return 0
+
+
+	std::ofstream out_file;
+	out_file.open("data/phase.txt");
+	out_file.precision(15);
+
+
 	for (size_t j =0; j< length; j++)
 	{
 		f = frequencies[j];
@@ -492,6 +501,9 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 			}
 			amp = (A0 * this->build_amp(f,&lambda,params,&pows,pn_amp_coeffs,deltas));
 			phase = (this->build_phase(f,&lambda,params,&pows,pn_phase_coeffs));
+
+			out_file << frequencies[j] << " " << (phase).real() << " " << (phase).imag() << " " << (amp).real() << std::endl;
+
 			//phase +=   (T)(tc*(f-f_ref) - phic);
 			//debugger_print(__FILE__,__LINE__,std::real(phase));
 			phase -=   (T)(tc*(f-f_ref) + phic);
@@ -499,6 +511,7 @@ int IMRPhenomD<T>::construct_waveform(T *frequencies, /**< T array of frequencie
 		}
 
 	}
+	out_file.close();
 	
 	return 1;
 }

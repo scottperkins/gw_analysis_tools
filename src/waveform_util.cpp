@@ -24,6 +24,8 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_errno.h>
+
+#include <fstream>
 /*!\file 
  * Utilities for waveforms - SNR calculation and detector response
  * 	
@@ -172,57 +174,75 @@ void create_coherent_GW_detection_reuse_WF(
 			
 			//T function
 			T *tf = new T[length];
-			if(generation_method.find("IMRPhenomD")){
+			if(generation_method.find("IMRPhenomD")!=std::string::npos){
 				// Taken from IMRPhenomD.cpp construct_waveform function
-				source_parameters<T> *s_param;
+				source_parameters<T> s_param;
 				T fdamp, fRD, fpeak;
 				//s_param = source_parameters<T>::populate_source_parameters(params);
-				s_param->populate_source_parameters(gen_params);
-				s_param->sky_average = gen_params->sky_average;
-				s_param->f_ref = gen_params->f_ref;
-				s_param->phiRef = gen_params->phiRef;
-				s_param->cosmology = gen_params->cosmology;
-				s_param->incl_angle = gen_params->incl_angle;
-				s_param->dep_postmerger = gen_params->dep_postmerger;
+				s_param.populate_source_parameters(gen_params);
+				s_param.sky_average = gen_params->sky_average;
+				s_param.f_ref = gen_params->f_ref;
+				s_param.phiRef = gen_params->phiRef;
+				s_param.cosmology = gen_params->cosmology;
+				s_param.incl_angle = gen_params->incl_angle;
+				s_param.dep_postmerger = gen_params->dep_postmerger;
 
 				IMRPhenomD<T> model;
 				lambda_parameters<T> lambda;
 				T pn_phase_coeffs[12];
 				
-				model.assign_lambda_param(s_param,&lambda);	
-				model.post_merger_variables(s_param);
-				fRD = s_param->fRD;
-				fdamp = s_param->fdamp;
-				fpeak = model.fpeak(s_param , &lambda);
+				model.assign_lambda_param(&s_param,&lambda);	
+				model.post_merger_variables(&s_param);
 
-				model.assign_static_pn_phase_coeff(s_param, pn_phase_coeffs);	
-				model.phase_connection_coefficients(s_param,&lambda,pn_phase_coeffs);
+				fRD = s_param.fRD;
+				fdamp = s_param.fdamp;
+				fpeak = model.fpeak(&s_param , &lambda);
+
+				s_param.f1 = 0.014/(s_param.M);
+				s_param.f3 = fpeak;
+				s_param.f1_phase = 0.018/(s_param.M);
+				s_param.f2_phase = fRD/2.;
+
+				model.assign_static_pn_phase_coeff(&s_param, pn_phase_coeffs);	
+				model.phase_connection_coefficients(&s_param,&lambda,pn_phase_coeffs);
 
 				T tc_shift, tc;
-				if(s_param->shift_time){
-					T alpha1_offset = model.assign_lambda_param_element(s_param,14);
-					tc_shift = model.Dphase_mr(fpeak, s_param, &lambda)+(-lambda.alpha[1]+alpha1_offset)*s_param->M/s_param->eta;
+				if(s_param.shift_time){
+
+					T alpha1_offset = model.assign_lambda_param_element(&s_param,14);
+					tc_shift = model.Dphase_mr(fpeak, &s_param, &lambda)+(-lambda.alpha[1]+alpha1_offset)*s_param.M/s_param.eta;
+
 				}
 				else{
 					tc_shift=0;
 				}
-				tc = 2*M_PI*s_param->tc + tc_shift;
+				tc = 2*M_PI*s_param.tc + tc_shift;
+
+				//std::cout << "tc_shift" << std::endl;
 
 
+				std::ofstream out_file;
+				out_file.open("data/tf.txt");
+				out_file.precision(15);
 
-				for(int j=0; j<=length; j++){
-					T f = frequencies[i];
-					if(f < 0.018/(s_param->M)){
-						tf[j] = (model.Dphase_ins(f, s_param, pn_phase_coeffs, &lambda)  - tc)/2.0/M_PI;
+
+				for(int j=0; j<length; j++){
+					T f = frequencies[j];
+					if(f < s_param.f1_phase){
+						tf[j] = (model.Dphase_ins(f, &s_param, pn_phase_coeffs, &lambda)  - tc)/2.0/M_PI;
 					}
-					else if(f > fRD/2)
+					else if(f > s_param.f2_phase)
 					{
-						tf[j] = (model.Dphase_mr(f, s_param, &lambda) - tc)/2.0/M_PI;
+						tf[j] = (model.Dphase_mr(f, &s_param, &lambda) - tc)/2.0/M_PI;
 					}
 					else{
-						tf[j] = (model.Dphase_int(f, s_param, &lambda) - tc)/2.0/M_PI;
+						tf[j] = (model.Dphase_int(f, &s_param, &lambda) - tc)/2.0/M_PI;
 					}
+					// std::cout << tf[j] << std::endl;
+					out_file << f << " " << tf[j] << std::endl;
 				}
+				
+				out_file.close();
 
 
 			}
@@ -233,6 +253,7 @@ void create_coherent_GW_detection_reuse_WF(
 
 
 			fourier_detector_response_LISA(detectors[0], frequencies, tf, length, gen_params, &wp, responses);
+			std::cout << "fourior_detector_response_LISA run successfully!" << std::endl;
 
 
 		}
@@ -248,7 +269,10 @@ void create_coherent_GW_detection_reuse_WF(
 			}
 		}
 	}
+
+	std::cout << "Deleting wp." << std::endl;
 	wp.deallocate_memory();
+	std::cout << "Deleted wp!" << std::endl;
 	
 	return;
 }
@@ -323,17 +347,21 @@ int fourier_detector_response_LISA(
 		std::string TDI_tag;
 		std::string approximate_tag;
 
-		if(detectors.find("XYZ")){
-			TDI_tag = "XYZ";
+		if(detectors.find("TDIXYZ")!=std::string::npos){
+			TDI_tag = "TDIXYZ";
 		}
 		else{
-			TDI_tag = "AET";
+			TDI_tag = "TDIAET";
 		}
 
 		T L_LISA = 2.5*pow_int(10.,9);
+
+		std::cout << "Now step in EvaluateTDI_FD." << std::endl;
 		
 
 		EvaluateTDI_FD(tf, frequencies, Hplus, Hcross, k, length, responses, wp, TDI_tag, detectors, L_LISA);
+
+		std::cout << "EvaluateTDI_FD run successfully!" <<std::endl;
 
 		return status;
 
