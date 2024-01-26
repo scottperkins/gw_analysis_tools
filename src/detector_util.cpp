@@ -856,7 +856,7 @@ void EvaluateGslr(T *t,
 
 			factorcexp0 = std::exp((T)(-2.*M_PI)*complex_I*freq[i]*kp0); // kp0(unit SEC)
 			prefactor = -M_PI*freq[i]*L/c;
-      T ONE = 1.;
+      		T ONE = 1.;
 
 			if (approximate_tag.find("lowf") != std::string::npos){
 				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3;
@@ -866,15 +866,19 @@ void EvaluateGslr(T *t,
 				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2;
 				G13[i] = G31[i];
 
-				Gslr[0][i] = G12[i] ;
-				Gslr[1][i] = G21[i] ;
-				Gslr[2][i] = G23[i] ;
-				Gslr[3][i] = G32[i] ;
-				Gslr[4][i] = G31[i] ;
-				Gslr[5][i] = G13[i] ;
+				Gslr[i][0] = G12[i] ;
+				Gslr[i][1] = G21[i] ;
+				Gslr[i][2] = G23[i] ;
+				Gslr[i][3] = G32[i] ;
+				Gslr[i][4] = G31[i] ;
+				Gslr[i][5] = G13[i] ;
 			}
 			else if(approximate_tag.find("full") != std::string::npos){
 				// kpxLpxL(unit SEC)
+				// std::cout << "full calculating!" << std::endl;
+				// std::cout << "prefactor:	" << prefactor << std::endl;
+				// std::cout << "kn3:	" << kn3 << std::endl;
+
 				G12[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc((T)(prefactor * (1.-kn3))) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
 				G21[i] = complex_I*prefactor*factorcexp0 * n3Hn3 * sinc((T)(prefactor * (1.+kn3))) * std::exp(complex_I*prefactor*(T)(1.+kp1Lp2L/L*c));
 				G23[i] = complex_I*prefactor*factorcexp0 * n1Hn1 * sinc((T)(prefactor * (1.-kn1))) * std::exp(complex_I*prefactor*(T)(1.+kp2Lp3L/L*c));
@@ -882,12 +886,12 @@ void EvaluateGslr(T *t,
 				G31[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc((T)(prefactor * (1.-kn2))) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
 				G13[i] = complex_I*prefactor*factorcexp0 * n2Hn2 * sinc((T)(prefactor * (1.+kn2))) * std::exp(complex_I*prefactor*(T)(1.+kp3Lp1L/L*c));
 
-				Gslr[0][i] = G12[i] ;
-				Gslr[1][i] = G21[i] ;
-				Gslr[2][i] = G23[i] ;
-				Gslr[3][i] = G32[i] ;
-				Gslr[4][i] = G31[i] ;
-				Gslr[5][i] = G13[i] ;
+				Gslr[i][0] = G12[i] ;
+				Gslr[i][1] = G21[i] ;
+				Gslr[i][2] = G23[i] ;
+				Gslr[i][3] = G32[i] ;
+				Gslr[i][4] = G31[i] ;
+				Gslr[i][5] = G13[i] ;
 			}
 			else{
 				std::cout << "Please provide a valid frequency approximation! Fly you fools!" << std::endl;
@@ -961,25 +965,24 @@ void Evaluateyslr(
 			//loop over elements of Gslr
 			yslr[i][j] = Gplus_slr[i][j]*(hplusf[i])+Gcross_slr[i][j]*(hcrossf[i]);
 		}
+		// std::cout <<"yslr[4]:	" << yslr[i][4] << std::endl;
+		// std::cout <<"yslr[5]:	" << yslr[i][5] << std::endl;
 	}
 
-	std::cout << "Now delete Gplus/cross_slr." << std::endl;
+	//std::cout << "Now delete Gplus/cross_slr." << std::endl;
 
-	// for(int i = 0; i<length; i++){
-	// 	std::cout << i << std::endl;
-	// 	delete[] Gplus_slr[i];
-	// 	delete[] Gcross_slr[i];
-	// }
+	for(int i = 0; i<length; i++){
+		delete[] Gplus_slr[i];
+		delete[] Gcross_slr[i];
+	}
 
-	// delete [] Gplus_slr[1];
-	// 	delete [] Gcross_slr[1];
 
-	std::cout << "Deleted[i]!" << std::endl;
+	//std::cout << "Deleted[i]!" << std::endl;
 
 	delete[] Gplus_slr;
 	delete[] Gcross_slr;
 
-	std::cout << "Deleted!" << std::endl;
+	//std::cout << "Deleted!" << std::endl;
 	
 
 }
@@ -1059,7 +1062,7 @@ T L
 	else if(TDI_tag == "TDIAET")
 	{
 
-				std::cout << "Now calculate AET channel." << std::endl;
+				//std::cout << "Now calculate AET channel." << std::endl;
 
 				std::complex<T> prefactorA, prefactorE, prefactorT;
 
@@ -1089,17 +1092,19 @@ T L
 					else{
 						// Full response version with unrescaled
 
-
+						std::cout << "length:	" << length << std::endl;
 						for(int i = 0; i<length; i++){
 							// Frequency loop
 
-							std::cout << "prefactor calculating." << std::endl;
+							//std::cout << "prefactor calculating." << std::endl;
 
 							prefactorA = -((T)1.0-(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))))/((T)ROOT_TWO);
 							prefactorE = prefactorA;
 							prefactorT = -((T)1.0-(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))) * ((T)1.0-(std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c))))/((T)ROOT_TWO);
 
-							std::cout << "CHANNEL calculating." << std::endl;
+							
+							//std::cout << "prefA:	" << prefactorA << std::endl;
+							//std::cout << "CHANNEL calculating." << std::endl;
 
 							// A channel
 							TDI_FD[0][i] = prefactorA*( ((T)1.0+std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][4]+yslr[i][5])
@@ -1109,6 +1114,7 @@ T L
 							+ ((T)2.0+std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][0]-yslr[i][3]) + ((T)1.0+(T)2.0*std::exp((T)(-2.0)*complex_I*(T)M_PI*freq[i]*L/((T)c)))*(yslr[i][1]-yslr[i][2])  );
 							// T channel
 							TDI_FD[2][i] = prefactorT*(T)ROOT_TWO/((T)ROOT_THREE)*(yslr[i][1]-yslr[i][0]+yslr[i][3]-yslr[i][2]+yslr[i][5]-yslr[i][4]);
+							//std::cout <<"FD_A_term1:	" << TDI_FD[0][i] << std::endl;
 						}
 					}
 
@@ -1159,17 +1165,17 @@ T L
 		std::exit(1);
 	}
 
-	std::cout << "Deleting yslr[i]." << std::endl;
+	//std::cout << "Deleting yslr[i]." << std::endl;
 
 	for(int i = 0; i<length; i++){
 		delete[] yslr[i];
 	}
 
-	std::cout << "Deleting yslr." << std::endl;
+	//std::cout << "Deleting yslr." << std::endl;
 
 	delete[] yslr;
 
-	std::cout << "Deleted!" << std::endl;
+	//std::cout << "Deleted!" << std::endl;
 
 }
 
