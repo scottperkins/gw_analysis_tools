@@ -8,7 +8,6 @@
 ///*! \file 
 // * Header file for utilities
 // */
-//
 ///*! \struct
 // * Structure to facilitate IMRPhenomD parameter transfers
 // */
