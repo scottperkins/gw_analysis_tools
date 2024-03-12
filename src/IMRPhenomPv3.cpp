@@ -9,24 +9,24 @@
  * Precomputes useful quantities and populates the
  * PhenomPv3HMStorage and sysq (for precession angles) structs.
  */
-static int init_PhenomPv3_Storage(
-    PhenomPv3Storage *p,   /**< [out] PhenomPv3Storage struct */
-    sysprecquant *pAngles,           /**< [out] precession angle pre-computations struct */
-    double m1_SI,             /**< mass of primary in SI (kg) */
-    double m2_SI,             /**< mass of secondary in SI (kg) */
-    double S1x,               /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
-    double S1y,               /**< y-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
-    double S1z,               /**< z-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
-    double S2x,               /**< x-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
-    double S2y,               /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
-    double S2z,               /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
-    const double distance,    /**< distance of source (m) */
-    const double inclination, /**< inclination of source (rad) */
-    const double phiRef,      /**< reference orbital phase (rad) */
-    const double deltaF,      /**< Sampling frequency (Hz) */
-    const double f_min,       /**< Starting GW frequency (Hz) */
-    const double f_max,       /**< End frequency; 0 defaults to ringdown cutoff freq */
-    const double f_ref        /**< Reference GW frequency (Hz) */
+template <class T> static int init_PhenomPv3_Storage(
+    PhenomPv3Storage<T> *p,   /**< [out] PhenomPv3Storage struct */
+    sysprecquant<T> *pAngles,           /**< [out] precession angle pre-computations struct */
+    T m1_SI,             /**< mass of primary in SI (kg) */
+    T m2_SI,             /**< mass of secondary in SI (kg) */
+    T S1x,               /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
+    T S1y,               /**< y-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
+    T S1z,               /**< z-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
+    T S2x,               /**< x-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
+    T S2y,               /**< y-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
+    T S2z,               /**< z-component of the dimensionless spin of object 2 w.r.t. Lhat = (0,0,1) */
+    const T distance,    /**< distance of source (m) */
+    const T inclination, /**< inclination of source (rad) */
+    const T phiRef,      /**< reference orbital phase (rad) */
+    const T deltaF,      /**< Sampling frequency (Hz) */
+    const T f_min,       /**< Starting GW frequency (Hz) */
+    const T f_max,       /**< End frequency; 0 defaults to ringdown cutoff freq */
+    const T f_ref        /**< Reference GW frequency (Hz) */
 )
 {
     p->PRECESSING = 0;
@@ -82,8 +82,8 @@ static int init_PhenomPv3_Storage(
 
     /* Rotate to PhenomP frame */
     /* chi1_l == chi1z, chi2_l == chi2z for intermediate calculations*/
-    double chi1_l, chi2_l;
-    PhenomP_Param_Transform(
+    T chi1_l, chi2_l;
+    PhenomP_ParametersFromSourceFrame(
         &chi1_l, &chi2_l, &(p->chip), &(p->thetaJN), &(p->alpha0), &(p->phi_aligned), &(p->zeta_polariz),
         p->m1_SI, p->m2_SI, p->f_ref, p->phiRef, inclination,
         p->chi1x, p->chi1y, p->chi1z,
@@ -116,11 +116,25 @@ static int init_PhenomPv3_Storage(
  * Compute the precession angles at a single frequency
  */
 template <class T>
-static int IMRPhenomPv3_Compute_a_b_e(double *alpha, double *beta, double *two_epsilon, double fHz, const double pi_Msec, source_parameters<T> *params, sysprecquant *pAngles)
+static void IMRPhenomPv3_Compute_a_b_e(
+    T *alpha, T *beta, T *two_epsilon,
+    T fHz, const T pi_Msec,
+    PhenomPv3Storage<T> *params, sysprecquant<T> *pAngles)
 {
-    vector angles;
-    double xi;
+    vector3D<T> angles;
+    T xi;
 
     xi = pow(fHz * pi_Msec, pAngles->onethird);
     angles = compute_phiz_zeta_costhetaL3PN(xi, pAngles);
+
+    *alpha = angles.x + params->alpha0;
+    
+    T epsilon = angles.y
+    *two_epsilon = 2.*epsilon;
+
+    /* angles.z can sometimes nan just above 1.
+    * The following nudge seems to be a good fix.
+    */
+    nudge(&(angles.z), 1.0, 1e-6); //This could even go from 1e-6 to 1e-15 - then would have to also change in Pv3 code. Should just fix the problem in the angles code.
+    *beta = acos(angles.z);
 }

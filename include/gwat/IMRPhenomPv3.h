@@ -19,4 +19,9 @@ public:
 
 };
 
+template <class T> static void IMRPhenomPv3_Compute_a_b_e(
+    T *alpha, T *beta, T *two_epsilon,
+    T fHz, const T pi_Msec,
+    PhenomPv3Storage<T> *params, sysprecquant<T> *pAngles);
+
 #endif /* IMRPHENOMPV3_H */

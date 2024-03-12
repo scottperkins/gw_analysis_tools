@@ -8,148 +8,146 @@
 #include "IMRPhenomP.h"
 
 
-typedef std::vector<double> DOUBLEVector;
-
-
 /*! \struct
  * 3D vector
  */
-typedef struct tagvector
+template <class T> struct vector3D
 {
-    double x;
-    double y;
-    double z;
-} vector;
+    T x;
+    T y;
+    T z;
+};
 
 /*! \struct
  * Holds quantities needed for precession calculations.
  */
-typedef struct tagsystemprecessionquantities
+template <class T> struct sysprecquant
 {
-    double onethird;
-    double constants_u[6];
-    double constants_phiz[6];
-    double constants_zeta[6];
-    double constants_L[6];
-    double phiz_0, zeta_0, constant_of_S;
-    double c_1, Ssqave, sqrtSsqave, Seff, c1_2, nu_2, nu_4, c_1_over_nu, S0_norm;
-    double S1_norm_2, S2_norm_2;
-    double dot1, dot2, dot12, dot1n, dot2n;
-    double deltam_over_M, nu, q;
-} sysprecquant;
+    T onethird;
+    T constants_u[6];
+    T constants_phiz[6];
+    T constants_zeta[6];
+    T constants_L[6];
+    T phiz_0, zeta_0, constant_of_S;
+    T c_1, Ssqave, sqrtSsqave, Seff, c1_2, nu_2, nu_4, c_1_over_nu, S0_norm;
+    T S1_norm_2, S2_norm_2;
+    T dot1, dot2, dot12, dot1n, dot2n;
+    T deltam_over_M, nu, q;
+};
 
 /**
  * Structure storing initial and derived variables for IMRPhenomPv3
  */
-typedef struct tagPhenomPv3Storage
+template <class T> struct PhenomPv3Storage
 {
     int PRECESSING;   /**< integer to signify if system is precessing, 1 for false (not precessing), 0 for true (precessing) */
     /* input parameters */
-    double m1_SI;       /**< mass of primary in SI (kg) */
-    double m2_SI;       /**< mass of secondary in SI (kg) */
-    double chi1x;       /**< x-component of dimensionless spin on primary w.r.t. Lhat = (0,0,1) */
-    double chi1y;       /**< y-component of dimensionless spin on primary w.r.t. Lhat = (0,0,1) */
-    double chi1z;       /**< z-component of dimensionless spin on primary w.r.t. Lhat = (0,0,1) */
-    double chi2x;       /**< x-component of dimensionless spin on secondary w.r.t. Lhat = (0,0,1) */
-    double chi2y;       /**< y-component of dimensionless spin on secondary w.r.t. Lhat = (0,0,1) */
-    double chi2z;       /**< z-component of dimensionless spin on secondary w.r.t. Lhat = (0,0,1) */
-    double distance_SI; /**< distance to source in SI (m) */
-    double inclination; /**< inclination - used to compute the angle thetaJN (rad) */
-    double phiRef;      /**< */
-    double deltaF;      /**< frequency spacing (Hz) */
-    double f_min;       /**< starting GW frequency (Hz) */
-    double f_max;       /**< ending GW frequency (Hz) */
-    double f_ref;       /**< reference GW frequency (Hz) */
+    T m1_SI;       /**< mass of primary in SI (kg) */
+    T m2_SI;       /**< mass of secondary in SI (kg) */
+    T chi1x;       /**< x-component of dimensionless spin on primary w.r.t. Lhat = (0,0,1) */
+    T chi1y;       /**< y-component of dimensionless spin on primary w.r.t. Lhat = (0,0,1) */
+    T chi1z;       /**< z-component of dimensionless spin on primary w.r.t. Lhat = (0,0,1) */
+    T chi2x;       /**< x-component of dimensionless spin on secondary w.r.t. Lhat = (0,0,1) */
+    T chi2y;       /**< y-component of dimensionless spin on secondary w.r.t. Lhat = (0,0,1) */
+    T chi2z;       /**< z-component of dimensionless spin on secondary w.r.t. Lhat = (0,0,1) */
+    T distance_SI; /**< distance to source in SI (m) */
+    T inclination; /**< inclination - used to compute the angle thetaJN (rad) */
+    T phiRef;      /**< */
+    T deltaF;      /**< frequency spacing (Hz) */
+    T f_min;       /**< starting GW frequency (Hz) */
+    T f_max;       /**< ending GW frequency (Hz) */
+    T f_ref;       /**< reference GW frequency (Hz) */
     /* derived parameters */
-    double m1_Msun;      /**< mass of primary in solar masses */
-    double m2_Msun;      /**< mass of secondary in solar masses */
-    double Mtot_SI;      /**< total mass in SI (kg) */
-    double Mtot_Msun;    /**< total mass in solar masses */
-    double eta;          /**< Symmetric mass ratio*/
-    double q;            /* with m1>=m2 so q>=1 */
-    double Msec;         /**< Total mass in seconds */
-    double f_ref_Orb_Hz; /**< Reference orbital frequency (Hz) [It's the reference GW frequency converted to orbital frequency] */
-    double twopi_Msec;   /**< LAL_TWOPI * Msec */
-    double amp0;         /**< frequency domain physical scaling */
+    T m1_Msun;      /**< mass of primary in solar masses */
+    T m2_Msun;      /**< mass of secondary in solar masses */
+    T Mtot_SI;      /**< total mass in SI (kg) */
+    T Mtot_Msun;    /**< total mass in solar masses */
+    T eta;          /**< Symmetric mass ratio*/
+    T q;            /* with m1>=m2 so q>=1 */
+    T Msec;         /**< Total mass in seconds */
+    T f_ref_Orb_Hz; /**< Reference orbital frequency (Hz) [It's the reference GW frequency converted to orbital frequency] */
+    T twopi_Msec;   /**< LAL_TWOPI * Msec */
+    T amp0;         /**< frequency domain physical scaling */
     /* variables used when rotating input parameters (LAL frame) into PhenomP intrinsic parameters  */
-    double chip;         /**< effective precessing parameter */
-    double thetaJN;      /**< Angle between J0 and line of sight (z-direction) */
-    double alpha0;       /**< Initial value of alpha angle (azimuthal precession angle) */
-    double phi_aligned;  /**< Initial phase to feed the underlying aligned-spin model */
-    double zeta_polariz; /**< Angle to rotate the polarizations */
+    T chip;         /**< effective precessing parameter */
+    T thetaJN;      /**< Angle between J0 and line of sight (z-direction) */
+    T alpha0;       /**< Initial value of alpha angle (azimuthal precession angle) */
+    T phi_aligned;  /**< Initial phase to feed the underlying aligned-spin model */
+    T zeta_polariz; /**< Angle to rotate the polarizations */
     /* compute spins in polar coordinates */
-    double chi1_mag;   /**< dimensionless spin magnitude on primary */
-    double chi1_theta; /**< polar angle w.r.t. Lhat = (0,0,1) on primary */
-    double chi1_phi;   /**< azimuthal angle w.r.t. Lhat = (0,0,1) on primary */
-    double chi2_mag;   /**< dimensionless spin magnitude on secondary */
-    double chi2_theta; /**< polar angle w.r.t. Lhat = (0,0,1) on secondary */
-    double chi2_phi;   /**< azimuthal angle w.r.t. Lhat = (0,0,1) on secondary */
+    T chi1_mag;   /**< dimensionless spin magnitude on primary */
+    T chi1_theta; /**< polar angle w.r.t. Lhat = (0,0,1) on primary */
+    T chi1_phi;   /**< azimuthal angle w.r.t. Lhat = (0,0,1) on primary */
+    T chi2_mag;   /**< dimensionless spin magnitude on secondary */
+    T chi2_theta; /**< polar angle w.r.t. Lhat = (0,0,1) on secondary */
+    T chi2_phi;   /**< azimuthal angle w.r.t. Lhat = (0,0,1) on secondary */
     /* Precession angles at reference frequency */
-    double alphaRef;   /**< azimuthal precession angle at f_ref */
-    double epsilonRef; /**< epsilon precession angle at f_ref */
-    double betaRef;    /**< beta (opening angle) precession angle at f_ref */
-} PhenomPv3Storage;
+    T alphaRef;   /**< azimuthal precession angle at f_ref */
+    T epsilonRef; /**< epsilon precession angle at f_ref */
+    T betaRef;    /**< beta (opening angle) precession angle at f_ref */
+};
 
-void PhenomPrecessingSpinEnforcePrimary(double *m1, double *m2,
-    double *chi1x, double *chi1y, double *chi1z,
-    double *chi2x, double *chi2y,double *chi2z
-);
+template <class T> void PhenomPrecessingSpinEnforcePrimary(T *m1, T *m2,
+    T *chi1x, T *chi1y, T *chi1z,
+    T *chi2x, T *chi2y, T *chi2z);
 
-void nudge(double *x, double X, double epsilon);
+template <class T> void nudge(T *x, T X, T epsilon);
 
-static vector CreateSphVector(const double r, const double th, const double ph);
-static vector ScaleVector(double c, vector vec);
-static vector VectorSum(vector vec1, vector vec2);
-static double DotProduct(const vector vec1, const vector vec2);
-static double VectorNorm(const vector vec);
-static vector CrossProduct(const vector vec1, const vector vec2);
+template <class T> static vector3D<T> CreateSphVector(const T r, const T th, const T ph);
+template <class T> static vector3D<T> ScaleVector(T c, vector3D<T> vec);
+template <class T> static vector3D<T> VectorSum(vector3D<T> vec1, vector3D<T> vec2);
+template <class T> static T DotProduct(const vector3D<T> vec1, const vector3D<T> vec2);
+template <class T> static T VectorNorm(const vector3D<T> vec);
+template <class T> static vector3D<T> CrossProduct(const vector3D<T> vec1, const vector3D<T> vec2);
 
-static vector Roots(const double L_norm, const double J_norm, const sysprecquant *system);
-static vector BCDcoeff(const double L_norm, const double J_norm, const sysprecquant *system);
-static double beta(const double a, const double b, const sysprecquant *system);
-static double sigma(const double a, const double b, const sysprecquant *system);
-static double tau(const double a, const double b, const sysprecquant *system);
+template <class T> static vector3D<T> Roots(const T L_norm, const T J_norm, const sysprecquant<T> *system);
+template <class T> static vector3D<T> BCDcoeff(const T L_norm, const T J_norm, const sysprecquant<T> *system);
+template <class T> static T beta(const T a, const T b, const sysprecquant<T> *system);
+template <class T> static T sigma(const T a, const T b, const sysprecquant<T> *system);
+template <class T> static T tau(const T a, const T b, const sysprecquant<T> *system);
 
-static double L_norm_3PN_of_xi(const double xi, const double xi_2, const double L_norm, const sysprecquant *system);
-static double J_norm_of_xi(const double L_norm, const sysprecquant *system);
-static double S_norm_of_xi(const double xi, const double xi_2, const vector roots, const sysprecquant *system);
-static double costhetaL(const double J_norm, const double L_norm, const double S_norm);
+template <class T> static T L_norm_3PN_of_xi(const T xi, const T xi_2, const T L_norm, const sysprecquant<T> *system);
+template <class T> static T J_norm_of_xi(const T L_norm, const sysprecquant<T> *system);
+template <class T> static T S_norm_of_xi(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system);
+template <class T> static T costhetaL(const T J_norm, const T L_norm, const T S_norm);
 
-static double u_of_xi(const double xi, const double xi_2, const sysprecquant *system);
-static double phiz_of_xi(const double xi, const double xi_2, const double J_norm, const sysprecquant *system);
-static double zeta_of_xi(const double xi, const double xi_2, const sysprecquant *system);
+template <class T> static T u_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system);
+template <class T> static T phiz_of_xi(const T xi, const T xi_2, const T J_norm, const sysprecquant<T> *system);
+template <class T> static T zeta_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system);
 
-static vector computeMScorrections(const double xi, const double xi_2, const double L_norm, const double J_norm, const vector roots, const sysprecquant *system);
+template <class T> static vector3D<T> computeMScorrections(const T xi, const T xi_2, const T L_norm, const T J_norm, const vector3D<T> roots, const sysprecquant<T> *system);
 
-static int checkOmegaz5(const double Omegaz5);
-static void invalidExpansionOrder(const int ExpansionOrder);
+template <class T> static int checkOmegaz5(const T Omegaz5);
+void invalidExpansionOrder(const int ExpansionOrder);
 
-static vector compute_phiz_zeta_costhetaL3PN(const double xi, const sysprecquant *system);
+template <class T> static vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi, const sysprecquant<T> *system);
 
-static double L2PNR(const double v, const double eta);
-double L3PN(
-    const double f_orb_hz,
-    const double m1, const double m2,
-    const double s1x, const double s1y, const double s1z,
-    const double s2x, const double s2y, const double s2z,
-    const double f_0, const int ExpansionOrder);
+template <class T> static T L2PNR(const T v, const T eta);
+template <class T> T L3PN(
+    const T f_orb_hz,
+    const T m1, const T m2,
+    const T s1x, const T s1y, const T s1z,
+    const T s2x, const T s2y, const T s2z,
+    const T f_0, const int ExpansionOrder);
 
-void CartesianToPolar(double *polar, double *azimuthal, double *magnitude, double x, double y, double z);
+template <class T> void CartesianToPolar(T *polar, T *azimuthal, T *magnitude, T x, T y, T z);
 
-void PhenomP_Param_Transform(
-    double *chi1_l, double *chi2_l, double *chip, double *thetaJN, double *alpha0, double *phi_aligned, double *zeta_polariz,
-    const double m1, const double m2, const double f_ref, const double phiRef, const double incl,
-    const double s1x, const double s1y, const double s1z, const double s2x, const double s2y, const double s2z,
+template <class T> void PhenomP_ParametersFromSourceFrame(
+    T *chi1_l, T *chi2_l, T *chip, T *thetaJN, T *alpha0, T *phi_aligned, T *zeta_polariz,
+    const T m1, const T m2, const T f_ref, const T phiRef, const T incl,
+    const T s1x, const T s1y, const T s1z, const T s2x, const T s2y, const T s2z,
     IMRPhenomP_version_type IMRPhenomP_version);
 
-static void InitializePrecession(
-    sysprecquant* system,
-    const double m1, const double m2, const double mul, const double phl, const double mu1, const double ph1,
-    const double ch1, const double mu2, const double ph2, const double ch2, const double f_0,
+template <class T> void PhenomPv3_Param_Transform(source_parameters<T> *out, gen_params_base<T> *in);
+
+template <class T> static void InitializePrecession(
+    sysprecquant<T>* system,
+    const T m1, const T m2, const T mul, const T phl, const T mu1, const T ph1,
+    const T ch1, const T mu2, const T ph2, const T ch2, const T f_0,
     const int ExpansionOrder);
 
-void OrbitalAngMom3PNSpinning(
-    DOUBLEVector *L_norm_3PN, DOUBLEVector *f_orb_hz,
+template <class T> void OrbitalAngMom3PNSpinning(
+    std::vector<T> *L_norm_3PN, std::vector<T> *f_orb_hz,
     const double m1_SI, const double m2_SI,
     const double mul, const double phl, double mu1, double ph1, double ch1, double mu2, double ph2, double ch2,
     const double f_0, const int ExpansionOrder);
