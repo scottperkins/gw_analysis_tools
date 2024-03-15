@@ -87,9 +87,14 @@ template <class T> struct PhenomPv3Storage
     T betaRef;    /**< beta (opening angle) precession angle at f_ref */
 };
 
+template <class T>
+void IMRPhenomPv3InitY2m(sph_harm<T> *Ylm, T theta, T phi);
+
 template <class T> void PhenomPrecessingSpinEnforcePrimary(T *m1, T *m2,
     T *chi1x, T *chi1y, T *chi1z,
     T *chi2x, T *chi2y, T *chi2z);
+
+template <class T> void IMRPhenomPv3ComputeWignerD(T *WignerD22, const T beta);
 
 template <class T> void nudge(T *x, T X, T epsilon);
 
@@ -146,11 +151,20 @@ template <class T> static void InitializePrecession(
     const T ch1, const T mu2, const T ph2, const T ch2, const T f_0,
     const int ExpansionOrder);
 
+template <class T> static int init_PhenomPv3_Storage(PhenomPv3Storage<T> *p,  sysprecquant<T> *pAngles,
+    T m1, T m2,
+    T S1x, T S1y, T S1z,
+    T S2x, T S2y, T S2z,
+    const T distance, const T inclination,
+    const T phiRef, const T deltaF, const T f_min, const T f_max, const T f_ref
+);
+
 template <class T> void OrbitalAngMom3PNSpinning(
     std::vector<T> *L_norm_3PN, std::vector<T> *f_orb_hz,
     const double m1_SI, const double m2_SI,
     const double mul, const double phl, double mu1, double ph1, double ch1, double mu2, double ph2, double ch2,
-    const double f_0, const int ExpansionOrder);
+    const double f_0, const int ExpansionOrder
+);
 
 
 #endif /* IMRPHENOMPV3_UTILS_H */
