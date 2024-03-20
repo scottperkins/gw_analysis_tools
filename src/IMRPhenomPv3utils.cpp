@@ -32,8 +32,8 @@ void IMRPhenomPv3InitY2m(sph_harm<T> *Ylm, T theta, T phi)
 */
 template <class T>
 void IMRPhenomPv3ComputeWignerD(
-    T *WignerD22[2][5], /** [out] D^{2}_{2, m} elements */
-    const T beta /**< beta angle */
+    T (*WignerD22)[2][5], /** [out] D^{2}_{2, m} elements */
+    const T b /**< beta angle */
 )
 {
     T b2 = 2. * b;
@@ -45,26 +45,26 @@ void IMRPhenomPv3ComputeWignerD(
     T cos2b_over_two = 0.;
     T cos3b = 0.;
 
-    T cosb_over_two = cosb * ONE_OVER_TWO;
+    T cosb_over_two = cosb * 0.5;
     T cos2b_fac_1 = cos2b * ONE_OVER_EIGHT + THREE_OVER_EIGHT;
     T cosb_minus_1 = cosb - 1.0;
     T cosb_plus_1 = cosb + 1.0;
 
-    T sinb_over_two = sinb * ONE_OVER_TWO;
+    T sinb_over_two = sinb * 0.5;
 
     //mprime == 2
-    WignerD22[0][0] = -cosb_over_two + cos2b_fac_1;           //m=-2
-    WignerD22[0][1] = cosb_minus_1 * sinb_over_two;           //m=-1
-    WignerD22[0][2] = SQRT_6 * (1. - cos2b) * ONE_OVER_EIGHT; //m=0
-    WignerD22[0][3] = -cosb_plus_1 * sinb_over_two;           //m=1
-    WignerD22[0][4] = cosb_over_two + cos2b_fac_1;            //m=2
+    (*WignerD22)[0][0] = -cosb_over_two + cos2b_fac_1;           //m=-2
+    (*WignerD22)[0][1] = cosb_minus_1 * sinb_over_two;           //m=-1
+    (*WignerD22)[0][2] = SQRT_6 * (1. - cos2b) * ONE_OVER_EIGHT; //m=0
+    (*WignerD22)[0][3] = -cosb_plus_1 * sinb_over_two;           //m=1
+    (*WignerD22)[0][4] = cosb_over_two + cos2b_fac_1;            //m=2
 
     //mprime == -2
-    WignerD22[1][0] = WignerD22[0][4];
-    WignerD22[1][1] = -WignerD22[0][3];
-    WignerD22[1][2] = WignerD22[0][2];
-    WignerD22[1][3] = -WignerD22[0][1];
-    WignerD22[1][4] = WignerD22[0][0];
+    (*WignerD22)[1][0] = (*WignerD22)[0][4];
+    (*WignerD22)[1][1] = -(*WignerD22)[0][3];
+    (*WignerD22)[1][2] = (*WignerD22)[0][2];
+    (*WignerD22)[1][3] = -(*WignerD22)[0][1];
+    (*WignerD22)[1][4] = (*WignerD22)[0][0];
 }
 
 /**
@@ -127,6 +127,20 @@ template <class T> void PhenomPrecessingSpinEnforcePrimary(
         throw std::runtime_error("Unable to enforce m1 as the larger mass.");
 }
 
+template <class T> int approx_equal(T x, T X, T epsilon)
+{
+    return !(gsl_fcmp(x, X, epsilon));
+}
+
+template<> int approx_equal<adouble>(adouble x, adouble X, adouble epsilon)
+{
+    double x_val = x.value();
+    double X_val = X.value();
+    double eps = epsilon.value();
+
+    return approx_equal(x_val, X_val, eps);
+}
+
 /**
  * If x and X are relatively equal within epsilon, set x = X.
  * If X = 0, compare absolute values.
@@ -135,7 +149,7 @@ template <class T> void nudge(T *x, T X, T epsilon)
 {
     if (X != 0)
     {
-        if (gsl_fcmp(*x, X, epsilon))
+        if (approx_equal(*x, X, epsilon))
         {
             *x = X;
         }
@@ -152,7 +166,7 @@ template <class T> void nudge(T *x, T X, T epsilon)
 /*
  * Adapted from LALSimInspiralFDPrecAngles_internals
 */
-template <class T> static int checkOmegaz5(const T Omegaz5)
+template <class T> int checkOmegaz5(const T Omegaz5)
 {
     if (Omegaz5 >= 1000.0)
     {
@@ -169,7 +183,7 @@ template <class T> static int checkOmegaz5(const T Omegaz5)
 /*
  * Adapted from LALSimInspiralFDPrecAngles_internals
 */
-static void invalidExpansionOrder(const int ExpansionOrder)
+void invalidExpansionOrder(const int ExpansionOrder)
 {
     std::cerr << "ExpansionOrder = " << ExpansionOrder << " not recognised. \
     Defaulting to keeping all orders in expansion.\n";
@@ -178,10 +192,10 @@ static void invalidExpansionOrder(const int ExpansionOrder)
 /**
  * Create a vector in spherical coordinates using its magnitude r, polar angle th, and azimuthal angle ph 
 */
-template <class T> static vector3D<T> CreateSphVector(const T r, const T th, const T ph)
+template <class T> vector3D<T> CreateSphVector(const T r, const T th, const T ph)
 {
     const T fact = r*sin(th);
-    vector out {fact*cos(ph), fact*sin(ph), r*cos(th)};
+    vector3D<T> out {fact*cos(ph), fact*sin(ph), r*cos(th)};
 
     return out;
 }
@@ -189,7 +203,7 @@ template <class T> static vector3D<T> CreateSphVector(const T r, const T th, con
 /**
  * Scale a vector vec by a scalar c.
 */
-template <class T> static vector3D<T> ScaleVector(T c, vector3D<T> vec)
+template <class T> vector3D<T> ScaleVector(T c, vector3D<T> vec)
 {
     vector3D<T> out {c*vec.x, c*vec.y, c*vec.z};
 
@@ -199,7 +213,7 @@ template <class T> static vector3D<T> ScaleVector(T c, vector3D<T> vec)
 /**
  * Sum of two vectors
 */
-template <class T> static vector3D<T> VectorSum(vector3D<T> vec1, vector3D<T> vec2)
+template <class T> vector3D<T> VectorSum(vector3D<T> vec1, vector3D<T> vec2)
 {
     vector3D<T> out;
     out.x = vec1.x+vec2.x;
@@ -212,7 +226,7 @@ template <class T> static vector3D<T> VectorSum(vector3D<T> vec1, vector3D<T> ve
 /**
  * Dot product of two vectors.
 */
-template <class T> static T DotProduct(const vector3D<T> vec1, const vector3D<T> vec2)
+template <class T> T DotProduct(const vector3D<T> vec1, const vector3D<T> vec2)
 {
     return vec1.x*vec2.x + vec1.y*vec2.y + vec1.z*vec2.z;
 }
@@ -220,7 +234,7 @@ template <class T> static T DotProduct(const vector3D<T> vec1, const vector3D<T>
 /**
  * Magnitude of a vector.
 */
-template <class T> static T VectorNorm(const vector3D<T> vec)
+template <class T> T VectorNorm(const vector3D<T> vec)
 {
     return sqrt(DotProduct(vec, vec));
 }
@@ -228,7 +242,7 @@ template <class T> static T VectorNorm(const vector3D<T> vec)
 /**
  * Cross product of two vectors.
 */
-template <class T> static vector3D<T> CrossProduct(const vector3D<T> vec1, const vector3D<T> vec2)
+template <class T> vector3D<T> CrossProduct(const vector3D<T> vec1, const vector3D<T> vec2)
 {
     vector3D<T> out;
     out.x = vec1.y*vec2.z-vec1.z*vec2.y;
@@ -246,7 +260,7 @@ template <class T> static vector3D<T> CrossProduct(const vector3D<T> vec1, const
  * out.y = A2 = S_{-}^2
  * out.z = A3 = S_{+}^2
  */
-template <class T> static vector3D<T> Roots(const T L_norm, const T J_norm, const sysprecquant<T> *system)
+template <class T> vector3D<T> Roots(const T L_norm, const T J_norm, const sysprecquant<T> *system)
 {
     vector3D<T> out;
     vector3D<T> coeffs = BCDcoeff(L_norm, J_norm, system);
@@ -305,7 +319,7 @@ template <class T> static vector3D<T> Roots(const T L_norm, const T J_norm, cons
  * C coefficient = eq. B3
  * D coefficient = eq. B4
  */
-template <class T> static vector3D<T> BCDcoeff(const T L_norm, const T J_norm, const sysprecquant<T> *system)
+template <class T> vector3D<T> BCDcoeff(const T L_norm, const T J_norm, const sysprecquant<T> *system)
 {
     vector3D<T> out;
     const T J_norm_2 = J_norm*J_norm;
@@ -323,7 +337,7 @@ template <class T> static vector3D<T> BCDcoeff(const T L_norm, const T J_norm, c
 /**
  * Compute the spin-orbit couplings
  */
-template <class T> static T beta(const T a, const T b, const sysprecquant<T> *system)
+template <class T> T beta(const T a, const T b, const sysprecquant<T> *system)
 {
     return ((((*system).dot1)*(a + b*((*system).q))) + (((*system).dot2)*(a + b/((*system).q))));
 }
@@ -331,7 +345,7 @@ template <class T> static T beta(const T a, const T b, const sysprecquant<T> *sy
 /**
  * Compute the spin-spin couplings
  */
-template <class T> static T sigma(const T a, const T b, const sysprecquant<T> *system)
+template <class T> T sigma(const T a, const T b, const sysprecquant<T> *system)
 {
     return (a*((*system).dot12) - b*((*system).dot1)*((*system).dot2))/((*system).nu);
 }
@@ -339,7 +353,7 @@ template <class T> static T sigma(const T a, const T b, const sysprecquant<T> *s
 /**
  * Compute the spin-spin couplings
  */
-template <class T> static T tau(const T a, const T b, const sysprecquant<T> *system)
+template <class T> T tau(const T a, const T b, const sysprecquant<T> *system)
 {
     return (((*system).q)*((*system).S1_norm_2*a - b*((*system).dot1)*((*system).dot1)) + ((*system).S2_norm_2*a - b*((*system).dot2)*((*system).dot2))/((*system).q))/((*system).nu);
 }
@@ -349,7 +363,7 @@ template <class T> static T tau(const T a, const T b, const sysprecquant<T> *sys
  * 3PN order
  * from 0605140 and Blanchet LRR and 1212.5520 Eq. 4.7
  */
-template <class T> static T L_norm_3PN_of_xi(const T xi, const T xi_2, const T L_norm, const sysprecquant<T> *system)
+template <class T> T L_norm_3PN_of_xi(const T xi, const T xi_2, const T L_norm, const sysprecquant<T> *system)
 {
     return L_norm*(1. + xi_2*((*system).constants_L[0] + xi*(*system).constants_L[1] + xi_2*((*system).constants_L[2] + xi*(*system).constants_L[3] + xi_2*((*system).constants_L[4]))));
 }
@@ -358,16 +372,38 @@ template <class T> static T L_norm_3PN_of_xi(const T xi, const T xi_2, const T L
  * Magnitude of J to Newtonian order
  * Equation 41 (1703.03967)
  */
-template <class T> static T J_norm_of_xi(const T L_norm, const sysprecquant<T> *system)
+template <class T> T J_norm_of_xi(const T L_norm, const sysprecquant<T> *system)
 {
     return sqrt(L_norm*L_norm + 2.*L_norm*((*system).c_1_over_nu) + (*system).Ssqave);
+}
+
+template <class T> int elljacobi(T u, T m, T *sn, T *cn, T *dn)
+{
+    return gsl_sf_elljac_e(u, m, sn, cn, dn);
+}
+
+template <> int elljacobi<adouble>(adouble u, adouble m, adouble *sn, adouble *cn, adouble *dn)
+{
+    int gsl_ret;
+    double u_val = u.value();
+    double m_val = m.value();
+
+    double sn_val, cn_val, dn_val;
+
+    gsl_ret = gsl_sf_elljac_e(u_val, m_val, &sn_val, &cn_val, &dn_val);
+
+    *sn = (adouble)sn_val;
+    *cn = (adouble)cn_val;
+    *dn = (adouble)dn_val;
+
+    return gsl_ret;
 }
 
 /**
  * Magnitude of S divided by GMsquare_over_c
  * Equation 23 (1703.03967)
  */
-template <class T> static T S_norm_of_xi(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system)
+template <class T> T S_norm_of_xi(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system)
 {
     T sn, cn, dn, m, u;
 
@@ -375,7 +411,7 @@ template <class T> static T S_norm_of_xi(const T xi, const T xi_2, const vector3
     else {
         m = (roots.y - roots.z)/(roots.x - roots.z);
         u = u_of_xi(xi,xi_2,system)+(*system).constant_of_S;
-        gsl_sf_elljac_e(u, m, &sn, &cn, &dn);
+        elljacobi(u, m, &sn, &cn, &dn);
     }
     const T S_norm_square_bar = roots.z + (roots.y - roots.z)*sn*sn;
     return sqrt(S_norm_square_bar);
@@ -385,7 +421,7 @@ template <class T> static T S_norm_of_xi(const T xi, const T xi_2, const vector3
  * Cosine of the angle between L and J
  * equation 8 1703.03967
  */
-template <class T> static T costhetaL(const T J_norm, const T L_norm, const T S_norm)
+template <class T> T costhetaL(const T J_norm, const T L_norm, const T S_norm)
 {
     T out = 0.5*(J_norm*J_norm + L_norm*L_norm - S_norm*S_norm)/L_norm/J_norm;
 
@@ -399,7 +435,7 @@ template <class T> static T costhetaL(const T J_norm, const T L_norm, const T S_
  * Second term in phase of the magnitude of S
  * Eqn. 51 in arxiv:1703.03967
 */
-template <class T> static T u_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system)
+template <class T> T u_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system)
 {
 
     /*
@@ -423,7 +459,7 @@ template <class T> static T u_of_xi(const T xi, const T xi_2, const sysprecquant
  * out.y = c_2
  * out.z = c_4
  */
-template <class T> static vector3D<T> c_coeffs(const T xi, const T xi_2, const T J_norm, const vector3D<T> roots, const vector3D<T> *system)
+template <class T> vector3D<T> c_coeffs(const T xi, const T xi_2, const T J_norm, const vector3D<T> roots, const sysprecquant<T> *system)
 {
     const T xi_3 = xi_2*xi;
     const T xi_4 = xi_3*xi;
@@ -448,7 +484,7 @@ template <class T> static vector3D<T> c_coeffs(const T xi, const T xi_2, const T
  * out.y = d_2
  * out.z = d_4
  */
-template <class T> static vector3D<T> d_coeffs(const T L_norm, const T J_norm, const vector3D<T> roots)
+template <class T> vector3D<T> d_coeffs(const T L_norm, const T J_norm, const vector3D<T> roots)
 {
     vector3D<T> out;
 
@@ -463,7 +499,7 @@ template <class T> static vector3D<T> d_coeffs(const T L_norm, const T J_norm, c
  * The derivative of the phase of the magnitude of S
  * Eqn 24 in arxiv:1703.03967
  */
-template <class T> static T psidot(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system)
+template <class T> T psidot(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system)
 {
     const T xi_3 = xi_2*xi;
     const T xi_6 = xi_3*xi_3;
@@ -489,7 +525,7 @@ template <class T> static T psidot(const T xi, const T xi_2, const vector3D<T> r
  * Computes the MS corrections for phiz and zeta
  * eq. 67 (for phiz) and F19 (for zeta) in arxiv:1703.03967
  */
-template <class T> static vector3D<T> computeMScorrections(const T xi, const T xi_2,
+template <class T> vector3D<T> computeMScorrections(const T xi, const T xi_2,
     const T L_norm, const T J_norm,
     const vector3D<T> roots, const sysprecquant<T> *system)
 {
@@ -561,7 +597,7 @@ template <class T> static vector3D<T> computeMScorrections(const T xi, const T x
  * phiz
  * equation 66 in 1703.03967
  */
-template <class T> static T phiz_of_xi(const T xi, const T xi_2, const T J_norm, const sysprecquant<T> *system)
+template <class T> T phiz_of_xi(const T xi, const T xi_2, const T J_norm, const sysprecquant<T> *system)
 {
     const T inside_log1 = ((*system).c_1) + J_norm*((*system).nu)+((*system).nu_2)/xi;
     // eq. D28 in 1703.03967
@@ -594,7 +630,7 @@ template <class T> static T phiz_of_xi(const T xi, const T xi_2, const T J_norm,
  * zeta
  * eq. F5 in 1703.03967
  */
-template <class T> static T zeta_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system)
+template <class T> T zeta_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system)
 {
     const T logxi = log(xi);
     const T xi_3 = xi_2*xi;
@@ -609,7 +645,7 @@ template <class T> static T zeta_of_xi(const T xi, const T xi_2, const sysprecqu
 /**
  * Computes phiz, zeta, and costhetaL at 3PN
  */
-template <class T> static vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi, const sysprecquant<T> *system)
+template <class T> vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi, const sysprecquant<T> *system)
 {
     vector3D<T> angles;
     const T xi_2 = xi*xi;
@@ -617,7 +653,7 @@ template <class T> static vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi,
     const T L_norm3PN = L_norm_3PN_of_xi(xi,xi_2,L_norm,system);
     const T J_norm3PN = J_norm_of_xi(L_norm3PN,system);
     const T J_norm = J_norm_of_xi(L_norm,system);
-    const vector roots = Roots(L_norm,J_norm,system);
+    const vector3D<T> roots = Roots(L_norm,J_norm,system);
     const T S_norm = S_norm_of_xi(xi,xi_2,roots,system);
 
     vector3D<T> MScorrections = {0.,0.,0.};
@@ -639,7 +675,7 @@ template <class T> static vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi,
  *  Reference:
  *  - Bohe et al, 1212.5520v2 Eq 4.7 first line
  */
-template <class T> static T L2PNR(
+template <class T> T L2PNR(
   const T v,   /**< Cubic root of (Pi * Frequency (geometric)) */
   const T eta) /**< Symmetric mass-ratio */
 {
@@ -654,7 +690,7 @@ template <class T> static T L2PNR(
  * We assume that Lhat = (0,0,1)
  */
 template <class T> T L3PN(
-    const T f_orb_hz,   /**< Orbtial frequency (Hz)  */
+    const T f_orb_hz,   /**< Orbital frequency (Hz)  */
     const T m1,         /**< mass of primary in SI (kg) */
     const T m2,         /**< mass of secondary in SI (kg) */
     const T s1x,        /**< x-component of the dimensionless spin of object 1 w.r.t. Lhat = (0,0,1) */
@@ -684,12 +720,14 @@ template <class T> T L3PN(
     CartesianToPolar(&mu1, &ph1, &ch1, s1x, s1y, s1z);
     CartesianToPolar(&mu2, &ph2, &ch2, s2x, s2y, s2z);
 
+    T cosmu1 = cos(mu1);
+    T cosmu2 = cos(mu2);
     OrbitalAngMom3PNSpinning(
         &L_norm_3PN_Seq, &freqs_seq,
         m1, m2,
         mul, phl,
-        cos(mu1), ph1, ch1,
-        cos(mu2), ph2, ch2,
+        cosmu1, ph1, ch1,
+        cosmu2, ph2, ch2,
         f_0, ExpansionOrder);
 
     return L_norm_3PN_Seq[0];
@@ -726,13 +764,18 @@ template <class T> void CartesianToPolar(
     T z
 )
 {
+    T zero = 0.;
+    T eps = 1e-9;
+    T tol_atan = MAX_TOL_ATAN;
+
     *magnitude = sqrt( x*x + y*y + z*z );
-    if (gsl_fcmp(*magnitude, 0, 1e-9)){
-        *polar = 0.;
-        *azimuthal = 0.;
+    if (approx_equal(*magnitude, zero, eps)){
+        *polar = zero;
+        *azimuthal = zero;
     } else {
-        *polar = acos(z / *magnitude);
-        *azimuthal = atan2tol(y, x, MAX_TOL_ATAN);
+        T along_z = acos(z / *magnitude);
+        *polar = along_z;
+        *azimuthal = atan2tol(y, x, tol_atan);
     }
 }
 
@@ -757,8 +800,9 @@ template <class T> void PhenomPv3_Param_Transform(source_parameters<T> *out, gen
     // to avoid issues (if any) down the line
     T q = in->mass2/in->mass1;
     T m1_M_2 = q/(1.+q);
-    T m2_M_2 = m1_M / q;
-    m1_M_2 *= m1_M_2;
+    T m2_M_2 = m1_M_2 / q;
+    // squared masses
+    m1_M_2 *= m1_M_2; 
     m2_M_2 *= m2_M_2;
 
     out->chil = chi1L + chi2L/q;
@@ -766,11 +810,29 @@ template <class T> void PhenomPv3_Param_Transform(source_parameters<T> *out, gen
     out->SL = chi1L * m1_M_2 + chi2L * m2_M_2;
 }
 
+/**
+ * \brief Calculate the Incomplete Elliptic Integral
+*/
+template <class T> T ellint_F(T phi, T k)
+{
+    return gsl_sf_ellint_F(phi, k, GSL_PREC_DOUBLE);
+}
+
+template <> adouble ellint_F<adouble>(adouble phi, adouble k)
+{
+    double phi_val = phi.value();
+    double k_val = k.value();
+
+    double out_val = ellint_F(phi_val, k_val);
+
+    return (adouble)out_val;
+}
+
 /*! \brief Initialize quantities needed for Pv3 precession
  *
  * Adapted from LALSimIMRPhenomPv3HM
  */
-template <class T> static void InitializePrecession(sysprecquant<T>* system, /** [out] Pointer to sysprecquant struct */
+template <class T> void InitializePrecession(sysprecquant<T>* system, /** [out] Pointer to sysprecquant struct */
     const T m1,  /**< Primary mass in SI (kg) */
     const T m2,  /**< Secondary mass in SI (kg) */
     const T mul, /**< Cosine of Polar angle of orbital angular momentum */
@@ -811,10 +873,15 @@ template <class T> static void InitializePrecession(sysprecquant<T>* system, /**
 
     const T xi_0 = pow(piGM_over_cthree*f_0, system->onethird);
     const T xi0_2 = xi_0*xi_0;
-    const vector3D<T> Lhat_0 = CreateSphVector(1.,acos(mul),phl);
-    const vector3D<T> S1_0 = CreateSphVector(S1_norm,acos(mu1),ph1);//in geometric units and with M=1
-    const vector3D<T> S2_0 = CreateSphVector(S2_norm,acos(mu2),ph2);
-    const vector3D<T> L_0 = ScaleVector(nu/xi_0, Lhat_0);
+    T acosmul = acos(mul);
+    T acosmu1 = acos(mu1);
+    T acosmu2 = acos(mu2);
+    const T one = 1.;
+    const vector3D<T> Lhat_0 = CreateSphVector(one,acosmul,phl);
+    const vector3D<T> S1_0 = CreateSphVector(S1_norm,acosmu1,ph1);//in geometric units and with M=1
+    const vector3D<T> S2_0 = CreateSphVector(S2_norm,acosmu2,ph2);
+    T Lnorm_0 = nu/xi_0;
+    const vector3D<T> L_0 = ScaleVector(Lnorm_0, Lhat_0);
 
     system->dot1 = DotProduct(S1_0,Lhat_0);
     system->dot2 = DotProduct(S2_0,Lhat_0);
@@ -849,11 +916,13 @@ template <class T> static void InitializePrecession(sysprecquant<T>* system, /**
 
     //computed with initial spin couplings, they're not exactly accurate for generic precession, but the correction should be 4PN
     //these constants are used in TaylorT1 where domega/dt is expressed as a polynomial
+    T beta_a = domegadt_csts_spinorbit[2] + nu*(domegadt_csts_spinorbit[3]);
+    T beta_b = domegadt_csts_spinorbit[4] + nu*(domegadt_csts_spinorbit[5]);
     const T a0 = nu*domegadt_csts_nonspin[0];
     const T a2 = nu*(domegadt_csts_nonspin[1] + nu*(domegadt_csts_nonspin[2]));
     const T a3 = nu*(domegadt_csts_nonspin[3] + beta(domegadt_csts_spinorbit[0], domegadt_csts_spinorbit[1], system));
     const T a4 = nu*(domegadt_csts_nonspin[4] + nu*(domegadt_csts_nonspin[5] + nu*(domegadt_csts_nonspin[6])) + sigma(domegadt_csts_spinspin[0], domegadt_csts_spinspin[1], system) + tau(domegadt_csts_spinspin[2], domegadt_csts_spinspin[3], system));
-    const T a5 = nu*(domegadt_csts_nonspin[7] + nu*(domegadt_csts_nonspin[8]) + beta((domegadt_csts_spinorbit[2] + nu*(domegadt_csts_spinorbit[3])), (domegadt_csts_spinorbit[4] + nu*(domegadt_csts_spinorbit[5])), system));
+    const T a5 = nu*(domegadt_csts_nonspin[7] + nu*(domegadt_csts_nonspin[8]) + beta(beta_a, beta_b, system));
 
     const T a0_2 = a0*a0;
     const T a0_3 = a0_2*a0;
@@ -1077,22 +1146,38 @@ template <class T> static void InitializePrecession(sysprecquant<T>* system, /**
     }
     else
     {
+        T asin_sign;
         m = sqrt((roots.y - roots.z)/(roots.x - roots.z));
         B = (S_0_norm*S_0_norm-roots.z)/(roots.y-roots.z);
         signelement = DotProduct(CrossProduct(L_0,S1_0),S2_0);
         sign_num = (signelement > 0) - (signelement < 0);
 
-        if(B < 0. || B > 1.) {
-            if(B > 1 && B-1. < 0.00001) system->constant_of_S = gsl_sf_ellint_F(asin(sign_num*sqrt(1.)), m, GSL_PREC_DOUBLE) - u_of_xi(xi_0,xi0_2,system);
-            if(B < 0 && B > -0.00001) system->constant_of_S = gsl_sf_ellint_F(asin(sign_num*sqrt(0.)), m, GSL_PREC_DOUBLE) - u_of_xi(xi_0,xi0_2,system);
+        if(B < 0. || B > 1.)
+        {
+            if(B > 1 && B-1. < 0.00001)
+            {
+                asin_sign = asin(sign_num*sqrt(1.));
+                system->constant_of_S = ellint_F(asin_sign, m) - u_of_xi(xi_0,xi0_2,system);
+            }
+            if(B < 0 && B > -0.00001)
+            {
+                asin_sign = asin(sign_num*sqrt(0.));
+                system->constant_of_S = ellint_F(asin_sign, m) - u_of_xi(xi_0,xi0_2,system);
+            }
         }
-        else system->constant_of_S = gsl_sf_ellint_F(asin(sign_num*sqrt(B)), m, GSL_PREC_DOUBLE) - u_of_xi(xi_0,xi0_2,system);
+        else
+        {
+            asin_sign = asin(sign_num*sqrt(B));
+            system->constant_of_S = ellint_F(asin_sign, m) - u_of_xi(xi_0,xi0_2,system);
+        }
     }
 
+    beta_a = L_csts_spinorbit[2]+L_csts_spinorbit[3]*nu;
+    beta_b = L_csts_spinorbit[4]+L_csts_spinorbit[5]*nu;
     system->constants_L[0] = (L_csts_nonspin[0] + nu*L_csts_nonspin[1]);
     system->constants_L[1] = beta(L_csts_spinorbit[0], L_csts_spinorbit[1], system);
     system->constants_L[2] = (L_csts_nonspin[2] + nu*L_csts_nonspin[3] + nu*nu*L_csts_nonspin[4]);
-    system->constants_L[3] = beta((L_csts_spinorbit[2]+L_csts_spinorbit[3]*nu), (L_csts_spinorbit[4]+L_csts_spinorbit[5]*nu), system);
+    system->constants_L[3] = beta(beta_a, beta_b, system);
     system->constants_L[4] = (L_csts_nonspin[5]+L_csts_nonspin[6]*nu +L_csts_nonspin[7]*nu*nu+L_csts_nonspin[8]*nu*nu*nu);
 
     vector3D<T> MScorrections = {0.,0.,0.};
@@ -1194,8 +1279,13 @@ template <class T> void PhenomP_ParametersFromSourceFrame(
       }
       else
       { // precessing case, use 3PN spinning approx
-        L0 = Msq * L3PN(0.5*f_ref,
-            m1*GWAT_MSUN_SI, m2*GWAT_MSUN_SI, s1x, s1y, s1z, s2x, s2y, s2z, f_ref, ExpansionOrder);
+        T f_ref_orb = 0.5*f_ref;
+        T m1_SI = m1*GWAT_MSUN_SI;
+        T m2_SI = m2*GWAT_MSUN_SI;
+        L0 = Msq * L3PN(f_ref_orb,
+            m1_SI, m2_SI,
+            s1x, s1y, s1z, s2x, s2y, s2z,
+            f_ref, ExpansionOrder);
       }
       break;
     default:
@@ -1247,7 +1337,8 @@ template <class T> void PhenomP_ParametersFromSourceFrame(
     ROTATEZ(-phiJ_sf, tmp_x, tmp_y, tmp_z);
     ROTATEY(-thetaJ_sf, tmp_x, tmp_y, tmp_z);
     T kappa;
-    kappa = - atan2tol(tmp_y,tmp_x, MAX_TOL_ATAN);
+    T atan_tol = MAX_TOL_ATAN;
+    kappa = - atan2tol(tmp_y,tmp_x, atan_tol);
 
     // Then we determine alpha0, by rotating LN
     tmp_x = 0.;
@@ -1311,7 +1402,7 @@ template <class T> void PhenomP_ParametersFromSourceFrame(
  * PhenomPv3Storage and sysprecquant (for precession angles) structs.
  * Converts from GWAT seconds to SI.
  */
-template <class T> static int init_PhenomPv3_Storage(
+template <class T> void init_PhenomPv3_Storage(
     PhenomPv3Storage<T> *p,   /**< [out] PhenomPv3Storage struct */
     sysprecquant<T> *pAngles,           /**< [out] precession angle pre-computations struct */
     T m1,             /**< mass of primary in solar masses */
@@ -1338,8 +1429,8 @@ template <class T> static int init_PhenomPv3_Storage(
     }
     
     /* input parameters */
-    p->m1_SI = m1_SI*GWAT_MSUN_SI;
-    p->m2_SI = m2_SI*GWAT_MSUN_SI;
+    p->m1_SI = m1*GWAT_MSUN_SI;
+    p->m2_SI = m2*GWAT_MSUN_SI;
     p->chi1x = S1x;
     p->chi1y = S1y;
     p->chi1z = S1z;
@@ -1374,8 +1465,13 @@ template <class T> static int init_PhenomPv3_Storage(
     /* check for rounding errors */
     if (p->eta > 0.25 || p->q < 1.0)
     {
-        nudge(&(p->eta), 0.25, 1e-6);
-        nudge(&(p->q), 1.0, 1e-6);
+        T comparison;
+        T eps = 1e-6;
+
+        comparison = 0.25;
+        nudge(&(p->eta), comparison, eps);
+        comparison = 1.0;
+        nudge(&(p->q), comparison, eps);
     }
 
     p->Msec = p->Mtot_Msun * GWAT_MTSUN_SI; /* Total mass in seconds */
@@ -1395,6 +1491,8 @@ template <class T> static int init_PhenomPv3_Storage(
 
     if (p->PRECESSING != 1) // precessing case. compute angles
     {
+        T one = 1.0;
+        T zero = 0.;
         /* Initialize precession angles */
         /* evaluating the angles at the reference frequency */
         p->f_ref_Orb_Hz = 0.5 * p->f_ref; /* factor of 0.5 to go from GW to Orbital frequency */
@@ -1404,12 +1502,14 @@ template <class T> static int init_PhenomPv3_Storage(
         * In PhenomP3 we set this to 5, i.e. all but the highest order terms.
         * */
         int ExpansionOrder = 5;
+        T coschi1 = cos(p->chi1_theta);
+        T coschi2 = cos(p->chi2_theta);
         InitializePrecession(
             pAngles,
             p->m1_SI, p->m2_SI,
-            1.0, 0.0,
-            cos(p->chi1_theta), p->chi1_phi, p->chi1_mag,
-            cos(p->chi2_theta), p->chi2_phi, p->chi2_mag,
+            one, zero,
+            coschi1, p->chi1_phi, p->chi1_mag,
+            coschi2, p->chi2_phi, p->chi2_mag,
             p->f_ref, ExpansionOrder);
     }
 }
@@ -1435,7 +1535,7 @@ template <class T> void OrbitalAngMom3PNSpinning(
     const int ExpansionOrder   /**< Keep terms upto ExpansionOrder in precession angles phi_z and zeta (1,2,3,4,5 or -1 for all orders) */
 )
 {
-    sysprecquant *system = (sysprecquant *)malloc(sizeof(sysprecquant));
+    sysprecquant<T> *system = (sysprecquant<T> *)malloc(sizeof(sysprecquant<T>));
 
     InitializePrecession(system, m1_SI, m2_SI, mul, phl, mu1, ph1, ch1, mu2, ph2, ch2, f_0, ExpansionOrder);
 
@@ -1452,3 +1552,171 @@ template <class T> void OrbitalAngMom3PNSpinning(
 
     free(system);
 }
+
+
+// Template instantiations
+
+// template class vector3D<double>;
+// template class vector3D<adouble>;
+
+// template class sysprecquant<double>;
+// template class sysprecquant<adouble>;
+
+// template class PhenomPv3Storage<double>;
+// template class PhenomPv3Storage<adouble>;
+
+template void IMRPhenomPv3InitY2m<double>(sph_harm<double> *Ylm, double theta, double phi);
+template void IMRPhenomPv3InitY2m<adouble>(sph_harm<adouble> *Ylm, adouble theta, adouble phi);
+
+template void PhenomPrecessingSpinEnforcePrimary<double>(double *m1, double *m2,
+    double *chi1x, double *chi1y, double *chi1z,
+    double *chi2x, double *chi2y, double *chi2z);
+template void PhenomPrecessingSpinEnforcePrimary<adouble>(adouble *m1, adouble *m2,
+    adouble *chi1x, adouble *chi1y, adouble *chi1z,
+    adouble *chi2x, adouble *chi2y, adouble *chi2z);
+
+template void IMRPhenomPv3ComputeWignerD<double>(double (*WignerD22)[2][5], const double beta);
+template void IMRPhenomPv3ComputeWignerD<adouble>(adouble (*WignerD22)[2][5], const adouble beta);
+
+template void nudge<double>(double *x, double X, double epsilon);
+
+template vector3D<double> CreateSphVector<double>(const double r, const double th, const double ph);
+template vector3D<adouble> CreateSphVector<adouble>(const adouble r, const adouble th, const adouble ph);
+
+template vector3D<double> ScaleVector<double>(double c, vector3D<double> vec);
+template vector3D<adouble> ScaleVector<adouble>(adouble c, vector3D<adouble> vec);
+
+template vector3D<double> VectorSum<double>(vector3D<double> vec1, vector3D<double> vec2);
+template vector3D<adouble> VectorSum<adouble>(vector3D<adouble> vec1, vector3D<adouble> vec2);
+
+template double DotProduct<double>(const vector3D<double> vec1, const vector3D<double> vec2);
+template adouble DotProduct<adouble>(const vector3D<adouble> vec1, const vector3D<adouble> vec2);
+
+template double VectorNorm<double>(const vector3D<double> vec);
+template adouble VectorNorm<adouble>(const vector3D<adouble> vec);
+
+template vector3D<double> CrossProduct<double>(const vector3D<double> vec1, const vector3D<double> vec2);
+template vector3D<adouble> CrossProduct<adouble>(const vector3D<adouble> vec1, const vector3D<adouble> vec2);
+
+template vector3D<double> Roots<double>(const double L_norm, const double J_norm, const sysprecquant<double> *system);
+template vector3D<adouble> Roots<adouble>(const adouble L_norm, const adouble J_norm, const sysprecquant<adouble> *system);
+
+template vector3D<double> BCDcoeff<double>(const double L_norm, const double J_norm, const sysprecquant<double> *system);
+template vector3D<adouble> BCDcoeff<adouble>(const adouble L_norm, const adouble J_norm, const sysprecquant<adouble> *system);
+
+template double beta<double>(const double a, const double b, const sysprecquant<double> *system);
+template adouble beta<adouble>(const adouble a, const adouble b, const sysprecquant<adouble> *system);
+
+template double sigma<double>(const double a, const double b, const sysprecquant<double> *system);
+template adouble sigma<adouble>(const adouble a, const adouble b, const sysprecquant<adouble> *system);
+
+template double tau<double>(const double a, const double b, const sysprecquant<double> *system);
+template adouble tau<adouble>(const adouble a, const adouble b, const sysprecquant<adouble> *system);
+
+template double L_norm_3PN_of_xi<double>(const double xi, const double xi_2, const double L_norm, const sysprecquant<double> *system);
+template adouble L_norm_3PN_of_xi<adouble>(const adouble xi, const adouble xi_2, const adouble L_norm, const sysprecquant<adouble> *system);
+
+template double J_norm_of_xi<double>(const double L_norm, const sysprecquant<double> *system);
+template adouble J_norm_of_xi<adouble>(const adouble L_norm, const sysprecquant<adouble> *system);
+
+template double S_norm_of_xi<double>(const double xi, const double xi_2, const vector3D<double> roots, const sysprecquant<double> *system);
+template adouble S_norm_of_xi<adouble>(const adouble xi, const adouble xi_2, const vector3D<adouble> roots, const sysprecquant<adouble> *system);
+
+template double costhetaL<double>(const double J_norm, const double L_norm, const double S_norm);
+template adouble costhetaL<adouble>(const adouble J_norm, const adouble L_norm, const adouble S_norm);
+
+template double u_of_xi<double>(const double xi, const double xi_2, const sysprecquant<double> *system);
+template adouble u_of_xi<adouble>(const adouble xi, const adouble xi_2, const sysprecquant<adouble> *system);
+
+template double phiz_of_xi<double>(const double xi, const double xi_2, const double J_norm, const sysprecquant<double> *system);
+template adouble phiz_of_xi<adouble>(const adouble xi, const adouble xi_2, const adouble J_norm, const sysprecquant<adouble> *system);
+
+template double zeta_of_xi<double>(const double xi, const double xi_2, const sysprecquant<double> *system);
+template adouble zeta_of_xi<adouble>(const adouble xi, const adouble xi_2, const sysprecquant<adouble> *system);
+
+template vector3D<double> computeMScorrections<double>(const double xi, const double xi_2, const double L_norm, const double J_norm, const vector3D<double> roots, const sysprecquant<double> *system);
+template vector3D<adouble> computeMScorrections<adouble>(const adouble xi, const adouble xi_2, const adouble L_norm, const adouble J_norm, const vector3D<adouble> roots, const sysprecquant<adouble> *system);
+
+template vector3D<double> c_coeffs<double>(const double xi, const double xi_2, const double J_norm, const vector3D<double> roots, const sysprecquant<double> *system);
+template vector3D<adouble> c_coeffs<adouble>(const adouble xi, const adouble xi_2, const adouble J_norm, const vector3D<adouble> roots, const sysprecquant<adouble> *system);
+
+template vector3D<adouble> d_coeffs<adouble>(const adouble L_norm, const adouble J_norm, const vector3D<adouble> roots);
+template vector3D<double> d_coeffs<double>(const double L_norm, const double J_norm, const vector3D<double> roots);
+
+template int checkOmegaz5<double>(const double Omegaz5);
+template int checkOmegaz5<adouble>(const adouble Omegaz5);
+
+template vector3D<double> compute_phiz_zeta_costhetaL3PN<double>(const double xi, const sysprecquant<double> *system);
+template vector3D<adouble> compute_phiz_zeta_costhetaL3PN<adouble>(const adouble xi, const sysprecquant<adouble> *system);
+
+template double L2PNR<double>(const double v, const double eta);
+template adouble L2PNR<adouble>(const adouble v, const adouble eta);
+
+template double L3PN<double>(
+    const double f_orb_hz,
+    const double m1, const double m2,
+    const double s1x, const double s1y, const double s1z,
+    const double s2x, const double s2y, const double s2z,
+    const double f_0, const int ExpansionOrder);
+template adouble L3PN<adouble>(
+    const adouble f_orb_hz,
+    const adouble m1, const adouble m2,
+    const adouble s1x, const adouble s1y, const adouble s1z,
+    const adouble s2x, const adouble s2y, const adouble s2z,
+    const adouble f_0, const int ExpansionOrder);
+
+template void CartesianToPolar<double>(double *polar, double *azimuthal, double *magnitude, double x, double y, double z);
+template void CartesianToPolar<adouble>(adouble *polar, adouble *azimuthal, adouble *magnitude, adouble x, adouble y, adouble z);
+
+template void PhenomP_ParametersFromSourceFrame<double>(
+    double *chi1_l, double *chi2_l, double *chip, double *thetaJN, double *alpha0, double *phi_aligned, double *zeta_polariz,
+    const double m1, const double m2, const double f_ref, const double phiRef, const double incl,
+    const double s1x, const double s1y, const double s1z, const double s2x, const double s2y, const double s2z,
+    IMRPhenomP_version_type IMRPhenomP_version);
+template void PhenomP_ParametersFromSourceFrame<adouble>(
+    adouble *chi1_l, adouble *chi2_l, adouble *chip, adouble *thetaJN, adouble *alpha0, adouble *phi_aligned, adouble *zeta_polariz,
+    const adouble m1, const adouble m2, const adouble f_ref, const adouble phiRef, const adouble incl,
+    const adouble s1x, const adouble s1y, const adouble s1z, const adouble s2x, const adouble s2y, const adouble s2z,
+    IMRPhenomP_version_type IMRPhenomP_version);
+
+template void PhenomPv3_Param_Transform<double>(source_parameters<double> *out, gen_params_base<double> *in);
+template void PhenomPv3_Param_Transform<adouble>(source_parameters<adouble> *out, gen_params_base<adouble> *in);
+
+template void InitializePrecession<double>(
+    sysprecquant<double>* system,
+    const double m1, const double m2, const double mul, const double phl, const double mu1, const double ph1,
+    const double ch1, const double mu2, const double ph2, const double ch2, const double f_0,
+    const int ExpansionOrder);
+template void InitializePrecession<adouble>(
+    sysprecquant<adouble>* system,
+    const adouble m1, const adouble m2, const adouble mul, const adouble phl, const adouble mu1, const adouble ph1,
+    const adouble ch1, const adouble mu2, const adouble ph2, const adouble ch2, const adouble f_0,
+    const int ExpansionOrder);
+
+template void init_PhenomPv3_Storage<double>(PhenomPv3Storage<double> *p,  sysprecquant<double> *pAngles,
+    double m1, double m2,
+    double S1x, double S1y, double S1z,
+    double S2x, double S2y, double S2z,
+    const double distance, const double inclination,
+    const double phiRef, const double deltaF, const double f_min, const double f_max, const double f_ref
+);
+template void init_PhenomPv3_Storage<adouble>(PhenomPv3Storage<adouble> *p,  sysprecquant<adouble> *pAngles,
+    adouble m1, adouble m2,
+    adouble S1x, adouble S1y, adouble S1z,
+    adouble S2x, adouble S2y, adouble S2z,
+    const adouble distance, const adouble inclination,
+    const adouble phiRef, const adouble deltaF, const adouble f_min, const adouble f_max, const adouble f_ref
+);
+
+template void OrbitalAngMom3PNSpinning<double>(
+    std::vector<double> *L_norm_3PN, std::vector<double> *f_orb_hz,
+    const double m1_SI, const double m2_SI,
+    const double mul, const double phl, double mu1, double ph1, double ch1, double mu2, double ph2, double ch2,
+    const double f_0, const int ExpansionOrder
+);
+template void OrbitalAngMom3PNSpinning<adouble>(
+    std::vector<adouble> *L_norm_3PN, std::vector<adouble> *f_orb_hz,
+    const adouble m1_SI, const adouble m2_SI,
+    const adouble mul, const adouble phl, adouble mu1, adouble ph1, adouble ch1, adouble mu2, adouble ph2, adouble ch2,
+    const adouble f_0, const int ExpansionOrder
+);

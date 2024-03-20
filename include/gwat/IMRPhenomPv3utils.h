@@ -8,6 +8,10 @@
 #include "IMRPhenomP.h"
 
 
+#define ONE_OVER_EIGHT 0.125
+#define THREE_OVER_EIGHT 0.375
+#define SQRT_6 2.44948974278317788
+
 /*! \struct
  * 3D vector
  */
@@ -94,40 +98,40 @@ template <class T> void PhenomPrecessingSpinEnforcePrimary(T *m1, T *m2,
     T *chi1x, T *chi1y, T *chi1z,
     T *chi2x, T *chi2y, T *chi2z);
 
-template <class T> void IMRPhenomPv3ComputeWignerD(T *WignerD22, const T beta);
+template <class T> void IMRPhenomPv3ComputeWignerD(T (*WignerD22)[2][5], const T beta);
 
 template <class T> void nudge(T *x, T X, T epsilon);
 
-template <class T> static vector3D<T> CreateSphVector(const T r, const T th, const T ph);
-template <class T> static vector3D<T> ScaleVector(T c, vector3D<T> vec);
-template <class T> static vector3D<T> VectorSum(vector3D<T> vec1, vector3D<T> vec2);
-template <class T> static T DotProduct(const vector3D<T> vec1, const vector3D<T> vec2);
-template <class T> static T VectorNorm(const vector3D<T> vec);
-template <class T> static vector3D<T> CrossProduct(const vector3D<T> vec1, const vector3D<T> vec2);
+template <class T> vector3D<T> CreateSphVector(const T r, const T th, const T ph);
+template <class T> vector3D<T> ScaleVector(T c, vector3D<T> vec);
+template <class T> vector3D<T> VectorSum(vector3D<T> vec1, vector3D<T> vec2);
+template <class T> T DotProduct(const vector3D<T> vec1, const vector3D<T> vec2);
+template <class T> T VectorNorm(const vector3D<T> vec);
+template <class T> vector3D<T> CrossProduct(const vector3D<T> vec1, const vector3D<T> vec2);
 
-template <class T> static vector3D<T> Roots(const T L_norm, const T J_norm, const sysprecquant<T> *system);
-template <class T> static vector3D<T> BCDcoeff(const T L_norm, const T J_norm, const sysprecquant<T> *system);
-template <class T> static T beta(const T a, const T b, const sysprecquant<T> *system);
-template <class T> static T sigma(const T a, const T b, const sysprecquant<T> *system);
-template <class T> static T tau(const T a, const T b, const sysprecquant<T> *system);
+template <class T> vector3D<T> Roots(const T L_norm, const T J_norm, const sysprecquant<T> *system);
+template <class T> vector3D<T> BCDcoeff(const T L_norm, const T J_norm, const sysprecquant<T> *system);
+template <class T> T beta(const T a, const T b, const sysprecquant<T> *system);
+template <class T> T sigma(const T a, const T b, const sysprecquant<T> *system);
+template <class T> T tau(const T a, const T b, const sysprecquant<T> *system);
 
-template <class T> static T L_norm_3PN_of_xi(const T xi, const T xi_2, const T L_norm, const sysprecquant<T> *system);
-template <class T> static T J_norm_of_xi(const T L_norm, const sysprecquant<T> *system);
-template <class T> static T S_norm_of_xi(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system);
-template <class T> static T costhetaL(const T J_norm, const T L_norm, const T S_norm);
+template <class T> T L_norm_3PN_of_xi(const T xi, const T xi_2, const T L_norm, const sysprecquant<T> *system);
+template <class T> T J_norm_of_xi(const T L_norm, const sysprecquant<T> *system);
+template <class T> T S_norm_of_xi(const T xi, const T xi_2, const vector3D<T> roots, const sysprecquant<T> *system);
+template <class T> T costhetaL(const T J_norm, const T L_norm, const T S_norm);
 
-template <class T> static T u_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system);
-template <class T> static T phiz_of_xi(const T xi, const T xi_2, const T J_norm, const sysprecquant<T> *system);
-template <class T> static T zeta_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system);
+template <class T> T u_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system);
+template <class T> T phiz_of_xi(const T xi, const T xi_2, const T J_norm, const sysprecquant<T> *system);
+template <class T> T zeta_of_xi(const T xi, const T xi_2, const sysprecquant<T> *system);
 
-template <class T> static vector3D<T> computeMScorrections(const T xi, const T xi_2, const T L_norm, const T J_norm, const vector3D<T> roots, const sysprecquant<T> *system);
+template <class T> vector3D<T> computeMScorrections(const T xi, const T xi_2, const T L_norm, const T J_norm, const vector3D<T> roots, const sysprecquant<T> *system);
 
-template <class T> static int checkOmegaz5(const T Omegaz5);
+template <class T> int checkOmegaz5(const T Omegaz5);
 void invalidExpansionOrder(const int ExpansionOrder);
 
-template <class T> static vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi, const sysprecquant<T> *system);
+template <class T> vector3D<T> compute_phiz_zeta_costhetaL3PN(const T xi, const sysprecquant<T> *system);
 
-template <class T> static T L2PNR(const T v, const T eta);
+template <class T> T L2PNR(const T v, const T eta);
 template <class T> T L3PN(
     const T f_orb_hz,
     const T m1, const T m2,
@@ -145,13 +149,13 @@ template <class T> void PhenomP_ParametersFromSourceFrame(
 
 template <class T> void PhenomPv3_Param_Transform(source_parameters<T> *out, gen_params_base<T> *in);
 
-template <class T> static void InitializePrecession(
+template <class T> void InitializePrecession(
     sysprecquant<T>* system,
     const T m1, const T m2, const T mul, const T phl, const T mu1, const T ph1,
     const T ch1, const T mu2, const T ph2, const T ch2, const T f_0,
     const int ExpansionOrder);
 
-template <class T> static int init_PhenomPv3_Storage(PhenomPv3Storage<T> *p,  sysprecquant<T> *pAngles,
+template <class T> void init_PhenomPv3_Storage(PhenomPv3Storage<T> *p,  sysprecquant<T> *pAngles,
     T m1, T m2,
     T S1x, T S1y, T S1z,
     T S2x, T S2y, T S2z,
@@ -161,9 +165,9 @@ template <class T> static int init_PhenomPv3_Storage(PhenomPv3Storage<T> *p,  sy
 
 template <class T> void OrbitalAngMom3PNSpinning(
     std::vector<T> *L_norm_3PN, std::vector<T> *f_orb_hz,
-    const double m1_SI, const double m2_SI,
-    const double mul, const double phl, double mu1, double ph1, double ch1, double mu2, double ph2, double ch2,
-    const double f_0, const int ExpansionOrder
+    const T m1_SI, const T m2_SI,
+    const T mul, const T phl, T mu1, T ph1, T ch1, T mu2, T ph2, T ch2,
+    const T f_0, const int ExpansionOrder
 );
 
 

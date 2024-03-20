@@ -26,6 +26,7 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 {
     // Imaginary unit
     const std::complex<T> I (0.,1.);
+    const T half = 0.5;
 
     /* Store useful variables and compute derived and frequency independent variables */
     PhenomPv3Storage<T> *pv3storage;
@@ -34,12 +35,13 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
     sysprecquant<T> *pAngles;
     pAngles = (sysprecquant<T> *)malloc(sizeof(sysprecquant<T>));
 
+    T deltaF = -1; // for PhenomPv3Storage
     init_PhenomPv3_Storage(pv3storage, pAngles,
-        params->mass1, params->m2,
+        params->mass1, params->mass2,
         params->spin1x, params->spin1y, params->spin1z,
         params->spin2x, params->spin2y, params->spin2z,
         params->DL, params->incl_angle, params->phiRef,
-        -1, frequencies[0], frequencies[length-1], params->f_ref);
+        deltaF, frequencies[0], frequencies[length-1], params->f_ref);
 
     T phiHarm = 0.;
     sph_harm<T> *Y2m = (sph_harm<T> *)malloc(sizeof(sph_harm<T>));
@@ -67,16 +69,16 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 	this->amp_connection_coeffs(params,&lambda,pn_amp_coeffs,deltas);
 	this->phase_connection_coefficients(params,&lambda,pn_phase_coeffs);
 
-    // Rescale amplitude because we aren't just using (2,2) mode anymore
-	const T A0 = params->A0 * pow(M,7./6.) / ( 2. * sqrt(5. / (64.*M_PI)) );
-
     // Zero out the polarization arrays
-    std::fill(std::begin(waveform_plus), std::begin(waveform_plus)+length, std::complex<T> (0.));
-    std::fill(std::begin(waveform_cross), std::begin(waveform_cross)+length, std::complex<T> (0.));
+    std::fill(waveform_plus, waveform_plus+length, std::complex<T> (0.));
+    std::fill(waveform_cross, waveform_cross+length, std::complex<T> (0.));
 
     // Set up useful quantities
     const T Msec = params->M; // total mass in sec
     const T pi_Msec = GWAT_TWOPI * Msec;
+
+    // Rescale amplitude because we aren't just using (2,2) mode anymore
+	const T A0 = params->A0 * pow(Msec,7./6.) / ( 2. * sqrt(5. / (64.*M_PI)) );
 
     const T f_ref = params->f_ref;
 	const T phic = 2*params->phi_aligned;
@@ -85,8 +87,8 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
     T wignerD[2][5];
 
     std::complex<T> PhenomDamp, expphase, half_amp_eps, hp_proj, hc_proj;
-    T alpha, beta, two_epsilon;
-    T PhenomDphase;
+    T alpha, beta, two_epsilon, minusbeta;
+    T PhenomDphase, epsphase;
     T fHz;
     for (int j = 0; j < length; j++)
     {
@@ -109,12 +111,14 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
         IMRPhenomPv3_Compute_a_b_e(&alpha, &beta, &two_epsilon,
             fHz, pi_Msec, pv3storage, pAngles);
         // Compute the Wigner D elements
-        IMRPhenomPv3ComputeWignerD(wignerD, -beta);
+        minusbeta = -beta;
+        IMRPhenomPv3ComputeWignerD(&wignerD, minusbeta);
 
         // Twist-up
-        IMRPhenomPv3twist(&hp_proj, &hc_proj, alpha, Y2m, wignerD);
-        expphase = std::exp(-I*(PhenomDphase + two_epsilon));
-        half_amp_eps = 0.5 * PhenomDamp * expphase;
+        IMRPhenomPv3twist(&hp_proj, &hc_proj, alpha, Y2m, &wignerD);
+        epsphase = PhenomDphase + two_epsilon;
+        expphase = std::exp(-I*epsphase);
+        half_amp_eps = half * PhenomDamp * expphase;
 
         // Store the polarizations
         waveform_plus[j] += half_amp_eps * hp_proj;
@@ -123,19 +127,23 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
     
     // Time correction
     T t_corr_fixed;
-	if(params->shift_time){
+	if(params->shift_time)
+    {
 		t_corr_fixed = this->calculate_time_shift(params, &pows, pn_phase_coeffs, &lambda);
 	}
-	else{
+	else
+    {
 		t_corr_fixed = 0;
 	}
 
     // Phase correction
-    T phase_corr;
+    T phase_corr_term;
+    std::complex<T> phase_corr;
     T two_pi_t_corr = GWAT_TWOPI * t_corr_fixed;
     for (int j = 0; j<lengthCut; j++)
     {
-        phase_corr = std::exp(-I*(two_pi_t_corr * frequencies[j]));
+        phase_corr_term = two_pi_t_corr * frequencies[j];
+        phase_corr = std::exp(-I*phase_corr_term);
 
         waveform_plus[j] *= phase_corr;
         waveform_cross[j] *= phase_corr;
@@ -167,7 +175,7 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
  * Compute the precession angles at a single frequency
  */
 template <class T>
-static void IMRPhenomPv3_Compute_a_b_e(
+void IMRPhenomPv3_Compute_a_b_e(
     T *alpha, T *beta, T *two_epsilon,
     const T fHz, const T pi_Msec,
     const PhenomPv3Storage<T> *params, const sysprecquant<T> *pAngles)
@@ -180,13 +188,15 @@ static void IMRPhenomPv3_Compute_a_b_e(
 
     *alpha = angles.x + params->alpha0;
     
-    T epsilon = angles.y
+    T epsilon = angles.y;
     *two_epsilon = 2.*epsilon;
 
     /* angles.z can sometimes nan just above 1.
     * The following nudge seems to be a good fix.
     */
-    nudge(&(angles.z), 1.0, 1e-6); //This could even go from 1e-6 to 1e-15 - then would have to also change in Pv3 code. Should just fix the problem in the angles code.
+    T one = 1;
+    T diff = 1e-6;
+    nudge(&(angles.z), one, diff); //This could even go from 1e-6 to 1e-15 - then would have to also change in Pv3 code. Should just fix the problem in the angles code.
     *beta = acos(angles.z);
 }
 
@@ -199,22 +209,23 @@ void IMRPhenomPv3twist(
     std::complex<T> *hcTerm, /** [out] (twice) the cross polarization projector */
     const T alpha, /**< alpha angle */
     const sph_harm<T> *Y2ms, /**< spherical harmonics */
-    const T *wignerD[2][5] /** Wigner D^2_{+/- 2, m} */
+    const T (*wignerD)[2][5] /** Wigner D^2_{+/- 2, m} */
 )
 {
     // Imaginary unit
     const std::complex<T> I (0., 1.);
+    const std::complex<T> one (1.);
 
-    std::complex<T> Term1_sum = 0.;
-    std::complex<T> Term2_sum = 0.;
+    std::complex<T> Term1_sum (0.);
+    std::complex<T> Term2_sum (0.);
     std::complex<T> T1, T2;
 
     // Computer powers of exp{i m alpha}
     std::complex<T> cexp_i_alpha = std::complex<T> (0., alpha);
     std::complex<T> cexp_2i_alpha = cexp_i_alpha*cexp_i_alpha;
-    std::complex<T> cexp_mi_alpha = 1.0/cexp_i_alpha;
+    std::complex<T> cexp_mi_alpha = one/cexp_i_alpha;
     std::complex<T> cexp_m2i_alpha = cexp_mi_alpha*cexp_mi_alpha;
-    std::complex<T> cexp_im_alpha[5] = {cexp_m2i_alpha, cexp_mi_alpha, 1.0, cexp_i_alpha, cexp_2i_alpha};
+    std::complex<T> cexp_im_alpha[5] = {cexp_m2i_alpha, cexp_mi_alpha, one, cexp_i_alpha, cexp_2i_alpha};
 
     std::complex<T> Y2ms_arr[5] = 
 			{Y2ms->Y2m2, Y2ms->Y2m1, Y2ms->Y20, Y2ms->Y21, Y2ms->Y22};
@@ -222,8 +233,8 @@ void IMRPhenomPv3twist(
 
     for (int m = -2; m < 2; m++)
     {
-        T1 = cexp_im_alpha[m+2] * wignerD[0][m+2];
-        T2 = cexp_im_alpha[-m+2] * wignerD[1][m+2];
+        T1 = cexp_im_alpha[m+2] * (*wignerD)[0][m+2];
+        T2 = cexp_im_alpha[-m+2] * (*wignerD)[1][m+2];
 
         Y2m = Y2ms_arr[m+2];
         Term1_sum += T1 * Y2m;
@@ -234,4 +245,29 @@ void IMRPhenomPv3twist(
     *hcTerm = -I*(Term1_sum - Term2_sum);
 }
 
+
+// Template instantiations
+
+
+template void IMRPhenomPv3_Compute_a_b_e<double>(
+    double *, double *, double *,
+    const double, const double,
+    const PhenomPv3Storage<double> *, const sysprecquant<double> *
+);
+template void IMRPhenomPv3_Compute_a_b_e<adouble>(
+    adouble *, adouble *, adouble *,
+    const adouble, const adouble,
+    const PhenomPv3Storage<adouble> *, const sysprecquant<adouble> *
+);
+
+template void IMRPhenomPv3twist<double>(
+    std::complex<double> *hpTerm, std::complex<double> *hcTerm,
+    const double alpha, const sph_harm<double> *Y2m, const double (*wignerD)[2][5]
+);
+template void IMRPhenomPv3twist<adouble>(
+    std::complex<adouble> *hpTerm, std::complex<adouble> *hcTerm,
+    const adouble alpha, const sph_harm<adouble> *Y2m, const adouble (*wignerD)[2][5]
+);
+
 template class IMRPhenomPv3<double>;
+template class IMRPhenomPv3<adouble>;

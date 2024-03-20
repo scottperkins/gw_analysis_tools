@@ -26,14 +26,14 @@ private:
     virtual void init_post_merger(source_parameters<T> *params, lambda_parameters<T> *lambda);
 };
 
-template <class T> static void IMRPhenomPv3_Compute_a_b_e(
+template <class T> void IMRPhenomPv3_Compute_a_b_e(
     T *alpha, T *beta, T *two_epsilon,
-    T fHz, const T pi_Msec,
-    PhenomPv3Storage<T> *params, sysprecquant<T> *pAngles);
+    const T fHz, const T pi_Msec,
+    const PhenomPv3Storage<T> *params, const sysprecquant<T> *pAngles);
 
 template <class T> void IMRPhenomPv3twist(
-    std::complex<T> hpTerm, std::complex<T> hcTerm,
-    const T alpha, const sph_harm<T> *Y2m, const T *wignerD[2][5]
+    std::complex<T> *hpTerm, std::complex<T> *hcTerm,
+    const T alpha, const sph_harm<T> *Y2m, const T (*wignerD)[2][5]
 );
 
 #endif /* IMRPHENOMPV3_H */

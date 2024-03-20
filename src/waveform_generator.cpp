@@ -1291,7 +1291,7 @@ std::string prep_source_parameters(source_parameters<T> *out, gen_params_base<T>
 			out->populate_source_parameters(in);
 		}
 
-		PhenomPv3_Param_Transform(*out, *in);
+		PhenomPv3_Param_Transform(out, in);
 	}
 	if(generation_method.find("ppE") != std::string::npos){
 		out->Nmod = in->Nmod;
