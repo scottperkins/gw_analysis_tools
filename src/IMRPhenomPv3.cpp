@@ -79,6 +79,9 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
     const T Msec = params->M; // total mass in sec
     const T pi_Msec = M_PI * Msec;
 
+    std::complex<T> *hD = (std::complex<T> *)malloc(length*sizeof(std::complex<T>));
+    std::fill(hD, hD+length, std::complex<T> (0.));
+
     // Rescale amplitude because we aren't just using (2,2) mode anymore
 	const T A0 = params->A0 * pow(Msec,7./6.) / ( 2. * sqrt(5. / (64.*M_PI)) );
 
@@ -89,10 +92,13 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
     // T wignerD[2][5];
     T d2[5], dm2[5];
 
-    std::complex<T> PhenomDamp, expphase, half_amp_eps, hp_proj, hc_proj;
-    T alpha, beta, two_epsilon, minusbeta;
-    T PhenomDphase, epsphase;
+    std::complex<T> hp_proj, hc_proj;
+    std::complex<T> PhenomDamp, expphase, half_amp_eps;
+    T PhenomDphase;
     T fHz;
+
+    // Obtain non-precessing amplitude and phase
+    // Find the last index before fCut
     for (int j = 0; j < length; j++)
     {
         fHz = frequencies[j];
@@ -101,9 +107,7 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
             lengthCut = j;
             break;
         }
-        hp_proj = 0.;
-        hc_proj = 0.;
-        
+
         this->precalc_powers_ins(fHz, Msec, &pows);
 
         // Get non-precessing amplitude and phase
@@ -111,25 +115,56 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
 
         PhenomDphase = this->build_phase(fHz, &lambda, params, &pows, pn_phase_coeffs);        
         PhenomDphase -= phic + two_pi_tc * (fHz - params->f_ref); // shift from initial conditions
+        
+        expphase = std::exp(-I*PhenomDphase);
+        hD[j] = half * PhenomDamp * expphase;
+    }
 
-        // Compute the precession angles
-        IMRPhenomPv3_Compute_a_b_e(&alpha, &beta, &two_epsilon,
-            fHz, pi_Msec, pv3storage, pAngles);
-        // Compute the Wigner D elements
-        // minusbeta = -beta;
-        // IMRPhenomPv3ComputeWignerD(&wignerD, minusbeta);
-        PhenomPComputeWignerD(d2, dm2, beta, params);
-
-        // Twist-up
-        // IMRPhenomPv3twist(&hp_proj, &hc_proj, alpha, Y2m, &wignerD);
-        this->calculate_twistup(alpha, &hp_proj, &hc_proj, d2, dm2, Y2m);
-        epsphase = PhenomDphase + two_epsilon;
-        expphase = std::exp(-I*epsphase);
-        half_amp_eps = half * PhenomDamp * expphase;
+    // Find the polarizations
+    if (pv3storage->PRECESSING == 1) // non-precessing
+    {
+        // WignerD matrices become Kronecker deltas of their lower indices
+        std::complex<T> Y = Y2m->Y22;
+        std::complex<T> Ystar = conj(Y2m->Y2m2);
+        hp_proj = Y + Ystar;
+        hc_proj = Y - Ystar;
+        hc_proj *= I;
 
         // Store the polarizations
-        waveform_plus[j] += half_amp_eps * hp_proj;
-        waveform_cross[j] += half_amp_eps * hc_proj;
+        for (int j = 0; j<lengthCut; j++)
+        {
+            waveform_plus[j] += hp_proj * hD[j];
+            waveform_cross[j] += hc_proj * hD[j];
+        }
+    }
+    else // precessing
+    {
+        T alpha, beta, two_epsilon, epsphase;
+
+        for (int j = 0; j<lengthCut; j++)
+        {
+            hp_proj = 0.;
+            hc_proj = 0.;
+            fHz = frequencies[j];
+
+            // Compute the precession angles
+            IMRPhenomPv3_Compute_a_b_e(&alpha, &beta, &two_epsilon,
+                fHz, pi_Msec, pv3storage, pAngles);
+            expphase = std::exp(-I*two_epsilon);
+            half_amp_eps = hD[j] * expphase;
+
+            // Compute the Wigner D elements
+            // IMRPhenomPv3ComputeWignerD(&wignerD, minusbeta);
+            PhenomPComputeWignerD(d2, dm2, beta, params);
+
+            // Twist-up
+            // IMRPhenomPv3twist(&hp_proj, &hc_proj, alpha, Y2m, &wignerD);
+            this->calculate_twistup(alpha, &hp_proj, &hc_proj, d2, dm2, Y2m);
+
+            // Store the polarizations
+            waveform_plus[j] += half_amp_eps * hp_proj;
+            waveform_cross[j] += half_amp_eps * hc_proj;
+        }
     }
     
     // Time correction
@@ -171,6 +206,7 @@ int IMRPhenomPv3<T>::construct_waveform(T *frequencies, /**< T array of frequenc
     }
 
     // Cleanup
+    free(hD);
     free(Y2m);
     free(pv3storage);
     free(pAngles);
