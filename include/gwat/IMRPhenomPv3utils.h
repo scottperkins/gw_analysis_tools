@@ -163,8 +163,8 @@ template <class T> void init_PhenomPv3_Storage(PhenomPv3Storage<T> *p,  sysprecq
     const T phiRef, const T deltaF, const T f_min, const T f_max, const T f_ref
 );
 
-template <class T> void OrbitalAngMom3PNSpinning(
-    std::vector<T> *L_norm_3PN, std::vector<T> *f_orb_hz,
+template <class T> T OrbitalAngMom3PNSpinning(
+    const T f_orb_hz,
     const T m1_SI, const T m2_SI,
     const T mul, const T phl, T mu1, T ph1, T ch1, T mu2, T ph2, T ch2,
     const T f_0, const int ExpansionOrder

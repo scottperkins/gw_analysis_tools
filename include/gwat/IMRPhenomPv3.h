@@ -22,6 +22,11 @@ public:
 				std::complex<T> *waveform_cross,
 				source_parameters<T> *params);
 
+    virtual int construct_amplitude(T *frequencies,
+				int length,
+				T *amplitude,
+				source_parameters<T> *params);
+
 private:
     virtual void init_post_merger(source_parameters<T> *params, lambda_parameters<T> *lambda);
 };
@@ -35,5 +40,7 @@ template <class T> void IMRPhenomPv3twist(
     std::complex<T> *hpTerm, std::complex<T> *hcTerm,
     const T alpha, const sph_harm<T> *Y2m, const T (*wignerD)[2][5]
 );
+
+template<class T> void PhenomPComputeWignerD(T d2[5], T dm2[5], T b, source_parameters<T> *params);
 
 #endif /* IMRPHENOMPV3_H */

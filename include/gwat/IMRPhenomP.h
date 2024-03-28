@@ -34,6 +34,7 @@ typedef enum tagIMRPhenomP_version_type {
  IMRPhenomPv3_V  /**< version 3: based on IMRPhenomD and the precession angles from Katerina Chatziioannou PhysRevD.95.104004 (arxiv:1703.03967) */
 } IMRPhenomP_version_type;
 
+const double sqrt_6 = 2.44948974278317788;
 
 template<class T>
 struct alpha_coeffs

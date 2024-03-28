@@ -19,7 +19,6 @@
  */
 
 
-const double sqrt_6 = 2.44948974278317788;
 
 template<class T>
 T IMRPhenomPv2<T>::alpha(T omega, T q,T chi2l, T chi2){

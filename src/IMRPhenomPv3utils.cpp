@@ -19,12 +19,11 @@ void IMRPhenomPv3InitY2m(sph_harm<T> *Ylm, T theta, T phi)
     const std::complex<T> zero (0.,0.);
     *Ylm = {zero, zero, zero, zero, zero};
 
-    Ylm->Y22 = XLALSpinWeightedSphericalHarmonic(theta, phi,
-        -2, 2, 2);
-    Ylm->Y21 = XLALSpinWeightedSphericalHarmonic(theta,phi, -2,2,1);
-	Ylm->Y20 = XLALSpinWeightedSphericalHarmonic(theta,phi, -2,2,0);
-	Ylm->Y2m1 = XLALSpinWeightedSphericalHarmonic(theta,phi, -2,2,-1);
-	Ylm->Y2m2 = XLALSpinWeightedSphericalHarmonic(theta,phi, -2,2,-2);
+    Ylm->Y22  = XLALSpinWeightedSphericalHarmonic(theta, phi, -2, 2, 2);
+    Ylm->Y21  = XLALSpinWeightedSphericalHarmonic(theta, phi, -2, 2, 1);
+	Ylm->Y20  = XLALSpinWeightedSphericalHarmonic(theta, phi, -2, 2, 0);
+	Ylm->Y2m1 = XLALSpinWeightedSphericalHarmonic(theta, phi, -2, 2, -1);
+	Ylm->Y2m2 = XLALSpinWeightedSphericalHarmonic(theta, phi, -2, 2, -2);
 }
 
 /** Compute the Wigner D^{2}_{+/- 2, m}(beta) elements 
@@ -40,10 +39,6 @@ void IMRPhenomPv3ComputeWignerD(
     T cosb = cos(b);
     T cos2b = cos(b2);
     T sinb = sin(b);
-
-    T b3 = 0.;
-    T cos2b_over_two = 0.;
-    T cos3b = 0.;
 
     T cosb_over_two = cosb * 0.5;
     T cos2b_fac_1 = cos2b * ONE_OVER_EIGHT + THREE_OVER_EIGHT;
@@ -712,25 +707,18 @@ template <class T> T L3PN(
     T ph2 = 0.0;
     T ch2 = 0.0;
 
-    std::vector<T> L_norm_3PN_Seq {0.0};
-    std::vector<T> freqs_seq {0.0};
-
-    freqs_seq[0] = f_orb_hz;
-
     CartesianToPolar(&mu1, &ph1, &ch1, s1x, s1y, s1z);
     CartesianToPolar(&mu2, &ph2, &ch2, s2x, s2y, s2z);
 
     T cosmu1 = cos(mu1);
     T cosmu2 = cos(mu2);
-    OrbitalAngMom3PNSpinning(
-        &L_norm_3PN_Seq, &freqs_seq,
-        m1, m2,
-        mul, phl,
-        cosmu1, ph1, ch1,
-        cosmu2, ph2, ch2,
-        f_0, ExpansionOrder);
-
-    return L_norm_3PN_Seq[0];
+    return OrbitalAngMom3PNSpinning(
+            f_orb_hz,
+            m1, m2,
+            mul, phl,
+            cosmu1, ph1, ch1,
+            cosmu2, ph2, ch2,
+            f_0, ExpansionOrder);
 }
 
 /**
@@ -777,37 +765,6 @@ template <class T> void CartesianToPolar(
         *polar = along_z;
         *azimuthal = atan2tol(y, x, tol_atan);
     }
-}
-
-/**
- * Set the parameters for IMRPhenomPv3 source_parameters
-*/
-template <class T> void PhenomPv3_Param_Transform(source_parameters<T> *out, gen_params_base<T> *in)
-{
-    // chi1L, chi2L for intermediate calculations
-    T chi1L, chi2L;
-
-    // Define parameters used by Pv3
-    PhenomP_ParametersFromSourceFrame(&chi1L, &chi2L,
-        &(out->chip), &(out->thetaJN), &(out->alpha0),
-        &(out->phi_aligned), &(out->zeta_polariz),
-        in->mass1, in->mass2, in->f_ref, in->phiRef, in->incl_angle,
-        in->spin1[0], in->spin1[1], in->spin1[3],
-        in->spin2[0], in->spin2[1], in->spin2[3],
-        IMRPhenomPv3_V);
-
-    // Set parameters used by source_parameters
-    // to avoid issues (if any) down the line
-    T q = in->mass2/in->mass1;
-    T m1_M_2 = q/(1.+q);
-    T m2_M_2 = m1_M_2 / q;
-    // squared masses
-    m1_M_2 *= m1_M_2; 
-    m2_M_2 *= m2_M_2;
-
-    out->chil = chi1L + chi2L/q;
-    out->SP = out->chip * m1_M_2;
-    out->SL = chi1L * m1_M_2 + chi2L * m2_M_2;
 }
 
 /**
@@ -1192,6 +1149,37 @@ template <class T> void InitializePrecession(sysprecquant<T>* system, /** [out] 
 }
 
 /**
+ * Set the parameters for IMRPhenomPv3 source_parameters
+*/
+template <class T> void PhenomPv3_Param_Transform(source_parameters<T> *out, gen_params_base<T> *in)
+{
+    // chi1L, chi2L for intermediate calculations
+    T chi1L, chi2L;
+
+    // Define parameters used by Pv3
+    PhenomP_ParametersFromSourceFrame(&chi1L, &chi2L,
+        &(out->chip), &(out->thetaJN), &(out->alpha0),
+        &(out->phi_aligned), &(out->zeta_polariz),
+        in->mass1, in->mass2, in->f_ref, in->phiRef, in->incl_angle,
+        in->spin1[0], in->spin1[1], in->spin1[2],
+        in->spin2[0], in->spin2[1], in->spin2[2],
+        IMRPhenomPv3_V);
+
+    // Set parameters used by source_parameters
+    // to avoid issues (if any) down the line
+    T q = in->mass1/in->mass2;
+    T m1_M_2 = q/(1.+q);
+    T m2_M_2 = m1_M_2 / q;
+    // squared masses
+    m1_M_2 *= m1_M_2; 
+    m2_M_2 *= m2_M_2;
+
+    out->chil = chi1L + chi2L/q;
+    out->SP = out->chip * m1_M_2;
+    out->SL = chi1L * m1_M_2 + chi2L * m2_M_2;
+}
+
+/**
  * Function to map parameters
  * (masses, 6 spin components, phiRef and inclination at f_ref)
  * (assumed to be in the source frame
@@ -1201,8 +1189,6 @@ template <class T> void InitializePrecession(sysprecquant<T>* system, /** [out] 
  *  and the spherical angles of the line of sight N are (incl,Pi/2-phiRef))
  * into IMRPhenomP intrinsic parameters
  * (chi1_l, chi2_l, chip, thetaJN, alpha0 and phi_aligned).
- *
- * All input masses and frequencies should be in SI units.
  *
  * See Fig. 1. in arxiv:1408.1810 for a diagram of the angles.
  */
@@ -1483,11 +1469,15 @@ template <class T> void init_PhenomPv3_Storage(
     T chi1_l, chi2_l;
     PhenomP_ParametersFromSourceFrame(
         &chi1_l, &chi2_l, &(p->chip), &(p->thetaJN), &(p->alpha0), &(p->phi_aligned), &(p->zeta_polariz),
-        p->m1_SI, p->m2_SI, p->f_ref, p->phiRef, inclination,
+        m1, m2, p->f_ref, p->phiRef, inclination,
         p->chi1x, p->chi1y, p->chi1z,
         p->chi2x, p->chi2y, p->chi2z, IMRPhenomPv3_V);
 
     p->inclination = p->thetaJN;
+
+    /* compute spins in polar coordinates */
+    CartesianToPolar(&(p->chi1_theta), &(p->chi1_phi), &(p->chi1_mag), p->chi1x, p->chi1y, p->chi1z);
+    CartesianToPolar(&(p->chi2_theta), &(p->chi2_phi), &(p->chi2_mag), p->chi2x, p->chi2y, p->chi2z);
 
     if (p->PRECESSING != 1) // precessing case. compute angles
     {
@@ -1518,9 +1508,8 @@ template <class T> void init_PhenomPv3_Storage(
  * Compute the magnitude of L divided by GMsquare_over_c to
  * 3PN order with spin terms as a function of the orbital frequency in Hz
 */
-template <class T> void OrbitalAngMom3PNSpinning(
-    std::vector<T> *L_norm_3PN, /**< [out] Normalised Orbital angular momentum accurate to 3PN with spin terms */
-    std::vector<T> *f_orb_hz,    /**< list of input Orbital frequencies (Hz) */
+template <class T> T OrbitalAngMom3PNSpinning(
+    const T f_orb_hz,    /**< input Orbital frequencies (Hz) */
     const T m1_SI,           /**< Primary mass in SI (kg) */
     const T m2_SI,           /**< Secondary mass in SI (kg) */
     const T mul,          /**< Cosine of Polar angle of orbital angular momentum */
@@ -1535,6 +1524,7 @@ template <class T> void OrbitalAngMom3PNSpinning(
     const int ExpansionOrder   /**< Keep terms upto ExpansionOrder in precession angles phi_z and zeta (1,2,3,4,5 or -1 for all orders) */
 )
 {
+    T L_norm_3PN = 0;
     sysprecquant<T> *system = (sysprecquant<T> *)malloc(sizeof(sysprecquant<T>));
 
     InitializePrecession(system, m1_SI, m2_SI, mul, phl, mu1, ph1, ch1, mu2, ph2, ch2, f_0, ExpansionOrder);
@@ -1542,28 +1532,18 @@ template <class T> void OrbitalAngMom3PNSpinning(
     T xi, xi_2, L_norm;
     const T twopiGM_over_cthree = GWAT_TWOPI * GWAT_G_SI * (m1_SI + m2_SI) / (c*c*c);
 
-    for (int i = 0; i < (*f_orb_hz).size(); i++)
-    {
-        xi = pow((*f_orb_hz)[i] * twopiGM_over_cthree, system->onethird);
-        xi_2 = xi*xi;
-        L_norm = system->nu / xi;
-        (*L_norm_3PN)[i] = L_norm_3PN_of_xi(xi, xi_2, L_norm, system);
-    }
+    xi = pow(f_orb_hz * twopiGM_over_cthree, system->onethird);
+    xi_2 = xi*xi;
+    L_norm = system->nu / xi;
+    L_norm_3PN = L_norm_3PN_of_xi(xi, xi_2, L_norm, system);
 
     free(system);
+    return L_norm_3PN;
 }
 
 
 // Template instantiations
 
-// template class vector3D<double>;
-// template class vector3D<adouble>;
-
-// template class sysprecquant<double>;
-// template class sysprecquant<adouble>;
-
-// template class PhenomPv3Storage<double>;
-// template class PhenomPv3Storage<adouble>;
 
 template void IMRPhenomPv3InitY2m<double>(sph_harm<double> *Ylm, double theta, double phi);
 template void IMRPhenomPv3InitY2m<adouble>(sph_harm<adouble> *Ylm, adouble theta, adouble phi);
@@ -1708,14 +1688,14 @@ template void init_PhenomPv3_Storage<adouble>(PhenomPv3Storage<adouble> *p,  sys
     const adouble phiRef, const adouble deltaF, const adouble f_min, const adouble f_max, const adouble f_ref
 );
 
-template void OrbitalAngMom3PNSpinning<double>(
-    std::vector<double> *L_norm_3PN, std::vector<double> *f_orb_hz,
+template double OrbitalAngMom3PNSpinning<double>(
+    const double f_orb_hz,
     const double m1_SI, const double m2_SI,
     const double mul, const double phl, double mu1, double ph1, double ch1, double mu2, double ph2, double ch2,
     const double f_0, const int ExpansionOrder
 );
-template void OrbitalAngMom3PNSpinning<adouble>(
-    std::vector<adouble> *L_norm_3PN, std::vector<adouble> *f_orb_hz,
+template adouble OrbitalAngMom3PNSpinning<adouble>(
+    const adouble f_orb_hz,
     const adouble m1_SI, const adouble m2_SI,
     const adouble mul, const adouble phl, adouble mu1, adouble ph1, adouble ch1, adouble mu2, adouble ph2, adouble ch2,
     const adouble f_0, const int ExpansionOrder
