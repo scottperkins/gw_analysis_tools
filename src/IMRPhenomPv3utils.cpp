@@ -1012,6 +1012,11 @@ template <class T> void InitializePrecession(sysprecquant<T>* system, /** [out] 
     catch(const std::exception& e)
     {
         std::cerr << e.what() << '\n';
+        std::cerr << "f0 = " << f_0 << std::endl;
+        std::cerr << "(m1, cos(s1z), chi1) = ";
+        std::cerr << "(" << (m1/GWAT_MSUN_SI) << ", " << mu1 << ", " << ch1 << ")\n";
+        std::cerr << "(m2, cos(s2z), chi2) = ";
+        std::cerr << "(" << (m2/GWAT_MSUN_SI) << ", " << mu2 << ", " << ch2 << ")\n";
     }
     
     //eq.D16 (1703.03967), note that "c0" in the code is "$g_0$" in the paper and likewise for the other "c's" and "g's"

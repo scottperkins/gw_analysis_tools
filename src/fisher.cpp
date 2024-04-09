@@ -11,6 +11,8 @@
 #include "io_util.h"
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
+#include "IMRPhenomPv3utils.h"
+#include "IMRPhenomPv3.h"
 #include "ppE_utilities.h"
 #include "ppE_IMRPhenomD.h"
 #include "waveform_generator.h"
@@ -61,6 +63,7 @@ using namespace std;
  * 
  * EdGB_IMRPhenomPv2 !sky_averaged (14) --  RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p,  \alpha (all at f_ref)
  *
+ * IMRPhenomPv3 !sky_averaged (13) --  RA, DEC, psi,phiRef, tc, \iota_L,  ln DL, ln chirpmass, eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p (all at f_ref)
  *
  * All MCMC options correspond to the base, minus the coalescence time (which is maximized over) -- Reduced MCMC option correspond to the options above minus t_c (and phic for sky_averaged) -- Non reduced correspond to replacing \chi_1 \dot \hat{L}, \chi_2 \dot \hat{L}, \chi_p and \phi_p with |\chi_1|, |\chi_2|, \theta_1, \theta_2, \phi_1, and \phi_2
  *
@@ -992,7 +995,7 @@ void calculate_derivatives_autodiff(double *frequency,
  */
 void num_src_params(int *N_src_params, std::string generation_method, gen_params_base<double> *params)
 {
-	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
+	if(generation_method.find("IMRPhenomPv2")!=std::string::npos || generation_method.find("IMRPhenomPv3")!=std::string::npos){
 		*N_src_params = 9+1;	
 	}
 	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
@@ -1022,7 +1025,7 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_method, gen_params_base<double>*params)
 {
 	int gr_dim, gr_param_dim;
-	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
+	if(generation_method.find("IMRPhenomPv2")!=std::string::npos || generation_method.find("IMRPhenomPv3")!=std::string::npos){
 		src_params[0]=0;
 		src_params[1]=4;
 		src_params[2]=5;
@@ -1562,6 +1565,35 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 			fdamp = s_param.fdamp;
 			fpeak = modelp.fpeak(&s_param , &lambda);
 		}
+		else if(local_gen.find("IMRPhenomPv3")!=std::string::npos)
+		{
+			IMRPhenomPv3<T> modelp;
+
+			if (params->mass1 < params->mass2)
+			{
+				PhenomPrecessingSpinEnforcePrimary(&(params->mass1), &(params->mass2),
+				&(params->spin1[0]), &(params->spin1[1]), &(params->spin1[2]),
+				&(params->spin2[0]), &(params->spin2[1]), &(params->spin2[2]));
+			}
+
+			s_param.populate_source_parameters(params);
+			s_param.spin1z = params->spin1[2];
+			s_param.spin2z = params->spin2[2];
+			s_param.chip = params->chip;
+			s_param.phip = params->phip;
+			s_param.phiRef = params->phiRef;
+			s_param.f_ref = params->f_ref;
+			s_param.incl_angle = params->incl_angle;
+			PhenomPv3_Param_Transform(&s_param, params);
+
+			s_param.sky_average = params->sky_average;
+			s_param.cosmology = params->cosmology;
+			modelp.assign_lambda_param(&s_param,&lambda);	
+			modelp.post_merger_variables(&s_param);
+			fRD = s_param.fRD;
+			fdamp = s_param.fdamp;
+			fpeak = modelp.fpeak(&s_param , &lambda);
+		}
 		else if(local_gen.find("IMRPhenomD")!=std::string::npos){
 			IMRPhenomD<T> model;
 			//s_param = source_parameters<T>::populate_source_parameters(params);
@@ -1729,6 +1761,30 @@ void detect_adjust_parameters( double *freq_boundaries,double *grad_freqs, int *
 				fRD = s_param.fRD.value();
 				fpeak = modelp.fpeak(&s_param, &lambda).value();
 			}
+			else if(generation_method.find("IMRPhenomPv3")!=std::string::npos)
+			{
+				IMRPhenomPv3<adouble> modelp;
+
+				if (internal_params.mass1 < internal_params.mass2)
+				{
+					PhenomPrecessingSpinEnforcePrimary(&(internal_params.mass1), &(internal_params.mass2),
+					&(internal_params.spin1[0]), &(internal_params.spin1[1]), &(internal_params.spin1[2]),
+					&(internal_params.spin2[0]), &(internal_params.spin2[1]), &(internal_params.spin2[2]));
+				}
+
+				s_param.populate_source_parameters(&internal_params);
+				s_param.spin1z = internal_params.spin1[2];
+				s_param.spin2z = internal_params.spin2[2];
+				s_param.chip = internal_params.chip;
+				s_param.phip = internal_params.phip;
+				PhenomPv3_Param_Transform(&s_param, &internal_params);
+
+				modelp.assign_lambda_param(&s_param,&lambda);	
+				modelp.post_merger_variables(&s_param);
+				M = s_param.M.value();
+				fRD = s_param.fRD.value();
+				fpeak = modelp.fpeak(&s_param, &lambda).value();
+			}
 			else if(generation_method.find("IMRPhenomD")!=std::string::npos){
 				IMRPhenomD<adouble> modeld;
 				modeld.assign_lambda_param(&s_param, &lambda);
@@ -1746,7 +1802,7 @@ void detect_adjust_parameters( double *freq_boundaries,double *grad_freqs, int *
 void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors)
 {
 	if(!input_params->sky_average){
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
 			if(generation_method.find("MCMC") != std::string::npos){
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
@@ -1870,7 +1926,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 
 	}
 	else{
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
 			//Need to populate
 			if(generation_method.find("MCMC") != std::string::npos){
 				for(int i = 0 ; i<dimension; i++){
@@ -1897,7 +1953,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 			}
 			else{
 		
-				std::cout<<"Sky averaged IMRPhenomPv2 is not supported for regular fishers."<<std::endl;
+				std::cout<<"Sky averaged IMRPhenomP is not supported for regular fishers."<<std::endl;
 
 			}
 	
@@ -2072,7 +2128,7 @@ template<class T>
 void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim, gen_params_base<double> *original_params)
 {
 	if(!a_params->sky_average){
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
 				a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
 					avec_parameters[8]);
@@ -2211,7 +2267,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 	}
 	else{
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
 
 				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),avec_parameters[1]);
