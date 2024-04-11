@@ -172,6 +172,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv41c"><code class="docutils literal notranslate"><span class="pre">c</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv41G"><code class="docutils literal notranslate"><span class="pre">G</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv48MSOL_SEC"><code class="docutils literal notranslate"><span class="pre">MSOL_SEC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv411GWAT_MPC_SI"><code class="docutils literal notranslate"><span class="pre">GWAT_MPC_SI</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv47MPC_SEC"><code class="docutils literal notranslate"><span class="pre">MPC_SEC</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv46T_year"><code class="docutils literal notranslate"><span class="pre">T_year</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#_CPPv45T_day"><code class="docutils literal notranslate"><span class="pre">T_day</span></code></a></li>
@@ -493,6 +494,46 @@
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
 <dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.GWAT_LN2">
+<span class="target" id="util_8h_1afd4b94abe666954fc64bfd681d36bae0"></span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_LN2</span></span></span><a class="headerlink" href="#c.GWAT_LN2" title="Link to this definition"></a><br /></dt>
+<dd><p>natural log of 2 </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.GWAT_G_SI">
+<span class="target" id="util_8h_1a613aeb417f6d1a03f8803df4881f3685"></span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_G_SI</span></span></span><a class="headerlink" href="#c.GWAT_G_SI" title="Link to this definition"></a><br /></dt>
+<dd><p>Gravitational constant in SI </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.GWAT_TWOPI">
+<span class="target" id="util_8h_1a92975c7041318c50a487aa8a85252d3d"></span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_TWOPI</span></span></span><a class="headerlink" href="#c.GWAT_TWOPI" title="Link to this definition"></a><br /></dt>
+<dd><p>2*PI </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.GWAT_MSUN_SI">
+<span class="target" id="util_8h_1a3ef6441e8e12749bc44020d2d09591ea"></span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_MSUN_SI</span></span></span><a class="headerlink" href="#c.GWAT_MSUN_SI" title="Link to this definition"></a><br /></dt>
+<dd><p>! Nominal solar mass, kg </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.GWAT_MTSUN_SI">
+<span class="target" id="util_8h_1a2a285fdad4d718c5486cc9fd22187cba"></span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_MTSUN_SI</span></span></span><a class="headerlink" href="#c.GWAT_MTSUN_SI" title="Link to this definition"></a><br /></dt>
+<dd><p>Geometrized nominal solar mass, s ! </p>
+<p>!</p>
+<p>GWAT_MTSUN_SI = GWAT_GMSUN_SI / c^3 </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.GWAT_MRSUN_SI">
+<span class="target" id="util_8h_1a4d3b0b7c84fcdcbdd83cf1c2f7f3d3ae"></span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_MRSUN_SI</span></span></span><a class="headerlink" href="#c.GWAT_MRSUN_SI" title="Link to this definition"></a><br /></dt>
+<dd><p>Geometrized nominal solar mass, m ! </p>
+<p>!</p>
+<p>GWAT_MRSUN_SI = GWAT_GMSUN_SI / c^3 </p>
+</dd></dl>
+
+<dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.PBSTR">
 <span class="target" id="util_8h_1a93f03159397f25c687840129b18c972d"></span><span class="sig-name descname"><span class="n"><span class="pre">PBSTR</span></span></span><a class="headerlink" href="#c.PBSTR" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
@@ -500,6 +541,11 @@
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.PBWIDTH">
 <span class="target" id="util_8h_1a69793e71975c25754a8236df29896e15"></span><span class="sig-name descname"><span class="n"><span class="pre">PBWIDTH</span></span></span><a class="headerlink" href="#c.PBWIDTH" title="Link to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.MAX_TOL_ATAN">
+<span class="target" id="util_8h_1a7a6cd0fd85492d6fad6af2807bef9d22"></span><span class="sig-name descname"><span class="n"><span class="pre">MAX_TOL_ATAN</span></span></span><a class="headerlink" href="#c.MAX_TOL_ATAN" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>
@@ -1188,7 +1234,7 @@
 
 <dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv41G">
-<span id="_CPPv31G"></span><span id="_CPPv21G"></span><span id="G__doubleC"></span><span class="target" id="util_8h_1ab97e4616d23ed4c2961295010c1afc3c"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">G</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">6.67430e-11</span></span><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="m"><span class="pre">1.988409902147041637325262574352366540e30</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#_CPPv41G" title="Link to this definition"></a><br /></dt>
+<span id="_CPPv31G"></span><span id="_CPPv21G"></span><span id="G__doubleC"></span><span class="target" id="util_8h_1ab97e4616d23ed4c2961295010c1afc3c"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">G</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">GWAT_G_SI</span></span><span class="w"> </span><span class="o"><span class="pre">*</span></span><span class="w"> </span><span class="p"><span class="pre">(</span></span><span class="m"><span class="pre">1.988409902147041637325262574352366540e30</span></span><span class="p"><span class="pre">)</span></span><a class="headerlink" href="#_CPPv41G" title="Link to this definition"></a><br /></dt>
 <dd><p>Gravitational constant in m**3/(s**2 SolMass) </p>
 </dd></dl>
 
@@ -1199,8 +1245,14 @@
 </dd></dl>
 
 <dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv411GWAT_MPC_SI">
+<span id="_CPPv311GWAT_MPC_SI"></span><span id="_CPPv211GWAT_MPC_SI"></span><span id="GWAT_MPC_SI__doubleC"></span><span class="target" id="util_8h_1aaa94ff563a649a1815992ff468dba244"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GWAT_MPC_SI</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">3.085677581491367278913937957796471611e22</span></span><a class="headerlink" href="#_CPPv411GWAT_MPC_SI" title="Link to this definition"></a><br /></dt>
+<dd><p>Meters in a megaparsec </p>
+</dd></dl>
+
+<dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv47MPC_SEC">
-<span id="_CPPv37MPC_SEC"></span><span id="_CPPv27MPC_SEC"></span><span id="MPC_SEC__doubleC"></span><span class="target" id="util_8h_1a47be806b6c8a58bd030f167ca91ed201"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MPC_SEC</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">3.085677581491367278913937957796471611e22</span></span><span class="w"> </span><span class="o"><span class="pre">/</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv41c" title="c"><span class="n"><span class="pre">c</span></span></a><a class="headerlink" href="#_CPPv47MPC_SEC" title="Link to this definition"></a><br /></dt>
+<span id="_CPPv37MPC_SEC"></span><span id="_CPPv27MPC_SEC"></span><span id="MPC_SEC__doubleC"></span><span class="target" id="util_8h_1a47be806b6c8a58bd030f167ca91ed201"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MPC_SEC</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv411GWAT_MPC_SI" title="GWAT_MPC_SI"><span class="n"><span class="pre">GWAT_MPC_SI</span></span></a><span class="w"> </span><span class="o"><span class="pre">/</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv41c" title="c"><span class="n"><span class="pre">c</span></span></a><a class="headerlink" href="#_CPPv47MPC_SEC" title="Link to this definition"></a><br /></dt>
 <dd><p>consts.kpc.to(‘m’)*1000/c Mpc in sec </p>
 </dd></dl>
 

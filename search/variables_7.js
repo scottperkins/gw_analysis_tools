@@ -17,7 +17,7 @@ var searchData=
   ['history_5fupdate_14',['history_update',['../classsampler.html#ae8c91af39ee6b6342becfb78b6bfc260',1,'sampler']]],
   ['hl_15',['hl',['../classwaveform__polarizations.html#a173b62767ad62b1390302e4e2fdd41d0',1,'waveform_polarizations']]],
   ['horizon_5fcoord_16',['horizon_coord',['../classgen__params__base.html#a75a9201e603d8d7e348a8ae914b03ee9',1,'gen_params_base']]],
-  ['hplus_17',['hplus',['../structskysearch__params.html#a2507ab4bf5b70a0cb34263ec54819151',1,'skysearch_params::hplus'],['../classwaveform__polarizations.html#a51dd113681f2ff29ecc0421ffc90383e',1,'waveform_polarizations::hplus']]],
+  ['hplus_17',['hplus',['../classwaveform__polarizations.html#a51dd113681f2ff29ecc0421ffc90383e',1,'waveform_polarizations::hplus'],['../structskysearch__params.html#a2507ab4bf5b70a0cb34263ec54819151',1,'skysearch_params::hplus']]],
   ['hx_18',['hx',['../classwaveform__polarizations.html#a9023392f0578dc6fdcb60f4e935bbbe7',1,'waveform_polarizations']]],
   ['hy_19',['hy',['../classwaveform__polarizations.html#a53e85c60adb6706f9432ba7e2fee1cd3',1,'waveform_polarizations']]]
 ];

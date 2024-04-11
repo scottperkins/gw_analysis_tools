@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['threads_5fper_5fblock_0',['THREADS_PER_BLOCK',['../autocorrelation__cuda_8h.html#a869bf6501bf4809f3de1db59ef2dd914',1,'autocorrelation_cuda.h']]]
+  ['rotatey_0',['ROTATEY',['../IMRPhenomP_8h.html#ac7b1a6a2bcd511c88405f0d1c53d6f9a',1,'IMRPhenomP.h']]],
+  ['rotatez_1',['ROTATEZ',['../IMRPhenomP_8h.html#a31ac217bed1daa05f93845a6f9a6a211',1,'IMRPhenomP.h']]]
 ];

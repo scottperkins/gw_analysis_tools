@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['rotatey_0',['ROTATEY',['../IMRPhenomP_8cpp.html#ac7b1a6a2bcd511c88405f0d1c53d6f9a',1,'IMRPhenomP.cpp']]],
-  ['rotatez_1',['ROTATEZ',['../IMRPhenomP_8cpp.html#a31ac217bed1daa05f93845a6f9a6a211',1,'IMRPhenomP.cpp']]]
+  ['pbstr_0',['PBSTR',['../util_8h.html#a93f03159397f25c687840129b18c972d',1,'util.h']]],
+  ['pbwidth_1',['PBWIDTH',['../util_8h.html#a69793e71975c25754a8236df29896e15',1,'util.h']]]
 ];
