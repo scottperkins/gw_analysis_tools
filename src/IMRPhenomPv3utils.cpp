@@ -166,8 +166,7 @@ template <class T> int checkOmegaz5(const T Omegaz5)
     if (Omegaz5 >= 1000.0)
     {
         std::ostringstream str;
-        str << "Omegaz5 = " << Omegaz5;
-        str << "  which is larger than expected. Not generating a waveform here.";
+        str << "Omegaz5 = " << Omegaz5 << ", which is larger than expected.";
 
         throw std::domain_error(str.str());
     }
@@ -1005,19 +1004,21 @@ template <class T> void InitializePrecession(sysprecquant<T>* system, /** [out] 
 
     /* We check the size of the Omegaz5 coefficient to try and catch
     cases where we think the precession model is breaking down */
-    try
-    {
-        checkOmegaz5(Omegaz5);
-    }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-        std::cerr << "f0 = " << f_0 << std::endl;
-        std::cerr << "(m1, cos(s1z), chi1) = ";
-        std::cerr << "(" << (m1/GWAT_MSUN_SI) << ", " << mu1 << ", " << ch1 << ")\n";
-        std::cerr << "(m2, cos(s2z), chi2) = ";
-        std::cerr << "(" << (m2/GWAT_MSUN_SI) << ", " << mu2 << ", " << ch2 << ")\n";
-    }
+    // Commented out as it isn't really significant.
+    // TODO: Activate the check with a flag.
+    //try
+    //{
+    //    checkOmegaz5(Omegaz5);
+    //}
+    //catch(const std::exception& e)
+    //{
+    //    std::cerr << e.what() << '\n';
+    //    std::cerr << "f0 = " << f_0 << std::endl;
+    //    std::cerr << "(m1, cos(s1z), chi1) = ";
+    //    std::cerr << "(" << (m1/GWAT_MSUN_SI) << ", " << mu1 << ", " << ch1 << ")\n";
+    //    std::cerr << "(m2, cos(s2z), chi2) = ";
+    //    std::cerr << "(" << (m2/GWAT_MSUN_SI) << ", " << mu2 << ", " << ch2 << ")\n";
+    //}
     
     //eq.D16 (1703.03967), note that "c0" in the code is "$g_0$" in the paper and likewise for the other "c's" and "g's"
     system->constants_phiz[0] = 3.*Omegaz0*c0;
