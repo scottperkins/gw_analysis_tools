@@ -388,7 +388,7 @@ double maximized_Log_Likelihood(std::complex<double> *data,
 		
 		free(response);
 		}
-	if(	generation_method.find("IMRPhenomPv2")!=std::string::npos){
+	if(generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos){
 				
 		//fourier_waveform(frequencies,length,hp,hc,generation_method,params);
 		waveform_polarizations<double> wp;
@@ -1959,7 +1959,8 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=true;
 	} 
-	else if(generation_method.find("PhenomPv2") != std::string::npos && (dimension - totalmod) == 8)
+	else if((generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos)
+		&& (dimension - totalmod) == 8)
 	{
 		std::cout<<"Sampling in parameters: ln chirpmass, eta, a1, a2, tilt1, tilt2, phi1, phi2";
 		for(int i =0; i<totalmod; i++){
@@ -2092,7 +2093,8 @@ void PTMCMC_method_specific_prep(std::string generation_method, int dimension,do
 		}
 		mcmc_intrinsic=false;
 	} 
-	else if(generation_method.find("PhenomPv2") != std::string::npos && (dimension - totalmod) == 15)
+	else if((generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos)
+		&& (dimension - totalmod) == 15)
 	{
 		std::cout<<"Sampling in parameters: RA, sin DEC, psi, cos iota,phi_ref, tc,  ln DL, ln chirpmass, eta, a1, a2,cos tilt1, cos tilt2, phi1, phi2"<<std::endl;
 		for(int i =0; i<totalmod; i++){
@@ -2151,7 +2153,7 @@ void MCMC_fisher_transformations(
 		fisher[8][8] += 1./.25;//eta
 		fisher[9][9] += 1./4;//spin1
 		fisher[10][10] += 1./4;//spin2
-		if(generation_method.find("PhenomPv2") != std::string::npos){
+		if(generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos){
 			fisher[11][11] += 1./4;//cos theta1
 			fisher[12][12] += 1./4;//cos theta2
 			fisher[13][13] += 1./(4*M_PI*M_PI);//phi1
@@ -2159,7 +2161,7 @@ void MCMC_fisher_transformations(
 		}
 	}
 	else{
-		if(generation_method.find("PhenomPv2") != std::string::npos){
+		if(generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos){
 			fisher[1][1] =1./(.25) ;//eta
 			fisher[2][2] =1./(4);//spin1
 			fisher[3][3] =1./(4);//spin2
@@ -2840,7 +2842,7 @@ void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, i
 			}
 		}
 	}
-	else if(min_dim==15 && (generation_method.find("IMRPhenomPv2") != std::string::npos)){
+	else if(min_dim==15 && (generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos)){
 		mcmc_intrinsic=false;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL ,ln chirpmass, eta, chi1, chi2, psi";
 		for(int i =0; i<mcmc_Nmod_max; i++){
@@ -2870,7 +2872,7 @@ void RJPTMCMC_method_specific_prep(std::string generation_method, int max_dim, i
 			}
 		}
 	}
-	else if(min_dim==8 && (generation_method.find("IMRPhenomPv2") != std::string::npos)){
+	else if(min_dim==8 && (generation_method.find("PhenomPv2") != std::string::npos || generation_method.find("PhenomPv3") != std::string::npos)){
 		mcmc_intrinsic=true;
 		std::cout<<"Sampling in parameters: cos inclination, RA, DEC, ln DL ,ln chirpmass, eta, chi1, chi2, psi";
 		for(int i =0; i<mcmc_Nmod_max; i++){
@@ -3743,7 +3745,7 @@ void RJMCMC_2WF_fisher_wrapper(
 		fisher[8][8] += 1./.25;//eta
 		fisher[9][9] += 1./4;//spin1
 		fisher[10][10] += 1./4;//spin2
-		if(mcmc_generation_method_base.find("PhenomPv2") != std::string::npos){
+		if(mcmc_generation_method_base.find("PhenomPv2") != std::string::npos || mcmc_generation_method_base.find("PhenomPv3") != std::string::npos){
 			fisher[11][11] += 1./4;//cos theta1
 			fisher[12][12] += 1./4;//cos theta2
 			fisher[13][13] += 1./(4*M_PI*M_PI);//phi1
@@ -3751,7 +3753,7 @@ void RJMCMC_2WF_fisher_wrapper(
 		}
 	}
 	else{
-		if(mcmc_generation_method_base.find("PhenomPv2") != std::string::npos){
+		if(mcmc_generation_method_base.find("PhenomPv2") != std::string::npos || mcmc_generation_method_base.find("PhenomPv3") != std::string::npos){
 			fisher[1][1] =1./(.25) ;//eta
 			fisher[2][2] =1./(4);//spin1
 			fisher[3][3] =1./(4);//spin2
