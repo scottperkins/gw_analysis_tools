@@ -669,6 +669,13 @@ public:
 	
 			}
 		}
+		else if (mcmcVar->mcmc_adaptive)
+		{
+			ll = mcmcVar->adaptivell->log_likelihood(
+				mcmcVar->mcmc_detectors, mcmcVar->mcmc_num_detectors,
+				&gen_params, local_integration_method, mcmcVar->mcmc_save_waveform
+				);
+		}
 		else{
 			double RA = gen_params.RA;
 			double DEC = gen_params.DEC;
@@ -1239,7 +1246,8 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputFileMoniker,
 	bool ignoreExistingCheckpoint,
 	bool restrictSwapTemperatures,
-	bool coldChainStorageOnly
+	bool coldChainStorageOnly,
+	AdaptiveLikelihood *adaptivell
 	)
 {
 	int chainN = ensembleSize*ensembleN;
@@ -1270,6 +1278,11 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	mcmcVar.mcmc_save_waveform = true;
 	mcmcVar.maxDim = dimension;
 
+	if (adaptivell != nullptr)
+	{
+		mcmcVar.adaptivell = adaptivell;
+		mcmcVar.mcmc_adaptive = true;
+	}
 
 
 //##########################################################
