@@ -60,13 +60,13 @@ int test_EA_fisher(int argc, char *argv[])
 	std::cout.precision(15);
 	//Create injection structure
 	gen_params params;	
-	params.mass1 = 1.9;
-	params.mass2 = 1.4;
+	//params.mass1 = 1.9 *MSOL_SEC;
+	params.mass1 = 1.4 *MSOL_SEC;
+	params.mass2 = 1.4 *MSOL_SEC;
 	params.spin1[2] = -.03;
 	params.spin2[2] = .03 ;
 	params.Luminosity_Distance = 30;
 	params.incl_angle = 3*M_PI/4;
-
 
 	params.NSflag1 = true;
 	params.NSflag2 =true;
@@ -75,8 +75,8 @@ int test_EA_fisher(int argc, char *argv[])
 	params.RA = 1.;
 	params.DEC = 0.6;
 	params.f_ref = 20;
-	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
-	double eta = calculate_eta(params.mass1,params.mass2)*MSOL_SEC;
+	double chirpmass = calculate_chirpmass(params.mass1,params.mass2);//*MSOL_SEC;
+	double eta = calculate_eta(params.mass1,params.mass2);//*MSOL_SEC;
 
 	params.horizon_coord = false;
 	params.shift_time=false;
@@ -108,7 +108,8 @@ int test_EA_fisher(int argc, char *argv[])
 	//#######################################
 	//#######################################
 	
-	
+	std::cout<<"m1: "<<params.mass1<<", m2: "<<params.mass2<<std::endl;
+	std::cout<<"chirpmass: "<<chirpmass<<", eta: "<<eta<<std::endl; 
 
 	//#######################################
 	//#######################################
@@ -123,10 +124,10 @@ int test_EA_fisher(int argc, char *argv[])
 	int Ndetect = 3;
 	double **psd = new double*[Ndetect];
 	//Noise curves to use
-	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
+	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdLIGOMidHigh"}; //"AdVIRGOPlus1"};
 	
 	//Calculate freq/weight array (using gauss-legendre quadrature)
-	bool AD = false;
+	bool AD = true;
 	bool GL = false;
 	double *weights = new double[length];
 	if(AD && GL){
@@ -151,7 +152,7 @@ int test_EA_fisher(int argc, char *argv[])
 			psd[i][j]*=psd[i][j];	
 		}
 	}
-
+	std::cout<<"frequency[10]:"<<frequency[10]<<std::endl; 
 	
 	//Set detector names
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
@@ -159,9 +160,11 @@ int test_EA_fisher(int argc, char *argv[])
 	//###############################################
 	//Dimension and model
 	//###############################################
-	int dim = 15;
-	std::string method = "EA_IMRPhenomD_NRT";
-
+	//int dim = 15;
+	//std::string method = "EA_IMRPhenomD_NRT";
+	int dim = 11; 
+	std::string method = "IMRPhenomD"; 
+	
 	//###############################################
 	//Allocate output
 	//###############################################
@@ -187,14 +190,18 @@ int test_EA_fisher(int argc, char *argv[])
 			if(GL){
 				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "GAUSSLEG", weights, true), 2);
 				fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
+				//debugger_print(__FILE__,__LINE__, total_snr);
+
 			}
 			else{
 				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
 				fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "SIMPSONS",weights,false, psd[i],NULL,NULL);
+				//debugger_print(__FILE__,__LINE__, total_snr);
 			}
 		}
 		else{
-				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
+		        total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
+			//debugger_print(__FILE__,__LINE__,total_snr);
 			fisher_numerical(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, 2,NULL,NULL, psd[i]);
 		}
 		for(int k = 0 ; k<dim; k++){
@@ -220,8 +227,9 @@ int test_EA_fisher(int argc, char *argv[])
 	//output_AD[dim-2][dim-2]+= 1./sigma_omega/sigma_omega;
 	//output_AD[dim-1][dim-1]+= 1./sigma_sigma/sigma_sigma;
 	//####################################
-	for(int i = 0 ; i <3; i++){
-	//  //	  for(int j = 0 ; j<4; j++){
+
+	//####Removing correlations between EA coupling constants for simplicity
+	/*for(int i = 0 ; i <3; i++){
 	  for(int j = 0 ; j<dim; j++){
 	    if(i!=j){
 	      output_AD[dim-1-i][dim-1-j] = 0;
@@ -233,7 +241,7 @@ int test_EA_fisher(int argc, char *argv[])
 	      output_AD[dim-1-j][dim-1-i] = 0; 
 	    }
 	  }
-	}
+	  }*/
 
 	//###############################################
 	//Invert and print -- uncomment to see full cov or fisher
@@ -251,14 +259,14 @@ int test_EA_fisher(int argc, char *argv[])
 
 	gsl_LU_matrix_invert(output_AD,COV_AD,dim);
 	//gsl_cholesky_matrix_invert(output_AD,COV_AD,dim);
-	//std::cout<<"COV AD:"<<std::endl;
-	//for(int i = 0 ; i<dim; i++){
-	//	std::cout<<i<<" ";
-	//	for(int j = 0 ; j<dim; j++){
-	//		std::cout<<COV_AD[i][j]<<" ";
-	//	}
-	//	std::cout<<std::endl;
-	//}
+	std::cout<<"COV AD:"<<std::endl;
+	for(int i = 0 ; i<dim; i++){
+	  std::cout<<i<<" ";
+	  for(int j = 0 ; j<dim; j++){
+	    std::cout<<COV_AD[i][j]<<" ";
+	  }
+	  std::cout<<std::endl;
+	}
 	std::cout<<"Standard Deviations:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<": "<<std::sqrt(COV_AD[i][i])<<"\n";
