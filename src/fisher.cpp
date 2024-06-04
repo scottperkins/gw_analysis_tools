@@ -152,8 +152,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-  	double epsilon = 1e-8;
-
+  double epsilon = 1e-8;
+  //double epsilon = .01; 
   //double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
@@ -173,7 +173,6 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	gen_params waveform_params;
 	repack_non_parameter_options(&waveform_params,parameters, gen_method);
 	//##########################################################
-	//debugger_print(__FILE__,__LINE__,"WHAT THE FUCK");	
 	//for(int i = 0 ; i<dimension; i++){
 	//	std::cout<<parameters_vec[i]<<std::endl;
 	//}
@@ -213,6 +212,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			}
 			param_p[i] = parameters_vec[i] + epsilon;
 			param_m[i] = parameters_vec[i] - epsilon;
+			if(i==8 && parameters_vec[i] >.25-epsilon){
+			  param_p[i] = parameters_vec[i]; //instead of parameters_vec[i] + epsilon
+			  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+			}
 			if(order>=4){
 				for( int j =0;j<dimension;j++){
 					param_pp[j] = parameters_vec[j] ;
@@ -220,6 +223,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				}
 				param_pp[i] = parameters_vec[i] + 2*epsilon;
 				param_mm[i] = parameters_vec[i] - 2*epsilon;
+				if(i==8 && parameters_vec[i] >.25-epsilon){
+				  param_pp[i] = parameters_vec[i];
+				  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+				}
 
 			}
 			repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
@@ -278,20 +285,31 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			if(order==2){
 				for (int l =0;l<length;l++)
 				{
-					amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
-					phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
-					response_deriv[i][l] = amplitude_deriv + 
-						std::complex<double>(0,1)*phase_deriv*amplitude[l];
+				  if(i==8 && parameters_vec[i] > .25-epsilon){
+				    amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(epsilon);
+				    phase_deriv = (phase_plus[l] -phase_minus[l])/(epsilon);
+				  }
+				  else{
+				    amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
+				    phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
+				  }
+				  response_deriv[i][l] = amplitude_deriv + 
+				    std::complex<double>(0,1)*phase_deriv*amplitude[l];
 				}
 			}
 			else if(order==4){
 				for (int l =0;l<length;l++)
 				{
-					amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
-					phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
-		  
-					response_deriv[i][l] = amplitude_deriv - 
-						std::complex<double>(0,1)*phase_deriv*amplitude[l];
+				  if(i==8 && parameters_vec[i] > .25-epsilon){
+				    amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(6.*epsilon);
+				    phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(6.*epsilon);
+				  }
+				  else{
+				    amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
+				    phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
+				  }
+				  response_deriv[i][l] = amplitude_deriv - 
+				    std::complex<double>(0,1)*phase_deriv*amplitude[l];
 				}
 			}
 
@@ -345,6 +363,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			}
 			param_p[i] = parameters_vec[i] + epsilon;
 			param_m[i] = parameters_vec[i] - epsilon;
+			if(i==8 && parameters_vec[i] >.25-epsilon){
+			  param_p[i] = parameters_vec[i];
+			  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+			}
 			if(order>=4){
 				for( int j =0;j<dimension;j++){
 					param_pp[j] = parameters_vec[j] ;
@@ -352,6 +374,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				}
 				param_pp[i] = parameters_vec[i] +2 *epsilon;
 				param_mm[i] = parameters_vec[i] -2 *epsilon;
+				if(i==8 && parameters_vec[i] >.25-epsilon){
+				  param_pp[i] = parameters_vec[i];
+				  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+				}
 			}
 			repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
 			//if(detector=="LISA"){
@@ -369,7 +395,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				detector,
 				local_gen_method,
 				&waveform_params,
-				times);	
+				times);
+ 
 			if(reference_detector != detector){
 				DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
 				for(int l = 0 ; l<length; l++){
@@ -434,6 +461,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					response_deriv[i][l] = 
 						(response_plus[l]-response_minus[l])/(2.*epsilon);
+					if(i==8 && parameters_vec[i] >.25-epsilon){
+					  response_deriv[i][l]=
+					    (response_plus[l]-response_minus[l])/epsilon;
+					}
 				}
 			}
 			else if(order == 4){
@@ -441,7 +472,11 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					response_deriv[i][l] = 
 						(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(12.*epsilon);
-					//std::cout<<"order = 4, response_plus_plus = "<<response_plus_plus[l]<<", response_minus_minus"<<response_minus_minus[l]<<std::endl; 
+					if(i==8 && parameters_vec[i] >.25-epsilon){
+					  response_deriv[i][l] = 
+						(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(6.*epsilon);
+					}
+					  
 				}
 			}
 				
@@ -1941,6 +1976,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		}
 	}
 	if(generation_method.find("NRT") != std::string::npos){
+	  //debugger_print(__FILE__,__LINE__,generation_method);
 		if(!input_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos ){
 				if( (input_params->tidal_love)){
