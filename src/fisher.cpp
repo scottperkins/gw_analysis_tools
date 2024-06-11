@@ -11,8 +11,6 @@
 #include "io_util.h"
 #include "IMRPhenomD.h"
 #include "IMRPhenomP.h"
-#include "IMRPhenomPv3utils.h"
-#include "IMRPhenomPv3.h"
 #include "ppE_utilities.h"
 #include "ppE_IMRPhenomD.h"
 #include "waveform_generator.h"
@@ -63,7 +61,6 @@ using namespace std;
  * 
  * EdGB_IMRPhenomPv2 !sky_averaged (14) --  RA, DEC, psi, phiRef, tc, \iota_L, ln DL, ln chirpmass, ln eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p,  \alpha (all at f_ref)
  *
- * IMRPhenomPv3 !sky_averaged (13) --  RA, DEC, psi,phiRef, tc, \iota_L,  ln DL, ln chirpmass, eta, chi_1 \dot \hat{L}, chi_2 \dot \hat{L} ,chi_p,  \phi_p (all at f_ref)
  *
  * All MCMC options correspond to the base, minus the coalescence time (which is maximized over) -- Reduced MCMC option correspond to the options above minus t_c (and phic for sky_averaged) -- Non reduced correspond to replacing \chi_1 \dot \hat{L}, \chi_2 \dot \hat{L}, \chi_p and \phi_p with |\chi_1|, |\chi_2|, \theta_1, \theta_2, \phi_1, and \phi_2
  *
@@ -155,8 +152,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
        	gen_params_base<double> *parameters,
 	int order)
 {
-  	double epsilon = 1e-8;
-
+  double epsilon = 1e-8;
+  //double epsilon = .01; 
   //double epsilon = 1e-5;
 	//Order of numerical derivative
 	double parameters_vec[dimension];
@@ -176,7 +173,6 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 	gen_params waveform_params;
 	repack_non_parameter_options(&waveform_params,parameters, gen_method);
 	//##########################################################
-	//debugger_print(__FILE__,__LINE__,"WHAT THE FUCK");	
 	//for(int i = 0 ; i<dimension; i++){
 	//	std::cout<<parameters_vec[i]<<std::endl;
 	//}
@@ -216,6 +212,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			}
 			param_p[i] = parameters_vec[i] + epsilon;
 			param_m[i] = parameters_vec[i] - epsilon;
+			if(i==8 && parameters_vec[i] >.25-epsilon){
+			  param_p[i] = parameters_vec[i]; //instead of parameters_vec[i] + epsilon
+			  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+			}
 			if(order>=4){
 				for( int j =0;j<dimension;j++){
 					param_pp[j] = parameters_vec[j] ;
@@ -223,6 +223,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				}
 				param_pp[i] = parameters_vec[i] + 2*epsilon;
 				param_mm[i] = parameters_vec[i] - 2*epsilon;
+				if(i==8 && parameters_vec[i] >.25-epsilon){
+				  param_pp[i] = parameters_vec[i];
+				  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+				}
 
 			}
 			repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
@@ -281,20 +285,31 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			if(order==2){
 				for (int l =0;l<length;l++)
 				{
-					amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
-					phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
-					response_deriv[i][l] = amplitude_deriv + 
-						std::complex<double>(0,1)*phase_deriv*amplitude[l];
+				  if(i==8 && parameters_vec[i] > .25-epsilon){
+				    amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(epsilon);
+				    phase_deriv = (phase_plus[l] -phase_minus[l])/(epsilon);
+				  }
+				  else{
+				    amplitude_deriv = (amplitude_plus[l] -amplitude_minus[l])/(2*epsilon);
+				    phase_deriv = (phase_plus[l] -phase_minus[l])/(2*epsilon);
+				  }
+				  response_deriv[i][l] = amplitude_deriv + 
+				    std::complex<double>(0,1)*phase_deriv*amplitude[l];
 				}
 			}
 			else if(order==4){
 				for (int l =0;l<length;l++)
 				{
-					amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
-					phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
-		  
-					response_deriv[i][l] = amplitude_deriv - 
-						std::complex<double>(0,1)*phase_deriv*amplitude[l];
+				  if(i==8 && parameters_vec[i] > .25-epsilon){
+				    amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(6.*epsilon);
+				    phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(6.*epsilon);
+				  }
+				  else{
+				    amplitude_deriv = (-amplitude_plus_plus[l]+8.*amplitude_plus[l] -8.*amplitude_minus[l]+amplitude_minus_minus[l])/(12.*epsilon);
+				    phase_deriv = (-phase_plus_plus[l]+8.*phase_plus[l] -8.*phase_minus[l]+phase_minus_minus[l])/(12.*epsilon);
+				  }
+				  response_deriv[i][l] = amplitude_deriv - 
+				    std::complex<double>(0,1)*phase_deriv*amplitude[l];
 				}
 			}
 
@@ -348,6 +363,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 			}
 			param_p[i] = parameters_vec[i] + epsilon;
 			param_m[i] = parameters_vec[i] - epsilon;
+			if(i==8 && parameters_vec[i] >.25-epsilon){
+			  param_p[i] = parameters_vec[i];
+			  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+			}
 			if(order>=4){
 				for( int j =0;j<dimension;j++){
 					param_pp[j] = parameters_vec[j] ;
@@ -355,6 +374,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				}
 				param_pp[i] = parameters_vec[i] +2 *epsilon;
 				param_mm[i] = parameters_vec[i] -2 *epsilon;
+				if(i==8 && parameters_vec[i] >.25-epsilon){
+				  param_pp[i] = parameters_vec[i];
+				  std::cout<<"eta close to boundary, using backward difference approximation to differentiate. See line "<<__LINE__<<" in "<<__FILE__<<" for more information."<<std::endl;
+				}
 			}
 			repack_parameters(param_p, &waveform_params, gen_method, dimension, parameters);
 			//if(detector=="LISA"){
@@ -372,7 +395,8 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				detector,
 				local_gen_method,
 				&waveform_params,
-				times);	
+				times);
+ 
 			if(reference_detector != detector){
 				DTOA = -2*M_PI*DTOA_DETECTOR(waveform_params.RA,waveform_params.DEC,waveform_params.gmst, reference_detector, detector);
 				for(int l = 0 ; l<length; l++){
@@ -437,6 +461,10 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					response_deriv[i][l] = 
 						(response_plus[l]-response_minus[l])/(2.*epsilon);
+					if(i==8 && parameters_vec[i] >.25-epsilon){
+					  response_deriv[i][l]=
+					    (response_plus[l]-response_minus[l])/epsilon;
+					}
 				}
 			}
 			else if(order == 4){
@@ -444,7 +472,11 @@ void calculate_derivatives(std::complex<double>  **response_deriv,
 				{
 					response_deriv[i][l] = 
 						(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(12.*epsilon);
-					//std::cout<<"order = 4, response_plus_plus = "<<response_plus_plus[l]<<", response_minus_minus"<<response_minus_minus[l]<<std::endl; 
+					if(i==8 && parameters_vec[i] >.25-epsilon){
+					  response_deriv[i][l] = 
+						(-response_plus_plus[l]+8.*response_plus[l]-8.*response_minus[l]+response_minus_minus[l])/(6.*epsilon);
+					}
+					  
 				}
 			}
 				
@@ -995,7 +1027,7 @@ void calculate_derivatives_autodiff(double *frequency,
  */
 void num_src_params(int *N_src_params, std::string generation_method, gen_params_base<double> *params)
 {
-	if(generation_method.find("IMRPhenomPv2")!=std::string::npos || generation_method.find("IMRPhenomPv3")!=std::string::npos){
+	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
 		*N_src_params = 9+1;	
 	}
 	else if(generation_method.find("IMRPhenomD")!=std::string::npos){
@@ -1025,7 +1057,7 @@ void num_src_params(int *N_src_params, std::string generation_method, gen_params
 void reduce_extrinsic(int *src_params, int N_src_params, std::string generation_method, gen_params_base<double>*params)
 {
 	int gr_dim, gr_param_dim;
-	if(generation_method.find("IMRPhenomPv2")!=std::string::npos || generation_method.find("IMRPhenomPv3")!=std::string::npos){
+	if(generation_method.find("IMRPhenomPv2")!=std::string::npos){
 		src_params[0]=0;
 		src_params[1]=4;
 		src_params[2]=5;
@@ -1565,35 +1597,6 @@ void time_phase_corrected_derivative_numerical(T **dt, int length, T *frequencie
 			fdamp = s_param.fdamp;
 			fpeak = modelp.fpeak(&s_param , &lambda);
 		}
-		else if(local_gen.find("IMRPhenomPv3")!=std::string::npos)
-		{
-			IMRPhenomPv3<T> modelp;
-
-			if (params->mass1 < params->mass2)
-			{
-				PhenomPrecessingSpinEnforcePrimary(&(params->mass1), &(params->mass2),
-				&(params->spin1[0]), &(params->spin1[1]), &(params->spin1[2]),
-				&(params->spin2[0]), &(params->spin2[1]), &(params->spin2[2]));
-			}
-
-			s_param.populate_source_parameters(params);
-			s_param.spin1z = params->spin1[2];
-			s_param.spin2z = params->spin2[2];
-			s_param.chip = params->chip;
-			s_param.phip = params->phip;
-			s_param.phiRef = params->phiRef;
-			s_param.f_ref = params->f_ref;
-			s_param.incl_angle = params->incl_angle;
-			PhenomPv3_Param_Transform(&s_param, params);
-
-			s_param.sky_average = params->sky_average;
-			s_param.cosmology = params->cosmology;
-			modelp.assign_lambda_param(&s_param,&lambda);	
-			modelp.post_merger_variables(&s_param);
-			fRD = s_param.fRD;
-			fdamp = s_param.fdamp;
-			fpeak = modelp.fpeak(&s_param , &lambda);
-		}
 		else if(local_gen.find("IMRPhenomD")!=std::string::npos){
 			IMRPhenomD<T> model;
 			//s_param = source_parameters<T>::populate_source_parameters(params);
@@ -1761,30 +1764,6 @@ void detect_adjust_parameters( double *freq_boundaries,double *grad_freqs, int *
 				fRD = s_param.fRD.value();
 				fpeak = modelp.fpeak(&s_param, &lambda).value();
 			}
-			else if(generation_method.find("IMRPhenomPv3")!=std::string::npos)
-			{
-				IMRPhenomPv3<adouble> modelp;
-
-				if (internal_params.mass1 < internal_params.mass2)
-				{
-					PhenomPrecessingSpinEnforcePrimary(&(internal_params.mass1), &(internal_params.mass2),
-					&(internal_params.spin1[0]), &(internal_params.spin1[1]), &(internal_params.spin1[2]),
-					&(internal_params.spin2[0]), &(internal_params.spin2[1]), &(internal_params.spin2[2]));
-				}
-
-				s_param.populate_source_parameters(&internal_params);
-				s_param.spin1z = internal_params.spin1[2];
-				s_param.spin2z = internal_params.spin2[2];
-				s_param.chip = internal_params.chip;
-				s_param.phip = internal_params.phip;
-				PhenomPv3_Param_Transform(&s_param, &internal_params);
-
-				modelp.assign_lambda_param(&s_param,&lambda);	
-				modelp.post_merger_variables(&s_param);
-				M = s_param.M.value();
-				fRD = s_param.fRD.value();
-				fpeak = modelp.fpeak(&s_param, &lambda).value();
-			}
 			else if(generation_method.find("IMRPhenomD")!=std::string::npos){
 				IMRPhenomD<adouble> modeld;
 				modeld.assign_lambda_param(&s_param, &lambda);
@@ -1802,7 +1781,7 @@ void detect_adjust_parameters( double *freq_boundaries,double *grad_freqs, int *
 void unpack_parameters(double *parameters, gen_params_base<double> *input_params, std::string generation_method, int dimension, bool *log_factors)
 {
 	if(!input_params->sky_average){
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC") != std::string::npos){
 				for(int i = 0 ; i<dimension; i++){
 					log_factors[i] = false;
@@ -1926,7 +1905,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 
 	}
 	else{
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			//Need to populate
 			if(generation_method.find("MCMC") != std::string::npos){
 				for(int i = 0 ; i<dimension; i++){
@@ -1953,7 +1932,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 			}
 			else{
 		
-				std::cout<<"Sky averaged IMRPhenomP is not supported for regular fishers."<<std::endl;
+				std::cout<<"Sky averaged IMRPhenomPv2 is not supported for regular fishers."<<std::endl;
 
 			}
 	
@@ -1997,6 +1976,7 @@ void unpack_parameters(double *parameters, gen_params_base<double> *input_params
 		}
 	}
 	if(generation_method.find("NRT") != std::string::npos){
+	  //debugger_print(__FILE__,__LINE__,generation_method);
 		if(!input_params->sky_average){
 			if(generation_method.find("PhenomD") != std::string::npos ){
 				if( (input_params->tidal_love)){
@@ -2128,7 +2108,7 @@ template<class T>
 void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::string generation_method, int dim, gen_params_base<double> *original_params)
 {
 	if(!a_params->sky_average){
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
 				a_params->mass1 = calculate_mass1(exp(avec_parameters[7]),
 					avec_parameters[8]);
@@ -2267,7 +2247,7 @@ void repack_parameters(T *avec_parameters, gen_params_base<T> *a_params, std::st
 		}	
 	}
 	else{
-		if(generation_method.find("IMRPhenomPv2") != std::string::npos || generation_method.find("IMRPhenomPv3") != std::string::npos){
+		if(generation_method.find("IMRPhenomPv2") != std::string::npos){
 			if(generation_method.find("MCMC")!=std::string::npos){
 
 				a_params->mass1 = calculate_mass1(exp(avec_parameters[0]),avec_parameters[1]);
