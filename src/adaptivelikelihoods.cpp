@@ -63,8 +63,8 @@ RelativeBinningLikelihood::RelativeBinningLikelihood(
 }
 
 /**
- * Find maximum frequency at which we can evaluate the likelihood
- * Also determines the binning
+ * Find maximum frequency at which we can evaluate the likelihood,
+ * which will determine the binning.
  * Defined as the last frequency where the fiducial data is non-zero
 */
 double RelativeBinningLikelihood::find_max_frequency(
@@ -171,6 +171,8 @@ void RelativeBinningLikelihood::setup_bins(
     int bin_ind, last_ind = -1;
     double d_phi_lower, bin_freq;
     double d_phi_lower_den = d_phi_from_start.back() / (double)num_bins;
+	// Find in integer increments i*epsilon where a bin will have reached a dephasing
+	// on the order of epsilon
     for (int i = 0; i < num_bins+1; i++)
     {
         d_phi_lower = i * d_phi_lower_den;
