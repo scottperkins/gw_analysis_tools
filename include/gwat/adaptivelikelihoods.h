@@ -79,6 +79,8 @@ public:
 
 private:
 	double chi, epsilon;
+	// Signal duration for tc purposes
+	double duration;
 	int number_of_bins;
 	// Check that bins have been setup
 	bool bins_are_setup = false;

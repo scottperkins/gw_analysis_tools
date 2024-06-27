@@ -34,6 +34,7 @@ RelativeBinningLikelihood::RelativeBinningLikelihood(
     }
     std::cout << "}\n";
 
+    duration = ifos_data[0].duration;
     max_frequency = find_max_frequency(
         fiducial_data, frequencies, data_length, num_detectors
     );
@@ -382,7 +383,7 @@ double RelativeBinningLikelihood::log_likelihood(
     }
 
     // Time shift
-    double T = 1./(frequencies[1]-frequencies[0]);
+    double T = duration;
     double tc_ref = T - params->tc;
     params->tc = tc_ref;
 
