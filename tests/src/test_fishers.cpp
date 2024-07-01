@@ -60,8 +60,9 @@ int test_EA_fisher(int argc, char *argv[])
 	std::cout.precision(15);
 	//Create injection structure
 	gen_params params;	
-	//params.mass1 = 1.9 *MSOL_SEC;
-	params.mass1 = 1.4 *MSOL_SEC;
+	params.mass1 = 1.9 *MSOL_SEC;
+	//params.mass1 = 1.4 *MSOL_SEC;
+	//params.mass1 = (1.4 - pow(10, -1))*MSOL_SEC; 
 	params.mass2 = 1.4 *MSOL_SEC;
 	params.spin1[2] = -.03;
 	params.spin2[2] = .03 ;
@@ -164,6 +165,8 @@ int test_EA_fisher(int argc, char *argv[])
 	//std::string method = "EA_IMRPhenomD_NRT";
 	int dim = 11; 
 	std::string method = "IMRPhenomD"; 
+	//int dim = 12;
+	//std::string method = "IMRPhenomD_NRT"; 
 	
 	//###############################################
 	//Allocate output

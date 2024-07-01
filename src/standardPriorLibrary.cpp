@@ -8,7 +8,14 @@
 
 
 double chirpmass_eta_jac(double chirpmass, double eta){
-	return chirpmass*chirpmass/(sqrt(1. - 4.*eta)*pow(eta,1.2));
+  double epsilon = 1e-12;
+  double delta = sqrt(1.-4.*eta);
+  if(eta >.25-epsilon)
+    {
+      delta = sqrt(1.-4.*(eta - epsilon));
+    }
+	
+  return chirpmass*chirpmass/(delta*pow(eta,1.2));
 }
 
 double chirpmass_q_jac(double chirpmass, double q){
