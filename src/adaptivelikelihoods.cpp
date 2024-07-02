@@ -8,6 +8,13 @@
 using std::conj;
 
 
+/* Print statement */
+void RelativeBinningPrinter(std::string message)
+{
+    std::cout << "RELATIVE BINNING:\t";
+    std::cout << message << "\n";
+}
+
 /**
  * Initialize relative binning
 */
@@ -38,16 +45,16 @@ RelativeBinningLikelihood::RelativeBinningLikelihood(
     max_frequency = find_max_frequency(
         fiducial_data, frequencies, data_length, num_detectors
     );
-    std::cout << "RELATIVE BINNING:\tMax frequency: " << max_frequency << "\n";
+    RelativeBinningPrinter("Max frequency: " + std::to_string(max_frequency));
 
     setup_bins(frequencies, data_length);
-    std::cout << "RELATIVE BINNING:\t" << number_of_bins << " bins setup\n";
+    RelativeBinningPrinter(std::to_string(number_of_bins) + " bins setup");
 
     setup_fiducial_data(fiducial_data, num_detectors);
-    std::cout << "RELATIVE BINNING:\t" << "Fiducial data setup\n";
+    RelativeBinningPrinter("Fiducial data setup");
 
     compute_summary_data(fiducial_data, ifos_data);
-    std::cout << "RELATIVE BINNING:\t" << "Summary data setup\n";
+    RelativeBinningPrinter("Summary data setup");
 
     // Calculate likelihood
     double logL = 0.;
@@ -59,8 +66,7 @@ RelativeBinningLikelihood::RelativeBinningLikelihood(
             data, &(ifos_fiducial_data.at(i))
         );
     }
-    std::cout << "RELATIVE BINNING:\t" << "Fiducial likelihood: " 
-              << logL << "\n";
+    RelativeBinningPrinter("Fiducial likelihood: " + std::to_string(logL));
 }
 
 /**
@@ -92,8 +98,8 @@ double RelativeBinningLikelihood::find_max_frequency(
             // If the last data point is non-zero
             continue;
         }
-        idx = std::distance(ref, fiducial_data.rend());
-
+        
+        idx = std::distance(ref, fiducial_data.rend())-1;
         maxFreq = fmin(frequencies[idx], maxFreq);
     }
 
@@ -172,8 +178,8 @@ void RelativeBinningLikelihood::setup_bins(
     int bin_ind, last_ind = -1;
     double d_phi_lower, bin_freq;
     double d_phi_lower_den = d_phi_from_start.back() / (double)num_bins;
-	// Find in integer increments i*epsilon where a bin will have reached a dephasing
-	// on the order of epsilon
+	// Find in integer increments of epsilon where a bin will have reached a 
+	// dephasing on the order of epsilon
     for (int i = 0; i < num_bins+1; i++)
     {
         d_phi_lower = i * d_phi_lower_den;
@@ -320,16 +326,20 @@ void RelativeBinningLikelihood::compute_waveform_ratios(
     const fiducial_data_struct *fiducial /**< Interferometer data */
 )
 {
-    // Ratios at left edges and right edges
-    cpl ratio_left, ratio_right;
+    // Ratios at left edge
+    cpl ratio_left = h[0]/fiducial->strain.front();
+    // Ratio at right edge
+    cpl ratio_right;
 
     for (int i = 0; i < number_of_bins; i++)
     {
-        ratio_left = h[i]/fiducial->strain[i];
         ratio_right = h[i+1]/fiducial->strain[i+1];
 
         r0.push_back( 0.5*(ratio_right + ratio_left) );
         r1.push_back( (ratio_right - ratio_left)/bin_widths[i] );
+
+        // For next bin
+        ratio_left = ratio_right;
     }
 }
 
@@ -383,12 +393,12 @@ double RelativeBinningLikelihood::log_likelihood(
     }
 
     // Time shift
+    // TODO: How important is shifting tc as in MCMC_likelihood_extrinsic?
     double T = duration;
     double tc_ref = T - params->tc;
     params->tc = tc_ref;
 
     // Obtain the data
-    // TODO: How important is shifting tc as in MCMC_likelihood_extrinsic?
     create_coherent_GW_detection(
         detectors, num_detectors, frequencies, data_lengths, reuse_WF,
         params, generation_method, responses
