@@ -673,7 +673,7 @@ public:
 		{
 			ll = mcmcVar->adaptivell->log_likelihood(
 				mcmcVar->mcmc_detectors, mcmcVar->mcmc_num_detectors,
-				&gen_params, local_integration_method, mcmcVar->mcmc_save_waveform
+				&gen_params, local_gen, mcmcVar->mcmc_save_waveform
 				);
 		}
 		else{
