@@ -1,21 +1,23 @@
 ####################################################
 #EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe bin/test_waveform_util.exe bin/test_mcmc.exe bin/test_cosmology.exe bin/test_response_functions.exe
-#EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe
-EXE:=bin/test_fishers.exe
+EXE:=bin/test_fishers.exe 
 ####################################################
 # Use the default CXX compiler and linker
 #
 CCLOCAL:=$(CXX)
 LINKERLOCAL:=$(CXX)
 #CFLAGS:=-fopenmp -O3  -Wall -I../include -I/usr/include/hdf5/serial
-CFLAGS:=-fopenmp  -Wall -I../include -I/home/sperkins/git-repos/PTRJMCMC/build/install/include -g 
-LFLAGS:= -fopenmp -L../lib  -L/home/sperkins/git-repos/gw_analysis_tools/build/lib -L/home/sperkins/git-repos/PTRJMCMC/build/install/lib
+#CFLAGS:=-fopenmp  -Wall -I../include -I/home/sperkins/git-repos/PTRJMCMC/build/install/include -g 
+#LFLAGS:= -fopenmp -L../lib  -L/home/sperkins/git-repos/gw_analysis_tools/build/lib -L/home/sperkins/git-repos/PTRJMCMC/build/install/lib
+CFLAGS:=-fopenmp  -Wall -I../include  -g 
+LFLAGS:= -fopenmp -L../lib  -L/opt/gw_analysis_tools/build/lib
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation -lhdf5 -lhdf5_cpp
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation
 #LIBS:=-lm -lgsl -lgwat -llal -llalsimulation 
-LIBS:=-lm -lgsl -lgwat -lptrjmcmc
+#LIBS:=-lm -lgsl -lgwat -lptrjmcmc
+LIBS:=-lm -lgsl -lgwat 
 
 SRCDIR:=src
 ODIR:=build
@@ -23,7 +25,7 @@ DATA_DIR:=data
 PLOTS_DIR:=plots
 EXEDIR:=bin
 LIBDIR:=lib
-IDIR:=include
+IDIR:=include/gwat
 
 SRCEXT:=cpp
 IEXT:=h

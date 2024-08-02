@@ -1,4 +1,4 @@
-FROM debian:10.9
+#FROM debian:10.9
 
 WORKDIR /gwat
 
@@ -30,27 +30,29 @@ doxygen
 
 RUN pip3 install \
 numpy \
+#openblas \
+#lapack \
 matplotlib \
 scipy \
-pandas
+#pandas
 
 
 ## LALSUITE FRAME install ##
-RUN mkdir /usr/local/LALFRAME
-WORKDIR /usr/local/LALFRAME
-RUN git clone https://git.ligo.org/virgo/virgoapp/Fr.git
-WORKDIR /usr/local/LALFRAME/Fr
-RUN cmake .
-RUN make && make install 
+#RUN mkdir /usr/local/LALFRAME
+#WORKDIR /usr/local/LALFRAME
+#RUN git clone https://git.ligo.org/virgo/virgoapp/Fr.git
+#WORKDIR /usr/local/LALFRAME/Fr
+#RUN cmake .
+#RUN make && make install 
 
 ## LALSUITE METAIO install ##
-RUN mkdir /usr/local/LALMETAIO
-WORKDIR /usr/local/LALMETAIO
-RUN wget http://software.ligo.org/lscsoft/source/metaio-8.4.0.tar.gz
-RUN tar -zxf metaio-8.4.0.tar.gz  
-WORKDIR /usr/local/LALMETAIO/metaio-8.4.0
-RUN ./configure --prefix=/usr/local
-RUN make && make install 
+#RUN mkdir /usr/local/LALMETAIO
+#WORKDIR /usr/local/LALMETAIO
+#RUN wget http://software.ligo.org/lscsoft/source/metaio-8.4.0.tar.gz
+#RUN tar -zxf metaio-8.4.0.tar.gz  
+#WORKDIR /usr/local/LALMETAIO/metaio-8.4.0
+#RUN ./configure --prefix=/usr/local
+#RUN make && make install 
 
 ## HDF5 install ##
 #RUN mkdir /usr/local/hdf5 
@@ -61,12 +63,12 @@ RUN make && make install
 #RUN ./configure --prefix=/usr/local && make check && make install && make check-install
 
 ## LALSUITE install ##
-WORKDIR /usr/local
-RUN git clone https://git.ligo.org/lscsoft/lalsuite.git
-WORKDIR /usr/local/lalsuite
-RUN ./00boot
-RUN ./configure --prefix=/usr/local
-RUN make -j && make install 
+#WORKDIR /usr/local
+#RUN git clone https://git.ligo.org/lscsoft/lalsuite.git
+#WORKDIR /usr/local/lalsuite
+#RUN ./00boot
+#RUN ./configure --prefix=/usr/local
+#RUN make -j && make install 
 
 
 ## ADOL-C install ##
