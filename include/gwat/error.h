@@ -13,9 +13,9 @@ void calculate_systematic_error(
 	std::complex<double>* h_model,
 	std::complex<double>* h_true, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
-	string generation_method, 
-	string detector, 
-	string reference_detector, 
+	std::string generation_method, 
+	std::string* detectors, 
+	std::string reference_detector,  
 	double* output,/**< double [dimension][dimension]*/
 	int dimension, 
 	gen_params_base<double> *parameters,

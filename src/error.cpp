@@ -15,9 +15,9 @@ void calculate_systematic_error(
 	std::complex<double>* h_model,
 	std::complex<double>* h_true, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
-	string generation_method, 
-	string detector, 
-	string reference_detector, 
+	std::string generation_method, 
+	std::string* detectors, 
+	std::string reference_detector, 
 	double *output,/**< double [dimension][dimension]*/
 	int dimension, 
 	gen_params_base<double> *parameters,
@@ -27,6 +27,7 @@ void calculate_systematic_error(
 )
 {
 	//populate noise and frequency
+	/**
 	double *internal_noise = new double[length];
 	if (noise)
 	{
@@ -39,7 +40,7 @@ void calculate_systematic_error(
 		populate_noise(frequency,detector, internal_noise,length);
 		for (int i =0; i<length;i++)
 		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
-	}
+	}**/
 
 	std::cout<<__LINE__<<"psd input:"<<noise[0]<<std::endl;
 	//Get Fisher (basic test if stuff is running or not)
@@ -51,20 +52,22 @@ void calculate_systematic_error(
 			fisher_inverse[i][j]= 0;
 		}
 	}
-
+	//std::cout<<__LINE__<<"lENGTH"<<length<<": Detector:"<<detectors[0]<<": reference - "<<reference_detector<<": dim -"<<dimension<<std::endl;
 	//fisher_numerical(frequency, length, generation_method, detector, reference_detector, fisher, dimension, parameters, order);
-	fisher_numerical(frequency, length, generation_method, detector, reference_detector, fisher, dimension, parameters, order);
-	
-	std::cout<<__LINE__<<"Fisher input:"<<fisher[0][0]<<std::endl;
-
-	for(int i = 0 ; i<dimension; i++){
-		std::cout<<i<<" ";
-		for(int j = 0 ; j<dimension; j++){
-		  std::cout<<fisher[i][j]<<" ";
+	for(int i = 0 ;i < 3; i++){
+		        //total_snr += pow_int( calculate_snr(SN[i],detectors[i],generation_method, &parameters, frequency, length, "SIMPSONS", weights, false), 2);
+			//debugger_print(__FILE__,__LINE__,total_snr);
+			fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher, dimension, parameters, 2,NULL,NULL, noise);
+		
+		for(int k = 0 ; k<dimension; k++){
+			std::cout<<i<<": "<<std::endl;
+			for(int j = 0 ; j<dimension; j++){
+				//output_AD[k][j]+= output_AD_temp[k][j];
+				std::cout<<fisher[i][j]<<" ";
+			}
+			std::cout<<std::endl;
 		}
-		std::cout<<std::endl;
 	}
-
 	//Get derivative of waveform
 	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
 	for (int i = 0 ; i<dimension; i++){
@@ -76,7 +79,7 @@ void calculate_systematic_error(
 			frequency,
 			length, 
 			dimension, 
-			detector, 
+			detectors[0], 
 			reference_detector, 
 			generation_method,
 			parameters,
@@ -89,9 +92,17 @@ void calculate_systematic_error(
 	
 
 	//Get elements of systematic error
-	output[0] = calculate_sys_err_elements(frequency, h_model, h_true, response_deriv, fisher_inverse, internal_noise, length, dimension, 0, 0);
-	//double uwu = calculate_sys_err_elements(frequency, h_model, h_true, response_deriv, fisher_inverse, internal_noise, length, dimension, 0, 0);
-
+	//output[0] = calculate_sys_err_elements(frequency, h_model, h_true, response_deriv, fisher_inverse, internal_noise, length, dimension, 0, 0);
+	
+	/*
+	//THIS IS THE COMPLETE SYS ERR CALCULATION, UNCOMMENT WHEN EVERYTHNG ELSE IS WORKING 
+	for(int i = 0; i < dimension; i++){
+		for(int j = 0; j < dimension; j++){
+			//Calculate the (i,j) element of systematic error, and then sum over all j
+			output[i] += calculate_sys_err_elements(frequency, h_model, h_true, response_deriv, fisher_inverse, internal_noise, length, dimension, i, j);
+		}
+	}
+	*/
 
 	//Deallocation
 	for (int i = 0 ; i<dimension; i++){
