@@ -158,9 +158,9 @@ int main(int argc, char *argv[]){
 	fourier_waveform(frequency, length, &wp, "ppE_IMRPhenomD_IMR",&params);
 
 
-	//calculate_systematic_error(frequency, hpg, hpppE, length, method, detector,detector, output, dim, &params, 2, psd);
-	calculate_systematic_error(frequency, hcg, hcppE, length, method, detectors, detectors[0], output, dim, &params, 2, psd[1]);
-	//fisher_autodiff(frequency, length, method, detector,detector, output, dim, &params, "GAUSSLEG",weights,true, psd,NULL,NULL);
+	//calculate_systematic_error(frequency, hcg, hcppE, length, method, detectors, detectors[0], output, dim, &params, 2, psd[1]);
+
+	calculate_statistical_error(frequency, length, method, detectors, detectors[0], output, dim, &params, 2, psd[1]);
 	std::cout<<"SNR: "<<sqrt(output[0])<<std::endl;
 
 	

@@ -159,3 +159,67 @@ double calculate_sys_err_elements(
 	//return integrand[0];
 	return 4*simpsons_sum(frequency[1]-frequency[0], length, integrand);
 }
+
+void calculate_statistical_error(
+    double *frequency,
+	//std::complex<double>* h_model,
+	//std::complex<double>* h_true, 
+	int length,/**< if 0, standard frequency range for the detector is used*/ 
+	std::string generation_method, 
+	std::string* detectors, 
+	std::string reference_detector,  
+	double* output,/**< double [dimension][dimension]*/
+	int dimension, 
+	gen_params_base<double> *parameters,
+	int order,/**< Order of the numerical derivative (2 or 4)**/
+	//double *parameters,
+	double *noise
+){
+	std::cout<<__LINE__<<"psd input:"<<noise[0]<<std::endl;
+	//Get Fisher (basic test if stuff is running or not)
+	double **fisher = allocate_2D_array(dimension,dimension);
+	double **fisher_inverse = allocate_2D_array(dimension,dimension);
+	for(int i = 0 ; i<dimension; i++){
+		for(int j = 0 ; j<dimension; j++){
+			fisher[i][j]= 0;
+			fisher_inverse[i][j]= 0;
+		}
+	}
+	
+	for(int i = 0 ;i < 3; i++){
+		fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher, dimension, parameters, 2,NULL,NULL, noise);
+
+		gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
+
+		std::cout<<"-------------FISHER-----------"<<std::endl;
+		
+		for(int k = 0 ; k<dimension; k++){
+			std::cout<<i<<": "<<std::endl;
+			for(int j = 0 ; j<dimension; j++){
+				//output_AD[k][j]+= output_AD_temp[k][j];
+				std::cout<<fisher[i][j]<<" ";
+			}
+			std::cout<<std::endl;
+		}
+
+		std::cout<<"-------------FISHER INVERSE-----------"<<std::endl;
+
+		for(int k = 0 ; k<dimension; k++){
+			std::cout<<i<<": "<<std::endl;
+			for(int j = 0 ; j<dimension; j++){
+				//output_AD[k][j]+= output_AD_temp[k][j];
+				std::cout<<fisher_inverse[i][j]<<" ";
+			}
+			std::cout<<std::endl;
+		}
+
+		for(int i = 0; i < dimension; i++){
+			for(int j  = 0; j < dimension; j++){
+				output[i] = sqrt(fisher_inverse[i][i]);
+				std::cout<<"Statistical Error ["<<i<<"] : "<<output[i]<<std::endl;
+			}
+		}
+
+		
+	}
+}
