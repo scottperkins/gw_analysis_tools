@@ -65,8 +65,9 @@ int main(int argc, char *argv[]){
 	//double fmax = .0067506;
 	//double fmin = .01208;
 	//double fmax = 1.00;
-	double T =(t_0PN(fmin,chirpmass)- t_0PN(fmax,chirpmass));
-	std::cout<<"TIME: "<<T/T_year<<std::endl;
+	//double T =(t_0PN(fmin,chirpmass)- t_0PN(fmax,chirpmass));
+	double T = 16;
+	//std::cout<<"TIME: "<<T/T_year<<std::endl;
 
 	params.tc = 3.*T/4.;
 	int length = 2000;
@@ -160,7 +161,7 @@ int main(int argc, char *argv[]){
 
 	//calculate_systematic_error(frequency, hcg, hcppE, length, method, detectors, detectors[0], output, dim, &params, 2, psd[1]);
 
-	calculate_statistical_error(frequency, length, method, detectors, detectors[0], output, dim, &params, 2, psd[1]);
+	calculate_statistical_error(frequency, length, method, detectors, detectors[0], output, dim, &params, 2, psd);
 	std::cout<<"SNR: "<<sqrt(output[0])<<std::endl;
 
 	

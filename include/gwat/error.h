@@ -50,7 +50,7 @@ void calculate_statistical_error(
 	gen_params_base<double> *parameters,
 	int order,/**< Order of the numerical derivative (2 or 4)**/
 	//double *parameters,
-	double *noise
+	double **noise
 );
 
 

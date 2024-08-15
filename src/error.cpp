@@ -173,11 +173,12 @@ void calculate_statistical_error(
 	gen_params_base<double> *parameters,
 	int order,/**< Order of the numerical derivative (2 or 4)**/
 	//double *parameters,
-	double *noise
+	double **noise
 ){
 	std::cout<<__LINE__<<"psd input:"<<noise[0]<<std::endl;
 	//Get Fisher (basic test if stuff is running or not)
 	double **fisher = allocate_2D_array(dimension,dimension);
+	double **fisher_temp = allocate_2D_array(dimension,dimension);
 	double **fisher_inverse = allocate_2D_array(dimension,dimension);
 	for(int i = 0 ; i<dimension; i++){
 		for(int j = 0 ; j<dimension; j++){
@@ -187,17 +188,27 @@ void calculate_statistical_error(
 	}
 	
 	for(int i = 0 ;i < 3; i++){
-		fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher, dimension, parameters, 2,NULL,NULL, noise);
-
-		gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
+		fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher_temp, dimension, parameters, 2,NULL,NULL, noise[i]);
+		for(int k = 0 ; k<dimension; k++){
+			//std::cout<<i<<": "<<std::endl;
+			for(int j = 0 ; j<dimension; j++){
+				fisher[k][j]+= fisher_temp[k][j];
+				//std::cout<<std::setprecision(5)<<output_AD[i][j]<<" ";
+			}
+			//std::cout<<std::endl;
+		}
+		
+		
+	}
+	gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
 
 		std::cout<<"-------------FISHER-----------"<<std::endl;
-		
+
 		for(int k = 0 ; k<dimension; k++){
-			std::cout<<i<<": "<<std::endl;
+			//std::cout<<i<<": "<<std::endl;
 			for(int j = 0 ; j<dimension; j++){
 				//output_AD[k][j]+= output_AD_temp[k][j];
-				std::cout<<fisher[i][j]<<" ";
+				std::cout<<fisher[k][j]<<" ";
 			}
 			std::cout<<std::endl;
 		}
@@ -205,21 +216,20 @@ void calculate_statistical_error(
 		std::cout<<"-------------FISHER INVERSE-----------"<<std::endl;
 
 		for(int k = 0 ; k<dimension; k++){
-			std::cout<<i<<": "<<std::endl;
+			std::cout<<k<<": "<<std::endl;
 			for(int j = 0 ; j<dimension; j++){
 				//output_AD[k][j]+= output_AD_temp[k][j];
-				std::cout<<fisher_inverse[i][j]<<" ";
+				std::cout<<fisher_inverse[k][j]<<" ";
 			}
 			std::cout<<std::endl;
 		}
 
-		for(int i = 0; i < dimension; i++){
+		
+	for(int a = 0; a < dimension; a++){
 			//for(int j  = 0; j < dimension; j++){
-				output[i] = sqrt(fisher_inverse[i][i]);
-				std::cout<<"Statistical Error ["<<i<<"] : "<<output[i]<<std::endl;
+				output[a] = sqrt(fisher_inverse[a][a]);
+				std::cout<<"Statistical Error ["<<a<<"] : "<<output[a]<<std::endl;
 			//}
 		}
-
-		
-	}
+	
 }
