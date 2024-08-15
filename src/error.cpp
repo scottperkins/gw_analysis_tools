@@ -214,10 +214,10 @@ void calculate_statistical_error(
 		}
 
 		for(int i = 0; i < dimension; i++){
-			for(int j  = 0; j < dimension; j++){
+			//for(int j  = 0; j < dimension; j++){
 				output[i] = sqrt(fisher_inverse[i][i]);
 				std::cout<<"Statistical Error ["<<i<<"] : "<<output[i]<<std::endl;
-			}
+			//}
 		}
 
 		

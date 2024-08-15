@@ -22,11 +22,11 @@ int main(int argc, char *argv[]){
 	//Create injection structure
 	gen_params params;	
 	//params.mass1 = 1.9 *MSOL_SEC;
-	params.mass1 = 1.4 *MSOL_SEC;
+	params.mass1 = 2.0 *MSOL_SEC;
 	params.mass2 = 1.4 *MSOL_SEC;
-	params.spin1[2] = -.03;
-	params.spin2[2] = .03 ;
-	params.Luminosity_Distance = 30;
+	params.spin1[2] = .001;
+	params.spin2[2] = .002 ;
+	params.Luminosity_Distance = 100;
 	params.incl_angle = 3*M_PI/4;
 
 	params.NSflag1 = true;
