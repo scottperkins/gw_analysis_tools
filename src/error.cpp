@@ -162,8 +162,6 @@ double calculate_sys_err_elements(
 
 void calculate_statistical_error(
     double *frequency,
-	//std::complex<double>* h_model,
-	//std::complex<double>* h_true, 
 	int length,/**< if 0, standard frequency range for the detector is used*/ 
 	std::string generation_method, 
 	std::string* detectors, 
@@ -172,7 +170,6 @@ void calculate_statistical_error(
 	int dimension, 
 	gen_params_base<double> *parameters,
 	int order,/**< Order of the numerical derivative (2 or 4)**/
-	//double *parameters,
 	double **noise
 ){
 	std::cout<<__LINE__<<"psd input:"<<noise[0]<<std::endl;

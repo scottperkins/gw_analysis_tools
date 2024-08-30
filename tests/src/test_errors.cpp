@@ -57,8 +57,11 @@ int main(int argc, char *argv[]){
 
 	
 
-	double fmin = 5;
-	double fmax = 2048;
+	//double fmin = 5;
+	//double fmax = 2048;
+
+	double fmin = 7.2;
+	double fmax = 1820;
 	
 	//double **psd = new double*[Ndetect];
 	//double fmin = .006508;
