@@ -61,11 +61,11 @@ int test_EA_fisher(int argc, char *argv[])
 	//Create injection structure
 	gen_params params;	
 	//params.mass1 = 1.9 *MSOL_SEC;
-	params.mass1 = 1.4 *MSOL_SEC;
+	params.mass1 = 2.0 *MSOL_SEC;
 	params.mass2 = 1.4 *MSOL_SEC;
-	params.spin1[2] = -.03;
-	params.spin2[2] = .03 ;
-	params.Luminosity_Distance = 30;
+	params.spin1[2] = .001;
+	params.spin2[2] = .002 ;
+	params.Luminosity_Distance = 100;
 	params.incl_angle = 3*M_PI/4;
 
 	params.NSflag1 = true;
@@ -114,8 +114,8 @@ int test_EA_fisher(int argc, char *argv[])
 	//#######################################
 	//#######################################
 	//Detector characteristics
-	double fmin = 5;
-	double fmax = 2048;
+	double fmin = 7.2;
+	double fmax = 1820;
 	double T = 16;
 	params.tc = 3.*T/4.;
 
@@ -248,7 +248,7 @@ int test_EA_fisher(int argc, char *argv[])
 	//###############################################
 	
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	//std::cout<<"AD Fisher:"<<std::endl;
+	std::cout<<"----------AD Fisher:------------------"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
 		for(int j = 0 ; j<dim; j++){
