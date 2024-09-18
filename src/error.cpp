@@ -27,7 +27,7 @@ void calculate_systematic_error(
 )
 {
 	//populate noise and frequency
-	/**
+	
 	double *internal_noise = new double[length];
 	if (noise)
 	{
@@ -37,14 +37,15 @@ void calculate_systematic_error(
 		}
 	}
 	else{
-		populate_noise(frequency,detector, internal_noise,length);
+		populate_noise(frequency,detectors[0], internal_noise,length);
 		for (int i =0; i<length;i++)
 		        internal_noise[i] = internal_noise[i]*internal_noise[i];	
-	}**/
+	}
 
 	std::cout<<__LINE__<<"psd input:"<<noise[0]<<std::endl;
 	//Get Fisher (basic test if stuff is running or not)
 	double **fisher = allocate_2D_array(dimension,dimension);
+	double **fisher_temp = allocate_2D_array(dimension,dimension);
 	double **fisher_inverse = allocate_2D_array(dimension,dimension);
 	for(int i = 0 ; i<dimension; i++){
 		for(int j = 0 ; j<dimension; j++){
@@ -52,22 +53,21 @@ void calculate_systematic_error(
 			fisher_inverse[i][j]= 0;
 		}
 	}
-	//std::cout<<__LINE__<<"lENGTH"<<length<<": Detector:"<<detectors[0]<<": reference - "<<reference_detector<<": dim -"<<dimension<<std::endl;
-	//fisher_numerical(frequency, length, generation_method, detector, reference_detector, fisher, dimension, parameters, order);
+	
 	for(int i = 0 ;i < 3; i++){
-		        //total_snr += pow_int( calculate_snr(SN[i],detectors[i],generation_method, &parameters, frequency, length, "SIMPSONS", weights, false), 2);
-			//debugger_print(__FILE__,__LINE__,total_snr);
-			fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher, dimension, parameters, 2,NULL,NULL, noise);
-		
+		fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher_temp, dimension, parameters, 2,NULL,NULL, noise);
 		for(int k = 0 ; k<dimension; k++){
-			std::cout<<i<<": "<<std::endl;
+			//std::cout<<i<<": "<<std::endl;
 			for(int j = 0 ; j<dimension; j++){
-				//output_AD[k][j]+= output_AD_temp[k][j];
-				std::cout<<fisher[i][j]<<" ";
+				fisher[k][j]+= fisher_temp[k][j];
+				//std::cout<<std::setprecision(5)<<output_AD[i][j]<<" ";
 			}
-			std::cout<<std::endl;
+			//std::cout<<std::endl;
 		}
+		
+		
 	}
+	gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
 	//Get derivative of waveform
 	std::complex<double> **response_deriv = new std::complex<double>*[dimension];
 	for (int i = 0 ; i<dimension; i++){
@@ -86,23 +86,26 @@ void calculate_systematic_error(
 			order);
 
 
-	gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
+	//gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
 
-	std::cout<<__LINE__<<"Fisher INVERSE input:"<<fisher_inverse[0][0]<<std::endl;
+	//std::cout<<__LINE__<<"Fisher INVERSE input:"<<fisher_inverse[0][0]<<std::endl;
 	
 
 	//Get elements of systematic error
 	//output[0] = calculate_sys_err_elements(frequency, h_model, h_true, response_deriv, fisher_inverse, internal_noise, length, dimension, 0, 0);
 	
-	/*
+	
 	//THIS IS THE COMPLETE SYS ERR CALCULATION, UNCOMMENT WHEN EVERYTHNG ELSE IS WORKING 
 	for(int i = 0; i < dimension; i++){
 		for(int j = 0; j < dimension; j++){
 			//Calculate the (i,j) element of systematic error, and then sum over all j
+			
 			output[i] += calculate_sys_err_elements(frequency, h_model, h_true, response_deriv, fisher_inverse, internal_noise, length, dimension, i, j);
+			
 		}
+		//std::cout<<__LINE__<<" - Systematic Error "<<i<<": "<<output[i]<<std::endl;
 	}
-	*/
+	
 
 	//Deallocation
 	for (int i = 0 ; i<dimension; i++){
@@ -138,26 +141,34 @@ double calculate_sys_err_elements(
 	//Safety check for a and b
 	if(a<0 || b<0 || a>=dimension || b>=dimension) return -100.0;
 
-	std::cout<<"Fisher:"<<fisher_inverse[a][b]<<std::endl;
-	std::cout<<"Noise:"<<psd[0]<<std::endl;
+	//std::cout<<"Fisher:"<<fisher_inverse[a][b]<<std::endl;
+	//std::cout<<"Noise:"<<psd[0]<<std::endl;
 
 	double *integrand=new double[length];
 
 	for(int i = 0; i < length; i++){
+		for(int i = 0 ; i<length; i++){
+		//std::cout<<hpg[i]<<std::endl;;
+		
 		//Calculate the systematic error integrand
 		//integrand[i] = 10.0;
 		integrand[i] = 
 		real(
 		fisher_inverse[a][b] 
-	//	* (h_true[i] - h_model[i]) * std::conj(dh[b][i])
+		* (h_true[i] - h_model[i]) * std::conj(dh[b][i])
 		)
 		/
 		psd[i]
 		;
+		
+		}
 	}
 	//Integrate and result results
 	//return integrand[0];
+	//std::cout<<__LINE__<<"Waveform difference: "<<h_true[i] -h_model[i]<<std::endl;
 	return 4*simpsons_sum(frequency[1]-frequency[0], length, integrand);
+	
+	//return 4*simpsons_sum(frequency[1]-frequency[0], 0, new double[0]());
 }
 
 void calculate_statistical_error(
@@ -199,33 +210,33 @@ void calculate_statistical_error(
 	}
 	gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
 
-		std::cout<<"-------------FISHER-----------"<<std::endl;
+		//std::cout<<"-------------FISHER-----------"<<std::endl;
 
 		for(int k = 0 ; k<dimension; k++){
 			//std::cout<<i<<": "<<std::endl;
 			for(int j = 0 ; j<dimension; j++){
 				//output_AD[k][j]+= output_AD_temp[k][j];
-				std::cout<<fisher[k][j]<<" ";
+				//std::cout<<fisher[k][j]<<" ";
 			}
-			std::cout<<std::endl;
+			//std::cout<<std::endl;
 		}
 
-		std::cout<<"-------------FISHER INVERSE-----------"<<std::endl;
+		//std::cout<<"-------------FISHER INVERSE-----------"<<std::endl;
 
 		for(int k = 0 ; k<dimension; k++){
-			std::cout<<k<<": "<<std::endl;
+			//std::cout<<k<<": "<<std::endl;
 			for(int j = 0 ; j<dimension; j++){
 				//output_AD[k][j]+= output_AD_temp[k][j];
-				std::cout<<fisher_inverse[k][j]<<" ";
+				//std::cout<<fisher_inverse[k][j]<<" ";
 			}
-			std::cout<<std::endl;
+			//std::cout<<std::endl;
 		}
 
 		
 	for(int a = 0; a < dimension; a++){
 			//for(int j  = 0; j < dimension; j++){
 				output[a] = sqrt(fisher_inverse[a][a]);
-				std::cout<<"Statistical Error ["<<a<<"] : "<<output[a]<<std::endl;
+				//std::cout<<"Statistical Error ["<<a<<"] : "<<output[a]<<std::endl;
 			//}
 		}
 	
