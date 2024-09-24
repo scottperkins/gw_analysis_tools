@@ -52,6 +52,7 @@ int main(int argc, char *argv[]){
 	int b = -7.;
 	std::cout<<"Beta: "<<beta<<std::endl;
 	std::cout<<"b: "<<b<<std::endl;
+	
 	params.Nmod = 1;
 	params.bppe = new double[1];
 	params.bppe[0] = b;
@@ -176,15 +177,6 @@ int main(int argc, char *argv[]){
 		}
 	}
 	std::cout<<"Total SNR: "<<sqrt(total_snr)<<std::endl;
-	//td::cout<<"-------FISHER CALC IN TEST_FISHER----------"<<std::endl;
-	for(int k = 0 ; k<dim; k++){
-			//std::cout<<k<<": "<<std::endl;
-			for(int j = 0 ; j<dim; j++){
-				//std::cout<<output_AD[k][j]<<" ";
-			}
-			//std::cout<<std::endl;
-		}
-	std::cout<<"Total SNR: "<<sqrt(total_snr)<<std::endl;
 
 	//Get Waveforms
 	
@@ -207,22 +199,26 @@ int main(int argc, char *argv[]){
 		output_stat[i] = 0;
 	}
 
-	calculate_systematic_error(frequency, hcg, hcppE, length, method, detectors, detectors[0], output_sys, dim, &params, 2, psd[1]);
+	//calculate_systematic_error(frequency, hcg, hcppE, length, method, detectors, detectors[0], output_sys, dim, &params, 2, psd[1]);
 
 	std::vector<std::string> param_info = {"RA", "DEC", "psi", "phiRef", "tc", "iota_L", "ln DL", "ln chirpmass", "eta", "chi1", "chi2"};
 
 	
 
 	for(int i = 0; i < dim; i++){
-	std::cout<<__LINE__<<" ? "<< param_info[i]<<" - Systematic Error "<<i<<": "<<output[i]<<std::endl;
+	//std::cout<<__LINE__<<" ? "<< param_info[i]<<" - Systematic Error "<<i<<": "<<output_sys[i]<<std::endl;
 	}
 	
 
-	calculate_statistical_error(frequency, length, method, detectors, detectors[0], output_stat, dim, &params, 2, psd);
+	//calculate_statistical_error(frequency, length, method, detectors, detectors[0], output_stat, dim, &params, 2, psd);
 	//std::cout<<"SNR: "<<sqrt(output[0])<<std::endl;
 
 	for(int i = 0; i < dim; i++){
-	std::cout<<param_info[i]<<" - Systematic Error / Statistical Error "<<i<<": "<<output_sys[i]/output_stat[i]<<std::endl;
+	//std::cout<<param_info[i]<<"Statistical Error "<<i<<": "<<output_stat[i]<<std::endl;
+	}
+
+	for(int i = 0; i < dim; i++){
+	//std::cout<<param_info[i]<<" - Systematic Error / Statistical Error "<<i<<": "<<output_sys[i]/output_stat[i]<<std::endl;
 	}
 
 	
