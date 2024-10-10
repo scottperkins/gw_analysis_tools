@@ -394,9 +394,9 @@ double RelativeBinningLikelihood::log_likelihood(
 
     // Time shift
     // TODO: How important is shifting tc as in MCMC_likelihood_extrinsic?
-    double T = duration;
-    double tc_ref = T - params->tc;
-    params->tc = tc_ref;
+    //double T = duration;
+    //double tc_ref = T - params->tc;
+    //params->tc = tc_ref;
 
     // Obtain the data
     create_coherent_GW_detection(

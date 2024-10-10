@@ -2463,14 +2463,14 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	
 	//#################################################################################
 	//#################################################################################
-	double T = 1./( frequencies[1]-frequencies[0]);
-	double tc_ref = T-parameters->tc;
+	//double T = 1./( frequencies[0][1]-frequencies[0][0]);
+	//double tc_ref = T-parameters->tc;
 	double ll=0;
 	std::complex<double> **responses = new std::complex<double>*[num_detectors];	
 	for(int i = 0 ; i<num_detectors; i++){
 		responses[i] = new std::complex<double>[data_length[i]];
 	}
-	parameters->tc = tc_ref;	
+	//parameters->tc = -(parameters->tc);	
 	create_coherent_GW_detection(detectors, num_detectors, frequencies,data_length, save_waveform, parameters, generation_method, responses);
 	for(int i = 0 ;i<num_detectors; i++){
 		ll += Log_Likelihood_internal(data[i],psd[i],frequencies[i],weights[i],responses[i],data_length[i], log10F,integration_method);	
