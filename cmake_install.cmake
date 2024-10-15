@@ -2,8 +2,7 @@
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
- set(CMAKE_INSTALL_PREFIX "/usr/local/lib")  
-#set(CMAKE_INSTALL_PREFIX "/opt/gw_analysis_tools/install")
+  set(CMAKE_INSTALL_PREFIX "/opt/gw_analysis_tools/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
