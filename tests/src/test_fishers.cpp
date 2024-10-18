@@ -22,12 +22,12 @@ void RT_ERROR_MSG();
 int main(int argc, char *argv[])
 {
 	std::cout<<"TESTING FISHER CALCULATIONS"<<std::endl;
-
+		
 	if(argc != 2){
 		RT_ERROR_MSG();
 		return 1;
 	}
-
+	
 	int runtime_opt = stoi(argv[1]);	
 	if(runtime_opt == 0){
 		return AD_v_N(argc,argv);
@@ -61,19 +61,19 @@ int test_EA_fisher(int argc, char *argv[])
 	//Create injection structure
 	gen_params params;	
 	//params.mass1 = 1.9 *MSOL_SEC;
-	params.mass1 = 1.44;
-	params.mass2 = 1.29399;
-	params.spin1[2] = .003;
-	params.spin2[2] = -.002 ;
-	params.Luminosity_Distance = 63;
-	params.incl_angle = 2.532207345558998;
+	params.mass1 = 2.0 *MSOL_SEC;
+	params.mass2 = 1.4 *MSOL_SEC;
+	params.spin1[2] = .001;
+	params.spin2[2] = .002 ;
+	params.Luminosity_Distance = 100;
+	params.incl_angle = 3*M_PI/4;
 
 	params.NSflag1 = true;
 	params.NSflag2 =true;
 
-	params.phiRef = 2.;
-	params.RA = 3.42;
-	params.DEC = -.37;
+	params.phiRef = .0;
+	params.RA = 1.;
+	params.DEC = 0.6;
 	params.f_ref = 20;
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2);//*MSOL_SEC;
 	double eta = calculate_eta(params.mass1,params.mass2);//*MSOL_SEC;
@@ -84,64 +84,48 @@ int test_EA_fisher(int argc, char *argv[])
 	params.dep_postmerger=true;
 	params.sky_average=false;
 	params.tidal_love=true;
-	params.tidal_s=242;
-
+	params.tidal_s=200;
+	
 	//params.tidal_love=false;
 	//params.tidal1=200;
 	//params.tidal2=100;
-
-	params.psi = 2.;
-	double gps = 1187008882.4;
-	params.gmst = gps_to_GMST_radian(gps);
-	//params.gmst = 2.;
+	
+	params.psi = 1.;
+	params.gmst = 2.;
 	params.sky_average = false;
 
 
 	//#######################################
 	//EA parameters
 	//#######################################
-	params.ca_EA = 1.76044705650715010e-06; 
-	params.ctheta_EA = 5.28136e-06; 
-	params.cw_EA = 3.52089e-06; 
+	params.ca_EA = 5.01510850153863e-07; 
+	params.ctheta_EA = 1.50544346457309e-06; 
+	params.cw_EA = 5.11795863509178; 
 	//params.ca_EA = 1e-7;
 	//params.ctheta_EA = 2e-7;
 	//params.cw_EA = 2e-7;
 	//params.csigma_EA = 1e-30;
 	//#######################################
 	//#######################################
-
+	
 	std::cout<<"m1: "<<params.mass1<<", m2: "<<params.mass2<<std::endl;
 	std::cout<<"chirpmass: "<<chirpmass<<", eta: "<<eta<<std::endl; 
 
 	//#######################################
 	//#######################################
 	//Detector characteristics
-	double fmin = 10;
-	double fmax = 2048;
+	double fmin = 7.2;
+	double fmax = 1820;
 	double T = 16;
-	//params.tc = 3.*T/4.;
+	params.tc = 3.*T/4.;
 
-	double Tsignal = 4;
-	//double Tsignal = 128; 
-	double deltaF = 1./Tsignal;
-	//Merger time -- 3/4 of total signal length. If using >4 seconds, change to Tsignal - 2
-	double T_merger= Tsignal*3./4.;
-	int length = (int)((fmax-fmin)/deltaF);
-	params.tc=Tsignal-T_merger;
-
-	//int length = 2000;
+	int length = 2000;
 	double *frequency = new double[length];
 	int Ndetect = 3;
 	double **psd = new double*[Ndetect];
-
-
-	std::complex<double> **data = new std::complex<double>*[Ndetect];
-	double **freq = new double*[Ndetect];
-
-
 	//Noise curves to use
 	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdLIGOMidHigh"}; //"AdVIRGOPlus1"};
-
+	
 	//Calculate freq/weight array (using gauss-legendre quadrature)
 	bool AD = false;
 	bool GL = false;
@@ -159,12 +143,9 @@ int test_EA_fisher(int argc, char *argv[])
 			frequency[i] = fmin + deltaF*i;
 		}
 	}
-
+	
 
 	for(int i = 0 ; i<Ndetect; i++){
-		data[i]= new std::complex<double>[length];
-		freq[i]= new double[length];
-
 		psd[i]= new double[length];
 		populate_noise(frequency, SN[i],psd[i], length, 48);
 		for(int j = 0 ; j<length; j++){
@@ -172,17 +153,17 @@ int test_EA_fisher(int argc, char *argv[])
 		}
 	}
 	std::cout<<"frequency[10]:"<<frequency[10]<<std::endl; 
-
+	
 	//Set detector names
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
-
+		
 	//###############################################
 	//Dimension and model
 	//###############################################
 	//int dim = 15;
 	//std::string method = "EA_IMRPhenomD_NRT";
 	int dim = 11; 
-	std::string method = "IMRPhenomD_NRT"; 
+	std::string method = "IMRPhenomD"; 
 	
 	//###############################################
 	//Allocate output
@@ -201,25 +182,16 @@ int test_EA_fisher(int argc, char *argv[])
 	double snr; 
 	double total_snr = 0;
 
-	//Set data_length array 
-	int data_lengths[Ndetect];
-	for(int i = 0 ; i<Ndetect; i++){
-		data_lengths[i]=length;
-		freq[i] = frequency;	
-	}
-
-
-	//calculate_snr_internal(SN[0], )
 	//###############################################
 	//Calculate Fishers
 	//###############################################
-	create_coherent_GW_detection(detectors, Ndetect, freq, data_lengths, true, &params, method, data);
 	for(int i = 0 ;i < Ndetect; i++){
 		if(AD){
 			if(GL){
 				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "GAUSSLEG", weights, true), 2);
 				fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 				//debugger_print(__FILE__,__LINE__, total_snr);
+
 			}
 			else{
 				total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
@@ -228,16 +200,8 @@ int test_EA_fisher(int argc, char *argv[])
 			}
 		}
 		else{
-			//std::complex<double> *response = new std::complex<double>[length];
-			//fourier_detector_response(frequency, length, response, detectors[i], method, &params,weights);
-
-			//calculate_snr_internal(psd, response, frequency, length, "SIMPSONS", weights, false);
-			//snr = calculate_snr(SN[i], response, frequencies, length,integration_method, weights, log10_freq);
-		    //total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
-
-			//total_snr += pow_int( calculate_snr_internal(psd[i], response, frequency, length, "SIMPSONS", weights, false), 2);
-			total_snr += pow_int( calculate_snr_internal(psd[i], data[i], frequency, length, "SIMPSONS", weights, false), 2);
-			debugger_print(__FILE__,__LINE__,total_snr);
+		        total_snr += pow_int( calculate_snr(SN[i],detectors[i],method, &params, frequency, length, "SIMPSONS", weights, false), 2);
+			//debugger_print(__FILE__,__LINE__,total_snr);
 			fisher_numerical(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, 2,NULL,NULL, psd[i]);
 		}
 		for(int k = 0 ; k<dim; k++){
@@ -263,6 +227,7 @@ int test_EA_fisher(int argc, char *argv[])
 	//output_AD[dim-2][dim-2]+= 1./sigma_omega/sigma_omega;
 	//output_AD[dim-1][dim-1]+= 1./sigma_sigma/sigma_sigma;
 	//####################################
+
 	//####Removing correlations between EA coupling constants for simplicity
 	/*for(int i = 0 ; i <3; i++){
 	  for(int j = 0 ; j<dim; j++){
@@ -281,9 +246,9 @@ int test_EA_fisher(int argc, char *argv[])
 	//###############################################
 	//Invert and print -- uncomment to see full cov or fisher
 	//###############################################
-
+	
 	std::cout<<"SNR: "<<sqrt(output_AD[6][6])<<std::endl;
-	//std::cout<<"AD Fisher:"<<std::endl;
+	std::cout<<"----------AD Fisher:------------------"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
 		for(int j = 0 ; j<dim; j++){
@@ -328,7 +293,7 @@ int test_EA_fisher(int argc, char *argv[])
 	deallocate_2D_array(output_AD,dim,dim);
 	deallocate_2D_array(output_AD_temp,dim,dim);
 	deallocate_2D_array(COV_AD,dim,dim);
-
+	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
@@ -372,7 +337,7 @@ int test_LISA_fisher(int argc, char *argv[])
 	params.dep_postmerger=true;
 	//params.equatorial_orientation=true;
 	params.equatorial_orientation=false;
-
+	
 	params.gmst = 2.;
 	//params.sky_average = false;
 	params.sky_average = true;
@@ -446,7 +411,7 @@ int test_LISA_fisher(int argc, char *argv[])
 	deallocate_2D_array(output,dim,dim);
 	deallocate_2D_array(output_temp,dim,dim);
 	deallocate_2D_array(COV,dim,dim);
-
+	
 	delete [] frequency;
 	delete [] weights;
 	delete [] psd;
@@ -488,7 +453,7 @@ int test_MCMC_fisher(int argc, char *argv[])
 	params.dep_postmerger=true;
 	params.sky_average=false;
 	params.equatorial_orientation=false;
-
+	
 	params.psi = 1.;
 	params.gmst = 2.;
 	params.sky_average = false;
@@ -568,7 +533,7 @@ int test_MCMC_fisher(int argc, char *argv[])
 	deallocate_2D_array(output,dim,dim);
 	deallocate_2D_array(output_temp,dim,dim);
 	deallocate_2D_array(COV,dim,dim);
-
+	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
@@ -607,7 +572,7 @@ int test_jac_transform(int argc, char *argv[])
 	params.shift_phase=false;
 	params.dep_postmerger=true;
 	params.sky_average=false;
-
+	
 	params.psi = 1.;
 	params.gmst = 2.;
 	params.sky_average = false;
@@ -620,7 +585,7 @@ int test_jac_transform(int argc, char *argv[])
 	params.bppe[0] = -7;
 	//params.bppe[0] = -1.5;
 	//params.bppe[0] = -3;
-
+	
 
 	double fmin = 5;
 	double fmax = 2048;
@@ -635,7 +600,7 @@ int test_jac_transform(int argc, char *argv[])
 	//std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
 	//std::string SN[3] = {"CE1","AdLIGOMidHigh","AdVIRGOPlus1"};
-
+	
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
 	for(int i = 0 ; i<length; i++){
@@ -660,14 +625,14 @@ int test_jac_transform(int argc, char *argv[])
 	source_parameters<double> sparam;
 	std::string local_method = prep_source_parameters(&sparam,&params,method);
 	double beta_value =  sparam.betappe[0];
-
+	
 	std::cout<<beta_value<<std::endl;;
 	std::cout<<local_method<<std::endl;;
 	cleanup_source_parameters(&sparam, method);
 	//#########################
 
 
-
+		
 	int dim = 14;
 	int dimDSA = 8;
 
@@ -730,7 +695,7 @@ int test_jac_transform(int argc, char *argv[])
 		}
 		std::cout<<std::endl;
 	}
-
+	
 	deallocate_2D_array(identity_full, dim,dim);
 
 
@@ -767,7 +732,7 @@ int test_jac_transform(int argc, char *argv[])
 		cov_dcs[i] = COV_AD[i][dim-1] / sqrt( COV_AD[i][i]*COV_AD[dim-1][dim-1]);
 		std::cout<<cov_dcs[i]<<" "<<cov_ppe[i]<<" "<<COV_AD2[i][dim-1]<<" "<<COV_AD[i][dim-1]<<std::endl;
 	}
-
+	
 	std::cout<<"Covariance difference: i j frac_diff Cov1 Cov2 ppE"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		for(int j = 0 ; j<dim; j++){
@@ -789,10 +754,10 @@ int test_jac_transform(int argc, char *argv[])
 		}
 		std::cout<<std::endl;
 	}
-
+	
 	deallocate_2D_array(identity_full2, dim,dim);
 
-
+	
 	std::cout<<"AD-2:"<<std::endl;
 
 	params.sky_average = true;
@@ -806,7 +771,7 @@ int test_jac_transform(int argc, char *argv[])
 			}
 		}
 	}
-
+	
 	method = "ppE_IMRPhenomD_Inspiral";
 	params.betappe[0]=beta_value;
 	for(int i = 0 ;i < Ndetect; i++){
@@ -819,7 +784,7 @@ int test_jac_transform(int argc, char *argv[])
 	}
 	params.betappe[0]=mod_value;
 	ppE_theory_fisher_transformation("ppE_IMRPhenomD_Inspiral","DipRad_IMRPhenomD",dimDSA, &params, output_ADSA2,output_ADSA2_T);
-
+	
 	std::cout<<"Sky averaged fisher diff: i j fracdiff F1 F2 F3"<<std::endl;
 	for(int i = 0 ; i<dimDSA; i++){
 		for(int j = 0 ; j<dimDSA; j++){
@@ -845,7 +810,7 @@ int test_jac_transform(int argc, char *argv[])
 	deallocate_2D_array(output_AD2,dim,dim);
 	deallocate_2D_array(output_AD2_T,dim,dim);
 	deallocate_2D_array(output_AD2_temp,dim,dim);
-
+	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
@@ -880,7 +845,7 @@ int network_fishers(int argc, char *argv[])
 	params.shift_phase=false;
 	params.dep_postmerger=true;
 	params.sky_average=false;
-
+	
 	params.mass1 = 15;
 	params.mass2 = 8;
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
@@ -908,7 +873,7 @@ int network_fishers(int argc, char *argv[])
 	int Ndetect = 2;
 	double **psd = new double*[Ndetect];
 	std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
-
+	
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
 	for(int i = 0 ; i<length; i++){
@@ -945,7 +910,7 @@ int network_fishers(int argc, char *argv[])
 
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
-
+		
 	int dim = 15;
 
 	double **jac_spins = allocate_2D_array(dim,dim);
@@ -1003,8 +968,8 @@ int network_fishers(int argc, char *argv[])
 	}
 	//matrix_multiply(output_AD, jac_spins,output_AD_temp,dim,dim,dim);
 	//matrix_multiply(jac_spins,output_AD_temp, output_AD,dim,dim,dim);
-
-
+	
+	
 	std::cout<<"AD:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
@@ -1039,8 +1004,8 @@ int network_fishers(int argc, char *argv[])
 	}
 	matrix_multiply(output_AD3, jac_spins,output_AD3_temp,dim,dim,dim);
 	matrix_multiply(jac_spins,output_AD3_temp, output_AD3,dim,dim,dim);
-
-
+	
+	
 	std::cout<<"AD-Network:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		std::cout<<i<<" ";
@@ -1082,7 +1047,7 @@ int network_fishers(int argc, char *argv[])
 	deallocate_2D_array(output_AD3,dim,dim);
 	deallocate_2D_array(output_AD3_temp,dim,dim);
 	deallocate_2D_array(jac_spins,dim,dim);
-
+	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
@@ -1092,7 +1057,7 @@ int network_fishers(int argc, char *argv[])
 }
 int dCS_EdGB(int argc, char *argv[])
 {
-
+	
 	std::cout.precision(15);
 	gen_params params;	
 	//params.mass1 = 31.5;
@@ -1103,7 +1068,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.phip = 1.0;
 	//params.Luminosity_Distance = 730;
 	//params.incl_angle = .76;
-
+	
 	params.mass1 = 5.9;
 	params.mass2 = 1.4;
 	//params.spin1[2] = .08* (params.mass1+params.mass2)/params.mass1;
@@ -1126,7 +1091,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.phip = 1.0;
 	//params.Luminosity_Distance = 70;
 	//params.incl_angle = M_PI/3.;
-
+	
 
 	params.NSflag1 = false;
 	params.NSflag2 =true;
@@ -1144,7 +1109,7 @@ int dCS_EdGB(int argc, char *argv[])
 	params.shift_phase=false;
 	params.dep_postmerger=true;
 	params.sky_average=false;
-
+	
 	params.psi = 1.;
 	params.gmst = 2.;
 	params.sky_average = false;
@@ -1153,9 +1118,9 @@ int dCS_EdGB(int argc, char *argv[])
 	//params.phii[0]=4;
 	//params.delta_phi=new double[1];
 	//params.delta_phi[0]=0;
-
-
-
+	
+	
+	
 	//params.Nmod = 2;
 	//params.betappe = new double[2];
 	//params.bppe = new double[2];
@@ -1165,7 +1130,7 @@ int dCS_EdGB(int argc, char *argv[])
 	////params.betappe[0] =1;
 	//params.bppe[0] = -7;
 	//params.bppe[1] = -5;
-
+	
 	params.Nmod = 1;
 	params.betappe = new double[1];
 	params.bppe = new double[1];
@@ -1173,7 +1138,7 @@ int dCS_EdGB(int argc, char *argv[])
 	params.betappe[0] =1e-30;
 	//params.betappe[0] =1;
 	params.bppe[0] = -7;
-
+	
 
 	double fmin = 5;
 	double fmax = 2048;
@@ -1188,7 +1153,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	std::string SN[3] = {"AdLIGOMidHigh","AdLIGOMidHigh","AdVIRGOPlus1"};
 	//std::string SN[3] = {"CE1","AdLIGOMidHigh","AdVIRGOPlus1"};
-
+	
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
 	for(int i = 0 ; i<length; i++){
@@ -1209,7 +1174,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//std::string method = "EdGB_IMRPhenomPv2";
 	std::string method = "EdGB_HO_IMRPhenomPv2";
 	//std::string method = "EdGB_GHOv1_IMRPhenomPv2";
-
+	
 
 	//source_parameters<double> sp;
 	//std::string temp_meth = prep_source_parameters(&sp, &params, "EdGB_IMRPhenomPv2");
@@ -1220,7 +1185,7 @@ int dCS_EdGB(int argc, char *argv[])
 
 
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
-
+		
 	int dim = 14;
 	int dimD = 12;
 	int dimDSA = 8;
@@ -1347,7 +1312,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//	}
 	//	std::cout<<std::endl;
 	//}
-
+	
 	deallocate_2D_array(identity_full, dim,dim);
 
 
@@ -1409,8 +1374,8 @@ int dCS_EdGB(int argc, char *argv[])
 	}
 	//matrix_multiply(output_AD2, jac_spins,output_AD2_temp,dimD,dimD,dimD);
 	//matrix_multiply(jac_spins,output_AD2_temp, output_AD2,dimD,dimD,dimD);
-
-
+	
+	
 	std::cout<<"AD-D:"<<std::endl;
 	//for(int i = 0 ; i<dimD; i++){
 	//	std::cout<<i<<" ";
@@ -1451,8 +1416,8 @@ int dCS_EdGB(int argc, char *argv[])
 			}
 		}
 	}
-
-
+	
+	
 	std::cout<<"AD-DSA:"<<std::endl;
 	//for(int i = 0 ; i<dimDSA; i++){
 	//	std::cout<<i<<" ";
@@ -1471,7 +1436,7 @@ int dCS_EdGB(int argc, char *argv[])
 	//	}
 	//	std::cout<<std::endl;
 	//}
-
+	
 	deallocate_2D_array(identity, dimDSA,dimDSA);
 	std::cout<<"Variances (90%):"<<std::endl;
 	for(int i = 0 ; i<dimDSA; i++){
@@ -1505,7 +1470,7 @@ int dCS_EdGB(int argc, char *argv[])
 	deallocate_2D_array(output_AD2,dimD,dimD);
 	deallocate_2D_array(output_AD2_temp,dimD,dimD);
 	deallocate_2D_array(jac_spins,dim,dim);
-
+	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
@@ -1520,7 +1485,7 @@ int dCS_EdGB(int argc, char *argv[])
 }
 int AD_v_N(int argc, char *argv[])
 {
-
+	
 	std::cout.precision(5);
 	gen_params params;	
 	params.spin1[2] = .1;
@@ -1540,7 +1505,7 @@ int AD_v_N(int argc, char *argv[])
 	params.shift_phase=false;
 	params.dep_postmerger=true;
 	params.sky_average=false;
-
+	
 	params.mass1 = 36;
 	params.mass2 = 29;
 	double chirpmass = calculate_chirpmass(params.mass1,params.mass2)*MSOL_SEC;
@@ -1574,7 +1539,7 @@ int AD_v_N(int argc, char *argv[])
 	std::string SN[3] = {"AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	//std::string SN[4] = {"LISA_SADC_CONF","AdLIGODesign_smoothed","AdLIGODesign_smoothed","AdLIGODesign_smoothed"};
 	//std::string SN[3] = {"Hanford_O1_fitted","Hanford_O1_fitted","Hanford_O1_fitted"};
-
+	
 	double *weights = new double[length];
 	gauleg(log10(fmin), log10(fmax),frequency,weights,length);
 	for(int i = 0 ; i<length; i++){
@@ -1625,7 +1590,7 @@ int AD_v_N(int argc, char *argv[])
 	//std::string detectors[4] = {"CE","Hanford","Livingston","Virgo"};
 	std::string detectors[3] = {"Hanford","Livingston","Virgo"};
 	//std::string detectors[4] = {"LISA","Hanford","Livingston","Virgo"};
-
+		
 	int dim = 13;
 	int dimD = 12;
 	int dimDSA = 8;
@@ -1710,7 +1675,7 @@ int AD_v_N(int argc, char *argv[])
 	//		}
 	//	}
 	//}
-
+	
 	//std::cout<<"NUMERICAL:"<<std::endl;
 	//for(int i = 0 ; i<dim; i++){
 	//	std::cout<<i<<" ";
@@ -1735,8 +1700,8 @@ int AD_v_N(int argc, char *argv[])
 	std::cout<<"SNR: "<<snr<<std::endl;
 	//snr = calculate_snr(SN[1],"Hanford",method, &params, frequency, length, "SIMPSONS",NULL,false);
 	//std::cout<<"SNR (Hanford): "<<snr<<std::endl;
-
-
+	
+	
 	//std::cout<<"AD:"<<std::endl;
 	//for(int i = 0 ; i<dim; i++){
 	//	std::cout<<i<<" ";
@@ -1773,8 +1738,8 @@ int AD_v_N(int argc, char *argv[])
 	}
 	//matrix_multiply(output_AD3, jac_spins,output_AD3_temp,dimD,dimD,dimD);
 	//matrix_multiply(jac_spins,output_AD3_temp, output_AD3,dimD,dimD,dimD);
-
-
+	
+	
 	//std::cout<<"AD-D:"<<std::endl;
 	//for(int i = 0 ; i<dimD; i++){
 	//	std::cout<<i<<" ";
@@ -1853,7 +1818,7 @@ int AD_v_N(int argc, char *argv[])
 	//fisher_autodiff(frequency, length, method, detectors[i],detectors[0], output_AD_temp, dim, &params, "GAUSSLEG",weights,true, psd[i],NULL,NULL);
 	method = "gIMRPhenomPv2";
 	fisher_autodiff(frequency, length, method, detectors[0],detectors[0], output_AD2, dim, &params, "GAUSSLEG",weights,true, psd[0],NULL,NULL);
-
+	
 	std::cout<<"FD AD / AD2:"<<std::endl;
 	for(int i = 0 ; i<dim; i++){
 		//std::cout<<i<<" ";
@@ -1898,7 +1863,7 @@ int AD_v_N(int argc, char *argv[])
 	deallocate_2D_array(output_N,dim,dim);
 	deallocate_2D_array(output_N_temp,dim,dim);
 	deallocate_2D_array(jac_spins,dim,dim);
-
+	
 	delete [] frequency;
 	for(int i = 0 ; i<Ndetect; i++){
 		delete [] psd[i];
@@ -1923,3 +1888,5 @@ void RT_ERROR_MSG()
 	std::cout<<"5 --- Test LISA fisher"<<std::endl;
 	std::cout<<"6 --- Test EA fisher"<<std::endl;
 }
+
+

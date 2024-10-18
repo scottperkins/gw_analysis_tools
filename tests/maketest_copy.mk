@@ -1,6 +1,6 @@
 ####################################################
 #EXE:=bin/test_fishers.exe bin/test_SNR.exe bin/test_util.exe bin/test_waveform.exe bin/test_waveform_util.exe bin/test_mcmc.exe bin/test_cosmology.exe bin/test_response_functions.exe
-EXE:=bin/test_fishers.exe bin/test_errors.exe
+EXE:=bin/test_fishers.exe 
 ####################################################
 # Use the default CXX compiler and linker
 #
@@ -72,7 +72,7 @@ remove:
 #########################################
 EXE0:=bin/test_fishers.exe
 EXE1:=bin/test_SNR.exe
-EXE2:=bin/test_errors.exe
+EXE2:=bin/test_util.exe
 EXE3:=bin/test_waveform.exe
 EXE4:=bin/test_waveform_util.exe
 EXE5:=bin/test_mcmc.exe
@@ -80,7 +80,7 @@ EXE6:=bin/test_cosmology.exe
 EXE7:=bin/test_response_functions.exe
 OBJEXE0:=build/test_fishers.o
 OBJEXE1:=build/test_SNR.o
-OBJEXE2:=build/test_errors.o
+OBJEXE2:=build/test_util.o
 OBJEXE3:=build/test_waveform.o
 OBJEXE4:=build/test_waveform_util.o
 OBJEXE5:=build/test_mcmc.o
