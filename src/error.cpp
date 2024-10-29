@@ -147,7 +147,7 @@ double calculate_sys_err_elements(
 	double *integrand=new double[length];
 
 	for(int i = 0; i < length; i++){
-		for(int i = 0 ; i<length; i++){
+		//for(int i = 0 ; i<length; i++){
 		//std::cout<<hpg[i]<<std::endl;;
 		
 		//Calculate the systematic error integrand
@@ -161,11 +161,12 @@ double calculate_sys_err_elements(
 		psd[i]
 		;
 		
-		}
+		//}
+		//std::cout<<__LINE__<<"Waveform difference: "<<h_true[i] -h_model[i]<<std::endl;
 	}
 	//Integrate and result results
 	//return integrand[0];
-	//std::cout<<__LINE__<<"Waveform difference: "<<h_true[i] -h_model[i]<<std::endl;
+	
 	return 4*simpsons_sum(frequency[1]-frequency[0], length, integrand);
 	
 	//return 4*simpsons_sum(frequency[1]-frequency[0], 0, new double[0]());
@@ -183,19 +184,24 @@ void calculate_statistical_error(
 	int order,/**< Order of the numerical derivative (2 or 4)**/
 	double **noise
 ){
-	std::cout<<__LINE__<<"psd input:"<<noise[0]<<std::endl;
+	int num_detectors = 3;
+
+	std::cout<<__LINE__<<": Calculating statistical Error"<<std::endl;
+
 	//Get Fisher (basic test if stuff is running or not)
 	double **fisher = allocate_2D_array(dimension,dimension);
 	double **fisher_temp = allocate_2D_array(dimension,dimension);
 	double **fisher_inverse = allocate_2D_array(dimension,dimension);
+	//Fill fisher and fisher inverse arrays with placeholder values
 	for(int i = 0 ; i<dimension; i++){
 		for(int j = 0 ; j<dimension; j++){
 			fisher[i][j]= 0;
 			fisher_inverse[i][j]= 0;
 		}
 	}
-	
-	for(int i = 0 ;i < 3; i++){
+
+	//Calculate Fishers numerically
+	for(int i = 0 ;i < num_detectors; i++){
 		fisher_numerical(frequency, length, generation_method, detectors[i],detectors[0], fisher_temp, dimension, parameters, 2,NULL,NULL, noise[i]);
 		for(int k = 0 ; k<dimension; k++){
 			//std::cout<<i<<": "<<std::endl;
@@ -208,10 +214,14 @@ void calculate_statistical_error(
 		
 		
 	}
+
+	//Invert the matrix
 	gsl_LU_matrix_invert(fisher, fisher_inverse, dimension);
 
+		//Test Output
+		/*
 		//std::cout<<"-------------FISHER-----------"<<std::endl;
-
+		
 		for(int k = 0 ; k<dimension; k++){
 			//std::cout<<i<<": "<<std::endl;
 			for(int j = 0 ; j<dimension; j++){
@@ -231,8 +241,9 @@ void calculate_statistical_error(
 			}
 			//std::cout<<std::endl;
 		}
+		*/
 
-		
+	//Calculate square root of the diagonal of the inverse fisher to get statistical error	
 	for(int a = 0; a < dimension; a++){
 			//for(int j  = 0; j < dimension; j++){
 				output[a] = sqrt(fisher_inverse[a][a]);
