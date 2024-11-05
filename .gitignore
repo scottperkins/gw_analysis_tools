@@ -41,6 +41,11 @@ _templates/
 
 # Test Files
 tests/data/*
+
+#CMakeFiles
+CMakeFiles/*
+src/CMakeFiles/*
+
 CMakeFiles/Progress/1
 CMakeFiles/Progress/10
 CMakeFiles/Progress/11
