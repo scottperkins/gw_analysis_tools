@@ -348,10 +348,11 @@ void assign_mapping(std::string generation_method,theory_ppE_map<T> *mapping, ge
 			mapping->ppE_method = "ppE_IMRPhenomD_IMR";
 		}
 		else if(ins && generation_method.find("NRT") != std::string::npos){
-			mapping->ppE_method = "ppE_IMRPhenomD_NRT_Inspiral";
+			mapping->ppE_method = "ppE_IMRPhenomD_NRT";
 		}
 		else if(!ins && generation_method.find("NRT") != std::string::npos){
-			mapping->ppE_method = "ppE_IMRPhenomD_NRT_IMR";
+			mapping->ppE_method = "ppE_IMRPhenomD_NRT";
+			//std::cout<<"Merger/Ringdown not supported for ppE_IMRPhenomD_NRT"<<std::endl; 
 		}
 
 	}

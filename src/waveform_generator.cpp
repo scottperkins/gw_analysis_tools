@@ -144,15 +144,9 @@ int fourier_waveform(T *frequencies, /**< double array of frequencies for the wa
 			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
-		else if(local_method == "ppE_IMRPhenomD_NRT_Inspiral")
+		else if(local_method == "ppE_IMRPhenomD_NRT")
 		{
-			ppE_IMRPhenomD_NRT_Inspiral<T> ppemodeld;
-			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
-
-		}
-		else if(local_method == "ppE_IMRPhenomD_NRT_IMR")
-		{
-			ppE_IMRPhenomD_NRT_IMR<T> ppemodeld;
+			ppE_IMRPhenomD_NRT<T> ppemodeld;
 			status = ppemodeld.construct_waveform(frequencies, length, wp->hplus, &params);
 
 		}
