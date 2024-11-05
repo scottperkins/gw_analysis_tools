@@ -24,7 +24,7 @@ virtual T Dphase_ins(T f, source_parameters<T> *param, T *pn_coeff, lambda_param
 /*! Class that extends the IMRPhenomD_NRT waveform to include non-GR terms in the full
  * phase. This is an appropriate waveform choice for propagation effects
  */
- 
+
 template<class T> 
 class ppE_IMRPhenomD_NRT_IMR: public ppE_IMRPhenomD_NRT_Inspiral<T>
 {
