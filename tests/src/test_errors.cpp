@@ -136,7 +136,7 @@ int main(int argc, char *argv[]){
 	
 	std::cout<<"frequency[10]:"<<frequency[10]<<std::endl;
 
-	int dim = 11;
+	int dim = 11;	
 	double* output = new double[dim];
 
 	std::string method = "IMRPhenomD_NRT";
