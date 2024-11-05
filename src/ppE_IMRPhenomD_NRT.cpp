@@ -16,12 +16,13 @@ T ppE_IMRPhenomD_NRT<T>::phase_ins_NRT(T f, source_parameters<T> *param, T *pn_c
 {
 	IMRPhenomD_NRT<T> model;
 	T PIMFcube = pow(M_PI * param->chirpmass * f, 1./3.);
-	T gr_ins = model.phase_ins_NRT(f, param, pn_coeff, lambda,powers);
+	T gr_ins = model.phase_ins_NRT(f,powers, param);
+	//T gr_ins = model.phase_ins_NRT(f, param, pn_coeff, lambda,powers);
 	T phaseout= gr_ins;
 
 	//return the model itself, no ppE corrections test
 	//return phaseout;
-	
+
 	for(int i = 0; i<param->Nmod; i++)
 		phaseout =phaseout +  pow((PIMFcube),param->bppe[i]) * param->betappe[i];
 
