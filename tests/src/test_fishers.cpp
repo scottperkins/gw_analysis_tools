@@ -60,10 +60,10 @@ int test_EA_fisher(int argc, char *argv[])
 	std::cout.precision(15);
 	//Create injection structure
 	gen_params params;	
-	params.mass1 = 1.9 *MSOL_SEC;
-	//params.mass1 = 1.4 *MSOL_SEC;
-	//params.mass1 = (1.4 - pow(10, -1))*MSOL_SEC; 
-	params.mass2 = 1.4 *MSOL_SEC;
+	params.mass1 = 1.9;
+	//params.mass1 = 1.4;
+	//params.mass1 = (1.4 - pow(10, -1)); 
+	params.mass2 = 1.4;
 	params.spin1[2] = -.03;
 	params.spin2[2] = .03 ;
 	params.Luminosity_Distance = 30;
