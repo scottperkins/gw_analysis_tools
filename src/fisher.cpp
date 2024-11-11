@@ -90,7 +90,8 @@ void fisher_numerical(double *frequency,
 	//double *parameters,
 	int *amp_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method -- if using numerical derivatives or speed isn't that important, just set to NULL*/
 	int *phase_tapes,/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
-	double *noise
+	double *noise,
+	Quadrature *quadMethod	/**< Quadrature method */
 	)
 {
 	//populate noise and frequency
@@ -124,11 +125,25 @@ void fisher_numerical(double *frequency,
 			order);
 
 
-	//calulate fisher elements
-	bool log10_f=false;
-	std::string integration_method="SIMPSONS";
-	double *weights=NULL;
-	calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise,integration_method,weights,log10_f);
+	//calculate fisher elements
+	// TODO: Remove old calculate_fisher_elements method.
+	//		 Keep only the inside of the ELSE block.
+	//		 All methods that call fisher_numerical would have to pass a Quadrature class.
+	if (quadMethod == NULL)
+	{
+		// Old method. Hard-coded to Simpsons
+		bool log10_f=false;
+		std::string integration_method="SIMPSONS";
+		double *weights=NULL;
+		calculate_fisher_elements(frequency, length,dimension, response_deriv, output,  internal_noise,integration_method,weights,log10_f);
+	}
+	else
+	{
+		// New method. Takes in a user-defined Quadrature class
+		calculate_fisher_elements(output, response_deriv,
+		internal_noise, dimension, quadMethod);
+	}
+
 	//Factor of 2 for LISA's second arm
 	if(detector == "LISA"){
 		for(int i = 0 ; i<dimension;i++){
@@ -2778,6 +2793,47 @@ void calculate_fisher_elements(double *frequency,
 	}
 	delete [] integrand;	
 
+}
+
+void calculate_fisher_elements(
+	double **output,		//< [return] Fisher matrix
+	std::complex<double> **response_deriv,	//< Derivatives of the response from calculate_derivatives
+	double *psd,			//< PSD array
+	int dimension,			//< Dimension of parameter space 
+	Quadrature *quadMethod	//< Quadrature class to compute integrals
+)
+{
+	// Array for integrand
+	int length = quadMethod->get_length();
+	double *integrand = new double [length];
+
+	// Loop over derivatives
+	for (int j=0; j<dimension; j++)
+	{
+		for (int k=0; k<=j; k++)
+		{
+			// Set up integrand
+			for (int i=0; i < length; i++)
+			{
+				integrand[i] = real(
+					(response_deriv[j][i] * std::conj(response_deriv[k][i]))
+					/psd[i]);
+			}
+
+			// Compute the (j,k) Fisher element
+			output[j][k] = 4.*quadMethod->integrate(integrand);
+
+			// Off-diagonal elements
+			if (k != j)
+			{
+				// By symmetry, compute the (k,j) element
+				output[k][j] = output[j][k];
+			}
+		}
+	}
+
+	// Clean-up
+	delete [] integrand;
 }
 //#################################################################
 template void repack_parameters<adouble>(adouble *, gen_params_base<adouble> *, std::string, int, gen_params_base<double> *);

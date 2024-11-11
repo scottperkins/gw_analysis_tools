@@ -11,6 +11,8 @@
 #include <gsl/gsl_errno.h>
 #include <mutex>
 #include "mcmc_sampler.h"
+#include "quadrature.h"
+#include "adaptivelikelihoods.h"
 /*! \file 
  *
  * Header file for the Graviational Wave specific MCMC routines
@@ -85,6 +87,10 @@ struct MCMC_modification_struct
 	int *fisher_length =NULL;
 	bool fisher_log10F = false;
 
+	// Quadrature method to be used for Fisher and likelihood calculations
+	// (unless an AdaptiveLikelihood is being used for the latter).
+	Quadrature *QuadMethod = NULL;
+	AdaptiveLikelihood *adaptivell = NULL;
 };
 
 static MCMC_modification_struct *mcmc_mod_struct;
@@ -109,6 +115,8 @@ struct MCMC_user_param
 	bool fisher_GAUSS_QUAD=false;
 	int *fisher_length =NULL;
 	bool fisher_log10F = false;
+
+	Quadrature *QuadMethod = NULL;
 		
 	//RJ stuff
 	double **mod_prior_ranges=NULL;

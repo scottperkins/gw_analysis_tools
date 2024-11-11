@@ -1246,8 +1246,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputFileMoniker,
 	bool ignoreExistingCheckpoint,
 	bool restrictSwapTemperatures,
-	bool coldChainStorageOnly,
-	AdaptiveLikelihood *adaptivell
+	bool coldChainStorageOnly
 	)
 {
 	int chainN = ensembleSize*ensembleN;
@@ -1278,10 +1277,10 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	mcmcVar.mcmc_save_waveform = true;
 	mcmcVar.maxDim = dimension;
 
-	if (adaptivell != nullptr)
+	if (mod_struct->adaptivell != nullptr)
 	{
 		std::cout << "Sampling with adaptive likelihood\n";
-		mcmcVar.adaptivell = adaptivell;
+		mcmcVar.adaptivell = mod_struct->adaptivell;
 		mcmcVar.mcmc_adaptive = true;
 	}
 
@@ -1393,7 +1392,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 		}	
 		user_parameters[i]->fisher_PSD= mod_struct->fisher_PSD;
 		user_parameters[i]->fisher_length= mod_struct->fisher_length;
-
+		user_parameters[i]->QuadMethod = mod_struct->QuadMethod;
 
 		user_parameters[i]->mod_struct = mod_struct;
 
@@ -2290,7 +2289,8 @@ void MCMC_fisher_wrapper_v3(bayesship::positionInfo *pos,   double **output, std
 		else{
 			fisher_numerical(local_freq[i], local_lengths[i],
 				"MCMC_"+local_gen_method, mcmcVar->mcmc_detectors[i],mcmcVar->mcmc_detectors[0],temp_out,local_dimension, 
-				&params, 4, NULL, NULL, local_noise[i]);
+				&params, 4, NULL, NULL, local_noise[i],
+				mcmcVar->user_parameters->QuadMethod);
 
 		}
 		for(int j =0; j<local_dimension; j++){

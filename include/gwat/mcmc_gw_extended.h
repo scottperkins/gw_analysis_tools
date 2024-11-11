@@ -96,8 +96,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	std::string outputFileMoniker, 
 	bool ignoreExistingCheckpoint,
 	bool restrictSwapTemperatures,
-	bool coldChainStorageOnly,
-	AdaptiveLikelihood *adaptivell=nullptr);
+	bool coldChainStorageOnly);
 
 bayesship::bayesshipSampler *  RJPTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	int minDim,
