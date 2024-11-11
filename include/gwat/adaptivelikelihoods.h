@@ -2,10 +2,8 @@
 #define ADAPTIVE_LIKELIHOODS_H
 
 
-#include "mcmc_gw.h"
 #include "waveform_util.h"
 #include <vector>
-#include <functional>
 
 
 using cpl = std::complex<double>;
