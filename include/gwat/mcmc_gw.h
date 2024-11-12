@@ -290,6 +290,11 @@ double Log_Likelihood_internal(std::complex<double> *data,
 			bool log10F,
 			std::string integration_method
 			);
+double Log_Likelihood_internal(std::complex<double> *data,
+	double *psd,
+	std::complex<double> *detector_response,
+	Quadrature *QuadMethod
+);
 
 double MCMC_likelihood_wrapper_SKYSEARCH(double *param, mcmc_data_interface *interface,void *parameters);
 void SkySearch_PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW(mcmc_sampler_output *sampler_output,
@@ -489,7 +494,8 @@ double MCMC_likelihood_extrinsic(bool save_waveform,
 	std::string integration_method, 
 	bool log10F,
 	std::string *detectors, 
-	int num_detectors
+	int num_detectors,
+	Quadrature *QuadMethod = NULL
 	);
 
 void MCMC_fisher_wrapper(double *param,  double **output, mcmc_data_interface *interface ,void *parameters) ;

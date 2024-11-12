@@ -18,7 +18,7 @@ SimpsonsQuad::SimpsonsQuad(
 
     if ((length % 2) == 0)
     {
-        // If length is even, setup trapezoidal rule for the last interval
+        // If length is even, set up trapezoidal rule for the last interval
         evenFlag = true;
         SimpsonsEnd = length-2;
         TrapDel = 0.5*delta;

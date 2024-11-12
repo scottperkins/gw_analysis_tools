@@ -685,7 +685,7 @@ public:
 			ll =  MCMC_likelihood_extrinsic(mcmcVar->mcmc_save_waveform, 
 				&gen_params,local_gen, local_lengths, 
 				local_freqs, local_data, local_noise, local_weights, local_integration_method, mcmcVar->user_parameters->log10F,mcmcVar->mcmc_detectors, 
-				 mcmcVar->mcmc_num_detectors);
+				 mcmcVar->mcmc_num_detectors, mcmcVar->QuadMethod);
 			//ll=2;
 	
 			//ll = Log_Likelihood(mcmc_data[0], 
@@ -1276,6 +1276,7 @@ bayesship::bayesshipSampler *  PTMCMC_MH_dynamic_PT_alloc_uncorrelated_GW_v2(
 	mcmcVar.mcmc_mod_struct = mod_struct;
 	mcmcVar.mcmc_save_waveform = true;
 	mcmcVar.maxDim = dimension;
+	mcmcVar.QuadMethod = mod_struct->QuadMethod;
 
 	if (mod_struct->adaptivell != nullptr)
 	{

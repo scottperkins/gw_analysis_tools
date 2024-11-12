@@ -31,6 +31,7 @@ struct mcmcVariables
 	double maxDim;
 	bool mcmc_adaptive = false;
 	AdaptiveLikelihood *adaptivell=nullptr;
+	Quadrature *QuadMethod = NULL;
 };
 struct mcmcVariablesRJ
 {
