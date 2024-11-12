@@ -104,23 +104,35 @@ int EA_consistency_test(int argc, char *argv[])
 	params.spin2[1] = .0;
 	params.spin1[0] = .0;
 	params.spin2[0] = .0;
-	//params.chip = .07;
-	//params.phip = 0.1;
 	params.Luminosity_Distance = 100;
-	params.phiRef = 1;
-	params.RA = 2.;
-	params.DEC = -1.1;
+	//params.phiRef = 1;
+	//params.RA = 2.;
+	//params.DEC = -1.1;
 	params.f_ref = 20;
 	params.NSflag1 = true;
 	params.NSflag2 = true;
 	params.horizon_coord = false;
 	params.shift_time=true;
 	params.shift_phase=true;
+
+	//Inputting a point that we think gives a NAN
+	params.RA = 2.07169357356823;
+	params.DEC = asin(0.603993587177344); 
+	params.psi = 2.5232117171185;
+	params.incl_angle = acos(0.214429833819749);
+	params.phiRef = 1.70673419607014;
+	params.Luminosity_Distance = exp(5.86687228835658);
+	params.mass1 = 2.78785;
+	params.mass2 = 1.71587;
+	params.spin1[2] = -0.00456451703346724;
+	params.spin2[2] = 0.00826504741178317; 
+	params.tidal_s = 250.384067976897;
+	
 	
 	params.tc = 6;
 	params.equatorial_orientation = false;
-	params.psi = 1.;
-	params.incl_angle = M_PI/3.;
+	//params.psi = 1.;
+	//params.incl_angle = M_PI/3.;
 	params.gmst=3;
 	params.tidal_love = true;
 
@@ -154,12 +166,17 @@ int EA_consistency_test(int argc, char *argv[])
 	}
 
 	for (int i = 0 ; i<iterations; i++){
+	  params.alpha_param = true;
+	  params.alpha1_EA =  -0.185022041097348;
+	  params.alpha2_EA = -0.0070102640180704;
+	  params.cbarw_EA = 0.999640898572741;
+	  params.csigma_EA = 0; 
 	  
 	  //Small values of coupling constants
-	  params.ca_EA = 1.0E-30; 
-	  params.ctheta_EA = 2E-30; 
-	  params.cw_EA = 2E-30; 
-	  params.csigma_EA = 1.0E-30;
+	  //params.ca_EA = 1.0E-30; 
+	  //params.ctheta_EA = 2E-30; 
+	  //params.cw_EA = 2E-30; 
+	  //params.csigma_EA = 1.0E-30;
 	  
 	  //Large values of coupling constants
 	  //params.ca_EA = 1.0E-5; 
@@ -174,18 +191,19 @@ int EA_consistency_test(int argc, char *argv[])
 	  //params.csigma_EA = 5E-2;
 	  
 	  
-	  params.mass1 = gsl_rng_uniform(r) +1;
-	  params.mass2 = gsl_rng_uniform(r) +1;
-	  if(params.mass2>params.mass1){
-	    double temp = params.mass2;
-	    params.mass2 = params.mass1;
-	    params.mass1 = temp;
-	  }
+	  //params.mass1 = gsl_rng_uniform(r) +1;
+	  //params.mass2 = gsl_rng_uniform(r) +1;
+	  //if(params.mass2>params.mass1){
+	  //  double temp = params.mass2;
+	  //    params.mass2 = params.mass1;
+	  //  params.mass1 = temp;
+	  //}
 
-	  params.spin1[2] = gsl_rng_uniform(r)*.05 -.025;
-	  params.spin2[2] = gsl_rng_uniform(r)*.05 -.025;
+	  //params.spin1[2] = gsl_rng_uniform(r)*.05 -.025;
+	  //params.spin2[2] = gsl_rng_uniform(r)*.05 -.025;
 
-	  params.tidal_s = gsl_rng_uniform(r)*1000+5; 
+	  //params.tidal_s = gsl_rng_uniform(r)*1000+5;
+	  
 	  //params.tidal1 = gsl_rng_uniform(r)*100+5;
 	  //params.tidal2 = gsl_rng_uniform(r)*100+5;
 		
@@ -195,7 +213,7 @@ int EA_consistency_test(int argc, char *argv[])
 	  fourier_detector_response(freqs, samples, responseEA, "Hanford", "EA_IMRPhenomD_NRT", &params, (double *) NULL);
 	  //fourier_detector_response(freqs, samples, responseEA, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
 	  fourier_detector_response(freqs, samples, responseGR, "Hanford", "IMRPhenomD_NRT", &params, (double *) NULL);
-
+	  
 	  double matchresponse = match(responseEA, responseGR, testPSD, freqs, samples);
 	  //double matchresponse = match(responseGR, responseGR, testPSD, freqs, samples); //Sending in the same waveform to test match function
 
@@ -277,12 +295,15 @@ int EA_parameterization_test(int argc, char *argv[])
 	r=gsl_rng_alloc(T);
 	gsl_rng_set(r, time(NULL)); //seeding the random number generator with time
 	
-	int iterations = 1000;
+	int iterations = 10;
 	int num_bad_points = 0;
 	//int num_infspeeds = 0;
-	//int num_nan = 0;
+	int num_s1 = 0;
+	int num_s2 = 0;
+	int num_boths = 0;
+	int num_nan = 0;
 	int num_Cherenkov = 0;
-	int dim = 8;// Increase for every factor you want to output
+	int dim = 12;// Increase for every factor you want to output
 	double **output = allocate_2D_array(iterations, dim);
 
 	double a_bound = -4.; //(case 1)
@@ -293,13 +314,30 @@ int EA_parameterization_test(int argc, char *argv[])
 		
 	for (int i = 0 ; i<iterations; i++){
 	  /* Uses gsl to get a random number from a uniform distribution */
-	  params.ca_EA = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); 
+	  // params.ca_EA = gsl_ran_flat(r, 0., 1.)*pow(10, a_bound); 
 	  //ca has to be positive because of energy constraints
-	  params.ctheta_EA = 3.*params.ca_EA*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // (in case 1)
+	  //params.ctheta_EA = 3.*params.ca_EA*(1 + gsl_ran_flat(r, -1., 1.)*pow(10, theta_bound)); // (in case 1)
 	  //params.ctheta_EA = gsl_ran_flat(r, -1., 1.)*(0.3); // (in case 2)
-	  params.cw_EA = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); 
-	  params.csigma_EA = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound);
-	  
+	  //params.cw_EA = gsl_ran_flat(r, -1., 1.)*pow(10, w_bound); 
+	  //params.csigma_EA = gsl_ran_flat(r, -1., 1.)*pow(10, sigma_bound);
+	  params.cbarw_EA = gsl_ran_flat(r, 0, 1.);
+	  params.cw_EA = (1 - params.cbarw_EA)/params.cbarw_EA;
+	  params.alpha1_EA = gsl_ran_flat(r, -.25, .25);
+	  params.alpha2_EA = gsl_ran_flat(r, -.025, .025);
+	  //params.alpha1_EA = gsl_ran_flat(r, -1., 1.)*pow(10, -4.);
+	  //params.alpha2_EA = gsl_ran_flat(r, -4., 4.)*pow(10, -7.);
+	  //params.cw_EA = gsl_ran_flat(r, -1., 1.)*pow(10, -4.);
+	  /*
+	  params.alpha1_EA = - pow(10, -4.);
+	  params.alpha2_EA = - 4.*pow(10, -7.);
+	  params.cw_EA = pow(10, -3.);
+	  params.cbarw_EA = 1./(1 + params.cw_EA);
+       	  */
+	  params.csigma_EA = 0;
+	  params.alpha_param = true;
+
+	  sp.s1_EA = 0;
+	  sp.s2_EA = 0; 
 
 	  /* A set of coupling constants that satisfies all the physical 
 	   * constraints. Used to show that for a particular set of coupling
@@ -338,13 +376,13 @@ int EA_parameterization_test(int argc, char *argv[])
 	    alpha[j] = gsl_rng_uniform(r);
 	  }
 	  double tempm1,tempm2 ;
-	  //tempm1 = 1+1*alpha[0];
-	  //tempm2 = 1+1*alpha[1];
+	  tempm1 = 1+1*alpha[0];
+	  tempm2 = 1+1*alpha[1];
 	  
 	  //Setting masses to get a specific q
 	  /* For q=0.5, use m1=2, m2=1, for q=0.75 use m1=4, m2=3, for q=0.9 use m1=1, m2=.9 */
-	  tempm1 = 2.;
-	  tempm2 = 1.;
+	  //tempm1 = 2.;
+	  //tempm2 = 1.;
 	  //tempm1 = 4.;
 	  //tempm2 = 3.;
 	  //tempm1 = 1.;
@@ -372,35 +410,62 @@ int EA_parameterization_test(int argc, char *argv[])
 	  /* Sample tidal deformability uniform in log space from 1 to 10^4 for
 	   * comparison of compactness as a function of tidal deformability
 	   * with plots in arXiv:1903.03909 
-	   * Sample from 1 to 10^? for comparison of sensitivity as a function 
+	   * Sample from 1 to 10^9 for comparison of sensitivity as a function 
 	   * of compactness with plots in arXiv:2104.04596v1
 	   */
 	  // REAL8 lambda1 = pow(10, gsl_ran_flat(r, 0, 4)); 
 	  //REAL8 lambda2 = pow(10, gsl_ran_flat(r, 0, 4));
 	  //REAL8 lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
 	  //REAL8 lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
-	  /*
-	  double lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
-	  double lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  
+	  //double lambda1 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9)); 
+	  //double lambda2 = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 9));
+	  double lambda1 = pow(10, gsl_ran_flat(r, 0, 9));
+	  double lambda2 = pow(10, gsl_ran_flat(r, 0, 9));
+	  
 	  params.tidal1 = lambda1;
 	  params.tidal2 = lambda2;
-	  */
-
+	  params.tidal_love = false;
+	  params.tidal_love_error = false;
+	  
 	  /* For binary Love relation tests*/
-	  do{
+	  /*do{
 	  double lambdas = pow(10, gsl_ran_flat(r, 1, 4)); 
 	  params.tidal_s = lambdas;
 	  }
 	  while((params.mass2/params.mass1) < 1.2321 - .124616*log(params.tidal_s));
-	  params.tidal_love_error = true; 
-	  
+	  params.tidal_love = true;
+	  params.tidal_love_error = false; 
+	  */
 	  prep_source_parameters(&sp, &params,"EA_IMRPhenomD_NRT");
+	  
+	  double OmRatio1, OmRatio2; 
+	  OmRatio1 = (-5./7.)*sp.compact1 - ((18275.*params.alpha1_EA)/168168.)*pow(sp.compact1, 3.);
+	  OmRatio2 = (-5./7.)*sp.compact2 - ((18275.*params.alpha1_EA)/168168.)*pow(sp.compact2, 3.);
+
+
+	  //prep_source_parameters(&sp, &params,"IMRPhenomD_NRT");
+		  
 	  //This also runs pre_calculate_EA_factors
 	  //std::cout<<"tidal_s = "<<params.tidal_s<<"  tidal_a = "<<params.tidal_a<<std::endl;
 	  //cstd::cout<<"tidal_1 = "<<sp.tidal1<<"  tidal_2 = "<<sp.tidal2<<std::endl;
 
 	  //double new_lambdaa = tidal_error(params.tidal_s, params.tidal_a, params.mass2/params.mass1); 
 	  	  
+	  //Prior on EA parameters
+	  
+	  if(params.ca_EA < 0 || params.ca_EA > 2.)
+	    {
+	      num_bad_points++;
+	      i--;
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	      continue;
+	    }
+	  /* Throws out points with ca < 0 or ca > 2 because these violate 
+	   * the positive energy condition for the spin-0 mode (scalar mode).  
+	   * See equation 40 of arXiv:gr-qc/0507059v3.
+	   */
+	  
 	  if(params.cw_EA < (-params.csigma_EA/(1. - params.csigma_EA)))
 	    {
 	      //Throws out points with cw < -csigma/(1 - csigma) because these violate the positive energy condition for the spin-1 mode (vector mode?)
@@ -422,26 +487,14 @@ int EA_parameterization_test(int argc, char *argv[])
 	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue;
 	      }
-	  /*
-	  else if (isinf(sp.cV_EA) || isinf (sp.cS_EA))
-	    {
-	      //Pull infinite speed points out of the data set so that they don't mess with my plotting
-	      //Keep track of how many we pull
-	      num_infspeeds++;
-	      i--;
-	      continue; 
-	    }
 	  else if(isnan(sp.kappa3_EA))
 	    {
 	      num_nan++;
 	      i--;
-	      cleanup_source_parameters(&sp, "EA_fully_restricted_v1_IMRPhenomD_NRT");
+	      cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
 	      continue;
-	    }
-	  */
-	  
-	  	  
-	  else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.))
+	      }	  		  	  
+	  /*else if(sp.cT_EA - 1. < -3*pow(10, -15.) || sp.cT_EA -1. > 7*pow(10, -16.))
 	    {
 	      //Throws out points that don't obey the cT constraint from GW170817 and GRB170817A
 	      //arXiv:1710.05834
@@ -451,9 +504,19 @@ int EA_parameterization_test(int argc, char *argv[])
 	      //I wonder why all the incorrect points it prints have the same value?
 	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue;
-	      }
+	      }*/
 	  
-	  if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > pow(10, -7.))
+	  if(sp.ctheta_EA < 0 || (sp.ctheta_EA + (8.*sp.ca_EA/7)) > (2./7.))
+	  //if(fabs(sp.ctheta_EA) > 0.3)
+	    {
+	      // Throws out points that violate Big Bang Nucleosynthesis constraints. arXiv:hep-th/0407149v3
+	      num_bad_points++;
+	      i--;
+	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	      continue; 
+	    }
+	  /*
+	  if(abs(sp.alpha1_EA) > pow(10, -4.) || abs(sp.alpha2_EA) > 4.* pow(10, -7.))
 	    {
 	      //Throws out points that do not obey observational solar system constraints on alpha1 and alpha2
 	      //arXiv:1403.7377 and arXiv:gr-qc/0509114
@@ -462,6 +525,7 @@ int EA_parameterization_test(int argc, char *argv[])
 	      cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
 	      continue; 
 	    }
+	  */
 	  bool violate = false;
 	  if(sp.cV_EA < 1)
 	    {
@@ -500,7 +564,7 @@ int EA_parameterization_test(int argc, char *argv[])
 		  continue;
 		}
 	    }
-	  
+	  /*
 	  double sigma = 1.021*pow(10, -5.); 
 	  double mu = -0.563*pow(10, -5.);
 	  double prob;
@@ -513,26 +577,35 @@ int EA_parameterization_test(int argc, char *argv[])
 	      cleanup_source_parameters(&sp, "EA_IMRPhenomD_NRT");
 	      continue; 
 	    }
+	  */
 	  
-	 
-	  output[i][0] = sp.ca_EA;
-	  output[i][1] = sp.ctheta_EA;
-	  output[i][2] = sp.cw_EA;
+	  if(sp.s1_EA > 1){num_s1++; }
+	  if(sp.s2_EA > 2){num_s2++; }
+	  if(sp.s1_EA > 1 && sp.s2_EA > 1){num_boths++;}
+
+	  //output[i][0] = sp.ca_EA;
+	  //output[i][1] = sp.ctheta_EA;
+	  //output[i][2] = sp.cw_EA;
+	  output[i][0] = sp.alpha1_EA;
+	  output[i][1] = sp.alpha2_EA;
+	  output[i][2] = sp.cbarw_EA;
 	  output[i][3] = sp.csigma_EA;
 	  output[i][4] = sp.mass1;
 	  output[i][5] = sp.mass2;
-	  output[i][6] = params.tidal_s;
+	  //output[i][6] = params.tidal_s;
 	  //output[i][7] = new_lambdaa;
-	  output[i][7] = params.tidal_a;
+	  //output[i][7] = params.tidal_a;
 	  //output[i][8] = new_lambdaa; 
 
-	  /*output[i][6] = sp.tidal1;
+	  output[i][6] = sp.tidal1;
 	  output[i][7] = sp.tidal2;
 	  output[i][8] = sp.compact1;
 	  output[i][9] = sp.compact2;
+	  //output[i][8] = OmRatio1;
+	  //output[i][9] = OmRatio2;
 	  output[i][10] = sp.s1_EA;
 	  output[i][11] = sp.s2_EA; 
-	  
+	  /*
 	  output[i][4] = sp.cT_EA;
 	  output[i][5] = sp.cS_EA;
 	  output[i][6] = sp.cV_EA;
@@ -541,14 +614,18 @@ int EA_parameterization_test(int argc, char *argv[])
 	  */
 			  
 	  cleanup_source_parameters(&sp,"EA_IMRPhenomD_NRT");
+	  //cleanup_source_parameters(&sp,"IMRPhenomD_NRT");
 	  printProgress((double)i / iterations);
 	}
 	write_file("data/EA_parameter_MC.csv",output, iterations, dim);
 	std::cout<<"\n Wrote data to 'data/EA_parameter_MC.csv'"<<std::endl;
-	std::cout<<"Threw out "<<num_bad_points<<" unphysical data points."<<std::endl;
+	std::cout<<"Number of s1 > 1 = "<<num_s1<<", Number of s2 > 1 = "<<num_s2<<std::endl;
+	std::cout<<"Number of points that gave BOTH s1 > 1 and s2 > 1 = "<<num_boths<<std::endl; 
+	std::cout<<"Ratio of s > 1 to total = "<<(num_s1 + num_s2)/(2.*iterations)<<std::endl; 
+	//std::cout<<"Threw out "<<num_bad_points<<" unphysical data points."<<std::endl;
 	//std::cout<<"Found cS or cV to be infinite "<<num_infspeeds<<" times. Removed these cases from data."<<std::endl;
 	//std::cout<<"Found kappa3 as NAN "<<num_nan<<" times."<<std::endl;
-	std::cout<<"Threw out "<<num_Cherenkov<<" points because of Cherenkov constraints."<<std::endl; 
+	//std::cout<<"Threw out "<<num_Cherenkov<<" points because of Cherenkov constraints."<<std::endl; 
 	gsl_rng_free(r); 
 	deallocate_2D_array(output, iterations, dim);
 	delete [] params.betappe;
@@ -1007,14 +1084,14 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 	std::cout.precision(15);
 	bool P = false;
 	bool NRT = true;
-	bool tidalsym = false; 
+	bool tidal_love = true; 
 	bool EA = true;
 	bool gIMR = false;
 	gsl_rng_env_setup();	
 	const gsl_rng_type *T = gsl_rng_default;
 	gsl_rng *r = gsl_rng_alloc(T);
 	gsl_rng_set(r,10);
-	int iterations = 1;
+	int iterations = 100;
 	double times[iterations][2];
 	//###############################################################################
 	int rows = 500;
@@ -1125,8 +1202,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		source_parameters<double> sp;
 		REAL8 lambda1 = 0;
 		REAL8 lambda2 = 0;
-		REAL8 lambdas = 0; 
-		if(tidalsym) //Setting lambdas
+		REAL8 lambdas = 0;
+		param.tidal_love = tidal_love;
+		if(tidal_love) //Setting lambdas
 		  {
 		    lambdas = gsl_rng_uniform(r) * pow(10, gsl_ran_flat(r, 0, 4));
 		    param.tidal_s = lambdas; 
@@ -1139,6 +1217,9 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		    lambda1 = 100*fabs(alpha[15]) + 1.;
 		    //this prevents tidal deformability from being less than 1
 		    lambda2 = 100*fabs(alpha[16]) + 1.;
+		    sp.tidal1 = lambda1;
+		    sp.tidal2 = lambda2; 
+		    prep_source_parameters(&sp, &param,"IMRPhenomD_NRT");
 		  }
 		
 		NRTidal_version_type NRT_v=NRTidalv2_V;
@@ -1269,10 +1350,22 @@ int LALSuite_vs_GWAT_WF(int argc, char *argv[])
 		param.tidal1 =lambda1 ;
 		param.tidal2 =lambda2 ;
 		if(EA){
+		  /*
 		  param.ca_EA = input[k][0]; //ca
 		  param.ctheta_EA = input[k][1]; //ctheta
 		  param.cw_EA = input[k][2]; //cw
 		  param.csigma_EA = input[k][3]; //csigma
+		  */
+		  //param.include_l1 = true;
+		  param.include_l1 = false;
+		  param.alpha_param = false; 
+		  //param.ca_EA = 1.0E-30; 
+		  //param.ctheta_EA = 2E-30; 
+		  //param.cw_EA = 2E-30;
+		  param.ca_EA =  1.6E-06; 
+		  param.ctheta_EA = 5.0E-06; 
+		  param.cw_EA = 0.163453;
+		  param.csigma_EA = 0;
 		}
 		if(gIMR){
 			//Not including logarithmic terms for now
