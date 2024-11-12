@@ -581,7 +581,7 @@ void fisher_autodiff_batch_mod(double *frequency,
 	int *phase_tapes/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
 	)
 {
-    std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
+    //std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
 	//populate noise and frequency
 	double *internal_noise;
 	bool local_noise=false;
@@ -650,7 +650,7 @@ void fisher_autodiff_interp(double *frequency,
 	double *noise
 	)
 {
-    std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
+    //std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
 	//populate noise and frequency
 	double *internal_noise;
 	bool local_noise=false;
@@ -790,7 +790,7 @@ void fisher_autodiff(double *frequency,
 	int *phase_tapes/**< if speed is required, precomputed tapes can be used - assumed the user knows what they're doing, no checks done here to make sure that the number of tapes matches the requirement by the generation_method*/
 	)
 {
-  std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
+  //std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
 	//populate noise and frequency
 	double *internal_noise;
 	bool local_noise=false;
@@ -861,7 +861,7 @@ void calculate_derivatives_autodiff(double *frequency,
 	std::string reference_detector
 	)
 {
-    std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
+    //std::cout<<"Line "<<__LINE__<<":Using autodiff to calculate Fishers"<<std::endl; 
 	//Transform gen_params to double vectors
 	//double vec_parameters[dimension+1];
 	int vec_param_length= dimension +1;
